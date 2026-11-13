@@ -83,9 +83,26 @@ describe('GithubApi writes', () => {
 
     await api.editIssueBodyAndEnsureOpen(7, 'body');
     await api.addIssueComment(7, 'comment');
+    await api.closeAsDuplicate(7, 1007);
     expect((await api.createIssue('title', 'body')).html_url).toBe('https://dryrun');
 
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('closes an issue as a duplicate of the issue with the given id', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse({}));
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+
+    await api.closeAsDuplicate(7, 1042);
+
+    const [[url, init]] = fetchMock.mock.calls;
+    expect(String(url)).toBe('https://api.github.com/repos/elastic/kibana/issues/7');
+    expect(init?.method).toBe('PATCH');
+    expect(JSON.parse(String(init?.body))).toEqual({
+      state: 'closed',
+      state_reason: 'duplicate',
+      duplicate_issue_id: 1042,
+    });
   });
 
   it('spaces consecutive writes a second apart but never delays reads', async () => {

@@ -13,6 +13,10 @@ import {
 } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import {
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from '@kbn/nightshift-shared';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
 import { pollUntil } from './poll_until';
 
@@ -245,6 +249,16 @@ export const createSignificantEventsScheduledWorkflowsService = ({
 
   return {
     async ensureWorkflow({ enabled, request, spaceId, config }) {
+      // Installing enabled workflows binds work to a space, and Nightshift only runs in the
+      // default one. Disabling stays allowed everywhere, so a space set up on an earlier build
+      // can still be taken down.
+      if (enabled && !isNightshiftSupportedSpace(spaceId)) {
+        log.warn(
+          `Not installing the scheduled Significant Events discovery workflows in space ${spaceId}: ${NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE}`
+        );
+        return;
+      }
+
       const client = await getManagedWorkflowsClient();
 
       if (enabled) {

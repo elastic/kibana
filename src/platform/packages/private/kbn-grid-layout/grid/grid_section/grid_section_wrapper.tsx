@@ -35,9 +35,10 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
   }, [sectionId]);
 
   useEffect(() => {
+    const sectionRefs = gridLayoutStateManager.sectionRefs.current;
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.sectionRefs.current[sectionId];
+      delete sectionRefs[sectionId];
     };
   }, [sectionId, gridLayoutStateManager]);
 

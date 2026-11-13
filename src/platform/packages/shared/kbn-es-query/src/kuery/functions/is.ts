@@ -108,7 +108,10 @@ export function toElasticsearchQuery(
   }
 
   const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
-    const isKeywordField = field.esTypes?.length === 1 && field.esTypes.includes('keyword');
+    // Wildcard fields are untokenized, like keyword. Match and query_string queries do not apply.
+    const termLevelEsTypes = ['keyword', 'wildcard'];
+    const isTermLevelField =
+      field.esTypes?.length === 1 && termLevelEsTypes.includes(field.esTypes[0]);
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
@@ -151,7 +154,7 @@ export function toElasticsearchQuery(
         }),
       ];
     } else if (wildcard.isNode(valueArg)) {
-      const query = isKeywordField
+      const query = isTermLevelField
         ? {
             wildcard: {
               [field.name]: {
@@ -190,7 +193,7 @@ export function toElasticsearchQuery(
           },
         }),
       ];
-    } else if (isKeywordField) {
+    } else if (isTermLevelField) {
       return [
         ...accumulator,
         wrapWithNestedQuery({

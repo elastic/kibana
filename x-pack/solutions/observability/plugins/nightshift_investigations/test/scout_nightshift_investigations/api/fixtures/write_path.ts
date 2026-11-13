@@ -18,20 +18,23 @@ import { COMMON_HEADERS } from './constants';
 const START_PATH = 'internal/nightshift/investigations';
 const SLACK_THREAD_PATH = 'internal/nightshift/investigations/_slack_thread';
 const SHARED_INVESTIGATIONS_PATH = 'internal/investigations/investigations';
-const WORKFLOWS_PATH = '/api/workflows';
+export const WORKFLOWS_PATH = '/api/workflows';
 const WORKFLOWS_API_VERSION = '2023-10-31';
-const INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
+export const INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
 
 const SHARED_API_HEADERS = { ...COMMON_HEADERS, 'elastic-api-version': '1' } as const;
-const WORKFLOWS_HEADERS = { ...COMMON_HEADERS, 'elastic-api-version': WORKFLOWS_API_VERSION };
+export const WORKFLOWS_HEADERS = {
+  ...COMMON_HEADERS,
+  'elastic-api-version': WORKFLOWS_API_VERSION,
+};
 
 const POLL_INTERVAL_MS = 1_000;
-const POLL_TIMEOUT_MS = 150_000;
+export const POLL_TIMEOUT_MS = 150_000;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Polls `read` until `done` accepts its result, failing with `label` after the timeout. */
-const pollUntil = async <T>(
+export const pollUntil = async <T>(
   label: string,
   read: () => Promise<T>,
   done: (value: T) => boolean
@@ -163,15 +166,40 @@ export const findOrCreateSlackThread = (
  */
 export const NIGHTSHIFT_SCOUT_LLM_PORT = 8095;
 
+const LISTEN_ATTEMPTS = 20;
+const LISTEN_RETRY_DELAY_MS = 500;
+
+/**
+ * Listens on the Scout LLM port. The port is fixed and shared by every suite's LLM endpoint, so a
+ * port still busy for a moment is retried briefly before failing.
+ */
+export const listenOnScoutLlmPort = async (server: Server): Promise<void> => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(NIGHTSHIFT_SCOUT_LLM_PORT, '127.0.0.1', () => {
+          server.off('error', reject);
+          resolve();
+        });
+      });
+      return;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EADDRINUSE' || attempt >= LISTEN_ATTEMPTS) {
+        throw error;
+      }
+      await sleep(LISTEN_RETRY_DELAY_MS);
+    }
+  }
+};
+
 /**
  * An LLM endpoint that accepts connections and never answers, so the investigation agent stays
  * on its first model call and the investigation stays in progress without a real LLM.
  */
 export const startUnresponsiveLlm = async (): Promise<{ close: () => void }> => {
   const server: Server = createServer(() => {});
-  await new Promise<void>((resolve) =>
-    server.listen(NIGHTSHIFT_SCOUT_LLM_PORT, '127.0.0.1', resolve)
-  );
+  await listenOnScoutLlmPort(server);
   return {
     close: () => {
       server.closeAllConnections();
@@ -193,12 +221,12 @@ export const cancelWorkflowRuns = async (
   });
 };
 
-interface WorkflowExecution {
+export interface WorkflowExecution {
   id: string;
   status: string;
 }
 
-const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
+export const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
 
 /**
  * Cancels the investigation's runs, so a follow-up queued behind a run stuck on the unresponsive

@@ -56,6 +56,7 @@ export type RelayClaimResponse =
 
 export interface RelayCallbackResponse {
   status: number;
+  headers: Headers;
 }
 
 /**
@@ -94,6 +95,17 @@ export interface RelayBindingsPage {
   nextCursor?: string;
 }
 
+export interface RelayAvailableChannel {
+  scope_id: string;
+  display_name: string;
+}
+
+export interface RelayAvailableChannelsPage {
+  channels: RelayAvailableChannel[];
+  /** True when the Relay stopped listing early, so some channels are missing. */
+  truncated: boolean;
+}
+
 /**
  * The Relay resolves `channel` to a bound Slack conversation. Accepts a conversation id (`C…` /
  * `G…` / `D…`) or a connected channel name (`#general`, `general`).
@@ -122,6 +134,43 @@ export interface RelayTriggerResponse {
   externalConversationId?: string;
 }
 
+/**
+ * A window of a bound public channel (`GET .../channels/:id/messages`). The Relay defaults a
+ * channel read to the last two hours and refuses a window longer than seven days.
+ */
+export interface RelayReadMessagesInput {
+  tenantKey: string;
+  /** Slack conversation id. The Relay rejects a channel name with a 400. */
+  channelId: string;
+  /** Slack ts or whole epoch seconds. */
+  oldest?: string;
+  latest?: string;
+  /** 1-200. */
+  limit?: number;
+}
+
+/** A single thread (`GET .../channels/:id/threads/:ts`); the whole thread unless narrowed. */
+export interface RelayReadThreadInput extends RelayReadMessagesInput {
+  threadTs: string;
+}
+
+export interface RelayReadMessage {
+  ts: string;
+  threadTs?: string;
+  /** On thread parents. */
+  replyCount?: number;
+  author: { id?: string; name?: string; isBot: boolean };
+  text: string;
+}
+
+export interface RelayReadResponse {
+  channel: { id: string; name: string };
+  /** Channel reads come newest first, thread reads oldest first. */
+  messages: RelayReadMessage[];
+  /** Slack has more in the window, or the Relay clipped the response at its size cap. */
+  truncated: boolean;
+}
+
 export interface RelayClientContract {
   /**
    * `xpack.actions.relay.uiam.enabled`. When true, install sends a service-account
@@ -139,12 +188,18 @@ export interface RelayClientContract {
    * read subsequent pages of the cursor-paginated endpoint.
    */
   listBindings(tenantKey: string, options?: RelayListBindingsOptions): Promise<RelayBindingsPage>;
+  /** Public channels the bot is in that no deployment has bound. 429 if Slack throttled the listing. */
+  listAvailableChannels(tenantKey: string): Promise<RelayAvailableChannelsPage>;
   /** Claim an unclaimed channel for this deployment (put-if-absent; 409 if already claimed). */
   bind(tenantKey: string, channelId: string): Promise<void>;
   /** Release a channel binding owned by this deployment (404 if none; 403 if owned by another). */
   unbindChannel(tenantKey: string, channelId: string): Promise<void>;
   /** Post to a bound channel. `channel` is an id or a connected name. 403 if not bound; 409 if uninstalled; 429 if Slack throttled the lookup. */
   trigger(input: RelayTriggerInput): Promise<RelayTriggerResponse>;
+  /** Read a window of a bound public channel. 403 `not_readable` on any denial; 429 if Slack throttled it. */
+  readMessages(input: RelayReadMessagesInput): Promise<RelayReadResponse>;
+  /** Read one thread of a bound public channel. Fails like `readMessages`. */
+  readThread(input: RelayReadThreadInput): Promise<RelayReadResponse>;
   isRelayOrigin(url: string): boolean;
   postCallback(url: string, body: unknown, signal: AbortSignal): Promise<RelayCallbackResponse>;
 }

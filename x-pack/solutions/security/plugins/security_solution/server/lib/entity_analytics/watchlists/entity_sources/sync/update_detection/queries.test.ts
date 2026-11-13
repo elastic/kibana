@@ -132,7 +132,7 @@ describe('Watchlist sync queries', () => {
       expect(searchBody.runtime_mappings?.euid).toBeDefined();
     });
 
-    it('adds @timestamp range filter and latest_doc top_hits when syncMarker is set', () => {
+    it('adds @timestamp range filter when syncMarker is set', () => {
       const syncMarker = '2024-01-15T00:00:00Z';
       const searchBody = buildEntitiesSearchBody('user', undefined, 100, syncMarker);
 
@@ -140,20 +140,21 @@ describe('Watchlist sync queries', () => {
       expect(searchBody.query?.bool?.must).toContainEqual({
         range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
       });
+    });
+
+    it('always adds latest_doc top_hits, with an _id tiebreaker, regardless of syncMarker', () => {
+      const searchBody = buildEntitiesSearchBody('user');
 
       const latestDocAgg = searchBody.aggs?.entities?.aggs?.latest_doc;
       expect(latestDocAgg).toBeDefined();
       expect(latestDocAgg?.top_hits?.size).toBe(1);
-      expect(latestDocAgg?.top_hits?.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+      expect(latestDocAgg?.top_hits?.sort).toEqual([
+        { '@timestamp': { order: 'desc' } },
+        { _seq_no: { order: 'desc' } },
+      ]);
       expect(latestDocAgg?.top_hits?._source).toContain('@timestamp');
       expect(latestDocAgg?.top_hits?._source).toContain('user.name');
       expect(latestDocAgg?.top_hits?._source).toContain('host.name');
-    });
-
-    it('does not add latest_doc agg when syncMarker is not set', () => {
-      const searchBody = buildEntitiesSearchBody('user');
-      expect(searchBody.aggs?.entities?.aggs).toBeUndefined();
-      expect(searchBody.query?.bool?.must).toHaveLength(1);
     });
 
     it('adds an allowlist terms filter when allowed entity ids are provided', () => {
@@ -178,7 +179,10 @@ describe('Watchlist sync queries', () => {
       });
     });
 
-    it('applies queryRule as KQL filter', () => {
+    it('does not apply queryRule as a top-level query filter — uses latest_matching_doc instead', () => {
+      // queryRule is deliberately kept out of query.bool.must: filtering there would let a
+      // stale, superseded document (e.g. an old admin-role doc for a since-demoted user)
+      // count as a current match.
       const searchBody = buildEntitiesSearchBody(
         'user',
         undefined,
@@ -187,13 +191,17 @@ describe('Watchlist sync queries', () => {
         undefined,
         'event.action: "login"'
       );
-      const must = searchBody.query?.bool?.must as unknown[];
-      expect(must).toHaveLength(2);
-      expect(must[1]).toBeDefined();
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
+
+      const latestMatchingDocAgg = searchBody.aggs?.entities?.aggs?.latest_matching_doc;
+      expect(latestMatchingDocAgg?.filter).toBeDefined();
+      expect(latestMatchingDocAgg?.aggs?.doc?.top_hits?.size).toBe(1);
+      expect(latestMatchingDocAgg?.aggs?.doc?.top_hits?._source).toBe(false);
     });
 
-    it('does not add KQL filter when queryRule is undefined', () => {
+    it('does not add latest_matching_doc agg when queryRule is undefined', () => {
       const searchBody = buildEntitiesSearchBody('user');
+      expect(searchBody.aggs?.entities?.aggs?.latest_matching_doc).toBeUndefined();
       expect(searchBody.query?.bool?.must).toHaveLength(1);
     });
 
@@ -207,13 +215,15 @@ describe('Watchlist sync queries', () => {
         ['user:jdoe'],
         'user.roles: "admin"'
       );
-      expect(searchBody.query?.bool?.must).toHaveLength(4);
+      // base entity-type filter + euid terms filter + range filter
+      expect(searchBody.query?.bool?.must).toHaveLength(3);
       expect(searchBody.query?.bool?.must).toContainEqual({
         terms: { euid: ['user:jdoe'] },
       });
       expect(searchBody.query?.bool?.must).toContainEqual({
         range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
       });
+      expect(searchBody.aggs?.entities?.aggs?.latest_matching_doc?.filter).toBeDefined();
     });
 
     it('applies range filter when no syncMarker is set', () => {

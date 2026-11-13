@@ -7,12 +7,10 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { errorResponseSchema, suggestUserProfilesResponseSchema } from '@kbn/alerting-v2-schemas';
-import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import type { UserProfile } from '@kbn/core-user-profile-common';
-import type { AlertingServerStartDependencies } from '../../types';
+import { UserService } from '../../lib/services/user_service/user_service';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
@@ -55,10 +53,10 @@ type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
  *
  * So we need an app route that:
  * - accepts only safe inputs (name, size, dataPath — same shape as browser suggest params)
- * - calls security.userProfiles.suggest(...)
+ * - calls Core's userProfile.suggest(...)
  * - enforces authz (read alert episodes) and internal access
  *
- * So the new route is basically the secure “adapter” between UI search and the security suggest service.
+ * So the new route is basically the secure “adapter” between UI search and Core's user-profile suggest service.
  **/
 @injectable()
 export class SuggestUserProfilesRoute extends BaseAlertingRoute {
@@ -96,38 +94,20 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, SuggestUserProfilesBody>,
-    @inject(PluginStart<AlertingServerStartDependencies['security']>('security'))
-    private readonly securityStart: AlertingServerStartDependencies['security']
+    @inject(UserService)
+    private readonly userService: UserService
   ) {
     super(ctx);
   }
 
   protected async execute() {
     const { name, size } = this.request.body;
-    const profiles: UserProfile[] = await this.securityStart.userProfiles.suggest({
+    const body = await this.userService.suggestUsers({
       // An empty name must reach Elasticsearch as "no filter" so the picker can
       // show an initial list of profiles before the user types anything.
       name: name || undefined,
       size,
       dataPath: 'avatar',
-    });
-
-    const body = profiles.map(({ uid, user, data }) => {
-      return {
-        uid,
-        user: {
-          username: user.username,
-          full_name: user.full_name,
-          email: user.email,
-        },
-        ...(data?.avatar && {
-          avatar: {
-            initials: data.avatar.initials,
-            color: data.avatar.color,
-            image_url: data.avatar.imageUrl,
-          },
-        }),
-      };
     });
 
     return this.ctx.response.ok({ body });

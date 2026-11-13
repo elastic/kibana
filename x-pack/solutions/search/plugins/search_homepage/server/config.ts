@@ -9,8 +9,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-export type * from './types';
-
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });

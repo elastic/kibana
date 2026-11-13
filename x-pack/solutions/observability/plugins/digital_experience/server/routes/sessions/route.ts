@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { conflict, forbidden, internal, notFound } from '@hapi/boom';
+import { forbidden, internal, notFound } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +13,12 @@ import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import {
   SESSIONS_INDEX_PATTERN,
+  SESSIONS_LIST_DEFAULT_PER_PAGE,
+  SESSIONS_LIST_MAX_DURATION_MS,
+  SESSIONS_LIST_MAX_FACET_LENGTHS,
+  SESSIONS_LIST_MAX_PAGE,
+  SESSIONS_LIST_MAX_PER_PAGE,
+  SESSIONS_LIST_MAX_SEARCH_LENGTH,
   SESSIONS_SOURCE_INDICES,
   SESSION_SORT_FIELDS,
   type SessionDetailResponse,
@@ -22,9 +28,9 @@ import {
 import { getSession } from '../../sessions/get_session';
 import { listSessions } from '../../sessions/list_sessions';
 import { enableSessions, getSessionsStatus } from '../../sessions/sessions_setup';
-import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
+import { describeError } from '../../lib/helpers/errors';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 
 export const SESSIONS_STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
@@ -34,9 +40,6 @@ export const SESSIONS_LIST_ENDPOINT =
 export const SESSION_DETAIL_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}';
 
-const MAX_PER_PAGE = 100;
-/** A week; longer sessions only match a lower bound. */
-const MAX_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_SERVICE_NAME_LENGTH = 1024;
 
 const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.noAccess', {
@@ -62,9 +65,6 @@ const sessionNotFoundMessage = (sessionId: string) =>
     values: { sessionId },
   });
 
-const messageOf = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
 /**
  * Maps a read failure to a client error: an Elasticsearch 403 names the index privileges the
  * reads need; anything else is logged and hidden, as Elasticsearch details name users and indices.
@@ -73,7 +73,7 @@ const toReadError = (error: unknown, logger: Logger, what: string) => {
   if (isResponseError(error) && error.statusCode === 403) {
     return forbidden(NO_ACCESS_MESSAGE);
   }
-  logger.error(`Could not load ${what}: ${messageOf(error)}`);
+  logger.error(`Could not load ${what}: ${describeError(error)}`);
   return internal(LOAD_FAILED_MESSAGE);
 };
 
@@ -88,52 +88,21 @@ const toEnableError = (error: unknown, logger: Logger) => {
       reason: error.reason,
     });
   }
-  if (error instanceof SessionsNewerVersionError) {
-    return conflict(error.message, {
-      installedVersion: error.installedVersion,
-      currentVersion: error.currentVersion,
-    });
-  }
-  logger.error(`Could not enable sessions: ${messageOf(error)}`);
+  logger.error(`Could not enable sessions: ${describeError(error)}`);
   return internal(ENABLE_FAILED_MESSAGE);
 };
-
-/** Status without who enabled sessions or whose access the transforms run with. */
-const withoutEnabler = (status: SessionsStatus): SessionsStatus => ({
-  ...status,
-  enabledBy: null,
-  enabledAt: null,
-  authorization: null,
-  transforms: status.transforms.map((transform) => ({
-    ...transform,
-    enabledBy: null,
-    enabledAt: null,
-    authorization: null,
-  })),
-});
 
 const statusRoute = createDigitalExperienceServerRoute({
   endpoint: SESSIONS_STATUS_ENDPOINT,
   options: { access: 'internal' },
-  security: {
-    authz: {
-      requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read],
-      // Only users who can set sessions up also see who did, and whose access the transforms use.
-      extendedPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
-    },
-  },
-  handler: async ({ context, request, sessionsSettings, logger }): Promise<SessionsStatus> => {
+  security: { authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] } },
+  handler: async ({ context, logger }): Promise<SessionsStatus> => {
     const { elasticsearch } = await context.core;
     try {
-      // Transform metadata only; no session data is read with the internal user.
-      const status = await getSessionsStatus(elasticsearch.client.asInternalUser, {
-        settings: sessionsSettings,
-      });
-      const canManage =
-        request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
-      return canManage ? status : withoutEnabler(status);
+      // Index metadata only; no session data is read with the internal user.
+      return await getSessionsStatus(elasticsearch.client.asInternalUser);
     } catch (error) {
-      logger.error(`Could not read the sessions status: ${messageOf(error)}`);
+      logger.error(`Could not read the sessions status: ${describeError(error)}`);
       throw internal(LOAD_FAILED_MESSAGE);
     }
   },
@@ -145,7 +114,7 @@ const enableRoute = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
   },
-  handler: async ({ context, sessionsSettings, logger }): Promise<SessionsStatus> => {
+  handler: async ({ context, isServerless, logger }): Promise<SessionsStatus> => {
     const { elasticsearch, security } = await context.core;
     const enabledBy = security.authc.getCurrentUser()?.username ?? null;
     const audit = (outcome: 'success' | 'failure', error?: Error) =>
@@ -164,12 +133,7 @@ const enableRoute = createDigitalExperienceServerRoute({
       });
 
     try {
-      await enableSessions({
-        esClient: elasticsearch.client,
-        logger,
-        settings: sessionsSettings,
-        enabledBy,
-      });
+      await enableSessions({ esClient: elasticsearch.client, isServerless });
     } catch (error) {
       audit('failure', error);
       throw toEnableError(error, logger);
@@ -177,9 +141,7 @@ const enableRoute = createDigitalExperienceServerRoute({
     audit('success');
     logger.info(`Sessions enabled by [${enabledBy}]`);
     try {
-      return await getSessionsStatus(elasticsearch.client.asInternalUser, {
-        settings: sessionsSettings,
-      });
+      return await getSessionsStatus(elasticsearch.client.asInternalUser);
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');
     }
@@ -188,7 +150,8 @@ const enableRoute = createDigitalExperienceServerRoute({
 
 const serviceName = () => z.string().min(1).max(MAX_SERVICE_NAME_LENGTH);
 const facetValue = (maxLength: number) => z.string().min(1).max(maxLength).optional();
-const durationMs = () => z.coerce.number().int().min(0).max(MAX_DURATION_MS).optional();
+const durationMs = () =>
+  z.coerce.number().int().min(0).max(SESSIONS_LIST_MAX_DURATION_MS).optional();
 
 const listRoute = createDigitalExperienceServerRoute({
   endpoint: SESSIONS_LIST_ENDPOINT,
@@ -201,18 +164,23 @@ const listRoute = createDigitalExperienceServerRoute({
         .object({
           start: isoDateTime(),
           end: isoDateTime(),
-          query: z.string().max(256).optional(),
-          browser: facetValue(256),
-          os: facetValue(256),
-          country: facetValue(16),
-          entryPage: facetValue(1024),
+          query: z.string().max(SESSIONS_LIST_MAX_SEARCH_LENGTH).optional(),
+          browser: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.browser),
+          os: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
+          country: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
+          entryPage: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
           hasErrors: z.stringbool().optional(),
           minDurationMs: durationMs(),
           maxDurationMs: durationMs(),
           sortField: z.enum(SESSION_SORT_FIELDS).default('start_time'),
           sortDirection: z.enum(['asc', 'desc']).default('desc'),
-          page: z.coerce.number().int().min(0).max(1000).default(0),
-          perPage: z.coerce.number().int().min(1).max(MAX_PER_PAGE).default(25),
+          page: z.coerce.number().int().min(0).max(SESSIONS_LIST_MAX_PAGE).default(0),
+          perPage: z.coerce
+            .number()
+            .int()
+            .min(1)
+            .max(SESSIONS_LIST_MAX_PER_PAGE)
+            .default(SESSIONS_LIST_DEFAULT_PER_PAGE),
         })
         .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
           message: '`start` must be before `end`',

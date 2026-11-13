@@ -144,6 +144,21 @@ const throwIfCredentialProblem = (error: unknown, endpoint: string): void => {
   );
 };
 
+/**
+ * Fail before sending a request urlscan is certain to refuse: the result and DOM endpoints are
+ * authentication-only since 2026-05-04 (https://urlscan.io/blog/2026/03/18/api-auth-required/),
+ * and submission has always needed a key.
+ */
+const requireApiKey = (ctx: ActionContext, endpoint: string): void => {
+  if (ctx.secrets?.authType === 'api_key_header') {
+    return;
+  }
+  throw new Error(
+    `urlscan.io requires an API key for ${endpoint}, and the connector has none. ` +
+      'Set the API key authentication type on the connector, with the UUID-shaped key from your urlscan account.'
+  );
+};
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -618,6 +633,7 @@ Gotchas that matter:
         'The contacted domains, IPs, ASNs, and hashes are the pivot points for finding related infrastructure.',
       input: GetResultInputSchema,
       handler: async (ctx, input: GetResultInput) => {
+        requireApiKey(ctx, 'GET /api/v1/result/{uuid}/');
         try {
           const response = await ctx.client.get(`${API}/result/${encodeURIComponent(input.uuid)}/`);
           return {
@@ -666,6 +682,7 @@ Gotchas that matter:
         'Consider calling searchScans first: a recent prior scan answers the question without spending quota.',
       input: ScanUrlInputSchema,
       handler: async (ctx, input: ScanUrlInput) => {
+        requireApiKey(ctx, 'POST /api/v1/scan/');
         try {
           const response = await ctx.client.post(`${API}/scan/`, submissionBody(input), {
             headers: { 'Content-Type': 'application/json' },
@@ -692,6 +709,7 @@ Gotchas that matter:
         'Choose visibility deliberately: "public" makes the URL and its scan publicly visible.',
       input: ScanUrlAndWaitInputSchema,
       handler: async (ctx, input: ScanUrlAndWaitInput) => {
+        requireApiKey(ctx, 'POST /api/v1/scan/');
         let submission: SubmissionResponse;
         try {
           const response = await ctx.client.post(`${API}/scan/`, submissionBody(input), {
@@ -859,6 +877,7 @@ Gotchas that matter:
         'Returns found: false when urlscan stored no DOM for that scan, which is a normal outcome rather than an error.',
       input: GetDomInputSchema,
       handler: async (ctx, input: GetDomInput) => {
+        requireApiKey(ctx, 'GET /dom/{uuid}/');
         const uuid = encodeURIComponent(input.uuid);
         // The DOM endpoint also lives on the site root rather than under /api/v1.
         const domUrl = `${BASE_URL}/dom/${uuid}/`;

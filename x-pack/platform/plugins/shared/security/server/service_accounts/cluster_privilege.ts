@@ -13,7 +13,8 @@ import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-serv
 /**
  * The cluster privilege service accounts are gated on. `manage_security` covers every service
  * account operation, reads included, because the accounts and the workloads they run are a
- * security administrator's concern.
+ * security administrator's concern. The one exception is `getWorkloadServiceAccountSummary`,
+ * which names the account a workload runs as to users who may see the workload.
  */
 export type ServiceAccountClusterPrivilege = 'manage_security';
 

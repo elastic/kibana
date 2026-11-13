@@ -26,6 +26,7 @@ import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../../../common/agent_builder_attachments';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
+import { InsufficientPrivilegesError } from '../../../errors';
 
 export interface SaveAutomationParams {
   workflowAttachmentId?: string;
@@ -54,6 +55,13 @@ export interface SaveAutomationResult {
   aiIndexId: string;
   workflowId: string;
   status: 'saved_and_attached' | 'attached' | 'already_attached';
+  /**
+   * Whether the saved definition passed schema validation. `false` means it was stored but cannot
+   * be enabled or run.
+   */
+  valid?: boolean;
+  /** Validation diagnostics explaining why the saved definition is invalid, when `valid` is false. */
+  validationErrors?: string[];
 }
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -293,7 +301,7 @@ const assertWorkflowReadAccess = async ({
   const security = await getSecurityStart();
   const canRead = await hasWorkflowReadPrivilege({ security, request, spaceId });
   if (!canRead) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       `Unauthorized to reference workflow '${workflowId}'. The workflowsManagement read privilege is required.`
     );
   }
@@ -316,7 +324,7 @@ const assertWorkflowCreateAccess = async ({
   const security = await getSecurityStart();
   const canCreate = await hasWorkflowCreatePrivilege({ security, request, spaceId });
   if (!canCreate) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       'Unauthorized to create a workflow. The workflowsManagement create privilege is required.'
     );
   }
@@ -336,7 +344,7 @@ const assertWorkflowUpdateAccess = async ({
   const security = await getSecurityStart();
   const canUpdate = await hasWorkflowUpdatePrivilege({ security, request, spaceId });
   if (!canUpdate) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       `Unauthorized to update workflow '${workflowId}'. The workflowsManagement update privilege is required.`
     );
   }
@@ -391,7 +399,7 @@ const resolveWorkflowSource = (
  * reverts the workflow without anyone asking for that. None of this can fail a save that has
  * already persisted and attached, so every step only warns.
  */
-const syncAttachmentsToSavedWorkflow = async ({
+export const syncAttachmentsToSavedWorkflow = async ({
   source,
   workflowId,
   attachments,
@@ -474,6 +482,42 @@ const syncAttachmentsToSavedWorkflow = async ({
   }
 };
 
+/** Error-severity validation diagnostics for a YAML definition; never throws. */
+export const collectWorkflowValidationErrors = async ({
+  yaml,
+  workflowsManagement,
+  spaceId,
+  request,
+  logger,
+}: {
+  yaml: string;
+  workflowsManagement: WorkflowsManagementApi;
+  spaceId: string;
+  request: KibanaRequest;
+  logger: Logger;
+}): Promise<string[]> => {
+  try {
+    const validation = await workflowsManagement.validateWorkflow(yaml, spaceId, request);
+    return validation.diagnostics
+      .filter((diagnostic) => diagnostic.severity === 'error')
+      .map((diagnostic) => diagnostic.message);
+  } catch (error) {
+    logger.warn(
+      `Could not collect workflow validation diagnostics: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return [];
+  }
+};
+
+interface PersistedWorkflow {
+  workflowId: string;
+  newlyCreated: boolean;
+  valid: boolean;
+  validationErrors: string[];
+}
+
 const persistWorkflow = async ({
   yaml,
   existingWorkflowId,
@@ -481,6 +525,7 @@ const persistWorkflow = async ({
   spaceId,
   request,
   getSecurityStart,
+  logger,
 }: {
   yaml: string;
   existingWorkflowId?: string;
@@ -488,7 +533,8 @@ const persistWorkflow = async ({
   spaceId: string;
   request: KibanaRequest;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-}): Promise<{ workflowId: string; newlyCreated: boolean }> => {
+  logger: Logger;
+}): Promise<PersistedWorkflow> => {
   if (existingWorkflowId !== undefined) {
     await assertWorkflowUpdateAccess({
       workflowId: existingWorkflowId,
@@ -509,14 +555,39 @@ const persistWorkflow = async ({
       );
     }
 
-    await workflowsManagement.updateWorkflow(existingWorkflowId, { yaml }, spaceId, request);
-    return { workflowId: existingWorkflowId, newlyCreated: false };
+    const updated = await workflowsManagement.updateWorkflow(
+      existingWorkflowId,
+      { yaml },
+      spaceId,
+      request
+    );
+    return {
+      workflowId: existingWorkflowId,
+      newlyCreated: false,
+      valid: updated.valid,
+      validationErrors: updated.validationErrors ?? [],
+    };
   }
 
   await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
   const created = await workflowsManagement.createWorkflow({ yaml }, spaceId, request);
 
-  return { workflowId: created.id, newlyCreated: true };
+  const validationErrors = created.valid
+    ? []
+    : await collectWorkflowValidationErrors({
+        yaml,
+        workflowsManagement,
+        spaceId,
+        request,
+        logger,
+      });
+
+  return {
+    workflowId: created.id,
+    newlyCreated: true,
+    valid: created.valid,
+    validationErrors,
+  };
 };
 
 /**
@@ -704,7 +775,55 @@ export const saveAutomationHandler = async ({
   }
 
   const source = resolveWorkflowSource(params, attachments);
-  const { existingWorkflowId } = source;
+  const result = await saveWorkflowToAiIndex({
+    aiIndexId,
+    workflowYaml: source.yaml,
+    existingWorkflowId: source.existingWorkflowId,
+    request,
+    spaceId,
+    logger,
+    getAiIndexService,
+    getSecurityStart,
+    getWorkflowsManagement,
+  });
+
+  await syncAttachmentsToSavedWorkflow({
+    source,
+    workflowId: result.workflowId,
+    attachments,
+    logger,
+  });
+
+  return result;
+};
+
+/**
+ * Creates or overwrites a workflow and attaches it to an AI index, deleting a newly created
+ * workflow when attaching it fails. Callers must check Context Engine write access first.
+ */
+export const saveWorkflowToAiIndex = async ({
+  aiIndexId,
+  workflowYaml,
+  existingWorkflowId,
+  request,
+  spaceId,
+  logger,
+  getAiIndexService,
+  getSecurityStart,
+  getWorkflowsManagement,
+}: {
+  aiIndexId: string;
+  workflowYaml: string;
+  existingWorkflowId?: string;
+  request: KibanaRequest;
+  spaceId: string;
+  logger: Logger;
+  getAiIndexService: () => Promise<AiIndexService>;
+  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
+}): Promise<SaveAutomationResult> => {
+  const workflowsManagement = getWorkflowsManagement();
+  const aiIndexService = await getAiIndexService();
   const isUpdate = existingWorkflowId !== undefined;
 
   // Fail-fast: reject before createWorkflow/updateWorkflow when the index cannot accept this automation.
@@ -714,28 +833,28 @@ export const saveAutomationHandler = async ({
     existingWorkflowId ? { type: 'workflow', value: existingWorkflowId } : undefined
   );
 
-  const { workflowId, newlyCreated } = await persistWorkflow({
-    yaml: source.yaml,
+  const { workflowId, newlyCreated, valid, validationErrors } = await persistWorkflow({
+    yaml: workflowYaml,
     existingWorkflowId,
     workflowsManagement,
     spaceId,
     request,
     getSecurityStart,
+    logger,
   });
 
-  let result: SaveAutomationResult;
   try {
     const attachStatus = await aiIndexService.addAutomation(aiIndexId, spaceId, {
       type: 'workflow',
       value: workflowId,
     });
 
-    await syncAttachmentsToSavedWorkflow({ source, workflowId, attachments, logger });
-
-    result = {
+    return {
       aiIndexId,
       workflowId,
       status: isUpdate || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
+      ...(valid === false && { valid: false }),
+      ...(validationErrors.length > 0 && { validationErrors }),
     };
   } catch (error) {
     if (newlyCreated) {
@@ -750,8 +869,6 @@ export const saveAutomationHandler = async ({
 
     throw error;
   }
-
-  return result;
 };
 
 export const getSaveAutomationErrorMessage = (error: unknown): string => {

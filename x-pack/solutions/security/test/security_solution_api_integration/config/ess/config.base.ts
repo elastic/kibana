@@ -115,7 +115,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           '--uiSettings.overrides.securitySolution:enableRuleChangesHistory=true',
           `--plugin-path=${path.resolve(
             __dirname,
-            '../../../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
+            '../../../../../../../src/platform/test_plugins/analytics/analytics_ftr_helpers'
           )}`,
 
           '--xpack.task_manager.poll_interval=1000',

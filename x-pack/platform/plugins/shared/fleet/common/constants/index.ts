@@ -13,8 +13,10 @@ export {
   FLEET_SETUP_LOCK_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
 } from './saved_objects';
+export { AWS_ONBOARDING_PACKAGE_NAMES } from './aws_onboarding';
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';

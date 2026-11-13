@@ -13,6 +13,7 @@ import {
   createActionGroup,
   createActionPolicy,
   createAlert,
+  createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createStepLogger,
 } from '../fixtures/test_utils';
@@ -422,6 +423,24 @@ describe('ApplyThrottlingStep', () => {
 
   describe('notified lookup', () => {
     const groupOf = (id: string, policyId: string) => createActionGroup({ id, policyId });
+    const intervalPolicies = () =>
+      new Map([
+        [
+          'digest',
+          createActionPolicy({
+            id: 'digest',
+            grouping: { mode: 'all' },
+            throttle: { strategy: 'time_interval', interval: '5m' },
+          }),
+        ],
+        [
+          'reminder',
+          createActionPolicy({
+            id: 'reminder',
+            throttle: { strategy: 'per_status_interval', interval: '1h' },
+          }),
+        ],
+      ]);
 
     it('skips the lookup when no throttling decision reads it', async () => {
       const { queryService, mockEsClient } = createQueryService();
@@ -447,28 +466,11 @@ describe('ApplyThrottlingStep', () => {
     it('reads only the records inside the throttle interval', async () => {
       const { queryService, mockEsClient } = createQueryService();
       mockEsClient.esql.query.mockResolvedValue(createLastNotifiedTimestampsResponse());
-      const policies = new Map([
-        [
-          'digest',
-          createActionPolicy({
-            id: 'digest',
-            grouping: { mode: 'all' },
-            throttle: { strategy: 'time_interval', interval: '5m' },
-          }),
-        ],
-        [
-          'reminder',
-          createActionPolicy({
-            id: 'reminder',
-            throttle: { strategy: 'per_status_interval', interval: '1h' },
-          }),
-        ],
-      ]);
 
       await new ApplyThrottlingStep(queryService).execute(
         createDispatcherPipelineState({
           groups: [groupOf('g1', 'digest'), groupOf('g2', 'reminder')],
-          policies,
+          policies: intervalPolicies(),
         }),
         logger
       );
@@ -488,6 +490,27 @@ describe('ApplyThrottlingStep', () => {
         }),
         expect.anything()
       );
+    });
+
+    it('runs every lookup request with the tick abort signal', async () => {
+      const { signal } = new AbortController();
+      const { queryService, mockEsClient } = createQueryService();
+      mockEsClient.esql.query.mockResolvedValue(createLastNotifiedTimestampsResponse());
+
+      await new ApplyThrottlingStep(queryService).execute(
+        createDispatcherPipelineState({
+          groups: [groupOf('g1', 'digest'), groupOf('g2', 'reminder')],
+          policies: intervalPolicies(),
+          input: createDispatcherPipelineInput({ signal }),
+        }),
+        logger
+      );
+
+      const { calls } = mockEsClient.esql.query.mock;
+      expect(calls).toHaveLength(2);
+      for (const [, options] of calls) {
+        expect(options?.signal).toBe(signal);
+      }
     });
 
     it('reads every record for on_status_change and for an invalid interval', async () => {

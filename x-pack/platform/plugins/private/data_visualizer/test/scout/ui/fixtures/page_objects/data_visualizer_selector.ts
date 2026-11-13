@@ -84,9 +84,12 @@ export class DataVisualizerSelector {
     // Programmatically set the Monaco model (Discover/Streams Scout pattern). fill() and
     // insertText() can update the hidden textarea without firing onChange, so localQuery
     // never updates and the date picker stays on Refresh.
+    // The button can be icon-only, so match "Update" by accessible name rather than visible text.
     await expect(async () => {
       await this.esqlEditor.setQuery(query);
-      await expect(this.refreshPageButton.filter({ hasText: 'Update' })).toBeVisible();
+      await expect(
+        this.refreshPageButton.and(this.page.getByRole('button', { name: 'Update', exact: true }))
+      ).toBeVisible();
     }).toPass({ timeout: 30_000 });
 
     await this.refreshPageButton.click();

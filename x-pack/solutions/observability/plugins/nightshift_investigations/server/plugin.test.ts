@@ -7,22 +7,28 @@
 
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import {
+  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
-import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
+import type { NightshiftInvestigationsSetupDeps, NightshiftInvestigationsStartDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
 
 const createPlugin = (memoryEnabled = false) =>
   new NightshiftInvestigationsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
-      sandbox: undefined,
-      cortex: { enabled: false },
+      wiki: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
+      learning: { enabled: true },
+      findings_recorder: { enabled: true },
     })
   );
 
@@ -32,18 +38,15 @@ const createSetupDeps = () =>
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
-  it('keeps the assistant connector while registering named investigation targets', async () => {
+  it('registers the investigator and the assistant without connectors of their own', async () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const plugin = new NightshiftInvestigationsPlugin(
       coreMock.createPluginInitializerContext({
         enabled: true,
-        sandbox: {
-          telemetry_connector_id: 'legacy',
-          telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
-        },
-        cortex: { enabled: false },
+        wiki: { enabled: false },
         decision_trees: { enabled: false },
         memory: { enabled: false },
+        learning: { enabled: true },
       })
     );
     plugin.setup(coreMock.createSetup(), {
@@ -67,12 +70,9 @@ describe('NightshiftInvestigationsPlugin setup', () => {
           : baseConfiguration;
       return configuration.connector_ids;
     };
-    await expect(connectorsFor('platform.nightshift.investigation-type')).resolves.toEqual([
-      'legacy',
-      'c0',
-      'orca',
-    ]);
-    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual(['legacy']);
+    // Connectors are the ones users assign to the investigator; no setting adds one.
+    await expect(connectorsFor('platform.nightshift.investigation-type')).resolves.toEqual([]);
+    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual([]);
   });
 
   it('registers the investigation locator on the server', async () => {
@@ -109,25 +109,31 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     expect(await isEnabled(request)).toBe(false);
   });
 
-  it('accepts one investigation quota callback', () => {
-    const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
-    const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
+  it('registers the reference-free, alert-outcome, Wiki, and memory judges with the evals plugin', () => {
+    const registerEvaluator = jest.fn();
 
-    expect(() => setup.registerInvestigationQuota(callback)).not.toThrow();
-  });
+    createPlugin().setup(coreMock.createSetup(), {
+      ...createSetupDeps(),
+      evals: { enabled: true, mode: 'runtime', registerTaskProvider: jest.fn(), registerEvaluator },
+    });
 
-  it('rejects a second investigation quota callback registration', () => {
-    const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
-    const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
-
-    setup.registerInvestigationQuota(callback);
-
-    expect(() => setup.registerInvestigationQuota(callback)).toThrow(
-      'Investigation quota callback is already registered'
+    expect(registerEvaluator.mock.calls.map(([{ name, version }]) => `${name}@${version}`)).toEqual(
+      [
+        'nightshift_rca_reward@1.0.0',
+        'nightshift_investigation_process@1.0.0',
+        'nightshift_conclusion_quality@1.0.0',
+        'nightshift_alert_outcome_rca_accuracy@1.1.0',
+        'nightshift_alert_outcome_benign_classification@1.0.0',
+        'nightshift_alert_outcome_rca_reporting_gap@1.0.0',
+        'nightshift_wiki_pages_read@1.0.0',
+        'nightshift_wiki_page_influence@1.0.0',
+        'nightshift_memory_read_judge@1.0.0',
+        'nightshift_memory_write_judge@1.0.0',
+      ]
     );
   });
 
-  it('registers investigation steps when Cortex, memory, and decision trees are disabled', () => {
+  it('registers investigation steps when Wiki, memory, and decision trees are disabled', () => {
     const registerStepDefinition = jest.fn();
     const dependencies = {
       ...createSetupDeps(),
@@ -145,14 +151,81 @@ describe('NightshiftInvestigationsPlugin setup', () => {
       expect.arrayContaining([
         'nightshift.resolveModel',
         'nightshift.onlineEvals.classifyRound',
+        'nightshift.onlineEvals.score',
         'nightshift.sendNotifications',
         'nightshift.obtainSandbox',
-        'nightshift.cortexHydrate',
+        'nightshift.wikiHydrate',
         'nightshift.memoryMaterializeToSandbox',
         'nightshift.composeHydrateNotifications',
-        'nightshift.cortexOptimize',
+        'nightshift.wikiOptimize',
         'nightshift.memoryOptimize',
       ])
     );
+  });
+});
+
+describe('NightshiftInvestigationsPlugin start', () => {
+  /** Starts the plugin with only the given knowledge systems on and returns the workflows it installed. */
+  const installedWorkflows = async ({
+    wiki = false,
+    memory = false,
+    decisionTrees = false,
+  }: {
+    wiki?: boolean;
+    memory?: boolean;
+    decisionTrees?: boolean;
+  }): Promise<string[]> => {
+    const plugin = new NightshiftInvestigationsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        wiki: { enabled: wiki },
+        decision_trees: { enabled: decisionTrees },
+        memory: { enabled: memory },
+        learning: { enabled: true },
+        findings_recorder: { enabled: false },
+      })
+    );
+    plugin.setup(coreMock.createSetup(), { ...createSetupDeps(), sandbox: { isAvailable: true } });
+    const installMany = jest.fn(async (_items: ReadonlyArray<{ id: string }>) => ({ failed: [] }));
+    let ready = (): void => {};
+    const installed = new Promise<void>((resolve) => {
+      ready = resolve;
+    });
+    plugin.start(coreMock.createStart(), {
+      workflowsExtensions: {
+        initManagedWorkflowsClient: () => Promise.resolve({ installMany, ready }),
+      },
+    } as unknown as NightshiftInvestigationsStartDeps);
+    await installed;
+    return installMany.mock.calls.flatMap(([items]) => items.map(({ id }) => id));
+  };
+
+  const KNOWLEDGE_WORKFLOWS = [
+    NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+    NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  ];
+
+  // Decision trees do not require Wiki or Memory, so they alone must install the combined
+  // workflows that hydrate and reinforce them.
+  it('installs the combined knowledge workflows with only decision trees on', async () => {
+    const installed = await installedWorkflows({ decisionTrees: true });
+    expect(installed).toEqual(expect.arrayContaining(KNOWLEDGE_WORKFLOWS));
+    expect(installed).toContain(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID);
+  });
+
+  it('installs the combined knowledge workflows with only Wiki on', async () => {
+    const installed = await installedWorkflows({ wiki: true });
+    expect(installed).toEqual(expect.arrayContaining(KNOWLEDGE_WORKFLOWS));
+    expect(installed).not.toContain(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID);
+  });
+
+  it('installs no knowledge workflow with every knowledge system off', async () => {
+    const installed = await installedWorkflows({});
+    for (const workflowId of [
+      ...KNOWLEDGE_WORKFLOWS,
+      NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+    ]) {
+      expect(installed).not.toContain(workflowId);
+    }
   });
 });

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { agentIdMaxLength } from '@kbn/agent-builder-common/agents';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
+import { isInferenceRequestError, type InferenceConnector } from '@kbn/inference-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -22,7 +23,22 @@ import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
 import { isContextEngineEnabled } from '../agents';
 import { buildEffectiveAgentAiIndices } from '../../services/agents/build_effective_agent_ai_indices';
 import type { AgentsServiceStart } from '../../services/agents/types';
-import { resolveExecutionConnectorId } from '../../services/execution/utils';
+import { resolveAgentBuilderDefaultEndpoint } from '../../services/execution/utils';
+
+/**
+ * Whether `resolveFeatureConnector` failed because the feature currently resolves to no usable
+ * model. The inference side reports every such cause as a 400 request error — no endpoint is
+ * available, the feature is not registered, or it is not a chat completion feature — and this
+ * display-only route deliberately treats them alike rather than telling them apart by message.
+ * Any other error (other statuses, internal errors) is a failure the caller should see.
+ */
+const isUnresolvableFeatureError = (error: unknown): boolean =>
+  isInferenceRequestError(error) && error.meta.status === 400;
+
+const toAgentModelConnector = (
+  connector: InferenceConnector | undefined
+): Pick<GetAgentModelResponse, 'connector'> =>
+  connector ? { connector: { id: connector.connectorId, name: connector.name } } : {};
 
 interface InheritedAiIndicesResolveResult {
   inherited: string[];
@@ -181,23 +197,31 @@ export function registerInternalAgentRoutes({
       security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (_ctx, request, response) => {
-      const [, { searchInferenceEndpoints }] = await coreSetup.getStartServices();
+      const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
       const { agents: agentsService } = getInternalServices();
       const registry = await agentsService.getRegistry({ request });
       const agent = await registry.get(request.params.id);
       const inferenceFeatureId = agent.configuration.inference_feature_id;
 
-      const { connector, source } = await resolveExecutionConnectorId({
-        inferenceFeatureId,
-        request,
-        searchInferenceEndpoints,
-      });
+      // A feature-bound agent mirrors the run, which hands the feature to the inference plugin as
+      // is: ANY inference request error (400) — missing endpoint, unregistered feature, non-chat
+      // feature — means the feature has no usable model and is reported as no connector, since
+      // the run will not fall back either. Every other error propagates.
+      const connector =
+        inferenceFeatureId !== undefined
+          ? await inference.resolveFeatureConnector(inferenceFeatureId, request).catch((error) => {
+              if (isUnresolvableFeatureError(error)) {
+                return undefined;
+              }
+              throw error;
+            })
+          : await resolveAgentBuilderDefaultEndpoint({ request, searchInferenceEndpoints });
 
       return response.ok<GetAgentModelResponse>({
         body: {
           ...(inferenceFeatureId !== undefined ? { inference_feature_id: inferenceFeatureId } : {}),
-          ...(connector ? { connector: { id: connector.connectorId, name: connector.name } } : {}),
-          source: source === 'agent_feature' ? 'agent_feature' : 'default',
+          ...toAgentModelConnector(connector),
+          source: inferenceFeatureId !== undefined ? 'agent_feature' : 'default',
         },
       });
     })

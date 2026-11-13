@@ -17,8 +17,8 @@ import { css } from '@emotion/react';
 import {
   getFieldValue,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
-  formatFieldStringValueWithHighlights,
 } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils/components';
 import { extractTextFromReactNode } from '@kbn/discover-contextual-components/src/data_types/logs/components/utils';
 import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
@@ -44,18 +44,6 @@ export const getServiceNameCell =
       OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE
     ) as AgentName | undefined;
 
-    if (!serviceNameValue) {
-      return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
-    }
-
-    const agentNameIcon = otelSdkLanguage || agentName;
-
-    const getIcon = () => (
-      <EuiToolTip position="left" content={agentNameIcon} repositionOnScroll={true}>
-        <AgentIcon agentName={agentNameIcon} size="m" css={agentIconStyle} />
-      </EuiToolTip>
-    );
-
     const formattedValue = useMemo(
       () =>
         formatFieldStringValueWithHighlights({
@@ -69,6 +57,18 @@ export const getServiceNameCell =
     );
 
     const textValue = useMemo(() => extractTextFromReactNode(formattedValue), [formattedValue]);
+
+    if (!serviceNameValue) {
+      return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
+    }
+
+    const agentNameIcon = otelSdkLanguage || agentName;
+
+    const getIcon = () => (
+      <EuiToolTip position="left" content={agentNameIcon} repositionOnScroll={true}>
+        <AgentIcon agentName={agentNameIcon} size="m" css={agentIconStyle} />
+      </EuiToolTip>
+    );
 
     return (
       <FieldBadgeWithActions
