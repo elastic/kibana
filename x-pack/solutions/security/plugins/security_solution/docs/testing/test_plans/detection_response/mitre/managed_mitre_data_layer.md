@@ -166,7 +166,7 @@ And the total document count should match the number of entities in the bundled 
 Given the bundled artifact carries the enterprise, atlas and ics frameworks
 When MitreAttackService.populate() completes
 Then mitre-attack-entity Saved Objects should exist for every framework in the artifact
-And the population log line should list the entity count per framework and version (e.g. "enterprise@19.2: N, atlas@2026.8: M, ics@19.2: K")
+And the population log line should list the entity count per framework and version (e.g. "enterprise@19.2: N, atlas@2026.8: M, ics@20.1: K")
 And for each framework, the entities API called with that framework should return
   the artifact framework_version for that framework
   and active entity counts per bucket matching the artifact

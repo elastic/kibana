@@ -80,7 +80,7 @@ pinned release tags.
 |---|---|---|---|---|
 | `enterprise` | [mitre/cti](https://github.com/mitre/cti) `enterprise-attack.json` | `MITRE_CONTENT_VERSIONS` (e.g. `ATT&CK-v19.2`) | `mitre-attack` | `mitre-attack` |
 | `atlas` | [mitre-atlas/atlas-data](https://github.com/mitre-atlas/atlas-data/releases) `stix-atlas.json` | `ATLAS_CONTENT_VERSIONS` (e.g. `v2026.08`) | `mitre-atlas` | `mitre-atlas` |
-| `ics` | [mitre/cti](https://github.com/mitre/cti) `ics-attack/ics-attack.json` | `ICS_CONTENT_VERSIONS` (e.g. `ATT&CK-v19.2`) | `mitre-ics-attack` | `mitre-attack`, `mitre-ics-attack` |
+| `ics` | [mitre/cti](https://github.com/mitre/cti) `ics-attack/ics-attack.json` | `ICS_CONTENT_VERSIONS` (e.g. `ATT&CK-v20.1`) | `mitre-ics-attack` | `mitre-attack`, `mitre-ics-attack` |
 
 ATT&CK for ICS shares the Enterprise release tags and is a STIX 2.0 bundle with a
 single `x-mitre-matrix`. Its techniques use the `mitre-ics-attack` kill chain, but

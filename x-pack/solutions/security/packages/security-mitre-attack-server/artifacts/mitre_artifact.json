@@ -19624,7 +19624,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0108",
     "name": "Initial Access",
     "reference": "https://attack.mitre.org/tactics/TA0108/",
@@ -19636,7 +19636,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0104",
     "name": "Execution",
     "reference": "https://attack.mitre.org/tactics/TA0104/",
@@ -19648,7 +19648,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0110",
     "name": "Persistence",
     "reference": "https://attack.mitre.org/tactics/TA0110/",
@@ -19660,7 +19660,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0111",
     "name": "Privilege Escalation",
     "reference": "https://attack.mitre.org/tactics/TA0111/",
@@ -19672,7 +19672,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0103",
     "name": "Evasion",
     "reference": "https://attack.mitre.org/tactics/TA0103/",
@@ -19684,7 +19684,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0102",
     "name": "Discovery",
     "reference": "https://attack.mitre.org/tactics/TA0102/",
@@ -19696,7 +19696,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0109",
     "name": "Lateral Movement",
     "reference": "https://attack.mitre.org/tactics/TA0109/",
@@ -19708,7 +19708,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0100",
     "name": "Collection",
     "reference": "https://attack.mitre.org/tactics/TA0100/",
@@ -19720,7 +19720,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0101",
     "name": "Command and Control",
     "reference": "https://attack.mitre.org/tactics/TA0101/",
@@ -19732,7 +19732,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0107",
     "name": "Inhibit Response Function",
     "reference": "https://attack.mitre.org/tactics/TA0107/",
@@ -19744,7 +19744,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0106",
     "name": "Impair Process Control",
     "reference": "https://attack.mitre.org/tactics/TA0106/",
@@ -19756,7 +19756,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "TA0105",
     "name": "Impact",
     "reference": "https://attack.mitre.org/tactics/TA0105/",
@@ -19768,7 +19768,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0800",
     "name": "Activate Firmware Update Mode",
     "reference": "https://attack.mitre.org/techniques/T0800/",
@@ -19782,7 +19782,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0801",
     "name": "Monitor Process State",
     "reference": "https://attack.mitre.org/techniques/T0801/",
@@ -19796,7 +19796,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0802",
     "name": "Automated Collection",
     "reference": "https://attack.mitre.org/techniques/T0802/",
@@ -19810,7 +19810,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0803",
     "name": "Block Command Message",
     "reference": "https://attack.mitre.org/techniques/T0803/",
@@ -19827,7 +19827,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0804",
     "name": "Block Reporting Message",
     "reference": "https://attack.mitre.org/techniques/T0804/",
@@ -19844,7 +19844,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0805",
     "name": "Block Serial COM",
     "reference": "https://attack.mitre.org/techniques/T0805/",
@@ -19861,7 +19861,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0806",
     "name": "Brute Force I/O",
     "reference": "https://attack.mitre.org/techniques/T0806/",
@@ -19875,13 +19875,13 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0807",
     "name": "Command-Line Interface",
     "reference": "https://attack.mitre.org/techniques/T0807/",
     "description": "Adversaries may utilize command-line interfaces (CLIs) to interact with systems and execute commands. CLIs provide a means of interacting with computer systems and are a common feature across many types of platforms and devices within control systems environments. (Citation: Enterprise ATT&CK January 2018) Adversaries may also use CLIs to install and run new software, including malicious tools that may be installed over the course of an operation.\n\nCLIs are typically accessed locally, but can also be exposed via services, such as SSH, Telnet, and RDP.  Commands that are executed in the CLI execute with the current permissions level of the process running the terminal emulator, unless the command specifies a change in permissions context. Many controllers have CLI interfaces for management purposes.",
     "revoked": false,
-    "deprecated": false,
+    "deprecated": true,
     "type": "technique",
     "tactic_ids": [
       "TA0104"
@@ -19889,7 +19889,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0808",
     "name": "Control Device Identification",
     "reference": "https://attack.mitre.org/techniques/T0808/",
@@ -19903,7 +19903,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0809",
     "name": "Data Destruction",
     "reference": "https://attack.mitre.org/techniques/T0809/",
@@ -19917,7 +19917,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0810",
     "name": "Data Historian Compromise",
     "reference": "https://attack.mitre.org/techniques/T0810/",
@@ -19931,7 +19931,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0811",
     "name": "Data from Information Repositories",
     "reference": "https://attack.mitre.org/techniques/T0811/",
@@ -19945,7 +19945,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0812",
     "name": "Default Credentials",
     "reference": "https://attack.mitre.org/techniques/T0812/",
@@ -19962,7 +19962,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0813",
     "name": "Denial of Control",
     "reference": "https://attack.mitre.org/techniques/T0813/",
@@ -19976,7 +19976,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0814",
     "name": "Denial of Service",
     "reference": "https://attack.mitre.org/techniques/T0814/",
@@ -19990,7 +19990,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0815",
     "name": "Denial of View",
     "reference": "https://attack.mitre.org/techniques/T0815/",
@@ -20004,7 +20004,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0816",
     "name": "Device Restart/Shutdown",
     "reference": "https://attack.mitre.org/techniques/T0816/",
@@ -20018,7 +20018,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0817",
     "name": "Drive-by Compromise",
     "reference": "https://attack.mitre.org/techniques/T0817/",
@@ -20032,7 +20032,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0818",
     "name": "Engineering Workstation Compromise",
     "reference": "https://attack.mitre.org/techniques/T0818/",
@@ -20046,7 +20046,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0819",
     "name": "Exploit Public-Facing Application",
     "reference": "https://attack.mitre.org/techniques/T0819/",
@@ -20060,7 +20060,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0820",
     "name": "Exploitation for Evasion",
     "reference": "https://attack.mitre.org/techniques/T0820/",
@@ -20074,7 +20074,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0821",
     "name": "Modify Controller Tasking",
     "reference": "https://attack.mitre.org/techniques/T0821/",
@@ -20088,7 +20088,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0822",
     "name": "External Remote Services",
     "reference": "https://attack.mitre.org/techniques/T0822/",
@@ -20102,7 +20102,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0823",
     "name": "Graphical User Interface",
     "reference": "https://attack.mitre.org/techniques/T0823/",
@@ -20116,7 +20116,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0824",
     "name": "I/O Module Discovery",
     "reference": "https://attack.mitre.org/techniques/T0824/",
@@ -20130,7 +20130,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0825",
     "name": "Location Identification",
     "reference": "https://attack.mitre.org/techniques/T0825/",
@@ -20144,7 +20144,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0826",
     "name": "Loss of Availability",
     "reference": "https://attack.mitre.org/techniques/T0826/",
@@ -20158,7 +20158,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0827",
     "name": "Loss of Control",
     "reference": "https://attack.mitre.org/techniques/T0827/",
@@ -20172,7 +20172,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0828",
     "name": "Loss of Productivity and Revenue",
     "reference": "https://attack.mitre.org/techniques/T0828/",
@@ -20186,7 +20186,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0829",
     "name": "Loss of View",
     "reference": "https://attack.mitre.org/techniques/T0829/",
@@ -20200,7 +20200,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0830",
     "name": "Adversary-in-the-Middle",
     "reference": "https://attack.mitre.org/techniques/T0830/",
@@ -20214,7 +20214,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0831",
     "name": "Manipulation of Control",
     "reference": "https://attack.mitre.org/techniques/T0831/",
@@ -20228,7 +20228,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0832",
     "name": "Manipulation of View",
     "reference": "https://attack.mitre.org/techniques/T0832/",
@@ -20242,7 +20242,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0833",
     "name": "Modify Control Logic",
     "reference": "https://attack.mitre.org/techniques/T0833/",
@@ -20257,7 +20257,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0834",
     "name": "Native API",
     "reference": "https://attack.mitre.org/techniques/T0834/",
@@ -20271,7 +20271,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0835",
     "name": "Manipulate I/O Image",
     "reference": "https://attack.mitre.org/techniques/T0835/",
@@ -20285,7 +20285,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0836",
     "name": "Modify Parameter",
     "reference": "https://attack.mitre.org/techniques/T0836/",
@@ -20299,7 +20299,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0837",
     "name": "Loss of Protection",
     "reference": "https://attack.mitre.org/techniques/T0837/",
@@ -20313,7 +20313,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0838",
     "name": "Modify Alarm Settings",
     "reference": "https://attack.mitre.org/techniques/T0838/",
@@ -20327,7 +20327,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0839",
     "name": "Module Firmware",
     "reference": "https://attack.mitre.org/techniques/T0839/",
@@ -20345,7 +20345,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0840",
     "name": "Network Connection Enumeration",
     "reference": "https://attack.mitre.org/techniques/T0840/",
@@ -20359,7 +20359,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0841",
     "name": "Network Service Scanning",
     "reference": "https://attack.mitre.org/techniques/T0841/",
@@ -20373,7 +20373,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0842",
     "name": "Network Sniffing",
     "reference": "https://attack.mitre.org/techniques/T0842/",
@@ -20387,7 +20387,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0843",
     "name": "Program Download",
     "reference": "https://attack.mitre.org/techniques/T0843/",
@@ -20401,7 +20401,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0844",
     "name": "Program Organization Units",
     "reference": "https://attack.mitre.org/techniques/T0844/",
@@ -20416,7 +20416,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0845",
     "name": "Program Upload",
     "reference": "https://attack.mitre.org/techniques/T0845/",
@@ -20430,7 +20430,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0846",
     "name": "Remote System Discovery",
     "reference": "https://attack.mitre.org/techniques/T0846/",
@@ -20444,7 +20444,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0847",
     "name": "Replication Through Removable Media",
     "reference": "https://attack.mitre.org/techniques/T0847/",
@@ -20458,7 +20458,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0848",
     "name": "Rogue Master",
     "reference": "https://attack.mitre.org/techniques/T0848/",
@@ -20472,7 +20472,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0849",
     "name": "Masquerading",
     "reference": "https://attack.mitre.org/techniques/T0849/",
@@ -20486,7 +20486,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0850",
     "name": "Role Identification",
     "reference": "https://attack.mitre.org/techniques/T0850/",
@@ -20500,7 +20500,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0851",
     "name": "Rootkit",
     "reference": "https://attack.mitre.org/techniques/T0851/",
@@ -20515,7 +20515,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0852",
     "name": "Screen Capture",
     "reference": "https://attack.mitre.org/techniques/T0852/",
@@ -20529,13 +20529,13 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0853",
     "name": "Scripting",
     "reference": "https://attack.mitre.org/techniques/T0853/",
     "description": "Adversaries may use scripting languages to execute arbitrary code in the form of a pre-written script or in the form of user-supplied code to an interpreter. Scripting languages are programming languages that differ from compiled languages, in that scripting languages use an interpreter, instead of a compiler. These interpreters read and compile part of the source code just before it is executed, as opposed to compilers, which compile each and every line of code to an executable file. Scripting allows software developers to run their code on any system where the interpreter exists. This way, they can distribute one package, instead of precompiling executables for many different systems. Scripting languages, such as Python, have their interpreters shipped as a default with many Linux distributions. \n\nIn addition to being a useful tool for developers and administrators, scripting language interpreters may be abused by the adversary to execute code in the target environment. Due to the nature of scripting languages, this allows for weaponized code to be deployed to a target easily, and leaves open the possibility of on-the-fly scripting to perform a task.",
     "revoked": false,
-    "deprecated": false,
+    "deprecated": true,
     "type": "technique",
     "tactic_ids": [
       "TA0104"
@@ -20543,7 +20543,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0854",
     "name": "Serial Connection Enumeration",
     "reference": "https://attack.mitre.org/techniques/T0854/",
@@ -20557,7 +20557,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0855",
     "name": "Unauthorized Command Message",
     "reference": "https://attack.mitre.org/techniques/T0855/",
@@ -20574,7 +20574,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0856",
     "name": "Spoof Reporting Message",
     "reference": "https://attack.mitre.org/techniques/T0856/",
@@ -20592,7 +20592,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0857",
     "name": "System Firmware",
     "reference": "https://attack.mitre.org/techniques/T0857/",
@@ -20610,7 +20610,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0858",
     "name": "Change Operating Mode",
     "reference": "https://attack.mitre.org/techniques/T0858/",
@@ -20625,7 +20625,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0859",
     "name": "Valid Accounts",
     "reference": "https://attack.mitre.org/techniques/T0859/",
@@ -20640,7 +20640,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0860",
     "name": "Wireless Compromise",
     "reference": "https://attack.mitre.org/techniques/T0860/",
@@ -20654,7 +20654,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0861",
     "name": "Point & Tag Identification",
     "reference": "https://attack.mitre.org/techniques/T0861/",
@@ -20668,7 +20668,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0862",
     "name": "Supply Chain Compromise",
     "reference": "https://attack.mitre.org/techniques/T0862/",
@@ -20682,7 +20682,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0863",
     "name": "User Execution",
     "reference": "https://attack.mitre.org/techniques/T0863/",
@@ -20696,7 +20696,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0864",
     "name": "Transient Cyber Asset",
     "reference": "https://attack.mitre.org/techniques/T0864/",
@@ -20710,7 +20710,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0865",
     "name": "Spearphishing Attachment",
     "reference": "https://attack.mitre.org/techniques/T0865/",
@@ -20724,7 +20724,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0866",
     "name": "Exploitation of Remote Services",
     "reference": "https://attack.mitre.org/techniques/T0866/",
@@ -20739,11 +20739,11 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0867",
     "name": "Lateral Tool Transfer",
     "reference": "https://attack.mitre.org/techniques/T0867/",
-    "description": "Adversaries may transfer tools or other files from one system to another to stage adversary tools or other files over the course of an operation. (Citation: Enterprise ATT&CK) Copying of files may also be performed laterally between internal victim systems to support Lateral Movement with remote Execution using inherent file sharing protocols such as file sharing over SMB to connected network shares. (Citation: Enterprise ATT&CK)\n\nIn control systems environments, malware may use SMB and other file sharing protocols to move laterally through industrial networks.",
+    "description": "Adversaries may transfer tools or other files from one system to another to stage adversary tools or other files over the course of an operation.(Citation: Enterprise ATT&CK) Copying of files may also be performed laterally between internal victim systems to support Lateral Movement with remote Execution using inherent file sharing protocols such as file sharing over SMB to connected network shares.(Citation: Enterprise ATT&CK)\n\nIn control systems environments, malware may use SMB and other file sharing protocols to move laterally through industrial networks.",
     "revoked": false,
     "deprecated": false,
     "type": "technique",
@@ -20753,7 +20753,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0868",
     "name": "Detect Operating Mode",
     "reference": "https://attack.mitre.org/techniques/T0868/",
@@ -20767,7 +20767,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0869",
     "name": "Standard Application Layer Protocol",
     "reference": "https://attack.mitre.org/techniques/T0869/",
@@ -20781,7 +20781,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0870",
     "name": "Detect Program State",
     "reference": "https://attack.mitre.org/techniques/T0870/",
@@ -20795,7 +20795,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0871",
     "name": "Execution through API",
     "reference": "https://attack.mitre.org/techniques/T0871/",
@@ -20809,7 +20809,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0872",
     "name": "Indicator Removal on Host",
     "reference": "https://attack.mitre.org/techniques/T0872/",
@@ -20823,7 +20823,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0873",
     "name": "Project File Infection",
     "reference": "https://attack.mitre.org/techniques/T0873/",
@@ -20837,7 +20837,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0874",
     "name": "Hooking",
     "reference": "https://attack.mitre.org/techniques/T0874/",
@@ -20852,7 +20852,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0875",
     "name": "Change Program State",
     "reference": "https://attack.mitre.org/techniques/T0875/",
@@ -20867,7 +20867,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0877",
     "name": "I/O Image",
     "reference": "https://attack.mitre.org/techniques/T0877/",
@@ -20881,7 +20881,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0878",
     "name": "Alarm Suppression",
     "reference": "https://attack.mitre.org/techniques/T0878/",
@@ -20895,7 +20895,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0879",
     "name": "Damage to Property",
     "reference": "https://attack.mitre.org/techniques/T0879/",
@@ -20909,7 +20909,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0880",
     "name": "Loss of Safety",
     "reference": "https://attack.mitre.org/techniques/T0880/",
@@ -20923,7 +20923,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0881",
     "name": "Service Stop",
     "reference": "https://attack.mitre.org/techniques/T0881/",
@@ -20937,7 +20937,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0882",
     "name": "Theft of Operational Information",
     "reference": "https://attack.mitre.org/techniques/T0882/",
@@ -20951,7 +20951,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0883",
     "name": "Internet Accessible Device",
     "reference": "https://attack.mitre.org/techniques/T0883/",
@@ -20965,7 +20965,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0884",
     "name": "Connection Proxy",
     "reference": "https://attack.mitre.org/techniques/T0884/",
@@ -20979,7 +20979,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0885",
     "name": "Commonly Used Port",
     "reference": "https://attack.mitre.org/techniques/T0885/",
@@ -20993,7 +20993,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0886",
     "name": "Remote Services",
     "reference": "https://attack.mitre.org/techniques/T0886/",
@@ -21008,7 +21008,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0887",
     "name": "Wireless Sniffing",
     "reference": "https://attack.mitre.org/techniques/T0887/",
@@ -21023,7 +21023,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0888",
     "name": "Remote System Information Discovery",
     "reference": "https://attack.mitre.org/techniques/T0888/",
@@ -21037,7 +21037,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0889",
     "name": "Modify Program",
     "reference": "https://attack.mitre.org/techniques/T0889/",
@@ -21051,7 +21051,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0890",
     "name": "Exploitation for Privilege Escalation",
     "reference": "https://attack.mitre.org/techniques/T0890/",
@@ -21065,7 +21065,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0891",
     "name": "Hardcoded Credentials",
     "reference": "https://attack.mitre.org/techniques/T0891/",
@@ -21083,7 +21083,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0892",
     "name": "Change Credential",
     "reference": "https://attack.mitre.org/techniques/T0892/",
@@ -21097,7 +21097,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0893",
     "name": "Data from Local System",
     "reference": "https://attack.mitre.org/techniques/T0893/",
@@ -21111,7 +21111,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0894",
     "name": "System Binary Proxy Execution",
     "reference": "https://attack.mitre.org/techniques/T0894/",
@@ -21125,7 +21125,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0895",
     "name": "Autorun Image",
     "reference": "https://attack.mitre.org/techniques/T0895/",
@@ -21139,7 +21139,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1691",
     "name": "Block Operational Technology Message",
     "reference": "https://attack.mitre.org/techniques/T1691/",
@@ -21153,7 +21153,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1692",
     "name": "Unauthorized Message",
     "reference": "https://attack.mitre.org/techniques/T1692/",
@@ -21168,7 +21168,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1693",
     "name": "Modify Firmware",
     "reference": "https://attack.mitre.org/techniques/T1693/",
@@ -21184,7 +21184,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1694",
     "name": "Insecure Credentials",
     "reference": "https://attack.mitre.org/techniques/T1694/",
@@ -21199,7 +21199,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1695",
     "name": "Block Communications",
     "reference": "https://attack.mitre.org/techniques/T1695/",
@@ -21213,7 +21213,21 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
+    "id": "T1701",
+    "name": "Command and Scripting Interpreter",
+    "reference": "https://attack.mitre.org/techniques/T1701/",
+    "description": "Adversaries may abuse command and script interpreters to execute commands, scripts, or binaries. These interfaces and languages provide ways of interacting with computer systems and are a common feature across many different platforms within industrial control system environments. Most systems come with some built-in command-line interface and scripting capabilities, for example, macOS and Linux distributions include some flavor of [Unix Shell](https://attack.mitre.org/techniques/T1701/003) while Windows installations include the [Windows Command Shell](https://attack.mitre.org/techniques/T1701/002) and [PowerShell](https://attack.mitre.org/techniques/T1701/001). Some also have cross-platform interpreters such as [Python](https://attack.mitre.org/techniques/T1701/005), as well as those commonly associated with client applications such as [JavaScript](https://attack.mitre.org/techniques/T1701/006) and [Visual Basic](https://attack.mitre.org/techniques/T1701/004). Many controllers have command-line interfaces for management purposes. \n\nAdversaries may abuse these technologies in various ways as a means of executing arbitrary commands. Commands and scripts can be embedded in [Initial Access](https://attack.mitre.org/tactics/TA0108) payloads delivered to victims as lure documents or as secondary payloads downloaded from an existing C2. Adversaries may also execute commands through interactive terminals/shells, as well as utilize various [Remote Services](https://attack.mitre.org/techniques/T0886) (e.g., Telnet, SSH, RDP, etc.) often found in industrial control system environments to achieve remote [Execution](https://attack.mitre.org/tactics/TA0104).(Citation: Powershell Remote Commands)(Citation: Cisco IOS Software Integrity Assurance - Command History)(Citation: Remote Shell Execution in Python)",
+    "revoked": false,
+    "deprecated": false,
+    "type": "technique",
+    "tactic_ids": [
+      "TA0104"
+    ]
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
     "id": "T0843.001",
     "name": "Download All",
     "reference": "https://attack.mitre.org/techniques/T0843/001/",
@@ -21228,7 +21242,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0843.002",
     "name": "Online Edit",
     "reference": "https://attack.mitre.org/techniques/T0843/002/",
@@ -21243,7 +21257,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0843.003",
     "name": "Program Append",
     "reference": "https://attack.mitre.org/techniques/T0843/003/",
@@ -21258,7 +21272,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0846.001",
     "name": "Port Scan",
     "reference": "https://attack.mitre.org/techniques/T0846/001/",
@@ -21273,7 +21287,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0846.002",
     "name": "Broadcast Discovery",
     "reference": "https://attack.mitre.org/techniques/T0846/002/",
@@ -21288,7 +21302,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T0846.003",
     "name": "Multicast Discovery",
     "reference": "https://attack.mitre.org/techniques/T0846/003/",
@@ -21303,7 +21317,37 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
+    "id": "T0869.001",
+    "name": "DNS",
+    "reference": "https://attack.mitre.org/techniques/T0869/001/",
+    "description": "Adversaries may communicate using the Domain Name System (DNS) application layer protocol to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and often the results of those commands, will be embedded within the protocol traffic between the client and server.\nThe DNS protocol serves an administrative function in computer networking and thus may be very common in environments. DNS traffic may also be allowed even before network authentication is completed. DNS packets contain many fields and headers in which data can be concealed. Often known as DNS tunneling, adversaries may abuse DNS to communicate with systems under their control within a victim network while also mimicking normal, expected traffic.(Citation: PAN DNS Tunneling)(Citation: Medium DnsTunneling)\n\nDNS beaconing may be used to send commands to remote systems via DNS queries. A DNS beacon is created by tunneling DNS traffic (i.e. Protocol Tunneling). The commands may be embedded into different DNS records, for example, TXT or A records.(Citation: OilRig Uses Updated BONDUPDATER to Target Middle Eastern Government)\n DNS beacons may be difficult to detect because the beacons infrequently communicate with infected devices.(Citation: DNS Beacons) Infrequent communication conceals the malicious DNS traffic with normal DNS traffic.\n\nAdversaries may also use DNS over TLS (DoT) or HTTPS (DoH) for resolving C2 servers. This encrypts the DNS requests and allows the malware to lookup C2 servers without being detected by security systems (e.g., DNS filtering based on indicators of compromise). \n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0101"
+    ],
+    "technique_id": "T0869"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
+    "id": "T0869.002",
+    "name": "Publish/Subscribe Protocols",
+    "reference": "https://attack.mitre.org/techniques/T0869/002/",
+    "description": "Adversaries may communicate using publish/subscribe (pub/sub) application layer protocols to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and often the results of those commands, will be embedded within the protocol traffic between the client and broker.\n\nProtocols such as MQTT are widely used in Internet-of-Things (IoT) and operational technology environments where devices are resource constrained and there is limited or unreliable network bandwidth. The protocol follows a publish/subscribe design, with message distribution managed by a centralized broker. Publishers categorize their messages by topics, while subscribers receive messages according to their subscribed topics. An adversary may abuse publish/subscribe protocols to communicate with systems under their control from behind a message broker while also blending in with normal, expected traffic.\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0101"
+    ],
+    "technique_id": "T0869"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
     "id": "T0873.001",
     "name": "Siemens Project File Format",
     "reference": "https://attack.mitre.org/techniques/T0873/001/",
@@ -21318,7 +21362,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1691.001",
     "name": "Command Message",
     "reference": "https://attack.mitre.org/techniques/T1691/001/",
@@ -21333,7 +21377,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1691.002",
     "name": "Reporting Message",
     "reference": "https://attack.mitre.org/techniques/T1691/002/",
@@ -21348,11 +21392,11 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1692.001",
     "name": "Command Message",
     "reference": "https://attack.mitre.org/techniques/T1692/001/",
-    "description": "Adversaries may send unauthorized command messages to instruct control system assets to perform actions outside of their intended functionality, or without the logical preconditions to trigger their expected function. Command messages are used in ICS networks to give direct instructions to control systems devices. If an adversary can send an unauthorized command message to a control system, then it can instruct the control systems device to perform an action outside the normal bounds of the device's actions. An adversary could potentially instruct a control systems device to perform an action that will cause an [Impact](https://attack.mitre.org/tactics/TA0105).(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011)\n\nIn the Dallas Siren incident, adversaries were able to send command messages to activate tornado alarm systems across the city without an impending tornado or other disaster.(Citation: Zack Whittaker April 2017)(Citation: Benjamin Freed March 2019)",
+    "description": "Adversaries may send unauthorized command messages to instruct control system assets to perform actions outside of their intended functionality, or without the logical preconditions to trigger their expected function. Command messages are used in ICS networks to give direct instructions to control systems devices. If an adversary can send an unauthorized command message to a control system, then it can instruct the control systems device to perform an action outside the normal bounds of the device's actions. An adversary could potentially instruct a control systems device to perform an action that will cause an [Impact](https://attack.mitre.org/tactics/TA0105).(Citation: Bonnie Zhu, Anthony Joseph, Shankar Sastry 2011). An adversary could also misuse control system devices to store data collected from the network for later use.\n\nIn the Dallas Siren incident, adversaries were able to send command messages to activate tornado alarm systems across the city without an impending tornado or other disaster.(Citation: Zack Whittaker April 2017)(Citation: Benjamin Freed March 2019)",
     "revoked": false,
     "deprecated": false,
     "type": "subtechnique",
@@ -21364,7 +21408,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1692.002",
     "name": "Reporting Message",
     "reference": "https://attack.mitre.org/techniques/T1692/002/",
@@ -21380,7 +21424,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1693.001",
     "name": "System Firmware",
     "reference": "https://attack.mitre.org/techniques/T1693/001/",
@@ -21397,7 +21441,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1693.002",
     "name": "Module Firmware",
     "reference": "https://attack.mitre.org/techniques/T1693/002/",
@@ -21414,7 +21458,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1694.001",
     "name": "Default Credentials",
     "reference": "https://attack.mitre.org/techniques/T1694/001/",
@@ -21430,7 +21474,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1694.002",
     "name": "Hardcoded Credentials",
     "reference": "https://attack.mitre.org/techniques/T1694/002/",
@@ -21446,7 +21490,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1695.001",
     "name": "Serial COM",
     "reference": "https://attack.mitre.org/techniques/T1695/001/",
@@ -21461,7 +21505,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1695.002",
     "name": "Ethernet",
     "reference": "https://attack.mitre.org/techniques/T1695/002/",
@@ -21476,7 +21520,7 @@
   },
   {
     "framework": "ics",
-    "framework_version": "19.2",
+    "framework_version": "20.1",
     "id": "T1695.003",
     "name": "Wi-Fi",
     "reference": "https://attack.mitre.org/techniques/T1695/003/",
@@ -21488,5 +21532,95 @@
       "TA0107"
     ],
     "technique_id": "T1695"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
+    "id": "T1701.001",
+    "name": "PowerShell",
+    "reference": "https://attack.mitre.org/techniques/T1701/001/",
+    "description": "Adversaries may abuse PowerShell commands and scripts for execution. PowerShell is a powerful interactive command-line interface and scripting environment included in the Windows operating system.(Citation: TechNet PowerShell) Adversaries can use PowerShell to perform a number of actions, including discovery of information and execution of code. Examples include the <code>Start-Process</code> cmdlet which can be used to run an executable and the <code>Invoke-Command</code> cmdlet which runs a command locally or on a remote computer (though administrator permissions are required to use PowerShell to connect to remote systems).\n\nPowerShell may also be used to download and run executables from the Internet, which can be executed from disk or in memory without touching disk.\n\nPowerShell commands/scripts can also be executed without directly invoking the <code>powershell.exe</code> binary through interfaces to PowerShell's underlying <code>System.Management.Automation</code> assembly DLL exposed through the .NET framework and Windows Common Language Interface (CLI).(Citation: Sixdub PowerPick Jan 2016)(Citation: SilentBreak Offensive PS Dec 2015)(Citation: Microsoft PSfromCsharp APR 2014)\n\nWithin industrial control system networks, adversaries may abuse the use of PowerShell on overlap assets that run on Microsoft Windows operating systems (Workstations, Data Historians, Human Machine Interfaces, Application Servers, Jump Hosts, etc.).",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0104"
+    ],
+    "technique_id": "T1701"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
+    "id": "T1701.002",
+    "name": "Windows Command Shell",
+    "reference": "https://attack.mitre.org/techniques/T1701/002/",
+    "description": "Adversaries may abuse the Windows command shell for execution. The Windows command shell (cmd) is the primary command prompt on Windows systems which is used in industrial control system environments. The Windows command prompt can be used to control almost any aspect of a system, with various permission levels required for different subsets of commands. The command prompt can be invoked remotely via  [Remote Services](https://attack.mitre.org/techniques/T0886) (e.g., Telnet, SSH, RDP, etc.) \n\nBatch files (ex: .bat or .cmd) also provide the shell with a list of sequential commands to run, as well as normal scripting operations such as conditionals and loops. Common uses of batch files include long or repetitive tasks, or the need to run the same set of commands on multiple systems. \n\nAdversaries may leverage [cmd](https://attack.mitre.org/software/S0106) to execute various commands and payloads. Common uses include [cmd](https://attack.mitre.org/software/S0106) to execute a single command, or abusing [cmd](https://attack.mitre.org/software/S0106) interactively with input and output forwarded over a command and control channel. \n\nWithin industrial control system networks, adversaries may abuse the use of Windows Command Shell on overlap assets that run on Microsoft Windows operating systems (Workstations, Data Historians, Human Machine Interfaces, Application Servers, Jump Hosts, etc.). ",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0104"
+    ],
+    "technique_id": "T1701"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
+    "id": "T1701.003",
+    "name": "Unix Shell",
+    "reference": "https://attack.mitre.org/techniques/T1701/003/",
+    "description": "Adversaries may abuse Unix shell commands and scripts for execution. Unix shells are the primary command prompt on Linux, macOS, and ESXi systems, though many variations of the Unix shell exist (e.g. sh, ash, bash, zsh, etc.) depending on the specific OS or distribution.(Citation: DieNet Bash)(Citation: Apple ZShell) Unix shells can control every aspect of a system, with certain commands requiring elevated privileges.\n\nUnix shells also support scripts that enable sequential execution of commands as well as other typical programming operations such as conditionals and loops. Common uses of shell scripts include long or repetitive tasks, or the need to run the same set of commands on multiple systems.\n\nAdversaries may abuse Unix shells to execute various commands or payloads. Interactive shells may be accessed through command and control channels or during lateral movement such as with [Remote Services](https://attack.mitre.org/techniques/T0886). Adversaries may also leverage shell scripts to deliver and execute multiple commands on victims or as part of payloads used for persistence.\n\nWithin Industrial control system networks, workstations, control servers, hypervisors, networking devices, and embedded devices that run on linux platforms may allow for Unix command shell access or stripped-down shells to implement a subset of commands. Industrial automation equipment generally does not offer command shells as a native user interface.",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0104"
+    ],
+    "technique_id": "T1701"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
+    "id": "T1701.004",
+    "name": "Visual Basic",
+    "reference": "https://attack.mitre.org/techniques/T1701/004/",
+    "description": "Adversaries may abuse Visual Basic (VB) for execution. VB is a programming language created by Microsoft with interoperability with many Windows technologies such as [Component Object Model](https://attack.mitre.org/techniques/T1559/001) and the [Native API](https://attack.mitre.org/techniques/T1106) through the Windows API. Although tagged as legacy with no planned future evolutions, VB is integrated and supported in the .NET Framework and cross-platform .NET Core.(Citation: VB .NET Mar 2020)(Citation: VB Microsoft)\n\nDerivative languages based on VB have also been created, such as Visual Basic for Applications (VBA) and VBScript. VBA is an event-driven programming language built into Microsoft Office, as well as several third-party applications.(Citation: Microsoft VBA)(Citation: Wikipedia VBA) VBA enables documents to contain macros used to automate the execution of tasks and other functionality on the host. VBScript is a default scripting language on Windows hosts and can also be used in place of [JavaScript](https://attack.mitre.org/techniques/T1701/006) on HTML Application (HTA) webpages served to Internet Explorer (though most modern browsers do not come with VBScript support).(Citation: Microsoft VBScript)\n\nAdversaries may use VB payloads to execute malicious commands. Common malicious usage includes automating execution of behaviors with VBScript or embedding VBA content into [Spearphishing Attachment](https://attack.mitre.org/techniques/T1566/001) payloads (which may also involve [Mark-of-the-Web Bypass](https://attack.mitre.org/techniques/T1553/005) to enable execution).\n\nWithin industrial control system networks, adversaries may abuse the use of VB and VBScript on overlap assets that run on Microsoft Windows operating systems, especially in cases where legacy versions are still used in operations (Workstations, Data Historians, Human Machine Interfaces, Application Servers, Jump Hosts, etc.).  ",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0104"
+    ],
+    "technique_id": "T1701"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
+    "id": "T1701.005",
+    "name": "Python",
+    "reference": "https://attack.mitre.org/techniques/T1701/005/",
+    "description": "Adversaries may abuse Python commands and scripts for execution. Python is a very popular scripting/programming language, with capabilities to perform many functions. Python can be executed interactively from the command-line (via the <code>python.exe</code> interpreter) or via scripts (.py) that can be written and distributed to different systems. Python code can also be compiled into binary executables.(Citation: Zscaler APT31 Covid-19 October 2020)\n\nPython comes with many built-in packages to interact with the underlying system, such as file operations and device I/O. Within industrial control system environments, Python libraries have been developed to implement multiple ICS protocols to establish communications with field devices. Adversaries can use these libraries or develop their own to execute commands on workstation, control server assets or send remote command messages to manipulate the industrial process through exisiting ICS protocols. \n\n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0104"
+    ],
+    "technique_id": "T1701"
+  },
+  {
+    "framework": "ics",
+    "framework_version": "20.1",
+    "id": "T1701.006",
+    "name": "JavaScript",
+    "reference": "https://attack.mitre.org/techniques/T1701/006/",
+    "description": "Adversaries may abuse various implementations of JavaScript for execution. JavaScript is a platform-independent scripting language (compiled just-in-time at runtime) commonly associated with scripts in webpages, though JavaScript can be executed in runtime environments outside the browser.(Citation: NodeJS)\n\nJScript is the Microsoft implementation of the same scripting standard. JScript is interpreted via the Windows Script engine and thus integrated with many components of Windows such as the [Component Object Model](https://attack.mitre.org/techniques/T1559/001) and Internet Explorer HTML Application (HTA) pages.(Citation: JScrip May 2018)(Citation: Microsoft JScript 2007)(Citation: Microsoft Windows Scripts)\n\nAdversaries may abuse various implementations of JavaScript to execute various behaviors. Common uses include hosting malicious scripts on websites as part of a [Drive-by Compromise](https://attack.mitre.org/techniques/T0817) or downloading and executing these script files as secondary payloads. Since these payloads are text-based, it is also very common for adversaries to obfuscate their content as part of [Obfuscated Files or Information](https://attack.mitre.org/techniques/T1027).\n\nWithin industrial control system networks, adversaries most commonly abuse the use of JavaScript on overlap assets that run on operating system platforms similar to Enterprise devices. \n",
+    "revoked": false,
+    "deprecated": false,
+    "type": "subtechnique",
+    "tactic_ids": [
+      "TA0104"
+    ],
+    "technique_id": "T1701"
   }
 ]

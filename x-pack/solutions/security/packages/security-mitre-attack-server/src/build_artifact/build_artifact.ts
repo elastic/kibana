@@ -42,7 +42,7 @@ export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.2'];
 // ICS releases share the Enterprise tags (the same `ATT&CK-v*` release carries both bundles),
 // and each tag must match the version used by prebuilt rules in
 // https://github.com/elastic/detection-rules.
-export const ICS_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.2'];
+export const ICS_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v20.1'];
 
 // Append a tag here to include an additional MITRE ATLAS version in the artifact.
 // Tags are published at https://github.com/mitre-atlas/atlas-data/releases and must
