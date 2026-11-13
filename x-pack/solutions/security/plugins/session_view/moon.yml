@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/react-query'
   - '@kbn/es-query'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

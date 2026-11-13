@@ -23,7 +23,12 @@ export class SessionViewPlugin implements Plugin<SessionViewPluginStart, Session
   public start(core: CoreStart, plugins: SessionViewPluginStartDeps): SessionViewPluginStart {
     return {
       getSessionView: (sessionViewDeps: SessionViewDeps) =>
-        getSessionViewLazy({ ...sessionViewDeps, usageCollection: plugins?.usageCollection }),
+        getSessionViewLazy({
+          ...sessionViewDeps,
+          usageCollection: plugins?.usageCollection,
+          // `cpsManager` is present solely on CPS-enabled deployments, so this is false on CCS-only ones.
+          isCpsEnabled: Boolean(plugins?.cps?.cpsManager),
+        }),
     };
   }
 
