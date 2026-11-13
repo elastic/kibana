@@ -64,6 +64,16 @@ export const getPrincipalKind = (types: readonly string[]): PrincipalType | unde
 };
 
 /**
+ * Checks whether a principal ID isn't blank, that is, neither empty nor only whitespace. A request
+ * with a blank ID is refused, and a blank ID read from storage is skipped, so that an ACL read for
+ * editing can always be written back. It doesn't check that the principal exists.
+ *
+ * @param id The ID to check, from a request or from storage.
+ * @returns `true` when the ID isn't blank.
+ */
+export const isNonBlankPrincipalId = (id: string) => id.trim() !== '';
+
+/**
  * Checks whether a stored owner or entry names a principal, following the rules of
  * {@link StoredPrincipal}: its one known kind is the principal's, and its IDs include the
  * principal's ID.

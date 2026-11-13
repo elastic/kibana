@@ -11,7 +11,13 @@ import type { Acl, AclEntry, AclGrant, StoredAcl } from '../acl';
 import { toObjectDecision, type AclDecision } from '../evaluation';
 import { compareLevels, type GeneralAccessLevel } from '../levels';
 import type { AccessPolicy } from '../policy';
-import { getPrincipalKey, isPrincipalType, matchesPrincipal, type Principal } from '../principals';
+import {
+  getPrincipalKey,
+  isNonBlankPrincipalId,
+  isPrincipalType,
+  matchesPrincipal,
+  type Principal,
+} from '../principals';
 import { AclChangeError } from './acl_change_error';
 import { readEditableAcl } from './read_editable_acl';
 
@@ -399,11 +405,11 @@ const validateNow = (now: string) => {
 };
 
 /**
- * Refuses a principal without a known kind or a non-empty ID. The type doesn't guarantee either,
+ * Refuses a principal without a known kind or with a blank ID. The type doesn't guarantee either,
  * because the principal can come from a request body.
  */
 const validatePrincipal = ({ type, id }: Principal) => {
-  if (!isPrincipalType(type) || typeof id !== 'string' || id.length === 0) {
+  if (!isPrincipalType(type) || typeof id !== 'string' || !isNonBlankPrincipalId(id)) {
     throw new AclChangeError('bad_request', 'A principal needs a known type and an ID.');
   }
 };

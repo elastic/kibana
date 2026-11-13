@@ -11,6 +11,7 @@ export {
   PRINCIPAL_TYPES,
   getPrincipalKey,
   getPrincipalKind,
+  isNonBlankPrincipalId,
   isPrincipalType,
   matchesPrincipal,
   type Principal,

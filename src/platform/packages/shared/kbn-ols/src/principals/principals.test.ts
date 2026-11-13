@@ -7,7 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getPrincipalKey, getPrincipalKind, isPrincipalType, matchesPrincipal } from './principals';
+import {
+  getPrincipalKey,
+  getPrincipalKind,
+  isNonBlankPrincipalId,
+  isPrincipalType,
+  matchesPrincipal,
+} from './principals';
+
+describe('isNonBlankPrincipalId', () => {
+  it('rejects empty and whitespace-only IDs, and nothing else', () => {
+    expect(isNonBlankPrincipalId('')).toBe(false);
+    expect(isNonBlankPrincipalId(' \t\n')).toBe(false);
+    expect(isNonBlankPrincipalId('u_1')).toBe(true);
+    expect(isNonBlankPrincipalId(' u_1 ')).toBe(true);
+  });
+});
 
 describe('isPrincipalType', () => {
   it('accepts known kinds only', () => {

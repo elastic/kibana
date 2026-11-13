@@ -178,6 +178,7 @@ describe('prepareInitialAcl', () => {
     for (const principal of [
       { type: 'group' as Principal['type'], id: 'g_1' },
       { type: 'user' as const, id: '' },
+      { type: 'user' as const, id: '  ' },
     ]) {
       expectError(
         () => prepareInitialAcl({ policy, principal, enabled: true, now: NOW }),
@@ -224,6 +225,7 @@ describe('prepareInitialAcl', () => {
       { entries: [{ type: 'group' as Principal['type'], id: 'g_1', access: 'use' }] },
     ],
     ['an empty principal ID', { entries: [{ type: 'user', id: '', access: 'use' }] }],
+    ['a whitespace principal ID', { entries: [{ type: 'user', id: ' \t', access: 'use' }] }],
   ])('rejects %s', (_, requested) => {
     expectError(
       () => prepareInitialAcl({ policy, principal: OWNER, requested, enabled: true, now: NOW }),
@@ -314,10 +316,12 @@ describe('prepareAclChange', () => {
       expect(result.principalsToCheck).toEqual([]);
     });
 
-    it('accepts the unchanged access read from a stored ACL with an empty ID', () => {
+    it('accepts the unchanged access read from a stored ACL with blank IDs', () => {
       const current: StoredAcl = {
         ...stored,
-        entries: [{ type: ['user'], id: ['', GRANTEE.id], access: ['use'], added_at: [EARLIER] }],
+        entries: [
+          { type: ['user'], id: ['', GRANTEE.id, '  '], access: ['use'], added_at: [EARLIER] },
+        ],
       };
       const { general_access: generalAccess, entries } = readEditableAcl(policy, current);
 
