@@ -17,9 +17,8 @@ import React, { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import type { KiListItem } from '../../../../../common/http_api/knowledge_indicators';
 import { noneValueLabel } from '../../../utils/ki_display';
-import { useNavigation } from '../../../hooks/use_navigation';
 import { usePrefetchKi } from '../../../hooks/use_prefetch_ki';
-import { getViewKiPath } from '../../../paths';
+import { useSelectedKi } from '../../../hooks/use_selected_ki';
 import { KiFormattedDate } from '../shared/ki_formatted_date';
 import { KiLifecycleStatusBadge } from '../shared/ki_lifecycle_status_badge';
 import { KiTypeDisplay } from '../shared/ki_type_display';
@@ -41,7 +40,7 @@ const toTableRow = (ki: KiListItem): ListKiTableRow => ({
 });
 
 export const ListKiTable = ({ aiIndexId, kis, isRefetching = false }: ListKiTableProps) => {
-  const { navigateToContextEngine } = useNavigation();
+  const { selectKi } = useSelectedKi();
   const prefetchKi = usePrefetchKi(aiIndexId);
 
   const items = useMemo(() => kis.map(toTableRow), [kis]);
@@ -119,10 +118,7 @@ export const ListKiTable = ({ aiIndexId, kis, isRefetching = false }: ListKiTabl
         return {
           'data-test-subj': 'contextKiRow',
           onMouseEnter: () => prefetchKi(ki),
-          onClick: () =>
-            navigateToContextEngine(getViewKiPath(aiIndexId, ki.id), {
-              index: ki.index,
-            }),
+          onClick: () => selectKi(ki),
           'aria-label': i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.viewKi', {
             defaultMessage: 'View Knowledge Indicator {title}',
             values: { title },

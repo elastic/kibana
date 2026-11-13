@@ -10,8 +10,7 @@ import {
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
   getAiIndexKnowledgeIndicatorsPath,
-  getViewKiDocumentPath,
-  getViewKiPath,
+  getKiDocQueryParams,
 } from './paths';
 
 describe('getAiIndexDetailPath', () => {
@@ -34,23 +33,19 @@ describe('getAiIndexKnowledgeIndicatorsPath', () => {
   });
 });
 
-describe('getViewKiPath', () => {
-  it('builds the path with an unencoded AI index id and encoded KI id', () => {
-    expect(getViewKiPath('my-ai-index', 'ki-1')).toBe('/ai_index/my-ai-index/ki/ki-1');
+describe('getKiDocQueryParams', () => {
+  it('returns the doc and index query params', () => {
+    expect(getKiDocQueryParams('ki-1', 'my-index')).toEqual({ doc: 'ki-1', index: 'my-index' });
   });
 
-  it('encodes KI ids that contain slashes', () => {
-    expect(
-      getViewKiPath('quick-test', 'quick-test-metadata-2/traces-agent_builder.otel-default')
-    ).toBe('/ai_index/quick-test/ki/quick-test-metadata-2%2Ftraces-agent_builder.otel-default');
+  it('keeps ids with slashes as they are (URLSearchParams encodes them)', () => {
+    const params = new URLSearchParams(getKiDocQueryParams('a/b c', 'idx'));
+    expect(params.toString()).toBe('doc=a%2Fb+c&index=idx');
+    expect(params.get('doc')).toBe('a/b c');
   });
-});
 
-describe('getViewKiDocumentPath', () => {
-  it('appends /document to the view KI path', () => {
-    expect(getViewKiDocumentPath('my-ai-index', 'ki-1')).toBe(
-      '/ai_index/my-ai-index/ki/ki-1/document'
-    );
+  it('leaves out an empty index', () => {
+    expect(getKiDocQueryParams('ki-1', '')).toEqual({ doc: 'ki-1' });
   });
 });
 

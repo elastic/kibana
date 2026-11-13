@@ -64,7 +64,7 @@ export const KiPage = () => {
   const restoreKiMutation = useRestoreKi({ aiIndexId, kiId: resolvedKiId, index });
 
   const isDocumentTab =
-    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.viewKiDocument, exact: true }) !== null;
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.legacyViewKiDocument, exact: true }) !== null;
   const selectedTab: KiPageTabId = isDocumentTab ? 'document' : 'details';
   const [isEditing, { on: startContentEditing, off: exitContentEditing }] = useBoolean(false);
 

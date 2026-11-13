@@ -14,7 +14,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
 import type { GetAiIndexResponse } from '../../../../../../common/http_api/ai_indices';
 
 export const listKiTestAiIndex: GetAiIndexResponse = {
@@ -37,13 +39,19 @@ export const SAMPLE_DISCOVER_URL =
 export interface ListKiRenderOptions {
   discoverShow?: boolean;
   indexManagementMonitor?: boolean;
+  initialPath?: string;
 }
 
 export const renderListKiWithProviders = (
   ui: React.ReactElement,
   options: ListKiRenderOptions = {}
 ) => {
-  const { discoverShow = true, indexManagementMonitor = true } = options;
+  const {
+    discoverShow = true,
+    indexManagementMonitor = true,
+    initialPath = '/ai_index/sample-ki/knowledge_indicators',
+  } = options;
+  const history = createMemoryHistory({ initialEntries: [initialPath] });
   const services = {
     ...coreMock.createStart(),
     share: sharePluginMock.createStartContract(),
@@ -73,13 +81,17 @@ export const renderListKiWithProviders = (
 
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-  return render(
+  const result = render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+          <QueryClientProvider client={queryClient}>
+            <Router history={history}>{ui}</Router>
+          </QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+
+  return { ...result, history, services };
 };
