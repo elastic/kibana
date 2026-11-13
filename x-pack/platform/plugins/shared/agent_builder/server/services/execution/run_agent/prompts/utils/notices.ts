@@ -244,10 +244,6 @@ export const describeFinishedExecution = ({
   return header;
 };
 
-/**
- * A message the user sent while the run worked, as the model sees it: the text with a factual
- * notice of who sent it and when it arrived. No instruction on what to do with it.
- */
 export const formatDeliveredMessageNotice = (step: DeliveredMessageStep): string => {
   const who = step.is_run_owner
     ? 'the user who started this run'

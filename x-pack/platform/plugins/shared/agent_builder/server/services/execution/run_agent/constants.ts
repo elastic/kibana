@@ -10,8 +10,7 @@ import { internalTools } from '@kbn/agent-builder-common';
 // check for background executions and other background work every X agent cycles.
 export const BACKGROUND_CHECK_CYCLE_INTERVAL = 3;
 
-// How many steers (messages sent to a running agent) one check puts in front of the model; the
-// per-run cap is `STEERS_PER_RUN_MAX` in the common steering module.
+// Delivery batch size; independent of the per-run admission limit.
 export const STEERS_PER_CHECK_MAX = 5;
 
 // Context management triggers, relative to the connector's context window.

@@ -403,8 +403,6 @@ export const createBackgroundExecutionAlreadyReportedError = ({
   );
 };
 
-// Steer refusals: the steer endpoint returns each as a 409/429 whose code the client branches on.
-
 export type AgentBuilderConversationNotSteerableError =
   AgentBuilderError<AgentBuilderErrorCode.conversationNotSteerable>;
 

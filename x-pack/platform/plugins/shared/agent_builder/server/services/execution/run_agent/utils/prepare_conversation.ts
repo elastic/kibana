@@ -121,8 +121,7 @@ export const prepareConversation = async ({
   const processedTimeline: ProcessedTimelineEvent[] = [];
   const includedRounds = new Set(effectiveRounds.map((round) => round.id));
   for (const round of groupTimelineEntries(timeline)) {
-    // A stamped message is never history: one a run read is rendered by its `delivered_message`
-    // step inside its round, one still pending is delivered by this run's first check.
+    // Steers enter the model context through delivery steps, not standalone history.
     const standaloneMessage = isTimelineStandaloneUserMessage(round)
       ? round.userMessage
       : undefined;

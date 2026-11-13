@@ -422,7 +422,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversationMetadataWritable: updateConversationMetadata !== undefined,
     });
 
-    // Steers reach a storing run only: a run that stores nothing has no document to read them from.
     const { getWithVersion, peekVersion, getUser } = conversationClient;
     const incomingMessages =
       storesConversation &&

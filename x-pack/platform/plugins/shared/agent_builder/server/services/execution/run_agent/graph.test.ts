@@ -230,13 +230,11 @@ describe('createAgentGraph', () => {
         { type: ConversationRoundStepType.interimAnswer, message: 'first answer' },
         { type: ConversationRoundStepType.deliveredMessage, ...steer('s1') },
       ]);
-      // first pass check, the check after the first answer, the check after the second
       expect(drain.mock.calls.map(([args]) => args)).toEqual([
         { cycle: 0, lastToolCallGroupId: undefined },
         { cycle: 1, lastToolCallGroupId: undefined, afterAnswer: true },
         { cycle: 2, lastToolCallGroupId: undefined, afterAnswer: true },
       ]);
-      // the second call sees the interim answer and the delivered message
       expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith({
         run: expect.objectContaining({ steps: result.steps }),
       });

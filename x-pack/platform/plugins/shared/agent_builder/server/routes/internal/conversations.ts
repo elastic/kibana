@@ -338,7 +338,7 @@ export function registerInternalConversationRoutes({
         }),
         body: schema.object({
           message: schema.string({ minLength: 1, maxLength: STEER_MESSAGE_MAX_LENGTH }),
-          // An idempotency key the client mints; its format is not validated.
+          // Client-generated idempotency key.
           event_id: schema.string({ minLength: 1, maxLength: 64 }),
         }),
       },
@@ -353,7 +353,6 @@ export function registerInternalConversationRoutes({
       const { message, event_id: eventId } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      // Refusals are typed errors with their own status; the handler wrapper answers them.
       const { event, alreadyStored } = await client.appendSteer(
         { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
         { source: 'http_api' }

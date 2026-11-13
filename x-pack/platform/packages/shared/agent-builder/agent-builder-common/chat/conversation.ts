@@ -331,10 +331,7 @@ export const isInjectedContextStep = (step: ConversationRoundStep): step is Inje
 /** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
 export const relevantSkillsHookId = 'relevant-skills';
 
-/**
- * A steer (a `user_message` sent while this execution ran) that the run put in front of the model.
- * The message text is copied because the model renderer and the client cannot look it up cheaply.
- */
+/** A delivered steer. The text is embedded so renderers need no event lookup. */
 export interface DeliveredMessageStepData {
   /** The stamped `user_message` event. */
   event_id: string;
@@ -348,10 +345,7 @@ export interface DeliveredMessageStepData {
   cycle: number;
   /** The tool call group that preceded the pickup, for placement. */
   tool_call_group_id?: string;
-  /**
-   * True when the run had already written its answer when it read the message; that answer is the
-   * `interim_answer` step before this one and the run continued from it.
-   */
+  /** Delivered after the preceding `interim_answer` step. */
   after_answer?: boolean;
   /** How many earlier executions read the same message without finishing. */
   redelivered: number;
@@ -375,11 +369,7 @@ export const isDeliveredMessageStep = (
   return step.type === ConversationRoundStepType.deliveredMessage;
 };
 
-/**
- * An answer the run had written when a message that arrived meanwhile made it continue. The
- * round's response is the last answer; this one stays among the steps, so the transcript keeps
- * what the user already read and the model sees what it already said.
- */
+/** Preserves an answer shown before a steer continued the round; the response is the last answer. */
 export interface InterimAnswerStepData {
   message: string;
 }
@@ -829,7 +819,7 @@ export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
 /** Maximum accepted length for a user chat message (`input` / `message`) */
 export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
 
-/** Maximum accepted length for a steer: a message sent to a running agent (re-sent every cycle). */
+/** Maximum steer length in characters. */
 export const STEER_MESSAGE_MAX_LENGTH = 4_000;
 
 /** Maximum accepted length for a client-supplied conversation title */

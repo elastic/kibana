@@ -58,17 +58,13 @@ export interface MarkPinnedConversationResponse {
 
 export type CreateConversationResponse = ConversationWithPermissions;
 
-/** A message for the agent that currently runs on the conversation (internal `_steer` route). */
 export interface SteerConversationRequestBody {
   message: string;
-  /** Client-generated id: a retry after a lost response stores nothing twice. */
+  /** Client-generated idempotency key. */
   event_id: string;
 }
 
-/**
- * The stored message, stamped with the run that will read it. A refusal is an error whose code
- * says why: no active execution, awaiting a prompt, not steerable, too many pending.
- */
+/** Returns the canonical stored event. */
 export interface SteerConversationResponse {
   event: UserMessageEvent;
   /** Present and true when an earlier request already stored this `event_id`. */

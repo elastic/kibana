@@ -324,7 +324,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
   const { sendSteer, steerIfBusy, isUnansweredSteer, isSending: isSendingSteer } = useSendSteer();
-  // Steer mode: the run has started (so the server knows it) and is not paused on a prompt.
   const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt;
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
@@ -500,7 +499,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       saveDraftDebounceRef.current = null;
     }
 
-    // A message meant for the participants is posted, never steered, whether or not a run is active.
+    // Never mode bypasses steering.
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
@@ -517,8 +516,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       return;
     }
 
-    // A failure settled after the submit: the text goes back into the composer unless something
-    // newer was typed meanwhile, which is never overwritten.
+    // Preserve newer drafts on failure.
     const restoreUnsent = (unsent: string) => {
       if (lastEditorContentRef.current !== '') {
         return;
@@ -527,8 +525,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       messageEditorControllerRef.current?.setContent(unsent);
     };
 
-    // A resend of a steer that got no answer is its retry, under the same id, also once the run has
-    // ended: the server reports it stored or lets it start the next run, never a second copy.
+    // Retry uncertain sends through steering, also after the run ends.
     if (canSteer || isUnansweredSteer(content)) {
       if (content.length > STEER_MESSAGE_MAX_LENGTH) {
         addErrorToast(
@@ -556,8 +553,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      // A run that took the conversation since the client last looked refuses the send as busy;
-      // the message then steers that run instead of being dropped.
       submitMessage(content, { onRejected: steerIfBusy(content, { onUnsent: restoreUnsent }) });
     }
     clearDraft();

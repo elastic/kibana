@@ -451,8 +451,7 @@ const renderSteps = async (
     if (isBackgroundAgentCompleteStep(step)) {
       messages.push(createUserMessage(formatSystemNotice(step)));
     } else if (isDeliveredMessageStep(step)) {
-      // The text is rendered once: here for the current run and for finished past runs; a run
-      // that did not finish leaves only a reference, the current pickup carries the text.
+      // Interrupted history uses references; the redelivery supplies the text.
       const interrupted = context.type === 'history' && context.interrupted === true;
       messages.push(
         createUserMessage(
@@ -460,7 +459,6 @@ const renderSteps = async (
         )
       );
     } else if (isInterimAnswerStep(step)) {
-      // What the model answered before a message made it continue: its own words, verbatim.
       messages.push(new AIMessage({ content: step.message }));
     } else if (isSubagentRosterUpdatedStep(step)) {
       messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));

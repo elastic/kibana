@@ -7,7 +7,6 @@
 
 import type { ConversationRoundAuthor, EventActor } from '@kbn/agent-builder-common';
 
-/** The author a message bubble shows, from the actor an event or a step records. */
 export const eventActorToRoundAuthor = ({
   id,
   username,

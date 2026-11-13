@@ -116,7 +116,6 @@ export const createAgentGraph = ({
   >;
   /** The execution's cycle hooks, dispatched in their own node before each research model call. */
   cycleHooks?: CycleHookRuntime;
-  /** Messages sent to the conversation while this run holds it; drained at every check. */
   incomingMessages?: IncomingMessages;
 }) => {
   const contextManagementNodes = createContextManagementNodes({
@@ -131,11 +130,9 @@ export const createAgentGraph = ({
     return {};
   };
 
-  // Notices a check appends are placed after the last tool batch.
   const lastToolCallGroupIdOf = (state: StateType): string | undefined =>
     [...state.steps].reverse().find(isToolCallStep)?.tool_call_group_id;
 
-  // Steers are drained at every check: a message sent mid-run is read at the next one.
   const drainIncomingSteps = async (
     state: StateType,
     afterAnswer?: boolean
@@ -282,7 +279,7 @@ export const createAgentGraph = ({
         if (structuredOutput) {
           return steps.prepareToAnswer;
         }
-        // A steer never fails the round that picked it up: answer from what the run has.
+        // At the cycle limit, answer instead of failing after a steer.
         if (state.steps.some(isDeliveredMessageStep)) {
           return steps.forcedAnswer;
         }
@@ -295,16 +292,10 @@ export const createAgentGraph = ({
         return steps.executeTool;
       }
     }
-    // handover: the answer is written; a message that arrived meanwhile is read before it ends
     return steps.checkIncomingAfterAnswer;
   };
 
-  /**
-   * The last check of a run, after the model answered. A message that arrived while the answer
-   * was written is read now and the run continues from that answer, so nothing sent mid-run waits
-   * for the next run except what lands after this check. The answer stays as an interim step: the
-   * user has read it and the model must see it. Past the cycle budget the run ends as it is.
-   */
+  // Preserve the visible answer before continuing with newly delivered steers.
   const checkIncomingAfterAnswer = async (state: StateType): Promise<StateUpdate> => {
     const outcome = state.researchOutcome;
     if (
@@ -327,7 +318,6 @@ export const createAgentGraph = ({
     };
   };
 
-  // Where a run that read nothing after its answer ends: the structured graph still has to answer.
   const afterAnswerEnd = structuredOutput ? steps.prepareToAnswer : steps.finalize;
   const checkIncomingAfterAnswerEdge = async (state: StateType) =>
     state.continueAfterAnswer ? steps.contextManagement : afterAnswerEnd;
@@ -414,10 +404,7 @@ export const createAgentGraph = ({
     };
   };
 
-  /**
-   * One model call with no tools, in place of the `cycleLimitExceeded` throw when the run picked up
-   * a steer. Streams under the research tags so the text reaches the client as the answer.
-   */
+  // Tool-free final call; the research tags make its output stream as the answer.
   const forcedAnswer = async (state: StateType): Promise<StateUpdate> => {
     const answerModel = chatModel.withConfig({
       tags: [tags.agent, tags.researchAgent],

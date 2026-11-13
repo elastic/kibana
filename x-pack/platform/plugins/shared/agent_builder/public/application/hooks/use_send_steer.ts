@@ -22,7 +22,6 @@ const labels = {
   }),
 };
 
-/** A steer request that got no answer; its id is reused so the retry stores nothing twice. */
 interface UnansweredSteer {
   conversationId: string;
   message: string;
@@ -34,12 +33,7 @@ export interface SendSteerOptions {
   onUnsent?: (message: string) => void;
 }
 
-/**
- * Sends a message to the agent running on the current conversation. Stored first by the `_steer`
- * route, then shown in the timeline as waiting until the run's `message_delivered` event moves it
- * between the steps. When the run has released the lock meanwhile, the message starts a run
- * through the ordinary send path instead, so one submit always stores one message.
- */
+/** Steers the active run, falling back to converse when idle. */
 export const useSendSteer = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
@@ -49,8 +43,6 @@ export const useSendSteer = () => {
   const [isSending, setIsSending] = useState(false);
   const unansweredRef = useRef<UnansweredSteer | undefined>(undefined);
 
-  // The stored event goes into the live stream as the server holds it, so the message shows as
-  // waiting before the run picks it up and matches the saved form once it is reloaded.
   const attemptSteer = useCallback(
     async ({
       targetConversationId,
@@ -74,11 +66,7 @@ export const useSendSteer = () => {
     [conversationsService, conversationStreamService]
   );
 
-  /**
-   * Whether the message is the text of a steer request that got no answer. A resend of it is a
-   * retry under the same id, through `sendSteer`, also once the run has ended: the server then
-   * reports the message stored, or lets it start the next run, but never stores it twice.
-   */
+  /** Identifies retries of uncertain writes, including after the execution ends. */
   const isUnansweredSteer = useCallback(
     (message: string): boolean => {
       const unanswered = unansweredRef.current;
@@ -91,11 +79,7 @@ export const useSendSteer = () => {
     [conversationId]
   );
 
-  /**
-   * The `onRejected` handler of an ordinary send: when a run took the conversation before the send
-   * acquired it, the message steers that run once, under the given id, so the attempts still amount
-   * to one stored message. Any other rejection is left to the send path.
-   */
+  /** On a busy converse, attempt one steer with the same event id. */
   const steerAfterBusy = useCallback(
     ({
         message,
@@ -133,7 +117,6 @@ export const useSendSteer = () => {
       if (!conversationId) {
         return false;
       }
-      // The same text after an unanswered request is a retry of it, under the same id.
       const unanswered = unansweredRef.current;
       const eventId = unanswered && isUnansweredSteer(message) ? unanswered.eventId : uuidv4();
       unansweredRef.current = undefined;
@@ -155,7 +138,6 @@ export const useSendSteer = () => {
             addErrorToast({ title: outcome.title });
             return false;
           case 'converse':
-            // The run finished between the two requests: the message starts the next one.
             sendMessage({
               message,
               conversationId,
@@ -170,7 +152,6 @@ export const useSendSteer = () => {
     [conversationId, isUnansweredSteer, attemptSteer, sendMessage, addErrorToast, steerAfterBusy]
   );
 
-  /** For an ordinary send of `message`: steers the run that refused it as busy, under a new id. */
   const steerIfBusy = useCallback(
     (message: string, { onUnsent }: SendSteerOptions = {}) =>
       steerAfterBusy({ message, eventId: uuidv4(), onUnsent }),

@@ -120,7 +120,6 @@ const stepUpdatesToEvents = (
 
 const stripStepType = ({ type, ...execution }: BackgroundAgentCompleteStep) => execution;
 
-/** The event a step a check node appended is streamed as: a completion, an interim answer, a pickup. */
 const notificationEvent = (step: ConversationRoundStep): ChatAgentEvent | undefined => {
   if (isBackgroundAgentCompleteStep(step)) {
     return createBackgroundAgentCompleteEvent(stripStepType(step));
@@ -215,8 +214,7 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit reasoning and tool call events for research agent turns (a forced answer is a
-        // research turn with no tool calls)
+        // emit research and forced-answer events
         if (
           isRootGraphNodeEnd(event, graphName) &&
           (matchName(event, steps.researchAgent) || matchName(event, steps.forcedAnswer))
@@ -331,8 +329,6 @@ export const convertGraphEvents = ({
           return completed.length > 0 ? of(...completed) : EMPTY;
         }
 
-        // The check nodes append notifications in order: background completions and pickups, or
-        // the interim answer then the pickups read after it.
         if (
           isRootGraphNodeEnd(event, graphName) &&
           (matchName(event, steps.checkBackgroundWork) ||

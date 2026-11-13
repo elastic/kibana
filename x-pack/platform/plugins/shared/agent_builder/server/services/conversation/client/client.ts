@@ -180,15 +180,9 @@ type ConversationWriteEmission =
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
-  /** The conversation with its document version, for a reader that probes `peekVersion` for changes. */
   getWithVersion(conversationId: string): Promise<ConversationWithVersion>;
-  /** The document's version only; the cheapest way to learn whether anything was written. */
   peekVersion(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }>;
-  /**
-   * Stores a steer: a `user_message` stamped with the execution that holds the lock, for that
-   * execution to read at its next check. Refuses with a typed error when the conversation is
-   * public, paused on a prompt, has no live holder, or the holder already has too many pending.
-   */
+  /** Atomically validates the active execution and appends an idempotent steer. */
   appendSteer(
     request: AppendSteerRequest,
     options: ConversationWriteOptions

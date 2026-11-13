@@ -48,8 +48,7 @@ const UserMessageEventComponent: React.FC<UserMessageEventProps> = ({
   conversationAttachments,
 }) => {
   const turnContentInset = useTurnContentInset();
-  // A message sent to a running agent is part of that turn: set in like the turn's content, where
-  // it stays once the run has read it and it renders among the steps.
+  // Align pending steers with their eventual position inside the turn.
   const steerStyles = isSteerMessageEvent(event)
     ? css`
         margin-inline-start: ${turnContentInset};

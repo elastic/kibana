@@ -12,25 +12,19 @@ import type { ConversationClient } from '@kbn/agent-builder-server/agents';
 import { STEERS_PER_CHECK_MAX } from './constants';
 
 export interface IncomingMessages {
-  /**
-   * Claims every pending steer the conversation holds that this execution has not delivered yet,
-   * for the loop to put in front of the model. Returns step data; the graph node wraps it.
-   */
+  /** Returns up to `STEERS_PER_CHECK_MAX` undelivered steers as step data. */
   drain(args: {
     cycle: number;
     lastToolCallGroupId?: string;
-    /** The run had written its answer when it checked; the steps carry it as an interim answer. */
+    /** The check ran after the answer; the preceding step is the interim answer. */
     afterAnswer?: boolean;
   }): Promise<DeliveredMessageStepData[]>;
 }
 
 /**
- * The loop's view of messages sent while it runs. The first call reads the conversation body
- * (no baseline exists: a steer may have landed between the lock write and the start read); later
- * calls probe the document version and read the body only when it changed.
- *
- * At-most-once per execution comes from the delivered set, not from the probe: a probe that fails
- * delays delivery to the next successful check and cannot lose a steer.
+ * The first check reads the body, since a steer may have landed between the lock write and the
+ * start read; later checks probe the version and read only on change. The delivered set, not the
+ * probe, keeps each steer to one delivery per execution.
  */
 export const createIncomingMessages = ({
   conversationClient,

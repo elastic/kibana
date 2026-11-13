@@ -133,24 +133,20 @@ export interface AppendEventsRequest {
   consumeBackgroundExecution?: string;
 }
 
-/** Stores a message for the execution that holds the conversation lock to read at its next check. */
 export interface AppendSteerRequest {
-  /** Conversation to steer. */
   id: string;
   message: string;
-  /** Client-generated id, so a retry after a lost response stores nothing twice. */
+  /** Client-generated idempotency key: a retry after a lost response stores nothing twice. */
   eventId: string;
   actor: EventActor;
 }
 
 export interface AppendSteerResult {
-  /** The stored message, stamped with the lock holder that will read it. */
   event: UserMessageEvent;
   /** True when an earlier request already stored this `eventId`. */
   alreadyStored: boolean;
 }
 
-/** The conversation with the version of the document it was read from. */
 export interface ConversationWithVersion {
   conversation: Conversation;
   seqNo: number;

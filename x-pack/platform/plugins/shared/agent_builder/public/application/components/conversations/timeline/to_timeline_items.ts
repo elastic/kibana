@@ -40,12 +40,7 @@ import {
   inputRefsByMessageId,
 } from './attachment_event_refs';
 
-/**
- * Where each steer stands, from the shared delivery analysis: picked up by a run that is live or
- * finished (the step carries it, the message item is dropped), read only by runs that did not
- * finish, or still waiting. One no run read before the conversation went idle is a plain message:
- * nothing to say about it.
- */
+/** Delivered steers render inside their turn; undelivered steers remain standalone. */
 const steerPlacement = (events: TimelineDisplayEvent[]) => {
   const { settled, readByLive, unfinishedReads } = analyzeDeliveries(events);
   const started = new Set<string>();
@@ -127,8 +122,7 @@ export const groupTimelineEvents = (
       case TimelineEventType.userMessage: {
         foldAttachmentRefs(seenAttachmentRefs, event.data.attachment_refs);
         const isSteer = isSteerMessageEvent(event);
-        // A steer the live or a finished run picked up is shown by its step, between the run's
-        // steps, so the message renders once.
+        // Avoid rendering the message twice.
         if (isSteer && steers.carriedByStep(event.id)) {
           break;
         }

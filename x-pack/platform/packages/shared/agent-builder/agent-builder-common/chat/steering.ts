@@ -14,22 +14,17 @@ import {
 import type { ConversationEvent, ExecutionStepEvent, UserMessageEvent } from './timeline_events';
 
 /**
- * The single implementation of "settled" and "pending" for steers, shared by the loop's drain, the
- * server's history partition and the client's timeline fold.
- *
  * A steer is *picked up* when an execution writes a `delivered_message` step naming it. It is
  * *settled* only when that execution's terminal is `execution_terminated`: an execution that
  * failed or was aborted settles nothing, so the next execution reads the steer again.
  */
 
 /**
- * Messages sent to a running agent are re-sent to the model every remaining cycle, so this cap
- * times `STEER_MESSAGE_MAX_LENGTH` bounds the extra context a run carries. Per run; the loop caps
- * a single check separately.
+ * Maximum steers admitted per execution. Each stays in the prompt for the rest of the run, so with
+ * `STEER_MESSAGE_MAX_LENGTH` this bounds the extra context.
  */
 export const STEERS_PER_RUN_MAX = 5;
 
-/** What the `delivered_message` steps of a timeline say about each steer. */
 export interface SteerDeliveries {
   /** Steers a finished execution read: never delivered again. */
   settled: Set<string>;
@@ -39,7 +34,6 @@ export interface SteerDeliveries {
   unfinishedReads: Map<string, number>;
 }
 
-/** One pass over the timeline for everything the drain, the history partition and the UI ask. */
 export const analyzeDeliveries = (events: ReadonlyArray<ConversationEvent>): SteerDeliveries => {
   const terminals = new Map<string, TimelineEventType>();
   for (const event of events) {

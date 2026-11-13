@@ -61,17 +61,11 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
-  /**
-   * The conversation with its document version, for a reader that probes `peekVersion` for
-   * changes. Optional with `peekVersion` and `getUser`: the plugin's client has them, a minimal
-   * client (tests, embedders) may not, and the run then reads no mid-run messages.
-   */
+  /** Mid-run steering requires `getWithVersion`, `peekVersion` and `getUser`. */
   getWithVersion?(
     conversationId: string
   ): Promise<{ conversation: Conversation; seqNo: number; primaryTerm: number }>;
-  /** The document's version only; the cheapest way to learn whether anything was written. */
   peekVersion?(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }>;
-  /** The user the client is scoped to: for a run, its owner. */
   getUser?(): UserIdAndName;
   /**
    * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a

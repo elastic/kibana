@@ -111,8 +111,7 @@ export const deliverCallbackEvents = ({
           (event) =>
             !isMessageChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
-            // A steer pickup, and the answer it interrupted, are loop plumbing for the attached
-            // client, not callback events; the round's steps carry both.
+            // These notifications are included in the completed round's steps.
             !isMessageDeliveredEvent(event) &&
             !isInterimAnswerEvent(event) &&
             // Terminal timeline events (terminated / failed / aborted) are never delivered as

@@ -557,7 +557,6 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
-/** A steer the running agent picked up; same payload as the `delivered_message` step. */
 export type MessageDeliveredEventData = DeliveredMessageStepData;
 
 export type MessageDeliveredEvent = ChatEventBase<
@@ -578,10 +577,7 @@ export const isMessageDeliveredEvent = (
   return event.type === ChatEventType.messageDelivered;
 };
 
-/**
- * The answer streamed so far became an `interim_answer` step: a message arrived while it was
- * written and the run continues. The next chunks start the next answer.
- */
+/** Moves the current answer into a step; subsequent chunks start a new answer. */
 export type InterimAnswerEventData = InterimAnswerStepData;
 
 export type InterimAnswerEvent = ChatEventBase<ChatEventType.interimAnswer, InterimAnswerEventData>;

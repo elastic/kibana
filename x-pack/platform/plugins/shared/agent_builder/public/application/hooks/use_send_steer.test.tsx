@@ -108,7 +108,6 @@ describe('useSendSteer', () => {
       message: 'use a table',
       eventId: expect.any(String),
     });
-    // The event goes into the live stream as the server returned it.
     expect(recordSteer).toHaveBeenCalledWith(
       conversationId,
       storedEvent(steerIdOfCall(0), 'use a table')

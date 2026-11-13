@@ -283,8 +283,7 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   }
 
   if (isInterimAnswerEvent(event)) {
-    // The answer written so far moves into the steps; the run goes on and the next chunks start
-    // the answer that follows the message it read.
+    // Reset the streaming buffer after preserving the interim answer.
     return withStreamingEvent(
       withAppendedStep({ ...state, message: '' }, createInterimAnswerStep(event.data))
     );

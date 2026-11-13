@@ -25,11 +25,9 @@ const labels = {
 };
 
 export type SteerOutcome =
-  /** Stored by this request or an earlier one: the event as the server holds it. */
   | { kind: 'stored'; event: UserMessageEvent }
-  /** No run holds the conversation and nothing is stored: the message starts a run instead. */
+  /** Nothing is stored: the message starts a run instead. */
   | { kind: 'converse' }
-  /** Refused by the server, with the reason to show. */
   | { kind: 'refused'; title: string }
   /** No answer: the request may or may not have landed. */
   | { kind: 'unanswered' };
@@ -37,11 +35,10 @@ export type SteerOutcome =
 export interface SteerRequest {
   conversationId: string;
   message: string;
-  /** The idempotency key; a retry under the same id stores nothing twice. */
+  /** Reused across retries. */
   eventId: string;
 }
 
-/** The transport the request goes through: the conversations service, or a stand-in. */
 export interface SteerTransport {
   steer(request: SteerRequest): Promise<SteerConversationResponse>;
 }
@@ -49,17 +46,15 @@ export interface SteerTransport {
 const agentBuilderErrorCode = (error: unknown): string | undefined =>
   (error as IHttpFetchError<{ attributes?: { code?: string } }>)?.body?.attributes?.code;
 
-/** A 4xx without a steer code (not found, forbidden, invalid): refused before anything was written. */
+/** A 4xx without a steer code: refused before anything was written. */
 const isAnsweredRefusal = (error: unknown): boolean => {
   const status = (error as IHttpFetchError)?.response?.status;
   return typeof status === 'number' && status >= 400 && status < 500;
 };
 
-/** Whether the ordinary send was refused because a run holds the conversation. */
 export const isConversationBusyRejection = (error: unknown): boolean =>
   agentBuilderErrorCode(error) === AgentBuilderErrorCode.conversationBusy;
 
-/** What a failed steer request means, from the error code the route answered with. */
 export const steerErrorOutcome = (error: unknown): Exclude<SteerOutcome, { kind: 'stored' }> => {
   switch (agentBuilderErrorCode(error)) {
     case AgentBuilderErrorCode.noActiveExecution:
@@ -77,7 +72,6 @@ export const steerErrorOutcome = (error: unknown): Exclude<SteerOutcome, { kind:
   return { kind: 'unanswered' };
 };
 
-/** Sends one steer request and says what came of it. No React: the hook owns retries and effects. */
 export const requestSteer = async (
   transport: SteerTransport,
   request: SteerRequest

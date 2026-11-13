@@ -111,10 +111,7 @@ export class ConversationStreamService {
     this.upsertLiveEvent(conversationId, event);
   }
 
-  /**
-   * Inserts a steer (a message sent to the running agent) into the live stream as soon as the
-   * server stored it, so the timeline shows it waiting before the run picks it up.
-   */
+  /** Publishes a persisted steer to the live timeline. */
   recordSteer(conversationId: string, event: UserMessageEvent): void {
     this.upsertLiveEvent(conversationId, event);
   }

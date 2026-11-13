@@ -14,10 +14,6 @@ interface DeliveredMessageStepProps {
   step: DeliveredMessageStepData;
 }
 
-/**
- * A message sent while the agent ran, shown where the run picked it up: the same bubble as any
- * user message, its position among the steps saying when the agent read it.
- */
 export const DeliveredMessageStep: React.FC<DeliveredMessageStepProps> = ({ step }) => (
   <div data-test-subj="agentBuilderDeliveredMessageStep">
     <UserMessage

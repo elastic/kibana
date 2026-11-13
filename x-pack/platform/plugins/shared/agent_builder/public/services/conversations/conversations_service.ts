@@ -107,7 +107,6 @@ export class ConversationsService {
     );
   }
 
-  /** Sends a message to the agent currently running on the conversation; refusals surface as HTTP errors. */
   async steer({
     conversationId,
     message,

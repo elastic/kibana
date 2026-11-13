@@ -24,10 +24,6 @@ interface InterimAnswerStepProps {
   conversationId?: string;
 }
 
-/**
- * An answer the agent gave before a message that arrived meanwhile made it continue: the same text
- * the user read while it streamed, kept in place above that message.
- */
 export const InterimAnswerStep: React.FC<InterimAnswerStepProps> = ({
   step,
   steps,

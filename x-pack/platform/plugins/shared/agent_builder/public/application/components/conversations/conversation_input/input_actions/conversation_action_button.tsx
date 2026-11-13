@@ -17,7 +17,6 @@ interface ConversationActionButtonProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting?: boolean;
-  /** Keep Submit next to Stop while a run streams, so a message can be sent to the running agent. */
   showSubmitWhileRunning?: boolean;
 }
 
