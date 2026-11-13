@@ -917,6 +917,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               interactive={true}
               isLocked={isPopoverOpen}
               showMinimap={true}
+              onToggleSearch={
+                dataView && showToggleSearch ? () => setSearchToggled(!searchToggled) : undefined
+              }
             >
               <Panel position="top-right">
                 <Actions
