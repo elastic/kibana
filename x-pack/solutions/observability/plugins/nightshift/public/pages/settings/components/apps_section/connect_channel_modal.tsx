@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
+  EuiComboBox,
+  type EuiComboBoxOptionOption,
   EuiFormRow,
   EuiModal,
   EuiModalBody,
@@ -22,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, type KbnCalloutProps } from '@kbn/ui-callout';
 import {
+  useAvailableChannels,
   useBindChannel,
   type BindFailure,
 } from '../../../../data/relay_apps/use_relay_app_bindings';
@@ -71,15 +73,39 @@ interface ConnectChannelModalProps {
   onConnected: () => void;
 }
 
-/** Binds a Slack channel to this project by its id or a link copied from Slack. */
+/**
+ * Binds a Slack channel to this project. Picks from the public channels @Elastic is in that no
+ * project has connected; a channel ID or link copied from Slack is still accepted, for private
+ * channels and for a list that is unavailable or cut short.
+ */
 export function ConnectChannelModal({ onClose, onConnected }: ConnectChannelModalProps) {
   const { bind, isLoading, failure, clearFailure } = useBindChannel();
-  const [input, setInput] = useState('');
+  const { channels, isLoading: isLoadingChannels, isTruncated } = useAvailableChannels();
+  const [selected, setSelected] = useState<EuiComboBoxOptionOption<string>>();
+  const [searchValue, setSearchValue] = useState('');
+  const [hasMatchingOptions, setHasMatchingOptions] = useState(true);
   const titleId = useGeneratedHtmlId();
 
-  const channelId = parseSlackChannelInput(input);
-  const hasUnparsableInput = input.trim().length > 0 && channelId === undefined;
+  const options = useMemo(
+    () =>
+      channels.map(({ channel, displayName }) => ({ label: `#${displayName}`, value: channel })),
+    [channels]
+  );
+  // A pending search replaces the selection, so Connect never binds a channel the field no longer shows.
+  const isSearching = searchValue.trim().length > 0;
+  const typedChannelId = parseSlackChannelInput(searchValue);
+  const channelId = isSearching ? typedChannelId : selected?.value;
+  // Filtering the list by name is not an error: only text that matches no channel and is no ID is.
+  const hasUnparsableInput = isSearching && typedChannelId === undefined && !hasMatchingOptions;
   const canBind = !isLoading && channelId !== undefined;
+
+  const onCreateOption = (input: string): boolean => {
+    const id = parseSlackChannelInput(input);
+    if (id === undefined) return false;
+    setSelected({ label: id, value: id });
+    clearFailure();
+    return true;
+  };
 
   const onBind = () => {
     if (!canBind || channelId === undefined) return;
@@ -105,38 +131,58 @@ export function ConnectChannelModal({ onClose, onConnected }: ConnectChannelModa
       <EuiModalBody>
         <EuiFormRow
           fullWidth
-          label={i18n.translate('xpack.nightshift.settings.apps.slackChannelIdLabel', {
-            defaultMessage: 'Channel ID',
+          label={i18n.translate('xpack.nightshift.settings.apps.slackChannelLabel', {
+            defaultMessage: 'Channel',
           })}
           isInvalid={hasUnparsableInput}
           error={i18n.translate('xpack.nightshift.settings.apps.slackChannelInputInvalid', {
             defaultMessage:
               'Enter a channel ID such as C0123456789, or a link copied from the channel in Slack.',
           })}
-          helpText={i18n.translate('xpack.nightshift.settings.apps.slackChannelInputHelp', {
-            defaultMessage:
-              'Invite @Elastic to the channel in Slack. It posts the channel ID there.',
-          })}
+          helpText={
+            isTruncated
+              ? i18n.translate('xpack.nightshift.settings.apps.slackChannelTruncatedHelp', {
+                  defaultMessage:
+                    'Not seeing your channel? Enter its channel ID or a link copied from Slack.',
+                })
+              : i18n.translate('xpack.nightshift.settings.apps.slackChannelInputHelp', {
+                  defaultMessage:
+                    'Lists public channels @Elastic has been invited to. For a private channel, invite @Elastic in Slack, then enter its channel ID or a link.',
+                })
+          }
           data-test-subj="streamsSlackAppChannelInputHelp"
         >
-          <EuiFieldText
+          <EuiComboBox<string>
             fullWidth
             autoFocus
-            value={input}
+            isClearable
+            isLoading={isLoadingChannels}
             isInvalid={hasUnparsableInput}
-            onChange={(e) => {
-              setInput(e.target.value);
+            isDisabled={isLoading}
+            options={options}
+            selectedOptions={selected ? [selected] : []}
+            singleSelection={{ asPlainText: true }}
+            onChange={(next) => {
+              setSelected(next[0]);
               clearFailure();
             }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                onBind();
-              }
+            onSearchChange={(value, hasMatches) => {
+              setSearchValue(value);
+              setHasMatchingOptions(hasMatches ?? true);
             }}
-            disabled={isLoading}
-            placeholder="C0123456789"
+            onCreateOption={onCreateOption}
+            customOptionText={i18n.translate(
+              'xpack.nightshift.settings.apps.slackChannelCustomOption',
+              {
+                defaultMessage: 'Connect {searchValue} by channel ID or link',
+                values: { searchValue: '{searchValue}' },
+              }
+            )}
+            placeholder={i18n.translate('xpack.nightshift.settings.apps.slackChannelPlaceholder', {
+              defaultMessage: 'Select a channel or enter a channel ID',
+            })}
             aria-label={i18n.translate('xpack.nightshift.settings.apps.slackChannelIdAriaLabel', {
-              defaultMessage: 'Slack channel ID or link',
+              defaultMessage: 'Slack channel',
             })}
             data-test-subj="streamsSlackAppChannelIdInput"
           />

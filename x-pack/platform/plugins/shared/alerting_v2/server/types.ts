@@ -36,6 +36,7 @@ import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
+import type { AlertActionsClient } from './lib/alert_actions_client';
 import type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
@@ -56,6 +57,8 @@ export interface InternalRulesClientApi {
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
 export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
+
+export type AlertActionsClientApi = PublicMethodsOf<AlertActionsClient>;
 
 export interface AlertingServerSetup {
   /**
@@ -105,6 +108,13 @@ export interface AlertingServerStart {
    * check via PrivilegeChecker before invoking the client.
    */
   getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
+
+  /**
+   * Returns an AlertActionsClient for the request's space and user. Every method authorizes the
+   * request user for the "Alerts: All" feature privilege (403 otherwise) and then writes as the
+   * internal ES user, so the caller needs no index privileges on `.alert-actions` / `.rule-events`.
+   */
+  getAlertActionsClientWithRequest(request: KibanaRequest): Promise<AlertActionsClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {

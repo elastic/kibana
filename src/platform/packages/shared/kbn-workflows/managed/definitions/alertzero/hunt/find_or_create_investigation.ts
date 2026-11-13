@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import FIND_OR_CREATE_INVESTIGATION_YAML from './find_or_create_investigation.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
@@ -34,5 +34,7 @@ export const ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 2,
-  yaml: FIND_OR_CREATE_INVESTIGATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'find_or_create_investigation.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

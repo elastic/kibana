@@ -74,8 +74,7 @@ describe('decisionTreeReinforceStepDefinition', () => {
       tool_results: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'toolu_1', results }],
     });
 
-    const [{ agentId, request, agentParams, interactive, defaultConnectorId }] =
-      runAgent.mock.calls[0];
+    const [{ agentId, request, agentParams, interactive, defaultModel }] = runAgent.mock.calls[0];
     expect(output).toEqual({
       output: {
         message: 'Persisted 1 tree',
@@ -86,7 +85,7 @@ describe('decisionTreeReinforceStepDefinition', () => {
     expect(agentId).toBe(NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID);
     expect(request).toBe(fakeRequest);
     expect(interactive).toEqual({ enabled: false });
-    expect(defaultConnectorId).toBe('claude-sonnet');
+    expect(defaultModel).toEqual({ connectorId: 'claude-sonnet' });
     expect(agentParams.nextInput).toEqual({
       message: '<!-- nightshift-accessed-trees: -->\nTask: create a new decision tree',
     });
@@ -287,8 +286,8 @@ describe('decisionTreeReinforceStepDefinition', () => {
   it('treats empty connector and round ids as unset', async () => {
     await run({ connector_id: '', round_id: '' });
 
-    const [{ defaultConnectorId, agentParams }] = runAgent.mock.calls[0];
-    expect(defaultConnectorId).toBeUndefined();
+    const [{ defaultModel, agentParams }] = runAgent.mock.calls[0];
+    expect(defaultModel).toBeUndefined();
     expect(agentParams.conversation.rounds[0].id).not.toBe('');
   });
 

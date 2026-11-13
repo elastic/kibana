@@ -12,6 +12,7 @@ import type { AppMenuConfig, AppMenuRunActionParams } from '@kbn/core-chrome-app
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { EXPLORE_LIVE_EXAMPLE_HREF } from '../common/live_example';
 
 const nightshiftPageTitle = i18n.translate('xpack.nightshift.pageTitle', {
   defaultMessage: 'Elastic nightshift',
@@ -115,6 +116,7 @@ export interface NightshiftAppHeaderProps {
   detectionsHref?: string;
   /** Renders "Investigate" (opens the start investigation modal) as the primary action when set. */
   onStartInvestigationClick?: () => void;
+  showExploreLiveExample?: boolean;
   tabs?: AppHeaderTab[];
   back?: AppHeaderBack;
 }
@@ -133,6 +135,7 @@ export function NightshiftAppHeader({
   onDetectionsClick,
   detectionsHref,
   onStartInvestigationClick,
+  showExploreLiveExample = false,
   tabs,
   back,
 }: NightshiftAppHeaderProps): React.ReactElement {
@@ -151,6 +154,18 @@ export function NightshiftAppHeader({
             applyEbtProps(startInvestigationEbtProps, params);
             onStartInvestigationClick();
           },
+        },
+      }),
+      ...(showExploreLiveExample && {
+        primaryActionItem: {
+          id: 'nightshiftExploreLiveExample',
+          label: i18n.translate('xpack.nightshift.onboarding.exploreLiveExampleButton', {
+            defaultMessage: 'Explore live example',
+          }),
+          iconType: 'external',
+          href: EXPLORE_LIVE_EXAMPLE_HREF,
+          target: '_blank',
+          testId: 'appHeaderExploreLiveExample',
         },
       }),
       items: [
@@ -268,6 +283,7 @@ export function NightshiftAppHeader({
       onSourcesClick,
       onSettingsClick,
       onStartInvestigationClick,
+      showExploreLiveExample,
       settingsHref,
       sourcesHref,
     ]

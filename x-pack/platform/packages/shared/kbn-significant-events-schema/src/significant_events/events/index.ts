@@ -11,11 +11,7 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import { significantEventBaseSchema } from '../common_schemas';
-import {
-  MAX_TEXT_LENGTH,
-  ASSESSMENT_NOTE_ROLE_RULE,
-  NO_RAW_SENSITIVE_VALUES_RULE,
-} from '../constants';
+import { ASSESSMENT_NOTE_ROLE_RULE, NO_RAW_SENSITIVE_VALUES_RULE } from '../constants';
 
 /** Alerting v2 `deactivate` accepts a reason of 1 to 1024 characters. */
 export const MAX_DEACTIVATION_REASON_LENGTH = 1024;
@@ -96,7 +92,7 @@ export const significantEventSchema = lazySchema(() =>
     status: significantEventStatusSchema,
     assessment_note: z
       .string()
-      .max(MAX_TEXT_LENGTH)
+      .max(MAX_DEACTIVATION_REASON_LENGTH)
       .optional()
       .describe(
         dedent`

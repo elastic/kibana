@@ -9,7 +9,7 @@ import { PAGE_PATH_CASES } from './page_path_cases';
 import { toPagePath } from './sessions';
 
 describe('toPagePath', () => {
-  it.each(PAGE_PATH_CASES)('labels %p as %p, like the dest pipeline', (raw, page) => {
+  it.each(PAGE_PATH_CASES)('labels %p as %p', (raw, page) => {
     expect(toPagePath(raw)).toBe(page);
   });
 });

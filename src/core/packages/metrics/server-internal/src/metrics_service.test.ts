@@ -9,14 +9,17 @@
 
 import moment from 'moment';
 import { merge } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import { lastValueFrom, take, toArray } from 'rxjs';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { mockOpsCollector } from './metrics_service.test.mocks';
+import {
+  MockEventLoopUtilizationMonitor,
+  mockEluMonitor,
+  mockOpsCollector,
+} from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 
@@ -40,6 +43,7 @@ describe('MetricsService', () => {
   beforeEach(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     mockOpsCollector.collect.mockResolvedValue(getBaseTestMetrics());
+    mockEluMonitor.collect.mockReturnValue({ active: 1, idle: 0, utilization: 1 });
 
     const configService = configServiceMock.create({
       atPath: { interval: moment.duration(testInterval) },
@@ -51,6 +55,72 @@ describe('MetricsService', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.clearAllTimers();
+  });
+
+  describe('#preboot', () => {
+    const httpPrebootMock = httpServiceMock.createInternalPrebootContract();
+
+    it('registers the ELU history route on the preboot HTTP server', async () => {
+      await metricsService.preboot({ http: httpPrebootMock });
+
+      expect(httpPrebootMock.registerRoutes).toHaveBeenCalledTimes(1);
+      expect(httpPrebootMock.registerRoutes).toHaveBeenCalledWith('', expect.any(Function));
+
+      const router = httpServiceMock.createRouter();
+      const [[, registerCallback]] = httpPrebootMock.registerRoutes.mock.calls;
+      registerCallback(router);
+      expect(router.versioned.getRoute('get', '/api/_elu_history')).toBeDefined();
+    });
+
+    it('starts collecting the ELU with the configured interval', async () => {
+      await metricsService.preboot({ http: httpPrebootMock });
+
+      expect(MockEventLoopUtilizationMonitor).toHaveBeenCalledTimes(1);
+      expect(setInterval).toHaveBeenCalledTimes(1);
+      expect(setInterval).toHaveBeenCalledWith(expect.any(Function), testInterval);
+      expect(OpsMetricsCollector).not.toHaveBeenCalled();
+    });
+
+    it('serves the ELU history collected during preboot from the route', async () => {
+      await metricsService.preboot({ http: httpPrebootMock });
+      jest.advanceTimersByTime(testInterval);
+
+      const router = httpServiceMock.createRouter();
+      const [[, registerCallback]] = httpPrebootMock.registerRoutes.mock.calls;
+      registerCallback(router);
+      const { handler } = router.versioned.getRoute('get', '/api/_elu_history').versions['1'];
+      const responseFactory = httpServerMock.createResponseFactory();
+      await handler({}, httpServerMock.createKibanaRequest(), responseFactory);
+
+      expect(responseFactory.ok).toHaveBeenCalledWith({
+        body: {
+          history: {
+            short: expect.closeTo(0.007, 3),
+            medium: expect.closeTo(0.003, 3),
+            long: expect.closeTo(0.002, 3),
+          },
+        },
+      });
+    });
+
+    it('does not restart the ELU collection on setup', async () => {
+      await metricsService.preboot({ http: httpPrebootMock });
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
+
+      expect(MockEventLoopUtilizationMonitor).toHaveBeenCalledTimes(1);
+      // One for the ELU collection, another one for the ops metrics
+      expect(setInterval).toHaveBeenCalledTimes(2);
+    });
+
+    it('stops the ELU collection on stop, even if setup was never called', async () => {
+      await metricsService.preboot({ http: httpPrebootMock });
+      jest.advanceTimersByTime(testInterval);
+      expect(mockEluMonitor.collect).toHaveBeenCalledTimes(1);
+
+      await metricsService.stop();
+      jest.advanceTimersByTime(10 * testInterval);
+      expect(mockEluMonitor.collect).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('#start', () => {
@@ -65,8 +135,10 @@ describe('MetricsService', () => {
         expect.objectContaining({ logger: logger.get('metrics') })
       );
 
-      expect(setInterval).toHaveBeenCalledTimes(1);
-      expect(setInterval).toHaveBeenCalledWith(expect.any(Function), testInterval);
+      // One for the ELU collection, another one for the ops metrics
+      expect(setInterval).toHaveBeenCalledTimes(2);
+      expect(setInterval).toHaveBeenNthCalledWith(1, expect.any(Function), testInterval);
+      expect(setInterval).toHaveBeenNthCalledWith(2, expect.any(Function), testInterval);
     });
 
     it('collects the metrics at every interval', async () => {
@@ -191,33 +263,29 @@ describe('MetricsService', () => {
     });
 
     it('emits average ELU values on getEluMetrics$ call', async () => {
-      mockOpsCollector.collect
-        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 1.0))
-        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0))
-        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 1.0));
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getEluMetrics$ } = await metricsService.start();
       const eluMetricsPromise = lastValueFrom(getEluMetrics$().pipe(toArray()));
 
-      jest.advanceTimersByTime(testInterval * 2);
-      await new Promise((resolve) => process.nextTick(resolve));
+      jest.advanceTimersByTime(testInterval * 3);
       await metricsService.stop();
 
       await expect(eluMetricsPromise).resolves.toEqual([
+        { short: 0, medium: 0, long: 0 }, // initial value, before the first sample
         expect.objectContaining({
-          short: expect.closeTo(0.007, 3), // accumulating mean: (0 + 0 + 1) / (15 / 5) = 0.0067
-          medium: expect.closeTo(0.003, 3), // accumulating mean: (0 + 0 + 1) / (30 / 5) = 0.0033
-          long: expect.closeTo(0.002, 3), // accumulating mean: (0 + 0 + 1) / (60 / 5) = 0.0017
+          short: expect.closeTo(0.007, 3), // accumulating mean: 1 * 100 / 15000 = 0.0067
+          medium: expect.closeTo(0.003, 3), // accumulating mean: 1 * 100 / 30000 = 0.0033
+          long: expect.closeTo(0.002, 3), // accumulating mean: 1 * 100 / 60000 = 0.0017
         }),
         expect.objectContaining({
-          short: expect.closeTo(0.013, 3), // accumulating mean: (1 + 1) / (15 / 5) = 0.0133
-          medium: expect.closeTo(0.007, 3), // accumulating mean: (1 + 1) / (30 / 5) = 0.0067
-          long: expect.closeTo(0.003, 3), // accumulating mean: (1 + 1) / (60 / 5) = 0.0033
+          short: expect.closeTo(0.013, 3), // accumulating mean: 2 * 100 / 15000 = 0.0133
+          medium: expect.closeTo(0.007, 3), // accumulating mean: 2 * 100 / 30000 = 0.0067
+          long: expect.closeTo(0.003, 3), // accumulating mean: 2 * 100 / 60000 = 0.0033
         }),
         expect.objectContaining({
-          short: expect.closeTo(0.02, 2), // accumulating mean: (1 + 1 + 1) / (15 / 5) = 0.02
-          medium: expect.closeTo(0.01, 2), // accumulating mean: (1 + 1 + 1) / (30 / 5) = 0.01
-          long: expect.closeTo(0.005, 3), // accumulating mean: (1 + 1 + 1) / (60 / 5) = 0.005
+          short: expect.closeTo(0.02, 2), // accumulating mean: 3 * 100 / 15000 = 0.02
+          medium: expect.closeTo(0.01, 2), // accumulating mean: 3 * 100 / 30000 = 0.01
+          long: expect.closeTo(0.005, 3), // accumulating mean: 3 * 100 / 60000 = 0.005
         }),
       ]);
     });

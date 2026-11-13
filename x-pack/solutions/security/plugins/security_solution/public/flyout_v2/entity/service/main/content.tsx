@@ -15,6 +15,7 @@ import { FlyoutRiskSummary } from '../../../../entity_analytics/components/risk_
 import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScoresState } from '../../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import type { GraphEntryPoint } from '../../../../common/lib/telemetry';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
@@ -93,6 +94,8 @@ export interface ContentProps {
    * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
    */
   isGroupView?: boolean;
+  /** Where the flyout was opened from; reported by the graph preview telemetry. */
+  graphEntryPoint?: GraphEntryPoint;
 }
 
 /**
@@ -122,6 +125,7 @@ export const Content = ({
   identityFields,
   aliasRecords,
   noEntityInStore = false,
+  graphEntryPoint,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
@@ -189,6 +193,7 @@ export const Content = ({
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             hideHeaderIcons={hideHeaderIcons}
+            graphEntryPoint={graphEntryPoint}
           />
           <EuiHorizontalRule margin="m" />
         </>

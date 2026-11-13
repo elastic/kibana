@@ -62,7 +62,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'mock-bedrock.invalid.example.com',
         ])}`,
         `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'tinesWorkflowsMigration',
+        ])}`,
       ],
     },
   };

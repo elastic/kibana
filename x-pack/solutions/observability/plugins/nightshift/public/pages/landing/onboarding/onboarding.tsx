@@ -28,6 +28,7 @@ import {
 } from '../../../common/url_params';
 import { useKibana } from '../../../hooks/use_kibana';
 import { OnboardingIntroBanner } from './intro_banner';
+import type { IntroBannerDismissal } from '../../../components/use_intro_banner_dismissal';
 import {
   ONBOARDING_STEP_IDS,
   OnboardingStepsCard,
@@ -111,9 +112,13 @@ export function NightshiftOnboarding({
   latestInvestigation,
   automationsHref,
   onFinish,
+  introBannerDismissal,
+  onIntroBannerVisibilityChange,
 }: {
   latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
+  introBannerDismissal?: IntroBannerDismissal;
+  onIntroBannerVisibilityChange?: (visible: boolean | undefined) => void;
   /** "Skip this step" / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
@@ -163,6 +168,14 @@ export function NightshiftOnboarding({
     : latestInvestigation && stepOverride !== 'investigate'
     ? 'automate'
     : 'investigate';
+
+  const isIntroStep = step === 'enable' || step === 'addData' || step === 'connectSources';
+  const introBannerVisible = isIntroStep && !introBannerDismissal?.isDismissed;
+  const isBannerVisibilityLoading = isInitialLoading || serviceAccount.isLoading;
+  useEffect(() => {
+    onIntroBannerVisibilityChange?.(isBannerVisibilityLoading ? undefined : introBannerVisible);
+    return () => onIntroBannerVisibilityChange?.(undefined);
+  }, [introBannerVisible, isBannerVisibilityLoading, onIntroBannerVisibilityChange]);
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -353,9 +366,9 @@ export function NightshiftOnboarding({
     >
       <NightshiftHeader title={HERO_TITLES[step]} />
       <EuiSpacer size="l" />
-      {(step === 'enable' || step === 'addData' || step === 'connectSources') && (
+      {introBannerVisible && (
         <>
-          <OnboardingIntroBanner />
+          <OnboardingIntroBanner dismissal={introBannerDismissal} />
           <EuiSpacer size="xl" />
         </>
       )}
