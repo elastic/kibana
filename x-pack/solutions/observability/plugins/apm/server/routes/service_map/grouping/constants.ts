@@ -28,6 +28,12 @@ export const SHARED_MIN_NEIGHBOURS_MEDIAN_MULTIPLE = 3;
  * rest have.
  */
 export const SHARED_MIN_NEIGHBOURS = 10;
+/**
+ * Only services with at least this many neighbours count towards the typical number of
+ * neighbours. In a map where each team is a gateway calling its own backends, the backends have a
+ * single neighbour; counted, they would make every team's gateway look like an outlier.
+ */
+export const SHARED_TYPICAL_MIN_NEIGHBOURS = 2;
 /** At most this share of the estate is shared. */
 export const SHARED_MAX_SHARE = 0.05;
 

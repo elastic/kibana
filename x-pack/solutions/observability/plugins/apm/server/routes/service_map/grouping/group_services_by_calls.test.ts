@@ -117,6 +117,32 @@ describe('groupServicesByCalls', () => {
     expect(groupOf.get('batch-job')).toEqual({ id: 'notConnected', kind: 'notConnected' });
   });
 
+  it('groups each team of a gateway in front of its own backends, sharing none of the gateways', () => {
+    // 50 teams of 10, each a gateway calling its 9 backends
+    // and the gateways of the next team and of the team 3 further on
+    const teams = Array.from({ length: 50 }, (_, team) =>
+      Array.from({ length: 10 }, (__, member) => `team${team}-${member === 0 ? 'gateway' : member}`)
+    );
+    const estate = syntheticEstate({
+      teams: 0,
+      servicesPerTeam: 0,
+      extraServices: teams.flat(),
+      extraCalls: teams.flatMap(([gateway, ...backends], team) => [
+        ...backends.map((backend) => [gateway, backend] as const),
+        [gateway, teams[(team + 1) % teams.length][0]] as const,
+        [gateway, teams[(team + 3) % teams.length][0]] as const,
+      ]),
+    });
+    const { strategy, groupOf } = group(estate);
+
+    expect(new Set(strategy.groups.map(({ kind }) => kind))).toEqual(new Set(['calls']));
+    for (const members of teams) {
+      expect(new Set(members.map((service) => groupOf.get(service)?.id))).toEqual(
+        new Set([`calls:${members[0]}`])
+      );
+    }
+  });
+
   it('has no shared or not connected group when no service is either', () => {
     const { strategy } = group(syntheticEstate({ teams: 30, servicesPerTeam: 20, seed: 5 }));
 

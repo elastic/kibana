@@ -11,6 +11,7 @@ import {
   SHARED_MIN_NEIGHBOURS,
   SHARED_MIN_NEIGHBOURS_MEDIAN_MULTIPLE,
   SHARED_NEIGHBOUR_STANDARD_DEVIATIONS,
+  SHARED_TYPICAL_MIN_NEIGHBOURS,
 } from './constants';
 import type { ServiceCallStats } from './types';
 import { compareNames } from './utils';
@@ -23,12 +24,16 @@ import { compareNames } from './utils';
  * A service that is both called and calls a lot is as much a hub as one that only calls.
  *
  * Shares are over every service on the map, including those with no calls. The typical number of
- * neighbours is over the same services, except those already shared for their callers: a few
- * services called by hundreds would otherwise raise the bar so far that a gateway calling dozens
- * stays under it. Neighbour counts are skewed, so by chance a few ordinary services sit above the
- * mean plus 3 standard deviations: a service also needs at least 3 times the median, and at least
- * 10. At most a small share of the map is shared, those with the most neighbours. Ties are
- * arbitrarily broken by name.
+ * neighbours leaves out services already shared for their callers: a few services called by
+ * hundreds would otherwise raise the bar so far that a gateway calling dozens stays under it. It
+ * also leaves out services with fewer than 2 neighbours: where each team is a gateway in front of
+ * its own backends, the backends would otherwise pull the typical count down to 1, and every
+ * team's gateway would be shared, leaving its backends with no calls.
+ *
+ * Neighbour counts are skewed, so by chance a few ordinary services sit above the mean plus 3
+ * standard deviations: a service also needs at least 3 times the median, and at least 10. At most
+ * a small share of the map is shared, those with the most neighbours. Ties are arbitrarily broken
+ * by name.
  *
  * Both rules count distinct services, not calls, so a stray call (a health check, a script run
  * once in the day) counts as much as a real dependency. Grouping by calls weighs those down, but
@@ -49,7 +54,10 @@ export function findSharedServices({
   const calledByMany = (callers: number) => callers >= minCallers;
 
   const neighbourCounts = [...stats.values()]
-    .filter(({ callers }) => !calledByMany(callers))
+    .filter(
+      ({ callers, neighbours }) =>
+        !calledByMany(callers) && neighbours >= SHARED_TYPICAL_MIN_NEIGHBOURS
+    )
     .map(({ neighbours }) => neighbours);
   const mean = average(neighbourCounts);
   const variance = average(neighbourCounts.map((count) => (count - mean) ** 2));

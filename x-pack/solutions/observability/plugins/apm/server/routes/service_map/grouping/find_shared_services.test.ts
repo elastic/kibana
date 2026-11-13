@@ -72,6 +72,18 @@ describe('findSharedServices', () => {
     expect(findSharedServices({ stats })).toEqual(new Set(['gateway']));
   });
 
+  it('keeps each team gateway out when every team is a gateway in front of its own backends', () => {
+    // 15 teams: a gateway with 19 backends and 2 neighbouring gateways each way (23 neighbours),
+    // in front of backends with a single neighbour. Counting the backends, the bar would be about
+    // 16, and every gateway would be shared.
+    const stats = new Map([
+      ...servicesLike('backend', 285, { callers: 1, neighbours: 1 }),
+      ...servicesLike('gateway', 15, { callers: 2, neighbours: 23 }),
+    ]);
+
+    expect(findSharedServices({ stats })).toEqual(new Set());
+  });
+
   it('needs at least 10 neighbours, however few the rest have', () => {
     // the typical service has 1 neighbour, so 9 is far above the mean plus 3 standard deviations
     const stats = new Map([
