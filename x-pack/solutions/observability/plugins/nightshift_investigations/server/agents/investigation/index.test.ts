@@ -261,6 +261,8 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).toContain('**First sentence: 20 words or fewer**');
     expect(instructions).toContain('**Keep the names, explain the mechanics.**');
     expect(instructions).toContain('**When a table says it better, use one**');
+    // A last check before sending, which the length rules depend on.
+    expect(instructions).toContain('**Before you send**');
     // A long table goes in an attachment the reply shows inline.
     expect(instructions).toContain('`<render_attachment id="<attachment_id>"/>`');
   });
