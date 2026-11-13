@@ -30,7 +30,7 @@ export interface EntityCategoryResultsProps {
  * One truncation callout above the sections names every type whose shown list was truncated.
  */
 export const EntityCategoryResults = ({ entityTypeIdPrefix }: EntityCategoryResultsProps) => {
-  const { types: availableEntityTypes, loading, error, refresh } = useEntityTypes();
+  const { data: availableEntityTypes, loading, error, refresh } = useEntityTypes();
   const [truncatedTypes, setTruncatedTypes] = useState<ReadonlySet<string>>(() => new Set());
   const onTruncatedChange = useCallback((type: string, truncated: boolean) => {
     setTruncatedTypes((previous) => {
@@ -56,7 +56,9 @@ export const EntityCategoryResults = ({ entityTypeIdPrefix }: EntityCategoryResu
       />
     );
   }
-  if (loading || !availableEntityTypes) {
+  // Only a reload has types to keep: a first load and a retry after a failure both start from
+  // the initial, empty list.
+  if (loading && availableEntityTypes.length === 0) {
     return <EntityTableLoading />;
   }
 

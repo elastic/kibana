@@ -13,7 +13,7 @@ import { createFixtureEntityInventoryApiClient } from '../../__fixtures__/invent
 import { createScenarioEntityInventoryApiClient } from '../../__fixtures__/inventory_scenarios';
 import { createAppServicesMock } from '../../mocks';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
-import { useEntityList } from './use_entity_list';
+import { INITIAL_LIST_RESPONSE, useEntityList } from './use_entity_list';
 
 const createClientMock = (
   client: EntityInventoryApiClient = createFixtureEntityInventoryApiClient()
@@ -51,7 +51,7 @@ describe('useEntityList', () => {
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(15 * 60 * 1000);
     expect(new Date(request.from).toISOString()).toBe(request.from);
     expect(inventoryApi.getTypes).not.toHaveBeenCalled();
-    expect(result.current.result.list?.rows.length).toBeGreaterThan(0);
+    expect(result.current.result.data.rows.length).toBeGreaterThan(0);
     expect(result.current.result.error).toBeUndefined();
   });
 
@@ -60,7 +60,7 @@ describe('useEntityList', () => {
     const { result } = renderUseEntityList(createScenarioEntityInventoryApiClient({ failWith }));
 
     await waitFor(() => expect(result.current.result.error).toBe(failWith));
-    expect(result.current.result.list).toBeUndefined();
+    expect(result.current.result.data).toBe(INITIAL_LIST_RESPONSE);
   });
 
   it('lists again when a search is submitted', async () => {
@@ -93,7 +93,7 @@ describe('useEntityList', () => {
     await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
     expect(firstSignal?.aborted).toBe(true);
     await waitFor(() => expect(result.current.result.loading).toBe(false));
-    expect(result.current.result.list?.rows.length).toBeGreaterThan(0);
+    expect(result.current.result.data.rows.length).toBeGreaterThan(0);
   });
 
   it('lists again on refresh', async () => {
@@ -121,6 +121,65 @@ describe('useEntityList', () => {
     act(() => result.current.result.refresh());
 
     await waitFor(() => expect(result.current.result.loading).toBe(true));
-    expect(result.current.result.list).toBeUndefined();
+    expect(result.current.result.data).toBe(INITIAL_LIST_RESPONSE);
+  });
+
+  it('starts with the initial response, loading, before the request is sent', () => {
+    const inventoryApi = createClientMock();
+    // Never settles, so every render of this test happens before a response.
+    inventoryApi.getEntities.mockImplementation(() => new Promise<never>(() => {}));
+    const states: Array<{ loading: boolean; rowCount: number }> = [];
+
+    renderHook(
+      () => {
+        const { loading, data } = useEntityList('host');
+        states.push({ loading, rowCount: data.rows.length });
+        return null;
+      },
+      {
+        wrapper: ({ children }) => (
+          <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+            <EntityInventorySearchProvider entityCategory="hosts">
+              {children}
+            </EntityInventorySearchProvider>
+          </KibanaContextProvider>
+        ),
+      }
+    );
+
+    expect(states[0]).toEqual({ loading: true, rowCount: 0 });
+    expect(states.every(({ loading }) => loading)).toBe(true);
+  });
+
+  it('keeps the rows of the previous range while the next one loads', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    const firstRows = result.current.result.data.rows;
+    expect(firstRows.length).toBeGreaterThan(0);
+    // The reload never settles, so it stays in flight for the assertions below.
+    inventoryApi.getEntities.mockImplementationOnce(() => new Promise<never>(() => {}));
+
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+    });
+
+    await waitFor(() => expect(result.current.result.loading).toBe(true));
+    expect(result.current.result.data.rows).toBe(firstRows);
+  });
+
+  it('replaces the rows with the initial response when a reload fails', async () => {
+    const failWith = new Error('Request failed');
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    expect(result.current.result.data.rows.length).toBeGreaterThan(0);
+    inventoryApi.getEntities.mockRejectedValueOnce(failWith);
+
+    act(() => result.current.result.refresh());
+
+    await waitFor(() => expect(result.current.result.error).toBe(failWith));
+    expect(result.current.result.loading).toBe(false);
+    expect(result.current.result.data).toBe(INITIAL_LIST_RESPONSE);
   });
 });

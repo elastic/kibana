@@ -9,14 +9,14 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
+import type { FetchResult } from '../utils/to_fetch_result';
+import { FETCH_OPTIONS, toFetchResult } from '../utils/to_fetch_result';
 
-export interface EntityTypesContextValue {
-  /** `undefined` until the first `GET /types` response arrives. */
-  types?: InventoryType[];
-  loading: boolean;
-  error?: Error;
-  refresh: () => void;
-}
+/** The registered entity types; empty until the first `GET /types` response arrives. */
+export type EntityTypesContextValue = FetchResult<InventoryType[]>;
+
+/** The types the app lists before the first response arrives, and after a failed load. */
+export const INITIAL_ENTITY_TYPES: InventoryType[] = [];
 
 const EntityTypesContext = createContext<EntityTypesContextValue | null>(null);
 
@@ -31,10 +31,11 @@ export const EntityTypesProvider = ({ children }: { children: React.ReactNode })
   } = useKibana();
   const { value, loading, error, refresh } = useAbortableAsync(
     ({ signal }) => inventoryApi.getTypes({ signal }),
-    [inventoryApi]
+    [inventoryApi],
+    FETCH_OPTIONS
   );
   const contextValue = useMemo<EntityTypesContextValue>(
-    () => ({ types: value?.types, loading, error, refresh }),
+    () => toFetchResult({ value: value?.types, loading, error, refresh }, INITIAL_ENTITY_TYPES),
     [value, loading, error, refresh]
   );
 

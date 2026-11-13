@@ -10,13 +10,22 @@ import type { ListResponse } from '@kbn/entity-inventory-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntityInventorySearch } from '../context/search_context';
 import { toAbsoluteTimeRange } from '../utils/to_absolute_time_range';
+import type { FetchResult } from '../utils/to_fetch_result';
+import { FETCH_OPTIONS, toFetchResult } from '../utils/to_fetch_result';
 
-export interface UseEntityListResult {
-  list?: ListResponse;
-  loading: boolean;
-  error?: Error;
-  refresh: () => void;
-}
+/** The list response the app renders before the first one arrives, and after a failed load. */
+export const INITIAL_LIST_RESPONSE: ListResponse = {
+  columns: [],
+  rows: [],
+  provenance: {},
+  truncated: false,
+  took: 0,
+  queries: [],
+  errors: [],
+  unavailableColumns: [],
+};
+
+export type UseEntityListResult = FetchResult<ListResponse>;
 
 /** Loads the entities of the type with id `entityType` for the committed time range. */
 export const useEntityList = (entityType: string): UseEntityListResult => {
@@ -26,7 +35,7 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
   // The query and filters are not applied until search lands (#6327).
   const { dateRange } = useEntityInventorySearch();
 
-  const { value, loading, error, refresh } = useAbortableAsync(
+  const state = useAbortableAsync(
     ({ signal }) => {
       // Resolved here so a relative range is measured from when the request is sent.
       const range = toAbsoluteTimeRange(dateRange);
@@ -36,10 +45,8 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
       return inventoryApi.getEntities(entityType, range, { signal });
     },
     [inventoryApi, entityType, dateRange],
-    // A successful reload keeps the previous `list` until the new one arrives; a failed one sets
-    // `list` to `undefined`, so a retry shows the first-load skeleton rather than the old rows.
-    { clearValueOnNext: false, unsetValueOnError: true }
+    FETCH_OPTIONS
   );
 
-  return { list: value, loading, error, refresh };
+  return toFetchResult(state, INITIAL_LIST_RESPONSE);
 };

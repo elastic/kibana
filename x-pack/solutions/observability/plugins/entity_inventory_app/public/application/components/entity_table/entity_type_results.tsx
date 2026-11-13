@@ -65,10 +65,10 @@ export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeR
   const { type, name } = entityType;
   const accordionId = useGeneratedHtmlId({ prefix: 'entityInventoryTypeSection' });
   const listResult = useEntityList(type);
-  // `list` is `undefined` after a failed load and during its retry, so nothing of the previous
-  // response shows beside the error.
-  const { list } = listResult;
-  const isTruncated = list !== undefined && list.truncated && list.rows.length > 0;
+  const { data: list, loading, error } = listResult;
+  const isTruncated = !loading && !error && list.truncated && list.rows.length > 0;
+  // A reload keeps the previous rows up, so the count stays while they are on screen.
+  const showEntityCount = !error && (!loading || list.rows.length > 0);
 
   useEffect(() => {
     onTruncatedChange(type, isTruncated);
@@ -92,7 +92,7 @@ export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeR
           </EuiTitle>
         }
         extraAction={
-          list && (
+          showEntityCount && (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               {list.errors.length > 0 && (
                 <EuiFlexItem grow={false}>
@@ -126,7 +126,7 @@ interface EntityTypeListResultsProps {
 /** The list of one type with its loading, error, empty and partial states. */
 const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResultsProps) => {
   const { type, name } = entityType;
-  const { list, loading, error, refresh } = listResult;
+  const { data: list, loading, error, refresh } = listResult;
   // The column, sort and page size choices are kept per type above the routes, in
   // `EntityTablePreferencesProvider`, so an empty range, a failed load or another page does not
   // discard them.
@@ -137,12 +137,13 @@ const EntityTypeListResults = ({ entityType, listResult }: EntityTypeListResults
     return <EntityTableLoadError ebtDetail={type} message={error.message} onRetry={refresh} />;
   }
 
-  if (!list) {
-    return <EntityTableSkeleton />;
-  }
-
   const { rows, errors } = list;
   const isEmpty = rows.length === 0;
+  // Only a reload has rows to keep: a first load and a retry after a failure both start from the
+  // initial response, so there is nothing to show but the skeleton.
+  if (loading && isEmpty) {
+    return <EntityTableSkeleton />;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

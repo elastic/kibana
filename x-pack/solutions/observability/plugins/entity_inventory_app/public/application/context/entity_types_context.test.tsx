@@ -39,7 +39,7 @@ describe('useEntityTypes', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.types?.length).toBeGreaterThan(0);
+    expect(result.current.data.length).toBeGreaterThan(0);
     expect(result.current.error).toBeUndefined();
   });
 
