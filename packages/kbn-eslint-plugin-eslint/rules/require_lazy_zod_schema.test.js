@@ -53,6 +53,18 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     {
       code: dedent`
         import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({ a: z.string() }));
+        const build = (schema: z.ZodType) =>
+          z.lazy(() => {
+            const schema = z.object({ b: z.string() });
+            return schema.clone();
+          });
+        export const X = build(Base);
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
         const Node = lazySchema(() =>
           z.object({ next: z.lazy(() => Node).optional() })
         );

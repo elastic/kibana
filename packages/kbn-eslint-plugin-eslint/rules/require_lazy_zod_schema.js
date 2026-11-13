@@ -754,6 +754,11 @@ const getCloneHelperParamIndex = (callee, state, sourceCode) => {
   if (target?.type !== esTypes.Identifier) {
     return -1;
   }
+  // Skip locals in the lazy callback that shadow the helper parameter.
+  const targetDefinition = findDefinition(target, sourceCode);
+  if (targetDefinition?.type !== 'Parameter' || targetDefinition.node !== fn) {
+    return -1;
+  }
   return fn.params.findIndex(
     (param) => param.type === esTypes.Identifier && param.name === target.name
   );
