@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { isBoom } from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
