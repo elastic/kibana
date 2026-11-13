@@ -9,13 +9,10 @@
 
 import DIAGNOSE_YAML from './diagnose.yaml';
 import FIND_ARTIFACTS_YAML from './find_artifacts.yaml';
-import KNOWLEDGE_SEARCH_YAML from './knowledge_search.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW_ID =
   'system-security-endpoint-configuration-troubleshooting-diagnose';
-export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW_ID =
-  'system-security-endpoint-configuration-troubleshooting-knowledge-search';
 export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW_ID =
   'system-security-endpoint-configuration-troubleshooting-find-artifacts';
 
@@ -36,15 +33,6 @@ export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW = {
   yaml: DIAGNOSE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
-export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW = {
-  billable: false,
-  id: ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW_ID,
-  management: MANAGEMENT,
-  pluginId: PLUGIN_ID,
-  version: 1,
-  yaml: KNOWLEDGE_SEARCH_YAML,
-} as const satisfies ManagedWorkflowDefinition;
-
 export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW = {
   billable: false,
   id: ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW_ID,
@@ -56,6 +44,5 @@ export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW = {
 
 export const ENDPOINT_CONFIGURATION_TROUBLESHOOTING_WORKFLOW_IDS = [
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW_ID,
-  ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW_ID,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW_ID,
 ] as const;

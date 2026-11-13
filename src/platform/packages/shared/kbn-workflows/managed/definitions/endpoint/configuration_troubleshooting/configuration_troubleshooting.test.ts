@@ -11,7 +11,6 @@ import { parse } from 'yaml';
 import {
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW,
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW,
-  ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW,
 } from '.';
 
 interface WorkflowStep {
@@ -36,7 +35,6 @@ const FIND = parseWorkflow(ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS
 describe('endpoint configuration troubleshooting managed workflows', () => {
   it('is not billable, so it stays out of the billable workflow catalog', () => {
     expect(ENDPOINT_CONFIGURATION_TROUBLESHOOTING_DIAGNOSE_WORKFLOW.billable).toBe(false);
-    expect(ENDPOINT_CONFIGURATION_TROUBLESHOOTING_KNOWLEDGE_SEARCH_WORKFLOW.billable).toBe(false);
     expect(ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW.billable).toBe(false);
   });
 
