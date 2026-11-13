@@ -627,6 +627,295 @@ describe('cascaded documents helpers utils', () => {
         });
       });
 
+      describe('aggregate value constraints', () => {
+        const stubField = (field: Partial<DataViewField>) => field as unknown as DataViewField;
+
+        const mockDataViewFields = (fields: Record<string, Partial<DataViewField>>) => {
+          jest
+            .spyOn(dataViewMock.fields, 'getByName')
+            .mockImplementation((fieldName) =>
+              fields[fieldName] ? stubField(fields[fieldName]) : undefined
+            );
+        };
+
+        const keywordField = {
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        };
+
+        afterEach(() => {
+          jest.restoreAllMocks();
+        });
+
+        it('omits the INLINE STATS command for TS queries, constraining documents with the values displayed for the expanded row', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS metrics-elastic_agent.elastic_agent*
+              | WHERE beat.stats.libbeat.output.write.bytes IS NOT NULL
+              | STATS values(component.id) BY host.name
+            `,
+          };
+
+          mockDataViewFields({
+            'host.name': keywordField,
+            'component.id': keywordField,
+          });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'kahr-agent-wire-test' },
+            nodeAggregatedValues: { 'values(component.id)': ['elastic-otel-collector'] },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM metrics-elastic_agent.elastic_agent* | WHERE beat.stats.libbeat.output.write.bytes IS NOT NULL | WHERE `host.name` == "kahr-agent-wire-test" AND MATCH_PHRASE(`component.id`, "elastic-otel-collector")'
+          );
+        });
+
+        it('omits the INLINE STATS command for TS queries that use time series only aggregates', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb
+              | STATS count = COUNT(AVG_OVER_TIME(bytes_gauge)) BY agent.keyword
+            `,
+          };
+
+          mockDataViewFields({ 'agent.keyword': keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['agent.keyword'],
+            nodePathMap: { 'agent.keyword': 'Mozilla/5.0' },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `agent.keyword` == "Mozilla/5.0"'
+          );
+        });
+
+        it('constrains documents with the values displayed for the expanded row when a match phrase is required', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb | WHERE clientip IS NOT NULL | STATS values(tags) BY host
+            `,
+          };
+
+          mockDataViewFields({
+            host: { type: 'string', esTypes: ['text'], aggregatable: false, searchable: true },
+            tags: keywordField,
+          });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host'],
+            nodePathMap: { host: 'www.elastic.co' },
+            nodeAggregatedValues: { 'values(tags)': ['info'] },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE clientip IS NOT NULL | WHERE MATCH_PHRASE(host, "www.elastic.co") AND MATCH_PHRASE(tags, "info")'
+          );
+        });
+
+        it('combines the values of an aggregate with OR, and multiple aggregates with AND', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb | STATS values(tags), level_values = VALUES(log.level) BY host.name
+            `,
+          };
+
+          mockDataViewFields({
+            'host.name': keywordField,
+            tags: keywordField,
+            'log.level': keywordField,
+          });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            nodeAggregatedValues: {
+              'values(tags)': ['info', 'warning'],
+              level_values: ['error'],
+            },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (MATCH_PHRASE(tags, "info") OR MATCH_PHRASE(tags, "warning")) AND MATCH_PHRASE(`log.level`, "error")'
+          );
+        });
+
+        it('uses the MATCH function for fields that are not text or keyword fields', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb | STATS values(bytes), values(@timestamp) BY host.name
+            `,
+          };
+
+          mockDataViewFields({
+            'host.name': keywordField,
+            bytes: { type: 'number', esTypes: ['long'], aggregatable: true, searchable: true },
+            '@timestamp': { type: 'date', esTypes: ['date'], aggregatable: true, searchable: true },
+          });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            nodeAggregatedValues: {
+              'values(bytes)': [1024, 2048.5],
+              'values(@timestamp)': ['2026-10-29T19:46:14.000Z'],
+            },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (MATCH(bytes, 1024) OR MATCH(bytes, 2048.5)) AND MATCH(@timestamp, "2026-10-29T19:46:14.000Z")'
+          );
+        });
+
+        it('ignores aggregates that have no document level equivalent', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb
+              | STATS count = COUNT(bytes), average = AVG(bytes), VALUES(TO_UPPER(message)) BY host.name
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField, message: keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            nodeAggregatedValues: {
+              count: 10,
+              average: 1024,
+              'VALUES(TO_UPPER(message))': ['SOME MESSAGE'],
+            },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co"'
+          );
+        });
+
+        it('ignores aggregates on fields that no full text predicate can target', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              TS kibana_sample_data_logstsdb
+              | STATS values(geo.coordinates), values(missing.field), values(unindexed.field) BY host.name
+            `,
+          };
+
+          mockDataViewFields({
+            'host.name': keywordField,
+            'geo.coordinates': {
+              type: 'geo_point',
+              esTypes: ['geo_point'],
+              aggregatable: true,
+              searchable: true,
+            },
+            'unindexed.field': { ...keywordField, searchable: false },
+          });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            nodeAggregatedValues: {
+              'values(geo.coordinates)': ['POINT (-71.0 42.3)'],
+              'values(missing.field)': ['some value'],
+              'values(unindexed.field)': ['some value'],
+            },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co"'
+          );
+        });
+
+        it('does not constrain documents for queries that keep the INLINE STATS command', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS values(tags) BY host.name
+            `,
+          };
+
+          mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['host.name'],
+            nodePathMap: { 'host.name': 'www.elastic.co' },
+            nodeAggregatedValues: { 'values(tags)': ['info'] },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | INLINE STATS VALUES(tags) BY host.name | WHERE `host.name` == "www.elastic.co"'
+          );
+        });
+
+        it('constrains documents fetched for a categorize operation', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS values(tags) BY CATEGORIZE(message)
+            `,
+          };
+
+          mockDataViewFields({ tags: keywordField });
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['CATEGORIZE(message)'],
+            nodePathMap: { 'CATEGORIZE(message)': 'some random pattern' },
+            nodeAggregatedValues: { 'values(tags)': ['info'] },
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"}) AND MATCH_PHRASE(tags, "info")'
+          );
+        });
+      });
+
       describe('function group operations', () => {
         describe('categorize operation', () => {
           it('should throw an error if we attempt to construct a cascade query if the query contains a categorize function with a function argument', () => {

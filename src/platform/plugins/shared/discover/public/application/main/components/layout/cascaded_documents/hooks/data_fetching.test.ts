@@ -307,7 +307,7 @@ describe('data_fetching related hooks', () => {
       id: '1',
       groupColumn: 'category',
       groupValue: 'A',
-      aggregatedValues: {},
+      aggregatedValues: { 'values(tags)': ['info'] },
     });
 
     it('should return all four expansion handlers', () => {
@@ -388,6 +388,7 @@ describe('data_fetching related hooks', () => {
           nodeType: 'leaf',
           nodePath: ['category'],
           nodePathMap: { category: 'A' },
+          nodeAggregatedValues: mockRow.aggregatedValues,
           query: contextValue.esqlQuery,
           esqlVariables: contextValue.esqlVariables,
           timeRange: contextValue.timeRange,
