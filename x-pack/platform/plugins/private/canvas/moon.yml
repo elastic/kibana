@@ -98,6 +98,4 @@ fileGroups:
     - tasks/mocks/*
     - types/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -115,16 +115,19 @@ export const getMonitorSummary = ({
     ? locationName.join(` ${AND_LABEL} `)
     : locationName;
 
-  // When the monitor is pending there is no timestamp for the last ping
-  const { timestamp, checkedAt } =
-    monitorInfo && '@timestamp' in monitorInfo
-      ? {
-          timestamp: monitorInfo['@timestamp'],
-          checkedAt: moment(monitorInfo['@timestamp'])
-            .tz(tz || 'UTC')
-            .format(dateFormat),
-        }
-      : { timestamp: undefined, checkedAt: undefined };
+  // Pending monitors have no ping. An absent or unparseable time stays empty
+  // rather than becoming the string "undefined" or "Invalid date".
+  const pingTimestamp =
+    monitorInfo && '@timestamp' in monitorInfo ? monitorInfo['@timestamp'] : undefined;
+  const timestamp =
+    typeof pingTimestamp === 'string' && moment(pingTimestamp, moment.ISO_8601, true).isValid()
+      ? pingTimestamp
+      : undefined;
+  const checkedAt = timestamp
+    ? moment(timestamp)
+        .tz(tz || 'UTC')
+        .format(dateFormat)
+    : undefined;
 
   const typeToLabelMap: Record<string, string> = {
     http: 'HTTP',

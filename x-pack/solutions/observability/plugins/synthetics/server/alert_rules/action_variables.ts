@@ -7,7 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { SyntheticsPluginsSetupDependencies } from '../types';
-import { commonMonitorStateI18, commonStateTranslations } from './translations';
+import {
+  commonMonitorStateI18,
+  commonStateTranslations,
+  statusRuleCheckedAtVariable,
+  statusRuleTimestampVariable,
+} from './translations';
+
+export type SyntheticsAlertRuleType = 'monitorStatus' | 'tls';
 
 export const MESSAGE = 'message';
 export const ALERT_REASON_MSG = 'reason';
@@ -15,10 +22,24 @@ export const ALERT_DETAILS_URL = 'alertDetailsUrl';
 export const VIEW_IN_APP_URL = 'viewInAppUrl';
 export const RECOVERY_REASON = 'recoveryReason';
 
+const getMonitorContextVariables = (ruleType: SyntheticsAlertRuleType) => {
+  if (ruleType !== 'monitorStatus') {
+    return commonMonitorStateI18;
+  }
+
+  return commonMonitorStateI18.flatMap((variable) =>
+    variable.name === 'checkedAt'
+      ? [statusRuleCheckedAtVariable, statusRuleTimestampVariable]
+      : [variable]
+  );
+};
+
 export const getActionVariables = ({
   plugins,
+  ruleType,
 }: {
   plugins: SyntheticsPluginsSetupDependencies;
+  ruleType: SyntheticsAlertRuleType;
 }) => {
   return {
     context: [
@@ -29,7 +50,7 @@ export const getActionVariables = ({
       ACTION_VARIABLES[ALERT_REASON_MSG],
       ACTION_VARIABLES[VIEW_IN_APP_URL],
       ACTION_VARIABLES[RECOVERY_REASON],
-      ...commonMonitorStateI18,
+      ...getMonitorContextVariables(ruleType),
     ],
     state: [...commonStateTranslations],
   };

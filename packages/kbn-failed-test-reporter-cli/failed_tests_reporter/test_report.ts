@@ -16,7 +16,10 @@ const readAsync = promisify(Fs.readFile);
 export type TestReport =
   | {
       testsuites: {
-        $?: { name?: string };
+        /* attributes on the root <testsuites> element, e.g. name="ftr" | "jest" */
+        $?: {
+          name?: string;
+        };
         testsuite: TestSuite[];
       };
     }
@@ -26,8 +29,10 @@ export type TestReport =
 
 export interface TestSuite {
   $: {
-    /* Jest uses the repository-relative test file path as the suite name. */
+    /* name of the suite; Jest uses the repository-relative test file path */
     name?: string;
+    /* absolute test file path, when provided by the reporter */
+    file?: string;
     /* ISO8601 timetamp when test suite ran */
     timestamp: string;
     /* number of second this tests suite took */
@@ -62,6 +67,8 @@ export interface TestCase {
     'command-line'?: string;
     /* the codeowners of the file */
     owners?: string;
+    /* "true" when this failure only happened because an earlier Mocha timeout aborted the run */
+    'cascading-failure'?: string;
   };
   /* contents of system-out elements */
   'system-out'?: Array<string | { _: string }>;

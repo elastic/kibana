@@ -13,9 +13,9 @@ import { composeStories } from '@storybook/react';
 const { CreatingInApmFromService } = composeStories(stories);
 
 describe('ErrorCountRuleType', () => {
-  it('renders', async () => {
+  it('renders', () => {
     render(<CreatingInApmFromService />);
 
-    expect(await screen.findByText('Service')).toBeInTheDocument();
+    expect(screen.getByText('Service')).toBeInTheDocument();
   });
 });

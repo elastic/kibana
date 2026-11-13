@@ -19,6 +19,8 @@ export {
 } from './src/run_contract';
 export type { JestConfigResult, JestValidationResult } from './src/run_contract';
 
+export { runMoonJestProject } from './src/run_moon_project';
+
 export {
   runJestViaMoon,
   parseMoonJestOutput,

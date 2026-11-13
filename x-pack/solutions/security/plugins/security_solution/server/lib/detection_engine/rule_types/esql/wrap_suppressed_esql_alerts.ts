@@ -20,7 +20,7 @@ import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import type { SecuritySharedParams, SignalSource } from '../types';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
-import { generateAlertId } from './utils';
+import { generateAlertId, omitReservedMetadataColumns } from './utils';
 
 export const wrapSuppressedEsqlAlerts = ({
   sharedParams,
@@ -57,7 +57,8 @@ export const wrapSuppressedEsqlAlerts = ({
 
       const baseAlert: BaseFieldsLatest = transformHitToAlert({
         sharedParams,
-        doc: event,
+        // the id above needs the values of the reserved metadata columns, the alert cannot store them
+        doc: { ...event, _source: omitReservedMetadataColumns(event._source) },
         applyOverrides: true,
         buildReasonMessage: buildReasonMessageForNewTermsAlert,
         alertUuid: id,

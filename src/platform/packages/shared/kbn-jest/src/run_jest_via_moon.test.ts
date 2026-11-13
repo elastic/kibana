@@ -43,6 +43,20 @@ describe('buildJestNodeOptions', () => {
 });
 
 describe('parseMoonJestOutput', () => {
+  it('keeps results from multiple configs in one Moon project', () => {
+    const output = [
+      '@kbn/foo:jest | {"success":true,"numTotalTests":2,"testResults":[]}',
+      '@kbn/foo:jest | {"success":false,"numTotalTests":1,"testResults":[]}',
+    ].join('\n');
+
+    const result = parseMoonJestOutput(output);
+    expect(result.tasks).toHaveLength(2);
+    expect(result.tasks.map(({ passed, testCount }) => ({ passed, testCount }))).toEqual([
+      { passed: true, testCount: 2 },
+      { passed: false, testCount: 1 },
+    ]);
+  });
+
   it('parses successful Jest JSON output with project prefix', () => {
     const output = [
       'pass RunTask(@kbn/foo:jest) (1s 200ms, abc123)',

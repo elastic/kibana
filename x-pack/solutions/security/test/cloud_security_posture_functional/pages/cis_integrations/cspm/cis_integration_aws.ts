@@ -31,15 +31,14 @@ export default function (providerContext: FtrProviderContext) {
   const retry = getService('retry');
   const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
+  const postInstallModalTimeout = 1000 * 90; // 90 seconds
 
   describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
-    let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
-      cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
       await cisIntegration.closeAllOpenTabs();
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
@@ -54,17 +53,10 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
-          expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
-            true
-          );
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          expect(
-            (await cisIntegration.getUrlOnPostInstallModal()) ===
-              'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
-          );
-        });
+        await cisIntegration.waitForPostInstallModal(postInstallModalTimeout);
+        expect(await cisIntegration.getUrlOnPostInstallModal()).to.be(
+          'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
+        );
       });
       it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {
         await cisIntegration.navigateToIntegrationCspList();

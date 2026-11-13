@@ -73,4 +73,15 @@ fileGroups:
   src:
     - '**/*'
     - '!target/**/*'
+  jestConfigs:
+    - '**/jest.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!config/services/detections_response/**/*'
+  jestIntegrationConfigs:
+    - '**/jest.integration.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!config/services/detections_response/**/*'
+  scoutConfigs:
+    - '**/test/scout*/**/*playwright.config.ts'
+    - '!config/services/detections_response/**/*'
 tasks: {}

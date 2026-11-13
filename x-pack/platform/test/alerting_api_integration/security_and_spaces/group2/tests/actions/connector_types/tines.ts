@@ -317,6 +317,9 @@ export default function tinesTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             url = await simulator.start();
+          });
+
+          beforeEach(async () => {
             tinesActionId = await createConnector(url);
           });
 
@@ -360,7 +363,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               });
             });
 
-            const executeEvent = events[1];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 
@@ -402,13 +405,13 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 id: tinesActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { gte: 2 }],
-                  ['execute', { gte: 2 }],
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[3];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 
@@ -436,13 +439,13 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 id: tinesActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { gte: 3 }],
-                  ['execute', { gte: 3 }],
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[5];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(10);
           });
 
@@ -476,14 +479,15 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 id: tinesActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { gte: 3 }],
-                  ['execute', { gte: 3 }],
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[5];
-            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(10);
+            // `webhookUrl` skips the `getWebhookParameters` GET, so only the 8-byte POST is counted
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(8);
           });
         });
 
@@ -540,7 +544,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               });
             });
 
-            const executeEvent = events[1];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(2);
           });
 

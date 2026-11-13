@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { validateFleetSavedObjectId } from './validate_fleet_id';
+import {
+  validateFleetSavedObjectId,
+  isPathTraversalId,
+  validateNoPathTraversalId,
+} from './validate_fleet_id';
 
 describe('validateFleetSavedObjectId', () => {
   describe('accepts (does not throw)', () => {
@@ -121,5 +125,69 @@ describe('validateFleetSavedObjectId', () => {
     it('close parenthesis', () => {
       expect(() => validateFleetSavedObjectId('x)y')).toThrow('id is not valid');
     });
+  });
+});
+
+describe('isPathTraversalId / validateNoPathTraversalId', () => {
+  // Input and stream ids embed the input type, so `/` is legal — only `..`
+  // segments (and NUL) escape a parent directory.
+  const safeIds = [
+    'cloudbeat/cis_k8s-kspm-550e8400-e29b-41d4-a716-446655440000',
+    'logfile-system.syslog-550e8400',
+    'foo..bar', // ".." as a substring, not a whole segment
+    'a..b/c..d',
+    'cloudbeat/cis_k8s',
+    'my-input-id',
+    'a/b/c',
+    'policy.with.dots',
+  ];
+
+  const traversalIds = [
+    '..',
+    '../x',
+    'a/../b',
+    'a/..',
+    '../../../../tmp/report-proof',
+    'a\\..\\b', // Windows separator
+    '..\\x',
+    '\\..',
+    'a\0b', // NUL character
+  ];
+
+  describe('isPathTraversalId', () => {
+    it.each(safeIds)('returns false for safe id %j', (id) => {
+      expect(isPathTraversalId(id)).toBe(false);
+    });
+
+    it.each(traversalIds)('returns true for traversal id %j', (id) => {
+      expect(isPathTraversalId(id)).toBe(true);
+    });
+  });
+
+  describe('validateNoPathTraversalId', () => {
+    it('does not throw for undefined', () => {
+      expect(() => validateNoPathTraversalId(undefined)).not.toThrow();
+    });
+
+    it('does not throw for null (treated as no id set)', () => {
+      expect(() => validateNoPathTraversalId(null)).not.toThrow();
+    });
+
+    it.each(safeIds)('does not throw for safe id %j', (id) => {
+      expect(() => validateNoPathTraversalId(id)).not.toThrow();
+    });
+
+    it.each(traversalIds)('throws for traversal id %j', (id) => {
+      expect(() => validateNoPathTraversalId(id)).toThrow('path traversal');
+    });
+
+    // Some id sources are schema-typed as `any`; a non-string (other than
+    // null/undefined) must be rejected, not crash the string check.
+    it.each([42, true, {}, [], { value: 'x' }])(
+      'throws for non-string value %p instead of crashing',
+      (value) => {
+        expect(() => validateNoPathTraversalId(value)).toThrow('path traversal');
+      }
+    );
   });
 });

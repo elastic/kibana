@@ -37,7 +37,6 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
   } = attributes || {};
 
   return {
-    id,
     version,
     space_ids: namespaces,
     description,
@@ -58,5 +57,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     package_policies,
     agents,
     ...attributes,
+    // canonical id placed last so attributes.id cannot shadow it
+    id,
   };
 };
