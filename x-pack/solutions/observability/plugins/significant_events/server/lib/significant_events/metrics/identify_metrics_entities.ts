@@ -220,6 +220,7 @@ export const identifyMetricsEntities = async ({
   }
   const inventoryStartedAt = Date.now();
   const features: FeatureUpsert[] = [];
+  const featureRowPositions = new Map<string, number>();
   let metricsEntityRowsCount = 0;
   let droppedIncompleteRowsCount = 0;
   const droppedRows = createDroppedRows();
@@ -237,6 +238,11 @@ export const identifyMetricsEntities = async ({
     }
     metricsEntityRowsCount += rows.length;
     const folded = keyRow.foldRows(rows, { sourceQuery, sourceId });
+    folded.features.forEach((feature, rowPosition) => {
+      if (!featureRowPositions.has(feature.id)) {
+        featureRowPositions.set(feature.id, rowPosition);
+      }
+    });
     features.push(...folded.features);
     droppedIncompleteRowsCount += folded.droppedIncompleteRowsCount;
     droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
@@ -259,6 +265,12 @@ export const identifyMetricsEntities = async ({
       const priority = entityPriority(left) - entityPriority(right);
       if (priority !== 0) {
         return priority;
+      }
+      const rowPosition =
+        (featureRowPositions.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
+        (featureRowPositions.get(right.id) ?? Number.MAX_SAFE_INTEGER);
+      if (rowPosition !== 0) {
+        return rowPosition;
       }
       return compareEntityIds(left, right);
     });

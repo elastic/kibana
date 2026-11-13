@@ -11,7 +11,14 @@ import {
   MAX_TITLE_LENGTH,
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
-import { formatDatasetList, KUBERNETES_POD_DATASETS, stringsOf } from '../entity_rows/helpers';
+import type { Condition } from '@kbn/streamlang';
+import {
+  buildDatasetFilter,
+  buildScopedFilter,
+  formatDatasetList,
+  KUBERNETES_POD_DATASETS,
+  stringsOf,
+} from '../entity_rows/helpers';
 import {
   createDroppedRows,
   droppedRowsCount,
@@ -59,6 +66,30 @@ const WORKLOAD_TYPES: Record<
 const isWorkloadKind = (value: EsqlCell): value is WorkloadKind =>
   typeof value === 'string' && value in WORKLOAD_TYPES;
 
+const WORKLOAD_TYPE_FILTERS: Record<WorkloadKind, Condition> = {
+  deployment: {
+    or: [
+      { field: 'kubernetes.deployment.name', exists: true },
+      {
+        and: [
+          { not: { field: 'kubernetes.deployment.name', exists: true } },
+          { field: 'kubernetes.replicaset.name', exists: true },
+          { field: 'kubernetes.labels.pod-template-hash', exists: true },
+        ],
+      },
+    ],
+  },
+  statefulset: { field: 'kubernetes.statefulset.name', exists: true },
+  daemonset: { field: 'kubernetes.daemonset.name', exists: true },
+  // Streamlang has no regex operator, so this also includes plain Jobs.
+  cronjob: {
+    or: [
+      { field: 'kubernetes.cronjob.name', exists: true },
+      { field: 'kubernetes.job.name', exists: true },
+    ],
+  },
+};
+
 // ReplicaSet hashes and Job timestamp suffixes are removed to recover long-lived owners.
 const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-hash\`,
        rs = kubernetes.replicaset.name,
@@ -104,7 +135,7 @@ const buildWorkloadListQuery = ({
   kind,
 }: {
   sourceQuery: string;
-  cluster: string;
+  cluster?: string;
   kind: WorkloadKind;
 }): string =>
   buildConceptListQuery({
@@ -121,22 +152,23 @@ const buildWorkloadListQuery = ({
 
 export const foldWorkloadRows = (
   rows: EsqlRow[],
-  { sourceQuery }: EntityFoldContext
+  { sourceQuery, sourceId }: EntityFoldContext
 ): EntityFoldResult => {
   const droppedRows = createDroppedRows();
   const features = rows.flatMap((row): FeatureUpsert[] => {
-    const cluster = row['orchestrator.cluster.name'];
     const kind = row.kind;
-    if (typeof cluster !== 'string') {
-      droppedRows.nullCluster += 1;
-      return [];
-    }
     if (!isWorkloadKind(kind)) {
       return [];
     }
+    const clusterValue = row['orchestrator.cluster.name'];
+    const cluster =
+      typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const scope = cluster ?? sourceId;
     const { plural, ownerField } = WORKLOAD_TYPES[kind];
-    const id = `k8s.${plural}:${cluster}`;
-    const title = `Kubernetes ${plural} of ${cluster}`;
+    const id = `k8s.${plural}:${scope}`;
+    const title = cluster
+      ? `Kubernetes ${plural} of ${cluster}`
+      : `Kubernetes ${plural} (cluster not reported)`;
     if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
       droppedRows.idTooLong += 1;
       return [];
@@ -152,12 +184,16 @@ export const foldWorkloadRows = (
         title,
         description: buildInfrastructureConceptDescription({
           concept: plural,
-          scope: cluster,
+          scope: cluster ?? 'not reported',
           scale,
           breakdownFields: ['kubernetes.namespace', ownerField],
           members,
         }),
-        filter: { field: 'orchestrator.cluster.name', eq: cluster },
+        filter: buildScopedFilter(
+          cluster,
+          buildDatasetFilter(KUBERNETES_POD_DATASETS),
+          WORKLOAD_TYPE_FILTERS[kind]
+        ),
         properties: {
           breakdown: ['kubernetes.namespace', ownerField],
           entity_store_type: entityStoreType,

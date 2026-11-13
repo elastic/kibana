@@ -11,7 +11,12 @@ import {
   MAX_TITLE_LENGTH,
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
-import { stringsOf } from './entity_rows/helpers';
+import {
+  buildDatasetFilter,
+  buildScopedFilter,
+  formatDatasetList,
+  stringsOf,
+} from './entity_rows/helpers';
 import {
   createDroppedRows,
   droppedRowsCount,
@@ -25,9 +30,12 @@ import {
   buildInfrastructureConceptDescription,
 } from './kubernetes/concepts';
 
-const SERVICE_DATASET_CONDITION = `data_stream.dataset IN ("apm.service_summary.1m",
-                                "apm.service_summary.1m.otel",
-                                "generic.otel")`;
+const SERVICE_DATASETS = [
+  'apm.service_summary.1m',
+  'apm.service_summary.1m.otel',
+  'generic.otel',
+] as const;
+const SERVICE_DATASET_CONDITION = `data_stream.dataset IN (${formatDatasetList(SERVICE_DATASETS)})`;
 
 export const buildServiceQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
@@ -84,7 +92,10 @@ export const foldServiceRows = (
         breakdownFields: ['service.name'],
         members,
       }),
-      filter: { field: 'service.name', exists: true },
+      filter: buildScopedFilter(undefined, buildDatasetFilter(SERVICE_DATASETS), {
+        field: 'service.name',
+        exists: true,
+      }),
       properties: {
         breakdown: ['service.name'],
         entity_store_type: 'service',

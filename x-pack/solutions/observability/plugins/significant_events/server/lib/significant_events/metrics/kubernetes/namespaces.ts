@@ -11,7 +11,13 @@ import {
   MAX_TITLE_LENGTH,
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
-import { formatDatasetList, KUBERNETES_POD_DATASETS, stringsOf } from '../entity_rows/helpers';
+import {
+  buildDatasetFilter,
+  buildScopedFilter,
+  formatDatasetList,
+  KUBERNETES_POD_DATASETS,
+  stringsOf,
+} from '../entity_rows/helpers';
 import {
   createDroppedRows,
   droppedRowsCount,
@@ -27,7 +33,6 @@ export const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQue
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
     AND kubernetes.pod.uid IS NOT NULL
-    AND orchestrator.cluster.name IS NOT NULL
     AND kubernetes.namespace IS NOT NULL
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace
@@ -39,17 +44,20 @@ export const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQue
 
 export const foldNamespaceRows = (
   rows: EsqlRow[],
-  { sourceQuery }: EntityFoldContext
+  { sourceQuery, sourceId }: EntityFoldContext
 ): EntityFoldResult => {
   const droppedRows = createDroppedRows();
-  const conceptsByCluster = new Map<string, { scale: number; members: string[] }>();
+  const conceptsByCluster = new Map<
+    string,
+    { cluster?: string; scale: number; members: string[] }
+  >();
   for (const row of rows) {
-    const cluster = row['orchestrator.cluster.name'];
-    if (typeof cluster !== 'string') {
-      droppedRows.nullCluster += 1;
-      continue;
-    }
-    const concept = conceptsByCluster.get(cluster) ?? {
+    const clusterValue = row['orchestrator.cluster.name'];
+    const cluster =
+      typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const clusterKey = cluster === undefined ? 'source' : `cluster:${cluster}`;
+    const concept = conceptsByCluster.get(clusterKey) ?? {
+      cluster,
       scale: 0,
       members: [],
     };
@@ -57,12 +65,15 @@ export const foldNamespaceRows = (
       typeof row.scale === 'number' ? Math.max(concept.scale, row.scale) : concept.scale;
     // The description lists at most 50 members before directing readers to the live query.
     concept.members = stringsOf(row.members).slice(0, 50);
-    conceptsByCluster.set(cluster, concept);
+    conceptsByCluster.set(clusterKey, concept);
   }
 
-  const features = [...conceptsByCluster].flatMap(([cluster, concept]): FeatureUpsert[] => {
-    const id = `k8s.namespaces:${cluster}`;
-    const title = `Kubernetes namespaces of ${cluster}`;
+  const features = [...conceptsByCluster.values()].flatMap((concept): FeatureUpsert[] => {
+    const { cluster } = concept;
+    const id = `k8s.namespaces:${cluster ?? sourceId}`;
+    const title = cluster
+      ? `Kubernetes namespaces of ${cluster}`
+      : 'Kubernetes namespaces (cluster not reported)';
     if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
       droppedRows.idTooLong += 1;
       return [];
@@ -76,12 +87,15 @@ export const foldNamespaceRows = (
         title,
         description: buildInfrastructureConceptDescription({
           concept: 'namespaces',
-          scope: cluster,
+          scope: cluster ?? 'not reported',
           scale: concept.scale,
           breakdownFields: ['kubernetes.namespace'],
           members,
         }),
-        filter: { field: 'orchestrator.cluster.name', eq: cluster },
+        filter: buildScopedFilter(cluster, buildDatasetFilter(KUBERNETES_POD_DATASETS), {
+          field: 'kubernetes.namespace',
+          exists: true,
+        }),
         properties: {
           breakdown: ['kubernetes.namespace'],
           entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.namespace,

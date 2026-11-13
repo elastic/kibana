@@ -207,7 +207,6 @@ describe('Kubernetes type KIs', () => {
         type: 'infrastructure',
         subtype: 'k8s.deployment',
         title: 'Kubernetes deployments of cluster-a',
-        filter: { field: 'orchestrator.cluster.name', eq: 'cluster-a' },
         properties: expect.objectContaining({
           breakdown: ['kubernetes.namespace', 'kubernetes.deployment.name'],
           entity_store_type: 'k8s.deployment',
@@ -243,6 +242,49 @@ describe('Kubernetes type KIs', () => {
     );
     expect(byId.get('k8s.statefulsets:cluster-a')?.subtype).toBe('k8s.statefulset');
     expect(byId.get('k8s.daemonsets:cluster-a')?.subtype).toBe('k8s.daemonset');
+    const datasetFilter = {
+      or: [
+        { field: 'data_stream.dataset', eq: 'kubernetes.pod' },
+        { field: 'data_stream.dataset', eq: 'kubeletstatsreceiver.otel' },
+      ],
+    };
+    const clusterFilter = { field: 'orchestrator.cluster.name', eq: 'cluster-a' };
+    expect(deployments?.filter).toEqual({
+      and: [
+        clusterFilter,
+        datasetFilter,
+        {
+          or: [
+            { field: 'kubernetes.deployment.name', exists: true },
+            {
+              and: [
+                { not: { field: 'kubernetes.deployment.name', exists: true } },
+                { field: 'kubernetes.replicaset.name', exists: true },
+                { field: 'kubernetes.labels.pod-template-hash', exists: true },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    expect(byId.get('k8s.statefulsets:cluster-a')?.filter).toEqual({
+      and: [clusterFilter, datasetFilter, { field: 'kubernetes.statefulset.name', exists: true }],
+    });
+    expect(byId.get('k8s.daemonsets:cluster-a')?.filter).toEqual({
+      and: [clusterFilter, datasetFilter, { field: 'kubernetes.daemonset.name', exists: true }],
+    });
+    expect(byId.get('k8s.cronjobs:cluster-a')?.filter).toEqual({
+      and: [
+        clusterFilter,
+        datasetFilter,
+        {
+          or: [
+            { field: 'kubernetes.cronjob.name', exists: true },
+            { field: 'kubernetes.job.name', exists: true },
+          ],
+        },
+      ],
+    });
     expect(deployments?.properties).not.toHaveProperty('identity');
     expect(deployments?.properties).not.toHaveProperty('name');
     expect(result.features.every(({ filter }) => isConditionComplete(filter))).toBe(true);
@@ -290,6 +332,18 @@ describe('Kubernetes type KIs', () => {
       expect.objectContaining({
         id: 'k8s.nodes:cluster-a',
         subtype: 'k8s.node',
+        filter: {
+          and: [
+            { field: 'orchestrator.cluster.name', eq: 'cluster-a' },
+            {
+              or: [
+                { field: 'data_stream.dataset', eq: 'kubernetes.node' },
+                { field: 'data_stream.dataset', eq: 'kubeletstatsreceiver.otel' },
+              ],
+            },
+            { field: 'kubernetes.node.name', exists: true },
+          ],
+        },
         properties: expect.objectContaining({
           entity_store_type: 'k8s.node',
           scale: 2,
@@ -300,12 +354,58 @@ describe('Kubernetes type KIs', () => {
       expect.objectContaining({
         id: 'k8s.namespaces:cluster-a',
         subtype: 'k8s.namespace',
+        filter: {
+          and: [
+            { field: 'orchestrator.cluster.name', eq: 'cluster-a' },
+            {
+              or: [
+                { field: 'data_stream.dataset', eq: 'kubernetes.pod' },
+                { field: 'data_stream.dataset', eq: 'kubeletstatsreceiver.otel' },
+              ],
+            },
+            { field: 'kubernetes.namespace', exists: true },
+          ],
+        },
         properties: expect.objectContaining({
           entity_store_type: 'k8s.namespace',
           scale: 2,
         }),
       })
     );
+  });
+
+  it('groups workloads without a cluster name under the source', () => {
+    const feature = foldWorkloadRows(
+      [
+        {
+          'orchestrator.cluster.name': null,
+          kind: 'deployment',
+          scale: 1,
+          members: ['apps/api'],
+        },
+      ],
+      foldContext
+    ).features[0];
+
+    expect(feature).toEqual(
+      expect.objectContaining({
+        id: 'k8s.deployments:source-id',
+        title: 'Kubernetes deployments (cluster not reported)',
+        description: expect.stringContaining('cluster not reported'),
+        filter: {
+          and: [
+            {
+              or: [
+                { field: 'data_stream.dataset', eq: 'kubernetes.pod' },
+                { field: 'data_stream.dataset', eq: 'kubeletstatsreceiver.otel' },
+              ],
+            },
+            expect.any(Object),
+          ],
+        },
+      })
+    );
+    expect(JSON.stringify(feature?.filter)).not.toContain('orchestrator.cluster.name');
   });
 
   it('drops an overlong workload type identity while keeping valid rows', () => {
@@ -383,6 +483,19 @@ describe('host type KIs', () => {
         type: 'infrastructure',
         subtype: 'host',
         title: 'Hosts',
+        filter: {
+          and: [
+            {
+              or: [
+                { field: 'data_stream.dataset', startsWith: 'system.' },
+                { field: 'data_stream.dataset', eq: 'hostmetricsreceiver.otel' },
+              ],
+            },
+            { field: 'host.name', exists: true },
+            { not: { field: 'kubernetes.node.name', exists: true } },
+            { not: { field: 'k8s.node.name', exists: true } },
+          ],
+        },
         properties: expect.objectContaining({
           breakdown: ['host.name'],
           entity_store_type: 'host',
@@ -397,6 +510,23 @@ describe('host type KIs', () => {
     );
     expect(byId.get('hosts:source-id')?.description).toContain('and 2 more');
     expect(hostNodeFeature?.properties.breakdown).toEqual(['kubernetes.node.name']);
+    expect(hostNodeFeature?.filter).toEqual({
+      and: [
+        { field: 'orchestrator.cluster.name', eq: 'cluster-a' },
+        {
+          or: [
+            { field: 'data_stream.dataset', startsWith: 'system.' },
+            { field: 'data_stream.dataset', eq: 'hostmetricsreceiver.otel' },
+          ],
+        },
+        {
+          or: [
+            { field: 'kubernetes.node.name', exists: true },
+            { field: 'k8s.node.name', exists: true },
+          ],
+        },
+      ],
+    });
     expect(hostNodeFeature?.properties.list_query).toEqual(
       expect.stringContaining('| STATS last_seen = MAX(@timestamp) BY kubernetes.node.name')
     );
@@ -404,6 +534,9 @@ describe('host type KIs', () => {
       breakdown: ['kubernetes.node.name'],
       members: ['node-x'],
       host_summary: { os: ['Wolfi'], cloud_provider: ['gcp'] },
+    });
+    expect(byId.get('k8s.nodes:cluster-a')?.filter).toEqual({
+      or: [nodeFeatures[0].filter, hostNodeFeature?.filter],
     });
     expect(byId.has('host:node-x')).toBe(false);
   });
@@ -434,6 +567,18 @@ describe('service type KIs', () => {
         subtype: 'service',
         id: 'services:source-id',
         title: 'Services',
+        filter: {
+          and: [
+            {
+              or: [
+                { field: 'data_stream.dataset', eq: 'apm.service_summary.1m' },
+                { field: 'data_stream.dataset', eq: 'apm.service_summary.1m.otel' },
+                { field: 'data_stream.dataset', eq: 'generic.otel' },
+              ],
+            },
+            { field: 'service.name', exists: true },
+          ],
+        },
         properties: expect.objectContaining({
           breakdown: ['service.name'],
           entity_store_type: 'service',
@@ -597,12 +742,12 @@ describe('identifyMetricsEntities', () => {
     );
     expect(features.map(({ id }) => id)).toEqual([
       'k8s.namespaces:cluster-a',
-      'k8s.namespaces:cluster-b',
       'k8s.nodes:cluster-a',
+      'k8s.namespaces:cluster-b',
       'k8s.nodes:cluster-b',
-      'k8s.daemonsets:cluster-a',
       'k8s.deployments:cluster-a',
       'k8s.deployments:cluster-b',
+      'k8s.daemonsets:cluster-a',
     ]);
     expect(features.some(({ id }) => id.startsWith('k8s.cluster:'))).toBe(false);
     expect(
@@ -775,9 +920,9 @@ describe('identifyMetricsEntities', () => {
     ]);
   });
 
-  it('keeps node type KIs before workload types within the cap', async () => {
+  it('keeps priority and query activity order within the cap', async () => {
     const workloads = Array.from({ length: 501 }, (_, index) => [
-      `cluster-${String(index).padStart(3, '0')}`,
+      `cluster-${String(500 - index).padStart(3, '0')}`,
       'deployment',
       1,
       501 - index,
@@ -809,6 +954,10 @@ describe('identifyMetricsEntities', () => {
     expect(result.droppedOverflowRowsCount).toBe(2);
     const ids = getWrittenFeatures(harness.bulk).map(({ id }) => id);
     expect(ids[0]).toBe('k8s.nodes:cluster-a');
+    expect(ids[1]).toBe('k8s.deployments:cluster-500');
+    expect(ids.at(-1)).toBe('k8s.deployments:cluster-002');
+    expect(ids).not.toContain('k8s.deployments:cluster-001');
+    expect(ids).not.toContain('k8s.deployments:cluster-000');
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('row [ecs.k8s_workload]'));
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('502 rows, dropped 2'));
   });

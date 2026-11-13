@@ -6,6 +6,7 @@
  */
 
 // Shares dataset and value helpers used to find metrics type KIs.
+import type { Condition } from '@kbn/streamlang';
 import type { EsqlCell } from './types';
 
 export const KUBERNETES_POD_DATASETS = ['kubernetes.pod', 'kubeletstatsreceiver.otel'] as const;
@@ -29,3 +30,19 @@ export const quoteEsqlString = (value: string): string =>
 
 export const formatDatasetList = (datasets: readonly string[]): string =>
   datasets.map((dataset) => `"${dataset}"`).join(', ');
+
+export const buildDatasetFilter = (datasets: readonly string[]): Condition => ({
+  or: datasets.map((dataset) => ({ field: 'data_stream.dataset', eq: dataset })),
+});
+
+export const buildScopedFilter = (
+  cluster: string | undefined,
+  ...conditions: Condition[]
+): Condition => ({
+  and: [
+    ...(cluster !== undefined
+      ? [{ field: 'orchestrator.cluster.name', eq: cluster } as const]
+      : []),
+    ...conditions,
+  ],
+});

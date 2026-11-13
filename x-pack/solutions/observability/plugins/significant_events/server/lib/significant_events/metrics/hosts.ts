@@ -11,7 +11,8 @@ import {
   MAX_TITLE_LENGTH,
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
-import { stringsOf } from './entity_rows/helpers';
+import type { Condition } from '@kbn/streamlang';
+import { buildScopedFilter, stringsOf } from './entity_rows/helpers';
 import {
   createDroppedRows,
   droppedRowsCount,
@@ -29,6 +30,18 @@ import { KUBERNETES_ENTITY_STORE_TYPES } from './kubernetes/ids';
 const HOST_DATASET_CONDITION =
   '(STARTS_WITH(data_stream.dataset, "system.") OR data_stream.dataset == "hostmetricsreceiver.otel")';
 const HOST_NODE_NAME_EVAL = '| EVAL node_name = COALESCE(kubernetes.node.name, k8s.node.name)';
+const HOST_DATASET_FILTER: Condition = {
+  or: [
+    { field: 'data_stream.dataset', startsWith: 'system.' },
+    { field: 'data_stream.dataset', eq: 'hostmetricsreceiver.otel' },
+  ],
+};
+const NODE_NAME_FILTER: Condition = {
+  or: [
+    { field: 'kubernetes.node.name', exists: true },
+    { field: 'k8s.node.name', exists: true },
+  ],
+};
 
 export const buildHostQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
@@ -77,7 +90,13 @@ export const foldHostRows = (
           breakdownFields: ['host.name'],
           members,
         }),
-        filter: { field: 'host.name', exists: true },
+        filter: buildScopedFilter(
+          undefined,
+          HOST_DATASET_FILTER,
+          { field: 'host.name', exists: true },
+          { not: { field: 'kubernetes.node.name', exists: true } },
+          { not: { field: 'k8s.node.name', exists: true } }
+        ),
         properties: {
           breakdown: ['host.name'],
           entity_store_type: 'host',
@@ -104,13 +123,13 @@ export const foldHostRows = (
     if (entityType !== 'node') {
       continue;
     }
-    const cluster = row.concept_cluster;
-    if (typeof cluster !== 'string' || cluster.length === 0) {
-      droppedRows.nullCluster += 1;
-      continue;
-    }
-    const id = `k8s.nodes:${cluster}`;
-    const title = `Kubernetes nodes of ${cluster}`;
+    const clusterValue = row.concept_cluster;
+    const cluster =
+      typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const id = `k8s.nodes:${cluster ?? sourceId}`;
+    const title = cluster
+      ? `Kubernetes nodes of ${cluster}`
+      : 'Kubernetes nodes (cluster not reported)';
     if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
       droppedRows.idTooLong += 1;
       continue;
@@ -122,12 +141,12 @@ export const foldHostRows = (
       title,
       description: buildInfrastructureConceptDescription({
         concept: 'nodes',
-        scope: cluster,
+        scope: cluster ?? 'not reported',
         scale,
         breakdownFields: ['kubernetes.node.name'],
         members,
       }),
-      filter: { field: 'orchestrator.cluster.name', eq: cluster },
+      filter: buildScopedFilter(cluster, HOST_DATASET_FILTER, NODE_NAME_FILTER),
       properties: {
         breakdown: ['kubernetes.node.name'],
         entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
@@ -179,6 +198,19 @@ const hostSummaryOf = (
 const mergeValues = (left: readonly string[], right: readonly string[]): string[] =>
   [...new Set([...left, ...right])].sort();
 
+const mergeFilters = (
+  left: Condition | undefined,
+  right: Condition | undefined
+): Condition | undefined => {
+  if (!left) {
+    return right;
+  }
+  if (!right) {
+    return left;
+  }
+  return { or: [left, right] };
+};
+
 export const mergeHostFeatures = (features: FeatureUpsert[]): FeatureUpsert[] => {
   const featuresById = new Map<string, FeatureUpsert>();
   for (const feature of features) {
@@ -198,6 +230,7 @@ export const mergeHostFeatures = (features: FeatureUpsert[]): FeatureUpsert[] =>
       const featureSummary = hostSummaryOf(feature);
       featuresById.set(feature.id, {
         ...conceptFeature,
+        filter: mergeFilters(current.filter, feature.filter),
         properties: {
           ...conceptFeature.properties,
           host_summary: {
