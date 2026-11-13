@@ -124,7 +124,6 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
         kind: 'esql',
         id: 'dataset-id',
         title: 'logs-*',
-        sourceQuery: 'FROM logs-*',
         fields: [field],
         getFieldByName: () => field,
         isTimeBased: () => false,

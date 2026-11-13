@@ -15,29 +15,18 @@ import {
 } from './esql_source_queries';
 
 describe('queries on the FROM target of an ES|QL source', () => {
-  const source = (title: string, sourceQuery?: string): FilterableSource => ({
+  const source = (title: string): FilterableSource => ({
     kind: 'esql',
     id: 'dataset-id',
     title,
-    sourceQuery,
     fields: [],
     getFieldByName: () => undefined,
     isTimeBased: () => false,
   });
+  const fromOf = (title: string) => getHasDocumentsQuery(source(title)).replace(' | LIMIT 1', '');
 
-  it('starts from the source command of the source, as it was written', () => {
-    const withMetadata = source('logs-*', 'FROM logs-* METADATA _index');
-
-    expect(getFieldValuesQuery(withMetadata, 'host')).toBe(
-      'FROM logs-* METADATA _index | STATS BY host'
-    );
-    expect(getHasDocumentsQuery(withMetadata)).toBe('FROM logs-* METADATA _index | LIMIT 1');
-  });
-
-  it('starts from the title when the source has no source command', () => {
-    expect(getFieldValuesQuery(source('logs-*,metrics-*'), 'host')).toBe(
-      'FROM logs-*,metrics-* | STATS BY host'
-    );
+  it('starts from the sources of the source, quoted when they need it', () => {
+    expect(fromOf('logs-*,my index')).toBe('FROM logs-*, "my index"');
   });
 
   it('escapes a field name that is not a plain identifier', () => {

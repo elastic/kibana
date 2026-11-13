@@ -137,12 +137,6 @@ describe('toFilterableSource', () => {
       ]);
     });
 
-    it('has the source command of the dataset, which a query on its FROM target starts with', async () => {
-      const source = await statsOnDataset('command-*');
-
-      expect((await source.toFilterableSource()).sourceQuery).toBe('FROM command-*');
-    });
-
     it('looks a field up by name, as a data view does', async () => {
       const source = await statsOnDataset('lookup-*', '@timestamp');
 

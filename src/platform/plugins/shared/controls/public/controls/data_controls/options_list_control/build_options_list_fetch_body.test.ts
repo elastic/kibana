@@ -19,7 +19,6 @@ describe('buildOptionsListFetchBody', () => {
     kind: 'esql',
     id: 'esql-dataset-id',
     title: 'logs-*',
-    sourceQuery: 'FROM logs-*',
     fields: [field],
     getFieldByName: () => field,
     isTimeBased: () => false,
