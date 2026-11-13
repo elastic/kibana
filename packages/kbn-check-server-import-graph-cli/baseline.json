@@ -1,6 +1,4 @@
 {
   "//": "Source files reachable from the Kibana server entry points that import browser-only node modules, as \"<importer> <node module>\". This list may only shrink: fix the chain (move the browser-only code out of the module the server imports) and run `node scripts/check_server_import_graph --update-baseline` to remove the entry.",
-  "violations": [
-    "x-pack/solutions/observability/plugins/profiling/common/topn.ts @elastic/eui"
-  ]
+  "violations": []
 }

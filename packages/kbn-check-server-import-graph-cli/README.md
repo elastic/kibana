@@ -24,7 +24,7 @@ The import that pulls a browser library onto the server is almost never in a `se
 
 ## Why dynamic `import()` is followed
 
-Plugin `server/index.ts` files load their plugin class with `await import('./plugin')` at startup, so treating `import()` as lazy would hide most of every plugin. More generally, whether a lazy import runs at startup is a runtime property that static analysis cannot see, and server code has no business loading these packages even lazily. The runtime gate (`scripts/check_server_module_graph`) is the complement for things that genuinely depend on runtime behaviour.
+Plugin `server/index.ts` files load their plugin class with `await import('./plugin')` at startup, so treating `import()` as lazy would hide most of every plugin. More generally, whether a lazy import runs at startup is a runtime property that static analysis cannot see, and server code has no business loading these packages even lazily.
 
 ## Fixing a violation
 
