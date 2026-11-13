@@ -313,15 +313,14 @@ const PARAMS_TABLE = i18n.translate('xpack.synthetics.settingsRoute.params.table
 const SEARCH_PARAMS_PLACEHOLDER = i18n.translate(
   'xpack.synthetics.settingsRoute.params.searchPlaceholder',
   {
-    defaultMessage: 'Search parameters by key, description, or tag',
+    defaultMessage: 'Search by key, description, or tag',
   }
 );
 
 const SEARCH_PARAMS_ARIA_LABEL = i18n.translate(
   'xpack.synthetics.settingsRoute.params.searchAriaLabel',
   {
-    defaultMessage:
-      'Search global parameters by key, description, or tag. Results filter as you type.',
+    defaultMessage: 'Search global parameters',
   }
 );
 
