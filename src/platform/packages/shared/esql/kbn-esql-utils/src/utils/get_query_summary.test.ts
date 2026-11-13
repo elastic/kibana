@@ -186,6 +186,14 @@ describe('getQuerySummary', () => {
 
     expect(result.newColumns).toEqual(new Set(['total']));
   });
+
+  it('includes the aggregates and grouping of a referenced LET binding', () => {
+    const query = 'LET a = (FROM logs | STATS n = COUNT() BY host); FROM a';
+    const result = getQuerySummary(query);
+
+    expect([...(result.aggregates ?? [])].map(({ field }) => field)).toEqual(['n']);
+    expect([...(result.grouping ?? [])].map(({ field }) => field)).toEqual(['host']);
+  });
 });
 
 describe('isComputedColumn', () => {
