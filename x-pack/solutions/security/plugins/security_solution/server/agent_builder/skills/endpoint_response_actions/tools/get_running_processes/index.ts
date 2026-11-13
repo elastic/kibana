@@ -23,7 +23,7 @@ import {
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
-import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
+import { prepareDispatch } from '../services/dispatch_action';
 
 const getRunningProcessesSchema = z
   .object({
@@ -51,32 +51,6 @@ export const getRunningProcessesTool = (
     description: `Retrieves the list of running processes from a host by its hostname or agent ID (pass the agent ID, from an ambiguous_hostname result, when several endpoints share the hostname). Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in.`,
     schema: getRunningProcessesSchema,
     maxResultTokens: RUNNING_PROCESSES_MAX_RESULT_TOKENS,
-    // HITL gate enforced by the framework, not skill prose: the runner prompts
-    // the analyst for confirmation before every dispatch.
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: async ({ toolParams, context }) =>
-        buildDispatchConfirmation(
-          {
-            action: 'running-processes',
-            params: {
-              hostName: toolParams.hostName as string | undefined,
-              agentId: toolParams.agentId as string | undefined,
-            },
-            args: { comment: toolParams.comment as string | undefined },
-            context,
-            endpointAppContextService,
-            requiredPrivilege: 'canGetRunningProcesses',
-          },
-          {
-            title: 'List running processes?',
-            color: 'primary',
-            confirmText: 'List processes',
-            comment: toolParams.comment as string | undefined,
-            describe: (host) => `This will request the list of running processes from ${host}.`,
-          }
-        ),
-    },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
       // Set just before the client call: from there on a throw does not mean
@@ -94,6 +68,13 @@ export const getRunningProcessesTool = (
           context,
           endpointAppContextService,
           requiredPrivilege: 'canGetRunningProcesses',
+          confirmation: {
+            title: 'List running processes?',
+            color: 'primary',
+            confirmText: 'List processes',
+            comment: params.comment as string | undefined,
+            describe: (host) => `This will request the list of running processes from ${host}.`,
+          },
         });
         if (prepared.kind === 'result') {
           return prepared.result;

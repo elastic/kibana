@@ -6,6 +6,7 @@
  */
 
 import {
+  isToolHandlerInterruptReturn,
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
   type ToolHandlerReturn,
@@ -47,12 +48,16 @@ function mockActionCompletion(actionDetails: Record<string, unknown>) {
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 
-// Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation card
-// records the target the analyst was shown here, and the handler reads it back
-// once the call is confirmed.
+// Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation
+// the handler asks for records the target the analyst was shown, and the handler
+// reads it back once the call is confirmed.
 const toolCallState: { value?: unknown } = { value: undefined };
+const confirmationStatus: { value: 'unprompted' | 'accepted' | 'rejected' } = {
+  value: 'unprompted',
+};
+const mockAskForConfirmation = jest.fn((opts: Record<string, unknown>) => ({ prompt: opts }));
 const mockContext = {
-  callContext: { callSource: 'agent' },
+  callContext: { callSource: 'agent', toolCallId: 'call-test-1' },
   logger: mockLogger,
   request: httpServerMock.createKibanaRequest(),
   stateManager: {
@@ -60,6 +65,10 @@ const mockContext = {
     setState: (state: unknown) => {
       toolCallState.value = state;
     },
+  },
+  prompts: {
+    checkConfirmationStatus: () => ({ status: confirmationStatus.value }),
+    askForConfirmation: mockAskForConfirmation,
   },
   runContext: {
     runId: 'run-test-1',
@@ -74,19 +83,21 @@ function assertStandardReturn(result: unknown) {
   return (result as ToolHandlerStandardReturn).results;
 }
 
-// The runner builds the confirmation card and then runs the handler with the
-// same tool-call state; dispatching tests replay both phases so the handler sees
-// the target the analyst was shown.
+// The handler asks for the analyst's confirmation and the runner re-runs it once
+// they answer; dispatching tests replay both phases so the handler sees the
+// target the analyst was shown.
 async function confirmThenHandle(
   tool: ReturnType<typeof getRunningProcessesTool>,
   toolParams: Record<string, unknown>
 ) {
-  const getConfirmation = tool.confirmation?.getConfirmation;
-  if (!getConfirmation) {
-    throw new Error(`${tool.id} has no confirmation to build`);
+  confirmationStatus.value = 'unprompted';
+  const prompted = await tool.handler(toolParams, mockContext);
+  const card = isToolHandlerInterruptReturn(prompted) ? prompted.prompt : undefined;
+  if (!card) {
+    return { card, result: prompted };
   }
 
-  const card = await getConfirmation({ toolParams, context: mockContext });
+  confirmationStatus.value = 'accepted';
   const result = await tool.handler(toolParams, mockContext);
 
   return { card, result };
@@ -104,6 +115,7 @@ describe('getRunningProcessesTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     toolCallState.value = undefined;
+    confirmationStatus.value = 'unprompted';
     service = createMockEndpointAppContext().service;
     // Hostname resolution also reads the Defend metadata index on origin, so
     // tests that only stub Fleet get an empty metadata index by default.
@@ -120,19 +132,26 @@ describe('getRunningProcessesTool', () => {
     expect(tool.description).toContain('running processes');
   });
 
-  it('gates every dispatch with an always-on confirmation prompt naming the host, without dispatching', async () => {
+  it('asks for a confirmation naming the host from the handler, without dispatching', async () => {
     const mockResponseActionsClient = { runningProcesses: jest.fn() };
     service.getInternalResponseActionsClient = jest.fn(
       () => mockResponseActionsClient
     ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123', status: 'online', packages: ['endpoint'] }],
+        }),
+      },
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
     const tool = getRunningProcessesTool(service);
-    expect(tool.confirmation?.askUser).toBe('always');
-    const prompt = await tool.confirmation?.getConfirmation?.({
-      toolParams: { hostName: 'my-host' },
-      context: mockContext,
-    });
-    expect(prompt?.message).toContain('my-host');
+    expect(tool.confirmation).toBeUndefined();
+    const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+    expect(isToolHandlerInterruptReturn(result)).toBe(true);
+    expect(mockAskForConfirmation.mock.calls[0][0].message).toContain('my-host');
     expect(mockResponseActionsClient.runningProcesses).not.toHaveBeenCalled();
   });
 
@@ -155,6 +174,7 @@ describe('getRunningProcessesTool', () => {
     expect(denialData.error).toBe('insufficient_privileges');
     expect(denialData.privilege).toBe('canGetRunningProcesses');
     expect(mockResponseActionsClient.runningProcesses).not.toHaveBeenCalled();
+    expect(mockAskForConfirmation).not.toHaveBeenCalled();
   });
 
   it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
@@ -171,6 +191,7 @@ describe('getRunningProcessesTool', () => {
     const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
     expect(data.found).toBe(false);
     expect(data.reason).toBe('endpoint_not_found');
+    expect(mockAskForConfirmation).not.toHaveBeenCalled();
   });
 
   it('returns ambiguous_hostname with candidates and never dispatches when several endpoints share the hostname', async () => {
@@ -207,6 +228,7 @@ describe('getRunningProcessesTool', () => {
     ]);
     expect(mockResponseActionsClient.runningProcesses).not.toHaveBeenCalled();
     expect(mockLogger.error).not.toHaveBeenCalled();
+    expect(mockAskForConfirmation).not.toHaveBeenCalled();
   });
 
   it('calls responseActionsClient.runningProcesses when agent found', async () => {

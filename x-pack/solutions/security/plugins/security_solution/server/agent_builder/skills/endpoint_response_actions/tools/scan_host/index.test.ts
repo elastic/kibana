@@ -6,6 +6,7 @@
  */
 
 import {
+  isToolHandlerInterruptReturn,
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
   type ToolHandlerReturn,
@@ -40,12 +41,16 @@ function mockActionCompletion(actionDetails: Record<string, unknown>) {
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 
-// Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation card
-// records the target the analyst was shown here, and the handler reads it back
-// once the call is confirmed.
+// Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation
+// the handler asks for records the target the analyst was shown, and the handler
+// reads it back once the call is confirmed.
 const toolCallState: { value?: unknown } = { value: undefined };
+const confirmationStatus: { value: 'unprompted' | 'accepted' | 'rejected' } = {
+  value: 'unprompted',
+};
+const mockAskForConfirmation = jest.fn((opts: Record<string, unknown>) => ({ prompt: opts }));
 const mockContext = {
-  callContext: { callSource: 'agent' },
+  callContext: { callSource: 'agent', toolCallId: 'call-test-1' },
   logger: mockLogger,
   request: httpServerMock.createKibanaRequest(),
   stateManager: {
@@ -53,6 +58,10 @@ const mockContext = {
     setState: (state: unknown) => {
       toolCallState.value = state;
     },
+  },
+  prompts: {
+    checkConfirmationStatus: () => ({ status: confirmationStatus.value }),
+    askForConfirmation: mockAskForConfirmation,
   },
   runContext: {
     runId: 'run-test-1',
@@ -67,22 +76,37 @@ function assertStandardReturn(result: unknown) {
   return (result as ToolHandlerStandardReturn).results;
 }
 
-// The runner builds the confirmation card and then runs the handler with the
-// same tool-call state; dispatching tests replay both phases so the handler sees
-// the target the analyst was shown.
+// The handler asks for the analyst's confirmation and the runner re-runs it once
+// they answer; dispatching tests replay both phases so the handler sees the
+// target the analyst was shown.
 async function confirmThenHandle(
   tool: ReturnType<typeof scanHostTool>,
   toolParams: Record<string, unknown>
 ) {
-  const getConfirmation = tool.confirmation?.getConfirmation;
-  if (!getConfirmation) {
-    throw new Error(`${tool.id} has no confirmation to build`);
+  confirmationStatus.value = 'unprompted';
+  const prompted = await tool.handler(toolParams, mockContext);
+  const card = isToolHandlerInterruptReturn(prompted)
+    ? (prompted.prompt as { message?: string })
+    : undefined;
+  if (!card) {
+    return { card, result: prompted };
   }
 
-  const card = await getConfirmation({ toolParams, context: mockContext });
+  confirmationStatus.value = 'accepted';
   const result = await tool.handler(toolParams, mockContext);
 
   return { card, result };
+}
+
+// The card the handler asks the analyst to confirm for these params.
+async function cardFor(tool: ReturnType<typeof scanHostTool>, toolParams: Record<string, unknown>) {
+  confirmationStatus.value = 'unprompted';
+  const prompted = await tool.handler(toolParams, mockContext);
+  if (!isToolHandlerInterruptReturn(prompted)) {
+    throw new Error('Expected a confirmation prompt');
+  }
+
+  return prompted.prompt as { color?: string; message?: string; id?: string };
 }
 
 describe('scanHostTool', () => {
@@ -97,6 +121,7 @@ describe('scanHostTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     toolCallState.value = undefined;
+    confirmationStatus.value = 'unprompted';
     service = createMockEndpointAppContext().service;
     // Hostname resolution also reads the Defend metadata index on origin, so
     // tests that only stub Fleet get an empty metadata index by default.
@@ -113,9 +138,9 @@ describe('scanHostTool', () => {
     expect(tool.description).toContain('confirmation');
   });
 
-  it('gates every dispatch with an always-on confirmation prompt naming host and path', async () => {
+  it('asks for a confirmation naming host and path, from the handler rather than the runner policy', async () => {
     const tool = scanHostTool(service);
-    expect(tool.confirmation?.askUser).toBe('always');
+    expect(tool.confirmation).toBeUndefined();
     service.getInternalFleetServices = jest.fn(() => ({
       agent: {
         listAgents: jest.fn().mockResolvedValue({
@@ -124,14 +149,11 @@ describe('scanHostTool', () => {
       },
       ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-    const prompt = await tool.confirmation?.getConfirmation?.({
-      toolParams: { hostName: 'my-host', path: '/tmp' },
-      context: mockContext,
-    });
-    expect(prompt?.color).toBe('warning');
-    expect(prompt?.message).toContain('my-host');
-    expect(prompt?.message).toContain('agent-123');
-    expect(prompt?.message).toContain('/tmp');
+    const prompt = await cardFor(tool, { hostName: 'my-host', path: '/tmp' });
+    expect(prompt.color).toBe('warning');
+    expect(prompt.message).toContain('my-host');
+    expect(prompt.message).toContain('agent-123');
+    expect(prompt.message).toContain('/tmp');
   });
 
   it('shows a padded path on the confirmation card with its leading and trailing whitespace visible', async () => {
@@ -145,25 +167,16 @@ describe('scanHostTool', () => {
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
     const tool = scanHostTool(service);
-    const prompt = await tool.confirmation?.getConfirmation?.({
-      toolParams: { hostName: 'my-host', path: '/tmp/payload ' },
-      context: mockContext,
-    });
-    expect(prompt?.message).toContain('"/tmp/payload "');
+    const prompt = await cardFor(tool, { hostName: 'my-host', path: '/tmp/payload ' });
+    expect(prompt.message).toContain('"/tmp/payload "');
 
-    const padded = await tool.confirmation?.getConfirmation?.({
-      toolParams: { hostName: 'my-host', path: '  /tmp/x' },
-      context: mockContext,
-    });
-    expect(padded?.message).toContain('"  /tmp/x"');
+    const padded = await cardFor(tool, { hostName: 'my-host', path: '  /tmp/x' });
+    expect(padded.message).toContain('"  /tmp/x"');
 
     // JSON.stringify would escape backslashes here; the analyst must see the real path.
-    const windows = await tool.confirmation?.getConfirmation?.({
-      toolParams: { hostName: 'my-host', path: 'C:\\Users\\x\\evil.exe' },
-      context: mockContext,
-    });
-    expect(windows?.message).toContain('"C:\\Users\\x\\evil.exe"');
-    expect(windows?.message).not.toContain('\\\\');
+    const windows = await cardFor(tool, { hostName: 'my-host', path: 'C:\\Users\\x\\evil.exe' });
+    expect(windows.message).toContain('"C:\\Users\\x\\evil.exe"');
+    expect(windows.message).not.toContain('\\\\');
   });
 
   it('renders newline, RTLO and zero-width characters in the path as visible escapes on the confirmation card', async () => {
@@ -177,24 +190,15 @@ describe('scanHostTool', () => {
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
     const tool = scanHostTool(service);
-    const newline = await tool.confirmation?.getConfirmation?.({
-      toolParams: { hostName: 'my-host', path: '/tmp/a\nb' },
-      context: mockContext,
-    });
-    expect(newline?.message).toContain('"/tmp/a\\nb"');
+    const newline = await cardFor(tool, { hostName: 'my-host', path: '/tmp/a\nb' });
+    expect(newline.message).toContain('"/tmp/a\\nb"');
 
-    const rtlo = await tool.confirmation?.getConfirmation?.({
-      toolParams: { hostName: 'my-host', path: '/tmp/a\u202Eb.exe' },
-      context: mockContext,
-    });
-    expect(rtlo?.message).toContain('"/tmp/a\\u{202E}b.exe"');
-    expect(rtlo?.message).not.toContain('\u202E');
+    const rtlo = await cardFor(tool, { hostName: 'my-host', path: '/tmp/a\u202Eb.exe' });
+    expect(rtlo.message).toContain('"/tmp/a\\u{202E}b.exe"');
+    expect(rtlo.message).not.toContain('\u202E');
 
-    const zwsp = await tool.confirmation?.getConfirmation?.({
-      toolParams: { hostName: 'my-host', path: '/tmp/a\u200Bb' },
-      context: mockContext,
-    });
-    expect(zwsp?.message).toContain('"/tmp/a\\u{200B}b"');
+    const zwsp = await cardFor(tool, { hostName: 'my-host', path: '/tmp/a\u200Bb' });
+    expect(zwsp.message).toContain('"/tmp/a\\u{200B}b"');
   });
 
   it('returns insufficient_privileges and does not dispatch when caller lacks canWriteScanOperations', async () => {
@@ -216,6 +220,7 @@ describe('scanHostTool', () => {
     expect(denialData.error).toBe('insufficient_privileges');
     expect(denialData.privilege).toBe('canWriteScanOperations');
     expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
+    expect(mockAskForConfirmation).not.toHaveBeenCalled();
   });
 
   it('reports license_tier_required when Enterprise is what withholds canWriteScanOperations', async () => {
@@ -279,6 +284,7 @@ describe('scanHostTool', () => {
     expect(denialData.error).toBe('product_feature_disabled');
     expect(denialData.privilege).toBe('canWriteScanOperations');
     expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
+    expect(mockAskForConfirmation).not.toHaveBeenCalled();
   });
 
   it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
@@ -295,6 +301,7 @@ describe('scanHostTool', () => {
     const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
     expect(data.found).toBe(false);
     expect(data.reason).toBe('endpoint_not_found');
+    expect(mockAskForConfirmation).not.toHaveBeenCalled();
   });
 
   it('returns ambiguous_hostname with candidates and never dispatches when several endpoints share the hostname', async () => {
@@ -331,6 +338,7 @@ describe('scanHostTool', () => {
     ]);
     expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
     expect(mockLogger.error).not.toHaveBeenCalled();
+    expect(mockAskForConfirmation).not.toHaveBeenCalled();
   });
 
   it('calls responseActionsClient.scan with parameters.path when agent found', async () => {
@@ -451,8 +459,8 @@ describe('scanHostTool', () => {
     const { card } = await confirmThenHandle(tool, { hostName: 'my-host', path: newlinePath });
 
     // The card shows the escape; the dispatch gets the raw bytes.
-    expect(card.message).toContain('"/tmp/a\\nb"');
-    expect(card.message).not.toContain(newlinePath);
+    expect(card?.message).toContain('"/tmp/a\\nb"');
+    expect(card?.message).not.toContain(newlinePath);
     expect(mockResponseActionsClient.scan).toHaveBeenCalledWith(
       expect.objectContaining({ parameters: { path: newlinePath } }),
       expect.anything()
