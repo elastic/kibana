@@ -17,6 +17,7 @@ import {
   buildEvalRunEnv,
   formatEvalCliCommand,
   evalRunFlags,
+  readSkipServerFlag,
 } from '../run_helpers';
 import { formatScoutTarget } from '../scout_target';
 
@@ -64,7 +65,7 @@ export const startCmd: Command<void> = {
       requiresEisCcm,
     } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
-    const skipServer = flagsReader.boolean('skip-server');
+    const skipServer = readSkipServerFlag(flagsReader);
 
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);

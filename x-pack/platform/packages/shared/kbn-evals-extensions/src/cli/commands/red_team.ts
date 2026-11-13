@@ -17,6 +17,7 @@ import {
   buildEvalRunArgs,
   formatEvalCliCommand,
   evalRunFlags,
+  readSkipServerFlag,
 } from '@kbn/evals';
 import {
   runRedTeam,
@@ -114,7 +115,7 @@ export const redTeamCmd: Command<void> = {
       requiresEisCcm,
     } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
-    const skipServer = flagsReader.boolean('skip-server');
+    const skipServer = readSkipServerFlag(flagsReader);
 
     log.info('');
     log.info(`Suite:     ${suiteId}`);
