@@ -23,6 +23,7 @@ const preview = (
 ): InvestigationClosePreviewResponse => ({
   pending_proposal_count: 0,
   pending_proposals: [],
+  requires_discard_reason: true,
   running_proposal_count: 0,
   ...overrides,
 });

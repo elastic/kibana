@@ -29,6 +29,7 @@ describe('getRemoteIndexBySignal', () => {
         logsIndex: 'a',
         metricsIndex: 'b',
         tracesIndex: 'c',
+        docsIndex: 'd',
       })
     ).toEqual({});
   });
@@ -40,25 +41,27 @@ describe('getRemoteIndexBySignal', () => {
         logsIndex: '  my-logs ',
         metricsIndex: '   ',
         tracesIndex: 'my-traces',
+        docsIndex: ' my-docs ',
       })
-    ).toEqual({ logs: 'my-logs', traces: 'my-traces' });
+    ).toEqual({ logs: 'my-logs', traces: 'my-traces', docs: 'my-docs' });
   });
 });
 
 describe('createRemoteElasticsearchUnitDestination', () => {
-  it('auto: endpoint and credential only, all signals', () => {
+  it('auto: endpoint and credential only, all signals including docs', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: true,
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
     expect(node).toEqual({
       id: 'central',
       name: 'Central',
       type: REMOTE_ELASTICSEARCH_TYPE,
-      supported_telemetry: ['logs', 'metrics', 'traces'],
+      supported_telemetry: ['logs', 'metrics', 'traces', 'docs'],
       config: [endpointEntry, credentialEntry],
     });
   });
@@ -70,6 +73,7 @@ describe('createRemoteElasticsearchUnitDestination', () => {
       logsIndex: 'shared-idx',
       metricsIndex: 'shared-idx',
       tracesIndex: '',
+      docsIndex: '',
     });
     expect(node.supported_telemetry).toEqual(['logs', 'metrics']);
     expect(node.config).toEqual([
@@ -86,12 +90,48 @@ describe('createRemoteElasticsearchUnitDestination', () => {
       logsIndex: 'a',
       metricsIndex: '',
       tracesIndex: 'b',
+      docsIndex: '',
     });
     expect(node.supported_telemetry).toEqual(['logs', 'traces']);
     expect(node.config).toEqual([
       endpointEntry,
       { name: 'index', value: 'a', telemetry: ['logs'] },
       { name: 'index', value: 'b', telemetry: ['traces'] },
+      credentialEntry,
+    ]);
+  });
+
+  it('fixed, docs with the shared OTel name: docs keeps its own scoped entry', () => {
+    const node = createRemoteElasticsearchUnitDestination({
+      ...base,
+      auto: false,
+      logsIndex: 'shared-idx',
+      metricsIndex: 'shared-idx',
+      tracesIndex: 'shared-idx',
+      docsIndex: 'shared-idx',
+    });
+    expect(node.supported_telemetry).toEqual(['logs', 'metrics', 'traces', 'docs']);
+    expect(node.config).toEqual([
+      endpointEntry,
+      { name: 'index', value: 'shared-idx' },
+      { name: 'index', value: 'shared-idx', telemetry: ['docs'] },
+      credentialEntry,
+    ]);
+  });
+
+  it('fixed, docs only: one docs-scoped index', () => {
+    const node = createRemoteElasticsearchUnitDestination({
+      ...base,
+      auto: false,
+      logsIndex: '',
+      metricsIndex: '',
+      tracesIndex: '',
+      docsIndex: ' accounting-2026 ',
+    });
+    expect(node.supported_telemetry).toEqual(['docs']);
+    expect(node.config).toEqual([
+      endpointEntry,
+      { name: 'index', value: 'accounting-2026', telemetry: ['docs'] },
       credentialEntry,
     ]);
   });
@@ -200,6 +240,7 @@ describe('remote Elasticsearch view model', () => {
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
     expect(node.description).toBe('Prod cluster');
     expect(toDestinationViewModel(node)?.description).toBe('Prod cluster');
@@ -218,16 +259,44 @@ describe('remote Elasticsearch view model', () => {
   });
 
   it.each([
-    ['auto', { auto: true, logsIndex: '', metricsIndex: '', tracesIndex: '' }, {}],
+    ['auto', { auto: true, logsIndex: '', metricsIndex: '', tracesIndex: '', docsIndex: '' }, {}],
     [
       'one name',
-      { auto: false, logsIndex: 'shared-idx', metricsIndex: 'shared-idx', tracesIndex: '' },
+      {
+        auto: false,
+        logsIndex: 'shared-idx',
+        metricsIndex: 'shared-idx',
+        tracesIndex: '',
+        docsIndex: '',
+      },
       { logs: 'shared-idx', metrics: 'shared-idx' },
     ],
     [
       'different names',
-      { auto: false, logsIndex: 'logs-a-b', metricsIndex: '', tracesIndex: 'traces-a-b' },
+      {
+        auto: false,
+        logsIndex: 'logs-a-b',
+        metricsIndex: '',
+        tracesIndex: 'traces-a-b',
+        docsIndex: '',
+      },
       { logs: 'logs-a-b', traces: 'traces-a-b' },
+    ],
+    [
+      'shared name plus docs',
+      {
+        auto: false,
+        logsIndex: 'shared-idx',
+        metricsIndex: 'shared-idx',
+        tracesIndex: 'shared-idx',
+        docsIndex: 'accounting-2026',
+      },
+      {
+        logs: 'shared-idx',
+        metrics: 'shared-idx',
+        traces: 'shared-idx',
+        docs: 'accounting-2026',
+      },
     ],
   ])('reads back what the builder saved (%s)', (_, form, indexBySignal) => {
     const viewModel = toDestinationViewModel(

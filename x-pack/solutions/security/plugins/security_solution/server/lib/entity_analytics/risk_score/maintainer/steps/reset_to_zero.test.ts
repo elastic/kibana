@@ -69,7 +69,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -117,7 +116,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -189,7 +187,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.user,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -229,7 +226,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.service,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -270,7 +266,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -309,7 +304,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -335,7 +329,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -368,7 +361,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,
@@ -381,7 +373,7 @@ describe('resetToZero (maintainer)', () => {
     expect(query).toContain('WHERE calculation_run_id IS NULL OR calculation_run_id != "run-id-1"');
   });
 
-  it('writes to entity store when idBasedRiskScoringEnabled is true', async () => {
+  it('writes zero scores to the entity store', async () => {
     (esClient.esql.query as jest.Mock)
       .mockResolvedValueOnce({
         values: [['host:host-1', null]],
@@ -396,7 +388,6 @@ describe('resetToZero (maintainer)', () => {
       spaceId: 'default',
       entityType: EntityType.host,
       logger,
-      idBasedRiskScoringEnabled: true,
       crudClient,
       calculationRunId: 'run-id-1',
       now,

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 interface TileSeriesQueryOptions<T> {
   /** Identifies the tile in the query cache. */
@@ -43,18 +42,9 @@ export const useTileSeriesQuery = <T>({
     async ({ signal }) => {
       if (!query) return undefined;
       const result = await runWithTileTimeout(signal, (tileSignal) =>
-        lastValueFrom(
-          data.search.search(
-            { params: { query } },
-            {
-              abortSignal: tileSignal,
-              strategy: 'esql_async',
-              projectRouting: TILE_PROJECT_ROUTING,
-            }
-          )
-        )
+        runEsqlQuery(data.search, query, `needs_attention_tile_${tileKey}`, tileSignal)
       );
-      return parse(result.rawResponse as unknown as ESQLSearchResponse);
+      return parse(result);
     },
     {
       enabled: enabled && Boolean(query),

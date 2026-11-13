@@ -42,7 +42,6 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
     http,
     notifications: { toasts },
     ruleTypeRegistry,
-    cps,
     showClassicBadge,
   } = useKibana().services;
 
@@ -118,7 +117,6 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
-          cps={cps}
           showClassicBadge={showClassicBadge}
         />
       )}

@@ -14,25 +14,44 @@ const viewFile = (filePath: string) => ({
 });
 
 describe('extractRecallReads', () => {
-  it('finds cortex and memory files read through view-file and bash, once per path', () => {
+  it('finds wiki and memory files read through view-file and bash, once per path', () => {
     const reads = extractRecallReads([
-      viewFile('/workspace/cortex/checkout.md'),
+      viewFile('/workspace/wiki/checkout.md'),
       {
         tool_id: 'nightshift_sandbox_bash',
         params: { command: 'cat memories/a.md | head' },
         result: '',
       },
-      viewFile('/workspace/cortex/checkout.md'),
+      viewFile('/workspace/wiki/checkout.md'),
       viewFile('/workspace/src/app.ts'),
-      { tool_id: 'other', params: { file_path: 'cortex/ignored.md' }, result: '' },
+      { tool_id: 'other', params: { file_path: 'wiki/ignored.md' }, result: '' },
     ]);
     expect(reads).toEqual([
-      { kind: 'cortex', path: 'cortex/checkout.md', step: 1 },
+      { kind: 'wiki', path: 'wiki/checkout.md', step: 1 },
       { kind: 'memories', path: 'memories/a.md', step: 2 },
     ]);
   });
 
-  describe('bash calls run from a cortex or memories working directory', () => {
+  it('ignores wiki paths outside the sandbox recall directories', () => {
+    const bashCommand = (command: string) => ({
+      tool_id: 'nightshift_sandbox_bash',
+      params: { command },
+      result: '',
+    });
+    expect(
+      extractRecallReads([
+        bashCommand('curl https://github.com/org/repo/wiki/Runbook'),
+        bashCommand('gh api repos/o/r/wiki/pages'),
+        bashCommand('cat src/docs/wiki/setup.md'),
+        bashCommand('cat /workspace/wiki/db.md ./memories/a.md'),
+      ])
+    ).toEqual([
+      { kind: 'wiki', path: 'wiki/db.md', step: 4 },
+      { kind: 'memories', path: 'memories/a.md', step: 4 },
+    ]);
+  });
+
+  describe('bash calls run from a wiki or memories working directory', () => {
     const bash = (command: string, workingDirectory: string, result = '') => ({
       tool_id: 'nightshift_sandbox_bash',
       params: { command, working_directory: workingDirectory },
@@ -43,12 +62,12 @@ describe('extractRecallReads', () => {
       expect(
         extractRecallReads([
           bash('grep timeout checkout.md', '/workspace/memories'),
-          bash("cat 'notes/db.txt'", '/workspace/cortex/'),
+          bash("cat 'notes/db.txt'", '/workspace/wiki/'),
           bash('grep timeout checkout.md', '/workspace/src'),
         ])
       ).toEqual([
         { kind: 'memories', path: 'memories/checkout.md', step: 1 },
-        { kind: 'cortex', path: 'cortex/notes/db.txt', step: 2 },
+        { kind: 'wiki', path: 'wiki/notes/db.txt', step: 2 },
       ]);
     });
 
@@ -70,11 +89,9 @@ describe('extractRecallReads', () => {
 
     it('reads files from a find or grep -l listing', () => {
       const result = 'exit_code: 0 | stdout: ./a.md\n./notes/b.md\n';
-      expect(
-        extractRecallReads([bash("find . -name '*.md'", '/workspace/cortex', result)])
-      ).toEqual([
-        { kind: 'cortex', path: 'cortex/a.md', step: 1 },
-        { kind: 'cortex', path: 'cortex/notes/b.md', step: 1 },
+      expect(extractRecallReads([bash("find . -name '*.md'", '/workspace/wiki', result)])).toEqual([
+        { kind: 'wiki', path: 'wiki/a.md', step: 1 },
+        { kind: 'wiki', path: 'wiki/notes/b.md', step: 1 },
       ]);
     });
 
@@ -98,8 +115,8 @@ describe('extractRecallReads', () => {
   });
 
   it('renders the reads of one kind', () => {
-    const reads = extractRecallReads([viewFile('cortex/a.md'), viewFile('memories/b.md')]);
+    const reads = extractRecallReads([viewFile('wiki/a.md'), viewFile('memories/b.md')]);
     expect(composeRecallReadsText(reads, 'memories')).toBe('- memories/b.md (trajectory step 2)');
-    expect(composeRecallReadsText(reads, 'cortex')).toBe('- cortex/a.md (trajectory step 1)');
+    expect(composeRecallReadsText(reads, 'wiki')).toBe('- wiki/a.md (trajectory step 1)');
   });
 });

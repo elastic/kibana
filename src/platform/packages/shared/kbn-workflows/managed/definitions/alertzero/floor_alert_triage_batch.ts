@@ -11,8 +11,8 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FLOOR_ALERT_TRIAGE_BATCH_YAML from './floor_alert_triage_batch.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID =
   'system-security-floor-alert-triage-batch';
@@ -28,5 +28,7 @@ export const ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 13,
-  yaml: FLOOR_ALERT_TRIAGE_BATCH_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'floor_alert_triage_batch.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
