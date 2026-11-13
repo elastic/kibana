@@ -9,7 +9,7 @@
 
 import dateMath from '@kbn/datemath';
 import type { Filter, RangeFilter, ScriptedRangeFilter } from '@kbn/es-query';
-import { isRangeFilter } from '@kbn/es-query';
+import { isEsqlFilter, isRangeFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
@@ -17,8 +17,26 @@ import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Operator } from './filter_operators';
 import { FILTER_OPERATORS, OPERATORS } from './filter_operators';
 
+/**
+ * The column of an ES|QL filter is created by the query, so it is not a field of the data view.
+ * The filter has what is needed to edit it.
+ */
+const getEsqlColumnFromFilter = ({ meta: { key, esql } }: Filter): FilterableField | undefined =>
+  key
+    ? {
+        name: key,
+        type: esql?.type ?? 'string',
+        ...(esql?.esType ? { esTypes: [esql.esType] } : {}),
+        searchable: true,
+        aggregatable: false,
+      }
+    : undefined;
+
 export function getFieldFromFilter(filter: Filter, indexPattern?: FilterableSource) {
-  return indexPattern?.fields.find((field) => field.name === filter.meta.key);
+  return (
+    indexPattern?.fields.find((field) => field.name === filter.meta.key) ??
+    (isEsqlFilter(filter) ? getEsqlColumnFromFilter(filter) : undefined)
+  );
 }
 
 function getRangeOperatorFromFilter({

@@ -93,6 +93,14 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
         ...('is_multi_index' in filter && filter.is_multi_index !== undefined
           ? { isMultiIndex: filter.is_multi_index }
           : {}),
+        ...('esql' in filter && filter.esql
+          ? {
+              esql: {
+                ...(filter.esql.type !== undefined ? { type: filter.esql.type } : {}),
+                ...(filter.esql.es_type !== undefined ? { esType: filter.esql.es_type } : {}),
+              },
+            }
+          : {}),
       },
     };
 

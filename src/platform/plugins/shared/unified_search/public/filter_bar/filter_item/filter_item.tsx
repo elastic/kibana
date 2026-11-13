@@ -12,6 +12,7 @@ import { EuiContextMenu, EuiContextMenuPanel, EuiPopover, euiShadowMedium } from
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import {
+  isEsqlFilter,
   isFilterPinned,
   toggleFilterNegated,
   toggleFilterPinned,
@@ -250,6 +251,12 @@ export function FilterItemComponent(props: FilterItemProps) {
         'data-test-subj': 'deleteFilter',
       },
     ];
+
+    // The filter editor is built around the fields of a data view, and the column of an ES|QL
+    // filter is created by a query, so these filters can't be edited with it
+    if (isEsqlFilter(filter)) {
+      mainPanelItems = mainPanelItems.filter((pItem) => pItem['data-test-subj'] !== 'editFilter');
+    }
 
     if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {
       mainPanelItems = mainPanelItems.filter(

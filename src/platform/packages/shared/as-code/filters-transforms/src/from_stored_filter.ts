@@ -431,6 +431,14 @@ function convertToDSLFilter(
 /**
  * Extract base properties from stored filter
  */
+function toAsCodeEsqlMeta(esql: unknown): NonNullable<AsCodeFilter['esql']> {
+  const { type, esType } = esql as { type?: string; esType?: string };
+  return {
+    ...(type !== undefined ? { type } : {}),
+    ...(esType !== undefined ? { es_type: esType } : {}),
+  };
+}
+
 function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter> {
   const meta = storedFilter.meta;
 
@@ -441,6 +449,7 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
     ...(meta?.negate === true ? { negate: true } : {}),
     ...(meta?.alias != null ? { label: meta.alias } : {}),
     ...(meta?.isMultiIndex !== undefined ? { is_multi_index: meta.isMultiIndex } : {}),
+    ...(meta?.esql ? { esql: toAsCodeEsqlMeta(meta.esql) } : {}),
   };
 }
 
