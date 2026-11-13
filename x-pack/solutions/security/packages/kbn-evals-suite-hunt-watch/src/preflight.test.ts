@@ -141,6 +141,9 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     if (path === '/api/security/entity_store/install') {
       return {};
     }
+    if (path === '/api/security/entity_store/start' && method === 'PUT') {
+      return { ok: true };
+    }
     if (/\/internal\/_inference\/_exists\//.test(path)) {
       return { isEndpointExists: true };
     }
