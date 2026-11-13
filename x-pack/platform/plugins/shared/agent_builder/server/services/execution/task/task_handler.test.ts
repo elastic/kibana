@@ -215,8 +215,8 @@ describe('TaskHandler event streaming and finalization', () => {
       execution,
       events$: expect.anything(),
       request: fakeRequest,
-      readConversation: expect.any(Function),
       callbackDeliveryService,
+      conversationService,
       surfacesService,
       logger: expect.anything(),
     });
@@ -354,36 +354,6 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to update status for execution execution-1: status update failed'
     );
-  });
-
-  describe('the conversation read for callback delivery', () => {
-    const owner = { id: 'user-1', username: 'elastic' };
-
-    const readConversation = async (overrides: Record<string, unknown> = {}) => {
-      executionClient.get.mockResolvedValue({ ...execution, owner, ...overrides });
-      await run();
-
-      return deliverCallbackEventsMock.mock.calls[0][0].readConversation();
-    };
-
-    it("reads the execution's conversation as its owner", async () => {
-      const conversation = { id: 'conversation-1' };
-      conversationClient.get.mockResolvedValue(conversation as never);
-
-      await expect(readConversation()).resolves.toBe(conversation);
-      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith({
-        request: fakeRequest,
-        user: { ...owner, isAdmin: false },
-      });
-      expect(conversationClient.get).toHaveBeenCalledWith('conversation-1');
-    });
-
-    it('reads nothing when the conversation is not stored', async () => {
-      await expect(
-        readConversation({ agentParams: { ...execution.agentParams, storeConversation: false } })
-      ).resolves.toBeUndefined();
-      expect(conversationClient.get).not.toHaveBeenCalled();
-    });
   });
 
   describe('an execution aborted before it started', () => {

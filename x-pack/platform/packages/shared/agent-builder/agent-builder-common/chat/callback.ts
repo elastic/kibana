@@ -16,8 +16,6 @@ export interface ChatCallbackToolCall {
   tool_id: string;
   /** What the agent was doing with the call, as described by the model. */
   intent?: string;
-  /** Set when the run was interrupted while the call was in flight. */
-  interrupted?: true;
 }
 
 /**

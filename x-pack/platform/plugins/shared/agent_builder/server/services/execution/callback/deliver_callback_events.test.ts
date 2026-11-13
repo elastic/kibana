@@ -16,6 +16,8 @@ import {
   ChatEventType,
   ConversationOriginType,
   createRequestAbortedError,
+  isExecutionTerminatedEvent,
+  isRoundCompleteEvent,
   TimelineEventType,
   type ChatCallbackEventResponse,
   type ChatCallbackExecutionTerminatedEvent,
@@ -23,6 +25,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { AttachmentServiceStart } from '../../attachments';
+import type { ConversationService } from '../../conversation';
 import { SurfacesServiceImpl } from '../../surfaces';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 import { deliverCallbackEvents } from './deliver_callback_events';
@@ -30,13 +33,15 @@ import { deliverCallbackEvents } from './deliver_callback_events';
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
 const getTypeDefinition = jest.fn();
 const request = httpServerMock.createKibanaRequest();
-const readConversation = jest.fn();
+const conversationClient = { get: jest.fn() };
+const conversationService = { getScopedClientAsUser: jest.fn() };
+const owner = { id: 'user-1', username: 'elastic' };
 /**
- * What execution_terminated's callback fields are built with: the stored conversation, the surfaces
+ * What the surface payload is rendered with: the stored conversation's attachments, the surfaces
  * service, and the request the execution runs as.
  */
 const surfacesDeps = {
-  readConversation,
+  conversationService: conversationService as unknown as ConversationService,
   surfacesService: new SurfacesServiceImpl({
     attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
@@ -51,7 +56,9 @@ const createConversationExecution = (url: string | null = callbackUrl): AgentExe
     executionId: 'execution-1',
     executionMode: AgentExecutionMode.conversation,
     spaceId: 'space-1',
+    owner,
     agentParams: {
+      conversationId: 'conversation-1',
       nextInput: { message: 'hello' },
       ...(url ? { callback: { url } } : {}),
     },
@@ -128,21 +135,18 @@ const createExecutionTerminatedEvent = (
     data: { outcome },
   } as unknown as ChatEvent);
 
-const createExecutionStepEvent = (executionId: string, sequence: number, step: unknown) => ({
-  id: `${executionId}::step::${sequence}`,
-  type: TimelineEventType.executionStep,
-  created_at: '2024-01-01T00:00:00.000Z',
-  actor: { type: 'agent', id: 'agent-1' },
-  execution_id: executionId,
-  data: { step, sequence },
-});
+const createToolCallEvent = (data: Record<string, unknown>): ChatEvent =>
+  ({ type: ChatEventType.toolCall, data } as unknown as ChatEvent);
 
-/** Stores the conversation the callback reads back once the stream completes. */
-const storeConversation = ({
-  events = [],
-  attachments = [],
-}: { events?: unknown[]; attachments?: unknown[] } = {}) =>
-  readConversation.mockResolvedValue({ id: 'conversation-1', events, attachments });
+const createToolResultEvent = (toolCallId: string): ChatEvent =>
+  ({
+    type: ChatEventType.toolResult,
+    data: { tool_call_id: toolCallId, tool_id: 'search', results: [] },
+  } as unknown as ChatEvent);
+
+/** Stores the attachments of the conversation the callback reads once the stream completes. */
+const storeAttachments = (attachments: unknown[]) =>
+  conversationClient.get.mockResolvedValue({ id: 'conversation-1', attachments });
 
 const getDeliveredEvents = (service: jest.Mocked<CallbackDeliveryService>) =>
   service.makeCallbackRequest.mock.calls.map(
@@ -181,7 +185,8 @@ const createCallbackDeliveryServiceMock = () => {
 
 describe('deliverCallbackEvents', () => {
   beforeEach(() => {
-    readConversation.mockReset().mockResolvedValue(undefined);
+    conversationClient.get.mockReset().mockResolvedValue({ id: 'conversation-1' });
+    conversationService.getScopedClientAsUser.mockReset().mockResolvedValue(conversationClient);
   });
 
   it('resolves without subscribing when no callback is configured', async () => {
@@ -292,7 +297,11 @@ describe('deliverCallbackEvents', () => {
       ([{ payload }]) => (payload as { event: ChatEvent }).event
     );
 
-    expect(deliveredEvents).toEqual([reasoningEvent, executionTerminatedEvent, roundCompleteEvent]);
+    expect(deliveredEvents).toEqual([
+      reasoningEvent,
+      { ...executionTerminatedEvent, tool_calls: [] },
+      roundCompleteEvent,
+    ]);
     expect(deliveredEvents.some((event) => event.type === ChatEventType.messageChunk)).toBe(false);
     expect(deliveredEvents.some((event) => event.type === TimelineEventType.executionStarted)).toBe(
       false
@@ -325,7 +334,7 @@ describe('deliverCallbackEvents', () => {
       expect.objectContaining({
         payload: {
           execution_id: 'execution-1',
-          event: executionTerminatedEvent,
+          event: { ...executionTerminatedEvent, tool_calls: [] },
           idempotency_key: 'execution-1',
         },
         retry: true,
@@ -362,7 +371,11 @@ describe('deliverCallbackEvents', () => {
       ([{ payload }]) => (payload as { event: ChatEvent }).event
     );
 
-    expect(deliveredEvents).toEqual([laterEvent, executionTerminatedEvent, roundCompleteEvent]);
+    expect(deliveredEvents).toEqual([
+      laterEvent,
+      { ...executionTerminatedEvent, tool_calls: [] },
+      roundCompleteEvent,
+    ]);
   });
 
   it('defers round_complete until the stream completes, delivering it after later events', async () => {
@@ -385,7 +398,7 @@ describe('deliverCallbackEvents', () => {
     expect(deliveredEvents).toEqual([laterEvent, roundCompleteEvent]);
   });
 
-  it('adds the surface payload, rendered from the stored conversation, to both terminal events', async () => {
+  it('adds the surface payload to both terminal events, rendering it once', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
     const reasoningEvent = createReasoningEvent('thinking');
@@ -395,7 +408,6 @@ describe('deliverCallbackEvents', () => {
       type: 'responded',
       response: { message: 'There are **3** alerts.' },
     });
-    storeConversation();
 
     await deliverCallbackEvents({
       execution: createSlackExecution(),
@@ -436,58 +448,44 @@ describe('deliverCallbackEvents', () => {
     renderPayload.mockRestore();
   });
 
-  it("adds a summary of the execution's stored tool calls to execution_terminated, without params or results", async () => {
+  it("adds a summary of the stream's tool calls to execution_terminated, without params or results", async () => {
     const { service } = createCallbackDeliveryServiceMock();
-    storeConversation({
-      events: [
-        createExecutionStepEvent('round-0::execution', 0, {
-          type: 'tool_call',
-          tool_call_id: 'tc_0',
-          tool_id: 'search',
-          params: {},
-          results: [],
-        }),
-        createExecutionStepEvent('round-1::execution', 2, {
-          type: 'tool_call',
-          tool_call_id: 'tc_2',
-          tool_id: 'execute_api',
-          params: { api: 'cat.indices' },
-          results: [],
-          interrupted: true,
-        }),
-        createExecutionStepEvent('round-1::execution', 0, {
-          type: 'reasoning',
-          reasoning: 'Look at the logs first.',
-        }),
-        createExecutionStepEvent('round-1::execution', 1, {
-          type: 'tool_call',
-          tool_call_id: 'tc_1',
-          tool_id: 'search',
-          intent: 'Searching checkout service logs',
-          params: { query: 'service.name:checkout' },
-          results: [{ tool_result_id: 'r_1', type: 'other', data: { rows: 200 } }],
-        }),
-      ],
+    const searchCall = createToolCallEvent({
+      tool_call_id: 'tc_1',
+      tool_id: 'search',
+      intent: 'Searching checkout service logs',
+      params: { query: 'service.name:checkout' },
     });
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
-      events$: of(createRoundCompleteEvent(), createExecutionTerminatedEvent()),
+      events$: of(
+        searchCall,
+        createToolResultEvent('tc_1'),
+        createToolCallEvent({ tool_call_id: 'tc_2', tool_id: 'execute_api', params: {} }),
+        // A repeated tool call is listed once.
+        searchCall,
+        createRoundCompleteEvent(),
+        createExecutionTerminatedEvent()
+      ),
       callbackDeliveryService: service,
       ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
-    const [terminated, completed] = getDeliveredEvents(service);
+    const deliveredEvents = getDeliveredEvents(service);
+    const terminated = deliveredEvents.find(isExecutionTerminatedEvent) as
+      | ChatCallbackExecutionTerminatedEvent
+      | undefined;
 
-    expect((terminated as ChatCallbackExecutionTerminatedEvent).tool_calls).toEqual([
+    expect(terminated?.tool_calls).toEqual([
       { tool_call_id: 'tc_1', tool_id: 'search', intent: 'Searching checkout service logs' },
-      { tool_call_id: 'tc_2', tool_id: 'execute_api', interrupted: true },
+      { tool_call_id: 'tc_2', tool_id: 'execute_api' },
     ]);
-    expect(completed).not.toHaveProperty('tool_calls');
+    expect(deliveredEvents.find(isRoundCompleteEvent)).not.toHaveProperty('tool_calls');
   });
 
-  it("renders the stored conversation's attachments through their type mapping, and leaves out the others", async () => {
+  it("renders the stored conversation's attachments as the execution's owner, through their type mapping", async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const textAttachment = {
       id: 'a1',
@@ -507,7 +505,7 @@ describe('deliverCallbackEvents', () => {
           }
         : undefined
     );
-    storeConversation({ attachments: [textAttachment] });
+    storeAttachments([textAttachment]);
 
     await deliverCallbackEvents({
       execution: createSlackExecution(),
@@ -531,12 +529,16 @@ describe('deliverCallbackEvents', () => {
 
     expect(slack).toContain('Attached note');
     expect(slack).not.toContain('render_attachment');
+    expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith({
+      request,
+      user: { ...owner, isAdmin: false },
+    });
+    expect(conversationClient.get).toHaveBeenCalledWith('conversation-1');
   });
 
   it("renders the surface payload with the execution's agent, request and space", async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
-    storeConversation();
 
     await deliverCallbackEvents({
       execution: createSlackExecution(),
@@ -562,7 +564,6 @@ describe('deliverCallbackEvents', () => {
   it('renders no surface payload for an execution that asks for user input', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
-    storeConversation();
 
     await deliverCallbackEvents({
       execution: createSlackExecution(),
@@ -575,6 +576,7 @@ describe('deliverCallbackEvents', () => {
     const [terminated] = getDeliveredEvents(service);
 
     expect(renderPayload).not.toHaveBeenCalled();
+    expect(conversationClient.get).not.toHaveBeenCalled();
     expect(terminated).toMatchObject({ surface_payload: undefined, tool_calls: [] });
 
     renderPayload.mockRestore();
@@ -582,7 +584,6 @@ describe('deliverCallbackEvents', () => {
 
   it('does not add a surface payload to executions without an origin', async () => {
     const { service } = createCallbackDeliveryServiceMock();
-    storeConversation();
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
@@ -597,28 +598,37 @@ describe('deliverCallbackEvents', () => {
     expect((terminated as ChatCallbackExecutionTerminatedEvent).surface_payload).toBeUndefined();
   });
 
-  it('delivers both terminal events without the callback fields when the conversation is not stored', async () => {
+  it('renders the surface payload without attachments when the conversation is not stored', async () => {
     const { service } = createCallbackDeliveryServiceMock();
-    const roundCompleteEvent = createRoundCompleteEvent();
-    const executionTerminatedEvent = createExecutionTerminatedEvent();
+    const execution = createSlackExecution();
+    const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
 
     await deliverCallbackEvents({
-      execution: createSlackExecution(),
-      events$: of(roundCompleteEvent, executionTerminatedEvent),
+      execution: {
+        ...execution,
+        agentParams: { ...execution.agentParams, storeConversation: false },
+      } as AgentExecution,
+      events$: of(createExecutionTerminatedEvent()),
       callbackDeliveryService: service,
       ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
-    expect(getDeliveredEvents(service)).toEqual([executionTerminatedEvent, roundCompleteEvent]);
+    expect(conversationClient.get).not.toHaveBeenCalled();
+    expect(renderPayload).toHaveBeenCalledWith(
+      { message: 'Hello', attachments: [] },
+      expect.anything()
+    );
+
+    renderPayload.mockRestore();
   });
 
-  it('delivers both terminal events without the callback fields when the conversation read fails', async () => {
+  it('delivers both terminal events without a surface payload when the attachments read fails', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const logger = loggerMock.create();
     const roundCompleteEvent = createRoundCompleteEvent();
     const executionTerminatedEvent = createExecutionTerminatedEvent();
-    readConversation.mockRejectedValue(new Error('read boom'));
+    conversationClient.get.mockRejectedValue(new Error('read boom'));
 
     await deliverCallbackEvents({
       execution: createSlackExecution(),
@@ -628,9 +638,12 @@ describe('deliverCallbackEvents', () => {
       logger,
     });
 
-    expect(getDeliveredEvents(service)).toEqual([executionTerminatedEvent, roundCompleteEvent]);
+    expect(getDeliveredEvents(service)).toEqual([
+      { ...executionTerminatedEvent, tool_calls: [] },
+      roundCompleteEvent,
+    ]);
     expect(logger.warn).toHaveBeenCalledWith(
-      'Failed to read the conversation of execution execution-1 for its callback: read boom'
+      'Failed to read the attachments of execution execution-1 for its callback: read boom'
     );
     expect(service.makeCallbackRequest).not.toHaveBeenCalledWith(
       expect.objectContaining({ payload: expect.objectContaining({ error: expect.anything() }) })

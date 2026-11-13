@@ -14,6 +14,7 @@ import {
   defer,
   catchError,
   filter,
+  tap,
   type Observable,
 } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -26,35 +27,19 @@ import {
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isRoundCompleteEvent,
-  isToolCallStep,
+  isToolCallEvent,
   type ChatCallbackEvent,
-  type ChatCallbackExecutionTerminatedEvent,
   type ChatCallbackToolCall,
   type ChatEvent,
-  type Conversation,
-  type ConversationRoundStep,
   type ExecutionTerminatedEvent,
   type RoundCompleteEvent,
+  type SurfacePayload,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import type { ConversationService } from '../../conversation';
 import type { SurfacesService } from '../../surfaces';
-import { executionSteps } from '../run_agent/utils/context_timeline';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
-
-/** The fields added to execution_terminated at callback delivery. */
-type CallbackFields = Pick<ChatCallbackExecutionTerminatedEvent, 'surface_payload' | 'tool_calls'>;
-
-/** The tool calls among the steps, summarized for a callback: no params or results. */
-const toCallbackToolCalls = (steps: ConversationRoundStep[]): ChatCallbackToolCall[] =>
-  steps
-    .filter(isToolCallStep)
-    .map(({ tool_call_id: toolCallId, tool_id: toolId, intent, interrupted }) => ({
-      tool_call_id: toolCallId,
-      tool_id: toolId,
-      ...(intent ? { intent } : {}),
-      ...(interrupted ? { interrupted } : {}),
-    }));
 
 /**
  * Delivers the execution's events to its configured callback URL, resolving once every
@@ -66,25 +51,24 @@ const toCallbackToolCalls = (steps: ConversationRoundStep[]): ChatCallbackToolCa
  * first (e.g. the persistence write failed), both are skipped and a failure callback is sent
  * instead.
  *
- * The stored conversation is then read back to build execution_terminated's callback fields: the
- * response message ready to post on the surface (also added to round_complete), and a summary of
- * the execution's tool calls. Neither is stored.
+ * execution_terminated also carries two fields that are never stored: the response message ready
+ * to post on the surface (also added to round_complete), rendered with the attachments of the
+ * stored conversation, and a summary of the tool calls seen on the stream.
  */
 export const deliverCallbackEvents = ({
   execution,
   events$,
   request,
-  readConversation,
   callbackDeliveryService,
+  conversationService,
   surfacesService,
   logger,
 }: {
   execution: AgentExecution;
   events$: Observable<ChatEvent>;
   request: KibanaRequest;
-  /** Reads the execution's stored conversation, or resolves to nothing when it is not stored. */
-  readConversation: () => Promise<Conversation | undefined>;
   callbackDeliveryService: CallbackDeliveryService;
+  conversationService: ConversationService;
   surfacesService: SurfacesService;
   logger: Logger;
 }): Promise<void> => {
@@ -132,50 +116,59 @@ export const deliverCallbackEvents = ({
     );
   };
 
-  /** execution_terminated's callback fields, built from the event and the stored conversation. */
-  const buildCallbackFields = async ({
-    execution_id: terminatedExecutionId,
+  /** The stored conversation's attachments, as the execution's owner; empty when not stored. */
+  const readAttachments = async () => {
+    const { owner, runAs } = execution;
+    const { conversationId, storeConversation } = execution.agentParams;
+
+    if (!owner || !conversationId || storeConversation === false) {
+      return [];
+    }
+
+    const conversationClient = await conversationService.getScopedClientAsUser({
+      request,
+      user: { ...owner, isAdmin: false },
+      ...(runAs ? { runAs: runAs.serviceAccountId } : {}),
+    });
+    const { attachments = [] } = await conversationClient.get(conversationId);
+
+    return attachments;
+  };
+
+  /** The response message ready to post on the execution's surface, such as Slack. */
+  const renderSurfacePayload = async ({
     data: { outcome },
-  }: ExecutionTerminatedEvent): Promise<CallbackFields> => {
-    let conversation: Conversation | undefined;
+  }: ExecutionTerminatedEvent): Promise<SurfacePayload | undefined> => {
+    if (outcome.type !== 'responded') {
+      return undefined;
+    }
 
     try {
-      conversation = await readConversation();
+      const attachments = await readAttachments();
+
+      return await surfacesService.renderPayload(
+        { message: outcome.response.message, attachments },
+        {
+          originType: execution.agentParams.origin?.type,
+          agentId: execution.agentId,
+          request,
+          spaceId: execution.spaceId,
+        }
+      );
     } catch (error) {
       logger.warn(
-        `Failed to read the conversation of execution ${execution.executionId} for its callback: ${error.message}`
+        `Failed to read the attachments of execution ${execution.executionId} for its callback: ${error.message}`
       );
+
+      return undefined;
     }
-
-    if (!conversation) {
-      return {};
-    }
-
-    const { events = [], attachments = [] } = conversation;
-    const steps = executionSteps(
-      events.filter((event) => event.execution_id === terminatedExecutionId)
-    );
-
-    // The response message ready to post on the execution's surface, such as Slack.
-    const surfacePayload =
-      outcome.type === 'responded'
-        ? await surfacesService.renderPayload(
-            { message: outcome.response.message, attachments },
-            {
-              originType: execution.agentParams.origin?.type,
-              agentId: execution.agentId,
-              request,
-              spaceId: execution.spaceId,
-            }
-          )
-        : undefined;
-
-    return { surface_payload: surfacePayload, tool_calls: toCallbackToolCalls(steps) };
   };
 
   return new Promise<void>((resolve) => {
     let executionTerminatedEvent: ExecutionTerminatedEvent | undefined;
     let roundCompleteEvent: RoundCompleteEvent | undefined;
+    // The execution's tool calls, by id, summarized for execution_terminated: no params or results.
+    const toolCalls = new Map<string, ChatCallbackToolCall>();
 
     events$
       .pipe(
@@ -187,6 +180,17 @@ export const deliverCallbackEvents = ({
             !isExecutionFailedEvent(event) &&
             !isExecutionAbortedEvent(event)
         ),
+        tap((event) => {
+          if (isToolCallEvent(event) && !toolCalls.has(event.data.tool_call_id)) {
+            const { tool_call_id: toolCallId, tool_id: toolId, intent } = event.data;
+
+            toolCalls.set(toolCallId, {
+              tool_call_id: toolCallId,
+              tool_id: toolId,
+              ...(intent ? { intent } : {}),
+            });
+          }
+        }),
         concatMap((event) => {
           // Hold the terminal events back until the stream completes (persistence succeeded).
           if (isExecutionTerminatedEvent(event)) {
@@ -209,20 +213,21 @@ export const deliverCallbackEvents = ({
           defer(() =>
             from(
               executionTerminatedEvent
-                ? buildCallbackFields(executionTerminatedEvent)
-                : Promise.resolve<CallbackFields>({})
+                ? renderSurfacePayload(executionTerminatedEvent)
+                : Promise.resolve(undefined)
             )
           ).pipe(
-            concatMap((callbackFields) =>
+            concatMap((surfacePayload) =>
               concat(
                 executionTerminatedEvent
-                  ? deliverEvent({ ...executionTerminatedEvent, ...callbackFields })
+                  ? deliverEvent({
+                      ...executionTerminatedEvent,
+                      surface_payload: surfacePayload,
+                      tool_calls: [...toolCalls.values()],
+                    })
                   : EMPTY,
                 roundCompleteEvent
-                  ? deliverEvent({
-                      ...roundCompleteEvent,
-                      surface_payload: callbackFields.surface_payload,
-                    })
+                  ? deliverEvent({ ...roundCompleteEvent, surface_payload: surfacePayload })
                   : EMPTY
               )
             )
