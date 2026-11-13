@@ -35,7 +35,10 @@ export const FP_DECISION_MIN_ALERTS = 3;
 /** Most decisions one approval stores, so a very mixed proposal cannot flood the index. A starting value. */
 export const FP_DECISIONS_MAX_PER_APPROVAL = 20;
 
-/** Verdicts that stop a key from becoming a decision: the model judged an alert of this pattern differently. */
+/**
+ * Verdicts that stop a key from becoming a decision: the model judged an alert of this pattern differently.
+ * Only the batch writes the strict key tag, so the `az:inconclusive` a dismissal's skip adds never blocks.
+ */
 export const FP_DECISION_BLOCKING_VERDICT_TAGS = ['az:true_positive', 'az:inconclusive'] as const;
 
 const MAX_CONDITION_VALUE_LENGTH = 1000;
