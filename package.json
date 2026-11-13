@@ -2290,7 +2290,7 @@
     "openapi-types": "12.1.3",
     "oxlint": "1.80.0",
     "oxlint-tsgolint": "7.0.2002",
-    "peggy": "5.1.0",
+    "peggy": "5.1.1",
     "picomatch": "4.0.7",
     "pirates": "4.0.7",
     "pixelmatch": "5.3.0",
