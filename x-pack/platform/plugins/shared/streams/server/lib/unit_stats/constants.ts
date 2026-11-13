@@ -116,5 +116,7 @@ export const SERIES_MIN_BUCKET_MS = 10_000;
 
 /** UCUM units. Durations are natively in seconds, so no conversion happens. */
 export const ITEM_UNIT = '{item}';
+/** What an S3 failure rate counts: upload attempts, not items. */
+export const REQUEST_UNIT = '{request}';
 export const SECONDS_UNIT = 's';
 export const RATE_TIME_UNIT = 's';

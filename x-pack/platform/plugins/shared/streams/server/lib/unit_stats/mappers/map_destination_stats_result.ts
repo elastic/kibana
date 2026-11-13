@@ -55,8 +55,10 @@ export interface DestinationRow {
 
 /**
  * Joins the rows of the rate query and of the sums query on the destination id, into one object
- * per destination. A destination is there when the sums query has rows for it (it has items in
- * the window). The series keeps the order of the rows, which the query sorts by bucket.
+ * per destination. A destination is there when either query has rows for it, so one with no items
+ * in the window still has its latency: a destination that fails every attempt may report no items
+ * until its retries end. Its series is empty. The series keeps the order of the rows, which the
+ * query sorts by bucket.
  */
 export const joinDestinationRows = ({
   rateRows,
@@ -68,8 +70,13 @@ export const joinDestinationRows = ({
   const ratesById = indexById(rateRows, STATS_COLUMN.id);
   const seriesById = groupById(sumsRows, STATS_COLUMN.id);
 
+  const ids = new Set([...Object.keys(ratesById), ...Object.keys(seriesById)]);
+
   return Object.fromEntries(
-    Object.entries(seriesById).map(([id, series]) => [id, { ...ratesById[id], series }])
+    [...ids].map((id) => [
+      id,
+      { ...ratesById[id], series: Object.hasOwn(seriesById, id) ? seriesById[id] : [] },
+    ])
   );
 };
 

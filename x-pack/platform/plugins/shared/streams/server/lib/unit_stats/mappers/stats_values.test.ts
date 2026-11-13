@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MAX_FAILURE_BREAKDOWN_ENTRIES, STATS_COLUMN } from '../constants';
-import { toFailureRate, toItemRate, toSeries, toValue } from './stats_values';
+import { MAX_FAILURE_BREAKDOWN_ENTRIES, REQUEST_UNIT, STATS_COLUMN } from '../constants';
+import { toFailureRate, toItemRate, toRate, toSeries, toValue } from './stats_values';
 
 describe('toSeries', () => {
   const bucketMs = 60_000;
@@ -82,6 +82,20 @@ describe('toItemRate', () => {
 
   it('keeps both units when there is no value', () => {
     expect(toItemRate(null)).toEqual({ value: null, unit: '{item}', time_unit: 's' });
+  });
+});
+
+describe('toRate', () => {
+  it('carries the given unit and the per second time unit', () => {
+    expect(toRate(0.5, REQUEST_UNIT)).toEqual({ value: 0.5, unit: '{request}', time_unit: 's' });
+  });
+
+  it('keeps the unit when there is no value', () => {
+    expect(toRate(null, REQUEST_UNIT)).toEqual({
+      value: null,
+      unit: '{request}',
+      time_unit: 's',
+    });
   });
 });
 
@@ -200,6 +214,17 @@ describe('toFailureRate', () => {
     const { breakdown } = toFailureRate({ rate: 3, breakdownRows, column: authorization });
 
     expect(breakdown?.map(({ collection }) => collection)).toEqual(['logs-a-default']);
+  });
+
+  it('gives the rate and every breakdown entry the unit it is asked for', () => {
+    const breakdownRows = [causeRow(null, 'AccessDenied', { authorization: 0.5 })];
+
+    expect(
+      toFailureRate({ rate: 2, breakdownRows, column: authorization, unit: REQUEST_UNIT })
+    ).toEqual({
+      rate: toRate(2, REQUEST_UNIT),
+      breakdown: [{ collection: null, reason: 'AccessDenied', rate: toRate(0.5, REQUEST_UNIT) }],
+    });
   });
 
   it('keeps the causes with the highest rates, highest first, up to the cap', () => {

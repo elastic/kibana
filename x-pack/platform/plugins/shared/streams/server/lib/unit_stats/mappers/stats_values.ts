@@ -22,12 +22,15 @@ export type StatsFailureRate =
 /** A leaf always has its unit. A null value means no data. */
 export const toValue = (value: number | null, unit: string): StatsValue => ({ value, unit });
 
-/** A rate of items per second. */
-export const toItemRate = (value: number | null): StatsRate => ({
+/** A rate per second of what `unit` counts. */
+export const toRate = (value: number | null, unit: string): StatsRate => ({
   value,
-  unit: ITEM_UNIT,
+  unit,
   time_unit: RATE_TIME_UNIT,
 });
+
+/** A rate of items per second. */
+export const toItemRate = (value: number | null): StatsRate => toRate(value, ITEM_UNIT);
 
 /**
  * The failure rate of one class: the rate of the destination, and its breakdown by cause, one entry
@@ -35,15 +38,20 @@ export const toItemRate = (value: number | null): StatsRate => ({
  * `column`. The collection and the reason are null when the row has none. The entries with the
  * highest rates stay, at most `MAX_FAILURE_BREAKDOWN_ENTRIES`, highest first. `breakdown` is
  * missing when no entry is left.
+ *
+ * The `unit` says what the rates count, items unless the destination type reports its failures
+ * another way. Every rate of one failure rate has the same unit.
  */
 export const toFailureRate = ({
   rate,
   breakdownRows,
   column,
+  unit = ITEM_UNIT,
 }: {
   rate: number | null;
   breakdownRows: EsqlRow[];
   column: string;
+  unit?: string;
 }): StatsFailureRate => {
   const breakdown = breakdownRows
     .flatMap((row) => {
@@ -59,10 +67,12 @@ export const toFailureRate = ({
     .map(({ collection, reason, rate: causeRate }) => ({
       collection,
       reason,
-      rate: toItemRate(causeRate),
+      rate: toRate(causeRate, unit),
     }));
 
-  return breakdown.length > 0 ? { rate: toItemRate(rate), breakdown } : { rate: toItemRate(rate) };
+  return breakdown.length > 0
+    ? { rate: toRate(rate, unit), breakdown }
+    : { rate: toRate(rate, unit) };
 };
 
 /**

@@ -11,6 +11,7 @@ import { getElasticsearchAuthFailures, type AuthFailures } from './elasticsearch
 import type { EsqlRow } from './mappers/esql_rows';
 import type { StatsQueryBaseParams } from './query_builders/filters';
 import type { DestinationQueryRef } from './query_refs';
+import { getS3AuthFailures } from './s3_auth_failures';
 
 type GetAuthFailures = (args: {
   runQuery: (query: ComposerQuery) => Promise<EsqlRow[]>;
@@ -28,6 +29,7 @@ type GetAuthFailures = (args: {
 const AUTH_FAILURES_BY_TYPE: ReadonlyMap<string, GetAuthFailures> = new Map([
   ['elasticsearch', getElasticsearchAuthFailures],
   ['remote_elasticsearch', getElasticsearchAuthFailures],
+  ['s3', getS3AuthFailures],
 ]);
 
 /**

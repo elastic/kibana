@@ -165,13 +165,19 @@ describe('joinDestinationRows', () => {
     });
   });
 
-  it('leaves out a destination that has rates but no items in the window', () => {
+  it('keeps a destination that has rates but no items in the window, with an empty series', () => {
     const shaped = joinDestinationRows({
       rateRows,
       sumsRows: sumsRows.filter(({ id }) => id === 'es-prod'),
     });
 
-    expect(Object.keys(shaped)).toEqual(['es-prod']);
+    expect(Object.keys(shaped)).toEqual(['es-prod', 'es-dev']);
+    expect(shaped['es-dev']).toEqual({
+      incoming_rate: 4.2,
+      failed_rate: 0.5,
+      avg_latency: 0.17,
+      series: [],
+    });
   });
 
   it('keeps the series of a destination that has no rate row', () => {

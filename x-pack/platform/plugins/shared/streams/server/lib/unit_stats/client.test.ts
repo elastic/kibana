@@ -66,6 +66,19 @@ const responses = {
     ],
     values: [['es-dev', 'logs-generic.otel-default', 'security_exception', null, 1.9]],
   },
+  s3FailedUploadRates: {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'reason', type: 'keyword' },
+      { name: 'failed_rate', type: 'double' },
+    ],
+    values: [
+      ['s3-test', null, 0],
+      ['s3-test', 'SignatureDoesNotMatch', 0.146],
+      ['s3-test', 'InvalidAccessKeyId', 0.061],
+      ['s3-test', 'NoSuchBucket', 0.3],
+    ],
+  },
   destinationSums: {
     columns: [
       { name: 'sum_items', type: 'double' },
@@ -114,7 +127,15 @@ const isDestinationSumsQuery = (query: string) =>
 const queryName = (query: string): QueryName => {
   if (query.includes('metrics.streams.source.items')) return 'sourceRate';
   if (!query.includes('scope.attributes.streams.destination.id')) return 'processor';
-  // The breakdown query is the only one with `INLINE STATS`.
+  // The S3 query is the only one with a failed rate and no incoming rate or class rates.
+  if (
+    query.includes('failed_rate') &&
+    !query.includes('incoming_rate') &&
+    !query.includes('authentication_rate')
+  ) {
+    return 's3FailedUploadRates';
+  }
+  // The breakdown query is the only other one with `INLINE STATS`.
   if (query.includes('INLINE STATS')) return 'destinationAuthBreakdown';
   if (isDestinationRateQuery(query)) return 'destinationRate';
   if (query.includes('authentication_rate')) return 'destinationAuthRates';
@@ -629,6 +650,130 @@ describe('UnitStatsClient.getStats', () => {
       expect(esDev.events.failed.authorization).toEqual({ rate: rate(null) });
       expect(breakdownQueries(esql)).toHaveLength(0);
       expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('destination authentication and authorization rates')
+      );
+    });
+  });
+
+  describe('authentication and authorization failures of an S3 destination', () => {
+    const requestRate = (value: number | null) => ({ value, unit: '{request}', time_unit: 's' });
+    const s3Unit: StreamsUnit.Configuration = {
+      ...unit,
+      destinations: [
+        ...unit.destinations,
+        { id: 's3-test', type: 's3', supported_telemetry: ['logs'] },
+      ],
+    };
+    // The items of S3 have no failed rate yet, which the Elasticsearch gate would read as no failures.
+    const s3Esql = (overrides: Partial<Record<QueryName, () => EsqlResponse>> = {}) =>
+      makeEsql({
+        destinationRate: () => ({
+          columns: responses.destinationRate.columns,
+          values: [
+            [4.6, 0, 0.18, 'es-prod'],
+            [4.2, 2.4, 0.17, 'es-dev'],
+            [1.0, 0, 0.2, 's3-test'],
+          ],
+        }),
+        destinationSums: () => ({
+          columns: responses.destinationSums.columns,
+          values: [
+            ...responses.destinationSums.values,
+            [60, 's3-test', '2026-10-19T11:46:00.000Z'],
+          ],
+        }),
+        ...overrides,
+      });
+    const s3Queries = (esql: jest.Mock) =>
+      statsQueries(esql).filter(
+        (query) =>
+          query.includes('metrics.streams.destination.duration') &&
+          query.includes('failed = COUNT(')
+      );
+
+    it('puts the class rates of the upload attempts in its result, in requests', async () => {
+      const response = await run(s3Esql(), {}, s3Unit);
+
+      const { failed } = response.components.destinations['s3-test'].events;
+      expect(failed.authentication).toEqual({
+        rate: requestRate(0.146 + 0.061),
+        breakdown: [
+          { collection: null, reason: 'SignatureDoesNotMatch', rate: requestRate(0.146) },
+          { collection: null, reason: 'InvalidAccessKeyId', rate: requestRate(0.061) },
+        ],
+      });
+      expect(failed.authorization).toEqual({ rate: requestRate(0) });
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
+    });
+
+    it('asks once for the S3 destinations only, whatever their failed rate, and the Elasticsearch ones keep theirs', async () => {
+      const esql = s3Esql();
+
+      const response = await run(esql, {}, s3Unit);
+
+      expect(s3Queries(esql)).toHaveLength(1);
+      expect(s3Queries(esql)[0]).toContain('destination.id IN ("s3-test")');
+      expect(response.components.destinations['es-dev'].events.failed.authorization.rate).toEqual({
+        value: 1.9,
+        unit: '{item}',
+        time_unit: 's',
+      });
+    });
+
+    it('keeps the latency of an S3 destination that has no items in the window', async () => {
+      const response = await run(
+        s3Esql({
+          destinationRate: () => ({
+            columns: responses.destinationRate.columns,
+            values: [[null, null, 0.2, 's3-test']],
+          }),
+          destinationSums: () => ({ columns: responses.destinationSums.columns, values: [] }),
+        }),
+        {},
+        s3Unit
+      );
+
+      const s3 = response.components.destinations['s3-test'];
+      expect(s3.error).toBeUndefined();
+      expect(s3.latency.average.value).toBe(0.2);
+      expect(s3.events.incoming.rate.value).toBeNull();
+      expect(s3.events.incoming.total.value).toBeNull();
+      expect(s3.events.incoming.series.points).toEqual([]);
+      expect(s3.events.failed.authentication.rate.value).toBe(0.146 + 0.061);
+    });
+
+    it('leaves an S3 destination with no rows without failure rates', async () => {
+      const response = await run(
+        s3Esql({
+          s3FailedUploadRates: () => ({
+            columns: responses.s3FailedUploadRates.columns,
+            values: [],
+          }),
+        }),
+        {},
+        s3Unit
+      );
+
+      const { failed } = response.components.destinations['s3-test'].events;
+      expect(failed.authentication.rate.value).toBeNull();
+      expect(failed.authorization.rate.value).toBeNull();
+    });
+
+    it('keeps the other stats, and logs a warn, when the S3 query fails', async () => {
+      const logger = loggingSystemMock.createLogger();
+
+      const response = await run(
+        s3Esql({ s3FailedUploadRates: failWith(responseError(500)) }),
+        {},
+        s3Unit,
+        logger
+      );
+
+      const s3 = response.components.destinations['s3-test'];
+      expect(s3.error).toBeUndefined();
+      expect(s3.events.incoming.rate.value).toBe(1);
+      expect(s3.events.failed.authentication.rate.value).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('destination authentication and authorization rates')
       );
