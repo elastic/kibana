@@ -785,6 +785,11 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
       'IOC Hunt matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
     expect(entries[0].data.corroborated_technique_id).toBe('T1552.001');
+    // Nothing in this technique's scope matched an IOC or a behavior, so the entry says so
+    // with an empty array rather than leaving `detections` absent: an absent array is what
+    // the reader derives from the report-wide `per_ioc`, which this technique never matched.
+    expect(entries[0].data.detections).toEqual([]);
+    expect(entries[0].data.basis).toBeUndefined();
   });
 
   it('does not let an optional-index hit attributed to a technique promote it', async () => {

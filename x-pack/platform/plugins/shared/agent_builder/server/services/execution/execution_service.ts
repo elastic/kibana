@@ -30,7 +30,10 @@ import {
   createBadRequestError,
   createForbiddenError,
   createInternalError,
+  isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
+  isConversationPausedError,
+  createConversationPausedError,
   isConversationWriteConflictError,
   isExecutionAbortReason,
   isRequestAbortedError,
@@ -62,6 +65,7 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
+import { reportToParent } from './utils/wake_parent';
 import { apiPrivileges } from '../../../common/features';
 import { AGENT_WORKLOAD_TYPE } from '../agents/service_account_binding';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
@@ -72,7 +76,7 @@ import {
 } from './execution_runner';
 import {
   getPendingResumeRound,
-  resolveExecutionConnectorId,
+  resolveAgentBuilderDefaultEndpoint,
   serializeExecutionError,
 } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
@@ -180,10 +184,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const interactivity = normalizeInteractive(interactive, mode);
     const executionClient = this.createExecutionClient();
 
+    // A wake run acts as the owner of the sub-agent it reports; a task's request does not resolve to that user.
+    const reportedExecutionId =
+      args.mode === AgentExecutionMode.conversation
+        ? args.params.reportsBackgroundExecution
+        : undefined;
     const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
       executionClient,
-      parentExecutionId: params.parentExecutionId,
+      parentExecutionId: params.parentExecutionId ?? reportedExecutionId,
     });
     const owner = conversationClient.getUser();
 
@@ -210,6 +219,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       agentId,
       configurationOverrides: params.configurationOverrides,
     });
+    // A bound run carries no caller credential to report back with, so it never runs in the
+    // background; the tool error sends the parent's model to the foreground.
+    if (params.parentTriggerMode && runAs) {
+      throw createBadRequestError(
+        `Agent "${agentId}" runs as a service account and cannot report back to its parent, so it cannot run in the background: run it in the foreground instead.`
+      );
+    }
 
     if (
       params.reasoningLevel !== undefined &&
@@ -218,6 +234,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       const connector = await this.resolveExecutionConnector({
         agentId,
         connectorId: params.connectorId,
+        inferenceFeatureId: params.inferenceFeatureId,
         request,
       });
       if (connector) {
@@ -304,6 +321,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
       try {
         if (pendingResumeRound) {
+          if (conversationParams.reportsBackgroundExecution) {
+            throw createConversationPausedError({ conversationId: conversation.id });
+          }
           await conversationClient.update(
             { id: conversation.id },
             { source: 'execution', access: 'converse', retryOnConflict: true, activeExecution }
@@ -330,7 +350,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       } catch (err) {
         // A refused run never started, so it leaves no execution record behind: a keyed
         // redelivery then starts afresh instead of replaying the refusal.
-        if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
+        if (
+          isConversationBusyError(err) ||
+          isConversationWriteConflictError(err) ||
+          isBackgroundExecutionAlreadyReportedError(err) ||
+          isConversationPausedError(err)
+        ) {
           // Only a refusal is known to have written nothing; any other failure may follow a
           // write that landed, so what the hooks took stays taken.
           await releaseNewConversation?.();
@@ -457,7 +482,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw createBadRequestError('User message requests require input or attachments');
     }
 
-    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const { conversationClient } = await this.resolveConversationClient({
+      request,
+      executionClient: this.createExecutionClient(),
+      parentExecutionId: params.reportsBackgroundExecution,
+    });
     const { validatedParams, conversation, receivedAt } = await this.resolveConversationRequest({
       params,
       request,
@@ -727,6 +756,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionClient,
         abortMonitor,
         heartbeatReporter,
+        request,
       });
 
       this.logger.debug(
@@ -766,12 +796,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     executionClient,
     abortMonitor,
     heartbeatReporter,
+    request,
   }: {
     events$: Observable<ChatEvent>;
     execution: AgentExecution;
     executionClient: AgentExecutionClient;
     abortMonitor: AbortMonitor;
     heartbeatReporter: HeartbeatReporter;
+    request: KibanaRequest;
   }): void {
     const { executionId } = execution;
 
@@ -805,6 +837,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       .finally(() => {
         abortMonitor.stop();
         heartbeatReporter.stop();
+        void reportToParent({
+          execution,
+          request,
+          executionClient,
+          conversationService: this.deps.conversationService,
+          executionService: this,
+          uiSettings: this.deps.uiSettings,
+          savedObjects: this.deps.savedObjects,
+          taskManager: this.deps.taskManager,
+          logger: this.logger,
+        });
       });
   }
 
@@ -976,43 +1019,39 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return (await executionClient.peek(executionId)) !== undefined;
   }
 
+  /**
+   * The connector a run is known to use before it starts, for up-front validation.
+   * A feature-sourced run resolves nothing here, the inference plugin handles it.
+   */
   private async resolveExecutionConnector({
     agentId,
     connectorId,
+    inferenceFeatureId,
     request,
   }: {
     agentId: string;
     connectorId?: string;
+    inferenceFeatureId?: string;
     request: KibanaRequest;
   }): Promise<InferenceConnector | undefined> {
     const { inference, searchInferenceEndpoints, agentService } = this.deps;
-    const getInferenceFeatureId = async (): Promise<string | undefined> => {
+    const resolve = async (): Promise<InferenceConnector | undefined> => {
       if (connectorId !== undefined) {
+        return inference.getConnectorById(connectorId, request);
+      }
+      if (inferenceFeatureId !== undefined) {
         return undefined;
       }
       const agentRegistry = await agentService.getRegistry({ request });
-      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+      const { inference_feature_id: agentInferenceFeatureId } = (await agentRegistry.get(agentId))
+        .configuration;
+      if (agentInferenceFeatureId !== undefined) {
+        return undefined;
+      }
+      return resolveAgentBuilderDefaultEndpoint({ request, searchInferenceEndpoints });
     };
-    return (
-      getInferenceFeatureId()
-        .then((inferenceFeatureId) =>
-          resolveExecutionConnectorId({
-            connectorId,
-            inferenceFeatureId,
-            request,
-            searchInferenceEndpoints,
-          })
-        )
-        .then(
-          ({ connectorId: resolvedConnectorId, connector }) =>
-            connector ??
-            (resolvedConnectorId
-              ? inference.getConnectorById(resolvedConnectorId, request)
-              : undefined)
-        )
-        // Leaves resolution failures to the runner, which records them against the execution
-        .catch(() => undefined)
-    );
+    // Leaves resolution failures to the runner, which records them against the execution
+    return resolve().catch(() => undefined);
   }
 
   /**
@@ -1133,7 +1172,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     appendRefresh?: Refresh;
     activeExecution?: AcquireActiveExecution;
   }): Promise<string> {
-    const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
+    const {
+      nextInput,
+      origin: requestOrigin,
+      author: requestAuthor,
+      actor,
+      reportsBackgroundExecution,
+    } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
     const origin = requestOrigin ? { type: requestOrigin.type } : undefined;
     const base = {
@@ -1145,6 +1190,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       appendRefresh,
       ...(activeExecution ? { activeExecution } : {}),
       ...(origin ? { origin } : {}),
+      ...(actor ? { actor } : {}),
+      ...(reportsBackgroundExecution
+        ? { consumeBackgroundExecution: reportsBackgroundExecution }
+        : {}),
       ...(parentExecution
         ? {
             activity: {

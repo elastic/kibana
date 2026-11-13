@@ -146,7 +146,7 @@ account's roles on stateful (`ensureNightshiftServiceAccountRoles`), finds or cr
 user holds `manage_security`). The `evals_nightshift_investigations` config set turns on
 `xpack.security.serviceAccounts.enabled`. Nightshift allows five manual investigations a day by
 default and the eval starts one per example, so it turns the daily investigation limits off with
-`PUT /internal/significant_events/run_quotas` (`investigationLimitsEnabled: false`), as an admin
+`PUT /internal/nightshift/investigation_quotas` (`enabled: false`), as an admin
 would on the Nightshift settings page. The setting stays on that stack.
 
 The native framework still requires an evaluation endpoint in its configuration; the command

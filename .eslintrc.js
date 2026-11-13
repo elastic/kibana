@@ -24,22 +24,6 @@ module.exports = {
 
   overrides: [
     /**
-     * Temporarily disable some react rules for specific plugins, remove in separate PRs
-     */
-    {
-      files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'off',
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    /**
      * `formatjs/*` rules run in oxlint (.oxlint/formatjs.mts). The plugin stays registered so
      * `eslint-disable` directives naming its rules resolve.
      */
@@ -51,36 +35,6 @@ module.exports = {
     /**
      * APM, UX and Observability overrides
      */
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/slo/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      },
-    },
-    {
-      files: [
-        'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': [
-          'error',
-          {
-            additionalHooks:
-              '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
-          },
-        ],
-      },
-    },
     {
       files: [
         'x-pack/solutions/observability/plugins/apm/**/*.{ts,tsx}',
@@ -158,11 +112,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'warn',
-
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
       },
       overrides: [
         {
@@ -215,19 +165,6 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
-        'src/platform/test/*api_integration*/**/*.{js,ts}',
-        'x-pack/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
-        'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
-        'x-pack/platform/test/*functional/tests/**/*.{js,ts}',
-      ],
-      // `mocha/*` rules run in oxlint (.oxlint/mocha.mts). The mocha env stays for `no-undef`.
-      env: {
-        mocha: true,
-      },
-    },
-    {
       files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       // `eslint-plugin-playwright` rules run in oxlint (.oxlint/playwright.mts). The plugin stays
@@ -251,11 +188,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'error',
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
-        'sort-keys': 'error',
       },
     },
 
@@ -293,31 +226,6 @@ module.exports = {
         'x-pack/platform/test/api_integration/apis/cases/**/*.{ts, tsx}',
         'x-pack/solutions/**/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
-    },
-    /**
-     * Custom Content overrides
-     */
-    {
-      files: [
-        'x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': 'error',
-      },
-    },
-
-    /**
-     * Enterprise Search overrides
-     * NOTE: We also have a single rule at the bottom of the file that
-     * overrides Prettier's default of not linting unnecessary backticks
-     */
-    {
-      // All files
-      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
     },
 
     /**
@@ -389,11 +297,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'warn',
-
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
       },
     },
     /**
@@ -428,17 +332,6 @@ module.exports = {
       files: '.buildkite/**/*.{cjs,js,mjs,ts}',
       parserOptions: {
         ecmaVersion: 2022,
-      },
-    },
-
-    {
-      // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
-      // relies on these two fixes to clean them up. Both run here, in one ESLint fix pass, so the
-      // generator output stays the same on every machine. Oxlint turns both off for these files.
-      files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
-      rules: {
-        '@kbn/imports/no_unused_imports': 'error',
-        'import/no-duplicates': 'error',
       },
     },
   ],

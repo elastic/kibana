@@ -199,7 +199,7 @@ export const KnowledgePurgeSection = ({ canManage }: { canManage: boolean }) => 
                   !canManage
                     ? i18n.translate('xpack.nightshift.settings.purge.privilegeTooltip', {
                         defaultMessage:
-                          'Purging requires the Nightshift Manage and Configure privileges.',
+                          'Purging requires the nightshift Manage and Configure privileges.',
                       })
                     : undefined
                 }

@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 import { lmdJobIds, padJobIds } from '../../src/ml_helpers';
+import { deleteEntityEngines, installEntityStoreV2AndWait } from '../../src/setup_helpers';
 
 /**
  * Multi-skill routing prompts (P-MS1, P-MS2, and new cross-domain prompts).
@@ -15,12 +16,21 @@ import { lmdJobIds, padJobIds } from '../../src/ml_helpers';
  * Unlike partial_feasibility.spec.ts which asserts a single tool, these examples
  * assert that BOTH tools are called (all toolCalls entries must pass).
  *
- * No ES seeding required; tool routing works without pre-seeded data.
+ * Entity documents are not required. The entity store is installed because
+ * security.search_entities stays unavailable until the latest-entities index exists.
  */
 evaluate.describe(
   'SIEM Entity Analytics - Multi-Skill Routing',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ log, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+    });
+
+    evaluate.afterAll(async ({ log, supertest }) => {
+      await deleteEntityEngines({ supertest, log });
+    });
+
     evaluate('entity analytics multi-skill routing questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
@@ -52,8 +62,7 @@ evaluate.describe(
                     ],
                   },
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics (risk score or asset criticality) to identify or enrich privileged users.',
                     ],
@@ -82,8 +91,7 @@ evaluate.describe(
                     ],
                   },
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics to identify or rank privileged accounts by risk or criticality.',
                     ],
@@ -103,7 +111,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics risk scoring to identify or filter high-risk users.',
                     ],
@@ -129,15 +137,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.asset_criticality',
+                    id: 'security.search_entities',
                     criteria: [
-                      'The response uses asset criticality to identify business-critical assets.',
-                    ],
-                  },
-                  {
-                    id: 'security.entity_analytics.risk_score',
-                    criteria: [
-                      'The response uses risk scoring to detect risk score increases or changes over time.',
+                      'The response uses asset criticality to identify business-critical assets. If an asset is found, risk score history may be used to describe the increase.',
                     ],
                   },
                 ],

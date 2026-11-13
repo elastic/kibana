@@ -490,6 +490,27 @@ describe('reportFlakySuiteIssues', () => {
         issue: { number: 42, state: 'closed' },
       });
     });
+
+    it("reopens the suite's own closed issue even when one of its tests has an open per-test issue", async () => {
+      // CI failures of the test are counted on the suite issue, closed or not
+      const github = createGithubApi([
+        suiteIssue(42, closedBefore),
+        scoutTestIssue(43, flakyTest().testId),
+      ]);
+
+      const summary = await run(github, { report: flakyReport([flakyTest()]) });
+
+      expect(github.createIssue).not.toHaveBeenCalled();
+      expect(github.editIssue).toHaveBeenCalledWith(42, {
+        body: expect.any(String),
+        state: 'open',
+      });
+      expect(summary.actions[0]).toMatchObject({
+        action: 'updated',
+        reopened: true,
+        issue: { number: 42 },
+      });
+    });
   });
 
   describe('flaky tests skipped since', () => {
@@ -556,7 +577,7 @@ describe('reportFlakySuiteIssues', () => {
   describe('suites with an issue of their own in the target repository', () => {
     const report = () => flakyReport([flakyTest()]);
 
-    it("brings the issue's metadata up to the report, then comments with its numbers, the text left as filed", async () => {
+    it("brings the issue's metadata up to the report, then comments with where it is still flaky, the text left as filed", async () => {
       const issue = suiteIssue(42);
       const github = createGithubApi([issue]);
 
@@ -579,7 +600,7 @@ describe('reportFlakySuiteIssues', () => {
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
         expect.stringMatching(
-          /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \|[\s\S]*49 \/ 509[\s\S]*> \[!TIP\]/
+          /^Still flaky on `main`:\n\n- `creates default alert, triggers on down status, and recovers`: 10% of builds \(49 \/ 509\), last failed \[9 Sep\]\(.*\)$/
         )
       );
       // The failed-test alert a comment runs reads the metadata, so the body goes first
@@ -661,7 +682,7 @@ describe('reportFlakySuiteIssues', () => {
       });
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
-        expect.stringContaining('appears to be flaky again after this issue was closed')
+        expect.stringContaining('Flaky again after this issue was closed, on `main`:\n\n- ')
       );
       expect(summary.actions[0]).toMatchObject({
         action: 'updated',
@@ -699,17 +720,58 @@ describe('reportFlakySuiteIssues', () => {
       }
     });
 
-    it('does not refresh an issue about the whole file for one of its describe blocks', async () => {
+    it('refreshes an open issue about the whole file once for all its flaky describe blocks, naming their tests', async () => {
+      // e.g. a consistently failing issue filed for tests in several blocks: no report found it flaky
       const github = createGithubApi([fileWideIssue(44)]);
-
-      const summary = await run(github, { report: report() });
-
-      expectNoWrites(github);
-      expect(summary.actions[0]).toMatchObject({
-        action: 'skipped',
-        reason: 'tracked',
-        issue: { number: 44 },
+      const otherBlock = flakyTest({
+        testId: 'b',
+        suiteTitle: 'another describe',
+        title: 'does b',
+        failedBuilds: 9,
       });
+
+      const summary = await run(github, { report: flakyReport([flakyTest(), otherBlock]) });
+
+      expect(github.createIssue).not.toHaveBeenCalled();
+      expect(github.editIssue).toHaveBeenCalledTimes(1);
+      const [[number, { body }]] = github.editIssue.mock.calls;
+      expect(number).toBe(44);
+      const metadata = readFlakySuiteIssueMetadata(body);
+      // still about the whole file
+      expect(metadata?.['suite.title']).toBeUndefined();
+      expect(metadata?.['suite.testIds']).toEqual([flakyTest().testId, 'b']);
+      expect(metadata?.['report.count']).toBe(1);
+      expect(github.addIssueComment).toHaveBeenCalledTimes(1);
+      expect(github.addIssueComment.mock.calls[0][1]).toMatch(
+        new RegExp(
+          '^2 tests now flaky on `main`:\\n\\n' +
+            '- `Default status alert creates default alert, triggers on down status, and recovers`: 10% of builds \\(49 / 509\\), last failed \\[9 Sep\\]\\(.*\\)\\n' +
+            '- `another describe does b`: 10% of builds \\(49 / 509\\), last failed \\[9 Sep\\]\\(.*\\)$'
+        )
+      );
+      expect(
+        summary.actions.map((action) => [
+          action.action,
+          action.suiteTitle,
+          action.action === 'updated' ? action.issue.number : undefined,
+        ])
+      ).toEqual([
+        ['updated', 'Default status alert', 44],
+        ['updated', 'another describe', 44],
+      ]);
+    });
+
+    it("refreshes the describe block's own issue rather than an open issue about its whole file", async () => {
+      const github = createGithubApi([suiteIssue(42), fileWideIssue(44)]);
+
+      await run(github, { report: report() });
+
+      expect(github.editIssue).toHaveBeenCalledTimes(1);
+      expect(github.editIssue.mock.calls[0][0]).toBe(42);
+      expect(github.addIssueComment).toHaveBeenCalledWith(
+        42,
+        expect.stringMatching(/^Still flaky on `main`/)
+      );
     });
 
     it('records a failed update and carries on with the next suite', async () => {

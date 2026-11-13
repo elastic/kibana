@@ -36,8 +36,8 @@ export const getLimitReachedMessage = (
 ): string => {
   const reached = new InvestigationQuotaDeniedError(deniedBy, limit).message;
   return settingsUrl
-    ? `${reached}. An admin can raise it in [Nightshift settings](${settingsUrl}).`
-    : `${reached}. An admin can raise it in the Nightshift settings.`;
+    ? `${reached}. An admin can raise it in [nightshift settings](${settingsUrl}).`
+    : `${reached}. An admin can raise it in the nightshift settings.`;
 };
 
 /**
