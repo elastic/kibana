@@ -37,6 +37,8 @@ import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysi
 import type { LogRateAnalysisEmbeddableApi } from './types';
 import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
 import { canUseAiops } from '../../capabilities';
+import { normalizeStoredPanelTitle } from '../normalize_stored_panel_title';
+import { getLogRateAnalysisDefaultTitle } from './default_title';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
@@ -53,7 +55,13 @@ export const getLogRateAnalysisEmbeddableFactory = (
       canUseAiops(coreStart, true);
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
-      const titleManager = initializeTitleManager(initialState);
+      const titleManager = initializeTitleManager({
+        ...initialState,
+        title: normalizeStoredPanelTitle(initialState.title),
+      });
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(
+        getLogRateAnalysisDefaultTitle()
+      );
 
       const { logRateAnalysisControlsApi, serializeLogRateAnalysisChartState } =
         initializeLogRateAnalysisControls(runtimeState);
@@ -89,9 +97,13 @@ export const getLogRateAnalysisEmbeddableFactory = (
           ...titleComparators,
         }),
         applySerializedState: (nextState) => {
-          titleManager.reinitializeState(nextState);
-          timeRangeManager.reinitializeState(nextState);
-          logRateAnalysisControlsApi.updateUserInput(nextState);
+          const normalizedState = {
+            ...nextState,
+            title: normalizeStoredPanelTitle(nextState.title),
+          };
+          titleManager.reinitializeState(normalizedState);
+          timeRangeManager.reinitializeState(normalizedState);
+          logRateAnalysisControlsApi.updateUserInput(normalizedState);
         },
       });
 
@@ -100,6 +112,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
+        defaultTitle$,
         ...stateApi,
         ...logRateAnalysisControlsApi,
         getTypeDisplayName: () =>

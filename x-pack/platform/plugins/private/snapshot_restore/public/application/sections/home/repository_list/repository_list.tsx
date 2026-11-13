@@ -118,7 +118,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else if (repositories && repositories.length === 0) {
     content = (
       <EuiPageTemplate.EmptyPrompt
-        iconType="managementApp"
+        iconType="gear"
         title={
           <h1>
             <FormattedMessage

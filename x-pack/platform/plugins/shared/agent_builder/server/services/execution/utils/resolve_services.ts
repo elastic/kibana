@@ -12,34 +12,33 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type {
-  ChatCompletionReasoningEffort,
-  ConnectorTelemetryMetadata,
-  InferenceConnector,
-} from '@kbn/inference-common';
-import { getSupportedReasoningEffortLevels } from '@kbn/inference-common';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import { createAgentNotFoundError, isAgentNotFoundError } from '@kbn/agent-builder-common';
-import type { ModelProvider } from '@kbn/agent-builder-server/runner';
+import type { ModelProvider, ModelSource } from '@kbn/agent-builder-server/runner';
 import type { AgentRegistry, AgentsServiceStart } from '../../agents';
 import { createModelProvider } from '../runner/model_provider';
-import { resolveExecutionConnectorId } from './resolve_execution_connector_id';
 
 export interface ResolvedServices {
   modelProvider: ModelProvider;
-  selectedConnectorId: string;
-  reasoningLevel?: ChatCompletionReasoningEffort;
+  /** Where the run's default model comes from; `undefined` leaves the provider's own default. */
+  defaultModel?: ModelSource;
 }
 
 const getAgentConfiguration = async ({
   agentRegistry,
   agentId,
+  runAs,
 }: {
   agentRegistry: AgentRegistry;
   agentId: string;
+  runAs?: string;
 }): Promise<AgentConfiguration> => {
   try {
-    const { configuration } = await agentRegistry.get(agentId);
+    const { configuration } =
+      runAs !== undefined
+        ? await agentRegistry.get(agentId, { runAs })
+        : await agentRegistry.get(agentId);
     return configuration;
   } catch (error) {
     throw isAgentNotFoundError(error)
@@ -51,65 +50,47 @@ const getAgentConfiguration = async ({
   }
 };
 
-const resolveAgentReasoningLevel = async ({
-  agentId,
-  reasoningLevel,
+/**
+ * Decides where the default model of a run comes from, using the first of:
+ * 1. The connector requested by the caller.
+ * 2. The inference feature the execution was given (`inferenceFeatureId`).
+ * 3. The inference feature the agent declares.
+ * Returns `undefined` when none applies, leaving the provider on the Agent Builder default.
+ */
+const selectModelSource = ({
   connectorId,
-  connector,
-  request,
-  inference,
-  logger,
+  inferenceFeatureId,
+  agentInferenceFeatureId,
 }: {
-  agentId: string;
-  reasoningLevel?: ChatCompletionReasoningEffort;
-  connectorId: string;
-  connector?: InferenceConnector;
-  request: KibanaRequest;
-  inference: InferenceServerStart;
-  logger: Logger;
-}): Promise<ChatCompletionReasoningEffort | undefined> => {
-  if (reasoningLevel === undefined) {
-    return undefined;
+  connectorId?: string;
+  inferenceFeatureId?: string;
+  agentInferenceFeatureId?: string;
+}): ModelSource | undefined => {
+  if (connectorId !== undefined) {
+    return { connectorId };
   }
-
-  // Resolution failures are left to the runner, which records them against the execution.
-  const resolvedConnector =
-    connector ?? (await inference.getConnectorById(connectorId, request).catch(() => undefined));
-  const supportedLevels = resolvedConnector
-    ? getSupportedReasoningEffortLevels(resolvedConnector)
-    : undefined;
-
-  if (supportedLevels === undefined || supportedLevels.includes(reasoningLevel)) {
-    return reasoningLevel;
-  }
-
-  logger.warn(
-    `Reasoning level "${reasoningLevel}" declared by agent "${agentId}" is not supported by model "${
-      resolvedConnector?.name
-    }" (${connectorId}), running without a reasoning level. Supported levels: ${supportedLevels.join(
-      ', '
-    )}.`
-  );
-  return undefined;
+  const featureId = inferenceFeatureId ?? agentInferenceFeatureId;
+  return featureId !== undefined ? { featureId } : undefined;
 };
 
 /**
- * Resolves the model provider an agent execution runs with.
+ * Resolves the model provider an agent execution runs with, and the model source it was built
+ * from. No connector is resolved here: a feature source is handed to the inference plugin as is,
+ * and a run with no source fails at its first model use when no default endpoint is available.
  *
- * @param connectorId - Connector requested by the caller. When set, the agent's inference feature
- * is ignored.
- * @param reasoningLevel - Reasoning level requested by the caller. When set, it overrides the
- * agent's default `reasoning_level`.
- * @returns The model provider, the selected connector and the reasoning level the run uses.
+ * @param connectorId - Connector requested by the caller. When set, inference features are ignored.
+ * @param inferenceFeatureId - Inference feature the execution was given; overrides the agent's.
+ * @param runAs - Service account the execution runs as; see `GetAgentOptions.runAs`.
+ * @returns The model provider and the model source the run uses.
  * @throws {AgentBuilderError} with code `agentNotFound` when the agent does not exist or the
  * caller cannot access it.
- * @throws {Error} when no connector is available.
  */
 export const resolveServices = async ({
   agentId,
   connectorId,
-  reasoningLevel,
+  inferenceFeatureId,
   telemetryMetadata,
+  runAs,
   request,
   logger,
   inference,
@@ -121,8 +102,9 @@ export const resolveServices = async ({
 }: {
   agentId: string;
   connectorId?: string;
-  reasoningLevel?: ChatCompletionReasoningEffort;
+  inferenceFeatureId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  runAs?: string;
   request: KibanaRequest;
   logger: Logger;
   inference: InferenceServerStart;
@@ -132,48 +114,24 @@ export const resolveServices = async ({
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
 }): Promise<ResolvedServices> => {
+  // Always loaded, so an unavailable agent fails with `agentNotFound` even when a connector is passed.
   const agentRegistry = await agentService.getRegistry({ request });
-  const { inference_feature_id: agentInferenceFeatureId, reasoning_level: agentReasoningLevel } =
-    await getAgentConfiguration({ agentRegistry, agentId });
-  const inferenceFeatureId = connectorId === undefined ? agentInferenceFeatureId : undefined;
-
-  const {
-    connectorId: selectedConnectorId,
-    connector,
-    source,
-  } = await resolveExecutionConnectorId({
-    connectorId,
-    inferenceFeatureId,
-    request,
-    searchInferenceEndpoints,
+  const { inference_feature_id: agentInferenceFeatureId } = await getAgentConfiguration({
+    agentRegistry,
+    agentId,
+    runAs,
   });
 
-  if (inferenceFeatureId !== undefined && source === 'default') {
-    logger.warn(
-      `No model available for inference feature "${inferenceFeatureId}" declared by agent "${agentId}", falling back to the default model`
-    );
-  }
-
-  if (!selectedConnectorId) {
-    throw new Error('No connector available for chat execution');
-  }
-
-  const resolvedReasoningLevel =
-    reasoningLevel ??
-    (await resolveAgentReasoningLevel({
-      agentId,
-      reasoningLevel: agentReasoningLevel,
-      connectorId: selectedConnectorId,
-      connector,
-      request,
-      inference,
-      logger,
-    }));
+  const defaultModel = selectModelSource({
+    connectorId,
+    inferenceFeatureId,
+    agentInferenceFeatureId,
+  });
 
   const modelProvider = createModelProvider({
     inference,
     request,
-    defaultConnectorId: selectedConnectorId,
+    defaultModel,
     telemetryMetadata,
     logger,
     searchInferenceEndpoints,
@@ -184,7 +142,6 @@ export const resolveServices = async ({
 
   return {
     modelProvider,
-    selectedConnectorId,
-    ...(resolvedReasoningLevel !== undefined ? { reasoningLevel: resolvedReasoningLevel } : {}),
+    defaultModel,
   };
 };

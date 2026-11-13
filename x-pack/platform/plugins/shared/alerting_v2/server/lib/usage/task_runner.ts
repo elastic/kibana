@@ -18,6 +18,7 @@ import type { AlertingTaskRunner } from '../services/task_run_scope_service/crea
 import { SCHEDULE } from './constants';
 import { getActionPolicyStats } from './lib/get_action_policy_stats';
 import { getAlertStats } from './lib/get_alert_stats';
+import { getDispatcherStats } from './lib/get_dispatcher_stats';
 import { getExecutionStats } from './lib/get_execution_stats';
 import { getRuleStats } from './lib/get_rule_stats';
 import { type LatestTaskStateSchema } from './task_state';
@@ -57,18 +58,21 @@ export class TelemetryTaskRunner implements AlertingTaskRunner {
     const state = taskInstance.state as LatestTaskStateSchema;
     const logger = this.logger;
 
-    const [stats, executionStats, actionPolicyStats, alertStats] = await Promise.all([
-      runStat('rule_stats', logger, () => getRuleStats(this.esClient)),
-      runStat('execution_stats', logger, () => getExecutionStats(this.esClient)),
-      runStat('action_policy_stats', logger, () => getActionPolicyStats(this.esClient)),
-      runStat('alert_stats', logger, () => getAlertStats(this.esClient)),
-    ]);
+    const [stats, executionStats, actionPolicyStats, alertStats, dispatcherStats] =
+      await Promise.all([
+        runStat('rule_stats', logger, () => getRuleStats(this.esClient)),
+        runStat('execution_stats', logger, () => getExecutionStats(this.esClient)),
+        runStat('action_policy_stats', logger, () => getActionPolicyStats(this.esClient)),
+        runStat('alert_stats', logger, () => getAlertStats(this.esClient)),
+        runStat('dispatcher_stats', logger, () => getDispatcherStats(this.esClient)),
+      ]);
 
     const statResults: Array<[string, unknown]> = [
       ['rule_stats', stats],
       ['execution_stats', executionStats],
       ['action_policy_stats', actionPolicyStats],
       ['alert_stats', alertStats],
+      ['dispatcher_stats', dispatcherStats],
     ];
     const failedStats = statResults
       .filter(([, result]) => result === undefined)
@@ -84,6 +88,7 @@ export class TelemetryTaskRunner implements AlertingTaskRunner {
       ...(executionStats ?? {}),
       ...(actionPolicyStats ?? {}),
       ...(alertStats ?? {}),
+      ...(dispatcherStats ?? {}),
     };
 
     return { state: updatedState, schedule: SCHEDULE };

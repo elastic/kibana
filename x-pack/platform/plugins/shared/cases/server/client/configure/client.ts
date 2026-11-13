@@ -58,6 +58,7 @@ import {
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import { OWNER_INFO } from '../../../common/constants/owners';
 import type { Owner } from '../../../common/constants/types';
 import { ensureGlobalFieldDefinitions } from './ensure_field_definitions';
@@ -147,6 +148,37 @@ const validateTemplates = async ({
       customFieldsConfiguration: customFields,
     });
   }
+};
+
+/**
+ * Rejects an extractObservables value of true, in the configuration or in one of its templates,
+ * when the owner cannot auto-extract observables. A value that is already stored as true is kept.
+ */
+const assertConfigurationCanStoreExtractObservables = ({
+  owner,
+  request,
+  stored,
+}: {
+  owner: string;
+  request: { extractObservables?: boolean; templates?: TemplatesConfiguration };
+  stored?: { extractObservables?: boolean; templates?: TemplatesConfiguration };
+}): void => {
+  const { extractObservables, templates } = request;
+
+  if (stored?.extractObservables !== true) {
+    assertCanStoreExtractObservables({ owner, extractObservables });
+  }
+
+  templates?.forEach(({ key, caseFields }) => {
+    const storedTemplate = stored?.templates?.find((template) => template.key === key);
+
+    if (storedTemplate?.caseFields?.settings?.extractObservables !== true) {
+      assertCanStoreExtractObservables({
+        owner,
+        extractObservables: caseFields?.settings?.extractObservables,
+      });
+    }
+  });
 };
 
 /**
@@ -358,6 +390,12 @@ export async function update(
       );
     }
 
+    assertConfigurationCanStoreExtractObservables({
+      owner: configuration.attributes.owner,
+      request: { extractObservables: request.extractObservables, templates },
+      stored: configuration.attributes,
+    });
+
     let error = null;
     const updateDate = new Date().toISOString();
     let mappings: ConnectorMappings = [];
@@ -521,6 +559,11 @@ export async function create(
     await authorization.ensureAuthorized({
       operation: Operations.createConfiguration,
       entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
+    });
+
+    assertConfigurationCanStoreExtractObservables({
+      owner: validatedConfigurationRequest.owner,
+      request: validatedConfigurationRequest,
     });
 
     // Ensure linked field definitions BEFORE deleting any existing configuration and BEFORE

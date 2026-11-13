@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import type { FlyoutOrigin, FlyoutType } from '../../common/lib/telemetry';
 import {
   FLYOUT_SESSION_KIND,
@@ -56,7 +55,6 @@ import type { GraphViewProps } from './shared/tools/graph_view'; // Lazy-loaded 
 import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
 import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 import {
-  decodeFlyoutV2UrlParam,
   FLYOUT_DESCRIPTOR_KIND,
   toEntityDescriptorMode,
   urlParamKeyForHistoryKey,
@@ -157,21 +155,29 @@ export type OpenEntityEntraInsightsParams = EntraInsightsProps & WithTitle;
 export type OpenEntityOktaInsightsParams = OktaInsightsProps & WithTitle;
 export type OpenEntityFieldsTableParams = FieldsTableToolProps & WithTitle;
 
+/** Handle returned when opening a top-level entity flyout. */
+export interface EntityFlyoutHandle {
+  /** Closes the flyout. Does nothing if it's already closed. */
+  close: () => void;
+  /** Resolves once the flyout is closed, whether via `close()` or user interaction. */
+  onClose: Promise<void>;
+}
+
 export interface EntityFlyoutApi {
   /** Opens the host entity details flyout as a new, top-level flyout (fresh session). */
-  openHostFlyout: (params: OpenHostFlyoutParams) => void;
+  openHostFlyout: (params: OpenHostFlyoutParams) => EntityFlyoutHandle;
   /** Opens the host entity details flyout as a child of the currently open flyout. */
   openHostFlyoutAsChild: (params: OpenHostFlyoutParams) => void;
   /** Opens the user entity details flyout as a new, top-level flyout (fresh session). */
-  openUserFlyout: (params: OpenUserFlyoutParams) => void;
+  openUserFlyout: (params: OpenUserFlyoutParams) => EntityFlyoutHandle;
   /** Opens the user entity details flyout as a child of the currently open flyout. */
   openUserFlyoutAsChild: (params: OpenUserFlyoutParams) => void;
   /** Opens the service entity details flyout as a new, top-level flyout (fresh session). */
-  openServiceFlyout: (params: OpenServiceFlyoutParams) => void;
+  openServiceFlyout: (params: OpenServiceFlyoutParams) => EntityFlyoutHandle;
   /** Opens the service entity details flyout as a child of the currently open flyout. */
   openServiceFlyoutAsChild: (params: OpenServiceFlyoutParams) => void;
   /** Opens the generic entity details flyout as a new, top-level flyout (fresh session). */
-  openGenericEntityFlyout: (params: OpenGenericEntityFlyoutParams) => void;
+  openGenericEntityFlyout: (params: OpenGenericEntityFlyoutParams) => EntityFlyoutHandle;
   /** Opens the generic entity details flyout as a child of the currently open flyout. */
   openGenericEntityFlyoutAsChild: (params: OpenGenericEntityFlyoutParams) => void;
   /**
@@ -213,30 +219,18 @@ export interface EntityFlyoutApi {
  * `useOpenFlyout`) and the per-flyout properties so call sites don't repeat them. `useOpenFlyout`
  * also reports open/close telemetry for every method below.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useEntityFlyoutApi = (): EntityFlyoutApi => {
-  const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
-  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
-
-  // Reads the first descriptor from the current URL stack without bumping the generation.
-  // Used by ...AsChild openers and openEntityDetailsAsChild to get the parent descriptor
-  // (close fallback) before appending the child descriptor with writeOnOpen('inherit').
-  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
-    if (!history?.location) return null;
-    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
-    const stack = decodeFlyoutV2UrlParam(raw);
-    return stack?.[0] ?? null;
-  }, [history, urlParamKey]);
+  const { writeOnOpen, buildOnClose, readRootDescriptor } = useFlyoutV2UrlWriter(
+    urlParamKey,
+    historyKey
+  );
 
   // The entity flyouts differ only in their base properties (document vs tools size) and session;
   // both are kept private here so callers never reason about them — they pick the method they want.
@@ -262,7 +256,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
 
   // Main entity flyouts.
   const openHostFlyout = useCallback(
-    ({ title, origin, ...props }: OpenHostFlyoutParams) => {
+    ({ title, origin, ...props }: OpenHostFlyoutParams): EntityFlyoutHandle => {
       const flyoutTitle = title ?? formatFlyoutTitle(HOST_TITLE, props.hostName);
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.host,
@@ -272,7 +266,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
-      open(
+      const ref = open(
         <Host {...props} />,
         { ...mainProperties(undefined, flyoutTitle), onClose },
         {
@@ -282,13 +276,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           origin,
         }
       );
+      return { close: () => ref.close(), onClose: ref.onClose };
     },
     [open, mainProperties, sessionMode, writeOnOpen, buildOnClose]
   );
   const openHostFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenHostFlyoutParams) => {
       const childTitle = title ?? formatFlyoutTitle(HOST_TITLE, props.hostName);
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(
         {
           kind: FLYOUT_DESCRIPTOR_KIND.host,
@@ -315,10 +310,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, mainProperties, readFirstDescriptor, writeOnOpen, buildOnClose]
+    [open, mainProperties, readRootDescriptor, writeOnOpen, buildOnClose]
   );
   const openUserFlyout = useCallback(
-    ({ title, origin, ...props }: OpenUserFlyoutParams) => {
+    ({ title, origin, ...props }: OpenUserFlyoutParams): EntityFlyoutHandle => {
       const flyoutTitle = title ?? formatFlyoutTitle(USER_TITLE, props.userName);
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.user,
@@ -328,7 +323,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
-      open(
+      const ref = open(
         <User {...props} />,
         { ...mainProperties(undefined, flyoutTitle), onClose },
         {
@@ -338,13 +333,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           origin,
         }
       );
+      return { close: () => ref.close(), onClose: ref.onClose };
     },
     [open, mainProperties, sessionMode, writeOnOpen, buildOnClose]
   );
   const openUserFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenUserFlyoutParams) => {
       const childTitle = title ?? formatFlyoutTitle(USER_TITLE, props.userName);
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(
         {
           kind: FLYOUT_DESCRIPTOR_KIND.user,
@@ -371,10 +367,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, mainProperties, readFirstDescriptor, writeOnOpen, buildOnClose]
+    [open, mainProperties, readRootDescriptor, writeOnOpen, buildOnClose]
   );
   const openServiceFlyout = useCallback(
-    ({ title, origin, ...props }: OpenServiceFlyoutParams) => {
+    ({ title, origin, ...props }: OpenServiceFlyoutParams): EntityFlyoutHandle => {
       const flyoutTitle = title ?? formatFlyoutTitle(SERVICE_TITLE, props.serviceName);
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.service,
@@ -384,7 +380,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
-      open(
+      const ref = open(
         <Service {...props} />,
         { ...mainProperties(undefined, flyoutTitle), onClose },
         {
@@ -394,13 +390,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           origin,
         }
       );
+      return { close: () => ref.close(), onClose: ref.onClose };
     },
     [open, mainProperties, sessionMode, writeOnOpen, buildOnClose]
   );
   const openServiceFlyoutAsChild = useCallback(
     ({ title, origin, ...props }: OpenServiceFlyoutParams) => {
       const childTitle = title ?? formatFlyoutTitle(SERVICE_TITLE, props.serviceName);
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(
         {
           kind: FLYOUT_DESCRIPTOR_KIND.service,
@@ -427,10 +424,10 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, mainProperties, readFirstDescriptor, writeOnOpen, buildOnClose]
+    [open, mainProperties, readRootDescriptor, writeOnOpen, buildOnClose]
   );
   const openGenericEntityFlyout = useCallback(
-    ({ title, origin, ...props }: OpenGenericEntityFlyoutParams) => {
+    ({ title, origin, ...props }: OpenGenericEntityFlyoutParams): EntityFlyoutHandle => {
       const flyoutTitle = title ?? GENERIC_ENTITY_TITLE;
       // GenericEntityProps is a union type; extract entityId/entityDocId safely.
       const entityId = (props as { entityId?: string }).entityId;
@@ -442,7 +439,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         entityDocId,
       });
       const onClose = buildOnClose(null);
-      open(
+      const ref = open(
         <GenericEntity {...props} />,
         { ...mainProperties(undefined, flyoutTitle), onClose },
         {
@@ -452,6 +449,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           origin,
         }
       );
+      return { close: () => ref.close(), onClose: ref.onClose };
     },
     [open, mainProperties, sessionMode, writeOnOpen, buildOnClose]
   );
@@ -460,7 +458,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       const childTitle = title ?? GENERIC_ENTITY_TITLE;
       const entityId = (props as { entityId?: string }).entityId;
       const entityDocId = (props as { entityDocId?: string }).entityDocId;
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(
         {
           kind: FLYOUT_DESCRIPTOR_KIND.genericEntity,
@@ -486,7 +484,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, mainProperties, readFirstDescriptor, writeOnOpen, buildOnClose]
+    [open, mainProperties, readRootDescriptor, writeOnOpen, buildOnClose]
   );
 
   const openEntityFlyout = useCallback(
@@ -661,7 +659,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           children = <GenericEntity entityId={entityId} scopeId={scopeId} contextID={contextID} />;
           descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.genericEntity, entityId, scopeId };
       }
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(descriptor, 'inherit');
       const onClose = buildOnClose(parentDescriptor);
       const titleValue = entityName ?? entityId;
@@ -692,19 +690,20 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, mainProperties, readFirstDescriptor, writeOnOpen, buildOnClose]
+    [open, mainProperties, readRootDescriptor, writeOnOpen, buildOnClose]
   );
 
   // Entity tool flyouts.
   const openEntityRiskInputs = useCallback(
     ({ title, origin, ...props }: OpenEntityRiskInputsParams) => {
-      const { entityType, entityName, entityId, subTab } = props;
+      const { entityType, entityName, entityId, subTab, scopeId } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
         entityType: entityType as string,
         entityName,
         entityId,
         ...(subTab ? { subTab } : {}),
+        scopeId,
       });
       // Entity tools open session:'start' (roots): the entity main is not persisted alongside the
       // tool, so closing the tool clears the param rather than reverting to the entity.

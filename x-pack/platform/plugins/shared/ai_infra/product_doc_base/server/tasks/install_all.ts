@@ -14,9 +14,13 @@ import { DocumentationProduct, ResourceTypes, type ProductName } from '@kbn/prod
 import type { InternalServices } from '../types';
 import {
   INSTALL_TASK_TIMEOUT,
+  deferForRepositoryVersion,
   getRequestTaskStatus,
+  isTaskSuperseded,
+  requestTaskStateSchemaByVersion,
   runTaskUnderInstallLock,
   scheduleRequestTask,
+  shouldDeferForRepositoryVersion,
   type InstallLockManager,
   type RequestTaskParams,
   type RequestTaskStatus,
@@ -41,15 +45,45 @@ export const registerInstallAllTaskDefinition = ({
       timeout: INSTALL_TASK_TIMEOUT,
       maxAttempts: 5,
       createTaskRunner: ({ taskInstance }) => {
-        const { inferenceId, requestedAt } = taskInstance.params as RequestTaskParams;
+        const { inferenceId, requestedAt, repositoryVersion } =
+          taskInstance.params as RequestTaskParams;
         const since = new Date(requestedAt);
         return {
           async run() {
-            const { packageInstaller, logger } = getServices();
+            const { packageInstaller, logger, taskManager: taskManagerStart } = getServices();
+            const { id: taskId, state } = taskInstance;
+            const superseded = async () => {
+              const result = await isTaskSuperseded({ taskManager: taskManagerStart, taskId });
+              if (result) {
+                logger.info(
+                  `Skipping product documentation install for [${inferenceId}]: superseded by a request against a newer artifact repository version`
+                );
+              }
+              return result;
+            };
+            if (await superseded()) {
+              return { state };
+            }
+            if (
+              shouldDeferForRepositoryVersion({
+                requestedVersion: repositoryVersion,
+                localVersion: await packageInstaller.getRepositoryVersion(),
+                requestedAt,
+              })
+            ) {
+              logger.info(
+                `Deferring product documentation install for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], newer than this node's`
+              );
+              return deferForRepositoryVersion(state);
+            }
             return runTaskUnderInstallLock({
               lockManager,
+              state,
               metadata: { taskType: INSTALL_ALL_TASK_TYPE, inferenceId },
               run: async () => {
+                if (await superseded()) {
+                  return;
+                }
                 for (const productName of allProducts) {
                   // An uninstall requested after this install wins; OpenAPI-only uninstalls do not count
                   if (
@@ -76,7 +110,7 @@ export const registerInstallAllTaskDefinition = ({
           },
         };
       },
-      stateSchemaByVersion: {},
+      stateSchemaByVersion: requestTaskStateSchemaByVersion,
     },
   });
 };
@@ -90,13 +124,19 @@ export const scheduleInstallAllTask = ({
   logger,
   inferenceId,
   force = false,
+  repositoryVersion,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
   force?: boolean;
+  repositoryVersion?: string;
 }): Promise<string> => {
-  const params: RequestTaskParams = { inferenceId, requestedAt: new Date().toISOString() };
+  const params: RequestTaskParams = {
+    inferenceId,
+    requestedAt: new Date().toISOString(),
+    repositoryVersion,
+  };
   return scheduleRequestTask({
     taskManager,
     logger,

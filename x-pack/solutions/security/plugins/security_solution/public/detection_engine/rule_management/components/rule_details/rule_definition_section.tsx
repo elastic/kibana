@@ -369,7 +369,7 @@ export const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
         <EuiButtonEmpty
           size="xs"
           flush="left"
-          iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+          iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
           onClick={toggleExpanded}
           data-test-subj="toggleRequiredFieldsPropertyValueFoldButton"
         >

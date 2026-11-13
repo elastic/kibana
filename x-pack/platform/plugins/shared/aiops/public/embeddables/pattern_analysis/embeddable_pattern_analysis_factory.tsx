@@ -35,6 +35,8 @@ import { initializePatternAnalysisControls } from './initialize_pattern_analysis
 import type { PatternAnalysisEmbeddableApi } from './types';
 import { canUseAiops } from '../../capabilities';
 import { toUiMinimumTimeRange } from '../../../common/embeddables/pattern_analysis/normalize_legacy_state';
+import { normalizeStoredPanelTitle } from '../normalize_stored_panel_title';
+import { getPatternAnalysisDefaultTitle } from './default_title';
 
 export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
 
@@ -51,13 +53,25 @@ export const getPatternAnalysisEmbeddableFactory = (
       canUseAiops(coreStart, true);
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
-      const titleManager = initializeTitleManager(initialState);
+      const titleManager = initializeTitleManager({
+        ...initialState,
+        title: normalizeStoredPanelTitle(initialState.title),
+      });
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(
+        getPatternAnalysisDefaultTitle(runtimeState.field_name)
+      );
 
       const {
         patternAnalysisControlsApi,
         serializePatternAnalysisChartState,
         patternAnalysisControlsComparators,
       } = initializePatternAnalysisControls(runtimeState);
+
+      const updatePatternAnalysisUserInput = patternAnalysisControlsApi.updateUserInput;
+      patternAnalysisControlsApi.updateUserInput = (update) => {
+        updatePatternAnalysisUserInput(update);
+        defaultTitle$.next(getPatternAnalysisDefaultTitle(update.field_name));
+      };
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -108,9 +122,13 @@ export const getPatternAnalysisEmbeddableFactory = (
           ...patternAnalysisControlsComparators,
         }),
         applySerializedState: (nextState) => {
-          timeRangeManager.reinitializeState(nextState);
-          titleManager.reinitializeState(nextState);
-          patternAnalysisControlsApi.updateUserInput(nextState);
+          const normalizedState = {
+            ...nextState,
+            title: normalizeStoredPanelTitle(nextState.title),
+          };
+          timeRangeManager.reinitializeState(normalizedState);
+          titleManager.reinitializeState(normalizedState);
+          patternAnalysisControlsApi.updateUserInput(normalizedState);
         },
       });
 
@@ -119,6 +137,7 @@ export const getPatternAnalysisEmbeddableFactory = (
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
+        defaultTitle$,
         ...stateApi,
         ...patternAnalysisControlsApi,
         getTypeDisplayName: () =>

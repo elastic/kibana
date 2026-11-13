@@ -9,16 +9,21 @@
 
 import React, { useEffect } from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DefaultPresentationPanelApi } from '../types';
+import type { PresentationPanelHoverActionsProps } from './presentation_panel_hover_actions';
 import { PresentationPanelHoverActionsWrapper } from './presentation_panel_hover_actions_wrapper';
 
+const mockHoverActionsProps = jest.fn();
+
 jest.mock('./presentation_panel_hover_actions', () => ({
-  PresentationPanelHoverActions: () => (
-    <div data-test-subj="default-hover-actions">Default hover actions</div>
-  ),
+  PresentationPanelHoverActions: (props: PresentationPanelHoverActionsProps) => {
+    mockHoverActionsProps(props);
+    return <div data-test-subj="default-hover-actions">Default hover actions</div>;
+  },
 }));
 
 describe('PresentationPanelHoverActionsWrapper', () => {
@@ -84,5 +89,68 @@ describe('PresentationPanelHoverActionsWrapper', () => {
     expect(await screen.findByTestId('default-hover-actions')).toBeInTheDocument();
     expect(screen.queryByTestId('overridden-hover-actions')).not.toBeInTheDocument();
     expect(mountCount).toBe(1);
+  });
+
+  describe('panel selection', () => {
+    const buildSelectingParent = (selectedPanelIds: string[]) => ({
+      selectedPanelIds$: new BehaviorSubject<string[]>(selectedPanelIds),
+      togglePanelSelection: jest.fn(),
+      clearSelectedPanels: jest.fn(),
+    });
+
+    const renderWrapper = (api: DefaultPresentationPanelApi, viewMode: ViewMode = 'edit') =>
+      renderWithTheme(
+        <PresentationPanelHoverActionsWrapper
+          api={api}
+          getActions={jest.fn()}
+          setDragHandle={jest.fn()}
+          viewMode={viewMode}
+        >
+          <div />
+        </PresentationPanelHoverActionsWrapper>
+      );
+
+    const getLastSelection = () => mockHoverActionsProps.mock.lastCall?.[0].selection;
+
+    beforeEach(() => {
+      mockHoverActionsProps.mockClear();
+    });
+
+    it('passes no selection when the parent does not support selecting panels', () => {
+      renderWrapper({ uuid: 'panel1', parentApi: {} });
+
+      expect(getLastSelection()).toBeUndefined();
+    });
+
+    it('passes no selection outside edit mode', () => {
+      renderWrapper({ uuid: 'panel1', parentApi: buildSelectingParent(['panel1']) }, 'view');
+
+      expect(getLastSelection()).toBeUndefined();
+    });
+
+    it("reflects the parent's selection for this panel", async () => {
+      const parentApi = buildSelectingParent([]);
+      renderWrapper({ uuid: 'panel1', parentApi });
+      expect(getLastSelection()).toMatchObject({ isSelectionMode: false, isSelected: false });
+
+      act(() => parentApi.selectedPanelIds$.next(['panel2']));
+      await waitFor(() =>
+        expect(getLastSelection()).toMatchObject({ isSelectionMode: true, isSelected: false })
+      );
+
+      act(() => parentApi.selectedPanelIds$.next(['panel2', 'panel1']));
+      await waitFor(() =>
+        expect(getLastSelection()).toMatchObject({ isSelectionMode: true, isSelected: true })
+      );
+    });
+
+    it("toggles this panel in the parent's selection", () => {
+      const parentApi = buildSelectingParent([]);
+      renderWrapper({ uuid: 'panel1', parentApi });
+
+      getLastSelection()?.toggle();
+
+      expect(parentApi.togglePanelSelection).toHaveBeenCalledWith('panel1');
+    });
   });
 });

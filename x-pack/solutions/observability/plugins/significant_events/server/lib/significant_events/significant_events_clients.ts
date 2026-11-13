@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import {
   DetectionService,
@@ -16,6 +16,7 @@ import {
 } from './detections';
 import type { DetectionClient } from './detections';
 import { RuleEventsClient } from './events/rule_events_client';
+import type { EventStatusChangeReporter } from './events/event_status_change_telemetry';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
 
 export interface SignificantEventsServices {
@@ -40,22 +41,36 @@ export function createSignificantEventsClients({
   services,
   dataStreams,
   esClient,
+  internalEsClient,
+  logger,
   space,
   triggerEmitter,
+  telemetry,
   getAlertEventsClient,
+  getAlertActionsClient,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
+  /** Reads Alerting v2's private `.alert-actions` index for operator deactivations. */
+  internalEsClient?: ElasticsearchClient;
+  logger?: Logger;
   space: string;
   triggerEmitter?: TriggerEmitter;
+  telemetry?: EventStatusChangeReporter;
   getAlertEventsClient: () => Promise<AlertEventsClientApi>;
+  /** Writes an operator's deactivate or activate as an Alerting v2 alert action. */
+  getAlertActionsClient?: () => Promise<AlertActionsClientApi>;
 }): SignificantEventsClients {
   const eventSearchClient = new RuleEventsClient({
     esClient,
+    internalEsClient,
+    logger,
     space,
     getAlertEventsClient,
+    getAlertActionsClient,
     emitTrigger: triggerEmitter,
+    telemetry,
   });
 
   return {

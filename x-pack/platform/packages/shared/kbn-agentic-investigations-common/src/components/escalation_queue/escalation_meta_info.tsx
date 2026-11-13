@@ -21,7 +21,7 @@ export const EscalationMetaInfo = memo<EscalationMetaInfoProps>(({ createdAt, up
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} direction="row">
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued" component="span">
-          {i18n.translate('xpack.alertzero.escalationQueue.openedLabel', {
+          {i18n.translate('xpack.agenticInvestigations.escalationQueue.openedLabel', {
             defaultMessage: 'Opened',
           })}{' '}
           <FormattedRelative value={createdAt} />
@@ -34,7 +34,7 @@ export const EscalationMetaInfo = memo<EscalationMetaInfoProps>(({ createdAt, up
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued" component="span">
-          {i18n.translate('xpack.alertzero.escalationQueue.updatedLabel', {
+          {i18n.translate('xpack.agenticInvestigations.escalationQueue.updatedLabel', {
             defaultMessage: 'Updated',
           })}{' '}
           <FormattedRelative value={updatedAt} />

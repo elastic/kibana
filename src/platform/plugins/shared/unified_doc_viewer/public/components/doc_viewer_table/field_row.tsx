@@ -12,12 +12,8 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { columnToFieldBase, type Column, type DataSource } from '@kbn/data-source';
 import type { IgnoredReason } from '@kbn/discover-utils';
-import {
-  convertValueToString,
-  formatFieldValueReact,
-  getIgnoredReason,
-  isNestedFieldParent,
-} from '@kbn/discover-utils';
+import { convertValueToString, getIgnoredReason, isNestedFieldParent } from '@kbn/discover-utils';
+import { formatFieldValueReact } from '@kbn/discover-utils/components';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconType } from '@kbn/field-utils';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';

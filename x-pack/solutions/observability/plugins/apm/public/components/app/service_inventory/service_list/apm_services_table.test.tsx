@@ -506,6 +506,38 @@ describe('ApmServicesTable', () => {
       });
     });
 
+    it('forwards rangeEnd as end to the three sparkline columns', () => {
+      const rangeEnd = 1700000000000;
+      const columns = getServiceColumns({
+        comparisonDataLoading: false,
+        showAnomaliesColumn: true,
+        query: defaultQuery,
+        showTransactionTypeColumn: true,
+        breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
+        showAlertsColumn: true,
+        showSlosColumn: true,
+        link: apmRouter.link,
+        serviceOverflowCount: 0,
+        onSloBadgeClick: jest.fn(),
+        locators: undefined,
+        rangeEnd,
+      });
+
+      const sparklineFields = [
+        ServiceInventoryFieldName.Latency,
+        ServiceInventoryFieldName.Throughput,
+        ServiceInventoryFieldName.TransactionErrorRate,
+      ];
+
+      sparklineFields.forEach((field) => {
+        const column = columns.find((c) => c.field === field)!;
+        const element = column.render!(undefined, mockService) as React.ReactElement<{
+          end?: number;
+        }>;
+        expect(element.props.end).toBe(rangeEnd);
+      });
+    });
+
     describe('responsive columns', () => {
       const serviceForColumnTest: any = {
         serviceName: 'opbeans-python',
