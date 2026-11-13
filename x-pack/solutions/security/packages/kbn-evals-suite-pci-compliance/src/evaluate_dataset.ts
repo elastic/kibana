@@ -16,6 +16,7 @@ import type {
 } from '@kbn/evals';
 import { createSkillInvocationEvaluator } from '@kbn/evals';
 import type { PciEvalChatClient } from './chat_client';
+import { UNANSWERED_PROMPT_MARKER } from './chat_client';
 
 export interface PciDatasetExample extends Example {
   input: {
@@ -25,6 +26,23 @@ export interface PciDatasetExample extends Example {
     criteria: string[];
   };
 }
+
+/** Task output produced by {@link createEvaluatePciDataset}, as the evaluators receive it. */
+export interface PciTaskOutput {
+  messages: Array<{ message: string }>;
+  steps?: unknown[];
+  errors: unknown[];
+  traceId?: string;
+  unansweredPrompt: boolean;
+}
+
+/**
+ * A round the eval client could not drive to completion (the agent paused on a prompt it could not
+ * answer, or kept re-prompting past the client's turn cap) has no user-facing answer. Grading the
+ * transcript then measures the client, not the model, so such rounds are reported as unscored.
+ */
+export const isUnansweredPromptRound = (output: unknown): boolean =>
+  (output as PciTaskOutput | undefined)?.unansweredPrompt === true;
 
 export type EvaluatePciDataset = (options: {
   dataset: {
@@ -63,10 +81,21 @@ export function createPciCriteriaEvaluator({
     name: 'PCI Criteria',
     kind: 'LLM' as const,
     direction: 'maximize',
-    evaluate: async ({ expected, ...rest }) => {
+    evaluate: async ({ expected, output, ...rest }) => {
+      if (isUnansweredPromptRound(output)) {
+        return {
+          score: null,
+          label: 'unanswered_prompt',
+          explanation:
+            `${UNANSWERED_PROMPT_MARKER} the round ended on a prompt the eval client could not ` +
+            'answer, so it never produced a user-facing answer. Reported as unscored: the judge is ' +
+            'not run over the transcript of a paused round.',
+        };
+      }
+
       const exampleCriteria: string[] = (expected as PciDatasetExample['output'])?.criteria ?? [];
       const allCriteria = [...BASELINE_PCI_CRITERIA, ...extraCriteria, ...exampleCriteria];
-      return evaluators.criteria(allCriteria).evaluate({ expected, ...rest });
+      return evaluators.criteria(allCriteria).evaluate({ expected, output, ...rest });
     },
   };
 }
@@ -99,7 +128,7 @@ export function createEvaluatePciDataset({
       examples,
     } satisfies EvaluationDataset;
 
-    await executorClient.runExperiment(
+    const results = await executorClient.runExperiment(
       {
         datasets: [dataset],
         task: async ({ input }) => {
@@ -110,6 +139,7 @@ export function createEvaluatePciDataset({
             steps: response.steps,
             errors: response.errors,
             traceId: response.traceId,
+            unansweredPrompt: response.unansweredPrompt,
           };
         },
       },
@@ -122,5 +152,19 @@ export function createEvaluatePciDataset({
         }),
       ]
     );
+
+    // A round that ended on a prompt the client could not answer has no answer to grade; it is
+    // reported as unscored (never as a score) and surfaced next to the suite score.
+    const taskRuns = results.flatMap((result) => Object.values(result.runs));
+    const pausedRuns = taskRuns.filter((run) => isUnansweredPromptRound(run.output));
+    if (pausedRuns.length > 0) {
+      log.warning(
+        `paused ${pausedRuns.length}/${taskRuns.length} for "${name}" — round(s) ` +
+          `${pausedRuns.map((run) => run.exampleIndex).join(', ')} ended on an unanswered prompt ` +
+          'and are reported unscored instead of judged'
+      );
+    } else {
+      log.info(`paused 0/${taskRuns.length} for "${name}"`);
+    }
   };
 }
