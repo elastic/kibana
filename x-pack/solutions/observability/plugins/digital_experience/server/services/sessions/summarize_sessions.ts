@@ -41,6 +41,9 @@ const DAY_MS = 24 * HOUR_MS;
 
 /** Sessions rebuilt per summary query: half the ES|QL row limit, so reused session ids still fit. */
 export const SESSIONS_PER_QUERY = ESQL_MAX_ROWS / 2;
+/** The same, against the rows this cluster actually returns, which it may cap lower. */
+export const sessionsPerQuery = (maxRows: number): number =>
+  Math.max(1, Math.min(SESSIONS_PER_QUERY, Math.floor(maxRows / 2)));
 /**
  * Changed session ids fetched per query. Each query aggregates the whole window, so fewer and larger
  * ones are cheaper: at 137,000 changed sessions, one query took 0.6s against 13s for one per 5,000.
@@ -71,6 +74,8 @@ export interface SummarizeSessionsParams {
   /** Summary queries run at once, each with its own batch of sessions. */
   concurrency: number;
   logger: Logger;
+  /** Rows a response of this cluster holds, from `esqlMaxRows`. */
+  maxRows?: number;
 }
 
 export interface SummarizeSessionsResult {
@@ -189,11 +194,12 @@ const changedSessionIds = async (
   esClient: ElasticsearchClient,
   window: ChangedWindow,
   changedSessions: number,
-  signal: AbortSignal
+  signal: AbortSignal,
+  maxRows: number
 ): Promise<string[]> => {
   let ids: string[] = [];
   for (const range of hashRanges(Math.ceil(changedSessions / IDS_PER_QUERY))) {
-    const rows = await runEsql(esClient, changedSessionIdsQuery(window, range), signal);
+    const rows = await runEsql(esClient, changedSessionIdsQuery(window, range, maxRows), signal);
     // `concat`, as spreading 100,000 ids into `push` can overflow the call stack.
     ids = ids.concat(
       ...rows.map((row) =>
@@ -218,10 +224,11 @@ const summarizeBatch = async (
   window: RebuildWindow,
   batch: string[],
   signal: AbortSignal,
-  logger: Logger
+  logger: Logger,
+  maxRows: number
 ): Promise<BatchResult> => {
-  const response = await queryEsql(esClient, sessionSummaryQuery(window, batch), signal);
-  if (response.values.length >= ESQL_MAX_ROWS && batch.length > 1) {
+  const response = await queryEsql(esClient, sessionSummaryQuery(window, batch, maxRows), signal);
+  if (response.values.length >= maxRows && batch.length > 1) {
     const half = Math.ceil(batch.length / 2);
     return { halves: [batch.slice(0, half), batch.slice(half)] };
   }
@@ -241,14 +248,15 @@ const summarizeSessionIds = async (
   ids: string[],
   signal: AbortSignal,
   concurrency: number,
-  logger: Logger
+  logger: Logger,
+  maxRows: number
 ): Promise<number> => {
-  const batches = chunk(ids, SESSIONS_PER_QUERY);
+  const batches = chunk(ids, sessionsPerQuery(maxRows));
   let written = 0;
   while (batches.length > 0) {
     const round = batches.splice(0, Math.max(1, concurrency));
     const results = await Promise.allSettled(
-      round.map((batch) => summarizeBatch(esClient, window, batch, signal, logger))
+      round.map((batch) => summarizeBatch(esClient, window, batch, signal, logger, maxRows))
     );
     for (const result of results) {
       if (result.status === 'rejected') {
@@ -279,6 +287,7 @@ export const summarizeSessions = async ({
   budgetMs,
   concurrency,
   logger,
+  maxRows = ESQL_MAX_ROWS,
 }: SummarizeSessionsParams): Promise<SummarizeSessionsResult> => {
   const until = now - SESSIONS_SYNC_DELAY_SECONDS * 1000;
   const earliest = lookbackStart(now);
@@ -295,7 +304,7 @@ export const summarizeSessions = async ({
       size = Math.max(MIN_WINDOW_MS, Math.floor((to - from) / 2));
     } else {
       if (changed > 0) {
-        const ids = await changedSessionIds(esClient, window, changed, signal);
+        const ids = await changedSessionIds(esClient, window, changed, signal, maxRows);
         sessions += await summarizeSessionIds(
           esClient,
           {
@@ -305,7 +314,8 @@ export const summarizeSessions = async ({
           ids,
           signal,
           concurrency,
-          logger
+          logger,
+          maxRows
         );
       }
       from = to;

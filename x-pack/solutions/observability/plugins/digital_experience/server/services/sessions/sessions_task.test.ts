@@ -15,6 +15,7 @@ import {
 import { TaskCost, type TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SESSIONS_TASK_ID, SESSIONS_TASK_TYPE, SESSIONS_VERSION } from '../../../common/sessions';
+import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import {
   createSessionsIndex,
   putSessionsIndexTemplate,
@@ -171,6 +172,7 @@ describe('runSessionsTask', () => {
         budgetMs: 45_000,
         concurrency: 2,
         logger,
+        maxRows: ESQL_DEFAULT_MAX_ROWS,
       });
       expect(result.state).toEqual(expect.objectContaining({ version: SESSIONS_VERSION }));
     });

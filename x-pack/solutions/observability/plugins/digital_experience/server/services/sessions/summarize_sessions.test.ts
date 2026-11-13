@@ -216,6 +216,29 @@ describe('summarizeSessions', () => {
     expect(batches).toEqual(['"a", "b"', '"a"', '"b"']);
   });
 
+  it('splits against the rows this cluster returns, not the default it may have lowered', async () => {
+    const maxRows = 100;
+    const esClient = setUp({
+      // Far short of the default, so only a split against the cluster's own limit catches it.
+      summaryRows: (query) =>
+        query.includes('IN ("a", "b")')
+          ? Array.from({ length: maxRows }, (_, index) => summaryRow(`s${index}`))
+          : [summaryRow('one')],
+    });
+
+    const progress = await run(esClient, { maxRows });
+
+    expect(progress.sessions).toBe(2);
+    const batches = esClient.esql.query.mock.calls
+      .map(([{ query }]) => query)
+      .filter((query) => query.includes('page_view_count = COUNT'))
+      .map((query) => query.match(/IN \(([^)]*)\)/)?.[1]);
+    expect(batches).toEqual(['"a", "b"', '"a"', '"b"']);
+    expect(esClient.esql.query.mock.calls.map(([{ query }]) => query).join('\n')).toContain(
+      `LIMIT ${maxRows}`
+    );
+  });
+
   it('builds the summaries of a large response a chunk per event loop turn', async () => {
     const rows = 2 * ROWS_PER_TICK + 1;
     const esClient = setUp({

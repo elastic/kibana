@@ -23,6 +23,7 @@ import {
   type SessionsSettings,
 } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
+import { esqlMaxRows } from './esql_max_rows';
 import {
   createSessionsIndex,
   putSessionsIndexTemplate,
@@ -164,6 +165,9 @@ export const runSessionsTask = async ({
       budgetMs: RUN_BUDGET_MS,
       concurrency,
       logger,
+      // Once a run: the setting only changes with the cluster, and every query of the run is
+      // split against it.
+      maxRows: await esqlMaxRows(internalClient, signal),
     });
 
     const caughtUp = (!rebuild && state.caughtUp === true) || result.caughtUp;

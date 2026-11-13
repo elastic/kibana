@@ -10,6 +10,7 @@ import { FULL_HASH_RANGE, HASH_SPACE } from './hash_ranges';
 import {
   SESSION_ATTRIBUTE_GROUPS,
   attributeColumn,
+  bucketDigitsOf,
   changedSessionIdsQuery,
   changedSessionsCountQuery,
   sessionSummaryQuery,
@@ -49,6 +50,28 @@ describe('changedSessionIdsQuery', () => {
       { changed_from: WINDOW.changedFrom },
       { changed_to: WINDOW.changedTo },
     ]);
+  });
+
+  it('buckets the ids so that every bucket fits a response the cluster caps lower', () => {
+    expect(bucketDigitsOf(10_000)).toBe(3);
+    expect(bucketDigitsOf(4_096)).toBe(3);
+    expect(bucketDigitsOf(4_095)).toBe(2);
+    expect(bucketDigitsOf(255)).toBe(1);
+    expect(bucketDigitsOf(15)).toBe(0);
+
+    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, 1_000);
+
+    expect(query).toContain(
+      'STATS session_ids = VALUES(session_id) BY bucket = SUBSTRING(session_hash, 1, 2)'
+    );
+    expect(query).toContain('LIMIT 1000');
+  });
+
+  it('puts every id in one row when even 16 buckets would not fit', () => {
+    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, 10);
+
+    expect(query).toContain('STATS session_ids = VALUES(session_id)\n');
+    expect(query).not.toContain('SUBSTRING');
   });
 
   it('keeps the sessions of a hash range only', () => {

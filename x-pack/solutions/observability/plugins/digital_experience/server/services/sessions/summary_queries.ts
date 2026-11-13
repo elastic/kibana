@@ -44,14 +44,15 @@ import {
   SOURCE_WEB_VITAL_NAME_FIELD,
   SOURCE_WEB_VITAL_VALUE_FIELD,
 } from '../../lib/otel/source_fields';
+import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 
 /**
- * Rows an ES|QL response holds, whatever the `LIMIT`: the default of the cluster's
- * `esql.query.result_truncation_max_size`. A batch whose response reaches it is split and asked
- * again, so a cluster that raised the setting only splits later than it has to.
+ * Rows an ES|QL response holds, whatever the `LIMIT`: the cluster's
+ * `esql.query.result_truncation_max_size`, read by `esqlMaxRows`. A batch whose response reaches
+ * it is split and asked again, as the rows it would have held past the cut are gone silently.
  */
-export const ESQL_MAX_ROWS = 10_000;
+export const ESQL_MAX_ROWS = ESQL_DEFAULT_MAX_ROWS;
 
 /** The window of new events whose sessions are rebuilt. */
 export interface ChangedWindow {
@@ -105,8 +106,21 @@ const SESSION_ID = 'session_id';
 const SESSION_HASH = 'session_hash';
 /** The column of the changed session ids query: the ids of one hash bucket, multi-valued. */
 export const SESSION_IDS_COLUMN = 'session_ids';
-/** Hex digits of the hash that name a bucket: 4,096 buckets, well under the row limit. */
+/** Hex digits of the hash that name a bucket: 4,096 buckets, well under the default row limit. */
 const BUCKET_DIGITS = 3;
+
+/**
+ * Hex digits that name a bucket of the changed ids, so that every bucket is a row of the response:
+ * a bucket past the cut takes its sessions with it, and nothing says it was left out. One digit
+ * fewer is 16 times fewer buckets, and none at all puts every id in a single row.
+ */
+export const bucketDigitsOf = (maxRows: number): number => {
+  let digits = BUCKET_DIGITS;
+  while (digits > 0 && 16 ** digits > maxRows) {
+    digits -= 1;
+  }
+  return digits;
+};
 
 /**
  * The ids of the sessions of `range` with an event in the window, a row per bucket of their hash:
@@ -114,11 +128,16 @@ const BUCKET_DIGITS = 3;
  * the window returns them all. The rebuild then filters on them as literals, which Elasticsearch
  * looks up in the index: a subquery would scan the whole lookback.
  */
-export const changedSessionIdsQuery = (window: ChangedWindow, range: HashRange): SummaryQuery => {
+export const changedSessionIdsQuery = (
+  window: ChangedWindow,
+  range: HashRange,
+  maxRows: number = ESQL_MAX_ROWS
+): SummaryQuery => {
   const conditions = [
     ...(range.from > 0 ? [`${SESSION_HASH} >= ?hash_from`] : []),
     ...(range.to < HASH_SPACE ? [`${SESSION_HASH} < ?hash_to`] : []),
   ];
+  const digits = bucketDigitsOf(maxRows);
   return {
     query: `${NULLIFY_UNMAPPED_FIELDS}
 ${browserSessionEvents('changed_from', 'changed_to')}
@@ -126,8 +145,10 @@ ${browserSessionEvents('changed_from', 'changed_to')}
 | EVAL ${SESSION_HASH} = HASH("sha256", ${SESSION_ID})${
       conditions.length > 0 ? `\n| WHERE ${conditions.join(' AND ')}` : ''
     }
-| STATS ${SESSION_IDS_COLUMN} = VALUES(${SESSION_ID}) BY bucket = SUBSTRING(${SESSION_HASH}, 1, ${BUCKET_DIGITS})
-| LIMIT ${ESQL_MAX_ROWS}`,
+| STATS ${SESSION_IDS_COLUMN} = VALUES(${SESSION_ID})${
+      digits > 0 ? ` BY bucket = SUBSTRING(${SESSION_HASH}, 1, ${digits})` : ''
+    }
+| LIMIT ${maxRows}`,
     params: [
       ...windowParams(window),
       ...(range.from > 0 ? [{ hash_from: hashPrefix(range.from) }] : []),
@@ -232,7 +253,8 @@ const COUNTS = [
  */
 export const sessionSummaryQuery = (
   { changedTo, rebuildFrom }: { changedTo: string; rebuildFrom: string },
-  sessionIds: readonly string[]
+  sessionIds: readonly string[],
+  maxRows: number = ESQL_MAX_ROWS
 ): SummaryQuery => ({
   query: `${NULLIFY_UNMAPPED_FIELDS}
 ${browserSessionEvents('rebuild_from', 'changed_to')}
@@ -272,6 +294,6 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
   BY service, session
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}
 | DROP ${RAW_PREFIX}*
-| LIMIT ${ESQL_MAX_ROWS}`,
+| LIMIT ${maxRows}`,
   params: [{ rebuild_from: rebuildFrom }, { changed_to: changedTo }],
 });
