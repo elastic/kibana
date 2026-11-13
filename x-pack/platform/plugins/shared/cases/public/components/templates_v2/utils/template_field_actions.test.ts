@@ -6,6 +6,10 @@
  */
 
 import { parse as parseYaml } from 'yaml';
+import type { FieldDefinition } from '../../../../common/types/domain/field_definition/latest';
+import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import { resolveTemplateFields } from '../../../../common/utils';
+import { validateTemplateDefinitionYaml } from './validate_template_definition';
 import {
   applyFieldBlock,
   buildFieldScaffold,
@@ -32,6 +36,56 @@ fields:
 
 // Line map (1-based) for TEMPLATE:
 // 1 name, 2 severity, 3 fields:, 4-7 summary field, 8-13 escalate field
+
+const REF_TEMPLATE = `name: My template
+severity: low
+fields:
+  - name: summary
+    control: INPUT_TEXT
+    label: Summary
+    type: keyword
+  - $ref: Root_Cause
+  - $ref: impact
+    display:
+      show_when:
+        field: summary
+        operator: eq
+        value: high
+  - $ref: not_in_library
+`;
+
+// Line map (1-based) for REF_TEMPLATE:
+// 4-7 summary, 8 Root_Cause ref, 9-14 impact ref (with a display override), 15 unknown ref
+
+const makeLibraryField = (name: string, definition: string): FieldDefinition => ({
+  fieldDefinitionId: `fd-${name}`,
+  name,
+  owner: 'cases',
+  description: '',
+  isGlobal: false,
+  definition,
+});
+
+const LIBRARY: FieldDefinition[] = [
+  makeLibraryField(
+    'root_cause',
+    `name: root_cause
+control: INPUT_TEXT
+label: Root cause
+type: keyword
+validation:
+  required: true
+  pattern:
+    regex: '^[a-z]+$'
+display:
+  show_when:
+    field: summary
+    operator: eq
+    value: low
+`
+  ),
+  makeLibraryField('impact', 'name: impact\ncontrol: INPUT_NUMBER\nlabel: Impact\ntype: long\n'),
+];
 
 describe('stripSnippetPlaceholders', () => {
   it('reduces tab-stop placeholders to their bare text', () => {
@@ -134,6 +188,22 @@ describe('getFieldControlAtLine', () => {
     expect(getFieldControlAtLine('', 1)).toBeNull();
     expect(getFieldControlAtLine(':::not yaml', 1)).toBeNull();
   });
+
+  it('resolves a $ref entry through the library, matching names case-insensitively', () => {
+    expect(getFieldControlAtLine(REF_TEMPLATE, 8, LIBRARY)).toEqual({
+      control: 'INPUT_TEXT',
+      name: 'Root_Cause',
+    });
+    expect(getFieldControlAtLine(REF_TEMPLATE, 12, LIBRARY)).toEqual({
+      control: 'INPUT_NUMBER',
+      name: 'impact',
+    });
+  });
+
+  it('returns null for a $ref with no matching library definition', () => {
+    expect(getFieldControlAtLine(REF_TEMPLATE, 15, LIBRARY)).toBeNull();
+    expect(getFieldControlAtLine(REF_TEMPLATE, 8)).toBeNull();
+  });
 });
 
 describe('insertTemplateField', () => {
@@ -218,6 +288,51 @@ describe('applyFieldBlock', () => {
   it('returns no-field when the cursor is not on an inline field', () => {
     expect(applyFieldBlock(TEMPLATE, 1, 'validation', 'required', true).status).toBe('no-field');
     expect(applyFieldBlock(TEMPLATE, 3, 'validation', 'required', true).status).toBe('no-field');
+  });
+
+  describe('on a $ref entry', () => {
+    const resolveAt = (yaml: string, index: number) =>
+      resolveTemplateFields(ParsedTemplateDefinitionSchema.parse(parseYaml(yaml)).fields, LIBRARY)[
+        index
+      ];
+
+    it('writes the rule onto the $ref entry as a valid per-template override', () => {
+      const cond = { field: 'summary', operator: 'eq', value: 'high' };
+      const result = applyFieldBlock(REF_TEMPLATE, 8, 'validation', 'required_when', cond);
+      expect(result.status).toBe('applied');
+      expect(result.fieldName).toBe('Root_Cause');
+      expect(parseYaml(result.yaml).fields[1]).toEqual({
+        $ref: 'Root_Cause',
+        validation: { required_when: cond },
+      });
+      expect(validateTemplateDefinitionYaml(result.yaml)).toEqual({ success: true });
+    });
+
+    it('replaces the library requirement family but keeps its other validation rules', () => {
+      const cond = { field: 'summary', operator: 'eq', value: 'high' };
+      const result = applyFieldBlock(REF_TEMPLATE, 8, 'validation', 'required_when', cond);
+      expect(resolveAt(result.yaml, 1).validation).toEqual({
+        pattern: { regex: '^[a-z]+$' },
+        required_when: cond,
+      });
+    });
+
+    it('replaces the library display outright', () => {
+      const cond = { field: 'summary', operator: 'eq', value: 'high' };
+      const result = applyFieldBlock(REF_TEMPLATE, 8, 'display', 'show_when', cond);
+      expect(result.status).toBe('applied');
+      expect(resolveAt(result.yaml, 1).display).toEqual({ show_when: cond });
+    });
+
+    it('only treats rules the $ref already overrides as existing', () => {
+      const shown = applyFieldBlock(REF_TEMPLATE, 12, 'display', 'show_when', { field: 'x' });
+      expect(shown.status).toBe('exists');
+      expect(shown.yaml).toBe(REF_TEMPLATE);
+
+      // root_cause's library definition already has `required`; the $ref has no override yet.
+      const required = applyFieldBlock(REF_TEMPLATE, 8, 'validation', 'required', true);
+      expect(required.status).toBe('applied');
+    });
   });
 
   it('leaves an already-set rule untouched (exists)', () => {
