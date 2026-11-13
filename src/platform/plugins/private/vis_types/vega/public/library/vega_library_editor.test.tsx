@@ -149,6 +149,7 @@ describe('VegaLibraryEditor', () => {
       expect(lastPreviewState()).toEqual({
         spec: { format: 'hjson', value: '{ mark: point }' },
       });
+      expect(screen.getByTestId('vegaLibraryEditorCloseButton')).toHaveTextContent('Close');
     });
 
     it('cannot be saved until something changes', async () => {
@@ -176,9 +177,9 @@ describe('VegaLibraryEditor', () => {
       });
       expect(saveVegaToLibrary).not.toHaveBeenCalled();
       expect(closeFlyout).not.toHaveBeenCalled();
-      // The saved draft has no unsaved changes, so Cancel closes without asking.
+      // The saved draft has no unsaved changes, so Close closes without asking.
       expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorCancelButton'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorCloseButton'));
       expect(closeFlyout).toHaveBeenCalledTimes(1);
     });
 
@@ -443,7 +444,7 @@ describe('VegaLibraryEditor', () => {
     it('closes right away when nothing changed', async () => {
       const { closeFlyout } = renderEditor();
 
-      await userEvent.click(await screen.findByTestId('vegaLibraryEditorCancelButton'));
+      await userEvent.click(await screen.findByTestId('vegaLibraryEditorCloseButton'));
 
       expect(closeFlyout).toHaveBeenCalledTimes(1);
       expect(screen.queryByTestId('vegaLibraryEditorDiscardModal')).not.toBeInTheDocument();
@@ -453,7 +454,7 @@ describe('VegaLibraryEditor', () => {
       const { closeFlyout } = renderEditor();
 
       await userEvent.click(await screen.findByText('changeSpec'));
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorCancelButton'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorCloseButton'));
 
       expect(await screen.findByTestId('vegaLibraryEditorDiscardModal')).toBeInTheDocument();
       fireEvent.click(screen.getByText('Keep editing'));
@@ -468,7 +469,7 @@ describe('VegaLibraryEditor', () => {
       const { closeFlyout } = renderEditor();
 
       await userEvent.click(await screen.findByText('changeSpec'));
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorCancelButton'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorCloseButton'));
       fireEvent.click(await screen.findByText('Discard changes'));
 
       await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
@@ -482,7 +483,7 @@ describe('VegaLibraryEditor', () => {
       expect(await screen.findByTestId('vegaLibraryEditorReadOnlyBadge')).toBeInTheDocument();
       expect(screen.queryByTestId('vegaLibraryEditorSaveButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('vegaLibraryEditorSaveButtonPrimary')).not.toBeInTheDocument();
-      expect(screen.getByTestId('vegaLibraryEditorCancelButton')).toHaveTextContent('Close');
+      expect(screen.getByTestId('vegaLibraryEditorCloseButton')).toHaveTextContent('Close');
     });
 
     it('can still be edited and previewed', async () => {
@@ -498,7 +499,7 @@ describe('VegaLibraryEditor', () => {
       const { closeFlyout } = renderEditor({ canSave: false });
 
       await userEvent.click(await screen.findByText('changeSpec'));
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorCancelButton'));
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorCloseButton'));
 
       expect(closeFlyout).toHaveBeenCalledTimes(1);
       expect(screen.queryByTestId('vegaLibraryEditorDiscardModal')).not.toBeInTheDocument();

@@ -146,13 +146,13 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
       await queryInput.clear();
       await queryInput.pressSequentially('status:active');
       await queryInput.press('Enter');
-      await page.testSubj.click('vegaLibraryEditorCancelButton');
+      await page.testSubj.click('vegaLibraryEditorCloseButton');
 
       await expect(page.testSubj.locator('vegaLibraryEditorDiscardModal')).toBeVisible();
       await page.getByRole('button', { name: 'Keep editing' }).click();
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
 
-      await page.testSubj.click('vegaLibraryEditorCancelButton');
+      await page.testSubj.click('vegaLibraryEditorCloseButton');
       await page.getByRole('button', { name: 'Discard changes' }).click();
       await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeHidden();
     }

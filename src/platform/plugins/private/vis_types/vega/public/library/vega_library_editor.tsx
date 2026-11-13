@@ -219,7 +219,7 @@ export const VegaLibraryEditor = ({
     }
   };
 
-  const onCancel = () => {
+  const onClose = () => {
     if (canSave && isDirty) {
       setIsDiscardConfirmOpen(true);
       return;
@@ -285,9 +285,9 @@ export const VegaLibraryEditor = ({
         />
       </EuiFlyoutBody>
       <ManagedEditorFooter
-        onCancel={onCancel}
-        cancelButtonLabel={canSave ? undefined : closeLabel}
-        cancelButtonDataTestSubj="vegaLibraryEditorCancelButton"
+        onCancel={onClose}
+        cancelButtonLabel={closeLabel}
+        cancelButtonDataTestSubj="vegaLibraryEditorCloseButton"
         previewAction={{
           onPreview: () => {
             setPreviewedSpec({ spec: draft.spec, format: draft.format });
