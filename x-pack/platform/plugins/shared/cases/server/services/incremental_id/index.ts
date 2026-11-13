@@ -15,11 +15,13 @@ import pRetry from 'p-retry';
 import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { CASE_SAVED_OBJECT, CASE_ID_INCREMENTER_SAVED_OBJECT } from '../../../common/constants';
+import { INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS } from '../../../common/constants/incremental_id';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type {
   CaseIdIncrementerPersistedAttributes,
   CaseIdIncrementerSavedObject,
 } from '../../common/types/id_incrementer';
+import type { CasesEventBus } from '../../events/event_bus';
 
 type GetCasesParameters = Pick<
   SavedObjectsFindOptions,
@@ -38,7 +40,8 @@ export class CasesIncrementalIdService {
 
   constructor(
     private internalSavedObjectsClient: SavedObjectsClientContract,
-    private logger: Logger
+    private logger: Logger,
+    private casesEventBus?: CasesEventBus
   ) {
     this.logger = logger.get('incremental_id_service');
     this.logger.debug('Cases incremental ID service initialized');
@@ -132,6 +135,12 @@ export class CasesIncrementalIdService {
     const incIdSoCache: Map<string, SavedObject<CaseIdIncrementerPersistedAttributes>> = new Map();
 
     let hasAppliedAnId = false;
+    /**
+     * The recently created cases that got an ID applied, reported to the event bus once the loop is
+     * done. Older ones (e.g. the first batches after the feature was enabled) can't have a trigger task.
+     */
+    const assignedRecentCaseIds: string[] = [];
+    const oldestRecentCase = Date.now() - INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS;
 
     for (let index = 0; index < casesWithoutIncrementalId.length && !this.isStopped; index++) {
       try {
@@ -172,11 +181,21 @@ export class CasesIncrementalIdService {
           incIdSo.attributes.last_id = newId;
           hasAppliedAnId = true;
           countProcessedCases++;
+          if (new Date(caseSo.attributes.created_at).getTime() >= oldestRecentCase) {
+            assignedRecentCaseIds.push(caseSo.id);
+          }
         }
       } catch (error) {
         this.logger.error(`ID incrementing paused due to error: ${error}`);
         break;
       }
+    }
+
+    // This is deliberately a single event per batch and not one per case: the first runs can
+    // assign thousands of IDs. It is emitted before the counters are persisted because the IDs
+    // are already applied to the cases at this point.
+    if (assignedRecentCaseIds.length > 0) {
+      this.casesEventBus?.emitIncrementalIdsAssigned({ caseIds: assignedRecentCaseIds });
     }
 
     // If changes have been made, apply the changes to the counters

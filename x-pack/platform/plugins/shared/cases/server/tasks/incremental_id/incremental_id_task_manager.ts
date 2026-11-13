@@ -15,6 +15,7 @@ import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_co
 import { CASE_SAVED_OBJECT, CASE_ID_INCREMENTER_SAVED_OBJECT } from '../../../common/constants';
 import { CasesIncrementalIdService } from '../../services/incremental_id';
 import type { ConfigType } from '../../config';
+import type { CasesEventBus } from '../../events/event_bus';
 
 export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignment';
 export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
@@ -25,13 +26,16 @@ export class IncrementalIdTaskManager {
   private internalSavedObjectsClient?: SavedObjectsClient;
   private taskManager?: TaskManagerStartContract;
   private successErrorUsageCounter?: IUsageCounter;
+  private casesEventBus?: CasesEventBus;
   constructor(
     taskManager: TaskManagerSetupContract,
     config: ConfigType['incrementalId'],
     logger: Logger,
-    usageCollection?: UsageCollectionSetup
+    usageCollection?: UsageCollectionSetup,
+    casesEventBus?: CasesEventBus
   ) {
     this.config = config;
+    this.casesEventBus = casesEventBus;
     this.logger = logger.get('incremental_id_task');
     this.logger.info('Registering Case Incremental ID Task Manager');
 
@@ -50,7 +54,8 @@ export class IncrementalIdTaskManager {
           }
           const casesIncrementService = new CasesIncrementalIdService(
             this.internalSavedObjectsClient,
-            this.logger
+            this.logger,
+            this.casesEventBus
           );
           return {
             run: async () => {

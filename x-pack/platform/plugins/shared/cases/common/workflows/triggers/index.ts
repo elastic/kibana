@@ -103,7 +103,7 @@ export const caseUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   documentation: {
     details: i18n.translate('xpack.cases.workflowTriggers.caseUpdated.documentation.details', {
       defaultMessage:
-        'Emitted after case updates. Use event.updatedFields to filter by which fields changed, event.caseId to match a specific case, and event.owner to scope by case owner.',
+        'Emitted after case updates. Use event.updatedFields to filter by which fields changed, event.caseId to match a specific case, and event.owner to scope by case owner.\n\nWhen a new case is assigned its incremental ID, the trigger is emitted once more with "incremental_id" in event.updatedFields. This happens asynchronously, typically about 10 minutes after the case was created, and the workflow runs as the user who created the case. It only applies to cases that get their ID within 24 hours of being created. Workflows that should not run for this update can exclude it with the condition: not event.updatedFields: "incremental_id".',
     }),
     examples: [
       i18n.translate('xpack.cases.workflowTriggers.caseUpdated.documentation.example', {
@@ -118,6 +118,21 @@ triggers:
           triggerId: CaseUpdatedTriggerId,
         },
       }),
+      i18n.translate(
+        'xpack.cases.workflowTriggers.caseUpdated.documentation.exampleIncrementalId',
+        {
+          defaultMessage: `## Run on case updates, except when the incremental ID is assigned
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'not event.updatedFields: "incremental_id"'
+\`\`\``,
+          values: {
+            triggerId: CaseUpdatedTriggerId,
+          },
+        }
+      ),
     ],
   },
 };

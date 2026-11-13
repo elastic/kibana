@@ -49,6 +49,17 @@ describe('CasesEventBus', () => {
     });
   });
 
+  it('emits incremental ids assigned events without a request', () => {
+    const eventBus = new CasesEventBus();
+    const listener = jest.fn();
+    const payload = { caseIds: ['case-1'] };
+
+    eventBus.onIncrementalIdsAssigned(listener);
+    eventBus.emitIncrementalIdsAssigned(payload);
+
+    expect(listener).toHaveBeenCalledWith(payload);
+  });
+
   it('emits attachments deleted events', () => {
     const eventBus = new CasesEventBus();
     const listener = jest.fn();
