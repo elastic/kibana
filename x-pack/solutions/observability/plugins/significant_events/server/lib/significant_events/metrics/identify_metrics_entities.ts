@@ -8,23 +8,20 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Logger } from '@kbn/logging';
-import {
-  normalizeFeatureSlug,
-  type FeatureUpsert,
-} from '@kbn/significant-events-schema';
+import { normalizeFeatureSlug, type FeatureUpsert } from '@kbn/significant-events-schema';
 import { toFromSourceQuery } from '@kbn/nightshift-shared';
 import { timeoutSignal } from '@kbn/std';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
+import { ENTITY_KEY_TABLE } from './entity_key_table';
+import { getDatasetFamily } from './entity_rows/helpers';
 import {
   ENTITY_QUERY_LIMIT,
-  ENTITY_KEY_TABLE,
-  getDatasetFamily,
-  mergeHostFeatures,
   type DroppedMetricsEntityRows,
   type EsqlCell,
   type EsqlRow,
   type EsqlScalar,
-} from './entity_key_table';
+} from './entity_rows/types';
+import { mergeHostFeatures } from './hosts';
 
 const MAX_ENTITIES = 500;
 const DATASET_QUERY_TIMEOUT_MS = 30_000;
@@ -91,6 +88,7 @@ const rowsFromResponse = (response: ESQLSearchResponse): EsqlRow[] =>
     }, {})
   );
 
+// NULLIFY lets each entity query read only the fields its datasets provide.
 const buildSourceQuery = (esql: string): string =>
   `SET unmapped_fields = "NULLIFY"; ${toFromSourceQuery(esql)}`;
 
@@ -262,9 +260,7 @@ export const identifyMetricsEntities = async ({
     kiClient.getExcludedFeatures(sourceId),
     kiClient.getFeatures(sourceId),
   ]);
-  const excludedFeatureIds = new Set(
-    excludedFeatures.map(({ id }) => normalizeFeatureSlug(id))
-  );
+  const excludedFeatureIds = new Set(excludedFeatures.map(({ id }) => normalizeFeatureSlug(id)));
   const priorBySlug = new Map(
     priorFeatures.map((feature) => [normalizeFeatureSlug(feature.id), feature])
   );

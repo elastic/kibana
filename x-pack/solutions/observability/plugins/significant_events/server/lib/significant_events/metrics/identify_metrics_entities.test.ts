@@ -8,20 +8,15 @@
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { isConditionComplete } from '@kbn/streamlang';
 import { identifyMetricsEntities } from './identify_metrics_entities';
-import {
-  buildKubernetesEntityId,
-  buildInfrastructureConceptDescription,
-  ENTITY_KEY_TABLE,
-  foldClusterRows,
-  foldNamespaceRows,
-  foldNodeRows,
-  foldOtelHostRows,
-  foldSystemHostRows,
-  foldWorkloadRows,
-  getDatasetFamily,
-  KUBERNETES_ENTITY_STORE_TYPES,
-  mergeHostFeatures,
-} from './entity_key_table';
+import { ENTITY_KEY_TABLE } from './entity_key_table';
+import { getDatasetFamily } from './entity_rows/helpers';
+import { foldOtelHostRows, foldSystemHostRows, mergeHostFeatures } from './hosts';
+import { foldClusterRows } from './kubernetes/cluster';
+import { buildInfrastructureConceptDescription } from './kubernetes/concepts';
+import { buildKubernetesEntityId, KUBERNETES_ENTITY_STORE_TYPES } from './kubernetes/ids';
+import { foldNamespaceRows } from './kubernetes/namespaces';
+import { foldNodeRows } from './kubernetes/nodes';
+import { foldWorkloadRows } from './kubernetes/workloads';
 
 const datasetColumns = [
   { name: 'docs', type: 'long' },
@@ -690,13 +685,7 @@ describe('identifyMetricsEntities', () => {
         [null, 0, 1, '2026-11-10T12:01:00.000Z'],
       ],
     };
-    const harness = createHarness([
-      datasetList,
-      workloads,
-      nodes,
-      namespaces,
-      clusters,
-    ]);
+    const harness = createHarness([datasetList, workloads, nodes, namespaces, clusters]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
@@ -952,9 +941,7 @@ describe('identifyMetricsEntities', () => {
       },
       {
         columns: nodeColumns,
-        values: [
-          ['edge-edot', 1, 10, '2026-11-10T12:00:00.000Z', ['node-a'], ['Linux'], ['gcp']],
-        ],
+        values: [['edge-edot', 1, 10, '2026-11-10T12:00:00.000Z', ['node-a'], ['Linux'], ['gcp']]],
       },
       {
         columns: namespaceColumns,
@@ -1019,15 +1006,7 @@ describe('identifyMetricsEntities', () => {
     const nodes = {
       columns: nodeColumns,
       values: [
-        [
-          'cluster-a',
-          2,
-          15,
-          '2026-11-10T12:00:00.000Z',
-          ['node-a', 'node-b'],
-          ['Linux'],
-          ['gcp'],
-        ],
+        ['cluster-a', 2, 15, '2026-11-10T12:00:00.000Z', ['node-a', 'node-b'], ['Linux'], ['gcp']],
       ],
     };
     const harness = createHarness([
