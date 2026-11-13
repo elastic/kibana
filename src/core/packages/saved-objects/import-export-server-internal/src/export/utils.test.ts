@@ -8,23 +8,13 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { byIdAscComparator, getPreservedOrderComparator } from './utils';
+import { getPreservedOrderComparator } from './utils';
 
 const createObj = (id: string): SavedObject => ({
   id,
   type: 'dummy',
   attributes: {},
   references: [],
-});
-
-describe('byIdAscComparator', () => {
-  it('sorts the objects by id asc', () => {
-    const objs = [createObj('delta'), createObj('alpha'), createObj('beta')];
-
-    objs.sort(byIdAscComparator);
-
-    expect(objs.map((obj) => obj.id)).toEqual(['alpha', 'beta', 'delta']);
-  });
 });
 
 describe('getPreservedOrderComparator', () => {
