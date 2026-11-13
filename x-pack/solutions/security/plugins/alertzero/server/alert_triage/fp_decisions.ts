@@ -107,8 +107,10 @@ export interface DecisionSelection {
  * - An approval stores a key only when enough approved alerts have it, and no earlier alert of the
  *   key carries a verdict other than false positive (the consistency rule). `blocked` is the set
  *   of key hashes that fail the second test.
- * - A dismissal stores every key, because "do not propose again" needs no evidence.
- * Both stop at the per-approval cap, biggest keys first.
+ * - A dismissal skips the minimum and the consistency rule, because "do not propose again" needs no
+ *   evidence.
+ * Both stop at the per-approval cap, biggest keys first. A dismissed key past the cap goes back to
+ * analysis, which costs a review but hides no alert.
  */
 export const selectDecisionKeys = ({
   kind,
