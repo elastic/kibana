@@ -82,10 +82,12 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           top: -${euiTheme.size.s} !important;
         }
 
-        // When only the drag handle remains (panel focused for edit), undo the combined wrapper
-        // so the handle is an individual pill at the default left inset.
+        // When only the drag handle remains (panel focused for flyout edit), undo the combined
+        // wrapper so the handle is an individual pill at the default left inset. Skip overridden
+        // hover actions — those are inline-edit chrome, not a leftover combined wrapper.
         // https://github.com/elastic/kibana/issues/278578
-        .dshDashboardGrid__item--hideHoverActions.dshDashboardGrid__item--focused & {
+        .dshDashboardGrid__item--hideHoverActions.dshDashboardGrid__item--focused
+          &:not(.embPanel__hoverActions--overridden) {
           width: 100%;
           right: auto;
           padding: 0px ${euiTheme.size.m};
