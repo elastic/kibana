@@ -114,6 +114,7 @@ import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/work
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { STEP_FRAGMENT_SCHEMA_FILE_MATCH_EXCLUSION } from '../lib/step_fragment/step_fragment_models';
+import { useInactiveDebouncedValue } from '../lib/use_inactive_debounced_value';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -127,6 +128,10 @@ import {
 
 // Monaco's default `scrollbar.verticalScrollbarSize`.
 const MONACO_VERTICAL_SCROLLBAR_SIZE = 14;
+
+// While the graph is showing, this editor is hidden and only mirrors the store. Pushing the whole
+// document into it on every graph edit costs time and memory, so it catches up after this much quiet.
+const HIDDEN_EDITOR_SYNC_DEBOUNCE_MS = 300;
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
@@ -262,6 +267,11 @@ export const WorkflowYAMLEditor = ({
   );
 
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
+  const editorValue = useInactiveDebouncedValue(
+    workflowYaml,
+    isActive,
+    HIDDEN_EDITOR_SYNC_DEBOUNCE_MS
+  );
   const hasChanges = useSelector(selectHasChanges);
 
   const originalValue = workflow?.yaml ?? '';
@@ -1013,7 +1023,7 @@ export const WorkflowYAMLEditor = ({
             options={options}
             chromeOverrides={workflowsEditorChromeOverrides}
             schemas={schemas}
-            value={workflowYaml}
+            value={editorValue}
             enableFindAction={true}
             dataTestSubj="workflowYamlEditor"
           />

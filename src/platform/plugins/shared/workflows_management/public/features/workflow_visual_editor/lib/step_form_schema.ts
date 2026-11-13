@@ -105,6 +105,11 @@ export interface StepFormField {
   readonly deleteWhenEmpty?: true;
   /** A text field that holds a duration (`30s`, `1h30m`), or a `{{ }}` template where it is templatable. */
   readonly format?: 'duration';
+  /**
+   * A map whose values may be of any type (`data.set`): a single word typed in a row is read as
+   * YAML reads it, so `true` is a boolean and `1` a number. See `coerceSingleWord`.
+   */
+  readonly typedValues?: true;
 }
 
 export interface StepFormSchema {
@@ -285,6 +290,12 @@ const isStringLikeSchema = (schema: z.ZodType): boolean => {
     return members.every((m) => m instanceof z.ZodString || m instanceof z.ZodLiteral);
   }
   return false;
+};
+
+/** The map's values may be of any type (`z.unknown()`), so a value is not bound to being text. */
+const isAnyValueSchema = (schema: z.ZodType): boolean => {
+  const inner = unwrapSchema(schema);
+  return inner instanceof z.ZodUnknown || inner instanceof z.ZodAny;
 };
 
 /** A map's value type is a single scalar, so each entry fits one text cell (e.g. HTTP headers). */
@@ -640,6 +651,7 @@ const fieldsFromObject = (
       description: describe(schema),
       required: isRequired(schema),
       kind: 'key-value',
+      ...(isAnyValueSchema(inner.valueType as z.ZodType) ? { typedValues: true as const } : {}),
     };
     return [withField];
   }

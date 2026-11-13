@@ -29,6 +29,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
+  EuiTextArea,
   EuiTitle,
   EuiToolTip,
   useEuiFontSize,
@@ -88,6 +89,7 @@ import {
   formatDataReferenceToken,
   formatValueReferenceToken,
 } from '../lib/build_data_reference_catalog';
+import { containsMapDirective, MAP_DIRECTIVE_KEY } from '../lib/contains_map_directive';
 import { isInParallelBody } from '../lib/is_in_parallel_body';
 import { fromTags, isTagValue, toTags } from '../lib/list_value';
 import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
@@ -267,6 +269,39 @@ const fieldId = (field: StepFormField): string => field.path.join('.');
 
 /** For a row whose field has no sub-fields (only a `variants` field renders any). */
 const renderNoSubFields = (): React.ReactElement => <></>;
+
+/** A value the form cannot edit (it uses `$map`): its YAML, read-only, and where to edit it. */
+function YamlOnlyValue({
+  value,
+  ariaLabel,
+  testSubj,
+}: {
+  value: unknown;
+  ariaLabel: string;
+  testSubj: string;
+}) {
+  const yaml = stringifyYaml(value).trim();
+  return (
+    <>
+      <EuiTextArea
+        compressed
+        fullWidth
+        readOnly
+        resize="none"
+        rows={Math.min(yaml.split('\n').length, 8)}
+        value={yaml}
+        aria-label={ariaLabel}
+        data-test-subj={testSubj}
+      />
+      <EuiText size="xs" color="subdued" data-test-subj={`${testSubj}-yamlHint`}>
+        {i18n.translate('workflows.stepConfigPanel.keyValue.yamlOnlyHint', {
+          defaultMessage: 'Uses {directive}, which the form cannot edit. Edit it in the YAML tab.',
+          values: { directive: MAP_DIRECTIVE_KEY },
+        })}
+      </EuiText>
+    </>
+  );
+}
 
 /**
  * True when the panel draft differs from the applied snapshot opened with.
@@ -2106,18 +2141,27 @@ function StepFieldRow({
                   })
             }
             testSubj={testSubj}
-            renderJsonValue={(cell) => (
-              <CodeField
-                field={{ ...field, kind: 'code', language: 'json', label: cell.ariaLabel }}
-                value={cell.value}
-                catalog={referenceCatalog}
-                onChange={cell.onChange}
-                testSubj={cell.testSubj}
-                isInvalid={false}
-                onBlur={accuseIfInvalid}
-                onDraftErrorChange={cell.onDraftErrorChange}
-              />
-            )}
+            typedValues={field.typedValues === true}
+            renderJsonValue={(cell) =>
+              containsMapDirective(cell.value) ? (
+                <YamlOnlyValue
+                  value={cell.value}
+                  ariaLabel={cell.ariaLabel}
+                  testSubj={cell.testSubj}
+                />
+              ) : (
+                <CodeField
+                  field={{ ...field, kind: 'code', language: 'json', label: cell.ariaLabel }}
+                  value={cell.value}
+                  catalog={referenceCatalog}
+                  onChange={cell.onChange}
+                  testSubj={cell.testSubj}
+                  isInvalid={false}
+                  onBlur={accuseIfInvalid}
+                  onDraftErrorChange={cell.onDraftErrorChange}
+                />
+              )
+            }
           />
         </StepValidatedFormRow>
       );

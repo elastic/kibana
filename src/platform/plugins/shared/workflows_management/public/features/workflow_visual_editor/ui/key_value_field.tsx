@@ -15,11 +15,12 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ReferenceCapableField } from './reference_capable_field';
 import { ReferenceTextInput } from './reference_text_input';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
+import { coerceSingleWord } from '../lib/coerce_single_word';
 import { normalizeReferenceForm } from '../lib/reference_value';
 
 interface Row {
@@ -45,6 +46,11 @@ export interface KeyValueFieldProps {
   /** Label of the add button, e.g. "Add variable". */
   readonly addLabel: string;
   readonly testSubj: string;
+  /**
+   * The values may be of any type: a single word typed in a row is read as YAML reads it (`true`
+   * is a boolean, `1` a number), see `coerceSingleWord`. Off for maps whose values are text.
+   */
+  readonly typedValues?: boolean;
   /**
    * Renders a value that isn't text (a number, a list, a record) as JSON. Injected so this file
    * doesn't import the panel that renders it.
@@ -78,6 +84,127 @@ const rowsFromRecord = (
 const sameRecord = (a: Record<string, unknown>, b: Record<string, unknown>): boolean =>
   JSON.stringify(a) === JSON.stringify(b);
 
+interface KeyValueRowProps {
+  readonly row: Row;
+  readonly index: number;
+  readonly isDuplicate: boolean;
+  readonly jsonError: string | undefined;
+  readonly catalog: DataReferenceCatalog;
+  readonly fieldLabel: string;
+  readonly nameLabel: string;
+  readonly valueLabel: string;
+  readonly testSubj: string;
+  readonly onKeyChange: (id: number, key: string) => void;
+  readonly onTextChange: (id: number, value: string) => void;
+  readonly onJsonChange: (id: number, value: unknown) => void;
+  readonly onValueBlur: (id: number) => void;
+  readonly onRemove: (id: number) => void;
+  readonly onJsonErrorChange: (id: number, error: string | undefined) => void;
+  /**
+   * Only given to a row whose value is not text: the caller's function changes on every render, so
+   * a text row, which has no use for it, keeps its memo.
+   */
+  readonly renderJsonValue: ((props: KeyValueJsonCellProps) => React.ReactElement) | undefined;
+}
+
+/**
+ * One row. It is memoized, and every callback it gets is stable, so typing in one row does not
+ * render the others (each carries a reference picker, chips, a tooltip and icons).
+ */
+const KeyValueRow = React.memo(function KeyValueRow({
+  row,
+  index,
+  isDuplicate,
+  jsonError,
+  catalog,
+  fieldLabel,
+  nameLabel,
+  valueLabel,
+  testSubj,
+  onKeyChange,
+  onTextChange,
+  onJsonChange,
+  onValueBlur,
+  onRemove,
+  onJsonErrorChange,
+  renderJsonValue,
+}: KeyValueRowProps) {
+  const { euiTheme } = useEuiTheme();
+  const removeLabel = i18n.translate('workflows.stepConfigPanel.keyValue.remove', {
+    defaultMessage: 'Remove {name}',
+    values: { name: row.key || fieldLabel },
+  });
+  const isText = row.value === undefined || typeof row.value === 'string';
+  const error = isDuplicate
+    ? i18n.translate('workflows.stepConfigPanel.keyValue.duplicate', {
+        defaultMessage: 'Duplicate name "{name}"',
+        values: { name: row.key },
+      })
+    : jsonError;
+  return (
+    <div data-test-subj={`${testSubj}-row-${index}`}>
+      <div css={{ display: 'flex', alignItems: 'flex-start', gap: euiTheme.size.xs }}>
+        <div css={{ flex: '0 0 38%', minWidth: 0 }}>
+          <EuiFieldText
+            compressed
+            fullWidth
+            aria-label={nameLabel}
+            placeholder={i18n.translate('workflows.stepConfigPanel.keyValue.namePlaceholder', {
+              defaultMessage: 'name',
+            })}
+            value={row.key}
+            isInvalid={isDuplicate}
+            onChange={(event) => onKeyChange(row.id, event.target.value)}
+            data-test-subj={`${testSubj}-key-${index}`}
+          />
+        </div>
+        <div css={{ flex: '1 1 auto', minWidth: 0 }}>
+          {isText ? (
+            <ReferenceCapableField
+              catalog={catalog}
+              value={typeof row.value === 'string' ? row.value : ''}
+              onChange={(next) => onTextChange(row.id, next)}
+              openOnBrace
+            >
+              {(bind) => (
+                <ReferenceTextInput
+                  bind={bind}
+                  catalog={catalog}
+                  ariaLabel={valueLabel}
+                  isInvalid={false}
+                  // A whole reference keeps its type; one inside a sentence is text.
+                  onBlur={() => onValueBlur(row.id)}
+                  onChange={bind.reportChange}
+                  testSubj={`${testSubj}-value-${index}`}
+                  warnContainersInSentence={false}
+                />
+              )}
+            </ReferenceCapableField>
+          ) : (
+            renderJsonValue?.({
+              ariaLabel: valueLabel,
+              value: row.value,
+              onChange: (next) => onJsonChange(row.id, next),
+              onDraftErrorChange: (draftError) => onJsonErrorChange(row.id, draftError),
+              testSubj: `${testSubj}-value-${index}`,
+            })
+          )}
+        </div>
+        <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="trash"
+            color="text"
+            aria-label={removeLabel}
+            onClick={() => onRemove(row.id)}
+            data-test-subj={`${testSubj}-remove-${index}`}
+          />
+        </EuiToolTip>
+      </div>
+      {error ? <EuiFormErrorText>{error}</EuiFormErrorText> : null}
+    </div>
+  );
+});
+
 /**
  * A map as rows: a name on the left, a value on the right (text with reference chips), plus add
  * and remove. Rows keep their order. A row without a name stays local until it has one, and a
@@ -90,6 +217,7 @@ export function KeyValueField({
   fieldLabel,
   addLabel,
   testSubj,
+  typedValues = false,
   renderJsonValue,
 }: KeyValueFieldProps) {
   const { euiTheme } = useEuiTheme();
@@ -103,6 +231,8 @@ export function KeyValueField({
   // Cells changed since they were focused: only those get the written-form rule on blur, so
   // clicking into a cell and out again never rewrites what is stored.
   const editedIds = useRef(new Set<number>());
+  const typedValuesRef = useRef(typedValues);
+  typedValuesRef.current = typedValues;
 
   // The map changed from outside (YAML view, undo): follow it, unless it is just our own write.
   useEffect(() => {
@@ -118,6 +248,44 @@ export function KeyValueField({
   };
   const updateRow = (id: number, patch: Partial<Pick<Row, 'key' | 'value'>>) =>
     update(rowsRef.current.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+
+  // Handlers for the rows. They read the latest `update` through refs and never change, which is
+  // what lets a row that did not change skip its render.
+  const updateRef = useRef(update);
+  updateRef.current = update;
+  const updateRowRef = useRef(updateRow);
+  updateRowRef.current = updateRow;
+  const onKeyChange = useCallback(
+    (id: number, key: string) => updateRowRef.current(id, { key }),
+    []
+  );
+  const onTextChange = useCallback((id: number, next: string) => {
+    editedIds.current.add(id);
+    updateRowRef.current(id, { value: next });
+  }, []);
+  const onJsonChange = useCallback(
+    (id: number, next: unknown) => updateRowRef.current(id, { value: next }),
+    []
+  );
+  const onValueBlur = useCallback((id: number) => {
+    if (!editedIds.current.delete(id)) return;
+    const current = rowsRef.current.find((row) => row.id === id);
+    const normalized = normalizeReferenceForm(
+      typeof current?.value === 'string' ? current.value : ''
+    );
+    updateRowRef.current(id, {
+      value: typedValuesRef.current ? coerceSingleWord(normalized) : normalized,
+    });
+  }, []);
+  const onRemove = useCallback(
+    (id: number) => updateRef.current(rowsRef.current.filter((other) => other.id !== id)),
+    []
+  );
+  const onJsonErrorChange = useCallback(
+    (id: number, draftError: string | undefined) =>
+      setJsonErrors((current) => ({ ...current, [id]: draftError })),
+    []
+  );
 
   const seenKeys = new Set<string>();
   const duplicateIds = new Set<number>();
@@ -140,96 +308,29 @@ export function KeyValueField({
       css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}
       data-test-subj={testSubj}
     >
-      {rows.map((row, index) => {
-        const isDuplicate = duplicateIds.has(row.id);
-        const removeLabel = i18n.translate('workflows.stepConfigPanel.keyValue.remove', {
-          defaultMessage: 'Remove {name}',
-          values: { name: row.key || fieldLabel },
-        });
-        const isText = row.value === undefined || typeof row.value === 'string';
-        const error = isDuplicate
-          ? i18n.translate('workflows.stepConfigPanel.keyValue.duplicate', {
-              defaultMessage: 'Duplicate name "{name}"',
-              values: { name: row.key },
-            })
-          : jsonErrors[row.id];
-        return (
-          <div key={row.id} data-test-subj={`${testSubj}-row-${index}`}>
-            <div css={{ display: 'flex', alignItems: 'flex-start', gap: euiTheme.size.xs }}>
-              <div css={{ flex: '0 0 38%', minWidth: 0 }}>
-                <EuiFieldText
-                  compressed
-                  fullWidth
-                  aria-label={nameLabel}
-                  placeholder={i18n.translate(
-                    'workflows.stepConfigPanel.keyValue.namePlaceholder',
-                    {
-                      defaultMessage: 'name',
-                    }
-                  )}
-                  value={row.key}
-                  isInvalid={isDuplicate}
-                  onChange={(event) => updateRow(row.id, { key: event.target.value })}
-                  data-test-subj={`${testSubj}-key-${index}`}
-                />
-              </div>
-              <div css={{ flex: '1 1 auto', minWidth: 0 }}>
-                {isText ? (
-                  <ReferenceCapableField
-                    catalog={catalog}
-                    value={typeof row.value === 'string' ? row.value : ''}
-                    onChange={(next) => {
-                      editedIds.current.add(row.id);
-                      updateRow(row.id, { value: next });
-                    }}
-                    openOnBrace
-                  >
-                    {(bind) => (
-                      <ReferenceTextInput
-                        bind={bind}
-                        catalog={catalog}
-                        ariaLabel={valueLabel}
-                        isInvalid={false}
-                        // A whole reference keeps its type; one inside a sentence is text.
-                        onBlur={() => {
-                          if (!editedIds.current.delete(row.id)) return;
-                          updateRow(row.id, {
-                            value: normalizeReferenceForm(
-                              typeof row.value === 'string' ? row.value : ''
-                            ),
-                          });
-                        }}
-                        onChange={bind.reportChange}
-                        testSubj={`${testSubj}-value-${index}`}
-                        warnContainersInSentence={false}
-                      />
-                    )}
-                  </ReferenceCapableField>
-                ) : (
-                  renderJsonValue({
-                    ariaLabel: valueLabel,
-                    value: row.value,
-                    onChange: (next) => updateRow(row.id, { value: next }),
-                    onDraftErrorChange: (draftError) =>
-                      setJsonErrors((current) => ({ ...current, [row.id]: draftError })),
-                    testSubj: `${testSubj}-value-${index}`,
-                  })
-                )}
-              </div>
-              <EuiToolTip content={removeLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="text"
-                  aria-label={removeLabel}
-                  onClick={() => update(rowsRef.current.filter((other) => other.id !== row.id))}
-                  data-test-subj={`${testSubj}-remove-${index}`}
-                />
-              </EuiToolTip>
-            </div>
-            {error ? <EuiFormErrorText>{error}</EuiFormErrorText> : null}
-          </div>
-        );
-      })}
+      {rows.map((row, index) => (
+        <KeyValueRow
+          key={row.id}
+          row={row}
+          index={index}
+          isDuplicate={duplicateIds.has(row.id)}
+          jsonError={jsonErrors[row.id]}
+          catalog={catalog}
+          fieldLabel={fieldLabel}
+          nameLabel={nameLabel}
+          valueLabel={valueLabel}
+          testSubj={testSubj}
+          onKeyChange={onKeyChange}
+          onTextChange={onTextChange}
+          onJsonChange={onJsonChange}
+          onValueBlur={onValueBlur}
+          onRemove={onRemove}
+          onJsonErrorChange={onJsonErrorChange}
+          renderJsonValue={
+            row.value === undefined || typeof row.value === 'string' ? undefined : renderJsonValue
+          }
+        />
+      ))}
       <div>
         <EuiButton
           size="s"

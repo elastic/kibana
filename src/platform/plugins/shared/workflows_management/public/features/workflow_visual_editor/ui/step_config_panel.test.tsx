@@ -2054,6 +2054,96 @@ with:
       expect(lastFragment(onFragmentChange)).toMatch(/alpha: "2"/);
     });
 
+    describe('a single word typed as a value', () => {
+      const typeValue = (word: string) => {
+        const view = renderPanel(setStep(' {}'));
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with-add'));
+        fireEvent.change(screen.getByTestId('workflowStepConfigField-with-key-0'), {
+          target: { value: 'flag' },
+        });
+        const cell = activateField('workflowStepConfigField-with-value-0');
+        fireEvent.change(cell, { target: { value: word } });
+        fireEvent.blur(cell);
+        return lastFragment(view.onFragmentChange);
+      };
+
+      it.each([
+        ['true', 'flag: true\n'],
+        ['True', 'flag: true\n'],
+        ['false', 'flag: false\n'],
+        ['null', 'flag: null\n'],
+        ['~', 'flag: null\n'],
+        ['0', 'flag: 0\n'],
+        ['1', 'flag: 1\n'],
+        ['-1', 'flag: -1\n'],
+        ['1.1', 'flag: 1.1\n'],
+        ['-1.1', 'flag: -1.1\n'],
+        ['[]', 'flag: []\n'],
+        ['["a","b"]', 'flag:\n    - a\n    - b\n'],
+        ['["a", "b c"]', 'flag:\n    - a\n    - b c\n'],
+        ['[{"a":1}]', 'flag:\n    - a: 1\n'],
+      ])('%s is written as a YAML value of its own type', (word, line) => {
+        expect(typeValue(word)).toContain(line);
+      });
+
+      it.each([
+        ['undefined', 'flag: undefined\n'],
+        ['true_false', 'flag: true_false\n'],
+        ['1N', 'flag: 1N\n'],
+        ['yes', 'flag: yes\n'],
+        ['true false', 'flag: true false\n'],
+        ['007', 'flag: "007"\n'],
+        ['1.10', 'flag: "1.10"\n'],
+        ['1e3', 'flag: "1e3"\n'],
+        ['12345678901234567890', 'flag: "12345678901234567890"\n'],
+        ['{{x}}', 'flag: "{{x}}"\n'],
+        ['[a]', 'flag: "[a]"\n'],
+        ['#c', 'flag: "#c"\n'],
+        ['{{ x }}', 'flag: "{{ x }}"\n'],
+        ['[1.0]', 'flag: "[1.0]"\n'],
+      ])('%s stays text', (word, line) => {
+        expect(typeValue(word)).toContain(line);
+      });
+
+      it('keeps what was typed as text until the cell loses focus', () => {
+        const { onFragmentChange } = renderPanel(setStep(' {}'));
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with-add'));
+        fireEvent.change(screen.getByTestId('workflowStepConfigField-with-key-0'), {
+          target: { value: 'flag' },
+        });
+        const cell = activateField('workflowStepConfigField-with-value-0');
+        fireEvent.change(cell, { target: { value: 'true' } });
+        expect(lastFragment(onFragmentChange)).toContain('flag: "true"\n');
+        fireEvent.blur(cell);
+        expect(lastFragment(onFragmentChange)).toContain('flag: true\n');
+      });
+
+      it('leaves a stored string alone, whether or not another row is edited', () => {
+        const { onFragmentChange } = renderPanel(setStep('\n  quoted: "true"\n  other: x'));
+        // Into the cell and out again, with no change.
+        const quoted = activateField('workflowStepConfigField-with-value-0');
+        fireEvent.blur(quoted);
+        expect(lastFragment(onFragmentChange)).toContain('quoted: "true"');
+
+        const other = activateField('workflowStepConfigField-with-value-1');
+        fireEvent.change(other, { target: { value: 'false' } });
+        fireEvent.blur(other);
+        expect(lastFragment(onFragmentChange)).toContain('quoted: "true"');
+        expect(lastFragment(onFragmentChange)).toContain('other: false');
+      });
+
+      it.each(['true', '[]', '["a","b"]'])(
+        'shows %s as JSON, like any value that is not text',
+        (word) => {
+          typeValue(word);
+          expect(screen.getByTestId('workflowStepConfigField-with-value-0')).toHaveAttribute(
+            'data-language',
+            'json'
+          );
+        }
+      );
+    });
+
     it('shows a value that is not text as JSON and keeps its type', () => {
       const { onFragmentChange } = renderPanel(setStep('\n  retries: 5'));
       const cell = screen.getByTestId('workflowStepConfigField-with-value-0');
@@ -2556,6 +2646,73 @@ with:
       expect(screen.getByTestId('workflowStepConfigField-with.fields-add')).toHaveTextContent(
         'Add field'
       );
+    });
+
+    it('keeps a typed word as text, because the values of this map are text', () => {
+      const { onFragmentChange } = renderMapper(
+        'name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    id: x\n'
+      );
+      const cell = activateField('workflowStepConfigField-with.fields-value-0');
+      fireEvent.change(cell, { target: { value: 'true' } });
+      fireEvent.blur(cell);
+      expect(lastFragment(onFragmentChange)).toContain('id: "true"');
+
+      const again = activateField('workflowStepConfigField-with.fields-value-0');
+      fireEvent.change(again, { target: { value: '["a"]' } });
+      fireEvent.blur(again);
+      expect(lastFragment(onFragmentChange)).toContain('id: \'["a"]\'');
+    });
+
+    describe('a field that uses $map', () => {
+      const withMap =
+        'name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    tags:\n      $map:\n        items: "${{ item.tags }}"\n        item: tag\n      name: "${{ tag.name }}"\n    owner:\n      a: x\n    id: "{{ item.id }}"\n';
+
+      it('shows its YAML read-only, with a pointer to the YAML tab, instead of a JSON editor', () => {
+        renderMapper(withMap);
+        const cell = screen.getByTestId('workflowStepConfigField-with.fields-value-0');
+        expect(cell).toHaveAttribute('readonly');
+        expect(cell).not.toHaveAttribute('data-language');
+        expect((cell as HTMLTextAreaElement).value).toContain('$map:');
+        expect((cell as HTMLTextAreaElement).value).toContain('items: ${{ item.tags }}');
+        expect(
+          screen.getByTestId('workflowStepConfigField-with.fields-value-0-yamlHint')
+        ).toHaveTextContent('Uses $map, which the form cannot edit. Edit it in the YAML tab.');
+      });
+
+      it('leaves the other rows as they are', () => {
+        renderMapper(withMap);
+        expect(screen.getByTestId('workflowStepConfigField-with.fields-value-1')).toHaveAttribute(
+          'data-language',
+          'json'
+        );
+        expect(
+          screen.queryByTestId('workflowStepConfigField-with.fields-value-1-yamlHint')
+        ).not.toBeInTheDocument();
+      });
+
+      it('does not change it when another row is edited, and lets the row be removed', () => {
+        const { onFragmentChange } = renderMapper(withMap);
+        const cell = activateField('workflowStepConfigField-with.fields-value-2');
+        fireEvent.change(cell, { target: { value: '{{ item.key }}' } });
+        fireEvent.blur(cell);
+        const edited = lastFragment(onFragmentChange);
+        expect(edited).toContain('$map:');
+        expect(edited).toContain('items: ${{ item.tags }}');
+        expect(edited).toContain('item: tag');
+        expect(edited).toContain('name: ${{ tag.name }}');
+
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with.fields-remove-0'));
+        expect(lastFragment(onFragmentChange)).not.toContain('$map');
+      });
+
+      it('is found deeper in a value', () => {
+        renderMapper(
+          'name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    deep:\n      a:\n        b:\n          $map:\n            items: "${{ x }}"\n'
+        );
+        expect(
+          screen.getByTestId('workflowStepConfigField-with.fields-value-0-yamlHint')
+        ).toBeInTheDocument();
+      });
     });
 
     it('opens Items on earlier data when it is empty, and offers Fixed too', () => {

@@ -53,6 +53,7 @@ import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { LastRunWorkflowIdProvider } from './last_run_hint';
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
+import { useCanvasUndo } from './use_canvas_undo';
 import { useCreationAgentChat } from './use_creation_agent_chat';
 import { useStepFragmentYamlSupport } from './use_step_fragment_yaml_support';
 import {
@@ -113,6 +114,7 @@ import {
 } from '../../actions_menu_popover';
 import { collectStepsByName } from '../lib/collect_steps';
 import { getStepScope } from '../lib/get_step_scope';
+import { isStructuralFragmentChange } from '../lib/is_structural_fragment_change';
 import { buildDefaultStep, getStepConfigWarningReason } from '../lib/step_form_schema';
 import {
   appendTrigger,
@@ -588,7 +590,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   }, [nodeIdForStepName, setSelectedStep]);
 
   const applyMutation = useCallback(
-    (result: MutationResult): boolean => {
+    (result: MutationResult, options?: { flush?: boolean }): boolean => {
       if (!result.success) {
         notifications.toasts.addDanger({
           title: i18n.translate('workflows.visualEditor.mutationFailed', {
@@ -602,7 +604,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       // Visual mutations must update the graph in the same tick as the YAML
       // write — the middleware's typing debounce would otherwise leave the
       // canvas empty for ~250ms after Done (draft cleared, structure not yet).
-      flushWorkflowComputation();
+      // Edits that cannot change the graph pass `flush: false` and ride that debounce.
+      if (options?.flush ?? true) {
+        flushWorkflowComputation();
+      }
       return true;
     },
     [dispatch, notifications.toasts]
@@ -735,8 +740,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (!newName) return;
       const isRename = newName !== current.stepName;
       if (isRename && collectStepNames(yamlStringRef.current).has(newName)) return;
+      // Edits to the step's own settings (`with`, `if`, `timeout`, ...) leave the graph as it is, so
+      // they wait for the computation debounce instead of recomputing on every keystroke.
+      const isStructural = isStructuralFragmentChange(lastAppliedStepFragmentRef.current, fragment);
       const result = replaceStepFragment(yamlStringRef.current, current.stepName, fragment);
-      if (!applyMutation(result)) return;
+      if (!applyMutation(result, { flush: isStructural })) return;
       lastAppliedStepFragmentRef.current = fragment;
       lastAppliedYamlRef.current = result.yaml;
       if (isRename) {
@@ -1151,22 +1159,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setPendingInsert((current) => (current?.phase === 'choosing' ? null : current));
   }, []);
 
-  // ⌘Z / Ctrl+Z on the canvas delegates to Monaco's undo stack (ADR-0005).
-  useEffect(() => {
-    if (!editorRef) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return;
-      // Let Monaco handle it when focus is already inside the editor.
-      const target = event.target;
-      if (target instanceof HTMLElement && target.closest('.monaco-editor')) {
-        return;
-      }
-      event.preventDefault();
-      editorRef.current?.trigger('graph-gesture', 'undo', null);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [editorRef]);
+  useCanvasUndo(editorRef, yamlStringRef);
 
   const handleCreationPickTrigger = useCallback((triggerType: 'manual' | 'alert' | 'scheduled') => {
     const triggerLabel = triggerSchemas.getTriggerName(triggerType);
