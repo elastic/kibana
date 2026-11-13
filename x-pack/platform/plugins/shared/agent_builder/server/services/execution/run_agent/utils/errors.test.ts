@@ -6,6 +6,7 @@
  */
 
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import { OutputParserException } from '@langchain/core/output_parsers';
 import { isAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { createInferenceProviderError, createInferenceRequestError } from '@kbn/inference-common';
 import { convertError, isRecoverableError } from './errors';
@@ -62,6 +63,15 @@ describe('errors', () => {
     });
 
     describe('non-inference errors', () => {
+      it('maps a structured output parse failure to a recoverable toolValidationError', () => {
+        const err = new OutputParserException('No tool calls found in the response.', '""');
+        const converted = convertError(err);
+
+        expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.toolValidationError);
+        expect(isRecoverableError(converted)).toBe(true);
+        expect(converted.message).toContain('No tool calls found in the response.');
+      });
+
       it('returns unknownError for generic errors', () => {
         const err = new Error('Something went wrong');
         const converted = convertError(err);

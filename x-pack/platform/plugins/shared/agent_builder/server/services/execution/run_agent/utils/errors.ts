@@ -10,6 +10,7 @@ import {
   isToolValidationError,
   isContextLengthExceededError,
 } from '@kbn/inference-common/src/chat_complete/errors';
+import { OutputParserException } from '@langchain/core/output_parsers';
 import { isInferenceProviderError, isInferenceRequestError } from '@kbn/inference-common';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
@@ -40,6 +41,13 @@ export const convertError = (error: Error): AgentBuilderAgentExecutionError => {
       toolName: error.meta.name ?? 'unknown',
       toolArgs: error.meta.arguments ?? '',
       validationError: error.meta.errorsText,
+    });
+  } else if (error instanceof OutputParserException) {
+    // the structured output parser could not extract a valid tool call from the model response
+    return createAgentExecutionError(error.message, ErrCodes.toolValidationError, {
+      toolName: 'structured_answer',
+      toolArgs: error.llmOutput ?? '',
+      validationError: error.message,
     });
   } else if (isContextLengthExceededError(error)) {
     return createAgentExecutionError(error.message, ErrCodes.contextLengthExceeded, {});
