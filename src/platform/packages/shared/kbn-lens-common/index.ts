@@ -247,6 +247,7 @@ export type {
   LabelsOrientationConfig,
   YConfig,
   XYDataLayerConfig,
+  XYPointsLayerConfig,
   XYReferenceLineLayerConfig,
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,

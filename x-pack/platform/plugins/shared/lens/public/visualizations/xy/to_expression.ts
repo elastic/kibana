@@ -24,6 +24,7 @@ import type {
   ExtendedDataLayerFn,
   LayeredXyVisFn,
   LegendConfigFn,
+  PointsLayerFn,
   ReferenceLineDecorationConfigFn,
   ReferenceLineLayerFn,
   SeriesType,
@@ -45,6 +46,7 @@ import type {
   XYVisualizationState,
   YConfig,
   XYDataLayerConfig,
+  XYPointsLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
   AxisConfig,
@@ -61,6 +63,7 @@ import {
   getDataLayers,
   getReferenceLayers,
   getAnnotationsLayers,
+  getPointsLayers,
   isTimeChart,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
@@ -224,6 +227,10 @@ export const buildXYExpression = (
     })
     .filter((layer) => Boolean(layer.accessors.length));
 
+  const validPointsLayers = getPointsLayers(state.layers).filter(
+    (layer): layer is XYPointsLayerConfig => Boolean(layer.query && layer.yAccessor)
+  );
+
   const uniqueLabels = getUniqueLabels(state.layers);
   const validAnnotationsLayers = getAnnotationsLayers(state.layers)
     .filter((layer) => Boolean(layer.annotations.length))
@@ -381,6 +388,7 @@ export const buildXYExpression = (
           datasourceExpressionsByLayers[layer.layerId]
         )
       ),
+      ...validPointsLayers.map((layer) => pointsLayerToExpression(layer)),
     ],
     annotations:
       validAnnotationsLayers.length &&
@@ -427,6 +435,20 @@ const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
       }),
     ]).toAst()
   );
+};
+
+const pointsLayerToExpression = (layer: XYPointsLayerConfig): Ast => {
+  const kibanaFn = buildExpressionFunction('kibana', {});
+  const esqlFn = buildExpressionFunction('esql', {
+    query: layer.query,
+    timeField: '@timestamp',
+  });
+  const pointsLayerFn = buildExpressionFunction<PointsLayerFn>('pointsLayer', {
+    layerId: layer.layerId,
+    query: layer.query,
+    yAccessor: layer.yAccessor,
+  });
+  return buildExpression([kibanaFn, esqlFn, pointsLayerFn]).toAst();
 };
 
 const referenceLineLayerToExpression = (
