@@ -104,8 +104,8 @@ export const FlakyTestBranchStatsSchema = lazySchema(() =>
   z.object({
     branch: z.string(),
     /**
-     * The pipeline these counts are of, when it is judged on its own (not in `pooledPipelines`);
-     * absent for the counts over the pooled pipelines. A branch can have one entry of each.
+     * The pipeline these counts are of, when it is judged on its own (not in `judgedTogether`);
+     * absent for the counts over the pipelines judged together. A branch can have one of each.
      */
     pipeline: z.optional(z.string()),
     builds: z.int(),
@@ -138,8 +138,8 @@ export const FlakyTestTargetStatsSchema = lazySchema(() =>
     /** Where the target ran: `local` or `cloud`. */
     type: z.string(),
     /**
-     * The pipeline these counts are of, when it is judged on its own (not in `pooledPipelines`);
-     * absent for the counts over the pooled pipelines.
+     * The pipeline these counts are of, when it is judged on its own (not in `judgedTogether`);
+     * absent for the counts over the pipelines judged together.
      */
     pipeline: z.optional(z.string()),
     builds: z.int(),
@@ -303,10 +303,10 @@ export interface FlakyTestReportOptions {
   /**
    * Pipelines of `pipelines` whose builds are judged together, per branch, as they run the same
    * tests in the same environment. Every other pipeline is judged per branch on its own, such as
-   * those running the tests in another environment (FIPS mode, Elastic Cloud), so that the pooled
-   * builds can't dilute them. Unset, every pipeline is pooled.
+   * those running the tests in another environment (FIPS mode, Elastic Cloud), so that the others'
+   * builds can't dilute them. Unset, every pipeline is judged together.
    */
-  pooledPipelines?: string[];
+  judgedTogether?: string[];
   branches: string[];
   frameworks: TestFramework[];
   /** Which lists to compute; tests of an omitted classification are dropped before decoration. */
@@ -344,10 +344,10 @@ export const FlakyTestReportSchema = lazySchema(() =>
     scope: z.object({
       pipelines: z.array(z.string()),
       /**
-       * Pipelines judged together (`FlakyTestReportOptions.pooledPipelines`), the others each on
-       * their own; absent when every pipeline is pooled.
+       * Pipelines judged together (`FlakyTestReportOptions.judgedTogether`), the others each on
+       * their own; absent when every pipeline is judged together.
        */
-      pooledPipelines: z.optional(z.array(z.string())),
+      judgedTogether: z.optional(z.array(z.string())),
       /** Empty means no branch filter. */
       branches: z.array(z.string()),
       frameworks: z.array(TestFrameworkSchema),

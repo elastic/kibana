@@ -27,8 +27,8 @@ export interface FlakyTestQueryScope {
   from: Date;
   to: Date;
   pipelines: string[];
-  /** Pipelines judged together, per branch, the others each on their own; absent: all pooled. */
-  pooledPipelines?: string[];
+  /** Pipelines judged together, per branch, the others each on their own; absent: all together. */
+  judgedTogether?: string[];
   /** Empty means no branch filter. */
   branches: string[];
 }
@@ -97,22 +97,22 @@ const scopeClauses = (scope: FlakyTestQueryScope): string[] => {
 };
 
 /**
- * What a test is judged by in the per-branch queries: the branch, and with `pooledPipelines` set,
- * `judged_pipeline`, empty for a run of a pooled pipeline and the run's pipeline otherwise.
- * `eval` defines that column; both stay as they were when every pipeline is pooled.
+ * What a test is judged by in the per-branch queries: the branch, and with `judgedTogether` set,
+ * `judged_pipeline`, empty for a run of a pipeline judged together and the run's pipeline
+ * otherwise. `eval` defines that column; both stay as they were when all are judged together.
  */
-const judgedBy = ({ pooledPipelines }: FlakyTestQueryScope): { eval: string[]; by: string } => {
-  if (pooledPipelines === undefined) {
+const judgedBy = ({ judgedTogether }: FlakyTestQueryScope): { eval: string[]; by: string } => {
+  if (judgedTogether === undefined) {
     return { eval: [], by: 'buildkite.branch' };
   }
   const judged =
-    pooledPipelines.length > 0
-      ? `CASE(buildkite.pipeline.slug IN (${inList(pooledPipelines)}), "", buildkite.pipeline.slug)`
+    judgedTogether.length > 0
+      ? `CASE(buildkite.pipeline.slug IN (${inList(judgedTogether)}), "", buildkite.pipeline.slug)`
       : 'buildkite.pipeline.slug';
   return { eval: [`judged_pipeline = ${judged}`], by: 'buildkite.branch, judged_pipeline' };
 };
 
-/** The pipeline a row is judged in, from `judged_pipeline`; undefined for the pooled pipelines. */
+/** The pipeline a row is judged in, from `judged_pipeline`; undefined for those judged together. */
 const judgedPipeline = (value: string | null | undefined): string | undefined => value || undefined;
 
 /**
@@ -709,7 +709,7 @@ const UNKNOWN_TARGET = 'unknown';
  * ...) and where it ran (`local` or `cloud`); frameworks without a Scout target record the mode
  * `unknown`, and a document missing the fields is grouped with them. A pipeline judged on its own
  * has its own rows, as one running locally in another environment (FIPS mode) shares the targets
- * of the pooled ones. Over the same executions as the per-branch counts, plus the last failed
+ * of those judged together. Over the same executions as the per-branch counts, plus the last failed
  * build.
  */
 export const buildTargetStatsQuery = (

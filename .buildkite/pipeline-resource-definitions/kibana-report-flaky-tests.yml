@@ -27,7 +27,7 @@ spec:
         # Counted together per branch: the same tests in the same environment. Every other pipeline
         # (FIPS mode, Elastic Cloud ECH and MKI) is judged per branch on its own, so that on-merge
         # builds don't dilute a failure that only happens there
-        FLAKY_TESTS_POOLED_PIPELINES: 'kibana-on-merge,kibana-security-solution-on-merge'
+        FLAKY_TESTS_JUDGED_TOGETHER: 'kibana-on-merge,kibana-security-solution-on-merge'
         FLAKY_TESTS_LOOKBACK_DAYS: '7'
         FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
         # Repository .buildkite/scripts/steps/report_flaky_test_issues.sh files the suite issues in.

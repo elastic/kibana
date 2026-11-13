@@ -324,7 +324,7 @@ const buildReport = async (
     from,
     to,
     pipelines: options.pipelines,
-    pooledPipelines: options.pooledPipelines,
+    judgedTogether: options.judgedTogether,
     branches: options.branches,
   };
 
@@ -535,7 +535,7 @@ const buildReport = async (
     window: { lookbackDays: options.lookbackDays, from, to },
     scope: {
       pipelines: options.pipelines,
-      ...(options.pooledPipelines ? { pooledPipelines: options.pooledPipelines } : {}),
+      ...(options.judgedTogether ? { judgedTogether: options.judgedTogether } : {}),
       branches: options.branches,
       frameworks,
       classifications: options.classifications,

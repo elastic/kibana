@@ -103,7 +103,7 @@ describe('flakiestQualifyingBranch', () => {
   });
 
   it('judges a pipeline judged on its own apart from the same branch of the others', () => {
-    // 4 of 514 pooled would be 0.8%; FIPS alone is 29%
+    // 4 of 514 judged together would be 0.8%; FIPS alone is 29%
     const byBranch = [
       branch('main', 500, 0),
       { ...branch('main', 14, 4), pipeline: 'kibana-fips' },
@@ -263,7 +263,7 @@ describe('checkFlakyTest', () => {
     });
 
     it('is judged in a pipeline judged on its own by that pipeline’s builds only', () => {
-      // stopped failing in the pooled pipelines, still failing in FIPS on the same branch
+      // stopped failing in the pipelines judged together, still failing in FIPS on the same branch
       const fips = {
         ...setupBuilds('.........x'.repeat(10), 1000),
         pipeline: 'kibana-fips',

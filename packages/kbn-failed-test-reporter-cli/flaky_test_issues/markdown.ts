@@ -94,8 +94,8 @@ const PIPELINE_ENVIRONMENTS: Readonly<Record<string, string>> = {
 
 /**
  * `Local deployment (FIPS enabled)`: the environment of a target of a pipeline judged on its own,
- * whose local targets would otherwise read like those of the pooled pipelines. A Cloud target
- * already says where it ran.
+ * whose local targets would otherwise read like those of the pipelines judged together. A Cloud
+ * target already says where it ran.
  */
 export const pipelineTargetEnvironment = (target: {
   mode: string;

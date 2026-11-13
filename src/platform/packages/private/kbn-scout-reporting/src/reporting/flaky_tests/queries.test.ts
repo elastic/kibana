@@ -385,12 +385,12 @@ describe('buildBranchCountsQuery', () => {
     expect(query).not.toContain('judged_pipeline');
   });
 
-  it('counts the builds of a pipeline that is not pooled apart from the pooled ones', () => {
+  it('counts the builds of a pipeline judged on its own apart from those judged together', () => {
     const query = buildBranchCountsQuery(
       {
         ...scope,
         pipelines: ['kibana-on-merge', 'kibana-fips'],
-        pooledPipelines: ['kibana-on-merge'],
+        judgedTogether: ['kibana-on-merge'],
       },
       ['jest'],
       ['j1'],
@@ -404,9 +404,9 @@ describe('buildBranchCountsQuery', () => {
     expect(query).toContain('BY test.id, buildkite.branch, judged_pipeline |');
   });
 
-  it('judges every pipeline on its own when none is pooled', () => {
+  it('judges every pipeline on its own when none is judged together', () => {
     expect(
-      buildBranchCountsQuery({ ...scope, pooledPipelines: [] }, ['jest'], ['j1'], countThresholds)
+      buildBranchCountsQuery({ ...scope, judgedTogether: [] }, ['jest'], ['j1'], countThresholds)
     ).toContain(
       'EVAL failed = CASE(test.status IN ("failed", "timedOut"), 1, 0), ' +
         'judged_pipeline = buildkite.pipeline.slug'
@@ -418,7 +418,7 @@ describe('judging pipelines on their own in the other per-branch queries', () =>
   const separate = {
     ...scope,
     pipelines: ['kibana-on-merge', 'kibana-fips'],
-    pooledPipelines: ['kibana-on-merge'],
+    judgedTogether: ['kibana-on-merge'],
   };
 
   it('groups the branch stats, the setups and the setup builds by the judged pipeline too', () => {
@@ -908,12 +908,12 @@ describe('buildTargetStatsQuery', () => {
     expect(query).not.toContain('judged_pipeline');
   });
 
-  it('gives a pipeline judged on its own rows of its own, as it may share the pooled targets', () => {
+  it('gives a pipeline judged on its own rows of its own, as it may share the others’ targets', () => {
     const query = buildTargetStatsQuery(
       {
         ...scope,
         pipelines: ['kibana-on-merge', 'kibana-fips'],
-        pooledPipelines: ['kibana-on-merge'],
+        judgedTogether: ['kibana-on-merge'],
       },
       ['ftr'],
       ['t1']

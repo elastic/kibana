@@ -8,12 +8,12 @@
  */
 
 /**
- * Where a test is judged: a branch, over the builds of the pooled pipelines (`pooledPipelines`),
- * or a branch of a pipeline judged on its own, over that pipeline's builds only.
+ * Where a test is judged: a branch, over the builds of the pipelines judged together
+ * (`judgedTogether`), or a branch of a pipeline judged on its own, over its builds only.
  */
 export interface JudgedScope {
   branch: string;
-  /** The pipeline judged on its own; absent for the pooled pipelines. */
+  /** The pipeline judged on its own; absent for the pipelines judged together. */
   pipeline?: string;
 }
 
