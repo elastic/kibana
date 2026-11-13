@@ -175,7 +175,7 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 - **Status:** before sessions are set up, the tab shows a **Set up sessions** button to users with the
   **Set up session summaries** privilege and tells everyone else whom to ask. A failed setup names the
   step that failed. Once set up, a callout flags an API key that no longer works (with a **Set up
-  sessions again** button for those users, which a visit of theirs also does by itself), a failing
+  sessions again** button for those users), a failing
   run of the summaries task with its error, or summaries that are behind. A line next to the time
   picker says up to when events are in. While the sessions index is first built, an empty list says
   sessions are being built.
@@ -247,7 +247,10 @@ retries from the same checkpoint, and status shows the error. Events that arrive
 delay after their `@timestamp` are only summarized when another event of their session arrives.
 
 Readers don't depend on how summaries are built. A new `SESSIONS_VERSION` makes the task rebuild
-every summary into the new index.
+every summary into the new index. The task stands down instead when its state comes from a newer
+`SESSIONS_VERSION`, after a rollback or while a rolling upgrade still has older nodes: that version
+owns the index and its template, so rebuilding as this one would overwrite them and restart the
+backfill.
 
 The journey lists distinct pages in first-view order (revisits are not repeated), from the first 30
 page-view URLs, and the exit page is the one viewed last. Each attribute group (environment, user,
@@ -310,8 +313,9 @@ from replacing the key. Without Task Manager, sessions can't be enabled.
 Like any granted key, the task's key has the access the user had when it was granted, and no
 expiration. Anyone with `manage_api_key` or `manage_security`, or the enabling user with
 `manage_own_api_key`, can invalidate it. The task's runs then fail with a 401, which status reports
-as `apiKeyInvalid`. When a user with the privilege opens the Sessions tab, it enables sessions again,
-as the **Set up sessions again** button would.
+as `apiKeyInvalid`. A user with the privilege then sets sessions up again from the Sessions tab,
+which grants a new key on their behalf. Nothing re-grants it by itself: the task reads what the user
+who set sessions up can read, so only an explicit action changes whose data the summaries hold.
 
 There is no disable action. Removing the task (`digital_experience:sessions-summaries`) with the
 Task Manager API stops it and invalidates its key.

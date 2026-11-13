@@ -252,23 +252,25 @@ describe('SessionsTab', () => {
   });
 
   describe('when the API key of sessions no longer works', () => {
-    it('quietly grants a new one when a manager visits', async () => {
+    it('shows the warning with a button instead of granting a new key by itself', async () => {
       respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
       renderTab();
 
-      await waitFor(() => expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(1));
+      expect(
+        await screen.findByTestId('digitalExperienceSessionsApiKeyInvalid')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('digitalExperienceSessionsUpdate')).toHaveTextContent(
+        'Set up sessions again'
+      );
+      // The task reads what the user who set sessions up can read, so nobody changes that by
+      // visiting the tab.
+      expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(0);
       expect(
         await screen.findByTestId('digitalExperienceSessionRow-session-1')
       ).toBeInTheDocument();
-      // The new key works, so there is nothing left to warn about.
-      await waitFor(() =>
-        expect(
-          screen.queryByTestId('digitalExperienceSessionsApiKeyInvalid')
-        ).not.toBeInTheDocument()
-      );
     });
 
-    it('keeps the warning and a button to try again when granting a new key fails', async () => {
+    it('grants a new key when a manager sets sessions up again, and shows a failure', async () => {
       respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
       const respond = mockFetch.getMockImplementation();
       let enableFails = true;
@@ -280,19 +282,17 @@ describe('SessionsTab', () => {
       });
       renderTab();
 
+      fireEvent.click(await screen.findByTestId('digitalExperienceSessionsUpdate'));
+
       expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
         'Missing privileges: cluster:read_security'
       );
       expect(screen.getByTestId('digitalExperienceSessionsApiKeyInvalid')).toHaveTextContent(
         'The API key sessions are built with was invalidated or has expired'
       );
-      // Once per visit: the failure doesn't retry in a loop.
-      expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(1);
 
       enableFails = false;
-      const setUpAgain = screen.getByTestId('digitalExperienceSessionsUpdate');
-      expect(setUpAgain).toHaveTextContent('Set up sessions again');
-      fireEvent.click(setUpAgain);
+      fireEvent.click(screen.getByTestId('digitalExperienceSessionsUpdate'));
 
       await waitFor(() =>
         expect(

@@ -22,6 +22,7 @@ import {
   registerSessionsTask,
   withConfiguredInterval,
   runSessionsTask,
+  newerVersionMessage,
   scheduleSessionsTask,
   type RunSessionsTaskParams,
   type SessionsTaskState,
@@ -116,6 +117,33 @@ describe('runSessionsTask', () => {
       );
 
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a state from a newer Kibana', () => {
+    const newer = SESSIONS_VERSION + 1;
+    const newerState: SessionsTaskState = { ...caughtUpState, version: newer };
+
+    it('leaves that version its index, its template and its checkpoint', async () => {
+      const { state } = await run(newerState);
+
+      expect(putSessionsIndexTemplate).not.toHaveBeenCalled();
+      expect(createSessionsIndex).not.toHaveBeenCalled();
+      expect(summarizeSessions).not.toHaveBeenCalled();
+      expect(state).toEqual({
+        ...newerState,
+        lastRunAt: AT,
+        lastError: { message: newerVersionMessage(newer), at: AT },
+      });
+    });
+
+    it('logs it once, not on every run', async () => {
+      const { state } = await run(newerState);
+      expect(logger.warn).toHaveBeenCalledWith(newerVersionMessage(newer));
+
+      await run(state);
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
     });
   });
 

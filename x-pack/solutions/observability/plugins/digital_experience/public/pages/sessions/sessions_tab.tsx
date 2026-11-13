@@ -388,16 +388,6 @@ export function SessionsTab({
     return () => clearInterval(interval);
   }, [rebuilding, refresh]);
 
-  // The task can't run without a working API key. Someone who can set sessions up grants a new
-  // one by visiting, once per visit, as the button would; a failure shows as usual.
-  const regranted = useRef(false);
-  useEffect(() => {
-    if (status?.apiKeyInvalid && canManage && !regranted.current) {
-      regranted.current = true;
-      void enable();
-    }
-  }, [status?.apiKeyInvalid, canManage, enable]);
-
   // A failed background refresh keeps the last status.
   if (error && !status) {
     return (

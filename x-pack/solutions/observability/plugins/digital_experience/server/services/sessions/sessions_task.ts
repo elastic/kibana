@@ -97,6 +97,13 @@ const logErrorChange = (logger: Logger, previous: SessionsTaskState, message: st
 };
 
 /**
+ * Why a run of this Kibana stands down: the summaries belong to a newer version, which owns the
+ * index and its template.
+ */
+export const newerVersionMessage = (version: number) =>
+  `The session summaries are version ${version}, newer than this Kibana builds (version ${SESSIONS_VERSION}), so it left them to the nodes that can.`;
+
+/**
  * One run: summarizes the sessions with new events, window by window, and runs again right away
  * while it hasn't caught up. Failures are kept in the state rather than thrown, so the next run
  * retries from the same checkpoint and the status shows them.
@@ -117,6 +124,18 @@ export const runSessionsTask = async ({
     return {
       state: { ...state, lastRunAt: at, lastError: { message: NO_API_KEY_MESSAGE, at } },
     };
+  }
+
+  // Set up by a newer Kibana (a rollback, or an older node during a rolling upgrade): the
+  // summaries and the index template are that version's, so this node leaves them alone instead
+  // of rebuilding them as its own, which would overwrite the template and restart the backfill
+  // every time the task moved between them.
+  if (state.version != null && state.version > SESSIONS_VERSION) {
+    const message = newerVersionMessage(state.version);
+    if (state.lastError?.message !== message) {
+      logger.warn(message);
+    }
+    return { state: { ...state, lastRunAt: at, lastError: { message, at } } };
   }
 
   // A deleted index, or a new version, is rebuilt from the lookback, also after a failed run.
