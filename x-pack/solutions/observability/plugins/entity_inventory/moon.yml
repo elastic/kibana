@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/entity-store'
   - '@kbn/es-types'
+  - '@kbn/i18n'
   - '@kbn/logging-mocks'
   - '@kbn/scout-oblt'
   - '@kbn/server-route-repository'

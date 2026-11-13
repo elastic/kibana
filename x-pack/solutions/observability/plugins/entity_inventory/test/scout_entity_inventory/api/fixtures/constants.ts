@@ -14,6 +14,7 @@ export const K8S_TSDS_INDEX_TEMPLATE = 'entity-inventory-scout-k8s-tsds-index';
 
 export const TYPES_PATH = 'internal/entity_inventory/types';
 export const LIST_PATH = 'internal/entity_inventory/entities/{type}/_list';
+export const FILTER_VALUES_PATH = 'internal/entity_inventory/filters/_values';
 
 export const listPath = (type: string): string => LIST_PATH.replace('{type}', type);
 

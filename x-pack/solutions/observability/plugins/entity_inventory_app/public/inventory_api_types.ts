@@ -11,7 +11,6 @@ export interface EntityInventoryTypeAttribute {
   name: string;
   // TODO: check if the backend returns a label, or if labels need translating client side
   label?: string;
-  dimension?: boolean;
 }
 
 export interface EntityInventoryTypeSource {
@@ -24,6 +23,7 @@ export interface EntityInventoryTypeDefinition {
   category?: string;
   sources: EntityInventoryTypeSource[];
   attributes: EntityInventoryTypeAttribute[];
+  suggestedFilters: string[];
 }
 
 export interface EntityInventoryAttributeValuesParams {

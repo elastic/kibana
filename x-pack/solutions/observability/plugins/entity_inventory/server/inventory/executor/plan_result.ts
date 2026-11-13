@@ -8,6 +8,7 @@
 import type { ESQLColumn } from '@kbn/es-types';
 import { LAST_SEEN_COLUMN } from '../generator';
 import type { IdentityPlan, OutputColumn } from '../generator';
+import { noIdentityCompositionReason, noReadableIndexReason } from '../reasons';
 import type { PlanResult } from './types';
 
 // Reads what a plan's result says about the indices it reached, from column types alone. Every
@@ -77,7 +78,7 @@ export const interpretPlanResult = (
   if (!isMapped(resultColumns, LAST_SEEN_COLUMN)) {
     return {
       usable: false,
-      reason: `no readable index behind "${indexPattern}" maps @timestamp`,
+      reason: noReadableIndexReason(indexPattern),
       unavailableFields,
     };
   }
@@ -91,7 +92,7 @@ export const interpretPlanResult = (
   const wanted = compositions.map((fields) => fields.join(' + ')).join(', ');
   return {
     usable,
-    reason: `no index behind "${indexPattern}" maps every field of an identity composition (${wanted})`,
+    reason: noIdentityCompositionReason(indexPattern, wanted),
     unavailableFields,
   };
 };

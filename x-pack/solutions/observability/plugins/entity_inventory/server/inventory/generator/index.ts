@@ -13,6 +13,8 @@ export type { OutputColumn, OutputColumnKind } from './columns';
 export { resolveIdentityPlan, ENTITY_ID_COLUMN } from './identity';
 export type { IdentityPlan } from './identity';
 export { generateListQueries } from './list_query';
+export { generateAttributeValuesQueries, ATTRIBUTE_VALUE_COLUMN } from './attribute_values_query';
+export type { AttributeSelections } from './attribute_filters';
 export { buildProbeQuery } from './probe_query';
 export { MAX_QUERY_PLANS } from './types';
 export type {

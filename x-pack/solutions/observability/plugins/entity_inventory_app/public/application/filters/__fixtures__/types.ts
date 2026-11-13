@@ -13,11 +13,8 @@ export const typesFixture: EntityInventoryTypeDefinition[] = [
     name: 'Host',
     category: 'hosts',
     sources: [{ indexPattern: 'metrics-hostmetricsreceiver.otel-*' }],
-    attributes: [
-      { name: 'os.type', dimension: true },
-      { name: 'cloud.provider', dimension: true },
-      { name: 'host.ip' },
-    ],
+    attributes: [{ name: 'os.type' }, { name: 'cloud.provider' }, { name: 'host.ip' }],
+    suggestedFilters: ['os.type', 'cloud.provider'],
   },
   {
     type: 'k8s.deployment',
@@ -25,11 +22,12 @@ export const typesFixture: EntityInventoryTypeDefinition[] = [
     category: 'kubernetes',
     sources: [{ indexPattern: 'metrics-k8sclusterreceiver.otel-*' }],
     attributes: [
-      { name: 'k8s.cluster.name', dimension: true },
-      { name: 'k8s.namespace.name', dimension: true },
-      { name: 'cloud.provider', dimension: true },
+      { name: 'k8s.cluster.name' },
+      { name: 'k8s.namespace.name' },
+      { name: 'cloud.provider' },
       { name: 'k8s.deployment.strategy' },
     ],
+    suggestedFilters: ['k8s.cluster.name', 'k8s.namespace.name', 'cloud.provider'],
   },
   {
     type: 'k8s.pod',
@@ -37,10 +35,11 @@ export const typesFixture: EntityInventoryTypeDefinition[] = [
     category: 'kubernetes',
     sources: [{ indexPattern: 'metrics-k8sclusterreceiver.otel-*' }],
     attributes: [
-      { name: 'k8s.cluster.name', dimension: true },
-      { name: 'k8s.namespace.name', dimension: true },
-      { name: 'k8s.pod.phase', dimension: true },
+      { name: 'k8s.cluster.name' },
+      { name: 'k8s.namespace.name' },
+      { name: 'k8s.pod.phase' },
       { name: 'k8s.node.name' },
     ],
+    suggestedFilters: ['k8s.cluster.name', 'k8s.namespace.name', 'k8s.pod.phase'],
   },
 ];

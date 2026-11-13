@@ -12,6 +12,8 @@ import { quoteIdentifier } from './esql_syntax';
 import type { IdentityPlan } from './identity';
 import { ENTITY_ID_COLUMN, resolveIdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
+import { CONTINUATION, INDEX_MODE, TIMESTAMP } from './constants';
+import { assertValidLimit, sourceCommandOf } from './utils';
 import type { GeneratedQuery, QueryPlan, TimeWindow } from './types';
 
 /** What {@link buildListQuery} assembles one plan's list query from. */
@@ -22,16 +24,6 @@ export interface ListQueryInput {
   window: TimeWindow;
   limit: number;
 }
-
-const TIMESTAMP = quoteIdentifier('@timestamp');
-const INDEX_MODE = quoteIdentifier('_index_mode');
-const CONTINUATION = '\n    ';
-
-const assertValidLimit = (limit: number): void => {
-  if (!Number.isInteger(limit) || limit <= 0) {
-    throw new RangeError(`list query limit must be a positive integer, got ${limit}`);
-  }
-};
 
 // One `LAST ... WHERE ... IS NOT NULL` per attribute column the plan carries, in column order;
 // `LAST` does not skip null rows, so the filter is always there.
@@ -57,8 +49,8 @@ export const buildListQuery = ({
   window,
   limit,
 }: ListQueryInput): GeneratedQuery => {
-  assertValidLimit(limit);
-  const { engine, indexPattern, filter } = plan;
+  assertValidLimit(limit, 'list query');
+  const { engine, filter } = plan;
   const { groupingFields, presenceFilter, idEvaluation, rawIdentityColumns } = identity;
 
   // One source becomes two plans that together read every index behind the pattern exactly once.
@@ -75,8 +67,7 @@ export const buildListQuery = ({
   //   one there.
   // Under `unmapped_fields="nullify"` a field mapped in no index a plan reads comes back as a column
   // of type `null`; the executor reads readability and availability from that (plan_result.ts).
-  const sourceCommand =
-    engine === 'TS' ? `TS ${indexPattern}` : `FROM ${indexPattern} METADATA _index_mode`;
+  const sourceCommand = sourceCommandOf(plan);
   const predicates = [
     ...(engine === 'FROM' ? [`${INDEX_MODE} != "time_series"`] : []),
     `${TIMESTAMP} >= ?from AND ${TIMESTAMP} < ?to`,
@@ -125,7 +116,7 @@ export const generateListQueries = (
   window: TimeWindow,
   limit: number
 ): GeneratedQuery[] => {
-  assertValidLimit(limit);
+  assertValidLimit(limit, 'list query');
   const identity = resolveIdentityPlan(definition);
   const columns = buildColumns(definition, plans, identity);
   return plans.map((plan) => buildListQuery({ plan, identity, columns, window, limit }));

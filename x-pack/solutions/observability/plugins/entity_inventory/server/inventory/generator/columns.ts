@@ -78,6 +78,23 @@ export const buildColumns = (
   ];
 };
 
+/**
+ * The field a plan reads for a column, for a column the inventory can filter on: an attribute reads
+ * the field its source declares, and an identity column is its own field in every plan. `undefined`
+ * when the column does not exist, is neither, or the plan carries no field for it.
+ */
+export const fieldOfColumn = (
+  columns: OutputColumn[],
+  name: string,
+  plan: Pick<QueryPlan, 'index'>
+): string | undefined => {
+  const column = columns.find((candidate) => candidate.name === name);
+  if (column?.kind === 'attribute') {
+    return column.fieldByPlan?.[plan.index];
+  }
+  return column?.kind === 'identity' ? column.name : undefined;
+};
+
 /** Names of the columns a plan produces, in column order; attributes it does not carry are left out. */
 export const planColumnNames = (columns: OutputColumn[], plan: QueryPlan): string[] =>
   columns
