@@ -16,6 +16,7 @@ import {
 } from '../code_completion/code_completion_core';
 import { getCalledRules } from '../grammar_labels/call_sites';
 import { guardModePops } from './guard_mode_pops';
+import { isWordToken } from '../cursor_ir/token_classes';
 import {
   COMMAND_DISPATCH_RULES,
   COMMAND_RULES,
@@ -240,23 +241,24 @@ export const locateCursor = (text: string, offset: number): CursorLocation => {
   }
 
   // The caret is the word being typed when the cursor touches one, otherwise the next token.
-  // Untokenized characters directly after a word (e.g. the `:` of `_any:`) belong to that word.
-  // A dot after whitespace starts a decimal (`SAMPLE .`), as a dotted name has no space before it.
-  // A source name is a word however it ends, as `logs-` or `logs-*`.
+  // A word is a token with no fixed text (a name, a pattern, a number, a string) or a token
+  // whose fixed text is a word (a keyword). Untokenized characters directly after a word (e.g.
+  // the `:` of `_any:`) belong to that word. A dot after whitespace starts a decimal
+  // (`SAMPLE .`), as a dotted name has no space before it.
   const startsDecimal =
     lastToken?.type === grammar.dot && /\s/.test(textBeforeCursor.charAt(lastToken.start - 1));
   const isTypingWord =
     lastToken !== undefined &&
     isVisible(lastToken) &&
-    (/\w$/.test(lastToken.text) || startsDecimal || lastToken.type === grammar.unquotedSource) &&
+    (isWordToken(lastToken.type) || startsDecimal) &&
     tail === untokenized;
   const caret = isTypingWord ? lastToken : eof;
 
   let partial: CursorLocation['partial'];
   if (isTypingWord) {
-    partial = { text: lastToken.text + tail, start: lastToken.start };
+    partial = { text: lastToken.text + tail, start: lastToken.start, complete: tail === '' };
   } else if (untokenized) {
-    partial = { text: untokenized, start: offset - untokenized.length };
+    partial = { text: untokenized, start: offset - untokenized.length, complete: false };
   }
 
   const previousToken = allTokens.slice(0, caret.tokenIndex).findLast(isVisible);
@@ -350,6 +352,7 @@ export const locateCursor = (text: string, offset: number): CursorLocation => {
         invokingStates: [...callStack.map((entry) => entry.invokingState), invokingState],
         startsRules: callStack.length - 1 - enclosingStart,
         continuation,
+        start: slotStart,
         text:
           continuation && previousToken
             ? textBeforeCursor.slice(slotStart, previousToken.stop + 1)

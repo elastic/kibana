@@ -69,14 +69,16 @@ const getVocabulary = (): Vocabulary => {
   const modes = Array.from({ length: modeCount }, (_, mode) => mode);
 
   /**
-   * The modes where the text is a token of fixed text. A token that also takes the text twice
-   * is a name or a value that happens to match it.
+   * The token types the text is the fixed text of, in any mode. A token that also takes the
+   * text twice, or any other character, is a name or a value that happens to match it.
    */
   const fixedTypes = (text: string): number[] =>
     modes.flatMap((mode) => {
       const type = lexAs(text, mode);
+      const takesMore =
+        lexAs(text + text, mode) === type || lexAs('x', mode) === type || lexAs('0', mode) === type;
 
-      return type !== undefined && lexAs(text + text, mode) !== type ? [type] : [];
+      return type !== undefined && !takesMore ? [type] : [];
     });
 
   for (const bracket of BRACKETS) {
@@ -119,6 +121,13 @@ const getVocabulary = (): Vocabulary => {
 
 /** The fixed text of a token type, lower-cased, e.g. `by`; undefined for a name or a value. */
 export const getTokenText = (type: number): string | undefined => getVocabulary().texts.get(type);
+
+/** Whether a token can be a word being typed: it has no fixed text, or its fixed text is a word. */
+export const isWordToken = (type: number): boolean => {
+  const text = getTokenText(type);
+
+  return text === undefined || WORD.test(text);
+};
 
 /** Whether a rule is an expression rule: one the grammar parses with operator precedence. */
 export const isExpressionRule = (rule: string): boolean =>
