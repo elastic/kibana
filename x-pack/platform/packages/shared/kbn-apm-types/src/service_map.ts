@@ -56,7 +56,10 @@ export interface ServiceMapRawResponse {
   spans: ServiceMapSpan[];
   servicesData: ServicesResponse[];
   anomalies: ServiceAnomaliesResponse;
-  /** Absent when grouping is off, the map has fewer than 100 services, or grouping failed. */
+  /**
+   * Absent when grouping is off, the map has fewer services than `SERVICE_GROUPING_MIN_SERVICES`
+   * or grouping failed.
+   */
   serviceGrouping?: ServiceMapGrouping;
 }
 

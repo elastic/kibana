@@ -13,6 +13,7 @@ import {
   apiTest,
   COMMON_HEADERS,
   getServiceMap,
+  SERVICE_GROUPING_MIN_SERVICES,
   toSourceQuery,
   SERVICE_MAP_GROUPING_END_DATE,
   SERVICE_MAP_GROUPING_ENVIRONMENT,
@@ -119,18 +120,21 @@ apiTest.describe(
       }
     );
 
-    apiTest('does not group a map with fewer than 100 services', async ({ apiClient }) => {
-      // only one team's services, and the few their calls reach
-      const response = await getServiceMap(apiClient, {
-        headers,
-        query: { ...GROUPING_QUERY, kuery: 'service.name : grouping-t0-*' },
-      });
+    apiTest(
+      `does not group a map with fewer than ${SERVICE_GROUPING_MIN_SERVICES} services`,
+      async ({ apiClient }) => {
+        // only one team's services, and the few their calls reach
+        const response = await getServiceMap(apiClient, {
+          headers,
+          query: { ...GROUPING_QUERY, kuery: 'service.name : grouping-t0-*' },
+        });
 
-      expect(response).toHaveStatusCode(200);
-      const body = response.body as ServiceMapResponse;
-      expect(body.servicesData.length).toBeGreaterThan(0);
-      expect(body.serviceGrouping).toBeUndefined();
-    });
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as ServiceMapResponse;
+        expect(body.servicesData.length).toBeGreaterThan(0);
+        expect(body.serviceGrouping).toBeUndefined();
+      }
+    );
 
     apiTest('does not group the map of a single service', async ({ apiClient }) => {
       const response = await getServiceMap(apiClient, {

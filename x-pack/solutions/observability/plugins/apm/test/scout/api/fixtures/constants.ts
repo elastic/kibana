@@ -45,6 +45,11 @@ export const SERVICE_MAP_STATS_DATA = {
   },
 } as const;
 
+// Mirrors `SERVICE_GROUPING_MIN_SERVICES` in `apm/server/routes/service_map/grouping/constants.ts`.
+// The Scout projects don't reference the APM plugin, so the value is duplicated here.
+/** Below this many services the map is not grouped. */
+export const SERVICE_GROUPING_MIN_SERVICES = 100;
+
 // Service map grouping: on its own day, so neither this data nor the service map stats data falls
 // in the other's map or in the day of calls grouping reads
 export const SERVICE_MAP_GROUPING_START_DATE = '2021-10-13T00:00:00.000Z';

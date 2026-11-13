@@ -13,6 +13,7 @@ export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
 export { testData } from '../../shared';
 export {
   COMMON_HEADERS,
+  SERVICE_GROUPING_MIN_SERVICES,
   SERVICE_MAP_GROUPING_END_DATE,
   SERVICE_MAP_GROUPING_ENVIRONMENT,
   SERVICE_MAP_GROUPING_NOT_CONNECTED,
