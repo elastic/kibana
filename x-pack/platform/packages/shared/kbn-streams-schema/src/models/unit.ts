@@ -261,15 +261,28 @@ const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string
 const statsRateSchema = statsValueSchema.extend({ time_unit: z.string() });
 
 /**
- * Items rejected for one reason, per second. `collections` has the rate per collection that the
- * destination wrote to (an Elasticsearch data stream or index), keyed by its name. It only has
- * the collections with failures of this type, and it is missing when none has any. It can cover
- * less than `rate`, because a failure of a whole request has no collection.
+ * One cause of failures: the reason the destination gave (its own error type) on the collection
+ * that it wrote to (an Elasticsearch data stream or index). Either can be null, when the
+ * destination did not report it: a failure of a whole request has no collection.
+ */
+const statsFailureBreakdownEntrySchema = lazySchema(() =>
+  z.object({
+    collection: z.string().nullable(),
+    reason: z.string().nullable(),
+    rate: statsRateSchema,
+  })
+);
+
+/**
+ * Items that failed for one class of reason, per second. `rate` is the whole class. `breakdown`
+ * splits it by cause, highest rate first and limited to the highest ones. It leaves out a cause
+ * with neither a collection nor a reason, so it can cover less than `rate`, and it is missing when
+ * it has no entries.
  */
 const statsFailureRateSchema = lazySchema(() =>
   z.object({
     rate: statsRateSchema,
-    collections: z.record(z.string(), z.object({ rate: statsRateSchema })).optional(),
+    breakdown: z.array(statsFailureBreakdownEntrySchema).optional(),
   })
 );
 

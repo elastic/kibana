@@ -98,7 +98,7 @@ describe('withAuthFailures', () => {
     authentication: { rate: rate(0.5) },
     authorization: {
       rate: rate(1.9),
-      collections: { 'logs-a-default': { rate: rate(1.9) } },
+      breakdown: [{ collection: 'logs-a-default', reason: 'security_exception', rate: rate(1.9) }],
     },
   };
 

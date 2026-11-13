@@ -42,23 +42,24 @@ const parentResults = {
 };
 
 const failing = { id: 'es-dev', authentication_rate: 0.5, authorization_rate: 1.9 };
-const failingCollection = {
+const failingCause = {
   id: 'es-dev',
   collection: 'logs-a-default',
+  reason: 'security_exception',
   authentication_rate: null,
   authorization_rate: 1.9,
 };
 
-/** Answers the collections query (the one with `INLINE STATS`) and the rates query separately. */
+/** Answers the breakdown query (the one with `INLINE STATS`) and the rates query separately. */
 const makeRunQuery = ({
   rates = () => [],
-  collections = () => [],
+  breakdown = () => [],
 }: {
   rates?: () => EsqlRow[];
-  collections?: () => EsqlRow[];
+  breakdown?: () => EsqlRow[];
 } = {}) =>
   jest.fn(async (query: ComposerQuery) =>
-    query.print('basic').includes('INLINE STATS') ? collections() : rates()
+    query.print('basic').includes('INLINE STATS') ? breakdown() : rates()
   );
 
 const failWith = (error: Error) => () => {
@@ -104,7 +105,7 @@ describe('getElasticsearchAuthFailures', () => {
   it('asks about the destinations that fail only, and gives the others no failures', async () => {
     const runQuery = makeRunQuery({
       rates: () => [failing],
-      collections: () => [failingCollection],
+      breakdown: () => [failingCause],
     });
 
     const result = await getElasticsearchAuthFailures({
@@ -124,7 +125,9 @@ describe('getElasticsearchAuthFailures', () => {
       authentication: { rate: rate(0.5) },
       authorization: {
         rate: rate(1.9),
-        collections: { 'logs-a-default': { rate: rate(1.9) } },
+        breakdown: [
+          { collection: 'logs-a-default', reason: 'security_exception', rate: rate(1.9) },
+        ],
       },
     });
     expect(result['es-prod']).toEqual({
@@ -133,7 +136,7 @@ describe('getElasticsearchAuthFailures', () => {
     });
   });
 
-  it('asks for no collections when the failures are not authentication or authorization', async () => {
+  it('asks for no breakdown when the failures are not authentication or authorization', async () => {
     const runQuery = makeRunQuery({
       rates: () => [{ id: 'es-dev', authentication_rate: 0, authorization_rate: 0 }],
     });
@@ -153,9 +156,19 @@ describe('getElasticsearchAuthFailures', () => {
     });
   });
 
-  it('gives the destination rate and no collections for a 401, which a whole request has', async () => {
+  it('gives the destination rate and no breakdown for a 401, which a whole request has', async () => {
     const runQuery = makeRunQuery({
       rates: () => [{ id: 'es-dev', authentication_rate: 2, authorization_rate: 0 }],
+      // The breakdown query returns the row of a whole request, with neither collection nor reason.
+      breakdown: () => [
+        {
+          id: 'es-dev',
+          collection: null,
+          reason: null,
+          authentication_rate: 2,
+          authorization_rate: null,
+        },
+      ],
     });
 
     const result = await getElasticsearchAuthFailures({
@@ -172,10 +185,10 @@ describe('getElasticsearchAuthFailures', () => {
     });
   });
 
-  it('keeps the rates and reports it when the collections query fails', async () => {
-    const error = new Error('collections failed');
+  it('keeps the rates and reports it when the breakdown query fails', async () => {
+    const error = new Error('breakdown failed');
     const onFailure = jest.fn();
-    const runQuery = makeRunQuery({ rates: () => [failing], collections: failWith(error) });
+    const runQuery = makeRunQuery({ rates: () => [failing], breakdown: failWith(error) });
 
     const result = await getElasticsearchAuthFailures({
       runQuery,
@@ -185,14 +198,14 @@ describe('getElasticsearchAuthFailures', () => {
       onFailure,
     });
 
-    expect(onFailure).toHaveBeenCalledWith(error, 'authentication and authorization collections');
+    expect(onFailure).toHaveBeenCalledWith(error, 'authentication and authorization breakdown');
     expect(result['es-dev']).toEqual({
       authentication: { rate: rate(0.5) },
       authorization: { rate: rate(1.9) },
     });
   });
 
-  it('reports it, leaves out the failing destinations, and asks for no collections when the rates query fails', async () => {
+  it('reports it, leaves out the failing destinations, and asks for no breakdown when the rates query fails', async () => {
     const error = new Error('rates failed');
     const onFailure = jest.fn();
     const runQuery = makeRunQuery({ rates: failWith(error) });

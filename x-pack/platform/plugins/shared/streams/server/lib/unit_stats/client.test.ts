@@ -56,14 +56,15 @@ const responses = {
     // Only `es-dev` fails in the totals, so it is the only destination the query is asked about.
     values: [['es-dev', 0.5, 1.9]],
   },
-  destinationAuthCollections: {
+  destinationAuthBreakdown: {
     columns: [
       { name: 'id', type: 'keyword' },
       { name: 'collection', type: 'keyword' },
+      { name: 'reason', type: 'keyword' },
       { name: 'authentication_rate', type: 'double' },
       { name: 'authorization_rate', type: 'double' },
     ],
-    values: [['es-dev', 'logs-generic.otel-default', null, 1.9]],
+    values: [['es-dev', 'logs-generic.otel-default', 'security_exception', null, 1.9]],
   },
   destinationSums: {
     columns: [
@@ -113,8 +114,8 @@ const isDestinationSumsQuery = (query: string) =>
 const queryName = (query: string): QueryName => {
   if (query.includes('metrics.streams.source.items')) return 'sourceRate';
   if (!query.includes('scope.attributes.streams.destination.id')) return 'processor';
-  // The collections query is the only one with `INLINE STATS`.
-  if (query.includes('INLINE STATS')) return 'destinationAuthCollections';
+  // The breakdown query is the only one with `INLINE STATS`.
+  if (query.includes('INLINE STATS')) return 'destinationAuthBreakdown';
   if (isDestinationRateQuery(query)) return 'destinationRate';
   if (query.includes('authentication_rate')) return 'destinationAuthRates';
 
@@ -486,7 +487,7 @@ describe('UnitStatsClient.getStats', () => {
 
   describe('authentication and authorization failures', () => {
     const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
-    const collectionsQueries = (esql: jest.Mock) =>
+    const breakdownQueries = (esql: jest.Mock) =>
       statsQueries(esql).filter((query) => query.includes('INLINE STATS'));
     const authRatesQueries = (esql: jest.Mock) =>
       statsQueries(esql).filter(
@@ -496,7 +497,7 @@ describe('UnitStatsClient.getStats', () => {
           !isDestinationRateQuery(query)
       );
 
-    it('puts the failures of each destination in its result, with the collections of one that has failures', async () => {
+    it('puts the failures of each destination in its result, with the breakdown of one that has failures', async () => {
       const response = await run(makeEsql());
 
       expect(response.components.destinations['es-dev'].events.failed).toEqual({
@@ -504,7 +505,13 @@ describe('UnitStatsClient.getStats', () => {
         authentication: { rate: rate(0.5) },
         authorization: {
           rate: rate(1.9),
-          collections: { 'logs-generic.otel-default': { rate: rate(1.9) } },
+          breakdown: [
+            {
+              collection: 'logs-generic.otel-default',
+              reason: 'security_exception',
+              rate: rate(1.9),
+            },
+          ],
         },
       });
       expect(response.components.destinations['es-prod'].events.failed.authentication).toEqual({
@@ -516,15 +523,15 @@ describe('UnitStatsClient.getStats', () => {
       expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
     });
 
-    it('asks for the collections of the destinations that have failures only', async () => {
+    it('asks for the breakdown of the destinations that have failures only', async () => {
       const esql = makeEsql();
 
       await run(esql);
 
-      const [collectionsQuery] = collectionsQueries(esql);
-      expect(collectionsQueries(esql)).toHaveLength(1);
-      expect(collectionsQuery).toContain('destination.id IN ("es-dev")');
-      expect(collectionsQuery).not.toContain('"es-prod"');
+      const [breakdownQuery] = breakdownQueries(esql);
+      expect(breakdownQueries(esql)).toHaveLength(1);
+      expect(breakdownQuery).toContain('destination.id IN ("es-dev")');
+      expect(breakdownQuery).not.toContain('"es-prod"');
     });
 
     it('asks for no failure queries when no destination fails, and gives them no failures', async () => {
@@ -541,7 +548,7 @@ describe('UnitStatsClient.getStats', () => {
       const response = await run(esql);
 
       expect(authRatesQueries(esql)).toHaveLength(0);
-      expect(collectionsQueries(esql)).toHaveLength(0);
+      expect(breakdownQueries(esql)).toHaveLength(0);
       ['es-prod', 'es-dev'].forEach((id) => {
         const { failed } = response.components.destinations[id].events;
         expect(failed.authentication).toEqual({ rate: rate(0) });
@@ -557,7 +564,7 @@ describe('UnitStatsClient.getStats', () => {
       const { failed } = response.components.destinations.dbg.events;
       expect(failed.authentication).toEqual({ rate: rate(null) });
       expect(failed.authorization).toEqual({ rate: rate(null) });
-      [...authRatesQueries(esql), ...collectionsQueries(esql)].forEach((query) =>
+      [...authRatesQueries(esql), ...breakdownQueries(esql)].forEach((query) =>
         expect(query).not.toContain('"dbg"')
       );
     });
@@ -589,11 +596,11 @@ describe('UnitStatsClient.getStats', () => {
       expect(authRatesQueries(esql)[0]).toContain('destination.id IN ("remote")');
     });
 
-    it('keeps the failure rates and logs a warn when the collections query fails', async () => {
+    it('keeps the failure rates and logs a warn when the breakdown query fails', async () => {
       const logger = loggingSystemMock.createLogger();
 
       const response = await run(
-        makeEsql({ destinationAuthCollections: failWith(responseError(500)) }),
+        makeEsql({ destinationAuthBreakdown: failWith(responseError(500)) }),
         {},
         unit,
         logger
@@ -604,7 +611,7 @@ describe('UnitStatsClient.getStats', () => {
       expect(esDev.events.failed.authorization).toEqual({ rate: rate(1.9) });
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('destination authentication and authorization collections')
+        expect.stringContaining('destination authentication and authorization breakdown')
       );
     });
 
@@ -620,7 +627,7 @@ describe('UnitStatsClient.getStats', () => {
       expect(esDev.events.failed.rate).toEqual(rate(2.4));
       expect(esDev.events.failed.authentication).toEqual({ rate: rate(null) });
       expect(esDev.events.failed.authorization).toEqual({ rate: rate(null) });
-      expect(collectionsQueries(esql)).toHaveLength(0);
+      expect(breakdownQueries(esql)).toHaveLength(0);
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('destination authentication and authorization rates')

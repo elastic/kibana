@@ -12,7 +12,7 @@ import { groupById, indexById, numberOrNull, type EsqlRow } from './mappers/esql
 import { toFailureRate, toItemRate, type StatsFailureRate } from './mappers/stats_values';
 import type { DestinationStatsQueryParams } from './query_builders/build_destination_stats_queries';
 import {
-  buildElasticsearchAuthFailureCollectionsQuery,
+  buildElasticsearchAuthFailureBreakdownQuery,
   buildElasticsearchAuthFailureRatesQuery,
 } from './query_builders/build_elasticsearch_auth_failure_queries';
 import type { StatsQueryBaseParams } from './query_builders/filters';
@@ -62,33 +62,33 @@ const queryAuthFailures = async ({
     hasFailures(row) ? [id] : []
   );
 
-  let collectionsById: Record<string, EsqlRow[]> = {};
+  let breakdownById: Record<string, EsqlRow[]> = {};
   if (failingIds.length > 0) {
     try {
-      const collectionRows = await runQuery(
-        buildElasticsearchAuthFailureCollectionsQuery({ ...params, ids: failingIds })
+      const breakdownRows = await runQuery(
+        buildElasticsearchAuthFailureBreakdownQuery({ ...params, ids: failingIds })
       );
-      collectionsById = groupById(collectionRows, STATS_COLUMN.id);
+      breakdownById = groupById(breakdownRows, STATS_COLUMN.id);
     } catch (error) {
-      onFailure(error, 'authentication and authorization collections');
+      onFailure(error, 'authentication and authorization breakdown');
     }
   }
 
   return Object.entries(ratesById).map(([id, row]) => {
     // An id is user-defined, so `constructor` must not be read from `Object.prototype`.
-    const collectionRows = Object.hasOwn(collectionsById, id) ? collectionsById[id] : [];
+    const breakdownRows = Object.hasOwn(breakdownById, id) ? breakdownById[id] : [];
 
     return [
       id,
       {
         authentication: toFailureRate({
           rate: numberOrNull(row[STATS_COLUMN.authenticationRate]),
-          collectionRows,
+          breakdownRows,
           column: STATS_COLUMN.authenticationRate,
         }),
         authorization: toFailureRate({
           rate: numberOrNull(row[STATS_COLUMN.authorizationRate]),
-          collectionRows,
+          breakdownRows,
           column: STATS_COLUMN.authorizationRate,
         }),
       },

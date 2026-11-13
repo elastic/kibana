@@ -272,23 +272,37 @@ describe('streams unit stats response schema', () => {
         meta,
       }).success;
 
+    const failedWith = (breakdown: object[]) => ({
+      rate: rate(1.9),
+      authentication: { rate: rate(0) },
+      authorization: { rate: rate(1.9), breakdown },
+    });
+    const cause = (collection: string | null, reason: string | null) => ({
+      collection,
+      reason,
+      rate: rate(1.9),
+    });
+
+    expect(parse(failedWith([cause('logs-generic.otel-default', 'security_exception')]))).toBe(
+      true
+    );
+    // A failure of a whole request has a reason and no collection. A cause can also have only a collection.
+    expect(parse(failedWith([cause(null, 'AccessDenied'), cause('logs-a-default', null)]))).toBe(
+      true
+    );
     expect(
       parse({
         rate: rate(1.9),
         authentication: { rate: rate(0) },
-        authorization: {
-          rate: rate(1.9),
-          collections: { 'logs-generic.otel-default': { rate: rate(1.9) } },
-        },
+        authorization: { rate: rate(1.9) },
       })
     ).toBe(true);
-    expect(
-      parse({
-        rate: rate(1.9),
-        authentication: { rate: rate(0) },
-        authorization: { rate: rate(1.9), collections: { 'logs-generic.otel-default': {} } },
-      })
-    ).toBe(false);
+    // The API always says that a collection or a reason is missing, with null.
+    expect(parse(failedWith([{ reason: 'AccessDenied', rate: rate(1.9) }]))).toBe(false);
+    expect(parse(failedWith([{ collection: 'logs-a-default', reason: 7, rate: rate(1.9) }]))).toBe(
+      false
+    );
+    expect(parse(failedWith([{ collection: 'logs-a-default', reason: null }]))).toBe(false);
     expect(parse({ rate: rate(0), authentication: { rate: rate(0) } })).toBe(false);
   });
 

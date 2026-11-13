@@ -6,8 +6,13 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { ITEM_UNIT, MAX_FAILURE_COLLECTIONS, RATE_TIME_UNIT, STATS_COLUMN } from '../constants';
-import { numberOrNull, type EsqlRow } from './esql_rows';
+import {
+  ITEM_UNIT,
+  MAX_FAILURE_BREAKDOWN_ENTRIES,
+  RATE_TIME_UNIT,
+  STATS_COLUMN,
+} from '../constants';
+import { numberOrNull, stringOrNull, type EsqlRow } from './esql_rows';
 
 export type StatsValue = StreamsUnit.StatsDestinationResult['latency']['average'];
 export type StatsRate = StreamsUnit.StatsDestinationResult['events']['incoming']['rate'];
@@ -25,42 +30,39 @@ export const toItemRate = (value: number | null): StatsRate => ({
 });
 
 /**
- * The failure rate of one status: the rate of the destination, and the rate of each collection that has failures of
- * it, read from `column` of the collection rows. A collection with a null or zero rate is left out.
- * The ones with the highest rates stay, at most `MAX_FAILURE_COLLECTIONS`, highest first.
- * `collections` is missing when none is left.
+ * The failure rate of one class: the rate of the destination, and its breakdown by cause, one entry
+ * for each row of `breakdownRows` that has a collection or a reason and a rate above zero in
+ * `column`. The collection and the reason are null when the row has none. The entries with the
+ * highest rates stay, at most `MAX_FAILURE_BREAKDOWN_ENTRIES`, highest first. `breakdown` is
+ * missing when no entry is left.
  */
 export const toFailureRate = ({
   rate,
-  collectionRows,
+  breakdownRows,
   column,
 }: {
   rate: number | null;
-  collectionRows: EsqlRow[];
+  breakdownRows: EsqlRow[];
   column: string;
 }): StatsFailureRate => {
-  const collections = collectionRows
+  const breakdown = breakdownRows
     .flatMap((row) => {
-      const name = row[STATS_COLUMN.collection];
-      const collectionRate = numberOrNull(row[column]);
-      return typeof name === 'string' && collectionRate !== null && collectionRate > 0
-        ? [{ name, rate: collectionRate }]
+      const collection = stringOrNull(row[STATS_COLUMN.collection]);
+      const reason = stringOrNull(row[STATS_COLUMN.reason]);
+      const causeRate = numberOrNull(row[column]);
+      return causeRate !== null && causeRate > 0 && (collection !== null || reason !== null)
+        ? [{ collection, reason, rate: causeRate }]
         : [];
     })
     .sort((a, b) => b.rate - a.rate)
-    .slice(0, MAX_FAILURE_COLLECTIONS);
+    .slice(0, MAX_FAILURE_BREAKDOWN_ENTRIES)
+    .map(({ collection, reason, rate: causeRate }) => ({
+      collection,
+      reason,
+      rate: toItemRate(causeRate),
+    }));
 
-  return collections.length > 0
-    ? {
-        rate: toItemRate(rate),
-        collections: Object.fromEntries(
-          collections.map(({ name, rate: collectionRate }) => [
-            name,
-            { rate: toItemRate(collectionRate) },
-          ])
-        ),
-      }
-    : { rate: toItemRate(rate) };
+  return breakdown.length > 0 ? { rate: toItemRate(rate), breakdown } : { rate: toItemRate(rate) };
 };
 
 /**
