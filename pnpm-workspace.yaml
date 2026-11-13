@@ -1563,6 +1563,7 @@ packages:
   - 'x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin'
   - 'x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin'
   - 'x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin'
+  - 'x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector'
   - 'x-pack/platform/test_plugins/agent_builder_sml_test_types'
   - 'x-pack/platform/test_plugins/cloud_integration/saml_provider'
   - 'x-pack/platform/test_plugins/functional_embedded/iframe_embedded'

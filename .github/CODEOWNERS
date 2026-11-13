@@ -1385,6 +1385,7 @@ x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-
 x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
+x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector @elastic/workflows-eng
 x-pack/solutions/observability/packages/alert-details @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/nightshift-sre-agent-team

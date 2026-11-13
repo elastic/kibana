@@ -8,7 +8,10 @@
 import type { Client } from '@elastic/elasticsearch';
 import { randomUUID } from 'crypto';
 
-import { MOCK_IDP_GATEWAY_SHARED_SECRET } from '@kbn/mock-idp-utils';
+import {
+  exchangeUiamServiceAccountToken,
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
+} from '@kbn/mock-idp-utils';
 import type { ApiClientFixture, KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -19,7 +22,6 @@ import {
   createSystemIndicesEsClient,
   SYSTEM_INDICES_HEADERS,
 } from '../fixtures/system_indices_es_client';
-import { exchangeUiamServiceAccountToken } from '../fixtures/uiam_service_account_token';
 
 const TASKS_PATH = 'internal/service_accounts_test/_tasks';
 // How long to wait for a rule run, and for Task Manager's index to show a new task.
