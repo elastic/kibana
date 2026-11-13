@@ -1,5 +1,5 @@
 {
-  "sha1": "66320c7f35af4c946392bea99bd7960fad4a348f",
+  "sha1": "b337df62341246012e4a3442ca93ee754ee22fb5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -111,8 +111,8 @@
       }
     },
     {
-      "id": "219ae9c20262242-ae1440b80f7c536",
-      "title": "AddNewMonitorsUI sets namespace to Kibana space when not set to a custom namespace",
+      "id": "219ae9c20262242-f7bd0bb96086486",
+      "title": "AddNewMonitorsUI falls back to the Kibana space namespace when namespace is omitted",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -122,6 +122,34 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
         "line": 78,
         "column": 10
+      }
+    },
+    {
+      "id": "219ae9c20262242-c929a8c78359d23",
+      "title": "AddNewMonitorsUI honors an explicitly provided namespace, even \"default\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
+        "line": 111,
+        "column": 16
+      }
+    },
+    {
+      "id": "219ae9c20262242-6d0ffd66fc4901a",
+      "title": "AddNewMonitorsUI rejects an invalid namespace with a 400, also when preserve_namespace is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
+        "line": 140,
+        "column": 27
       }
     },
     {
@@ -218,7 +246,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 83,
+        "line": 84,
         "column": 29
       }
     },
@@ -232,7 +260,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 14
       }
     },
@@ -246,7 +274,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 185,
+        "line": 186,
         "column": 8
       }
     },
@@ -260,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 193,
+        "line": 194,
         "column": 25
       }
     },
@@ -274,7 +302,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 204,
+        "line": 205,
         "column": 33
       }
     },
@@ -288,7 +316,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 213,
+        "line": 214,
         "column": 28
       }
     },
@@ -302,7 +330,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 257,
+        "line": 258,
+        "column": 28
+      }
+    },
+    {
+      "id": "70038bf29ca7530-5f31e16cbe4977b",
+      "title": "EditMonitorAPI - Private Location honors an explicitly provided namespace on edit and rejects invalid ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/edit_monitor_private_location.spec.ts",
+        "line": 305,
         "column": 28
       }
     },
