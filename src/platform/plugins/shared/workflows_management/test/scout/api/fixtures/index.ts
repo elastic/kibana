@@ -16,7 +16,7 @@ export interface WorkflowsApiServicesFixture extends ApiServicesFixture {
   workflowsApi: WorkflowsApiService;
 }
 
-interface WorkflowsWorkerFixtures extends ScoutParallelWorkerFixtures {
+export interface WorkflowsWorkerFixtures extends ScoutParallelWorkerFixtures {
   apiServices: WorkflowsApiServicesFixture;
 }
 
