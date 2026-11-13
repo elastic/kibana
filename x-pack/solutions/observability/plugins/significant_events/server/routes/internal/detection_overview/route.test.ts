@@ -74,4 +74,43 @@ describe('GET /internal/significant_events/detection/_overview', () => {
       significant_events: 3,
     });
   });
+
+  it('narrows the significant events count to the requested statuses only', async () => {
+    const from = '2026-10-19T07:00:00.000Z';
+    const to = '2026-10-20T07:00:00.000Z';
+    const findLatestPaginated = jest.fn().mockResolvedValue({ total: 5 });
+    const findLatestByCurrentStatePaginated = jest.fn().mockResolvedValue({ total: 2 });
+
+    const response = await overviewRoute.handler({
+      params: { query: { from, to, status: ['active', 'recovering'] } },
+      request: {},
+      server: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({ sources: [{ id: 'source-a' }], total: 1 }),
+          assertReadable: jest.fn().mockResolvedValue(undefined),
+        },
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          countFeatures: jest.fn().mockResolvedValue(0),
+          countEntities: jest.fn().mockResolvedValue(0),
+          countUnbackedQueries: jest.fn().mockResolvedValue(0),
+          countRuleBackedQueries: jest.fn().mockResolvedValue(0),
+        }),
+        getDetectionClient: jest.fn().mockResolvedValue({ findLatestPaginated }),
+        getEventSearchClient: jest.fn().mockResolvedValue({ findLatestByCurrentStatePaginated }),
+      }),
+    } as never);
+
+    expect(findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
+      from,
+      to,
+      status: ['active', 'recovering'],
+      page: 1,
+      perPage: 1,
+    });
+    // Detections are not events: the status filter must not leak into their count.
+    expect(findLatestPaginated).toHaveBeenCalledWith({ from, to, page: 1, perPage: 1 });
+    expect(response.significant_events).toBe(2);
+  });
 });

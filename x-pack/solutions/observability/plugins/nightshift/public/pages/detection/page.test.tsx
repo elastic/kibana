@@ -514,6 +514,15 @@ describe('DetectionPage', () => {
     expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
   });
 
+  it('counts the same statuses in the overview tile as the events list filter selects', async () => {
+    renderPage('/detections/events?status=inactive');
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(mockUseDetectionOverview).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ['inactive'] })
+    );
+  });
+
   it('shows the overview error instead of zero counts', async () => {
     mockUseDetectionOverview.mockReturnValue({
       data: undefined,
@@ -536,7 +545,11 @@ describe('DetectionPage', () => {
     renderPage('/detections/events?rangeFrom=now-5zz&rangeTo=now');
 
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
-    expect(mockUseDetectionOverview).toHaveBeenCalledWith({ from: 'now-24h', to: 'now' });
+    expect(mockUseDetectionOverview).toHaveBeenCalledWith({
+      from: 'now-24h',
+      to: 'now',
+      status: ['active', 'recovering'],
+    });
   });
 
   it('keeps entities and every tab filter when switching tabs, but not the page or flyout', async () => {

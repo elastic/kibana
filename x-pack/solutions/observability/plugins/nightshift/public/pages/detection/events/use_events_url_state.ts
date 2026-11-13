@@ -29,6 +29,7 @@ import {
 } from '../../../common/url_params';
 import { PAGE_QUERY_PARAM } from '../constants';
 import { useUrlSearchParam } from '../use_url_search_param';
+import { NEEDS_ACTION_STATUSES } from '../../../components/entities/significant_event/significant_event_status';
 
 // PAGE_QUERY_PARAM lives in ../constants because the time range hook also resets it.
 const SEARCH_QUERY_PARAM = 'search';
@@ -39,6 +40,9 @@ const SORT_FIELD_QUERY_PARAM = 'sortField';
 const SORT_ORDER_QUERY_PARAM = 'sortOrder';
 // Recently changed events lead the list.
 const DEFAULT_SORT: EventsSort = { field: 'updated_at', order: 'desc' };
+// Without a `status` param the view hides inactive events. `status=all` is the explicit "no status
+// filter", so users can still clear every status and see everything.
+const ALL_STATUSES_PARAM_VALUE = 'all';
 const isSignificantEventStatus = (value: string): value is SignificantEventStatus =>
   SIGNIFICANT_EVENT_STATUS_OPTIONS.includes(value as SignificantEventStatus);
 
@@ -52,6 +56,22 @@ export interface EventsSort {
   field: SignificantEventsSortField;
   order: SignificantEventsSortOrder;
 }
+
+/** Status filter in effect for a URL: the default (active and recovering) when none is set. */
+export const getStatusFromParams = (params: URLSearchParams): SignificantEventStatus[] => {
+  const values = params.getAll(STATUS_QUERY_PARAM);
+  if (values.length === 0) {
+    return NEEDS_ACTION_STATUSES;
+  }
+  return values.filter(isSignificantEventStatus);
+};
+
+export const getStatusFromSearch = (search: string): SignificantEventStatus[] =>
+  getStatusFromParams(new URLSearchParams(search));
+
+const isDefaultStatus = (status: readonly SignificantEventStatus[]) =>
+  status.length === NEEDS_ACTION_STATUSES.length &&
+  NEEDS_ACTION_STATUSES.every((value) => status.includes(value));
 
 const getSort = (params: URLSearchParams): EventsSort => {
   const field = params.get(SORT_FIELD_QUERY_PARAM);
@@ -77,7 +97,7 @@ export const useEventsUrlState = () => {
     onChange: onSearchChange,
     clear: clearSearch,
   } = useUrlSearchParam(SEARCH_QUERY_PARAM, MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH);
-  const status = params.getAll(STATUS_QUERY_PARAM).filter(isSignificantEventStatus);
+  const status = getStatusFromParams(params);
   const severity = params.getAll(SEVERITY_QUERY_PARAM).filter(isSeverity);
   const investigation = params.getAll(INVESTIGATION_QUERY_PARAM).filter(isInvestigationState);
   const sort = getSort(params);
@@ -100,15 +120,27 @@ export const useEventsUrlState = () => {
 
   const setListParam = useCallback(
     (
-      key:
-        | typeof STATUS_QUERY_PARAM
-        | typeof SEVERITY_QUERY_PARAM
-        | typeof INVESTIGATION_QUERY_PARAM,
+      key: typeof SEVERITY_QUERY_PARAM | typeof INVESTIGATION_QUERY_PARAM,
       values: readonly string[]
     ) => {
       updateParams((nextParams) => {
         nextParams.delete(key);
         values.forEach((value) => nextParams.append(key, value));
+        nextParams.delete(PAGE_QUERY_PARAM);
+      });
+    },
+    [updateParams]
+  );
+
+  const setStatusParam = useCallback(
+    (values: readonly SignificantEventStatus[]) => {
+      updateParams((nextParams) => {
+        nextParams.delete(STATUS_QUERY_PARAM);
+        if (values.length === 0) {
+          nextParams.append(STATUS_QUERY_PARAM, ALL_STATUSES_PARAM_VALUE);
+        } else if (!isDefaultStatus(values)) {
+          values.forEach((value) => nextParams.append(STATUS_QUERY_PARAM, value));
+        }
         nextParams.delete(PAGE_QUERY_PARAM);
       });
     },
@@ -173,10 +205,11 @@ export const useEventsUrlState = () => {
     sort,
     page,
     eventId,
-    hasFilters: Boolean(searchQuery || status.length || severity.length || investigation.length),
+    hasFilters: Boolean(
+      searchQuery || !isDefaultStatus(status) || severity.length || investigation.length
+    ),
     onSearchChange,
-    setStatus: (nextStatus: SignificantEventStatus[]) =>
-      setListParam(STATUS_QUERY_PARAM, nextStatus),
+    setStatus: setStatusParam,
     setSeverity: (nextSeverity: Severity[]) => setListParam(SEVERITY_QUERY_PARAM, nextSeverity),
     setInvestigation: (nextInvestigation: SignificantEventInvestigationState[]) =>
       setListParam(INVESTIGATION_QUERY_PARAM, nextInvestigation),
