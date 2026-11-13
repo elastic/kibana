@@ -132,8 +132,8 @@ steps:
     with:
       services: "${{ steps.select_services.output.response.services }}"
       region: "{{ steps.select_services.output.response.region | default: inputs.region }}"
-      account_id: "{{ steps.discover.output.account_id }}"
-      namespace: "{{ inputs.namespace }}"
+      account_id: "${{ steps.discover.output.account_id }}"
+      namespace: "${{ inputs.namespace }}"
 
   - name: approve_values
     type: waitForApproval
@@ -226,9 +226,9 @@ steps:
       name: "{{ steps.name_identity.output.response.name }}"
       role_arn: "{{ steps.stack_status.output.role_arn }}"
       stack_id: "{{ steps.create_stack.output.stack_id }}"
-      template_sha: "{{ steps.create_stack.output.template_sha }}"
-      blueprint_id: "{{ steps.create_stack.output.blueprint_id }}"
-      blueprint_version: "{{ steps.create_stack.output.blueprint_version }}"
+      template_sha: "${{ steps.create_stack.output.template_sha }}"
+      blueprint_id: "${{ steps.create_stack.output.blueprint_id }}"
+      blueprint_version: "${{ steps.create_stack.output.blueprint_version }}"
 
   - name: create_policies
     type: fleet.awsOnboardingCreatePolicies
