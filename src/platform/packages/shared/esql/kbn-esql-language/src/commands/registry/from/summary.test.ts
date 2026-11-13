@@ -22,6 +22,8 @@ describe('FROM > summary', () => {
       newColumns: new Set([]),
       metadataColumns: new Set([]),
       renamedColumnsPairs: new Set([]),
+      aggregates: new Set([]),
+      grouping: new Set([]),
     });
   });
 
@@ -31,6 +33,8 @@ describe('FROM > summary', () => {
       newColumns: new Set([]),
       metadataColumns: new Set(['_index', '_id']),
       renamedColumnsPairs: new Set([]),
+      aggregates: new Set([]),
+      grouping: new Set([]),
     });
   });
 
@@ -44,6 +48,8 @@ describe('FROM > summary', () => {
       newColumns: new Set(['computed']),
       metadataColumns: new Set([]),
       renamedColumnsPairs: new Set([]),
+      aggregates: new Set([]),
+      grouping: new Set([]),
     });
   });
 
@@ -57,6 +63,8 @@ describe('FROM > summary', () => {
       newColumns: new Set(['a', 'b']),
       metadataColumns: new Set([]),
       renamedColumnsPairs: new Set([]),
+      aggregates: new Set([]),
+      grouping: new Set([]),
     });
   });
 });

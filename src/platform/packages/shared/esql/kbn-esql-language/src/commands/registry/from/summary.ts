@@ -63,11 +63,7 @@ export const summary = (
     }
   }
 
-  return {
-    newColumns: allNewColumns,
-    renamedColumnsPairs: allRenamedColumnsPairs,
-    metadataColumns: allMetadataColumns,
-  };
+  return target;
 };
 
 function processSubquery(
