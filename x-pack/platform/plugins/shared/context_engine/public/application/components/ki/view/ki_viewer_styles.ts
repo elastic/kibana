@@ -18,6 +18,7 @@ export const useKiViewerStyles = () => {
         borderRadius: euiTheme.border.radius.panel,
       }),
       titleRow: css({
+        gap: euiTheme.size.m,
         marginBottom: euiTheme.size.m,
       }),
       title: css({
@@ -32,7 +33,7 @@ export const useKiViewerStyles = () => {
         borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
       }),
       detailsTitle: css({
-        fontWeight: euiTheme.font.weight.semiBold,
+        fontWeight: euiTheme.font.weight.bold,
       }),
       actions: css({
         marginTop: euiTheme.size.l,

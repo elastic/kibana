@@ -31,7 +31,7 @@ export const KiViewerActions = ({
   isDeleting,
   isRestoring,
 }: KiViewerActionsProps) => (
-  <EuiFlexGroup gutterSize="base" responsive={false} wrap data-test-subj="contextKiViewerActions">
+  <EuiFlexGroup gutterSize="m" responsive={false} wrap data-test-subj="contextKiViewerActions">
     {canEdit ? (
       <EuiFlexItem grow={false}>
         <EuiButton

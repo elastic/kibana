@@ -205,7 +205,7 @@ export const KiViewer = ({ aiIndexId, selectedKi: { kiId, index } }: KiViewerPro
     <EuiPanel hasBorder paddingSize="l" css={styles.panel} data-test-subj="contextKiViewer">
       <EuiFlexGroup
         alignItems="center"
-        gutterSize="m"
+        gutterSize="none"
         responsive={false}
         css={styles.titleRow}
         data-test-subj="contextKiViewerTitleRow"

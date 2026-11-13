@@ -71,7 +71,7 @@ export const useListKiGroupsStyles = () => {
         },
       }),
       rowTitle: css({
-        fontWeight: euiTheme.font.weight.medium,
+        fontWeight: euiTheme.font.weight.semiBold,
         lineHeight: ROW_TITLE_LINE_HEIGHT,
         color: euiTheme.colors.textHeading,
         overflowWrap: 'anywhere',
