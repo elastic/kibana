@@ -6,6 +6,7 @@
  */
 
 import type { ThreatIntelSourceRequestOptions } from '../../../../../../common/api/search_strategy';
+import { IOC_TRANSFORM_SOURCE_QUERY } from '../../../../../../common/cti/constants';
 
 export const buildTiDataSourceQuery = ({
   timerange,
@@ -49,6 +50,7 @@ export const buildTiDataSourceQuery = ({
     query: {
       bool: {
         filter,
+        must_not: [IOC_TRANSFORM_SOURCE_QUERY],
       },
     },
   };
