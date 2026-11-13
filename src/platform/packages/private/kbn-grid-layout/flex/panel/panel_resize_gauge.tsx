@@ -8,9 +8,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import { combineLatest, skip } from 'rxjs';
 import { usePanelState } from './use_panel_state';
+import { resizeGaugeStyles } from '../../common/resize_styles';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
@@ -42,19 +42,12 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   }, [panel$, gridLayoutStateManager]);
 
   return isResizing ? (
-    <div css={outerStyles} className="kbnFlexPanel--resizeGauge">
+    <div css={resizeGaugeStyles} className="kbnFlexPanel--resizeGauge">
       <div className="kbnFlexPanel--resizeGauge--inner">
         <span className="kbnFlexPanel--resizeGauge--text">{width}</span>
       </div>
     </div>
   ) : null;
 });
-
-const outerStyles = () =>
-  css({
-    right: '0',
-    top: '0',
-    position: 'absolute',
-  });
 
 ResizeGauge.displayName = 'kbnFlexLayoutResizeGauge';

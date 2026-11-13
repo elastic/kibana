@@ -11,13 +11,11 @@ import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { UserInteractionEvent } from '../grid/use_grid_layout_events/types';
-
-export type DragHandleLayoutPrefix = 'kbnGrid' | 'kbnFlex';
+import type { LayoutClassPrefix } from './types';
 
 interface DefaultDragHandleProps {
   dragHandleApi: { startDrag: (e: UserInteractionEvent) => void };
-  /** Prefix of the layout's class names, e.g. `kbnGrid` -> `kbnGridPanel`, `kbnGrid--static` */
-  layoutPrefix: DragHandleLayoutPrefix;
+  layoutPrefix: LayoutClassPrefix;
 }
 
 export const DefaultDragHandle = React.memo(
@@ -42,7 +40,7 @@ export const DefaultDragHandle = React.memo(
 );
 
 const getStyles =
-  (layoutPrefix: DragHandleLayoutPrefix) =>
+  (layoutPrefix: LayoutClassPrefix) =>
   ({ euiTheme }: UseEuiTheme) =>
     css({
       opacity: 0,

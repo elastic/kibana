@@ -9,10 +9,9 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+import { getResizeHandleStyles } from '../../common/resize_styles';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutPanelEvents, getEffectiveWidthLimits } from '../use_grid_layout_events';
 
@@ -60,24 +59,6 @@ export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
   );
 });
 
-const styles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    right: '0',
-    bottom: '0',
-    margin: '-2px',
-    position: 'absolute',
-    width: euiTheme.size.l,
-    maxWidth: '100%',
-    maxHeight: '100%',
-    height: euiTheme.size.l,
-    zIndex: euiTheme.levels.toast,
-    scrollMarginBottom: euiTheme.size.s,
-    '&:hover, &:focus': {
-      cursor: 'var(--kbnDragHandleCursor)',
-    },
-    '.kbnFlex--static &, .kbnFlexPanel--expanded &': {
-      display: 'none',
-    },
-  });
+const styles = getResizeHandleStyles('kbnFlex');
 
 ResizeHandle.displayName = 'kbnFlexLayoutResizeHandle';
