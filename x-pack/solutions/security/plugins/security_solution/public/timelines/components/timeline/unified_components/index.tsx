@@ -17,14 +17,13 @@ import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
 import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import type {
   UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
-import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -47,9 +46,7 @@ import { timelineActions } from '../../../store';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';
 
-const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
-  className: `${className}`,
-}))`
+const TimelineBodyContainer = styled.div`
   width: 100%;
   height: 100%;
 `;
@@ -71,13 +68,13 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 
   .unifiedFieldListSidebar {
-    padding-bottom: ${(props) => (props.theme as EuiTheme).eui.euiSizeS};
+    padding-bottom: ${(props) => props.theme.euiTheme.size.s};
     padding-left: 0px;
-    border-top: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiColorLightShade};
+    border-top: 1px solid ${(props) => props.theme.euiTheme.colors.lightShade};
 
     .unifiedFieldListSidebar__group {
       .euiFlexItem:last-child {
-        /* padding-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS}; */
+        /* padding-right: ${(props) => props.theme.euiTheme.size.s}; */
       }
 
       .unifiedFieldListSidebar__list {
@@ -85,7 +82,7 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
       }
 
       .unifiedFieldListSidebar__addBtn {
-        margin-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS};
+        margin-right: ${(props) => props.theme.euiTheme.size.s};
       }
     }
   }
