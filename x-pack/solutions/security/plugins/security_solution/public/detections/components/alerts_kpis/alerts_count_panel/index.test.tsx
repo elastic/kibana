@@ -8,9 +8,8 @@
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { matchers as emotionMatchers } from '@emotion/jest';
 import { AlertsCountPanel } from '.';
-// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
-import 'jest-styled-components';
 
 import type { Status } from '../../../../../common/api/detection_engine';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
@@ -18,6 +17,8 @@ import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../chart_panels/chart_context_menu';
 import { COUNTS } from '../chart_panels/chart_select/translations';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+
+expect.extend(emotionMatchers);
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';

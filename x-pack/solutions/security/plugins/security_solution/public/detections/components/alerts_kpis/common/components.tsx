@@ -7,7 +7,7 @@
 
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { EuiPanel, EuiComboBox } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { LegacyRef } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { useStackByFields } from './hooks';
