@@ -8,6 +8,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import type { WorkflowApi } from '@kbn/workflows-ui';
 import { buildImportWorkflowYaml } from './build_import_workflow_yaml';
 import { toImportSource } from './import_form';
@@ -19,6 +20,7 @@ const INTERNAL_CONNECTOR_API_PATH = '/internal/actions/connector';
 
 export interface CreatedImport {
   connectorId: string;
+  /** The same as `connectorId`, so either one finds the other. */
   workflowId: string;
   /** Where the source system sends payloads. */
   url: string;
@@ -79,8 +81,9 @@ const getInvalidWorkflowError = () =>
 
 /**
  * Sets up a custom import with the existing APIs: an inbound webhook connector, its ingest token,
- * and a workflow that turns its payloads into alerts. On failure the resources created so far are
- * deleted again, and the error names the step that failed.
+ * and a workflow that turns its payloads into alerts. The connector and the workflow get the same
+ * generated id. On failure the resources created so far are deleted again, and the error names
+ * the step that failed.
  */
 export const createImport = async ({
   http,
@@ -94,18 +97,23 @@ export const createImport = async ({
   const name = values.name.trim();
   const source = values.source.trim() || toImportSource(name) || 'import';
   const fingerprintField = values.fingerprintField.trim();
+  // A lowercase UUID is also a valid workflow id.
+  const id = uuidv4();
   const undo: Array<() => Promise<unknown>> = [];
 
   let step: ImportSetupStep = 'create_connector';
   try {
-    const connector = await http.post<{ id: string }>(CONNECTOR_API_PATH, {
-      body: JSON.stringify({
-        name: `Import: ${name}`,
-        connector_type_id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
-        config: {},
-        secrets: { authType: 'none' },
-      }),
-    });
+    const connector = await http.post<{ id: string }>(
+      `${CONNECTOR_API_PATH}/${encodeURIComponent(id)}`,
+      {
+        body: JSON.stringify({
+          name: `Import: ${name}`,
+          connector_type_id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+          config: {},
+          secrets: { authType: 'none' },
+        }),
+      }
+    );
     undo.push(() => http.delete(`${CONNECTOR_API_PATH}/${encodeURIComponent(connector.id)}`));
 
     step = 'create_token';
@@ -115,6 +123,7 @@ export const createImport = async ({
 
     step = 'create_workflow';
     const workflow = await workflowApi.createWorkflow({
+      id,
       yaml: buildImportWorkflowYaml({
         name,
         connectorId: connector.id,
