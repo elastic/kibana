@@ -362,7 +362,7 @@ export const CONFIDENCE_CONTRACT_RULE = dedent`
     Confidence is a score from 0.0 to 1.0 for how strongly the evidence you hold supports the symptom this event reports. It rates the evidence, not the impact: severity rates the impact, and neither is set from the other.
     Check what the evidence shows:
     - the failure itself (an error signature or a stated outcome), not only a volume of log lines;
-    - that it agrees with itself and with the knowledge-base topology where both speak (an edge the evidence does not show is context, not a disagreement);
+    - that it agrees with itself and with the knowledge-base topology where both speak: signals disagree when one shows the operation healthy while another shows it failing, or when they name different failing places for the same operation; different failures on connected paths are not a disagreement, and an edge the evidence does not show is context;
     - where it fails (a service, operation or scope).
     With every check shown the score is near the top of the range. Each check not shown lowers it by how far it weakens support for the symptom.
     These never lower the score: anything that was not measured (a reach, outcome or rate, or a check whose query failed); a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
