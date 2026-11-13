@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-// Routes Kubernetes, system, hostmetrics, and APM datasets to pet or per-cluster cattle rows.
+// Routes Kubernetes, system, hostmetrics, and APM datasets to deterministic type KIs.
 import {
-  KUBERNETES_CLUSTER_DATASETS,
   KUBERNETES_DATASET_FAMILIES,
   KUBERNETES_NODE_DATASETS,
   KUBERNETES_POD_DATASETS,
 } from './entity_rows/helpers';
 import type { EntityKeyRow } from './entity_rows/types';
-import {
-  buildOtelHostQuery,
-  buildSystemHostQuery,
-  foldOtelHostRows,
-  foldSystemHostRows,
-} from './hosts';
-import { buildClusterQuery, foldClusterRows } from './kubernetes/cluster';
+import { buildHostQuery, foldHostRows } from './hosts';
 import { KUBERNETES_ENTITY_STORE_TYPES } from './kubernetes/ids';
 import { buildNamespaceQuery, foldNamespaceRows } from './kubernetes/namespaces';
 import { buildNodeQuery, foldNodeRows } from './kubernetes/nodes';
@@ -39,7 +32,7 @@ export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
     id: 'ecs.k8s_nodes',
     families: KUBERNETES_DATASET_FAMILIES,
     datasets: KUBERNETES_NODE_DATASETS,
-    subtype: 'k8s_nodes',
+    subtype: KUBERNETES_ENTITY_STORE_TYPES.node,
     buildQuery: buildNodeQuery,
     foldRows: foldNodeRows,
   },
@@ -47,34 +40,18 @@ export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
     id: 'ecs.k8s_namespaces',
     families: KUBERNETES_DATASET_FAMILIES,
     datasets: KUBERNETES_POD_DATASETS,
-    subtype: 'k8s_namespaces',
+    subtype: KUBERNETES_ENTITY_STORE_TYPES.namespace,
     buildQuery: buildNamespaceQuery,
     foldRows: foldNamespaceRows,
   },
   {
-    id: 'ecs.k8s_cluster',
-    families: KUBERNETES_DATASET_FAMILIES,
-    datasets: KUBERNETES_CLUSTER_DATASETS,
-    subtype: KUBERNETES_ENTITY_STORE_TYPES.cluster,
-    buildQuery: buildClusterQuery,
-    foldRows: foldClusterRows,
-  },
-  {
-    id: 'ecs.host',
-    families: ['system'],
-    datasets: [],
+    id: 'metrics.hosts',
+    families: ['system', 'hostmetricsreceiver'],
+    datasets: ['hostmetricsreceiver.otel'],
     datasetPrefixes: ['system.'],
     subtype: 'host',
-    buildQuery: buildSystemHostQuery,
-    foldRows: foldSystemHostRows,
-  },
-  {
-    id: 'otel.host',
-    families: ['hostmetricsreceiver'],
-    datasets: ['hostmetricsreceiver.otel'],
-    subtype: 'host',
-    buildQuery: buildOtelHostQuery,
-    foldRows: foldOtelHostRows,
+    buildQuery: buildHostQuery,
+    foldRows: foldHostRows,
   },
   {
     id: 'apm.service',

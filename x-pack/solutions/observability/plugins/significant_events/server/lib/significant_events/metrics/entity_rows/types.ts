@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Shares row and drop types used to find pets and per-cluster cattle across metrics datasets.
+// Shares row and drop types used to find metrics type KIs.
 import type { FeatureUpsert } from '@kbn/significant-events-schema';
 
 export type EsqlScalar = string | number | boolean | null;
@@ -30,6 +30,7 @@ export interface EntityFoldResult {
 
 export interface EntityFoldContext {
   sourceQuery: string;
+  sourceId: string;
 }
 
 export interface EntityKeyRow {
@@ -42,9 +43,8 @@ export interface EntityKeyRow {
     | 'k8s.statefulset'
     | 'k8s.daemonset'
     | 'k8s.cronjob'
-    | 'k8s.cluster'
-    | 'k8s_nodes'
-    | 'k8s_namespaces'
+    | 'k8s.node'
+    | 'k8s.namespace'
     | 'host'
     | 'service';
   buildQuery: (sourceQuery: string) => string;

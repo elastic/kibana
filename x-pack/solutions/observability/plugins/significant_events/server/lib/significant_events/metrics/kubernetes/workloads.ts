@@ -5,114 +5,62 @@
  * 2.0.
  */
 
-// Finds one pet KI per long-lived workload from Kubernetes pod and OTel kubeletstats datasets.
+// Finds one workload type KI per kind and cluster from Kubernetes pod and OTel kubeletstats data.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
-import type { Condition } from '@kbn/streamlang';
-import {
-  clustersOf,
-  formatDatasetList,
-  KUBERNETES_POD_DATASETS,
-  lastSeenOf,
-  replicasOf,
-  UNKNOWN_CLUSTER,
-} from '../entity_rows/helpers';
+import { formatDatasetList, KUBERNETES_POD_DATASETS, stringsOf } from '../entity_rows/helpers';
 import {
   createDroppedRows,
   droppedRowsCount,
   ENTITY_QUERY_LIMIT,
+  type EntityFoldContext,
   type EntityFoldResult,
   type EsqlCell,
   type EsqlRow,
 } from '../entity_rows/types';
-import { buildKubernetesEntityId, getKubernetesEntityStoreType, type WorkloadKind } from './ids';
+import {
+  buildConceptListQuery,
+  buildInfrastructureConceptDescription,
+  type InfrastructureConcept,
+} from './concepts';
+import { getKubernetesEntityStoreType, type WorkloadKind } from './ids';
 
-const workloadOwnerFields: Record<WorkloadKind, string> = {
-  deployment: 'kubernetes.deployment.name',
-  statefulset: 'kubernetes.statefulset.name',
-  daemonset: 'kubernetes.daemonset.name',
-  cronjob: 'kubernetes.cronjob.name',
+const WORKLOAD_TYPES: Record<
+  WorkloadKind,
+  {
+    plural: Extract<
+      InfrastructureConcept,
+      'deployments' | 'statefulsets' | 'daemonsets' | 'cronjobs'
+    >;
+    ownerField: string;
+  }
+> = {
+  deployment: {
+    plural: 'deployments',
+    ownerField: 'kubernetes.deployment.name',
+  },
+  statefulset: {
+    plural: 'statefulsets',
+    ownerField: 'kubernetes.statefulset.name',
+  },
+  daemonset: {
+    plural: 'daemonsets',
+    ownerField: 'kubernetes.daemonset.name',
+  },
+  cronjob: {
+    plural: 'cronjobs',
+    ownerField: 'kubernetes.cronjob.name',
+  },
 };
 
 const isWorkloadKind = (value: EsqlCell): value is WorkloadKind =>
-  typeof value === 'string' && value in workloadOwnerFields;
-
-interface WorkloadEntity {
-  kind: WorkloadKind;
-  namespace: string;
-  name: string;
-  ownerDerived: boolean;
-  clusters: string[];
-  replicas: number;
-  lastSeen: string;
-}
-
-const derivedOwnerSources: Partial<
-  Record<WorkloadKind, { stampedField: string; sourceField: string }>
-> = {
-  deployment: {
-    stampedField: 'kubernetes.deployment.name',
-    sourceField: 'kubernetes.replicaset.name',
-  },
-  cronjob: {
-    stampedField: 'kubernetes.cronjob.name',
-    sourceField: 'kubernetes.job.name',
-  },
-};
-
-const buildWorkloadOwnerFilter = (
-  target: Pick<WorkloadEntity, 'kind' | 'name' | 'ownerDerived'>,
-  collidingNames: readonly string[]
-): Condition => {
-  const ownerField = workloadOwnerFields[target.kind];
-  const stampedOwner: Condition = { field: ownerField, eq: target.name };
-  const derivedOwner = derivedOwnerSources[target.kind];
-  return target.ownerDerived && derivedOwner
-    ? {
-        or: [
-          stampedOwner,
-          {
-            and: [
-              { not: { field: derivedOwner.stampedField, exists: true } },
-              { field: derivedOwner.sourceField, startsWith: `${target.name}-` },
-              ...collidingNames.map(
-                (name): Condition => ({
-                  not: { field: derivedOwner.sourceField, startsWith: `${name}-` },
-                })
-              ),
-            ],
-          },
-        ],
-      }
-    : stampedOwner;
-};
-
-export const buildWorkloadFilter = (
-  target: Pick<WorkloadEntity, 'kind' | 'namespace' | 'name' | 'ownerDerived'>,
-  workloads: ReadonlyArray<Pick<WorkloadEntity, 'kind' | 'namespace' | 'name'>>
-): Condition => {
-  const collidingNames = workloads
-    .filter(
-      (workload) =>
-        workload.kind === target.kind &&
-        workload.namespace === target.namespace &&
-        workload.name !== target.name &&
-        workload.name.startsWith(`${target.name}-`)
-    )
-    .map(({ name }) => name);
-  return {
-    and: [
-      { field: 'kubernetes.namespace', eq: target.namespace },
-      buildWorkloadOwnerFilter(target, collidingNames),
-    ],
-  };
-};
+  typeof value === 'string' && value in WORKLOAD_TYPES;
 
 // ReplicaSet hashes and Job timestamp suffixes are removed to recover long-lived owners.
-const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-hash\`,
+export const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-hash\`,
        rs = kubernetes.replicaset.name,
        derived_deployment = CASE(
          kubernetes.deployment.name IS NULL AND h IS NOT NULL AND rs IS NOT NULL
@@ -132,8 +80,7 @@ const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-h
        workload = COALESCE(kubernetes.deployment.name, derived_deployment,
                            kubernetes.statefulset.name, kubernetes.daemonset.name,
                            kubernetes.cronjob.name, derived_cronjob, kubernetes.job.name,
-                           kubernetes.replicaset.name),
-       owner_derived = derived_deployment IS NOT NULL OR derived_cronjob IS NOT NULL`;
+                           kubernetes.replicaset.name)`;
 
 export const buildWorkloadQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
@@ -144,74 +91,79 @@ ${WORKLOAD_OWNER_DERIVATION}
     AND workload IS NOT NULL
     AND kubernetes.namespace IS NOT NULL
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
-  BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived
-| STATS replicas = SUM(replicas), last_seen = MAX(last_seen),
-        clusters = VALUES(orchestrator.cluster.name),
-        owner_derived = MAX(CASE(owner_derived, 1, 0))
-  BY kubernetes.namespace, kind, workload
-| SORT replicas DESC, kubernetes.namespace, workload
+  BY orchestrator.cluster.name, kubernetes.namespace, kind, workload
+| STATS scale = COUNT(*), activity = SUM(replicas), last_seen = MAX(last_seen),
+        members = TOP(CONCAT(kubernetes.namespace, "/", workload), 50, "asc")
+  BY orchestrator.cluster.name, kind
+| SORT activity DESC
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
-export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
-  const droppedRows = createDroppedRows();
-  let unknownClusterRows = 0;
-
-  const workloads = rows.flatMap((row): WorkloadEntity[] => {
-    const namespace = row['kubernetes.namespace'];
-    const kind = row.kind;
-    const name = row.workload;
-    if (!isWorkloadKind(kind) || typeof name !== 'string') {
-      return [];
-    }
-    if (typeof namespace !== 'string') {
-      return [];
-    }
-
-    const clusters = clustersOf(row.clusters);
-    if (clusters.includes(UNKNOWN_CLUSTER)) {
-      unknownClusterRows += 1;
-    }
-
-    return [
-      {
-        kind,
-        namespace,
-        name,
-        ownerDerived: row.owner_derived === true || row.owner_derived === 1,
-        clusters,
-        replicas: replicasOf(row),
-        lastSeen: lastSeenOf(row),
-      },
-    ];
+const buildWorkloadListQuery = ({
+  sourceQuery,
+  cluster,
+  kind,
+}: {
+  sourceQuery: string;
+  cluster: string;
+  kind: WorkloadKind;
+}): string =>
+  buildConceptListQuery({
+    sourceQuery,
+    cluster,
+    datasetCondition: `data_stream.dataset IN (${formatDatasetList(
+      KUBERNETES_POD_DATASETS
+    )}) AND kubernetes.pod.uid IS NOT NULL`,
+    additionalPipeline: `${WORKLOAD_OWNER_DERIVATION}
+| WHERE kind == "${kind}" AND workload IS NOT NULL AND kubernetes.namespace IS NOT NULL
+| EVAL member = CONCAT(kubernetes.namespace, "/", workload)`,
+    breakdownFields: ['member'],
   });
 
-  const features = workloads.flatMap((workload): FeatureUpsert[] => {
-    const id = buildKubernetesEntityId(workload);
-    if (id.length > MAX_ID_LENGTH || workload.name.length > MAX_TITLE_LENGTH) {
+export const foldWorkloadRows = (
+  rows: EsqlRow[],
+  { sourceQuery }: EntityFoldContext
+): EntityFoldResult => {
+  const droppedRows = createDroppedRows();
+  const features = rows.flatMap((row): FeatureUpsert[] => {
+    const cluster = row['orchestrator.cluster.name'];
+    const kind = row.kind;
+    if (typeof cluster !== 'string') {
+      droppedRows.nullCluster += 1;
+      return [];
+    }
+    if (!isWorkloadKind(kind)) {
+      return [];
+    }
+    const { plural, ownerField } = WORKLOAD_TYPES[kind];
+    const id = `k8s.${plural}:${cluster}`;
+    const title = `Kubernetes ${plural} of ${cluster}`;
+    if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
       droppedRows.idTooLong += 1;
       return [];
     }
-    const ownerField = workloadOwnerFields[workload.kind];
+    const members = stringsOf(row.members).slice(0, 50);
+    const scale = typeof row.scale === 'number' ? row.scale : 0;
+    const entityStoreType = getKubernetesEntityStoreType(kind);
     return [
       {
-        type: 'entity',
-        subtype: getKubernetesEntityStoreType(workload.kind),
+        type: 'infrastructure',
+        subtype: entityStoreType,
         id,
-        title: workload.name,
-        description: `Kubernetes ${workload.kind} ${workload.name} in namespace ${workload.namespace}.`,
-        filter: buildWorkloadFilter(workload, workloads),
+        title,
+        description: buildInfrastructureConceptDescription({
+          concept: plural,
+          scope: cluster,
+          scale,
+          breakdownFields: ['kubernetes.namespace', ownerField],
+          members,
+        }),
+        filter: { field: 'orchestrator.cluster.name', eq: cluster },
         properties: {
-          name: workload.name,
-          identity: {
-            'kubernetes.namespace': workload.namespace,
-            [ownerField]: workload.name,
-          },
-          grain: 'namespace',
-          breakdown: ['orchestrator.cluster.name'],
-          entity_store_type: getKubernetesEntityStoreType(workload.kind),
-          clusters: workload.clusters,
-          replicas: workload.replicas,
-          last_seen: workload.lastSeen,
+          breakdown: ['kubernetes.namespace', ownerField],
+          entity_store_type: entityStoreType,
+          scale,
+          members,
+          list_query: buildWorkloadListQuery({ sourceQuery, cluster, kind }),
           origin: 'metrics',
           key_row: 'ecs.k8s_workload',
         },
@@ -224,6 +176,6 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
-    unknownClusterRows,
+    unknownClusterRows: 0,
   };
 };

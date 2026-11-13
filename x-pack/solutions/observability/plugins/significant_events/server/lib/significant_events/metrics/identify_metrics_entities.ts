@@ -120,36 +120,29 @@ const getMetricsDatasets = async ({
   }
 };
 
-const replicasOf = (feature: FeatureUpsert): number => {
-  const replicas = feature.properties.replicas;
-  return typeof replicas === 'number' ? replicas : 0;
-};
-
 const compareEntityIds = (left: FeatureUpsert, right: FeatureUpsert): number =>
   left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
 
 const entityPriority = (feature: FeatureUpsert): number => {
   switch (feature.subtype) {
-    case 'k8s.cluster':
+    case 'k8s.node':
+    case 'k8s.namespace':
       return 0;
-    case 'k8s_nodes':
-    case 'k8s_namespaces':
-      return 1;
     case 'host':
-      return 2;
+      return 1;
     case 'service':
-      return 3;
+      return 2;
     case 'k8s.deployment':
     case 'k8s.statefulset':
     case 'k8s.daemonset':
     case 'k8s.cronjob':
-      return 4;
+      return 3;
     default:
-      return 5;
+      return 3;
   }
 };
 
-/** Lists a metrics source's datasets and writes its deterministic entities. */
+/** Lists a metrics source's datasets and writes its deterministic type KIs. */
 export const identifyMetricsEntities = async ({
   esClient,
   esql,
@@ -247,7 +240,7 @@ export const identifyMetricsEntities = async ({
       );
     }
     metricsEntityRowsCount += rows.length;
-    const folded = keyRow.foldRows(rows, { sourceQuery });
+    const folded = keyRow.foldRows(rows, { sourceQuery, sourceId });
     features.push(...folded.features);
     droppedIncompleteRowsCount += folded.droppedIncompleteRowsCount;
     droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
@@ -272,7 +265,7 @@ export const identifyMetricsEntities = async ({
       if (priority !== 0) {
         return priority;
       }
-      return replicasOf(right) - replicasOf(left) || compareEntityIds(left, right);
+      return compareEntityIds(left, right);
     });
   const excludedSkippedCount = mergedFeatures.length - selectedFeatures.length;
   const droppedOverflowRowsCount = Math.max(0, selectedFeatures.length - MAX_ENTITIES);

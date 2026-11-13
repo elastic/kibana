@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH, type FeatureUpsert } from '@kbn/significant-events-schema';
 import { isConditionComplete } from '@kbn/streamlang';
-import { identifyMetricsEntities } from './identify_metrics_entities';
 import { ENTITY_KEY_TABLE } from './entity_key_table';
 import { getDatasetFamily } from './entity_rows/helpers';
-import { foldOtelHostRows, foldSystemHostRows, mergeHostFeatures } from './hosts';
-import { foldClusterRows } from './kubernetes/cluster';
+import { foldHostRows, mergeHostFeatures } from './hosts';
+import { identifyMetricsEntities } from './identify_metrics_entities';
 import { buildInfrastructureConceptDescription } from './kubernetes/concepts';
-import { buildKubernetesEntityId, KUBERNETES_ENTITY_STORE_TYPES } from './kubernetes/ids';
 import { foldNamespaceRows } from './kubernetes/namespaces';
 import { foldNodeRows } from './kubernetes/nodes';
 import { foldWorkloadRows } from './kubernetes/workloads';
+import { foldServiceRows } from './services';
 
 const datasetColumns = [
   { name: 'docs', type: 'long' },
@@ -24,13 +23,12 @@ const datasetColumns = [
 ];
 
 const workloadColumns = [
-  { name: 'kubernetes.namespace', type: 'keyword' },
+  { name: 'orchestrator.cluster.name', type: 'keyword' },
   { name: 'kind', type: 'keyword' },
-  { name: 'workload', type: 'keyword' },
-  { name: 'replicas', type: 'long' },
+  { name: 'scale', type: 'long' },
+  { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
-  { name: 'clusters', type: 'keyword' },
-  { name: 'owner_derived', type: 'long' },
+  { name: 'members', type: 'keyword' },
 ];
 
 const nodeColumns = [
@@ -51,51 +49,45 @@ const namespaceColumns = [
   { name: 'members', type: 'keyword' },
 ];
 
-const clusterColumns = [
-  { name: 'orchestrator.cluster.name', type: 'keyword' },
-  { name: 'nodes', type: 'long' },
-  { name: 'replicas', type: 'long' },
+const hostColumns = [
+  { name: 'entity_type', type: 'keyword' },
+  { name: 'concept_cluster', type: 'keyword' },
+  { name: 'scale', type: 'long' },
+  { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
-];
-
-const otelHostColumns = [
-  { name: 'host.name', type: 'keyword' },
-  { name: 'k8s.node.name', type: 'keyword' },
-  { name: 'last_seen', type: 'date' },
+  { name: 'members', type: 'keyword' },
   { name: 'os', type: 'keyword' },
   { name: 'cloud_provider', type: 'keyword' },
-  { name: 'cloud_instance', type: 'keyword' },
-  { name: 'clusters', type: 'keyword' },
-];
-
-const systemHostColumns = [
-  { name: 'host.name', type: 'keyword' },
-  { name: 'kubernetes.node.name', type: 'keyword' },
-  { name: 'last_seen', type: 'date' },
-  { name: 'os', type: 'keyword' },
-  { name: 'cloud_provider', type: 'keyword' },
-  { name: 'cloud_instance', type: 'keyword' },
-  { name: 'clusters', type: 'keyword' },
 ];
 
 const serviceColumns = [
-  { name: 'service.name', type: 'keyword' },
-  { name: 'environments', type: 'keyword' },
+  { name: 'scale', type: 'long' },
+  { name: 'activity', type: 'long' },
   { name: 'last_seen', type: 'date' },
-  { name: 'docs', type: 'long' },
+  { name: 'members', type: 'keyword' },
+  { name: 'environments', type: 'keyword' },
 ];
 
 const sourceEsql =
   'FROM metrics-gcp-us-central1:metrics-kubernetes.*,-metrics-gcp-us-central1:metrics-kubernetes.apiserver-* | WHERE orchestrator.cluster.name == "cluster-a"';
+const foldContext = {
+  sourceQuery: 'SET unmapped_fields = "NULLIFY"; FROM metrics-*',
+  sourceId: 'source-id',
+};
 
 type TestScalar = string | number | boolean | null;
 type TestCell = TestScalar | readonly TestScalar[];
+interface TestResponse {
+  columns: object[];
+  values: TestCell[][];
+}
+type WrittenFeature = FeatureUpsert & { expires_at?: string };
 
 const datasetRows = (...datasets: Array<string | null>): TestCell[][] =>
   datasets.map((dataset, index) => [index + 1, dataset]);
 
 const createHarness = (
-  responses: Array<{ columns: object[]; values: TestCell[][] }>,
+  responses: TestResponse[],
   excludedIds: string[] = [],
   priorFeatures: object[] = []
 ) => {
@@ -119,6 +111,9 @@ const createHarness = (
   };
 };
 
+const getWrittenFeatures = (bulk: jest.Mock): WrittenFeature[] =>
+  bulk.mock.calls[0][1].map(({ index }: { index: { feature: WrittenFeature } }) => index.feature);
+
 describe('getDatasetFamily', () => {
   it('reads covered, uncovered, and null dataset families', () => {
     expect(getDatasetFamily('kubernetes.pod')).toBe('kubernetes');
@@ -128,408 +123,304 @@ describe('getDatasetFamily', () => {
 });
 
 describe('buildInfrastructureConceptDescription', () => {
-  it('formats scale and truncates members within the schema limit', () => {
+  it('uses the exact scale and truncates members within the schema limit', () => {
     const exact = buildInfrastructureConceptDescription({
       concept: 'nodes',
-      cluster: 'cluster-a',
-      scale: 3,
-      breakdownField: 'kubernetes.node.name',
-      members: ['node-a', 'node-b', 'node-c'],
-    });
-    const rounded = buildInfrastructureConceptDescription({
-      concept: 'nodes',
-      cluster: 'cluster-a',
+      scope: 'cluster-a',
       scale: 188,
-      breakdownField: 'kubernetes.node.name',
+      breakdownFields: ['kubernetes.node.name'],
       members: ['node-a'],
     });
     const truncated = buildInfrastructureConceptDescription({
-      concept: 'namespaces',
-      cluster: 'cluster-a',
+      concept: 'deployments',
+      scope: 'cluster-a',
       scale: 1000,
-      breakdownField: 'kubernetes.namespace',
+      breakdownFields: ['kubernetes.namespace', 'kubernetes.deployment.name'],
       members: Array.from({ length: 50 }, (_, index) => `${index}-${'x'.repeat(500)}`),
     });
 
-    expect(exact).toContain('3 nodes');
-    expect(exact).not.toContain('about 3 nodes');
-    expect(rounded).toContain('about 190 nodes');
-    expect(truncated).toContain('and about');
+    expect(exact).toContain('188 nodes');
+    expect(exact).not.toContain('about 190');
+    expect(truncated).toMatch(/and \d+ more\.$/);
     expect(truncated.length).toBeLessThanOrEqual(MAX_TEXT_LENGTH);
   });
 });
 
-describe('buildKubernetesEntityId', () => {
-  it('uses the entity store type map for workload and cluster ids', () => {
-    expect([
-      buildKubernetesEntityId({ kind: 'deployment', namespace: 'payments', name: 'checkout' }),
-      buildKubernetesEntityId({ kind: 'daemonset', namespace: 'payments', name: 'metricbeat' }),
-      buildKubernetesEntityId({ kind: 'cluster', name: 'cluster-a' }),
-    ]).toEqual([
-      `${KUBERNETES_ENTITY_STORE_TYPES.deployment}:payments/checkout`,
-      `${KUBERNETES_ENTITY_STORE_TYPES.daemonset}:payments/metricbeat`,
-      `${KUBERNETES_ENTITY_STORE_TYPES.cluster}:cluster-a`,
-    ]);
-  });
-});
-
-describe('Kubernetes entity derivation', () => {
-  it('builds derived owners, guards prefixes, and emits complete filters', () => {
-    const lastSeen = '2026-11-10T12:00:00.000Z';
-    const workloadResult = foldWorkloadRows([
-      {
-        'kubernetes.namespace': 'apps',
-        kind: 'deployment',
-        workload: 'api',
-        owner_derived: 1,
-        clusters: ['cluster-a'],
-        replicas: 2,
-        last_seen: lastSeen,
-      },
-      {
-        'kubernetes.namespace': 'apps',
-        kind: 'deployment',
-        workload: 'kb',
-        owner_derived: 1,
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: lastSeen,
-      },
-      {
-        'kubernetes.namespace': 'apps',
-        kind: 'deployment',
-        workload: 'kb-ui',
-        owner_derived: 1,
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: lastSeen,
-      },
-      {
-        'kubernetes.namespace': 'ops',
-        kind: 'cronjob',
-        workload: 'nightly-backup',
-        owner_derived: 1,
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: lastSeen,
-      },
-      {
-        'kubernetes.namespace': 'ops',
-        kind: 'job',
-        workload: 'migrate-2',
-        owner_derived: 0,
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: lastSeen,
-      },
-      {
-        'kubernetes.namespace': 'ops',
-        kind: 'replicaset',
-        workload: 'api-7d9f4',
-        owner_derived: 0,
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: lastSeen,
-      },
-    ]);
-    const { features } = workloadResult;
-    const byId = new Map(features.map((feature) => [feature.id, feature]));
-
-    expect(byId.get('k8s.deployment:apps/api')?.filter).toEqual({
-      and: [
-        { field: 'kubernetes.namespace', eq: 'apps' },
-        {
-          or: [
-            { field: 'kubernetes.deployment.name', eq: 'api' },
-            {
-              and: [
-                { not: { field: 'kubernetes.deployment.name', exists: true } },
-                { field: 'kubernetes.replicaset.name', startsWith: 'api-' },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    expect(byId.get('k8s.deployment:apps/kb')?.filter).toEqual({
-      and: [
-        { field: 'kubernetes.namespace', eq: 'apps' },
-        {
-          or: [
-            { field: 'kubernetes.deployment.name', eq: 'kb' },
-            {
-              and: [
-                { not: { field: 'kubernetes.deployment.name', exists: true } },
-                { field: 'kubernetes.replicaset.name', startsWith: 'kb-' },
-                { not: { field: 'kubernetes.replicaset.name', startsWith: 'kb-ui-' } },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    expect(byId.get('k8s.cronjob:ops/nightly-backup')?.filter).toEqual({
-      and: [
-        { field: 'kubernetes.namespace', eq: 'ops' },
-        {
-          or: [
-            { field: 'kubernetes.cronjob.name', eq: 'nightly-backup' },
-            {
-              and: [
-                { not: { field: 'kubernetes.cronjob.name', exists: true } },
-                { field: 'kubernetes.job.name', startsWith: 'nightly-backup-' },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    expect([...byId.keys()]).not.toEqual(
-      expect.arrayContaining(['k8s.job:ops/migrate-2', 'k8s.replicaset:ops/api-7d9f4'])
-    );
-    expect(byId.get('k8s.deployment:apps/api')?.subtype).toBe('k8s.deployment');
-    expect(byId.get('k8s.cronjob:ops/nightly-backup')?.subtype).toBe('k8s.cronjob');
-    expect(byId.get('k8s.deployment:apps/api')?.properties.entity_store_type).toBe(
-      'k8s.deployment'
-    );
-
-    const workloadQuery =
-      ENTITY_KEY_TABLE.find(({ id }) => id === 'ecs.k8s_workload')?.buildQuery(
-        'SET unmapped_fields = "NULLIFY"; FROM metrics-*'
-      ) ?? '';
-    expect(workloadQuery).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
-    expect(workloadQuery).toContain('@timestamp > NOW() - 1 hour');
-    expect(workloadQuery).toContain('`kubernetes.labels.pod-template-hash`');
-    expect(workloadQuery).toContain('SUBSTRING(rs, 1, LENGTH(rs) - LENGTH(h) - 1)');
-    expect(workloadQuery).toContain('kubernetes.job.name RLIKE ".*-[0-9]{8,}"');
-    expect(workloadQuery).toContain('REPLACE(kubernetes.job.name, "-[0-9]{8,}$", "")');
-    expect(workloadQuery).toContain(
-      '| WHERE kind IN ("deployment", "statefulset", "daemonset", "cronjob")'
-    );
-    expect(workloadQuery).toContain('AND kubernetes.namespace IS NOT NULL');
-    expect(workloadQuery).toContain(
-      'BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived'
-    );
-    expect(workloadQuery).toContain('clusters = VALUES(orchestrator.cluster.name)');
-    expect(workloadQuery).toContain('| SORT replicas DESC, kubernetes.namespace, workload');
-    expect(workloadQuery).toMatch(/\| LIMIT 501$/);
-    const kubernetesQueries = new Map(
-      ENTITY_KEY_TABLE.filter(({ id }) => id.startsWith('ecs.k8s_')).map(({ id, buildQuery }) => [
-        id,
-        buildQuery('SET unmapped_fields = "NULLIFY"; FROM metrics-*'),
-      ])
-    );
-    expect([...kubernetesQueries.values()]).toHaveLength(4);
-    kubernetesQueries.forEach((query) => {
-      expect(query).toContain('data_stream.dataset IN (');
-      expect(query).toContain('"kubeletstatsreceiver.otel"');
-    });
-    expect(kubernetesQueries.get('ecs.k8s_workload')).toContain(
-      'data_stream.dataset IN ("kubernetes.pod", "kubeletstatsreceiver.otel")'
-    );
-    expect(kubernetesQueries.get('ecs.k8s_workload')).toContain('kubernetes.pod.uid IS NOT NULL');
-    expect(kubernetesQueries.get('ecs.k8s_nodes')).toContain(
-      'data_stream.dataset IN ("kubernetes.node", "kubeletstatsreceiver.otel")'
-    );
-    expect(kubernetesQueries.get('ecs.k8s_nodes')).toContain('kubernetes.node.name IS NOT NULL');
-    expect(kubernetesQueries.get('ecs.k8s_namespaces')).toContain(
-      'data_stream.dataset IN ("kubernetes.pod", "kubeletstatsreceiver.otel")'
-    );
-    expect(kubernetesQueries.get('ecs.k8s_namespaces')).toContain('kubernetes.pod.uid IS NOT NULL');
-    expect(kubernetesQueries.get('ecs.k8s_cluster')).toContain(
-      'data_stream.dataset IN ("kubernetes.pod", "kubernetes.node", "kubeletstatsreceiver.otel")'
-    );
-    ENTITY_KEY_TABLE.forEach(({ buildQuery }) => {
-      const query = buildQuery('SET unmapped_fields = "NULLIFY"; FROM metrics-*');
-      expect(query).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
-      expect(query).toMatch(/\| SORT[\s\S]*\| LIMIT 501$/);
-    });
-
-    const foldContext = { sourceQuery: 'SET unmapped_fields = "NULLIFY"; FROM metrics-*' };
-    const nodeFeatures = foldNodeRows(
+describe('Kubernetes type KIs', () => {
+  it('writes one workload KI per kind and cluster with derived members and a 50-member cap', () => {
+    const deploymentMembers = [
+      'apps/api-derived',
+      ...Array.from({ length: 49 }, (_, index) => `team-${index}/api-${index}`),
+    ].sort();
+    const result = foldWorkloadRows(
       [
         {
           'orchestrator.cluster.name': 'cluster-a',
-          members: ['node-a'],
-          activity: 4,
-          os: ['Linux'],
-          cloud_provider: ['gcp'],
-          scale: 1,
-          last_seen: lastSeen,
+          kind: 'deployment',
+          scale: 60,
+          activity: 100,
+          members: deploymentMembers,
         },
         {
           'orchestrator.cluster.name': 'cluster-b',
-          members: ['node-z'],
-          activity: 1,
-          os: ['Linux'],
-          cloud_provider: ['aws'],
+          kind: 'deployment',
           scale: 1,
-          last_seen: lastSeen,
+          activity: 1,
+          members: ['apps/api'],
+        },
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          kind: 'cronjob',
+          scale: 1,
+          activity: 1,
+          members: ['ops/nightly-derived'],
+        },
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          kind: 'statefulset',
+          scale: 1,
+          activity: 1,
+          members: ['apps/database'],
+        },
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          kind: 'daemonset',
+          scale: 1,
+          activity: 1,
+          members: ['ops/agent'],
         },
       ],
       foldContext
-    ).features;
-    const namespaceFeatures = foldNamespaceRows(
+    );
+    const byId = new Map(result.features.map((feature) => [feature.id, feature]));
+    const deployments = byId.get('k8s.deployments:cluster-a');
+
+    expect([...byId.keys()]).toEqual([
+      'k8s.deployments:cluster-a',
+      'k8s.deployments:cluster-b',
+      'k8s.cronjobs:cluster-a',
+      'k8s.statefulsets:cluster-a',
+      'k8s.daemonsets:cluster-a',
+    ]);
+    expect(deployments).toEqual(
+      expect.objectContaining({
+        type: 'infrastructure',
+        subtype: 'k8s.deployment',
+        title: 'Kubernetes deployments of cluster-a',
+        filter: { field: 'orchestrator.cluster.name', eq: 'cluster-a' },
+        properties: expect.objectContaining({
+          breakdown: ['kubernetes.namespace', 'kubernetes.deployment.name'],
+          entity_store_type: 'k8s.deployment',
+          scale: 60,
+          members: deploymentMembers,
+          origin: 'metrics',
+          key_row: 'ecs.k8s_workload',
+        }),
+      })
+    );
+    expect(deployments?.properties.members).toHaveLength(50);
+    expect(deployments?.properties.members).toContain('apps/api-derived');
+    expect(deployments?.description).toContain('60 deployments');
+    expect(deployments?.properties.list_query).toEqual(
+      expect.stringContaining('kubernetes.replicaset.name')
+    );
+    expect(deployments?.properties.list_query).toEqual(
+      expect.stringContaining('| WHERE kind == "deployment"')
+    );
+    expect(byId.get('k8s.cronjobs:cluster-a')?.properties.list_query).toEqual(
+      expect.stringContaining('kubernetes.job.name RLIKE')
+    );
+    expect(byId.get('k8s.statefulsets:cluster-a')?.subtype).toBe('k8s.statefulset');
+    expect(byId.get('k8s.daemonsets:cluster-a')?.subtype).toBe('k8s.daemonset');
+    expect(deployments?.properties).not.toHaveProperty('identity');
+    expect(deployments?.properties).not.toHaveProperty('name');
+    expect(result.features.every(({ filter }) => isConditionComplete(filter))).toBe(true);
+
+    const workloadQuery =
+      ENTITY_KEY_TABLE.find(({ id }) => id === 'ecs.k8s_workload')?.buildQuery(
+        foldContext.sourceQuery
+      ) ?? '';
+    expect(workloadQuery).toContain('`kubernetes.labels.pod-template-hash`');
+    expect(workloadQuery).toContain(
+      '| WHERE kind IN ("deployment", "statefulset", "daemonset", "cronjob")'
+    );
+    expect(workloadQuery).toContain(
+      'members = TOP(CONCAT(kubernetes.namespace, "/", workload), 50, "asc")'
+    );
+    expect(workloadQuery).toContain('BY orchestrator.cluster.name, kind');
+    expect(workloadQuery).toMatch(/\| SORT activity DESC\n\| LIMIT 501$/);
+  });
+
+  it('keeps node and namespace ids while using entity-store subtypes', () => {
+    const nodes = foldNodeRows(
       [
         {
           'orchestrator.cluster.name': 'cluster-a',
-          members: ['apps'],
-          activity: 4,
+          scale: 2,
+          members: ['node-a', 'node-b'],
+          os: ['Linux'],
+          cloud_provider: ['gcp'],
+        },
+      ],
+      foldContext
+    ).features[0];
+    const namespaces = foldNamespaceRows(
+      [
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          scale: 2,
+          members: ['apps', 'kube-system'],
+        },
+      ],
+      foldContext
+    ).features[0];
+
+    expect(nodes).toEqual(
+      expect.objectContaining({
+        id: 'k8s.nodes:cluster-a',
+        subtype: 'k8s.node',
+        properties: expect.objectContaining({
+          entity_store_type: 'k8s.node',
+          scale: 2,
+        }),
+      })
+    );
+    expect(namespaces).toEqual(
+      expect.objectContaining({
+        id: 'k8s.namespaces:cluster-a',
+        subtype: 'k8s.namespace',
+        properties: expect.objectContaining({
+          entity_store_type: 'k8s.namespace',
+          scale: 2,
+        }),
+      })
+    );
+  });
+
+  it('drops an overlong workload type identity while keeping valid rows', () => {
+    const result = foldWorkloadRows(
+      [
+        {
+          'orchestrator.cluster.name': 'x'.repeat(300),
+          kind: 'deployment',
           scale: 1,
-          last_seen: lastSeen,
+          members: ['apps/api'],
+        },
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          kind: 'deployment',
+          scale: 1,
+          members: ['apps/api'],
+        },
+      ],
+      foldContext
+    );
+
+    expect(result.features.map(({ id }) => id)).toEqual(['k8s.deployments:cluster-a']);
+    expect(result.droppedIncompleteRowsCount).toBe(1);
+    expect(result.droppedRows.idTooLong).toBe(1);
+  });
+});
+
+describe('host type KIs', () => {
+  it('groups standalone hosts and lets node hosts enrich the node type KI', () => {
+    const standaloneMembers = Array.from(
+      { length: 50 },
+      (_, index) => `router-${String(index).padStart(2, '0')}`
+    );
+    const hostFeatures = foldHostRows(
+      [
+        {
+          entity_type: 'host',
+          concept_cluster: '',
+          scale: 52,
+          members: standaloneMembers,
+          os: ['Linux'],
+          cloud_provider: ['aws', 'gcp'],
+        },
+        {
+          entity_type: 'node',
+          concept_cluster: 'cluster-a',
+          scale: 1,
+          members: ['node-x'],
+          os: ['Wolfi'],
+          cloud_provider: ['gcp'],
         },
       ],
       foldContext
     ).features;
-    const clusterResult = foldClusterRows([
-      {
-        'orchestrator.cluster.name': 'cluster-a',
-        nodes: 1,
-        replicas: 4,
-        last_seen: lastSeen,
-      },
-      {
-        'orchestrator.cluster.name': null,
-        nodes: 0,
-        replicas: 1,
-        last_seen: lastSeen,
-      },
-    ]);
-    expect(nodeFeatures.map(({ id }) => id)).toEqual([
-      'k8s.nodes:cluster-a',
-      'k8s.nodes:cluster-b',
-    ]);
-    expect(namespaceFeatures.map(({ id }) => id)).toEqual(['k8s.namespaces:cluster-a']);
-    expect(clusterResult.features.map(({ id }) => id)).toEqual(['k8s.cluster:cluster-a']);
-    expect(clusterResult.features[0]?.subtype).toBe('k8s.cluster');
-    expect(clusterResult.droppedRows.nullCluster).toBe(1);
-    expect(
-      [...features, ...nodeFeatures, ...namespaceFeatures, ...clusterResult.features].every(
-        ({ filter }) => isConditionComplete(filter)
-      )
-    ).toBe(true);
-  });
-
-  it('drops an overlong workload identity while keeping other entities', () => {
-    const longName = 'x'.repeat(300);
-    const result = foldWorkloadRows([
-      {
-        'kubernetes.namespace': 'apps',
-        kind: 'deployment',
-        workload: longName,
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: '2026-11-10T12:00:00.000Z',
-      },
-      {
-        'kubernetes.namespace': 'apps',
-        kind: 'deployment',
-        workload: 'api',
-        clusters: ['cluster-a'],
-        replicas: 1,
-        last_seen: '2026-11-10T12:00:00.000Z',
-      },
-    ]);
-
-    expect(result.features.map(({ id }) => id)).toEqual(['k8s.deployment:apps/api']);
-    expect(result.droppedIncompleteRowsCount).toBe(1);
-    expect(result.droppedRows).toEqual({
-      nullNodeName: 0,
-      nullCluster: 0,
-      idTooLong: 1,
-    });
-  });
-});
-
-describe('host entity merging', () => {
-  it('enriches the nodes concept and keeps only standalone hosts as entities', () => {
-    const lastSeen = '2026-11-10T12:00:00.000Z';
     const nodeFeatures = foldNodeRows(
       [
         {
           'orchestrator.cluster.name': 'cluster-a',
+          scale: 1,
           members: ['node-x'],
-          activity: 10,
           os: [],
           cloud_provider: [],
-          scale: 1,
-          last_seen: lastSeen,
         },
       ],
-      { sourceQuery: 'SET unmapped_fields = "NULLIFY"; FROM metrics-*' }
+      foldContext
     ).features;
-    const hostFoldContext = {
-      sourceQuery: 'SET unmapped_fields = "NULLIFY"; FROM metrics-*',
-    };
-    const systemHostFeatures = foldSystemHostRows(
-      [
-        {
-          'host.name': 'node-x',
-          'kubernetes.node.name': 'node-x',
-          last_seen: lastSeen,
-          os: 'Wolfi',
-          cloud_provider: 'gcp',
-          cloud_instance: 'instance-x',
-          clusters: ['cluster-a'],
-        },
-        {
-          'host.name': 'node-y',
-          'kubernetes.node.name': 'node-y',
-          last_seen: lastSeen,
-          os: 'Linux',
-          cloud_provider: 'aws',
-          cloud_instance: 'instance-y',
-          clusters: ['cluster-b'],
-        },
-      ],
-      hostFoldContext
-    ).features;
-    const otelHostFeatures = foldOtelHostRows(
-      [
-        {
-          'host.name': 'router-1',
-          'k8s.node.name': null,
-          last_seen: lastSeen,
-          os: ['Linux'],
-          cloud_provider: [],
-          cloud_instance: [],
-          clusters: null,
-        },
-      ],
-      hostFoldContext
-    ).features;
-
     const byId = new Map(
-      mergeHostFeatures([...nodeFeatures, ...systemHostFeatures, ...otelHostFeatures]).map(
-        (feature) => [feature.id, feature]
-      )
+      mergeHostFeatures([...nodeFeatures, ...hostFeatures]).map((feature) => [feature.id, feature])
     );
-    expect([...byId.keys()]).toEqual([
-      'k8s.nodes:cluster-a',
-      'k8s.nodes:cluster-b',
-      'host:router-1',
-    ]);
-    expect(byId.has('host:node-x')).toBe(false);
-    expect(byId.get('k8s.nodes:cluster-a')?.properties).toMatchObject({
-      host_summary: {
-        os: ['Wolfi'],
-        cloud_provider: ['gcp'],
-      },
-    });
-    expect(byId.get('k8s.nodes:cluster-b')?.properties).toMatchObject({
-      breakdown: ['kubernetes.node.name'],
-      members: ['node-y'],
-      scale: 1,
-      list_query: expect.stringContaining('BY host.name'),
-    });
-    expect(byId.get('host:router-1')).toEqual(
+
+    expect([...byId.keys()]).toEqual(['k8s.nodes:cluster-a', 'hosts:source-id']);
+    expect(byId.get('hosts:source-id')).toEqual(
       expect.objectContaining({
+        type: 'infrastructure',
         subtype: 'host',
-        filter: { field: 'host.name', eq: 'router-1' },
         properties: expect.objectContaining({
-          name: 'router-1',
+          breakdown: ['host.name'],
           entity_store_type: 'host',
-          host: { os: ['Linux'], cloud_provider: [], cloud_instance: [] },
+          scale: 52,
+          members: standaloneMembers,
+          host_summary: {
+            os: ['Linux'],
+            cloud_provider: ['aws', 'gcp'],
+          },
+        }),
+      })
+    );
+    expect(byId.get('hosts:source-id')?.description).toContain('and 2 more');
+    expect(byId.get('k8s.nodes:cluster-a')?.properties).toMatchObject({
+      members: ['node-x'],
+      host_summary: { os: ['Wolfi'], cloud_provider: ['gcp'] },
+    });
+    expect(byId.has('host:node-x')).toBe(false);
+  });
+});
+
+describe('service type KIs', () => {
+  it('groups services and keeps ECS and OTel deployment environments', () => {
+    const query =
+      ENTITY_KEY_TABLE.find(({ id }) => id === 'apm.service')?.buildQuery(
+        foldContext.sourceQuery
+      ) ?? '';
+    const feature = foldServiceRows(
+      [
+        {
+          scale: 2,
+          members: ['checkout', 'payments'],
+          environments: ['production', 'staging'],
+        },
+      ],
+      foldContext
+    ).features[0];
+
+    expect(query).toContain('COALESCE(service.environment, deployment.environment.name)');
+    expect(query).toContain('members = TOP(service.name, 50, "asc")');
+    expect(feature).toEqual(
+      expect.objectContaining({
+        type: 'entity',
+        subtype: 'service',
+        id: 'services:source-id',
+        properties: expect.objectContaining({
+          breakdown: ['service.name'],
+          entity_store_type: 'service',
+          scale: 2,
+          members: ['checkout', 'payments'],
+          environments: ['production', 'staging'],
         }),
       })
     );
@@ -537,52 +428,43 @@ describe('host entity merging', () => {
 });
 
 describe('identifyMetricsEntities', () => {
-  it('does not rewrite an excluded entity', async () => {
+  it('does not rewrite an excluded type KI', async () => {
     const harness = createHarness(
       [
-        {
-          columns: datasetColumns,
-          values: datasetRows('generic.otel'),
-        },
+        { columns: datasetColumns, values: datasetRows('generic.otel') },
         {
           columns: serviceColumns,
-          values: [['Checkout', ['production'], '2026-11-10T12:00:00.000Z', 42]],
+          values: [[1, 42, '2026-11-10T12:00:00.000Z', ['Checkout'], ['production']]],
         },
       ],
-      ['service:checkout']
+      ['services:service-source']
     );
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
       esql: sourceEsql,
-      sourceId: 'service-source',
+      sourceId: 'Service-Source',
       kiClient: harness.kiClient,
       logger: harness.logger,
     });
 
     expect(result).toEqual(
-      expect.objectContaining({
-        metricsEntitiesCount: 0,
-        excludedSkippedCount: 1,
-      })
+      expect.objectContaining({ metricsEntitiesCount: 0, excludedSkippedCount: 1 })
     );
     expect(harness.bulk).not.toHaveBeenCalled();
   });
 
-  it('keeps a prior durable entity permanent', async () => {
+  it('keeps a prior durable type KI permanent', async () => {
     const harness = createHarness(
       [
-        {
-          columns: datasetColumns,
-          values: datasetRows('generic.otel'),
-        },
+        { columns: datasetColumns, values: datasetRows('generic.otel') },
         {
           columns: serviceColumns,
-          values: [['Checkout', ['production'], '2026-11-10T12:00:00.000Z', 42]],
+          values: [[1, 42, '2026-11-10T12:00:00.000Z', ['checkout'], ['production']]],
         },
       ],
       [],
-      [{ id: 'service:checkout' }]
+      [{ id: 'services:service-source' }]
     );
 
     await identifyMetricsEntities({
@@ -593,21 +475,25 @@ describe('identifyMetricsEntities', () => {
       logger: harness.logger,
     });
 
-    expect(harness.bulk.mock.calls[0][1][0].index.feature.expires_at).toBeUndefined();
+    expect(getWrittenFeatures(harness.bulk)[0].expires_at).toBeUndefined();
   });
 
-  it('keeps a nodes concept for a source with only Kubernetes system hosts', async () => {
-    const lastSeen = '2026-11-10T12:00:00.000Z';
+  it('keeps a node type KI for a source with only Kubernetes system hosts', async () => {
     const harness = createHarness([
+      { columns: datasetColumns, values: datasetRows('system.cpu') },
       {
-        columns: datasetColumns,
-        values: datasetRows('system.cpu'),
-      },
-      {
-        columns: systemHostColumns,
+        columns: hostColumns,
         values: [
-          ['node-a', 'node-a', lastSeen, ['Linux'], ['gcp'], ['instance-a'], ['cluster-a']],
-          ['node-b', 'node-b', lastSeen, ['Linux'], ['gcp'], ['instance-b'], ['cluster-a']],
+          [
+            'node',
+            'cluster-a',
+            2,
+            10,
+            '2026-11-10T12:00:00.000Z',
+            ['node-a', 'node-b'],
+            ['Linux'],
+            ['gcp'],
+          ],
         ],
       },
     ]);
@@ -621,176 +507,90 @@ describe('identifyMetricsEntities', () => {
     });
 
     expect(result.metricsEntitiesCount).toBe(1);
-    const operations = harness.bulk.mock.calls[0][1];
-    expect(operations).toHaveLength(1);
-    expect(operations[0].index.feature).toEqual(
+    expect(getWrittenFeatures(harness.bulk)[0]).toEqual(
       expect.objectContaining({
-        type: 'infrastructure',
-        subtype: 'k8s_nodes',
         id: 'k8s.nodes:cluster-a',
-        title: 'Kubernetes nodes of cluster-a',
-        filter: { field: 'orchestrator.cluster.name', eq: 'cluster-a' },
+        subtype: 'k8s.node',
         properties: expect.objectContaining({
-          breakdown: ['kubernetes.node.name'],
-          scale: 2,
           members: ['node-a', 'node-b'],
-          list_query: expect.stringContaining('BY host.name'),
-          key_row: 'ecs.host',
+          scale: 2,
+          key_row: 'metrics.hosts',
         }),
       })
     );
   });
 
-  it('folds clusters while keeping equal deployment and daemonset names separate', async () => {
-    const datasetList = {
-      columns: datasetColumns,
-      values: datasetRows('kubernetes.pod', 'kubernetes.node'),
-    };
-    const workloads = {
-      columns: workloadColumns,
-      values: [
-        [
-          'payments',
-          'deployment',
-          'checkout',
-          5,
-          '2026-11-10T12:05:00.000Z',
-          ['cluster-a', 'cluster-b'],
-          0,
+  it('writes workload, node, and namespace type KIs without a cluster KI', async () => {
+    const harness = createHarness([
+      {
+        columns: datasetColumns,
+        values: datasetRows('kubernetes.pod', 'kubernetes.node'),
+      },
+      {
+        columns: workloadColumns,
+        values: [
+          ['cluster-a', 'deployment', 2, 5, '2026-11-10T12:00:00.000Z', ['apps/api', 'apps/ui']],
+          ['cluster-b', 'deployment', 1, 1, '2026-11-10T12:00:00.000Z', ['apps/api']],
+          ['cluster-a', 'daemonset', 1, 3, '2026-11-10T12:00:00.000Z', ['ops/agent']],
         ],
-        ['payments', 'daemonset', 'checkout', 4, '2026-11-10T12:03:00.000Z', ['cluster-a'], 0],
-        ['payments', 'deployment', 'unknown-cluster', 1, '2026-11-10T12:04:00.000Z', null, 0],
-        ['payments', null, null, 0, '2026-11-10T12:02:00.000Z', ['cluster-a'], 0],
-        [null, 'deployment', 'missing-namespace', 1, '2026-11-10T12:00:00.000Z', ['cluster-a'], 0],
-      ],
-    };
-    const nodes = {
-      columns: nodeColumns,
-      values: [
-        ['cluster-a', 1, 10, '2026-11-10T12:06:00.000Z', ['node-a'], ['Linux'], ['gcp']],
-        [null, 1, 1, '2026-11-10T12:01:00.000Z', ['node-z'], ['Linux'], ['gcp']],
-      ],
-    };
-    const namespaces = {
-      columns: namespaceColumns,
-      values: [
-        ['cluster-a', 1, 9, '2026-11-10T12:06:00.000Z', ['payments']],
-        [null, 1, 1, '2026-11-10T12:01:00.000Z', ['other']],
-      ],
-    };
-    const clusters = {
-      columns: clusterColumns,
-      values: [
-        ['cluster-a', 1, 9, '2026-11-10T12:06:00.000Z'],
-        [null, 0, 1, '2026-11-10T12:01:00.000Z'],
-      ],
-    };
-    const harness = createHarness([datasetList, workloads, nodes, namespaces, clusters]);
+      },
+      {
+        columns: nodeColumns,
+        values: [
+          [
+            'cluster-a',
+            2,
+            10,
+            '2026-11-10T12:00:00.000Z',
+            ['node-a', 'node-b'],
+            ['Linux'],
+            ['gcp'],
+          ],
+          ['cluster-b', 1, 5, '2026-11-10T12:00:00.000Z', ['node-c'], ['Linux'], ['aws']],
+        ],
+      },
+      {
+        columns: namespaceColumns,
+        values: [
+          ['cluster-a', 2, 8, '2026-11-10T12:00:00.000Z', ['apps', 'ops']],
+          ['cluster-b', 1, 2, '2026-11-10T12:00:00.000Z', ['apps']],
+        ],
+      },
+    ]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
       esql: sourceEsql,
-      sourceId: 'gcp-k8s-csp-ecs',
+      sourceId: 'kubernetes-source',
       kiClient: harness.kiClient,
       logger: harness.logger,
     });
+    const features = getWrittenFeatures(harness.bulk);
 
     expect(result).toEqual(
       expect.objectContaining({
-        metricsEntitiesCount: 6,
-        metricsCatalogueRowsCount: 2,
-        matchedEntityKeyRowsCount: 4,
-        uncoveredDatasetsCount: 0,
-        metricsEntityRowsCount: 11,
-        droppedIncompleteRowsCount: 3,
-        droppedOverflowRowsCount: 0,
-        droppedRows: {
-          nullNodeName: 0,
-          nullCluster: 3,
-          idTooLong: 0,
-        },
-        unknownClusterRows: 1,
         handled: true,
+        metricsEntitiesCount: 7,
+        matchedEntityKeyRowsCount: 3,
+        metricsEntityRowsCount: 7,
       })
     );
-    const queries = harness.query.mock.calls.map(([request]: [{ query: string }]) => request.query);
-    expect(queries).toHaveLength(5);
-    queries.forEach((query) => {
-      expect(query).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
-      expect(query).not.toContain('$.nightshift');
-      expect(query).not.toContain('METRICS_INFO');
-      expect(query).not.toMatch(/(?:^|;\s*|\|\s*)TS\s/);
-    });
-    queries.slice(1).forEach((query) => {
-      expect(query).toMatch(/\| SORT[\s\S]*\| LIMIT 501$/);
-    });
-    expect(harness.bulk).toHaveBeenCalledTimes(1);
-    const operations = harness.bulk.mock.calls[0][1];
-    expect(operations).toHaveLength(6);
-    expect(
-      operations.map(({ index }: { index: { feature: { id: string } } }) => index.feature.id)
-    ).toEqual([
-      'k8s.cluster:cluster-a',
+    expect(features.map(({ id }) => id)).toEqual([
       'k8s.namespaces:cluster-a',
+      'k8s.namespaces:cluster-b',
       'k8s.nodes:cluster-a',
-      'k8s.deployment:payments/checkout',
-      'k8s.daemonset:payments/checkout',
-      'k8s.deployment:payments/unknown-cluster',
+      'k8s.nodes:cluster-b',
+      'k8s.daemonsets:cluster-a',
+      'k8s.deployments:cluster-a',
+      'k8s.deployments:cluster-b',
     ]);
+    expect(features.some(({ id }) => id.startsWith('k8s.cluster:'))).toBe(false);
     expect(
-      operations.find(
-        ({ index }: { index: { feature: { id: string } } }) =>
-          index.feature.id === 'k8s.deployment:payments/checkout'
-      )?.index.feature
-    ).toEqual({
-      type: 'entity',
-      subtype: 'k8s.deployment',
-      id: 'k8s.deployment:payments/checkout',
-      title: 'checkout',
-      description: 'Kubernetes deployment checkout in namespace payments.',
-      filter: {
-        and: [
-          { field: 'kubernetes.namespace', eq: 'payments' },
-          { field: 'kubernetes.deployment.name', eq: 'checkout' },
-        ],
-      },
-      properties: {
-        name: 'checkout',
-        identity: {
-          'kubernetes.namespace': 'payments',
-          'kubernetes.deployment.name': 'checkout',
-        },
-        grain: 'namespace',
-        breakdown: ['orchestrator.cluster.name'],
-        entity_store_type: 'k8s.deployment',
-        clusters: ['cluster-a', 'cluster-b'],
-        replicas: 5,
-        last_seen: '2026-11-10T12:05:00.000Z',
-        origin: 'metrics',
-        key_row: 'ecs.k8s_workload',
-      },
-      confidence: 100,
-      expires_at: '2026-12-10T12:00:00.000Z',
-    });
-    expect(
-      operations.find(
-        ({ index }: { index: { feature: { id: string } } }) =>
-          index.feature.id === 'k8s.deployment:payments/unknown-cluster'
-      )?.index.feature.properties.clusters
-    ).toEqual(['_unknown_cluster']);
-    expect(
-      operations.some(({ index }: { index: { feature: { id: string } } }) =>
-        index.feature.id.includes('missing-namespace')
-      )
-    ).toBe(false);
-    expect(
-      operations
-        .map(
-          ({ index }: { index: { feature: { type: string; properties: { name?: string } } } }) =>
-            index.feature
+      features.every(({ properties }) =>
+        ['breakdown', 'entity_store_type', 'list_query', 'members', 'scale'].every(
+          (property) => property in properties
         )
-        .filter(({ type }: { type: string }) => type === 'entity')
-        .every(({ properties }: { properties: { name?: string } }) => properties.name !== undefined)
+      )
     ).toBe(true);
   });
 
@@ -810,7 +610,6 @@ describe('identifyMetricsEntities', () => {
         handled: true,
         skipReason: 'no_data',
         metricsEntitiesCount: 0,
-        uncoveredDatasetsCount: 0,
       })
     );
     expect(harness.query).toHaveBeenCalledTimes(1);
@@ -834,12 +633,7 @@ describe('identifyMetricsEntities', () => {
   });
 
   it('counts a null dataset as uncovered and falls back without writing', async () => {
-    const harness = createHarness([
-      {
-        columns: datasetColumns,
-        values: datasetRows(null),
-      },
-    ]);
+    const harness = createHarness([{ columns: datasetColumns, values: datasetRows(null) }]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
@@ -857,11 +651,7 @@ describe('identifyMetricsEntities', () => {
         uncoveredDatasetsCount: 1,
       })
     );
-    expect(harness.query).toHaveBeenCalledTimes(1);
     expect(harness.bulk).not.toHaveBeenCalled();
-    expect(harness.info).toHaveBeenCalledTimes(1);
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('[plain-index]'));
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('<null>'));
   });
 
   it('handles Kubernetes, OTel host, and generic OTel service datasets', async () => {
@@ -873,18 +663,17 @@ describe('identifyMetricsEntities', () => {
       {
         columns: workloadColumns,
         values: [
-          ['payments', 'deployment', 'checkout', 3, '2026-11-10T12:00:00.000Z', ['cluster-a'], 0],
+          ['cluster-a', 'deployment', 1, 3, '2026-11-10T12:00:00.000Z', ['payments/checkout']],
         ],
       },
       { columns: namespaceColumns, values: [] },
-      { columns: clusterColumns, values: [] },
       {
-        columns: otelHostColumns,
-        values: [['router-1', null, '2026-11-10T12:00:00.000Z', ['Linux'], [], [], null]],
+        columns: hostColumns,
+        values: [['host', '', 1, 42, '2026-11-10T12:00:00.000Z', ['router-1'], ['Linux'], []]],
       },
       {
         columns: serviceColumns,
-        values: [['checkout', ['production', 'staging'], '2026-11-10T12:00:00.000Z', 42]],
+        values: [[1, 42, '2026-11-10T12:00:00.000Z', ['checkout'], ['production']]],
       },
     ]);
 
@@ -900,29 +689,15 @@ describe('identifyMetricsEntities', () => {
       expect.objectContaining({
         handled: true,
         metricsEntitiesCount: 3,
-        matchedEntityKeyRowsCount: 5,
+        matchedEntityKeyRowsCount: 4,
         uncoveredDatasetsCount: 0,
       })
     );
-    expect(harness.bulk).toHaveBeenCalledTimes(1);
-    expect(
-      harness.bulk.mock.calls[0][1].map(
-        ({ index }: { index: { feature: { id: string } } }) => index.feature.id
-      )
-    ).toEqual(['host:router-1', 'service:checkout', 'k8s.deployment:payments/checkout']);
-    expect(
-      harness.bulk.mock.calls[0][1].find(
-        ({ index }: { index: { feature: { id: string } } }) =>
-          index.feature.id === 'service:checkout'
-      )?.index.feature.properties.environments
-    ).toEqual(['production', 'staging']);
-    expect(
-      harness.bulk.mock.calls[0][1].map(
-        ({ index }: { index: { feature: { properties: { name?: string } } } }) =>
-          index.feature.properties.name
-      )
-    ).toEqual(['router-1', 'checkout', 'checkout']);
-    expect(harness.info).not.toHaveBeenCalled();
+    expect(getWrittenFeatures(harness.bulk).map(({ id }) => id)).toEqual([
+      'hosts:mixed-metrics',
+      'services:mixed-metrics',
+      'k8s.deployments:cluster-a',
+    ]);
   });
 
   it('matches OTel Kubernetes rows without counting object-level datasets as uncovered', async () => {
@@ -937,7 +712,7 @@ describe('identifyMetricsEntities', () => {
       },
       {
         columns: workloadColumns,
-        values: [['apps', 'deployment', 'api', 3, '2026-11-10T12:00:00.000Z', ['edge-edot'], 0]],
+        values: [['edge-edot', 'deployment', 1, 3, '2026-11-10T12:00:00.000Z', ['apps/api']]],
       },
       {
         columns: nodeColumns,
@@ -948,19 +723,18 @@ describe('identifyMetricsEntities', () => {
         values: [['edge-edot', 1, 3, '2026-11-10T12:00:00.000Z', ['apps']]],
       },
       {
-        columns: clusterColumns,
-        values: [['edge-edot', 1, 3, '2026-11-10T12:00:00.000Z']],
-      },
-      {
-        columns: otelHostColumns,
-        values: [['router-1', null, '2026-11-10T12:00:00.000Z', ['Linux'], [], [], null]],
+        columns: hostColumns,
+        values: [
+          ['node', 'edge-edot', 1, 42, '2026-11-10T12:00:00.000Z', ['node-a'], ['Linux'], ['gcp']],
+          ['host', '', 1, 1, '2026-11-10T12:00:00.000Z', ['router-1'], ['Linux'], []],
+        ],
       },
     ]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
       esql: sourceEsql,
-      sourceId: 'edge-edot',
+      sourceId: 'edge-edot-source',
       kiClient: harness.kiClient,
       logger: harness.logger,
     });
@@ -968,53 +742,39 @@ describe('identifyMetricsEntities', () => {
     expect(result).toEqual(
       expect.objectContaining({
         handled: true,
-        metricsEntitiesCount: 5,
-        matchedEntityKeyRowsCount: 5,
+        metricsEntitiesCount: 4,
+        matchedEntityKeyRowsCount: 4,
         uncoveredDatasetsCount: 0,
       })
     );
-    expect(
-      harness.bulk.mock.calls[0][1].map(
-        ({ index }: { index: { feature: { id: string } } }) => index.feature.id
-      )
-    ).toEqual([
-      'k8s.cluster:edge-edot',
+    expect(getWrittenFeatures(harness.bulk).map(({ id }) => id)).toEqual([
       'k8s.namespaces:edge-edot',
       'k8s.nodes:edge-edot',
-      'host:router-1',
-      'k8s.deployment:apps/api',
+      'hosts:edge-edot-source',
+      'k8s.deployments:edge-edot',
     ]);
   });
 
-  it('keeps the nodes concept before the highest-replica workloads within the cap', async () => {
-    const datasetList = {
-      columns: datasetColumns,
-      values: datasetRows('kubernetes.pod', 'kubernetes.node'),
-    };
-    const workloads = {
-      columns: workloadColumns,
-      values: Array.from({ length: 501 }, (_, index) => [
-        'namespace-a',
-        'deployment',
-        `workload-${index}`,
-        501 - index,
-        '2026-11-10T12:00:00.000Z',
-        ['cluster-a'],
-        0,
-      ]),
-    };
-    const nodes = {
-      columns: nodeColumns,
-      values: [
-        ['cluster-a', 2, 15, '2026-11-10T12:00:00.000Z', ['node-a', 'node-b'], ['Linux'], ['gcp']],
-      ],
-    };
+  it('keeps node type KIs before workload types within the cap', async () => {
+    const workloads = Array.from({ length: 501 }, (_, index) => [
+      `cluster-${String(index).padStart(3, '0')}`,
+      'deployment',
+      1,
+      501 - index,
+      '2026-11-10T12:00:00.000Z',
+      ['apps/api'],
+    ]);
     const harness = createHarness([
-      datasetList,
-      workloads,
-      nodes,
+      {
+        columns: datasetColumns,
+        values: datasetRows('kubernetes.pod', 'kubernetes.node'),
+      },
+      { columns: workloadColumns, values: workloads },
+      {
+        columns: nodeColumns,
+        values: [['cluster-a', 1, 1, '2026-11-10T12:00:00.000Z', ['node-a'], ['Linux'], ['gcp']]],
+      },
       { columns: namespaceColumns, values: [] },
-      { columns: clusterColumns, values: [] },
     ]);
 
     const result = await identifyMetricsEntities({
@@ -1027,23 +787,9 @@ describe('identifyMetricsEntities', () => {
 
     expect(result.metricsEntitiesCount).toBe(500);
     expect(result.droppedOverflowRowsCount).toBe(2);
-    const operations = harness.bulk.mock.calls[0][1];
-    expect(operations).toHaveLength(500);
-    const ids = operations.map(
-      ({ index }: { index: { feature: { id: string } } }) => index.feature.id
-    );
+    const ids = getWrittenFeatures(harness.bulk).map(({ id }) => id);
     expect(ids[0]).toBe('k8s.nodes:cluster-a');
-    expect(ids).not.toEqual(
-      expect.arrayContaining([
-        'k8s.deployment:namespace-a/workload-498',
-        'k8s.deployment:namespace-a/workload-499',
-        'k8s.deployment:namespace-a/workload-500',
-      ])
-    );
-    expect(harness.info).toHaveBeenCalledTimes(2);
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('row [ecs.k8s_workload]'));
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('501 row limit'));
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('source [overflow-source]'));
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('502 rows, dropped 2'));
   });
 });

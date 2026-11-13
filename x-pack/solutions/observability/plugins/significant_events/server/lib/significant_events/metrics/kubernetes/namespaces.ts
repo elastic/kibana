@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Finds one cattle group KI per cluster from Kubernetes pod and OTel kubeletstats datasets.
+// Finds one namespace type KI per cluster from Kubernetes pod and OTel kubeletstats datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -21,6 +21,7 @@ import {
   type EsqlRow,
 } from '../entity_rows/types';
 import { buildConceptListQuery, buildInfrastructureConceptDescription } from './concepts';
+import { KUBERNETES_ENTITY_STORE_TYPES } from './ids';
 
 export const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
@@ -70,19 +71,20 @@ export const foldNamespaceRows = (
     return [
       {
         type: 'infrastructure',
-        subtype: 'k8s_namespaces',
+        subtype: KUBERNETES_ENTITY_STORE_TYPES.namespace,
         id,
         title,
         description: buildInfrastructureConceptDescription({
           concept: 'namespaces',
-          cluster,
+          scope: cluster,
           scale: concept.scale,
-          breakdownField: 'kubernetes.namespace',
+          breakdownFields: ['kubernetes.namespace'],
           members,
         }),
         filter: { field: 'orchestrator.cluster.name', eq: cluster },
         properties: {
           breakdown: ['kubernetes.namespace'],
+          entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.namespace,
           scale: concept.scale,
           members,
           list_query: buildConceptListQuery({
@@ -91,7 +93,7 @@ export const foldNamespaceRows = (
             datasetCondition: `data_stream.dataset IN (${formatDatasetList(
               KUBERNETES_POD_DATASETS
             )})`,
-            breakdownField: 'kubernetes.namespace',
+            breakdownFields: ['kubernetes.namespace'],
           }),
           origin: 'metrics',
           key_row: 'ecs.k8s_namespaces',

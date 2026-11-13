@@ -5,66 +5,106 @@
  * 2.0.
  */
 
-// Finds one service pet KI from APM service-summary and generic OTel datasets.
+// Finds one service type KI per source from APM service-summary and generic OTel datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
-import { lastSeenOf, stringsOf } from './entity_rows/helpers';
+import { stringsOf } from './entity_rows/helpers';
 import {
   createDroppedRows,
   droppedRowsCount,
   ENTITY_QUERY_LIMIT,
+  type EntityFoldContext,
   type EntityFoldResult,
   type EsqlRow,
 } from './entity_rows/types';
+import {
+  buildConceptListQuery,
+  buildInfrastructureConceptDescription,
+} from './kubernetes/concepts';
+
+const SERVICE_DATASET_CONDITION = `data_stream.dataset IN ("apm.service_summary.1m",
+                                "apm.service_summary.1m.otel",
+                                "generic.otel")`;
 
 export const buildServiceQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
-    AND data_stream.dataset IN ("apm.service_summary.1m",
-                                "apm.service_summary.1m.otel",
-                                "generic.otel")
+    AND ${SERVICE_DATASET_CONDITION}
     AND service.name IS NOT NULL
-| STATS last_seen = MAX(@timestamp), environments = VALUES(service.environment),
+| EVAL environment = COALESCE(service.environment, deployment.environment.name)
+| STATS last_seen = MAX(@timestamp), environments = VALUES(environment),
         docs = COUNT(*)
   BY service.name
-| SORT docs DESC, service.name
+| STATS scale = COUNT(*), activity = SUM(docs), last_seen = MAX(last_seen),
+        members = TOP(service.name, 50, "asc"),
+        environments = VALUES(environments)
+| WHERE scale > 0
+| SORT activity DESC
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
-export const foldServiceRows = (rows: EsqlRow[]): EntityFoldResult => {
+export const foldServiceRows = (
+  rows: EsqlRow[],
+  { sourceQuery, sourceId }: EntityFoldContext
+): EntityFoldResult => {
   const droppedRows = createDroppedRows();
-  const features = rows.flatMap((row): FeatureUpsert[] => {
-    const name = row['service.name'];
-    if (typeof name !== 'string') {
-      return [];
-    }
-    const id = `service:${name}`;
-    if (id.length > MAX_ID_LENGTH || name.length > MAX_TITLE_LENGTH) {
-      droppedRows.idTooLong += 1;
-      return [];
-    }
-    return [
-      {
-        type: 'entity',
-        subtype: 'service',
-        id,
-        title: name,
-        description: `Service ${name}.`,
-        filter: { field: 'service.name', eq: name },
-        properties: {
-          name,
-          identity: { 'service.name': name },
-          environments: stringsOf(row.environments),
-          entity_store_type: 'service',
-          last_seen: lastSeenOf(row),
-          origin: 'metrics',
-          key_row: 'apm.service',
-        },
-        confidence: 100,
+  const row = rows[0];
+  if (!row) {
+    return {
+      features: [],
+      droppedIncompleteRowsCount: 0,
+      droppedRows,
+      unknownClusterRows: 0,
+    };
+  }
+
+  const id = `services:${sourceId}`;
+  const title = `Services of ${sourceId}`;
+  if (id.length > MAX_ID_LENGTH || title.length > MAX_TITLE_LENGTH) {
+    droppedRows.idTooLong += 1;
+    return {
+      features: [],
+      droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
+      droppedRows,
+      unknownClusterRows: 0,
+    };
+  }
+
+  const members = stringsOf(row.members).slice(0, 50);
+  const scale = typeof row.scale === 'number' ? row.scale : 0;
+  const features: FeatureUpsert[] = [
+    {
+      type: 'entity',
+      subtype: 'service',
+      id,
+      title,
+      description: buildInfrastructureConceptDescription({
+        concept: 'services',
+        scope: sourceId,
+        scale,
+        breakdownFields: ['service.name'],
+        members,
+      }),
+      filter: { field: 'service.name', exists: true },
+      properties: {
+        breakdown: ['service.name'],
+        entity_store_type: 'service',
+        scale,
+        members,
+        list_query: buildConceptListQuery({
+          sourceQuery,
+          datasetCondition: `${SERVICE_DATASET_CONDITION} AND service.name IS NOT NULL`,
+          breakdownFields: ['service.name'],
+        }),
+        environments: stringsOf(row.environments),
+        origin: 'metrics',
+        key_row: 'apm.service',
       },
-    ];
-  });
+      confidence: 100,
+    },
+  ];
+
   return {
     features,
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),

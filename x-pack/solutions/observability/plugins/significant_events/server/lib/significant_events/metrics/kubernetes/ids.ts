@@ -5,29 +5,19 @@
  * 2.0.
  */
 
-// Builds stable IDs for Kubernetes cluster and workload pet KIs; it reads no datasets.
+// Maps Kubernetes type KIs to entity store types; it reads no datasets.
 export type WorkloadKind = 'deployment' | 'statefulset' | 'daemonset' | 'cronjob';
-type KubernetesEntityKind = WorkloadKind | 'cluster';
+export type KubernetesEntityKind = WorkloadKind | 'node' | 'namespace';
 
 export const KUBERNETES_ENTITY_STORE_TYPES = {
   deployment: 'k8s.deployment',
   statefulset: 'k8s.statefulset',
   daemonset: 'k8s.daemonset',
   cronjob: 'k8s.cronjob',
-  cluster: 'k8s.cluster',
+  node: 'k8s.node',
+  namespace: 'k8s.namespace',
 } as const satisfies Record<KubernetesEntityKind, string>;
-
-type KubernetesEntityIdentity =
-  | { kind: WorkloadKind; namespace: string; name: string }
-  | { kind: 'cluster'; name: string };
 
 export const getKubernetesEntityStoreType = <TKind extends KubernetesEntityKind>(
   kind: TKind
 ): (typeof KUBERNETES_ENTITY_STORE_TYPES)[TKind] => KUBERNETES_ENTITY_STORE_TYPES[kind];
-
-export const buildKubernetesEntityId = (identity: KubernetesEntityIdentity): string => {
-  const type = getKubernetesEntityStoreType(identity.kind);
-  return 'namespace' in identity
-    ? `${type}:${identity.namespace}/${identity.name}`
-    : `${type}:${identity.name}`;
-};

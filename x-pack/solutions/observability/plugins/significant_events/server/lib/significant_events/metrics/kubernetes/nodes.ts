@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// Finds one cattle group KI per cluster from Kubernetes node and OTel kubeletstats datasets.
+// Finds one node type KI per cluster from Kubernetes node and OTel kubeletstats datasets.
 import {
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -21,6 +21,7 @@ import {
   type EsqlRow,
 } from '../entity_rows/types';
 import { buildConceptListQuery, buildInfrastructureConceptDescription } from './concepts';
+import { KUBERNETES_ENTITY_STORE_TYPES } from './ids';
 
 export const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
@@ -83,19 +84,20 @@ export const foldNodeRows = (
     return [
       {
         type: 'infrastructure',
-        subtype: 'k8s_nodes',
+        subtype: KUBERNETES_ENTITY_STORE_TYPES.node,
         id,
         title,
         description: buildInfrastructureConceptDescription({
           concept: 'nodes',
-          cluster,
+          scope: cluster,
           scale: concept.scale,
-          breakdownField: 'kubernetes.node.name',
+          breakdownFields: ['kubernetes.node.name'],
           members,
         }),
         filter: { field: 'orchestrator.cluster.name', eq: cluster },
         properties: {
           breakdown: ['kubernetes.node.name'],
+          entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
           scale: concept.scale,
           members,
           list_query: buildConceptListQuery({
@@ -104,7 +106,7 @@ export const foldNodeRows = (
             datasetCondition: `data_stream.dataset IN (${formatDatasetList(
               KUBERNETES_NODE_DATASETS
             )})`,
-            breakdownField: 'kubernetes.node.name',
+            breakdownFields: ['kubernetes.node.name'],
           }),
           host_summary: {
             os: [...concept.os].sort(),
