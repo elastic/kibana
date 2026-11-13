@@ -70,4 +70,24 @@ fileGroups:
     - '!security_solution_endpoint/**/*'
     - '!*/packages/**/*'
     - '!*/*/packages/**/*'
+  jestConfigs:
+    - '**/jest.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!security_solution_api_integration/config/services/detections_response/**/*'
+    - '!plugin_functional/plugins/resolver_test/**/*'
+    - '!security_solution_api_integration/**/*'
+    - '!security_solution_endpoint/**/*'
+  jestIntegrationConfigs:
+    - '**/jest.integration.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!security_solution_api_integration/config/services/detections_response/**/*'
+    - '!plugin_functional/plugins/resolver_test/**/*'
+    - '!security_solution_api_integration/**/*'
+    - '!security_solution_endpoint/**/*'
+  scoutConfigs:
+    - '**/test/scout*/**/*playwright.config.ts'
+    - '!security_solution_api_integration/config/services/detections_response/**/*'
+    - '!plugin_functional/plugins/resolver_test/**/*'
+    - '!security_solution_api_integration/**/*'
+    - '!security_solution_endpoint/**/*'
 tasks: {}

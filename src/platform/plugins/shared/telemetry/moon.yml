@@ -56,6 +56,4 @@ fileGroups:
     - common/**/*
     - schema/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

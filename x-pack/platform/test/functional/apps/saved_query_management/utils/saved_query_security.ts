@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function getSavedQuerySecurityUtils({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['header']);
-  const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
@@ -61,7 +60,6 @@ export function getSavedQuerySecurityUtils({ getPageObjects, getService }: FtrPr
           await PageObjects.header.waitUntilLoadingHasFinished();
           await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
           await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-          await testSubjects.click('showQueryBarMenu');
           await savedQueryManagementComponent.deleteSavedQuery('ok2');
         });
       }

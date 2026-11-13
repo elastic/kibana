@@ -121,6 +121,13 @@ const featuresStart = featuresPluginMock.createStart();
 
 featuresStart.getKibanaFeatures.mockReturnValue([...features]);
 
+const MALICIOUS_SVG_IMAGE_URL = `data:image/svg+xml;base64,${Buffer.from(
+  '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(2)</script><rect width="10" height="10"/></svg>'
+).toString('base64')}`;
+
+const decodeSvgImageUrl = (imageUrl: string) =>
+  Buffer.from(imageUrl.replace('data:image/svg+xml;base64,', ''), 'base64').toString('utf8');
+
 describe('#getAll', () => {
   const savedObjects: Array<SavedObject<unknown>> = [
     {
@@ -485,6 +492,31 @@ describe('#create', () => {
       {
         id,
       }
+    );
+  });
+
+  test(`sanitizes an SVG imageUrl before creating the space`, async () => {
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+    mockCallWithRequestRepository.find.mockResolvedValue({
+      total: 0,
+    } as Awaited<ReturnType<typeof mockCallWithRequestRepository.find>>);
+
+    const client = new SpacesClient(
+      createMockDebugLogger(),
+      createMockConfig(),
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart
+    );
+
+    await client.create({ ...spaceToCreate, imageUrl: MALICIOUS_SVG_IMAGE_URL });
+
+    const [, createdAttributes] = mockCallWithRequestRepository.create.mock.calls[0];
+    const { imageUrl } = createdAttributes as { imageUrl: string };
+    expect(decodeSvgImageUrl(imageUrl)).toBe(
+      '<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"></rect></svg>'
     );
   });
 
@@ -890,6 +922,47 @@ describe('#update', () => {
       solution: 'es',
     });
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+  });
+
+  test(`sanitizes an SVG imageUrl before updating the space`, async () => {
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+    const client = new SpacesClient(
+      createMockDebugLogger(),
+      createMockConfig(),
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart
+    );
+
+    await client.update(savedObject.id, { ...spaceToUpdate, imageUrl: MALICIOUS_SVG_IMAGE_URL });
+
+    const [, , updatedAttributes] = mockCallWithRequestRepository.update.mock.calls[0];
+    const { imageUrl } = updatedAttributes as { imageUrl: string };
+    expect(decodeSvgImageUrl(imageUrl)).toBe(
+      '<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"></rect></svg>'
+    );
+  });
+
+  test(`rejects an invalid SVG before writing the space`, async () => {
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    const client = new SpacesClient(
+      createMockDebugLogger(),
+      createMockConfig(),
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart
+    );
+
+    await expect(
+      client.update(savedObject.id, { ...spaceToUpdate, imageUrl: 'data:image/svg+xml,%E0%A4%A' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to save Space, the image is not a valid SVG: Failed to decode SVG data URL: URI malformed"`
+    );
+    expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
   });
 
   describe('when config.allowFeatureVisibility is disabled', () => {

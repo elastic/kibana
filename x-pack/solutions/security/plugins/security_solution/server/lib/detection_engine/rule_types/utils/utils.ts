@@ -913,6 +913,11 @@ export const getSuppressionMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
 };
 
+export const getReservedMetadataColumnsWarning = (columns: string[]): string => {
+  const columnNames = columns.join(', ');
+  return `ES|QL query returns the metadata column(s) ${columnNames}, which cannot be stored in alerts. Alerts were created without it. Remove it from the "METADATA" clause or the query to stop this warning.`;
+};
+
 export const getDisabledActionsWarningText = ({
   alertsCreated,
   disabledActions,

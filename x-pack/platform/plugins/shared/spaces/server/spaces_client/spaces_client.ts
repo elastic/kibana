@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
+import { sanitizeImageDataUrl } from '@kbn/content-sanitization';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
@@ -163,10 +164,13 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to create Space, solution property cannot be empty');
     }
 
+    // Sanitize before any side effects so an invalid image never leaves a partial write behind.
+    const imageUrl = this.sanitizeImageUrl(space.imageUrl);
+
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
     const id = space.id;
-    const attributes = this.generateSpaceAttributes(space);
+    const attributes = this.generateSpaceAttributes({ ...space, imageUrl });
 
     const createdSavedObject = await this.repository.create('space', attributes, { id });
 
@@ -196,7 +200,9 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
     }
 
-    const attributes = this.generateSpaceAttributes(space);
+    // Sanitize before any side effects so an invalid image never leaves a partial write behind.
+    const imageUrl = this.sanitizeImageUrl(space.imageUrl);
+    const attributes = this.generateSpaceAttributes({ ...space, imageUrl });
     await this.repository.update('space', id, attributes);
     const updatedSavedObject = await this.repository.get('space', id);
     return this.transformSavedObjectToSpace(updatedSavedObject);
@@ -262,6 +268,19 @@ export class SpacesClient implements ISpacesClient {
       ...(!this.isServerless && space.solution ? { solution: space.solution } : {}),
     };
   };
+
+  /** Strips active content from SVG avatars before they are persisted. */
+  private sanitizeImageUrl(imageUrl: string | undefined) {
+    if (!imageUrl) {
+      return imageUrl;
+    }
+
+    try {
+      return sanitizeImageDataUrl(imageUrl);
+    } catch (error) {
+      throw Boom.badRequest(`Unable to save Space, the image is not a valid SVG: ${error.message}`);
+    }
+  }
 
   /**
    * Collects a map of all deprecated feature IDs and the feature IDs that replace them.

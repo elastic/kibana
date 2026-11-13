@@ -99,6 +99,46 @@ describe('<AutoFollowPatternList />', () => {
     });
   });
 
+  describe('when an auto-follow pattern has no follow index pattern', () => {
+    let find;
+    let component;
+    let table;
+    let actions;
+
+    beforeEach(async () => {
+      // Patterns created through the ES API may omit `follow_index_pattern`
+      httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({
+        patterns: [
+          {
+            name: 'no-follow-pattern',
+            active: true,
+            remoteCluster: getRandomString(),
+            leaderIndexPatterns: ['leader-*'],
+          },
+        ],
+      });
+
+      ({ find, component, table, actions } = setup());
+
+      await nextTick();
+      component.update();
+    });
+
+    test('should list the pattern instead of showing an error', () => {
+      expect(component.text()).not.toContain('Error loading auto-follow patterns');
+
+      const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
+      expect(tableCellsValues[0][1]).toBe('no-follow-pattern');
+    });
+
+    test('should show the default prefix and suffix values in the detail panel', () => {
+      actions.clickAutoFollowPatternAt(0);
+
+      expect(find('patternPrefix').text()).toEqual('No prefix');
+      expect(find('patternSuffix').text()).toEqual('No suffix');
+    });
+  });
+
   describe('when there are auto-follow patterns', () => {
     let find;
     let exists;

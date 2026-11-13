@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import * as YAML from 'yaml';
 import semver from 'semver';
+import { toDateOnly } from './health_diagnostic_utils';
 import {
   Action,
   QueryType,
@@ -24,14 +25,13 @@ type ValidVersion = (typeof VALID_VERSIONS)[number];
 const filterlistSchema = z.record(z.string(), z.nativeEnum(Action));
 const queryTypeSchema = z.nativeEnum(QueryType);
 // Accepts YYYY-MM-DD dates, full ISO datetime strings, and YAML Date objects.
-// The complete input is validated (no truncation) and normalised to an ISO instant:
-// a bare date maps to start-of-day UTC, a datetime keeps its exact instant.
+// The complete input is validated, then normalised to its YYYY-MM-DD date component
 const expiresAtSchema = z
   .preprocess(
     (val) => (val instanceof Date ? val.toISOString() : val),
     z.union([z.string().date(), z.string().datetime({ offset: true })])
   )
-  .transform((val) => new Date(val).toISOString())
+  .transform(toDateOnly)
   .optional();
 
 const stackVersionsSchema = z

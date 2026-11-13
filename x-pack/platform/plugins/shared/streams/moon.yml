@@ -73,6 +73,4 @@ fileGroups:
     - public/**/*
     - types/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
