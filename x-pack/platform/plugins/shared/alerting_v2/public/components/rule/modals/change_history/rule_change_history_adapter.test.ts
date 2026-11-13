@@ -7,6 +7,13 @@
 
 import type { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
 import { createRuleChangeHistoryAdapter } from './rule_change_history_adapter';
+import { waitForRestoredHistoryEntry } from './wait_for_restored_history_entry';
+
+jest.mock('./wait_for_restored_history_entry', () => ({
+  waitForRestoredHistoryEntry: jest.fn(),
+}));
+
+const mockWaitForRestoredHistoryEntry = jest.mocked(waitForRestoredHistoryEntry);
 
 const createApiMock = () =>
   ({
@@ -22,6 +29,10 @@ const createApiMock = () =>
   } as unknown as jest.Mocked<RuleChangeHistoryApi>);
 
 describe('createRuleChangeHistoryAdapter', () => {
+  beforeEach(() => {
+    mockWaitForRestoredHistoryEntry.mockReset().mockResolvedValue(undefined);
+  });
+
   describe('listChanges', () => {
     it('maps the 0-based page index to the 1-based API page and forwards size/signal', async () => {
       const api = createApiMock();
@@ -212,6 +223,52 @@ describe('createRuleChangeHistoryAdapter', () => {
       expect(onRestored).toHaveBeenCalledWith({ id: 'rule-1', version: 3 });
     });
 
+    it('resolves only after the restored version is listed in the change history', async () => {
+      const api = createApiMock();
+      const onRestored = jest.fn();
+      const adapter = createRuleChangeHistoryAdapter(api, { onRestored });
+      const signal = new AbortController().signal;
+      let finishWaiting: () => void = () => {};
+      mockWaitForRestoredHistoryEntry.mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          finishWaiting = resolve;
+        })
+      );
+
+      const restoring = adapter.restoreChange?.({
+        objectId: 'rule-1',
+        changeId: 'evt-1',
+        signal,
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(mockWaitForRestoredHistoryEntry).toHaveBeenCalledWith({
+        api,
+        ruleId: 'rule-1',
+        version: 3,
+        signal,
+      });
+      expect(onRestored).not.toHaveBeenCalled();
+
+      finishWaiting();
+      await restoring;
+
+      expect(onRestored).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report a restore whose wait for the history entry was aborted', async () => {
+      const api = createApiMock();
+      const onRestored = jest.fn();
+      const adapter = createRuleChangeHistoryAdapter(api, { onRestored });
+      mockWaitForRestoredHistoryEntry.mockRejectedValueOnce(new Error('aborted'));
+
+      await expect(
+        adapter.restoreChange?.({ objectId: 'rule-1', changeId: 'evt-1' })
+      ).rejects.toThrow('aborted');
+      expect(onRestored).not.toHaveBeenCalled();
+    });
+
     it('does not report a restore that failed', async () => {
       const api = createApiMock();
       api.restoreRuleChange.mockRejectedValueOnce(new Error('conflict'));
@@ -221,6 +278,7 @@ describe('createRuleChangeHistoryAdapter', () => {
       await expect(
         adapter.restoreChange?.({ objectId: 'rule-1', changeId: 'evt-1' })
       ).rejects.toThrow('conflict');
+      expect(mockWaitForRestoredHistoryEntry).not.toHaveBeenCalled();
       expect(onRestored).not.toHaveBeenCalled();
     });
   });

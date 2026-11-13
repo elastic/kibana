@@ -11,6 +11,10 @@ import type { ChangeHistoryAdapter } from '@kbn/change-history-ui';
 import { ruleKeys } from '../../../../hooks/query_key_factory';
 import { useRuleChangeHistoryModal } from './use_rule_change_history_modal';
 
+jest.mock('./wait_for_restored_history_entry', () => ({
+  waitForRestoredHistoryEntry: jest.fn().mockResolvedValue(undefined),
+}));
+
 const mockOpenModal = jest.fn();
 
 jest.mock('@kbn/change-history-ui', () => ({
@@ -164,7 +168,9 @@ describe('useRuleChangeHistoryModal', () => {
     render(<Harness canRestore />);
 
     fireEvent.click(screen.getByTestId('openA'));
-    await lastProviderRender().adapter.restoreChange?.({ objectId: 'a', changeId: 'evt-1' });
+    await act(() =>
+      lastProviderRender().adapter.restoreChange?.({ objectId: 'a', changeId: 'evt-1' })
+    );
 
     expect(mockApiStub.restoreRuleChange).toHaveBeenCalledWith({
       eventId: 'evt-1',

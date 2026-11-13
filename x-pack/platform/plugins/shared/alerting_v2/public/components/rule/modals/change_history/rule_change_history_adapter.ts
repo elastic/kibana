@@ -13,6 +13,7 @@ import type {
 } from '@kbn/change-history-ui';
 import type { RuleChangeHistoryListItem, RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
+import { waitForRestoredHistoryEntry } from './wait_for_restored_history_entry';
 
 const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryListItem => ({
   id: item.id,
@@ -29,7 +30,10 @@ const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryList
 });
 
 export interface RuleChangeHistoryAdapterOptions {
-  /** Called with the restored rule after a restore succeeds, e.g. to refetch rule queries. */
+  /**
+   * Called with the restored rule once its change-history entry is listed (or the
+   * wait gives up), e.g. to refetch rule queries.
+   */
   onRestored?: (rule: RuleResponse) => void;
 }
 
@@ -64,8 +68,18 @@ export const createRuleChangeHistoryAdapter = (
       reason,
     };
   },
+  /*
+   * Resolves only once the restore's history entry is listed, so the package's
+   * post-restore refetch shows (and selects) the new entry.
+   */
   restoreChange: async ({ changeId, signal }): Promise<void> => {
     const rule = await api.restoreRuleChange({ eventId: changeId, signal });
+    await waitForRestoredHistoryEntry({
+      api,
+      ruleId: rule.id,
+      version: rule.version,
+      signal,
+    });
     onRestored?.(rule);
   },
 });
