@@ -6,6 +6,7 @@
  */
 import type { ObservablePost } from '../types/api';
 import { DEFAULT_OBSERVABLE_TYPES } from './default_observable_types';
+import { getObservableDedupeKey } from './get_observable_dedupe_key';
 import {
   getIPType,
   getObservablesFromEcs,
@@ -30,7 +31,7 @@ describe('processObservable', () => {
   it('should add an observable to the map', () => {
     const observablesMap = new Map<string, ObservablePost>();
     processObservable(observablesMap, 'value', 'key', 'Description');
-    expect(observablesMap.get('key-value')).toEqual({
+    expect(observablesMap.get(getObservableDedupeKey('key', 'value'))).toEqual({
       typeKey: 'key',
       value: 'value',
       description: 'Description',
@@ -55,11 +56,21 @@ describe('processObservable', () => {
     ]);
   });
 
+  it('should keep both observables when a hyphen moves between the type key and the value', () => {
+    const observablesMap = new Map<string, ObservablePost>();
+    processObservable(observablesMap, 'bar-1', 'foo', 'Description');
+    processObservable(observablesMap, '1', 'foo-bar', 'Description');
+    expect(Array.from(observablesMap.values())).toEqual([
+      { typeKey: 'foo', value: 'bar-1', description: 'Description' },
+      { typeKey: 'foo-bar', value: '1', description: 'Description' },
+    ]);
+  });
+
   it('should preserve the initial value if a duplicate is added with a different description', () => {
     const observablesMap = new Map<string, ObservablePost>();
     processObservable(observablesMap, 'value', 'key', 'Description');
     processObservable(observablesMap, 'value', 'key', 'Another Description');
-    expect(observablesMap.get('key-value')).toEqual({
+    expect(observablesMap.get(getObservableDedupeKey('key', 'value'))).toEqual({
       typeKey: 'key',
       value: 'value',
       description: 'Description',
@@ -271,15 +282,18 @@ describe('getObservablesFromEcsDataArray', () => {
     const description = 'Auto extracted observable';
 
     it('skips a field that is turned off, and reads a custom type with its pattern', () => {
-      const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
-        {
-          key: 'employee-id',
-          label: 'Employee ID',
-          paths: [{ path: 'user.employee_id', enabled: true }],
-          valuePattern: '^E\\d{6}$',
-        },
-      ]);
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [{ key: 'employee-id', label: 'Employee ID' }],
+        [
+          { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+          {
+            key: 'employee-id',
+            paths: [{ path: 'user.employee_id', enabled: true }],
+            valuePattern: '^E\\d{6}$',
+          },
+        ]
+      );
 
       expect(
         getObservablesFromEcs(
@@ -299,12 +313,16 @@ describe('getObservablesFromEcsDataArray', () => {
     });
 
     it('skips an excluded value only on the field that excludes it', () => {
-      const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        {
-          key: 'observable-type-ipv4',
-          paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
-        },
-      ]);
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [],
+        [
+          {
+            key: 'observable-type-ipv4',
+            paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+          },
+        ]
+      );
 
       expect(
         getObservablesFromEcs(
@@ -323,12 +341,16 @@ describe('getObservablesFromEcsDataArray', () => {
     });
 
     it('compares excluded values exactly and with case', () => {
-      const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        {
-          key: 'observable-type-hostname',
-          paths: [{ path: 'host.name', enabled: true, excludedValues: ['localhost'] }],
-        },
-      ]);
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [],
+        [
+          {
+            key: 'observable-type-hostname',
+            paths: [{ path: 'host.name', enabled: true, excludedValues: ['localhost'] }],
+          },
+        ]
+      );
 
       expect(
         getObservablesFromEcs(
@@ -347,14 +369,11 @@ describe('getObservablesFromEcsDataArray', () => {
     });
 
     it('skips a value that is longer than the bound of the pattern', () => {
-      const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
-        {
-          key: 'any-id',
-          label: 'Any id',
-          paths: [{ path: 'user.id', enabled: true }],
-          valuePattern: '^a+$',
-        },
-      ]);
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [{ key: 'any-id', label: 'Any id' }],
+        [{ key: 'any-id', paths: [{ path: 'user.id', enabled: true }], valuePattern: '^a+$' }]
+      );
 
       expect(
         getObservablesFromEcs(

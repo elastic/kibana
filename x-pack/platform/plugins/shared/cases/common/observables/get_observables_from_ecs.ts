@@ -10,6 +10,7 @@ import type { ObservablePost } from '../types/api';
 import { AUTO_EXTRACT_OBSERVABLE_DESCRIPTION } from '../constants/observables';
 import type { DefaultObservableType } from './default_observable_types';
 import { DEFAULT_OBSERVABLE_TYPES } from './default_observable_types';
+import { getObservableDedupeKey } from './get_observable_dedupe_key';
 
 export const getIPType = (ip: string): 'IPV4' | 'IPV6' => {
   if (ip.includes(':')) {
@@ -39,7 +40,7 @@ export const processObservable = (
   typeKey: string,
   description: string
 ) => {
-  const key = `${typeKey}-${value}`;
+  const key = getObservableDedupeKey(typeKey, value);
   if (observablesMap.has(key)) {
     return;
   }
