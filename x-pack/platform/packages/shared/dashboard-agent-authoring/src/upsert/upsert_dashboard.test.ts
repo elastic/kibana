@@ -18,6 +18,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import type { PanelResolutionRequest, ResolvePanelContent, UpsertPanelContent } from '../panels';
+import { upsertPanelContentSchema } from '../panels';
 import type { PanelContentAttempt } from '../resolve_panel';
 import { DASHBOARD_FAILURE_TYPES, type DashboardFailureKind } from '../failure_types';
 import type { ControlFieldCapability, ResolveControlFieldCapabilities } from '../types';
@@ -168,18 +169,17 @@ describe('executeDashboardUpsert', () => {
   };
 
   const metricRequest = (query: string): UpsertPanelContent => ({
-    source: 'request',
+    type: 'vis',
     chartType: SupportedChartType.Metric,
     query,
   });
 
   const metricAttachment: UpsertPanelContent = {
-    source: 'attachment',
+    type: 'attachment',
     attachment_id: 'metric-vis',
   };
 
   const markdownContent = (content: string): UpsertPanelContent => ({
-    source: 'config',
     type: 'markdown',
     config: { content, settings: { open_links_in_new_tab: true } },
   });
@@ -268,7 +268,7 @@ describe('executeDashboardUpsert', () => {
     expect(getIds(result.dashboardData.panels)).toEqual(['summary']);
   });
 
-  it('adds attachment-source panels successfully', async () => {
+  it('adds attachment panels successfully', async () => {
     const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(resolveMetricAttachment);
 
     const result = await executeDashboardUpsert({
@@ -365,7 +365,6 @@ describe('executeDashboardUpsert', () => {
           {
             id: 'charts',
             content: {
-              source: 'config',
               type: 'ml_anomaly_charts',
               config: { job_ids: ['job-1'], severity_threshold: 50 },
             },
@@ -373,7 +372,6 @@ describe('executeDashboardUpsert', () => {
           {
             id: 'swimlane',
             content: {
-              source: 'config',
               type: 'ml_anomaly_swimlane',
               config: { job_ids: ['job-1'], swimlane_type: 'overall' },
             },
@@ -381,7 +379,6 @@ describe('executeDashboardUpsert', () => {
           {
             id: 'smv',
             content: {
-              source: 'config',
               type: 'ml_single_metric_viewer',
               config: { job_ids: ['job-1'] },
             },
@@ -407,6 +404,37 @@ describe('executeDashboardUpsert', () => {
     expect(findPanel(result.dashboardData, 'smv')).toEqual(
       expect.objectContaining({ type: 'ml_single_metric_viewer', config: { job_ids: ['job-1'] } })
     );
+  });
+
+  it('fails only the panel with an invalid ML config and leaves the rest applied', async () => {
+    const existingConfig = { job_ids: ['job-1'], swimlane_type: 'overall' };
+    const existing = createPanel('swimlane', 'ml_anomaly_swimlane', existingConfig);
+
+    const result = await executeDashboardUpsert({
+      dashboardData: { title: 'Test', panels: [existing] },
+      upsert: {
+        panels: [
+          {
+            id: 'swimlane',
+            content: {
+              type: 'ml_anomaly_swimlane',
+              config: { job_ids: 'job-1', swimlane_type: 'overall' },
+            },
+          },
+          { id: 'notes', content: markdownContent('Notes') },
+        ],
+      },
+      logger,
+    });
+
+    expect(result.failures).toEqual([
+      panelFailure(
+        'swimlane',
+        expect.stringMatching(/^Panel "swimlane": Invalid anomaly swim lane config\./)
+      ),
+    ]);
+    expect(findPanel(result.dashboardData, 'swimlane')).toEqual(existing);
+    expect(findPanel(result.dashboardData, 'notes')).toBeDefined();
   });
 
   it('places new panels below existing panels, which keep their place, until the layout step', async () => {
@@ -516,7 +544,7 @@ describe('executeDashboardUpsert', () => {
         name: 'an id that is both updated and removed',
         panels: [createLensPanel('panel-1')],
         upsert: {
-          panels: [{ id: 'panel-1', content: { source: 'request', query: 'make it a bar' } }],
+          panels: [{ id: 'panel-1', content: { type: 'vis', query: 'make it a bar' } }],
           remove: ['panel-1'],
         },
         kind: 'panel',
@@ -534,10 +562,10 @@ describe('executeDashboardUpsert', () => {
           '"section-a" is both updated and removed in this call, so neither change was applied. Do only one.',
       },
       {
-        name: 'a request edit of a panel type without a renderer',
+        name: 'a lens edit of an unregistered panel type',
         panels: [createPanel('panel-1', 'aiOpsLogRateAnalysis', { seriesType: 'log_rate' })],
         upsert: {
-          panels: [{ id: 'panel-1', content: { source: 'request', query: 'refine this' } }],
+          panels: [{ id: 'panel-1', content: { type: 'vis', query: 'refine this' } }],
         },
         kind: 'panel',
         identifier: 'panel-1',
@@ -545,41 +573,41 @@ describe('executeDashboardUpsert', () => {
           'Panel "panel-1" with type "aiOpsLogRateAnalysis" cannot be edited. Tell the user it cannot be edited, and replace it only after they confirm: then remove "panel-1" and add the new panel with a new id in the same call.',
       },
       {
-        name: 'a custom_content request edit without renderer',
+        name: 'a vis edit of a custom_content panel',
         panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
         upsert: {
-          panels: [{ id: 'cc-1', content: { source: 'request', query: 'change the title' } }],
+          panels: [{ id: 'cc-1', content: { type: 'vis', query: 'change the title' } }],
         },
         kind: 'panel',
         identifier: 'cc-1',
         error:
-          'Panel "cc-1" is a custom_content panel. Edit it with source: "request", renderer: "custom_content". To replace it with another kind of panel, remove "cc-1" and add the new panel with a new id in the same call.',
+          'Panel "cc-1" is a custom content panel. Edit it with type: "custom_content". To replace it with another kind of panel, remove "cc-1" and add the new panel with a new id in the same call.',
       },
       {
-        name: 'a markdown request edit without renderer',
+        name: 'a vis edit of a markdown panel',
         panels: [createPanel('md-1', MARKDOWN_EMBEDDABLE_TYPE, { content: 'old text' })],
         upsert: {
-          panels: [{ id: 'md-1', content: { source: 'request', query: 'change the title' } }],
+          panels: [{ id: 'md-1', content: { type: 'vis', query: 'change the title' } }],
         },
         kind: 'panel',
         identifier: 'md-1',
         error:
-          'Panel "md-1" is a markdown panel. Edit it with source: "config", type: "markdown". To replace it with another kind of panel, remove "md-1" and add the new panel with a new id in the same call.',
+          'Panel "md-1" is a markdown panel. Edit it with type: "markdown". To replace it with another kind of panel, remove "md-1" and add the new panel with a new id in the same call.',
       },
       {
-        name: 'a lens request on a Vega panel',
+        name: 'a vis edit of a Vega panel',
         panels: [vegaPanel],
         upsert: {
           panels: [
             {
               id: 'vega-1',
-              content: { source: 'request', renderer: 'lens', query: 'show requests per host' },
+              content: { type: 'vis', query: 'show requests per host' },
             },
           ],
         },
         kind: 'panel',
         identifier: 'vega-1',
-        error: `Panel "vega-1" is a vega panel. Edit it with source: "request", renderer: "vega". To replace it with another kind of panel, remove "vega-1" and add the new panel with a new id in the same call.`,
+        error: `Panel "vega-1" is a Vega panel. Edit it with type: "vega". To replace it with another kind of panel, remove "vega-1" and add the new panel with a new id in the same call.`,
       },
       {
         name: 'a custom_content request on a Lens panel',
@@ -588,26 +616,26 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'panel-1',
-              content: { source: 'request', renderer: 'custom_content', query: 'show a KPI card' },
+              content: { type: 'custom_content', query: 'show a KPI card' },
             },
           ],
         },
         kind: 'panel',
         identifier: 'panel-1',
-        error: `Panel "panel-1" is a lens panel. Edit it with source: "request", renderer: "lens". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.`,
+        error: `Panel "panel-1" is a Lens panel. Edit it with type: "vis". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.`,
       },
       {
         name: 'a request edit of a Lens panel not backed by ES|QL',
         panels: [createPanel('panel-1', LENS_EMBEDDABLE_TYPE, { type: 'metric' })],
         upsert: {
-          panels: [{ id: 'panel-1', content: { source: 'request', query: 'make it a bar' } }],
+          panels: [{ id: 'panel-1', content: { type: 'vis', query: 'make it a bar' } }],
         },
         kind: 'panel',
         identifier: 'panel-1',
         error: `Panel "panel-1" is a Lens panel that is not backed by ES|QL, so it cannot be edited. Tell the user it cannot be edited, and replace it only after they confirm: then remove "panel-1" and add the new panel with a new id in the same call.`,
       },
       {
-        name: 'a request edit of a Vega panel that reads Query DSL',
+        name: 'a Vega edit of a panel that reads Query DSL',
         panels: [
           createPanel('vega-dsl', VEGA_VIS_TYPE, {
             spec: `{
@@ -623,7 +651,7 @@ describe('executeDashboardUpsert', () => {
           }),
         ],
         upsert: {
-          panels: [{ id: 'vega-dsl', content: { source: 'request', query: 'make the bars blue' } }],
+          panels: [{ id: 'vega-dsl', content: { type: 'vega', query: 'make the bars blue' } }],
         },
         kind: 'panel',
         identifier: 'vega-dsl',
@@ -636,13 +664,13 @@ describe('executeDashboardUpsert', () => {
         kind: 'panel',
         identifier: 'panel-1',
         error:
-          'Panel "panel-1" is a lens panel. Edit it with source: "request", renderer: "lens". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.',
+          'Panel "panel-1" is a Lens panel. Edit it with type: "vis". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.',
       },
       {
         name: 'a new Lens panel without chartType',
         panels: [],
         upsert: {
-          panels: [{ id: 'trend', content: { source: 'request', query: 'show trend' } }],
+          panels: [{ id: 'trend', content: { type: 'vis', query: 'show trend' } }],
         },
         kind: 'panel',
         identifier: 'trend',
@@ -656,8 +684,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'kpi',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 esql: 'FROM logs',
                 hasData: true,
               },
@@ -672,7 +699,7 @@ describe('executeDashboardUpsert', () => {
         name: 'a custom_content edit with nothing to change',
         panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
         upsert: {
-          panels: [{ id: 'cc-1', content: { source: 'request', renderer: 'custom_content' } }],
+          panels: [{ id: 'cc-1', content: { type: 'custom_content' } }],
         },
         kind: 'panel',
         identifier: 'cc-1',
@@ -686,7 +713,7 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'cc-1',
-              content: { source: 'request', renderer: 'custom_content', esql: '  ' },
+              content: { type: 'custom_content', esql: '  ' },
             },
           ],
         },
@@ -702,7 +729,7 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'cc-1',
-              content: { source: 'request', renderer: 'custom_content', regenerateESQL: true },
+              content: { type: 'custom_content', regenerateESQL: true },
             },
           ],
         },
@@ -719,8 +746,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'cc-1',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 query: 'show errors by host',
                 regenerateESQL: true,
                 hasData: false,
@@ -740,7 +766,7 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'kpi',
-              content: { source: 'request', renderer: 'custom_content', query: 'show a KPI card' },
+              content: { type: 'custom_content', query: 'show a KPI card' },
             },
           ],
         },
@@ -753,7 +779,7 @@ describe('executeDashboardUpsert', () => {
         name: 'a new custom_content panel without query and hasData',
         panels: [],
         upsert: {
-          panels: [{ id: 'kpi', content: { source: 'request', renderer: 'custom_content' } }],
+          panels: [{ id: 'kpi', content: { type: 'custom_content' } }],
         },
         kind: 'panel',
         identifier: 'kpi',
@@ -768,8 +794,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'cc-1',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 query: 'show errors by host',
                 esql: null,
                 hasData: true,
@@ -790,8 +815,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'cc-1',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 query: 'show errors by host',
                 esql: null,
                 regenerateESQL: true,
@@ -812,8 +836,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'kpi',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 query: 'show a KPI card',
                 hasData: true,
                 regenerateESQL: true,
@@ -830,7 +853,7 @@ describe('executeDashboardUpsert', () => {
         name: 'attachment content on an existing panel',
         panels: [createLensPanel('panel-1')],
         upsert: {
-          panels: [{ id: 'panel-1', content: { source: 'attachment', attachment_id: 'a' } }],
+          panels: [{ id: 'panel-1', content: { type: 'attachment', attachment_id: 'a' } }],
         },
         kind: 'panel',
         identifier: 'panel-1',
@@ -1451,7 +1474,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'total-requests',
               content: {
-                source: 'request',
+                type: 'vis',
                 chartType: SupportedChartType.Metric,
                 query: 'show total requests',
                 index: 'logs-*',
@@ -1575,7 +1598,7 @@ describe('executeDashboardUpsert', () => {
       ]);
     });
 
-    it('throws when request-source panels are present without a resolver', async () => {
+    it('throws when generated panels are present without a resolver', async () => {
       await expect(
         executeDashboardUpsert({
           dashboardData: {
@@ -1595,17 +1618,17 @@ describe('executeDashboardUpsert', () => {
           },
           logger,
         })
-      ).rejects.toThrow('Inline panel resolver is required for request-source panels.');
+      ).rejects.toThrow('Inline panel resolver is required for generated panels.');
     });
 
-    it('throws when attachment-source panels are present without a resolver', async () => {
+    it('throws when attachment panels are present without a resolver', async () => {
       await expect(
         executeDashboardUpsert({
           dashboardData: { title: 'Test', panels: [] },
           upsert: { panels: [{ id: 'metric', content: metricAttachment }] },
           logger,
         })
-      ).rejects.toThrow('Attachment panel resolver is required for attachment-source panels.');
+      ).rejects.toThrow('Attachment panel resolver is required for attachment panels.');
     });
 
     it('edits inline visualization panels while preserving id and grid', async () => {
@@ -1639,11 +1662,11 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'panel-1',
-              content: { source: 'request', query: 'turn this into a bar chart' },
+              content: { type: 'vis', query: 'turn this into a bar chart' },
             },
             {
               id: 'section-panel-1',
-              content: { source: 'request', query: 'turn this into a line chart' },
+              content: { type: 'vis', query: 'turn this into a line chart' },
             },
           ],
         },
@@ -1653,7 +1676,7 @@ describe('executeDashboardUpsert', () => {
 
       expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          renderer: 'lens',
+          type: 'vis',
           nlQuery: 'turn this into a bar chart',
           existingPanel: topLevelPanel,
         })
@@ -1690,7 +1713,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'panel-1',
               section: 'section-a',
-              content: { source: 'request', query: 'make this a bar chart' },
+              content: { type: 'vis', query: 'make this a bar chart' },
             },
           ],
         },
@@ -1748,7 +1771,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'panel-1',
               section: 'section-a',
-              content: { source: 'request', query: 'make this a bar chart' },
+              content: { type: 'vis', query: 'make this a bar chart' },
             },
           ],
         },
@@ -1790,20 +1813,20 @@ describe('executeDashboardUpsert', () => {
       expect(result.failures).toEqual([
         panelFailure(
           'panel-1',
-          'Panel "panel-1" is a lens panel. Edit it with source: "request", renderer: "lens". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.'
+          'Panel "panel-1" is a Lens panel. Edit it with type: "vis". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.'
         ),
       ]);
       expect(result.updated).toEqual(['panel-1']);
     });
 
-    describe('request edit renderer', () => {
+    describe('request edit type', () => {
       const editWith = async (existingPanel: AttachmentPanel, content: UpsertPanelContent) => {
-        const resolvePanelContent = createResolverMock(async ({ renderer }) =>
+        const resolvePanelContent = createResolverMock(async ({ type }) =>
           createResolvedPanelContent({
             type:
-              renderer === 'custom_content'
+              type === 'custom_content'
                 ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
-                : renderer === 'vega'
+                : type === 'vega'
                 ? VEGA_VIS_TYPE
                 : LENS_EMBEDDABLE_TYPE,
             config: { updated: true },
@@ -1820,14 +1843,14 @@ describe('executeDashboardUpsert', () => {
 
       const vegaPanel = createPanel('vega-1', VEGA_VIS_TYPE, { spec: '{}' });
 
-      it('infers vega from the existing panel when renderer is omitted', async () => {
+      it('edits a Vega panel with type "vega"', async () => {
         const { result, resolvePanelContent } = await editWith(vegaPanel, {
-          source: 'request',
+          type: 'vega',
           query: 'change the title',
         });
 
         expect(resolvePanelContent).toHaveBeenCalledWith(
-          expect.objectContaining({ renderer: 'vega', existingPanel: vegaPanel })
+          expect.objectContaining({ type: 'vega', existingPanel: vegaPanel })
         );
         expect(result.dashboardData.panels).toEqual([{ ...vegaPanel, config: { updated: true } }]);
       });
@@ -1840,25 +1863,39 @@ describe('executeDashboardUpsert', () => {
           }),
         });
         const { result, resolvePanelContent } = await editWith(esqlVegaPanel, {
-          source: 'request',
+          type: 'vega',
           query: 'make the bars blue',
         });
 
         expect(resolvePanelContent).toHaveBeenCalledWith(
-          expect.objectContaining({ renderer: 'vega', existingPanel: esqlVegaPanel })
+          expect.objectContaining({ type: 'vega', existingPanel: esqlVegaPanel })
         );
         expect(result.failures).toEqual([]);
       });
 
-      it('drops applyChartRules when renderer is omitted on a vega panel', async () => {
-        const { result, resolvePanelContent } = await editWith(vegaPanel, {
-          source: 'request',
+      it('does not pass applyChartRules on a Vega edit', async () => {
+        const content = upsertPanelContentSchema.parse({
+          type: 'vega',
+          query: 'change the title',
+          applyChartRules: true,
+        });
+        const { resolvePanelContent } = await editWith(vegaPanel, content);
+
+        expect(resolvePanelContent).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'vega', applyChartRules: undefined })
+        );
+      });
+
+      it('passes applyChartRules on a Lens edit with type "vis"', async () => {
+        const lensPanel = createLensPanel('panel-1');
+        const { result, resolvePanelContent } = await editWith(lensPanel, {
+          type: 'vis',
           query: 'change the title',
           applyChartRules: true,
         });
 
         expect(resolvePanelContent).toHaveBeenCalledWith(
-          expect.objectContaining({ renderer: 'vega', applyChartRules: undefined })
+          expect.objectContaining({ type: 'vis', applyChartRules: true, existingPanel: lensPanel })
         );
         expect(result.failures).toEqual([]);
       });
@@ -1888,7 +1925,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'panel-1',
               content: {
-                source: 'request',
+                type: 'vis',
                 query: 'make this a bar chart',
                 applyChartRules: true,
                 preserveESQL: true,
@@ -1897,7 +1934,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'panel-2',
               content: {
-                source: 'request',
+                type: 'vis',
                 query: 'make this a line chart',
                 applyChartRules: true,
                 preserveESQL: false,
@@ -1962,9 +1999,9 @@ describe('executeDashboardUpsert', () => {
         },
         upsert: {
           panels: [
-            { id: 'panel-1', content: { source: 'request', query: 'first edit' } },
-            { id: 'panel-2', content: { source: 'request', query: 'edit a different panel' } },
-            { id: 'panel-1', content: { source: 'request', query: 'second edit of same panel' } },
+            { id: 'panel-1', content: { type: 'vis', query: 'first edit' } },
+            { id: 'panel-2', content: { type: 'vis', query: 'edit a different panel' } },
+            { id: 'panel-1', content: { type: 'vis', query: 'second edit of same panel' } },
           ],
         },
         logger,
@@ -2011,7 +2048,6 @@ describe('executeDashboardUpsert', () => {
         name: 'ML anomaly charts content on an anomaly charts panel',
         existingPanel: createPanel('panel-1', 'ml_anomaly_charts', { job_ids: ['job-1'] }),
         content: {
-          source: 'config',
           type: 'ml_anomaly_charts',
           config: { job_ids: ['job-1'], title: 'Severe anomalies', severity_threshold: 50 },
         },
@@ -2028,7 +2064,6 @@ describe('executeDashboardUpsert', () => {
         name: 'ML anomaly swimlane content on an anomaly swimlane panel',
         existingPanel: createPanel('panel-1', 'ml_anomaly_swimlane', { job_ids: ['job-1'] }),
         content: {
-          source: 'config',
           type: 'ml_anomaly_swimlane',
           config: { job_ids: ['job-1'], swimlane_type: 'overall', severity_threshold: 75 },
         },
@@ -2041,7 +2076,6 @@ describe('executeDashboardUpsert', () => {
         name: 'ML single metric viewer content on a single metric viewer panel',
         existingPanel: createPanel('panel-1', 'ml_single_metric_viewer', { job_ids: ['job-1'] }),
         content: {
-          source: 'config',
           type: 'ml_single_metric_viewer',
           config: { job_ids: ['job-1'], selected_entities: { 'host.name': 'web-01' } },
         },
@@ -2086,8 +2120,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'cc-1',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 query: 'updated prompt',
                 esql: 'FROM logs | STATS count = COUNT(*)',
               },
@@ -2099,7 +2132,7 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(resolvePanelContent).toHaveBeenCalledWith({
-        renderer: 'custom_content',
+        type: 'custom_content',
         resolveEsqlVariables: expect.any(Function),
         nlQuery: 'updated prompt',
         esql: 'FROM logs | STATS count = COUNT(*)',
@@ -2132,8 +2165,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'error-rate-kpi',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 query: 'Show error rate KPI',
                 esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
                 hasData: true,
@@ -2147,7 +2179,7 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(resolvePanelContent).toHaveBeenCalledWith({
-        renderer: 'custom_content',
+        type: 'custom_content',
         resolveEsqlVariables: expect.any(Function),
         nlQuery: 'Show error rate KPI',
         esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
@@ -2182,8 +2214,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'note',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 query: 'A note about the release',
                 hasData: false,
                 regenerateESQL: false,
@@ -2197,7 +2228,7 @@ describe('executeDashboardUpsert', () => {
 
       expect(result.failures).toEqual([]);
       expect(resolvePanelContent).toHaveBeenCalledWith(
-        expect.objectContaining({ renderer: 'custom_content', hasData: false })
+        expect.objectContaining({ type: 'custom_content', hasData: false })
       );
     });
 
@@ -2222,8 +2253,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'cc-1',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 query: 'show errors by host',
                 regenerateESQL: true,
                 index: 'logs-*',
@@ -2237,7 +2267,7 @@ describe('executeDashboardUpsert', () => {
 
       expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          renderer: 'custom_content',
+          type: 'custom_content',
           nlQuery: 'show errors by host',
           regenerateESQL: true,
           index: 'logs-*',
@@ -2268,8 +2298,7 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'cc-1',
               content: {
-                source: 'request',
-                renderer: 'custom_content',
+                type: 'custom_content',
                 esql: 'FROM metrics-* | STATS count = COUNT(*)',
                 hasData: true,
               },
@@ -2282,7 +2311,7 @@ describe('executeDashboardUpsert', () => {
 
       expect(resolvePanelContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          renderer: 'custom_content',
+          type: 'custom_content',
           esql: 'FROM metrics-* | STATS count = COUNT(*)',
           hasData: true,
           existingPanel,
@@ -2311,7 +2340,7 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'cc-1',
-              content: { source: 'request', renderer: 'custom_content', hasData: false },
+              content: { type: 'custom_content', hasData: false },
             },
           ],
         },
@@ -2320,7 +2349,7 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(resolvePanelContent).toHaveBeenCalledWith(
-        expect.objectContaining({ renderer: 'custom_content', hasData: false, existingPanel })
+        expect.objectContaining({ type: 'custom_content', hasData: false, existingPanel })
       );
       expect(result.failures).toEqual([]);
     });
@@ -2442,7 +2471,6 @@ describe('executeDashboardUpsert', () => {
           {
             id: 'summary',
             content: {
-              source: 'config',
               type: 'markdown',
               config: { content: '## Hi', settings: { open_links_in_new_tab: true } },
             },
@@ -2459,7 +2487,6 @@ describe('executeDashboardUpsert', () => {
           {
             id: 'summary',
             content: {
-              source: 'config',
               type: 'markdown',
               config: { settings: { open_links_in_new_tab: false } },
             },
@@ -2895,7 +2922,6 @@ describe('executeDashboardUpsert controls', () => {
             {
               id: 'notes',
               content: {
-                source: 'config',
                 type: 'markdown',
                 config: { content: 'Notes', settings: { open_links_in_new_tab: true } },
               },
@@ -3168,11 +3194,11 @@ describe('executeDashboardUpsert controls', () => {
   });
 });
 
-describe('executeDashboardUpsert attachment-source panels', () => {
+describe('executeDashboardUpsert attachment panels', () => {
   const logger = createMockLogger();
 
   const attachmentContent = (attachmentId: string): UpsertPanelContent => ({
-    source: 'attachment',
+    type: 'attachment',
     attachment_id: attachmentId,
   });
 

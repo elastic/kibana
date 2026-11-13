@@ -27,7 +27,7 @@ evaluate.describe(
           dataset: {
             name: 'agent builder visualizations: custom content routing',
             description:
-              'Requests that never say "custom panel": status boards, scorecards and narrative text around live values, which only an HTML layout can express, and line, pie, table and metric requests, which should stay in a chart. Scored on the renderer the agent asked for.',
+              'Requests that never say "custom panel": status boards, scorecards and narrative text around live values, which only an HTML layout can express, and line, pie, table and metric requests, which should stay in a chart. Scored on the panel type the agent asked for.',
             examples: CUSTOM_CONTENT_ROUTING_EXAMPLES,
           },
         });

@@ -145,7 +145,7 @@ export const createMlChartsTool = (
 After the tool succeeds, render the chart inline by emitting:
 \`<render_attachment id="{attachment_id}" version="{version}" />\`
 
-The returned \`config\` in the result can also be forwarded to \`platform.dashboard.generate_dashboard\` if the user asks to add the chart to a dashboard (use \`source: "config"\` with the appropriate panel type).`,
+The returned \`config\` in the result can also be forwarded to \`platform.dashboard.generate_dashboard\` if the user asks to add the chart to a dashboard (use it as the panel \`config\`, with \`type\` set to \`ml_\` followed by the \`chart_type\`, e.g. \`ml_anomaly_swimlane\`).`,
   experimental: true,
   schema,
   handler: async (params, { esClient, savedObjectsClient, request, logger, attachments }) => {

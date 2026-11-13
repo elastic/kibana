@@ -54,8 +54,9 @@ describe('createPanelResolver', () => {
     });
   });
 
-  it('routes a request without renderer to the vis resolver', async () => {
+  it('routes a Lens request to the vis resolver', async () => {
     const result = await resolve({
+      type: 'vis',
       nlQuery: 'show total requests',
     });
 
@@ -69,7 +70,7 @@ describe('createPanelResolver', () => {
 
   it('routes a custom_content request to the custom content builder', async () => {
     const result = await resolve({
-      renderer: 'custom_content',
+      type: 'custom_content',
       nlQuery: 'change the title',
       existingPanel: { id: 'cc-1', type: CUSTOM_CONTENT_EMBEDDABLE_TYPE, config: {}, grid },
     });

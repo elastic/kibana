@@ -10,15 +10,17 @@ import { isRecord } from '../../evaluator_utils';
 
 const CREATE_VISUALIZATION_TOOL_ID = 'platform.core.create_visualization';
 
+const GENERATED_PANEL_TYPES: ReadonlySet<unknown> = new Set(['vis', 'vega', 'custom_content']);
+
 /**
- * The renderers the agent asked for, from the arguments of its tool calls. Which one it picked is
+ * The panel types the agent asked for, from the arguments of its tool calls. Which one it picked is
  * the routing decision, and it is in the request whichever tool stores the panel: a dashboard panel
- * names its renderer (Lens when it names none) and a visualization names it as the target type.
+ * names it as its content type (`vis` for Lens) and a visualization as its target type.
  */
-export const getRequestedRenderers = (
+export const getRequestedPanelTypes = (
   steps: Array<Record<string, unknown>> | undefined
 ): string[] => {
-  const renderers = (steps ?? []).flatMap((step): string[] => {
+  const panelTypes = (steps ?? []).flatMap((step): string[] => {
     if (step.type !== 'tool_call' || !isRecord(step.params)) {
       return [];
     }
@@ -29,8 +31,8 @@ export const getRequestedRenderers = (
       Array.isArray(params.panels)
     ) {
       return params.panels.flatMap((item: unknown) =>
-        isRecord(item) && isRecord(item.content) && item.content.source === 'request'
-          ? [typeof item.content.renderer === 'string' ? item.content.renderer : 'lens']
+        isRecord(item) && isRecord(item.content) && GENERATED_PANEL_TYPES.has(item.content.type)
+          ? [String(item.content.type)]
           : []
       );
     }
@@ -40,11 +42,11 @@ export const getRequestedRenderers = (
       if (type === 'custom_content' || type === 'vega') {
         return [type];
       }
-      return typeof type === 'string' && type !== 'attachment' ? ['lens'] : [];
+      return typeof type === 'string' && type !== 'attachment' ? ['vis'] : [];
     }
 
     return [];
   });
 
-  return [...new Set(renderers)];
+  return [...new Set(panelTypes)];
 };

@@ -10,12 +10,16 @@ import {
   getChartTypeSelectionPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
+import { getInlinePanelKindGuidance, getPanelTypeSelection } from '@kbn/dashboard-agent-authoring';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
 import { ENHANCE_GUIDANCE_PATH, enhanceGuidanceReference } from './enhance_guidance';
+import { panelConfigReferenceGuidance, panelConfigReferences } from './panel_config_references';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
+const panelTypeSelection = getPanelTypeSelection();
+const inlinePanelKindGuidance = getInlinePanelKindGuidance();
 
 const guidance = `## Dashboard Changes
 
@@ -34,34 +38,25 @@ Make all changes in a single ${dashboardTools.generateDashboard} call whenever p
 For a new dashboard, set both \`title\` and \`description\`.
 
 For an existing dashboard:
-- Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, ES|QL Vega, and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and for markdown and ML anomaly panels (\`source: "config"\` with the panel's \`type\`).
+- Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, ES|QL Vega, custom content, markdown, and ML anomaly panels, with the \`type\` of the panel's kind.
 - For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.
 - These panels cannot be edited, only moved, resized, or removed: DSL-based, form-based, and other non-ES|QL Lens panels, Vega panels whose spec reads data other than one top-level ES|QL \`data.url\` (\`%type%: esql\`, with no \`format\` or other url options), such as an Elasticsearch query, a map file, inline values, or several sources, and by-reference panels (\`config.savedObjectId\` or \`config.ref_id\`). A by-reference panel's content is unknown: do not look it up with any tool or API; its title is the only hint. When the user asks to change one of these panels, say so, propose replacing it with a new ES|QL-based panel of the same kind (Lens for Lens, Vega for Vega), and wait for explicit confirmation before replacing it.
 
 ## Panel Inputs
 
-Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens and Vega panels pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Custom content panels take no \`index\`; their data comes only from \`esql\` (see Custom Content Panels). Edits of existing panels receive the original configuration and queries automatically through the panel id.
+Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens, Vega, and custom content panels with \`hasData: true\` pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Never write a custom content panel's \`esql\` yourself (see Custom Content Panels). Edits of existing panels receive the original configuration and queries automatically through the panel id.
 
-- Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel.
-- Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A \`source: "request"\` would generate a **new**, different panel instead.
-- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
+- Lens, Vega, and custom content panels (\`type: "vis"\`, \`"vega"\` or \`"custom_content"\`) are generated server-side from a natural-language \`query\` — this is the only way to make a **new** generated panel.
+- Use \`type: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A generated panel would be a **new**, different panel instead.
+- Markdown and ML anomaly panels are authored by value, with their \`type\` and \`config\`. ${panelConfigReferenceGuidance}
 
 ## Panel Type Selection
 
 Choose the first panel type that fits:
 
-1. **Lens** (\`renderer: "lens"\` or omitted) — metrics, time series, bar, line, pie, area, and data tables.
-2. **Vega** (\`renderer: "vega"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.
-3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — static text, links, or notes with no data.
-4. **Custom content** (\`renderer: "custom_content"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.
+${panelTypeSelection}
 
-## Custom Content Panels
-
-A custom content panel with live data does not need a query from you. Always set \`hasData\` when you create one, since there is no default: \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. \`hasData: false\` makes a static panel with no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
-
-To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
-
-To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
+${inlinePanelKindGuidance}
 
 Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
 
@@ -100,5 +95,5 @@ Controls are keyed by the \`id\` from the \`controls[]\` list in the tool result
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
-  referencedContent: [enhanceGuidanceReference],
+  referencedContent: [enhanceGuidanceReference, ...panelConfigReferences],
 };

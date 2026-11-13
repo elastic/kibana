@@ -338,16 +338,14 @@ describe('getCustomContentToolArgs', () => {
           {
             id: 'banner',
             content: {
-              source: 'request',
-              renderer: 'custom_content',
+              type: 'custom_content',
               query: 'show the live total number of requests',
             },
           },
           {
             id: 'kpi',
             content: {
-              source: 'request',
-              renderer: 'custom_content',
+              type: 'custom_content',
               query: 'show requests',
               hasData: true,
               esql: 'FROM logs | STATS c = COUNT(*)',
@@ -382,12 +380,12 @@ describe('getCustomContentToolArgs', () => {
     expect(lines[1].length).toBeLessThan(200);
   });
 
-  it('ignores other tools, other renderers and steps without params', () => {
+  it('ignores other tools, other panel types and steps without params', () => {
     expect(
       getCustomContentToolArgs([
         call('platform.core.get_index_mapping', { index: 'logs' }),
         call('platform.dashboard.generate_dashboard', {
-          panels: [{ id: 'a', content: { source: 'request', renderer: 'lens', query: 'x' } }],
+          panels: [{ id: 'a', content: { type: 'vis', query: 'x' } }],
         }),
         { type: 'tool_call', tool_id: 'platform.dashboard.generate_dashboard' },
         { type: 'reasoning' },

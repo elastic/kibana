@@ -19,21 +19,21 @@ const NEEDS_CUSTOM_CONTENT: RoutingExample[] = [
     input: {
       question: `Show a health board for ${LOGS}: one card per machine.os with the request count, the error rate (response codes 5xx) and a green, amber or red status badge.`,
     },
-    output: { renderer: 'custom_content' },
+    output: { panelType: 'custom_content' },
     metadata: { useCase: 'status-board' },
   },
   {
     input: {
       question: `Build a scorecard for ${LOGS}: total requests, average bytes and distinct clients as three big numbers, each with a colored arrow that is green when it is good.`,
     },
-    output: { renderer: 'custom_content' },
+    output: { panelType: 'custom_content' },
     metadata: { useCase: 'scorecard' },
   },
   {
     input: {
       question: `Write a short summary sentence for ${FLIGHTS} that reads like "N flights, X% delayed, Y% cancelled", with the numbers live and the delayed share highlighted in red when it is above 20%.`,
     },
-    output: { renderer: 'custom_content' },
+    output: { panelType: 'custom_content' },
     metadata: { useCase: 'narrative-with-values' },
   },
 ];
@@ -42,24 +42,24 @@ const NEEDS_CUSTOM_CONTENT: RoutingExample[] = [
 const FITS_A_CHART: RoutingExample[] = [
   {
     input: { question: `Show the number of requests over time for ${LOGS} as a line chart.` },
-    output: { renderer: 'lens' },
+    output: { panelType: 'vis' },
     metadata: { useCase: 'line-chart' },
   },
   {
     input: { question: `Show the share of requests by machine.os in ${LOGS} as a pie chart.` },
-    output: { renderer: 'lens' },
+    output: { panelType: 'vis' },
     metadata: { useCase: 'pie-chart' },
   },
   {
     input: {
       question: `Create a table visualization of the top 10 geo.src countries by request count in ${LOGS}.`,
     },
-    output: { renderer: 'lens' },
+    output: { panelType: 'vis' },
     metadata: { useCase: 'table' },
   },
   {
     input: { question: `Show the total number of flights in ${FLIGHTS} as a single metric.` },
-    output: { renderer: 'lens' },
+    output: { panelType: 'vis' },
     metadata: { useCase: 'metric' },
   },
 ];

@@ -10,8 +10,7 @@ import { customContentPanelKind } from '.';
 describe('custom content panel kind content schema', () => {
   const parse = (input: Record<string, unknown>) =>
     customContentPanelKind.contentSchema.safeParse({
-      source: 'request',
-      renderer: 'custom_content',
+      type: 'custom_content',
       ...input,
     });
 

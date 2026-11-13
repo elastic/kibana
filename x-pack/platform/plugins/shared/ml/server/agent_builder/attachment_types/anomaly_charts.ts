@@ -36,7 +36,7 @@ export const createAnomalyChartsAttachmentType = (): AttachmentTypeDefinition<
   isReadonly: false,
 
   getAgentDescription: () =>
-    'An ML anomaly charts attachment renders multiple time-series charts — one per anomalous entity — showing actual metric values alongside model bounds and anomaly markers. Render it inline with <render_attachment id="{attachment_id}" version="{version}" />. The config can also be forwarded to the dashboard generation tool as a panel with source: "config" and type: "ml_anomaly_charts".',
+    'An ML anomaly charts attachment renders multiple time-series charts — one per anomalous entity — showing actual metric values alongside model bounds and anomaly markers. Render it inline with <render_attachment id="{attachment_id}" version="{version}" />. The config can also be forwarded to the dashboard generation tool as a panel with type: "ml_anomaly_charts".',
 
   getTools: () => [],
 });

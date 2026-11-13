@@ -61,6 +61,7 @@ describe('createVisPanelResolver', () => {
     });
 
     const result = await resolveVisPanel({
+      type: 'vis',
       nlQuery: 'show total requests',
       index: 'logs-*',
       chartType: SupportedChartType.Metric,
@@ -98,6 +99,7 @@ describe('createVisPanelResolver', () => {
 
     await expect(
       resolveVisPanel({
+        type: 'vis',
         nlQuery: 'show total requests',
         index: 'logs-*',
       })
@@ -121,6 +123,7 @@ describe('createVisPanelResolver', () => {
     });
 
     await resolveVisPanel({
+      type: 'vis',
       nlQuery: 'change the title',
       preserveESQL: true,
       applyChartRules: true,
@@ -142,7 +145,7 @@ describe('createVisPanelResolver', () => {
     );
   });
 
-  it('creates a Vega panel in the attachment API shape (config.spec) when renderer is "vega"', async () => {
+  it('creates a Vega panel in the attachment API shape (config.spec) when type is "vega"', async () => {
     const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
     mockedBuildVegaConfig.mockResolvedValue({
       spec,
@@ -156,7 +159,7 @@ describe('createVisPanelResolver', () => {
     const result = await resolveVisPanel({
       nlQuery: 'a small multiples chart',
       index: 'logs-*',
-      renderer: 'vega',
+      type: 'vega',
     });
 
     expect(result).toEqual({
@@ -173,12 +176,13 @@ describe('createVisPanelResolver', () => {
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
   });
 
-  it('defaults to Lens when renderer is omitted on a create request', async () => {
+  it('creates a Lens panel when type is "vis"', async () => {
     mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
 
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
+      type: 'vis',
       nlQuery: 'total requests',
       chartType: SupportedChartType.Metric,
     });
@@ -202,7 +206,7 @@ describe('createVisPanelResolver', () => {
     const result = await resolveVisPanel({
       nlQuery: 'make it a line chart',
       preserveESQL: true,
-      renderer: 'vega',
+      type: 'vega',
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,
@@ -230,7 +234,7 @@ describe('createVisPanelResolver', () => {
 
     const result = await resolveVisPanel({
       nlQuery: 'Enhance this panel',
-      renderer: 'vega',
+      type: 'vega',
       applyChartRules: true,
       preserveESQL: true,
       existingPanel: {

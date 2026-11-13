@@ -17,7 +17,7 @@ import {
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withLowScoreLogging } from '../../evaluator_utils';
 import { getToolIds } from '../../extract_visualization';
-import { getRequestedRenderers } from './requested_renderers';
+import { getRequestedPanelTypes } from './requested_panel_types';
 import { createRoutingEvaluator } from './routing_evaluator';
 import type { RoutingEvaluator, RoutingExample, RoutingTaskOutput } from './types';
 
@@ -38,7 +38,7 @@ const useAgentTraceId = (evaluator: Evaluator): RoutingEvaluator => ({
     }),
 });
 
-/** Scores which renderer the agent picks when the prompt does not say "custom panel". */
+/** Scores which panel type the agent picks when the prompt does not say "custom panel". */
 export function createEvaluateRoutingDataset({
   agentBuilderClient,
   agentId: defaultAgentId,
@@ -59,18 +59,18 @@ export function createEvaluateRoutingDataset({
       const agentId = getStringMeta(metadata, 'agentId') ?? defaultAgentId;
       const response = await agentBuilderClient.converse({ agentId, input: input?.question ?? '' });
 
-      const renderers = getRequestedRenderers(response.steps);
+      const panelTypes = getRequestedPanelTypes(response.steps);
       const toolIds = getToolIds({ steps: response.steps ?? [] });
       log.info(
         `[custom content routing] "${(input?.question ?? '').slice(0, 60)}": ` +
-          `renderers: ${renderers.join(', ') || '(none)'}; tools: ${toolIds.join(' > ')}`
+          `panel types: ${panelTypes.join(', ') || '(none)'}; tools: ${toolIds.join(' > ')}`
       );
 
       return {
         errors: [],
         messages: [{ message: response.message }],
         steps: response.steps,
-        renderers,
+        panelTypes,
         toolIds,
         agentTraceId: response.traceId,
         prompts: response.prompts ?? [],

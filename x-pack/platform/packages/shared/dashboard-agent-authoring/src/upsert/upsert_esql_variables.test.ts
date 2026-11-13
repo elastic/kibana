@@ -91,7 +91,7 @@ const upsert = (
 
 const restyle = (id: string) => ({
   id,
-  content: { source: 'request', renderer: 'custom_content', query: 'use a darker background' },
+  content: { type: 'custom_content', query: 'use a darker background' },
 });
 
 /** The variables the `callIndex`th panel request asks for, for a panel that runs `queries`. */
@@ -123,8 +123,7 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       {
         id: 'new-cc',
         content: {
-          source: 'request',
-          renderer: 'custom_content',
+          type: 'custom_content',
           query: 'a card for the selected host',
           hasData: true,
           esql: 'FROM logs | WHERE host.name == ?host | STATS n = COUNT(*)',
@@ -305,10 +304,10 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     await upsert(
       resolvePanelContent,
       { title: 'Test', panels: [lensPanel], pinned_panels: [hostControl] },
-      [{ id: 'lens-1', content: { source: 'request', renderer: 'lens', query: 'make it a bar' } }]
+      [{ id: 'lens-1', content: { type: 'vis', query: 'make it a bar' } }]
     );
 
-    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({ renderer: 'lens' });
+    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({ type: 'vis' });
     expect(await variablesAskedBy(resolvePanelContent)).toEqual([
       { key: 'host', value: 'web-1', type: 'values' },
     ]);

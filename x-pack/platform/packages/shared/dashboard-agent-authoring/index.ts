@@ -22,11 +22,20 @@ export type { PanelContent, PanelContentAttempt, ResolveEsqlVariables } from './
 
 export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
 
-export { getRendererEmbeddableType, parseVegaSpec } from './src/panels';
+export {
+  createPanelContentResolver,
+  getConfigPanelReferences,
+  getInlinePanelKindGuidance,
+  getPanelTypeSelection,
+  parseVegaSpec,
+  requiresRegisteredSchema,
+} from './src/panels';
 export type {
+  ConfigPanelReference,
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
   CustomContentPanelResolutionRequest,
+  PanelKindExecutors,
   ResolvePanelContent,
   VisPanelResolutionRequest,
 } from './src/panels';

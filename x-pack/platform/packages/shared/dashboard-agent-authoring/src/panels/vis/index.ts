@@ -17,11 +17,11 @@ import { defineRequestPanelKind } from '../panel_kind';
 /**
  * Lens and Vega visualization panel requests.
  *
- * A new visualization is resolved from a natural-language (or ES|QL) query via
- * `source: 'request'`; an existing one is placed with `source: 'attachment'`.
- * This module owns the Lens/Vega members of the `renderer`-discriminated content
- * union and the vis resolution-request contract. The host provides
- * the resolver that turns these requests into panel content.
+ * A new visualization is resolved from a natural-language (or ES|QL) query with
+ * `type: 'vis'` (Lens) or `type: 'vega'`; an existing one is placed with `type: 'attachment'`.
+ * This module owns the Lens/Vega members of the content union and the vis
+ * resolution-request contract. The host provides the resolver that turns these
+ * requests into panel content.
  */
 
 /**
@@ -29,11 +29,8 @@ import { defineRequestPanelKind } from '../panel_kind';
  * ES|QL query. This is the vis member of the panel resolution union.
  */
 export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
-  /**
-   * Which engine renders the panel; Lens when omitted. On edits, upsert
-   * sets it from the existing panel, and the resolver trusts it.
-   */
-  renderer?: 'lens' | 'vega';
+  /** Which engine renders the panel. On edits, it matches the existing panel. */
+  type: 'vis' | 'vega';
   /** Natural language description of the desired visualization. */
   nlQuery: string;
   /** Index, alias, or datastream to target; discovered when omitted. */
@@ -60,7 +57,6 @@ const esqlField = lazySchema(() =>
 
 const visPanelContentBaseSchema = lazySchema(() =>
   z.object({
-    source: z.literal('request'),
     query: z
       .string()
       .max(2048)
@@ -85,12 +81,7 @@ const visPanelContentBaseSchema = lazySchema(() =>
 /** Creates or edits a Lens panel. A new Lens panel requires the caller to choose its chart type. */
 export const lensPanelContentSchema = lazySchema(() =>
   visPanelContentBaseSchema.extend({
-    renderer: z
-      .literal('lens')
-      .optional()
-      .describe(
-        "(optional) Render with Lens. When omitted, a new panel uses Lens and an edit keeps the panel's own renderer (Lens or Vega)."
-      ),
+    type: z.literal('vis').describe('A Lens chart, generated server-side from `query`.'),
     chartType: z
       .nativeEnum(SupportedChartType)
       .optional()
@@ -101,7 +92,7 @@ export const lensPanelContentSchema = lazySchema(() =>
       .boolean()
       .optional()
       .describe(
-        '(optional) Existing Lens panels only; ignored on a Vega panel. Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
+        '(optional) Existing Lens panels only. Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
       ),
   })
 );
@@ -109,11 +100,7 @@ export const lensPanelContentSchema = lazySchema(() =>
 /** Creates or edits a Vega panel, which may carry the closest Lens chart type as an authoring hint. */
 export const vegaPanelContentSchema = lazySchema(() =>
   visPanelContentBaseSchema.extend({
-    renderer: z
-      .literal('vega')
-      .describe(
-        'Render with Vega-Lite. Use for small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite.'
-      ),
+    type: z.literal('vega').describe('A Vega-Lite chart, generated server-side from `query`.'),
     chartType: z
       .nativeEnum(SupportedChartType)
       .optional()
@@ -196,15 +183,29 @@ export const readsDataVegaEditsCannotKeep = ({ type, config }: AttachmentPanel):
 };
 
 export const lensPanelKind = defineRequestPanelKind({
-  renderer: 'lens',
+  type: 'vis',
   embeddableType: LENS_EMBEDDABLE_TYPE,
   label: 'Lens',
+  selection: {
+    priority: 1,
+    whenToUse: 'metrics, time series, bar, line, pie, area, and data tables.',
+  },
+  canEdit: isEsqlLensPanel,
+  uneditableDescription: 'Lens panel that is not backed by ES|QL',
   contentSchema: lensPanelContentSchema,
 });
 
 export const vegaPanelKind = defineRequestPanelKind({
-  renderer: 'vega',
+  type: 'vega',
   embeddableType: VEGA_VIS_TYPE,
   label: 'Vega',
+  selection: {
+    priority: 2,
+    whenToUse:
+      'scatter/bubble plots, small multiples/faceting, layered or combination charts, custom encodings, or when the user asks for Vega.',
+  },
+  canEdit: (panel) => !readsDataVegaEditsCannotKeep(panel),
+  uneditableDescription:
+    'Vega panel that reads data other than one top-level ES|QL query (such as an Elasticsearch query, a map file, inline values, or several sources)',
   contentSchema: vegaPanelContentSchema,
 });
