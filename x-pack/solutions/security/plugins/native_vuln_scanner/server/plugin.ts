@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { NativeVulnScannerConfig } from './config';
+import { ensureFindingsIndex } from './lib/findings';
 import type { NativeVulnScannerServerSetup, NativeVulnScannerServerStart } from './types';
 
 export class NativeVulnScannerPlugin
@@ -27,7 +28,12 @@ export class NativeVulnScannerPlugin
     return {};
   }
 
-  public start(): NativeVulnScannerServerStart {
+  public start(core: CoreStart): NativeVulnScannerServerStart {
+    if (this.config.enabled) {
+      ensureFindingsIndex(core.elasticsearch.client.asInternalUser).catch((error: Error) => {
+        this.logger.error(`Failed to set up the vulnerability findings index: ${error.message}`);
+      });
+    }
     return {};
   }
 
