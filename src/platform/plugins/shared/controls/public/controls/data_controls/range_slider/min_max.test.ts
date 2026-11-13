@@ -8,14 +8,8 @@
  */
 
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
-import { dataViewsService } from '../../../services/kibana_services';
+import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMinMax } from './min_max';
-
-const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
-}));
 
 describe('getMinMax', () => {
   const field: FilterableField = { name: 'bytes', type: 'number', aggregatable: true };
@@ -25,37 +19,48 @@ describe('getMinMax', () => {
     title: 'logs-*',
     fields: [field],
     getFieldByName: () => field,
-    isTimeBased: () => false,
+    timeFieldName: '@timestamp',
+    isTimeBased: () => true,
   };
   const abortSignal = new AbortController().signal;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    dataService.search.esql = jest.fn();
     dataViewsService.get = jest.fn();
   });
 
   it('asks the FROM target of an ES|QL source, with no data view', async () => {
-    mockGetESQLResults.mockResolvedValue({ response: { values: [[3, 90]] } });
+    (dataService.search.esql as jest.Mock).mockResolvedValue({
+      rawResponse: { values: [[3, 90]] },
+    });
 
     const result = await getMinMax({
       abortSignal,
       dataSource: esqlSource,
       field,
       projectRouting: '_alias:*',
+      timeRange: { from: 'now-1h', to: 'now' },
     });
 
     expect(result).toEqual({ min: 3, max: 90 });
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
+    expect(dataService.search.esql).toHaveBeenCalledWith(
       expect.objectContaining({
-        esqlQuery: 'FROM logs-* | STATS min = MIN(bytes), max = MAX(bytes)',
+        query: 'FROM logs-* | STATS min = MIN(bytes), max = MAX(bytes)',
         projectRouting: '_alias:*',
-      })
+        kibanaQueryContext: expect.objectContaining({
+          timeRange: { from: 'now-1h', to: 'now' },
+          timeField: '@timestamp',
+        }),
+      }),
+      expect.anything()
     );
     expect(dataViewsService.get).not.toHaveBeenCalled();
   });
 
   it('has no bounds when the target has no values in the field', async () => {
-    mockGetESQLResults.mockResolvedValue({ response: { values: [[null, null]] } });
+    (dataService.search.esql as jest.Mock).mockResolvedValue({
+      rawResponse: { values: [[null, null]] },
+    });
 
     expect(await getMinMax({ abortSignal, dataSource: esqlSource, field })).toEqual({
       min: undefined,

@@ -10,19 +10,16 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableSource } from '@kbn/data-source';
-import { getESQLResults } from '@kbn/esql-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import {
-  buildESQLPreFilter,
-  getAnyDocumentQuery,
+  fetchEsqlSourceHasNoResults,
   getFetchContextFilters,
   getFetchContextTimeRange,
 } from '../utils';
-import { getControlsTimezone } from '../../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function hasNoResults$({
@@ -109,24 +106,15 @@ export async function hasNoResults({
   projectRouting?: string;
 }): Promise<boolean> {
   if (isEsqlFilterableSource(dataSource)) {
-    const esqlQuery = getAnyDocumentQuery(dataSource);
-    const {
-      response: { values },
-    } = await getESQLResults({
-      esqlQuery,
-      search: dataService.search.search,
-      signal: abortSignal,
-      filter: buildESQLPreFilter({
-        fetchContext: { query, filters: [...(filters ?? []), rangeFilter] },
-        useGlobalFilters: true,
-        dataSource,
-        timeRange,
-        esqlQuery,
-      }),
-      timezone: getControlsTimezone(),
+    return fetchEsqlSourceHasNoResults({
+      abortSignal,
+      dataSource,
+      filters,
+      query,
+      rangeFilter,
+      timeRange,
       projectRouting,
     });
-    return values.length === 0;
   }
 
   if (!dataSource.id) {

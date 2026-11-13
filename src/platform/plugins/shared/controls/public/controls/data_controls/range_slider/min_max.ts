@@ -10,7 +10,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
-import { getESQLResults } from '@kbn/esql-utils';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
   FetchContext,
@@ -25,9 +24,9 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import {
   buildESQLPreFilter,
+  fetchEsqlSourceMinMax,
   getFetchContextFilters,
   getFetchContextTimeRange,
-  getFieldMinMaxQuery,
 } from '../utils';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
@@ -175,28 +174,15 @@ export async function getMinMax({
   }
 
   if (isEsqlFilterableSource(dataSource)) {
-    const esqlQuery = getFieldMinMaxQuery(dataSource, field.name);
-    const {
-      response: { values },
-    } = await getESQLResults({
-      esqlQuery,
-      search: dataService.search.search,
-      signal: abortSignal,
-      filter: buildESQLPreFilter({
-        fetchContext: { query, filters },
-        useGlobalFilters: true,
-        dataSource,
-        timeRange,
-        esqlQuery,
-      }),
-      timezone: getControlsTimezone(),
+    return fetchEsqlSourceMinMax({
+      abortSignal,
+      dataSource,
+      field,
+      filters,
+      query,
+      timeRange,
       projectRouting,
     });
-    const [rangeMin, rangeMax] = values[0] ?? [];
-    return {
-      min: typeof rangeMin === 'number' ? rangeMin : undefined,
-      max: typeof rangeMax === 'number' ? rangeMax : undefined,
-    };
   }
 
   if (!dataSource.id) {
