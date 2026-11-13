@@ -24,7 +24,7 @@ describe('buildOptionsListFetchBody', () => {
     isTimeBased: () => false,
   };
 
-  it('requests the options of a field of an ES|QL source from its title', () => {
+  it('requests the options of a field of an ES|QL source with an ES|QL query on its FROM target', () => {
     const result = buildOptionsListFetchBody({
       valuesSource: ControlValuesSource.FIELD,
       dataSources: [esqlSource],
@@ -43,11 +43,8 @@ describe('buildOptionsListFetchBody', () => {
     expect(result).toMatchObject({
       outcome: 'fetch',
       body: {
-        kind: 'dsl',
-        index: 'logs-*',
-        fieldName: 'host',
-        fieldSpec: field,
-        runtimeFieldMap: undefined,
+        kind: 'esql',
+        esql: 'FROM logs-* | STATS BY host',
         projectRouting: '_alias:*',
       },
     });

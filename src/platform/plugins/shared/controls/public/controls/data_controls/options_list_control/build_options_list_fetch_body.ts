@@ -13,7 +13,7 @@ import type {
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
-import { getFilterableFieldSpec } from '@kbn/data-source';
+import { getFilterableFieldSpec, isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 
@@ -27,6 +27,7 @@ import {
   buildESQLPreFilter,
   buildOptionsListDashboardFilters,
   getFetchContextTimeRange,
+  getFieldValuesQuery,
 } from '../utils';
 
 export type BuildOptionsListFetchBodyResult =
@@ -102,6 +103,35 @@ export function buildOptionsListFetchBody({
   }
 
   const dataSource = dataSources?.[0];
+  if (dataSource && field && isEsqlFilterableSource(dataSource)) {
+    const esql = getFieldValuesQuery(dataSource, field.name);
+    const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
+    return {
+      outcome: 'fetch',
+      showLoadingSuggestions: true,
+      body: {
+        kind: 'esql',
+        esql,
+        timeRange,
+        filter: buildESQLPreFilter({
+          fetchContext,
+          useGlobalFilters,
+          dataSource,
+          timeRange,
+          esqlQuery: esql,
+        }),
+        sort,
+        searchString,
+        searchTechnique,
+        selectedOptions,
+        esqlVariables: fetchContext.esqlVariables,
+        ignoreValidations,
+        isReload: fetchContext.isReload,
+        projectRouting: fetchContext.projectRouting,
+      },
+    };
+  }
+
   if (
     !dataSource ||
     !field ||

@@ -8,7 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { isEsqlFilterableSource } from '@kbn/data-source';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
+import { getESQLResults } from '@kbn/esql-utils';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
   FetchContext,
@@ -20,9 +22,13 @@ import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { ControlValuesSource } from '@kbn/controls-constants';
 import { max, min } from 'lodash';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { dataService } from '../../../services/kibana_services';
-import { asDataView } from './utils/as_data_view';
-import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import { dataService, dataViewsService } from '../../../services/kibana_services';
+import {
+  buildESQLPreFilter,
+  getFetchContextFilters,
+  getFetchContextTimeRange,
+  getFieldMinMaxQuery,
+} from '../utils';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
 
@@ -65,16 +71,15 @@ export function minMax$({
     switchMap(
       async ([
         controlFetchContext,
-        dataViews,
+        dataSources,
         fieldName,
         useGlobalFilters,
         esqlQuery,
         valuesSource,
       ]) => {
-        const dataView = asDataView(dataViews?.[0]);
-        const dataViewField =
-          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        if (!dataView || !dataViewField) {
+        const dataSource = dataSources?.[0];
+        const field = dataSource && fieldName ? dataSource.getFieldByName(fieldName) : undefined;
+        if (!dataSource || !field) {
           return { max: undefined, min: undefined };
         }
 
@@ -84,8 +89,8 @@ export function minMax$({
           prevRequestAbortController = abortController;
           return await getMinMax({
             abortSignal: abortController.signal,
-            dataView,
-            field: dataViewField,
+            dataSource,
+            field,
             ...controlFetchContext,
             query:
               valuesSource === ControlValuesSource.ESQL && esqlQuery !== undefined
@@ -101,7 +106,7 @@ export function minMax$({
                 ? buildESQLPreFilter({
                     fetchContext: controlFetchContext,
                     useGlobalFilters,
-                    dataSource: dataView,
+                    dataSource,
                     timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
                     esqlQuery,
                   })
@@ -130,22 +135,24 @@ export function minMax$({
 
 export async function getMinMax({
   abortSignal,
-  dataView,
+  dataSource,
   field,
   filters,
   query,
   timeRange,
   esqlVariables,
   esqlPreFilter,
+  projectRouting,
 }: {
   abortSignal: AbortSignal;
-  dataView: DataView;
-  field: DataViewField;
+  dataSource: FilterableSource;
+  field: FilterableField;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
   esqlVariables?: ESQLControlVariable[];
   esqlPreFilter?: { bool: BoolQuery };
+  projectRouting?: string;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
   if (query && 'esql' in query) {
     const result = await getESQLSingleColumnValues({
@@ -166,6 +173,36 @@ export async function getMinMax({
       throw error;
     }
   }
+
+  if (isEsqlFilterableSource(dataSource)) {
+    const esqlQuery = getFieldMinMaxQuery(dataSource, field.name);
+    const {
+      response: { values },
+    } = await getESQLResults({
+      esqlQuery,
+      search: dataService.search.search,
+      signal: abortSignal,
+      filter: buildESQLPreFilter({
+        fetchContext: { query, filters },
+        useGlobalFilters: true,
+        dataSource,
+        timeRange,
+        esqlQuery,
+      }),
+      timezone: getControlsTimezone(),
+      projectRouting,
+    });
+    const [rangeMin, rangeMax] = values[0] ?? [];
+    return {
+      min: typeof rangeMin === 'number' ? rangeMin : undefined,
+      max: typeof rangeMax === 'number' ? rangeMax : undefined,
+    };
+  }
+
+  if (!dataSource.id) {
+    return { min: undefined, max: undefined };
+  }
+  const dataView = await dataViewsService.get(dataSource.id);
 
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);

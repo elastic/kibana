@@ -8,14 +8,21 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { isEsqlFilterableSource } from '@kbn/data-source';
+import type { FilterableSource } from '@kbn/data-source';
+import { getESQLResults } from '@kbn/esql-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
-import { dataService } from '../../../services/kibana_services';
-import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
-import { asDataView } from './utils/as_data_view';
+import { dataService, dataViewsService } from '../../../services/kibana_services';
+import {
+  buildESQLPreFilter,
+  getAnyDocumentQuery,
+  getFetchContextFilters,
+  getFetchContextTimeRange,
+} from '../utils';
+import { getControlsTimezone } from '../../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function hasNoResults$({
@@ -45,9 +52,9 @@ export function hasNoResults$({
       }
     }),
     switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
-      const dataView = asDataView(api.dataSources$?.value?.[0]);
+      const dataSource = api.dataSources$?.value?.[0];
       const rangeFilter = rangeFilters?.[0];
-      if (!dataView || !rangeFilter || ignoreValidations) {
+      if (!dataSource || !rangeFilter || ignoreValidations) {
         return false;
       }
 
@@ -57,7 +64,7 @@ export function hasNoResults$({
         prevRequestAbortController = abortController;
         return await hasNoResults({
           abortSignal: abortController.signal,
-          dataView,
+          dataSource,
           rangeFilter,
           ...controlFetchContext,
           timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
@@ -84,21 +91,49 @@ export function hasNoResults$({
   };
 }
 
-async function hasNoResults({
+export async function hasNoResults({
   abortSignal,
-  dataView,
+  dataSource,
   filters,
   query,
   rangeFilter,
   timeRange,
+  projectRouting,
 }: {
   abortSignal: AbortSignal;
-  dataView: DataView;
+  dataSource: FilterableSource;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
+  projectRouting?: string;
 }): Promise<boolean> {
+  if (isEsqlFilterableSource(dataSource)) {
+    const esqlQuery = getAnyDocumentQuery(dataSource);
+    const {
+      response: { values },
+    } = await getESQLResults({
+      esqlQuery,
+      search: dataService.search.search,
+      signal: abortSignal,
+      filter: buildESQLPreFilter({
+        fetchContext: { query, filters: [...(filters ?? []), rangeFilter] },
+        useGlobalFilters: true,
+        dataSource,
+        timeRange,
+        esqlQuery,
+      }),
+      timezone: getControlsTimezone(),
+      projectRouting,
+    });
+    return values.length === 0;
+  }
+
+  if (!dataSource.id) {
+    return false;
+  }
+  const dataView = await dataViewsService.get(dataSource.id);
+
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);
