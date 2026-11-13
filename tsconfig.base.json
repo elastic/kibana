@@ -71,6 +71,8 @@
       "@kbn/agent-builder-workflows-plugin/*": ["./x-pack/platform/plugins/shared/agent_builder_workflows/*"],
       "@kbn/agentic-investigations-common": ["./x-pack/platform/packages/shared/kbn-agentic-investigations-common"],
       "@kbn/agentic-investigations-common/*": ["./x-pack/platform/packages/shared/kbn-agentic-investigations-common/*"],
+      "@kbn/agentic-investigations-impact": ["./x-pack/platform/packages/shared/kbn-agentic-investigations-impact"],
+      "@kbn/agentic-investigations-impact/*": ["./x-pack/platform/packages/shared/kbn-agentic-investigations-impact/*"],
       "@kbn/agentic-investigations-plugin": ["./x-pack/platform/plugins/shared/agentic_investigations"],
       "@kbn/agentic-investigations-plugin/*": ["./x-pack/platform/plugins/shared/agentic_investigations/*"],
       "@kbn/ai-anonymization-common": ["./x-pack/platform/packages/shared/ai-infra/ai-anonymization-common"],

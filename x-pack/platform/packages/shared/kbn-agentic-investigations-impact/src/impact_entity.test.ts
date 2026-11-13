@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { entityStoreIdType, impactEntityFlyoutType } from './open_impact_entity';
+import { entityStoreIdType, impactEntityFlyoutType } from './impact_entity';
 
 describe('entityStoreIdType', () => {
   it('reads the type off an Entity Store id', () => {

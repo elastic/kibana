@@ -607,6 +607,9 @@ importers:
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
+      '@kbn/agentic-investigations-impact':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-impact
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
@@ -9119,6 +9122,8 @@ importers:
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
+
+  x-pack/platform/packages/shared/kbn-agentic-investigations-impact: {}
 
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
 
