@@ -35,7 +35,7 @@ Connector name
 
 When you select **Save**, the flyout stays open and shows the **Webhook URL** and the **Ingest token**. {{kib}} shows the token only once. Copy it and store it with the URL before you close the flyout.
 
-If the flyout warns that `server.publicBaseUrl` is not set, the **Webhook URL** is a relative path that external tools can't use. Set [`server.publicBaseUrl`](/reference/configuration-reference/general-settings.md#server-publicbaseurl) to the {{kib}} host that the tool sends requests to.
+If the flyout warns that `server.publicBaseUrl` isn't set, the **Webhook URL** is a relative path that external tools can't use. Set [`server.publicBaseUrl`](/reference/configuration-reference/general-settings.md#server-publicbaseurl) to the {{kib}} host that the tool sends requests to.
 
 ## Connect an external tool [inbound-webhook-url]
 
@@ -48,16 +48,16 @@ https://<kibana-host>/s/<space-id>/api/actions/events/.inboundWebhook/<connector
 
 Authenticate each request with the ingest token in one of these ways:
 
-- Send an `Authorization: Bearer <ingest-token>` header. If the tool lets you set headers, use this method, because it keeps the token out of URLs and logs.
+- If the tool lets you set headers, send an `Authorization: Bearer <ingest-token>` header. This method keeps the token out of URLs and logs.
 - Append `?token=<ingest-token>` to the URL. {{kib}} reads this parameter only when the request has no `Authorization` header.
 
 Some tools confirm a webhook URL by sending a verification value before they send events. When the JSON body has a top-level string field named `challenge`, the connector returns HTTP 200 with `{"challenge": "<value>"}` and doesn't start any workflows. The connector ignores a `challenge` field inside a nested object, so that request starts workflows as usual.
 
-The ingest token proves that the sender may start workflows. The workflows themselves run with the privileges of the last user who saved the connector, so anyone who has the token can start them as that user. Protect the token like a password.
+Protect the ingest token like a password. Anyone who has the token can start the connector's workflows, and those workflows run with the privileges of the last user who saved the connector.
 
 ### Rotate the ingest token [inbound-webhook-rotate-token]
 
-If you lose the ingest token or someone else might have it, open the connector, select **Rotate ingest token**, then select **Rotate token** to confirm. The previous token stops working immediately, and {{kib}} shows the new token only once. Update the token in the external tool after you rotate it.
+If you lose the ingest token or someone else might have it, open the connector, select **Rotate ingest token**, then select **Rotate token** to confirm. The previous token stops working immediately, and {{kib}} shows the new token only once. Then update the external tool with the new token.
 
 Rotating the token doesn't change which user the workflows run as. To run the workflows as a different user, have that user save the connector.
 
