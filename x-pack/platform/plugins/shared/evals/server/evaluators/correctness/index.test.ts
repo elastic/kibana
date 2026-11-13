@@ -131,7 +131,7 @@ describe('correctness evaluator', () => {
     });
 
     expect(result.scores.map(({ name, label }) => [name, label])).toEqual([
-      ['factuality', 'ACCURATE'],
+      ['factuality', 'MINOR_INACCURACIES'],
       ['relevance', 'RELEVANT'],
       ['sequence_accuracy', 'NOT_APPLICABLE'],
     ]);
@@ -182,6 +182,50 @@ describe('correctness evaluator', () => {
     const sequenceScore = result.scores.find(({ name }) => name === 'sequence_accuracy');
     expect(sequenceScore?.label).toBe('MISMATCH');
     expect(sequenceScore?.score).toBe(0.5);
+  });
+
+  it('labels a derived factual summary MAJOR_INACCURACIES for an unsupported central claim', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    const promptMock = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              analysis: [
+                {
+                  claim: 'Event 4625 means the account is locked.',
+                  centrality: 'central',
+                  centrality_reason: 'Answers the question.',
+                  verdict: 'NOT_IN_GROUND_TRUTH',
+                  sequence_match: 'NOT_APPLICABLE',
+                  justification_snippet: null,
+                  explanation: 'Not covered.',
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await correctnessEvaluator.evaluate({
+      trace: traceAccessor,
+      round: {
+        input: { message: 'What does event 4625 indicate?' },
+        response: { message: 'Event 4625 means the account is locked.' },
+        steps: [],
+      },
+      referenceData: { expected: 'Event ID 4625 indicates a failed logon attempt.' },
+      inferenceClient: { prompt: promptMock } as unknown as BoundInferenceClient,
+      log: logger,
+    });
+
+    const factuality = result.scores.find(({ name }) => name === 'factuality');
+    expect(factuality?.label).toBe('MAJOR_INACCURACIES');
+    expect(factuality?.score).toBeCloseTo(0.1);
   });
 
   it('throws when inferenceClient is not provided', async () => {

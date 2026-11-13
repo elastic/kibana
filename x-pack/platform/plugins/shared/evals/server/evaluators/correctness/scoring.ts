@@ -103,13 +103,12 @@ export function deriveCorrectnessSummary(
   const claims = Array.isArray(analysis) ? analysis : [];
   const central = claims.filter((claim) => claim.centrality === 'central');
 
-  const hasCentralContradiction = central.some((claim) => claim.verdict === 'CONTRADICTED');
-  const hasMinorIssue = claims.some(
-    (claim) => claim.verdict === 'CONTRADICTED' || claim.verdict === 'PARTIALLY_SUPPORTED'
-  );
-  const factualAccuracy = hasCentralContradiction
+  // Mirrors the judge prompt: unsupported claims are inaccuracies, major when central.
+  const isUnsupported = (claim: (typeof claims)[number]) =>
+    claim.verdict === 'CONTRADICTED' || claim.verdict === 'NOT_IN_GROUND_TRUTH';
+  const factualAccuracy = central.some(isUnsupported)
     ? 'MAJOR_INACCURACIES'
-    : hasMinorIssue
+    : claims.some(isUnsupported)
     ? 'MINOR_INACCURACIES'
     : 'ACCURATE';
 
