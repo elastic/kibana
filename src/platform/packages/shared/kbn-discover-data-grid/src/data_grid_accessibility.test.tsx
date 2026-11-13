@@ -112,6 +112,25 @@ describe('DataGrid accessibility', () => {
     );
   });
 
+  it('re-announces repeated copy outcomes', async () => {
+    renderGrid();
+    const cell = screen.getByRole('gridcell', { name: '0' });
+    const clipboardData = { setData: jest.fn() };
+
+    fireEvent.copy(cell, { clipboardData });
+    const status = await screen.findByRole('status');
+    await waitFor(() => expect(status.textContent).toContain('Cell value copied.'));
+    const firstAnnouncement = status.firstElementChild;
+    if (!firstAnnouncement) {
+      throw new Error('Expected the first copy announcement to render.');
+    }
+
+    fireEvent.copy(cell, { clipboardData });
+
+    await waitFor(() => expect(status.firstElementChild).not.toBe(firstAnnouncement));
+    expect(status.textContent).toContain('Cell value copied.');
+  });
+
   it('preserves native copy behavior when text is explicitly selected', () => {
     renderGrid();
     const cell = screen.getByRole('gridcell', { name: 'Name 0' });

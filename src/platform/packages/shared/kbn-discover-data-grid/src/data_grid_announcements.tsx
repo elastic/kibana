@@ -21,59 +21,70 @@ interface DataGridAnnouncements {
   readonly announceRowsBecameEmpty: () => void;
 }
 
+interface AnnouncementEvent {
+  readonly id: number;
+  readonly message: string;
+}
+
 export const useDataGridAnnouncements = (): DataGridAnnouncements => {
-  const [announcement, setAnnouncement] = useState('');
+  const [announcement, setAnnouncement] = useState<AnnouncementEvent>();
+  const announce = useCallback((message: string) => {
+    setAnnouncement((previous) => ({ id: (previous?.id ?? 0) + 1, message }));
+  }, []);
   const announceCopySuccess = useCallback(() => {
-    setAnnouncement(
+    announce(
       i18n.translate('discoverDataGrid.accessibility.copySuccessDetail', {
         defaultMessage: 'Cell value copied.',
       })
     );
-  }, []);
+  }, [announce]);
   const announceCopyFailure = useCallback(() => {
-    setAnnouncement(
+    announce(
       i18n.translate('discoverDataGrid.accessibility.copyFailureErrorMessage', {
         defaultMessage: 'Cell value could not be copied.',
       })
     );
-  }, []);
-  const announceCommandFailure = useCallback((reason: DataGridCommandFailureReason) => {
-    switch (reason) {
-      case 'row_not_found':
-        setAnnouncement(
-          i18n.translate('discoverDataGrid.accessibility.missingRowErrorMessage', {
-            defaultMessage: 'Could not find the requested grid row.',
-          })
-        );
-        break;
-      case 'column_not_found':
-        setAnnouncement(
-          i18n.translate('discoverDataGrid.accessibility.missingColumnErrorMessage', {
-            defaultMessage: 'Could not find the requested grid column.',
-          })
-        );
-        break;
-      case 'scroll_failed':
-        setAnnouncement(
-          i18n.translate('discoverDataGrid.accessibility.scrollFailureErrorMessage', {
-            defaultMessage: 'Could not move to the requested grid cell.',
-          })
-        );
-        break;
-    }
-  }, []);
+  }, [announce]);
+  const announceCommandFailure = useCallback(
+    (reason: DataGridCommandFailureReason) => {
+      switch (reason) {
+        case 'row_not_found':
+          announce(
+            i18n.translate('discoverDataGrid.accessibility.missingRowErrorMessage', {
+              defaultMessage: 'Could not find the requested grid row.',
+            })
+          );
+          break;
+        case 'column_not_found':
+          announce(
+            i18n.translate('discoverDataGrid.accessibility.missingColumnErrorMessage', {
+              defaultMessage: 'Could not find the requested grid column.',
+            })
+          );
+          break;
+        case 'scroll_failed':
+          announce(
+            i18n.translate('discoverDataGrid.accessibility.scrollFailureErrorMessage', {
+              defaultMessage: 'Could not move to the requested grid cell.',
+            })
+          );
+          break;
+      }
+    },
+    [announce]
+  );
   const announceRowsBecameEmpty = useCallback(() => {
-    setAnnouncement(
+    announce(
       i18n.translate('discoverDataGrid.accessibility.noRowsDescription', {
         defaultMessage: 'No rows remain in the grid.',
       })
     );
-  }, []);
+  }, [announce]);
 
   return {
     liveRegion: (
-      <EuiLiveAnnouncer clearAfterMs={false} role="status" aria-live="polite">
-        {announcement}
+      <EuiLiveAnnouncer role="status" aria-live="polite">
+        {announcement ? <span key={announcement.id}>{announcement.message}</span> : null}
       </EuiLiveAnnouncer>
     ),
     announceCopySuccess,

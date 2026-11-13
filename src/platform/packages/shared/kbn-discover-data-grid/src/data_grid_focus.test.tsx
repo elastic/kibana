@@ -257,7 +257,11 @@ describe('DataGrid keyboard and logical focus', () => {
       )
     );
 
-    expect(await apiRef.current.scrollToCell({ rowId: 'row-50', columnId: 'value' })).toEqual({
+    let scrollResult: DataGridCommandResult | undefined;
+    await act(async () => {
+      scrollResult = await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'value' });
+    });
+    expect(scrollResult).toEqual({
       status: 'failed',
       reason: 'scroll_failed',
     });
@@ -265,7 +269,10 @@ describe('DataGrid keyboard and logical focus', () => {
 
     virtualizerTestHarness.allowOffsetLookup();
     virtualizerTestHarness.throwOnNextScroll();
-    expect(await apiRef.current.scrollToCell({ rowId: 'row-50', columnId: 'value' })).toEqual({
+    await act(async () => {
+      scrollResult = await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'value' });
+    });
+    expect(scrollResult).toEqual({
       status: 'failed',
       reason: 'scroll_failed',
     });
