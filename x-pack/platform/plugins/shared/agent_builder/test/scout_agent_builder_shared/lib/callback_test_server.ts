@@ -14,6 +14,17 @@ export interface CallbackTestServerRequest {
   headers: http.IncomingHttpHeaders;
   rawBody: string;
   body: unknown;
+  receivedAtMs: number;
+}
+
+export interface CallbackTestServerResponse {
+  status: number;
+  headers?: http.OutgoingHttpHeaders;
+}
+
+interface ResponseOverride {
+  matches: (request: CallbackTestServerRequest) => boolean;
+  response: CallbackTestServerResponse;
 }
 
 interface PendingWaiter {
@@ -27,6 +38,7 @@ export class CallbackTestServer {
   private port: number | null = null;
   private readonly requests: CallbackTestServerRequest[] = [];
   private readonly waiters: PendingWaiter[] = [];
+  private readonly responseOverrides: ResponseOverride[] = [];
 
   async start(): Promise<string> {
     this.port = await getPort({ port: portNumbers(18400, 18499) });
@@ -71,6 +83,14 @@ export class CallbackTestServer {
     return `http://127.0.0.1:${this.port}`;
   }
 
+  /** Answers the next request that matches with the given response instead of a 204. */
+  respondOnceWith(
+    matches: (request: CallbackTestServerRequest) => boolean,
+    response: CallbackTestServerResponse
+  ): void {
+    this.responseOverrides.push({ matches, response });
+  }
+
   waitForRequest(timeoutMs = 120_000): Promise<CallbackTestServerRequest> {
     const request = this.requests.shift();
     if (request) {
@@ -92,12 +112,14 @@ export class CallbackTestServer {
 
   private async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     const rawBody = await this.readBody(req);
+    const receivedAtMs = Date.now();
     const request: CallbackTestServerRequest = {
       method: req.method,
       url: req.url,
       headers: req.headers,
       rawBody,
       body: rawBody ? JSON.parse(rawBody) : undefined,
+      receivedAtMs,
     };
 
     const waiter = this.waiters.shift();
@@ -108,7 +130,11 @@ export class CallbackTestServer {
       this.requests.push(request);
     }
 
-    res.writeHead(204);
+    const overrideIndex = this.responseOverrides.findIndex(({ matches }) => matches(request));
+    const override =
+      overrideIndex >= 0 ? this.responseOverrides.splice(overrideIndex, 1)[0] : undefined;
+
+    res.writeHead(override?.response.status ?? 204, override?.response.headers);
     res.end();
   }
 

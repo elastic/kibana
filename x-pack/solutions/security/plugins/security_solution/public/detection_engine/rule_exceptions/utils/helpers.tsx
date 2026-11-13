@@ -662,7 +662,6 @@ export const getPrepopulatedMemoryShellcodeException = ({
   };
 };
 
-/* eslint complexity: ["error", 21]*/
 export const getPrepopulatedBehaviorException = ({
   listId,
   name,

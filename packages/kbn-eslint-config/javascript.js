@@ -59,7 +59,6 @@ module.exports = {
         'no-path-concat': 'off',
         'no-return-assign': 'off',
         'no-shadow': 'off',
-        'no-undef': 'error',
         'no-underscore-dangle': 'off',
         'no-unused-expressions': 'off',
         yoda: 'off',

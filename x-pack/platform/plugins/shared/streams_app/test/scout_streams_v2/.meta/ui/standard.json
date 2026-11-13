@@ -1,5 +1,5 @@
 {
-  "sha1": "aa5a64c846ddd7a655f11a0d6086310dba8370ef",
+  "sha1": "10ac2a8f25e5fe05312ec058d3f09d336dd16f45",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -249,8 +249,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 60,
-        "column": 26
+        "line": 27,
+        "column": 21
       }
     },
     {
@@ -263,8 +263,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 66,
-        "column": 72
+        "line": 32,
+        "column": 82
       }
     },
     {
@@ -277,8 +277,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 67,
-        "column": 19
+        "line": 36,
+        "column": 13
       }
     },
     {
@@ -291,8 +291,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 79,
-        "column": 11
+        "line": 48,
+        "column": 8
       }
     },
     {
@@ -305,8 +305,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 84,
-        "column": 28
+        "line": 52,
+        "column": 19
       }
     },
     {

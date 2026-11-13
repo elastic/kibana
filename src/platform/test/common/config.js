@@ -58,7 +58,7 @@ export default function () {
         `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
         `--server.maxPayload=1679958`,
         // newsfeed mock service
-        `--plugin-path=${path.join(__dirname, 'plugins', 'newsfeed')}`,
+        `--plugin-path=${path.join(__dirname, '../../test_plugins/common/newsfeed')}`,
         // otel mock service
         `--plugin-path=${path.resolve(__dirname, '..', '..', 'test_plugins', 'otel_metrics')}`,
         `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
