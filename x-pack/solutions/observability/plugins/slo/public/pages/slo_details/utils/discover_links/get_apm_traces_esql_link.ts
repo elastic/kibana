@@ -12,8 +12,8 @@ import {
   ALL_VALUE,
   type SLOWithSummaryResponse,
   is,
-  apmTransactionDurationIndicatorSchemaZod,
-  apmTransactionErrorRateIndicatorSchemaZod,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
 } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { esql, type ComposerQueryTagHole } from '@elastic/esql';
@@ -107,7 +107,7 @@ function buildApmEsqlQuery(
 }
 
 function buildApmLatencyEsqlQuery(slo: SLOWithSummaryResponse, transactionIndex: string): string {
-  if (!is(apmTransactionDurationIndicatorSchemaZod, slo.indicator)) return '';
+  if (!is(apmTransactionDurationIndicatorSchema, slo.indicator)) return '';
 
   const { params } = slo.indicator;
   // threshold is in ms, transaction.duration.us is in microseconds
@@ -125,7 +125,7 @@ function buildApmAvailabilityEsqlQuery(
   slo: SLOWithSummaryResponse,
   transactionIndex: string
 ): string {
-  if (!is(apmTransactionErrorRateIndicatorSchemaZod, slo.indicator)) return '';
+  if (!is(apmTransactionErrorRateIndicatorSchema, slo.indicator)) return '';
 
   const { params } = slo.indicator;
   const col = esql.col(EVENT_OUTCOME);
@@ -170,7 +170,7 @@ function buildApmTracesLocatorParams({
   transactionIndex: string;
   selectedEventType?: SloEventType;
 }) {
-  const esqlQuery = is(apmTransactionDurationIndicatorSchemaZod, slo.indicator)
+  const esqlQuery = is(apmTransactionDurationIndicatorSchema, slo.indicator)
     ? buildApmLatencyEsqlQuery(slo, transactionIndex)
     : buildApmAvailabilityEsqlQuery(slo, transactionIndex);
 

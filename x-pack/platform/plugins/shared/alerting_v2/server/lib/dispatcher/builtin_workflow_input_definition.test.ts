@@ -52,6 +52,7 @@ const exampleAlert: Required<ActionPolicyWorkflowPayloadAlert> = {
 
 const exampleRuleValue: Required<ActionPolicyWorkflowPayloadRule> = {
   name: 'CPU spike',
+  grouping_fields: ['host.name'],
 };
 
 const alertItemSchema = (schema: JsonSchema): JsonSchema => {
@@ -134,6 +135,10 @@ describe('alertingV2NotificationGroup builtin workflow input definition', () => 
       Object.keys(exampleRuleValue),
       'ActionPolicyWorkflowPayloadRule'
     );
+  });
+
+  it('requires only name on rules values, so payloads built before grouping_fields stay valid', () => {
+    expect(ruleValueSchema(schema).required).toEqual(['name']);
   });
 
   it('allows null rule_id on alert items (ActionPolicyWorkflowPayloadAlert.rule_id is RuleId | null)', () => {

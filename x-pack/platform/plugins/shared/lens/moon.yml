@@ -168,12 +168,15 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/managed-content-badge'
   - '@kbn/core-http-common'
+  - '@kbn/coloring-components'
+  - '@kbn/palettes-components'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'

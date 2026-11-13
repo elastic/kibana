@@ -7,10 +7,13 @@
 
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { z } from '@kbn/zod/v4';
 import { getResearchAgentPrompt } from './research_agent';
+import { attachmentToolsUnavailableNotice } from './utils/attachments';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
+  ...jest.requireActual('../utils/to_langchain_messages'),
   prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
@@ -37,7 +40,11 @@ describe('getResearchAgentPrompt', () => {
             } as any),
         }),
       },
-      configuration: { instructions: '', aiIndices: [] },
+      configuration: {
+        instructions: '',
+        aiIndices: [],
+        capabilities: { attachmentTools: true, apiTools: true },
+      },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
@@ -229,6 +236,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
+          capabilities: { attachmentTools: true, apiTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -246,6 +254,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
+          capabilities: { attachmentTools: true, apiTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -262,7 +271,7 @@ describe('getResearchAgentPrompt', () => {
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
   });
 
-  it('omits the SML sections when experimental features are off', async () => {
+  it('omits the SML tool instructions when experimental features are off', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: {
@@ -275,9 +284,27 @@ describe('getResearchAgentPrompt', () => {
     );
     const system = asText(messages[0]);
 
-    expect(system).not.toContain("## SML '#' REFERENCES");
+    expect(system).not.toContain('sml_attach');
     expect(system).not.toContain('## CONNECTOR DISCOVERY');
     expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
+  });
+
+  it('explains the # references even when experimental features are off', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: {
+          aiIndices: true,
+          sml: false,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain("## SML '#' REFERENCES");
+    expect(system).toContain('`[#label](sml://ENTRY_ID)`');
+    expect(system).toContain('matching them to the links by description');
   });
 
   it('renders the SML sections with # references when SML is on', async () => {
@@ -295,6 +322,8 @@ describe('getResearchAgentPrompt', () => {
 
     expect(system).toContain("## SML '#' REFERENCES");
     expect(system).toContain('`[#label](sml://ENTRY_ID)`');
+    expect(system).toContain('call `sml_attach`');
+    expect(system).toContain('## CONNECTOR DISCOVERY');
     expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
   });
 
@@ -304,6 +333,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
+          capabilities: { attachmentTools: true, apiTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -329,6 +359,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic', 'my-custom'],
+          capabilities: { attachmentTools: true, apiTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
             { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets' },
@@ -365,6 +396,7 @@ describe('getResearchAgentPrompt', () => {
       configuration: {
         instructions: '',
         aiIndices: [],
+        capabilities: { attachmentTools: true, apiTools: true },
       },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
@@ -394,5 +426,66 @@ describe('getResearchAgentPrompt', () => {
     expect(systemMessage).not.toContain('## ATTACHMENT TYPES');
     expect(systemMessage).not.toContain('## Conversation Attachments');
     expect(systemMessage).not.toMatch(/attachment_id="/);
+  });
+
+  describe('attachment_tools capability', () => {
+    const tableRenderer = {
+      type: 'table',
+      payloadSchema: z.object({ columns: z.array(z.string()) }),
+      getAgentDescription: () => 'Renders a dataset as an interactive table.',
+    };
+
+    const systemPrompt = async (overrides: Record<string, any> = {}) =>
+      asText((await getResearchAgentPrompt(makeParams(overrides)))[0]);
+
+    const off = {
+      instructions: '',
+      aiIndices: [],
+      capabilities: { attachmentTools: false, apiTools: true },
+    };
+
+    it('replaces the ATTACHMENTS section with the notice and drops inline rendering when off', async () => {
+      const prompt = await systemPrompt({ configuration: off });
+
+      expect(prompt).toContain(attachmentToolsUnavailableNotice());
+      expect(prompt).not.toContain('attachment_read(');
+      expect(prompt).not.toContain('### INLINE ATTACHMENT RENDERING');
+    });
+
+    it('omits the CUSTOM RENDERING heading and its OUTPUT STYLE line when off and there are no renderers', async () => {
+      const prompt = await systemPrompt({ configuration: off });
+
+      expect(prompt).not.toContain('## CUSTOM RENDERING');
+      expect(prompt).not.toContain('Use custom rendering when appropriate');
+    });
+
+    it('keeps the CUSTOM RENDERING heading for renderers when off', async () => {
+      const prompt = await systemPrompt({
+        configuration: off,
+        renderers: [tableRenderer],
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).toContain('## CUSTOM RENDERING');
+      expect(prompt).toContain('Use custom rendering when appropriate');
+      expect(prompt).toContain('#### type: "table"');
+      expect(prompt).not.toContain('### INLINE ATTACHMENT RENDERING');
+    });
+
+    it('keeps the full ATTACHMENTS section and inline rendering when on', async () => {
+      const prompt = await systemPrompt();
+
+      expect(prompt).toContain('MUST use the attachment tools');
+      expect(prompt).toContain('## CUSTOM RENDERING');
+      expect(prompt).toContain('Use custom rendering when appropriate');
+      expect(prompt).toContain('### INLINE ATTACHMENT RENDERING');
+    });
+
+    it('is at least 1,000 characters shorter when off', async () => {
+      const on = await systemPrompt();
+      const offPrompt = await systemPrompt({ configuration: off });
+
+      expect(on.length - offPrompt.length).toBeGreaterThanOrEqual(1000);
+    });
   });
 });

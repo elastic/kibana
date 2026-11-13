@@ -1,11 +1,11 @@
 {
-  "sha1": "8f017b13a5ba09905bf94b20a0c9aea7a93cd432",
+  "sha1": "9c20dd93c4ccc8ed8ea680206b33fd5e99a08ae9",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "686afb1e43c1702-93eb078795ca679",
+      "id": "645dd8b04456ef4-93eb078795ca679",
       "title": "blocked internal saved objects API post /api/saved_objects/_bulk_create returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -25,7 +25,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-a37c39e10458d4b",
+      "id": "645dd8b04456ef4-a37c39e10458d4b",
       "title": "blocked internal saved objects API post /api/saved_objects/_bulk_delete returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -45,7 +45,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-1ccd8b7bfcff39e",
+      "id": "645dd8b04456ef4-1ccd8b7bfcff39e",
       "title": "blocked internal saved objects API post /api/saved_objects/_bulk_get returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -65,7 +65,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-369aa1fcc98c081",
+      "id": "645dd8b04456ef4-369aa1fcc98c081",
       "title": "blocked internal saved objects API post /api/saved_objects/_bulk_resolve returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -85,7 +85,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-be7d768f1a165cd",
+      "id": "645dd8b04456ef4-be7d768f1a165cd",
       "title": "blocked internal saved objects API post /api/saved_objects/_bulk_update returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -105,7 +105,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-a4f50f6f408c4a7",
+      "id": "645dd8b04456ef4-a4f50f6f408c4a7",
       "title": "blocked internal saved objects API get /api/saved_objects/test/id returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -125,7 +125,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-770386b247870f7",
+      "id": "645dd8b04456ef4-770386b247870f7",
       "title": "blocked internal saved objects API post /api/saved_objects/test/id returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -145,7 +145,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-42d710165637ec6",
+      "id": "645dd8b04456ef4-42d710165637ec6",
       "title": "blocked internal saved objects API delete /api/saved_objects/test/id returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -165,7 +165,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-48e110dd7cdae01",
+      "id": "645dd8b04456ef4-48e110dd7cdae01",
       "title": "blocked internal saved objects API get /api/saved_objects/_find returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -185,7 +185,7 @@
       }
     },
     {
-      "id": "686afb1e43c1702-05780bc38941c88",
+      "id": "645dd8b04456ef4-05780bc38941c88",
       "title": "blocked internal saved objects API put /api/saved_objects/test/id returns 400",
       "expectedStatus": "passed",
       "tags": [
@@ -205,7 +205,7 @@
       }
     },
     {
-      "id": "86ba5703113e69a-6f4b0a7c5c0ce07",
+      "id": "33567c4e7f7fca5-6f4b0a7c5c0ce07",
       "title": "capabilities returns a 400 when an invalid app id is provided",
       "expectedStatus": "passed",
       "tags": [
@@ -225,7 +225,7 @@
       }
     },
     {
-      "id": "72d6c2fd4f4541e-b83ed9283b3719a",
+      "id": "ec1c9e2aa863294-b83ed9283b3719a",
       "title": "compression uses compression when there is no referer",
       "expectedStatus": "passed",
       "tags": [
@@ -245,7 +245,7 @@
       }
     },
     {
-      "id": "72d6c2fd4f4541e-75ad71f09bc256a",
+      "id": "ec1c9e2aa863294-75ad71f09bc256a",
       "title": "compression uses compression when there is a whitelisted referer",
       "expectedStatus": "passed",
       "tags": [
@@ -265,7 +265,7 @@
       }
     },
     {
-      "id": "2392b373cc723ee-ab33734347ca58f",
+      "id": "26d01d6e2740e1e-ab33734347ca58f",
       "title": "kibana status api returns version, status and metrics fields",
       "expectedStatus": "passed",
       "tags": [
@@ -285,7 +285,7 @@
       }
     },
     {
-      "id": "2392b373cc723ee-872c3803747abcc",
+      "id": "26d01d6e2740e1e-872c3803747abcc",
       "title": "kibana status api returns at least the overall status level to a viewer",
       "expectedStatus": "passed",
       "tags": [
@@ -305,7 +305,7 @@
       }
     },
     {
-      "id": "6054c2de485a042-e6175d7abccb252",
+      "id": "64db91de0b3507f-e6175d7abccb252",
       "title": "translations returns the translations with the correct headers",
       "expectedStatus": "passed",
       "tags": [
@@ -325,7 +325,7 @@
       }
     },
     {
-      "id": "6054c2de485a042-eec0454c4331f2c",
+      "id": "64db91de0b3507f-eec0454c4331f2c",
       "title": "translations serves a non-default locale file with the locale field intact",
       "expectedStatus": "passed",
       "tags": [
@@ -345,7 +345,7 @@
       }
     },
     {
-      "id": "6054c2de485a042-7c1b7d0f5a752d1",
+      "id": "64db91de0b3507f-7c1b7d0f5a752d1",
       "title": "translations returns a 404 when not using the correct locale",
       "expectedStatus": "passed",
       "tags": [
@@ -365,7 +365,7 @@
       }
     },
     {
-      "id": "6fbdb2654b9e364-e44412455fa0d7e",
+      "id": "2e50fe2111c9a7b-e44412455fa0d7e",
       "title": "ui settings CRUD returns list of settings",
       "expectedStatus": "passed",
       "tags": [
@@ -380,12 +380,12 @@
       ],
       "location": {
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 33,
+        "line": 36,
         "column": 45
       }
     },
     {
-      "id": "6fbdb2654b9e364-f60cbf2c626f5ce",
+      "id": "2e50fe2111c9a7b-f60cbf2c626f5ce",
       "title": "ui settings CRUD set validates value",
       "expectedStatus": "passed",
       "tags": [
@@ -400,12 +400,12 @@
       ],
       "location": {
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 58,
+        "column": 52
       }
     },
     {
-      "id": "6fbdb2654b9e364-4618619772f68a0",
+      "id": "2e50fe2111c9a7b-4618619772f68a0",
       "title": "ui settings CRUD sets value of a setting",
       "expectedStatus": "passed",
       "tags": [
@@ -420,12 +420,12 @@
       ],
       "location": {
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 59,
-        "column": 12
+        "line": 72,
+        "column": 22
       }
     },
     {
-      "id": "6fbdb2654b9e364-c38c95874036220",
+      "id": "2e50fe2111c9a7b-c38c95874036220",
       "title": "ui settings CRUD set many validates value",
       "expectedStatus": "passed",
       "tags": [
@@ -440,12 +440,12 @@
       ],
       "location": {
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 84,
+        "column": 13
       }
     },
     {
-      "id": "6fbdb2654b9e364-e1879b7a513bf21",
+      "id": "2e50fe2111c9a7b-e1879b7a513bf21",
       "title": "ui settings CRUD sets values of multiple settings",
       "expectedStatus": "passed",
       "tags": [
@@ -460,12 +460,12 @@
       ],
       "location": {
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 86,
-        "column": 48
+        "line": 97,
+        "column": 80
       }
     },
     {
-      "id": "6fbdb2654b9e364-c971c3cd0d843b3",
+      "id": "2e50fe2111c9a7b-c971c3cd0d843b3",
       "title": "ui settings CRUD deletes setting",
       "expectedStatus": "passed",
       "tags": [
@@ -480,12 +480,12 @@
       ],
       "location": {
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 99,
-        "column": 16
+        "line": 112,
+        "column": 12
       }
     },
     {
-      "id": "00b3bc15914b6b5-1a3d801f87f249d",
+      "id": "7c64d329b1f53de-1a3d801f87f249d",
       "title": "ui settings validate returns validation error for invalid value",
       "expectedStatus": "passed",
       "tags": [
@@ -505,7 +505,7 @@
       }
     },
     {
-      "id": "00b3bc15914b6b5-628ade5d8dbc25e",
+      "id": "7c64d329b1f53de-628ade5d8dbc25e",
       "title": "ui settings validate returns no error for valid value",
       "expectedStatus": "passed",
       "tags": [
@@ -525,7 +525,7 @@
       }
     },
     {
-      "id": "00b3bc15914b6b5-efa22959cc1a5d8",
+      "id": "7c64d329b1f53de-efa22959cc1a5d8",
       "title": "ui settings validate returns 404 for non-existing key",
       "expectedStatus": "passed",
       "tags": [
@@ -545,7 +545,7 @@
       }
     },
     {
-      "id": "00b3bc15914b6b5-e2d3cac2f19ae7d",
+      "id": "7c64d329b1f53de-e2d3cac2f19ae7d",
       "title": "ui settings validate returns 400 for null value",
       "expectedStatus": "passed",
       "tags": [

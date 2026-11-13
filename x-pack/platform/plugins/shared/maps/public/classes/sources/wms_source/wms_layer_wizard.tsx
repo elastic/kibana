@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { WMSCreateSourceEditor } from './wms_create_source_editor';
 import { sourceTitle, WMSSource } from './wms_source';
 import type { LayerWizard, RenderWizardArguments } from '../../layers';
@@ -24,7 +23,7 @@ export const wmsLayerWizardConfig: LayerWizard = {
   }),
   icon: WebMapServiceLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<WMSSourceDescriptor>) => {
+    const onSourceConfigChange = (sourceConfig: Partial<WMSSourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;

@@ -16,26 +16,29 @@ import type { ObservedEntityData } from './observed_entity/types';
 import { ObservedEntity } from './observed_entity';
 import { useObservedHostFields } from '../../host/main/hooks/use_observed_host_fields';
 import { useObservedUserFields } from '../../user/main/hooks/use_observed_user_fields';
+import { useObservedServiceItems } from '../../service/main/hooks/use_observed_service_items';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
-import type { HostItem, UserItem } from '../../../../../common/search_strategy';
+import type { HostItem, ServiceItem, UserItem } from '../../../../../common/search_strategy';
 import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersType } from '../../../../explore/users/store/model';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 
 export type ObservedData<T> = Omit<ObservedEntityData<T>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
 };
 
 export interface ObservedDataSectionProps {
-  /** Whether this section is scoped to a host or user entity. Controls anomaly criteria and field layout. */
-  entityType: EntityType.host | EntityType.user;
+  /**
+   * Entity type this section is scoped to. Controls anomaly criteria and field layout. Services have
+   * no anomaly row, so anomaly data is never fetched for them.
+   */
+  entityType: EntityType.host | EntityType.user | EntityType.service;
   /** Observed entity data (anomalies excluded) plus an optional Entity Store record. */
-  observedData: ObservedData<HostItem> | ObservedData<UserItem>;
+  observedData: ObservedData<HostItem> | ObservedData<UserItem> | ObservedData<ServiceItem>;
   /** Identity fields used to scope anomaly queries to this specific entity. */
   identityFields: IdentityFields;
   /** Resolved Entity Store record for this entity, used to enrich anomaly criteria. */
@@ -57,8 +60,8 @@ const resolveEntityAnomalyConfig = ({
   identityFields,
   euidApi,
 }: {
-  entityType: EntityType.host | EntityType.user;
-  observedData: ObservedData<HostItem> | ObservedData<UserItem>;
+  entityType: EntityType.host | EntityType.user | EntityType.service;
+  observedData: ObservedData<HostItem> | ObservedData<UserItem> | ObservedData<ServiceItem>;
   entityRecord: EntityStoreRecord | null | undefined;
   identityFields: IdentityFields;
   euidApi: EntityStoreEuidApi | undefined;
@@ -88,6 +91,8 @@ const resolveEntityAnomalyConfig = ({
         }),
       };
     }
+    case EntityType.service:
+      return { nameFallback: undefined, criteriaFields: [] };
   }
 };
 
@@ -101,8 +106,6 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     scopeId,
     hideAnomalies = false,
   } = props;
-
-  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const globalTime = useGlobalTime();
   const { isInitializing } = globalTime;
@@ -131,19 +134,22 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     euidApi,
   });
 
+  const isServiceEntity = entityType === EntityType.service;
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields,
-    filterQuery: buildAnomaliesTableInfluencersFilterQuery({
-      euidApi,
-      entityType,
-      isScopedToEntity: true,
-      identityFields,
-      entityRecord,
-      fallbackDisplayName: nameFallback,
-    }),
+    filterQuery: isServiceEntity
+      ? undefined
+      : buildAnomaliesTableInfluencersFilterQuery({
+          euidApi,
+          entityType,
+          isScopedToEntity: true,
+          identityFields,
+          entityRecord,
+          fallbackDisplayName: nameFallback,
+        }),
     startDate: from,
     endDate: to,
-    skip: isInitializing || !!hideAnomalies,
+    skip: isInitializing || !!hideAnomalies || isServiceEntity,
     jobIds,
     aggregationInterval: 'auto',
   });
@@ -169,14 +175,24 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     observedDataWithAnomalies as ObservedEntityData<UserItem>,
     hideAnomalies
   );
-  const observedFields = entityType === EntityType.host ? hostFields : userFields;
+  const serviceFields = useObservedServiceItems(
+    observedDataWithAnomalies as ObservedEntityData<ServiceItem>
+  );
+  const observedFields =
+    entityType === EntityType.host
+      ? hostFields
+      : entityType === EntityType.user
+      ? userFields
+      : serviceFields;
 
   const renderFlyoutLink = useCallback(
     (flyoutLinkProps: OpenFlyoutLinkProps) => <OpenFlyoutLink {...flyoutLinkProps} />,
     []
   );
 
-  const typedData = observedDataWithAnomalies as ObservedEntityData<HostItem & UserItem>;
+  const typedData = observedDataWithAnomalies as ObservedEntityData<
+    HostItem & UserItem & ServiceItem
+  >;
   const typedFields = observedFields as typeof hostFields;
 
   return (
@@ -185,7 +201,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
       contextID={contextID}
       scopeId={scopeId}
       observedFields={typedFields}
-      entityLink={newFlyoutSystemEnabled ? renderFlyoutLink : undefined}
+      entityLink={renderFlyoutLink}
     />
   );
 });

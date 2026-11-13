@@ -80,7 +80,8 @@ test.describe(
 
       await test.step('should contain geotile_grid aggregation elasticsearch request', async () => {
         await maps.setView(0, 0, 0);
-        const { rawResponse: response } = await maps.getResponse(GEO_POINT_REQUEST_NAME);
+        // the next step types a query
+        const { rawResponse: response } = await maps.getResponse(GEO_POINT_REQUEST_NAME, true);
         expect(response.aggregations.gridSplit.buckets).toHaveLength(4);
       });
 

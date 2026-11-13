@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import HUNT_YAML from './hunt.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
@@ -30,6 +30,8 @@ export const ALERTZERO_HUNT_WORKFLOW = {
   id: ALERTZERO_HUNT_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
-  yaml: HUNT_YAML,
+  version: 6,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'hunt.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

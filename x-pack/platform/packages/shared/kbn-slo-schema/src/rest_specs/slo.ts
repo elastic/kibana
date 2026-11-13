@@ -5,26 +5,36 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import { lazySchema, type z } from '@kbn/zod';
 import {
-  allOrAnyString as allOrAnyStringZod,
-  groupingsSchema as groupingsSchemaZod,
-  metaSchema as metaSchemaZod,
-  remoteSchema as remoteSchemaZod,
-  sloDefinitionSchema as sloDefinitionSchemaZod,
-  summarySchema as summarySchemaZod,
-} from '../schema/zod';
+  allOrAnyString,
+  groupingsSchema,
+  metaSchema,
+  remoteSchema,
+  sloDefinitionSchema,
+  summarySchema,
+} from '../schema';
 import type { SLODefinitionResponse } from './routes/find_definition';
 
-const sloWithDataResponseSchemaZod = sloDefinitionSchemaZod.extend({
-  summary: summarySchemaZod,
-  groupings: groupingsSchemaZod,
-  instanceId: allOrAnyStringZod,
-  meta: metaSchemaZod.optional(),
-  remote: remoteSchemaZod.optional(),
-});
+const sloWithDataResponseSchema = lazySchema(() =>
+  sloDefinitionSchema
+    .extend({
+      summary: summarySchema,
+      groupings: groupingsSchema,
+      instanceId: allOrAnyString.describe(
+        "the value derived from the groupBy field, if present, otherwise '*'"
+      ),
+      meta: metaSchema.optional(),
+      remote: remoteSchema.optional(),
+    })
+    .meta({
+      id: 'SLOWithSummaryResponse',
+      description: 'The SLO definition with its computed summary',
+      additionalProperties: true,
+    })
+);
 
-type SLOWithSummaryResponse = z.input<typeof sloWithDataResponseSchemaZod>;
+type SLOWithSummaryResponse = z.input<typeof sloWithDataResponseSchema>;
 
-export { sloWithDataResponseSchemaZod };
+export { sloWithDataResponseSchema };
 export type { SLODefinitionResponse, SLOWithSummaryResponse };

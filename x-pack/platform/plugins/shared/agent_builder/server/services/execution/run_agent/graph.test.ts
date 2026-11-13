@@ -11,8 +11,10 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
 import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStepType,
+  ExecutionStatus,
   ToolCallInvocation,
   createInjectedContextStep,
   type ConversationRoundStep,
@@ -22,9 +24,11 @@ import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { createAgentGraph } from './graph';
+import type { BackgroundExecutionService } from './background_execution_service';
 import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { stepUpdates } from './step_state';
 import type { PromptFactory } from './prompts';
+import type { RunAttachmentEvents } from './run_attachment_events';
 import { RunTracker, type ToolExecutionBuffer } from './run_tracker';
 import type { StateType } from './state';
 import type { ProcessedConversation } from './utils/prepare_conversation';
@@ -55,14 +59,18 @@ const createTestGraph = ({
   sessionId,
   cacheControl,
   toolExecutionBuffer,
+  runAttachmentEvents,
   cycleHooks,
+  backgroundExecutionService,
 }: {
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
   toolExecutionBuffer?: ToolExecutionBuffer;
+  runAttachmentEvents?: RunAttachmentEvents;
   cycleHooks?: CycleHookRuntime;
+  backgroundExecutionService?: BackgroundExecutionService;
 } = {}) => {
   const researchInvoke = jest.fn();
   const structuredInvoke = jest.fn();
@@ -98,7 +106,11 @@ const createTestGraph = ({
   const graph = createAgentGraph({
     chatModel,
     toolManager,
-    configuration: { instructions: '', aiIndices: [] },
+    configuration: {
+      instructions: '',
+      aiIndices: [],
+      capabilities: { attachmentTools: true, apiTools: true },
+    },
     logger: {} as Logger,
     events: { emit: jest.fn() } as unknown as AgentEventEmitter,
     structuredOutput,
@@ -109,7 +121,9 @@ const createTestGraph = ({
     sessionId,
     cacheControl,
     toolExecutionBuffer,
+    runAttachmentEvents,
     cycleHooks,
+    backgroundExecutionService,
     contextManagement: {
       connector: { connectorId: 'test-connector' } as InferenceConnector,
       resultStore: createToolResultStoreMock(),
@@ -154,7 +168,7 @@ describe('createAgentGraph', () => {
     expect(result.retryNotices).toEqual([
       {
         phase: 'research',
-        afterNonTodosStepCount: 0,
+        afterStepCount: 0,
         error: expect.objectContaining({
           meta: expect.objectContaining({ errCode: AgentExecutionErrorCode.emptyResponse }),
         }),
@@ -182,6 +196,32 @@ describe('createAgentGraph', () => {
     expect(toolManager.recordToolUse).toHaveBeenCalledWith('test-tool');
     expect(result.finalAnswer).toBe('answer after tool call');
     expect(result.errorCount).toBe(0);
+  });
+
+  it('checks pending background work on the first pass of a run resumed mid-cycle', async () => {
+    const backgroundExecutionService = {
+      hasPending: jest.fn(() => true),
+      checkForCompletions: jest.fn().mockResolvedValue([
+        {
+          execution_id: 'child-1',
+          status: ExecutionStatus.completed,
+          response: { message: 'PEAR' },
+        },
+      ]),
+    } as unknown as BackgroundExecutionService;
+    const { graph, researchInvoke } = createTestGraph({ backgroundExecutionService });
+    researchInvoke.mockResolvedValue(new AIMessage({ content: 'the answer' }));
+
+    // Cycle 1 is not a scheduled check; a resume starts there and must still report the child.
+    const result = await graph.invoke({ cycleLimit: 10, currentCycle: 1 });
+
+    expect(backgroundExecutionService.checkForCompletions).toHaveBeenCalledTimes(1);
+    expect(result.steps).toEqual([
+      expect.objectContaining({
+        type: ConversationRoundStepType.backgroundAgentComplete,
+        execution_id: 'child-1',
+      }),
+    ]);
   });
 
   it('records tool calls as pending steps, resolves them after execution and clears pending ids', async () => {
@@ -221,6 +261,30 @@ describe('createAgentGraph', () => {
     expect(result.toolRenderState.c1.content).toContain('"ok":true');
     expect(result.toolOutcome).toEqual({ type: 'completed' });
     expect(result.finalAnswer).toBe('done');
+  });
+
+  it('drains the attachment events of the executed tool calls into the run', async () => {
+    const event = { id: 'att-evt', type: 'attachment_added' } as unknown as AttachmentTimelineEvent;
+    const drainToolCalls = jest.fn(() => [event]);
+    const { graph, researchInvoke, promptFactory } = createTestGraph({
+      runAttachmentEvents: { drainToolCalls } as unknown as RunAttachmentEvents,
+    });
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({ content: '', tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }] })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: '{}', artifact: { results: [] } }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(drainToolCalls).toHaveBeenCalledWith(['c1']);
+    expect(result.attachmentEvents).toEqual([event]);
+    expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith({
+      run: expect.objectContaining({ attachmentEvents: [event] }),
+    });
   });
 
   it('lets the model repair an ask_user_question call whose arguments failed validation', async () => {
@@ -379,7 +443,7 @@ describe('createAgentGraph', () => {
       data: { response: 'structured answer' },
     });
     expect(result.retryNotices).toEqual([
-      expect.objectContaining({ phase: 'answer', afterNonTodosStepCount: 0 }),
+      expect.objectContaining({ phase: 'answer', afterStepCount: 0 }),
     ]);
   });
 

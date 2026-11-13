@@ -42,6 +42,12 @@ import {
 <AiIcon iconType="sparkles" size="m" aria-label="AI Assistant" />;
 ```
 
+## Standalone package
+
+This package is also built as a standalone npm package for applications outside Kibana (e.g. Cloud UI, design prototypes), so they can use the real AI buttons instead of re-creating the gradient styles. The publish pipeline builds and publishes it to the internal Artifactory registry on merge to `main` whenever this package changes.
+
+See [packaging/README.md](./packaging/README.md) for how it is built, its peer dependencies, and how to use it.
+
 ## Development
 
 ```bash

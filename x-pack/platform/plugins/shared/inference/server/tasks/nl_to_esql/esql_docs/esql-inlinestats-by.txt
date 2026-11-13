@@ -1,6 +1,6 @@
 # INLINESTATS-BY
 
-The INLINE STATS command groups rows based on a common value specified after BY and calculates one or more aggregated values over the grouped rows. The output table retains all columns from the input table, with new columns added or existing columns overridden if their names overlap. Aggregated values can be filtered using WHERE for each calculation, and if BY is omitted, aggregations are applied to the entire dataset. The new columns appear in the order defined in the INLINE STATS command.
+The `INLINE STATS` processing command groups rows according to a common value and calculates one or more aggregated values over the grouped rows. The results are appended as new columns to the input rows. The command is identical to `STATS` except that it preserves all columns from the input table.
 
 ## Syntax
 
@@ -13,25 +13,31 @@ The INLINE STATS command groups rows based on a common value specified after BY 
 
 ### Parameters
 
-#### columnX
+#### `columnX`
 
-The name for the aggregated value returned. If omitted, the name defaults to the corresponding expression. If multiple columns share the same name, only the rightmost column with that name is kept.
+Optional.
 
-#### expressionX
+The name by which the aggregated value is returned. If omitted, the name is equal to the corresponding expression (`expressionX`). If multiple columns have the same name, all but the rightmost column with this name will be ignored.
+
+#### `expressionX`
 
 An expression that computes an aggregated value.
 
-#### grouping_expressionX
+#### `grouping_expressionX`
 
-An expression that outputs the values to group by. If its name matches an existing or computed column, that column will be overridden.
+Optional.
 
-#### boolean_expressionX
+An expression that outputs the values to group by. If its name coincides with one of the existing or computed columns, that column will be overridden by this one.
 
-The condition that determines which rows are included when evaluating expressionX.
+#### `boolean_expressionX`
+
+Optional.
+
+The condition that determines which rows are included when evaluating `expressionX`. Individual `null` values are skipped when computing aggregations.
 
 ## Examples
 
-Calculates the maximum salary for each language group and adds it as a new column.
+Calculate the maximum salary grouped by language.
 
 ```esql
 FROM employees
@@ -39,7 +45,9 @@ FROM employees
 | INLINE STATS max_salary = MAX(salary) BY languages
 ```
 
-Calculates the maximum salary across all employees and adds it as a new column to every row.
+The `languages` column moves to the last position in the output table because it is a column overridden by the `INLINE STATS` command and it is the last column defined by it.
+
+Calculate the maximum salary across the entire dataset.
 
 ```esql
 FROM employees
@@ -47,7 +55,7 @@ FROM employees
 | INLINE STATS max_salary = MAX(salary)
 ```
 
-Calculates the average salary and the count of employees, grouped by both language and tenure.
+Calculate average salary and employee count by language and tenure.
 
 ```esql
 FROM employees
@@ -58,7 +66,7 @@ FROM employees
 | INLINE STATS avg_salary = AVG(salary), count = count(*) BY languages, tenure
 ```
 
-Calculates rounded average salaries for employees in different salary ranges, using conditional WHERE clauses for each aggregation.
+Calculate salary averages for multiple salary ranges.
 
 ```esql
 FROM employees
@@ -70,6 +78,6 @@ FROM employees
 
 ## Limitations
 
-- The CATEGORIZE grouping function is not currently supported.
-- You cannot use LIMIT (explicit or implicit) before INLINE STATS, as this can lead to unexpected results.
-- You cannot use FORK before INLINE STATS, because FORK adds an implicit LIMIT to each branch, which can lead to unexpected results.
+- The `CATEGORIZE` grouping function is not currently supported.
+- You cannot currently use `LIMIT` before `INLINE STATS`, whether explicit or implicit, because this can lead to unexpected results.
+- You cannot currently use `FORK` before `INLINE STATS`, because `FORK` adds an implicit `LIMIT` to each branch, which can lead to unexpected results.

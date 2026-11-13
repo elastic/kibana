@@ -9,11 +9,11 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, mathWithUnits, transparentize } from '@elastic/eui';
 
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import {
   getThemeResolvedSeverityColor,
   getThemeResolvedSeverityStrokeColor,
-  ML_ANOMALY_THRESHOLD,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/use_severity_color';
 
 export const useCssMlExplorerChartContainer = () => {
   const { euiTheme, colorMode } = useEuiTheme();

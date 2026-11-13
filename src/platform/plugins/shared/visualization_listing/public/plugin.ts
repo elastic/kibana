@@ -8,7 +8,6 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DashboardSetup, DashboardListingTab } from '@kbn/dashboard-plugin/public';
@@ -19,7 +18,6 @@ import type { VisualizationListingPageServices } from './get_table_list';
 
 export interface VisualizationListingStartDependencies {
   visualizations: VisualizationsStart;
-  contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
@@ -58,7 +56,6 @@ export class VisualizationListingPlugin
         const services: VisualizationListingPageServices = {
           core: coreStart,
           visualizations: pluginsStart.visualizations,
-          contentManagement: pluginsStart.contentManagement,
           embeddable: pluginsStart.embeddable,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi,
         };

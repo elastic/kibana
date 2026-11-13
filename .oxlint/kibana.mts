@@ -17,6 +17,8 @@ const HOOK_FORM_LIB_DEPRECATION =
 
 export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_async_promise_body': 'error',
+  '@kbn/eslint/no_abort_signal_timeout': 'error',
+  '@kbn/eslint/no_uncleared_race_timeout': 'error',
   '@kbn/eslint/no_async_foreach': 'error',
   '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
   '@kbn/eslint/no_trailing_import_slash': 'error',
@@ -28,6 +30,7 @@ export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
   '@kbn/eslint/no_wrapped_error_in_logger': 'error',
   '@kbn/eslint/no_npx_playwright': 'error',
+  '@kbn/eslint/no_redundant_link_navigation': 'warn',
   '@kbn/eslint/no_feature_flag_snapshot': [
     'error',
     {
@@ -43,7 +46,8 @@ export const kibanaOverrides: OxlintOverride[] = [
   {
     files: ['**/*.{js,mjs,ts,tsx}'],
     rules: {
-      'no-restricted-imports': [
+      // A separate rule, so these stay warnings next to the error-level `no-restricted-imports`.
+      '@kbn/eslint/no_deprecated_imports': [
         'warn',
         {
           paths: [
@@ -137,6 +141,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-lens-common/**/*',
       'src/platform/packages/shared/kbn-lens-common-2/**/*',
       'src/platform/packages/shared/kbn-coloring/**/*',
+      'src/platform/packages/shared/kbn-coloring-components/**/*',
       'src/platform/packages/shared/kbn-chart-icons/**/*',
       'src/platform/packages/shared/kbn-event-annotation-common/**/*',
       'src/platform/packages/shared/kbn-event-annotation-components/**/*',
@@ -178,7 +183,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-zod/**',
     ],
     rules: {
-      '@kbn/eslint/require_lazy_zod_schema': 'warn',
+      '@kbn/eslint/require_lazy_zod_schema': 'error',
     },
   },
   {

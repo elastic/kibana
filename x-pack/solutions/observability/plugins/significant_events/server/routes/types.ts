@@ -17,12 +17,12 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SourceKnowledgeStateClient } from '../lib/knowledge_indicators/source_knowledge_state';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsServer } from '../types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
+import type { KnowledgeIndicatorClient, TopologySnapshotClient } from '../lib/knowledge_indicators';
 
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
@@ -57,6 +57,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   space: string;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: (source?: NightshiftSource) => Promise<KnowledgeIndicatorClient>;
+  getTopologySnapshotClient: () => Promise<TopologySnapshotClient>;
   sourceKnowledgeState: SourceKnowledgeStateClient;
   /**
    * Starts onboarding for a source revision; resolves to whether a run was started. Skipped for a
@@ -68,6 +69,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
     options?: IScheduleSourceOnboardingOptions
   ) => Promise<boolean>;
   getAlertEventsClient: () => Promise<AlertEventsClientApi>;
+  getAlertActionsClient: () => Promise<AlertActionsClientApi>;
   inferenceClient: InferenceClient;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;

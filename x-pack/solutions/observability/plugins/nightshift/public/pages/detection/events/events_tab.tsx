@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiIllustration,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { analyzeMagnifyGlass } from '@elastic/eui-illustrations';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { getHttpErrorStatus } from '../../../common/http_error';
 import { EventFlyout } from '../../../components/entities/significant_event/event_flyout';
 import { useFetchEventById } from '../../../data/significant_events/use_fetch_event_by_id';
 import { useSignificantEventsFacets } from '../../../data/significant_events/use_significant_events_facets';
@@ -22,6 +32,7 @@ import {
   EMPTY_BODY,
   EMPTY_TITLE,
   EVENT_NOT_FOUND_TOAST_TITLE,
+  INVESTIGATION_FILTER_ERROR_MESSAGE,
   LIST_ERROR_MESSAGE,
   LIST_ERROR_TITLE,
   RETRY_LABEL,
@@ -29,6 +40,7 @@ import {
 import { useEventsUrlState } from './use_events_url_state';
 
 const DEFAULT_PAGE_SIZE = 25;
+const HTTP_SERVICE_UNAVAILABLE = 503;
 
 export const EventsTab = ({
   timeRange,
@@ -41,6 +53,7 @@ export const EventsTab = ({
   entities: string[];
   unassigned: boolean;
 }): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
   const { notifications } = useKibana().services;
   const [perPage, setPerPage] = useState(DEFAULT_PAGE_SIZE);
   const openButtons = useRef(new Map<string, HTMLButtonElement | null>());
@@ -81,6 +94,9 @@ export const EventsTab = ({
     sortOrder: sort.order,
   });
   const facetsQuery = useSignificantEventsFacets(filters);
+  // Only the 503 from the route means the investigation state is unavailable.
+  const isInvestigationStateUnavailable =
+    investigation.length > 0 && getHttpErrorStatus(eventsQuery.error) === HTTP_SERVICE_UNAVAILABLE;
   const events = eventsQuery.data?.hits ?? [];
   const lastPage = Math.max(1, Math.ceil((eventsQuery.data?.total ?? 0) / perPage));
   const isPastLastPage = Boolean(eventsQuery.data) && page > lastPage;
@@ -145,27 +161,48 @@ export const EventsTab = ({
     []
   );
 
+  const isEmpty =
+    !eventsQuery.isLoading && eventsQuery.data && events.length === 0 && !isPastLastPage;
+
   return (
-    <>
-      <EventsFilters
-        timeRange={timeRange}
-        searchValue={searchValue}
-        status={status}
-        severity={severity}
-        onTimeRangeChange={onTimeRangeChange}
-        investigation={investigation}
-        facets={facetsQuery.data}
-        onInvestigationChange={setInvestigation}
-        onSearchChange={onSearchChange}
-        onStatusChange={setStatus}
-        onSeverityChange={setSeverity}
-      />
-      <EuiSpacer size="m" />
-      {eventsQuery.isError && !eventsQuery.data ? (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-block-size: 100%;
+      `}
+    >
+      {/* EuiFlexGroup grows by default — keep filters from eating the empty-state space. */}
+      <div
+        css={css`
+          flex: 0 0 auto;
+        `}
+      >
+        <EventsFilters
+          timeRange={timeRange}
+          searchValue={searchValue}
+          status={status}
+          severity={severity}
+          onTimeRangeChange={onTimeRangeChange}
+          investigation={investigation}
+          facets={facetsQuery.data}
+          onInvestigationChange={setInvestigation}
+          onSearchChange={onSearchChange}
+          onStatusChange={setStatus}
+          onSeverityChange={setSeverity}
+        />
+        <EuiSpacer size="m" />
+      </div>
+      {eventsQuery.isError && (!eventsQuery.data || eventsQuery.isPreviousData) ? (
         <KbnDangerCallout
           announceOnMount
           title={LIST_ERROR_TITLE}
-          text={LIST_ERROR_MESSAGE}
+          text={
+            isInvestigationStateUnavailable
+              ? INVESTIGATION_FILTER_ERROR_MESSAGE
+              : LIST_ERROR_MESSAGE
+          }
           size="s"
           data-test-subj="nightshiftDetectionEventsError"
           actionProps={{
@@ -177,20 +214,51 @@ export const EventsTab = ({
             },
           }}
         />
-      ) : !eventsQuery.isLoading && eventsQuery.data && events.length === 0 && !isPastLastPage ? (
-        <EuiEmptyPrompt
-          data-test-subj="nightshiftDetectionEventsEmpty"
-          iconType="search"
-          title={<h2>{EMPTY_TITLE}</h2>}
-          body={<p>{EMPTY_BODY}</p>}
-          actions={
-            hasFilters ? (
-              <EuiButton onClick={clearFilters} data-test-subj="nightshiftDetectionEventsClear">
-                {CLEAR_FILTERS_LABEL}
-              </EuiButton>
-            ) : undefined
-          }
-        />
+      ) : isEmpty ? (
+        <div
+          css={css`
+            display: flex;
+            flex: 1 1 auto;
+            align-items: center;
+            justify-content: center;
+            min-block-size: 0;
+          `}
+        >
+          <EuiEmptyPrompt
+            data-test-subj="nightshiftDetectionEventsEmpty"
+            layout="vertical"
+            color="transparent"
+            paddingSize="s"
+            titleSize="xs"
+            icon={
+              <EuiIllustration
+                type={analyzeMagnifyGlass}
+                alt=""
+                css={css`
+                  max-inline-size: ${euiTheme.base * 5}px;
+                  margin-inline: auto;
+                `}
+              />
+            }
+            title={<h2>{EMPTY_TITLE}</h2>}
+            body={
+              <EuiText size="s">
+                <p>{EMPTY_BODY}</p>
+              </EuiText>
+            }
+            actions={
+              hasFilters ? (
+                <EuiButton
+                  size="s"
+                  onClick={clearFilters}
+                  data-test-subj="nightshiftDetectionEventsClear"
+                >
+                  {CLEAR_FILTERS_LABEL}
+                </EuiButton>
+              ) : undefined
+            }
+          />
+        </div>
       ) : (
         <EventsTable
           events={events}
@@ -207,6 +275,6 @@ export const EventsTab = ({
         />
       )}
       {openEventData ? <EventFlyout event={openEventData} onClose={handleCloseFlyout} /> : null}
-    </>
+    </div>
   );
 };

@@ -14,11 +14,8 @@ import type {
 
 export const FEATURE_ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 
-const MAX_TEMPERATURE = 2;
-
 const validateModelParameters = ({
   reasoning,
-  temperature,
 }: NonNullable<RecommendedEndpoint['parameters']>): void => {
   if (
     reasoning?.effort !== undefined &&
@@ -27,13 +24,6 @@ const validateModelParameters = ({
     throw new Error(
       `parameters.reasoning.effort must be one of: ${chatCompletionReasoningEfforts.join(', ')}.`
     );
-  }
-
-  if (
-    temperature !== undefined &&
-    (!Number.isFinite(temperature) || temperature < 0 || temperature > MAX_TEMPERATURE)
-  ) {
-    throw new Error(`parameters.temperature must be a number between 0 and ${MAX_TEMPERATURE}.`);
   }
 };
 

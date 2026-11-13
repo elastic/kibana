@@ -17,6 +17,8 @@
   ],
   "exclude": ["target/**/*", "test/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
+    "@kbn/data-source",
+    "@kbn/securitysolution-alerts-page-url",
     "@kbn/setup-node-env",
     "@kbn/core",
     "@kbn/data-plugin",
@@ -61,6 +63,8 @@
     "@kbn/std",
     "@kbn/rule-data-utils",
     "@kbn/securitysolution-t-grid",
+    "@kbn/securitysolution-timeline-common",
+    "@kbn/securitysolution-timeline-components",
     "@kbn/rule-registry-plugin",
     "@kbn/securitysolution-utils",
     "@kbn/securitysolution-list-constants",
@@ -272,6 +276,7 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/agent-builder-browser",
     "@kbn/agentic-investigations-common",
+    "@kbn/agentic-investigations-impact",
     "@kbn/agentic-investigations-plugin",
     "@kbn/mitre-attack-plugin",
     "@kbn/security-mitre-attack-common",
@@ -321,5 +326,6 @@
     "@kbn/css-utils",
     "@kbn/custom-content-common",
     "@kbn/custom-content-renderer",
+    "@kbn/securitysolution-timeline-search-strategy",
   ]
 }

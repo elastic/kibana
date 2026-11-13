@@ -8,9 +8,11 @@
 import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { HuntScope, HuntScopeResolution, IndexScopeWindow } from '@kbn/alertzero-common';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import { classifyActionableIndices } from './classify_actionable_indices';
 import { discoverHuntDatasets } from './discover_hunt_datasets';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
+import { scopeGuardPatterns } from './cps_scope';
 import { buildMatchesRequired } from './matches_required';
 import { matchDatasetsDeterministic } from './match_hunt_datasets';
 import type { HuntScopeReportContext } from './match_hunt_datasets';
@@ -39,22 +41,24 @@ const defaultWindow = (): IndexScopeWindow => ({
   to: new Date().toISOString(),
 });
 
-const isExclusion = (pattern: string): boolean => pattern.startsWith('-');
-
 /**
  * The universe patterns no resolved name globs to. A name counts whether it resolved as an
  * index, an alias, a data stream, or a data stream's backing index.
  */
-const unresolvedPatterns = (
+export const unresolvedPatterns = (
   patterns: string[],
-  resolved: IndicesResolveIndexResponse
+  resolved: IndicesResolveIndexResponse,
+  crossProjectSearch = false
 ): string[] => {
   const names = [
     ...resolved.indices.map(({ name }) => name),
     ...resolved.aliases.map(({ name }) => name),
     ...resolved.data_streams.flatMap(({ name, backing_indices: backing }) => [name, ...backing]),
   ];
-  return patterns.filter((pattern) => !names.some(buildMatchesRequired([pattern])));
+  return patterns.filter(
+    (pattern) =>
+      !names.some(buildMatchesRequired(scopeGuardPatterns([pattern], crossProjectSearch)))
+  );
 };
 
 /**
@@ -100,6 +104,7 @@ export const resolveHuntScope = async ({
   esClient,
   spaceId,
   indexPatterns,
+  crossProjectSearch = false,
   window,
   row_limit = DEFAULT_ROW_LIMIT,
   report,
@@ -109,13 +114,15 @@ export const resolveHuntScope = async ({
   spaceId: string;
   /** The space's default data view patterns, exclusions included. Caller-supplied. */
   indexPatterns: string[];
+  /** Cross-project search is on: an unqualified pattern resolving only on a linked project is not missing. */
+  crossProjectSearch?: boolean;
   window?: IndexScopeWindow;
   row_limit?: number;
   report?: HuntScopeReportContext;
   logger?: Logger;
 }): Promise<ResolvedHuntScope> => {
   const resolvedWindow = window ?? defaultWindow();
-  const positivePatterns = indexPatterns.filter((pattern) => !isExclusion(pattern));
+  const positivePatterns = indexPatterns.filter((pattern) => !isIndexExclusion(pattern));
   const blocked = (
     resolution: Extract<HuntScopeResolution, `blocked:${string}`>,
     missing: string[]
@@ -153,7 +160,7 @@ export const resolveHuntScope = async ({
     return blocked('blocked:discovery_failed', []);
   }
 
-  const missing = unresolvedPatterns(positivePatterns, resolved);
+  const missing = unresolvedPatterns(positivePatterns, resolved, crossProjectSearch);
   if (
     resolved.indices.length === 0 &&
     resolved.data_streams.length === 0 &&

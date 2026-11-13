@@ -1,0 +1,1377 @@
+{
+  "components": {
+    "schemas": {
+      "Handler_typesFlaggedRuleV0": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Handler_typesGetTaskResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "started",
+              "succeeded",
+              "failed",
+              "retrying"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "state"
+        ],
+        "type": "object"
+      },
+      "Handler_typesMailbox": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "external_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "id"
+        ],
+        "type": "object"
+      },
+      "Handler_typesMessage": {
+        "properties": {
+          "canonical_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "external_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "forward_recipients": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "forwarded_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "landed_in_spam": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "mailbox": {
+            "$ref": "#/components/schemas/Handler_typesMailbox"
+          },
+          "message_source_id": {
+            "format": "uuid",
+            "nullable": true,
+            "type": "string"
+          },
+          "read_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "recipients": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesRecipient"
+            },
+            "type": "array"
+          },
+          "replied_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/Handler_typesSender"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "canonical_id",
+          "created_at",
+          "id",
+          "message_source_id",
+          "recipients",
+          "sender",
+          "subject"
+        ],
+        "type": "object"
+      },
+      "Handler_typesMessageGroupEventLinkClick": {
+        "properties": {
+          "clicked_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "client_ip": {
+            "type": "string"
+          },
+          "mailbox_display_name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mailbox_email_address": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mailbox_external_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string"
+          },
+          "user_agent": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Handler_typesMessageGroupEventLinksClickedV0": {
+        "properties": {
+          "clicks": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageGroupEventLinkClick"
+            },
+            "type": "array"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Handler_typesMessageGroupV0": {
+        "properties": {
+          "classification": {
+            "nullable": true,
+            "type": "string"
+          },
+          "flagged_rules": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesFlaggedRuleV0"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "message_links_clicked": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageGroupEventLinksClickedV0"
+            },
+            "type": "array"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessagePreviewV0"
+            },
+            "type": "array"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "review_comment": {
+            "nullable": true,
+            "type": "string"
+          },
+          "review_label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "review_status": {
+            "nullable": true,
+            "type": "string"
+          },
+          "state": {
+            "nullable": true,
+            "type": "string"
+          },
+          "user_reports": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageReportV0"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "Handler_typesMessagePreviewV0": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "delivered": {
+            "type": "boolean"
+          },
+          "forward_recipients": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "forwarded_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "mailbox": {
+            "$ref": "#/components/schemas/Handler_typesMailbox"
+          },
+          "read_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "recipients": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesRecipient"
+            },
+            "type": "array"
+          },
+          "replied_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/Handler_typesSender"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "mailbox",
+          "recipients",
+          "sender",
+          "subject"
+        ],
+        "type": "object"
+      },
+      "Handler_typesMessageReportV0": {
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "reported_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reported_by_message_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reporter": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Handler_typesRecipient": {
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "Handler_typesSender": {
+        "properties": {
+          "display_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "Handler_typesTaskAccepted": {
+        "properties": {
+          "task_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id"
+        ],
+        "type": "object"
+      },
+      "Handler_typesV0ListMessageGroupsResponse": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "message_groups": {
+            "items": {
+              "$ref": "#/components/schemas/Handler_typesMessageGroupV0"
+            },
+            "type": "array"
+          },
+          "stats_limit_exceeded": {
+            "type": "boolean"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "total"
+        ],
+        "type": "object"
+      },
+      "HandlersAsaVerdictResponseV0": {
+        "properties": {
+          "verdict": {
+            "enum": [
+              "malicious",
+              "spam",
+              "graymail",
+              "likely_benign",
+              "benign",
+              "unknown"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HandlersAttackScoreResponse": {
+        "properties": {
+          "graymail_score": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "score": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "top_signals": {
+            "items": {
+              "$ref": "#/components/schemas/HandlersAttackScoreSignalResult"
+            },
+            "type": "array"
+          },
+          "verdict": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HandlersAttackScoreSignalResult": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "rank": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "HandlersV0ListMailboxesResponse": {
+        "properties": {
+          "active": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mailboxes": {
+            "items": {
+              "$ref": "#/components/schemas/HandlersV0Mailbox"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "HandlersV0Mailbox": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "email_address": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "subscription_error_status": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email_address",
+          "id"
+        ],
+        "type": "object"
+      },
+      "QuarantineMultipleMessageGroupsInput": {
+        "properties": {
+          "classification": {
+            "enum": [
+              "malicious",
+              "benign",
+              "spam",
+              "graymail",
+              "simulation",
+              "unwanted",
+              "violation",
+              "non-violation"
+            ],
+            "type": "string"
+          },
+          "message_group_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "report_label": {
+            "enum": [
+              "spam",
+              "phishing",
+              "false_positive",
+              "false_negative",
+              "phishing_simulation",
+              "graymail",
+              "violation",
+              "non-violation"
+            ],
+            "type": "string"
+          },
+          "review_comment": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "message_group_ids"
+        ],
+        "type": "object"
+      },
+      "RestoreMultipleMessageGroupsInput": {
+        "properties": {
+          "classification": {
+            "enum": [
+              "malicious",
+              "benign",
+              "spam",
+              "graymail",
+              "simulation",
+              "unwanted",
+              "violation",
+              "non-violation"
+            ],
+            "type": "string"
+          },
+          "message_group_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "report_label": {
+            "enum": [
+              "spam",
+              "phishing",
+              "false_positive",
+              "false_negative",
+              "phishing_simulation",
+              "graymail",
+              "violation",
+              "non-violation"
+            ],
+            "type": "string"
+          },
+          "review_comment": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "message_group_ids"
+        ],
+        "type": "object"
+      },
+      "TrashMultipleMessageGroupsInput": {
+        "properties": {
+          "classification": {
+            "enum": [
+              "malicious",
+              "benign",
+              "spam",
+              "graymail",
+              "simulation",
+              "unwanted",
+              "violation",
+              "non-violation"
+            ],
+            "type": "string"
+          },
+          "message_group_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "report_label": {
+            "enum": [
+              "spam",
+              "phishing",
+              "false_positive",
+              "false_negative",
+              "phishing_simulation",
+              "graymail",
+              "violation",
+              "non-violation"
+            ],
+            "type": "string"
+          },
+          "review_comment": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "message_group_ids"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Sublime Platform API"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/v0/mailboxes": {
+      "get": {
+        "operationId": "listMailboxes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email_addresses",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "maximum": 500,
+              "nullable": true,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mailbox_types",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "marked_active",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "message_source_id",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "format": "int32",
+              "nullable": true,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sub_error_types",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandlersV0ListMailboxesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/message-groups": {
+      "get": {
+        "operationId": "listMessageGroups",
+        "parameters": [
+          {
+            "explode": true,
+            "in": "query",
+            "name": "attachment_name__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "attachment_sha256__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "attack_score_verdict__is",
+            "schema": {
+              "items": {
+                "enum": [
+                  "unknown",
+                  "likely_benign",
+                  "suspicious",
+                  "malicious",
+                  "graymail",
+                  "spam"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "attack_surface_reduction__filter",
+            "schema": {
+              "format": "bool",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "canonical_id__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "created_at__gte",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "created_at__lt",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "first_message_reported_at[gte]",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "first_message_reported_at__gte",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "flagged",
+            "schema": {
+              "format": "bool",
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "flagged_rule_id__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "flagged_rule_severity__is",
+            "schema": {
+              "items": {
+                "enum": [
+                  "informational",
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "historically_flagged_rule_id__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "historically_flagged_rule_severity__is",
+            "schema": {
+              "items": {
+                "enum": [
+                  "informational",
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "last_created_at__gte",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "last_created_at__lt",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "last_message_created_at[gte]",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "maximum": 500,
+              "nullable": true,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "mailbox_email__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "format": "int32",
+              "nullable": true,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "recipient_email__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "reported_as_phish_by__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "reviewed",
+            "schema": {
+              "format": "bool",
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "sender_display_name__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "sender_domain__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "sender_email__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "spam__is",
+            "schema": {
+              "items": {
+                "enum": [
+                  "spam",
+                  "not_spam",
+                  "mixed"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "subject__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "user_reported",
+            "schema": {
+              "format": "bool",
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "vendor_id__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "verdict__is_not",
+            "schema": {
+              "items": {
+                "enum": [
+                  "unknown",
+                  "likely_benign",
+                  "suspicious",
+                  "malicious",
+                  "graymail",
+                  "spam"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Handler_typesV0ListMessageGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/message-groups/quarantine": {
+      "post": {
+        "operationId": "quarantineMultipleMessageGroups",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuarantineMultipleMessageGroupsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Handler_typesTaskAccepted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/message-groups/restore": {
+      "post": {
+        "operationId": "restoreMultipleMessageGroups",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreMultipleMessageGroupsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Handler_typesTaskAccepted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/message-groups/trash": {
+      "post": {
+        "operationId": "trashMultipleMessageGroups",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrashMultipleMessageGroupsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Handler_typesTaskAccepted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/message-groups/{id}": {
+      "get": {
+        "operationId": "getMessageGroup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "sort_previews_message_id__is",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Handler_typesMessageGroupV0"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/messages/{id}": {
+      "get": {
+        "operationId": "getMessage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recompute_mdm_from_raw",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "remove_large_text_fields",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Handler_typesMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/messages/{id}/asa_verdict": {
+      "get": {
+        "operationId": "retrieveASAVerdict",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandlersAsaVerdictResponseV0"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/messages/{id}/attack_score": {
+      "get": {
+        "operationId": "attackScoreForMessage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandlersAttackScoreResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/tasks/{id}": {
+      "get": {
+        "operationId": "getTask",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Handler_typesGetTaskResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "{scheme}://{server}",
+      "variables": {
+        "scheme": {
+          "default": "https",
+          "enum": [
+            "http",
+            "https"
+          ]
+        },
+        "server": {
+          "default": "platform.sublime.security"
+        }
+      }
+    }
+  ]
+}

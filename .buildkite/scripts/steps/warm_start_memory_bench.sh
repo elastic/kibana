@@ -56,7 +56,8 @@ if ! BASELINE_BUILD_ID=$(node .buildkite/scripts/steps/bench/resolve_merge_base_
   soft_fail "Baseline build lookup failed; see the step log. No memory comparison was made for this PR."
 fi
 if [[ -z "$BASELINE_BUILD_ID" ]]; then
-  soft_fail "No baseline distributable for merge base ${GITHUB_PR_MERGE_BASE}; it has likely expired. No memory comparison was made for this PR."
+  BASELINE_PIPELINE="${WARM_START_MEMORY_BASELINE_PIPELINE:-kibana-on-merge}"
+  soft_fail "No baseline distributable found for merge base ${GITHUB_PR_MERGE_BASE} — [check its ${BASELINE_PIPELINE} builds](https://buildkite.com/elastic/${BASELINE_PIPELINE}/builds?commit=${GITHUB_PR_MERGE_BASE}): the build may still be running, have failed, or its artifact may have expired. Retry this step later, or update your branch with latest main to get a newer merge base. No memory comparison was made for this PR."
 fi
 
 .buildkite/scripts/bootstrap.sh

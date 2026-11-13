@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EntityUpdateClient } from '../../domain/crud';
@@ -82,6 +83,8 @@ export interface EntityMaintainerStatus extends Record<string, unknown> {
 }
 
 export interface EntityMaintainerTaskMethodContext {
+  /** Attaches maintainer-owned data to the scheduled execution event. */
+  setCustomTaskRunEventFields?: RunContext['setCustomTaskRunEventFields'];
   status: EntityMaintainerStatus;
   signal: AbortSignal;
   logger: Logger;

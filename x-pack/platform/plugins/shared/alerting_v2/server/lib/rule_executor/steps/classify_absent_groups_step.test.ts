@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import {
   collectStreamResults,
@@ -21,9 +20,10 @@ import { buildGroupHash } from '../build_alert_events';
 import type { AlertEventDocument } from '../../../resources/datastreams/alert_events';
 import type { PipelineStateStream } from '../types';
 import type { PluginConfig } from '../../../config';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import { ClassifyAbsentGroupsStep } from './classify_absent_groups_step';
 
-const createPluginConfigAccessor = () => {
+const createPluginConfigService = () => {
   const config: PluginConfig = {
     enabled: true,
     invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
@@ -31,6 +31,7 @@ const createPluginConfigAccessor = () => {
       ruleEvents: { enabled: false, dataRetention: '90d' },
       alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
     },
+    dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
@@ -41,7 +42,7 @@ const createPluginConfigAccessor = () => {
       },
     },
   };
-  return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
+  return createConfigServiceMock(config);
 };
 
 const hashFor = (host: string): string =>
@@ -57,7 +58,7 @@ describe('ClassifyAbsentGroupsStep', () => {
     const step = new ClassifyAbsentGroupsStep(
       internal.queryService,
       scoped.queryService,
-      createPluginConfigAccessor()
+      createPluginConfigService()
     );
     return { step, internalEsClient: internal.mockEsClient, scopedEsClient: scoped.mockEsClient };
   }

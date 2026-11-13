@@ -19,6 +19,25 @@ import {
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useCanvasEvents } from '../state_management';
+import { getFlowDimStyles, useFlowHighlightState } from '../canvas_flow_highlight';
+import { useCanvasReadOnly } from '../canvas_read_only_context';
+import type { ClassicCanvasEdge } from '../types';
+
+const addRoutingUnavailableLabel = i18n.translate(
+  'xpack.streams.animatedEdge.addRoutingUnavailableTooltip',
+  {
+    defaultMessage:
+      'Routing cannot be added to this line yet. Add it to a line that ends at a destination.',
+  }
+);
+
+const addProcessingUnavailableLabel = i18n.translate(
+  'xpack.streams.animatedEdge.addProcessingUnavailableTooltip',
+  {
+    defaultMessage:
+      'This processing uses telemetry-specific processor lists, which cannot be edited on the map yet.',
+  }
+);
 
 const DASH = 4;
 const GAP = 8;
@@ -60,15 +79,17 @@ export function AnimatedEdge({
   style,
   selected,
   data,
-}: EdgeProps) {
-  const { openRoutingFlyout } = useCanvasEvents();
+}: EdgeProps<ClassicCanvasEdge>) {
+  const { openRoutingFlyout, openProcessingFlyout, openLineProcessingFlyout } = useCanvasEvents();
+  const readOnly = useCanvasReadOnly();
   const edgeMenuId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
-  const canUnhook = Boolean(
-    data && typeof data === 'object' && 'unitConnection' in data && data.unitConnection
-  );
+  const flowHighlightState = useFlowHighlightState(id, 'edge');
+  const canUnhook = Boolean(data?.editable) && !readOnly;
+  const processingTarget = data?.processingTarget;
+  const routingLine = data?.routingLine;
 
   // The built-in unhook circles sit on the line just outside each handle and are
   // easy to miss. Pressing the line itself starts that same drag from the
@@ -148,22 +169,33 @@ export function AnimatedEdge({
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      openRoutingFlyout(id, 'routing');
+      if (!routingLine) {
+        return;
+      }
+      openRoutingFlyout({ kind: 'line', line: routingLine });
       menu.off();
       hover.off();
     },
-    [id, openRoutingFlyout, menu, hover]
+    [routingLine, openRoutingFlyout, menu, hover]
   );
 
   const openEdgeProcessingFlyout = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      openRoutingFlyout(id, 'processing');
+      if (!processingTarget) {
+        return;
+      }
+      if ('line' in processingTarget) {
+        openLineProcessingFlyout(processingTarget.line);
+      } else {
+        const { ref, position, exists } = processingTarget;
+        openProcessingFlyout(ref, exists ? position : undefined);
+      }
       menu.off();
       hover.off();
     },
-    [id, openRoutingFlyout, menu, hover]
+    [processingTarget, openLineProcessingFlyout, openProcessingFlyout, menu, hover]
   );
 
   const closeOnEscape = useCallback(
@@ -178,7 +210,9 @@ export function AnimatedEdge({
   );
 
   const isActive = isHovered || Boolean(selected);
-  const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
+  // An edge in the hovered node's flow animates like a hovered edge, without its menu.
+  const isFlowing = isActive || flowHighlightState === 'highlighted';
+  const strokeColor = isFlowing ? 'transparent' : euiTheme.colors.borderBaseProminent;
 
   const edgeStyle = useMemo(
     () => ({
@@ -211,7 +245,14 @@ export function AnimatedEdge({
   );
 
   return (
-    <g onMouseDown={onLinePointerDown} onMouseEnter={show} onMouseLeave={close}>
+    <g
+      onMouseDown={onLinePointerDown}
+      onMouseEnter={show}
+      onMouseLeave={close}
+      data-test-subj={`streamsCanvasEdge-${id}`}
+      data-flow-highlight={flowHighlightState}
+      css={getFlowDimStyles(flowHighlightState)}
+    >
       <BaseEdge
         id={id}
         data-test-subj="streamsCanvasBasicEdge"
@@ -220,7 +261,7 @@ export function AnimatedEdge({
         style={edgeStyle}
         interactionWidth={24}
       />
-      {isActive ? (
+      {isFlowing ? (
         <path
           d={edgePath}
           css={flowStyles}
@@ -230,7 +271,7 @@ export function AnimatedEdge({
           style={PATH_OPACITY}
         />
       ) : null}
-      {canUnhook && isActive ? (
+      {isActive && !readOnly ? (
         <EdgeLabelRenderer>
           <div className="nopan nodrag" style={labelPositionStyle}>
             <EuiPopover
@@ -247,6 +288,8 @@ export function AnimatedEdge({
               <EuiContextMenuPanel onClose={menu.off}>
                 <EuiContextMenuItem
                   data-test-subj="streamsCanvasEdgeMenu-addProcessing"
+                  disabled={!processingTarget}
+                  toolTipContent={processingTarget ? undefined : addProcessingUnavailableLabel}
                   onClick={openEdgeProcessingFlyout}
                 >
                   {i18n.translate('xpack.streams.animatedEdge.addProcessingContextMenuItemLabel', {
@@ -255,6 +298,8 @@ export function AnimatedEdge({
                 </EuiContextMenuItem>
                 <EuiContextMenuItem
                   data-test-subj="streamsCanvasEdgeMenu-addRouting"
+                  disabled={!routingLine}
+                  toolTipContent={routingLine ? undefined : addRoutingUnavailableLabel}
                   onClick={openEdgeRoutingFlyout}
                 >
                   {i18n.translate('xpack.streams.animatedEdge.addRoutingContextMenuItemLabel', {

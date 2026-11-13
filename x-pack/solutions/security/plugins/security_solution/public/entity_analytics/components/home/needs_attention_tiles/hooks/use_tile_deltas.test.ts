@@ -43,7 +43,7 @@ const returns = (overrides = {}) =>
     ...overrides,
   });
 
-const base = { spaceId: 'default', timeRange: '7d' as const, isReady: true };
+const base = { spaceId: 'default', timeRange: '7d' as const, isReady: true, hasCount: true };
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -85,11 +85,12 @@ describe.each([
     'newlyHighCritical',
   ],
 ] as const)('%s', (_name, render, tileKey) => {
-  it('is the count minus the previous period', () => {
+  it('is the count minus the previous period, which it also returns for the sparkline', () => {
     returns({ previous: 4, reachesBack: true });
     const { result } = render({});
     expect(result.current).toEqual({
       delta: 6,
+      previous: 4,
       isDeltaLoading: false,
       isHistoryMissing: false,
       reachesBack: true,
@@ -105,7 +106,7 @@ describe.each([
     expect(render({}).result.current.reachesBack).toBeUndefined();
   });
 
-  it('runs once the page is ready, the tile is not skipped and its count is above 0', () => {
+  it('runs once the page is ready, the tile is not skipped and its count came back', () => {
     render({});
     expect(lastOptions().tileKey).toBe(tileKey);
     expect(lastOptions().enabled).toBe(true);
@@ -114,13 +115,19 @@ describe.each([
     expect(lastOptions().enabled).toBe(false);
     render({ skip: true });
     expect(lastOptions().enabled).toBe(false);
-    render({ count: 0 });
+    render({ hasCount: false });
     expect(lastOptions().enabled).toBe(false);
   });
 
-  it('waits with a spinner for the other counts, and shows none at a zero count', () => {
+  it('also runs for a count of 0 that came back, to show a drop to 0', () => {
+    render({ count: 0 });
+    expect(lastOptions().enabled).toBe(true);
+    expect(render({ count: 0 }).result.current.isDeltaLoading).toBe(true);
+  });
+
+  it('waits with a skeleton for the other counts, and shows none without a count', () => {
     expect(render({ isReady: false }).result.current.isDeltaLoading).toBe(true);
-    expect(render({ count: 0 }).result.current.isDeltaLoading).toBe(false);
+    expect(render({ hasCount: false }).result.current.isDeltaLoading).toBe(false);
     expect(render({ skip: true }).result.current.isDeltaLoading).toBe(false);
   });
 
@@ -202,12 +209,11 @@ describe('useEntitiesWithAnomaliesDelta', () => {
 });
 
 describe('useNewEntityDelta', () => {
-  it('runs on the local cluster only, like the count, and applies the entity filters', () => {
+  it('applies the entity filters', () => {
     const entityFilters = { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['high_impact'] };
     const clauses = buildEntityFilterClauses(entityFilters);
     expect(clauses.length).toBeGreaterThan(0);
     renderHook(() => useNewEntityDelta({ ...base, count: 3, entityFilters }));
-    expect(lastOptions().localOnly).toBe(true);
     clauses.forEach((clause) => expect(lastOptions().previousQuery).toContain(clause));
   });
 });
@@ -251,23 +257,28 @@ describe('useAlertBasedTilesDelta', () => {
     expect(render().result.current).toEqual({
       severeAlertsDelta: 3,
       watchlistedDelta: -2,
+      severeAlertsPrevious: 7,
+      watchlistedPrevious: 6,
       isDeltaLoading: false,
       isHistoryMissing: false,
       reachesBack: true,
     });
   });
 
-  it('skips the shared query only when BOTH counts are 0', () => {
+  it('runs the shared query once the counts came back, also when both are 0', () => {
     render({ severeAlertsCount: 0, watchlistedCount: 4 });
     expect(lastOptions().enabled).toBe(true);
-    render({ severeAlertsCount: 5, watchlistedCount: 0 });
-    expect(lastOptions().enabled).toBe(true);
-
     render({ severeAlertsCount: 0, watchlistedCount: 0 });
-    expect(lastOptions().enabled).toBe(false);
+    expect(lastOptions().enabled).toBe(true);
     expect(
       render({ severeAlertsCount: 0, watchlistedCount: 0 }).result.current.isDeltaLoading
-    ).toBe(false);
+    ).toBe(true);
+  });
+
+  it('skips the shared query when the counts did not come back', () => {
+    render({ hasCount: false });
+    expect(lastOptions().enabled).toBe(false);
+    expect(render({ hasCount: false }).result.current.isDeltaLoading).toBe(false);
   });
 
   it('waits for the other counts and for the entities index, and respects skip', () => {

@@ -1,0 +1,52 @@
+{
+  "operations": {
+    "getFile": [
+      {
+        "method": "get",
+        "path": "/v1/files/{file_key}",
+        "source": "rest"
+      },
+      {
+        "method": "get",
+        "path": "/v1/files/{file_key}/nodes",
+        "source": "rest"
+      }
+    ],
+    "listProjectFiles": [
+      {
+        "method": "get",
+        "path": "/v1/projects/{project_id}/files",
+        "source": "rest"
+      }
+    ],
+    "listTeamProjects": [
+      {
+        "method": "get",
+        "path": "/v1/teams/{team_id}/projects",
+        "source": "rest"
+      }
+    ],
+    "renderNodes": [
+      {
+        "method": "get",
+        "path": "/v1/images/{file_key}",
+        "source": "rest"
+      }
+    ],
+    "whoAmI": [
+      {
+        "method": "get",
+        "path": "/v1/me",
+        "source": "rest"
+      }
+    ]
+  },
+  "sources": {
+    "rest": {
+      "apiVersion": "0.43.0",
+      "fetchedAt": "2026-10-07T11:55:35.314Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/figma/rest-api-spec/main/openapi/openapi.yaml"
+    }
+  }
+}
