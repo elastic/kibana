@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
+import type { CreateIntegrationSideCardButtonProps } from '@kbn/automatic-import-plugin/public';
 
 import { Sidebar } from './side_bar';
 
@@ -64,6 +65,19 @@ describe('Sidebar created integrations entry points', () => {
 
     expect(screen.getByTestId('createIntegrationCard')).toBeInTheDocument();
     expect(screen.queryByTestId('manageCreatedIntegrationsLink')).not.toBeInTheDocument();
+  });
+
+  it('passes the create and upload permissions to the card', () => {
+    const CardSpy = jest.fn((_props: CreateIntegrationSideCardButtonProps) => null);
+    renderSidebar({
+      showCreatedIntegrations: true,
+      hasCreatedIntegrations: false,
+      CreateIntegrationCardButton: CardSpy,
+      canCreateIntegration: false,
+      canUploadIntegrationPackage: true,
+    });
+
+    expect(CardSpy.mock.calls[0][0]).toEqual({ canCreate: false, canUpload: true });
   });
 
   it('shows neither entry point when created integrations are not viewable', () => {

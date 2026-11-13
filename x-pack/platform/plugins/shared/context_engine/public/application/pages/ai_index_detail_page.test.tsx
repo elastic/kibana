@@ -6,7 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
@@ -209,7 +209,7 @@ const renderWithProviders = (
     history.push(options?.path ?? '');
   });
   return render(
-    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+    <MockChromeContextProvider chrome={services.chrome}>
       <I18nProvider>
         <EuiProvider>
           <KibanaContextProvider
@@ -223,7 +223,7 @@ const renderWithProviders = (
           </KibanaContextProvider>
         </EuiProvider>
       </I18nProvider>
-    </ChromeServiceProvider>
+    </MockChromeContextProvider>
   );
 };
 
@@ -379,7 +379,7 @@ describe('AiIndexDetailPage', () => {
       history.push(options?.path ?? '');
     });
     render(
-      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <MockChromeContextProvider chrome={services.chrome}>
         <I18nProvider>
           <EuiProvider>
             <KibanaContextProvider
@@ -393,7 +393,7 @@ describe('AiIndexDetailPage', () => {
             </KibanaContextProvider>
           </EuiProvider>
         </I18nProvider>
-      </ChromeServiceProvider>
+      </MockChromeContextProvider>
     );
 
     expect(await screen.findByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
@@ -911,7 +911,7 @@ describe('AiIndexDetailPage', () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     render(
-      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <MockChromeContextProvider chrome={services.chrome}>
         <I18nProvider>
           <EuiProvider>
             <KibanaContextProvider
@@ -925,7 +925,7 @@ describe('AiIndexDetailPage', () => {
             </KibanaContextProvider>
           </EuiProvider>
         </I18nProvider>
-      </ChromeServiceProvider>
+      </MockChromeContextProvider>
     );
 
     await waitForAiIndexDetailLoaded();
@@ -997,7 +997,7 @@ describe('AiIndexDetailPage', () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     render(
-      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <MockChromeContextProvider chrome={services.chrome}>
         <I18nProvider>
           <EuiProvider>
             <KibanaContextProvider
@@ -1011,7 +1011,7 @@ describe('AiIndexDetailPage', () => {
             </KibanaContextProvider>
           </EuiProvider>
         </I18nProvider>
-      </ChromeServiceProvider>
+      </MockChromeContextProvider>
     );
 
     expect(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators')).toBeInTheDocument();
@@ -1035,7 +1035,7 @@ describe('AiIndexDetailPage', () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     render(
-      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <MockChromeContextProvider chrome={services.chrome}>
         <I18nProvider>
           <EuiProvider>
             <KibanaContextProvider
@@ -1049,7 +1049,7 @@ describe('AiIndexDetailPage', () => {
             </KibanaContextProvider>
           </EuiProvider>
         </I18nProvider>
-      </ChromeServiceProvider>
+      </MockChromeContextProvider>
     );
 
     expect(await screen.findByTestId('contextListKiPanel')).toBeInTheDocument();

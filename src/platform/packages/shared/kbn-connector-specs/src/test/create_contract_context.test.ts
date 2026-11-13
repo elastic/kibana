@@ -8,6 +8,7 @@
  */
 
 import { Readable } from 'stream';
+import { issueAccessToken } from '@kbn/connector-emulate';
 import { z } from '@kbn/zod/v4';
 import { getGcpIdToken, parseServiceAccountKey } from '../auth_types/gcp_jwt_helpers';
 import type { ConnectorSpec } from '../connector_spec';
@@ -115,6 +116,7 @@ describe('createContractContext', () => {
         request: 'POST https://api.firecrawl.dev/v2/scrape',
         operation: 'POST /scrape',
         matched: { method: 'post', path: '/scrape' },
+        responseSource: 'generated',
         status: 200,
         requestViolations: [],
         responseViolations: [],
@@ -155,8 +157,9 @@ describe('createContractContext', () => {
 
     await runAction('whoAmI', {});
 
+    // A token the mock issued for the auth type's default scopes, so it can check them.
     expect(ctx.client.defaults.headers.common.Authorization).toBe(
-      'Bearer contract-mock-access-token'
+      `Bearer ${issueAccessToken('current_user:read file_content:read projects:read')}`
     );
     expect(mock.calls.map(({ status, requestViolations }) => [status, requestViolations])).toEqual([
       [200, []],
@@ -367,9 +370,9 @@ describe('createContractContext', () => {
       });
 
       expect(await runAction('listSecrets', {})).toBe(200);
-      // The mock appends the granted scopes to the token it issues.
-      expect(ctx.client.defaults.headers.common.Authorization).toMatch(
-        /^Bearer contract-mock-access-token(\.|$)/
+      // No scope is sampled, so the auth type requests its default, which the token carries.
+      expect(ctx.client.defaults.headers.common.Authorization).toBe(
+        `Bearer ${issueAccessToken('https://www.googleapis.com/auth/cloud-platform')}`
       );
       expect(mock.calls.map(({ operation, status }) => [operation, status])).toEqual([
         ['OAuth token', 200],

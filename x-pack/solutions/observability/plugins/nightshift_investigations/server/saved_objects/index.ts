@@ -26,3 +26,12 @@ export {
   nightshiftAutomationBudgetSavedObjectType,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
 } from './automation_budget_saved_object';
+export {
+  nightshiftInvestigationQuotaLedgerSavedObjectType,
+  nightshiftInvestigationQuotaSettingsSavedObjectType,
+  NIGHTSHIFT_INVESTIGATION_QUOTA_LEDGER_SO_TYPE,
+  NIGHTSHIFT_INVESTIGATION_QUOTA_SETTINGS_SO_ID,
+  NIGHTSHIFT_INVESTIGATION_QUOTA_SETTINGS_SO_TYPE,
+  type NightshiftInvestigationQuotaLedgerAttributes,
+  type NightshiftInvestigationQuotaSettingsAttributes,
+} from './investigation_quota_saved_objects';

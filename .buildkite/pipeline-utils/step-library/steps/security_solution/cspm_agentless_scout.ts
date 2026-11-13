@@ -16,7 +16,7 @@ export const cspmAgentlessScoutSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/cspm_agentless_scout.sh',
     label: 'CSPM Agentless Scout E2E Tests',
     key: 'cspm-agentless-scout',
-    agents: { ...spotAgent('n2-standard-8', spotZones.centralFCA), ...pdBalanced },
+    agents: { ...spotAgent('n2-standard-8', spotZones.n2), ...pdBalanced },
     depends_on: ['build'],
     timeout_in_minutes: 60,
     retry: retry.agentLossOrAnyOnce,

@@ -17,5 +17,6 @@ describe('GET /internal/digital_experience/applications/{serviceName}/usage', ()
       return usageRouteRepository[APPLICATION_USAGE_ENDPOINT];
     },
     getData: jest.mocked(getOtelUsage),
+    hasFilters: true,
   });
 });

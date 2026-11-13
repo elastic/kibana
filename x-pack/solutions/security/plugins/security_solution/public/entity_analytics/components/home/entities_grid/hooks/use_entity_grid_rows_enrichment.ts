@@ -114,7 +114,18 @@ const fetchEnrichedChunk = (
   return fetchEnrichedRows(
     chunk,
     buildQueryArgs(ready, options),
-    { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },
+    {
+      runQuery: createEsqlRunner(
+        context.searchService,
+        {
+          id: 'entities_grid_enrich',
+          meta: { rowsMode: options.rowsMode, timeRange: options.timeRange },
+        },
+        signal
+      ),
+      http: context.http,
+      signal,
+    },
     getPageEnrichers(options.rowsMode, options.columnIds)
   );
 };

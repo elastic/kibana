@@ -23,7 +23,12 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
         # Inputs of .buildkite/scripts/steps/report_flaky_tests.sh. Schedules may override
         # them to produce different reports (other pipelines, consistently failing tests, ...).
-        FLAKY_TESTS_PIPELINES: 'kibana-on-merge,kibana-security-solution-on-merge,appex-qa-serverless-kibana-ftr-tests,appex-qa-serverless-kibana-scout-tests,appex-qa-stateful-kibana-ftr-tests,appex-qa-stateful-kibana-scout-tests'
+        FLAKY_TESTS_PIPELINES: 'kibana-on-merge,kibana-security-solution-on-merge,kibana-fips,appex-qa-serverless-kibana-ftr-tests,appex-qa-serverless-kibana-scout-tests,appex-qa-stateful-kibana-ftr-tests,appex-qa-stateful-kibana-scout-tests'
+        # Counted together per branch: the same tests in the same local environment; one the report
+        # doesn't read is ignored. Every other pipeline (FIPS mode, Elastic Cloud ECH and MKI) is
+        # judged per branch on its own, so that on-merge builds don't dilute a failure that only
+        # happens there
+        FLAKY_TESTS_JUDGED_TOGETHER: 'kibana-on-merge,kibana-security-solution-on-merge,kibana-batch-testing'
         FLAKY_TESTS_LOOKBACK_DAYS: '7'
         FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
         # Repository .buildkite/scripts/steps/report_flaky_test_issues.sh files the suite issues in.

@@ -103,6 +103,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversation,
     origin,
     author,
+    actor,
     agentConfiguration,
     runId = uuidv4(),
     agentId,
@@ -225,6 +226,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     timeline,
     nextInputAuthor: pendingTurn?.compatRound.author ?? author,
+    nextInputActor: actor,
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
@@ -314,6 +316,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentConfiguration,
       aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
       aiIndicesEnabled: experimentalFeatures.aiIndices,
+      capabilities: resolvedConfiguration.capabilities,
       attachmentsService: attachments,
       request,
       spaceId: context.spaceId,
@@ -365,19 +368,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       subagentTracker,
       conversationExists: (id: string) => conversationClient.exists(id),
       agentConfiguration,
+      capabilities: resolvedConfiguration.capabilities,
     });
 
-    // Then add dynamic tools
-    await toolManager.addTools(
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger,
-      },
-      {
-        dynamic: true,
-      }
-    );
+    // Then add the dynamic tools
+    if (experimentalFeatures.dynamicTools) {
+      // tools loaded in previous rounds in the registry behind
+      // `execute_dynamic_tool` when the feature is on
+      await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools: dynamicTools });
+    } else {
+      // LRU bound tools with feature off
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: dynamicTools,
+          logger,
+        },
+        {
+          dynamic: true,
+        }
+      );
+    }
 
     const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
@@ -444,6 +455,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         analyticsService: context.analyticsService,
         agentId,
         executionId,
+        toolManager,
       },
       cycleHooks,
     });
@@ -704,9 +716,9 @@ const createInitializerCommand = ({
       ? { lastCallUsage: { inputTokens: lastCallInputTokens } }
       : {}),
   };
-  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop,
-  // through context management.
-  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.contextManagement;
+  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop
+  // through the background check, so a sub-agent that finished during the pause is reported.
+  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.checkBackgroundWork;
   return new Command({ update, goto });
 };
 

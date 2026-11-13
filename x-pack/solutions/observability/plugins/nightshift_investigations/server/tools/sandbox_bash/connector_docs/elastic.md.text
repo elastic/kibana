@@ -24,10 +24,12 @@ shown below, before querying.
 
 - Replace `logs-*` in the examples below with the indices you found, or those the custom context names.
 - Name each remote explicitly as `remote:index`; never use wildcard remote names in
-  `_resolve/cluster`, `_cat/indices` or searches. Use `GET /_remote/info` only if remote names
-  are not supplied by the space's custom context. To check many remotes, query them in parallel with a short
-  per-request timeout, as in the last example below: a sequential loop over dozens of remotes
-  exceeds the sandbox command timeout and returns nothing.
+  `_resolve/cluster`, `_resolve/index` or searches. Use `GET /_remote/info` only if remote names
+  are not supplied by the space's custom context. The "Local Elasticsearch" connector reaches only
+  its own project and may not call `GET /` or `GET /_remote/info`: carry on without them. To
+  check many remotes, query them in parallel with a short per-request timeout, as in the last
+  example below: a sequential loop over dozens of remotes exceeds the sandbox command timeout and
+  returns nothing.
 - Query a specific data stream, not a broad `logs-*`: on large clusters a broad pattern scans
   every data stream and times out. Find candidates with
   `GET /_resolve/index/<remote>:logs-*<keyword>*`, then query the one you need. The response has

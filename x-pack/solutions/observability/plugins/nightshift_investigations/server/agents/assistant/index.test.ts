@@ -29,7 +29,7 @@ import {
 
 const options: NightshiftAgentTypeOptions = {
   sandboxEnabled: true,
-  cortexEnabled: true,
+  wikiEnabled: true,
   memoryEnabled: true,
   investigationToolsEnabled: true,
   proposalsEnabled: true,
@@ -126,7 +126,7 @@ describe('Nightshift assistant agent type', () => {
     for (const path of [
       '/workspace/connectors.md',
       '/workspace/.connector-docs/elastic.md',
-      '/workspace/cortex/INDEX.md',
+      '/workspace/wiki/INDEX.md',
       '/workspace/memories/.index.json',
     ]) {
       expect(ASSISTANT_INSTRUCTIONS).toContain(path);

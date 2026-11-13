@@ -21,7 +21,6 @@
     "@kbn/es-query",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/ebt-tools",
-    "@kbn/core-http-router-server-internal",
     "@kbn/core-elasticsearch-server",
     "@kbn/std",
     "@kbn/core-saved-objects-api-server",
