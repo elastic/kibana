@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const RUNNING_LABEL = i18n.translate(
   'xpack.agenticInvestigations.investigations.runningLabel',
@@ -29,3 +31,10 @@ export const NEW_INVESTIGATION_TITLE = i18n.translate(
   'xpack.agenticInvestigations.investigations.newInvestigationTitle',
   { defaultMessage: 'New investigation' }
 );
+
+export const updatedAgoLabel = (age: React.ReactNode): React.ReactNode =>
+  React.createElement(FormattedMessage, {
+    id: 'xpack.agenticInvestigations.investigations.updatedAgo',
+    defaultMessage: 'Updated {age}',
+    values: { age },
+  });

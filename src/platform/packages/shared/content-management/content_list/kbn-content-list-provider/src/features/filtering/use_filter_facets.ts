@@ -16,9 +16,14 @@ import { useActiveFilters } from '../../query_model';
 import { contentListKeys } from '../../query';
 
 /**
- * Exclude a specific filter from the active filters to implement
- * faceted-search semantics (the filter popover shows counts for the
- * full result set, not narrowed by its own selection).
+ * Exclude a specific filter from the filters passed to `getFacets`, enabling
+ * disjunctive faceting: a dimension's own selection does not narrow its own
+ * counts, so the popover can show what each option would bring in.
+ *
+ * How complete those counts are is up to the provider. One that computes over
+ * an unfiltered source returns true counts; one that computes over an
+ * already-filtered snapshot returns counts narrowed by that snapshot — see
+ * `ContentListClientProvider`.
  */
 const excludeFilter = (filters: ActiveFilters, filterId: string): ActiveFilters => {
   const { [filterId]: _excluded, ...rest } = filters;
