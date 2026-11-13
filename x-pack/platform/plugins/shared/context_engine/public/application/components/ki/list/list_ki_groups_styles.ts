@@ -89,8 +89,11 @@ export const useListKiGroupsStyles = () => {
       rowUpdated: css({
         color: euiTheme.colors.textSubdued,
       }),
+      // Same "Load more" look as the old list footer: a small button in the middle.
       groupFooter: css({
-        padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+        display: 'flex',
+        justifyContent: 'center',
+        padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
         borderTop: divider,
       }),
     };

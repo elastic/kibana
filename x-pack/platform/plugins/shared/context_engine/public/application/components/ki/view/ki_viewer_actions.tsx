@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 
 interface KiViewerActionsProps {
   isDeleted: boolean;
-  canEdit: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onRestore: () => void;
@@ -21,10 +21,12 @@ interface KiViewerActionsProps {
   isRestoring: boolean;
 }
 
-/** Edit and Delete under the document (prototype). A deleted document gets Restore instead of Delete. */
+/**
+ * Edit and Delete under the document (prototype). A deleted document gets Restore instead of
+ * Delete, and Edit is disabled because the API refuses edits until the document is restored.
+ */
 export const KiViewerActions = ({
   isDeleted,
-  canEdit,
   onEdit,
   onDelete,
   onRestore,
@@ -32,11 +34,20 @@ export const KiViewerActions = ({
   isRestoring,
 }: KiViewerActionsProps) => (
   <EuiFlexGroup gutterSize="m" responsive={false} wrap data-test-subj="contextKiViewerActions">
-    {canEdit ? (
-      <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false}>
+      <EuiToolTip
+        content={
+          isDeleted
+            ? i18n.translate('xpack.contextEngine.viewKi.editDeletedTooltip', {
+                defaultMessage: 'Restore this Knowledge document to edit it.',
+              })
+            : undefined
+        }
+      >
         <EuiButton
           iconType="pencil"
           onClick={onEdit}
+          isDisabled={isDeleted}
           data-test-subj="contextViewKiEditButton"
           {...getEbtProps({
             element: CONTEXT_ENGINE_UI_EBT.element.viewKiPage,
@@ -45,8 +56,8 @@ export const KiViewerActions = ({
         >
           <FormattedMessage id="xpack.contextEngine.viewKi.editButton" defaultMessage="Edit" />
         </EuiButton>
-      </EuiFlexItem>
-    ) : null}
+      </EuiToolTip>
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       {isDeleted ? (
         <EuiButton

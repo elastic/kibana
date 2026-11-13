@@ -208,12 +208,12 @@ describe('KiViewer', () => {
       });
     });
 
-    it('shows Restore instead of Delete for a deleted document, and no Edit', () => {
+    it('shows Restore instead of Delete for a deleted document, and a disabled Edit', () => {
       succeed(mockRestoreMutate);
       const { services } = renderViewer({ ki: deletedKi }, 'backing-1', { canWrite: true });
 
       expect(screen.queryByTestId('contextViewKiDeleteButton')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('contextViewKiEditButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextViewKiEditButton')).toBeDisabled();
 
       fireEvent.click(screen.getByTestId('contextViewKiRestoreButton'));
 

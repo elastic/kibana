@@ -277,7 +277,6 @@ export const KiViewer = ({ aiIndexId, selectedKi: { kiId, index } }: KiViewerPro
         <div css={styles.actions}>
           <KiViewerActions
             isDeleted={isDeleted}
-            canEdit={canEdit}
             onEdit={startEditing}
             onDelete={deleteKi}
             onRestore={restoreKi}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -119,10 +119,8 @@ export const ListKiGroup = ({
           {canShowMore || isCapReached ? (
             <div css={styles.groupFooter}>
               {canShowMore ? (
-                <EuiButtonEmpty
-                  size="xs"
-                  flush="left"
-                  iconType="chevronSingleDown"
+                <EuiButton
+                  size="s"
                   isLoading={isLoadingMore}
                   onClick={() => onShowMore(type, kis.length)}
                   data-test-subj="contextListKiShowMoreButton"
@@ -134,7 +132,7 @@ export const ListKiGroup = ({
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.showMoreButton', {
                     defaultMessage: 'Show more',
                   })}
-                </EuiButtonEmpty>
+                </EuiButton>
               ) : (
                 <CapReachedMessage discoverHref={discoverHref} />
               )}
