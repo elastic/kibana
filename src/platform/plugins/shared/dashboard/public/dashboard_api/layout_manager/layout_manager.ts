@@ -268,6 +268,7 @@ export function initializeLayoutManager(
       const child = children$.value[uuid];
       if (sameType && child && apiHasSerializableState(child)) {
         const stateToApply = cloneDeep(nextState);
+        // Apply state after the loop so loading is set first and a synchronous error doesn't stop the remaining panels.
         applyStatePromises.push(
           Promise.resolve().then(() => child.applySerializedState(stateToApply))
         );
