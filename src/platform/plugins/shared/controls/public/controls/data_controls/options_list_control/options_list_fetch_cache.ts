@@ -86,22 +86,6 @@ export class OptionsListFetchCache {
       });
     }
 
-    if (request.kind === 'esql-source') {
-      const { esql, fieldName, filter, sort, ignoreValidations, selectedOptions, projectRouting } =
-        request;
-
-      return hash({
-        kind: request.kind,
-        esql,
-        fieldName,
-        filter,
-        sort,
-        ignoreValidations,
-        selectedOptions: ignoreValidations ? undefined : selectedOptions,
-        projectRouting,
-      });
-    }
-
     const {
       esql,
       timeRange,

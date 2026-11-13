@@ -8,29 +8,24 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 
 import { esqlColumnValuesToOptionsListResponse } from '../../../../common/options_list/esql_response';
 import { getESQLSingleColumnValues } from '../../../../common/options_list/get_esql_single_column_values';
-import type { OptionsListResponse } from '../../../../common/options_list/types';
+import type {
+  OptionsListESQLFetchBody,
+  OptionsListResponse,
+} from '../../../../common/options_list/types';
 import { dataService } from '../../../services/kibana_services';
 
 /**
  * The request of the options of a field of an ES|QL source. It is run from the browser, so that
  * aborting it cancels the query in Elasticsearch, which a request to the server route does not.
  */
-export interface OptionsListEsqlSourceFetchBody {
+export type OptionsListEsqlSourceFetchBody = Omit<OptionsListESQLFetchBody, 'kind' | 'filter'> & {
   kind: 'esql-source';
-  fieldName: string;
-  esql: string;
   /** The dashboard filters and the search of the control, as the DSL filter of the ES|QL request. */
   filter?: estypes.QueryDslQueryContainer;
-  sort?: OptionsListDSLControlState['sort'];
-  selectedOptions?: OptionsListDSLControlState['selected_options'];
-  ignoreValidations?: boolean;
-  isReload?: boolean;
-  projectRouting?: string;
-}
+};
 
 export const fetchEsqlSourceOptions = async (
   {

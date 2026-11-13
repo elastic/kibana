@@ -133,7 +133,6 @@ describe('OptionsListFetchCache', () => {
   describe('request of a field of an ES|QL source', () => {
     const baseSourceRequest = (overrides: Record<string, unknown> = {}) => ({
       kind: 'esql-source' as const,
-      fieldName: 'host',
       esql: 'FROM logs-* | STATS BY host',
       selectedOptions: [],
       ...overrides,
@@ -175,12 +174,12 @@ describe('OptionsListFetchCache', () => {
       expect(fetchEsqlSourceOptions).toHaveBeenCalledTimes(2);
     });
 
-    it('refetches when the field changes, for the same query', async () => {
+    it('refetches when the query changes', async () => {
       const cache = new OptionsListFetchCache();
 
       await cache.runFetchRequest(baseSourceRequest(), new AbortController().signal);
       await cache.runFetchRequest(
-        baseSourceRequest({ fieldName: 'other' }),
+        baseSourceRequest({ esql: 'FROM logs-* | STATS BY other' }),
         new AbortController().signal
       );
 

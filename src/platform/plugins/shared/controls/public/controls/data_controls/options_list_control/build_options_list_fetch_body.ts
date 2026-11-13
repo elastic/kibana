@@ -170,7 +170,6 @@ export function buildOptionsListFetchBody({
       showLoadingSuggestions: true,
       body: {
         kind: 'esql-source',
-        fieldName: field.name,
         esql,
         filter: filter.length ? { bool: { filter } } : undefined,
         sort,

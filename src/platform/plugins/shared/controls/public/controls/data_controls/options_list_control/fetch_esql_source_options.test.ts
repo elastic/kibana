@@ -19,7 +19,6 @@ jest.mock('@kbn/esql-utils', () => ({
 describe('fetchEsqlSourceOptions', () => {
   const request = {
     kind: 'esql-source' as const,
-    fieldName: 'host',
     esql: 'FROM logs-* | STATS BY host',
     filter: { bool: { filter: [{ prefix: { host: { value: 'ma', case_insensitive: true } } }] } },
     sort: { by: '_key' as const, direction: 'asc' as const },

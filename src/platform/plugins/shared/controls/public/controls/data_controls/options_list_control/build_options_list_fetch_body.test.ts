@@ -73,7 +73,6 @@ describe('buildOptionsListFetchBody', () => {
         outcome: 'fetch',
         body: {
           kind: 'esql-source',
-          fieldName: 'host',
           esql: 'FROM logs-* | STATS BY host',
           sort: { by: '_key', direction: 'asc' },
           selectedOptions: ['web-01'],
