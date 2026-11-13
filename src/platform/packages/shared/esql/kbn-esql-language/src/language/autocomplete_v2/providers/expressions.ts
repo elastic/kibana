@@ -293,19 +293,18 @@ export const provideExpression = async (
       }),
     },
   };
-  // The position comes from the grammar. A position that is not decided here yet still goes
-  // to the expression engine of the current flow.
-  const position = describeExpressionPosition(ir, entry);
-  const items =
-    (await decideExpression({ ir, position, request })) ??
-    (await suggestForExpression(request)).suggestions;
-
   const expressionType = getExpressionType(
     expressionRoot,
     fullContext.columns,
     fullContext.unmappedFieldsStrategy,
     fullContext.isTimeseriesSource === true
   );
+  // The position comes from the grammar. A position that is not decided here yet still goes
+  // to the expression engine of the current flow.
+  const position = describeExpressionPosition(ir, entry);
+  const items =
+    (await decideExpression({ ir, position, request, expressionType })) ??
+    (await suggestForExpression(request)).suggestions;
   const isComplete = isExpressionComplete(expressionType, text.slice(0, offset));
   const hasItsType = !role.completeAs || expressionType === role.completeAs;
 

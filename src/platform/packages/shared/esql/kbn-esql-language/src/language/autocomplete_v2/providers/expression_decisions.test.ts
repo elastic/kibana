@@ -48,6 +48,18 @@ const loadTables = (): ScenarioTable[] =>
       }
     });
 
+/**
+ * The rows where the decisions are right to differ. After a keyword of the command typed in
+ * full, the current engine is handed the node of the whole sort order and offers operands
+ * again; the expression has ended there, so the decisions offer nothing of it.
+ */
+const ACCEPTED_DIFFERENCES = [
+  '[sort] from a | sort keywordField ASC▮',
+  '[sort] from a | sort keywordField asc▮',
+  '[sort] from a | sort keywordField desc▮',
+  '[sort] from a | sort keywordField nulls▮',
+];
+
 const callbacks = createCallbacks({
   columns: [
     { name: 'k', type: 'keyword', userDefined: false },
@@ -69,8 +81,14 @@ describe('expression decisions', () => {
     expect(await engineCallsAt('FROM d | SORT k')).toBe(0);
   });
 
+  it('decides what follows a complete operand without that engine', async () => {
+    expect(await engineCallsAt('FROM d | WHERE n ')).toBe(0);
+    expect(await engineCallsAt('FROM d | EVAL a = ABS(n) ')).toBe(0);
+    expect(await engineCallsAt('FROM d | WHERE k IS NULL ')).toBe(0);
+  });
+
   it('still asks that engine at the positions that are not moved yet', async () => {
-    expect(await engineCallsAt('FROM d | WHERE n ')).toBe(1);
+    expect(await engineCallsAt('FROM d | WHERE n > ')).toBe(1);
     expect(await engineCallsAt('FROM d | WHERE ABS(')).toBe(1);
   });
 
@@ -107,8 +125,8 @@ describe('expression decisions', () => {
       }
     }
 
-    expect(differing).toEqual([]);
+    expect(differing).toEqual(ACCEPTED_DIFFERENCES);
     // The rows the decisions serve alone. The number grows as positions are moved.
-    expect(served).toMatchInlineSnapshot(`86`);
+    expect(served).toMatchInlineSnapshot(`152`);
   });
 });
