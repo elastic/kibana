@@ -1312,76 +1312,128 @@ describe('client', () => {
           );
         });
 
-        it('throws when a custom observable type has no label', async () => {
-          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
-
-          await expect(
-            update(
-              'test-id',
-              { version: 'test-version', observableTypes: [{ key: 'employee-id' }] },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            'Failed to get patch configure in route: Error: Invalid observable types in request: custom observable type employee-id needs a label'
-          );
-        });
-
-        it('throws when a built-in observable type has a value pattern', async () => {
-          await expect(
-            update(
-              'test-id',
-              {
-                version: 'test-version',
-                observableTypes: [{ key: OBSERVABLE_TYPE_IPV4.key, valuePattern: '^a$' }],
-              },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            `Failed to get patch configure in route: Error: Invalid observable types in request: built-in observable type ${OBSERVABLE_TYPE_IPV4.key} cannot have a value pattern`
-          );
-        });
-
-        it('stores the fields of an override and of a custom type', async () => {
-          clientArgs.services.caseConfigureService.get.mockResolvedValue({
-            attributes: {
-              connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
-              customFields: [],
-              templates: [],
-              closure_type: 'close-by-user',
-              owner: 'cases',
-              extractObservables: true,
-              observableTypes: [],
-            },
-            id: 'test-id',
-            version: 'test-version',
-          } as never);
-          const observableTypes = [
-            {
-              key: OBSERVABLE_TYPE_AGENT_ID.key,
-              paths: [{ path: 'agent.id', enabled: false, excludedValues: ['static-id'] }],
-            },
-            {
-              key: 'employee-id',
-              label: 'Employee ID',
-              valuePattern: '^E\\d{6}$',
-              paths: [{ path: 'user.employee_id', enabled: true }],
-            },
+        describe('observableTypeSettings', () => {
+          const storedSettings = [
+            { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [{ path: 'agent.id', enabled: false }] },
+            { key: 'employee-id', paths: [{ path: 'user.employee_id', enabled: true }] },
           ];
 
-          await update(
-            'test-id',
-            { version: 'test-version', observableTypes },
-            clientArgs,
-            casesClientInternal
-          );
+          beforeEach(() => {
+            clientArgs.services.caseConfigureService.get.mockResolvedValue({
+              attributes: {
+                connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+                customFields: [],
+                templates: [],
+                closure_type: 'close-by-user',
+                owner: 'cases',
+                extractObservables: true,
+                observableTypes: [{ key: 'employee-id', label: 'Employee ID' }],
+                observableTypeSettings: storedSettings,
+              },
+              id: 'test-id',
+              version: 'test-version',
+            } as never);
+          });
 
-          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
-            expect.objectContaining({
-              updatedAttributes: expect.objectContaining({ observableTypes }),
-            })
-          );
+          it('throws when a settings entry has no built-in or custom type', async () => {
+            await expect(
+              update(
+                'test-id',
+                { version: 'test-version', observableTypeSettings: [{ key: 'unknown-type' }] },
+                clientArgs,
+                casesClientInternal
+              )
+            ).rejects.toThrow(
+              'Failed to get patch configure in route: Error: Invalid observable type settings in request: observable type unknown-type does not exist'
+            );
+          });
+
+          it('throws when a built-in observable type has a value pattern', async () => {
+            await expect(
+              update(
+                'test-id',
+                {
+                  version: 'test-version',
+                  observableTypeSettings: [{ key: OBSERVABLE_TYPE_IPV4.key, valuePattern: '^a$' }],
+                },
+                clientArgs,
+                casesClientInternal
+              )
+            ).rejects.toThrow(
+              `Failed to get patch configure in route: Error: Invalid observable type settings in request: built-in observable type ${OBSERVABLE_TYPE_IPV4.key} cannot have a value pattern`
+            );
+          });
+
+          it('validates the settings against the stored custom types when the request omits them', async () => {
+            const observableTypeSettings = [
+              {
+                key: 'employee-id',
+                valuePattern: '^E\\d{6}$',
+                paths: [{ path: 'user.employee_id', enabled: true, excludedValues: ['E000000'] }],
+              },
+            ];
+
+            await update(
+              'test-id',
+              { version: 'test-version', observableTypeSettings },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+              expect.objectContaining({
+                updatedAttributes: expect.objectContaining({ observableTypeSettings }),
+              })
+            );
+          });
+
+          it('validates the settings against the custom types in the request', async () => {
+            await expect(
+              update(
+                'test-id',
+                {
+                  version: 'test-version',
+                  observableTypes: [],
+                  observableTypeSettings: [{ key: 'employee-id' }],
+                },
+                clientArgs,
+                casesClientInternal
+              )
+            ).rejects.toThrow(
+              'Failed to get patch configure in route: Error: Invalid observable type settings in request: observable type employee-id does not exist'
+            );
+          });
+
+          it('removes the settings of a custom type that the request deletes', async () => {
+            await update(
+              'test-id',
+              { version: 'test-version', observableTypes: [] },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+              expect.objectContaining({
+                updatedAttributes: expect.objectContaining({
+                  observableTypes: [],
+                  observableTypeSettings: [storedSettings[0]],
+                }),
+              })
+            );
+          });
+
+          it('does not change the settings when the request omits the observable types', async () => {
+            await update(
+              'test-id',
+              { version: 'test-version', extractObservables: false },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(
+              clientArgs.services.caseConfigureService.patch.mock.calls[0][0].updatedAttributes
+            ).not.toHaveProperty('observableTypeSettings');
+          });
         });
       });
 
@@ -2272,39 +2324,23 @@ describe('client', () => {
           );
         });
 
-        it('throws when a custom observable type has no label', async () => {
-          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
-
-          await expect(
-            create(
-              { ...baseRequest, observableTypes: [{ key: 'employee-id' }] },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            'Failed to create case configuration: Error: Invalid observable types in request: custom observable type employee-id needs a label'
-          );
-        });
-
-        it('throws when two entries override the same built-in type', async () => {
+        it('throws when a settings entry has no built-in or custom type', async () => {
           await expect(
             create(
               {
                 ...baseRequest,
-                observableTypes: [
-                  { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [] },
-                  { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [] },
-                ],
+                observableTypes: [{ key: 'employee-id', label: 'Employee ID' }],
+                observableTypeSettings: [{ key: 'unknown-type' }],
               },
               clientArgs,
               casesClientInternal
             )
           ).rejects.toThrow(
-            `Failed to create case configuration: Error: Invalid observable types in request: built-in observable type ${OBSERVABLE_TYPE_AGENT_ID.key} has more than one entry`
+            'Failed to create case configuration: Error: Invalid observable type settings in request: observable type unknown-type does not exist'
           );
         });
 
-        it('stores the fields of an override and of a custom type', async () => {
+        it('stores the observable type settings', async () => {
           clientArgs.services.caseConfigureService.find.mockResolvedValue({
             saved_objects: [],
           } as never);
@@ -2327,20 +2363,21 @@ describe('client', () => {
               updated_by: null,
             },
           } as never);
-          const observableTypes = [
+          const observableTypes = [{ key: 'employee-id', label: 'Employee ID' }];
+          const observableTypeSettings = [
             { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [{ path: 'agent.id', enabled: false }] },
-            {
-              key: 'employee-id',
-              label: 'Employee ID',
-              paths: [{ path: 'user.employee_id', enabled: true }],
-            },
+            { key: 'employee-id', paths: [{ path: 'user.employee_id', enabled: true }] },
           ];
 
-          await create({ ...baseRequest, observableTypes }, clientArgs, casesClientInternal);
+          await create(
+            { ...baseRequest, observableTypes, observableTypeSettings },
+            clientArgs,
+            casesClientInternal
+          );
 
           expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalledWith(
             expect.objectContaining({
-              attributes: expect.objectContaining({ observableTypes }),
+              attributes: expect.objectContaining({ observableTypes, observableTypeSettings }),
             })
           );
         });
