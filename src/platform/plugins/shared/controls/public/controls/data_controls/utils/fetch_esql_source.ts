@@ -8,33 +8,30 @@
  */
 
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import type {
+  EsqlKibanaQueryContext,
+  IEsqlSearchOptions,
+  IEsqlSearchParams,
+} from '@kbn/search-types';
 import { dataService } from '../../../services/kibana_services';
 import { getAnyDocumentQuery, getFieldMinMaxQuery } from './esql_source_queries';
 
-interface EsqlSourceFetchParams {
-  abortSignal: AbortSignal;
-  dataSource: FilterableSource;
-  filters?: Filter[];
-  query?: Query | AggregateQuery;
-  timeRange?: TimeRange;
-  projectRouting?: string;
-}
+type EsqlSourceFetchParams = Pick<IEsqlSearchParams, 'projectRouting'> &
+  Pick<IEsqlSearchOptions, 'abortSignal'> & {
+    dataSource: FilterableSource;
+    kibanaQueryContext: Pick<EsqlKibanaQueryContext, 'timeRange' | 'kibanaFilters' | 'kqlQuery'>;
+  };
 
 const runEsqlSourceQuery = async (
   esqlQuery: string,
-  { abortSignal, dataSource, filters, query, timeRange, projectRouting }: EsqlSourceFetchParams
+  { abortSignal, dataSource, kibanaQueryContext, projectRouting }: EsqlSourceFetchParams
 ) => {
   const { rawResponse } = await dataService.search.esql(
     {
       query: esqlQuery,
       projectRouting,
-      kibanaQueryContext: {
-        timeRange,
-        timeField: dataSource.timeFieldName,
-        kibanaFilters: filters,
-        kqlQuery: query,
-      },
+      kibanaQueryContext: { ...kibanaQueryContext, timeField: dataSource.timeFieldName },
     },
     { abortSignal }
   );
@@ -59,7 +56,10 @@ export const fetchEsqlSourceHasNoResults = async (
 ): Promise<boolean> => {
   const rows = await runEsqlSourceQuery(getAnyDocumentQuery(params.dataSource), {
     ...params,
-    filters: [...(params.filters ?? []), params.rangeFilter],
+    kibanaQueryContext: {
+      ...params.kibanaQueryContext,
+      kibanaFilters: [...(params.kibanaQueryContext.kibanaFilters ?? []), params.rangeFilter],
+    },
   });
   return rows.length === 0;
 };

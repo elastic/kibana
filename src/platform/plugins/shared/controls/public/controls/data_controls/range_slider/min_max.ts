@@ -10,7 +10,14 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
-import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type {
+  AggregateQuery,
+  BoolQuery,
+  Filter,
+  ProjectRouting,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import type {
   FetchContext,
   PublishesDataSources,
@@ -151,7 +158,7 @@ export async function getMinMax({
   timeRange?: TimeRange;
   esqlVariables?: ESQLControlVariable[];
   esqlPreFilter?: { bool: BoolQuery };
-  projectRouting?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
   if (query && 'esql' in query) {
     const result = await getESQLSingleColumnValues({
@@ -178,9 +185,7 @@ export async function getMinMax({
       abortSignal,
       dataSource,
       field,
-      filters,
-      query,
-      timeRange,
+      kibanaQueryContext: { timeRange, kibanaFilters: filters, kqlQuery: query },
       projectRouting,
     });
   }

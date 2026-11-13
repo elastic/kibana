@@ -10,7 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableSource } from '@kbn/data-source';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
@@ -103,16 +103,14 @@ export async function hasNoResults({
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
-  projectRouting?: string;
+  projectRouting?: ProjectRouting;
 }): Promise<boolean> {
   if (isEsqlFilterableSource(dataSource)) {
     return fetchEsqlSourceHasNoResults({
       abortSignal,
       dataSource,
-      filters,
-      query,
+      kibanaQueryContext: { timeRange, kibanaFilters: filters, kqlQuery: query },
       rangeFilter,
-      timeRange,
       projectRouting,
     });
   }
