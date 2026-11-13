@@ -20,6 +20,7 @@ import {
 import { getWorkflowPageSavedObjectId } from './page_saved_object';
 import { computePageSecretHash } from './page_secret';
 import { WorkflowPagesSystemClientImpl } from './workflow_pages_system_client';
+import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
 
 const setup = ({ canEncrypt = true } = {}) => {
   const store = createFakeStore();
@@ -144,11 +145,10 @@ describe('WorkflowPagesSystemClient', () => {
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
     });
 
-    it('creates no page without an encryption key', async () => {
-      const { savedObjectsClient, logger, sync } = setup({ canEncrypt: false });
-      await sync(pageDefinition());
+    it('throws instead of creating a page without an encryption key', async () => {
+      const { savedObjectsClient, sync } = setup({ canEncrypt: false });
+      await expect(sync(pageDefinition())).rejects.toBeInstanceOf(WorkflowPagesUnavailableError);
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
-      expect(logger.warn).toHaveBeenCalled();
     });
 
     it('keeps the existing page when a concurrent save created it first', async () => {

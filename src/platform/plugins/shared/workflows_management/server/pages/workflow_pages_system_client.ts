@@ -20,6 +20,7 @@ import type { WorkflowPageAttributes } from './page_saved_object';
 import { computePageSecretHash, generatePageSecret, isPageSecretValid } from './page_secret';
 import type { WorkflowPageRef } from './page_secret';
 import { getPageOrUndefined, isPageOnline, namespaceOf } from './utils';
+import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
 
 // A find returns at most 10,000 objects. 1,000 workflows leave room for stale pages.
 const FIND_WORKFLOW_IDS_PER_REQUEST = 1_000;
@@ -69,7 +70,7 @@ export interface WorkflowPagesSystemClient {
 
 export interface WorkflowPagesSystemClientDeps {
   logger: Logger;
-  /** False without an encryption key. No page is created and every page is offline. */
+  /** False without an encryption key. A sync that needs a new page throws, and every page is offline. */
   canEncrypt: boolean;
   /** Internal client with the page type. */
   savedObjectsClient: SavedObjectsClientContract;
@@ -107,10 +108,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
       return;
     }
     if (!this.deps.canEncrypt) {
-      this.deps.logger.warn(
-        `Workflow [${workflowId}] has a page trigger, but pages need an encryption key. The page stays offline.`
-      );
-      return;
+      throw new WorkflowPagesUnavailableError();
     }
     await Promise.all(
       toCreate.map((pageId) => this.createPage({ workflowId, spaceId, pageId }, workflowCreatedAt))
