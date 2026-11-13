@@ -41,8 +41,6 @@ test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classi
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    // `vega` isn't in the standard list of cleaned types, so unload its archive explicitly.
-    await kbnClient.importExport.unload(testData.KBN_ARCHIVES.VEGA);
     await kbnClient.savedObjects.cleanStandardList();
   });
 
