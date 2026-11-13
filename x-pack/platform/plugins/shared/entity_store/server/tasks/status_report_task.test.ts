@@ -1149,6 +1149,25 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       expect(reportedCoverage()).toEqual([expect.objectContaining({ outcome: 'failed' })]);
     });
 
+    it('reads the store-wide patterns when the user engine is not installed', async () => {
+      getLocalIndexPatterns.mockResolvedValue(['logs-*', 'extra-*']);
+      getStatus.mockResolvedValue({
+        status: ENTITY_STORE_STATUS.RUNNING,
+        engines: [],
+        // A host-only store has no entry for `user`.
+        logsExtractionConfigByType: { host: { additionalIndexPatterns: ['host-only-*'] } },
+        logsExtractionConfig: {
+          additionalIndexPatterns: ['extra-*'],
+          excludedIndexPatterns: ['skip-*'],
+        },
+        excludedUserNames: [],
+      });
+
+      await runStatusReportTask();
+
+      expect(getLocalIndexPatterns).toHaveBeenCalledWith(['extra-*'], ['skip-*']);
+    });
+
     it('skips the probe and keeps the sample size when the status lookup fails', async () => {
       getLocalIndexPatterns.mockResolvedValue(['logs-*']);
       getStatus.mockRejectedValue(new Error('status_boom'));
