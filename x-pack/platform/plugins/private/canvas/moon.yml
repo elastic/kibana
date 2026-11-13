@@ -77,6 +77,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/rison'
   - '@kbn/ui-callout'
+  - '@kbn/vis-type-vega-plugin'
 tags:
   - plugin
   - prod
