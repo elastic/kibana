@@ -3289,7 +3289,7 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/hunt @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.schema.yaml @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.gen.ts @elastic/security-investigations
-/x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/hunt_watch.ts @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/continuous_threat_hunt.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/hunt_coordinator_result_attachment_schema.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.test.ts @elastic/security-investigations

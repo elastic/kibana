@@ -52,7 +52,7 @@ export const WorkerBlockingReason = lazySchema(() => z.literal('no_model'));
 export type WorkerBlockingReason = z.infer<typeof WorkerBlockingReason>;
 
 /**
- * Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the shared read/update path stays generic; each Worker declares a closed schema for its own extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates against that declaration, rejecting unknown or missing fields by name.
+ * Worker-specific settings owned by the Worker's team. The wire schema is open so the shared read/update path stays generic; each Worker declares a closed schema for its own extras (see the `<worker>_settings.schema.yaml` files) and the server validates against that declaration, rejecting unknown or missing fields by name.
  */
 export const WorkerSettingsExtras = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type WorkerSettingsExtras = z.infer<typeof WorkerSettingsExtras>;

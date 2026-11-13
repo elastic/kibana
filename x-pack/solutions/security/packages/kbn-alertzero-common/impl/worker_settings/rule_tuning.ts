@@ -6,23 +6,16 @@
  */
 
 /**
- * Detection Watch Worker settings, owned by the Detection Watch team. Adding a Rule Tuning setting
- * means: add the field to `RuleTuningWorkerExtras` in `detection_watch_settings.schema.yaml`, add
- * its default to `RULE_TUNING_WORKER_SETTINGS_DEFAULTS` in
- * `kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts`, forward it in the Rule
- * Tuning workflow template, and build its control under the Watch page's
+ * Rule Tuning Worker settings. Adding a setting means: add the field to `RuleTuningWorkerExtras`
+ * in `rule_tuning_settings.schema.yaml`, add its default to `RULE_TUNING_WORKER_SETTINGS_DEFAULTS`
+ * in `kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts`, forward it in the
+ * Rule Tuning workflow template, and build its control under the Watch page's
  * `custom_settings/rule_tuning/`.
  */
 
-import {
-  RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
-  RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
-} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
-import {
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-} from '../../constants';
-import { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '../schemas';
+import { RULE_TUNING_WORKER_SETTINGS_DEFAULTS } from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
+import { SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID } from '../../constants';
+import { RuleTuningWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
 
 const RULE_TUNING_EXTRAS_DEFAULTS = RULE_TUNING_WORKER_SETTINGS_DEFAULTS.extras.defaultValue;
@@ -51,25 +44,4 @@ export const RULE_TUNING_SETTINGS: WorkerSettingsDeclaration<RuleTuningWorkerExt
   allowedAutonomyLevels: RULE_TUNING_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
   scheduleInterval: RULE_TUNING_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
   extras: { schema: RuleTuningWorkerExtras, defaultValue: RULE_TUNING_DEFAULT_EXTRAS },
-};
-
-const RULE_COVERAGE_EXTRAS_DEFAULTS = RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.extras.defaultValue;
-
-export const LOOKBACK_DAYS_DEFAULT = RULE_COVERAGE_EXTRAS_DEFAULTS.lookbackDays;
-export const LOOKBACK_DAYS_MIN = 8;
-export const LOOKBACK_DAYS_MAX = 90;
-
-export const MAX_GAPS_PER_RUN_DEFAULT = RULE_COVERAGE_EXTRAS_DEFAULTS.maxGapsPerRun;
-export const MAX_GAPS_PER_RUN_MIN = 1;
-export const MAX_GAPS_PER_RUN_MAX = 50;
-
-export const RULE_COVERAGE_DEFAULT_EXTRAS: RuleCoverageWorkerExtras = {
-  ...RULE_COVERAGE_EXTRAS_DEFAULTS,
-};
-
-export const RULE_COVERAGE_SETTINGS: WorkerSettingsDeclaration<RuleCoverageWorkerExtras> = {
-  workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
-  allowedAutonomyLevels: RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
-  scheduleInterval: RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
-  extras: { schema: RuleCoverageWorkerExtras, defaultValue: RULE_COVERAGE_DEFAULT_EXTRAS },
 };

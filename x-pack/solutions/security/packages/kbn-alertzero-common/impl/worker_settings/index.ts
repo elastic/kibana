@@ -8,10 +8,12 @@
 import type { z } from '@kbn/zod/v4';
 import type { WatchAutonomyLevel, WorkerSettings } from '../schemas';
 import { buildCompleteWorkerSettingsSchema, buildDefaultWorkerSettings } from './contract';
-import { RULE_COVERAGE_SETTINGS, RULE_TUNING_SETTINGS } from './detection_watch';
-import { ENDPOINT_ANALYSIS_SETTINGS } from './forensics_watch';
-import { ALERT_TRIAGE_SETTINGS, ATTACK_DISCOVERY_SETTINGS } from './floor_watch';
-import { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
+import { ALERT_TRIAGE_SETTINGS } from './alert_triage';
+import { ATTACK_DISCOVERY_SETTINGS } from './attack_discovery';
+import { CONTINUOUS_THREAT_HUNT_SETTINGS } from './continuous_threat_hunt';
+import { ENDPOINT_ANALYSIS_SETTINGS } from './endpoint_analysis';
+import { RULE_COVERAGE_SETTINGS } from './rule_coverage';
+import { RULE_TUNING_SETTINGS } from './rule_tuning';
 import type { WorkerSettingsDeclaration } from './types';
 
 /** Every registered Worker declares its settings here; each Watch team owns its own file. */
@@ -86,6 +88,9 @@ export {
   FP_RATE_THRESHOLD_PCT_DEFAULT,
   FP_RATE_THRESHOLD_PCT_MAX,
   FP_RATE_THRESHOLD_PCT_MIN,
+  RULE_TUNING_DEFAULT_EXTRAS,
+} from './rule_tuning';
+export {
   LOOKBACK_DAYS_DEFAULT,
   LOOKBACK_DAYS_MAX,
   LOOKBACK_DAYS_MIN,
@@ -93,8 +98,7 @@ export {
   MAX_GAPS_PER_RUN_MAX,
   MAX_GAPS_PER_RUN_MIN,
   RULE_COVERAGE_DEFAULT_EXTRAS,
-  RULE_TUNING_DEFAULT_EXTRAS,
-} from './detection_watch';
+} from './rule_coverage';
 export {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   BUDGET_PER_HOUR_DEFAULT,
@@ -108,6 +112,6 @@ export {
   EXCLUDED_RULE_TAGS_MAX_COUNT,
   EXCLUDED_RULE_TAG_MAX_LENGTH,
   LOOKBACK_HOURS_MIN,
-} from './floor_watch';
-export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
+} from './alert_triage';
+export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './continuous_threat_hunt';
 export type { WorkerSettingsDeclaration } from './types';
