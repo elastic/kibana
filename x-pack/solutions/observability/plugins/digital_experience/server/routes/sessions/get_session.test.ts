@@ -316,6 +316,36 @@ describe('getSession', () => {
     );
   });
 
+  it('opens a visit per page view, so reloading a page does not merge it into the last one', async () => {
+    const load = (offsetMs: number) => ({
+      '@timestamp': [at(offsetMs)],
+      name: ['documentLoad'],
+      'attributes.url.full': ['https://shop.example.com/'],
+    });
+    const lcp = (offsetMs: number, value: number) => ({
+      '@timestamp': [at(offsetMs)],
+      event_name: ['browser.web_vital'],
+      'attributes.browser.web_vital.name': ['lcp'],
+      'attributes.browser.web_vital.value': [value],
+    });
+    client.search
+      .mockResolvedValueOnce(
+        summaryResponse(sessionSource({ start_time: START, end_time: at(21_000) }))
+      )
+      .mockResolvedValueOnce(
+        eventsResponse([load(0), lcp(1_000, 1200), load(20_000), lcp(21_000, 2400)])
+      );
+
+    const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
+
+    // Two loads of the same URL are two visits, each keeping the vitals it measured.
+    expect(detail?.pageVisits.map(({ page, durationMs }) => ({ page, durationMs }))).toEqual([
+      { page: '/', durationMs: 20_000 },
+      { page: '/', durationMs: 1_000 },
+    ]);
+    expect(detail?.pageVisits.map(({ webVitals }) => webVitals.lcp)).toEqual([1200, 2400]);
+  });
+
   it('does not throw when the summary has no start or end time', async () => {
     client.search
       .mockResolvedValueOnce(summaryResponse(sessionSource({})))

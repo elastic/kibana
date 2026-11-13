@@ -217,6 +217,8 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
   the page and a marker per error. Selecting a segment scrolls to that visit.
 - **Page journey:** a card per page visit with its time, share of the session, clicks, errors and web
   vitals, and its page views, clicks, errors and web vitals in order. Spans and logs are left out.
+  Every page view opens a visit, so loading the same URL again is a visit of its own with the web
+  vitals it measured, and the visits add up to the summary's `page_view_count`.
 - **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
 
 ## Sessions

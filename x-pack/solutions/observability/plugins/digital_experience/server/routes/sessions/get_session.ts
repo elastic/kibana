@@ -232,7 +232,11 @@ export const buildPageVisits = (
     }
     lastEventTime = timelineEvent.timestamp;
     const { page, kind } = timelineEvent;
-    if (page && page !== current?.page && (kind === 'page_view' || !current)) {
+    // Every page view opens a visit, so loading the same URL again is a visit of its own with its
+    // own web vitals rather than being folded into the one before it, whose values it would
+    // overwrite. It also keeps the visits and the summary's `page_view_count` in step. Any other
+    // event only opens one when there is none, to place the events before the first page view.
+    if (page && (kind === 'page_view' || !current)) {
       close(timelineEvent.timestamp);
       current = {
         page,
