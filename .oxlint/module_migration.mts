@@ -24,7 +24,9 @@ const USES_ELASTIC_APM_AGENT = [
   /kbn-cli-dev-mode[\/\\]/,
   /kbn-docs-utils[\/\\]/,
   /src[\/\\]platform[\/\\]test[\/\\]/,
+  /src[\/\\]platform[\/\\]test_plugins[\/\\]/,
   /x-pack[\/\\]platform[\/\\]test[\/\\]/,
+  /x-pack[\/\\]platform[\/\\]test_plugins[\/\\]/,
 
   // Shared packages with APM tracing
   /kbn-langchain[\/\\]server[\/\\]tracers[\/\\]/,
@@ -123,7 +125,7 @@ export const moduleMigrationRule: DummyRule = [
       disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
     },
     {
-      from: '@kbn/test/jest',
+      from: '@kbn/jest/jest',
       to: '@kbn/test-jest-helpers',
       disallowedMessage: `import from @kbn/test-jest-helpers instead`,
     },

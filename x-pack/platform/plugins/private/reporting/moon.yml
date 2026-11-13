@@ -50,7 +50,6 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/reporting-common'
   - '@kbn/std'
-  - '@kbn/core-http-router-server-internal'
   - '@kbn/reporting-public'
   - '@kbn/reporting-server'
   - '@kbn/reporting-export-types-csv'
@@ -95,12 +94,11 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

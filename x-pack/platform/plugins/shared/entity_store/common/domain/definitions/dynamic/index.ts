@@ -6,7 +6,6 @@
  */
 
 export {
-  ATTRIBUTE_NAME_PATTERN,
   INDEX_PATTERN_PATTERN,
   LITERAL_FIELD_PATH_PATTERN,
   MAX_ATTRIBUTE_NAME_LENGTH,
@@ -33,6 +32,7 @@ export type {
 export {
   MAX_DYNAMIC_IDENTITY_FIELDS,
   assertDynamicDefinitionRules,
+  getIdentityCompositions,
   getIdentityFields,
   getPresenceFilter,
 } from './dynamic_definition_rules';

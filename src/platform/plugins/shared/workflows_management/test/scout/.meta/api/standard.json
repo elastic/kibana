@@ -1,5 +1,5 @@
 {
-  "sha1": "96829251db332533cc996e5256c6a4694b6e67c5",
+  "sha1": "25952fa648ecc9634e78ad6d65303c526bfaa6b2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -173,6 +173,106 @@
       }
     },
     {
+      "id": "673fe1ead21ee83-d0aa6da81406bba",
+      "title": "Workflow execution concurrency admission burst drop admits one run and skips the rest when fifty runs start together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_burst.spec.ts",
+        "line": 73,
+        "column": 7
+      }
+    },
+    {
+      "id": "6c1ac6c209a75e4-533a962f6318ca1",
+      "title": "Workflow execution concurrency admission race queue admits one run, keeps queue-size queued, and skips the rest when runs start together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_race.spec.ts",
+        "line": 183,
+        "column": 30
+      }
+    },
+    {
+      "id": "6c1ac6c209a75e4-017a77c5fcf20b4",
+      "title": "Workflow execution concurrency admission race drop admits one run and skips the rest when runs start together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_race.spec.ts",
+        "line": 204,
+        "column": 16
+      }
+    },
+    {
+      "id": "6c1ac6c209a75e4-0253405417201b9",
+      "title": "Workflow execution concurrency admission race cancel-in-progress completes only the newest run when several start together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_race.spec.ts",
+        "line": 221,
+        "column": 6
+      }
+    },
+    {
+      "id": "6c1ac6c209a75e4-ec206157d37d1ca",
+      "title": "Workflow execution concurrency admission race cancel-in-progress keeps the two newest runs when several start together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_admission_race.spec.ts",
+        "line": 285,
+        "column": 7
+      }
+    },
+    {
       "id": "71ab25cab01b404-b402fd1accda876",
       "title": "Workflow execution concurrency control cancel-in-progress strategy cancels previous executions and completes the latest",
       "expectedStatus": "passed",
@@ -189,7 +289,7 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
         "line": 112,
-        "column": 21
+        "column": 11
       }
     },
     {
@@ -209,7 +309,7 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
         "line": 142,
-        "column": 15
+        "column": 22
       }
     },
     {
@@ -228,8 +328,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 172,
-        "column": 22
+        "line": 170,
+        "column": 18
       }
     },
     {
@@ -250,6 +350,51 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hard_delete_race_condition.spec.ts",
         "line": 81,
         "column": 3
+      }
+    },
+    {
+      "id": "024271a574dcab2-39184ccd1e5f851",
+      "title": "HITL resume across executions with restricted access rejects a step of a private execution the caller cannot access and leaves it resumable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_cross_execution_resume.spec.ts",
+        "line": 112,
+        "column": 27
+      }
+    },
+    {
+      "id": "c7ed30cf4096600-ec737346693fca6",
+      "title": "HITL recorded step input waitForInput keeps its recorded input and accepts one external response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_recorded_step_input.spec.ts",
+        "line": 260,
+        "column": 30
+      }
+    },
+    {
+      "id": "c7ed30cf4096600-e312735ba490efc",
+      "title": "HITL recorded step input waitForApproval keeps its recorded input and accepts one external decision",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_recorded_step_input.spec.ts",
+        "line": 328,
+        "column": 14
       }
     },
     {
@@ -290,6 +435,26 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_wait_for_input.spec.ts",
         "line": 119,
         "column": 26
+      }
+    },
+    {
+      "id": "852fb4b9089c63d-d0c78d37bfde096",
+      "title": "HITL waitForInput resume rejects a step execution id that belongs to another execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_wait_for_input.spec.ts",
+        "line": 181,
+        "column": 5
       }
     },
     {
@@ -370,6 +535,26 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/kibana_request_step.spec.ts",
         "line": 178,
         "column": 29
+      }
+    },
+    {
+      "id": "ef6366b34705572-ac4c1a8b1cf42d4",
+      "title": "Parked wait timeout times out a parked wait at the workflow deadline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/parked_wait_timeout.spec.ts",
+        "line": 35,
+        "column": 55
       }
     },
     {
@@ -619,8 +804,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 315,
-        "column": 88
+        "line": 374,
+        "column": 30
       }
     },
     {
@@ -632,8 +817,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 339,
-        "column": 62
+        "line": 396,
+        "column": 20
       }
     },
     {
@@ -645,8 +830,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 416,
-        "column": 30
+        "line": 473,
+        "column": 1
       }
     },
     {
@@ -658,8 +843,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 416,
-        "column": 30
+        "line": 473,
+        "column": 1
       }
     },
     {
@@ -671,8 +856,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 416,
-        "column": 30
+        "line": 473,
+        "column": 1
       }
     },
     {
@@ -684,8 +869,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 416,
-        "column": 30
+        "line": 473,
+        "column": 1
       }
     },
     {
@@ -697,8 +882,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 536,
-        "column": 13
+        "line": 593,
+        "column": 56
       }
     },
     {
@@ -710,8 +895,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 617,
-        "column": 27
+        "line": 671,
+        "column": 10
       }
     },
     {
@@ -723,8 +908,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 617,
-        "column": 27
+        "line": 671,
+        "column": 10
       }
     },
     {
@@ -736,8 +921,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 617,
-        "column": 27
+        "line": 671,
+        "column": 10
       }
     },
     {
@@ -749,8 +934,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 617,
-        "column": 27
+        "line": 671,
+        "column": 10
       }
     },
     {
@@ -762,8 +947,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 617,
-        "column": 27
+        "line": 671,
+        "column": 10
       }
     },
     {
@@ -775,8 +960,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 670,
-        "column": 29
+        "line": 728,
+        "column": 17
       }
     },
     {
@@ -788,8 +973,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 785,
-        "column": 16
+        "line": 843,
+        "column": 25
       }
     },
     {
@@ -801,8 +986,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 866,
-        "column": 11
+        "line": 923,
+        "column": 79
       }
     },
     {
@@ -814,8 +999,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 958,
-        "column": 62
+        "line": 1016,
+        "column": 16
       }
     },
     {
@@ -827,8 +1012,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 1073,
-        "column": 9
+        "line": 1130,
+        "column": 80
       }
     },
     {
@@ -840,8 +1025,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 1073,
-        "column": 9
+        "line": 1130,
+        "column": 80
       }
     },
     {
@@ -853,8 +1038,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 1073,
-        "column": 9
+        "line": 1130,
+        "column": 80
       }
     },
     {
@@ -866,7 +1051,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 1270,
+        "line": 1346,
         "column": 24
       }
     },
@@ -1108,6 +1293,45 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
         "line": 322,
         "column": 27
+      }
+    },
+    {
+      "id": "362db501e8862ba-3aa8b9a1c8c090c",
+      "title": "Workflow executor profile resolves the executor name for a user without bulkGetUserProfiles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 75,
+        "column": 5
+      }
+    },
+    {
+      "id": "362db501e8862ba-c0a159379f64266",
+      "title": "Workflow executor profile resolves the workflow owner name for the access control modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 132,
+        "column": 17
+      }
+    },
+    {
+      "id": "362db501e8862ba-10437f8c12f7904",
+      "title": "Workflow executor profile does not resolve the unvalidated entries of a public ACL for the access control modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 147,
+        "column": 14
       }
     },
     {

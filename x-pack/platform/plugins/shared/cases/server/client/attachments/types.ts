@@ -25,11 +25,6 @@ export interface AddArgs {
    * toUnifiedAttachmentRequest.
    */
   comment: UnifiedAttachmentPayload;
-  /**
-   * Optional pre-generated saved object id. The internal POST /attachments route
-   * supplies this so it can locate the created attachment in the returned case.
-   */
-  id?: string;
 }
 
 export interface BulkCreateArgs {
@@ -72,6 +67,11 @@ export type BulkDeleteArgs = {
    * The id of the case
    */
   caseId: string;
+  /**
+   * Whether the attachments that the deleted types take along with them are removed too.
+   * Defaults to true.
+   */
+  includeRelated?: boolean;
 } & (
   | {
       /**

@@ -281,6 +281,26 @@ describe('classifyErrorCategory', () => {
     ).toBe('context_length_exceeded');
   });
 
+  it('returns content_filter when the model refused the request', () => {
+    expect(
+      classifyErrorCategory(
+        new Error(
+          'Generation workflow failed: The model refused to complete the response: The response was stopped by the provider content filter (finish_reason: content_filter).'
+        )
+      )
+    ).toBe('content_filter');
+  });
+
+  it('prefers content_filter over timeout when a refused run also timed out', () => {
+    expect(
+      classifyErrorCategory(
+        new Error(
+          'Step execution exceeded the configured timeout of 10m after finish_reason: content_filter'
+        )
+      )
+    ).toBe('content_filter');
+  });
+
   it('returns unknown for unrecognized errors', () => {
     expect(classifyErrorCategory(new Error('Something went wrong'))).toBe('unknown');
   });

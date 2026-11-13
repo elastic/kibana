@@ -72,10 +72,19 @@ const configSchema = schema.object({
    * this plugin).
    */
   library: librarySchema,
+  /**
+   * Workflow pages: the `page` trigger and the hosted form. Off by default while the feature
+   * is in development. Enable with `workflowsManagement.pages.enabled: true` in `kibana.yml`.
+   */
+  pages: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
+  // The editor builds the YAML schema in the browser, so it needs the pages switch.
+  exposeToBrowser: { pages: true },
 };

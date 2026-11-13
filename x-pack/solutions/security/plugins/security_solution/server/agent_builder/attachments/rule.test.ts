@@ -40,7 +40,7 @@ describe('createRuleAttachmentType', () => {
   });
 
   describe('resolve', () => {
-    it('looks up the rule by rule_id signature and stores the full rule (keeping rule_id/id) as attachment content', async () => {
+    it('looks up the rule by saved-object id and stores the full rule (keeping rule_id/id) as attachment content', async () => {
       const transformed = {
         id: 'rule-so-id-1',
         rule_id: 'static-rule-id',
@@ -52,13 +52,13 @@ describe('createRuleAttachmentType', () => {
       readRulesMock.mockResolvedValueOnce({ id: 'rule-so-id-1' } as never);
       transformMock.mockReturnValueOnce(transformed as never);
 
-      const content = await makeType().resolve!('static-rule-id', resolveCtx);
+      const content = await makeType().resolve!('rule-so-id-1', resolveCtx);
 
-      // Resolves by ruleId (signature), NOT by the saved-object id.
+      // Resolves by the saved-object id, NOT by the rule_id signature.
       expect(readRulesMock).toHaveBeenCalledWith({
         rulesClient,
-        id: undefined,
-        ruleId: 'static-rule-id',
+        id: 'rule-so-id-1',
+        ruleId: undefined,
       });
 
       expect(content).toEqual(expect.objectContaining({ attachmentLabel: 'Resolved Rule' }));
@@ -75,11 +75,11 @@ describe('createRuleAttachmentType', () => {
       );
     });
 
-    it('throws when no rule matches the rule_id', async () => {
+    it('throws when no rule matches the id', async () => {
       readRulesMock.mockResolvedValueOnce(null);
 
-      await expect(makeType().resolve!('missing-rule-id', resolveCtx)).rejects.toThrow(
-        'Rule with rule_id "missing-rule-id" was not found'
+      await expect(makeType().resolve!('missing-rule-so-id', resolveCtx)).rejects.toThrow(
+        'Rule with id "missing-rule-so-id" was not found'
       );
     });
   });

@@ -6,8 +6,13 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import { presetScheduleSchema } from '../../../common/automation_schedule';
-import { MAX_RULE_NAMES } from '../../../common/automation_limits';
+import {
+  MAX_ALERT_SOURCES,
+  MAX_ALERT_SOURCE_LENGTH,
+  MAX_RULE_NAMES,
+} from '../../../common/automation_limits';
 
 export const triggerRowSchema = lazySchema(() =>
   z.union([
@@ -18,6 +23,15 @@ export const triggerRowSchema = lazySchema(() =>
       ruleNameMatchMode: z.enum(['substring', 'regex']).optional(),
       alertStatus: z.enum(['active', 'inactive', 'any']).optional(),
       tags: z.array(z.string().max(500)).optional(),
+      severities: z
+        .array(z.enum(ALERT_SEVERITY_VALUES))
+        .max(ALERT_SEVERITY_VALUES.length)
+        .optional(),
+      alertSources: z
+        .array(z.string().trim().min(1).max(MAX_ALERT_SOURCE_LENGTH))
+        .max(MAX_ALERT_SOURCES)
+        .optional(),
+      alertSourceMode: z.enum(['include', 'exclude']).optional(),
     }),
     presetScheduleSchema.and(
       z.object({
@@ -31,14 +45,15 @@ export const triggerRowSchema = lazySchema(() =>
         event: z.enum(['message']),
         channels: z.array(z.string().max(500)).max(100).optional(),
         users: z.array(z.string().max(500)).max(100).optional(),
+        bots: z.array(z.string().max(500)).max(100).optional(),
         messageFilter: z.string().max(1000).optional(),
       })
       .refine(
-        ({ channels, users, messageFilter }) =>
-          [...(channels ?? []), ...(users ?? []), messageFilter ?? ''].some(
+        ({ channels, users, bots, messageFilter }) =>
+          [...(channels ?? []), ...(users ?? []), ...(bots ?? []), messageFilter ?? ''].some(
             (value) => value.trim() !== ''
           ),
-        { message: 'A Slack trigger needs at least one of channels, users or messageFilter' }
+        { message: 'A Slack trigger needs at least one of channels, users, bots or messageFilter' }
       ),
   ])
 );

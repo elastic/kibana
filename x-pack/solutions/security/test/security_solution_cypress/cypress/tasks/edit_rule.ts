@@ -32,5 +32,5 @@ export const saveEditedRuleWithNonBlockingErrors = () => {
 
 export const goBackToRuleDetails = () => {
   cy.get(BACK_TO_RULE_DETAILS).should('exist').click();
-  cy.get(BACK_TO_RULE_DETAILS).should('not.exist');
+  cy.url().should('not.include', '/edit');
 };

@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/ai_assistant_management/selection'],
   coverageDirectory:

@@ -140,6 +140,7 @@ export type CaseAggregationResult = Record<
   counts: Buckets;
   syncAlerts: Buckets;
   extractObservables: Buckets;
+  extractObservablesSource: Buckets;
   observables: ObservablesAggregationResult;
   status: Buckets;
   users: Cardinality;
@@ -336,6 +337,20 @@ export interface WorkflowsSolutionTelemetry {
   configurationsWithWorkflowTags: number;
 }
 
+/**
+ * Cumulative user action count for one `source.type` and user action `type` pair. Only pairs
+ * with at least 1 user action appear; user actions without a source are reported as `unknown`.
+ */
+export interface UserActionsBySourceRow {
+  source: string;
+  type: string;
+  total: number;
+}
+
+export interface UserActionsSourceTelemetry {
+  bySource: UserActionsBySourceRow[];
+}
+
 export interface CasesTelemetry {
   cases: {
     all: Count &
@@ -346,6 +361,10 @@ export interface CasesTelemetry {
         syncAlertsOff: number;
         extractObservablesOn: number;
         extractObservablesOff: number;
+        extractObservablesSourceExplicit: number;
+        extractObservablesSourceTemplate: number;
+        extractObservablesSourceSpaceDefault: number;
+        extractObservablesSourceRule: number;
         observables: ObservablesTelemetry;
         totalWithMaxObservables: number;
         totalUsers: number;
@@ -359,7 +378,12 @@ export interface CasesTelemetry {
     obs: SolutionTelemetry;
     main: SolutionTelemetry;
   };
-  userActions: { all: Count & { maxOnACase: number } };
+  userActions: {
+    all: Count & { maxOnACase: number } & UserActionsSourceTelemetry;
+    sec: UserActionsSourceTelemetry;
+    obs: UserActionsSourceTelemetry;
+    main: UserActionsSourceTelemetry;
+  };
   comments: { all: Count & { maxOnACase: number } };
   alerts: {
     all: Count & { maxOnACase: number };
@@ -382,6 +406,8 @@ export interface CasesTelemetry {
         manually: number;
         automatic: number;
       };
+      extractObservablesDefaultOn: number;
+      extractObservablesDefaultOff: number;
       customFields: CustomFieldsTelemetry;
     };
     sec: CustomFieldsSolutionTelemetry;
@@ -415,3 +441,4 @@ export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSol
 export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
 export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;
 export type WorkflowsSolutionTelemetrySchema = MakeSchemaFrom<WorkflowsSolutionTelemetry>;
+export type UserActionsSourceTelemetrySchema = MakeSchemaFrom<UserActionsSourceTelemetry>;

@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration_node',
+  preset: '@kbn/jest/jest_integration_node',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/src/core/packages/core/server/integration_tests/elasticsearch'],
   // must override to match all test given there is no `integration_tests` subfolder

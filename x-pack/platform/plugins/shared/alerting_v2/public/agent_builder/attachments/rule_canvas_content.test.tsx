@@ -8,13 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import { RuleCanvasContent } from './rule_canvas_content';
 
 const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
 const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
 const mockRulesNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
+const mockAddDanger = jest.fn();
 const mockUseQueryClient = jest.requireActual('@kbn/react-query').useQueryClient;
 const mockUseAlertingLocators = jest.requireActual(
   '../../application/locator_context'
@@ -33,7 +34,7 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
   useService: (token: unknown) => {
     if (token === 'notifications') {
-      return { toasts: { addSuccess: mockAddSuccess } };
+      return { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } };
     }
     return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
   },
@@ -213,6 +214,34 @@ describe('RuleCanvasContent', () => {
       expect(mockUpsertRule).not.toHaveBeenCalled();
       expect(updateOrigin).toHaveBeenCalledWith('generated-rule-id');
     });
+
+    it('shows a danger toast when create fails', async () => {
+      mockUpsertRule.mockRejectedValueOnce({ message: 'Server error' });
+      const { registerActionButtons, updateOrigin } = renderCanvas({ dataId: 'pre-assigned-id' });
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Create rule')!.handler();
+
+      expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to create rule'));
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
+    });
+
+    it('shows a danger toast when linking the created rule to the attachment fails', async () => {
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('Conversation update failed'));
+      const { registerActionButtons } = renderCanvas(
+        { dataId: 'pre-assigned-id' },
+        { updateOrigin }
+      );
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Create rule')!.handler();
+
+      expect(mockAddDanger).toHaveBeenCalledWith(
+        expect.stringContaining('Conversation update failed')
+      );
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
   });
 
   describe('action buttons for persisted (saved) rules', () => {
@@ -234,8 +263,10 @@ describe('RuleCanvasContent', () => {
       expect(buttons.find((b) => b.label === 'Create rule')).toBeUndefined();
     });
 
-    it('Update Rule handler calls upsertRule with the origin id', async () => {
-      const { registerActionButtons, attachment } = renderCanvas({ origin: 'rule-123' });
+    it('Update Rule handler calls upsertRule with the origin id, then refreshes the origin', async () => {
+      const { registerActionButtons, attachment, updateOrigin } = renderCanvas({
+        origin: 'rule-123',
+      });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const updateButton = buttons.find((b) => b.label === 'Update Rule')!;
@@ -245,7 +276,35 @@ describe('RuleCanvasContent', () => {
         'rule-123',
         expect.objectContaining({ metadata: attachment.data.metadata })
       );
+      expect(updateOrigin).toHaveBeenCalledWith('rule-123');
+      // The sync timestamp must be taken after the save, or the save itself looks like drift.
+      expect(mockUpsertRule.mock.invocationCallOrder[0]).toBeLessThan(
+        updateOrigin.mock.invocationCallOrder[0]
+      );
       expect(mockAddSuccess).toHaveBeenCalled();
+    });
+
+    it('still reports success when refreshing the origin fails after the rule was saved', async () => {
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('Conversation update failed'));
+      const { registerActionButtons } = renderCanvas({ origin: 'rule-123' }, { updateOrigin });
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Update Rule')!.handler();
+
+      expect(mockAddSuccess).toHaveBeenCalled();
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('shows a danger toast when update fails', async () => {
+      mockUpsertRule.mockRejectedValueOnce({ message: 'Conflict' });
+      const { registerActionButtons, updateOrigin } = renderCanvas({ origin: 'rule-123' });
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Update Rule')!.handler();
+
+      expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to update rule'));
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
     });
 
     it('View in Rules handler navigates with the observability host', () => {

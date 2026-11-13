@@ -106,6 +106,8 @@ const fillForm = async () => {
 };
 
 describe('ServiceAccountsApp', () => {
+  jest.setTimeout(30_000);
+
   it('keeps Create account disabled until name and roles are valid', async () => {
     await renderApp();
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
@@ -218,6 +220,7 @@ describe('ServiceAccountsApp', () => {
     create.mockRejectedValueOnce(
       Object.assign(new Error('Conflict'), {
         request: {},
+        response: { status: 409 },
         body: { message: 'An account with this name already exists.' },
       })
     );
@@ -229,6 +232,25 @@ describe('ServiceAccountsApp', () => {
     fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
     expect(create).toHaveBeenCalledTimes(2);
     await waitForElementToBeRemoved(() => screen.queryByTestId('createServiceAccountFlyout'));
+  });
+
+  it('reports an unexpected create failure without closing the flyout', async () => {
+    const { create, onError, onCreated, history } = await renderApp();
+    const error = Object.assign(new Error('fetch failed'), {
+      request: {},
+      response: { status: 500 },
+      body: { message: 'fetch failed' },
+    });
+    create.mockRejectedValueOnce(error);
+    await fillForm();
+    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+
+    await waitFor(() =>
+      expect(onError).toHaveBeenCalledWith(error, 'Unable to create "workflow-runner"')
+    );
+    expect(screen.getByTestId('createServiceAccountFlyout')).toBeVisible();
+    expect(history.location.pathname).toBe('/create');
+    expect(onCreated).not.toHaveBeenCalled();
   });
 
   it('blocks duplicate submissions and closing while creation is pending', async () => {

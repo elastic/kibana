@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BundleProductDocArtifacts writes the artifacts and an index.xml with the bucket LastModified into every serverless platform 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<ListBucketResult>
+  <Name>kibana-ai-assistant-kb-artifacts</Name>
+  <IsTruncated>false</IsTruncated>
+  <Contents>
+    <Key>kb-product-doc-kibana-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:01.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-observability-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:02.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:03.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-openapi-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:04.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-kibana-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:05.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:06.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-observability-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:07.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:08.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-openapi-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:09.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>security-labs-2026.07.28-052323--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-07-28T05:25:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>security-labs-2026.07.28-052323.zip</Key>
+    <LastModified>2026-07-28T05:25:00.000Z</LastModified>
+  </Contents>
+</ListBucketResult>
+"
+`;
+
+exports[`BundleProductDocArtifacts writes the artifacts and an index.xml with the bucket LastModified into every serverless platform 2`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<ListBucketResult>
+  <Name>kibana-ai-assistant-kb-artifacts</Name>
+  <IsTruncated>false</IsTruncated>
+  <Contents>
+    <Key>kb-product-doc-kibana-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:01.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-observability-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:02.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:03.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-openapi-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-10-12T20:25:04.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-kibana-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:05.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:06.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-observability-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:07.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:08.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-openapi-latest.zip</Key>
+    <LastModified>2026-10-12T20:25:09.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>security-labs-2026.07.28-052323--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2026-07-28T05:25:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>security-labs-2026.07.28-052323.zip</Key>
+    <LastModified>2026-07-28T05:25:00.000Z</LastModified>
+  </Contents>
+</ListBucketResult>
+"
+`;

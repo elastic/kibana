@@ -14,6 +14,7 @@ import {
   ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import type { Logger } from '@kbn/core/server';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
@@ -29,22 +30,32 @@ export const AD_WORKFLOW_IDS = [
 
 export const installStatic = async ({
   enabled,
+  logger,
   workflowsExtensions,
 }: {
   enabled: boolean;
+  logger: Logger;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }): Promise<{ failedIds: string[] }> => {
   if (!enabled) return { failedIds: [] };
 
   const client = await workflowsExtensions.initManagedWorkflowsClient('discoveries');
-  const failedIds: string[] = [];
-
-  for (const id of AD_WORKFLOW_IDS) {
-    try {
-      await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
-    } catch {
-      failedIds.push(id);
+  let failedIds: string[];
+  try {
+    const { failed } = await client.installMany(
+      AD_WORKFLOW_IDS.map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+    );
+    for (const { id, error } of failed) {
+      logger.error(`discoveries: Failed to install managed workflow "${id}": ${error.message}`);
     }
+    failedIds = failed.map(({ id }) => id);
+  } catch (error) {
+    logger.error(
+      `discoveries: Failed to install managed workflows: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    failedIds = [...AD_WORKFLOW_IDS];
   }
 
   await client.ready();

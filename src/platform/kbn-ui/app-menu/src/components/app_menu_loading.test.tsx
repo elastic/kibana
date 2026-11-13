@@ -83,6 +83,23 @@ describe('AppMenuLoading', () => {
     expect(menuRectangles()).toHaveLength(2);
   });
 
+  it('places the overflow placeholder after the primary placeholder', () => {
+    for (const breakpoint of ['s', 'xl'] as const) {
+      mockCurrentBreakpoint = breakpoint;
+
+      const { unmount } = render(<AppMenuLoading buttonCount={3} />);
+
+      const rectangles = Array.from(menuRectangles());
+      const primaryIndex = rectangles.findIndex((rectangle) =>
+        rectangle.getAttribute('style')?.includes('96px')
+      );
+
+      expect(primaryIndex).toBe(rectangles.length - 2);
+
+      unmount();
+    }
+  });
+
   it('shows every requested button at expanded breakpoints', () => {
     render(<AppMenuLoading buttonCount={2} hasPrimary={false} />);
 

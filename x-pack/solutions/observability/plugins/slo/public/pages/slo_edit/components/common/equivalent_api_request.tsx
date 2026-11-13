@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import type { CreateSLOForm } from '../../types';
@@ -36,17 +36,11 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
   const [sloData, setSloData] = useState<CreateSLOInput>();
   const flyoutTitleId = useGeneratedHtmlId();
 
-  useEffect(() => {
-    if (!isFlyoutVisible) {
-      return;
-    }
-
-    trigger().then((isValid) => {
-      if (isValid) {
-        setSloData(transformCreateSLOFormToCreateSLOInput(getValues()));
-      }
-    });
-  }, [getValues, trigger, isFlyoutVisible]);
+  const handleOpenFlyout = async () => {
+    const isValid = await trigger();
+    setSloData(isValid ? transformCreateSLOFormToCreateSLOInput(getValues()) : undefined);
+    setIsFlyoutVisible(true);
+  };
 
   let flyout;
 
@@ -114,7 +108,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
         iconType="copy"
         data-test-subj="sloFormCopyJsonButton"
         disabled={disabled}
-        onClick={() => setIsFlyoutVisible(true)}
+        onClick={handleOpenFlyout}
       >
         {i18n.translate('xpack.slo.sloEdit.equivalentApiRequest', {
           defaultMessage: 'Equivalent API request',

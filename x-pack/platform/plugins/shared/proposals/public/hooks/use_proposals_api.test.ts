@@ -11,6 +11,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
+  RETRY_WAIT_MS,
+  isDecisionShown,
+  isInFlux,
   retryOnTransientError,
   useConversationProposals,
   usePendingProposals,
@@ -19,18 +22,27 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useReopenProposal,
   useSettleDeclinedProposal,
 } from './use_proposals_api';
 import {
   PROPOSALS_INTERNAL_URL,
   PROPOSALS_API_VERSION,
   MAX_PROPOSALS_PAGE_SIZE,
+  PROPOSAL_SETTLING_POLL_INTERVAL_MS,
 } from '@kbn/proposals-common';
 import { queryKeys } from '../query_keys';
+import { inFlightDecisions } from './in_flight_decisions';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
+}));
+
+// A short poll interval keeps the polling tests fast. They use real timers.
+jest.mock('@kbn/proposals-common', () => ({
+  ...jest.requireActual('@kbn/proposals-common'),
+  PROPOSAL_SETTLING_POLL_INTERVAL_MS: 50,
 }));
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -57,6 +69,8 @@ const makeHttpFetchError = (status: number): IHttpFetchError => {
   });
   return err as unknown as IHttpFetchError;
 };
+
+afterEach(() => inFlightDecisions.reset());
 
 describe('retryOnTransientError', () => {
   it('retries non-HTTP errors (e.g. network failure)', () => {
@@ -151,6 +165,41 @@ describe('usePendingProposals', () => {
   });
 });
 
+describe('isInFlux', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('is true while an approved action runs', () => {
+    expect(isInFlux({ id: 'run-1', decision: 'approved', status: 'executing' })).toBe(true);
+  });
+
+  it('is true for a failed action with no new action (retry) yet, until the wait is over', () => {
+    const failed = { id: 'fail-1', decision: 'approved', status: 'failed' } as const;
+    const now = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+    expect(isInFlux(failed)).toBe(true);
+
+    now.mockReturnValue(1_000_000 + RETRY_WAIT_MS - 1);
+    expect(isInFlux(failed)).toBe(true);
+
+    now.mockReturnValue(1_000_000 + RETRY_WAIT_MS);
+    expect(isInFlux(failed)).toBe(false);
+  });
+
+  it('times each failed action from when it was first seen', () => {
+    const now = jest.spyOn(Date, 'now').mockReturnValue(2_000_000);
+    expect(isInFlux({ id: 'fail-a', decision: 'approved', status: 'failed' })).toBe(true);
+
+    now.mockReturnValue(2_000_000 + RETRY_WAIT_MS * 2);
+    expect(isInFlux({ id: 'fail-b', decision: 'approved', status: 'failed' })).toBe(true);
+    expect(isInFlux({ id: 'fail-a', decision: 'approved', status: 'failed' })).toBe(false);
+  });
+
+  it('is false once the new action (retry) has replaced the failed action', () => {
+    expect(
+      isInFlux({ id: 'fail-2', decision: 'approved', status: 'failed', supersededBy: 'retry' })
+    ).toBe(false);
+  });
+});
+
 describe('useConversationProposals', () => {
   it('calls GET on the proposals URL scoped to the conversation, with no status filter', async () => {
     const http = makeHttp();
@@ -230,6 +279,60 @@ describe('useConversationProposals', () => {
     });
     await waitFor(() => expect(result.current.data?.pages).toEqual([firstPage, secondPage]));
     expect(result.current.hasNextPage).toBe(false);
+  });
+
+  describe('polling', () => {
+    const failedOriginal = { id: 'p-1', status: 'failed', decision: 'approved' };
+    const retry = { id: 'p-2', status: 'pending', rootProposalId: 'p-1' };
+
+    it('keeps polling after a failure until its retry replaces the original', async () => {
+      const http = makeHttp();
+      http.get
+        .mockResolvedValueOnce({ proposals: [failedOriginal], total: 1 })
+        .mockResolvedValue({ proposals: [retry], total: 1 });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+
+      const { Wrapper, queryClient } = createWrapper();
+      const { result } = renderHook(() => useConversationProposals('conv-42'), {
+        wrapper: Wrapper,
+      });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      // Read the cache, not the rendered result: the poll refetches outside React's batching.
+      await waitFor(() =>
+        expect(
+          queryClient.getQueryData<{ pages: Array<{ proposals: unknown[] }> }>(
+            queryKeys.proposals.forConversation('conv-42')
+          )?.pages[0].proposals
+        ).toEqual([retry])
+      );
+      expect(http.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('stops polling once a failed proposal has its retry', async () => {
+      const http = makeHttp();
+      http.get.mockResolvedValue({
+        proposals: [{ ...failedOriginal, supersededBy: 'p-2' }],
+        total: 1,
+      });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+
+      const { Wrapper } = createWrapper();
+      const { result } = renderHook(() => useConversationProposals('conv-42'), {
+        wrapper: Wrapper,
+      });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, PROPOSAL_SETTLING_POLL_INTERVAL_MS * 3));
+      });
+
+      expect(http.get).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('uses a query key distinct from usePendingProposals, so the two caches never collide', () => {
@@ -458,6 +561,92 @@ describe('useApproveProposal', () => {
     expect(http.get).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps the proposal in flux and approving until a list read shows its decision', async () => {
+    jest.useFakeTimers();
+    try {
+      const http = makeHttp();
+      http.post.mockResolvedValue({ id: 'slow-1', status: 'approved' });
+      // The by-id read shows no decision for the whole wait.
+      http.get.mockResolvedValue({ decision: undefined });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+
+      const { Wrapper } = createWrapper();
+      const { result, rerender } = renderHook(
+        ({ shown }) => ({
+          approve: useApproveProposal(),
+          approving: useIsApprovingProposal('slow-1', shown),
+          declining: useIsDecliningProposal('slow-1', shown),
+        }),
+        { wrapper: Wrapper, initialProps: { shown: false } }
+      );
+
+      const approval = result.current.approve.mutateAsync({ id: 'slow-1', body: {} });
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(10_000);
+      });
+      await act(async () => {
+        await approval;
+      });
+
+      expect(result.current.approve.isLoading).toBe(false);
+      expect(result.current.approving).toBe(true);
+      expect(result.current.declining).toBe(false);
+      expect(isInFlux({ id: 'slow-1', decision: undefined, status: 'pending' })).toBe(true);
+      expect(isInFlux({ id: 'other', decision: undefined, status: 'pending' })).toBe(false);
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(24 * 60 * 60 * 1000);
+      });
+      expect(isInFlux({ id: 'slow-1', decision: undefined, status: 'pending' })).toBe(true);
+
+      // A list read shows the decision, so this row stops reading as approving.
+      expect(isInFlux({ id: 'slow-1', decision: 'approved', status: 'succeeded' })).toBe(false);
+      rerender({ shown: true });
+      expect(result.current.approving).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('stops waiting for a decision when the proposal expires or has a newer revision', async () => {
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'end-1', status: 'approved' });
+    http.get.mockResolvedValue({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await result.current.mutateAsync({ id: 'end-1', body: {} });
+    expect(isInFlux({ id: 'end-1', decision: undefined, status: 'expired' })).toBe(false);
+
+    await result.current.mutateAsync({ id: 'end-1', body: {} });
+    expect(
+      isInFlux({ id: 'end-1', decision: undefined, status: 'pending', supersededBy: 'end-2' })
+    ).toBe(false);
+  });
+
+  it('keeps the proposal in flux when the list still shows no decision after the decision landed', async () => {
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'lag-1', status: 'approved' });
+    // The by-id read shows the decision. The list read can still show old data.
+    http.get.mockResolvedValue({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await result.current.mutateAsync({ id: 'lag-1', body: {} });
+
+    expect(isInFlux({ id: 'lag-1', decision: undefined, status: 'pending' })).toBe(true);
+    expect(isInFlux({ id: 'lag-1', decision: 'approved', status: 'succeeded' })).toBe(false);
+  });
+
   it('surfaces the error when the API call rejects', async () => {
     const http = makeHttp();
     http.post.mockRejectedValue(new Error('Server error'));
@@ -471,6 +660,63 @@ describe('useApproveProposal', () => {
     await expect(result.current.mutateAsync({ id: 'p-1', body: {} })).rejects.toThrow(
       'Server error'
     );
+  });
+});
+
+describe('after an approval ends, before the new data arrives', () => {
+  it('never shows "not approving" with the old data while many observers share the list', async () => {
+    let decided = false;
+    const http = makeHttp();
+    http.get.mockImplementation(async (url: string) => {
+      const proposal = decided
+        ? { id: 'p-1', decision: 'approved', status: 'executing' }
+        : { id: 'p-1', status: 'pending' };
+      // The list read is slower than the detail read, as with a real index.
+      if (url.endsWith('/p-1')) {
+        return proposal;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return { proposals: [proposal], total: 1 };
+    });
+    http.post.mockImplementation(async () => {
+      setTimeout(() => {
+        decided = true;
+      }, 300);
+      return { id: 'p-1', status: 'pending' };
+    });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+    const { Wrapper } = createWrapper();
+    const seen: string[] = [];
+
+    const { result } = renderHook(
+      () => {
+        // The flyout reads this list in many components: the rows, the count and the badge.
+        const list = useConversationProposals('conv-42');
+        useConversationProposals('conv-42');
+        useConversationProposals('conv-42');
+        const approve = useApproveProposal();
+        const proposal = list.data?.pages[0]?.proposals[0];
+        const isApproving = useIsApprovingProposal('p-1', isDecisionShown(proposal));
+        const state = `approving=${isApproving} status=${proposal?.status}`;
+        if (seen[seen.length - 1] !== state) {
+          seen.push(state);
+        }
+        return approve;
+      },
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(seen).toContain('approving=false status=pending'));
+
+    await result.current.mutateAsync({ id: 'p-1', body: { actionInput: {} } as never });
+    await waitFor(() => expect(seen[seen.length - 1]).toBe('approving=false status=executing'));
+
+    // After approving starts, the list never shows old data with "not approving".
+    const afterStart = seen.slice(seen.indexOf('approving=true status=pending'));
+    expect(afterStart[0]).toBe('approving=true status=pending');
+    expect(afterStart).not.toContain('approving=false status=pending');
+    expect(afterStart[afterStart.length - 1]).toBe('approving=false status=executing');
   });
 });
 
@@ -538,8 +784,8 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     const { Wrapper } = createWrapper();
     const { result } = renderHook(
       () => ({
-        approving: useIsApprovingProposal('p-1'),
-        declining: useIsDecliningProposal('p-1'),
+        approving: useIsApprovingProposal('p-1', false),
+        declining: useIsDecliningProposal('p-1', false),
       }),
       { wrapper: Wrapper }
     );
@@ -548,7 +794,7 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     expect(result.current.declining).toBe(false);
   });
 
-  it('is true only for the proposal actually being approved, and settles back to false', async () => {
+  it('is true only for the proposal actually being approved, and settles back to false once a read shows the decision', async () => {
     const http = makeHttp();
     let resolvePost: (value: unknown) => void = () => {};
     http.post.mockImplementation(
@@ -563,14 +809,14 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     >);
 
     const { Wrapper } = createWrapper();
-    const { result } = renderHook(
-      () => ({
+    const { result, rerender } = renderHook(
+      ({ shown }) => ({
         approve: useApproveProposal(),
-        isApprovingP1: useIsApprovingProposal('p-1'),
-        isApprovingP2: useIsApprovingProposal('p-2'),
-        isDecliningP1: useIsDecliningProposal('p-1'),
+        isApprovingP1: useIsApprovingProposal('p-1', shown),
+        isApprovingP2: useIsApprovingProposal('p-2', false),
+        isDecliningP1: useIsDecliningProposal('p-1', shown),
       }),
-      { wrapper: Wrapper }
+      { wrapper: Wrapper, initialProps: { shown: false } }
     );
 
     let mutatePromise: Promise<unknown> = Promise.resolve();
@@ -588,10 +834,15 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
       await mutatePromise;
     });
 
-    await waitFor(() => expect(result.current.isApprovingP1).toBe(false));
+    // The request has ended, but no read shows the decision yet.
+    expect(result.current.isApprovingP1).toBe(true);
+
+    // The data of the row shows the decision.
+    rerender({ shown: true });
+    expect(result.current.isApprovingP1).toBe(false);
   });
 
-  it('is true only for the proposal actually being declined, and settles back to false', async () => {
+  it('is true only for the proposal actually being declined, and settles back to false once a read shows the decision', async () => {
     const http = makeHttp();
     let resolvePost: (value: unknown) => void = () => {};
     http.post.mockImplementation(
@@ -606,14 +857,14 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     >);
 
     const { Wrapper } = createWrapper();
-    const { result } = renderHook(
-      () => ({
+    const { result, rerender } = renderHook(
+      ({ shown }) => ({
         dismiss: useDismissProposal(),
-        isDecliningP1: useIsDecliningProposal('p-1'),
-        isDecliningP2: useIsDecliningProposal('p-2'),
-        isApprovingP1: useIsApprovingProposal('p-1'),
+        isDecliningP1: useIsDecliningProposal('p-1', shown),
+        isDecliningP2: useIsDecliningProposal('p-2', false),
+        isApprovingP1: useIsApprovingProposal('p-1', shown),
       }),
-      { wrapper: Wrapper }
+      { wrapper: Wrapper, initialProps: { shown: false } }
     );
 
     let mutatePromise: Promise<unknown> = Promise.resolve();
@@ -633,7 +884,30 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
       await mutatePromise;
     });
 
-    await waitFor(() => expect(result.current.isDecliningP1).toBe(false));
+    expect(result.current.isDecliningP1).toBe(true);
+
+    // The data of the row shows the decision.
+    rerender({ shown: true });
+    expect(result.current.isDecliningP1).toBe(false);
+  });
+});
+
+describe('useReopenProposal', () => {
+  it('ends the unseen decision of the proposal, so a reopened proposal does not read as applying', async () => {
+    const http = makeHttp();
+    http.post.mockResolvedValue({ proposalId: 'p-2' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+    inFlightDecisions.markUnseen('approve', 'p-1');
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useReopenProposal(), { wrapper: Wrapper });
+    await act(async () => {
+      await result.current.mutateAsync({ id: 'p-1' });
+    });
+
+    expect(inFlightDecisions.hasUnseen('p-1')).toBe(false);
   });
 });
 
@@ -651,8 +925,8 @@ describe('useSettleDeclinedProposal', () => {
     const { result } = renderHook(
       () => ({
         settle: useSettleDeclinedProposal(),
-        isDecliningP1: useIsDecliningProposal('p-1'),
-        isDecliningP2: useIsDecliningProposal('p-2'),
+        isDecliningP1: useIsDecliningProposal('p-1', false),
+        isDecliningP2: useIsDecliningProposal('p-2', false),
       }),
       { wrapper: Wrapper }
     );
@@ -673,6 +947,46 @@ describe('useSettleDeclinedProposal', () => {
     expect(http.get).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps reading as declining until `afterDecision` ends, even after the decision lands', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValue({ decision: 'dismissed' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+    let finishRefresh!: () => void;
+    const afterDecision = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishRefresh = resolve;
+        })
+    );
+
+    const { Wrapper, queryClient } = createWrapper();
+    const { result } = renderHook(
+      () => ({
+        settle: useSettleDeclinedProposal(),
+        isDeclining: useIsDecliningProposal('p-1', false),
+      }),
+      { wrapper: Wrapper }
+    );
+
+    let settled: Promise<void> | undefined;
+    act(() => {
+      settled = result.current.settle('p-1', queryClient, afterDecision);
+    });
+
+    await waitFor(() => expect(afterDecision).toHaveBeenCalledTimes(1));
+    // The decision is recorded, but the refresh has not ended: the row must still read declining.
+    expect(result.current.isDeclining).toBe(true);
+
+    await act(async () => {
+      finishRefresh();
+      await settled;
+    });
+
+    await waitFor(() => expect(result.current.isDeclining).toBe(false));
+  });
+
   it('shows the decline only on the client it was given, until the decision lands', async () => {
     let resolveDecision!: (value: { decision: string }) => void;
     const http = makeHttp();
@@ -691,10 +1005,10 @@ describe('useSettleDeclinedProposal', () => {
     const { result: settleHook } = renderHook(() => useSettleDeclinedProposal(), {
       wrapper: caller.Wrapper,
     });
-    const { result: onCallerClient } = renderHook(() => useIsDecliningProposal('p-1'), {
+    const { result: onCallerClient } = renderHook(() => useIsDecliningProposal('p-1', false), {
       wrapper: caller.Wrapper,
     });
-    const { result: onCardsClient } = renderHook(() => useIsDecliningProposal('p-1'), {
+    const { result: onCardsClient } = renderHook(() => useIsDecliningProposal('p-1', false), {
       wrapper: cards.Wrapper,
     });
 
@@ -729,5 +1043,112 @@ describe('useSettleDeclinedProposal', () => {
     });
 
     expect(queryClient.getMutationCache().getAll()).toHaveLength(0);
+  });
+});
+
+describe('a decision made in another QueryClient', () => {
+  it('reads as approving and declining here until it ends', async () => {
+    const releaseApprove: Array<() => void> = [];
+    const http = makeHttp();
+    http.post.mockImplementation(
+      () => new Promise((resolve) => releaseApprove.push(() => resolve({ id: 'x-1' })))
+    );
+    http.get.mockResolvedValue({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    // Two hosts: the chat page and the investigation flyout.
+    const chat = createWrapper();
+    const flyout = createWrapper();
+    const { result: chatApprove } = renderHook(() => useApproveProposal(), {
+      wrapper: chat.Wrapper,
+    });
+    const { result: flyoutState, rerender: rerenderFlyout } = renderHook(
+      ({ shown }) => ({
+        approving: useIsApprovingProposal('x-1', shown),
+        declining: useIsDecliningProposal('x-1', shown),
+        otherApproving: useIsApprovingProposal('x-2', false),
+      }),
+      { wrapper: flyout.Wrapper, initialProps: { shown: false } }
+    );
+    expect(flyoutState.current).toEqual({
+      approving: false,
+      declining: false,
+      otherApproving: false,
+    });
+
+    let approval: Promise<unknown> = Promise.resolve();
+    act(() => {
+      approval = chatApprove.current.mutateAsync({ id: 'x-1', body: {} });
+    });
+    await waitFor(() => expect(flyoutState.current.approving).toBe(true));
+    expect(flyoutState.current.declining).toBe(false);
+    expect(flyoutState.current.otherApproving).toBe(false);
+
+    releaseApprove.forEach((release) => release());
+    await act(async () => {
+      await approval;
+    });
+    // The data of the flyout row shows the decision.
+    rerenderFlyout({ shown: true });
+    expect(flyoutState.current.approving).toBe(false);
+  });
+});
+
+describe('a decision that one read shows and another read does not yet', () => {
+  it('keeps the row approving and keeps polling the list until the list shows the decision', async () => {
+    let listShowsDecision = false;
+    let listReads = 0;
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'p-1', status: 'approved' });
+    http.get.mockImplementation(async (url: string) => {
+      // The by-id read is real time. The list is a search, so it can lag behind.
+      if (url === `${PROPOSALS_INTERNAL_URL}/p-1`) {
+        return { id: 'p-1', decision: 'approved', status: 'succeeded' };
+      }
+      listReads += 1;
+      const proposal = listShowsDecision
+        ? { id: 'p-1', decision: 'approved', status: 'succeeded' }
+        : { id: 'p-1', status: 'pending' };
+      return { proposals: [proposal], total: 1 };
+    });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => {
+        const list = useConversationProposals('conv-42');
+        return {
+          approve: useApproveProposal(),
+          detail: useProposal('p-1'),
+          list,
+          approving: useIsApprovingProposal(
+            'p-1',
+            isDecisionShown(list.data?.pages[0]?.proposals[0])
+          ),
+        };
+      },
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(result.current.list.isSuccess).toBe(true));
+
+    await act(async () => {
+      await result.current.approve.mutateAsync({ id: 'p-1', body: {} });
+    });
+    await waitFor(() => expect(result.current.detail.data?.decision).toBe('approved'));
+
+    // The detail read shows the decision. The list still reads `pending`.
+    const readsBefore = listReads;
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    });
+    expect(result.current.approving).toBe(true);
+    expect(listReads).toBeGreaterThan(readsBefore + 1);
+
+    listShowsDecision = true;
+    await waitFor(() => expect(result.current.approving).toBe(false));
   });
 });

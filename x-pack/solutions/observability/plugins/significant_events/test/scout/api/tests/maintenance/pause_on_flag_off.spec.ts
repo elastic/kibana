@@ -180,10 +180,10 @@ const createClient = (apiClient: ApiClientFixture, sessions: IRoleSessions) => {
       });
       return response.statusCode === 200 ? response.body.enabled : undefined;
     },
-    /** Creates the source the rule-backed query is stored under. */
+    /** Creates the source the rule-backed query is stored under. Changing sources needs the engine admin, which holds configure. */
     async createSource(title: string) {
       const response = await apiClient.post('internal/nightshift/sources', {
-        headers: await internalHeaders(),
+        headers: { ...COMMON_API_HEADERS, ...(await cookieFor('engine')) },
         body: { title, esql: SOURCE_ESQL },
         responseType: 'json',
       });
@@ -192,7 +192,7 @@ const createClient = (apiClient: ApiClientFixture, sessions: IRoleSessions) => {
     },
     async deleteSource(sourceId: string) {
       const response = await apiClient.delete(`internal/nightshift/sources/${sourceId}`, {
-        headers: await internalHeaders(),
+        headers: { ...COMMON_API_HEADERS, ...(await cookieFor('engine')) },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -207,22 +207,16 @@ const createClient = (apiClient: ApiClientFixture, sessions: IRoleSessions) => {
     }) {
       // A filter-only MATCH query, so creating it also installs its backing rule.
       const esql = `FROM ${source.viewName} | WHERE severity_text == "ERROR"`;
-      // Creating the source only queues its reconciliation. While that run holds the source's
-      // write lease the write answers 409 and asks to retry, so retry until the lease is free.
-      await expect
-        .poll(async () => {
-          const response = await apiClient.put(`internal/significant_events/queries/${queryId}`, {
-            headers: await internalHeaders(),
-            body: {
-              title: 'Nightshift flag-off rule',
-              esql: { query: esql },
-              source_id: source.id,
-            },
-            responseType: 'json',
-          });
-          return response.statusCode;
-        }, POLL_OPTIONS)
-        .toBe(200);
+      const response = await apiClient.put(`internal/significant_events/queries/${queryId}`, {
+        headers: await internalHeaders(),
+        body: {
+          title: 'Nightshift flag-off rule',
+          esql: { query: esql },
+          source_id: source.id,
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
       return computeRuleId('default', source.id, queryId, esql);
     },
     /** Deletes the query together with its backing rule. */

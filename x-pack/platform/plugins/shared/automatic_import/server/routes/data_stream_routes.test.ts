@@ -115,6 +115,34 @@ describe('Data stream routes - upload samples', () => {
       expect(mockResponse.ok).toHaveBeenCalled();
       expect(mockResponse.badRequest).not.toHaveBeenCalled();
     });
+
+    it.each([
+      [
+        'binary content',
+        ['\u0000\u0000JFIF\u0000\u0000\u0000\u0001'],
+        'Samples appear to contain binary data, not text logs.',
+      ],
+      [
+        'a script starting with a shebang',
+        ['#!/usr/bin/env python', 'import os'],
+        'Samples appear to be a script or source code, not logs.',
+      ],
+      ['only blank samples', ['', '   '], 'Samples do not contain any log lines.'],
+    ])('returns badRequest for %s', async (_name, samples, message) => {
+      const request = {
+        params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
+        body: {
+          samples,
+          originalSource: { sourceType: 'file' as const, sourceValue: 'app.log' },
+        },
+      };
+
+      await routeHandler!(createMockContext(), request, mockResponse);
+
+      expect(mockAddSamplesToDataStream).not.toHaveBeenCalled();
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({ body: message });
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
   });
 
   describe('when body has sourceIndex (index-based sampling)', () => {

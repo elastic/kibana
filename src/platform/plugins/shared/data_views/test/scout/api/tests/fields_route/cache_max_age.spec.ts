@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
+import {
+  apiTest,
+  tags,
+  type ApiClientFixture,
+  type ApiClientResponse,
+  type RoleApiCredentials,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   ES_ARCHIVE_BASIC_INDEX,
@@ -16,6 +22,11 @@ import {
 } from '../../fixtures/constants';
 
 const CACHE_MAX_AGE_SETTING = 'data_views:cache_max_age';
+const SETTINGS_PROPAGATION_TIMEOUT = 30_000;
+
+// `data_views:cache_max_age` and the server-side uiSettings cache holding it are both space-scoped,
+// so writing it in a dedicated space keeps it out of the default space `cache.spec.ts` reads.
+const CACHE_MAX_AGE_SPACE_ID = 'api_data_views_cache_max_age';
 
 // `data_views:cache_max_age` is not registered on serverless, so it can only be configured on classic.
 apiTest.describe(
@@ -24,40 +35,56 @@ apiTest.describe(
   () => {
     let viewerApiCredentials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ esArchiver, requestAuth }) => {
+    const getFields = (apiClient: ApiClientFixture) =>
+      apiClient.get(
+        `s/${CACHE_MAX_AGE_SPACE_ID}/${FIELDS_ROUTE_PATH}?pattern=b*&include_unmapped=true`,
+        {
+          headers: {
+            ...INTERNAL_COMMON_HEADERS,
+            ...viewerApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
+
+    apiTest.beforeAll(async ({ apiServices, esArchiver, requestAuth }) => {
       // Route only reads field metadata, so `viewer` is sufficient.
       viewerApiCredentials = await requestAuth.getApiKey('viewer');
       await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
+      await apiServices.spaces.delete(CACHE_MAX_AGE_SPACE_ID);
+      await apiServices.spaces.create({ id: CACHE_MAX_AGE_SPACE_ID });
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.unset(CACHE_MAX_AGE_SETTING);
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.spaces.delete(CACHE_MAX_AGE_SPACE_ID);
     });
 
     apiTest(
       'no-cache when data_views:cache_max_age set to zero',
       async ({ apiClient, kbnClient }) => {
-        await kbnClient.uiSettings.update({ [CACHE_MAX_AGE_SETTING]: 0 });
-
-        const response = await apiClient.get(
-          `${FIELDS_ROUTE_PATH}?pattern=b*&include_unmapped=true`,
-          {
-            headers: {
-              ...INTERNAL_COMMON_HEADERS,
-              ...viewerApiCredentials.apiKeyHeader,
-            },
-            responseType: 'json',
-          }
+        await kbnClient.uiSettings.update(
+          { [CACHE_MAX_AGE_SETTING]: 0 },
+          { space: CACHE_MAX_AGE_SPACE_ID }
         );
 
-        expect(response).toHaveStatusCode(200);
-        const cacheControlHeader = response.headers['cache-control'];
-        expect(cacheControlHeader).toContain('private');
-        expect(cacheControlHeader).toContain('no-cache');
-        expect(cacheControlHeader).not.toContain('max-age');
-        expect(cacheControlHeader).not.toContain('stale-while-revalidate');
-        expect(response.headers.vary).toBe('accept-encoding, user-hash');
-        expect(response.headers.etag).toBeDefined();
+        let response: ApiClientResponse | undefined;
+
+        await expect
+          .poll(
+            async () => {
+              response = await getFields(apiClient);
+
+              // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
+              return response.statusCode === 200
+                ? response.headers['cache-control']
+                : `status ${response.statusCode}`;
+            },
+            { timeout: SETTINGS_PROPAGATION_TIMEOUT, intervals: [1_000] }
+          )
+          .toBe('private, no-cache');
+
+        expect(response?.headers.vary).toBe('accept-encoding, user-hash');
+        expect(response?.headers.etag).toBeDefined();
       }
     );
   }

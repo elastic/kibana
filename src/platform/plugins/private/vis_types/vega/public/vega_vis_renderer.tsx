@@ -11,7 +11,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VisualizationContainer } from '@kbn/visualizations-common';
+import { VisualizationContainer } from '@kbn/visualizations-components';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { VegaVisualizationDependencies } from './plugin';
 import { reportVegaRender } from './lib/vega_render_telemetry';
@@ -39,7 +39,7 @@ export const getVegaVisRenderer: (
 ) => ExpressionRenderDefinition<RenderValue> = (deps) => ({
   name: 'vega_vis',
   reuseDomNode: true,
-  render: async (domNode, { visData }, handlers) => {
+  render: async (domNode, { visData, inspectorAdapters }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -62,6 +62,7 @@ export const getVegaVisRenderer: (
           <LazyVegaVisComponent
             deps={deps}
             fireEvent={handlers.event}
+            inspectorAdapters={inspectorAdapters}
             renderComplete={renderComplete}
             // Adapts the Expressions render mode to Vega's own contract. Historically any mode
             // other than `view` — the Visualize editor's `edit` in practice — showed warnings.

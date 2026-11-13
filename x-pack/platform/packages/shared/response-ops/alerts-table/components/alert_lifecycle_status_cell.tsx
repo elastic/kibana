@@ -52,7 +52,7 @@ export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
         {isAcknowledged && (
           <EuiToolTip
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertsTable.alertAcknowledged',
+              'xpack.responseOpsAlertsTable.sections.alertsTable.alertAcknowledged',
               { defaultMessage: 'Alert acknowledged' }
             )}
           >

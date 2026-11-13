@@ -58,6 +58,12 @@ The mouse wheel scrolls the body from anywhere in the header. Scrolling over the
 
 The behavior is always on and needs no configuration. It turns itself off when the body does not overflow by more than the collapse budget plus the 4px expansion threshold. The budget is the height of the collapsible content, the expanded title row, and the expanded spacer, so short flyouts are unaffected. A header with no secondary content still collapses, because the title row and spacer shrink on their own.
 
+### Open popovers keep the header expanded
+
+The header does not collapse while a control in the collapsible region has `aria-expanded="true"` and an `aria-controls` that points at a panel outside the region, such as an info block value whose popover is open. A disclosure that controls content inside the region, like an `EuiAccordion`, does not hold the header open. The popover panel renders in a portal, outside the region, so collapsing would leave it floating over a hidden trigger that focus could not return to. EUI sets `aria-expanded` and `aria-controls` on a button-like `EuiPopover` trigger while it is open, so EUI popovers get this without extra work. A custom trigger needs to set both itself. Once the popover closes, the next scroll collapses the header as usual. An expanded control does not stop an already collapsed header from expanding.
+
+The guard applies to scroll-driven collapse only. Setting `collapsed` to `true` while a popover in the region is open collapses the header regardless. The badge overflow popover closes with it. A popover you render in the region, such as one on an info block value, is not closed for you. Its panel stays visible over the now hidden trigger until you close it, so close your own popovers before forcing a collapse.
+
 ### Starting collapsed
 
 Set `collapsed` on the header to render the compact row immediately, independent of scroll position:
@@ -78,9 +84,9 @@ The collapsible region uses a CSS grid trick (`grid-template-rows: 0fr / 1fr`) t
 
 ### Wheel forwarding
 
-The header does not scroll, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, the hook's `headerRef` callback adds one non-passive `wheel` listener to the `EuiFlyoutHeader` element. Listening on this outer element also covers the header's padding.
+The header does not scroll, so `wheel` events over it would normally scroll the page behind the flyout. To prevent this, `header.tsx` passes the hook's `headerRef` callback to `EuiFlyoutHeader`, which adds one non-passive `wheel` listener to the header element. Listening on this outer element also covers the header's padding.
 
-`EuiFlyoutHeader` does not forward a ref, so the callback finds it with `closest()`, using the Kibana-owned `FLYOUT_HEADER_CLASS_NAME` class applied in `header.tsx`. EUI's internal `euiFlyoutHeader` class is deliberately not used. The listener calls `event.preventDefault()` and forwards the scroll to the body's scroll container. The header component has no scroll logic of its own. Normal scrolling and forwarded wheel events both reach the same scroll container and run the same RAF-throttled `evaluate()` callback.
+The listener calls `event.preventDefault()` and forwards the scroll to the body's scroll container. The header component has no scroll logic of its own. Normal scrolling and forwarded wheel events both reach the same scroll container and run the same RAF-throttled `evaluate()` callback.
 
 The unit of `WheelEvent.deltaY` depends on `deltaMode`, but `scrollBy` only accepts pixels. Firefox's line-mode and page-mode deltas are therefore converted to pixels before being forwarded.
 

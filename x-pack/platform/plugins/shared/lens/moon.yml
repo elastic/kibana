@@ -109,13 +109,13 @@ dependsOn:
   - '@kbn/test-eui-helpers'
   - '@kbn/shared-ux-utility'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
   - '@kbn/data-source'
   - '@kbn/data-view-utils'
   - '@kbn/std'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/sort-predicates'
   - '@kbn/presentation-publishing'
@@ -167,12 +167,16 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/managed-content-badge'
   - '@kbn/core-http-common'
+  - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/coloring-components'
+  - '@kbn/palettes-components'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'
@@ -182,6 +186,4 @@ fileGroups:
     - test/scout/**/*
     - test/scout_search_sessions/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -15,22 +15,30 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 const mockUseKibana = jest.mocked(useKibana);
 
+const alertZero = {
+  overview: 'https://example.com/alertzero',
+  setUp: 'https://example.com/alertzero/set-up',
+  proposedActions: 'https://example.com/alertzero/proposed-actions',
+  escalations: 'https://example.com/alertzero/escalations',
+  watches: 'https://example.com/alertzero/watches',
+};
+
 describe('useAlertZeroDocumentationLink', () => {
-  it('returns the Security solution guide link', () => {
+  it.each(Object.entries(alertZero))('returns the %s documentation link', (page, url) => {
     mockUseKibana.mockReturnValue({
-      services: {
-        docLinks: { links: { siem: { guide: 'https://example.com/guide' } } },
-      },
+      services: { docLinks: { links: { securitySolution: { alertZero } } } },
     } as never);
 
-    const { result } = renderHook(() => useAlertZeroDocumentationLink());
-    expect(result.current).toBe('https://example.com/guide');
+    const { result } = renderHook(() =>
+      useAlertZeroDocumentationLink(page as keyof typeof alertZero)
+    );
+    expect(result.current).toBe(url);
   });
 
   it('is undefined when docLinks is unavailable', () => {
     mockUseKibana.mockReturnValue({ services: {} } as never);
 
-    const { result } = renderHook(() => useAlertZeroDocumentationLink());
+    const { result } = renderHook(() => useAlertZeroDocumentationLink('overview'));
     expect(result.current).toBeUndefined();
   });
 });

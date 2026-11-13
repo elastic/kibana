@@ -1,5 +1,5 @@
 {
-  "sha1": "87eb5da26aba1a33744eec541da97790e1353b97",
+  "sha1": "f7411707e0c93d3a9bac99f9f8fa822028b0029d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 99,
+        "line": 97,
         "column": 13
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 125,
+        "line": 123,
         "column": 11
       }
     },
@@ -436,6 +436,20 @@
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
         "line": 99,
         "column": 11
+      }
+    },
+    {
+      "id": "72ec9b91640edd2-2895c1d02337a4d",
+      "title": "Feature Settings reasoning effort saves a reasoning effort for a model and keeps it after reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_reasoning_effort.spec.ts",
+        "line": 42,
+        "column": 49
       }
     },
     {

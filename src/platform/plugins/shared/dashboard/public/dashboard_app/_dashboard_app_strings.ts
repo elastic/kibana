@@ -205,6 +205,11 @@ export const topNavStrings = {
       defaultMessage: 'Quick save your dashboard without any prompts',
     }),
   },
+  resetChangesError: {
+    title: i18n.translate('dashboard.topNave.resetChangesErrorTitle', {
+      defaultMessage: 'Unable to reset dashboard changes',
+    }),
+  },
   editModeInteractiveSave: {
     label: i18n.translate('dashboard.topNave.editModeInteractiveSaveButtonAriaLabel', {
       defaultMessage: 'Save as',
@@ -310,6 +315,11 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.saveMenuDescription', {
       defaultMessage: 'Additional save options',
+    }),
+  },
+  history: {
+    label: i18n.translate('dashboard.topNav.historyLabel', {
+      defaultMessage: 'History',
     }),
   },
   unsavedChangesTooltip: i18n.translate('dashboard.topNav.unsavedChangesTooltip', {

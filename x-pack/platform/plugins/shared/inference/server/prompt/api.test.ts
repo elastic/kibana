@@ -169,6 +169,28 @@ describe('createPromptApi', () => {
     );
   });
 
+  it('forwards featureId to the callback api instead of connectorId', async () => {
+    // a feature-bound server client forwards `featureId` in place of `connectorId`
+    const promptOptions = {
+      prompt: mockPrompt,
+      input: mockInput,
+      featureId: 'my_feature',
+      stream: false,
+    } as unknown as PromptOptions;
+    await promptApi(promptOptions);
+
+    expect(mockCallbackApi).toHaveBeenCalledTimes(1);
+    const [initOptions] = mockCallbackApi.mock.calls[0];
+    expect(initOptions).toEqual({
+      featureId: 'my_feature',
+      stream: false,
+      abortSignal: undefined,
+      retryConfiguration: undefined,
+      maxRetries: undefined,
+    });
+    expect(initOptions).not.toHaveProperty('connectorId');
+  });
+
   it('constructs messages correctly, including prevMessages', async () => {
     let callbackFn: any;
     mockCallbackApi.mockImplementationOnce((_opts, callback) => {

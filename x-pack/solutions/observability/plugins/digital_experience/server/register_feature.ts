@@ -12,17 +12,18 @@ import {
   DIGITAL_EXPERIENCE_API_PRIVILEGES,
   DIGITAL_EXPERIENCE_FEATURE_ID,
   DIGITAL_EXPERIENCE_UI_PRIVILEGES,
+  MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
 } from '../common/feature';
 
 export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup): void => {
   features.registerKibanaFeature({
     id: DIGITAL_EXPERIENCE_FEATURE_ID,
     name: i18n.translate('xpack.digitalExperience.featureRegistry.featureName', {
-      defaultMessage: 'Digital Experience',
+      defaultMessage: 'Digital experience',
     }),
     privilegesTooltip: i18n.translate('xpack.digitalExperience.featureRegistry.privilegesTooltip', {
       defaultMessage:
-        'Digital Experience reads its data through APM, so users also need the APM and User Experience feature privilege.',
+        'Digital experience reads its data through APM, so users also need the APM and User Experience feature privilege.',
     }),
     order: 8500,
     category: DEFAULT_APP_CATEGORIES.observability,
@@ -41,5 +42,41 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
         savedObject: { all: [], read: [] },
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.digitalExperience.featureRegistry.sessionsSubFeatureName', {
+          defaultMessage: 'Sessions',
+        }),
+        // The sessions index serves every space, so only grant this in all spaces.
+        requireAllSpaces: true,
+        privilegesTooltip: i18n.translate(
+          'xpack.digitalExperience.featureRegistry.sessionsSubFeatureTooltip',
+          {
+            defaultMessage:
+              'Requires "*" (All spaces). Users also need the Elasticsearch privilege to manage index templates.',
+          }
+        ),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
+                name: i18n.translate(
+                  'xpack.digitalExperience.featureRegistry.manageSessionsPrivilegeName',
+                  { defaultMessage: 'Set up and update session summaries' }
+                ),
+                // Never granted with `all`: sessions are set up with this user's data access, for
+                // everyone who reads sessions.
+                includeIn: 'none',
+                api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
+                ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions],
+                savedObject: { all: [], read: [] },
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };

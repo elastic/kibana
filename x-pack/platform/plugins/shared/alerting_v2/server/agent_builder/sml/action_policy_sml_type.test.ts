@@ -317,6 +317,20 @@ describe('createActionPolicySmlType', () => {
       expect(result?.data).toEqual(expect.objectContaining({ name: baseActionPolicyAttrs.name }));
     });
 
+    it('sets the attachment origin to the raw policy id instead of the SML origin URI', async () => {
+      getActionPolicy.mockResolvedValueOnce({
+        ...baseActionPolicyAttrs,
+        id: 'policy-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('policy-1');
+    });
+
     it('returns undefined when getActionPolicy throws', async () => {
       // The entry surfaces in search results but the policy itself
       // was deleted between index time and read time — surface this
@@ -358,6 +372,32 @@ describe('createActionPolicySmlType', () => {
 
       expect(result).toBeUndefined();
       expect(getActionPolicy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('searchByTitle', () => {
+    const search = (title: string) =>
+      buildDefinition().searchByTitle!({ title, size: 5 }, buildToAttachmentContext());
+
+    let findActionPolicies: jest.Mock;
+
+    beforeEach(() => {
+      findActionPolicies = jest.fn().mockResolvedValue({
+        items: [{ id: 'policy-1', name: 'Critical alerts' }],
+      });
+      actionPolicyClient = { findActionPolicies } as unknown as ActionPolicyClient;
+    });
+
+    it('searches action policies by the title and maps the results', async () => {
+      expect(await search('crit')).toEqual([{ originId: 'policy-1', title: 'Critical alerts' }]);
+      expect(findActionPolicies).toHaveBeenCalledWith({ search: 'crit', perPage: 5 });
+    });
+
+    it('returns nothing when Alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      expect(await search('crit')).toEqual([]);
+      expect(findActionPolicies).not.toHaveBeenCalled();
     });
   });
 });

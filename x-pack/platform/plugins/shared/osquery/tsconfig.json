@@ -12,6 +12,7 @@
     "scripts/**/*.json",
     "server/**/*",
     "test/scout/**/*",
+    "test/scout_osquery_workflows/**/*",
     "../../../../../typings/**/*",
     // ECS and Osquery schema files (JSON not matched by **/* globs)
     "common/schemas/*/*.json"
@@ -77,8 +78,11 @@
     "@kbn/openapi-bundler",
     "@kbn/repo-info",
     "@kbn/zod",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/crypto",
+    "@kbn/test-es-server",
     "@kbn/core-lifecycle-server",
-    "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",
     "@kbn/core-spaces-common",
     "@kbn/core-http-server",
@@ -102,6 +106,8 @@
     "@kbn/core-security-server",
     "@kbn/rrule",
     "@kbn/cps-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/app-menu"
   ]
 }
