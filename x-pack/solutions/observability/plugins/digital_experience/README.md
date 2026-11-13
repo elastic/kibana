@@ -243,12 +243,11 @@ run after sessions are enabled, it starts from 30 days ago, at the start of that
 catches up window by window, oldest first, and status reports `rebuilding` until it has. A window
 grows while it holds few sessions and halves when it holds more than 320,000, so a run always
 finishes the windows it starts. Failures are kept in the task's state, not thrown, so the next run
-retries from the same checkpoint, and status shows the error. Once an hour, a run deletes the
-summaries of sessions that ended more than 31 days ago. Events that arrive later than the sync delay
-after their `@timestamp` are only summarized when another event of their session arrives.
+retries from the same checkpoint, and status shows the error. Events that arrive later than the sync
+delay after their `@timestamp` are only summarized when another event of their session arrives.
 
-Readers don't depend on how summaries are built. A new `SESSIONS_VERSION` makes the task delete the
-summaries of other versions and rebuild them all into the new index.
+Readers don't depend on how summaries are built. A new `SESSIONS_VERSION` makes the task rebuild
+every summary into the new index.
 
 The journey lists distinct pages in first-view order (revisits are not repeated), from the first 30
 page-view URLs, and the exit page is the one viewed last. Each attribute group (environment, user,
@@ -271,8 +270,7 @@ spaces, as the task and index serve every space. The user also needs these Elast
 when any is missing the request fails with a 403 listing them, before anything is written:
 
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
-- `digital-experience-sessions-*`: `read`, `view_index_metadata`, `index`, `create_index`, `delete`,
-  `delete_index`
+- `digital-experience-sessions-*`: `read`, `view_index_metadata`, `index`, `create_index`
 - On serverless, the cluster privilege `read_security` (the predefined `admin` role has it; custom
   roles may not)
 

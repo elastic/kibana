@@ -65,12 +65,12 @@ const grantAll = (client: Client) => {
   mockReadPrivileges(client, [{}]);
 };
 
-/** What the summaries task does with the user's API key: read the events, manage the summaries. */
+/** What the summaries task does with the user's API key: read the events, write the summaries. */
 const requestedIndexPrivileges = [
   { names: SOURCE_INDICES, privileges: ['read', 'view_index_metadata'] },
   {
     names: ['digital-experience-sessions-*'],
-    privileges: ['read', 'view_index_metadata', 'index', 'create_index', 'delete', 'delete_index'],
+    privileges: ['read', 'view_index_metadata', 'index', 'create_index'],
   },
 ];
 
@@ -88,7 +88,7 @@ describe('sessions privileges', () => {
         cluster: {},
         index: {
           'traces-*.otel-*': { read: false, view_index_metadata: true },
-          'digital-experience-sessions-*': { read: true, delete_index: false },
+          'digital-experience-sessions-*': { read: true, create_index: false },
         },
         application: {},
         username: 'reader',
@@ -96,7 +96,7 @@ describe('sessions privileges', () => {
 
       expect(await getMissingSessionsPrivileges(client, { isServerless: false })).toEqual([
         'index:traces-*.otel-*:read',
-        'index:digital-experience-sessions-*:delete_index',
+        'index:digital-experience-sessions-*:create_index',
       ]);
     });
 

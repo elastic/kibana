@@ -28,14 +28,7 @@ const FILTERED_READ_ROLE: KibanaRole = {
       },
       {
         names: [SESSIONS_INDEX_PATTERN],
-        privileges: [
-          'read',
-          'view_index_metadata',
-          'index',
-          'create_index',
-          'delete',
-          'delete_index',
-        ],
+        privileges: ['read', 'view_index_metadata', 'index', 'create_index'],
       },
     ],
   },

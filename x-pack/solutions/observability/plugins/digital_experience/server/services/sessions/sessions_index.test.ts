@@ -20,8 +20,6 @@ import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fiel
 import { ENVIRONMENT_FIELDS } from '../../lib/otel/queries';
 import {
   createSessionsIndex,
-  deleteExpiredSessions,
-  deleteOtherSessionsIndices,
   putSessionsIndexTemplate,
   sessionsIndexMappings,
   sessionsIndexTemplate,
@@ -34,8 +32,6 @@ interface MappingNode {
   type?: string;
   properties?: Record<string, MappingNode>;
 }
-
-const NOW = Date.parse('2026-10-27T12:00:00.000Z');
 
 const samples = { count: 4, good: 2, needs_improvement: 1, poor: 1 };
 
@@ -189,64 +185,6 @@ describe('sessions index', () => {
       client.indices.create.mockRejectedValue(error);
 
       await expect(createSessionsIndex(client)).rejects.toBe(error);
-    });
-  });
-
-  describe('deleteOtherSessionsIndices', () => {
-    it('deletes the indices of other versions by name, open or closed', async () => {
-      const older = 'digital-experience-sessions-0';
-      const newer = `digital-experience-sessions-${SESSIONS_VERSION + 1}`;
-      client.indices.get.mockResolvedValue({ [older]: {}, [SESSIONS_INDEX]: {}, [newer]: {} });
-      const { signal } = new AbortController();
-
-      expect(await deleteOtherSessionsIndices(client, signal)).toEqual([older, newer]);
-      expect(client.indices.get).toHaveBeenCalledWith(
-        {
-          index: SESSIONS_INDEX_PATTERN,
-          allow_no_indices: true,
-          expand_wildcards: ['open', 'closed'],
-        },
-        { signal }
-      );
-      expect(client.indices.delete).toHaveBeenCalledWith(
-        { index: [older, newer], ignore_unavailable: true },
-        { signal }
-      );
-    });
-
-    it('deletes nothing when only this version exists', async () => {
-      client.indices.get.mockResolvedValue({ [SESSIONS_INDEX]: {} });
-
-      expect(await deleteOtherSessionsIndices(client)).toEqual([]);
-      expect(client.indices.delete).not.toHaveBeenCalled();
-    });
-
-    it('deletes nothing when no sessions index exists', async () => {
-      client.indices.get.mockResolvedValue({});
-
-      expect(await deleteOtherSessionsIndices(client)).toEqual([]);
-      expect(client.indices.delete).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('deleteExpiredSessions', () => {
-    it('deletes the sessions that ended before the lookback and a day, in the background', async () => {
-      const { signal } = new AbortController();
-
-      await deleteExpiredSessions(client, NOW, signal);
-
-      expect(client.deleteByQuery).toHaveBeenCalledWith(
-        {
-          index: SESSIONS_INDEX_PATTERN,
-          allow_no_indices: true,
-          ignore_unavailable: true,
-          conflicts: 'proceed',
-          wait_for_completion: false,
-          // 30 days of lookback plus one of margin.
-          query: { range: { end_time: { lt: '2026-09-26T12:00:00.000Z' } } },
-        },
-        { signal }
-      );
     });
   });
 });

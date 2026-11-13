@@ -15,12 +15,7 @@ import {
 import { TaskCost, type TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SESSIONS_TASK_ID, SESSIONS_TASK_TYPE, SESSIONS_VERSION } from '../../../common/sessions';
-import {
-  createSessionsIndex,
-  deleteExpiredSessions,
-  deleteOtherSessionsIndices,
-  putSessionsIndexTemplate,
-} from './sessions_index';
+import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
 import {
   NO_API_KEY_MESSAGE,
   apiKeyIdOf,
@@ -51,7 +46,6 @@ const caughtUpState: SessionsTaskState = {
   lastSuccessAt: minutesAgo(1),
   lastError: null,
   apiKeyInvalid: false,
-  lastRetentionAt: minutesAgo(10),
 };
 
 const summarized = {
@@ -94,7 +88,6 @@ describe('runSessionsTask', () => {
     internalClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
     jest.mocked(createSessionsIndex).mockResolvedValue(false);
-    jest.mocked(deleteOtherSessionsIndices).mockResolvedValue([]);
     jest.mocked(summarizeSessions).mockResolvedValue(summarized);
   });
 
@@ -130,33 +123,21 @@ describe('runSessionsTask', () => {
     it.each([
       ['the first run', {}],
       ['a new version', { ...caughtUpState, version: SESSIONS_VERSION - 1 }],
-    ])(
-      'puts the template, replaces the other versions and starts from the lookback on %s',
-      async (_name, state) => {
-        const result = await run(state);
+    ])('puts the template and starts from the lookback on %s', async (_name, state) => {
+      const result = await run(state);
 
-        expect(putSessionsIndexTemplate).toHaveBeenCalledWith(internalClient, signal);
-        expect(createSessionsIndex).toHaveBeenCalledWith(esClient, signal);
-        expect(deleteOtherSessionsIndices).toHaveBeenCalledWith(esClient, signal);
-        expect(summarizeSessions).toHaveBeenCalledWith({
-          esClient,
-          signal,
-          now: NOW,
-          checkpoint: null,
-          windowMs: INITIAL_WINDOW_MS,
-          budgetMs: 45_000,
-          concurrency: 2,
-        });
-        expect(result.state).toEqual(expect.objectContaining({ version: SESSIONS_VERSION }));
-      }
-    );
-
-    it('creates the index of this version before deleting the others', async () => {
-      await run({});
-
-      const [create] = jest.mocked(createSessionsIndex).mock.invocationCallOrder;
-      const [deleteOthers] = jest.mocked(deleteOtherSessionsIndices).mock.invocationCallOrder;
-      expect(create).toBeLessThan(deleteOthers);
+      expect(putSessionsIndexTemplate).toHaveBeenCalledWith(internalClient, signal);
+      expect(createSessionsIndex).toHaveBeenCalledWith(esClient, signal);
+      expect(summarizeSessions).toHaveBeenCalledWith({
+        esClient,
+        signal,
+        now: NOW,
+        checkpoint: null,
+        windowMs: INITIAL_WINDOW_MS,
+        budgetMs: 45_000,
+        concurrency: 2,
+      });
+      expect(result.state).toEqual(expect.objectContaining({ version: SESSIONS_VERSION }));
     });
 
     it('is not caught up until a run of the new version is', async () => {
@@ -173,7 +154,6 @@ describe('runSessionsTask', () => {
       const result = await run(caughtUpState);
 
       expect(putSessionsIndexTemplate).not.toHaveBeenCalled();
-      expect(deleteOtherSessionsIndices).not.toHaveBeenCalled();
       expect(createSessionsIndex).toHaveBeenCalledWith(esClient, signal);
       expect(summarizeSessions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -192,7 +172,6 @@ describe('runSessionsTask', () => {
           lastError: null,
           apiKeyInvalid: false,
           failedApiKeyId: null,
-          lastRetentionAt: caughtUpState.lastRetentionAt,
         },
       });
     });
@@ -207,9 +186,8 @@ describe('runSessionsTask', () => {
         expect.objectContaining({ checkpoint: null, windowMs: INITIAL_WINDOW_MS })
       );
       expect(state.caughtUp).toBe(false);
-      // Only a new version replaces the template and the other indices.
+      // Only a new version replaces the template.
       expect(putSessionsIndexTemplate).not.toHaveBeenCalled();
-      expect(deleteOtherSessionsIndices).not.toHaveBeenCalled();
     });
 
     it('stays caught up when one run falls behind, and runs again right away', async () => {
@@ -242,25 +220,6 @@ describe('runSessionsTask', () => {
       expect(summarizeSessions).toHaveBeenCalledWith(
         expect.objectContaining({ checkpoint: null, windowMs: INITIAL_WINDOW_MS })
       );
-    });
-  });
-
-  describe('retention', () => {
-    it.each([
-      ['never ran', undefined],
-      ['last ran an hour ago', minutesAgo(60)],
-    ])('deletes the expired sessions when it %s', async (_name, lastRetentionAt) => {
-      const { state } = await run({ ...caughtUpState, lastRetentionAt });
-
-      expect(deleteExpiredSessions).toHaveBeenCalledWith(esClient, NOW, signal);
-      expect(state.lastRetentionAt).toBe(AT);
-    });
-
-    it('runs at most hourly', async () => {
-      const { state } = await run({ ...caughtUpState, lastRetentionAt: minutesAgo(59) });
-
-      expect(deleteExpiredSessions).not.toHaveBeenCalled();
-      expect(state.lastRetentionAt).toBe(minutesAgo(59));
     });
   });
 
@@ -314,7 +273,6 @@ describe('runSessionsTask', () => {
       const { state } = await run(caughtUpState);
 
       expect(summarizeSessions).not.toHaveBeenCalled();
-      expect(deleteExpiredSessions).not.toHaveBeenCalled();
       expect(state.lastError?.message).toBe('cluster_block_exception');
     });
 

@@ -13,12 +13,9 @@ import {
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
-  SESSIONS_LOOKBACK_DAYS,
   SESSIONS_MANAGED_BY,
   SESSIONS_VERSION,
 } from '../../../common/sessions';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 // `managed` makes the Index Management UI warn before editing or deleting these.
 export const SESSIONS_META = {
@@ -156,46 +153,4 @@ export const createSessionsIndex = async (
     }
     throw error;
   }
-};
-
-/**
- * Deletes the sessions indices of other versions, by name, as Elasticsearch refuses wildcard
- * deletes by default. Readers search every version, so an older one would count sessions twice.
- */
-export const deleteOtherSessionsIndices = async (
-  client: ElasticsearchClient,
-  signal?: AbortSignal
-): Promise<string[]> => {
-  const indices = await client.indices.get(
-    { index: SESSIONS_INDEX_PATTERN, allow_no_indices: true, expand_wildcards: ['open', 'closed'] },
-    { signal }
-  );
-  const others = Object.keys(indices).filter((name) => name !== SESSIONS_INDEX);
-  if (others.length > 0) {
-    await client.indices.delete({ index: others, ignore_unavailable: true }, { signal });
-  }
-  return others;
-};
-
-/**
- * Deletes the summaries of sessions that ended before the lookback, plus a day of margin, in the
- * background: they no longer get events, and the list never reads that far back.
- */
-export const deleteExpiredSessions = async (
-  client: ElasticsearchClient,
-  now: number,
-  signal?: AbortSignal
-): Promise<void> => {
-  const cutoff = now - (SESSIONS_LOOKBACK_DAYS + 1) * DAY_MS;
-  await client.deleteByQuery(
-    {
-      index: SESSIONS_INDEX_PATTERN,
-      allow_no_indices: true,
-      ignore_unavailable: true,
-      conflicts: 'proceed',
-      wait_for_completion: false,
-      query: { range: { end_time: { lt: new Date(cutoff).toISOString() } } },
-    },
-    { signal }
-  );
 };

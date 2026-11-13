@@ -39,7 +39,6 @@ const healthyState: SessionsTaskState = {
   lastSuccessAt: secondsAgo(30),
   lastError: null,
   apiKeyInvalid: false,
-  lastRetentionAt: secondsAgo(600),
 };
 
 const MISSING: SessionsStatus = {

@@ -20,17 +20,11 @@ import {
   type SessionsSettings,
 } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
-import {
-  createSessionsIndex,
-  deleteExpiredSessions,
-  deleteOtherSessionsIndices,
-  putSessionsIndexTemplate,
-} from './sessions_index';
+import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
 import { INITIAL_WINDOW_MS, summarizeSessions } from './summarize_sessions';
 
 /** No window starts after this much of a run, so it ends well before its timeout. */
 const RUN_BUDGET_MS = 45 * 1000;
-const RETENTION_INTERVAL_MS = 60 * 60 * 1000;
 
 export const NO_API_KEY_MESSAGE =
   'The task has no API key, so it cannot read events. Enable sessions again to grant one.';
@@ -56,7 +50,6 @@ const stateSchemaV1 = schema.object({
    * by enabling sessions again isn't taken for invalid while a run of the old one finishes.
    */
   failedApiKeyId: schema.maybe(schema.nullable(schema.string())),
-  lastRetentionAt: schema.maybe(schema.nullable(schema.string())),
 });
 
 export type SessionsTaskState = TypeOf<typeof stateSchemaV1>;
@@ -133,9 +126,6 @@ export const runSessionsTask = async ({
       await putSessionsIndexTemplate(internalClient, signal);
     }
     const created = await createSessionsIndex(esClient, signal);
-    if (rebuild) {
-      await deleteOtherSessionsIndices(esClient, signal);
-    }
     rebuild = rebuild || created;
     const result = await summarizeSessions({
       esClient,
@@ -146,12 +136,6 @@ export const runSessionsTask = async ({
       budgetMs: RUN_BUDGET_MS,
       concurrency,
     });
-
-    const retentionDue =
-      !state.lastRetentionAt || now - Date.parse(state.lastRetentionAt) >= RETENTION_INTERVAL_MS;
-    if (retentionDue) {
-      await deleteExpiredSessions(esClient, now, signal);
-    }
 
     const caughtUp = (!rebuild && state.caughtUp === true) || result.caughtUp;
     if (caughtUp && state.caughtUp !== true) {
@@ -171,7 +155,6 @@ export const runSessionsTask = async ({
         lastError: null,
         apiKeyInvalid: false,
         failedApiKeyId: null,
-        lastRetentionAt: retentionDue ? at : state.lastRetentionAt ?? null,
       },
       // Behind: run again right away instead of waiting for the interval.
       ...(result.caughtUp ? {} : { runAt: new Date() }),
