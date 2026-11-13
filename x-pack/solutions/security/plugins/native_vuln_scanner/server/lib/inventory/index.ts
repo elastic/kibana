@@ -17,3 +17,8 @@ export type {
 export { normalizeDebRow, normalizeInventories, normalizeOs, normalizeRpmRow } from './normalize';
 export type { ReadInventoriesOptions } from './reader';
 export { OSQUERY_RESULTS_INDEX, readAgentInventories } from './reader';
+export {
+  findInventoryScheduleIds,
+  INVENTORY_PACK_NAME,
+  OSQUERY_PACK_SO_TYPE,
+} from './schedule_ids';

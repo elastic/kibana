@@ -10,7 +10,7 @@
     "browser": false,
     "server": true,
     "configPath": ["xpack", "nativeVulnScanner"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["taskManager"],
     "optionalPlugins": []
   }
 }

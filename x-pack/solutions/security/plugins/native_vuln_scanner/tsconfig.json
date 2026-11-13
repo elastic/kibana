@@ -3,15 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/core-test-helpers-kbn-server"
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/task-manager-plugin"
   ]
 }

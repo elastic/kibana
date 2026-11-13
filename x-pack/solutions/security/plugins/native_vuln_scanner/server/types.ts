@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+
 export type NativeVulnScannerServerSetup = Record<string, never>;
 
 export type NativeVulnScannerServerStart = Record<string, never>;
+
+export interface NativeVulnScannerSetupDeps {
+  taskManager: TaskManagerSetupContract;
+}
+
+export interface NativeVulnScannerStartDeps {
+  taskManager: TaskManagerStartContract;
+}

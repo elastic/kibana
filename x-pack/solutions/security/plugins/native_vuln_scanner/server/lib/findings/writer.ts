@@ -43,6 +43,7 @@ export interface WriteFindingsParams {
   findings: readonly Finding[];
   now: string;
   runId: string;
+  signal?: AbortSignal;
 }
 
 export interface WriteFindingsResult {
@@ -90,7 +91,7 @@ const countFailures = (response: BulkResponse, failures: Record<string, number>)
  */
 export const writeFindings = async (
   es: ElasticsearchClient,
-  { hosts, findings, now, runId }: WriteFindingsParams
+  { hosts, findings, now, runId, signal }: WriteFindingsParams
 ): Promise<WriteFindingsResult> => {
   const metaById = new Map(hosts.map((host) => [host.id, host]));
   const docs = new Map<string, FindingDoc>();
@@ -106,13 +107,16 @@ export const writeFindings = async (
   let written = 0;
   for (let i = 0; i < all.length; i += BULK_BATCH) {
     const batch = all.slice(i, i + BULK_BATCH);
-    const response = await es.bulk({ operations: bulkOperations(batch), refresh: false });
+    const response = await es.bulk(
+      { operations: bulkOperations(batch), refresh: false },
+      { signal }
+    );
     written += batch.length - countFailures(response, failures);
   }
   if (Object.keys(failures).length > 0) throw new FindingsWriteError(failures);
   if (hosts.length === 0) return { written, fixed: 0, fixSkipped: 0, failures };
 
-  await es.indices.refresh({ index: FINDINGS_INDEX });
+  await es.indices.refresh({ index: FINDINGS_INDEX }, { signal });
   const hostIds = [...metaById.keys()];
   let fixed = 0;
   let fixSkipped = 0;
@@ -121,21 +125,24 @@ export const writeFindings = async (
       updated = 0,
       version_conflicts: conflicts = 0,
       failures: fixFailures = [],
-    } = await es.updateByQuery({
-      index: FINDINGS_INDEX,
-      conflicts: 'proceed',
-      refresh: true,
-      query: {
-        bool: {
-          filter: [{ terms: { 'host.id': hostIds.slice(i, i + HOST_BATCH) } }],
-          must_not: [
-            { term: { 'native_vuln_scanner.state': 'fixed' } },
-            { term: { 'native_vuln_scanner.run_id': runId } },
-          ],
+    } = await es.updateByQuery(
+      {
+        index: FINDINGS_INDEX,
+        conflicts: 'proceed',
+        refresh: true,
+        query: {
+          bool: {
+            filter: [{ terms: { 'host.id': hostIds.slice(i, i + HOST_BATCH) } }],
+            must_not: [
+              { term: { 'native_vuln_scanner.state': 'fixed' } },
+              { term: { 'native_vuln_scanner.run_id': runId } },
+            ],
+          },
         },
+        script: { source: FIX_SCRIPT, lang: 'painless', params: { now } },
       },
-      script: { source: FIX_SCRIPT, lang: 'painless', params: { now } },
-    });
+      { signal }
+    );
     fixed += updated;
     fixSkipped += conflicts + fixFailures.length;
   }

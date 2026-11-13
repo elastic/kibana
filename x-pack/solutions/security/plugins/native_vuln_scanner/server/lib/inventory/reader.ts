@@ -24,6 +24,8 @@ export interface ReadInventoriesOptions {
   /** Oldest result considered, as an ES date (default `now-3d`, three daily runs). */
   since?: string;
   pageSize?: number;
+  /** Aborts the in-flight search; the point in time is still closed. */
+  signal?: AbortSignal;
 }
 
 interface ResultSource {
@@ -81,7 +83,7 @@ class AgentAccumulator {
  */
 export async function* readAgentInventories(
   es: ElasticsearchClient,
-  { scheduleIds, since = 'now-3d', pageSize = PAGE_SIZE }: ReadInventoriesOptions
+  { scheduleIds, since = 'now-3d', pageSize = PAGE_SIZE, signal }: ReadInventoriesOptions
 ): AsyncGenerator<AgentInventoryRows> {
   const kindById = new Map<string, InventoryQueryKind>();
   for (const [kind, ids] of Object.entries(scheduleIds) as Array<
@@ -91,43 +93,49 @@ export async function* readAgentInventories(
   }
   if (kindById.size === 0) return;
 
-  const { id: pitId } = await es.openPointInTime({
-    index: OSQUERY_RESULTS_INDEX,
-    keep_alive: KEEP_ALIVE,
-    ignore_unavailable: true,
-    allow_partial_search_results: false,
-  });
+  const { id: pitId } = await es.openPointInTime(
+    {
+      index: OSQUERY_RESULTS_INDEX,
+      keep_alive: KEEP_ALIVE,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
+    },
+    { signal }
+  );
   let pit = pitId;
   try {
     let current: AgentAccumulator | undefined;
     let searchAfter: SortResults | undefined;
     for (;;) {
-      const response = await es.search<ResultSource>({
-        pit: { id: pit, keep_alive: KEEP_ALIVE },
-        size: pageSize,
-        sort: SORT,
-        search_after: searchAfter,
-        track_total_hits: false,
-        _source: [
-          'agent.id',
-          'host.name',
-          'host.hostname',
-          'schedule_id',
-          'osquery_meta.unix_time',
-          'osquery',
-        ],
-        query: {
-          bool: {
-            filter: [
-              { terms: { schedule_id: [...kindById.keys()] } },
-              { range: { '@timestamp': { gte: since } } },
-              { exists: { field: 'agent.id' } },
-            ],
-            // A differential run reports only changes, which would read as a partial inventory.
-            must_not: [{ terms: { 'osquery_meta.action': ['added', 'removed'] } }],
+      const response = await es.search<ResultSource>(
+        {
+          pit: { id: pit, keep_alive: KEEP_ALIVE },
+          size: pageSize,
+          sort: SORT,
+          search_after: searchAfter,
+          track_total_hits: false,
+          _source: [
+            'agent.id',
+            'host.name',
+            'host.hostname',
+            'schedule_id',
+            'osquery_meta.unix_time',
+            'osquery',
+          ],
+          query: {
+            bool: {
+              filter: [
+                { terms: { schedule_id: [...kindById.keys()] } },
+                { range: { '@timestamp': { gte: since } } },
+                { exists: { field: 'agent.id' } },
+              ],
+              // A differential run reports only changes, which would read as a partial inventory.
+              must_not: [{ terms: { 'osquery_meta.action': ['added', 'removed'] } }],
+            },
           },
         },
-      });
+        { signal }
+      );
       pit = response.pit_id ?? pit;
       const { hits } = response.hits;
       for (const { _source: source } of hits) {
