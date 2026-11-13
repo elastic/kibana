@@ -181,8 +181,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should update the current saved view and load it', async () => {
-        let views = await pageObjects.infraSavedViews.getManageViewsEntries();
-        expect(views.length).to.equal(2);
+        await pageObjects.infraSavedViews.ensureManageViewsEntriesCount(2);
         await pageObjects.infraSavedViews.pressEsc();
 
         await pageObjects.infraSavedViews.clickSavedViewsButton();
@@ -190,8 +189,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
 
         await pageObjects.infraSavedViews.clickSavedViewsButton();
-        views = await pageObjects.infraSavedViews.getManageViewsEntries();
-        expect(views.length).to.equal(3);
+        await pageObjects.infraSavedViews.ensureManageViewsEntriesCount(3);
         await pageObjects.infraSavedViews.pressEsc();
 
         await pageObjects.infraSavedViews.clickSavedViewsButton();
@@ -199,8 +197,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
 
         await pageObjects.infraSavedViews.clickSavedViewsButton();
-        views = await pageObjects.infraSavedViews.getManageViewsEntries();
-        expect(views.length).to.equal(3);
+        await pageObjects.infraSavedViews.ensureManageViewsEntriesCount(3);
         await pageObjects.infraSavedViews.pressEsc();
       });
     });

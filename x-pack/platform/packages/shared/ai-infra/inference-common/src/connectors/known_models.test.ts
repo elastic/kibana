@@ -14,6 +14,21 @@ describe('getModelDefinition', () => {
     expect(getModelDefinition('gpt-4.1')!.id).toBe('gpt-4.1');
   });
 
+  it('returns the expected models for GPT-6 family model names, including the pro variants', () => {
+    expect(getModelDefinition('gpt-6-sol')!.id).toBe('gpt-6-sol');
+    expect(getModelDefinition('gpt-6-sol-pro')!.id).toBe('gpt-6-sol');
+    expect(getModelDefinition('gpt-6-luna')!.id).toBe('gpt-6-luna');
+    expect(getModelDefinition('.openai-gpt-6-luna-pro-chat_completion')!.id).toBe('gpt-6-luna');
+    expect(getModelDefinition('gpt-6-astra')!.id).toBe('gpt-6-astra');
+  });
+
+  it('returns the expected models for Claude 5.5 model names', () => {
+    expect(getModelDefinition('anthropic-claude-5.5-opus')!.id).toBe('claude-5.5-opus');
+    expect(getModelDefinition('.anthropic-claude-5.5-sonnet-chat_completion')!.id).toBe(
+      'claude-5.5-sonnet'
+    );
+  });
+
   it('returns the expected models for common Claude full model names', () => {
     expect(getModelDefinition('anthropic.claude-3-opus-20240229-v1:0')!.id).toBe('claude-3-opus');
     expect(getModelDefinition('anthropic.claude-3-5-sonnet-20241022-v2:0')!.id).toBe(

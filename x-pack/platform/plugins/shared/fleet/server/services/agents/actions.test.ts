@@ -22,7 +22,9 @@ import {
   bulkCreateAgentActions,
   cancelAgentAction,
   createAgentAction,
+  collectAgentIdsFromActions,
   getAgentsByActionsIds,
+  getAgentsWithoutActionResults,
   transformDataSecrets,
 } from './actions';
 
@@ -920,6 +922,522 @@ describe('Agent actions', () => {
           password: '$co.elastic.secret{passwordref1}',
         },
       });
+    });
+  });
+
+  describe('bulkCreateAgentActionResults refused items', () => {
+    const okResponse = { errors: false, items: [] };
+    const results = [
+      { actionId: 'action1', agentId: 'agent1' },
+      { actionId: 'action1', agentId: 'agent2' },
+    ];
+
+    it('writes nothing when there is nothing to write', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await bulkCreateAgentActionResults(esClientMock, []);
+
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    it('writes the refused items again rather than only logging them', async () => {
+      jest.useFakeTimers();
+      try {
+        // an action counting an agent whose result never arrived waits for it forever, and a
+        // refused item indexed nothing, so rewriting it cannot produce a second result for it
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockResolvedValueOnce({
+            errors: true,
+            items: [{ create: {} }, { create: { status: 429, error: { reason: 'rejected' } } }],
+          } as any)
+          .mockResolvedValueOnce(okResponse as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
+        // only the one that did not land
+        const retried = (esClientMock.bulk.mock.calls[1][0] as any).operations;
+        expect(retried).toHaveLength(2);
+        expect(retried[1].agent_id).toEqual('agent2');
+        expect(mockContext.logger.error).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('writes an item again when Elasticsearch gives no reason it cannot succeed', async () => {
+      jest.useFakeTimers();
+      try {
+        // not rewriting one Elasticsearch would have accepted leaves an action a result short of
+        // its total, waiting forever, which costs more than two wasted requests
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockResolvedValueOnce({
+            errors: true,
+            items: [{ create: {} }, { create: { status: 500, error: { reason: 'unexpected' } } }],
+          } as any)
+          .mockResolvedValueOnce(okResponse as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('reuses each document id across attempts, so a replay cannot duplicate', async () => {
+      jest.useFakeTimers();
+      try {
+        // the transport retries internally and can raise NoLivingConnectionsError after a request
+        // was already dispatched, so no transport error proves nothing was written; reusing the id
+        // is what turns that case into a conflict instead of a second result for every agent
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockRejectedValueOnce(new Error('socket hang up'))
+          .mockResolvedValueOnce(okResponse as any);
+        esClientMock.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        const idsOf = (call: number) =>
+          (esClientMock.bulk.mock.calls[call][0] as any).operations
+            .filter((op: any) => op.create)
+            .map((op: any) => op.create._id);
+        expect(idsOf(1)).toEqual(idsOf(0));
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('does not resend a result an earlier attempt already wrote', async () => {
+      jest.useFakeTimers();
+      try {
+        // the conflict only holds within one index, and .fleet-actions-results rolls over: a
+        // rollover between a landed attempt and its resend would be accepted rather than refused
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockRejectedValueOnce(new Error('socket hang up'))
+          .mockResolvedValueOnce(okResponse as any);
+        esClientMock.search.mockImplementation(async (request: any) => {
+          const [firstId] = request.query.ids.values;
+          return { hits: { hits: [{ _id: firstId }] } } as any;
+        });
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        // only the one the search did not find
+        const resent = (esClientMock.bulk.mock.calls[1][0] as any).operations;
+        expect(resent).toHaveLength(2);
+        expect(resent[1].agent_id).toEqual('agent2');
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('looks up the ids in pages, so a large batch does not turn the check off', async () => {
+      jest.useFakeTimers();
+      try {
+        // a batch is as large as the caller's batchSize, which nothing here bounds, and a size
+        // above index.max_result_window is refused outright
+        const manyResults = Array.from({ length: 2_500 }, (_, i) => ({
+          actionId: 'action1',
+          agentId: `agent${i}`,
+        }));
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockRejectedValueOnce(new Error('socket hang up'))
+          .mockResolvedValueOnce(okResponse as any);
+        esClientMock.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, manyResults);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        expect(esClientMock.search).toHaveBeenCalledTimes(3);
+        for (const [request] of esClientMock.search.mock.calls) {
+          expect((request as any).query.ids.values.length).toBeLessThanOrEqual(1_000);
+        }
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('does not look for already written results when items were merely refused', async () => {
+      jest.useFakeTimers();
+      try {
+        // a refused item indexed nothing, so there is nothing to find
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockResolvedValueOnce({
+            errors: true,
+            items: [{ create: {} }, { create: { status: 429, error: { reason: 'rejected' } } }],
+          } as any)
+          .mockResolvedValueOnce(okResponse as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        expect(esClientMock.search).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('resends anyway when it cannot check what was written', async () => {
+      jest.useFakeTimers();
+      try {
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockRejectedValueOnce(new Error('socket hang up'))
+          .mockResolvedValueOnce(okResponse as any);
+        esClientMock.search.mockRejectedValue(new Error('Request timed out'));
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
+        expect(mockContext.logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Could not check which agent action results')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('reads a conflict as already written rather than as a failure', async () => {
+      // which is what an attempt that did land, and then looked like it had not, comes back as
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { create: { status: 409, error: { reason: 'version_conflict_engine_exception' } } },
+          { create: {} },
+        ],
+      } as any);
+
+      await bulkCreateAgentActionResults(esClientMock, results);
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
+      expect(mockContext.logger.error).not.toHaveBeenCalled();
+    });
+
+    it('throws when it cannot tell whether anything was written', async () => {
+      jest.useFakeTimers();
+      try {
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk.mockRejectedValue(new Error('socket hang up'));
+        esClientMock.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        const assertion = expect(written).rejects.toThrow('socket hang up');
+        await jest.advanceTimersByTimeAsync(60_000);
+        await assertion;
+
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(3);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('gives up after a bounded number of attempts, waiting in between', async () => {
+      jest.useFakeTimers();
+      try {
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk.mockResolvedValue({
+          errors: true,
+          items: [{ create: { status: 429, error: { reason: 'rejected' } } }, { create: {} }],
+        } as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        // what gets an item refused rather than the whole request is a full write queue, which
+        // milliseconds will not have cleared
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(3);
+        expect(mockContext.logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to write 1 of 2 agent action results, for agents agent1')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('does not write an item again that Elasticsearch will refuse again', async () => {
+      // a mapping failure cannot succeed on a second attempt, so another one is only load on a
+      // cluster that is already struggling
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { create: { status: 400, error: { reason: 'mapper_parsing_exception' } } },
+          { create: {} },
+        ],
+      } as any);
+
+      await bulkCreateAgentActionResults(esClientMock, results);
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
+      expect(mockContext.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to write 1 of 2 agent action results, for agents agent1')
+      );
+    });
+
+    it('reports the refused agents rather than throwing', async () => {
+      // failing the batch would have the retry rewrite the results that did land, under a new
+      // action id, while the action they belong to stayed short either way. The ids go back to
+      // the caller instead, for the one path that will never return to these agents.
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ create: { status: 400, error: { reason: 'rejected' } } }, { create: {} }],
+      } as any);
+
+      await expect(bulkCreateAgentActionResults(esClientMock, results)).resolves.toEqual([
+        'agent1',
+      ]);
+    });
+
+    it('reports nothing when every result lands', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockResolvedValue(okResponse as any);
+
+      await expect(bulkCreateAgentActionResults(esClientMock, results)).resolves.toEqual([]);
+    });
+  });
+
+  describe('collectAgentIdsFromActions', () => {
+    const mockHits = (agentIds: string[][]) => ({
+      hits: { hits: agentIds.map((agents) => ({ _source: { agents } })) },
+    });
+
+    /** Collects into a fresh set, the way a first read does. */
+    const collect = async (
+      esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>,
+      actionIds: string[],
+      options?: Parameters<typeof collectAgentIdsFromActions>[3]
+    ) => {
+      const agentIds = new Set<string>();
+      await collectAgentIdsFromActions(esClientMock, actionIds, agentIds, options);
+      return agentIds;
+    };
+
+    it('reads nothing without an action id', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await expect(collect(esClientMock, [])).resolves.toEqual(new Set());
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
+    it('collects the agents of every document of every action id given', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(
+        mockHits([['agent1', 'agent2'], ['agent2', 'agent3'], []]) as any
+      );
+
+      await expect(collect(esClientMock, ['action1', 'child1'])).resolves.toEqual(
+        new Set(['agent1', 'agent2', 'agent3'])
+      );
+      // a missing .fleet-actions means nothing has been actioned, not a 404: Fleet Server creates
+      // the index, so a deployment whose first ever action fails early does not have it yet
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ignore_unavailable: true,
+          query: { bool: { filter: [{ terms: { action_id: ['action1', 'child1'] } }] } },
+        })
+      );
+    });
+
+    it('adds to the set it is given rather than replacing it', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['agent2']]) as any);
+      const agentIds = new Set(['agent1']);
+
+      await collectAgentIdsFromActions(esClientMock, ['action1'], agentIds);
+
+      expect(agentIds).toEqual(new Set(['agent1', 'agent2']));
+    });
+
+    it('does not spend a top-up budget on ids the caller already has', async () => {
+      // the refresh window overlaps by design, so most of what a top-up reads is already there;
+      // charging those against a budget of their own would stop the paging before the new ones
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['known1', 'known2', 'new1']]) as any);
+      const agentIds = new Set(['known1', 'known2']);
+
+      await collectAgentIdsFromActions(esClientMock, ['action1'], agentIds, { limit: 3 });
+
+      expect(agentIds).toEqual(new Set(['known1', 'known2', 'new1']));
+    });
+
+    it('restricts the read to recent documents when asked to', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
+
+      await collect(esClientMock, ['action1'], { since: '2026-11-07T10:00:00.000Z' });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: ['action1'] } },
+                { range: { '@timestamp': { gte: '2026-11-07T10:00:00.000Z' } } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('pages under a point in time rather than truncating at one page', async () => {
+      // an action run with a small batchSize writes one document per batch, so it can hold far
+      // more than a page; a truncated read would silently action those agents twice
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      const fullPage = Array.from({ length: 1000 }, (_, i) => [`agent${i}`]);
+      esClientMock.search
+        .mockResolvedValueOnce(mockHits(fullPage) as any)
+        .mockResolvedValueOnce({
+          pit_id: 'pit2',
+          hits: { hits: fullPage.map((agents, i) => ({ _source: { agents }, sort: [i] })) },
+        } as any)
+        .mockResolvedValueOnce(mockHits([['agent-last']]) as any);
+      esClientMock.openPointInTime.mockResolvedValue({ id: 'pit1' } as any);
+
+      const agentIds = await collect(esClientMock, ['action1']);
+
+      expect(agentIds.has('agent-last')).toBe(true);
+      expect(agentIds.size).toBe(1001);
+      expect(esClientMock.openPointInTime).toHaveBeenCalled();
+      // the next page searches the point in time the last one handed back
+      expect(esClientMock.search).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit2' }),
+          search_after: [999],
+        })
+      );
+      expect(esClientMock.closePointInTime).toHaveBeenCalledWith({ id: 'pit2' });
+    });
+
+    it('stops collecting and stops paging at the limit', async () => {
+      // the limit is the caller's memory bound, so it has to stop the read rather than be applied
+      // to what it returns: the documents naming a million agents are held to produce that set
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      const fullPage = Array.from({ length: 1000 }, (_, i) => [`agent${i}`]);
+      esClientMock.search.mockResolvedValue(mockHits(fullPage) as any);
+
+      const agentIds = await collect(esClientMock, ['action1'], { limit: 10 });
+
+      expect(agentIds.size).toBe(10);
+      expect(esClientMock.search).toHaveBeenCalledTimes(1);
+      expect(esClientMock.openPointInTime).not.toHaveBeenCalled();
+    });
+
+    it('sizes a page to the ids still wanted, not to a document count', async () => {
+      // a page of documents says nothing about how big the response is: one document names up to a
+      // whole batch of agents, so a thousand of them can carry millions of ids
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
+
+      await collect(esClientMock, ['action1'], { limit: 200_000, agentsPerDocument: 10_000 });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(expect.objectContaining({ size: 20 }));
+    });
+
+    it('reads nothing when the set is already at the limit', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await collectAgentIdsFromActions(esClientMock, ['action1'], new Set(['agent1']), {
+        limit: 1,
+      });
+
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
+    it('closes the point in time when a page fails', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      const fullPage = Array.from({ length: 1000 }, (_, i) => [`agent${i}`]);
+      esClientMock.search
+        .mockResolvedValueOnce(mockHits(fullPage) as any)
+        .mockRejectedValueOnce(new Error('Request timed out'));
+      esClientMock.openPointInTime.mockResolvedValue({ id: 'pit1' } as any);
+
+      await expect(collect(esClientMock, ['action1'])).rejects.toThrow('Request timed out');
+      expect(esClientMock.closePointInTime).toHaveBeenCalledWith({ id: 'pit1' });
+    });
+  });
+
+  describe('getAgentsWithoutActionResults', () => {
+    it('returns the agents that have no result for the action', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { agent_ids: { buckets: [{ key: 'agent2' }] } },
+      } as any);
+
+      await expect(
+        getAgentsWithoutActionResults(esClientMock, ['action1'], ['agent1', 'agent2'])
+      ).resolves.toEqual(['agent1']);
+    });
+
+    it('counts an agent once however many results it has', async () => {
+      // result documents carry generated ids, so a retry can write a second one for an agent, and
+      // an agent can have one under more than one of the given action ids; a page of hits sized to
+      // the number of agents asked about could be filled by those duplicates and hide the rest
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { agent_ids: { buckets: [{ key: 'agent1' }, { key: 'agent2' }] } },
+      } as any);
+
+      await expect(
+        getAgentsWithoutActionResults(esClientMock, ['action1', 'child1'], ['agent1', 'agent2'])
+      ).resolves.toEqual([]);
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 0,
+          aggs: { agent_ids: { terms: { field: 'agent_id', size: 2 } } },
+        })
+      );
+    });
+
+    it('does not search without an agent to look for', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await expect(getAgentsWithoutActionResults(esClientMock, ['action1'], [])).resolves.toEqual(
+        []
+      );
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
+    it('treats a missing results index as no results at all', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockRejectedValue({ statusCode: 404 });
+
+      await expect(
+        getAgentsWithoutActionResults(esClientMock, ['action1'], ['agent1'])
+      ).resolves.toEqual(['agent1']);
+    });
+
+    it('throws anything else, rather than writing results twice', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockRejectedValue(new Error('Request timed out'));
+
+      await expect(
+        getAgentsWithoutActionResults(esClientMock, ['action1'], ['agent1'])
+      ).rejects.toThrow('Request timed out');
     });
   });
 });

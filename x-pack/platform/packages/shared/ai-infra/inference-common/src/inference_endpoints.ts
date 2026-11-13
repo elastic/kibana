@@ -55,6 +55,20 @@ export interface GeoOnlyRegion {
 /** Union of all region entry shapes returned by the EIS metadata.regions field. */
 export type EisRegion = CspRegion | GeoOnlyRegion;
 
+/**
+ * Model capabilities advertised by EIS for chat completion endpoints.
+ */
+export interface EisInferenceEndpointCapabilities {
+  reasoning?: {
+    supported_effort_levels?: string[];
+    default_effort_level?: string;
+  };
+  context_window?: {
+    max_input_tokens?: number;
+    max_output_tokens?: number;
+  };
+}
+
 export type EisInferenceEndpointMetadata = {
   heuristics?: {
     properties?: string[];
@@ -67,4 +81,5 @@ export type EisInferenceEndpointMetadata = {
     model_creator?: string;
   } & Record<string, unknown>;
   regions?: EisRegion[];
+  capabilities?: EisInferenceEndpointCapabilities;
 } & Record<string, unknown>;
