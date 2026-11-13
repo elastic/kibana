@@ -93,26 +93,6 @@ describe('createSignificantEventAttachmentType', () => {
     ).resolves.toEqual(updatedEvent);
   });
 
-  it('resolves the event with the severity its investigation gave it, without writing it back', async () => {
-    const server = createSignificantEventsServer({ featurePrivilege: 'read' });
-    server.severitySync = {
-      ...server.severitySync,
-      reconcileRows: async ({ rows }) =>
-        rows.map((row) => Object.assign({}, row, { severity: 'critical' as const })),
-    };
-    const reconcileRows = jest.spyOn(server.severitySync, 'reconcileRows');
-    const type = createSignificantEventAttachmentType({
-      logger: loggingSystemMock.createLogger(),
-      getScopedClients: createGetScopedClients([event]),
-      server,
-    });
-
-    await expect(
-      type.resolve?.('payment-outage', agentBuilderMocks.attachments.createResolveContextMock())
-    ).resolves.toEqual({ ...event, severity: 'critical' });
-    expect(reconcileRows).toHaveBeenCalledWith(expect.objectContaining({ repair: false }));
-  });
-
   it('reports stale when the latest event differs from the stored snapshot', async () => {
     // Every events_write sets a new @timestamp; changing event_uuid alone (same timestamp)
     // cannot happen in production. Use a realistic update that bumps @timestamp.
@@ -141,27 +121,6 @@ describe('createSignificantEventAttachmentType', () => {
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
       server: createSignificantEventsServer({ featurePrivilege: 'read' }),
-    });
-
-    await expect(
-      type.isStale?.(
-        createVersionedAttachment(event),
-        agentBuilderMocks.attachments.createResolveContextMock()
-      )
-    ).resolves.toBe(true);
-  });
-
-  it('reports stale when the investigation gave the event another severity', async () => {
-    const server = createSignificantEventsServer({ featurePrivilege: 'read' });
-    server.severitySync = {
-      ...server.severitySync,
-      reconcileRows: async ({ rows }) =>
-        rows.map((row) => Object.assign({}, row, { severity: 'critical' as const })),
-    };
-    const type = createSignificantEventAttachmentType({
-      logger: loggingSystemMock.createLogger(),
-      getScopedClients: createGetScopedClients([event]),
-      server,
     });
 
     await expect(

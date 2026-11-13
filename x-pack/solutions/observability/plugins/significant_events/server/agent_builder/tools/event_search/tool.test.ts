@@ -171,7 +171,7 @@ describe('event_search tool', () => {
     );
   });
 
-  it('reconciles severities without writing them back, as a read-only tool', async () => {
+  it('passes the rows to severitySync.reconcileRows', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
       events: [],
@@ -196,7 +196,9 @@ describe('event_search tool', () => {
     const [{ reconcileSeverities }] = (searchEventsToolHandler as jest.Mock).mock.calls[0];
     await reconcileSeverities([]);
 
-    expect(reconcileRows).toHaveBeenCalledWith(expect.objectContaining({ repair: false }));
+    // `reconcileRows` is display-only: it has no write option, and `sync_severity.test.ts` covers
+    // that it never calls `syncSeverity`.
+    expect(reconcileRows).toHaveBeenCalledWith(expect.objectContaining({ rows: [] }));
   });
 
   it('accepts searches that omit slugs', async () => {

@@ -24,7 +24,7 @@ import type { SignificantEventsServer } from '../../types';
 interface CreateSignificantEventAttachmentTypeOptions {
   logger: Logger;
   getScopedClients: GetScopedClients;
-  server: Pick<SignificantEventsServer, 'security' | 'severitySync'>;
+  server: Pick<SignificantEventsServer, 'security'>;
 }
 
 const formatList = (values: string[] | undefined): string => {
@@ -67,19 +67,7 @@ export const createSignificantEventAttachmentType = ({
     const { getEventSearchClient } = await getScopedClients({ request: context.request });
     const eventClient = await getEventSearchClient();
 
-    const event = await eventClient.findLatestByEventId(eventId);
-    if (!event) {
-      return undefined;
-    }
-    // The card shows the event as it is now, so it carries the severity its investigation gave it.
-    const [reconciled] = await server.severitySync.reconcileRows({
-      rows: [event],
-      request: context.request,
-      eventClient,
-      // Resolved from agent conversations, so reading it must not write the event back.
-      repair: false,
-    });
-    return reconciled;
+    return eventClient.findLatestByEventId(eventId);
   };
 
   return {
@@ -117,14 +105,9 @@ export const createSignificantEventAttachmentType = ({
 
       try {
         const latestEvent = await fetchByEventId(attachment.origin, context);
-        // @timestamp reflects the latest write regardless of how `.rule-events` identifies a version
-        // (group_hash rather than a stored version id). The severity can change with no new write,
-        // when the investigation's differs from the stored copy.
-        return (
-          !latestEvent ||
-          latestVersion.data['@timestamp'] !== latestEvent['@timestamp'] ||
-          latestVersion.data.severity !== latestEvent.severity
-        );
+        // Compare @timestamp only: it reflects the latest write regardless of how `.rule-events`
+        // identifies a version (group_hash rather than a stored version id).
+        return !latestEvent || latestVersion.data['@timestamp'] !== latestEvent['@timestamp'];
       } catch (error) {
         logger.warn(
           `Failed to check staleness for significant event attachment "${attachment.origin}": ${error}`

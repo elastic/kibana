@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { Severity } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../rule_events_client';
@@ -16,6 +15,12 @@ import {
 } from './investigation_outcome';
 
 type SeveritySyncEventClient = Pick<RuleEventsClient, 'findEpisodeIdsByEventIds' | 'syncSeverity'>;
+type SeverityReadClient = Pick<RuleEventsClient, 'findEpisodeIdsByEventIds'>;
+
+interface SeverityReadArgs {
+  request: KibanaRequest;
+  eventClient: SeverityReadClient;
+}
 
 interface SeveritySyncArgs {
   request: KibanaRequest;
@@ -25,18 +30,17 @@ interface SeveritySyncArgs {
 /**
  * Keeps the stored severity of an event in step with its investigation, which owns it once it has
  * recorded its findings. The investigation's outcome is the source of truth and the stored severity
- * is a copy, refreshed when the investigation agent finishes (`syncEvents`) and when a read finds a
- * row stale (`reconcileRows`). A closed event's copy is not refreshed (see `syncSeverity`), so reads
- * still give it its investigation's severity.
+ * is a copy. Two writers refresh it: the investigation agent hook (`syncEvents`) and Discovery's
+ * event write (`resolveSeverities`, which only reads). Reads never write; `reconcileRows` only shows
+ * what the investigation concluded.
  */
 export interface SeveritySync {
   /**
-   * For a read: returns the rows with the severity their investigations concluded, and refreshes the
-   * stored rows that were stale in the background unless `repair` is `false`. It never throws and
-   * never waits for the write. While the investigations cannot be read the rows come back as they are.
+   * For display only: returns the rows with the severity their investigations concluded and writes
+   * nothing. It never throws. While the investigations cannot be read the rows come back as they are.
    */
   reconcileRows: <T extends { event_id: string; severity: Severity }>(
-    args: SeveritySyncArgs & { rows: T[]; repair?: boolean }
+    args: SeverityReadArgs & { rows: T[] }
   ) => Promise<T[]>;
   /**
    * For the investigation agent hook: writes the severity of the events' investigation outcomes now
@@ -52,14 +56,10 @@ export interface SeveritySync {
    * so the caller's own severity stands.
    */
   resolveSeverities: (
-    args: SeveritySyncArgs & { events: Array<{ eventId: string; storedSeverity: Severity }> }
+    args: SeverityReadArgs & { events: Array<{ eventId: string; storedSeverity: Severity }> }
   ) => Promise<Map<string, Severity>>;
 }
 
-const MAX_WRITES_PER_READ = 20;
-const WRITE_CONCURRENCY = 3;
-/** How long an event whose write did not land is left alone, so a failing one is not retried on each view. */
-const COOLDOWN_MS = 60_000;
 const WARN_EVERY_MS = 5 * 60_000;
 /** A page view cannot wait on a slow read: past this it shows the stored severities. */
 const READ_TIMEOUT_MS = 3_000;
@@ -72,9 +72,6 @@ export const createSeveritySync = ({
   logger: Logger;
 }): SeveritySync => {
   const log = logger.get('severitySync');
-  // Event ids are unique across spaces, so the id alone keys the state below.
-  const inFlight = new Set<string>();
-  const coolingDownUntil = new Map<string, number>();
   const lastWarnedAt = new Map<string, number>();
 
   const load = ({
@@ -82,7 +79,12 @@ export const createSeveritySync = ({
     eventClient,
     eventIds,
     timeoutMs,
-  }: SeveritySyncArgs & { eventIds: string[]; timeoutMs?: number }) =>
+  }: {
+    request: KibanaRequest;
+    eventClient: SeverityReadClient;
+    eventIds: string[];
+    timeoutMs?: number;
+  }) =>
     loadInvestigationOutcomes({
       request,
       eventClient,
@@ -100,52 +102,8 @@ export const createSeveritySync = ({
     log.warn(`Showing stored event severities: the investigations are unavailable (${reason})`);
   };
 
-  const pruneCooldowns = () => {
-    const now = Date.now();
-    coolingDownUntil.forEach((until, eventId) => {
-      if (until <= now) coolingDownUntil.delete(eventId);
-    });
-  };
-
-  /** Writes a read's stale rows in small concurrent groups. Never throws. */
-  const writeStale = async ({
-    eventClient,
-    stale,
-  }: {
-    eventClient: Pick<RuleEventsClient, 'syncSeverity'>;
-    stale: Map<string, Severity>;
-  }): Promise<void> => {
-    const pending = [...stale]
-      .filter(([eventId]) => !inFlight.has(eventId) && !coolingDownUntil.has(eventId))
-      .slice(0, MAX_WRITES_PER_READ);
-    pending.forEach(([eventId]) => inFlight.add(eventId));
-
-    const failures: string[] = [];
-    for (const group of chunk(pending, WRITE_CONCURRENCY)) {
-      await Promise.all(
-        group.map(async ([eventId, severity]) => {
-          try {
-            const writeResult = await eventClient.syncSeverity({ eventId, severity });
-            if (writeResult !== 'updated' && writeResult !== 'unchanged') {
-              coolingDownUntil.set(eventId, Date.now() + COOLDOWN_MS);
-            }
-          } catch (error) {
-            coolingDownUntil.set(eventId, Date.now() + COOLDOWN_MS);
-            failures.push(error instanceof Error ? error.message : String(error));
-          } finally {
-            inFlight.delete(eventId);
-          }
-        })
-      );
-    }
-    if (failures.length) {
-      log.warn(`Could not write the severity of ${failures.length} event(s): ${failures[0]}`);
-    }
-  };
-
   return {
-    reconcileRows: async ({ rows, request, eventClient, repair = true }) => {
-      pruneCooldowns();
+    reconcileRows: async ({ rows, request, eventClient }) => {
       const loaded = await load({
         request,
         eventClient,
@@ -160,16 +118,10 @@ export const createSeveritySync = ({
         }
         return rows;
       }
-
-      const stale = new Map<string, Severity>();
-      const reconciled = rows.map((row) => {
+      return rows.map((row) => {
         const concluded = loaded.outcomes.get(row.event_id)?.severity;
-        if (!concluded || concluded === row.severity) return row;
-        stale.set(row.event_id, concluded);
-        return { ...row, severity: concluded };
+        return concluded && concluded !== row.severity ? { ...row, severity: concluded } : row;
       });
-      if (repair && stale.size) void writeStale({ eventClient, stale });
-      return reconciled;
     },
 
     syncEvents: async ({ eventIds, request, eventClient }) => {

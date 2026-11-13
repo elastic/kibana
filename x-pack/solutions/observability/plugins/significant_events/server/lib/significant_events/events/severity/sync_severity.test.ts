@@ -33,10 +33,6 @@ const staleRows = (prefix: string, count: number): Row[] =>
     event_id: `${prefix}-${index}`,
     severity: 'low',
   }));
-const allCritical = (rows: Row[]) =>
-  available(
-    rows.map(({ event_id: eventId }) => [eventId, 'critical'] as [string, Row['severity']])
-  );
 
 const setup = (syncSeverity: jest.Mock = jest.fn().mockResolvedValue('updated' as Outcome)) => {
   const eventClient = { findEpisodeIdsByEventIds: jest.fn(), syncSeverity };
@@ -59,7 +55,7 @@ describe('createSeveritySync', () => {
   afterEach(() => jest.useRealTimers());
 
   describe('reconcileRows', () => {
-    it('gives each row the severity its investigation concluded and writes the stored rows that differ', async () => {
+    it('gives each row the severity its investigation concluded and never writes', async () => {
       mockLoadInvestigationOutcomes.mockResolvedValue(
         available([
           ['event-1', 'critical'],
@@ -76,32 +72,36 @@ describe('createSeveritySync', () => {
       await flush();
 
       expect(rows.map(({ severity }) => severity)).toEqual(['critical', 'low', 'high']);
-      expect(syncSeverity).toHaveBeenCalledTimes(1);
-      expect(syncSeverity).toHaveBeenCalledWith({ eventId: 'event-1', severity: 'critical' });
-    });
-
-    it('gives the rows their concluded severity without writing them when repair is off', async () => {
-      mockLoadInvestigationOutcomes.mockResolvedValue(available([['event-1', 'critical']]));
-      const { severitySync, syncSeverity, eventClient } = setup();
-
-      const rows = await severitySync.reconcileRows({
-        rows: [{ event_id: 'event-1', severity: 'high' }],
-        request,
-        eventClient,
-        repair: false,
-      });
-      await flush();
-
-      expect(rows).toEqual([{ event_id: 'event-1', severity: 'critical' }]);
       expect(syncSeverity).not.toHaveBeenCalled();
     });
 
-    it('keeps the stored severities and writes nothing while the investigations are unavailable', async () => {
-      mockLoadInvestigationOutcomes.mockResolvedValue(unavailable('forbidden'));
-      const { reconcile, syncSeverity } = setup();
-      const rows = staleRows('kept', 2);
+    it.each(['forbidden', 'timeout', 'error', 'not_installed'])(
+      'keeps the stored severities and writes nothing while the investigations are unavailable (%s)',
+      async (reason) => {
+        mockLoadInvestigationOutcomes.mockResolvedValue(unavailable(reason));
+        const { reconcile, syncSeverity } = setup();
+        const rows = staleRows('kept', 2);
 
-      expect(await reconcile(rows)).toEqual(rows);
+        expect(await reconcile(rows)).toEqual(rows);
+        await flush();
+
+        expect(syncSeverity).not.toHaveBeenCalled();
+      }
+    );
+
+    it('never writes for inactive events or when a write would fail', async () => {
+      mockLoadInvestigationOutcomes.mockResolvedValue(
+        available([
+          ['event-1', 'critical'],
+          ['event-2', 'low'],
+        ])
+      );
+      const { reconcile, syncSeverity } = setup(jest.fn().mockRejectedValue(new Error('boom')));
+
+      await reconcile([
+        { event_id: 'event-1', severity: 'low', status: 'inactive' },
+        { event_id: 'event-2', severity: 'high' },
+      ] as Row[]);
       await flush();
 
       expect(syncSeverity).not.toHaveBeenCalled();
@@ -129,66 +129,6 @@ describe('createSeveritySync', () => {
         await reconcile([]);
       }
       expect(log.warn).toHaveBeenCalledTimes(3);
-    });
-
-    it('writes at most 20 rows per read, three at a time', async () => {
-      const rows = staleRows('cap', 25);
-      mockLoadInvestigationOutcomes.mockResolvedValue(allCritical(rows));
-      let running = 0;
-      let mostRunning = 0;
-      const syncSeverity = jest.fn(async () => {
-        running += 1;
-        mostRunning = Math.max(mostRunning, running);
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        running -= 1;
-        return 'updated' as Outcome;
-      });
-      const { reconcile } = setup(syncSeverity);
-
-      await reconcile(rows);
-      await jest.advanceTimersByTimeAsync(1_000);
-
-      expect(syncSeverity).toHaveBeenCalledTimes(20);
-      expect(mostRunning).toBe(3);
-    });
-
-    it.each<[string, Outcome]>([
-      ['a lost race', 'superseded'],
-      ['a closed event', 'closed'],
-    ])(
-      'does not write an event that is already being written, and leaves %s alone for a minute',
-      async (_name, outcome) => {
-        const rows = staleRows('again', 1);
-        mockLoadInvestigationOutcomes.mockResolvedValue(allCritical(rows));
-        let finish: (result: Outcome) => void = () => undefined;
-        const syncSeverity = jest.fn(() => new Promise<Outcome>((resolve) => (finish = resolve)));
-        const { reconcile } = setup(syncSeverity);
-
-        await reconcile(rows);
-        await reconcile(rows);
-        expect(syncSeverity).toHaveBeenCalledTimes(1);
-
-        finish(outcome);
-        await flush();
-        await reconcile(rows);
-        expect(syncSeverity).toHaveBeenCalledTimes(1);
-
-        await jest.advanceTimersByTimeAsync(60_001);
-        await reconcile(rows);
-        expect(syncSeverity).toHaveBeenCalledTimes(2);
-      }
-    );
-
-    it('warns once per read, with the count, when writes fail', async () => {
-      const rows = staleRows('fail', 3);
-      mockLoadInvestigationOutcomes.mockResolvedValue(allCritical(rows));
-      const { reconcile } = setup(jest.fn().mockRejectedValue(new Error('boom')));
-
-      await reconcile(rows);
-      await flush();
-
-      expect(log.warn).toHaveBeenCalledTimes(1);
-      expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('3 event(s): boom'));
     });
   });
 

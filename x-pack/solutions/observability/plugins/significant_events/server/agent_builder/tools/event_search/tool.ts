@@ -281,8 +281,6 @@ export function createSearchEventsTool({
               rows,
               request,
               eventClient: eventSearchClient,
-              // The tool is declared `readOnlyHint: true`, so it must not write the stale rows back.
-              repair: false,
             }),
           params: {
             ...searchParams,

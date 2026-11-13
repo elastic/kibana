@@ -361,6 +361,16 @@ describe('eventsWriteBulkHandler, severity resolved from investigations', () => 
     expect(writtenDocs()[0].severity).toBe('medium');
   });
 
+  it("stores the severity a person set on the investigation when the stored copy and the agent's still hold the old one", async () => {
+    const [result] = await write(
+      clientWith(stored('high')),
+      new Map([['checkout-stable', 'critical']])
+    );
+
+    expect(result).toMatchObject({ written: true });
+    expect(writtenDocs()[0].severity).toBe('critical');
+  });
+
   it('writes nothing when the agent only disagrees with the resolved severity (no churn)', async () => {
     const [result] = await write(
       clientWith(stored('medium')),

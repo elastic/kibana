@@ -233,11 +233,7 @@ const eventsSearchRoute = createServerRoute({
     return {
       ...result,
       hits: await attachInvestigationState({
-        hits: await server.severitySync.reconcileRows({
-          rows: result.hits,
-          request,
-          eventClient,
-        }),
+        hits: result.hits,
         sets,
         agenticInvestigations: server.agenticInvestigations,
         request,

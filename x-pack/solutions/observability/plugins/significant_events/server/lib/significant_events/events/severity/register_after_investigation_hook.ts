@@ -133,7 +133,7 @@ export const registerAfterInvestigationHook = ({
 
     if (lastFailure) {
       logger.warn(
-        `Investigation ${conversationId} severity was not written through after ${retryDelaysMs.length} attempts (${lastFailure}); the next read or Discovery write repairs it`
+        `Investigation ${conversationId} severity was not written through after ${retryDelaysMs.length} attempts (${lastFailure}); the next investigation run or Discovery write will write it`
       );
     } else {
       logger.debug(
