@@ -256,9 +256,6 @@ anything is written:
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
 - `digital-experience-sessions-*`: `read`, `index`, `create_index`, `delete`, `delete_index`
 
-The check and its 403 name the browser indices, `digital-experience-sessions-browser-*`, which the
-`digital-experience-sessions-*` grant covers.
-
 The read on `traces-*.otel-*` and `logs-*.otel-*` must also be unrestricted: no document- or
 field-level security. Otherwise the summaries would only hold that user's slice of the data, so
 every other application's sessions (or fields) would silently be missing for everyone.
