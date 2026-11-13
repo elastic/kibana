@@ -25,7 +25,7 @@ const AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
  */
 const SML_TEST_TYPES_PLUGIN_PATH = `--plugin-path=${resolve(
   REPO_ROOT,
-  'x-pack/platform/test/agent_builder_sml/plugins/sml_test_types'
+  'x-pack/platform/test_plugins/agent_builder_sml_test_types'
 )}`;
 
 /**

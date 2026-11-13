@@ -21,7 +21,8 @@
     "@kbn/core-http-common",
     "@kbn/synthtrace-client",
     "@kbn/synthtrace",
-    "@kbn/core-chrome-browser-components"
+    "@kbn/core-chrome-browser-components",
+    "@kbn/content-list-common"
   ],
   "exclude": [
     "target/**/*",

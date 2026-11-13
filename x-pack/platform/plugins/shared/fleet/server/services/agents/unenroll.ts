@@ -68,6 +68,7 @@ export async function unenrollAgent(
     force?: boolean;
     skipAgentlessValidation?: boolean;
     revoke?: boolean;
+    unenrolledReason?: string;
   }
 ) {
   await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
@@ -78,7 +79,9 @@ export async function unenrollAgent(
     skipHostedValidation: options?.force,
   });
   if (options?.revoke) {
-    return forceUnenrollAgent(esClient, soClient, agentId);
+    return forceUnenrollAgent(esClient, soClient, agentId, {
+      unenrolledReason: options.unenrolledReason,
+    });
   }
   const now = new Date().toISOString();
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -162,7 +165,8 @@ export async function unenrollAgents(
 export async function forceUnenrollAgent(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  agentIdOrAgent: string | Agent
+  agentIdOrAgent: string | Agent,
+  options?: { unenrolledReason?: string }
 ) {
   const agent =
     typeof agentIdOrAgent === 'string'
@@ -173,6 +177,7 @@ export async function forceUnenrollAgent(
   await updateAgent(esClient, agent.id, {
     active: false,
     unenrolled_at: new Date().toISOString(),
+    ...(options?.unenrolledReason ? { unenrolled_reason: options.unenrolledReason } : {}),
   });
   await updateActionsForForceUnenroll(esClient, soClient, [agent.id], uuidv4(), 1);
 }

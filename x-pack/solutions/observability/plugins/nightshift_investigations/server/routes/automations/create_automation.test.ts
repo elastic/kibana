@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import { createAutomationRoute } from './create_automation';
 import { createRouteContext, createServiceAccountService } from './test_helpers';
 
@@ -120,6 +121,15 @@ describe('request validation', () => {
     messageFilter: 'outage',
   };
   const parseRows = (rows: unknown[]) => params.parse({ body: { ...body, trigger: { rows } } });
+
+  it('accepts named alert severities and rejects unknown or oversized selections', () => {
+    const row = { kind: 'alert', severities: [...ALERT_SEVERITY_VALUES] };
+    expect(parseRows([row]).body.trigger.rows).toEqual([row]);
+    expect(() => parseRows([{ kind: 'alert', severities: ['unknown'] }])).toThrow();
+    expect(() =>
+      parseRows([{ kind: 'alert', severities: [...ALERT_SEVERITY_VALUES, 'high'] }])
+    ).toThrow();
+  });
 
   it('accepts Slack trigger rows and keeps their fields', () => {
     expect(parseRows([slackRow]).body.trigger.rows).toEqual([slackRow]);

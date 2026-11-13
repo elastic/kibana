@@ -8,7 +8,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiBasicTable,
+  EuiLiveAnnouncer,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -54,6 +61,19 @@ export const ImportJsonWarningsCallout = ({
   const warningsSummary =
     getWarningsSummary?.(warnings.length) ??
     importJsonFlyoutStrings.getWarningsSummary(warnings.length);
+  const calloutTitle =
+    relatedItems.length > 0
+      ? importJsonFlyoutStrings.getReviewWarningsTitle()
+      : importJsonFlyoutStrings.getWarningsTitle();
+  const announcement = [
+    calloutTitle,
+    warnings.length > 0 ? warningsSummary : '',
+    relatedItems.length > 0
+      ? importJsonFlyoutStrings.getRelatedItemsSummary(relatedItemsCount)
+      : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   if (!isVisible || (warnings.length === 0 && relatedItems.length === 0)) {
     return null;
@@ -62,13 +82,8 @@ export const ImportJsonWarningsCallout = ({
   return (
     <>
       <KbnWarningCallout
-        announceOnMount
         size="s"
-        title={
-          relatedItems.length > 0
-            ? importJsonFlyoutStrings.getReviewWarningsTitle()
-            : importJsonFlyoutStrings.getWarningsTitle()
-        }
+        title={calloutTitle}
         text={relatedItems.length > 0 ? undefined : warningsSummary}
         data-test-subj={`${dataTestSubjPrefix}Warnings`}
         onDismiss={() => {
@@ -150,6 +165,7 @@ export const ImportJsonWarningsCallout = ({
           </>
         )}
       </KbnWarningCallout>
+      <EuiLiveAnnouncer>{announcement}</EuiLiveAnnouncer>
       <EuiSpacer size="m" />
     </>
   );

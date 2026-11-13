@@ -81,7 +81,7 @@ const COLUMN_LABELS: Record<SessionsOptionalColumnId, string> = {
   duration: i18n.translate('xpack.digitalExperience.sessions.table.durationColumn', {
     defaultMessage: 'Duration',
   }),
-  // As the session page and the transform call them.
+  // As the session page calls them.
   pages: i18n.translate('xpack.digitalExperience.sessions.table.pageViewsColumn', {
     defaultMessage: 'Page views',
   }),

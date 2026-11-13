@@ -19,12 +19,12 @@ type RoleDescriptor = Omit<estypes.SecurityPutRoleRequest, 'name'>;
 export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, RoleDescriptor>> = {
   nightshift_agent: {
     description:
-      'Privileges for the service account of the Nightshift agent. Assigned by Kibana; do not assign to users.',
+      'Privileges for the service account of the nightshift agent. Assigned by Kibana; do not assign to users.',
     cluster: ['monitor_inference'],
     indices: [
       {
         names: [
-          'ai-index-idx-nightshift-cortex',
+          'ai-index-idx-nightshift-wiki',
           'ai-index-idx-nightshift-semantic-memory',
           'ai-index-idx-nightshift-decision-trees',
         ],
@@ -51,7 +51,7 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
   },
   nightshift_automations: {
     description:
-      'Privileges for the service account of Nightshift automations. Assigned by Kibana; do not assign to users.',
+      'Privileges for the service account of nightshift automations. Assigned by Kibana; do not assign to users.',
     cluster: ['monitor_inference'],
     applications: [
       {

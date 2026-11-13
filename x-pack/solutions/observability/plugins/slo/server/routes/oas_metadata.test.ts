@@ -15,7 +15,8 @@ import type {
 import { getSloRouteRepository } from './route';
 
 interface MediaTypes {
-  content?: Record<string, { examples?: object }>;
+  description?: string;
+  content?: Record<string, { schema?: object; examples?: object }>;
 }
 
 interface OperationFile {
@@ -23,7 +24,7 @@ interface OperationFile {
   responses?: Record<string, MediaTypes>;
 }
 
-const SHARED_SCHEMAS_FILE = path.join(__dirname, 'oas_schemas.yaml');
+const SHARED_SCHEMAS_FILE = path.join(__dirname, 'oas_error_schemas.yaml');
 
 const readYaml = <T>(file: string): T => parse(fs.readFileSync(file, 'utf8'));
 
@@ -32,6 +33,14 @@ const getRouteOptions = (route: ServerRouteRepository[string]): DefaultRouteCrea
 
 const collectRefs = (document: object): string[] =>
   Array.from(JSON.stringify(document).matchAll(/"\$ref":"([^"]+)"/g), ([, ref]) => ref);
+
+const readOperationFile = ({
+  oasOperationObject,
+}: DefaultRouteCreateOptions): { operationFile: string; operation: OperationFile } => {
+  const operationFile = oasOperationObject?.();
+  if (typeof operationFile !== 'string') throw new Error('oasOperationObject has no file path');
+  return { operationFile, operation: readYaml<OperationFile>(operationFile) };
+};
 
 const EXPECTED_OPERATION_IDS: Record<string, string> = {
   'POST /api/observability/slos 2023-10-31': 'createSloOp',
@@ -53,7 +62,11 @@ const EXPECTED_OPERATION_IDS: Record<string, string> = {
 
 describe('SLO routes OpenAPI metadata', () => {
   const documentedRoutes = Object.values(getSloRouteRepository())
-    .map((route) => ({ endpoint: route.endpoint, options: getRouteOptions(route) }))
+    .map((route) => ({
+      endpoint: route.endpoint,
+      options: getRouteOptions(route),
+      routeResponses: route.responses,
+    }))
     .filter(({ options }) => options.access !== 'internal' && !options.excludeFromOAS);
   const sharedSchemas = readYaml<Record<string, object>>(SHARED_SCHEMAS_FILE);
 
@@ -65,14 +78,7 @@ describe('SLO routes OpenAPI metadata', () => {
     ).toEqual(EXPECTED_OPERATION_IDS);
   });
 
-  it('resolves every internal reference of the shared response schemas', () => {
-    for (const ref of collectRefs(sharedSchemas)) {
-      expect(ref).toMatch(/^#\//);
-      expect(sharedSchemas).toHaveProperty([ref.slice(2)]);
-    }
-  });
-
-  describe.each(documentedRoutes)('$endpoint', ({ options }) => {
+  describe.each(documentedRoutes)('$endpoint', ({ options, routeResponses }) => {
     it('has a summary, a description and the slo tag', () => {
       expect(options).toEqual(
         expect.objectContaining({
@@ -84,10 +90,7 @@ describe('SLO routes OpenAPI metadata', () => {
     });
 
     it('has an operation file with resolvable references, a successful response and examples', () => {
-      const operationFile = options.oasOperationObject?.();
-      if (typeof operationFile !== 'string') throw new Error('oasOperationObject has no file path');
-
-      const operation = readYaml<OperationFile>(operationFile);
+      const { operationFile, operation } = readOperationFile(options);
       for (const ref of collectRefs(operation)) {
         const [file, pointer] = ref.split('#/');
         expect(path.resolve(path.dirname(operationFile), file)).toBe(SHARED_SCHEMAS_FILE);
@@ -108,6 +111,23 @@ describe('SLO routes OpenAPI metadata', () => {
             examples: expect.any(Object),
           });
         }
+      }
+    });
+
+    it('generates its successful response body schema from the route', () => {
+      const {
+        operation: { responses: documentedResponses = {} },
+      } = readOperationFile(options);
+      for (const [status, { description, content }] of Object.entries(documentedResponses)) {
+        if (!status.startsWith('2') || !content) continue;
+        expect({ status, description }).toEqual({ status, description: undefined });
+        for (const [mediaType, { schema }] of Object.entries(content)) {
+          expect({ status, mediaType, schema }).toEqual({ status, mediaType, schema: undefined });
+        }
+        expect(routeResponses?.[Number(status)]).toEqual({
+          description: expect.stringMatching(/\S/),
+          body: expect.any(Function),
+        });
       }
     });
   });

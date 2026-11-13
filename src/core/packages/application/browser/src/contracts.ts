@@ -73,6 +73,10 @@ export interface ApplicationStart {
    * Before rendering a UI element that a user could use to navigate to another application,
    * first check if the destination application is actually available using the isAppRegistered API.
    *
+   * For links, render `href={getUrlForApp(appId, { path })}` instead: core routes `<a href>` clicks
+   * for you, and Cmd/Ctrl-click keeps working. Call this directly for buttons, or for options a URL
+   * can't carry, like `state` or `replace`.
+   *
    * @param appId - The identifier of the app to navigate to
    * @param options - navigation options
    */
@@ -83,7 +87,7 @@ export interface ApplicationStart {
    * within the current basePath).
    *
    * **Important**: This method always uses `history.push()` and creates a NEW entry in the browser history stack.
-   * This is appropriate for user-initiated navigation (e.g., clicking links or buttons), but NOT for:
+   * This is appropriate for user-initiated navigation (e.g., clicking buttons), but NOT for:
    * - **In-app navigation** within the same React Router instance - use React Router's `history.replace()` instead
    * - **Conditional redirects** in components - use `navigateToApp(appId, { replace: true })` for cross-app redirects
    *
@@ -99,6 +103,9 @@ export interface ApplicationStart {
    *
    * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
    * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.
+   *
+   * Links don't need this: core already routes same-origin `<a href>` clicks through it. Call it
+   * directly for buttons, after async work, or for options a URL can't carry, like `forceRedirect`.
    *
    * @example
    * ```ts
