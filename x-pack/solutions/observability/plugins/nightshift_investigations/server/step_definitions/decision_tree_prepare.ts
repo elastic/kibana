@@ -16,11 +16,6 @@ import { NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID } from '@kbn/nightshift
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import {
-  ALERT_OUTCOME_VERDICTS,
-  isAlertRecoveryRound,
-  parseAlertOutcomeVerdict,
-} from '../client/build_investigation_message';
-import {
   extractAccessedTreeIdsFromRounds,
   roundsBefore,
   type InvestigationToolCall,
@@ -67,8 +62,8 @@ export const decisionTreePrepareStepDefinition = ({
       'Builds the closing reinforcement message for a completed investigation round: the decision ' +
       'trees available to edit, the learnings already on file, and the turn script. A follow-up ' +
       'round only edits the trees of its own investigation, and is skipped when there are none. ' +
-      'A human follow-up that has trees gets one LLM causal check; an alert-recovery round reads ' +
-      "the investigator's Verdict from the round response without an extra LLM call.",
+      'A follow-up that has trees gets one LLM causal check: only a cause the investigation data ' +
+      'shows reinforces a path.',
     inputSchema: z.object({
       prompt: investigationRoundInputsSchema.prompt.optional(),
       response: investigationRoundInputsSchema.response.optional(),
@@ -127,12 +122,6 @@ export const decisionTreePrepareStepDefinition = ({
         })
         .optional()
         .describe('For a follow-up with trees to edit: what its causal check found.'),
-      alert_outcome_verdict: z
-        .enum(ALERT_OUTCOME_VERDICTS)
-        .optional()
-        .describe(
-          "For an alert-recovery follow-up with trees to edit: the investigator's Verdict."
-        ),
     }),
     handler: async (context) => {
       const {
@@ -255,12 +244,6 @@ export const decisionTreePrepareStepDefinition = ({
           return NO_CAUSAL_VERDICT;
         }
       };
-      const turnKind =
-        earlierRounds.length === 0 ? 'initial_investigation' : 'feedback_reinforcement';
-      const alertRecovery = turnKind === 'feedback_reinforcement' && isAlertRecoveryRound(prompt);
-      const alertOutcomeVerdict = alertRecovery ? parseAlertOutcomeVerdict(response) : undefined;
-      const alertOutcomeConfirmed = alertRecovery ? alertOutcomeVerdict === 'confirmed' : undefined;
-
       const turn = await withNightshiftBackgroundSpan(
         {
           name: 'nightshift.decisionTreePrepare',
@@ -274,7 +257,8 @@ export const decisionTreePrepareStepDefinition = ({
         },
         async (span) => {
           const res = await prepareReinforcementTurn({
-            turnKind,
+            turnKind:
+              earlierRounds.length === 0 ? 'initial_investigation' : 'feedback_reinforcement',
             investigationId: conversationId,
             roundId,
             earlierAccessedTreeIds: extractAccessedTreeIdsFromRounds(earlierRounds),
@@ -283,9 +267,7 @@ export const decisionTreePrepareStepDefinition = ({
             logger,
             spaceId,
             toolCalls: roundToolCalls,
-            ...(alertOutcomeConfirmed !== undefined
-              ? { causalConfirmed: alertOutcomeConfirmed }
-              : { checkCausal }),
+            checkCausal,
           });
           if (res.skipped) {
             span?.setAttribute('nightshift.skipped', true);
@@ -294,19 +276,7 @@ export const decisionTreePrepareStepDefinition = ({
           span?.setAttribute('nightshift.tree_count', res.treeCount);
           span?.setAttribute('nightshift.turn_kind', res.turnKind);
           span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
-          if (alertOutcomeConfirmed !== undefined) {
-            context.logger.info(
-              `Round "${roundId}" of "${conversationId}" alert-recovery outcome: verdict=${
-                alertOutcomeVerdict ?? 'missing'
-              } confirmed=${alertOutcomeConfirmed}`
-            );
-            span?.setAttribute('nightshift.causal_check.alert_recovery', true);
-            span?.setAttribute(
-              'nightshift.alert_outcome.verdict',
-              alertOutcomeVerdict ?? 'missing'
-            );
-            span?.setAttribute('nightshift.causal_check.confirmed', alertOutcomeConfirmed);
-          } else if (res.verdict) {
+          if (res.verdict) {
             span?.setAttribute('nightshift.causal_check.is_feedback', res.verdict.isFeedback);
             span?.setAttribute('nightshift.causal_check.confirmed', res.verdict.causalConfirmed);
           }
@@ -324,7 +294,6 @@ export const decisionTreePrepareStepDefinition = ({
           turn_kind: turn.turnKind,
           skipped: false,
           ...(turn.openedTreeIds.length > 0 ? { opened_ids: turn.openedTreeIds } : {}),
-          ...(alertOutcomeVerdict ? { alert_outcome_verdict: alertOutcomeVerdict } : {}),
           ...(turn.verdict
             ? {
                 causal_check: {

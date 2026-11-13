@@ -9,7 +9,6 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
-import { buildAlertRecoveredFollowUpMessage } from '../client/build_investigation_message';
 import { NO_CAUSAL_VERDICT } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { createOptimizeModel } from '../lib/create_optimize_model';
@@ -312,50 +311,6 @@ describe('decisionTreePrepareStepDefinition', () => {
           },
         },
       });
-    });
-
-    it.each([
-      ['confirmed', 'Verdict: confirmed', true],
-      ['partially supported but incomplete', 'Verdict: partially supported but incomplete', false],
-      ['contradicted', 'Verdict: contradicted', false],
-      ['unresolved', 'Verdict: unresolved', false],
-    ] as const)(
-      "reads an alert-recovery round's %s Verdict from the investigator reply without an LLM causal check",
-      async (expectedVerdict, verdictLine, expectedConfirmed) => {
-        const result = await run({
-          ...investigatorRound,
-          prompt: buildAlertRecoveredFollowUpMessage({
-            alertUuid: 'alert-1',
-            alertId: 'service.name:checkout',
-          }),
-          response: `Recovery analysis.\n\nAlert-driving failure: 500s.\nIncident trigger: deploy.\nBackground condition: none.\nResolution mechanism: rollback.\n${verdictLine}`,
-        });
-
-        expect(createOptimizeModel).not.toHaveBeenCalled();
-        expect(preparedWith().checkCausal).toBeUndefined();
-        expect(preparedWith().causalConfirmed).toBe(expectedConfirmed);
-        expect(result).toMatchObject({
-          output: {
-            alert_outcome_verdict: expectedVerdict,
-          },
-        });
-        expect(result.output).not.toHaveProperty('causal_check');
-      }
-    );
-
-    it('defaults causalConfirmed to false on an alert-recovery round with no Verdict line', async () => {
-      const result = await run({
-        ...investigatorRound,
-        prompt: buildAlertRecoveredFollowUpMessage({
-          alertUuid: 'alert-1',
-          alertId: 'service.name:checkout',
-        }),
-        response: 'Could not reach telemetry.',
-      });
-
-      expect(createOptimizeModel).not.toHaveBeenCalled();
-      expect(preparedWith().causalConfirmed).toBe(false);
-      expect(result.output).not.toHaveProperty('alert_outcome_verdict');
     });
   });
 

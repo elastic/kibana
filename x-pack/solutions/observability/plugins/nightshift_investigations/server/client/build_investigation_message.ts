@@ -249,15 +249,6 @@ export function buildInvestigationMessage(context: AlertInvestigationContext): s
 /** How the alert-recovered follow-up opens, so a consumer can tell that round from a user's message. */
 export const ALERT_RECOVERED_MESSAGE_PREFIX = 'An alert in this investigation has recovered.';
 
-export const ALERT_OUTCOME_VERDICTS = [
-  'confirmed',
-  'partially supported but incomplete',
-  'contradicted',
-  'unresolved',
-] as const;
-
-export type AlertOutcomeVerdict = (typeof ALERT_OUTCOME_VERDICTS)[number];
-
 /** Whether a round's prompt is the automated follow-up `followUpRecoveredAlert` builds. */
 export const isAlertRecoveryRound = (prompt: string | undefined): boolean =>
   (prompt ?? '').trimStart().startsWith(ALERT_RECOVERED_MESSAGE_PREFIX);
@@ -281,55 +272,6 @@ This turn evaluates an earlier incident hypothesis using alert-outcome evidence.
 - In your reply, update or downgrade hypotheses to match the outcome evidence. Do not reinforce an earlier hypothesis merely because the alert stopped firing.
 - End with this explicit reconciliation block: "Alert-driving failure:", "Incident trigger:", "Background condition:", "Resolution mechanism:", and "Verdict: <one allowed verdict>".
 </alert_outcome_policy>`;
-
-const VERDICT_LINE_RE = /^[ \t*-]*(?:\*\*|`)?verdict(?:\*\*|`)?[ \t]*:(?:\*\*|`)?[ \t]*(.+)$/i;
-
-/**
- * Extracts the investigator's `Verdict:` from the trailing `<alert_outcome_policy>` reconciliation
- * block. Scans from the end so earlier prose does not shadow the final reconciliation, and ignores
- * blockquoted lines (`>`) or unrecognized verdict text rather than guessing.
- */
-export const parseAlertOutcomeVerdict = (
-  response: string | undefined
-): AlertOutcomeVerdict | undefined => {
-  if (!response) return undefined;
-  const lines = response.split(/\r?\n/);
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const match = VERDICT_LINE_RE.exec(lines[i]);
-    if (!match) continue;
-    const cleaned = match[1]
-      .replace(/[*"'`]+/g, '')
-      .trim()
-      .replace(/^[<\[]+/, '')
-      .replace(/[>\].!?\s]+$/, '')
-      .trim()
-      .toLowerCase();
-    if (!cleaned) continue;
-
-    if (
-      /^partially\s+supported(?:\s+but\s+incomplete)?(?=$|[\s.,;:—–(-])/.test(cleaned) ||
-      /^partly\s+supported(?:\s+but\s+incomplete)?(?=$|[\s.,;:—–(-])/.test(cleaned)
-    ) {
-      return 'partially supported but incomplete';
-    }
-    if (/^contradicted(?=$|[\s.,;:—–(-])/.test(cleaned)) {
-      return 'contradicted';
-    }
-    if (/^unresolved(?=$|[\s.,;:—–(-])/.test(cleaned)) {
-      return 'unresolved';
-    }
-    if (
-      /^confirmed(?=$|[\s.,;:—–(-])/.test(cleaned) &&
-      !/\b(?:not|never|neither|unconfirmed|contradicted|unresolved|partly|partially)\b/.test(
-        cleaned
-      )
-    ) {
-      return 'confirmed';
-    }
-    return undefined;
-  }
-  return undefined;
-};
 
 export interface AlertRecoveredMessageInput {
   alertUuid: string;

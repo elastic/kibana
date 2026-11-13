@@ -120,7 +120,6 @@ export const prepareReinforcementTurn = async ({
   spaceId,
   signal,
   toolCalls = [],
-  causalConfirmed: causalConfirmedOverride,
   checkCausal,
 }: {
   turnKind: DecisionTreeTurnKind;
@@ -135,11 +134,6 @@ export const prepareReinforcementTurn = async ({
   spaceId: string;
   signal?: AbortSignal;
   toolCalls?: InvestigationToolCall[];
-  /**
-   * Pre-resolved causal confirmation (for example from an alert-recovery round's `Verdict:`
-   * reconciliation block). When set, `checkCausal` is not called.
-   */
-  causalConfirmed?: boolean;
   /**
    * The follow-up's causal check. Called only when a follow-up has trees to edit, so a round that
    * reinforces nothing costs no model call. Without it, a follow-up extends and claims no cause.
@@ -180,20 +174,13 @@ export const prepareReinforcementTurn = async ({
     return { skipped: true };
   }
 
-  const verdict =
-    isFollowUp && causalConfirmedOverride === undefined
-      ? checkCausal
-        ? await checkCausal()
-        : NO_CAUSAL_VERDICT
-      : undefined;
+  const verdict = isFollowUp ? (checkCausal ? await checkCausal() : NO_CAUSAL_VERDICT) : undefined;
   const message = buildReinforcementPrompt({
     trees: editable,
     learnings,
     connectorNames,
     turnKind,
-    causalConfirmed: isFollowUp
-      ? causalConfirmedOverride ?? verdict?.causalConfirmed ?? false
-      : false,
+    causalConfirmed: verdict?.causalConfirmed ?? false,
   });
   return {
     skipped: false,

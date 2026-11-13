@@ -214,26 +214,6 @@ describe('prepareReinforcementTurn', () => {
       expect(turn.skipped === false && turn.message).not.toContain(confirmed.causalSummary);
     });
 
-    it('uses a pre-resolved causalConfirmed verdict without calling checkCausal', async () => {
-      const checkCausal = jest.fn();
-
-      const reinforced = await prepare({
-        earlierAccessedTreeIds: ['symptom:checkout-latency'],
-        causalConfirmed: true,
-        checkCausal,
-      });
-      const extended = await prepare({
-        earlierAccessedTreeIds: ['symptom:checkout-latency'],
-        causalConfirmed: false,
-        checkCausal,
-      });
-
-      expect(checkCausal).not.toHaveBeenCalled();
-      expect(reinforced).not.toHaveProperty('verdict');
-      expect(reinforced.skipped === false && reinforced.message).toContain(scripts.reinforce);
-      expect(extended.skipped === false && extended.message).toContain(scripts.followupExtend);
-    });
-
     // A recovery or a reply has nothing new to seed a tree from.
     it('is skipped when the investigation has no tree to build on', async () => {
       const checkCausal = jest.fn();
