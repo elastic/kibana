@@ -51,13 +51,13 @@ export const getResizePreviewRect = ({
   pointerPixel,
   gridSettings,
   resizeOptions,
-  maxRight,
+  usableWidth,
 }: {
   pointerPixel: PointerPosition;
   activePanel: ActivePanelEvent;
   gridSettings: GridSettings;
   resizeOptions: FlexPanelData['resizeOptions'];
-  maxRight: number;
+  usableWidth: number;
 }) => {
   const panelRect = activePanel.panelDiv.getBoundingClientRect();
   // use the left edge from the resize start; the live `left` can change if the panel reflows rows
@@ -80,9 +80,9 @@ export const getResizePreviewRect = ({
     right: Math.max(
       Math.min(
         pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position
-        originLeft + maxWidth, // max width of panel
-        // cannot extend width past the right edge of the grid layout
-        maxRight
+        // max width of panel; limited by the container's usable width rather than the space left on
+        // the original row, since the panel wraps onto the next row when it no longer fits
+        originLeft + Math.min(maxWidth, usableWidth)
       ),
       originLeft + minWidth // min width of panel
     ),
@@ -193,14 +193,21 @@ export const getNextKeyboardResizePosition = (
 
   const gridPosition = gridLayoutStateManager.layoutRef.current?.getBoundingClientRect();
   const gridLeft = (gridPosition?.left || 0) + gutterSize;
-  const gridRight = (gridPosition?.right || window.innerWidth) - gutterSize;
+  const usableWidth = (gridPosition?.width || window.innerWidth) - gutterSize * 2;
   const stepX = rowHeight + gutterSize; // this acts as a decent guess for how much to resize by
   // step from the last requested edge, since the handle's live position shifts if the panel reflows
   const currentX = activePanel.position.right + activePanel.sensorOffsets.right;
 
   switch (ev.code) {
     case KeyboardCode.Right:
-      return { ...handlePosition, clientX: Math.min(currentX + stepX, gridRight) };
+      // the width is capped by the container's usable width, not by the space left on the original row
+      return {
+        ...handlePosition,
+        clientX: Math.min(
+          currentX + stepX,
+          activePanel.position.left + usableWidth + activePanel.sensorOffsets.right
+        ),
+      };
     case KeyboardCode.Left:
       return { ...handlePosition, clientX: Math.max(currentX - stepX, gridLeft) };
     default:

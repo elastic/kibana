@@ -660,6 +660,45 @@ describe('FlexLayout pointer resize with wrapping', () => {
     expect(getLastLayout().panel1.width).toBe(medium);
   });
 
+  it('limits the width by the container width, not the space left on the original row', () => {
+    mockWrappingLayout();
+    const medium = 500;
+    renderFlexLayout({
+      gridSettings: { ...gridSettings, gutterSize: GUTTER, rowHeight: ROW_HEIGHT },
+      layout: {
+        panel1: { type: 'panel', id: 'panel1', order: 0, grow: false, width: medium },
+        panel2: { type: 'panel', id: 'panel2', order: 1, grow: false, width: medium },
+      },
+    });
+
+    const handle = getHandle('panel2', 'resize');
+    fireEvent.mouseDown(handle, { clientX: 2 * medium + GUTTER, clientY: ROW_HEIGHT });
+    // only 680px remain beside `panel1`, but 790px fits once the panel wraps onto its own row
+    fireEvent.mouseMove(document, { clientX: 1300, clientY: ROW_HEIGHT });
+    fireEvent.mouseUp(document);
+    expect(getLastLayout().panel2.width).toBe(790);
+  });
+
+  it('caps the width at the container usable width', () => {
+    mockWrappingLayout();
+    renderFlexLayout({
+      gridSettings: { ...gridSettings, gutterSize: GUTTER, rowHeight: ROW_HEIGHT },
+      layout: {
+        panel1: { type: 'panel', id: 'panel1', order: 0, grow: false, width: 500 },
+        panel2: { type: 'panel', id: 'panel2', order: 1, grow: false, width: 500 },
+      },
+    });
+
+    fireEvent.mouseDown(getHandle('panel2', 'resize'), {
+      clientX: 1010,
+      clientY: ROW_HEIGHT,
+    });
+    fireEvent.mouseMove(document, { clientX: 5000, clientY: ROW_HEIGHT });
+    fireEvent.mouseUp(document);
+    // the container width minus both gutters
+    expect(getLastLayout().panel2.width).toBe(CONTAINER_WIDTH - 2 * GUTTER);
+  });
+
   it('keeps shrinking with ArrowLeft after the panel reflows onto the previous row', async () => {
     mockWrappingLayout();
     renderFlexLayout({
