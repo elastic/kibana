@@ -247,6 +247,8 @@ apiTest.describe(
       expect(isExecutionTerminatedEvent(terminated) && terminated.surface_payload).toStrictEqual(
         surfacePayload
       );
+      // A direct answer makes no tool calls.
+      expect(isExecutionTerminatedEvent(terminated) && terminated.tool_calls).toStrictEqual([]);
 
       const conversationId = getConversationId(callbackRequests);
       expect(conversationId.length).toBeGreaterThan(0);

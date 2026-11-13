@@ -326,4 +326,5 @@ export type {
   ChatCallbackExecutionTerminatedEvent,
   ChatCallbackFailureResponse,
   ChatCallbackResponse,
+  ChatCallbackToolCall,
 } from './callback';

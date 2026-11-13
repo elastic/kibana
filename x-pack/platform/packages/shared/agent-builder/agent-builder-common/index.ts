@@ -538,6 +538,7 @@ export {
   type ChatCallbackExecutionTerminatedEvent,
   type ChatCallbackFailureResponse,
   type ChatCallbackResponse,
+  type ChatCallbackToolCall,
 } from './chat';
 export {
   type PublicSkillDefinition,

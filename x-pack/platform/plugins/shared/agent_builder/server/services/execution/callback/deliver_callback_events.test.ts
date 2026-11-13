@@ -87,11 +87,15 @@ const createMessageChunkEvent = (text: string): ChatEvent =>
     data: { text_chunk: text, message_id: 'message-1' },
   } as ChatEvent);
 
-const createRoundCompleteEvent = (message = 'Hello', attachments: unknown[] = []): ChatEvent =>
+const createRoundCompleteEvent = (
+  message = 'Hello',
+  attachments: unknown[] = [],
+  steps: unknown[] = []
+): ChatEvent =>
   ({
     type: ChatEventType.roundComplete,
     data: {
-      round: { id: 'round-1', input: { message: 'hello' }, response: { message } },
+      round: { id: 'round-1', input: { message: 'hello' }, response: { message }, steps },
       attachments,
     },
   } as unknown as ChatEvent);
@@ -257,7 +261,11 @@ describe('deliverCallbackEvents', () => {
       ([{ payload }]) => (payload as { event: ChatEvent }).event
     );
 
-    expect(deliveredEvents).toEqual([reasoningEvent, executionTerminatedEvent, roundCompleteEvent]);
+    expect(deliveredEvents).toEqual([
+      reasoningEvent,
+      { ...executionTerminatedEvent, tool_calls: [] },
+      roundCompleteEvent,
+    ]);
     expect(deliveredEvents.some((event) => event.type === ChatEventType.messageChunk)).toBe(false);
     expect(deliveredEvents.some((event) => event.type === TimelineEventType.executionStarted)).toBe(
       false
@@ -290,7 +298,7 @@ describe('deliverCallbackEvents', () => {
       expect.objectContaining({
         payload: {
           execution_id: 'execution-1',
-          event: executionTerminatedEvent,
+          event: { ...executionTerminatedEvent, tool_calls: [] },
           idempotency_key: 'execution-1',
         },
         retry: true,
@@ -327,7 +335,11 @@ describe('deliverCallbackEvents', () => {
       ([{ payload }]) => (payload as { event: ChatEvent }).event
     );
 
-    expect(deliveredEvents).toEqual([laterEvent, executionTerminatedEvent, roundCompleteEvent]);
+    expect(deliveredEvents).toEqual([
+      laterEvent,
+      { ...executionTerminatedEvent, tool_calls: [] },
+      roundCompleteEvent,
+    ]);
   });
 
   it('defers round_complete until the stream completes, delivering it after later events', async () => {
@@ -416,6 +428,7 @@ describe('deliverCallbackEvents', () => {
     expect(terminated).toEqual({
       ...executionTerminatedEvent,
       surface_payload: { text: expect.any(String), blocks: expect.any(Array) },
+      tool_calls: [],
     });
     expect(completed).toMatchObject({ type: ChatEventType.roundComplete });
     expect((terminated as ChatCallbackExecutionTerminatedEvent).surface_payload).toEqual(
@@ -426,7 +439,56 @@ describe('deliverCallbackEvents', () => {
     renderPayload.mockRestore();
   });
 
-  it('delivers execution_terminated without a surface payload when there is no round_complete', async () => {
+  it("adds a summary of the round's tool calls to execution_terminated, without params or results", async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const roundCompleteEvent = createRoundCompleteEvent(
+      'Hello',
+      [],
+      [
+        { type: 'reasoning', reasoning: 'Look at the logs first.' },
+        {
+          type: 'tool_call',
+          tool_call_id: 'tc_1',
+          tool_id: 'search',
+          intent: 'Searching checkout service logs',
+          params: { query: 'service.name:checkout' },
+          results: [{ tool_result_id: 'r_1', type: 'other', data: { rows: 200 } }],
+        },
+        {
+          type: 'tool_call',
+          tool_call_id: 'tc_2',
+          tool_id: 'execute_api',
+          params: { api: 'cat.indices' },
+          results: [],
+          interrupted: true,
+        },
+      ]
+    );
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(roundCompleteEvent, createExecutionTerminatedEvent()),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const [[{ payload: terminatedPayload }], [{ payload: completedPayload }]] =
+      service.makeCallbackRequest.mock.calls;
+
+    expect(
+      (
+        (terminatedPayload as ChatCallbackEventResponse)
+          .event as ChatCallbackExecutionTerminatedEvent
+      ).tool_calls
+    ).toEqual([
+      { tool_call_id: 'tc_1', tool_id: 'search', intent: 'Searching checkout service logs' },
+      { tool_call_id: 'tc_2', tool_id: 'execute_api', interrupted: true },
+    ]);
+    expect((completedPayload as ChatCallbackEventResponse).event).not.toHaveProperty('tool_calls');
+  });
+
+  it('delivers execution_terminated without a surface payload or tool calls when there is no round_complete', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
 
@@ -440,11 +502,12 @@ describe('deliverCallbackEvents', () => {
 
     const [[{ payload }]] = service.makeCallbackRequest.mock.calls;
 
+    const event = (payload as ChatCallbackEventResponse)
+      .event as ChatCallbackExecutionTerminatedEvent;
+
     expect(renderPayload).not.toHaveBeenCalled();
-    expect(
-      ((payload as ChatCallbackEventResponse).event as ChatCallbackExecutionTerminatedEvent)
-        .surface_payload
-    ).toBeUndefined();
+    expect(event.surface_payload).toBeUndefined();
+    expect(event).not.toHaveProperty('tool_calls');
 
     renderPayload.mockRestore();
   });

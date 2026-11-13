@@ -26,8 +26,11 @@ import {
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isRoundCompleteEvent,
+  isToolCallStep,
   type ChatCallbackEvent,
+  type ChatCallbackToolCall,
   type ChatEvent,
+  type ConversationRoundStep,
   type ExecutionTerminatedEvent,
   type RoundCompleteEvent,
   type SurfacePayload,
@@ -36,6 +39,17 @@ import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { SurfacesService } from '../../surfaces';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
+
+/** The tool calls among the steps, summarized for a callback: no params or results. */
+const toCallbackToolCalls = (steps: ConversationRoundStep[]): ChatCallbackToolCall[] =>
+  steps
+    .filter(isToolCallStep)
+    .map(({ tool_call_id: toolCallId, tool_id: toolId, intent, interrupted }) => ({
+      tool_call_id: toolCallId,
+      tool_id: toolId,
+      ...(intent ? { intent } : {}),
+      ...(interrupted ? { interrupted } : {}),
+    }));
 
 /**
  * Delivers the execution's events to its configured callback URL, resolving once every
@@ -46,7 +60,7 @@ import type { CallbackDeliveryService } from './callback_delivery_service';
  * same idempotency key, so a consumer acts on whichever it handles first. If the stream errors
  * first (e.g. the persistence write failed), both are skipped and a failure callback is sent
  * instead. Both carry the response message ready to post on the round's surface, which is never
- * stored.
+ * stored; execution_terminated also carries a summary of the round's tool calls.
  */
 export const deliverCallbackEvents = ({
   execution,
@@ -156,7 +170,13 @@ export const deliverCallbackEvents = ({
             concatMap((surfacePayload) =>
               concat(
                 executionTerminatedEvent
-                  ? deliverEvent({ ...executionTerminatedEvent, surface_payload: surfacePayload })
+                  ? deliverEvent({
+                      ...executionTerminatedEvent,
+                      surface_payload: surfacePayload,
+                      ...(roundCompleteEvent
+                        ? { tool_calls: toCallbackToolCalls(roundCompleteEvent.data.round.steps) }
+                        : {}),
+                    })
                   : EMPTY,
                 roundCompleteEvent
                   ? deliverEvent({ ...roundCompleteEvent, surface_payload: surfacePayload })
