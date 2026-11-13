@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { useGridLayoutPanelEvents, getDefaultResizeOptions } from '../use_grid_layout_events';
+import { useGridLayoutPanelEvents, getEffectiveWidthLimits } from '../use_grid_layout_events';
 
 export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -30,10 +30,8 @@ export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
       const panel = layout[panelId];
       if (!panel || !buttonRef.current) return;
 
-      const { minWidth, maxWidth } = {
-        ...getDefaultResizeOptions(),
-        ...panel.resizeOptions,
-      };
+      const { widthBreakpoints } = gridLayoutStateManager.gridSettings$.getValue();
+      const { minWidth, maxWidth } = getEffectiveWidthLimits(widthBreakpoints, panel.resizeOptions);
       let direction = 'ew';
       if (panel.width === maxWidth) {
         direction = 'w';

@@ -21,7 +21,7 @@ import type {
 import { getPanelKeysInOrder } from '../../utils/panel_order';
 import type { UserKeyboardEvent } from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
 import {
-  getDefaultResizeOptions,
+  getAllowedBreakpoints,
   getDragPreviewRect,
   getKeyboardDragPosition,
   getResizePreviewRect,
@@ -199,11 +199,8 @@ const snapToBreakpoint = (
   breakpoints: number[],
   resizeOptions: FlexPanelData['resizeOptions']
 ): number => {
-  const { minWidth, maxWidth } = { ...getDefaultResizeOptions(), ...resizeOptions };
   // only snap to breakpoints that respect the panel's resize limits
-  const allowed = breakpoints.filter(
-    (breakpoint) => breakpoint >= minWidth && breakpoint <= maxWidth
-  );
+  const allowed = getAllowedBreakpoints(breakpoints, resizeOptions);
   if (!allowed.length) return width;
   return allowed.reduce((closest, breakpoint) =>
     Math.abs(breakpoint - width) < Math.abs(closest - width) ? breakpoint : closest

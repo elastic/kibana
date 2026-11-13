@@ -21,7 +21,7 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   useEffect(() => {
-    /** Update the styles of the panel as it is dragged via a subscription to prevent re-renders */
+    /** Update the styles via a subscription to prevent re-renders */
     const activePanelStyleSubscription = combineLatest([
       gridLayoutStateManager.activePanelEvent$,
       panel$,

@@ -32,6 +32,27 @@ export const getDefaultResizeOptions = () => ({
   maxWidth: Number.MAX_VALUE,
 });
 
+// Width breakpoints that respect the panel's resize limits
+export const getAllowedBreakpoints = (
+  breakpoints: number[] | undefined,
+  resizeOptions: FlexPanelData['resizeOptions']
+): number[] => {
+  const { minWidth, maxWidth } = { ...getDefaultResizeOptions(), ...resizeOptions };
+  return (breakpoints ?? []).filter(
+    (breakpoint) => breakpoint >= minWidth && breakpoint <= maxWidth
+  );
+};
+
+// The narrowest and widest a panel can be committed at, taking width breakpoints into account
+export const getEffectiveWidthLimits = (
+  breakpoints: number[] | undefined,
+  resizeOptions: FlexPanelData['resizeOptions']
+): { minWidth: number; maxWidth: number } => {
+  const allowed = getAllowedBreakpoints(breakpoints, resizeOptions);
+  if (!allowed.length) return { ...getDefaultResizeOptions(), ...resizeOptions };
+  return { minWidth: Math.min(...allowed), maxWidth: Math.max(...allowed) };
+};
+
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
   activePanel,
