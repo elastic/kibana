@@ -18,25 +18,34 @@ import { StatsProblemIcon } from './stats_problem_icon';
 
 interface DestinationNodeStatsProps {
   destinationId: string;
+  /** False when no source feeds the destination in the saved unit. Nothing is requested then. */
+  hasSavedSource: boolean;
   indexCount?: number;
 }
 
 /**
  * The footer of a destination node: the rate and the latency, for example `8.1k/s | 175ms`. A value
  * that is missing shows a dash, and a rate of exactly 0 shows `0/s`. A destination with neither a
- * rate nor a latency shows `Data not flowing in` instead. It is its own component, so a stats
+ * rate nor a latency shows `Data not flowing in` instead, and so does one that no source feeds in
+ * the saved unit, which is not requested at all. It is its own component, so a stats
  * update re-renders only this row, and never the node or the graph. It always reserves its row, so
  * the card does not change size when the first result arrives. Until then, and when the stats could
  * not be loaded, it shows no numbers, so a load or a failure never looks like a measured value.
  */
-export function DestinationNodeStats({ destinationId, indexCount }: DestinationNodeStatsProps) {
+export function DestinationNodeStats({
+  destinationId,
+  hasSavedSource,
+  indexCount,
+}: DestinationNodeStatsProps) {
   const { euiTheme } = useEuiTheme();
-  const entry = useDestinationStats(destinationId);
+  // No id registers nothing and reads nothing, so a destination with no saved source is not requested.
+  const entry = useDestinationStats(hasSavedSource ? destinationId : undefined);
   const hasValues =
     entry?.status === 'ready' || entry?.status === 'noData' || entry?.status === 'stale';
   const eventsRate = entry?.stats?.eventsRate ?? null;
   const latencyAverage = entry?.stats?.latencyAverage ?? null;
-  const isNotFlowing = hasValues && eventsRate === null && latencyAverage === null;
+  const isNotFlowing =
+    !hasSavedSource || (hasValues && eventsRate === null && latencyAverage === null);
 
   return (
     <div

@@ -20,6 +20,7 @@ const makeClient = (overrides: Record<string, unknown> = {}) => ({
     startedAt: '2024-01-01T00:00:00Z',
     ...overrides,
   }),
+  getLifecycleCorrelation: jest.fn().mockResolvedValue({}),
 });
 
 const makeResources = (
@@ -70,6 +71,42 @@ it('attributes the event to the trigger type recorded on the subject', async () 
   expect(emitter).toHaveBeenCalledWith(
     'nightshift-investigations.started',
     expect.objectContaining({ trigger_type: 'automatic' })
+  );
+});
+
+it('emits the investigation and source workflow execution IDs for pipeline joins', async () => {
+  const emitter = jest.fn();
+  const client = makeClient();
+  client.getLifecycleCorrelation.mockResolvedValue({
+    event_id: 'significant-event-1',
+    source_workflow_execution_id: 'discovery-execution-1',
+  });
+  const resources = {
+    ...makeResources(
+      emitter,
+      {
+        path: { id: 'inv-1' },
+        body: { status: 'running' },
+      },
+      client
+    ),
+    request: {
+      ...mockRequest,
+      isInternalApiRequest: true,
+      headers: { 'x-kibana-workflow-execution-id': 'investigation-execution-1' },
+    } as unknown as KibanaRequest,
+  };
+
+  await handler(resources as never);
+
+  expect(emitter).toHaveBeenCalledWith(
+    'nightshift-investigations.started',
+    expect.objectContaining({
+      workflow_execution_id: 'investigation-execution-1',
+      execution_id: 'investigation-execution-1',
+      event_id: 'significant-event-1',
+      source_workflow_execution_id: 'discovery-execution-1',
+    })
   );
 });
 

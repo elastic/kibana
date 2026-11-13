@@ -9,7 +9,13 @@
 
 import type { OtelScope } from '../otel_logs';
 import { generateLongId, generateShortId } from '../utils/generate_id';
-import { LOGS_INDEX, SEVERITY_ERROR, SEVERITY_INFO, TRACES_INDEX } from '../edot_shared/constants';
+import {
+  LOGS_INDEX,
+  REPLAY_INDEX,
+  SEVERITY_ERROR,
+  SEVERITY_INFO,
+  TRACES_INDEX,
+} from '../edot_shared/constants';
 import { EdotLog } from '../edot_shared/edot_log';
 import { EdotSpan } from '../edot_shared/edot_span';
 import { asFloat } from './as_float';
@@ -18,6 +24,7 @@ import { getWebVitalRating, type WebVitalName } from './health_profiles';
 
 const SCOPE_PREFIX = '@opentelemetry/browser-instrumentation';
 const DISTRO_SCOPE_NAME = '@elastic/opentelemetry-browser';
+const REPLAY_SCOPE_NAME = `${DISTRO_SCOPE_NAME}/replay`;
 // Version of the instrumentations, which EDOT Browser's `^0.8.0` range resolves to
 const SCOPE_VERSION = '0.8.2';
 
@@ -167,6 +174,78 @@ export class EdotBrowserClient {
       attributes,
       severityNumber
     );
+  }
+
+  /**
+   * A record of the replay logger. Its scope version is the version of EDOT Browser, it has no
+   * severity and, like every record of the SDK, the session attributes of the log processor.
+   */
+  private replayLog(eventName: string, attributes: Record<string, unknown>): EdotLog {
+    const distroVersion = this.resourceAttributes['telemetry.distro.version'];
+    return new EdotLog({ _index: REPLAY_INDEX })
+      .eventName(eventName)
+      .scope({
+        name: REPLAY_SCOPE_NAME,
+        ...(typeof distroVersion === 'string' ? { version: distroVersion } : {}),
+      })
+      .addResourceAttributes({ ...this.resourceAttributes })
+      .addAttributes({ ...attributes, ...this.sessionAttributes });
+  }
+
+  /**
+   * Emitted when a segment starts recording, once per page load that records. Its timestamp is the
+   * one of the segment's first rrweb event.
+   */
+  replayStart({
+    segmentId,
+    trigger,
+    format = 'rrweb/2',
+  }: {
+    segmentId: string;
+    /** `sampled` when recording started with the page, `error` when an error started it. */
+    trigger: 'sampled' | 'error';
+    format?: string;
+  }) {
+    return this.replayLog('elastic.replay.start', {
+      'elastic.replay.segment.id': segmentId,
+      'elastic.replay.trigger': trigger,
+      'elastic.replay.format': format,
+    });
+  }
+
+  /**
+   * One rrweb event, or one chunk of a large one: `body` is the event's JSON, or the piece of it.
+   * Chunk and packed attributes are only written when they differ from their defaults, like the
+   * SDK does.
+   */
+  replayEvent({
+    segmentId,
+    sequence,
+    eventType,
+    body,
+    chunk,
+    packed = false,
+  }: {
+    segmentId: string;
+    /** Position of the event in its segment, from 0. All chunks of an event share it. */
+    sequence: number;
+    /** rrweb's event type. */
+    eventType: number;
+    body: string;
+    /** Set for the chunks of a split event, `index` counting from 0. */
+    chunk?: { index: number; count: number };
+    /** The body is `@rrweb/packer` output instead of plain JSON. */
+    packed?: boolean;
+  }) {
+    return this.replayLog('elastic.replay.event', {
+      'elastic.replay.segment.id': segmentId,
+      'elastic.replay.sequence': sequence,
+      'elastic.replay.event.type': eventType,
+      ...(chunk
+        ? { 'elastic.replay.chunk.index': chunk.index, 'elastic.replay.chunk.count': chunk.count }
+        : {}),
+      ...(packed ? { 'elastic.replay.packed': true } : {}),
+    }).message(body);
   }
 
   /**

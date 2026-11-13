@@ -7,7 +7,6 @@
 
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
-  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   type Severity,
   type SignalEntry,
   type SignalVerdict,
@@ -22,7 +21,6 @@ import {
   mergeSignalsLatestPerRule,
   preserveStableNarrative,
 } from './episode_context';
-import { lockSeverityForCompletedInvestigation, type EventsWriteSource } from './severity_lock';
 import type {
   BulkResults,
   EventsWriteInput,
@@ -59,8 +57,7 @@ export const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] 
 /**
  * Returns true when the latest stored version for this event_id has the same severity and status
  * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
- * would produce a pure-churn duplicate. `severity` is the tier this write would store, after the
- * investigation lock.
+ * would produce a pure-churn duplicate. `severity` is the tier this write would store.
  */
 export const shouldSkipAsNoOp = ({
   candidate,
@@ -179,18 +176,15 @@ export const loadHistory = async ({
 
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
- * takes the agent's proposed severity, floors an inactive event to low and applies the
- * investigation lock — the facts shared by the no-op check and the final document, derived once per
- * candidate so the two cannot disagree.
+ * takes the agent's proposed severity and floors an inactive event to low — the facts shared by
+ * the no-op check and the final document, derived once per candidate so the two cannot disagree.
  */
 export const computeEventFacts = ({
   candidate,
   timestamp,
-  source,
 }: {
   candidate: ResolvedWriteCandidate;
   timestamp: string;
-  source: EventsWriteSource | undefined;
 }): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const { latest, priorDocs } = candidate;
@@ -211,18 +205,11 @@ export const computeEventFacts = ({
           sourceIds: rest.source_ids,
           causalFeatures: rest.causal_features ?? [],
           blastRadius: rest.blast_radius ?? [],
-          confidence: rest.confidence ?? 0,
         };
 
   const { status } = candidate;
 
-  const severity = lockSeverityForCompletedInvestigation({
-    source,
-    latestEvent: latest,
-    proposedSeverity: decideSeverity({ proposed: candidate.input.severity, status, signals }),
-    proposedStatus: status,
-    proposedSignals: candidate.input.signals,
-  });
+  const severity = decideSeverity({ proposed: candidate.input.severity, status, signals });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
@@ -238,6 +225,14 @@ export const computeEventFacts = ({
         )
       : undefined;
 
+  // A continuation that brings no new confirming evidence keeps its score: nothing new supports a
+  // different one. A new event, a reopen or a write with a confirming signal is rated afresh.
+  const keepsStoredConfidence =
+    isContinuation &&
+    !reopens &&
+    latest?.confidence !== undefined &&
+    !(candidate.input.signals ?? []).some(({ verdict }) => verdict === 'confirms');
+
   return {
     candidate,
     rest,
@@ -246,11 +241,7 @@ export const computeEventFacts = ({
     status,
     severity,
     frozenNarrative,
-    // Nothing confirmed, so nothing to be confident about; a signal-less write keeps its own.
-    confidence:
-      signals.length === 0 || hasEventWorthySignal(signals)
-        ? episodeContext.confidence
-        : Math.min(episodeContext.confidence, UNCONFIRMED_EVENT_MAX_CONFIDENCE),
+    confidence: keepsStoredConfidence && latest ? latest.confidence : rest.confidence,
   };
 };
 
@@ -290,7 +281,6 @@ export const buildPendingWrite = ({
         : {}),
       '@timestamp': timestamp,
       event_id: candidate.eventId,
-      investigations: candidate.latest?.investigations,
       signals,
       source_ids: episodeContext.sourceIds,
       causal_features: episodeContext.causalFeatures,

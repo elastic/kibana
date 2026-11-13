@@ -56,7 +56,6 @@
     "@kbn/links-plugin",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/core-chrome-browser",
-    "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/data-grid-in-table-search",
     "@kbn/scout-info",
     "@kbn/synthtrace",

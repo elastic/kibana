@@ -31,7 +31,7 @@ export type RcaRewardOutput = z.infer<typeof rcaRewardOutputSchema>;
 export const rcaRewardPrompt = createPrompt({
   name: 'nightshift_rca_reward',
   description:
-    'Scores the evidence, timeline, leakage and confidence of a Nightshift investigation',
+    'Scores the evidence, timeline, leakage and confidence of a nightshift investigation',
   input: lazySchema(() =>
     z.object({
       transcript: z.string(),

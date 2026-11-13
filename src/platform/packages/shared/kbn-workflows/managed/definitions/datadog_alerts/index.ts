@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DATADOG_ALERT_TRANSLATION_YAML from './datadog_alert_translation.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const DATADOG_ALERT_TRANSLATION_WORKFLOW_ID = 'system-datadog-alert-translation';
 
@@ -17,7 +17,9 @@ export const DATADOG_ALERT_TRANSLATION_WORKFLOW = {
   pluginId: 'alertingVTwo',
   version: 2,
   billable: false,
-  yaml: DATADOG_ALERT_TRANSLATION_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'datadog_alert_translation.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

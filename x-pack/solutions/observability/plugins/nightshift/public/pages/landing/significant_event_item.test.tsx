@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { NightshiftSignificantEvent } from '../../data/significant_events/use_fetch_significant_events';
 import { SignificantEventItem } from './significant_event_item';
 
-const mockEvent: SignificantEvent = {
+const mockEvent: NightshiftSignificantEvent = {
   '@timestamp': new Date().toISOString(),
   event_id: 'evt-1',
   status: 'active',
@@ -21,17 +21,6 @@ const mockEvent: SignificantEvent = {
   summary: 'Something happened',
   severity: 'high',
   confidence: 0.9,
-};
-
-const investigatedEvent: SignificantEvent = {
-  ...mockEvent,
-  investigations: [
-    {
-      workflow_execution_id: 'exec-1',
-      started_at: '2026-07-10T12:00:00Z',
-      completed_at: '2026-07-10T12:05:00Z',
-    },
-  ],
 };
 
 describe('SignificantEventItem', () => {
@@ -172,55 +161,21 @@ describe('SignificantEventItem', () => {
   });
 
   describe('investigation marker', () => {
-    it('leaves an event without investigations unlabeled', () => {
-      renderItem();
+    it.each(['not_started', 'unknown'] as const)('leaves a %s event unlabeled', (state) => {
+      renderItem({ event: { ...mockEvent, investigation_state: state } });
 
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
-    });
-
-    it('falls back to completed_at while the status is still being fetched', () => {
-      renderItem({ event: investigatedEvent });
-
-      expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
-      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
-    });
-
-    it('marks a complete run as investigated', () => {
-      renderItem({ event: investigatedEvent, investigationRunStatus: 'complete' });
-
-      expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
-      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
-    });
-
-    it('marks a run recorded as failed as unavailable, since investigations no longer fail', () => {
-      renderItem({ event: investigatedEvent, investigationRunStatus: 'failed' });
-
-      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
-        'Investigation unavailable'
-      );
-      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
-    });
-
-    it('marks an unreadable run as unavailable', () => {
-      renderItem({ event: investigatedEvent, investigationRunStatus: 'unavailable' });
-
-      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
-        'Investigation unavailable'
-      );
-      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
-    });
-
-    it('hides the badge when the execution does not exist', () => {
-      renderItem({ event: investigatedEvent, investigationRunStatus: null });
-
-      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftInvestigatingStatusDots')).not.toBeInTheDocument();
     });
 
-    it('marks a pending run as investigating', () => {
-      renderItem({ event: investigatedEvent, investigationRunStatus: 'pending' });
+    it('marks a completed investigation as investigated', () => {
+      renderItem({ event: { ...mockEvent, investigation_state: 'completed' } });
+
+      expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
+    });
+
+    it('marks an investigation in progress as investigating', () => {
+      renderItem({ event: { ...mockEvent, investigation_state: 'in_progress' } });
 
       expect(screen.getByTestId('nightshiftInvestigatingStatusDots')).toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();

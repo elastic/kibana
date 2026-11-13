@@ -102,6 +102,8 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
         // Off by default and read-only in the UI. With it on, every inference call an eval makes
         // writes a token-usage doc, so a run's cost can be compared across models.
         '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true',
+        // Documentation evals install and score the real product documentation, not the test stub
+        '--xpack.productDocBase.artifactRepositoryUrl=https://kibana-knowledge-base-artifacts.elastic.co',
         ...(shouldEnableTracing
           ? [
               '--elastic.apm.active=false',
