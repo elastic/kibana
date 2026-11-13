@@ -82,7 +82,13 @@ const archMatches = (
 ): boolean => {
   if (!constraint || arch === undefined) return true;
   if (constraint.operation === 'equals') return constraint.value === arch;
-  return compile(`^(?:${constraint.value})$`, stats)?.test(arch) ?? false;
+  const re = compile(`^(?:${constraint.value})$`, stats);
+  if (re === null) {
+    // Cannot decide; counted like any other undecidable condition rather than as a clean host.
+    countInto(stats, 'unknown_arch');
+    return false;
+  }
+  return re.test(arch);
 };
 
 const RPM_KERNEL_SUFFIX = /(?:\.(?:x86_64|aarch64|ppc64le|s390x|i686|noarch))?(?:\+[\w-]+)?$/;

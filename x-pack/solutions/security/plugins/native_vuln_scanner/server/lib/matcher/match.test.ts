@@ -276,6 +276,16 @@ describe('matchHost: RHEL', () => {
       expect(findings.map((f) => f.package.name)).toEqual(['glibc']);
     });
 
+    it('counts an arch pattern that does not compile as unknown', () => {
+      const broken = rhsa({
+        package: { name: 'glibc', arch: { operation: 'pattern match', value: 'x86_64(' } },
+        fixed_version: { raw: '0:2.34-100.el9', scheme: 'rpm' },
+      });
+      const stats: MatchStats = {};
+      expect(run(host({ os: RHEL9, packages: [glibc('glibc')] }), [broken], stats)).toEqual([]);
+      expect(stats).toEqual({ invalid_pattern: 1, unknown_arch: 1 });
+    });
+
     it('does not expand on Ubuntu', () => {
       const fix = record({
         os: UBUNTU,

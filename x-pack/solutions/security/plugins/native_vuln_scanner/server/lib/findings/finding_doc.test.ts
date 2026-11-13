@@ -133,7 +133,7 @@ describe('toFindingDoc', () => {
       reference: ['https://www.cve.org/CVERecord?id=CVE-2024-1'],
       title: 'CVE-2024-1',
       severity: 'UNKNOWN',
-      data_source: { ID: 'CVE-2024-1', Name: 'OVAL' },
+      data_source: { ID: 'CVE-2024-1', Name: 'Red Hat OVAL' },
     });
     expect(doc.vulnerability.cvss).toBeUndefined();
   });
@@ -148,6 +148,12 @@ describe('toFindingDoc', () => {
     const doc = toFindingDoc({ ...f, advisories: [{ ...advisory, source: 'ubuntu' }] }, HOST, CTX);
     expect(Object.keys(doc.vulnerability.cvss ?? {})).toEqual(['nvd']);
     expect(doc.vulnerability.data_source.Name).toBe('Ubuntu OVAL');
+  });
+
+  it('derives the CVSS key and data source from the scheme when no advisory is attached', () => {
+    const doc = toFindingDoc(finding({ advisories: [] }), HOST, CTX);
+    expect(Object.keys(doc.vulnerability.cvss ?? {})).toEqual(['redhat']);
+    expect(doc.vulnerability.data_source.Name).toBe('Red Hat OVAL');
   });
 
   it('stores CVSS v2 scores under the V2 keys', () => {

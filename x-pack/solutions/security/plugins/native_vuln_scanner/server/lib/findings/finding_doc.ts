@@ -155,6 +155,8 @@ export const toFindingDoc = (
   }
   const { cve, package: pkg, advisories } = finding;
   const [primary] = advisories;
+  const source: AdvisorySource =
+    primary?.source ?? (finding.scheme === 'dpkg' ? 'ubuntu' : 'redhat');
   const id = findingId(finding);
   const name = host.name ?? host.id;
   return {
@@ -188,7 +190,7 @@ export const toFindingDoc = (
       ...(cve.cvss
         ? {
             score: { base: cve.cvss.score, version: cve.cvss.version },
-            cvss: { [CVSS_KEY[primary?.source ?? 'ubuntu']]: toCvssVendorScore(cve.cvss) },
+            cvss: { [CVSS_KEY[source]]: toCvssVendorScore(cve.cvss) },
             classification: 'CVSS' as const,
           }
         : {}),
@@ -201,7 +203,7 @@ export const toFindingDoc = (
       scanner: { vendor: FINDINGS_VENDOR },
       data_source: {
         ID: primary?.id ?? cve.id,
-        Name: primary ? DATA_SOURCE_NAME[primary.source] : 'OVAL',
+        Name: DATA_SOURCE_NAME[source],
         ...(primary?.url ? { URL: primary.url } : {}),
       },
     },
