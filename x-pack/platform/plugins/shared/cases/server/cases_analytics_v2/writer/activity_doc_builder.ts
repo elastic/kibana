@@ -7,7 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import type { ActionSourceType } from '../../../common/types/domain';
+import type { PersistedActionSource } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { findCommentReferenceId } from '../../common/references';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
@@ -79,7 +79,7 @@ export interface ActivityAnalyticsDoc {
 }
 
 interface ActivitySourceDoc {
-  type: ActionSourceType;
+  type: PersistedActionSource['type'];
   id: string;
   name?: string;
   run_id?: string;

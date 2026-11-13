@@ -19,13 +19,18 @@ import type { ESBoolQuery } from '../../../common/typed_json';
 interface GlobalFilterQueryProps {
   extraFilter?: Filter;
   dataView?: DataViewBase;
+  filtersOverride?: Filter[];
 }
 
 /**
  * It builds a global filterQuery from KQL search bar and global filters.
  * It also validates the query and shows a warning if it's invalid.
  */
-export const useGlobalFilterQuery = ({ extraFilter, dataView }: GlobalFilterQueryProps = {}) => {
+export const useGlobalFilterQuery = ({
+  extraFilter,
+  dataView,
+  filtersOverride,
+}: GlobalFilterQueryProps = {}) => {
   const { from, to } = useGlobalTime();
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -33,7 +38,8 @@ export const useGlobalFilterQuery = ({ extraFilter, dataView }: GlobalFilterQuer
   );
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const storeFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const globalFilters = filtersOverride ?? storeFilters;
   const { uiSettings } = useKibana().services;
 
   const filters = useMemo(() => {

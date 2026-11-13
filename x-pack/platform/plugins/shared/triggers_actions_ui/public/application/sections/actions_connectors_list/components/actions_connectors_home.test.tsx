@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -18,6 +18,18 @@ import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
+import { useKibana } from '../../../../common/lib/kibana';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ReactActual = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiIcon: ({ type, ...props }: { type?: React.ElementType; [key: string]: unknown }) =>
+      ReactActual.createElement(typeof type === 'string' ? 'span' : type ?? 'span', props),
+  };
+});
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
@@ -26,7 +38,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadConnectorAuthStatus: jest.fn(),
 }));
-const { loadAllActions, loadConnectorAuthStatus } = jest.requireMock(
+const { loadAllActions, loadActionTypes, loadConnectorAuthStatus } = jest.requireMock(
   '../../../lib/action_connector_api'
 );
 jest.mock('../../../../common/lib/kibana');
@@ -65,15 +77,17 @@ const queryClient = new QueryClient();
 
 const renderHome = (props: RouteComponentProps<MatchParams>) =>
   render(
-    <IntlProvider locale="en">
-      <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
-          <MockAppHeaderProvider>
-            <ActionsConnectorsHome {...props} />
-          </MockAppHeaderProvider>
-        </QueryClientProvider>
-      </Router>
-    </IntlProvider>
+    <React.Suspense fallback={<div data-test-subj="outer-fallback" />}>
+      <IntlProvider locale="en">
+        <Router history={props.history}>
+          <QueryClientProvider client={queryClient}>
+            <MockAppHeaderProvider>
+              <ActionsConnectorsHome {...props} />
+            </MockAppHeaderProvider>
+          </QueryClientProvider>
+        </Router>
+      </IntlProvider>
+    </React.Suspense>
   );
 
 const expectDocumentationInOverflow = async () => {
@@ -181,6 +195,40 @@ describe('ActionsConnectorsHome', () => {
       name: 'Select a connector',
     });
     expect(selectConnectorFlyout).toBeInTheDocument();
+  });
+
+  it('keeps the flyout open while connector icons load', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: 'lazy-icon-type',
+      iconClass: React.lazy(
+        () => new Promise<{ default: React.ComponentType<React.SVGProps<SVGSVGElement>> }>(() => {})
+      ),
+      selectMessage: 'test',
+      actionConnectorFields: null,
+    });
+    const { actionTypeRegistry } = useKibana().services;
+    (actionTypeRegistry.has as jest.Mock).mockReturnValue(true);
+    (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+    loadActionTypes.mockResolvedValue([
+      {
+        id: actionType.id,
+        enabled: true,
+        name: 'Lazy icon',
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+    ]);
+
+    renderHome(connectorsTabProps());
+    await userEvent.click(await screen.findByTestId('createConnectorButton'));
+    await waitFor(() => expect(actionTypeRegistry.get).toHaveBeenCalledWith(actionType.id));
+
+    const flyout = screen.getByTestId('create-connector-flyout');
+    expect(flyout).toHaveTextContent('Select a connector');
+    expect(flyout).toHaveTextContent('Loading connector types');
+    expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
   });
 
   it('hide "Create connector" button when the user only has read access', async () => {

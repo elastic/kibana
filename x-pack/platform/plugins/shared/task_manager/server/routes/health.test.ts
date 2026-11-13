@@ -547,6 +547,72 @@ describe('healthRoute', () => {
     });
   });
 
+  it('returns an OK status if the stats are stale while Elasticsearch-driven backpressure is active', async () => {
+    const router = httpServiceMock.createRouter();
+    const coldTimestamp = new Date(Date.now() - 3001).toISOString();
+    summarizeMonitoringStats.mockReturnValue({
+      last_update: coldTimestamp,
+      stats: {
+        workload: {
+          timestamp: coldTimestamp,
+          value: {},
+          status: 'OK',
+        },
+        capacity_estimation: {
+          status: 'OK',
+          timestamp: coldTimestamp,
+          value: {},
+        },
+      },
+    });
+
+    const stats$ = new Subject<MonitoringStats>();
+
+    const { serviceStatus$ } = healthRoute({
+      router,
+      monitoringStats$: stats$,
+      logger,
+      taskManagerId: uuidv4(),
+      config: getTaskManagerConfig({
+        monitored_stats_required_freshness: 1000,
+        monitored_aggregated_stats_refresh_rate: 60000,
+      }),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
+    });
+
+    const serviceStatus = firstValueFrom(serviceStatus$);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+
+    await sleep(0);
+
+    stats$.next(
+      mockHealthStats({
+        last_update: coldTimestamp,
+        stats: { utilization: { timestamp, value: { load: 0, es_backpressure_active: 1 } } },
+      })
+    );
+
+    expect(await handler(context, req, res)).toMatchObject({
+      body: {
+        status: 'OK',
+        reason: expect.stringContaining('Elasticsearch-driven backpressure'),
+      },
+    });
+
+    expect(await serviceStatus).toMatchObject({
+      level: ServiceStatusLevels.available,
+    });
+  });
+
   it('returns a error status if the workload stats have not been updated within the required cold freshness', async () => {
     const coldTimestamp = new Date(Date.now() - 120000).toISOString();
     const router = httpServiceMock.createRouter();

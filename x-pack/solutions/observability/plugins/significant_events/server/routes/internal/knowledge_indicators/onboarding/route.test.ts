@@ -47,7 +47,7 @@ const makeHandlerParams = ({
   const getSource = jest
     .fn()
     .mockResolvedValue({ source: { id: 'logs.test', slug: 'logs-test', enabled: true } });
-  const request = {};
+  const request = { spaceId: 'default' };
   const server = {
     inference: {},
     core: { savedObjects: {}, uiSettings: {} },
@@ -177,7 +177,7 @@ describe('onboardingBulkStatusRoute', () => {
     });
     const handlerParams = {
       params: { body: { sourceIds: ['source-a', 'other-space-source'] } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         sourcesClient: {
@@ -223,7 +223,7 @@ describe('onboardingExecuteRoute', () => {
         path: { sourceId: 'source-a' },
         body: { action: 'schedule', from: Date.now(), to: Date.now(), steps: [] },
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         sourcesClient: {
@@ -263,7 +263,7 @@ describe('onboardingExecuteRoute', () => {
     });
     const handlerParams = {
       params: { path: { sourceId: 'source-a' }, body: { action: 'cancel' } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         sourcesClient: {
@@ -304,7 +304,7 @@ describe('onboardingExecuteRoute', () => {
         }
       });
       const base = {
-        request: {},
+        request: { spaceId: 'default' },
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
           sourcesClient: {

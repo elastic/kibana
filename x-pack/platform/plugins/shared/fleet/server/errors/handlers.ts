@@ -58,6 +58,7 @@ import {
   AgentlessAgentCreateOverProvisionnedError,
   FleetErrorWithStatusCode,
   PackageRollbackError,
+  AgentRestartPendingError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -141,6 +142,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 409;
   }
   if (error instanceof AgentlessPolicyExistsRequestError) {
+    return 409;
+  }
+  if (error instanceof AgentRestartPendingError) {
     return 409;
   }
   // Unsupported Media Type

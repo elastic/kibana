@@ -12,7 +12,10 @@ import { Provider } from 'react-redux-v7';
 import { createStore } from 'redux-v4';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
+import {
+  GraphGroupedNodePreviewPanelKey,
+  GraphInvestigation,
+} from '@kbn/cloud-security-posture-graph';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { GraphVisualization } from './graph_visualization';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -46,7 +49,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
 jest.mock('@kbn/cloud-security-posture-graph', () => {
   const { isEntityNode, getNodeDocumentMode, hasNodeDocumentsData, getSingleDocumentData } =
     jest.requireActual('@kbn/cloud-security-posture-graph/src/components/utils');
-  const { GraphGroupedNodePreviewPanelKey, GROUP_PREVIEW_BANNER } = jest.requireActual(
+  const { GraphGroupedNodePreviewPanelKey: panelKey, GROUP_PREVIEW_BANNER } = jest.requireActual(
     '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/constants'
   );
   const { isEntityItem } = jest.requireActual(
@@ -60,7 +63,7 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
     getNodeDocumentMode,
     hasNodeDocumentsData,
     getSingleDocumentData,
-    GraphGroupedNodePreviewPanelKey,
+    GraphGroupedNodePreviewPanelKey: panelKey,
     GROUP_PREVIEW_BANNER,
   };
 });
@@ -122,9 +125,11 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => true,
 }));
 
+let mockSearchHit: Record<string, unknown> = { _id: 'doc-1', _index: 'idx', _source: {} };
+
 jest.mock('../../shared/context', () => ({
   useDocumentDetailsContext: () => ({
-    searchHit: { _id: 'doc-1', _index: 'idx', _source: {} },
+    searchHit: mockSearchHit,
     scopeId: 'test-scope',
   }),
 }));
@@ -154,6 +159,7 @@ const renderGraphVisualization = () =>
 describe('GraphVisualization (document_details wrapper)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSearchHit = { _id: 'doc-1', _index: 'idx', _source: {} };
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     (GraphInvestigation as unknown as jest.Mock).mockReturnValue(
       <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
@@ -189,6 +195,49 @@ describe('GraphVisualization (document_details wrapper)', () => {
     expect(initialState.timeRange).toEqual({
       from: `${MOCK_TIMESTAMP}||-30m`,
       to: `${MOCK_TIMESTAMP}||+30m`,
+    });
+  });
+
+  describe('grouped node panel params', () => {
+    const openGroupedEventsPanel = async () => {
+      renderGraphVisualization();
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { onOpenEventPreview } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      onOpenEventPreview?.({
+        documentsData: [
+          { id: 'doc-1', type: 'event', index: 'idx' },
+          { id: 'doc-2', type: 'event', index: 'idx' },
+        ],
+      } as never);
+    };
+
+    it('includes the event flyout entry point for an event', async () => {
+      await openGroupedEventsPanel();
+
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: GraphGroupedNodePreviewPanelKey,
+        params: expect.objectContaining({ entryPoint: 'event_flyout', docMode: 'grouped-events' }),
+      });
+    });
+
+    it('includes the alert flyout entry point for an alert', async () => {
+      mockSearchHit = {
+        _id: 'doc-1',
+        _index: 'idx',
+        _source: {},
+        fields: { 'event.kind': ['signal'] },
+      };
+
+      await openGroupedEventsPanel();
+
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: GraphGroupedNodePreviewPanelKey,
+        params: expect.objectContaining({ entryPoint: 'alert_flyout', docMode: 'grouped-events' }),
+      });
     });
   });
 });

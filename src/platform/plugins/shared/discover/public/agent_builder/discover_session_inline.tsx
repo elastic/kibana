@@ -46,20 +46,6 @@ const sessionTimePickerStyles = css({
   maxWidth: '100%',
 });
 
-// Chat markdown wraps this card in EuiText. Its description-list margins push Summary
-// field names below a one-line cell. These rules only apply inside that wrapper.
-// TODO: Remove this temporary fix once Agent Builder renders attachment cards outside EuiText.
-const chatProseResetStyles = css({
-  '.euiText &': {
-    dl: {
-      marginBlockEnd: 0,
-    },
-    dt: {
-      marginBlock: 0,
-    },
-  },
-});
-
 const saveTableToDashboardButtonLabel = i18n.translate(
   'discover.agentBuilder.saveTableToDashboardButtonLabel',
   {
@@ -296,7 +282,7 @@ export const DiscoverSessionInline = ({
   }, [application, data, effectiveTimeRange, embeddableApi, locator, registerActionButtons]);
 
   return (
-    <div css={chatProseResetStyles} data-test-subj="discoverAgentBuilderSessionCard">
+    <div data-test-subj="discoverAgentBuilderSessionCard">
       <SearchEmbeddableToolbarProvider value={toolbarSlot}>
         {blockingError && (
           <>
