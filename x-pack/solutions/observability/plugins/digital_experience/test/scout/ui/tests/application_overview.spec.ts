@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 // Inside the RUM test data, so the dashboard keeps showing data; typed as the picker displays it.
 const NEW_TIME_RANGE = { from: 'Jan 18, 2021 @ 12:15:00.000', to: 'Jan 18, 2021 @ 12:45:00.000' };
@@ -19,8 +20,16 @@ test.describe(
   'Digital Experience application overview',
   { tag: DIGITAL_EXPERIENCE_WITH_UX_TAGS },
   () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_ON_OVERRIDE);
+    });
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsViewer();
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
     test('renders the Classic RUM dashboard of the application', async ({

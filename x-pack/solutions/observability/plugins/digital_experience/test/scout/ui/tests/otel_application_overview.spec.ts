@@ -10,6 +10,7 @@ import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 /** The `filters` param of the URL: Kibana filters as rison, `negate:!t` for an excluded value. */
 const filtersParam = (page: ScoutPage) => new URL(page.url()).searchParams.get('filters') ?? '';
@@ -28,10 +29,18 @@ test.describe(
   'Digital Experience EDOT Browser application',
   { tag: DIGITAL_EXPERIENCE_TAGS },
   () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_ON_OVERRIDE);
+    });
+
     test.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsViewer();
       // Wide enough for the whole row of filters, which gives way to "All filters" when narrower.
       await page.setViewportSize(WIDE_VIEWPORT);
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
     test('shows the pages, browsers and clicks of the EDOT Browser application', async ({

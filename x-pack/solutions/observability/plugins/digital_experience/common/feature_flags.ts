@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout-oblt';
-
-export default createPlaywrightConfig({
-  testDir: './tests',
-  runGlobalSetup: true,
-});
+/** Controls whether users see Digital Experience; evaluate it with fallback `false`. */
+export const DIGITAL_EXPERIENCE_ENABLED_FLAG = 'digitalExperience.enabled';

@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const {
   COMMON_HEADERS,
@@ -32,6 +33,14 @@ const usagePath = (serviceName: string, environment?: string) => {
 };
 
 apiTest.describe('Digital Experience usage API', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
+  apiTest.beforeAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_ON_OVERRIDE);
+  });
+
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_RESET_OVERRIDE);
+  });
+
   apiTest(
     'returns the pages, breakdowns and clicks of the application',
     async ({ apiClient, samlAuth }) => {
