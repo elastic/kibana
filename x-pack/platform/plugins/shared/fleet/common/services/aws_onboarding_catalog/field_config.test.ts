@@ -15,7 +15,7 @@ import {
   isRequiredBySelectedOption,
   resolveVarGroupSelections,
   shouldDefaultCollectS3Logs,
-  getRegionFieldName,
+  getFormRegionFieldName,
   offersDatasetTemplates,
   getRequiredTextFields,
   getFlyoutFields,
@@ -48,25 +48,25 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   } as AwsServiceMatrixEntry;
 }
 
-describe('getRegionFieldName', () => {
+describe('getFormRegionFieldName', () => {
   it('returns "region" for S3 input when service has region in requiredConfig', () => {
     const service = makeService({ requiredConfig: ['region', 'bucket_arn'] });
-    expect(getRegionFieldName(service, 'aws-s3')).toBe('region');
+    expect(getFormRegionFieldName(service, 'aws-s3')).toBe('region');
   });
 
   it('returns "region_name" for CloudWatch input when service has region_name in requiredConfig', () => {
     const service = makeService({ requiredConfig: ['region_name', 'log_group_arn'] });
-    expect(getRegionFieldName(service, 'aws-cloudwatch')).toBe('region_name');
+    expect(getFormRegionFieldName(service, 'aws-cloudwatch')).toBe('region_name');
   });
 
   it('returns "aws_region" when service has aws_region in requiredConfig', () => {
     const service = makeService({ requiredConfig: ['aws_region'] });
-    expect(getRegionFieldName(service, null)).toBe('aws_region');
+    expect(getFormRegionFieldName(service, null)).toBe('aws_region');
   });
 
   it('falls back to "aws_region" when no matching region field exists', () => {
     const service = makeService({ requiredConfig: [] });
-    expect(getRegionFieldName(service, 'aws-s3')).toBe('aws_region');
+    expect(getFormRegionFieldName(service, 'aws-s3')).toBe('aws_region');
   });
 });
 

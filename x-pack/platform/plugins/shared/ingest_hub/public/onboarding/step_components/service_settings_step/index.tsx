@@ -28,10 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import {
-  getFormRegionFieldName as getRegionFieldName,
-  hasConfigurableFlyoutFields,
-} from '@kbn/fleet-plugin/common';
+import { getFormRegionFieldName, hasConfigurableFlyoutFields } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { supportsNamespace } from './instance_namespace_field';
 import { deploysAsPolicy, followsGlobalNamespace } from '../../common/effective_namespace';
@@ -436,7 +433,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             const dsVars = config.varsByDataStream[dsId];
             const inp = dsVars?.enabledInputs?.[0];
             if (inp) {
-              const regionField = getRegionFieldName(service, inp);
+              const regionField = getFormRegionFieldName(service, inp);
               const rawRegion = dsVars.varsByInput?.[inp]?.[regionField];
               override = (Array.isArray(rawRegion) ? rawRegion[0] : rawRegion)?.trim() || undefined;
               break;

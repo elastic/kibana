@@ -39,7 +39,7 @@ import {
   REGION_FIELD_NAMES,
   getFlyoutFields,
   getMissingSourceGroup,
-  getFormRegionFieldName as getRegionFieldName,
+  getFormRegionFieldName,
   getRequiredTextFields,
   getStreamVarGroups,
   isAdvancedVar,
@@ -257,7 +257,7 @@ function InputVarFields({
       return a.dataset.localeCompare(b.dataset);
     });
   }, [dataStreamsData, service.packageName, needsDatastreams]);
-  const regionFieldName = getRegionFieldName(service, activeInput);
+  const regionFieldName = getFormRegionFieldName(service, activeInput);
   const regionMeta = allConfigFields.includes(regionFieldName)
     ? resolveFieldMeta(service, activeInput, regionFieldName)
     : undefined;

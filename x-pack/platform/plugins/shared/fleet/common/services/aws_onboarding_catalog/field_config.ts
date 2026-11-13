@@ -363,7 +363,7 @@ export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boo
   return allInputs.some((input) => hasConfigurableFlyoutFieldsForInput(service, input));
 }
 
-export function getRegionFieldName(
+export function getFormRegionFieldName(
   service: AwsServiceMatrixEntry,
   activeInput: string | null
 ): string {

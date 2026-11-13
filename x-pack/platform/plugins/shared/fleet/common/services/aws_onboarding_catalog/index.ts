@@ -11,9 +11,3 @@ export * from './instances';
 export * from './package_inputs';
 export * from './service_index_patterns';
 export * from './types';
-
-// field_config and package_inputs each define a different getRegionFieldName. The package_inputs
-// one keeps the plain name (the deploy path); the form's one, which falls back to aws_region, is
-// exported under its own name.
-export { getRegionFieldName } from './package_inputs';
-export { getRegionFieldName as getFormRegionFieldName } from './field_config';
