@@ -952,8 +952,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'RELEASE_RELOCATION_WAIT_GROUPS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      // Like any instance arriving after a completed migration, transform outdated documents
-      // and update the mappings of the live index, in case we have plugins the others don't.
+      // Like CLONE_TEMP_TO_TARGET when another instance removed the temp index, transform outdated
+      // documents and update the mappings of the live index, in case we have plugins the others don't.
       // Without versionIndexReadyActions, this migrator will not update the aliases.
       return { ...stateP, controlState: 'REFRESH_TARGET' };
     } else {

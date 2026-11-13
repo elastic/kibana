@@ -1773,8 +1773,13 @@ describe('migrations v2 model', () => {
           type: 'source_equals_target' as const,
           index,
         });
-        const newState = model(setWriteBlockState, res);
+        const versionIndexReadyActions = Option.some([{ add: { index, alias: '.kibana' } }]);
+        const newState = model(
+          { ...setWriteBlockState, versionIndexReadyActions },
+          res
+        ) as RefreshTarget;
         expect(newState.controlState).toEqual('REFRESH_TARGET');
+        expect(newState.versionIndexReadyActions).toEqual(versionIndexReadyActions);
       });
 
       test('SET_SOURCE_WRITE_BLOCK -> RELEASE_RELOCATION_WAIT_GROUPS if source index matches target index and the migrator is involved in a relocation', () => {
