@@ -19,6 +19,7 @@ import { MAX_KEYWORD_LENGTH } from '../../common';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import {
+  MAX_HISTORY_RESULT_CHARS,
   buildInvestigationConversation,
   buildInvestigationRound,
 } from '../decision_trees/investigation_round';
@@ -204,6 +205,9 @@ export const decisionTreeReinforceStepDefinition = ({
       }
       const resolvedRoundId = loadedRound.roundId || roundId || undefined;
       const now = new Date().toISOString();
+      // Prioritize the latest round's tool results against the history budget, then fill earlier
+      // rounds from newest to oldest so a follow-up still sees Round 1's investigation trajectory.
+      const historyBudget = { remainingChars: MAX_HISTORY_RESULT_CHARS };
       const round = buildInvestigationRound({
         // Liquid renders an absent input as '', so empty strings count as unset.
         roundId: resolvedRoundId || uuidv4(),
@@ -213,12 +217,31 @@ export const decisionTreeReinforceStepDefinition = ({
         steps: loadedRound.source === 'persisted_round' ? loadedRound.steps : undefined,
         rawSteps: loadedRound.source === 'persisted_round' ? loadedRound.rawSteps : undefined,
         startedAt: loadedRound.startedAt ?? now,
+        budget: historyBudget,
       });
+      const earlierRounds = loadedRound.earlierRounds
+        ? [...loadedRound.earlierRounds]
+            .reverse()
+            .map((earlier) =>
+              buildInvestigationRound({
+                roundId: earlier.id,
+                prompt: earlier.prompt,
+                response: earlier.response,
+                toolCalls: earlier.toolCalls,
+                steps: earlier.steps,
+                rawSteps: earlier.rawSteps,
+                startedAt: earlier.startedAt,
+                budget: historyBudget,
+              })
+            )
+            .reverse()
+        : [];
       // A fresh id per run: the beforeAgent hydrate namespaces the sandbox by conversation id.
       const conversationId = uuidv4();
       const conversation = buildInvestigationConversation({
         conversationId,
         agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+        earlierRounds,
         round,
         now,
       });

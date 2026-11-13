@@ -249,6 +249,88 @@ export function buildInvestigationMessage(context: AlertInvestigationContext): s
 /** How the alert-recovered follow-up opens, so a consumer can tell that round from a user's message. */
 export const ALERT_RECOVERED_MESSAGE_PREFIX = 'An alert in this investigation has recovered.';
 
+export const ALERT_OUTCOME_VERDICTS = [
+  'confirmed',
+  'partially supported but incomplete',
+  'contradicted',
+  'unresolved',
+] as const;
+
+export type AlertOutcomeVerdict = (typeof ALERT_OUTCOME_VERDICTS)[number];
+
+/** Whether a round's prompt is the automated follow-up `followUpRecoveredAlert` builds. */
+export const isAlertRecoveryRound = (prompt: string | undefined): boolean =>
+  (prompt ?? '').trimStart().startsWith(ALERT_RECOVERED_MESSAGE_PREFIX);
+
+// Ported from Deductive's `ALERT_OUTCOME_POLICY` (inference/src/agent/copilot_v2.py). Hypotheses
+// are updated in the reply text rather than by a tool (#304553).
+export const ALERT_OUTCOME_POLICY = `<alert_outcome_policy>
+This turn evaluates an earlier incident hypothesis using alert-outcome evidence.
+- "Resolved" means only that the alert is no longer firing. It is not proof that a causal change occurred or that the earlier root-cause hypothesis was correct.
+- Compare both the proposed cause and the alert-driving signal across exact before, during, and after windows. Report the compared time windows, values, and direction of change; treat missing measurements as unknown.
+- Reject a "confirmed" verdict when the proposed cause remains materially flat while the alert-driving symptom resolves, unless evidence identifies a mediator or interaction that explains why the symptom changed without a corresponding movement in the proposed cause.
+- Treat temporal invariance as falsifying evidence: a signal that predates the alert and remains flat through symptom onset and cessation is a background condition, not the incident cause or "upstream signal". Its presence and operational importance do not partially validate a causal attribution.
+- Distinguish these roles explicitly: incident trigger, background condition, alert-driving failure, and resolution mechanism. Do not collapse correlation, pre-existing susceptibility, and recovery into one cause.
+- Give exactly one verdict: "confirmed", "partially supported but incomplete", "contradicted", or "unresolved". Unknown evidence or mechanism is allowed; use "unresolved" rather than forcing attribution.
+- Use "contradicted" when the earlier RCA's central causal link is falsified, even if some observations in that RCA remain true. Reserve "partially supported but incomplete" for a causal link that outcome evidence positively supports but whose upstream trigger or detailed mechanism remains unknown.
+- Grade the verdict against the earlier RCA's central causal claim, not the fraction of individually true observations. Correctly naming the symptom, call path, or a chronic dependency error does not earn partial support when the claimed causal link is contradicted.
+- Co-occurring rate series do not prove propagation. Do not claim that a background dependency error propagated, amplified, or intermittently surfaced as the alert-driving failure unless request-level logs, traces, or another direct mechanism tie the two together. If the failure appears and disappears independently, describe the background signal as unrelated and non-causal for this incident.
+- Forbidden reasoning pattern: "the dependency was the upstream call path, therefore the RCA is partially supported." An upstream relationship is not an incident-causal relationship.
+- Once invariance and the absence of direct mechanism evidence rule out a proposed dependency signal, state that it was unrelated and non-causal for this incident. Do not use that ruled-out signal as the object of "caused", "propagated", "amplified", "triggered", or "surfaced as" anywhere in the corrected narrative, incident-trigger field, or remaining hypotheses. Remaining hypotheses must be independent of the ruled-out signal.
+- Do not invent a "most likely" mediator to preserve an earlier RCA. If the incident trigger is not evidenced, label it unresolved and state what evidence would distinguish the remaining hypotheses.
+- In your reply, update or downgrade hypotheses to match the outcome evidence. Do not reinforce an earlier hypothesis merely because the alert stopped firing.
+- End with this explicit reconciliation block: "Alert-driving failure:", "Incident trigger:", "Background condition:", "Resolution mechanism:", and "Verdict: <one allowed verdict>".
+</alert_outcome_policy>`;
+
+const VERDICT_LINE_RE = /^[ \t*-]*(?:\*\*|`)?verdict(?:\*\*|`)?[ \t]*:(?:\*\*|`)?[ \t]*(.+)$/i;
+
+/**
+ * Extracts the investigator's `Verdict:` from the trailing `<alert_outcome_policy>` reconciliation
+ * block. Scans from the end so earlier prose does not shadow the final reconciliation, and ignores
+ * blockquoted lines (`>`) or unrecognized verdict text rather than guessing.
+ */
+export const parseAlertOutcomeVerdict = (
+  response: string | undefined
+): AlertOutcomeVerdict | undefined => {
+  if (!response) return undefined;
+  const lines = response.split(/\r?\n/);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const match = VERDICT_LINE_RE.exec(lines[i]);
+    if (!match) continue;
+    const cleaned = match[1]
+      .replace(/[*"'`]+/g, '')
+      .trim()
+      .replace(/^[<\[]+/, '')
+      .replace(/[>\].!?\s]+$/, '')
+      .trim()
+      .toLowerCase();
+    if (!cleaned) continue;
+
+    if (
+      /^partially\s+supported(?:\s+but\s+incomplete)?(?=$|[\s.,;:—–(-])/.test(cleaned) ||
+      /^partly\s+supported(?:\s+but\s+incomplete)?(?=$|[\s.,;:—–(-])/.test(cleaned)
+    ) {
+      return 'partially supported but incomplete';
+    }
+    if (/^contradicted(?=$|[\s.,;:—–(-])/.test(cleaned)) {
+      return 'contradicted';
+    }
+    if (/^unresolved(?=$|[\s.,;:—–(-])/.test(cleaned)) {
+      return 'unresolved';
+    }
+    if (
+      /^confirmed(?=$|[\s.,;:—–(-])/.test(cleaned) &&
+      !/\b(?:not|never|neither|unconfirmed|contradicted|unresolved|partly|partially)\b/.test(
+        cleaned
+      )
+    ) {
+      return 'confirmed';
+    }
+    return undefined;
+  }
+  return undefined;
+};
+
 export interface AlertRecoveredMessageInput {
   alertUuid: string;
   alertId: string;
@@ -316,8 +398,10 @@ export function buildAlertRecoveredFollowUpMessage({
     '',
     '1. Examine all available signals before, during, and after the recovery: metrics, logs, traces, topology, deployments, rollbacks, code and configuration changes, operational actions, and relevant discussions or incident records.',
     '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. In your reply, lower the confidence of or dismiss hypotheses contradicted by the evidence.',
-    '3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved.',
+    '3. State whether the investigated root cause is confirmed, partially supported but incomplete, contradicted, or unresolved.',
     '4. State whether the alert needed remediation, such as a rollback, configuration change, or code fix, or was benign: noise, a transient condition that ended on its own, or an expected artifact. Say so if it is unknown.',
+    '',
+    ALERT_OUTCOME_POLICY,
   ].join('\n');
 }
 
