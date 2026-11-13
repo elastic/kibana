@@ -307,8 +307,8 @@ export class AlertBuilder<
           stopTrackingIds.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
         );
       } else {
-        this.logger.error(
-          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - existing alert document not found ${this.ruleInfoMessage}.`,
+        this.logger.warn(
+          `Not updating recovered alert(${id}) in ${this.indexTemplateAndPattern.alias} - existing alert document not found ${this.ruleInfoMessage}.`,
           this.logTags
         );
       }
