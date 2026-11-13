@@ -15,7 +15,7 @@ export interface SelectedKi {
   index: string;
 }
 
-interface SelectKiOptions {
+export interface SelectKiOptions {
   /** Replace the current history entry instead of adding a new one. */
   replace?: boolean;
 }
