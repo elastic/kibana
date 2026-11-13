@@ -137,4 +137,31 @@ describe('useCloseSignificantEvent', () => {
       title: 'Failed to mark significant event inactive',
     });
   });
+
+  it('shows the server message when the update is forbidden', async () => {
+    significantEventsFetch.mockRejectedValueOnce(
+      Object.assign(new Error('Forbidden'), {
+        body: {
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Unauthorized to access "Alerts: All"',
+        },
+      })
+    );
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
+
+    act(() => result.current.closeSignificantEvent(event.event_id));
+
+    await waitFor(() => expect(addError).toHaveBeenCalled());
+    expect(addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Unauthorized to access "Alerts: All"' }),
+      { title: 'Failed to mark significant event inactive' }
+    );
+  });
 });

@@ -101,6 +101,27 @@ separate guarded investigation step. Alert publication opt-in and alert snapshot
 separate work. Existing saved schedules activate on their next valid save or enable action, with no
 automatic workflow rewrite at deployment.
 
+## Alert ingress telemetry
+
+The `nightshift-alert-entered-pipeline` EBT event is emitted when a new externally ingested
+Alerting v2 episode or an Elastic-configured Alerting v2 rule episode enters Nightshift. It contains
+only `alert_source`, the opaque `fingerprint`, `group_hash`, `space_id`, `source_kind`, and
+`sampling_probability`; it never includes alert titles, messages, tags, or customer alert data.
+`alert_source` is `internal` for Elastic-configured rules and otherwise the sender-provided
+integration identifier. Because an external writer may also send `internal`, `source_kind`
+distinguishes rule alerts from external alerts. Significant Events are excluded because they have
+separate ingress telemetry.
+
+`fingerprint` identifies the alert series across telemetry events and is
+`sha256(space_id:source:rule_id:group_hash)`, with an empty `rule_id` for external alerts. Rule
+alerts need the rule id because their `group_hash` is only unique within a rule. `group_hash` is
+the Alerting v2 series key as written, so the event can be joined back to `.rule-events`. Later
+events about the same alert must derive `fingerprint` with the exported `toAlertFingerprint`.
+
+Volume is bounded with deterministic 10% sampling by fingerprint. Every episode in the same alert
+series therefore makes the same sampling decision, and consumers can use `sampling_probability` to
+weight sampled counts.
+
 ## Requirements
 
 Nightshift investigations are being moved onto the shared `agenticInvestigations` plugin (an investigation is an Agent Builder conversation) and its proposed actions onto the `proposals` plugin. Both are optional dependencies and disabled by default:

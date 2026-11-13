@@ -149,6 +149,15 @@ export {
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
 
 export {
+  DEFAULT_RUN_QUOTA_TIME_ZONE,
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  dayKey,
+  resolveDailyWindow,
+  type RunQuotaWindow,
+} from './src/run_quota_window';
+
+export {
   isNightshiftSpaceGatedEndpoint,
   isNightshiftSupportedSpace,
   NIGHTSHIFT_SUPPORTED_SPACE_ID,

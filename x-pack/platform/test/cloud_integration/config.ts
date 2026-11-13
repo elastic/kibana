@@ -25,8 +25,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, './plugins/saml_provider/metadata.xml');
-  const samlIdPPlugin = resolve(__dirname, './plugins/saml_provider');
+  const idpPath = resolve(
+    __dirname,
+    '../../test_plugins/cloud_integration/saml_provider/metadata.xml'
+  );
+  const samlIdPPlugin = resolve(__dirname, '../../test_plugins/cloud_integration/saml_provider');
 
   return {
     testFiles: [...(RUN_FULLSTORY_TESTS ? [resolve(__dirname, './tests/fullstory')] : [])],
