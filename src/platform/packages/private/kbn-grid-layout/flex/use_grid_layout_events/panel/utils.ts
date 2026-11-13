@@ -62,11 +62,16 @@ export const getResizePreviewRect = ({
   const panelRect = activePanel.panelDiv.getBoundingClientRect();
   // use the left edge from the resize start; the live `left` can change if the panel reflows rows
   const originLeft = activePanel.position.left;
-  const { maxWidth, minHeight, maxHeight, ...widthOptions } = {
+  const {
+    maxWidth,
+    minHeight,
+    maxHeight,
+    minWidth: requestedMinWidth,
+  } = {
     ...getDefaultResizeOptions(),
     ...resizeOptions,
   };
-  const minWidth = Math.max(widthOptions.minWidth, MIN_RESIZE_WIDTH);
+  const minWidth = Math.max(requestedMinWidth, MIN_RESIZE_WIDTH);
   return {
     left: originLeft,
     top: panelRect.top,

@@ -18,7 +18,7 @@ import type {
   PointerPosition,
   UserInteractionEvent,
 } from '../../../grid/use_grid_layout_events/types';
-import { getPanelKeysInOrder } from '../../utils/resolve_grid_section';
+import { getPanelKeysInOrder } from '../../utils/panel_order';
 import type { UserKeyboardEvent } from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
 import {
   getDefaultResizeOptions,

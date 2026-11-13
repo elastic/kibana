@@ -10,7 +10,6 @@
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { combineLatest, skip } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { useGridPanelState } from './use_panel_grid_data';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
@@ -29,26 +28,12 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
     ])
       .pipe(skip(1))
       .subscribe(([activePanel, currentPanel]) => {
-        if (!currentPanel) {
-          setIsResizing(false);
-          return;
-        }
-        const ref = gridLayoutStateManager.panelRefs.current[currentPanel?.id];
+        const ref = currentPanel && gridLayoutStateManager.panelRefs.current[currentPanel.id];
+        const isResizingThisPanel =
+          Boolean(ref) && activePanel?.type === 'resize' && activePanel.id === currentPanel?.id;
 
-        if (!ref) {
-          setIsResizing(false);
-          return;
-        }
-
-        const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
-        const isResize = activePanel?.type === 'resize';
-
-        if (isPanelActive && isResize) {
-          setIsResizing(true);
-          setWidth(Math.round(currentPanel.width));
-        } else {
-          setIsResizing(false);
-        }
+        setIsResizing(isResizingThisPanel);
+        if (isResizingThisPanel && currentPanel) setWidth(Math.round(currentPanel.width));
       });
 
     return () => {
@@ -59,12 +44,7 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   return isResizing ? (
     <div css={outerStyles} className="kbnFlexPanel--resizeGauge">
       <div className="kbnFlexPanel--resizeGauge--inner">
-        <span className="kbnFlexPanel--resizeGauge--text">
-          {i18n.translate('kbnGridLayout.flex.resizeGauge.width', {
-            defaultMessage: '{width}',
-            values: { width },
-          })}
-        </span>
+        <span className="kbnFlexPanel--resizeGauge--text">{width}</span>
       </div>
     </div>
   ) : null;

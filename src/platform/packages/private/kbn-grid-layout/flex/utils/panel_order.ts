@@ -22,25 +22,13 @@ const comparePanel = (panelA: FlexPanelData, panelB: FlexPanelData, draggedId?: 
   return 1;
 };
 
+export const getPanelKeysInOrder = (panels: FlexLayoutData, draggedId?: string): string[] =>
+  Object.keys(panels).sort((panelKeyA, panelKeyB) =>
+    comparePanel(panels[panelKeyA], panels[panelKeyB], draggedId)
+  );
+
 export const getLayoutInOrder = (
   layout: FlexLayoutData,
   draggedId?: string
-): FlexLayoutElementsInOrder => {
-  const widgetIds = Object.keys(layout);
-  const idsInorder = widgetIds.sort((widgetKeyA, widgetKeyB) => {
-    const widgetA = layout[widgetKeyA];
-    const widgetB = layout[widgetKeyB];
-    return comparePanel(widgetA, widgetB, draggedId);
-  });
-  return idsInorder.map((id) => ({ id, type: layout[id].type }));
-};
-
-export const getPanelKeysInOrder = (panels: FlexLayoutData, draggedId?: string): string[] => {
-  const panelKeys = Object.keys(panels);
-  return panelKeys.sort((panelKeyA, panelKeyB) => {
-    const panelA = panels[panelKeyA];
-    const panelB = panels[panelKeyB];
-
-    return comparePanel(panelA, panelB, draggedId);
-  });
-};
+): FlexLayoutElementsInOrder =>
+  getPanelKeysInOrder(layout, draggedId).map((id) => ({ id, type: layout[id].type }));
