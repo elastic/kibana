@@ -13,7 +13,7 @@ The graph visualization feature is owned by **@elastic/contextual-security-apps*
 - **legacy flyout v1 (document details):** `flyout/document_details/left/components/graph_visualization.tsx` (passes `scopeId` and `graphScopeId={scopeId}`, `:110-111`)
 - **legacy flyout v1 (entity details):** `flyout/entity_details/shared/components/left/graph_view_tab.tsx` (passes `scopeId` and `graphScopeId={scopeId}`, `:106-107`)
 
-Preview (non-full) graphs are mounted by `flyout_v2/document/main/components/graph_preview_container.tsx` (via `useGraphPreview`) and the legacy `flyout/entity_details/shared/components/right/entity_graph_preview_container.tsx` (gated by `useShouldShowGraph`: license + `useIsEntityStoreV2Available`).
+Preview (non-full) graphs are mounted by `flyout_v2/document/main/components/graph_preview_container.tsx` (via `useGraphPreview`) and the `flyout_v2/entity/shared/components/entity_graph_preview_container.tsx` (gated by `useShouldShowGraph`: license + `useIsEntityStoreV2Available`).
 
 The graph telemetry files (`common/lib/telemetry/events/graph/**` and `flyout_v2/shared/hooks/use_graph_telemetry.ts`) are maintained by @elastic/contextual-security-apps.
 

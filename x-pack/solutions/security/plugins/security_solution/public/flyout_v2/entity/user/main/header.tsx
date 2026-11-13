@@ -25,13 +25,13 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_actions';
 import type { FirstLastSeenData } from '../../shared/components/observed_entity/types';
-import type { ManagedUserData } from '../../../../flyout/entity_details/shared/hooks/use_managed_user';
+import type { ManagedUserData } from '../../shared/hooks/use_managed_user';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
-import { getResolvedFromRecordCount } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+import { EntitySourceBadge } from '../../shared/components/entity_source_badge';
+import { getResolvedFromRecordCount } from '../../shared/utils/entity_store_group_utils';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
+import { RiskLevelBadge } from '../../shared/components/risk_level_badge';
 import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
 import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';

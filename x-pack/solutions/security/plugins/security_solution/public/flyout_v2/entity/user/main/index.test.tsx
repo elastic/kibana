@@ -8,16 +8,13 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
+import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../shared/components/test_ids';
 import {
   mockUserEntityRiskScores,
   mockUserEntityRiskScoresWithResolution,
   mockUserRiskScoreState,
-} from '../../../../flyout/entity_details/mocks';
-import {
-  mockObservedUser,
-  mockManagedUserData,
-} from '../../../../flyout/entity_details/user_right/mocks';
+} from '../../shared/mocks';
+import { mockObservedUser, mockManagedUserData } from '../mocks';
 import type { UserEntity } from '../../../../../common/api/entity_analytics';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { User } from '.';
@@ -113,7 +110,7 @@ jest.mock('./hooks/use_observed_user', () => ({
 }));
 
 const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_managed_user', () => ({
+jest.mock('../../shared/hooks/use_managed_user', () => ({
   useManagedUser: () => mockedUseManagedUser(),
 }));
 

@@ -16,7 +16,7 @@ import {
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ONE_WEEK_IN_HOURS } from '../../../../flyout/entity_details/shared/constants';
+import { ONE_WEEK_IN_HOURS } from '../constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import type { ObservedDataSectionProps } from './observed_data_section_content';

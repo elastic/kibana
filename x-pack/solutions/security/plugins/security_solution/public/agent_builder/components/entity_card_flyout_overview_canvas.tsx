@@ -44,21 +44,21 @@ import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
 import {
   useEntityPanelTabs,
   TABLE_TAB_ID,
-} from '../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
-import { EntityPanelHeaderTabs } from '../../flyout/entity_details/shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../../flyout/entity_details/shared/components/entity_store_table_tab';
-import { EntitySummaryGrid } from '../../flyout/entity_details/shared/components/entity_summary_grid';
+} from '../../flyout_v2/entity/shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../flyout_v2/entity/shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../flyout_v2/entity/shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../flyout_v2/entity/shared/components/entity_summary_grid';
 import {
   HostPanelKey,
   ServicePanelKey,
   UserPanelKey,
-} from '../../flyout/entity_details/shared/constants';
+} from '../../flyout_v2/entity/shared/constants';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityEventTypes } from '../../common/lib/telemetry';
 import { Content as UserPanelContent } from '../../flyout_v2/entity/user/main/content';
 import { Header as UserPanelHeader } from '../../flyout_v2/entity/user/main/header';
 import { useObservedUser } from '../../flyout_v2/entity/user/main/hooks/use_observed_user';
-import { useManagedUser } from '../../flyout/entity_details/shared/hooks/use_managed_user';
+import { useManagedUser } from '../../flyout_v2/entity/shared/hooks/use_managed_user';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/user/main/constants';
 import { Content as ServicePanelContent } from '../../flyout_v2/entity/service/main/content';
 import { Header as ServicePanelHeader } from '../../flyout_v2/entity/service/main/header';

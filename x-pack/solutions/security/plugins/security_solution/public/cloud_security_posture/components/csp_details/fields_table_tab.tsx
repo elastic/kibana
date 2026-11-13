@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
-import { FieldsTable } from '../../../flyout/entity_details/generic_right/components/fields_table';
+import type { FieldsTableProps } from '../../../flyout_v2/entity/generic/main/components/fields_table';
+import { FieldsTable } from '../../../flyout_v2/entity/generic/main/components/fields_table';
 
 export const FieldsTableTab = memo(({ document, tableStorageKey }: FieldsTableProps) => {
   return <FieldsTable document={document} tableStorageKey={tableStorageKey} />;
