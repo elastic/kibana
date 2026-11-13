@@ -16,6 +16,7 @@ import {
 import {
   ESQL_MAX_QUERY_LENGTH,
   ESQL_MAX_RESULT_ROWS,
+  SET_UNMAPPED_NULLIFY,
   buildLookupJoinClause,
   buildRowFieldsSteps,
   buildSortSuffix,
@@ -73,6 +74,7 @@ const buildEmptyRowsQuery = (
   limit: number,
   afterId: string | null = null
 ): string[] => [
+  SET_UNMAPPED_NULLIFY,
   ...buildEntitiesInViewSteps(args),
   ...(valueIds.length ? [`| WHERE NOT ${ENTITY_ID_FIELD} IN (${toList(valueIds)})`] : []),
   ...(afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${escapeStringValue(afterId)}`] : []),
@@ -204,6 +206,7 @@ const fetchSearchedPage = async (
   ctx: SortPageContext
 ): Promise<Row[]> => {
   const matches = await ctx.runQuery([
+    SET_UNMAPPED_NULLIFY,
     ...buildEntitiesInViewSteps(args),
     `| LIMIT ${MAX_ROWS + 1}`,
     ...buildRowFieldsSteps(args),

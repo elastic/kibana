@@ -40,6 +40,7 @@ import {
   buildPaginationSection,
   mapPostAggFilterFieldsToRecentForEsql,
   NULLIFY_UNMAPPED_FIELDS_SETTING,
+  LOOKUP_FIELDS_UNMAPPED_ON_OLDER_INDICES,
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
@@ -151,6 +152,15 @@ export function buildLogsExtractionEsqlQuery({
       recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)
     )}`
   );
+
+  // The aggregation leaves only `recent.*` columns, so these names are free until the join. An older
+  // latest index lacks them, and the join resolves every column the query names; where it maps them,
+  // its value replaces the null.
+  for (const field of LOOKUP_FIELDS_UNMAPPED_ON_OLDER_INDICES) {
+    if (fields.some(({ destination }) => destination === field)) {
+      parts.push(`| EVAL ${field} = TO_STRING(null)`);
+    }
+  }
 
   // Lookup join to the latest index to perform data retention
   parts.push(`| LOOKUP JOIN _coordinator:${latestIndex}

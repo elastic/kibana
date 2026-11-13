@@ -735,7 +735,25 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
       expect(awsJson).not.toEqual(gcpJson);
     });
 
-    it('aws IAM record: does not guard user.entity.id, which the record does not store', () => {
+    it('aws IAM record: filters on the stored user.entity.id ARN instead of user.id', () => {
+      const roleArn = 'arn:aws:iam::123456789012:role/Admin';
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
+        entity: { id: `user:${roleArn}@aws`, namespace: 'aws' },
+        cloud: { provider: 'aws' },
+        user: { entity: { id: roleArn }, id: [roleArn, 'AROAEXAMPLE:session-1'], name: 'Admin' },
+      });
+
+      expect(result?.bool?.filter).toEqual(
+        expect.arrayContaining([{ term: { 'user.entity.id': roleArn } }])
+      );
+      expect(result?.bool?.filter).not.toEqual(
+        expect.arrayContaining([{ term: { 'user.id': roleArn } }])
+      );
+      // user.entity.id ranks first, so no higher-ranked identity field has to be missing.
+      expect(result?.bool?.must).toBeUndefined();
+    });
+
+    it('aws record without user.entity.id: falls back to user.id and requires user.entity.id to be missing', () => {
       const roleArn = 'arn:aws:iam::123456789012:role/Admin';
       const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { id: `user:${roleArn}@aws`, namespace: 'aws' },
@@ -746,8 +764,22 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
       expect(result?.bool?.filter).toEqual(
         expect.arrayContaining([{ term: { 'user.id': roleArn } }])
       );
-      // user.entity.id ranks first but is not on the record. Requiring it to be missing would
-      // match no document, because every AWS document carries it.
+      expect(result?.bool?.must).toEqual(
+        expect.arrayContaining([
+          fieldMissingOrEmpty('user.entity.id'),
+          fieldMissingOrEmpty('user.email'),
+        ])
+      );
+    });
+
+    it('non-aws record: ignores user.entity.id and keeps the default ranking', () => {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
+        entity: { namespace: 'okta' },
+        user: { entity: { id: 'okta-entity-id' }, id: 'u1' },
+      });
+
+      expect(result?.bool?.filter).toEqual(expect.arrayContaining([{ term: { 'user.id': 'u1' } }]));
+      expect(JSON.stringify(result)).not.toContain('user.entity.id');
       expect(result?.bool?.must).toEqual([fieldMissingOrEmpty('user.email')]);
     });
 

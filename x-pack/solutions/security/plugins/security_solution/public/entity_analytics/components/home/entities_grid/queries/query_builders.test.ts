@@ -229,7 +229,8 @@ describe('entities grid query builders', () => {
 
     it('gives the rows of an alias to its resolved entity, and aggregates them', () => {
       expect(buildRollUpOverAliasesSteps(BASE_ARGS, AGGREGATIONS)).toEqual([
-        `| LOOKUP JOIN ${BASE_ARGS.concreteEntityIndexName} ON \`entity.id\``,
+        // Set to null first, so an index without the field still joins.
+        `| EVAL user.entity.id = TO_STRING(null)\n| LOOKUP JOIN ${BASE_ARGS.concreteEntityIndexName} ON \`entity.id\``,
         '| EVAL `entity.id` = COALESCE(entity.relationships.resolution.resolved_to, `entity.id`)',
         '| STATS last_at = MAX(last_at), total = SUM(total), high = SUM(high) BY `entity.id`',
       ]);

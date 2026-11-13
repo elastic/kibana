@@ -25,4 +25,8 @@ describe('ENTITY_FIELDS', () => {
       expect(keptIdentityFields.filter((field) => !storedFields.has(field))).toEqual([]);
     }
   );
+
+  it('keeps user.entity.id for user, which the user definition stores', () => {
+    expect(ENTITY_FIELDS).toContain('user.entity.id');
+  });
 });

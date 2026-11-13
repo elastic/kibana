@@ -17,6 +17,12 @@ export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 // Bump this integer whenever entity index mappings change.
 export const MAPPING_VERSION = 1;
 
+// Bump this integer whenever the properties of the latest index mappings change (any definition field
+// with a mapping). Stored in the latest index `_meta`; existing indices are updated in place on startup.
+// Unrelated to MAPPING_VERSION, which is the index-name suffix.
+export const LATEST_INDEX_MAPPINGS_VERSION = 1;
+export const LATEST_INDEX_MAPPINGS_VERSION_META_KEY = 'latestMappingsVersion';
+
 type SchemaVersion = `v${number}`;
 type Dataset =
   | typeof ENTITY_LATEST

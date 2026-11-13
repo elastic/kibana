@@ -165,7 +165,7 @@ export async function installIndicesAndDataStreams(
   ]);
 }
 
-async function installIndexTemplates(
+export async function installIndexTemplates(
   esClient: ElasticsearchClient,
   namespace: string,
   logger: Logger
@@ -188,7 +188,7 @@ async function installIndexTemplates(
   ]);
 }
 
-async function installAllComponentTemplates(
+export async function installAllComponentTemplates(
   esClient: ElasticsearchClient,
   namespace: string,
   logger: Logger

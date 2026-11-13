@@ -28,6 +28,7 @@ import { translateSearch } from '../kql_to_esql';
 import { buildEntitiesInViewCountQuery } from '../entities_in_view';
 import type { EsqlRunner } from '../types';
 import { BASE_ARGS, getIds, hoursAgo, startFixtureCluster } from './fixture';
+import { ALICE_USER_ENTITY_ID } from './fixture/entities';
 import { DAY_MS, HOUR_MS } from './fixture/fixture_index';
 import type { FixtureCluster } from './fixture';
 
@@ -319,6 +320,30 @@ const VIEW_BY_CASES: readonly FilterCase[] = [
   ],
 ];
 
+/** The query arguments of a filter case, its filters compiled by the grid's own `toEsql`. */
+const buildFilteredArgs = async (
+  { runQuery }: Pick<FixtureCluster, 'runQuery'>,
+  [, filters, field, direction]: FilterCase
+): Promise<QueryArgs> => {
+  const activeFilters = { ...NO_FILTERS, ...filters };
+  const args = {
+    ...BASE_ARGS,
+    ...toEsql(activeFilters),
+    rowsMode: activeFilters.rowsMode,
+    sort: { field, direction },
+  };
+  // The grid reads the groups the filters on the group values add or remove first.
+  return {
+    ...args,
+    entityExpression:
+      args.entityExpression &&
+      applyResolvedEntityFilterOverrides(
+        args.entityExpression,
+        await fetchResolvedEntityFilterOverrides(args, runQuery)
+      ),
+  };
+};
+
 describe('entities grid on Elasticsearch', () => {
   let cluster: FixtureCluster;
 
@@ -331,31 +356,7 @@ describe('entities grid on Elasticsearch', () => {
   });
 
   describe('rows', () => {
-    /** The query arguments of a filter case, its filters compiled by the grid's own `toEsql`. */
-    const getFilteredArgs = async ([
-      ,
-      filters,
-      field,
-      direction,
-    ]: FilterCase): Promise<QueryArgs> => {
-      const activeFilters = { ...NO_FILTERS, ...filters };
-      const args = {
-        ...BASE_ARGS,
-        ...toEsql(activeFilters),
-        rowsMode: activeFilters.rowsMode,
-        sort: { field, direction },
-      };
-      // The grid reads the groups the filters on the group values add or remove first.
-      return {
-        ...args,
-        entityExpression:
-          args.entityExpression &&
-          applyResolvedEntityFilterOverrides(
-            args.entityExpression,
-            await fetchResolvedEntityFilterOverrides(args, cluster.runQuery)
-          ),
-      };
-    };
+    const getFilteredArgs = (filterCase: FilterCase) => buildFilteredArgs(cluster, filterCase);
 
     const fetchFilteredPage = async (filterCase: FilterCase): Promise<Row[]> =>
       fetchPage(cluster.runQuery, await getFilteredArgs(filterCase));
@@ -383,6 +384,23 @@ describe('entities grid on Elasticsearch', () => {
 
             expect(getIds(rows)).toEqual(expected.slice(0, pageSize + 1));
           }
+        }
+      );
+
+      it.each(EXPECTED_ORDERS)(
+        'reads user.entity.id from the entity docs in the %s %s rows',
+        async (field, direction) => {
+          const rows = await fetchPage(cluster.runQuery, {
+            ...BASE_ARGS,
+            sort: { field, direction },
+          });
+
+          expect(rows.find((row) => row['entity.id'] === 'user:alice@okta')).toMatchObject({
+            'user.entity.id': ALICE_USER_ENTITY_ID,
+          });
+          expect(rows.find((row) => row['entity.id'] === 'host:h1')).toMatchObject({
+            'user.entity.id': null,
+          });
         }
       );
 
@@ -711,6 +729,64 @@ describe('entities grid on Elasticsearch', () => {
         'host:h2': { risk_score_change: 0 },
         'user:alice@okta': { risk_score_change: -10 },
       });
+    });
+  });
+
+  describe('on an entities index that predates user.entity.id', () => {
+    // Between a Kibana upgrade and the mapping migration the latest index lacks the field that the
+    // grid keeps for AWS users. Every query must still run, and read the column as null.
+    beforeAll(async () => {
+      await cluster.replaceEntitiesIndexWithoutField('user.entity.id');
+    }, 60_000);
+
+    const expectNoUserEntityId = (rows: readonly Row[]) => {
+      expect(rows.length).toBeGreaterThan(0);
+      expect(rows.filter((row) => row['user.entity.id'] !== null)).toEqual([]);
+    };
+
+    it.each(EXPECTED_ORDERS)('sorts by %s %s', async (field, direction, expected) => {
+      const rows = await fetchPage(cluster.runQuery, {
+        ...BASE_ARGS,
+        sort: { field, direction },
+      });
+
+      expect(getIds(rows)).toEqual(expected);
+      expectNoUserEntityId(rows);
+    });
+
+    it.each(EXPECTED_ORDERS.filter(([field]) => field === 'alert_count'))(
+      'ranks every entity in view by %s %s',
+      async (field, direction, expected) => {
+        const rows = await cluster.runQuery(
+          buildAlertSortAllQuery({ ...BASE_ARGS, sort: { field, direction } })
+        );
+
+        expect(getIds(rows)).toEqual(expected);
+        expectNoUserEntityId(rows);
+      }
+    );
+
+    it.each([...SEARCH_CASES, ...FILTER_CASES, ...VIEW_BY_CASES])(
+      'keeps the rows of %s, sorted by %s %s',
+      async (...filterCase) => {
+        const rows = await fetchPage(
+          cluster.runQuery,
+          await buildFilteredArgs(cluster, filterCase)
+        );
+
+        expect(getIds(rows)).toEqual(filterCase[4]);
+        if (rows.length) expectNoUserEntityId(rows);
+      }
+    );
+
+    it('shows the values of the groups', async () => {
+      const rows = await withResolvedEntityValues(
+        [{ 'entity.id': 'host:h1' }],
+        BASE_ARGS,
+        cluster.runQuery
+      );
+
+      expect(rows[0]['asset.criticality']).toBe('extreme_impact');
     });
   });
 });

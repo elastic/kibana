@@ -21,6 +21,8 @@ import type { FixtureIndex } from './fixture_index';
 
 export const ENTITY_INDEX = 'entities-latest-test-concrete';
 
+export const ALICE_USER_ENTITY_ID = 'arn:aws:iam::123456789012:user/alice';
+
 interface EntitySeed {
   id: string;
   type: 'host' | 'user' | 'service';
@@ -36,6 +38,8 @@ interface EntitySeed {
   /** Hours before now that the entity was last seen; 1 by default. */
   lastSeenHoursAgo?: number;
   resolvedTo?: string;
+  /** The IAM ARN an AWS user stores in `user.entity.id`. */
+  userEntityId?: string;
 }
 
 const ENTITIES: readonly EntitySeed[] = [
@@ -85,6 +89,7 @@ const ENTITIES: readonly EntitySeed[] = [
     name: 'alice',
     risk: [70, 'High'],
     criticality: 'low_impact',
+    userEntityId: ALICE_USER_ENTITY_ID,
   },
   { id: 'user:bob@okta', type: 'user', name: 'bob', groupRisk: [85, 'High'] },
   { id: 'user:carol@okta', type: 'user', name: 'carol', resolvedTo: 'user:bob@okta' },
@@ -120,6 +125,7 @@ const toEntityDoc = (seed: EntitySeed, now: number) => ({
   ...(seed.criticality ? { 'asset.criticality': seed.criticality } : {}),
   ...(seed.watchlists ? { 'entity.attributes.watchlists': seed.watchlists } : {}),
   ...(seed.resolvedTo ? { 'entity.relationships.resolution.resolved_to': seed.resolvedTo } : {}),
+  ...(seed.userEntityId ? { 'user.entity.id': seed.userEntityId } : {}),
 });
 
 /** The entity store's latest index: in lookup mode for LOOKUP JOIN, behind its alias. */
