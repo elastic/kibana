@@ -9,6 +9,7 @@ import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   AESOP_AB_COMPARE_WORKFLOW_ID,
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+  AESOP_EXPLORER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
@@ -237,6 +238,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
       aesopPrototypeEnabled: true,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -247,11 +249,14 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(managed.install).toHaveBeenCalledWith(AESOP_AB_COMPARE_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
-    expect(managed.uninstall).not.toHaveBeenCalled();
+    expect(managed.uninstall).not.toHaveBeenCalledWith(
+      AESOP_AB_COMPARE_WORKFLOW_ID,
+      expect.anything()
+    );
     expect(managed.ready).toHaveBeenCalledTimes(1);
   });
 
-  it('uninstalls the A/B compare workflow and any drift-monitor instances when the flag is off', async () => {
+  it('uninstalls the A/B compare workflow and any drift-monitor and explorer instances when the flag is off', async () => {
     const managed = createManagedClient();
     managed.listInstalledWorkflowStates.mockResolvedValue([
       {
@@ -259,6 +264,13 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
         definitionId: AESOP_DRIFT_MONITOR_WORKFLOW_ID,
         templateValues: { skillId: 'find-security-rules' },
+        documentVersion: 1,
+      },
+      {
+        workflowId: `${AESOP_EXPLORER_WORKFLOW_ID}-discovery`,
+        spaceId: 'security',
+        definitionId: AESOP_EXPLORER_WORKFLOW_ID,
+        templateValues: { mode: 'discovery' },
         documentVersion: 1,
       },
       {
@@ -277,6 +289,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
       aesopPrototypeEnabled: false,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -288,6 +301,10 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(managed.uninstall).toHaveBeenCalledWith(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       workflowId: `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-skill-find-security-rules`,
+    });
+    expect(managed.uninstall).toHaveBeenCalledWith(AESOP_EXPLORER_WORKFLOW_ID, {
+      spaceId: 'security',
+      workflowId: `${AESOP_EXPLORER_WORKFLOW_ID}-discovery`,
     });
     expect(managed.uninstall).not.toHaveBeenCalledWith(
       SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
@@ -307,6 +324,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
       aesopPrototypeEnabled: true,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });

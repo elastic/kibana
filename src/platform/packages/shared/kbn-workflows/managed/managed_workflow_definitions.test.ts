@@ -14,6 +14,7 @@ import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   AESOP_AB_COMPARE_WORKFLOW_ID,
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+  AESOP_EXPLORER_WORKFLOW_ID,
   ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
@@ -51,6 +52,7 @@ import {
 } from './definitions';
 import AESOP_AB_COMPARE_YAML from './definitions/aesop_prototype/aesop_ab_compare.yaml';
 import AESOP_DRIFT_MONITOR_YAML from './definitions/aesop_prototype/aesop_drift_monitor.yaml';
+import AESOP_EXPLORER_YAML from './definitions/aesop_prototype/aesop_explorer.yaml';
 import ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML from './definitions/alertzero/actions/action_close_attack_discovery_investigation.yaml';
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
@@ -117,6 +119,14 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     skillName: 'Find security rules',
     intervalMinutes: 60,
     lookbackMinutes: 120,
+  },
+  [AESOP_EXPLORER_WORKFLOW_ID]: {
+    mode: 'discovery',
+    intervalMinutes: 1440,
+    connectorId: 'my-connector',
+    datasetId: 'aesop-dataset',
+    abAgentId: 'aesop-explorer',
+    investigationId: 'my-investigation',
   },
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 2,
@@ -305,6 +315,7 @@ it.each([
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
   [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '2:bececc44'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '7:b49d3235'],
+  [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '1:389b4b2e'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {

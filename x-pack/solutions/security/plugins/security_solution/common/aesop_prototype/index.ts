@@ -26,6 +26,10 @@ export const AESOP_VARIANT_TASK_PROVIDER_NAME = 'security.aesopVariant' as const
 /** Managed workflow ids, all prefixed `system-security-aesop-`. */
 export const AESOP_AB_COMPARE_WORKFLOW_ID = 'system-security-aesop-ab-compare' as const;
 export const AESOP_DRIFT_MONITOR_WORKFLOW_ID = 'system-security-aesop-drift-monitor' as const;
+export const AESOP_EXPLORER_WORKFLOW_ID = 'system-security-aesop-explorer' as const;
+
+/** Explorer cadence. */
+export const AESOP_EXPLORER_INTERVAL_MINUTES = 1440;
 
 /** Tags the AESOP managed workflows carry. */
 export const AESOP_WORKFLOW_TAGS = ['security', 'aesop_prototype'] as const;

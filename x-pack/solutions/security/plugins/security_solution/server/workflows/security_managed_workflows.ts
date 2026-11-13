@@ -9,6 +9,7 @@ import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/se
 import {
   AESOP_AB_COMPARE_WORKFLOW_ID,
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+  AESOP_EXPLORER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -78,8 +79,9 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   }
 
   try {
-    // The drift monitor is a per-skill template installed on deploy, so only
-    // the A/B workflow installs at boot; flag-off removes both.
+    // The drift monitor (per skill, on deploy) and the explorer (per space, on
+    // enable) are templates, so only the A/B workflow installs at boot;
+    // flag-off removes all of them.
     if (aesopPrototypeEnabled) {
       await managedWorkflowsClient.install(AESOP_AB_COMPARE_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
@@ -90,14 +92,15 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
       });
       const instances = await managedWorkflowsClient.listInstalledWorkflowStates();
       await Promise.all(
-        instances
-          .filter((instance) => instance.definitionId === AESOP_DRIFT_MONITOR_WORKFLOW_ID)
-          .map((instance) =>
-            managedWorkflowsClient.uninstall(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
-              spaceId: instance.spaceId,
-              workflowId: instance.workflowId,
-            })
-          )
+        instances.map(({ definitionId, spaceId, workflowId }) => {
+          if (
+            definitionId !== AESOP_DRIFT_MONITOR_WORKFLOW_ID &&
+            definitionId !== AESOP_EXPLORER_WORKFLOW_ID
+          ) {
+            return undefined;
+          }
+          return managedWorkflowsClient.uninstall(definitionId, { spaceId, workflowId });
+        })
       );
     }
   } catch (error) {

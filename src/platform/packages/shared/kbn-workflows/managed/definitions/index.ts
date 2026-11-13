@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AESOP_AB_COMPARE_WORKFLOW, AESOP_DRIFT_MONITOR_WORKFLOW } from './aesop_prototype';
+import {
+  AESOP_AB_COMPARE_WORKFLOW,
+  AESOP_DRIFT_MONITOR_WORKFLOW,
+  AESOP_EXPLORER_WORKFLOW,
+} from './aesop_prototype';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
 import {
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW,
@@ -139,8 +143,14 @@ export {
   AESOP_AB_COMPARE_WORKFLOW_ID,
   AESOP_DRIFT_MONITOR_WORKFLOW,
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+  AESOP_EXPLORER_WORKFLOW,
+  AESOP_EXPLORER_WORKFLOW_ID,
 } from './aesop_prototype';
-export type { AesopDriftMonitorWorkflowTemplateValues } from './aesop_prototype';
+export type {
+  AesopDriftMonitorWorkflowTemplateValues,
+  AesopExplorerMode,
+  AesopExplorerWorkflowTemplateValues,
+} from './aesop_prototype';
 export {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -281,6 +291,7 @@ export const managedWorkflowDefinitions = [
   // Install is gated on securitySolution's `aesopPrototypeEnabled` flag.
   AESOP_AB_COMPARE_WORKFLOW,
   AESOP_DRIFT_MONITOR_WORKFLOW,
+  AESOP_EXPLORER_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW,

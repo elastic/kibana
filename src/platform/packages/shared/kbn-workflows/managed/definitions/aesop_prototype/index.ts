@@ -9,11 +9,14 @@
 
 import AESOP_AB_COMPARE_YAML from './aesop_ab_compare.yaml';
 import AESOP_DRIFT_MONITOR_YAML from './aesop_drift_monitor.yaml';
+import AESOP_EXPLORER_YAML from './aesop_explorer.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
 export const AESOP_AB_COMPARE_WORKFLOW_ID = 'system-security-aesop-ab-compare';
 
 export const AESOP_DRIFT_MONITOR_WORKFLOW_ID = 'system-security-aesop-drift-monitor';
+
+export const AESOP_EXPLORER_WORKFLOW_ID = 'system-security-aesop-explorer';
 
 /** AESOP prototype: A/B up to three skill variants against a no-skill baseline and deploy the winner on approval. */
 export const AESOP_AB_COMPARE_WORKFLOW = {
@@ -77,3 +80,47 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW = {
     enablement: 'restorable',
   },
 } as const satisfies ManagedWorkflowDefinition<AesopDriftMonitorWorkflowTemplateValues>;
+
+export type AesopExplorerMode = 'discovery' | 'telemetry';
+
+export interface AesopExplorerWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
+  /** `discovery` proposes new skills from security data; `telemetry` proposes variants of existing skills. */
+  mode: AesopExplorerMode;
+  /** How often the explorer runs. */
+  intervalMinutes: number;
+  /** Model connector the explorer agent and every A/B arm run through. */
+  connectorId: string;
+  /** Evals dataset the A/B arms run against. */
+  datasetId: string;
+  /** Agent the A/B arms converse with. */
+  abAgentId: string;
+  /** Investigation the A/B proposals are recorded on. */
+  investigationId: string;
+}
+
+// Rendered into single-quoted YAML scalars, so a quote is doubled.
+const toYamlSingleQuoted = (value: string): string => value.replace(/'/g, "''");
+
+/** AESOP prototype: per-space explorer that proposes skill candidates to the A/B compare; enabling an instance schedules it. */
+export const AESOP_EXPLORER_WORKFLOW = {
+  id: AESOP_EXPLORER_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  // Bump on every YAML edit: yamlTemplate hashing does not see the imported
+  // YAML, so installed instances only re-render on a version bump.
+  version: 1,
+  billable: false,
+  yamlTemplate: ({ mode, intervalMinutes, connectorId, datasetId, abAgentId, investigationId }) =>
+    renderTemplate(AESOP_EXPLORER_YAML, {
+      __MODE__: mode === 'telemetry' ? 'telemetry' : 'discovery',
+      __INTERVAL_MINUTES__: intervalMinutes,
+      __CONNECTOR_ID__: toYamlSingleQuoted(connectorId),
+      __DATASET_ID__: toYamlSingleQuoted(datasetId),
+      __AB_AGENT_ID__: toYamlSingleQuoted(abAgentId),
+      __INVESTIGATION_ID__: toYamlSingleQuoted(investigationId),
+    }),
+  management: {
+    lifecycle: 'dynamic',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition<AesopExplorerWorkflowTemplateValues>;

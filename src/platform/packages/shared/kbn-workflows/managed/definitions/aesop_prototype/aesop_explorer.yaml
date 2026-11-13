@@ -1,0 +1,180 @@
+version: '1'
+name: 'AESOP Explorer (prototype)'
+description: >-
+  AESOP prototype: on a schedule, an explorer agent looks for skill
+  improvements and hands each candidate to the A/B compare workflow, which
+  proposes a deploy the analyst approves. Mode `discovery` reads security data
+  and proposes new skills; mode `telemetry` reads how existing skills are used
+  and proposes variants of them. The explorer reads what AESOP already learned
+  (rejections, dismissals, earlier findings) before it proposes anything.
+# Installed disabled, then enabled with the request of whoever turned the
+# explorer on: the enable is what registers the schedule and mints the API key
+# the runs execute under.
+enabled: false
+tags:
+  - security
+  - aesop_prototype
+  - scheduled
+settings:
+  timeout: '45m'
+  concurrency:
+    key: 'aesop-explorer-__MODE__'
+    strategy: drop
+    max: 1
+consts:
+  AI_INDEX_ID: aesop
+  MODE: '__MODE__'
+  # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
+  EMPTY_ARRAY: []
+outputs:
+  - name: mode
+    type: string
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+steps:
+  # ----------------------------------------------------------------------
+  # What AESOP already knows: rejected and dismissed candidates, prior skill
+  # content, earlier findings. A failed read leaves the agent without the
+  # list, not without a run: it can still query the AI index itself.
+  # ----------------------------------------------------------------------
+  - name: read_prior_knowledge
+    type: kibana.request
+    timeout: '30s'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/context_engine/ai_index/{{ consts.AI_INDEX_ID }}/kis?size=100'
+      headers:
+        elastic-api-version: '1'
+        x-elastic-internal-origin: 'Kibana'
+    on-failure:
+      continue: true
+
+  # ----------------------------------------------------------------------
+  # Bounded exploration. Each pass asks the explorer for up to two
+  # candidates, records them as findings and hands them to the A/B compare.
+  # The agent decides whether another pass is worth it; the limit of three is
+  # the ceiling, and a failed pass ends the loop.
+  # ----------------------------------------------------------------------
+  - name: explore
+    type: while
+    condition: '${{ steps.explorer_pass.output.structured_output.continue_exploring == true }}'
+    max-iterations:
+      limit: 3
+      on-limit: continue
+    timeout: '40m'
+    on-failure:
+      continue: true
+    steps:
+      - name: explorer_pass
+        type: ai.agent
+        agent-id: aesop-explorer
+        plugin-id: 'securitySolution'
+        connector-id: '__CONNECTOR_ID__'
+        create-conversation: false
+        ephemeral: true
+        timeout: '12m'
+        on-failure:
+          continue: true
+        with:
+          message: |-
+            {% if consts.MODE == 'discovery' %}Mode: discovery. Look through the security data in this space (alerts, detection rules, the indices you can list) for a recurring analyst task no existing skill covers, and propose new skills for it.{% else %}Mode: telemetry. Look at how the existing skills are used (invocation counts, tool patterns, failure rates in the traces) and propose improved variants of the skills that underperform.{% endif %}
+
+            This is pass {{ while.iteration | plus: 1 }} of at most 3. Pick a different angle from earlier passes.
+
+            What AESOP already recorded (do not propose these again; a rejection or dismissal stands unless you have new evidence):
+            {{ steps.read_prior_knowledge.output.kis | json | truncate: 6000 }}
+
+            Read the `aesop` AI index for the details of any entry before you rely on it.
+
+            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id; a candidate for a new skill leaves skill_id empty and names the skill. Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. Set continue_exploring to true only when another pass would look somewhere new.
+          schema:
+            type: object
+            properties:
+              candidates:
+                type: array
+                maxItems: 2
+                items:
+                  type: object
+                  properties:
+                    skill_id:
+                      type: string
+                      maxLength: 128
+                    skill_name:
+                      type: string
+                      maxLength: 64
+                    title:
+                      type: string
+                      maxLength: 400
+                    rationale:
+                      type: string
+                      maxLength: 1500
+                    evidence:
+                      type: string
+                      maxLength: 8000
+                    variants:
+                      type: array
+                      minItems: 1
+                      maxItems: 3
+                      items:
+                        type: string
+                        minLength: 1
+                        maxLength: 20000
+                  required: [skill_id, skill_name, title, rationale, evidence, variants]
+              continue_exploring:
+                type: boolean
+            required: [candidates, continue_exploring]
+
+      - name: record_findings
+        type: foreach
+        foreach: '${{ steps.explorer_pass.output.structured_output.candidates | default: consts.EMPTY_ARRAY }}'
+        steps:
+          - name: write_finding_ki
+            type: context-engine.createKi
+            with:
+              ai_index_id: '{{ consts.AI_INDEX_ID }}'
+              ki_id: 'finding-{{ execution.id }}-{{ while.iteration }}-{{ foreach.index }}'
+              ki:
+                type: aesop.finding
+                title: '{{ foreach.item.title | truncate: 500 }}'
+                description: '{{ foreach.item.rationale | truncate: 1900 }}'
+                content: '{{ foreach.item.evidence | truncate: 60000, "" }}'
+                tags:
+                  - aesop
+                  - aesop:finding
+                  - 'aesop:{{ consts.MODE }}'
+                attributes:
+                  skill_id: '{{ foreach.item.skill_id }}'
+                  skill_name: '{{ foreach.item.skill_name }}'
+                  mode: '{{ consts.MODE }}'
+                  workflow_execution_id: '{{ execution.id }}'
+            on-failure:
+              continue: true
+
+      # Fire and forget: the A/B run parks on an analyst approval for up to
+      # 72h, far beyond this workflow's own timeout.
+      - name: hand_to_ab_compare
+        type: foreach
+        foreach: '${{ steps.explorer_pass.output.structured_output.candidates | default: consts.EMPTY_ARRAY }}'
+        steps:
+          - name: start_ab_compare
+            type: workflow.executeAsync
+            with:
+              workflow-id: system-security-aesop-ab-compare
+              inputs:
+                skill_id: '{{ foreach.item.skill_id }}'
+                new_skill_name: '{{ foreach.item.skill_name }}'
+                dataset_id: '__DATASET_ID__'
+                connector_id: '__CONNECTOR_ID__'
+                agent_id: '__AB_AGENT_ID__'
+                variants: '${{ foreach.item.variants }}'
+                investigation_id: '__INVESTIGATION_ID__'
+            on-failure:
+              continue: true
+
+  - name: output_result
+    type: workflow.output
+    with:
+      mode: '{{ consts.MODE }}'
