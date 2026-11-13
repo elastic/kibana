@@ -6,7 +6,9 @@ To run this example plugin, use the command `pnpm start --run-examples`, then in
 This example registers a Lens XY overlay provider through `lens.registerXYOverlayProvider` that
 draws exemplar points on top of XY charts, the only Lens charts that render overlays. Nothing is
 stored in the chart: Lens evaluates the provider rules at render time, fetches the overlay after
-the chart data has loaded, and routes clicks on the points back to the provider.
+the chart data has loaded, and routes clicks on the points back to the provider. See the
+[XY overlay providers guide](../../platform/plugins/shared/lens/public/xy_overlay_providers/README.md)
+for the full contract.
 
 The provider applies to ES|QL layers with a `STATS` command rendered by this app, a dashboard
 or the Discover histogram. It matches on the `executionContext.type` each surface passes to Lens
