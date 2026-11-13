@@ -16,6 +16,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { searchSessionsManagementMock } from '@kbn/search-sessions-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { alertingV2PluginMock } from '@kbn/alerting-v2-plugin/public/mocks';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
   analyticsServiceMock,
@@ -336,15 +337,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       getOriginatingPath: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
-    alertingVTwo: {
-      CreateRuleOptionsFlyout: jest.fn(() => null),
-      RulesPage: jest.fn(() => null),
-      RuleLibraryPage: jest.fn(() => null),
-      EpisodesPage: jest.fn(() => null),
-      ActionPoliciesPage: jest.fn(() => null),
-      ExecutionHistoryPage: jest.fn(() => null),
-      createAlertingV2HostApp: jest.fn(),
-    },
+    alertingVTwo: alertingV2PluginMock.createStartContract(),
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;
