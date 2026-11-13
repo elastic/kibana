@@ -9,9 +9,11 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 
 import { awsOnboardingCloudContextStepDefinition } from './cloud_context';
 import { awsOnboardingCreateConnectorStepDefinition } from './create_connector';
+import { awsOnboardingCreatePoliciesStepDefinition } from './create_policies';
 import { awsOnboardingCreateStackStepDefinition } from './create_stack';
 import { awsOnboardingCredentialsStepDefinition } from './credentials';
 import { awsOnboardingDiscoverStepDefinition } from './discover';
+import { awsOnboardingHasDataStepDefinition } from './has_data';
 import { awsOnboardingResolveStepDefinition } from './resolve';
 import { awsOnboardingStackStatusStepDefinition } from './stack_status';
 
@@ -27,4 +29,6 @@ export const registerAwsOnboardingSteps = (setup: WorkflowsExtensionsServerPlugi
   setup.registerStepDefinition(awsOnboardingCreateStackStepDefinition);
   setup.registerStepDefinition(awsOnboardingStackStatusStepDefinition);
   setup.registerStepDefinition(awsOnboardingCreateConnectorStepDefinition);
+  setup.registerStepDefinition(awsOnboardingCreatePoliciesStepDefinition);
+  setup.registerStepDefinition(awsOnboardingHasDataStepDefinition);
 };
