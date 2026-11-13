@@ -21,9 +21,19 @@ interface EsqlResponse {
 // "no value" case distinct from a legitimate score.
 const NOT_REPORTED = Symbol('notReported');
 
+/**
+ * ES|QL condition matching one trace, or any of several: a task that spans multiple agent rounds
+ * produces one trace per round, and a metric over only the last would undercount the run.
+ */
+export const traceIdFilter = (traceIds: string[]): string =>
+  traceIds.length === 1
+    ? `trace.id == "${traceIds[0]}"`
+    : `trace.id IN (${traceIds.map((id) => `"${id}"`).join(', ')})`;
+
 export interface TraceBasedEvaluatorConfig {
   name: string;
-  buildQuery: (traceId: string) => string;
+  /** `traceId` is the task's last trace; `traceIds` holds every trace of the run (at least it). */
+  buildQuery: (traceId: string, traceIds: string[]) => string;
   extractResult: (response: EsqlResponse) => number | null;
   // Optional validation for the extracted result. Return false to signal the trace data looks incomplete, which triggers a retry
   isResultValid?: (result: number | null) => boolean;
@@ -34,7 +44,7 @@ export interface TraceBasedEvaluatorConfig {
   // without it: a complete trace means unreported rather than not yet indexed.
   notReportedProbe?: {
     matchesQueryError: (error: unknown) => boolean;
-    buildQuery: (traceId: string) => string;
+    buildQuery: (traceId: string, traceIds: string[]) => string;
     isTraceComplete: (response: EsqlResponse) => boolean;
   };
   /**
@@ -67,7 +77,13 @@ export function createTraceBasedEvaluator({
   return {
     direction,
     evaluate: async ({ output }) => {
-      const traceId = (output as any)?.traceId;
+      const { traceId: lastTraceId, traceIds: allTraceIds } = (output ?? {}) as {
+        traceId?: unknown;
+        traceIds?: unknown;
+      };
+      // `traceIds` lists every round's trace; `traceId` alone is a single-trace task.
+      const traceIds = Array.isArray(allTraceIds) && allTraceIds.length > 0 ? allTraceIds : [];
+      const traceId = lastTraceId || traceIds.at(-1);
 
       if (!traceId) {
         return {
@@ -78,9 +94,12 @@ export function createTraceBasedEvaluator({
         };
       }
 
-      const isTraceIdValid = typeof traceId === 'string' && isValidTraceId(traceId);
+      const evaluatedTraceIds: unknown[] = traceIds.length > 0 ? traceIds : [traceId];
+      const isTraceIdValid = evaluatedTraceIds.every(
+        (id) => typeof id === 'string' && isValidTraceId(id)
+      );
       if (!isTraceIdValid) {
-        log.error(`Invalid traceId for ${name} (traceId: ${traceId})`);
+        log.error(`Invalid traceId for ${name} (traceId: ${evaluatedTraceIds.join(', ')})`);
         return {
           score: null,
           label: 'error',
@@ -89,6 +108,7 @@ export function createTraceBasedEvaluator({
         };
       }
 
+      const ids = evaluatedTraceIds as string[];
       let lastResult: number | null | undefined;
 
       async function runQuery(query: string): Promise<EsqlResponse> {
@@ -103,7 +123,7 @@ export function createTraceBasedEvaluator({
 
         let probeResponse: EsqlResponse;
         try {
-          probeResponse = await runQuery(notReportedProbe.buildQuery(traceId));
+          probeResponse = await runQuery(notReportedProbe.buildQuery(traceId, ids));
         } catch {
           // Probe failed too, so nothing can be concluded about the trace.
           throw error;
@@ -120,7 +140,7 @@ export function createTraceBasedEvaluator({
       }
 
       async function fetchStats(): Promise<number | typeof NOT_REPORTED> {
-        const query = buildQuery(traceId);
+        const query = buildQuery(traceId, ids);
 
         let response: EsqlResponse;
         try {

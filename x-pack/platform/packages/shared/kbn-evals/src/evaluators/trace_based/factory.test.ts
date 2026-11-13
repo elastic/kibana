@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createTraceBasedEvaluator, type TraceBasedEvaluatorConfig } from './factory';
+import {
+  createTraceBasedEvaluator,
+  traceIdFilter,
+  type TraceBasedEvaluatorConfig,
+} from './factory';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -67,6 +71,50 @@ describe('createTraceBasedEvaluator', () => {
 
     expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledWith({
       query: `FROM traces-* | WHERE trace.id == "${VALID_TRACE_ID}"`,
+    });
+  });
+
+  describe('multi-round runs', () => {
+    const OTHER_TRACE_ID = 'b7ad6b7169203331b7ad6b7169203331';
+    const evaluateAll = (traceIds: string[], traceId = traceIds.at(-1)) =>
+      createTraceBasedEvaluator({
+        traceEsClient: mockEsClient,
+        log: mockLog,
+        config: {
+          ...mockConfig,
+          buildQuery: (_id, ids) => `FROM traces-* | WHERE ${traceIdFilter(ids)}`,
+        },
+      }).evaluate({ input: {}, output: { traceId, traceIds }, expected: {}, metadata: {} });
+
+    beforeEach(() => {
+      (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+        columns: [{ name: 'result', type: 'number' }],
+        values: [[42]],
+      });
+    });
+
+    it('queries every trace of the run', async () => {
+      const result = await evaluateAll([OTHER_TRACE_ID, VALID_TRACE_ID]);
+
+      expect(result.score).toBe(42);
+      expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledWith({
+        query: `FROM traces-* | WHERE trace.id IN ("${OTHER_TRACE_ID}", "${VALID_TRACE_ID}")`,
+      });
+    });
+
+    it('keeps the single-trace query when the run has one trace', async () => {
+      await evaluateAll([VALID_TRACE_ID]);
+
+      expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledWith({
+        query: `FROM traces-* | WHERE trace.id == "${VALID_TRACE_ID}"`,
+      });
+    });
+
+    it('rejects the run when any trace id is invalid', async () => {
+      const result = await evaluateAll([VALID_TRACE_ID, 'invalid-trace-id']);
+
+      expect(result.label).toBe('error');
+      expect(mockEsClient.esql.query as jest.Mock).not.toHaveBeenCalled();
     });
   });
 
