@@ -8,8 +8,48 @@
 import { schema } from '@kbn/config-schema';
 
 import { isCloudFormationStackArn } from '../../../common/services/cloud_connectors/iac_deployment';
+import {
+  AWS_REGION_PATTERN,
+  STS_GET_CALLER_IDENTITY_BODY,
+} from '../../services/provisioning_callback_caller_identity';
 
 const AWS_IAM_ROLE_ARN_PATTERN = /^arn:aws[a-zA-Z-]*:iam::\d{12}:role\/.+$/;
+
+/** Enough for SigV4 with a session token and the two binding headers; anything more is noise. */
+const MAX_PROOF_HEADERS = 16;
+const MAX_PROOF_HEADER_NAME_LENGTH = 64;
+const MAX_PROOF_HEADER_VALUE_LENGTH = 8192;
+
+/**
+ * A signed STS `GetCallerIdentity` request the service forwards to prove the AWS account the
+ * report came from. Only the region, the headers and the fixed body are accepted: Kibana builds
+ * the STS URL itself, so the caller cannot direct it to another host.
+ */
+const CallerIdentityProofSchema = schema.object({
+  region: schema.string({
+    minLength: 1,
+    maxLength: 32,
+    validate: (value) => (AWS_REGION_PATTERN.test(value) ? undefined : 'must be an AWS region'),
+    meta: { description: 'Region of the STS endpoint the request was signed for.' },
+  }),
+  headers: schema.recordOf(
+    schema.string({ minLength: 1, maxLength: MAX_PROOF_HEADER_NAME_LENGTH }),
+    schema.string({ maxLength: MAX_PROOF_HEADER_VALUE_LENGTH }),
+    {
+      validate: (value) =>
+        Object.keys(value).length <= MAX_PROOF_HEADERS
+          ? undefined
+          : `must have at most ${MAX_PROOF_HEADERS} headers`,
+      meta: {
+        description:
+          'The signed request headers: `Authorization`, `X-Amz-Date`, `X-Amz-Security-Token`, `Content-Type`, and the signed `x-elastic-callback-id` and `x-elastic-report-sha256` headers that bind the proof to this record and this report.',
+      },
+    }
+  ),
+  body: schema.oneOf([schema.literal(STS_GET_CALLER_IDENTITY_BODY)], {
+    meta: { description: 'The signed request body.' },
+  }),
+});
 
 const CallbackIdParamsSchema = schema.object({
   callbackId: schema.string({
@@ -136,6 +176,7 @@ export const ReceiveProvisioningCallbackRequestSchema = {
         isCloudFormationStackArn(value) ? undefined : 'must be a CloudFormation stack ARN',
       meta: { description: 'ARN (StackId) of the CloudFormation stack.' },
     }),
+    caller_identity: CallerIdentityProofSchema,
   }),
 };
 

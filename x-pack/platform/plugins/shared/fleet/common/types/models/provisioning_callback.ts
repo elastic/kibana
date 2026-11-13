@@ -38,6 +38,26 @@ export interface CloudConnectorCallbackReceivedValues {
 }
 
 /**
+ * Proof of the AWS account a report was sent from: an STS `GetCallerIdentity` request the
+ * reporting Lambda signed with its execution-role credentials, which Kibana forwards to STS. The
+ * callback id and the SHA-256 of the reported values are signed headers, so the proof fits one
+ * record and one report only. Kibana builds the STS URL from `region` itself; no URL is accepted.
+ */
+export interface CloudConnectorCallerIdentityProof {
+  /** The region of the regional STS endpoint the request was signed for. */
+  region: string;
+  /** The signed request headers, including `Authorization` and the two binding headers. */
+  headers: Record<string, string>;
+  /** The signed request body; always `Action=GetCallerIdentity&Version=2011-06-15`. */
+  body: string;
+}
+
+/** The report as the Lambda sends it: the values plus the proof of where they came from. */
+export interface CloudConnectorCallbackReport extends CloudConnectorCallbackReceivedValues {
+  caller_identity: CloudConnectorCallerIdentityProof;
+}
+
+/**
  * Cloud connector details the browser stores on the record at launch. Kibana uses them to create
  * the cloud connector when the stack reports back; the template fields are the ones the
  * connector stores.

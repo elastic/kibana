@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+
 import expect from '@kbn/expect';
 import {
   PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
@@ -14,17 +16,70 @@ import {
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { INTERNAL_ROUTE_HEADERS } from './helpers/fixtures';
+import {
+  callerIdentityResponse,
+  createMockSts,
+  signatureRejectedResponse,
+} from './helpers/mock_sts';
 
 const CALLBACKS_PATH = '/internal/fleet/iac_provisioner/callbacks';
 const receivePath = (id: string) => `/api/fleet/iac_provisioner/callbacks/${id}`;
 const PUBLIC_ROUTE_HEADERS = { 'kbn-xsrf': 'xxxx', 'elastic-api-version': '2023-10-31' };
 
 const ACCOUNT = '123456789012';
+const STACK_NAME = 'elastic-wif';
 const PAYLOAD = {
   role_arn: `arn:aws:iam::${ACCOUNT}:role/ElasticWorkloadIdentity-abc`,
-  stack_arn: `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/elastic-wif/11111111-2222-3333-4444-555555555555`,
+  stack_arn: `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/${STACK_NAME}/11111111-2222-3333-4444-555555555555`,
 };
 const OTHER_ROLE_ARN = `arn:aws:iam::${ACCOUNT}:role/ElasticWorkloadIdentity-other`;
+/** The principal of the stack's callback Lambda, as STS names it. */
+const CALLBACK_FUNCTION_ARN = `arn:aws:sts::${ACCOUNT}:assumed-role/${STACK_NAME}-ElasticCallbackFunctionRole-1A2B3C4D5E6F/${STACK_NAME}-ElasticCallbackFunction-A1B2C3D4E5F6`;
+const STS_BODY = 'Action=GetCallerIdentity&Version=2011-06-15';
+const SIGNED_HEADERS =
+  'content-type;host;x-amz-date;x-amz-security-token;x-elastic-callback-id;x-elastic-report-sha256';
+
+interface Values {
+  role_arn: string;
+  stack_arn: string;
+}
+
+/** The digest the Lambda signs: the values with sorted keys and no whitespace. */
+const digestOf = ({ role_arn: roleArn, stack_arn: stackArn }: Values) =>
+  createHash('sha256')
+    .update(JSON.stringify({ role_arn: roleArn, stack_arn: stackArn }))
+    .digest('hex');
+
+/**
+ * The proof as the Lambda attaches it: a SigV4-signed STS request whose signed headers carry the
+ * callback id and the digest of the values. The mock STS does not check the signature, so a
+ * well-formed `Authorization` header stands in for a real one.
+ */
+const proofFor = (
+  callbackId: string,
+  values: Values,
+  overrides: { region?: string; headers?: Record<string, string>; body?: string } = {}
+) => ({
+  region: overrides.region ?? 'us-east-1',
+  headers: {
+    Authorization: `AWS4-HMAC-SHA256 Credential=ASIAEXAMPLE/20261113/${
+      overrides.region ?? 'us-east-1'
+    }/sts/aws4_request, SignedHeaders=${SIGNED_HEADERS}, Signature=${'ab'.repeat(32)}`,
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'X-Amz-Date': '20261113T100000Z',
+    'X-Amz-Security-Token': 'IQoJb3JpZ2luX2VjEXAMPLE',
+    'x-elastic-callback-id': callbackId,
+    'x-elastic-report-sha256': digestOf(values),
+    ...overrides.headers,
+  },
+  body: overrides.body ?? STS_BODY,
+});
+
+/** A report of `values` for `callbackId`, with a proof bound to both. */
+const reportFor = (callbackId: string, values: Values = PAYLOAD) => ({
+  ...values,
+  caller_identity: proofFor(callbackId, values),
+});
 
 /**
  * The receive route is what the launched stack's Lambda calls. It is public, not authenticated,
@@ -37,6 +92,8 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
+  // Vouches, by default, for the callback function of the stack in PAYLOAD.
+  const sts = createMockSts(() => callerIdentityResponse(ACCOUNT, CALLBACK_FUNCTION_ARN));
 
   const createCallback = async (identity: Record<string, unknown> = {}) => {
     const { body } = await supertest
@@ -48,12 +105,23 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // The route is not authenticated: the record's token, in a header, is all the stack presents.
-  const receive = (id: string, token: string, payload: Record<string, unknown> = PAYLOAD) =>
+  // The report carries the proof of its account for the values it reports.
+  const receive = (id: string, token: string, values: Values = PAYLOAD) =>
+    receiveRaw(id, token, reportFor(id, values));
+  const receiveRaw = (id: string, token: string, body: Record<string, unknown>) =>
     supertestWithoutAuth
       .post(receivePath(id))
       .set(PUBLIC_ROUTE_HEADERS)
       .set(PROVISIONING_CALLBACK_TOKEN_HEADER, token)
-      .send(payload);
+      .send(body);
+
+  const getRecord = async (id: string) => {
+    const { body } = await supertest
+      .get(`${CALLBACKS_PATH}/${id}`)
+      .set(INTERNAL_ROUTE_HEADERS)
+      .expect(200);
+    return body.item as { status: string; cloud_connector_id?: string };
+  };
 
   describe('Provisioning callbacks', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -62,11 +130,17 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await fleetAndAgents.setup();
+      await sts.start();
     });
 
     after(async () => {
+      await sts.stop();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+    });
+
+    beforeEach(() => {
+      sts.reset();
     });
 
     it('creates a pending record and returns the token exactly once', async () => {
@@ -90,6 +164,16 @@ export default function (providerContext: FtrProviderContext) {
 
       const first = await receive(item.id, token).expect(200);
       expect(first.body).to.eql({ status: 'received' });
+
+      // The proof went to STS as signed: only the signed headers, and the fixed body.
+      const forwarded = sts.getRequests();
+      expect(forwarded).to.have.length(1);
+      expect(forwarded[0].body).to.be(STS_BODY);
+      expect(forwarded[0].headers['x-elastic-callback-id']).to.be(item.id);
+      expect(forwarded[0].headers['x-elastic-report-sha256']).to.be(digestOf(PAYLOAD));
+      expect(forwarded[0].headers['x-amz-security-token']).to.be('IQoJb3JpZ2luX2VjEXAMPLE');
+      expect(forwarded[0].headers.authorization).to.contain('AWS4-HMAC-SHA256');
+      expect(forwarded[0].headers['x-elastic-callback-token']).to.be(undefined);
 
       const { body } = await supertest
         .get(`${CALLBACKS_PATH}/${item.id}`)
@@ -145,6 +229,7 @@ export default function (providerContext: FtrProviderContext) {
         ...PAYLOAD,
         role_arn: 'arn:aws:iam::999999999999:role/other',
       }).expect(400);
+      expect(sts.getRequests()).to.have.length(0);
     });
 
     it('rejects malformed values', async () => {
@@ -152,6 +237,98 @@ export default function (providerContext: FtrProviderContext) {
 
       await receive(item.id, token, { ...PAYLOAD, stack_arn: 'not-an-arn' }).expect(400);
       await receive(item.id, token, { ...PAYLOAD, role_arn: 'not-an-arn' }).expect(400);
+    });
+
+    it('rejects a report without the proof of its account', async () => {
+      const { item, token } = await createCallback();
+
+      await receiveRaw(item.id, token, PAYLOAD).expect(400);
+      await receiveRaw(item.id, token, {
+        ...PAYLOAD,
+        caller_identity: { ...proofFor(item.id, PAYLOAD), region: 'sts.evil.example' },
+      }).expect(400);
+      expect(sts.getRequests()).to.have.length(0);
+      expect((await getRecord(item.id)).status).to.be('pending');
+    });
+
+    it('rejects with 401 a report signed from another account than the reported role, and keeps the record for a report that verifies', async () => {
+      const { item, token } = await createCallback();
+      const other = '999999999999';
+      sts.setResponder(() =>
+        callerIdentityResponse(other, CALLBACK_FUNCTION_ARN.replace(ACCOUNT, other))
+      );
+
+      const rejected = await receive(item.id, token).expect(401);
+      expect(rejected.body.message).to.be(
+        'The report was not signed from the AWS account of the reported role'
+      );
+      expect((await getRecord(item.id)).status).to.be('pending');
+      const connectors = await supertest
+        .get('/api/fleet/cloud_connectors')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      expect(connectors.body.items.find((c: { id: string }) => c.id === item.id)).to.be(undefined);
+
+      sts.reset();
+      await receive(item.id, token).expect(200);
+      expect((await getRecord(item.id)).status).to.be('received');
+    });
+
+    it('rejects with 401 a report whose signer is in the account but is not the stack callback function', async () => {
+      const { item, token } = await createCallback();
+      sts.setResponder(() =>
+        callerIdentityResponse(ACCOUNT, `arn:aws:sts::${ACCOUNT}:assumed-role/Admin/alice`)
+      );
+
+      await receive(item.id, token).expect(401);
+      expect((await getRecord(item.id)).status).to.be('pending');
+    });
+
+    it('rejects with 401 when STS refuses the signature', async () => {
+      const { item, token } = await createCallback();
+      sts.setResponder(() => signatureRejectedResponse());
+
+      await receive(item.id, token).expect(401);
+      expect((await getRecord(item.id)).status).to.be('pending');
+    });
+
+    it('rejects with 401, without contacting STS, a proof made for another callback', async () => {
+      const first = await createCallback();
+      const second = await createCallback();
+
+      // A proof captured from the second record's report, replayed against the first.
+      await receiveRaw(first.item.id, first.token, reportFor(second.item.id)).expect(401);
+      expect(sts.getRequests()).to.have.length(0);
+      expect((await getRecord(first.item.id)).status).to.be('pending');
+    });
+
+    it('rejects with 401, without contacting STS, a proof made for other values', async () => {
+      const { item, token } = await createCallback();
+
+      // The proof signs the digest of PAYLOAD, but another role is reported.
+      await receiveRaw(item.id, token, {
+        ...PAYLOAD,
+        role_arn: OTHER_ROLE_ARN,
+        caller_identity: proofFor(item.id, PAYLOAD),
+      }).expect(401);
+      expect(sts.getRequests()).to.have.length(0);
+      expect((await getRecord(item.id)).status).to.be('pending');
+    });
+
+    it('rejects with 401 a proof that did not sign the binding headers', async () => {
+      const { item, token } = await createCallback();
+
+      await receiveRaw(item.id, token, {
+        ...PAYLOAD,
+        caller_identity: proofFor(item.id, PAYLOAD, {
+          headers: {
+            Authorization: `AWS4-HMAC-SHA256 Credential=ASIAEXAMPLE/20261113/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date, Signature=${'ab'.repeat(
+              32
+            )}`,
+          },
+        }),
+      }).expect(401);
+      expect(sts.getRequests()).to.have.length(0);
     });
 
     it('answers 404 to a caller that presents no token, whatever else it authenticates with', async () => {

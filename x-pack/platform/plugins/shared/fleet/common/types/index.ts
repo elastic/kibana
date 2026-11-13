@@ -98,6 +98,7 @@ export interface FleetConfigType {
     bundledPackageLocation?: string;
     testSecretsIndex?: string;
     disableBundledPackagesCache?: boolean;
+    provisioningCallbackStsUrl?: string;
   };
   internal?: {
     useMeteringApi?: boolean;

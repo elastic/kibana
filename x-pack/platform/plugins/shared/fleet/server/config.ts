@@ -337,6 +337,10 @@ export const config: PluginConfigDescriptor = {
         disableBundledPackagesCache: schema.boolean({
           defaultValue: false,
         }),
+        // Where the provisioning callback's signed STS request is forwarded instead of the
+        // regional STS endpoint. For tests only: whoever answers here decides which AWS account
+        // a report is accepted from.
+        provisioningCallbackStsUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       }),
       packageVerification: schema.object({
         gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),

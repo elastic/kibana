@@ -59648,7 +59648,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
+        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account, and `caller_identity` must carry an STS `GetCallerIdentity` request signed from that account by the stack's callback function, with the callback id and the SHA-256 of the reported values among its signed headers. Kibana forwards the request to `sts.<region>.amazonaws.com`, so it needs egress to the regional STS endpoints; a report whose proof does not verify returns 401 and leaves the record waiting. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
       operationId: receive-provisioning-callback
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -59674,12 +59674,46 @@ paths:
                 description: The report the launched CloudFormation stack sends once its IAM role exists
                 summary: Report a created IAM role
                 value:
+                  caller_identity:
+                    body: Action=GetCallerIdentity&Version=2011-06-15
+                    headers:
+                      Authorization: AWS4-HMAC-SHA256 Credential=ASIAEXAMPLE/20261113/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-security-token;x-elastic-callback-id;x-elastic-report-sha256, Signature=5d41402abc4b2a76b9719d911017c592e5c0c8d3b0d4c3d6b0b1e0d8f9a1b2c3
+                      Content-Type: application/x-www-form-urlencoded
+                      X-Amz-Date: 20261113T100000Z
+                      X-Amz-Security-Token: IQoJb3JpZ2luX2VjEXAMPLE
+                      x-elastic-callback-id: 0f5d7a5e-2b1c-4a3d-9e8f-123456789abc
+                      x-elastic-report-sha256: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+                    region: us-east-1
                   role_arn: arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123
                   stack_arn: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555
             schema:
               additionalProperties: false
               type: object
               properties:
+                caller_identity:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    body:
+                      description: The signed request body.
+                      enum:
+                        - Action=GetCallerIdentity&Version=2011-06-15
+                      type: string
+                    headers:
+                      additionalProperties:
+                        maxLength: 8192
+                        type: string
+                      description: 'The signed request headers: `Authorization`, `X-Amz-Date`, `X-Amz-Security-Token`, `Content-Type`, and the signed `x-elastic-callback-id` and `x-elastic-report-sha256` headers that bind the proof to this record and this report.'
+                      type: object
+                    region:
+                      description: Region of the STS endpoint the request was signed for.
+                      maxLength: 32
+                      minLength: 1
+                      type: string
+                  required:
+                    - region
+                    - headers
+                    - body
                 role_arn:
                   description: ARN of the IAM role the stack created.
                   maxLength: 2048
@@ -59693,6 +59727,7 @@ paths:
               required:
                 - role_arn
                 - stack_arn
+                - caller_identity
       responses:
         '200':
           content:
@@ -59748,6 +59783,36 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '401':
+          content:
+            application/json:
+              examples:
+                unverifiedExample:
+                  description: STS did not vouch that the report was signed from the account of the reported role by the stack callback function, or the proof was made for another callback or other values
+                  summary: Proof of the sending account did not verify
+                  value:
+                    error: Unauthorized
+                    message: The report was not signed from the AWS account of the reported role
+                    statusCode: 401
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: The proof of the sending AWS account did not verify, or was made for another callback or other values.
         '404':
           content:
             application/json:
