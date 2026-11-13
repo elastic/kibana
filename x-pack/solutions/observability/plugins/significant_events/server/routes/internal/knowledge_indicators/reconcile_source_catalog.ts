@@ -198,9 +198,7 @@ export async function reconcileSourceRevision({
   const loadLatestExecution = ({
     id: sourceId,
     slug: sourceSlug,
-  }: Pick<NightshiftSource, 'id' | 'slug'>): Promise<
-    WorkflowExecutionListItemDto | undefined
-  > => {
+  }: Pick<NightshiftSource, 'id' | 'slug'>): Promise<WorkflowExecutionListItemDto | undefined> => {
     latestExecutionPromise ??=
       onboardingClient?.getLatestExecution?.({
         sourceId,
