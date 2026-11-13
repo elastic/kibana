@@ -74,6 +74,15 @@ export function mergeWithGlobalFilters(
   return mappedParams;
 }
 
+/**
+ * Inverts the backslash escaping applied when a kql/lucene filter is serialized into
+ * formula text (see generate.ts): the tinymath grammar only unescapes quotes, so the
+ * doubled backslashes reach us verbatim and must be collapsed back here.
+ */
+export function unescapeBackslashes(value: string): string {
+  return value.replace(/\\\\/g, '\\');
+}
+
 export function getOperationParams(
   operation:
     | OperationDefinition<GenericIndexPatternColumn, 'field'>
@@ -93,7 +102,7 @@ export function getOperationParams(
       args[name] = value;
     }
     if (operation.filterable && (name === 'kql' || name === 'lucene')) {
-      args[name] = value;
+      args[name] = typeof value === 'string' ? unescapeBackslashes(value) : value;
     }
     if (operation.shiftable && name === 'shift') {
       args[name] = value;
