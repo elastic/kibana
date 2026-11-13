@@ -29,22 +29,7 @@ import {
  */
 const BANNED_NODE_MODULES: ReadonlySet<string> = new Set(['@elastic/eui']);
 
-const BASELINE_PATH = Path.resolve(__dirname, '..', 'baseline.json');
-const BASELINE_COMMENT =
-  'Source files reachable from the Kibana server entry points that import browser-only node modules, ' +
-  'as "<importer> <node module>". This list may only shrink: fix the chain (move the browser-only code ' +
-  'out of the module the server imports) and run `node scripts/check_server_import_graph --update-baseline` ' +
-  'to remove the entry.';
-
 const relative = (absolute: string): string => Path.relative(REPO_ROOT, absolute);
-
-const readBaseline = (): Set<string> =>
-  new Set<string>(JSON.parse(Fs.readFileSync(BASELINE_PATH, 'utf8')).violations);
-
-const writeBaseline = (violations: Iterable<string>): void => {
-  const file = { '//': BASELINE_COMMENT, violations: [...violations].sort() };
-  Fs.writeFileSync(BASELINE_PATH, `${JSON.stringify(file, null, 2)}\n`);
-};
 
 /** Every plugin `server/index.ts` plus `@kbn/core/server`. */
 const findEntryPaths = (resolver: ImportResolver): string[] => {
@@ -66,11 +51,11 @@ const findEntryPaths = (resolver: ImportResolver): string[] => {
   return entries;
 };
 
-const reportAdded = (log: ToolingLog, added: Violation[]): void => {
+const reportViolations = (log: ToolingLog, violations: Violation[]): void => {
   log.error(
-    `${added.length} new browser-only import(s) are reachable from the Kibana server entry points:`
+    `${violations.length} browser-only import(s) are reachable from the Kibana server entry points:`
   );
-  for (const { importer, nodeModule, request, chain } of added) {
+  for (const { importer, nodeModule, request, chain } of violations) {
     log.write('');
     log.write(
       `  ${relative(importer)} imports ${nodeModule} (\`${request}\`) and is loaded by the server:`
@@ -90,33 +75,11 @@ const reportAdded = (log: ToolingLog, added: Violation[]): void => {
   );
 };
 
-const reportRemoved = (log: ToolingLog, removed: string[]): void => {
-  log.error(
-    `${removed.length} baseline entr${
-      removed.length === 1 ? 'y is' : 'ies are'
-    } no longer reachable from the server. Nice! Remove them from ${relative(BASELINE_PATH)} with:`
-  );
-  log.write('  node scripts/check_server_import_graph --update-baseline');
-  for (const entry of removed) {
-    log.write(`    - ${entry}`);
-  }
-};
-
-export interface CheckOptions {
-  log: ToolingLog;
-  /** Rewrite the baseline to the current violations instead of comparing against it. */
-  updateBaseline?: boolean;
-}
-
 /**
- * Walks the eagerly loaded import graph from every server entry point and fails when a source
- * file reachable from it imports a browser-only node module that is not in the baseline, or when
- * the baseline lists a violation that no longer exists.
+ * Walks the import graph from every server entry point and fails when a source file reachable
+ * from it imports a browser-only node module.
  */
-export const checkServerImportGraph = async ({
-  log,
-  updateBaseline = false,
-}: CheckOptions): Promise<boolean> => {
+export const checkServerImportGraph = async ({ log }: { log: ToolingLog }): Promise<boolean> => {
   const resolver = ImportResolver.create(REPO_ROOT);
   const locator = new ImportLocator({ ignoreTypeOnly: true });
   const entryPaths = findEntryPaths(resolver);
@@ -142,37 +105,15 @@ export const checkServerImportGraph = async ({
     getImports,
     bannedNodeModules: BANNED_NODE_MODULES,
   });
-  const current = new Map(
-    violations.map((violation) => [
-      `${relative(violation.importer)} ${violation.nodeModule}`,
-      violation,
-    ])
+
+  if (violations.length > 0) {
+    reportViolations(log, violations);
+    return false;
+  }
+
+  log.success(
+    `${fileCount} source files reachable from ${entryPaths.length} server entry points; ` +
+      `no browser-only imports`
   );
-
-  if (updateBaseline) {
-    writeBaseline(current.keys());
-    log.success(`wrote ${current.size} violation(s) to ${relative(BASELINE_PATH)}`);
-    return true;
-  }
-
-  const baseline = readBaseline();
-  const added = [...current]
-    .filter(([key]) => !baseline.has(key))
-    .map(([, violation]) => violation);
-  const removed = [...baseline].filter((key) => !current.has(key));
-
-  if (added.length > 0) {
-    reportAdded(log, added);
-  }
-  if (removed.length > 0) {
-    reportRemoved(log, removed);
-  }
-  const passed = added.length === 0 && removed.length === 0;
-  if (passed) {
-    log.success(
-      `${fileCount} source files reachable from ${entryPaths.length} server entry points; ` +
-        `no new browser-only imports (${current.size} baselined)`
-    );
-  }
-  return passed;
+  return true;
 };

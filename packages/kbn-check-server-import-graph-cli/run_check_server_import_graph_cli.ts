@@ -13,28 +13,19 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { checkServerImportGraph } from './src/check_server_import_graph';
 
 run(
-  async ({ log, flagsReader }) => {
-    const passed = await checkServerImportGraph({
-      log,
-      updateBaseline: flagsReader.boolean('update-baseline'),
-    });
+  async ({ log }) => {
+    const passed = await checkServerImportGraph({ log });
 
     if (!passed) {
       throw createFailError(
-        'Browser-only node modules are reachable from the Kibana server, or the baseline is stale. See the errors above.'
+        'Browser-only node modules are reachable from the Kibana server. See the errors above.'
       );
     }
   },
   {
-    usage: 'node scripts/check_server_import_graph [--update-baseline]',
+    usage: 'node scripts/check_server_import_graph',
     description:
       'Statically walks the import graph from every server entry point and fails when @elastic/eui ' +
-      'becomes reachable from it.',
-    flags: {
-      boolean: ['update-baseline'],
-      help: `
-        --update-baseline  Rewrite baseline.json with the current set of violations
-      `,
-    },
+      'is reachable from it.',
   }
 );

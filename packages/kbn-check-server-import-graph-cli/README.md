@@ -3,8 +3,7 @@
 Static check that `@elastic/eui` is not reachable from the Kibana server's import graph. The banned set is a list (`BANNED_NODE_MODULES`), so other browser-only node modules can be added later.
 
 ```sh
-node scripts/check_server_import_graph                   # check against baseline.json
-node scripts/check_server_import_graph --update-baseline # rewrite baseline.json
+node scripts/check_server_import_graph
 ```
 
 It also runs as part of `node scripts/check` and as a CI quick check.
@@ -14,7 +13,7 @@ It also runs as part of `node scripts/check` and as a CI quick check.
 1. Starts from every plugin `server/index.ts` (plugins with `plugin.server: true`) plus `@kbn/core/server`.
 2. Walks the import graph breadth-first, following every import that can load code: value `import`/`export ... from`, literal `require()`, and literal dynamic `import()`. `import type`, `export type` and all-`type` specifier lists are skipped because the compiler elides them (`ImportLocator` from `@kbn/import-locator` with `ignoreTypeOnly`).
 3. Stops at node modules and records every reachable source file that imports one of the banned modules (`BANNED_NODE_MODULES` in `src/check_server_import_graph.ts`), together with the shortest chain of imports from an entry point.
-4. Compares the result with `baseline.json`, a sorted list of `"<importer> <node module>"` entries, and fails on either direction of drift: a new violation, or a baseline entry that is no longer a violation.
+4. Fails when any such file is found.
 
 The whole repo (~25k reachable files) takes about ten seconds.
 
@@ -29,5 +28,3 @@ Plugin `server/index.ts` files load their plugin class with `await import('./plu
 ## Fixing a violation
 
 The reported chain starts at a server entry point and ends at the file that imports the browser-only module. The fix is almost always in the middle: a barrel (`common/index.ts`, a package `index.ts`) that re-exports both pure and browser-only code. Move the browser-only code into its own module that only browser code imports, or give the server a pure subpath to import. Rebuilding browser values from theme tokens on the server is rarely the right answer.
-
-Once fixed, run `--update-baseline` so the entry is removed; the check fails on stale entries so the baseline only shrinks.
