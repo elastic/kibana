@@ -31,7 +31,7 @@ export const createSourceGetTool = ({
   id: NIGHTSHIFT_SOURCE_GET_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Get one Nightshift source of the current space, with the health of its ES|QL view. Disabled
+    Get one nightshift source of the current space, with the health of its ES|QL view. Disabled
     sources are included.
 
     \`health\` is one of:

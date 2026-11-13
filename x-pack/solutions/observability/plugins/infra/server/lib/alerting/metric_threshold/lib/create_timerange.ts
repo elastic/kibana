@@ -12,8 +12,9 @@ export const createTimerange = (
   interval: number,
   aggType: Aggregators,
   timeframe?: { end: number; start?: number },
-  lastPeriodEnd?: number
-) => {
+  lastPeriodEnd?: number,
+  scheduleInterval: number = 0
+): { start: number; end: number } => {
   const end = moment(timeframe && timeframe.end ? timeframe.end : Date.now()).valueOf();
   const start = moment(timeframe && timeframe.start ? timeframe.start : end).valueOf();
 
@@ -25,8 +26,11 @@ export const createTimerange = (
   let calculatedFrom = end - interval;
 
   if (lastPeriodEnd && lastPeriodEnd - interval < start) {
-    const maxAllowedLookBack = moment(start).subtract(3 * interval, 'ms');
-    // Calculate the maximum allowable look-back time (3 intervals before the current 'from' time).
+    const maxAllowedLookBack = moment(start).subtract(
+      3 * Math.max(interval, scheduleInterval),
+      'ms'
+    );
+    // Runs are one schedule interval apart, so bound the look-back by the window or the schedule, whichever is longer.
     if (moment(lastPeriodEnd).isAfter(maxAllowedLookBack)) {
       // Ensure lastPeriodEnd is within the allowable look-back range.
       calculatedFrom = lastPeriodEnd - interval;

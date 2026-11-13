@@ -9,7 +9,6 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventInvestigationAttachProps,
   AgentToolEventSearchProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
@@ -17,7 +16,10 @@ import type {
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   DetectionScanProps,
+  DiscoveryCompletedProps,
+  DiscoveryStartedProps,
   DiscoveryTriggeredProps,
+  EventStatusChangedProps,
   AgentToolEventWriteProps,
 } from './types';
 import {
@@ -28,11 +30,13 @@ import {
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
 } from './constants';
 
 export class EbtTelemetryClient {
@@ -78,11 +82,16 @@ export class EbtTelemetryClient {
     );
   }
 
-  public trackAgentToolEventInvestigationAttach(params: AgentToolEventInvestigationAttachProps) {
-    this.analytics.reportEvent(
-      SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
-      params
-    );
+  public trackSignificantEventsDiscoveryStarted(params: DiscoveryStartedProps) {
+    this.analytics.reportEvent(SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE, params);
+  }
+
+  public trackSignificantEventsDiscoveryCompleted(params: DiscoveryCompletedProps) {
+    this.analytics.reportEvent(SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE, params);
+  }
+
+  public trackEventStatusChanged(params: EventStatusChangedProps) {
+    this.analytics.reportEvent(SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE, params);
   }
 
   public trackSignificantEventsDiscoveryTriggered(params: DiscoveryTriggeredProps) {

@@ -1,8 +1,8 @@
 ## Question (context only)
 {{{question}}}
 
-## Cortex files the agent opened
-{{{cortexReads}}}
+## Wiki files the agent opened
+{{{wikiReads}}}
 
 ## Memory files the agent opened
 {{{memoryReads}}}
@@ -16,4 +16,4 @@
 ## Tool-call trajectory (everything the agent called, in order)
 {{{trajectory}}}
 
-Judge the cortex influence and which memories the final report cites, then call the `score` tool.
+Judge the wiki influence and which memories the final report cites, then call the `score` tool.

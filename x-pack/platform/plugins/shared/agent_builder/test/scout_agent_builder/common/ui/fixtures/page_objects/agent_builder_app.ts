@@ -188,35 +188,19 @@ export class AgentBuilderApp {
   }
 
   async getConversationTitle(): Promise<string> {
-    const persisted = await this.page.testSubj
-      .locator('agentBuilderConversationTitleButton')
-      .count();
-    const selector =
-      persisted > 0 ? 'agentBuilderConversationTitleButton' : 'agentBuilderConversationTitle';
-    return this.page.testSubj.locator(selector).innerText();
+    return this.page.testSubj.locator('appHeaderTitle').innerText();
   }
 
   async renameConversation(newTitle: string): Promise<string> {
-    await this.page.testSubj.click('agentBuilderConversationTitleButton');
-    await this.page.testSubj.click('agentBuilderConversationMetadataTitle');
-    const input = this.page.testSubj.locator('agentBuilderConversationMetadataTitleInput');
-    await input.click();
-    await this.page.testSubj.clearInput('agentBuilderConversationMetadataTitleInput');
+    await this.page.testSubj.click('appHeaderTitleButton');
+    const input = this.page.testSubj.locator('appHeaderTitleInput');
     await input.fill(newTitle);
-    await this.page.testSubj.click('agentBuilderConversationMetadataTitleSave');
+    await input.press('Enter');
     await this.page.waitForFunction(
-      (t) => {
-        const btn = document.querySelector(
-          '[data-test-subj="agentBuilderConversationTitleButton"]'
-        );
-        const h4 = document.querySelector('[data-test-subj="agentBuilderConversationTitle"]');
-        const text = (btn ?? h4)?.textContent ?? '';
-        return text.trim() === t;
-      },
+      (t) => document.querySelector('[data-test-subj="appHeaderTitle"]')?.textContent?.trim() === t,
       newTitle,
       { timeout: 60_000 }
     );
-    await this.page.testSubj.click('euiFlyoutCloseButton');
     return newTitle;
   }
 

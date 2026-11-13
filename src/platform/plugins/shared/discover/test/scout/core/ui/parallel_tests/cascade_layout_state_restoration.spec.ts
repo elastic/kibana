@@ -63,12 +63,7 @@ spaceTest.describe(
       // (hidden behind a loading spinner until it stabilizes).
       await discover.waitForCascadeLayoutStable();
 
-      // Polling (rather than a single read) is intentional here: the
-      // virtualizer's scroll-anchor correction loop has a bounded retry
-      // budget and a timeout failsafe, so it can report itself "stable" (and
-      // flip the container visible) slightly before scrollTop has actually
-      // caught up to the target offset. Give it a bit more room to converge
-      // instead of racing a one-shot read against that.
+      // Scroll events and resize measurements settle asynchronously after restoration.
       await expect
         .poll(async () =>
           Math.abs((await discover.getCascadeLayoutScrollTop()) - scrollTopBeforeTabSwitch)
@@ -108,9 +103,7 @@ spaceTest.describe(
         await discover.waitForCascadeLayoutStable();
 
         expect(await discover.isCascadeLayoutRowExpanded(targetRowId)).toBe(true);
-        // See the "restores cascade scroll position" test above for why this is
-        // a poll rather than a single read: "stable" can fire slightly before
-        // scrollTop has actually converged.
+        // Wait for the final scroll event after the restored document has been measured.
         await expect
           .poll(async () =>
             Math.abs((await discover.getCascadeLayoutScrollTop()) - scrollTopBeforeTabSwitch)

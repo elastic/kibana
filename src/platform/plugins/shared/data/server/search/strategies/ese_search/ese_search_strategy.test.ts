@@ -148,13 +148,12 @@ describe('ES search strategy', () => {
         expect(request).toHaveProperty('return_intermediate_results', false);
       });
 
-      it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
+      it('allows overriding keep_alive, and wait_for_completion_timeout via pollLength', async () => {
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = {
           index: 'logstash-*',
           query: {},
-          wait_for_completion_timeout: '10s',
           keep_alive: '5m',
         };
         const esSearch = await enhancedEsSearchStrategyProvider(
@@ -163,7 +162,7 @@ describe('ES search strategy', () => {
           mockLogger
         );
 
-        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+        await esSearch.search({ id: 'foo', params }, { pollLength: '10s' }, mockDeps).toPromise();
 
         expect(mockGetCaller).toHaveBeenCalled();
         const request = mockGetCaller.mock.calls[0][0];

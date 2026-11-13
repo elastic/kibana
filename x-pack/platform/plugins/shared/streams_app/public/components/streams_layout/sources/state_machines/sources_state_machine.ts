@@ -246,17 +246,16 @@ const viewedSourceApiKeyTransitions = {
 
 const unavailableApiKeyPrivileges: SourceApiKeyPrivileges = {
   canCreate: false,
-  canList: false,
   failure: 'cluster',
 };
 
 const createLoadApiKeysActor = ({ services }: { services: SourceApiKeyServices }) =>
   fromPromise(
     async ({ input }: { input: { source: ConfiguredSource } }): Promise<LoadApiKeysOutput> => {
-      const privileges = await services
-        .checkPrivileges(input.source)
-        .catch(() => unavailableApiKeyPrivileges);
-      const apiKeys = privileges.canList ? await services.load(input.source.id) : [];
+      const [privileges, apiKeys] = await Promise.all([
+        services.checkPrivileges(input.source).catch(() => unavailableApiKeyPrivileges),
+        services.load(input.source.id),
+      ]);
 
       return {
         sourceId: input.source.id,

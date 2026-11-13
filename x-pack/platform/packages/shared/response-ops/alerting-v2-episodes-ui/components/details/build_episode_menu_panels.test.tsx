@@ -30,6 +30,7 @@ const makeAction = (id: string, overrides?: Partial<EpisodeAction>): EpisodeActi
   order: 0,
   displayName: `Action ${id}`,
   iconType: 'check',
+  enforcesOwnPrivileges: false,
   isCompatible: () => true,
   execute: jest.fn().mockResolvedValue(undefined),
   ...overrides,

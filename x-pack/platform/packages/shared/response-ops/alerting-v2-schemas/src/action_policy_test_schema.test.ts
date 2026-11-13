@@ -34,7 +34,7 @@ const payload: ActionPolicyWorkflowPayloadInput = {
   policyId: 'policy-1',
   groupKey: { 'data.host.name': 'test-host.name-0a1b2c3d' },
   alerts: [alert],
-  rules: { 'test-rule-1-0a1b2c3d': { name: 'Test rule 1' } },
+  rules: { 'test-rule-1-0a1b2c3d': { name: 'Test rule 1', grouping_fields: ['data.host.name'] } },
 };
 
 const manyKeys = (count: number): Record<string, string> =>
@@ -81,7 +81,12 @@ describe('actionPolicyWorkflowPayloadSchema', () => {
     ['an alert', { ...payload, alerts: [{ ...alert, unknown: true }] }, ['alerts', 0]],
     [
       'a rule',
-      { ...payload, rules: { 'test-rule-1-0a1b2c3d': { name: 'Test rule 1', unknown: true } } },
+      {
+        ...payload,
+        rules: {
+          'test-rule-1-0a1b2c3d': { name: 'Test rule 1', grouping_fields: [], unknown: true },
+        },
+      },
       ['rules', 'test-rule-1-0a1b2c3d'],
     ],
   ])('rejects an unknown key in %s', (_, value, path) => {

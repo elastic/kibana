@@ -52,6 +52,10 @@ jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
 }));
 
+jest.mock('./frequent_cancellations_tip.ts', () => ({
+  postFrequentCancellationsTip: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalTriggerStep: mockGetEvalTriggerStep,
 }));
@@ -323,8 +327,8 @@ const SCENARIOS: Scenario[] = [
   },
   { name: 'cloud image', labels: ['ci:build-cloud-image'] },
   { name: 'cloud fips image', labels: ['ci:build-cloud-fips-image'] },
-  { name: 'cloud deploy', labels: ['ci:deploy-cloud'] },
-  { name: 'cloud image with deploy label', labels: ['ci:build-cloud-image', 'ci:deploy-cloud'] },
+  { name: 'cloud deploy', labels: ['ci:cloud-deploy'] },
+  { name: 'cloud image with deploy label', labels: ['ci:build-cloud-image', 'ci:cloud-deploy'] },
   { name: 'docker fips', labels: ['ci:build-docker-fips'] },
   { name: 'entity store performance', labels: ['ci:entity-store-performance'] },
   { name: 'project deploy on main', labels: ['ci:project-deploy-security'], targetBranch: 'main' },

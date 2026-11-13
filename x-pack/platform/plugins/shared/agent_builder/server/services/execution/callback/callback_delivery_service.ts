@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-import pRetry, { AbortError } from 'p-retry';
+import { defer, lastValueFrom, retry as rxRetry, timer } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbacksSetup,
   CallbackTransportDefinition,
 } from '@kbn/agent-builder-server';
-import { isCallbackDeliveryError, throwIfNotDelivered } from '@kbn/agent-builder-server';
+import {
+  isCallbackDeliveryError,
+  parseRetryAfterMs,
+  throwIfNotDelivered,
+} from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
 import type { ConversationClient } from '../../conversation';
 
@@ -25,18 +32,18 @@ export interface ConversationResolution {
   agentId?: string;
 }
 
-const callbackRetryOptions = {
-  retries: 2,
-  minTimeout: 200,
-  factor: 2.5,
-  randomize: false,
-} as const;
+const CALLBACK_RETRIES = 2;
+const CALLBACK_RETRY_MIN_DELAY_MS = 200;
+const CALLBACK_RETRY_BACKOFF_FACTOR = 2.5;
+const MAX_CALLBACK_RETRY_AFTER_MS = 60_000;
+const RETRY_AFTER_HEADER = 'retry-after';
 
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
   private readonly logger: Logger;
   private readonly transports: CallbackTransportDefinition[];
   private readonly conversationResolvers: CallbackConversationResolver[] = [];
+  private readonly onBeforeNewConversationHooks: OnBeforeNewConversationHook[] = [];
 
   constructor({ actions, logger }: { actions: ActionsPluginSetup; logger: Logger }) {
     this.actions = actions;
@@ -48,6 +55,9 @@ export class CallbackDeliveryService {
     return {
       registerConversationResolver: (resolver) => {
         this.conversationResolvers.push(resolver);
+      },
+      registerOnBeforeNewConversation: (hook) => {
+        this.onBeforeNewConversationHooks.push(hook);
       },
       registerTransport: (transport) => {
         this.transports.push(transport);
@@ -93,6 +103,43 @@ export class CallbackDeliveryService {
     return conversation ? { conversationId: conversation.id } : undefined;
   }
 
+  /**
+   * Runs the registered on-before-new-conversation hooks in order; the first that throws refuses the
+   * execution and gives back what the hooks before it took. Resolves to the release of everything
+   * the hooks took, which never throws.
+   */
+  async runOnBeforeNewConversation(
+    context: OnBeforeNewConversationContext
+  ): Promise<OnBeforeNewConversationRelease> {
+    const releases: OnBeforeNewConversationRelease[] = [];
+    const releaseAll = async () => {
+      for (const release of releases.splice(0).reverse()) {
+        try {
+          await release();
+        } catch (error) {
+          this.logger.warn(
+            `Could not release an on-before-new-conversation hook: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
+    };
+
+    try {
+      for (const hook of this.onBeforeNewConversationHooks) {
+        const release = await hook(context);
+        if (release) {
+          releases.push(release);
+        }
+      }
+    } catch (error) {
+      await releaseAll();
+      throw error;
+    }
+    return releaseAll;
+  }
+
   validateCallbackUrl(callbackUrl: string): void {
     if (!callbackUrl.trim()) {
       throw new Error('Callback URL must be a non-empty string');
@@ -113,25 +160,54 @@ export class CallbackDeliveryService {
     const transport = this.getTransport(callbackUrl);
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
 
-    await pRetry(
-      async () => {
-        const abortController = new AbortController();
-        const timeoutId = setTimeout(() => abortController.abort(), timeout);
+    const attempt = async () => {
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
-        try {
-          await transport.send(callbackUrl, payload, abortController.signal);
-        } catch (error) {
-          if (isCallbackDeliveryError(error) && !error.retryable) {
-            throw new AbortError(error);
-          }
+      try {
+        await transport.send(callbackUrl, payload, abortController.signal);
+      } catch (error) {
+        throw error instanceof Error ? error : new Error(String(error));
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
 
-          throw error instanceof Error ? error : new Error(String(error));
-        } finally {
-          clearTimeout(timeoutId);
-        }
-      },
-      retry ? callbackRetryOptions : { retries: 0 }
+    await lastValueFrom(
+      defer(attempt).pipe(
+        rxRetry({
+          count: retry ? CALLBACK_RETRIES : 0,
+          delay: (error, retryCount) => timer(this.getRetryDelay(error, retryCount)),
+        })
+      )
     );
+  }
+
+  /** Throws the error back when it is not retryable. */
+  private getRetryDelay(error: Error, retryCount: number): number {
+    if (!isCallbackDeliveryError(error)) {
+      return this.getBackoffDelay(retryCount);
+    }
+
+    if (!error.retryable) {
+      throw error;
+    }
+
+    if (error.retryAfterMs === undefined) {
+      return this.getBackoffDelay(retryCount);
+    }
+
+    const delay = Math.min(error.retryAfterMs, MAX_CALLBACK_RETRY_AFTER_MS);
+
+    this.logger.debug(
+      `Callback receiver asked to retry after ${error.retryAfterMs}ms; waiting ${delay}ms`
+    );
+
+    return delay;
+  }
+
+  private getBackoffDelay(retryCount: number): number {
+    return CALLBACK_RETRY_MIN_DELAY_MS * CALLBACK_RETRY_BACKOFF_FACTOR ** (retryCount - 1);
   }
 
   /** The first transport that handles the URL, else one that delivers with fetch. */
@@ -155,7 +231,10 @@ export class CallbackDeliveryService {
           signal,
         });
 
-        throwIfNotDelivered(response);
+        throwIfNotDelivered({
+          status: response.status,
+          retryAfterMs: parseRetryAfterMs(response.headers.get(RETRY_AFTER_HEADER)),
+        });
       },
     };
   }
@@ -171,7 +250,12 @@ export class CallbackDeliveryService {
           throw new Error('The Relay client is not available');
         }
 
-        throwIfNotDelivered(await relayClient.postCallback(callbackUrl, payload, signal));
+        const { status, headers } = await relayClient.postCallback(callbackUrl, payload, signal);
+
+        throwIfNotDelivered({
+          status,
+          retryAfterMs: parseRetryAfterMs(headers.get(RETRY_AFTER_HEADER)),
+        });
       },
     };
   }

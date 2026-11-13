@@ -52,6 +52,8 @@ export type SimplifiedPackagePolicyStreams = Record<
     vars?: SimplifiedVars;
     var_group_selections?: Record<string, string>;
     condition?: AgentConditionExpression | null;
+    /** Selected option per stream-level var_group (package-spec ≥ 3.6.0). */
+    var_group_selections?: Record<string, string>;
   }
 >;
 
@@ -176,6 +178,7 @@ function formatStreams(
       // Stream selections round-trip like package-level ones, so a supplied selection isn't lost.
       ...(stream.var_group_selections ? { var_group_selections: stream.var_group_selections } : {}),
       ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
+      ...(stream.var_group_selections ? { var_group_selections: stream.var_group_selections } : {}),
     };
 
     return acc;
@@ -322,6 +325,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
         vars: streamsLevelVars,
         var_group_selections: streamVarGroupSelections,
         condition: streamCondition,
+        var_group_selections: streamVarGroupSelections,
       } = streamVal;
       const packagePolicyStream = streamsMap.get(streamId);
       if (!packagePolicyStream) {
@@ -344,6 +348,11 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
       if (streamCondition !== undefined) {
         packagePolicyStream.condition = streamCondition;
+      }
+
+      // Stream-level var_groups are only validated when the policy carries the selection.
+      if (streamVarGroupSelections) {
+        packagePolicyStream.var_group_selections = streamVarGroupSelections;
       }
     });
   });

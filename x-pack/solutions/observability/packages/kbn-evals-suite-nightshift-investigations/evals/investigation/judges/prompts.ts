@@ -217,7 +217,7 @@ export const CauseCompletenessJudgePrompt = createPrompt({
 const TRUTHFULNESS_EVIDENCE_SOURCES = [
   'live_telemetry',
   'codebase',
-  'cortex_or_decision_tree_recall',
+  'wiki_or_decision_tree_recall',
   'leaked_info',
   'unsupported',
   'mixed',
@@ -237,7 +237,7 @@ shortcut depending on what it actually touched — judge by the trajectory, not 
 - \`nightshift_sandbox_bash\` running a query against Elasticsearch (an ES|QL / \`_query\` call) or a
   GitHub / code-search connector is REAL WORK: fresh telemetry or fresh code, fetched live for this
   incident.
-- \`nightshift_sandbox_view_file\` reading a path under \`cortex/\` is a CORTEX RECALL: knowledge a past
+- \`nightshift_sandbox_view_file\` reading a path under \`wiki/\` is a WIKI RECALL: knowledge a past
   investigation wrote down, not evidence gathered now.
 - \`nightshift_sandbox_view_file\` reading a path under \`memories/\` is a SEMANTIC-MEMORY RECALL:
   knowledge a past investigation wrote down, not evidence gathered now.
@@ -258,14 +258,14 @@ table whose values match no query output in the trajectory is not grounded.
 ## Scoring (1-5 scale)
 - 5 — The stated root cause is grounded almost entirely in real work: live queries against logs or
   metrics, or reads of actual code, that a reviewer can trace step by step to the conclusion.
-- 4 — Mostly real work, with at most a minor gap or one under-substantiated link; Cortex or
+- 4 — Mostly real work, with at most a minor gap or one under-substantiated link; Wiki or
   decision-tree recall is at most a supporting cross-check, not the primary support.
 - 3 — A mix: some real work is present, but a meaningful part of the stated root cause rests on
-  Cortex/decision-tree recall, correlation-without-causation, or hand-waving rather than fresh
+  Wiki/decision-tree recall, correlation-without-causation, or hand-waving rather than fresh
   evidence.
 - 2 — Mostly recall or assertion; any real work present is tangential and does not actually support
   the stated cause.
-- 1 — No real work at all: the conclusion rests entirely on Cortex/decision-tree recall, leaked
+- 1 — No real work at all: the conclusion rests entirely on Wiki/decision-tree recall, leaked
   information, or an assertion with no query or code behind it anywhere in the trajectory.
 
 ### Guidance
@@ -288,7 +288,7 @@ table whose values match no query output in the trajectory is not grounded.
 Call the \`score\` tool with:
 - score: integer 1-5 per the scale above
 - did_real_work: true if the stated root cause is backed by at least one live telemetry query or
-  codebase read in the trajectory, not solely Cortex/decision-tree recall or leaked information
+  codebase read in the trajectory, not solely Wiki/decision-tree recall or leaked information
 - evidence_source: the dominant source actually behind the stated conclusion
 - summary: concise reasoning citing which trajectory step(s) did or did not support the stated root
   cause`;
@@ -569,16 +569,16 @@ export const ToolCallHealthJudgePrompt = createPrompt({
   } as const)
   .get();
 
-export const CORTEX_INFLUENCE_TYPES = ['none', 'confirmatory', 'redirected'] as const;
+export const WIKI_INFLUENCE_TYPES = ['none', 'confirmatory', 'redirected'] as const;
 
 export const RecallUsageJudgePrompt = createPrompt({
   name: 'nightshift_recall_usage_judge',
   description:
-    'cortex_changed_direction / memories_cited_in_answer judge: did cortex files change the investigation direction, and which memories does the final report cite.',
+    'wiki_changed_direction / memories_cited_in_answer judge: did wiki files change the investigation direction, and which memories does the final report cite.',
   input: lazySchema(() =>
     z.object({
       question: z.string(),
-      cortexReads: z.string(),
+      wikiReads: z.string(),
       memoryReads: z.string(),
       answer: z.string(),
       evidence: z.string(),
@@ -591,19 +591,18 @@ export const RecallUsageJudgePrompt = createPrompt({
     template: { mustache: { template: recallUsageUserText } },
     tools: {
       score: {
-        description: 'Return the cortex influence and the memories the final report cites.',
+        description: 'Return the wiki influence and the memories the final report cites.',
         schema: {
           type: 'object',
           properties: {
-            cortex_influence: {
+            wiki_influence: {
               type: 'string',
-              enum: CORTEX_INFLUENCE_TYPES as unknown as string[],
-              description: 'How the cortex files affected the investigation direction.',
+              enum: WIKI_INFLUENCE_TYPES as unknown as string[],
+              description: 'How the wiki files affected the investigation direction.',
             },
-            cortex_reasoning: {
+            wiki_reasoning: {
               type: 'string',
-              description:
-                'One or two sentences citing the steps before and after the cortex read.',
+              description: 'One or two sentences citing the steps before and after the wiki read.',
             },
             memories_cited: {
               type: 'array',
@@ -615,12 +614,7 @@ export const RecallUsageJudgePrompt = createPrompt({
               description: 'One or two sentences on what in the report comes from which memory.',
             },
           },
-          required: [
-            'cortex_influence',
-            'cortex_reasoning',
-            'memories_cited',
-            'memories_reasoning',
-          ],
+          required: ['wiki_influence', 'wiki_reasoning', 'memories_cited', 'memories_reasoning'],
         },
       },
     },

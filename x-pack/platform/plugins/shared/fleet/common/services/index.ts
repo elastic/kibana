@@ -98,6 +98,7 @@ export {
   validatePackagePolicyConfig,
   validationHasErrors,
   countValidationErrors,
+  formatAgentConditionErrors,
 } from './validate_package_policy';
 
 export { normalizeHostsForAgents } from './hosts_utils';

@@ -166,7 +166,7 @@ export const useColumns = (
   const copyToClipBoardAction = useCopyToClipboardAction();
 
   const { earliest, latest } = useAppSelector((s) => s.logRateAnalysis);
-  const timeRangeMs = { from: earliest ?? 0, to: latest ?? 0 };
+  const timeRangeMs = useMemo(() => ({ from: earliest ?? 0, to: latest ?? 0 }), [earliest, latest]);
 
   const loading = useAppSelector((s) => s.stream.isRunning);
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);

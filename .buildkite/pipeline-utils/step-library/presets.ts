@@ -44,7 +44,6 @@ export type MachineType =
   | 'n2-standard-8'
   | 'n2-standard-16'
   | 'n2d-custom-16-32768'
-  | 'n2d-standard-2'
   | 'n2d-standard-8'
   | 'n4-highcpu-32'
   | 'n4-standard-16'
@@ -64,20 +63,19 @@ export const usZones = [
 ] as const satisfies readonly Zone[];
 
 export const spotZones = {
-  centralFCA: ['us-central1-f', 'us-central1-c', 'us-central1-a'],
-  centralFCBA: ['us-central1-f', 'us-central1-c', 'us-central1-b', 'us-central1-a'],
   allUS: usZones,
-  // Zones aligned with the preemptible N2D CPU quota, which is separate from the standard quota.
-  n2dPreemptible: [
+  n2: [
     'asia-south2-a',
     'asia-south2-b',
     'asia-south2-c',
-    'europe-west2-a',
-    'europe-west2-b',
-    'europe-west2-c',
     'northamerica-northeast2-a',
     'northamerica-northeast2-b',
     'northamerica-northeast2-c',
+  ],
+  n4: [
+    'asia-south2-a',
+    'asia-south2-b',
+    'asia-south2-c',
     'southamerica-east1-a',
     'southamerica-east1-b',
     'southamerica-east1-c',
@@ -142,7 +140,7 @@ export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): Age
 export const mainTargetBranchOnly = "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'";
 
 export const securitySolutionCypressDefaults = {
-  agents: { ...spotAgent('n2-standard-4', spotZones.centralFCA), ...pdBalanced },
+  agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
   depends_on: ['build'],
   timeout_in_minutes: 60,
   retry: retry.agentLossOrAnyOnce,
@@ -150,5 +148,5 @@ export const securitySolutionCypressDefaults = {
 
 export const securitySolutionHighMemoryCypressDefaults = {
   ...securitySolutionCypressDefaults,
-  agents: { ...spotAgent('n2-highmem-4', spotZones.centralFCA), ...pdBalanced },
+  agents: { ...spotAgent('n2-highmem-4', spotZones.n2), ...pdBalanced },
 };

@@ -7,17 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { EuiAccordion, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useResolutionGroup } from './hooks/use_resolution_group';
@@ -38,7 +32,7 @@ interface ResolutionSectionProps {
   openDetailsPanel?: (path: EntityDetailsPath) => void;
   /**
    * When provided, clicking a related entity name is delegated to this callback (used by the
-   * new EUI system flyout). When omitted, the legacy expandable-flyout `openFlyout` is used.
+   * new EUI system flyout). When omitted, the entity flyout is opened via `openEntityFlyout`.
    */
   onShowEntity?: (params: {
     engineType: string | undefined;
@@ -72,8 +66,6 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
     enabled: !!entityId,
   });
 
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openFlyout } = useExpandableFlyoutApi();
   const { openEntityFlyout } = useFlyoutApi();
 
   const handleOpenResolutionTab = useCallback(() => {
@@ -94,27 +86,16 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
         return;
       }
 
-      const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
-
-      if (enableNewFlyout) {
-        openEntityFlyout({
-          engineType: entityType,
-          entityName: clickedEntityName,
-          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
-          ...sharedParams,
-        });
-        return;
-      }
-
-      const panelKey = EntityPanelKeyByType[entityType];
-      const paramName = EntityPanelParamByType[entityType];
-      if (panelKey && paramName) {
-        openFlyout({
-          right: { id: panelKey, params: { [paramName]: clickedEntityName, ...sharedParams } },
-        });
-      }
+      openEntityFlyout({
+        engineType: entityType,
+        entityName: clickedEntityName,
+        origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
+        entityId: clickedEntityId,
+        contextID: scopeId,
+        scopeId,
+      });
     },
-    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
+    [onShowEntity, openEntityFlyout, entityType, scopeId]
   );
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;

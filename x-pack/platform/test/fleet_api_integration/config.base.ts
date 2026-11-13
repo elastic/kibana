@@ -103,6 +103,8 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           // config.agentless_legacy_disabled.ts overrides this to true for the rejection tests.
           disableAgentlessLegacyAPI: false,
         })}`,
+        // Deploy every agent policy as `<id>#sentinel` too, so the version specific policy code paths run in all suites
+        `--feature_flags.overrides.fleet.enableSentinelPolicyVersion=true`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,

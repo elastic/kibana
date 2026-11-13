@@ -14,12 +14,16 @@ import { toPresetSchedule } from '../automation_form_values';
 
 const defaultCatalog = {
   data: [
-    { name: 'CPU usage high', tags: ['infra', 'prod'] },
-    { name: 'Disk full', tags: ['storage', 'prod'] },
-    { name: 'Memory pressure', tags: ['infra'] },
+    { name: 'CPU usage high', tags: ['infra', 'prod'], family: 'classic' },
+    { name: 'Disk full', tags: ['storage', 'prod'], family: 'classic' },
+    { name: 'Memory pressure', tags: ['infra'], family: 'classic' },
   ],
   isError: false,
+  isComplete: true,
 };
+jest.mock('../../../hooks/use_global_limit', () => ({
+  useGlobalLimit: () => ({ isReached: false }),
+}));
 const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../../data/rules/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
@@ -39,17 +43,27 @@ const legacyPatternTrigger: TriggerFormValues = {
   ruleNamePattern: 'cpu',
   ruleNames: [],
   ruleTags: [],
+  severities: [],
+  alertSources: [],
+  alertSourceMode: 'include',
 };
 
 const onTriggerChange = jest.fn();
 
-const TriggerSection = ({ initialTrigger }: { initialTrigger?: TriggerFormValues }) => {
+const TriggerSection = ({
+  initialTrigger,
+  readOnly = false,
+}: {
+  initialTrigger?: TriggerFormValues;
+  readOnly?: boolean;
+}) => {
   const [trigger, setTrigger] = useState(initialTrigger);
   const [instructions, setInstructions] = useState('');
   const [dailyDispatchLimit, setDailyDispatchLimit] = useState('20');
   return (
     <I18nProvider>
       <AutomationTriggerSection
+        readOnly={readOnly}
         trigger={trigger}
         instructions={instructions}
         onInstructionsChange={setInstructions}
@@ -172,6 +186,61 @@ describe('AutomationTriggerSection', () => {
 
     fireEvent.click(screen.getByTestId('automationRuleClear'));
     expect(lastTrigger()).toMatchObject({ ruleNames: [], ruleTags: [] });
+  });
+
+  it('selects and clears named severities without changing the rule filter', async () => {
+    render(
+      <TriggerSection initialTrigger={{ ...legacyPatternTrigger, alertSources: ['classic'] }} />
+    );
+    expect(screen.getByTestId('automationAlertSources')).toHaveTextContent('Classic');
+    expect(screen.getByTestId('automationAlertSeverity')).toHaveTextContent('Any severity');
+    expect(
+      screen.getByText(
+        'Severity is checked when the alert becomes active. Later severity changes do not trigger an investigation.'
+      )
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('automationAlertSeverity'));
+    fireEvent.click(await screen.findByRole('option', { name: 'High' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Major' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Warning' }));
+    expect(lastTrigger()).toMatchObject({
+      ruleNamePattern: 'cpu',
+      severities: ['major', 'high', 'warning'],
+      alertSources: ['classic'],
+    });
+    fireEvent.click(screen.getByRole('option', { name: 'High' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Major' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Warning' }));
+    expect(lastTrigger().severities).toEqual([]);
+    expect(screen.getByTestId('automationAlertSeverity')).toHaveTextContent('Any severity');
+  });
+
+  it('shows selected severities and activation-time semantics in read-only details', () => {
+    render(
+      <TriggerSection
+        initialTrigger={{ ...legacyPatternTrigger, severities: ['major', 'high'] }}
+        readOnly
+      />
+    );
+    expect(screen.getByText('Major or High')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Severity is checked when the alert becomes active. Later severity changes do not trigger an investigation.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('automationAlertSeverity')).not.toBeInTheDocument();
+  });
+
+  it('omits severity details when a saved automation has no severity filter', () => {
+    render(<TriggerSection initialTrigger={legacyPatternTrigger} readOnly />);
+
+    expect(screen.queryByText('with severity')).not.toBeInTheDocument();
+    expect(screen.queryByText('Any severity')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        'Severity is checked when the alert becomes active. Later severity changes do not trigger an investigation.'
+      )
+    ).not.toBeInTheDocument();
   });
 
   it('replaces the legacy name pattern when rules are picked', async () => {

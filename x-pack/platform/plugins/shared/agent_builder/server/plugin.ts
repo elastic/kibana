@@ -49,7 +49,10 @@ import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/reg
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/execution/runner/model_provider';
+import {
+  createModelProviderFactory,
+  createRuntimeModelProviderFactory,
+} from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
@@ -167,7 +170,7 @@ export class AgentBuilderPlugin
       type: AGENT_WORKLOAD_TYPE,
       name: 'Agent',
       description: 'Agent Builder agent that runs every conversation as the bound service account',
-      resolveWorkloads: async (workloads) => {
+      resolveWorkloads: async (workloads, { signal }) => {
         const [coreStart] = await coreSetup.getStartServices();
         return resolveAgentWorkloads({
           storage: createAgentStorage({
@@ -175,6 +178,7 @@ export class AgentBuilderPlugin
             esClient: coreStart.elasticsearch.client.asInternalUser,
           }),
           workloads,
+          signal,
         });
       },
     });
@@ -358,6 +362,7 @@ export class AgentBuilderPlugin
       },
       callbacks: {
         registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerOnBeforeNewConversation: serviceSetups.callbacks.registerOnBeforeNewConversation,
         registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,
@@ -418,6 +423,8 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
+      cloud: this.cloudSetup,
       conversationEventBus: this.conversationEventBus,
     });
 
@@ -488,7 +495,7 @@ export class AgentBuilderPlugin
         findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
-        createModelProvider: modelProviderFactory,
+        createModelProvider: createRuntimeModelProviderFactory(modelProviderFactory),
       },
       conversations: {
         getScopedClient: async ({ request }) => {

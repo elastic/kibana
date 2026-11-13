@@ -67,6 +67,12 @@ export interface OnlineEvalScoreEvent {
   alert_rule_type?: string;
   judge_connector_id?: string;
   judge_model?: string;
+  judge_input_tokens?: number;
+  judge_cached_input_tokens?: number;
+  judge_output_tokens?: number;
+  judge_reasoning_tokens?: number;
+  judge_llm_calls?: number;
+  judge_llm_calls_without_usage?: number;
   scores: OnlineEvalScore[];
   evaluator_count: number;
   failed_count: number;
@@ -158,6 +164,52 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   judge_model: {
     type: 'keyword',
     _meta: { description: 'Model the judges ran on.', optional: true },
+  },
+  // Judge token totals, counted like `agent_builder_round_complete` so the two can be summed.
+  // Absent when no judge made a model call.
+  judge_input_tokens: {
+    type: 'long',
+    _meta: {
+      description: 'Input tokens of every judge call, including tokens served from cache.',
+      optional: true,
+    },
+  },
+  judge_cached_input_tokens: {
+    type: 'long',
+    _meta: {
+      description: 'Input tokens served from cache (part of judge_input_tokens), when reported.',
+      optional: true,
+    },
+  },
+  judge_output_tokens: {
+    type: 'long',
+    _meta: {
+      description: 'Output tokens of every judge call, including reasoning.',
+      optional: true,
+    },
+  },
+  judge_reasoning_tokens: {
+    type: 'long',
+    _meta: {
+      description: 'Reasoning tokens (part of judge_output_tokens), when reported.',
+      optional: true,
+    },
+  },
+  judge_llm_calls: {
+    type: 'long',
+    _meta: {
+      description:
+        'Judge model calls attempted, including calls that failed before reaching a model. A call the inference client retried counts once.',
+      optional: true,
+    },
+  },
+  judge_llm_calls_without_usage: {
+    type: 'long',
+    _meta: {
+      description:
+        'Judge calls missing from the token totals: the call failed or the provider reported no usage.',
+      optional: true,
+    },
   },
   scores: {
     type: 'array',

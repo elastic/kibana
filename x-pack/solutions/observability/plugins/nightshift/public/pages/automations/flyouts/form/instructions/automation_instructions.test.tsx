@@ -59,5 +59,7 @@ describe('AutomationInstructions', () => {
     expect(screen.getByText('No additional instructions')).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(screen.queryByTestId('automationInstructionMode')).not.toBeInTheDocument();
+    expect(screen.queryByText('Optional')).not.toBeInTheDocument();
+    expect(screen.queryByText('Maximum 5,000 characters.')).not.toBeInTheDocument();
   });
 });

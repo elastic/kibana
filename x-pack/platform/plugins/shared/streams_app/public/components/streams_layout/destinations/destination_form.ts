@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { collectUnitComponentIds } from '@kbn/streams-schema';
+import { collectUnitComponentIds, getSignalTargetsWritePatterns } from '@kbn/streams-schema';
+import { MAX_RESOLVE_INDEX_PATTERNS } from '@kbn/streams-plugin/common';
 import { createDestinationId, getDestinationNameValidationError } from './destination_helpers';
 import {
   DESTINATION_SIGNALS,
+  getDestinationCreateSpec,
   getFormDestinationSignals,
+  localElasticsearchCredentialName,
+  PREFIXED_DESTINATION_SIGNALS,
   SIGNAL_INDEX_FIELDS,
   validateAutoWritePattern,
-  validateRemoteIndex,
+  validateDocsWritePattern,
+  validateFreeFormIndexName,
   validateStaticSignalIndex,
 } from './destination_models';
 import { getDestinationTypeDefinition } from './destination_type_registry';
@@ -136,7 +141,7 @@ export const validateRemoteEndpoint = (value: string): 'required' | 'invalid' | 
   return canParseUrl(endpoint) ? undefined : 'invalid';
 };
 
-/** Matches the saved node's supported_telemetry: all three in Auto, the filled ones in Fixed. */
+/** Matches the saved node's supported_telemetry: every signal in Auto, the filled ones in Fixed. */
 const getRemoteDestinationSignals = (
   remoteElasticsearch: RemoteElasticsearchDestinationFormData
 ): readonly DestinationSignal[] => {
@@ -150,7 +155,7 @@ const getRemoteDestinationSignals = (
 type RemoteElasticsearchErrors = RemoteElasticsearchConnectionErrors &
   Pick<
     DestinationCreationFormErrors,
-    'staticIndexes' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+    'staticIndexes' | 'logsIndex' | 'metricsIndex' | 'tracesIndex' | 'docsIndex'
   >;
 
 const getRemoteElasticsearchErrors = (
@@ -166,20 +171,49 @@ const getRemoteElasticsearchErrors = (
   if (getRemoteDestinationSignals(remoteElasticsearch).length === 0) {
     errors.staticIndexes = 'required';
   }
-  for (const signal of DESTINATION_SIGNALS) {
+  for (const signal of PREFIXED_DESTINATION_SIGNALS) {
     const field = SIGNAL_INDEX_FIELDS[signal];
-    const error = validateRemoteIndex(remoteElasticsearch[field]);
+    const error = validateFreeFormIndexName(remoteElasticsearch[field]);
     if (error) {
       errors[field] = error;
     }
+  }
+  const docsIndexError = validateFreeFormIndexName(remoteElasticsearch.docsIndex);
+  if (docsIndexError) {
+    errors.docsIndex = docsIndexError;
   }
   return errors;
 };
 
 type LocalElasticsearchErrors = Pick<
   DestinationCreationFormErrors,
-  'staticIndexes' | 'customSignals' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+  | 'staticIndexes'
+  | 'customSignals'
+  | 'logsIndex'
+  | 'metricsIndex'
+  | 'tracesIndex'
+  | 'docsIndex'
+  | 'docsWritePatterns'
 >;
+
+const getDocsWritePatternsError = (
+  elasticsearch: ElasticsearchDestinationFormData
+): LocalElasticsearchErrors['docsWritePatterns'] => {
+  const { docsWritePatterns } = elasticsearch;
+  if (docsWritePatterns.length === 0) {
+    return 'required';
+  }
+  const entryErrors = docsWritePatterns.flatMap((pattern) => {
+    const error = validateDocsWritePattern(pattern);
+    return error ? [{ pattern, error }] : [];
+  });
+  if (entryErrors.length > 0) {
+    return entryErrors;
+  }
+  // Only docs can overflow the API key route's pattern cap (OTel adds at most three).
+  const keyScope = getSignalTargetsWritePatterns(getDestinationCreateSpec(elasticsearch));
+  return keyScope.length > MAX_RESOLVE_INDEX_PATTERNS ? 'tooMany' : undefined;
+};
 
 const getLocalElasticsearchErrors = (
   elasticsearch: ElasticsearchDestinationFormData
@@ -192,7 +226,7 @@ const getLocalElasticsearchErrors = (
     if (elasticsearch.customSignals.length === 0) {
       errors.customSignals = 'required';
     }
-    for (const signal of elasticsearch.customSignals) {
+    for (const signal of elasticsearch.customSignals.filter((candidate) => candidate !== 'docs')) {
       const field = SIGNAL_INDEX_FIELDS[signal];
       const error = elasticsearch[field].trim()
         ? validateAutoWritePattern(signal, elasticsearch[field])
@@ -201,20 +235,27 @@ const getLocalElasticsearchErrors = (
         errors[field] = error;
       }
     }
+    if (elasticsearch.customSignals.includes('docs')) {
+      const docsWritePatternsError = getDocsWritePatternsError(elasticsearch);
+      if (docsWritePatternsError) {
+        errors.docsWritePatterns = docsWritePatternsError;
+      }
+    }
     return errors;
   }
-  const hasIndex = Object.values(SIGNAL_INDEX_FIELDS).some(
-    (field) => elasticsearch[field].trim().length > 0
-  );
-  if (!hasIndex) {
+  if (getFormDestinationSignals(elasticsearch).length === 0) {
     errors.staticIndexes = 'required';
   }
-  for (const signal of DESTINATION_SIGNALS) {
+  for (const signal of PREFIXED_DESTINATION_SIGNALS) {
     const field = SIGNAL_INDEX_FIELDS[signal];
     const error = validateStaticSignalIndex(signal, elasticsearch[field]);
     if (error) {
       errors[field] = error;
     }
+  }
+  const docsIndexError = validateFreeFormIndexName(elasticsearch.docsIndex);
+  if (docsIndexError) {
+    errors.docsIndex = docsIndexError;
   }
   return errors;
 };
@@ -256,11 +297,17 @@ export const getDestinationCreationFormErrors = ({
     return { destinationName, ...getRemoteElasticsearchErrors(remoteElasticsearch) };
   }
   const errors: DestinationCreationFormErrors = {
-    destinationName: getDestinationNameValidationError({
-      destinationName: formData.destinationName,
-      unitDefinition,
-      signals: getFormDestinationSignals(formData.elasticsearch),
-    }),
+    destinationName:
+      getDestinationNameValidationError({
+        destinationName: formData.destinationName,
+        unitDefinition,
+        signals: getFormDestinationSignals(formData.elasticsearch),
+      }) ??
+      getCredentialNameError({
+        destinationName: formData.destinationName,
+        unitDefinition,
+        getCredentialNames: (id) => [localElasticsearchCredentialName(id)],
+      }),
   };
   return { ...errors, ...getLocalElasticsearchErrors(formData.elasticsearch) };
 };
@@ -278,14 +325,18 @@ const ERROR_FIELD_PATHS: Record<DestinationCreationFormField, readonly FormField
     'elasticsearch.logsIndex',
     'elasticsearch.metricsIndex',
     'elasticsearch.tracesIndex',
+    'elasticsearch.docsIndex',
     'remoteElasticsearch.logsIndex',
     'remoteElasticsearch.metricsIndex',
     'remoteElasticsearch.tracesIndex',
+    'remoteElasticsearch.docsIndex',
   ],
   customSignals: ['elasticsearch.customSignals'],
   logsIndex: ['elasticsearch.logsIndex', 'remoteElasticsearch.logsIndex'],
   metricsIndex: ['elasticsearch.metricsIndex', 'remoteElasticsearch.metricsIndex'],
   tracesIndex: ['elasticsearch.tracesIndex', 'remoteElasticsearch.tracesIndex'],
+  docsIndex: ['elasticsearch.docsIndex', 'remoteElasticsearch.docsIndex'],
+  docsWritePatterns: ['elasticsearch.docsWritePatterns'],
   endpoint: ['remoteElasticsearch.endpoint'],
   apiKey: ['remoteElasticsearch.apiKey'],
   region: ['s3.region'],

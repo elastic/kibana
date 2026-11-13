@@ -66,6 +66,8 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import {
   type InTableSearchRestorableState,
+  type InTableSearchScrollToCell,
+  type UseDataGridInTableSearchProps,
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
@@ -523,6 +525,15 @@ interface InternalUnifiedDataTableProps {
    */
   enableInTableSearch?: boolean;
   /**
+   * Additional hosts containing table controls rendered outside the grid wrapper.
+   */
+  additionalSearchScopeElements?: UseDataGridInTableSearchProps['additionalSearchScopeElements'];
+  /**
+   * Overrides how the grid scrolls to the active in-table search match. Provide this together with
+   * `renderCustomGridBody`, since EUI's built-in `scrollToItem` only works with its own virtualized body.
+   */
+  scrollToCell?: InTableSearchScrollToCell;
+  /**
    * Optional extra props passed to the renderCellValue function/component.
    */
   cellContext?: EuiDataGridProps['cellContext'];
@@ -671,6 +682,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       customGridColumnsConfiguration,
       enableComparisonMode,
       enableInTableSearch = false,
+      additionalSearchScopeElements,
+      scrollToCell,
       cellContext,
       renderCellPopover,
       getRowIndicator,
@@ -1088,13 +1101,15 @@ const InternalUnifiedDataTable = React.forwardRef<
       renderCellValueWithInTableSearchSupport,
     } = useDataGridInTableSearch({
       enableInTableSearch: enableInTableSearch && isInteractive,
+      additionalSearchScopeElements,
       dataGridWrapper,
       dataGridRef,
+      scrollToCell,
       visibleColumns,
       rows: displayedRows,
       renderCellValue,
       cellContext,
-      pagination: paginationObj,
+      pagination: paginationMode === 'multiPage' ? paginationObj : undefined,
       initialState: inTableSearchLatestStateRef.current,
       onInitialStateChange: onInTableSearchInitialStateChange,
     });

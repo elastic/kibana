@@ -226,7 +226,14 @@ describe('TokenUsageLogger', () => {
       esClient.index.mockResolvedValue({} as any);
 
       await tokenUsageLogger.log({
-        tokens: { prompt: 100, completion: 50, thinking: 20, total: 170, cached: 30 },
+        tokens: {
+          prompt: 100,
+          completion: 50,
+          thinking: 20,
+          total: 170,
+          cached: 30,
+          cacheWrite: 15,
+        },
         context: defaultContext,
       });
 
@@ -239,6 +246,7 @@ describe('TokenUsageLogger', () => {
               thinking_tokens: 20,
               total_tokens: 170,
               cached_tokens: 30,
+              cache_write_tokens: 15,
             },
           }),
         })

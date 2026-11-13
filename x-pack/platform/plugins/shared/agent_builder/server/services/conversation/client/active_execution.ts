@@ -54,18 +54,20 @@ export const readHeldExecution = async ({
   document,
   update,
   executionClient,
+  peekHeld = false,
 }: {
   document: Document;
   update?: ActiveExecutionUpdate;
   executionClient: AgentExecutionClient;
+  /** Peek the holder for a write that only needs to know whether it is live. */
+  peekHeld?: boolean;
 }): Promise<ExecutionPeek | undefined> => {
   const heldExecutionId = document._source?.active_execution?.execution_id;
 
-  if (
-    !isAcquireActiveExecution(update) ||
-    !heldExecutionId ||
-    heldExecutionId === update.executionId
-  ) {
+  if (!heldExecutionId) {
+    return undefined;
+  }
+  if (!peekHeld && (!isAcquireActiveExecution(update) || heldExecutionId === update.executionId)) {
     return undefined;
   }
 

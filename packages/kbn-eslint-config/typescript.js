@@ -76,16 +76,7 @@ module.exports = {
           '@typescript-eslint/no-unsafe-function-type': 'off',
           '@typescript-eslint/no-empty-object-type': 'off',
           // ##
-          // rely on typescript
-          'no-undef': 'off',
-
           '@typescript-eslint/no-var-requires': 'error',
-          'import/order': [
-            'error',
-            {
-              groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
-            },
-          ],
           'no-unused-expressions': 'off',
         },
         eslintConfigPrettierRules

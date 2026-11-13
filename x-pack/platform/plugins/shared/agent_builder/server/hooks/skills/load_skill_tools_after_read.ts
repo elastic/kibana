@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
+import type { AfterToolCallHookContext, HookHandlerResult } from '@kbn/agent-builder-server';
+import { createOtherResult, type HookLifecycle } from '@kbn/agent-builder-server';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { loadSkillTools } from '../../services/skills/load_skill_tools';
 import { isSkillFileEntry } from '../../services/execution/runner/store/volumes/skills/utils';
@@ -16,13 +17,23 @@ export const createLoadSkillToolsAfterRead = ({
   analyticsService,
   trackingService,
 }: { analyticsService?: AnalyticsService; trackingService?: TrackingService } = {}) => {
-  return async (context: AfterToolCallHookContext): Promise<void> => {
+  return async (
+    context: AfterToolCallHookContext
+  ): Promise<void | HookHandlerResult<HookLifecycle.afterToolCall>> => {
     if (context.toolId !== internalTools.readFile) {
       return;
     }
 
-    const { skillsStore, skills, toolProvider, toolManager, request, logger, runContext } =
-      context.toolHandlerContext;
+    const {
+      skillsStore,
+      skills,
+      toolProvider,
+      toolManager,
+      request,
+      logger,
+      runContext,
+      experimentalFeatures,
+    } = context.toolHandlerContext;
 
     const path = context.toolParams.path as string | undefined;
     if (!path) {
@@ -48,7 +59,7 @@ export const createLoadSkillToolsAfterRead = ({
       return;
     }
 
-    await loadSkillTools({
+    const { dynamicTools } = await loadSkillTools({
       skill,
       skillsService: skills,
       toolProvider,
@@ -56,8 +67,22 @@ export const createLoadSkillToolsAfterRead = ({
       toolManager,
       logger,
       runContext,
+      dynamicToolsEnabled: experimentalFeatures.dynamicTools,
       analyticsService,
       trackingService,
     });
+
+    // Natively bound tools show up in the model's tool list on their own. Dynamic tools are
+    // only reachable through their definitions, so append them to the file's content.
+    const { results } = context.toolReturn;
+    if (dynamicTools.length === 0 || !results) {
+      return;
+    }
+    return {
+      toolReturn: {
+        ...context.toolReturn,
+        results: [...results, createOtherResult({ dynamic_tools: dynamicTools })],
+      },
+    };
   };
 };
