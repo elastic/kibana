@@ -31,13 +31,13 @@ const renderAt = (path: string) => {
 
 describe('ContextEngineRoutes', () => {
   it('opens the Knowledge documents tab', () => {
-    const history = renderAt('/ai_index/my-index/knowledge_documents?doc=a&index=b');
-    expect(history.location.pathname).toBe('/ai_index/my-index/knowledge_documents');
+    const history = renderAt('/ai_index/my-index/knowledge_documents/backing-1?doc=a');
+    expect(history.location.pathname).toBe('/ai_index/my-index/knowledge_documents/backing-1');
     expect(screen.getByTestId('detailPage')).toBeInTheDocument();
   });
 
   it('sends an unknown path under an AI index to that AI index', () => {
-    const history = renderAt('/ai_index/my-index/knowledge_indicators?doc=a&index=b');
+    const history = renderAt('/ai_index/my-index/knowledge_indicators?doc=a');
     expect(history.location.pathname).toBe('/ai_index/my-index');
     expect(screen.getByTestId('detailPage')).toBeInTheDocument();
   });

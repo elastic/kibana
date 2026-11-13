@@ -127,7 +127,7 @@ describe('ListKiGroups', () => {
 
     expect(history.action).toBe('REPLACE');
     expect(searchParam(history.location.search, 'doc')).toBe('faq-1');
-    expect(searchParam(history.location.search, 'index')).toBe(INDEX);
+    expect(history.location.pathname).toBe(`${TAB_PATH}/${INDEX}`);
     expect(screen.getAllByTestId('contextKiRow')[0]).toHaveAttribute('aria-selected', 'true');
   });
 
@@ -137,21 +137,21 @@ describe('ListKiGroups', () => {
     fireEvent.click(screen.getAllByTestId('contextKiRow')[1]);
 
     expect(history.action).toBe('PUSH');
-    expect(history.location.pathname).toBe(TAB_PATH);
+    expect(history.location.pathname).toBe(`${TAB_PATH}/${INDEX}`);
     expect(searchParam(history.location.search, 'doc')).toBe('faq-2');
     expect(screen.getAllByTestId('contextKiRow')[1]).toHaveAttribute('aria-selected', 'true');
   });
 
   it('keeps a deep-linked document that is not in the list', () => {
     const { history } = renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />, {
-      initialPath: `${TAB_PATH}?doc=other&index=${INDEX}`,
+      initialPath: `${TAB_PATH}/${INDEX}?doc=other`,
     });
     expect(searchParam(history.location.search, 'doc')).toBe('other');
   });
 
   it('opens the first document of the new list when a filter hides the open one', () => {
     const { history } = renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />, {
-      initialPath: `${TAB_PATH}?doc=faq-2&index=${INDEX}`,
+      initialPath: `${TAB_PATH}/${INDEX}?doc=faq-2`,
     });
 
     fireEvent.change(screen.getByTestId('contextListKiStatusFilter'), {
@@ -164,7 +164,7 @@ describe('ListKiGroups', () => {
 
   it('keeps the open document when the new filter still shows it', () => {
     const { history } = renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />, {
-      initialPath: `${TAB_PATH}?doc=faq-2&index=${INDEX}`,
+      initialPath: `${TAB_PATH}/${INDEX}?doc=faq-2`,
     });
 
     fireEvent.change(screen.getByTestId('contextListKiStatusFilter'), {

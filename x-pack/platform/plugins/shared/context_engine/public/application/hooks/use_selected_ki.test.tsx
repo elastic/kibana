@@ -25,17 +25,23 @@ describe('useSelectedKi', () => {
     expect(result.current.selectedKi).toBeUndefined();
   });
 
-  it('reads doc and index from the query', () => {
-    const { result } = renderSelectedKi('/ai_index/a/knowledge_documents?doc=a%2Fb&index=idx');
+  it('reads the index from the path and the doc id from the query', () => {
+    const { result } = renderSelectedKi('/ai_index/a/knowledge_documents/idx?doc=a%2Fb');
     expect(result.current.selectedKi).toEqual({ kiId: 'a/b', index: 'idx' });
   });
 
-  it('pushes a new history entry and keeps the path', () => {
-    const { history, result } = renderSelectedKi('/ai_index/a/knowledge_documents?doc=x&index=i');
-    act(() => result.current.selectKi({ id: 'ki-2', index: 'idx-2' }));
+  it('works without the index in the path', () => {
+    const { result } = renderSelectedKi('/ai_index/a/knowledge_documents?doc=x');
+    expect(result.current.selectedKi).toEqual({ kiId: 'x', index: '' });
+  });
+
+  it('pushes a new history entry with the new index and doc', () => {
+    const { history, result } = renderSelectedKi('/ai_index/a/knowledge_documents/i?doc=x');
+    act(() => result.current.selectKi({ id: 'a/b c', index: 'idx-2' }));
     expect(history.length).toBe(2);
-    expect(history.location.pathname).toBe('/ai_index/a/knowledge_documents');
-    expect(result.current.selectedKi).toEqual({ kiId: 'ki-2', index: 'idx-2' });
+    expect(history.location.pathname).toBe('/ai_index/a/knowledge_documents/idx-2');
+    expect(history.location.search).toBe('?doc=a%2Fb+c');
+    expect(result.current.selectedKi).toEqual({ kiId: 'a/b c', index: 'idx-2' });
   });
 
   it('replaces the history entry when asked', () => {
@@ -43,6 +49,7 @@ describe('useSelectedKi', () => {
     act(() => result.current.selectKi({ id: 'ki-1', index: 'idx' }, { replace: true }));
     expect(history.length).toBe(1);
     expect(history.action).toBe('REPLACE');
+    expect(history.location.pathname).toBe('/ai_index/a/knowledge_documents/idx');
     expect(result.current.selectedKi).toEqual({ kiId: 'ki-1', index: 'idx' });
   });
 });

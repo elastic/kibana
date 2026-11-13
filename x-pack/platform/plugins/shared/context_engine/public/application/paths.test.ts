@@ -9,7 +9,7 @@ import {
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
   getAiIndexKnowledgeDocumentsPath,
-  getKiDocQueryParams,
+  getKnowledgeDocumentPath,
 } from './paths';
 
 describe('getAiIndexDetailPath', () => {
@@ -32,18 +32,10 @@ describe('getAiIndexKnowledgeDocumentsPath', () => {
   });
 });
 
-describe('getKiDocQueryParams', () => {
-  it('returns the doc and index query params', () => {
-    expect(getKiDocQueryParams('ki-1', 'my-index')).toEqual({ doc: 'ki-1', index: 'my-index' });
-  });
-
-  it('keeps ids with slashes as they are (URLSearchParams encodes them)', () => {
-    const params = new URLSearchParams(getKiDocQueryParams('a/b c', 'idx'));
-    expect(params.toString()).toBe('doc=a%2Fb+c&index=idx');
-    expect(params.get('doc')).toBe('a/b c');
-  });
-
-  it('leaves out an empty index', () => {
-    expect(getKiDocQueryParams('ki-1', '')).toEqual({ doc: 'ki-1' });
+describe('getKnowledgeDocumentPath', () => {
+  it('puts the backing index in the path', () => {
+    expect(getKnowledgeDocumentPath('my-ai-index', 'ai-index-idx-sample')).toBe(
+      '/ai_index/my-ai-index/knowledge_documents/ai-index-idx-sample'
+    );
   });
 });

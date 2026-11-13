@@ -19,6 +19,7 @@ export const ContextEngineRoutes = () => (
         CONTEXT_ENGINE_PATHS.detail,
         CONTEXT_ENGINE_PATHS.detailSources,
         CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
       ]}
       exact
       component={AiIndexDetailPage}

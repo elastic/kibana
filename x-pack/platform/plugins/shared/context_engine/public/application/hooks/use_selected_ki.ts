@@ -6,9 +6,14 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import type { KiListItem } from '../../../common/http_api/knowledge_indicators';
-import { KI_DOC_QUERY_PARAM, KI_INDEX_QUERY_PARAM, getKiDocQueryParams } from '../paths';
+import {
+  CONTEXT_ENGINE_PATHS,
+  KI_DOC_QUERY_PARAM,
+  getAiIndexKnowledgeDocumentsPath,
+  getKnowledgeDocumentPath,
+} from '../paths';
 
 export interface SelectedKi {
   kiId: string;
@@ -25,19 +30,30 @@ interface UseSelectedKiResult {
   selectKi: (ki: Pick<KiListItem, 'id' | 'index'>, options?: SelectKiOptions) => void;
 }
 
-/** Reads and writes the Knowledge document selected on the tab (`?doc=<id>&index=<index>`). */
+/**
+ * Reads and writes the Knowledge document selected on the tab:
+ * `/ai_index/<id>/knowledge_documents/<index>?doc=<id>`.
+ */
 export const useSelectedKi = (): UseSelectedKiResult => {
   const history = useHistory();
-  const { pathname, search } = useLocation();
+  const { search } = useLocation();
+  const match = useRouteMatch<{ id: string; index?: string }>({
+    path: [
+      CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
+      CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+    ],
+    exact: true,
+  });
+  const aiIndexId = match?.params.id ?? '';
+  const indexParam = match?.params.index ?? '';
 
   const selectedKi = useMemo((): SelectedKi | undefined => {
-    const params = new URLSearchParams(search);
-    const kiId = params.get(KI_DOC_QUERY_PARAM);
+    const kiId = new URLSearchParams(search).get(KI_DOC_QUERY_PARAM);
     if (kiId === null || kiId.length === 0) {
       return undefined;
     }
-    return { kiId, index: params.get(KI_INDEX_QUERY_PARAM) ?? '' };
-  }, [search]);
+    return { kiId, index: indexParam };
+  }, [indexParam, search]);
 
   const selectKi = useCallback(
     (
@@ -45,19 +61,21 @@ export const useSelectedKi = (): UseSelectedKiResult => {
       { replace = false }: SelectKiOptions = {}
     ) => {
       const params = new URLSearchParams(search);
-      params.delete(KI_DOC_QUERY_PARAM);
-      params.delete(KI_INDEX_QUERY_PARAM);
-      Object.entries(getKiDocQueryParams(id, index)).forEach(([key, value]) =>
-        params.set(key, value)
-      );
-      const location = { pathname, search: `?${params}` };
+      params.set(KI_DOC_QUERY_PARAM, id);
+      const location = {
+        pathname:
+          index.length > 0
+            ? getKnowledgeDocumentPath(aiIndexId, index)
+            : getAiIndexKnowledgeDocumentsPath(aiIndexId),
+        search: `?${params}`,
+      };
       if (replace) {
         history.replace(location);
         return;
       }
       history.push(location);
     },
-    [history, pathname, search]
+    [aiIndexId, history, search]
   );
 
   return { selectedKi, selectKi };

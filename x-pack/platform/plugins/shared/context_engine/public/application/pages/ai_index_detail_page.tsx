@@ -106,7 +106,13 @@ export const AiIndexDetailPage = () => {
   const isSourcesTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
   const isKnowledgeIndicatorsTab =
-    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments, exact: true }) !== null;
+    useRouteMatch({
+      path: [
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
+      ],
+      exact: true,
+    }) !== null;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
   const [showCreatedCallout, setShowCreatedCallout] = useState(
@@ -381,7 +387,13 @@ export const AiIndexDetailPage = () => {
       <Route path={CONTEXT_ENGINE_PATHS.detailSources} exact>
         {sourcesPanel}
       </Route>
-      <Route path={CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments} exact>
+      <Route
+        path={[
+          CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+          CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
+        ]}
+        exact
+      >
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detail} exact>
