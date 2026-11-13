@@ -138,6 +138,52 @@ describe('correctness evaluator', () => {
     expect(result.scores.find(({ name }) => name === 'sequence_accuracy')?.score).toBe(1);
   });
 
+  it('labels a derived sequence summary MISMATCH when only some central claims match', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    const centralClaim = (claim: string, sequenceMatch: string) => ({
+      claim,
+      centrality: 'central',
+      centrality_reason: 'Required step.',
+      verdict: 'FULLY_SUPPORTED',
+      sequence_match: sequenceMatch,
+      justification_snippet: claim,
+      explanation: 'Matches.',
+    });
+    const promptMock = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              analysis: [
+                centralClaim('Open the rule.', 'MATCH'),
+                centralClaim('Enable it.', 'NOT_APPLICABLE'),
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await correctnessEvaluator.evaluate({
+      trace: traceAccessor,
+      round: {
+        input: { message: 'How do I enable a rule?' },
+        response: { message: 'Open the rule. Enable it.' },
+        steps: [],
+      },
+      referenceData: { expected: 'Open the rule, then enable it.' },
+      inferenceClient: { prompt: promptMock } as unknown as BoundInferenceClient,
+      log: logger,
+    });
+
+    const sequenceScore = result.scores.find(({ name }) => name === 'sequence_accuracy');
+    expect(sequenceScore?.label).toBe('MISMATCH');
+    expect(sequenceScore?.score).toBe(0.5);
+  });
+
   it('throws when inferenceClient is not provided', async () => {
     const logger = loggingSystemMock.createLogger();
     const { esClient } = createEsClient();

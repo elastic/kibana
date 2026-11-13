@@ -117,13 +117,14 @@ export function deriveCorrectnessSummary(
   const relevance =
     centralShare >= 0.5 ? 'RELEVANT' : centralShare > 0 ? 'PARTIALLY_RELEVANT' : 'IRRELEVANT';
 
-  const sequenced = central.filter((claim) => claim.sequence_match !== 'NOT_APPLICABLE');
-  const sequenceAccuracy =
-    sequenced.length === 0
-      ? 'NOT_APPLICABLE'
-      : sequenced.some((claim) => claim.sequence_match === 'MISMATCH')
-      ? 'MISMATCH'
-      : 'MATCH';
+  // Same rule as the judge prompt: MATCH only when every central claim matches, so the
+  // label agrees with calculateProceduralFidelityScore for mixed MATCH/NOT_APPLICABLE claims.
+  const isSequenceCritical = central.some((claim) => claim.sequence_match !== 'NOT_APPLICABLE');
+  const sequenceAccuracy = !isSequenceCritical
+    ? 'NOT_APPLICABLE'
+    : central.every((claim) => claim.sequence_match === 'MATCH')
+    ? 'MATCH'
+    : 'MISMATCH';
 
   return {
     factual_accuracy_summary: factualAccuracy,
