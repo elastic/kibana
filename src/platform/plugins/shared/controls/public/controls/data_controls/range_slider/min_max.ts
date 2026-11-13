@@ -82,8 +82,9 @@ export function minMax$({
         }
         // The values of a field of an ES|QL source come from a query, as for a query of the user
         const esql =
-          getEsqlSourceFieldQuery(dataSource, field) ??
-          (valuesSource === ControlValuesSource.ESQL ? esqlQuery : undefined);
+          valuesSource === ControlValuesSource.ESQL
+            ? esqlQuery
+            : getEsqlSourceFieldQuery(dataSource, field);
 
         try {
           setIsLoading(true);

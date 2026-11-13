@@ -140,8 +140,42 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toMatchObject({
       kind: 'esql',
-      esql: 'FROM logs-* | STATS BY host',
+      esql: 'FROM logs-*\n| STATS BY host',
     });
+    subscription.unsubscribe();
+  }, 10000);
+
+  it('asks the query of the user, not a generated one, when the values come from a query', async () => {
+    const api = buildApi({
+      filters$: new BehaviorSubject<unknown>([]),
+      parentQuery$: new BehaviorSubject<unknown>(undefined),
+    });
+    const field = { name: 'host', type: 'string', aggregatable: true };
+    api.dataSources$.next([
+      {
+        kind: 'esql',
+        id: 'dataset-id',
+        title: 'logs-*',
+        fields: [field],
+        getFieldByName: () => field,
+        isTimeBased: () => false,
+      },
+    ]);
+    api.field$.next(field);
+
+    const { suggestions$ } = fetchAndValidate$({
+      api,
+      requestSize$: new BehaviorSubject<number>(10) as any,
+      runPastTimeout$: new BehaviorSubject<boolean>(false) as any,
+      selectedOptions$: new BehaviorSubject<unknown[]>([]) as any,
+      searchTechnique$: new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard') as any,
+      sort$: new BehaviorSubject<unknown>({ by: '_key', direction: 'asc' }) as any,
+    });
+    const subscription = suggestions$.subscribe(() => {});
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(JSON.parse(fetchSpy.mock.calls[0][1].body).esql).toBe('FROM logs | KEEP host');
     subscription.unsubscribe();
   }, 10000);
 

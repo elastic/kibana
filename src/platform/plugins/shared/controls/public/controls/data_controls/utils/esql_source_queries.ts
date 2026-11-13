@@ -9,7 +9,7 @@
 
 import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
-import { formatEsqlIdentifier, formatEsqlSources } from '@kbn/esql-utils';
+import { appendStatsByToQuery, formatEsqlIdentifier, formatEsqlSources } from '@kbn/esql-utils';
 
 /**
  * The query that populates a control on a field of an ES|QL source, as the query that the user
@@ -20,5 +20,8 @@ export const getEsqlSourceFieldQuery = (
   field?: FilterableField
 ): string | undefined =>
   source && field && isEsqlFilterableSource(source)
-    ? `FROM ${formatEsqlSources(source.title)} | STATS BY ${formatEsqlIdentifier(field.name)}`
+    ? appendStatsByToQuery(
+        `FROM ${formatEsqlSources(source.title)}`,
+        formatEsqlIdentifier(field.name)
+      )
     : undefined;

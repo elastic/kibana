@@ -24,7 +24,7 @@ describe('getEsqlSourceFieldQuery', () => {
 
   it('groups the values of the field on the FROM target of an ES|QL source', () => {
     expect(getEsqlSourceFieldQuery(source(), field)).toBe(
-      'FROM logs-*, "logs=archive" | STATS BY `host.name`'
+      'FROM logs-*, "logs=archive"\n| STATS BY `host.name`'
     );
   });
 

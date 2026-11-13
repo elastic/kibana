@@ -99,7 +99,11 @@ export function fetchAndValidate$({
       ]) => {
         let built: ReturnType<typeof buildOptionsListFetchBody>;
         try {
-          const sourceQuery = getEsqlSourceFieldQuery(dataSources?.[0], field);
+          // the query of the user is the one to run, when there is one
+          const sourceQuery =
+            valuesSource === ControlValuesSource.ESQL
+              ? undefined
+              : getEsqlSourceFieldQuery(dataSources?.[0], field);
           built = buildOptionsListFetchBody({
             valuesSource: sourceQuery
               ? ControlValuesSource.ESQL
