@@ -87,8 +87,8 @@ export async function pickTestGroupRunOrder() {
     await recordOnMergeShadow(bk, {
       jestUnitConfigs,
       jestIntegrationConfigs,
-      ftrConfigCount: [...ftrManifestEntriesByQueue.values()].reduce(
-        (count, entries) => count + entries.length,
+      ftrConfigCount: [...ftrConfigsByQueue.values()].reduce(
+        (count, configs) => count + configs.length,
         0
       ),
     });
