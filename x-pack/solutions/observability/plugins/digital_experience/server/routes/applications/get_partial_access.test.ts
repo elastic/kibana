@@ -87,36 +87,86 @@ describe('hasPartialReadAccess', () => {
     });
   });
 
-  it('resolves every pattern once, open only, without the Agent Builder indices', async () => {
+  it('resolves each distinct list once, open only, without the Agent Builder indices', async () => {
     const params = setup({});
 
-    await hasPartialReadAccess({ ...params, getIndices: async () => OTEL });
+    await hasPartialReadAccess({ ...params, getIndices: async () => [...OTEL, ...OTEL] });
 
-    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledTimes(1);
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledTimes(2);
     expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledWith({
-      name: 'logs-*.otel-*,-logs-agent_builder.otel-*,traces-*.otel-*,-traces-agent_builder.otel-*',
+      name: 'logs-*.otel-*,-logs-agent_builder.otel-*',
       expand_wildcards: 'open',
       ignore_unavailable: true,
       allow_no_indices: true,
     });
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'traces-*.otel-*,-traces-agent_builder.otel-*' })
+    );
   });
 
-  it('splits comma-separated patterns, deduplicates them and drops exclusions and ignored ones', async () => {
+  it('keeps the exclusions of each list and drops the ignored patterns', async () => {
     const params = setup({});
 
     await hasPartialReadAccess({
       ...params,
       getIndices: async () => [
-        'traces-apm*,apm-*,traces-*.otel-*',
+        'traces-apm*,-traces-apm.private-*,apm-*,traces-*.otel-*',
         'logs-apm*, apm-*',
-        '-traces-apm.rum*',
+        'traces-*.otel-*',
       ],
       ignoredPatterns: OTEL,
     });
 
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledTimes(2);
     expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'traces-apm*,apm-*,logs-apm*' })
+      expect.objectContaining({ name: 'traces-apm*,-traces-apm.private-*,apm-*' })
     );
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-apm*,apm-*' })
+    );
+  });
+
+  it('leaves out the remote clusters, which local privileges do not cover', async () => {
+    const params = setup({
+      dataStreams: ['traces-apm-default', 'remote:traces-apm-default'],
+      readable: ['traces-apm-default'],
+    });
+
+    await expect(
+      hasPartialReadAccess({
+        ...params,
+        getIndices: async () => ['traces-apm*,remote:traces-apm*'],
+      })
+    ).resolves.toBe(false);
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'traces-apm*' })
+    );
+    expect(params.esClient.security.hasPrivileges).toHaveBeenCalledWith({
+      index: [{ names: ['traces-apm-default'], privileges: ['read'] }],
+    });
+  });
+
+  it('keeps a local pattern with a selector, which is not a remote cluster', async () => {
+    const params = setup({});
+
+    await hasPartialReadAccess({ ...params, getIndices: async () => ['logs-apm*::failures'] });
+
+    expect(params.internalEsClient.indices.resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-apm*::failures' })
+    );
+  });
+
+  it('skips a list that only remote patterns or exclusions are left in', async () => {
+    const params = setup({});
+
+    await expect(
+      hasPartialReadAccess({
+        ...params,
+        getIndices: async () => ['remote:traces-apm*', 'traces-*.otel-*,-traces-apm.private-*'],
+        ignoredPatterns: OTEL,
+      })
+    ).resolves.toBe(false);
+    expect(params.internalEsClient.indices.resolveIndex).not.toHaveBeenCalled();
   });
 
   it('skips the privilege check when the patterns match nothing', async () => {

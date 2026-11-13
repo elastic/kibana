@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { describeError } from '../../lib/helpers/errors';
 
 /**
@@ -24,17 +25,27 @@ const excludeAgentBuilderOtelIndices = (pattern: string): string => {
   return exclusion ? `${pattern},-${exclusion}` : pattern;
 };
 
-const splitPatterns = (indices: string[], ignoredPatterns: string[]): string[] => [
-  ...new Set(
-    indices
-      .flatMap((index) => index.split(','))
+/**
+ * One resolvable expression per distinct list, as an exclusion only applies to the patterns before
+ * it in its own list. Ignored and remote (CCS or CPS) patterns are left out, as local `hasPrivileges`
+ * doesn't see the `remote_indices` that grant their reads; a list with only exclusions left is dropped.
+ */
+const toExpressions = (indices: string[], ignoredPatterns: string[]): string[] => {
+  const expressions = [...new Set(indices)].flatMap((list) => {
+    const patterns = list
+      .split(',')
       .map((pattern) => pattern.trim())
       .filter(
         (pattern) =>
-          pattern.length > 0 && !pattern.startsWith('-') && !ignoredPatterns.includes(pattern)
-      )
-  ),
-];
+          pattern.length > 0 && !isNonLocalIndexName(pattern) && !ignoredPatterns.includes(pattern)
+      );
+    if (patterns.every((pattern) => pattern.startsWith('-'))) {
+      return [];
+    }
+    return [patterns.map(excludeAgentBuilderOtelIndices).join(',')];
+  });
+  return [...new Set(expressions)];
+};
 
 /**
  * Whether the user can't read every open index, alias or data stream behind `indices`.
@@ -53,32 +64,43 @@ export const hasPartialReadAccess = async ({
   esClient: ElasticsearchClient;
   /** Internal client, which lists the indices whatever the user can read. */
   internalEsClient: ElasticsearchClient;
-  /** The source's index patterns, each possibly a comma-separated list. */
+  /** The source's index lists, each a comma-separated list that may hold exclusions. */
   getIndices: () => Promise<string[]>;
   /** Patterns the source's search finds no rows in, left out of the check. */
   ignoredPatterns?: string[];
   logger: Logger;
 }): Promise<boolean> => {
   try {
-    const patterns = splitPatterns(await getIndices(), ignoredPatterns);
-    if (patterns.length === 0) {
+    const expressions = toExpressions(await getIndices(), ignoredPatterns);
+    if (expressions.length === 0) {
       return false;
     }
 
     // `hasPrivileges` compares patterns with the role's patterns, so it gets the concrete names:
     // a role on `traces-*.otel-production` reads every existing `traces-*.otel-*` index when
     // only production ones exist.
-    const {
-      indices: matchedIndices,
-      aliases,
-      data_streams: dataStreams,
-    } = await internalEsClient.indices.resolveIndex({
-      name: patterns.map(excludeAgentBuilderOtelIndices).join(','),
-      expand_wildcards: 'open',
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    });
-    const names = [...matchedIndices, ...aliases, ...dataStreams].map(({ name }) => name);
+    const resolved = await Promise.all(
+      expressions.map((name) =>
+        internalEsClient.indices.resolveIndex({
+          name,
+          expand_wildcards: 'open',
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        })
+      )
+    );
+    const names = [
+      ...new Set(
+        resolved
+          .flatMap(({ indices, aliases, data_streams: dataStreams }) => [
+            ...indices,
+            ...aliases,
+            ...dataStreams,
+          ])
+          .map(({ name }) => name)
+          .filter((name) => !isNonLocalIndexName(name))
+      ),
+    ];
     if (names.length === 0) {
       return false;
     }
