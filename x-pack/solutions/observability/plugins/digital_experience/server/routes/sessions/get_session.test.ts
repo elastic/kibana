@@ -242,8 +242,17 @@ describe('getSession', () => {
             filter: [
               { term: { [SOURCE_SESSION_ID_FIELD]: 'abc' } },
               { term: { [SOURCE_SERVICE_NAME_FIELD]: 'web' } },
-              // Browser events only, so a backend sharing the service name stays out.
-              { term: { [TELEMETRY_SDK_LANGUAGE]: BROWSER_SDK_LANGUAGE } },
+              // No other SDK's events, so a backend sharing the service name stays out, while
+              // events that name no SDK are kept.
+              {
+                bool: {
+                  should: [
+                    { term: { [TELEMETRY_SDK_LANGUAGE]: BROWSER_SDK_LANGUAGE } },
+                    { bool: { must_not: { exists: { field: TELEMETRY_SDK_LANGUAGE } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
               // From just before the summary starts to the longest a session lasts, so events
               // newer than the summary still show.
               {

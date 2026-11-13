@@ -13,6 +13,7 @@ import {
   TELEMETRY_SDK_LANGUAGE,
   URL_FULL,
 } from '@kbn/apm-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { dateRangeQuery, termQuery } from '@kbn/es-query';
 import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vitals';
@@ -47,6 +48,17 @@ import { toSessionSummary, type StoredSessionDocument } from './list_sessions';
 
 /** Max raw events loaded for the session timeline. */
 export const SESSION_TIMELINE_SIZE = 1000;
+
+/** Events of the browser SDK, or of none: every other SDK names itself and is left out. */
+export const NOT_ANOTHER_SDK: QueryDslQueryContainer = {
+  bool: {
+    should: [
+      ...termQuery(TELEMETRY_SDK_LANGUAGE, BROWSER_SDK_LANGUAGE),
+      { bool: { must_not: { exists: { field: TELEMETRY_SDK_LANGUAGE } } } },
+    ],
+    minimum_should_match: 1,
+  },
+};
 /** Widens the raw event window so events just before the summary start are not cut off. */
 const TIMELINE_SLACK_MS = 60_000;
 const MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
@@ -329,9 +341,11 @@ export const getSession = async (
         filter: [
           ...termQuery(SOURCE_SESSION_ID_FIELD, sessionId),
           ...termQuery(SOURCE_SERVICE_NAME_FIELD, serviceName),
-          // Browser SDKs only, as the summary counts: a backend sharing the service name and
-          // passing the session id along would otherwise appear in the timeline.
-          ...termQuery(TELEMETRY_SDK_LANGUAGE, BROWSER_SDK_LANGUAGE),
+          // No other SDK's events: a backend sharing the service name and passing the session id
+          // along would otherwise appear in the timeline. Events that name no SDK are kept, as
+          // requiring the browser's would empty the whole timeline wherever the attribute is
+          // dropped on the way in, rather than leave out the few events that aren't the browser's.
+          NOT_ANOTHER_SDK,
           ...timelineTimeRange(startMs),
         ],
       },
