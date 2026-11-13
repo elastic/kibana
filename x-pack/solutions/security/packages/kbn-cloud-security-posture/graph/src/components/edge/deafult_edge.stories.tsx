@@ -23,7 +23,7 @@ import { isEmpty, isEqual, pick, size, xorWith } from 'lodash';
 import type { Meta, StoryObj } from '@storybook/react';
 import { DefaultEdge } from '.';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import { LabelNode } from '../node';
+import { EventNode } from '../node';
 import type { EdgeViewModel } from '../types';
 import { SvgDefsMarker } from './markers';
 
@@ -53,7 +53,7 @@ const nodeTypes = {
       </div>
     );
   }),
-  label: LabelNode,
+  event: EventNode,
 };
 
 const edgeTypes = {
@@ -85,7 +85,7 @@ const Template = (args: EdgeViewModel) => {
       },
       {
         id: args.id,
-        type: 'label',
+        type: 'event',
         data: {
           ...edgeData,
           color: edgeData.color === 'subdued' ? 'primary' : edgeData.color,
@@ -105,9 +105,9 @@ const Template = (args: EdgeViewModel) => {
         data: {
           id: `source-${args.id}`,
           source: 'source',
-          sourceShape: 'custom',
+          sourceKind: 'custom',
           target: args.id,
-          targetShape: 'label',
+          targetKind: 'event',
           color: args.color,
           type: args.type,
         },
@@ -120,9 +120,9 @@ const Template = (args: EdgeViewModel) => {
         data: {
           id: `${args.id}-target`,
           source: args.id,
-          sourceShape: 'label',
+          sourceKind: 'event',
           target: 'target',
-          targetShape: 'custom',
+          targetKind: 'custom',
           color: args.color,
           type: args.type,
         },

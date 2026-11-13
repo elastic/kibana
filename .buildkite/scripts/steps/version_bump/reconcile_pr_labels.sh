@@ -4,7 +4,13 @@ set -euo pipefail
 
 echo --- Reconcile PR labels
 
-OLD_VERSION=$(buildkite-agent meta-data get "OLD_VERSION")
+# Derived from NEW_VERSION rather than the pre-bump package.json, which a re-run reads as already bumped.
+IFS=. read -r major minor patch <<< "$NEW_VERSION"
+if [[ ! "$patch" =~ ^[1-9][0-9]*$ ]]; then
+  echo "Cannot derive the shipped version from NEW_VERSION=${NEW_VERSION}: expected a patch version greater than 0" >&2
+  exit 1
+fi
+OLD_VERSION="${major}.${minor}.$((patch - 1))"
 
 echo "Reconciling labels from v${OLD_VERSION} to v${NEW_VERSION}"
 
