@@ -65,6 +65,10 @@ steps:
 
         Tool results also show how the systems the agent works in behave: what a page, form or record holds, which fields are mandatory, read-only or filled in by default and with what, and what an action changes beyond what it was for. When the INSTRUCTIONS or the types call for it, record what holds beyond the task at hand. When many pages, forms or records share a layout or a behavior, such as the page of every item in a catalog, record it once, for that kind of page, apart from what one of them holds.
 
+        Keep lists whole. When a page, dialog, menu or dropdown shows options, columns, checkboxes, buttons, links, tabs or stages, record every one, in the order shown, with which is selected, checked or the default, rather than a few examples ("such as", "including", "and others"). Counts are knowledge too: how many icons are beside a field, how many results a page shows, how many stages remain.
+
+        A batch of tool results can hold hundreds of such items: write each of them, rather than a summary of the page.
+
         A round too long for one batch comes in parts, each with the round's id and a header saying which part it is and how the round began. Read a part as the continuation of that round, and cite the round's id.
 
         Record every piece of knowledge in the ROUNDS that a configured type covers, the small ones too, not only the main topic of a conversation: a later question can be about any of them.
