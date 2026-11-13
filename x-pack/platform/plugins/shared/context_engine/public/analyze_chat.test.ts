@@ -11,7 +11,6 @@ import { buildAnalyzeChat } from './analyze_chat';
 const aiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-index',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ds-my-index' },
   sources: [{ type: 'esql', value: 'FROM logs' }],
   automations: [

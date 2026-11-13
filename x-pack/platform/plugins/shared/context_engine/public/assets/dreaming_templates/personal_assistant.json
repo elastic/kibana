@@ -1,0 +1,109 @@
+{
+  "summary": "Personal assistant. Users save conversations, notes, and daily context. The assistant uses what it learns to help each person with their plans, routines and the people in their life.",
+  "rationale": "A personal assistant serves one person at a time, so memories are grouped by user and each user's are consolidated on their own. The ontology centers on the user and the people, places and organizations around them, so the assistant can pick up where it left off: who someone works for, where they live, what they prefer.",
+  "dreaming": {
+    "instructions": "Record what the user states or confirms about their own life: what they prefer, their routines, the people in it, their plans, what has happened to them, what they own, the numbers they track, the projects they work on and their role in each, and what they are learning. Keep exact names, models, dates, days, places, counts and amounts. Record each person the user mentions as an entity linked to the user.\n\nMost of it comes up in passing, while the user asks for something else, such as \"a screen protector for my iPhone 13 Pro\" or \"I've worn them four times already\": record it as you would if the user had said it on purpose.\n\nAlso record what the assistant told or made for the user that they may ask about again: a recommendation by name, a list of options, a schedule or table, a ratio or an amount, with its specifics. For something built over several rounds, such as a shift schedule, record its final version, with the details a question could be about, such as who has which shift on which day.\n\nWhen a number the user tracks changes, such as a count, a measurement or a goal, keep the earlier value with its date next to the new one.\n\nSkip:\n- Generic advice without specifics the user could ask about again.\n- Pleasantries and small talk without factual content.\n- Scheduling details already recorded. Update the existing fact instead of repeating it.",
+    "facts": [
+      {
+        "type": "preference",
+        "description": "Something the user likes, dislikes, needs or must avoid, such as \"prefers morning meetings\" or \"allergic to peanuts\"."
+      },
+      {
+        "type": "routine",
+        "description": "Something the user does regularly, with when, such as \"works out every Tuesday and Thursday\"."
+      },
+      {
+        "type": "plan",
+        "description": "Something the user intends to do, with when, such as \"planning a trip to Japan in March\"."
+      },
+      {
+        "type": "life_event",
+        "description": "A change in the user's life, with when it happened, such as \"moved to Austin last month\" or \"started a new job\"."
+      },
+      {
+        "type": "possession",
+        "description": "Something the user owns, uses or collects, with its make, model or details, such as \"has an iPhone 13 Pro\" or \"collects pre-1920 American coins\"."
+      },
+      {
+        "type": "tracked_value",
+        "description": "A number about the user that changes over time, such as a count, an amount, a measurement or a goal, with when it held and the earlier values, such as \"has worn their black Converse 6 times as of May 30, 2023 (4 times before)\"."
+      },
+      {
+        "type": "task",
+        "description": "Something the user still has to do soon, such as an errand, a return or a pickup, such as \"needs to pick up the boots exchanged at Zara\"."
+      },
+      {
+        "type": "assistant_note",
+        "description": "Something the assistant told or made for the user that they may ask about again, with its specifics, such as \"the assistant suggested diluting tea tree oil 1:10 with a carrier oil\" or \"in the assistant's shift schedule for the GM social media agents, Admon works 8 am to 4 pm on Sunday\"."
+      },
+      {
+        "type": "learning_goal",
+        "description": "What the user is learning or wants to get better at, and how far along they are, such as \"learning the advanced settings of Adobe Premiere Pro\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "user",
+          "description": "The person whose assistant this is. One per user.",
+          "attributes": [
+            "name",
+            "location",
+            "occupation"
+          ]
+        },
+        {
+          "type": "person",
+          "description": "Someone in the user's life, by name.",
+          "attributes": [
+            "role"
+          ]
+        },
+        {
+          "type": "place",
+          "description": "A city, country or venue the user lives in, visits or plans to visit.",
+          "attributes": [
+            "kind"
+          ]
+        },
+        {
+          "type": "organization",
+          "description": "An employer, school, club or other group the user belongs to.",
+          "attributes": [
+            "kind"
+          ]
+        },
+        {
+          "type": "project",
+          "description": "Something the user works on, at work, school or home, such as a class project, a work project or a renovation.",
+          "attributes": [
+            "role",
+            "status"
+          ]
+        }
+      ]
+    },
+    "relationships": [
+      {
+        "type": "knows",
+        "description": "The user knows a person, and how, such as their manager or sister."
+      },
+      {
+        "type": "lives_in",
+        "description": "A person lives in a place."
+      },
+      {
+        "type": "member_of",
+        "description": "A person works for or belongs to an organization."
+      },
+      {
+        "type": "plans_to_visit",
+        "description": "A person plans to visit a place."
+      },
+      {
+        "type": "works_on",
+        "description": "A person works on a project, in the role the project's role attribute names, such as leading it."
+      }
+    ]
+  }
+}
