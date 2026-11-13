@@ -239,6 +239,31 @@ describe('EventsTab', () => {
     ]);
   });
 
+  it('writes status=all when the last selected status is cleared', async () => {
+    const history = renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsStatusFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-active')
+    );
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: ['recovering'] })
+      )
+    );
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-recovering')
+    );
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: [] })
+      )
+    );
+    // The sentinel is what keeps an empty selection from restoring the default.
+    expect(new URLSearchParams(history.location.search).getAll('status')).toEqual(['all']);
+  });
+
   it('treats status=all as no status filter', () => {
     renderTab('/detections/events?status=all');
 
