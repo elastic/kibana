@@ -20,6 +20,7 @@ import {
   evalGuard,
   INVESTIGATION_ID,
   renderReport,
+  renderValue,
   stepNamed,
   stepsOf,
   topLevelSteps,
@@ -714,22 +715,71 @@ describe('Rule Coverage outcome reports', () => {
     const steps = topLevelSteps(ALERTZERO_COVERAGE_WORKER_WORKFLOW.yaml);
     const report = stepNamed(steps, 'report_worker_run_completed');
 
-    describeReportStep(steps, 'report_worker_run_completed', 'worker_run_completed', 'emit_result');
+    describeReportStep(
+      steps,
+      'report_worker_run_completed',
+      'worker_run_completed',
+      'emit_search_failure'
+    );
+
+    // A failed dependency check ends the run before `report_worker_run_completed`, so the
+    // blocked run is reported on its own, right before the run fails.
+    describeReportStep(
+      steps,
+      'report_worker_blocked',
+      'worker_run_completed',
+      'fail_context_engine_unavailable'
+    );
+
+    it.each([
+      [
+        'Context Engine is unavailable',
+        { check_context_engine: { error: { message: 'HTTP 404' } } },
+        true,
+      ],
+      ['AlertZero is unavailable', { check_alertzero: { error: { message: 'HTTP 503' } } }, true],
+      [
+        'both checks pass',
+        { check_context_engine: { output: {} }, check_alertzero: { output: {} } },
+        false,
+      ],
+    ])('reports a blocked run when %s: %s', (_case, checks, reported) => {
+      expect(evalGuard(stepNamed(steps, 'report_worker_blocked'), { steps: checks })).toBe(
+        reported
+      );
+    });
 
     const MAX_OPEN_CHECKS = 100;
     const BATCH_SIZE = 5;
+
+    // The search step as it looks after a run: its error, or its hits. The sweep's own
+    // `resolve_search_unreadable` expression turns an error into the `unreadable` flag.
+    const searchSteps = (pending: number, searchError?: string): Record<string, unknown> => {
+      const search = searchError
+        ? { error: { message: searchError } }
+        : { output: { hits: { hits: [], total: { value: pending } } } };
+      const unreadable = renderValue(
+        stepNamed(steps, 'resolve_search_unreadable').with?.unreadable,
+        { steps: { search_pending_indicators: search } }
+      );
+
+      return {
+        search_pending_indicators: search,
+        resolve_search_unreadable: { output: { unreadable } },
+      };
+    };
 
     const sweepContext = ({
       inFlight = 0,
       lookupFailed = false,
       pending = 0,
-      searchFailed = false,
+      searchError,
       started = 0,
     }: {
       inFlight?: number;
       lookupFailed?: boolean;
       pending?: number;
-      searchFailed?: boolean;
+      searchError?: string;
       started?: number;
     }): Record<string, unknown> => ({
       consts: { no_rows: [] },
@@ -745,9 +795,7 @@ describe('Rule Coverage outcome reports', () => {
           },
         },
         resolve_free_slots: { output: { free: Math.max(MAX_OPEN_CHECKS - inFlight, 0) } },
-        search_pending_indicators: searchFailed
-          ? { error: { message: 'index_not_found_exception' } }
-          : { output: { hits: { hits: [], total: { value: pending } } } },
+        ...searchSteps(pending, searchError),
       },
     });
 
@@ -819,8 +867,34 @@ describe('Rule Coverage outcome reports', () => {
         },
       ],
       [
+        'a missing gaps index, as an empty queue',
+        { searchError: 'index_not_found_exception' },
+        {
+          candidates_found: 0,
+          degraded_reason: 'none',
+          items_dispatched: 0,
+          items_in_flight: '0',
+          lookup_failed: false,
+          run_outcome: 'empty_nothing_pending',
+          source_read_failed: false,
+        },
+      ],
+      [
+        'a closed gaps index, as a failed search',
+        { searchError: 'index_closed_exception' },
+        {
+          candidates_found: 0,
+          degraded_reason: 'dependency_unavailable',
+          items_dispatched: 0,
+          items_in_flight: '0',
+          lookup_failed: false,
+          run_outcome: 'failed_source_unavailable',
+          source_read_failed: true,
+        },
+      ],
+      [
         'a failed search',
-        { searchFailed: true },
+        { searchError: 'search_phase_execution_exception' },
         {
           candidates_found: 0,
           degraded_reason: 'dependency_unavailable',
@@ -1123,7 +1197,7 @@ describe('Rule Tuning and Rule Coverage managed versions', () => {
   it.each([
     [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 34],
     [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 36],
-    [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 6],
+    [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 7],
     [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 8],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
