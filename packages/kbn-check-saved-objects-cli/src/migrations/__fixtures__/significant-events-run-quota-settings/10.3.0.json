@@ -15,8 +15,8 @@
       "limits": {
         "detection": 0,
         "investigation": 30,
-        "manual_investigation": 0,
-        "total_investigation": 0,
+        "manual_investigation": 7,
+        "total_investigation": 12,
         "ki_extraction": 0
       }
     }
@@ -37,8 +37,8 @@
       "limits": {
         "detection": 0,
         "investigation": 30,
-        "manual_investigation": -1,
-        "total_investigation": -1,
+        "manual_investigation": 7,
+        "total_investigation": 12,
         "ki_extraction": 0
       }
     }
