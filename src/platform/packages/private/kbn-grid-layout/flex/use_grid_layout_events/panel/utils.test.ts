@@ -8,7 +8,9 @@
  */
 
 import { KeyboardCode } from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
-import { getKeyboardDragPosition } from './utils';
+import type { FlexLayoutStateManager } from '../../types';
+import type { ActivePanelEvent } from '../../grid_panel/types';
+import { getKeyboardDragPosition, getNextKeyboardResizePosition } from './utils';
 
 // a: [0-200] b: [250-450] c: [500-700]   (row 0)
 // d: [0-200] e: [250-450]                (row 1)
@@ -57,5 +59,36 @@ describe('getKeyboardDragTargetIndex', () => {
   it('stays put when there is no row in that direction', () => {
     expect(getTarget(KeyboardCode.Up, 'b')).toBe(1);
     expect(getTarget(KeyboardCode.Down, 'e')).toBe(4);
+  });
+});
+
+describe('getNextKeyboardResizePosition', () => {
+  const stateManager = {
+    gridSettings$: { value: { rowHeight: 100, gutterSize: 10 } },
+    layoutRef: { current: { getBoundingClientRect: () => ({ left: 0, width: 1000 }) } },
+  } as unknown as FlexLayoutStateManager;
+  const activePanel = {
+    position: { left: 0, right: 300 },
+    sensorOffsets: { right: 0 },
+  } as unknown as ActivePanelEvent;
+  // the live handle has wrapped onto another row, so its X differs from the stored origin
+  const handlePosition = { clientX: 50, clientY: 400 };
+
+  const getPosition = (code: string) =>
+    getNextKeyboardResizePosition(
+      { code } as Parameters<typeof getNextKeyboardResizePosition>[0],
+      stateManager,
+      activePanel,
+      handlePosition
+    );
+
+  it('ignores Up/Down by keeping the requested edge instead of the live handle position', () => {
+    expect(getPosition(KeyboardCode.Up).clientX).toBe(300);
+    expect(getPosition(KeyboardCode.Down).clientX).toBe(300);
+  });
+
+  it('steps left and right from the requested edge', () => {
+    expect(getPosition(KeyboardCode.Right).clientX).toBe(410);
+    expect(getPosition(KeyboardCode.Left).clientX).toBe(190);
   });
 });

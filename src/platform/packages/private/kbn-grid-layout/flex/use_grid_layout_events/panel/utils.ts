@@ -211,6 +211,6 @@ export const getNextKeyboardResizePosition = (
     case KeyboardCode.Left:
       return { ...handlePosition, clientX: Math.max(currentX - stepX, gridLeft) };
     default:
-      return handlePosition;
+      return { ...handlePosition, clientX: currentX };
   }
 };
