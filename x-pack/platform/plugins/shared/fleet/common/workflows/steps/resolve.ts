@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { StepCategory } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { z, lazySchema } from '@kbn/zod/v4';
+
+export const AwsOnboardingResolveStepTypeId = 'fleet.awsOnboardingResolve';
+
+export const awsOnboardingResolveInputSchema = lazySchema(() =>
+  z.object({
+    services: z.array(z.string()),
+    region: z.string(),
+    namespace: z.string().optional(),
+    account_id: z.string().optional(),
+  })
+);
+
+const policyBodySchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    namespace: z.string(),
+    package: z.object({ name: z.literal('aws'), version: z.string() }),
+    inputs: z.record(z.string(), z.unknown()),
+    vars: z.record(z.string(), z.unknown()).optional(),
+  })
+);
+
+export const awsOnboardingResolveOutputSchema = lazySchema(() =>
+  z.object({
+    package_name: z.literal('aws'),
+    package_version: z.string(),
+    integrations: z.array(
+      z.object({
+        name: z.string(),
+        policyTemplates: z.array(
+          z.object({ name: z.string(), enabledInputs: z.array(z.string()) })
+        ),
+      })
+    ),
+    policies: z.array(
+      z.object({
+        service: z.string(),
+        name: z.string(),
+        body: policyBodySchema,
+      })
+    ),
+    index_patterns: z.array(z.string()),
+    suggested_identity_name: z.string(),
+  })
+);
+
+export type AwsOnboardingResolveInput = z.infer<typeof awsOnboardingResolveInputSchema>;
+export type AwsOnboardingResolveOutput = z.infer<typeof awsOnboardingResolveOutputSchema>;
+
+export const awsOnboardingResolveCommonDefinition: CommonStepDefinition<
+  typeof awsOnboardingResolveInputSchema,
+  typeof awsOnboardingResolveOutputSchema
+> = {
+  id: AwsOnboardingResolveStepTypeId,
+  label: i18n.translate('xpack.fleet.workflows.steps.awsOnboardingResolve.label', {
+    defaultMessage: 'Resolve AWS onboarding plan',
+  }),
+  description: i18n.translate('xpack.fleet.workflows.steps.awsOnboardingResolve.description', {
+    defaultMessage:
+      'Turn the chosen AWS services into the integrations, agentless policy bodies and index patterns needed to onboard them.',
+  }),
+  category: StepCategory.Kibana,
+  inputSchema: awsOnboardingResolveInputSchema,
+  outputSchema: awsOnboardingResolveOutputSchema,
+};

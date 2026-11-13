@@ -108,6 +108,7 @@ import {
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
+import { registerAwsOnboardingSteps } from './workflows/steps';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
@@ -721,6 +722,9 @@ export class FleetPlugin
 
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     registerRoutes(fleetAuthzRouter, config, isServerless, router);
+    if (deps.workflowsExtensions) {
+      registerAwsOnboardingSteps(deps.workflowsExtensions);
+    }
 
     this.telemetryEventsSender.setup(deps.telemetry);
     // Register tasks
