@@ -19,7 +19,10 @@ export interface WorkflowPageDto {
   access: WorkflowPageAccess | null;
   /** The page switch. A disabled page is offline while its workflow keeps running. */
   enabled: boolean;
-  /** True when the public route serves the page. */
+  /**
+   * True when the page itself allows serving: enabled, with an access level and an encryption
+   * key. The public route also needs the workflow to be enabled, valid, and bound.
+   */
   online: boolean;
   createdAt?: string;
   createdBy?: string;
