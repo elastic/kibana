@@ -39,6 +39,7 @@ import {
   registerRoutes as registerIacProvisionerRoutes,
   registerPublicRoutes as registerIacProvisionerPublicRoutes,
 } from './iac_provisioner';
+import { registerRoutes as registerAwsOnboardingRoutes } from './aws_onboarding';
 
 export function registerRoutes(
   fleetAuthzRouter: FleetAuthzRouter,
@@ -80,6 +81,7 @@ export function registerRoutes(
   if (router) {
     registerIacProvisionerPublicRoutes(router);
   }
+  registerAwsOnboardingRoutes(fleetAuthzRouter);
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 
   // Conditional config routes

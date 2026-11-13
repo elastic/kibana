@@ -16,6 +16,7 @@ import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
   PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+  AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -159,6 +160,18 @@ import { bumpProfilingSymbolizerPolicy } from './model_versions/bump_profiling_s
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
+
+const AwsOnboardingCredentialsSchemaV1 = schema.object({
+  accessKeyId: schema.string(),
+  secretAccessKey: schema.string(),
+  region: schema.string(),
+  stackNamePrefix: schema.string(),
+  bootstrapStackArn: schema.maybe(schema.string()),
+  discoveryRoleArn: schema.maybe(schema.string()),
+  provisioningRoleArn: schema.maybe(schema.string()),
+  createdAt: schema.string(),
+  updatedAt: schema.string(),
+});
 
 export const getSavedObjectTypes = (
   options = { useSpaceAwareness: false }
@@ -2005,6 +2018,33 @@ export const getSavedObjectTypes = (
         properties: {},
       },
     },
+    // POC: bootstrap AWS identity for Kibana-managed onboarding; secret attribute encrypted (see registerEncryptedSavedObjects)
+    [AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE]: {
+      name: AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: true,
+      namespaceType: 'agnostic',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {},
+      },
+      modelVersions: {
+        '1': {
+          changes: [],
+          schemas: {
+            // Nothing is mapped; the secret is encrypted at rest and the rest is only read back by Fleet.
+            forwardCompatibility: AwsOnboardingCredentialsSchemaV1.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: AwsOnboardingCredentialsSchemaV1,
+          },
+        },
+      },
+    },
     [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: {
       name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
@@ -2397,6 +2437,13 @@ export function registerEncryptedSavedObjects(
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
     attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
+  });
+  encryptedSavedObjects.registerType({
+    type: AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['secretAccessKey']),
+    attributesToIncludeInAAD: new Set(['createdAt']),
+    // single well-known document id
+    enforceRandomId: false,
   });
   encryptedSavedObjects.registerType({
     type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,

@@ -2158,6 +2158,11 @@
         "@smithy/util-utf8",
         "@aws-sdk/client-bedrock-agent-runtime",
         "@aws-sdk/client-bedrock-runtime",
+        "@aws-sdk/client-cloudformation",
+        "@aws-sdk/client-cloudtrail",
+        "@aws-sdk/client-cost-explorer",
+        "@aws-sdk/client-guardduty",
+        "@aws-sdk/client-sts",
         "@aws-sdk/client-kendra",
         "@aws-sdk/credential-provider-node",
         "google-auth-library"

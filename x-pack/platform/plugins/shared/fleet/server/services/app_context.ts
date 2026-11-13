@@ -52,6 +52,7 @@ import { KibanaSavedObjectType } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
+import { AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MessageSigningServiceInterface } from '..';
 import type { FleetUsage } from '../collectors/register';
 
@@ -90,6 +91,7 @@ class AppContextService {
   private alertingStart: AlertingServerStart | undefined;
   private includedHiddenTypes: string[] = [
     UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE,
     KibanaSavedObjectType.alertingRuleTemplate,
     KibanaSavedObjectType.sloTemplate,
   ];

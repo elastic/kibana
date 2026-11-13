@@ -25,3 +25,6 @@ export const ENABLE_OTLP_OUTPUT_FLAG = 'fleet.enableOtlpOutput';
  * agent policy, so version-specific policy code paths are exercised by default. Fallback is false.
  */
 export const ENABLE_SENTINEL_POLICY_VERSION_FLAG = 'fleet.enableSentinelPolicyVersion';
+
+/** LaunchDarkly flag that gates the POC where Kibana creates Federated Identity stacks itself via the AWS SDK. Fallback is false. */
+export const AWS_MANAGED_ONBOARDING_FLAG = 'fleet.awsManagedOnboarding';

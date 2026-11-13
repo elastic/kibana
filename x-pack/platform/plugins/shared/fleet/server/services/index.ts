@@ -76,6 +76,8 @@ export { provisioningCallbackService } from './provisioning_callback';
 export type { ProvisioningCallbackReceiveResult } from './provisioning_callback';
 export type { IacProvisionerService } from './iac_provisioner';
 
+export { awsOnboardingCredentialsService, awsOnboardingStackService } from './aws_onboarding';
+
 export * from './cloud_connectors';
 
 export type { MessageSigningServiceInterface } from './security';

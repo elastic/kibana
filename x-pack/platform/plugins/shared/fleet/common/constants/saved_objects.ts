@@ -20,3 +20,5 @@ export const PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE = 'fleet-provisioning-callb
  * name could be cut and two policies of one deploy could end up with the same name.
  */
 export const CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH = 160;
+
+export const AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE = 'fleet-aws-onboarding-credentials';
