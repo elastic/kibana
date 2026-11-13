@@ -232,7 +232,8 @@ export interface SessionTimelineEvent {
 }
 
 export interface SessionPageVisit {
-  page: string;
+  /** `null` when the page view carried no URL, so the page it was on is unknown. */
+  page: string | null;
   url: string | null;
   startTime: string;
   endTime: string;

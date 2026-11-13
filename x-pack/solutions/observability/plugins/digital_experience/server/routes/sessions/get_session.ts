@@ -237,6 +237,18 @@ export const buildPageVisits = (
     }
   };
 
+  /**
+   * The visit a web vital belongs to: the open one, unless the vital names a page of its own that
+   * the visit before it was on. EDOT Browser settles LCP and INP when the page is left, so they
+   * arrive after the next page view, with the URL they were measured on.
+   */
+  const visitOf = (page: string | null): SessionPageVisit | undefined => {
+    if (!page || current?.page === page) {
+      return current;
+    }
+    return [...visits].reverse().find((visit) => visit.page === page) ?? current;
+  };
+
   for (const event of events) {
     const timelineEvent = toTimelineEvent(event, sessionStartMs);
     if (!timelineEvent) {
@@ -246,9 +258,11 @@ export const buildPageVisits = (
     const { page, kind } = timelineEvent;
     // Every page view opens a visit, so loading the same URL again is a visit of its own with its
     // own web vitals rather than being folded into the one before it, whose values it would
-    // overwrite. It also keeps the visits and the summary's `page_view_count` in step. Any other
-    // event only opens one when there is none, to place the events before the first page view.
-    if (page && (kind === 'page_view' || !current)) {
+    // overwrite. It also keeps the visits and the summary's `page_view_count` in step, which is
+    // why a page view with no URL opens one too, rather than leaving its events on the page
+    // before it. Any other event only opens one when there is none, to place the events before
+    // the first page view.
+    if (kind === 'page_view' || (page && !current)) {
       close(timelineEvent.timestamp);
       current = {
         page,
@@ -273,7 +287,10 @@ export const buildPageVisits = (
     const vital = webVitalOf(event);
     if (vital) {
       // EDOT Browser reports a final value per page; keep the latest one.
-      current.webVitals[vital.name] = vital.value;
+      const visit = visitOf(page);
+      if (visit) {
+        visit.webVitals[vital.name] = vital.value;
+      }
     }
   }
   // Raw events can be newer than the summary, which is as fresh as the task's last run.

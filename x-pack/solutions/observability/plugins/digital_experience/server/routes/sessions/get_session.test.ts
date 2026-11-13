@@ -189,6 +189,63 @@ describe('buildPageVisits', () => {
       },
     ]);
   });
+
+  it('keeps a web vital on the page it names, though it arrives after the next page view', () => {
+    const visits = buildPageVisits(
+      [
+        {
+          '@timestamp': [at(0)],
+          event_name: ['browser.navigation'],
+          'attributes.url.full': ['https://shop.example.com/products'],
+        },
+        {
+          '@timestamp': [at(5_000)],
+          event_name: ['browser.navigation'],
+          'attributes.url.full': ['https://shop.example.com/cart'],
+        },
+        // EDOT Browser settles LCP when the page is left, so it lands after the next page view.
+        {
+          '@timestamp': [at(5_100)],
+          event_name: ['browser.web_vital'],
+          'attributes.browser.web_vital.name': ['lcp'],
+          'attributes.browser.web_vital.value': [1900],
+          'attributes.url.full': ['https://shop.example.com/products'],
+        },
+      ],
+      startMs,
+      at(10_000)
+    );
+
+    expect(visits.map(({ page, webVitals }) => [page, webVitals.lcp])).toEqual([
+      ['/products', 1900],
+      ['/cart', null],
+    ]);
+  });
+
+  it('opens a visit for a page view with no URL, rather than leaving its events on the page before', () => {
+    const visits = buildPageVisits(
+      [
+        {
+          '@timestamp': [at(0)],
+          event_name: ['browser.navigation'],
+          'attributes.url.full': ['https://shop.example.com/'],
+        },
+        { '@timestamp': [at(2_000)], event_name: ['browser.navigation'] },
+        {
+          '@timestamp': [at(3_000)],
+          event_name: ['browser.user_action.click'],
+          'attributes.browser.css_selector': ['button.buy'],
+        },
+      ],
+      startMs,
+      at(5_000)
+    );
+
+    expect(visits.map(({ page, clickCount }) => [page, clickCount])).toEqual([
+      ['/', 0],
+      [null, 1],
+    ]);
+  });
 });
 
 describe('getSession', () => {

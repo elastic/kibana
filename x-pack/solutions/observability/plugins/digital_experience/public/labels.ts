@@ -81,3 +81,9 @@ export const ANONYMOUS_USER = i18n.translate(
   'xpack.digitalExperience.sessions.table.anonymousUserLabel',
   { defaultMessage: 'Anonymous' }
 );
+
+/** A page visit whose page view carried no URL, so there is no page to name. */
+export const UNKNOWN_PAGE = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.unknownPageLabel',
+  { defaultMessage: 'Unknown page' }
+);
