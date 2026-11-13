@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core/server';
 import { createHooksExecutionError, createRequestAbortedError } from '@kbn/agent-builder-common';
 import { withTimeout } from '@kbn/std';
 import type {
@@ -57,6 +58,15 @@ export interface CreateHooksRunnerDeps {
   getHooksForLifecycle: (lifecycle: HookLifecycle) => Array<HookRegistration<HookLifecycle>>;
   /** Returns the cycle hook definitions in registration order. */
   getCycleHooks: () => CycleHookDefinition[];
+  /**
+   * Runs `fn` with a request authenticated as the service account the agent is bound to. The
+   * credential lasts until `fn` settles. Without it, a non-blocking hook keeps the execution's own
+   * request, which can no longer authenticate once the execution has returned.
+   */
+  withAgentServiceAccountRequest?: <T>(
+    params: { agentId: string; runAs: string; request: KibanaRequest },
+    fn: (request: KibanaRequest) => Promise<T>
+  ) => Promise<T>;
 }
 
 function getRelevantHooks<E extends HookLifecycle>(
@@ -76,7 +86,7 @@ function getRelevantHooks<E extends HookLifecycle>(
  * It runs blocking hooks first, then non-blocking hooks.
  */
 export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStart {
-  const { logger, getHooksForLifecycle, getCycleHooks } = deps;
+  const { logger, getHooksForLifecycle, getCycleHooks, withAgentServiceAccountRequest } = deps;
   const getRelevant = <E extends HookLifecycle>(
     lifecycle: E,
     mode: HookExecutionMode,
@@ -124,12 +134,34 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
     return currentContext;
   };
 
+  /**
+   * A non-blocking hook runs after the execution has returned, so the execution's request may no
+   * longer authenticate. When the execution ran as a bound service account, the hook gets a request
+   * for that account instead, valid until the hook settles.
+   */
+  const runWithOwnRequest = <E extends HookLifecycle, R>(
+    context: HookContext<E>,
+    run: (context: HookContext<E>) => R | Promise<R>
+  ): Promise<R> => {
+    const { agentId, runAs, request } = context as {
+      agentId?: string;
+      runAs?: string;
+      request?: KibanaRequest;
+    };
+    if (!withAgentServiceAccountRequest || !agentId || !runAs || !request) {
+      return Promise.resolve(run(context));
+    }
+    return withAgentServiceAccountRequest({ agentId, runAs, request }, async (scopedRequest) =>
+      run({ ...context, request: scopedRequest })
+    );
+  };
+
   const runNonBlocking = <E extends HookLifecycle>(lifecycle: E, context: HookContext<E>): void => {
     const hooks = getRelevant(lifecycle, HookExecutionMode.nonBlocking, context);
     for (const hook of hooks) {
       // Fire-and-forget. Must never throw to the caller.
       Promise.resolve()
-        .then(() => hook.handler(context))
+        .then(() => runWithOwnRequest(context, (ctx) => hook.handler(ctx)))
         .catch((err) => {
           const normalized = normalizeHookError(lifecycle, hook, err);
           logger.error(`Non-blocking hook "${hook.id}" failed: ${normalized.message}`);
