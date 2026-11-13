@@ -1,0 +1,2357 @@
+{
+  "components": {
+    "schemas": {
+      "Alias": {
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "Type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnnotationValue": {
+        "oneOf": [
+          {
+            "properties": {
+              "NumberValue": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "required": [
+              "NumberValue"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "BooleanValue": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "BooleanValue"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "StringValue": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "StringValue"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "AnomalousService": {
+        "properties": {
+          "ServiceId": {
+            "$ref": "#/components/schemas/ServiceId"
+          }
+        },
+        "type": "object"
+      },
+      "AvailabilityZoneDetail": {
+        "properties": {
+          "Name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BatchGetTracesRequestContent": {
+        "properties": {
+          "NextToken": {
+            "type": "string"
+          },
+          "TraceIds": {
+            "items": {
+              "maxLength": 35,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "TraceIds"
+        ],
+        "type": "object"
+      },
+      "BatchGetTracesResponseContent": {
+        "properties": {
+          "NextToken": {
+            "type": "string"
+          },
+          "Traces": {
+            "items": {
+              "$ref": "#/components/schemas/Trace"
+            },
+            "type": "array"
+          },
+          "UnprocessedTraceIds": {
+            "items": {
+              "maxLength": 35,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Edge": {
+        "properties": {
+          "Aliases": {
+            "items": {
+              "$ref": "#/components/schemas/Alias"
+            },
+            "type": "array"
+          },
+          "EdgeType": {
+            "type": "string"
+          },
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ReceivedEventAgeHistogram": {
+            "items": {
+              "$ref": "#/components/schemas/HistogramEntry"
+            },
+            "type": "array"
+          },
+          "ReferenceId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ResponseTimeHistogram": {
+            "items": {
+              "$ref": "#/components/schemas/HistogramEntry"
+            },
+            "type": "array"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "SummaryStatistics": {
+            "$ref": "#/components/schemas/EdgeStatistics"
+          }
+        },
+        "type": "object"
+      },
+      "EdgeStatistics": {
+        "properties": {
+          "ErrorStatistics": {
+            "$ref": "#/components/schemas/ErrorStatistics"
+          },
+          "FaultStatistics": {
+            "$ref": "#/components/schemas/FaultStatistics"
+          },
+          "OkCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TotalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TotalResponseTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorRootCause": {
+        "properties": {
+          "ClientImpacting": {
+            "type": "boolean"
+          },
+          "Services": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorRootCauseService"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorRootCauseEntity": {
+        "properties": {
+          "Exceptions": {
+            "items": {
+              "$ref": "#/components/schemas/RootCauseException"
+            },
+            "type": "array"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Remote": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorRootCauseService": {
+        "properties": {
+          "AccountId": {
+            "type": "string"
+          },
+          "EntityPath": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorRootCauseEntity"
+            },
+            "type": "array"
+          },
+          "Inferred": {
+            "type": "boolean"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "Type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorStatistics": {
+        "properties": {
+          "OtherCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ThrottleCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TotalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FaultRootCause": {
+        "properties": {
+          "ClientImpacting": {
+            "type": "boolean"
+          },
+          "Services": {
+            "items": {
+              "$ref": "#/components/schemas/FaultRootCauseService"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FaultRootCauseEntity": {
+        "properties": {
+          "Exceptions": {
+            "items": {
+              "$ref": "#/components/schemas/RootCauseException"
+            },
+            "type": "array"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Remote": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "FaultRootCauseService": {
+        "properties": {
+          "AccountId": {
+            "type": "string"
+          },
+          "EntityPath": {
+            "items": {
+              "$ref": "#/components/schemas/FaultRootCauseEntity"
+            },
+            "type": "array"
+          },
+          "Inferred": {
+            "type": "boolean"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "Type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FaultStatistics": {
+        "properties": {
+          "OtherCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TotalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ForecastStatistics": {
+        "properties": {
+          "FaultCountHigh": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "FaultCountLow": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GetGroupsRequestContent": {
+        "properties": {
+          "NextToken": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetGroupsResponseContent": {
+        "properties": {
+          "Groups": {
+            "items": {
+              "$ref": "#/components/schemas/GroupSummary"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetInsightEventsRequestContent": {
+        "properties": {
+          "InsightId": {
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type": "string"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "InsightId"
+        ],
+        "type": "object"
+      },
+      "GetInsightEventsResponseContent": {
+        "properties": {
+          "InsightEvents": {
+            "items": {
+              "$ref": "#/components/schemas/InsightEvent"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetInsightImpactGraphRequestContent": {
+        "properties": {
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "InsightId": {
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type": "string"
+          },
+          "NextToken": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "InsightId",
+          "StartTime",
+          "EndTime"
+        ],
+        "type": "object"
+      },
+      "GetInsightImpactGraphResponseContent": {
+        "properties": {
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "InsightId": {
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type": "string"
+          },
+          "NextToken": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ServiceGraphEndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ServiceGraphStartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "Services": {
+            "items": {
+              "$ref": "#/components/schemas/InsightImpactGraphService"
+            },
+            "type": "array"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "GetInsightRequestContent": {
+        "properties": {
+          "InsightId": {
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "InsightId"
+        ],
+        "type": "object"
+      },
+      "GetInsightResponseContent": {
+        "properties": {
+          "Insight": {
+            "$ref": "#/components/schemas/Insight"
+          }
+        },
+        "type": "object"
+      },
+      "GetInsightSummariesRequestContent": {
+        "properties": {
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "GroupARN": {
+            "maxLength": 400,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GroupName": {
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "States": {
+            "items": {
+              "$ref": "#/components/schemas/InsightState"
+            },
+            "maxItems": 1,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "StartTime",
+          "EndTime"
+        ],
+        "type": "object"
+      },
+      "GetInsightSummariesResponseContent": {
+        "properties": {
+          "InsightSummaries": {
+            "items": {
+              "$ref": "#/components/schemas/InsightSummary"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetRetrievedTracesGraphRequestContent": {
+        "properties": {
+          "NextToken": {
+            "type": "string"
+          },
+          "RetrievalToken": {
+            "maxLength": 1020,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "RetrievalToken"
+        ],
+        "type": "object"
+      },
+      "GetRetrievedTracesGraphResponseContent": {
+        "properties": {
+          "NextToken": {
+            "type": "string"
+          },
+          "RetrievalStatus": {
+            "$ref": "#/components/schemas/RetrievalStatus"
+          },
+          "Services": {
+            "items": {
+              "$ref": "#/components/schemas/RetrievedService"
+            },
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GetSamplingRulesRequestContent": {
+        "properties": {
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetSamplingRulesResponseContent": {
+        "properties": {
+          "NextToken": {
+            "type": "string"
+          },
+          "SamplingRuleRecords": {
+            "items": {
+              "$ref": "#/components/schemas/SamplingRuleRecord"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GetServiceGraphRequestContent": {
+        "properties": {
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "GroupARN": {
+            "maxLength": 400,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GroupName": {
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "StartTime",
+          "EndTime"
+        ],
+        "type": "object"
+      },
+      "GetServiceGraphResponseContent": {
+        "properties": {
+          "ContainsOldGroupVersions": {
+            "default": false,
+            "type": "boolean"
+          },
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "Services": {
+            "items": {
+              "$ref": "#/components/schemas/Service"
+            },
+            "type": "array"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "GetTimeSeriesServiceStatisticsRequestContent": {
+        "properties": {
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "EntitySelectorExpression": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ForecastStatistics": {
+            "type": "boolean"
+          },
+          "GroupARN": {
+            "maxLength": 400,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GroupName": {
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "Period": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "StartTime",
+          "EndTime"
+        ],
+        "type": "object"
+      },
+      "GetTimeSeriesServiceStatisticsResponseContent": {
+        "properties": {
+          "ContainsOldGroupVersions": {
+            "default": false,
+            "type": "boolean"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "TimeSeriesServiceStatistics": {
+            "items": {
+              "$ref": "#/components/schemas/TimeSeriesServiceStatistics"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GetTraceGraphRequestContent": {
+        "properties": {
+          "NextToken": {
+            "type": "string"
+          },
+          "TraceIds": {
+            "items": {
+              "maxLength": 35,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "TraceIds"
+        ],
+        "type": "object"
+      },
+      "GetTraceGraphResponseContent": {
+        "properties": {
+          "NextToken": {
+            "type": "string"
+          },
+          "Services": {
+            "items": {
+              "$ref": "#/components/schemas/Service"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GetTraceSummariesRequestContent": {
+        "properties": {
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "FilterExpression": {
+            "type": "string"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "Sampling": {
+            "type": "boolean"
+          },
+          "SamplingStrategy": {
+            "$ref": "#/components/schemas/SamplingStrategy"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "TimeRangeType": {
+            "$ref": "#/components/schemas/TimeRangeType"
+          }
+        },
+        "required": [
+          "StartTime",
+          "EndTime"
+        ],
+        "type": "object"
+      },
+      "GetTraceSummariesResponseContent": {
+        "properties": {
+          "ApproximateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "TraceSummaries": {
+            "items": {
+              "$ref": "#/components/schemas/TraceSummary"
+            },
+            "type": "array"
+          },
+          "TracesProcessedCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GraphLink": {
+        "properties": {
+          "DestinationTraceIds": {
+            "items": {
+              "maxLength": 35,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ReferenceType": {
+            "type": "string"
+          },
+          "SourceTraceId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GroupSummary": {
+        "properties": {
+          "FilterExpression": {
+            "type": "string"
+          },
+          "GroupARN": {
+            "type": "string"
+          },
+          "GroupName": {
+            "type": "string"
+          },
+          "InsightsConfiguration": {
+            "$ref": "#/components/schemas/InsightsConfiguration"
+          }
+        },
+        "type": "object"
+      },
+      "HistogramEntry": {
+        "properties": {
+          "Count": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "Value": {
+            "default": 0,
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Http": {
+        "properties": {
+          "ClientIp": {
+            "type": "string"
+          },
+          "HttpMethod": {
+            "type": "string"
+          },
+          "HttpStatus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "HttpURL": {
+            "type": "string"
+          },
+          "UserAgent": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Insight": {
+        "properties": {
+          "Categories": {
+            "items": {
+              "$ref": "#/components/schemas/InsightCategory"
+            },
+            "type": "array"
+          },
+          "ClientRequestImpactStatistics": {
+            "$ref": "#/components/schemas/RequestImpactStatistics"
+          },
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "GroupARN": {
+            "maxLength": 400,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GroupName": {
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "InsightId": {
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type": "string"
+          },
+          "RootCauseServiceId": {
+            "$ref": "#/components/schemas/ServiceId"
+          },
+          "RootCauseServiceRequestImpactStatistics": {
+            "$ref": "#/components/schemas/RequestImpactStatistics"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "State": {
+            "$ref": "#/components/schemas/InsightState"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "TopAnomalousServices": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalousService"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InsightCategory": {
+        "enum": [
+          "FAULT"
+        ],
+        "type": "string"
+      },
+      "InsightEvent": {
+        "properties": {
+          "ClientRequestImpactStatistics": {
+            "$ref": "#/components/schemas/RequestImpactStatistics"
+          },
+          "EventTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "RootCauseServiceRequestImpactStatistics": {
+            "$ref": "#/components/schemas/RequestImpactStatistics"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "TopAnomalousServices": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalousService"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InsightImpactGraphEdge": {
+        "properties": {
+          "ReferenceId": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "InsightImpactGraphService": {
+        "properties": {
+          "AccountId": {
+            "type": "string"
+          },
+          "Edges": {
+            "items": {
+              "$ref": "#/components/schemas/InsightImpactGraphEdge"
+            },
+            "type": "array"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ReferenceId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "Type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InsightState": {
+        "enum": [
+          "ACTIVE",
+          "CLOSED"
+        ],
+        "type": "string"
+      },
+      "InsightSummary": {
+        "properties": {
+          "Categories": {
+            "items": {
+              "$ref": "#/components/schemas/InsightCategory"
+            },
+            "type": "array"
+          },
+          "ClientRequestImpactStatistics": {
+            "$ref": "#/components/schemas/RequestImpactStatistics"
+          },
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "GroupARN": {
+            "maxLength": 400,
+            "minLength": 1,
+            "type": "string"
+          },
+          "GroupName": {
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "InsightId": {
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type": "string"
+          },
+          "LastUpdateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "RootCauseServiceId": {
+            "$ref": "#/components/schemas/ServiceId"
+          },
+          "RootCauseServiceRequestImpactStatistics": {
+            "$ref": "#/components/schemas/RequestImpactStatistics"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "State": {
+            "$ref": "#/components/schemas/InsightState"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "TopAnomalousServices": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalousService"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InsightsConfiguration": {
+        "properties": {
+          "InsightsEnabled": {
+            "type": "boolean"
+          },
+          "NotificationsEnabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "InstanceIdDetail": {
+        "properties": {
+          "Id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidRequestExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RequestImpactStatistics": {
+        "properties": {
+          "FaultCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "OkCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TotalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceARNDetail": {
+        "properties": {
+          "ARN": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceNotFoundExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "ResourceName": {
+            "maxLength": 1011,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResponseTimeRootCause": {
+        "properties": {
+          "ClientImpacting": {
+            "type": "boolean"
+          },
+          "Services": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseTimeRootCauseService"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ResponseTimeRootCauseEntity": {
+        "properties": {
+          "Coverage": {
+            "format": "double",
+            "type": "number"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Remote": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ResponseTimeRootCauseService": {
+        "properties": {
+          "AccountId": {
+            "type": "string"
+          },
+          "EntityPath": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseTimeRootCauseEntity"
+            },
+            "type": "array"
+          },
+          "Inferred": {
+            "type": "boolean"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "Type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RetrievalStatus": {
+        "enum": [
+          "SCHEDULED",
+          "RUNNING",
+          "COMPLETE",
+          "FAILED",
+          "CANCELLED",
+          "TIMEOUT"
+        ],
+        "type": "string"
+      },
+      "RetrievedService": {
+        "properties": {
+          "Links": {
+            "items": {
+              "$ref": "#/components/schemas/GraphLink"
+            },
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array"
+          },
+          "Service": {
+            "$ref": "#/components/schemas/Service"
+          }
+        },
+        "type": "object"
+      },
+      "RootCauseException": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SamplingRateBoost": {
+        "properties": {
+          "CooldownWindowMinutes": {
+            "default": 0,
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "MaxRate": {
+            "default": 0,
+            "format": "double",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SamplingRule": {
+        "properties": {
+          "Attributes": {
+            "additionalProperties": {
+              "maxLength": 32,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxProperties": 5,
+            "minProperties": 0,
+            "type": "object"
+          },
+          "FixedRate": {
+            "default": 0,
+            "format": "double",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "HTTPMethod": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "Host": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "Priority": {
+            "format": "int32",
+            "maximum": 9999,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ReservoirSize": {
+            "default": 0,
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ResourceARN": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "RuleARN": {
+            "type": "string"
+          },
+          "RuleName": {
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "SamplingRateBoost": {
+            "$ref": "#/components/schemas/SamplingRateBoost"
+          },
+          "ServiceName": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ServiceType": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "URLPath": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "Version": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ResourceARN",
+          "Priority",
+          "ServiceName",
+          "ServiceType",
+          "Host",
+          "HTTPMethod",
+          "URLPath",
+          "Version"
+        ],
+        "type": "object"
+      },
+      "SamplingRuleRecord": {
+        "properties": {
+          "CreatedAt": {
+            "format": "double",
+            "type": "number"
+          },
+          "ModifiedAt": {
+            "format": "double",
+            "type": "number"
+          },
+          "SamplingRule": {
+            "$ref": "#/components/schemas/SamplingRule"
+          }
+        },
+        "type": "object"
+      },
+      "SamplingStrategy": {
+        "properties": {
+          "Name": {
+            "$ref": "#/components/schemas/SamplingStrategyName"
+          },
+          "Value": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SamplingStrategyName": {
+        "enum": [
+          "PartialScan",
+          "FixedRate"
+        ],
+        "type": "string"
+      },
+      "Segment": {
+        "properties": {
+          "Document": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "Id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Service": {
+        "properties": {
+          "AccountId": {
+            "type": "string"
+          },
+          "DurationHistogram": {
+            "items": {
+              "$ref": "#/components/schemas/HistogramEntry"
+            },
+            "type": "array"
+          },
+          "Edges": {
+            "items": {
+              "$ref": "#/components/schemas/Edge"
+            },
+            "type": "array"
+          },
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ReferenceId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ResponseTimeHistogram": {
+            "items": {
+              "$ref": "#/components/schemas/HistogramEntry"
+            },
+            "type": "array"
+          },
+          "Root": {
+            "type": "boolean"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "State": {
+            "type": "string"
+          },
+          "SummaryStatistics": {
+            "$ref": "#/components/schemas/ServiceStatistics"
+          },
+          "Type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceId": {
+        "properties": {
+          "AccountId": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "Type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceStatistics": {
+        "properties": {
+          "ErrorStatistics": {
+            "$ref": "#/components/schemas/ErrorStatistics"
+          },
+          "FaultStatistics": {
+            "$ref": "#/components/schemas/FaultStatistics"
+          },
+          "OkCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TotalCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TotalResponseTime": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "StartTraceRetrievalRequestContent": {
+        "properties": {
+          "EndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "TraceIds": {
+            "items": {
+              "maxLength": 35,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "TraceIds",
+          "StartTime",
+          "EndTime"
+        ],
+        "type": "object"
+      },
+      "StartTraceRetrievalResponseContent": {
+        "properties": {
+          "RetrievalToken": {
+            "maxLength": 1020,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ThrottledExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimeRangeType": {
+        "enum": [
+          "TraceId",
+          "Event",
+          "Service"
+        ],
+        "type": "string"
+      },
+      "TimeSeriesServiceStatistics": {
+        "properties": {
+          "EdgeSummaryStatistics": {
+            "$ref": "#/components/schemas/EdgeStatistics"
+          },
+          "ResponseTimeHistogram": {
+            "items": {
+              "$ref": "#/components/schemas/HistogramEntry"
+            },
+            "type": "array"
+          },
+          "ServiceForecastStatistics": {
+            "$ref": "#/components/schemas/ForecastStatistics"
+          },
+          "ServiceSummaryStatistics": {
+            "$ref": "#/components/schemas/ServiceStatistics"
+          },
+          "Timestamp": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Trace": {
+        "properties": {
+          "Duration": {
+            "format": "double",
+            "type": "number"
+          },
+          "Id": {
+            "maxLength": 35,
+            "minLength": 1,
+            "type": "string"
+          },
+          "LimitExceeded": {
+            "type": "boolean"
+          },
+          "Segments": {
+            "items": {
+              "$ref": "#/components/schemas/Segment"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TraceSummary": {
+        "properties": {
+          "Annotations": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ValueWithServiceIds"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "AvailabilityZones": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityZoneDetail"
+            },
+            "type": "array"
+          },
+          "Duration": {
+            "format": "double",
+            "type": "number"
+          },
+          "EntryPoint": {
+            "$ref": "#/components/schemas/ServiceId"
+          },
+          "ErrorRootCauses": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorRootCause"
+            },
+            "type": "array"
+          },
+          "FaultRootCauses": {
+            "items": {
+              "$ref": "#/components/schemas/FaultRootCause"
+            },
+            "type": "array"
+          },
+          "HasError": {
+            "type": "boolean"
+          },
+          "HasFault": {
+            "type": "boolean"
+          },
+          "HasThrottle": {
+            "type": "boolean"
+          },
+          "Http": {
+            "$ref": "#/components/schemas/Http"
+          },
+          "Id": {
+            "maxLength": 35,
+            "minLength": 1,
+            "type": "string"
+          },
+          "InstanceIds": {
+            "items": {
+              "$ref": "#/components/schemas/InstanceIdDetail"
+            },
+            "type": "array"
+          },
+          "IsPartial": {
+            "type": "boolean"
+          },
+          "MatchedEventTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ResourceARNs": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceARNDetail"
+            },
+            "type": "array"
+          },
+          "ResponseTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ResponseTimeRootCauses": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseTimeRootCause"
+            },
+            "type": "array"
+          },
+          "Revision": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "ServiceIds": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceId"
+            },
+            "type": "array"
+          },
+          "StartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "Users": {
+            "items": {
+              "$ref": "#/components/schemas/TraceUser"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TraceUser": {
+        "properties": {
+          "ServiceIds": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceId"
+            },
+            "type": "array"
+          },
+          "UserName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ValueWithServiceIds": {
+        "properties": {
+          "AnnotationValue": {
+            "$ref": "#/components/schemas/AnnotationValue"
+          },
+          "ServiceIds": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceId"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "aws.auth.sigv4": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "AWS X-Ray"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/GetRetrievedTracesGraph": {
+      "post": {
+        "operationId": "GetRetrievedTracesGraph",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetRetrievedTracesGraphRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRetrievedTracesGraphResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetSamplingRules": {
+      "post": {
+        "operationId": "GetSamplingRules",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSamplingRulesRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSamplingRulesResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Groups": {
+      "post": {
+        "operationId": "GetGroups",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetGroupsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGroupsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Insight": {
+      "post": {
+        "operationId": "GetInsight",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetInsightRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInsightResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/InsightEvents": {
+      "post": {
+        "operationId": "GetInsightEvents",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetInsightEventsRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInsightEventsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/InsightImpactGraph": {
+      "post": {
+        "operationId": "GetInsightImpactGraph",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetInsightImpactGraphRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInsightImpactGraphResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/InsightSummaries": {
+      "post": {
+        "operationId": "GetInsightSummaries",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetInsightSummariesRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInsightSummariesResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ServiceGraph": {
+      "post": {
+        "operationId": "GetServiceGraph",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetServiceGraphRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetServiceGraphResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/StartTraceRetrieval": {
+      "post": {
+        "operationId": "StartTraceRetrieval",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartTraceRetrievalRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartTraceRetrievalResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/TimeSeriesServiceStatistics": {
+      "post": {
+        "operationId": "GetTimeSeriesServiceStatistics",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTimeSeriesServiceStatisticsRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTimeSeriesServiceStatisticsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/TraceGraph": {
+      "post": {
+        "operationId": "GetTraceGraph",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTraceGraphRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTraceGraphResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/TraceSummaries": {
+      "post": {
+        "operationId": "GetTraceSummaries",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTraceSummariesRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTraceSummariesResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Traces": {
+      "post": {
+        "operationId": "BatchGetTraces",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchGetTracesRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchGetTracesResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThrottledExceptionResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "aws.auth.sigv4": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://xray.{region}.amazonaws.com",
+      "variables": {
+        "region": {
+          "default": "us-east-1"
+        }
+      }
+    }
+  ]
+}

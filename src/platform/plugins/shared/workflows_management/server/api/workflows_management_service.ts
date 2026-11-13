@@ -23,6 +23,7 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   ExecutionType,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
@@ -39,8 +40,10 @@ import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
+  ManagedWorkflowInstallManyResult,
   ManagedWorkflowInstanceState,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallManyItem,
   ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
@@ -140,6 +143,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   concurrencyGroupKey?: string;
   omitStepRuns?: boolean;
   finishedAfter?: string;
@@ -187,7 +191,9 @@ export class WorkflowsService {
     public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
     public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
-    public readonly kibanaVersion: string
+    public readonly kibanaVersion: string,
+    /** `workflowsManagement.pages.enabled`. */
+    private readonly pagesEnabled = false
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(core);
@@ -266,6 +272,7 @@ export class WorkflowsService {
       getCoreStart: () => this.coreStart,
       licensing: pluginsStart.licensing,
       logger: this.logger,
+      pagesEnabled: this.pagesEnabled,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -728,6 +735,10 @@ export class WorkflowsService {
     return this.validationService.getAvailableConnectors(spaceId, request);
   }
 
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return { includePageTrigger: this.pagesEnabled };
+  }
+
   public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
     await this.ensureInitialized();
     return this.validationService.getRegisteredCustomTriggerDefinitions();
@@ -778,6 +789,26 @@ export class WorkflowsService {
     );
   }
 
+  /**
+   * Install or update static managed workflows with `_bulk`, after one ES readiness check for the
+   * whole batch. Best-effort like {@link installManagedWorkflow}: a gated batch resolves with no
+   * failures and marks the plugin install pass incomplete.
+   */
+  public async bulkInstallManagedWorkflows(
+    items: readonly ManagedWorkflowServiceInstallManyItem[],
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowInstallManyResult> {
+    await this.ensureInitialized();
+    const readiness = await this.ensureManagedInstallReady(
+      `install of ${items.length} workflow(s) for plugin '${registeredPluginId}'`
+    );
+    if (!readiness.ready) {
+      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+      return { failed: [] };
+    }
+    return this.managedWorkflowsService.bulkInstallManagedWorkflows(items, registeredPluginId);
+  }
+
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
@@ -791,6 +822,15 @@ export class WorkflowsService {
       registeredPluginId,
       request
     );
+  }
+
+  public async disableManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.disableManagedWorkflow(id, options, registeredPluginId);
   }
 
   public async getManagedWorkflowStatus(

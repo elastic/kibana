@@ -509,6 +509,23 @@ groups:
           ech: unavailable
           self: ga
 
+  - group: Service account settings
+    id: service-account-settings
+    settings:
+
+      - setting: xpack.security.serviceAccounts.enabled
+        description: |
+          Determines whether user-managed service accounts are available in {{kib}}. When set to `false`, you can't manage service accounts in {{kib}} or run workloads as a service account. The default is `true`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.6+
+          ech: ga 9.6+
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
   - group: Audit logging settings
     id: audit-logging-settings
     description: |

@@ -1,0 +1,47 @@
+{
+  "operations": {
+    "getFunction": [
+      {
+        "method": "get",
+        "path": "/2015-03-31/functions/{FunctionName}",
+        "source": "lambda"
+      }
+    ],
+    "invoke": [
+      {
+        "method": "post",
+        "path": "/2015-03-31/functions/{FunctionName}/invocations",
+        "source": "lambda"
+      }
+    ],
+    "listFunctions": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "end": "missing",
+          "request": {
+            "cursorParam": "Marker",
+            "in": "query",
+            "sizeParam": "MaxItems"
+          },
+          "response": {
+            "itemsPath": "Functions",
+            "nextPath": "NextMarker"
+          },
+          "style": "cursor"
+        },
+        "path": "/2015-03-31/functions",
+        "source": "lambda"
+      }
+    ]
+  },
+  "sources": {
+    "lambda": {
+      "apiVersion": "2015-03-31",
+      "fetchedAt": "2026-11-01T19:12:04.556Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/lambda/service/2015-03-31/lambda-2015-03-31.json"
+    }
+  }
+}

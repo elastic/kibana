@@ -11,6 +11,9 @@
 // definitions so `eslint-disable` directives naming them resolve; they run in oxlint.
 module.exports = {
   rules: {
+    ...require('./rules/eslint'),
+    ...require('./rules/import'),
     ...require('./rules/react'),
+    ...require('./rules/typescript'),
   },
 };

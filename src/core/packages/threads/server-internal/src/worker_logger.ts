@@ -61,7 +61,7 @@ const createWorkerLogSink = (
   let droppedLogLines = 0;
   let needsNewline = false;
 
-  const format = (record: LogRecord, meta: LogMeta | undefined): string => {
+  const format = (record: LogRecord, meta: LogMeta | undefined, uptime: number): string => {
     const mergedMeta = merge(
       { service: config.service },
       meta ?? {},
@@ -70,7 +70,7 @@ const createWorkerLogSink = (
     const markedRecord: LogRecord = { ...record, meta: mergedMeta };
 
     if (config.format === 'json') {
-      return JSON.stringify(toEcsLog(markedRecord, process.uptime()));
+      return JSON.stringify(toEcsLog(markedRecord, uptime));
     }
     return pattern.format({
       ...markedRecord,
@@ -81,7 +81,10 @@ const createWorkerLogSink = (
   };
 
   const formatWithinLimit = (record: LogRecord): string | undefined => {
-    const line = format(record, record.meta);
+    // Sampled once: the uptime renders to a variable number of characters, so re-sampling it would
+    // make each attempt below correct the size of a log line it was not measured on.
+    const uptime = process.uptime();
+    const line = format(record, record.meta, uptime);
     // One byte is kept for the newline, and one for the newline that may end a cut-off log line.
     const maxBytes = MAX_LOG_LINE_BYTES - 2;
     if (Buffer.byteLength(line) <= maxBytes) {
@@ -98,7 +101,8 @@ const createWorkerLogSink = (
           error: undefined,
           message: `${truncateToBytes(record.message, messageBytes)}${TRUNCATED_SUFFIX}`,
         },
-        undefined
+        undefined,
+        uptime
       );
       const overflow = Buffer.byteLength(truncated) - maxBytes;
       if (overflow <= 0) {

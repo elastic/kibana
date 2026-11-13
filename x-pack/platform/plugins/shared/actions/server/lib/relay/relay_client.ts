@@ -13,6 +13,8 @@ import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { request } from '../axios_utils';
 import { RelayRequestError } from './relay_error';
 import type {
+  RelayAvailableChannel,
+  RelayAvailableChannelsPage,
   RelayBinding,
   RelayBindingsPage,
   RelayCallbackResponse,
@@ -26,6 +28,7 @@ import type {
   RelayReadMessage,
   RelayReadMessagesInput,
   RelayReadResponse,
+  RelayReadThreadInput,
   RelayTriggerInput,
   RelayTriggerResponse,
 } from './types';
@@ -76,7 +79,7 @@ interface RelayTriggerResponseBody {
   origin?: { external_conversation_id?: string };
 }
 
-/** Raw shape of the channel read response body. */
+/** Raw shape of the channel and thread read response body. */
 interface RelayReadResponseBody {
   channel?: { id?: string; name?: string };
   messages?: Array<{
@@ -92,6 +95,20 @@ interface RelayReadResponseBody {
 const parseRetryAfterSeconds = (value: unknown): number | undefined => {
   const seconds = Number(Array.isArray(value) ? value[0] : value);
   return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
+};
+
+const toHeaders = (axiosHeaders: Record<string, unknown> = {}): Headers => {
+  const headers = new Headers();
+
+  for (const [name, value] of Object.entries(axiosHeaders)) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      if (item !== undefined && item !== null) {
+        headers.append(name, String(item));
+      }
+    }
+  }
+
+  return headers;
 };
 
 export class RelayClient implements RelayClientContract {
@@ -202,6 +219,27 @@ export class RelayClient implements RelayClientContract {
     return { bindings, nextCursor: body?.next_cursor };
   }
 
+  async listAvailableChannels(tenantKey: string): Promise<RelayAvailableChannelsPage> {
+    const path = `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/channels`;
+    const response = await this.get(`${path}?status=available`);
+    const body = response.data as
+      | { channels?: RelayAvailableChannel[]; truncated?: boolean }
+      | undefined;
+
+    if (!Array.isArray(body?.channels)) {
+      throw new RelayRequestError(
+        path,
+        response.status,
+        'Relay invalid response format missing expected `channels` array'
+      );
+    }
+
+    return {
+      channels: body.channels.map(({ scope_id, display_name }) => ({ scope_id, display_name })),
+      truncated: body.truncated === true,
+    };
+  }
+
   /** Claim an unclaimed channel (put-if-absent). The caller must hold a registration for the tenant. */
   async bind(tenantKey: string, channelId: string): Promise<void> {
     await this.put(
@@ -257,16 +295,29 @@ export class RelayClient implements RelayClientContract {
   }
 
   /** Read a window of a bound public channel. */
-  async readMessages({
-    tenantKey,
-    channelId,
-    oldest,
-    latest,
-    limit,
-  }: RelayReadMessagesInput): Promise<RelayReadResponse> {
-    const path = `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/channels/${encodeURIComponent(
-      channelId
-    )}/messages`;
+  async readMessages(input: RelayReadMessagesInput): Promise<RelayReadResponse> {
+    return this.read(
+      `/v1/slack/tenants/${encodeURIComponent(input.tenantKey)}/channels/${encodeURIComponent(
+        input.channelId
+      )}/messages`,
+      input
+    );
+  }
+
+  /** Read one thread of a bound public channel. */
+  async readThread(input: RelayReadThreadInput): Promise<RelayReadResponse> {
+    return this.read(
+      `/v1/slack/tenants/${encodeURIComponent(input.tenantKey)}/channels/${encodeURIComponent(
+        input.channelId
+      )}/threads/${encodeURIComponent(input.threadTs)}`,
+      input
+    );
+  }
+
+  private async read(
+    path: string,
+    { oldest, latest, limit }: RelayReadMessagesInput
+  ): Promise<RelayReadResponse> {
     const query = new URLSearchParams();
     if (oldest) query.set('oldest', oldest);
     if (latest) query.set('latest', latest);
@@ -318,7 +369,7 @@ export class RelayClient implements RelayClientContract {
     }
 
     const response = await this.sendRequest(url, body, 'post', signal);
-    return { status: response.status };
+    return { status: response.status, headers: toHeaders(response.headers) };
   }
 
   private async post(path: string, body: unknown): Promise<AxiosResponse> {

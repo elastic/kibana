@@ -13,6 +13,7 @@ import {
   KI_QUERY_GENERATION_AGENT_TYPE_ID,
   kiQueryGenerationAgentType,
 } from './ki_query_generation_agent';
+import { assertNightshiftSpace } from '../../../lib/assert_nightshift_space';
 
 export const installKIQueryGenerationAgent = async ({
   agentBuilder,
@@ -23,6 +24,9 @@ export const installKIQueryGenerationAgent = async ({
   spaceId: string;
   availability?: AgentAvailabilityConfig;
 }): Promise<void> => {
+  // Nightshift runs in the default space only, so the KI query generation agent must not show up in another
+  // space's Agent Builder.
+  assertNightshiftSpace(spaceId);
   await agentBuilder.agents.ensure({
     spaceId,
     availability,

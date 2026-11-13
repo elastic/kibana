@@ -6,7 +6,11 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import {
+  getSmlOriginId,
+  kibanaPermissions,
+  searchSavedObjectsByTitle,
+} from '@kbn/agent-builder-sml-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
@@ -66,6 +70,7 @@ export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
   id: DASHBOARD_KI_TYPE,
+  attachmentType: DASHBOARD_ATTACHMENT_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -108,6 +113,9 @@ export const createDashboardSmlType = ({
   },
 
   getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_KI_TYPE }),
+
+  searchByTitle: ({ title, size }, { savedObjectsClient }) =>
+    searchSavedObjectsByTitle({ type: 'dashboard', title, size, savedObjectsClient }),
 
   toAttachment: async (item, context) => {
     const originId = getSmlOriginId(item);

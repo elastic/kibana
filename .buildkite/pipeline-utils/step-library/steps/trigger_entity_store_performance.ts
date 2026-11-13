@@ -8,18 +8,16 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { onDemandAgent } from '../presets.ts';
+import { gcpImageAgent, onDemandAgent } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const entityStorePerformanceSteps = (): readonly Step[] => [
   commandStep({
-    command: '.buildkite/scripts/steps/entity_store_performance/trigger_performance_tests.sh',
+    command: '.buildkite/scripts/steps/trigger_from_pr.sh kibana-entity-store-performance-from-pr',
     label: 'Entity Store Performance Tests',
     key: 'entity_store_performance',
     agents: {
-      provider: 'gcp',
-      image: 'family/kibana-minimal-ubuntu-2604',
-      imageProject: 'elastic-images-prod',
+      ...gcpImageAgent('kibana-minimal-ubuntu-2604'),
       ...onDemandAgent('n2-standard-2'),
     },
     timeout_in_minutes: 10,

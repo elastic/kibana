@@ -6,26 +6,27 @@
  */
 
 import moment from 'moment';
-import { useQuery, type UseQueryResult } from '@kbn/react-query';
+import { useQuery, useQueryClient, type UseQueryResult } from '@kbn/react-query';
 import type { SignificantEventsRepositoryClient } from '@kbn/significant-events-plugin/public';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../hooks/use_kibana';
 import { NIGHTSHIFT_LANDING_SEVERITIES } from '../../common/constants';
-import { hasInvestigationsToPoll } from './investigation_state';
+import { getInvestigationsRefetchInterval } from './investigation_state';
+
+/** An event with its resolved investigation state, without the fields the list does not need. */
+export type NightshiftSignificantEvent = SignificantEvent &
+  Pick<SignificantEventResponse, 'investigation_state' | 'investigation_id'>;
 
 /** The paginated envelope the events endpoint returns, flattened across the pages we fetch. */
 export interface NightshiftSignificantEventsQueryData {
-  hits: SignificantEvent[];
+  hits: NightshiftSignificantEvent[];
   page: number;
   perPage: number;
   total: number;
 }
 
 export const NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY = ['nightshift.significantEvents'] as const;
-
-/** Poll while any visible event still has an open investigation workflow. */
-const RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
 
 /** Server allows up to 1000 hits per page (`events` internal route). */
 export const NIGHTSHIFT_EVENTS_PAGE_SIZE = 1000;
@@ -43,7 +44,7 @@ const fetchSignificantEvents = async ({
   from: string;
   to: string;
 }): Promise<NightshiftSignificantEventsQueryData> => {
-  const allHits: SignificantEvent[] = [];
+  const allHits: NightshiftSignificantEvent[] = [];
   let page = 1;
   let total = 0;
 
@@ -92,6 +93,8 @@ export const useFetchSignificantEvents = (): UseQueryResult<
   } = useKibana().services;
   const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
 
+  const queryClient = useQueryClient();
+
   return useQuery<NightshiftSignificantEventsQueryData, Error>({
     queryKey: NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
     enabled: canShow,
@@ -102,8 +105,6 @@ export const useFetchSignificantEvents = (): UseQueryResult<
       return fetchSignificantEvents({ significantEventsRepositoryClient, signal, from, to });
     },
     refetchInterval: (data) =>
-      data?.hits && hasInvestigationsToPoll(data.hits)
-        ? RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS
-        : false,
+      data?.hits ? getInvestigationsRefetchInterval(data.hits, queryClient) : false,
   });
 };

@@ -98,7 +98,6 @@ export function AlertingFlyout(props: Props) {
       transactionName,
       errorGroupingKey,
       transactionType,
-      environment,
       start,
       end,
     ]
