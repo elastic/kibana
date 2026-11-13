@@ -722,7 +722,7 @@ export function XYChart({
       return;
     }
     const [min, max] = x;
-    if (!xAxisColumn || !isHistogramVis) {
+    if (!xAxisColumn || !isHistogramVis || (isEsqlMode && !isTimeVis)) {
       return;
     }
 

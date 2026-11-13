@@ -1292,6 +1292,63 @@ describe('XYChart component', () => {
     });
   });
 
+  test('onBrushEnd does not select a range for ES|QL number histogram data', () => {
+    const { args } = sampleArgs();
+
+    const esqlNumberHistogramData: Datatable = {
+      type: 'datatable',
+      meta: { type: ESQL_TABLE_TYPE },
+      rows: [
+        { xAccessorId: 0, yAccessorId: 1 },
+        { xAccessorId: 1000, yAccessorId: 3 },
+      ],
+      columns: [
+        {
+          id: 'xAccessorId',
+          name: 'b',
+          meta: { type: 'number', esMeta: { bucket: { interval: 1000 } } },
+        },
+        {
+          id: 'yAccessorId',
+          name: 'count',
+          meta: { type: 'number' },
+        },
+      ],
+    };
+
+    const esqlNumberLayer: DataLayerConfig = {
+      layerId: 'esqlNumberLayer',
+      type: 'dataLayer',
+      layerType: LayerTypes.DATA,
+      simpleView: false,
+      showLines: true,
+      xAccessor: 'xAccessorId',
+      xScaleType: 'linear',
+      isHistogram: true,
+      isHorizontal: false,
+      isStacked: true,
+      seriesType: 'bar',
+      isPercentage: false,
+      accessors: ['yAccessorId'],
+      palette: mockPaletteOutput,
+      table: esqlNumberHistogramData,
+    };
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [esqlNumberLayer],
+        }}
+      />
+    );
+
+    wrapper.find(Settings).first().prop('onBrushEnd')!({ x: [0, 2000] });
+
+    expect(onSelectRange).not.toHaveBeenCalled();
+  });
+
   test('onBrushEnd is not set on non-interactive mode', () => {
     const { args } = sampleArgs();
 
