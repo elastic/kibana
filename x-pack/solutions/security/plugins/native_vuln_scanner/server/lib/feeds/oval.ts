@@ -174,7 +174,7 @@ export const expandCriteria = <Leaf, Cond>(
   onFalse?: (reason: string) => void
 ): Array<Conjunction<Leaf, Cond>> => {
   const walk = (node: XmlNode): Array<Conjunction<Leaf, Cond>> => {
-    if (node.attrs.negate === 'true') {
+    if (node.attrs.negate === 'true' || node.attrs.negate === '1') {
       throw new UnsupportedCriteriaError('negated', node.attrs.comment);
     }
     if (node.name === 'criterion' || node.name === 'extend_definition') {
@@ -191,14 +191,20 @@ export const expandCriteria = <Leaf, Cond>(
       return [[atom]];
     }
     if (node.name !== 'criteria') return [[]];
+    const operator = node.attrs.operator ?? 'AND';
+    if (operator !== 'AND' && operator !== 'OR') {
+      throw new UnsupportedCriteriaError('operator', `${operator}: ${node.attrs.comment ?? ''}`);
+    }
     const parts = node.children.map(walk);
-    if (node.attrs.operator === 'OR') return parts.flat();
+    if (operator === 'OR') return parts.flat();
     // AND (the OVAL default): cartesian product of the children's disjunctions.
     let product: Array<Conjunction<Leaf, Cond>> = [[]];
     for (const part of parts) {
+      if (product.length * part.length > MAX_CONJUNCTIONS) {
+        throw new UnsupportedCriteriaError('too_complex');
+      }
       const next: Array<Conjunction<Leaf, Cond>> = [];
       for (const left of product) for (const right of part) next.push([...left, ...right]);
-      if (next.length > MAX_CONJUNCTIONS) throw new UnsupportedCriteriaError('too_complex');
       product = next;
     }
     return product;

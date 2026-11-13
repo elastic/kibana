@@ -85,6 +85,6 @@ export interface FeedParseResult {
   snapshotTime?: string;
   definitions: number;
   records: AdvisoryRecord[];
-  /** Why definitions or criteria were dropped, with counts (e.g. `esm`, `unencodable_version`). */
+  /** Why definitions or criteria were dropped, with counts (e.g. `other_pocket`, `criteria_negated`). */
   skipped: Record<string, number>;
 }

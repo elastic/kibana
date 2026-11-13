@@ -85,9 +85,9 @@ const archMatches = (
   return compile(`^(?:${constraint.value})$`, stats)?.test(arch) ?? false;
 };
 
-const RPM_KERNEL_SUFFIX = /(?:\.(?:x86_64|aarch64|ppc64le|s390x|i686|noarch))?(?:\+\w+)?$/;
+const RPM_KERNEL_SUFFIX = /(?:\.(?:x86_64|aarch64|ppc64le|s390x|i686|noarch))?(?:\+[\w-]+)?$/;
 
-/** RHEL `uname -r` (`5.14.0-427.13.1.el9_4.x86_64[+debug]`) as an rpm EVR. */
+/** RHEL `uname -r` (`5.14.0-427.13.1.el9_4.x86_64[+rt-debug]`) as an rpm EVR. */
 export const rhelKernelEvr = (kernelRelease: string): string =>
   `0:${kernelRelease.replace(RPM_KERNEL_SUFFIX, '')}`;
 

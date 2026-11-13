@@ -109,5 +109,6 @@ const encodeRuns = (value: string): string => {
 /** Builds a keyword whose byte order equals dpkg order; throws UnencodableVersionError. */
 export const dpkgKey = (raw: string): string => {
   const { epoch, upstream, revision } = parseDpkg(raw);
+  if (epoch < 0) throw new UnencodableVersionError(`negative epoch: ${raw}`);
   return encodeNumber(String(epoch)) + encodeRuns(upstream) + encodeRuns(revision);
 };

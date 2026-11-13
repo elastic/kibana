@@ -68,6 +68,17 @@ describe('expandCriteria', () => {
     );
   });
 
+  it('refuses ONE/XOR operators and xs:boolean negation', () => {
+    const one = node('criteria', { operator: 'ONE' }, [criterion('a'), criterion('b')]);
+    expect(() => expandCriteria(one, classify)).toThrow(
+      expect.objectContaining({ reason: 'operator' }) as UnsupportedCriteriaError
+    );
+    const negated = and(node('criterion', { comment: 'a', negate: '1' }));
+    expect(() => expandCriteria(negated, classify)).toThrow(
+      expect.objectContaining({ reason: 'negated' }) as UnsupportedCriteriaError
+    );
+  });
+
   it('refuses trees whose expansion explodes', () => {
     const wide = or(...Array.from({ length: 200 }, (_, i) => criterion(`C:${i}`)));
     expect(() => expandCriteria(and(wide, wide), classify)).toThrow(UnsupportedCriteriaError);

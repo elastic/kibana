@@ -269,7 +269,7 @@ describe('matchHost: RHEL', () => {
     });
     const nodePkg = [{ name: 'nodejs', version: '1:18.19.0-1.module+el9.3.0+20000+1a1a1a1a' }];
 
-    it('requires every condition of one alternative', () => {
+    it('reports only when the enabled module matches', () => {
       expect(
         run(host({ os: RHEL9, enabledModules: ['nodejs:18'], packages: nodePkg }), [nodejs])
       ).toEqual([
@@ -280,6 +280,22 @@ describe('matchHost: RHEL', () => {
       expect(
         run(host({ os: RHEL9, enabledModules: ['nodejs:20'], packages: nodePkg }), [nodejs])
       ).toEqual([]);
+    });
+
+    it('requires every condition of an alternative together', () => {
+      const both = {
+        ...nodejs,
+        conditions: [
+          [
+            { type: 'module_enabled' as const, module: 'nodejs:18' },
+            { type: 'module_enabled' as const, module: 'nodejs:18-extra' },
+          ],
+        ],
+      };
+      const enabled = (modules: string[]) =>
+        run(host({ os: RHEL9, enabledModules: modules, packages: nodePkg }), [both]);
+      expect(enabled(['nodejs:18'])).toEqual([]);
+      expect(enabled(['nodejs:18', 'nodejs:18-extra'])).toHaveLength(1);
     });
 
     it('counts unknown host facts instead of reporting', () => {
@@ -349,6 +365,9 @@ describe('helpers', () => {
       '0:5.14.0-70.22.1.rt21.94.el9_0'
     );
     expect(rhelKernelEvr('4.18.0-553.el8_10.aarch64')).toBe('0:4.18.0-553.el8_10');
+    expect(rhelKernelEvr('5.14.0-427.13.1.el9_4.aarch64+64k-debug')).toBe(
+      '0:5.14.0-427.13.1.el9_4'
+    );
   });
 
   it('reduces a SOURCERPM file name to the source name', () => {

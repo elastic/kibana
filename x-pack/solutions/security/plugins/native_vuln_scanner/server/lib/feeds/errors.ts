@@ -7,10 +7,11 @@
 
 /**
  * A definition's criteria cannot be turned into "installed < fixed" rows: `negated` criteria
- * would need absence facts, `too_complex` ones expand past the parser's limit.
+ * would need absence facts, `operator` ones use ONE/XOR, `too_complex` ones expand past the
+ * parser's limit.
  */
 export class UnsupportedCriteriaError extends Error {
-  constructor(public readonly reason: 'negated' | 'too_complex', message?: string) {
+  constructor(public readonly reason: 'negated' | 'operator' | 'too_complex', message?: string) {
     super(message ?? `unsupported OVAL criteria: ${reason}`);
   }
 }

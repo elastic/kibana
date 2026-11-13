@@ -106,7 +106,7 @@ int dash = rest.lastIndexOf('-');
 String a = dash >= 0 ? rest.substring(0, dash) : rest;
 String b = dash >= 0 ? rest.substring(dash + 1) : '';
 
-String ep = encNum(String.valueOf(epoch));
+String ep = epoch < 0 ? null : encNum(String.valueOf(epoch));
 String ka = scheme == 'dpkg' ? dpkgRuns(a) : rpmVer(a);
 String kb = scheme == 'dpkg' ? dpkgRuns(b) : rpmVer(b);
 if (ep == null || ka == null || kb == null) {
