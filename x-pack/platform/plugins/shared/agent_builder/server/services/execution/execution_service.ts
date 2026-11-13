@@ -15,6 +15,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { DecisionsStart } from '@kbn/agent-builder-server';
 import { validateReasoningEffort, type InferenceConnector } from '@kbn/inference-common';
 import type {
   ChatEvent,
@@ -47,6 +48,7 @@ import type {
   AgentExecutionParams,
   ConversationExecutionParams,
   ExecuteAgentParams,
+  ExecuteConversationAgentParams,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
   FollowExecutionOptions,
@@ -54,6 +56,8 @@ import type {
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS, FOLLOW_POLL_INTERVAL_MS } from './constants';
+import type { AgentBuilderConfig } from '../../config';
+import { shouldRunAgent } from './auto_trigger/should_run_agent';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
@@ -96,6 +100,8 @@ interface ParentExecution {
 }
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
+  decisions: DecisionsStart;
+  decisionConfig: AgentBuilderConfig['decisionModel'];
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
@@ -115,6 +121,8 @@ const noop = () => {};
 class AgentExecutionServiceImpl implements AgentExecutionService {
   private readonly deps: AgentExecutionServiceDeps;
   private readonly logger: Logger;
+  /** `trigger_mode: 'auto'` decisions in flight, by the execution id they would start. */
+  private readonly pendingDecisions = new Map<string, AbortController>();
 
   constructor(deps: AgentExecutionServiceDeps) {
     this.deps = deps;
@@ -376,15 +384,62 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
   /**
    * The chat API's entry point: persists the request's user message, then runs the agent unless
-   * `trigger_mode: 'never'` asked for the message alone. Callers that always run the agent use
-   * {@link executeAgent}.
+   * `trigger_mode: 'never'` asked for the message alone, or `trigger_mode: 'auto'` decided the
+   * agent should not respond. Callers that always run the agent use {@link executeAgent}.
    */
   async maybeExecuteAgent(args: ExecuteAgentParams): Promise<MaybeExecuteAgentResult> {
+    if (args.mode === AgentExecutionMode.conversation) {
+      this.logger.debug(
+        `Chat request for conversation [${
+          args.params.conversationId ?? 'new'
+        }] with trigger_mode [${args.params.triggerMode ?? ChatTriggerMode.Always}]`
+      );
+    }
+
     if ('triggerMode' in args.params && args.params.triggerMode === ChatTriggerMode.Never) {
       return this.handleNeverTriggerMode(args);
     }
 
+    if (
+      args.mode === AgentExecutionMode.conversation &&
+      args.params.triggerMode === ChatTriggerMode.Auto &&
+      !(await this.decideToRun(args))
+    ) {
+      return this.handleNeverTriggerMode(args);
+    }
+
     return this.executeAgent(args);
+  }
+
+  /**
+   * The `trigger_mode: 'auto'` decision. A stop (an abort of the execution id the run would get)
+   * or a client disconnect while it is in flight cancels it, so no run starts.
+   */
+  private async decideToRun(args: ExecuteConversationAgentParams): Promise<boolean> {
+    const { executionId, request, params } = args;
+    const controller = new AbortController();
+    const subscription = request.events.aborted$.subscribe(() => controller.abort());
+
+    if (executionId) {
+      this.pendingDecisions.set(executionId, controller);
+    }
+
+    try {
+      const run = await shouldRunAgent({
+        request,
+        params,
+        deps: this.deps,
+        abortSignal: controller.signal,
+      });
+
+      return run && !controller.signal.aborted;
+    } finally {
+      subscription.unsubscribe();
+
+      if (executionId) {
+        this.pendingDecisions.delete(executionId);
+      }
+    }
   }
 
   /**
@@ -451,6 +506,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     executionId: string,
     { reason = { source: 'api' }, waitForTerminal = true }: AbortExecutionOptions = {}
   ): Promise<AbortExecutionResult> {
+    const pendingDecision = this.pendingDecisions.get(executionId);
+
+    if (pendingDecision) {
+      pendingDecision.abort();
+      return { acknowledged: true, terminalPersisted: false };
+    }
+
     const executionClient = this.createExecutionClient();
     const execution = await executionClient.get(executionId);
 

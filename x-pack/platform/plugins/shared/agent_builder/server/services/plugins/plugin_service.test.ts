@@ -166,6 +166,7 @@ describe('PluginsService', () => {
           opik_distributed_tracing: false,
         },
         decisionModel: {
+          triggerThreshold: 0.5,
           decisionModelTimeoutMs: 1000,
           fastModelTimeoutMs: 2000,
           unavailableTtlMs: 3600000,
@@ -572,6 +573,7 @@ describe('PluginsService', () => {
                 opik_distributed_tracing: false,
               },
               decisionModel: {
+                triggerThreshold: 0.5,
                 decisionModelTimeoutMs: 1000,
                 fastModelTimeoutMs: 2000,
                 unavailableTtlMs: 3600000,

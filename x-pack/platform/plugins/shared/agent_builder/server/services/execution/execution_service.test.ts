@@ -76,6 +76,11 @@ const conflictError = () =>
 const mockHandleAgentExecution = jest.fn();
 const mockCollectAndWriteEvents = jest.fn();
 
+const mockShouldRunAgent = jest.fn();
+jest.mock('./auto_trigger/should_run_agent', () => ({
+  shouldRunAgent: (...args: unknown[]) => mockShouldRunAgent(...args),
+}));
+
 jest.mock('./execution_runner', () => ({
   handleAgentExecution: (...args: any[]) => mockHandleAgentExecution(...args),
   collectAndWriteEvents: (...args: any[]) => mockCollectAndWriteEvents(...args),
@@ -105,6 +110,12 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { createAgentExecutionService } from './execution_service';
 import { CallbackDeliveryService } from './callback';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
+
+const waitForCondition = async (condition: () => boolean) => {
+  for (let attempt = 0; attempt < 50 && !condition(); attempt++) {
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+};
 
 describe('AgentExecutionService', () => {
   const logger = loggerMock.create();
@@ -183,6 +194,13 @@ describe('AgentExecutionService', () => {
     meteringService,
     searchInferenceEndpoints,
     callbackDeliveryService,
+    decisions: { decide: jest.fn() },
+    decisionConfig: {
+      triggerThreshold: 0.5,
+      decisionModelTimeoutMs: 1000,
+      fastModelTimeoutMs: 2000,
+      unavailableTtlMs: 3600000,
+    },
   });
 
   beforeEach(() => {
@@ -255,6 +273,13 @@ describe('AgentExecutionService', () => {
         meteringService,
         searchInferenceEndpoints,
         callbackDeliveryService,
+        decisions: { decide: jest.fn() },
+        decisionConfig: {
+          triggerThreshold: 0.5,
+          decisionModelTimeoutMs: 1000,
+          fastModelTimeoutMs: 2000,
+          unavailableTtlMs: 3600000,
+        },
       });
     const converse = (
       boundService: ReturnType<typeof createBoundService>,
@@ -2492,6 +2517,173 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
       expect(appendedActiveExecution()).toBeUndefined();
       expect(conversationClient.update).not.toHaveBeenCalled();
+    });
+
+    describe('trigger_mode auto', () => {
+      const send = () =>
+        service.maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          useTaskManager: true,
+          params: {
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+            triggerMode: ChatTriggerMode.Auto,
+            nextInput: { message: '@jane thanks!' },
+          },
+        });
+
+      const busy = () =>
+        createConversationBusyError({
+          conversationId: 'conversation-1',
+          activeExecutionId: 'other-exec',
+        });
+
+      beforeEach(() => {
+        (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
+          getAccessedRefs: () => [],
+          getAll: () => [],
+          drainChanges: () => [],
+        });
+      });
+
+      it('with a "no" decision persists the user message without an active execution', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(false);
+
+        const result = await send();
+
+        expect(result.executionId).toBeUndefined();
+        expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+        expect(appendedActiveExecution()).toBeUndefined();
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('with a "yes" decision runs the agent', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(true);
+
+        const result = await send();
+
+        expect(mockExecutionClient.create).toHaveBeenCalledTimes(1);
+        expect(result.executionId).toBeDefined();
+        expect(appendedActiveExecution()).toEqual(
+          expect.objectContaining({ action: 'acquire', executionId: result.executionId })
+        );
+      });
+
+      it('passes the conversation request to the decision', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(true);
+
+        await send();
+
+        expect(mockShouldRunAgent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            params: expect.objectContaining({
+              conversationId: 'conversation-1',
+              nextInput: { message: '@jane thanks!' },
+            }),
+          })
+        );
+      });
+
+      it('with a "yes" decision on a busy conversation throws ConversationBusyError', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(true);
+        conversationClient.appendEvents.mockRejectedValueOnce(busy());
+
+        const error = await send().catch((thrown) => thrown);
+
+        expect(isConversationBusyError(error)).toBe(true);
+      });
+
+      it('Stop during the decision keeps the agent from running and saves the message', async () => {
+        let decide: (run: boolean) => void = () => {};
+        let decisionSignal: AbortSignal | undefined;
+
+        mockShouldRunAgent.mockImplementationOnce(
+          ({ abortSignal }: { abortSignal: AbortSignal }) =>
+            new Promise<boolean>((resolve) => {
+              decisionSignal = abortSignal;
+              decide = resolve;
+            })
+        );
+
+        const pending = service.maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          useTaskManager: true,
+          executionId: 'exec-auto',
+          params: {
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+            triggerMode: ChatTriggerMode.Auto,
+            nextInput: { message: '@agent help' },
+          },
+        });
+
+        await waitForCondition(() => decisionSignal !== undefined);
+
+        const abortResult = await service.abortExecution('exec-auto');
+
+        expect(abortResult).toEqual({ acknowledged: true, terminalPersisted: false });
+        expect(decisionSignal?.aborted).toBe(true);
+
+        decide(true);
+        const result = await pending;
+
+        expect(result.executionId).toBeUndefined();
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+        expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      });
+
+      it('a disconnect during the decision keeps the agent from running', async () => {
+        const aborted$ = new Subject<void>();
+        const request = httpServerMock.createKibanaRequest();
+        let decide: (run: boolean) => void = () => {};
+        let decisionSignal: AbortSignal | undefined;
+
+        Object.defineProperty(request, 'events', {
+          value: { aborted$, completed$: new Subject<void>() },
+        });
+        mockShouldRunAgent.mockImplementationOnce(
+          ({ abortSignal }: { abortSignal: AbortSignal }) =>
+            new Promise<boolean>((resolve) => {
+              decisionSignal = abortSignal;
+              decide = resolve;
+            })
+        );
+
+        const pending = service.maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          useTaskManager: true,
+          params: {
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+            triggerMode: ChatTriggerMode.Auto,
+            nextInput: { message: '@agent help' },
+          },
+        });
+
+        await waitForCondition(() => decisionSignal !== undefined);
+        aborted$.next();
+        decide(true);
+        await pending;
+
+        expect(decisionSignal?.aborted).toBe(true);
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('with a "no" decision on a busy conversation still persists the message', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(false);
+        conversationClient.get.mockResolvedValue({
+          ...conversation,
+          active_execution: { execution_id: 'other-exec' },
+        });
+
+        await send();
+
+        expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
     });
   });
 });
