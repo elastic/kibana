@@ -94,6 +94,11 @@ export interface FlyoutHeaderProps {
    * become part of the flyout's accessible name.
    */
   isLoading?: boolean;
+  /**
+   * Accessible name of the `isLoading` spinner, saying what is loading. Without it, the spinner
+   * has EUI's generic "Loading" name.
+   */
+  loadingLabel?: string;
   /** Subdued text below the title. */
   description?: ReactNode;
   /**

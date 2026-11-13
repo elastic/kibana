@@ -236,6 +236,20 @@ describe('FlyoutTemplate header title icon and description', () => {
     );
   });
 
+  it('names the loading spinner with loadingLabel', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" isLoading loadingLabel="Syncing attachments" />
+        {body}
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('flyoutHeaderTitleLoading')).toHaveAttribute(
+      'aria-label',
+      'Syncing attachments'
+    );
+  });
+
   it('renders no loading spinner by default', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">

@@ -15,6 +15,7 @@ See the package README for the tab bar.
 - `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip`, it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip`. It uses `titleIcon` as its type, or `info` if `titleIcon` is not set.
 - `isLoading` — shows a loading spinner after the title and any title icon, in both the expanded and the compact layout. The spinner sits outside the heading, so it does not change the flyout's accessible name.
+- `loadingLabel` — the spinner's accessible name, saying what is loading (for example, "Syncing attachments"). Without it, the spinner has EUI's generic "Loading" name.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. It is not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — always renders the compact layout, regardless of scroll position. See [Starting collapsed](#starting-collapsed).
 - `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Anything else, such as elements, components, or bare text, is not rendered. The assembly library warns in development about unrecognized children.

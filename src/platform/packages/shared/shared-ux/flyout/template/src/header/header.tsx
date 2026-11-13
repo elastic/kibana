@@ -237,6 +237,7 @@ export const HeaderZone = ({
   titleIcon,
   titleTooltip,
   isLoading = false,
+  loadingLabel,
   description,
   collapsed = false,
   children,
@@ -258,7 +259,7 @@ export const HeaderZone = ({
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
-  const titleLoadingNode = renderTitleLoading(isLoading);
+  const titleLoadingNode = renderTitleLoading(isLoading, loadingLabel);
   // The collapsed title truncates, so a string title gets a native hover reveal. A node title is
   // left untitled: a native `title` on its ancestor would cover any tooltip the node renders.
   const collapsedTitleText = typeof title === 'string' ? titleText ?? title : undefined;
