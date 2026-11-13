@@ -132,8 +132,15 @@ describe('getRunningProcessesTool', () => {
     expect(tool.description).toContain('running processes');
   });
 
-  it('asks for a confirmation naming the host from the handler, without dispatching', async () => {
-    const mockResponseActionsClient = { runningProcesses: jest.fn() };
+  it('dispatches in one call without asking the analyst to confirm', async () => {
+    const mockResponseActionsClient = {
+      runningProcesses: jest.fn().mockResolvedValue({
+        id: 'action-999',
+        status: 'pending',
+        hosts: { 'agent-123': { name: 'my-host' } },
+        outputs: {},
+      }),
+    };
     service.getInternalResponseActionsClient = jest.fn(
       () => mockResponseActionsClient
     ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
@@ -145,14 +152,21 @@ describe('getRunningProcessesTool', () => {
       },
       ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    mockActionCompletion({
+      id: 'action-999',
+      status: 'successful',
+      wasSuccessful: true,
+      hosts: { 'agent-123': { name: 'my-host' } },
+      outputs: {},
+    });
 
     const tool = getRunningProcessesTool(service);
     expect(tool.confirmation).toBeUndefined();
     const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-    expect(isToolHandlerInterruptReturn(result)).toBe(true);
-    expect(mockAskForConfirmation.mock.calls[0][0].message).toContain('my-host');
-    expect(mockResponseActionsClient.runningProcesses).not.toHaveBeenCalled();
+    expect(isToolHandlerInterruptReturn(result)).toBe(false);
+    expect(mockAskForConfirmation).not.toHaveBeenCalled();
+    expect(mockResponseActionsClient.runningProcesses).toHaveBeenCalledTimes(1);
   });
 
   it('returns insufficient_privileges and does not dispatch when caller lacks canGetRunningProcesses', async () => {

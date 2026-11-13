@@ -40,7 +40,7 @@ const getRunningProcessesSchema = z
 /**
  * Inspection action: retrieves the list of running processes from an enrolled
  * Elastic Defend host. It enqueues a real `running-processes` response action
- * on the endpoint, so every dispatch is gated by an analyst confirmation.
+ * on the endpoint. It only reads from the host, so it runs without a confirmation.
  */
 export const getRunningProcessesTool = (
   endpointAppContextService: EndpointAppContextService
@@ -68,13 +68,6 @@ export const getRunningProcessesTool = (
           context,
           endpointAppContextService,
           requiredPrivilege: 'canGetRunningProcesses',
-          confirmation: {
-            title: 'List running processes?',
-            color: 'primary',
-            confirmText: 'List processes',
-            comment: params.comment as string | undefined,
-            describe: (host) => `This will request the list of running processes from ${host}.`,
-          },
         });
         if (prepared.kind === 'result') {
           return prepared.result;
@@ -92,7 +85,8 @@ export const getRunningProcessesTool = (
           // Analyst-initiated via chat, not a system/rule-triggered action —
           // RESPONSE_ACTIONS_SUPPORT_MAP gates `running-processes` per agent
           // type/action-type combination (see is_response_action_supported.ts);
-          // `manual` is what a human confirming in chat maps to.
+          // `manual` is what an analyst-requested chat action maps to, even
+          // though this read runs without a confirmation prompt.
           isAutomated: false,
         });
 

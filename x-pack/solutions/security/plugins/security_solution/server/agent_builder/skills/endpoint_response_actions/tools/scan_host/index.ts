@@ -50,8 +50,8 @@ const scanHostSchema = z
  * Malware scan action. `scan` only detects malware on the provided path using
  * the endpoint's existing Elastic Defend policy — it does not execute or modify
  * anything on the host. It is nonetheless classified as a write action and
- * therefore always requires an explicit human confirmation step before the
- * skill dispatches it (see the skill system instructions).
+ * therefore always requires an explicit human confirmation step: the handler
+ * asks the analyst before it dispatches.
  */
 export const scanHostTool = (
   endpointAppContextService: EndpointAppContextService

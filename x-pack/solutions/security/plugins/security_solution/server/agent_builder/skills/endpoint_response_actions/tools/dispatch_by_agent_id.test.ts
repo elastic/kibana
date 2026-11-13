@@ -98,10 +98,7 @@ async function cardFor(tool: ReturnType<Case['build']>, toolParams: Record<strin
 }
 
 // An analyst-approved call: the handler runs again with the confirmation accepted.
-async function runApproved(
-  tool: ReturnType<Case['build']>,
-  toolParams: Record<string, unknown>
-) {
+async function runApproved(tool: ReturnType<Case['build']>, toolParams: Record<string, unknown>) {
   confirmationStatus.value = 'accepted';
 
   return tool.handler(toolParams, mockContext);
@@ -113,6 +110,8 @@ interface Case {
   action: string;
   build: typeof isolateHostTool;
   extraParams: Record<string, unknown>;
+  // Whether the analyst confirms the dispatch. Running processes only reads.
+  gated: boolean;
   privilege:
     | 'canIsolateHost'
     | 'canUnIsolateHost'
@@ -128,6 +127,7 @@ const CASES: Case[] = [
     action: 'isolate',
     build: isolateHostTool,
     extraParams: {},
+    gated: true,
   },
   {
     label: 'unisolate_host',
@@ -136,6 +136,7 @@ const CASES: Case[] = [
     action: 'unisolate',
     build: unisolateHostTool,
     extraParams: {},
+    gated: true,
   },
   {
     label: 'scan_host',
@@ -144,6 +145,7 @@ const CASES: Case[] = [
     action: 'scan',
     build: scanHostTool as unknown as typeof isolateHostTool,
     extraParams: { path: '/tmp/x' },
+    gated: true,
   },
   {
     label: 'running_processes',
@@ -152,13 +154,21 @@ const CASES: Case[] = [
     action: 'running-processes',
     build: getRunningProcessesTool,
     extraParams: {},
+    gated: false,
   },
 ];
 
 describe.each(CASES)(
   '$label: dispatch by agent ID',
-  ({ clientMethod, action, build, extraParams, privilege }) => {
+  ({ clientMethod, action, build, extraParams, privilege, gated }) => {
     jest.setTimeout(20000);
+
+    // Tests of the confirmation card exist only for the tools that show one.
+    const itGated = (name: string, fn: () => Promise<void>) => {
+      if (gated) {
+        it(name, fn);
+      }
+    };
 
     let service: EndpointAppContextService;
     let client: Record<string, jest.Mock>;
@@ -290,48 +300,54 @@ describe.each(CASES)(
       );
     });
 
-    it('records the resolved agent as the confirmed target when the card names a host', async () => {
-      const tool = build(service);
+    itGated(
+      'records the resolved agent as the confirmed target when the card names a host',
+      async () => {
+        const tool = build(service);
 
-      await cardFor(tool, { hostName: 'dup-host', agentId: 'agent-b', ...extraParams });
+        await cardFor(tool, { hostName: 'dup-host', agentId: 'agent-b', ...extraParams });
 
-      // The displayed arguments travel with the confirmation: scan records
-      // its `path`; tools called without a `comment` record none.
-      const recordedArgs = 'path' in extraParams ? { path: extraParams.path } : undefined;
-      expect(toolCallState.value).toEqual({
-        kind: 'confirmed',
-        action,
-        agentId: 'agent-b',
-        ...(recordedArgs ? { args: recordedArgs } : {}),
-      });
-    });
+        // The displayed arguments travel with the confirmation: scan records
+        // its `path`; tools called without a `comment` record none.
+        const recordedArgs = 'path' in extraParams ? { path: extraParams.path } : undefined;
+        expect(toolCallState.value).toEqual({
+          kind: 'confirmed',
+          action,
+          agentId: 'agent-b',
+          ...(recordedArgs ? { args: recordedArgs } : {}),
+        });
+      }
+    );
 
-    it('does not dispatch when the host now resolves to a different agent than the confirmed one', async () => {
-      listAgents.mockResolvedValueOnce({
-        agents: [{ id: 'agent-b', status: 'online', packages: ['endpoint'] }],
-      });
-      const tool = build(service);
+    itGated(
+      'does not dispatch when the host now resolves to a different agent than the confirmed one',
+      async () => {
+        listAgents.mockResolvedValueOnce({
+          agents: [{ id: 'agent-b', status: 'online', packages: ['endpoint'] }],
+        });
+        const tool = build(service);
 
-      await cardFor(tool, { hostName: 'dup-host', ...extraParams });
+        await cardFor(tool, { hostName: 'dup-host', ...extraParams });
 
-      // The confirmed agent goes offline and another agent answers to the same
-      // hostname, so the handler's own walk would pick a host the card never
-      // named.
-      listAgents.mockResolvedValue({
-        agents: [{ id: 'agent-a', status: 'online', packages: ['endpoint'] }],
-      });
+        // The confirmed agent goes offline and another agent answers to the same
+        // hostname, so the handler's own walk would pick a host the card never
+        // named.
+        listAgents.mockResolvedValue({
+          agents: [{ id: 'agent-a', status: 'online', packages: ['endpoint'] }],
+        });
 
-      const out = results(await runApproved(tool, { hostName: 'dup-host', ...extraParams }));
+        const out = results(await runApproved(tool, { hostName: 'dup-host', ...extraParams }));
 
-      expect(out[0].type).toBe('error');
-      expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
-      expect((out[0].data as Record<string, unknown>).message).toEqual(
-        expect.stringContaining('changed after the analyst confirmed it')
-      );
-      expect(client[clientMethod]).not.toHaveBeenCalled();
-    });
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+        expect((out[0].data as Record<string, unknown>).message).toEqual(
+          expect.stringContaining('changed after the analyst confirmed it')
+        );
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
 
-    it('does not dispatch a call that carries no confirmation at all', async () => {
+    itGated('does not dispatch a call that carries no confirmation at all', async () => {
       const tool = build(service);
 
       const out = results(await runApproved(tool, { agentId: 'agent-b', ...extraParams }));
@@ -343,33 +359,36 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('does not dispatch when a confirmed call is replayed with different arguments', async () => {
-      // The card is the human gate on the whole request, its displayed
-      // arguments included: a resumed call reusing the confirmed tool-call
-      // state but swapping the comment (or, for scan, the path) must not
-      // inherit the approval.
-      const tool = build(service);
+    itGated(
+      'does not dispatch when a confirmed call is replayed with different arguments',
+      async () => {
+        // The card is the human gate on the whole request, its displayed
+        // arguments included: a resumed call reusing the confirmed tool-call
+        // state but swapping the comment (or, for scan, the path) must not
+        // inherit the approval.
+        const tool = build(service);
 
-      await cardFor(tool, { agentId: 'agent-b', comment: 'first reason', ...extraParams });
-      expect(toolCallState.value).toEqual(
-        expect.objectContaining({
-          kind: 'confirmed',
-          args: expect.objectContaining({ comment: 'first reason' }),
-        })
-      );
+        await cardFor(tool, { agentId: 'agent-b', comment: 'first reason', ...extraParams });
+        expect(toolCallState.value).toEqual(
+          expect.objectContaining({
+            kind: 'confirmed',
+            args: expect.objectContaining({ comment: 'first reason' }),
+          })
+        );
 
-      const out = results(
-        await runApproved(tool, { agentId: 'agent-b', comment: 'swapped reason', ...extraParams })
-      );
+        const out = results(
+          await runApproved(tool, { agentId: 'agent-b', comment: 'swapped reason', ...extraParams })
+        );
 
-      expect(out[0].type).toBe('error');
-      const data = out[0].data as Record<string, unknown>;
-      expect(data.error).toBe('invalid_argument');
-      expect(data.message).toEqual(
-        expect.stringContaining('differ from the ones the analyst confirmed')
-      );
-      expect(client[clientMethod]).not.toHaveBeenCalled();
-    });
+        expect(out[0].type).toBe('error');
+        const data = out[0].data as Record<string, unknown>;
+        expect(data.error).toBe('invalid_argument');
+        expect(data.message).toEqual(
+          expect.stringContaining('differ from the ones the analyst confirmed')
+        );
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
 
     it('dispatches when the replayed arguments are the ones that were confirmed', async () => {
       const tool = build(service);
@@ -390,6 +409,24 @@ describe.each(CASES)(
       );
     });
 
+    if (!gated) {
+      it('dispatches in one call, without asking the analyst to confirm', async () => {
+        const tool = build(service);
+
+        const out = results(
+          await tool.handler({ agentId: 'agent-b', ...extraParams }, mockContext)
+        );
+
+        expect(mockAskForConfirmation).not.toHaveBeenCalled();
+        expect(toolCallState.value).toBeUndefined();
+        expect(out[0].type).not.toBe('error');
+        expect(client[clientMethod]).toHaveBeenCalledTimes(1);
+        expect(client[clientMethod].mock.calls[0][0]).toEqual(
+          expect.objectContaining({ endpoint_ids: ['agent-b'] })
+        );
+      });
+    }
+
     it('refuses a hostName that does not match the Fleet hostname of the agentId, instead of acting on the agent', async () => {
       const tool = build(service);
 
@@ -405,19 +442,22 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('renders the confirmation card from the resolved Fleet host, not the hostName the model supplied', async () => {
-      const tool = build(service);
+    itGated(
+      'renders the confirmation card from the resolved Fleet host, not the hostName the model supplied',
+      async () => {
+        const tool = build(service);
 
-      const card = await cardFor(tool, {
-        hostName: 'dup-host',
-        agentId: 'agent-b',
-        ...extraParams,
-      });
+        const card = await cardFor(tool, {
+          hostName: 'dup-host',
+          agentId: 'agent-b',
+          ...extraParams,
+        });
 
-      expect(card.message).toContain('dup-host');
-      expect(card.message).toContain('agent-b');
-      expect(client[clientMethod]).not.toHaveBeenCalled();
-    });
+        expect(card.message).toContain('dup-host');
+        expect(card.message).toContain('agent-b');
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
 
     it('accepts the short Defend hostname of an agent whose Fleet hostname is the FQDN', async () => {
       // Agent policy hostname format is FQDN: Fleet names the agent
@@ -566,17 +606,20 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('shows the model-written comment on the card, since it is logged under the analyst', async () => {
-      const tool = build(service);
+    itGated(
+      'shows the model-written comment on the card, since it is logged under the analyst',
+      async () => {
+        const tool = build(service);
 
-      const card = await cardFor(tool, {
-        agentId: 'agent-b',
-        comment: 'Per ticket SEC-42',
-        ...extraParams,
-      });
+        const card = await cardFor(tool, {
+          agentId: 'agent-b',
+          comment: 'Per ticket SEC-42',
+          ...extraParams,
+        });
 
-      expect(card.message).toContain('Per ticket SEC-42');
-    });
+        expect(card.message).toContain('Per ticket SEC-42');
+      }
+    );
 
     it.each(['user', 'mcp', 'unknown'] as const)(
       'refuses a %s call source without dispatching, so the confirmation gate cannot be bypassed',
@@ -696,21 +739,24 @@ describe.each(CASES)(
       );
     });
 
-    it('labels the host by agent ID, never by the model-supplied hostName, when Fleet records no name', async () => {
-      getAgent.mockResolvedValue({ id: 'agent-b', status: 'online', packages: ['endpoint'] });
-      const tool = build(service);
-      const params = { hostName: 'attacker-chosen-name', agentId: 'agent-b', ...extraParams };
+    itGated(
+      'labels the host by agent ID, never by the model-supplied hostName, when Fleet records no name',
+      async () => {
+        getAgent.mockResolvedValue({ id: 'agent-b', status: 'online', packages: ['endpoint'] });
+        const tool = build(service);
+        const params = { hostName: 'attacker-chosen-name', agentId: 'agent-b', ...extraParams };
 
-      const card = await cardFor(tool, params);
-      expect(card.message).not.toContain('attacker-chosen-name');
-      expect(card.message).toContain('agent-b');
+        const card = await cardFor(tool, params);
+        expect(card.message).not.toContain('attacker-chosen-name');
+        expect(card.message).toContain('agent-b');
 
-      await runApproved(tool, params);
-      const [payload, metadata] = client[clientMethod].mock.calls[0];
-      expect(JSON.stringify(payload)).not.toContain('attacker-chosen-name');
-      expect(JSON.stringify(metadata)).not.toContain('attacker-chosen-name');
-      expect(metadata).toEqual({ hosts: { 'agent-b': { name: 'agent-b' } } });
-    });
+        await runApproved(tool, params);
+        const [payload, metadata] = client[clientMethod].mock.calls[0];
+        expect(JSON.stringify(payload)).not.toContain('attacker-chosen-name');
+        expect(JSON.stringify(metadata)).not.toContain('attacker-chosen-name');
+        expect(metadata).toEqual({ hosts: { 'agent-b': { name: 'agent-b' } } });
+      }
+    );
 
     it('includes why the action failed in the result', async () => {
       mockGetActionDetailsById.mockResolvedValue({
