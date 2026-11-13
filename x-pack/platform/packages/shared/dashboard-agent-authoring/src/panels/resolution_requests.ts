@@ -56,30 +56,44 @@ const getPanelEditError = (
 
 type ResolutionRequestResult = { request: PanelResolutionRequest } | { error: string };
 
+const removeAllExcludesDataQueriesError = (id: string): string =>
+  `Panel "${id}" cannot combine \`removeAllQueries\`, which removes every query, with \`dataQueries\`.`;
+
+const getStoredQueries = (panel: AttachmentPanel): string[] =>
+  (panel.config as { esql_query?: string[] }).esql_query ?? [];
+
 /** Maps request content for a new panel onto the resolution request for its renderer. */
 const toCreationResolutionRequest = (
   content: PanelRequestContent,
   id: string
 ): ResolutionRequestResult => {
   if (content.renderer === 'custom_content') {
-    const { renderer, query, esql, hasData, regenerateESQL, index } = content;
-    if (query === undefined || hasData === undefined) {
+    const { renderer, query, dataQueries, removeAllQueries } = content;
+    if (query === undefined || (!dataQueries && !removeAllQueries)) {
       const missing = [
         ...(query === undefined ? ['`query`'] : []),
-        ...(hasData === undefined
-          ? ['`hasData` (true to generate its ES|QL query, false for static content with no query)']
+        ...(!dataQueries && !removeAllQueries
+          ? [
+              '`dataQueries` (for a panel with live data) or `removeAllQueries: true` (for static content with no data)',
+            ]
           : []),
       ];
       return { error: `Panel "${id}" is new. Provide ${missing.join(' and ')} to create it.` };
     }
-    if (regenerateESQL) {
+    if (dataQueries && removeAllQueries) {
+      return { error: removeAllExcludesDataQueriesError(id) };
+    }
+    const empty = dataQueries?.findIndex(
+      (dataQuery) => !dataQuery.description?.trim() && !dataQuery.esql?.trim()
+    );
+    if (empty !== undefined && empty !== -1) {
       return {
-        error: `Panel "${id}" is new, so \`regenerateESQL\` does not apply. Use \`hasData\` to say whether it has a query.`,
+        error: `Data query ${
+          empty + 1
+        } of the new panel "${id}" needs a \`description\` or an \`esql\` query.`,
       };
     }
-    return {
-      request: { renderer, nlQuery: query, esql: esql ?? undefined, hasData, index },
-    };
+    return { request: { renderer, nlQuery: query, dataQueries, removeAllQueries } };
   }
 
   const { renderer, query, index, esql, chartType } = content;
@@ -104,29 +118,25 @@ const toEditResolutionRequest = (
   const base = { existingPanel };
 
   if (content.renderer === 'custom_content') {
-    const { renderer, query, esql, hasData, regenerateESQL, index } = content;
-    if (regenerateESQL && hasData === false) {
+    const { renderer, query, dataQueries, removeAllQueries } = content;
+    if (dataQueries && removeAllQueries) {
+      return { error: removeAllExcludesDataQueriesError(existingPanel.id) };
+    }
+    if (query === undefined && !dataQueries && !removeAllQueries) {
       return {
-        error: `Panel "${existingPanel.id}" cannot combine \`regenerateESQL\` with \`hasData\`: false, which removes the query.`,
+        error: `Panel "${existingPanel.id}" edit needs \`query\`, \`dataQueries\` or \`removeAllQueries\`.`,
       };
     }
-    if (esql === null && (hasData === true || regenerateESQL)) {
+    const existingCount = getStoredQueries(existingPanel).length;
+    const changesWhatIsShown = dataQueries?.some(
+      (dataQuery, position) => Boolean(dataQuery.description?.trim()) || position >= existingCount
+    );
+    if (query === undefined && changesWhatIsShown) {
       return {
-        error: `Panel "${existingPanel.id}" cannot combine \`esql\`: null, which removes the query, with \`hasData\`: true or \`regenerateESQL\`.`,
+        error: `Panel "${existingPanel.id}" edit needs \`query\` when a data query has a \`description\` or adds a query: say how the panel should now use the data.`,
       };
     }
-    const replacesQuery = typeof esql === 'string' && esql.trim() !== '';
-    const removesQuery = esql === null || hasData === false;
-    const changesOnlyQuery =
-      !regenerateESQL && (replacesQuery || (removesQuery && hasData !== true));
-    if (query === undefined && !changesOnlyQuery) {
-      return {
-        error: `Panel "${existingPanel.id}" edit needs \`query\` unless it only replaces the ES|QL query with a non-blank \`esql\` or removes it (\`esql\`: null, or \`hasData\`: false); \`regenerateESQL\` and \`hasData\`: true need it.`,
-      };
-    }
-    return {
-      request: { ...base, renderer, nlQuery: query, esql, hasData, regenerateESQL, index },
-    };
+    return { request: { ...base, renderer, nlQuery: query, dataQueries, removeAllQueries } };
   }
 
   const renderer = findPanelRenderer(existingPanel.type);

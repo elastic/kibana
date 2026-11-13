@@ -31,16 +31,13 @@ export const createCustomContentPanelResolver = ({
   esClient,
 }: VisPanelResolverDeps) => {
   return async (request: CustomContentPanelResolutionRequest): Promise<PanelContentAttempt> => {
-    const { nlQuery, index, esql, hasData, existingPanel, resolveEsqlVariables } = request;
-    const regenerateESQL = request.existingPanel ? request.regenerateESQL : undefined;
+    const { nlQuery, dataQueries, removeAllQueries, existingPanel, resolveEsqlVariables } = request;
     try {
       const existing = existingPanel?.config as CustomContentState | undefined;
       const { esqlQueries, template } = await buildCustomContentConfig({
         nlQuery,
-        index,
-        esql,
-        hasData,
-        regenerateESQL,
+        dataQueries,
+        removeAllQueries,
         resolveEsqlVariables,
         existing: existing && { esqlQueries: existing.esql_query, template: existing.template },
         modelProvider,

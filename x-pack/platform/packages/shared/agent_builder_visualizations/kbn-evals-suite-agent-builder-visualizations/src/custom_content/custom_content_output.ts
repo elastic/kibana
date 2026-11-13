@@ -19,7 +19,7 @@ import { extractVisualizations, type ExtractedVisualization } from '../extract_v
 
 /** A custom content panel as stored in the visualization attachment. */
 export interface StoredCustomContent {
-  /** Absent for a static panel. */
+  /** The main query, the one the template reads as `rows`. Absent for a static panel. */
   esql?: string;
   template?: string;
   height?: number;
@@ -71,8 +71,11 @@ export const toStoredCustomContent = (data: unknown): StoredCustomContent | unde
   if (!isRecord(data) || data.renderer !== 'custom_content') {
     return undefined;
   }
-  const { esql, visualization } = data;
+  const { visualization } = data;
   const stored: StoredCustomContent = {};
+  // A list since a panel can have several queries, a string in attachments saved before that. As
+  // for a dashboard panel, the evaluators judge the first one, the one the template reads as `rows`.
+  const [esql] = Array.isArray(data.esql) ? data.esql : [data.esql];
   if (typeof esql === 'string' && esql.trim().length > 0) {
     stored.esql = esql;
   }
@@ -262,16 +265,15 @@ const PROMPT_EXCERPT_LENGTH = 80;
 const flag = (value: unknown): string =>
   value === undefined || value === null ? 'unset' : String(value);
 
-const presence = (value: unknown): string =>
-  value === null ? 'null' : typeof value === 'string' && value.trim() !== '' ? 'yes' : 'no';
+const count = (value: unknown): string => (Array.isArray(value) ? String(value.length) : 'unset');
 
 const excerpt = (value: unknown): string =>
   typeof value === 'string' ? JSON.stringify(value.slice(0, PROMPT_EXCERPT_LENGTH)) : 'unset';
 
 /**
- * Summarizes what each tool call of these steps passed for a custom content panel: the data flags
- * and whether a query was supplied, never the query itself. It tells an agent that left out
- * `hasData` from one that passed it and still got no query.
+ * Summarizes what each tool call of these steps passed for a custom content panel: how many data
+ * queries and whether it removed them all, never the queries themselves. It tells an agent that
+ * left out `dataQueries` from one that passed them and still got no query.
  */
 export const getCustomContentToolArgs = (
   steps: Array<Record<string, unknown>> | undefined
@@ -287,11 +289,11 @@ export const getCustomContentToolArgs = (
       return params.panels.flatMap((item: unknown) =>
         isRecord(item) && isRecord(item.content) && item.content.renderer === 'custom_content'
           ? [
-              `${toolId} panel ${String(item.id)}: hasData=${flag(
-                item.content.hasData
-              )} regenerateESQL=${flag(item.content.regenerateESQL)} esql=${presence(
-                item.content.esql
-              )} index=${presence(item.content.index)} query=${excerpt(item.content.query)}`,
+              `${toolId} panel ${String(item.id)}: dataQueries=${count(
+                item.content.dataQueries
+              )} removeAllQueries=${flag(item.content.removeAllQueries)} query=${excerpt(
+                item.content.query
+              )}`,
             ]
           : []
       );
@@ -301,20 +303,18 @@ export const getCustomContentToolArgs = (
       const { target } = params;
       return target.type === 'custom_content' || target.type === 'attachment'
         ? [
-            `${toolId} ${String(target.type)}: has_data=${flag(
-              target.has_data
-            )} regenerate_esql=${flag(target.regenerate_esql)} esql=${presence(
-              target.esql
-            )} index=${presence(params.index)} query=${excerpt(params.query)}`,
+            `${toolId} ${String(target.type)}: dataQueries=${count(
+              target.dataQueries
+            )} removeAllQueries=${flag(target.removeAllQueries)} query=${excerpt(params.query)}`,
           ]
         : [];
     }
 
     if (toolId.includes(CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID)) {
       return [
-        `${toolId}: regenerateEsql=${flag(params.regenerateEsql)} esqlQuery=${presence(
-          params.esqlQuery
-        )} index=${presence(params.index)} prompt=${excerpt(params.prompt)}`,
+        `${toolId}: dataQueries=${count(params.dataQueries)} removeAllQueries=${flag(
+          params.removeAllQueries
+        )} prompt=${excerpt(params.prompt)}`,
       ];
     }
 

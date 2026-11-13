@@ -133,6 +133,30 @@ describe('visualizationAttachmentDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
+    it('stores a query saved as a single string, as before a panel could have several, as a list', () => {
+      const result = visualizationAttachmentDataSchema.safeParse({
+        renderer: 'custom_content',
+        query: 'a status board per host',
+        visualization: { template: '<div>x</div>' },
+        esql: 'FROM logs | STATS count() BY host',
+      });
+
+      expect(result.success && result.data).toMatchObject({
+        esql: ['FROM logs | STATS count() BY host'],
+      });
+    });
+
+    it('rejects a query longer than a chart query may be', () => {
+      const result = visualizationAttachmentDataSchema.safeParse({
+        renderer: 'custom_content',
+        query: 'a status board per host',
+        visualization: { template: '<div>x</div>' },
+        esql: ['a'.repeat(4097)],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
     it('accepts a static custom content attachment with no esql', () => {
       const result = visualizationAttachmentDataSchema.safeParse({
         renderer: 'custom_content',

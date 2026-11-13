@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateVisualizationEsql } from './generate_visualization_esql';
-import { CUSTOM_CONTENT_ESQL_INSTRUCTIONS, generateCustomContentEsql } from './custom_content_esql';
+import {
+  CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS,
+  CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
+  generateCustomContentEsql,
+} from './custom_content_esql';
 
 jest.mock('./generate_visualization_esql', () => ({
   generateVisualizationEsql: jest.fn(),
@@ -41,6 +45,21 @@ describe('generateCustomContentEsql', () => {
       extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
     });
     expect(result).toBe('FROM logs-*');
+  });
+
+  it('adds the multi-query instructions when the query is one of several', async () => {
+    await generateCustomContentEsql({ ...params, queryCount: 2 });
+
+    expect(mockGenerate).toHaveBeenCalledWith({
+      ...params,
+      extraInstructions: `${CUSTOM_CONTENT_ESQL_INSTRUCTIONS}${CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS}`,
+    });
+  });
+
+  it('does not pass queryCount on to the generator', async () => {
+    await generateCustomContentEsql({ ...params, queryCount: 2 });
+
+    expect(mockGenerate.mock.calls[0][0]).not.toHaveProperty('queryCount');
   });
 
   it('throws with the reason and the caller hint when no query is produced', async () => {
@@ -80,6 +99,16 @@ describe('generateCustomContentEsql', () => {
     it('keeps ordinal content in the order the user listed', () => {
       expect(CUSTOM_CONTENT_ESQL_INSTRUCTIONS).toContain('funnel');
       expect(CUSTOM_CONTENT_ESQL_INSTRUCTIONS).toContain('never sort a funnel by its values');
+    });
+
+    it('lets a data query of headline numbers be one row, and keeps it to its own data', () => {
+      expect(CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS).toContain(
+        'ONE row with one column per number'
+      );
+      expect(CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS).toContain(
+        'ONLY the data it was described for'
+      );
+      expect(CUSTOM_CONTENT_MULTI_QUERY_INSTRUCTIONS).toContain('snake_case');
     });
 
     it('asks for one row per item', () => {

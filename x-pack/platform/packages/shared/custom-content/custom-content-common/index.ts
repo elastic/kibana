@@ -24,10 +24,16 @@ export {
 export {
   customContentStateSchema,
   customContentPanelUpdateSchema,
-  readEsqlQuery,
-  toEsqlQueryState,
+  customContentDataQueriesSchema,
+  REMOVE_ALL_QUERIES_DESCRIPTION,
+  rejectRemovedQueryFields,
 } from './schema';
-export type { CustomContentState } from './schema';
+export type {
+  CustomContentState,
+  CustomContentDataQuery,
+  CustomContentDataQueries,
+  CustomContentQueryChanges,
+} from './schema';
 export {
   fitsEsqlQueriesTotalLength,
   ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,

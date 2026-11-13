@@ -14,7 +14,6 @@ import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
-import { readEsqlQuery } from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_UPDATED_UI_EVENT } from '../common/ui_events';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { openLazyFlyout } from '@kbn/presentation-util';
@@ -68,9 +67,9 @@ jest.mock('@kbn/custom-content-renderer', () => ({
 
 let capturedFlyoutProps:
   | {
-      onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
+      onSave: (esqlQueries: string[], template: string | undefined) => void;
       onClose: () => void;
-      onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
+      onGenerateWithChat?: (template: string, esqlQueries: string[]) => void;
       esqlQueries?: readonly string[];
     }
   | undefined;
@@ -215,9 +214,9 @@ describe('customContentEmbeddableFactory', () => {
           esql_query: ['FROM metrics | STATS avg = AVG(value)'],
         });
       });
-      expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
-        'FROM metrics | STATS avg = AVG(value)'
-      );
+      expect(embeddable.api.serializeState().esql_query).toEqual([
+        'FROM metrics | STATS avg = AVG(value)',
+      ]);
     });
   });
 
@@ -550,7 +549,7 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => render(<embeddable.Component />));
 
       const el = screen.getByTestId('mockCustomContentComponent');
-      expect(el).toHaveAttribute('data-esql-query', readEsqlQuery(baseState));
+      expect(el).toHaveAttribute('data-esql-query', baseState.esql_query?.[0]);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });
   });
@@ -582,11 +581,11 @@ describe('customContentEmbeddableFactory', () => {
       await renderFlyoutContent();
 
       await act(async () =>
-        capturedFlyoutProps!.onSave('FROM metrics | LIMIT 10', '<div>new</div>')
+        capturedFlyoutProps!.onSave(['FROM metrics | LIMIT 10', 'FROM logs'], '<div>new</div>')
       );
 
       const state = embeddable.api.serializeState();
-      expect(readEsqlQuery(state)).toBe('FROM metrics | LIMIT 10');
+      expect(state.esql_query).toEqual(['FROM metrics | LIMIT 10', 'FROM logs']);
       expect(state.template).toBe('<div>new</div>');
     });
 
@@ -659,7 +658,7 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
       await renderFlyoutContent();
 
-      await act(async () => capturedFlyoutProps!.onSave('FROM logs', '<div>saved</div>'));
+      await act(async () => capturedFlyoutProps!.onSave(['FROM logs'], '<div>saved</div>'));
       await act(async () => mockFlyoutOnClose);
       expect(removePanel).not.toHaveBeenCalled();
     });
@@ -672,7 +671,7 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
       await renderFlyoutContent();
-      await act(async () => capturedFlyoutProps!.onSave('FROM logs', '<div>saved</div>'));
+      await act(async () => capturedFlyoutProps!.onSave(['FROM logs'], '<div>saved</div>'));
       await act(async () => mockFlyoutOnClose);
 
       capturedOpenLazyFlyoutArgs = undefined;
@@ -699,13 +698,11 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => embeddable.api.onEdit());
       await renderFlyoutContent();
 
-      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', undefined));
+      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', []));
 
       expect(openChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
     });
 
-    // The editor does not change the other queries yet, so a refine must not lose them: the agent
-    // hands back whatever the attachment carried.
     it('gives the flyout the additional queries of the panel, so its preview can fetch them', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
@@ -731,7 +728,7 @@ describe('customContentEmbeddableFactory', () => {
       ]);
     });
 
-    it('removes the additional queries with the main one, so a query added later does not bring them back', async () => {
+    it('removes every query when the editor saves none, so a query added later does not bring them back', async () => {
       const { embeddable } = await buildEmbeddable({
         ...baseState,
         esql_query: ['FROM a', 'FROM b'],
@@ -740,12 +737,12 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => embeddable.api.onEdit());
       await renderFlyoutContent();
-      await act(async () => capturedFlyoutProps!.onSave(undefined, '<div>static</div>'));
+      await act(async () => capturedFlyoutProps!.onSave([], '<div>static</div>'));
       expect(embeddable.api.serializeState().esql_query).toBeUndefined();
 
       await act(async () => embeddable.api.onEdit());
       await renderFlyoutContent();
-      await act(async () => capturedFlyoutProps!.onSave('FROM c', '<div>dynamic</div>'));
+      await act(async () => capturedFlyoutProps!.onSave(['FROM c'], '<div>dynamic</div>'));
 
       expect(embeddable.api.serializeState().esql_query).toEqual(['FROM c']);
     });
@@ -768,7 +765,7 @@ describe('customContentEmbeddableFactory', () => {
       expect(after).toBe(before);
     });
 
-    it('sends the additional queries of the panel to the chat', async () => {
+    it('sends the queries of the flyout draft to the chat', async () => {
       const openChat = jest.fn();
       mockAgentBuilder = {
         openChat,
@@ -786,7 +783,9 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => embeddable.api.onEdit());
       await renderFlyoutContent();
 
-      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', 'FROM a'));
+      await act(async () =>
+        capturedFlyoutProps!.onGenerateWithChat?.('draft', ['FROM a', 'FROM b', 'FROM c'])
+      );
 
       expect(openChat.mock.calls[0][0].attachments[0].data).toMatchObject({
         esql_query: 'FROM a',
@@ -811,7 +810,7 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
       await renderFlyoutContent();
 
-      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', undefined));
+      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', []));
       await act(async () => mockFlyoutOnClose);
 
       expect(openChat).toHaveBeenCalled();
@@ -918,7 +917,7 @@ describe('customContentEmbeddableFactory', () => {
       // A query added later in the editor must not bring the ignored ones back.
       await act(async () => embeddable.api.onEdit());
       await renderFlyoutContent();
-      await act(async () => capturedFlyoutProps!.onSave('FROM a', '<div>dynamic</div>'));
+      await act(async () => capturedFlyoutProps!.onSave(['FROM a'], '<div>dynamic</div>'));
 
       expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a']);
     });

@@ -18,7 +18,9 @@ jest.mock('./visualize_vega', () => ({
   VisualizeVega: () => <span data-test-subj="vega-renderer" />,
 }));
 jest.mock('./visualize_custom_content', () => ({
-  VisualizeCustomContent: () => <span data-test-subj="custom-content-renderer" />,
+  VisualizeCustomContent: ({ esqlQueries }: { esqlQueries?: readonly string[] }) => (
+    <span data-test-subj="custom-content-renderer">{JSON.stringify(esqlQueries)}</span>
+  ),
 }));
 
 const services = {} as VisualizationServices;
@@ -61,5 +63,24 @@ describe('InlineVisualization', () => {
 
       unmount();
     }
+  });
+
+  it.each([
+    ['a list of queries', ['FROM a', 'FROM b'], ['FROM a', 'FROM b']],
+    ['a single string, as saved before a panel could have several', 'FROM a', ['FROM a']],
+    ['no queries', undefined, []],
+  ])('gives custom content its queries as a list from %s', async (_name, esql, expected) => {
+    render(
+      <InlineVisualization
+        services={services}
+        renderer="custom_content"
+        visualization={{}}
+        esql={esql}
+      />
+    );
+
+    expect((await screen.findByTestId('custom-content-renderer')).textContent).toBe(
+      JSON.stringify(expected)
+    );
   });
 });

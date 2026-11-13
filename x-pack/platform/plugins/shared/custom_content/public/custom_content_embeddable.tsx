@@ -153,8 +153,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     // The other queries extend the first, so a panel with no first query, or an empty one, has none.
     const keepIfMainQuery = (queries: readonly string[]): string[] =>
       queries[0] ? [...queries] : [];
-    // The panel's queries, the first of which is `rows` in its template. Only a hand-edited panel has
-    // more than one, and the editor changes only the first.
+    // The panel's queries, the first of which is `rows` in its template.
     const esqlQueries$ = new BehaviorSubject<string[]>(
       keepIfMainQuery(initialState.esql_query ?? [])
     );
@@ -167,8 +166,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         current.length === next.length && current.every((query, index) => query === next[index]);
       if (!isSame) esqlQueries$.next(next);
     };
-    const replaceMainQuery = (queries: readonly string[], mainQuery: string | undefined) =>
-      mainQuery ? [mainQuery, ...queries.slice(1)] : [];
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
@@ -220,13 +217,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     ) => {
       template$.next(data.panel_template);
       setEsqlQueries(readContextQueries(data));
-    };
-
-    const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
-      if ('esqlQuery' in update) {
-        setEsqlQueries(replaceMainQuery(esqlQueries$.getValue(), update.esqlQuery));
-      }
-      if ('template' in update) template$.next(update.template);
     };
 
     const stateApi = initializeStateApi<CustomContentEmbeddableState>({
@@ -291,12 +281,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               './components/edit_custom_content_flyout'
             );
 
-            const handleSave = (
-              newEsqlQuery: string | undefined,
-              newTemplate: string | undefined
-            ) => {
+            const handleSave = (newEsqlQueries: string[], newTemplate: string | undefined) => {
               hasSaved = true;
-              applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
+              setEsqlQueries(newEsqlQueries);
+              template$.next(newTemplate);
               closeFlyout();
             };
 
@@ -306,7 +294,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
             const handleGenerateWithChatFromFlyout = (
               draftTemplate: string,
-              draftEsqlQuery: string | undefined
+              newEsqlQueries: string[]
             ) => {
               if (!agentBuilder) return;
               hasSaved = true;
@@ -317,8 +305,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
-                    // The editor does not change the other queries yet, so the chat gets the panel's own.
-                    esqlQueries: replaceMainQuery(esqlQueries$.getValue(), draftEsqlQuery),
+                    esqlQueries: newEsqlQueries,
                     embeddableId: uuid,
                     panelTitle: titleManager.api.title$.getValue() ?? undefined,
                     panelHeight: measurePanelHeight(),

@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/palettes'
   - '@kbn/zod'
+  - '@kbn/custom-content-common'
 tags:
   - shared-server
   - package
