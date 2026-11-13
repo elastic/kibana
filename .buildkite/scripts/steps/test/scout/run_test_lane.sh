@@ -6,6 +6,10 @@ source .buildkite/scripts/steps/functional/common.sh
 
 SCOUT_SERVER_LOG=""
 PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
+PLAYWRIGHT_WATCHDOG=".buildkite/scripts/steps/test/scout/run_playwright_with_watchdog.ts"
+HANG_DIAGNOSTICS_DIR=".scout/hang-diagnostics"
+# Hard cap per config, in case the watchdog itself fails. Slowest config is ~21m.
+CONFIG_RUN_TIMEOUT="30m"
 
 LOAD_IDS=()
 LOAD_CONFIG_SETS=()
@@ -59,6 +63,13 @@ flaky_count() {
   report="$(json_report_path "$idx")"
   [[ -f "$report" ]] || { echo 0; return; }
   jq -r '.stats.flaky // 0' "$report" 2>/dev/null || echo 0
+}
+
+# True if a config's JSON report exists and records no unexpected test results or run-level errors
+all_tests_passed() {
+  local report
+  report="$(json_report_path "$1")"
+  [[ -f "$report" ]] && jq -e '.stats.unexpected == 0 and (.errors | length) == 0' "$report" > /dev/null 2>&1
 }
 
 # After a config fails, persist its failed spec files so the next attempt can re-run only those.
@@ -252,7 +263,8 @@ run_scout_tests() {
     "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
     "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
     "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
-    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/swc-register/install"
+    # The report flags let the watchdog get a Node diagnostic report out of a hung Playwright
+    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/swc-register/install --report-on-signal --report-signal=SIGUSR2 --report-directory=$HANG_DIAGNOSTICS_DIR"
     # Pin the JSON report to a path we control (see json_report_path).
     "PLAYWRIGHT_JSON_OUTPUT_FILE=$(json_report_path "$idx")"
   )
@@ -260,10 +272,25 @@ run_scout_tests() {
   local start_time
   start_time=$(date +%s)
 
+  # Node does not create the report directory itself
+  mkdir -p "$HANG_DIAGNOSTICS_DIR"
+
   set +e
-  env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
+  timeout --kill-after=1m "$CONFIG_RUN_TIMEOUT" \
+    node "$PLAYWRIGHT_WATCHDOG" "$(json_report_path "$idx")" env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
   local exit_code=$?
   set -e
+
+  local timed_out=false
+  if [[ $exit_code -eq 124 || $exit_code -eq 137 ]]; then
+    timed_out=true
+    buildkite-agent artifact upload "$HANG_DIAGNOSTICS_DIR/*" || echo "No hang diagnostics to upload"
+    # The report is only written once the run is over, so Playwright hung on exit, not mid-run
+    if all_tests_passed "$idx"; then
+      echo "Playwright hung after finishing $config_path, all tests passed"
+      exit_code=0
+    fi
+  fi
 
   local elapsed=$(( $(date +%s) - start_time ))
   local duration
@@ -290,7 +317,11 @@ run_scout_tests() {
       upload_report_events "$config_path"
       snapshot_failed_specs "$idx"
       FAILED+=("$config_path")
-      echo "Exited with code $exit_code for $config_path"
+      if [[ "$timed_out" == true ]]; then
+        echo "Timed out for $config_path"
+      else
+        echo "Exited with code $exit_code for $config_path"
+      fi
       ;;
   esac
 }

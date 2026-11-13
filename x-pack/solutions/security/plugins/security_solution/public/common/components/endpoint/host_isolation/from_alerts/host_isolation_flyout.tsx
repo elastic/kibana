@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue, HOST_NAME_FIELD } from '@kbn/discover-utils';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';

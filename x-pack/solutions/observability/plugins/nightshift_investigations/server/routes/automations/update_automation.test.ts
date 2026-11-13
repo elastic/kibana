@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { conflict, forbidden } from '@hapi/boom';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
 import { updateAutomationRoute } from './update_automation';
@@ -45,7 +47,9 @@ const call = (body: Record<string, unknown>) =>
 let serviceAccountService = createServiceAccountService();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
+  getAutomationsSoClient.mockReturnValue(soClient);
+  getWorkflowsManagement.mockReturnValue({ management: { updateWorkflow } });
   serviceAccountService = createServiceAccountService();
   soClient.get.mockResolvedValue({ attributes: existing });
 });
@@ -317,11 +321,10 @@ it('disables a scheduled automation through the normal workflow update', async (
   await call({ isEnabled: false });
   expect(updateWorkflow).toHaveBeenCalledWith(
     'workflow-1',
-    { yaml: expect.any(String) },
+    { enabled: false },
     'default',
     expect.anything()
   );
-  expect(parse(updateWorkflow.mock.calls[0][1].yaml).enabled).toBe(false);
   expect(soClient.update).toHaveBeenCalledWith(
     'nightshift-automation',
     'automation-1',
@@ -330,7 +333,7 @@ it('disables a scheduled automation through the normal workflow update', async (
   );
 });
 
-it.each([{ name: 'Changed' }, { isEnabled: false }])(
+it.each([{ name: 'Changed' }, { isEnabled: true }])(
   'rejects unsupported schedules on update %j without changing the workflow or saved object',
   async (body) => {
     soClient.get.mockResolvedValue({
@@ -359,4 +362,43 @@ it('refuses callers who cannot write a bound workflow before writing anything', 
   await expect(call({ isEnabled: false })).rejects.toThrow('manage_security');
   expect(updateWorkflow).not.toHaveBeenCalled();
   expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('pauses a missing workflow even when the saved configuration is invalid', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: { ...existing, completions: [{ action: 'invalid' }] },
+  });
+  updateWorkflow.mockRejectedValue(new WorkflowNotFoundError('workflow-1'));
+  const result = await call({ isEnabled: false });
+  expect(result.isEnabled).toBe(false);
+  expect(soClient.update).toHaveBeenCalledWith(
+    'nightshift-automation',
+    'automation-1',
+    expect.objectContaining({ isEnabled: false, workflowId: 'workflow-1' }),
+    { mergeAttributes: false }
+  );
+});
+
+it.each([{ name: 'Changed' }, { isEnabled: true }])(
+  'directs edits and Enable to Repair when the workflow is missing: %j',
+  async (body) => {
+    updateWorkflow.mockRejectedValue(new WorkflowNotFoundError('workflow-1'));
+    await expect(call(body)).rejects.toThrow('use Repair');
+    expect(soClient.update).not.toHaveBeenCalled();
+  }
+);
+
+it('does not persist Pause when a workflow write is denied', async () => {
+  updateWorkflow.mockRejectedValue(forbidden());
+  await expect(call({ isEnabled: false })).rejects.toThrow();
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('uses the read version so a stale Pause cannot overwrite a repaired workflow link', async () => {
+  soClient.get.mockResolvedValue({ attributes: existing, version: 'before-repair' });
+  updateWorkflow.mockRejectedValue(new WorkflowNotFoundError('workflow-1'));
+  soClient.update.mockImplementation(async (_type, _id, _attributes, options) => {
+    if (options.version === 'before-repair') throw conflict('Automation changed');
+  });
+  await expect(call({ isEnabled: false })).rejects.toMatchObject({ output: { statusCode: 409 } });
 });
