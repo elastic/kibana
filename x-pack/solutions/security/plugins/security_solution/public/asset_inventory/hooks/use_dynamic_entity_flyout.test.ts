@@ -213,7 +213,9 @@ describe('useDynamicEntityFlyout', () => {
     expect(openUserFlyoutMock).not.toHaveBeenCalled();
   });
 
-  it('should close the flyout when closeDynamicFlyout is called', () => {
+  it('should close the legacy flyout when closeDynamicFlyout is called and the new flyout is disabled', () => {
+    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
+
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
     );
@@ -223,5 +225,97 @@ describe('useDynamicEntityFlyout', () => {
     });
 
     expect(closeFlyoutMock).toHaveBeenCalled();
+  });
+
+  describe('closing', () => {
+    const createHandle = () => {
+      let resolveOnClose: () => void = () => {};
+      const onClose = new Promise<void>((resolve) => {
+        resolveOnClose = resolve;
+      });
+      const close = jest.fn(() => resolveOnClose());
+      return { close, onClose, resolveOnClose: () => resolveOnClose() };
+    };
+
+    const openHost = (
+      result: { current: ReturnType<typeof useDynamicEntityFlyout> },
+      entityName: string
+    ) =>
+      act(() => {
+        result.current.openDynamicFlyout({
+          entityType: 'host',
+          entityName,
+          entityId: entityName,
+          scopeId: 'scope1',
+        });
+      });
+
+    it('closes the opened flyout when closeDynamicFlyout is called', async () => {
+      const handle = createHandle();
+      openHostFlyoutMock.mockReturnValue(handle);
+      const { result } = renderHook(() =>
+        useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
+      );
+
+      openHost(result, 'host-1');
+      act(() => {
+        result.current.closeDynamicFlyout();
+      });
+
+      expect(handle.close).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        await handle.onClose;
+      });
+      // Closed by the table itself, which already clears its own row highlight.
+      expect(onFlyoutCloseMock).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when closeDynamicFlyout is called with no open flyout', () => {
+      const { result } = renderHook(() =>
+        useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
+      );
+
+      expect(() => result.current.closeDynamicFlyout()).not.toThrow();
+    });
+
+    it('calls onFlyoutClose when the user closes the flyout', async () => {
+      const handle = createHandle();
+      openHostFlyoutMock.mockReturnValue(handle);
+      const { result } = renderHook(() =>
+        useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
+      );
+
+      openHost(result, 'host-1');
+      await act(async () => {
+        handle.resolveOnClose();
+        await handle.onClose;
+      });
+
+      expect(onFlyoutCloseMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores the close of a flyout replaced by a newer one', async () => {
+      const first = createHandle();
+      const second = createHandle();
+      openHostFlyoutMock.mockReturnValueOnce(first).mockReturnValueOnce(second);
+      const { result } = renderHook(() =>
+        useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
+      );
+
+      openHost(result, 'host-1');
+      openHost(result, 'host-2');
+      await act(async () => {
+        first.resolveOnClose();
+        await first.onClose;
+      });
+
+      expect(onFlyoutCloseMock).not.toHaveBeenCalled();
+
+      act(() => {
+        result.current.closeDynamicFlyout();
+      });
+      expect(second.close).toHaveBeenCalledTimes(1);
+      expect(first.close).not.toHaveBeenCalled();
+    });
   });
 });
