@@ -282,20 +282,6 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const requirements: Array<{ capability: EndpointCapabilities; unsupportedMessage: string }> =
       [];
 
-<<<<<<< HEAD
-    if (command === 'get-file' && parameters.force === true) {
-      // `force` (read a locked file from a volume snapshot) is supported on Windows only
-      capability = 'get_file_force';
-      unsupportedMessage = 'the get-file `force` parameter (Windows only)';
-=======
-    if (command === 'kill-process' && parameters.kill_descendants === true) {
-      requirements.push({
-        capability: 'kill_process_descendants',
-        unsupportedMessage: 'killing process descendents',
-      });
->>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
-    }
-
     if (command === 'get-file') {
       if (parameters.force === true) {
         // `force` (read a locked file from a volume snapshot) is supported on Windows only

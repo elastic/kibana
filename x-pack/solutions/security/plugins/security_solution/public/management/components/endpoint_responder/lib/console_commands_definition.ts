@@ -237,37 +237,6 @@ export const getEndpointConsoleCommands = ({
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
 
-<<<<<<< HEAD
-=======
-  // `kill-process --kill-descendants` applies only to the Elastic Defend Endpoint, is gated behind
-  // a feature flag and requires that the host's Endpoint version supports it (reported via the
-  // `kill_process_descendants` capability).
-  const isKillDescendantsSupportedByEndpoint = (
-    endpointCapabilities as EndpointCapabilities[]
-  ).includes('kill_process_descendants');
-  const killDescendantsArg: Record<string, CommandArgDefinition> =
-    agentType === 'endpoint' && responseActionsEndpointKillProcessDescendants
-      ? {
-          'kill-descendants': {
-            required: false,
-            allowMultiples: false,
-            mustHaveValue: false,
-            about:
-              CONSOLE_COMMANDS.killProcess.args.killDescendants.about +
-              (isKillDescendantsSupportedByEndpoint
-                ? ''
-                : ` (${CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported})`),
-            validate: () => {
-              if (!isKillDescendantsSupportedByEndpoint) {
-                return CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported;
-              }
-
-              return true;
-            },
-          },
-        }
-      : {};
-
   // `get-file` with multiple `--path` arguments applies only to the Elastic Defend Endpoint and
   // requires that the host's Endpoint supports it (via the `get_file_multi_path` capability).
   const getFileAllowsMultiplePaths = agentType === 'endpoint';
@@ -280,7 +249,6 @@ export const getEndpointConsoleCommands = ({
       ? CONSOLE_COMMANDS.getFile.args.path.aboutMultiple
       : CONSOLE_COMMANDS.getFile.args.path.about;
 
->>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
   // `get-file --force` applies only to the Elastic Defend Endpoint and is only offered when the
   // host's Endpoint supports it (reported via the `get_file_force` capability, Windows only).
   const isGetFileForceSupportedByEndpoint = (

@@ -16,11 +16,8 @@ export const EndpointActionGetFileSchema = {
       ...BaseActionRequestSchema,
 
       parameters: schema.object({
-<<<<<<< HEAD
-        path: schema.string({ minLength: 1 }),
-=======
         // Exactly one of `path` or `paths` must be defined (validated below)
-        path: schema.maybe(schema.string({ minLength: 1, maxLength: 4096 })),
+        path: schema.maybe(schema.string({ minLength: 1 })),
         // `paths` applies only to the Elastic Defend Endpoint (validated below)
         paths: schema.maybe(
           schema.arrayOf(schema.string({ minLength: 1, maxLength: 4096 }), {
@@ -28,7 +25,6 @@ export const EndpointActionGetFileSchema = {
             maxSize: GET_FILE_MAX_PATHS,
           })
         ),
->>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
         // `force` applies only to the Elastic Defend Endpoint on Windows (validated below)
         force: schema.maybe(schema.boolean()),
       }),

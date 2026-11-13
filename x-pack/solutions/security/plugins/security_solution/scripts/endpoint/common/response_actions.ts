@@ -338,9 +338,6 @@ type ResponseOutput<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 
-<<<<<<< HEAD
-const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
-=======
 /** Returns the file path(s) requested via `parameters.path` or `parameters.paths` of a get-file action */
 const getGetFileRequestedPaths = (action: ActionDetails): string[] => {
   const parameters: ResponseActionGetFileParameters | undefined = (
@@ -358,12 +355,7 @@ const getGetFileRequestedPaths = (action: ActionDetails): string[] => {
   return [path ?? '/execute/file/path'];
 };
 
-const getOutputDataIfNeeded = (
-  action: ActionDetails,
-  state: 'success' | 'failure' = 'success',
-  responseCode?: string
-): ResponseOutput => {
->>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
+const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();
 
   switch (action.command) {

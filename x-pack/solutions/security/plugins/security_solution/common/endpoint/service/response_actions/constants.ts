@@ -66,11 +66,7 @@ export const ENDPOINT_CAPABILITIES = [
   'memdump_process',
   'memdump_kernel',
   'memdump_raw',
-<<<<<<< HEAD
-=======
-  'kill_process_descendants',
   'get_file_multi_path',
->>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
   'get_file_force',
 ] as const;
 

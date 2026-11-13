@@ -2494,14 +2494,8 @@ components:
                   example: true
                   type: boolean
                 path:
-<<<<<<< HEAD
-                  description: The full file path to retrieve from the endpoint.
-=======
                   description: The full file path to retrieve from the endpoint. Either `path` or
                     `paths` must be defined, but not both.
-                  maxLength: 4096
-                  minLength: 1
->>>>>>> 3b89ec86d137 ([Security Solution][Endpoint] Add paths parameter to the get-file response action (#304019))
                   type: string
                 paths:
                   description: The list of file paths to retrieve from the endpoint. Either `path`
