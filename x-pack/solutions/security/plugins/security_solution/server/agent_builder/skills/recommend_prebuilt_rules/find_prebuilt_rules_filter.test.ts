@@ -72,6 +72,12 @@ describe('buildPrebuiltRulesToolFilter', () => {
     );
   });
 
+  it('reduces sub-technique IDs to their deduplicated parent technique', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1218.011', 'T1218', 'T1059'] })).toBe(
+      'security-rule.threat.technique.id: ("T1218" OR "T1059")'
+    );
+  });
+
   it('routes a single tactic ID to threat.tactic.id', () => {
     expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001'] })).toBe(
       'security-rule.threat.tactic.id: ("TA0001")'

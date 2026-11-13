@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -27,128 +27,133 @@ const MAX_STRING_LENGTH = 10_000;
 const MAX_TAG_LENGTH = 1000;
 const MAX_RULE_IDS = 50;
 
-const findPrebuiltRulesFilterSchema = z
-  .object({
-    keywords: z
-      .string()
-      .min(1)
-      .max(MAX_STRING_LENGTH)
-      .optional()
-      .describe(
-        'Free-text keywords matched against rule name and description (case-insensitive, no ' +
-          'wildcards). For categorical concepts — Windows, endpoint, LLM, Initial Access — prefer ' +
-          'the structured filters (`tags`, `mitreTactic`, etc.); they are more precise.'
-      ),
-    severity: z
-      .array(z.enum(['critical', 'high', 'medium', 'low']))
-      .optional()
-      .describe('Severity levels to include (OR). E.g. ["critical", "high"].'),
-    ruleType: z
-      .array(
-        z.enum([
-          'query',
-          'eql',
-          'esql',
-          'threshold',
-          'machine_learning',
-          'new_terms',
-          'threat_match',
-          'saved_query',
-        ])
-      )
-      .optional()
-      .describe('Rule types to include (OR). E.g. ["esql", "eql"].'),
-    tags: z
-      .array(z.string().min(1).max(MAX_TAG_LENGTH))
-      .optional()
-      .describe(
-        'Exact tag values to include (OR). Discover available values first via ' +
-          '`security.get_installable_catalog_overview` — call it in the same turn before any ' +
-          'tags-filtered search.'
-      ),
-    mitreTechnique: z
-      .array(
-        z
-          .string()
-          .regex(/^(AML\.)?T\d{4}$/)
-          .max(MAX_STRING_LENGTH)
-      )
-      .optional()
-      .describe(
-        'MITRE technique IDs to include (OR), e.g. ["T1059", "T1078"] (ATT&CK) or ["AML.T0044"] (ATLAS).'
-      ),
-    mitreTactic: z
-      .array(
-        z
-          .string()
-          .regex(/^(AML\.)?TA\d{4}$/)
-          .max(MAX_STRING_LENGTH)
-      )
-      .optional()
-      .describe(
-        'MITRE tactic IDs to include (OR), e.g. ["TA0001", "TA0006"] (ATT&CK) or ["AML.TA0000"] (ATLAS).'
-      ),
-    relatedIntegrations: z
-      .array(z.string().min(1).max(MAX_STRING_LENGTH))
-      .optional()
-      .describe(
-        'Fleet package names a rule depends on (OR). E.g. ["okta", "aws"]. Matches the rule ' +
-          "metadata's `related_integrations.package`."
-      ),
-    ruleIds: z
-      .array(z.string().min(1).max(MAX_STRING_LENGTH))
-      .max(MAX_RULE_IDS)
-      .optional()
-      .describe(
-        'Deep-fetch specific rules by their `rule_id` signature (OR). Typically used as a ' +
-          'follow-up to fetch finalists; omit the other filters when using it. Already-installed ' +
-          'IDs return nothing (this tool only sees not-yet-installed rules).'
-      ),
-  })
-  .strict();
+const findPrebuiltRulesFilterSchema = lazySchema(() =>
+  z
+    .object({
+      keywords: z
+        .string()
+        .min(1)
+        .max(MAX_STRING_LENGTH)
+        .optional()
+        .describe(
+          'Free-text keywords matched against rule name and description (case-insensitive, no ' +
+            'wildcards). For categorical concepts — Windows, endpoint, LLM, Initial Access — prefer ' +
+            'the structured filters (`tags`, `mitreTactic`, etc.); they are more precise.'
+        ),
+      severity: z
+        .array(z.enum(['critical', 'high', 'medium', 'low']))
+        .optional()
+        .describe('Severity levels to include (OR). E.g. ["critical", "high"].'),
+      ruleType: z
+        .array(
+          z.enum([
+            'query',
+            'eql',
+            'esql',
+            'threshold',
+            'machine_learning',
+            'new_terms',
+            'threat_match',
+            'saved_query',
+          ])
+        )
+        .optional()
+        .describe('Rule types to include (OR). E.g. ["esql", "eql"].'),
+      tags: z
+        .array(z.string().min(1).max(MAX_TAG_LENGTH))
+        .optional()
+        .describe(
+          'Exact tag values to include (OR). Discover available values first via ' +
+            '`security.get_installable_catalog_overview` — call it in the same turn before any ' +
+            'tags-filtered search.'
+        ),
+      mitreTechnique: z
+        .array(
+          z
+            .string()
+            .regex(/^(AML\.)?T\d{4}(\.\d{3})?$/)
+            .max(MAX_STRING_LENGTH)
+        )
+        .optional()
+        .describe(
+          'MITRE technique IDs to include (OR), e.g. ["T1059", "T1078"] (ATT&CK) or ["AML.T0044"] (ATLAS). ' +
+            'A sub-technique ID such as "T1059.001" is accepted and matches rules mapped to its parent technique.'
+        ),
+      mitreTactic: z
+        .array(
+          z
+            .string()
+            .regex(/^(AML\.)?TA\d{4}$/)
+            .max(MAX_STRING_LENGTH)
+        )
+        .optional()
+        .describe(
+          'MITRE tactic IDs to include (OR), e.g. ["TA0001", "TA0006"] (ATT&CK) or ["AML.TA0000"] (ATLAS).'
+        ),
+      relatedIntegrations: z
+        .array(z.string().min(1).max(MAX_STRING_LENGTH))
+        .optional()
+        .describe(
+          'Fleet package names a rule depends on (OR). E.g. ["okta", "aws"]. Matches the rule ' +
+            "metadata's `related_integrations.package`."
+        ),
+      ruleIds: z
+        .array(z.string().min(1).max(MAX_STRING_LENGTH))
+        .max(MAX_RULE_IDS)
+        .optional()
+        .describe(
+          'Deep-fetch specific rules by their `rule_id` signature (OR). Typically used as a ' +
+            'follow-up to fetch finalists; omit the other filters when using it. Already-installed ' +
+            'IDs return nothing (this tool only sees not-yet-installed rules).'
+        ),
+    })
+    .strict()
+);
 
-export const findPrebuiltRulesSchema = z
-  .object({
-    filter: findPrebuiltRulesFilterSchema
-      .optional()
-      .describe(
-        'Structured filters selecting which installable rules match. Filters are ANDed together; ' +
-          'array values are ORed within a single filter. Omit to match the whole installable catalog.'
-      ),
-    fields: z
-      .array(z.enum(['description', 'query', 'threat', 'note', 'references', 'false_positives']))
-      .optional()
-      .describe(
-        'Opt into deeper per-rule detail beyond the default triage shape (omit for triage only). ' +
-          'Available fields: ' +
-          '`description` (full rule description); ' +
-          '`query` (the detection query/logic; `machine_learning` rules have none); ' +
-          '`threat` (full MITRE ATT&CK/ATLAS mapping incl. techniques and subtechniques — triage gives ' +
-          'tactics only); ' +
-          '`note` (investigation guide / runbook shown when an alert fires); ' +
-          '`references` (external reference URLs); ' +
-          '`false_positives` (known false-positive scenarios).'
-      ),
-    perPage: z
-      .number()
-      .int()
-      .min(1)
-      .max(50)
-      .default(10)
-      .describe('Number of results to return (default 10, max 50).'),
-    sort: z
-      .object({
-        field: z
-          .enum(['name', 'risk_score', 'severity'])
-          .describe(
-            'Field to sort by. Use `severity`/`risk_score` for "most severe"/"highest risk" queries.'
-          ),
-        order: z.enum(['asc', 'desc']).default('desc').describe('Sort direction (default desc).'),
-      })
-      .optional()
-      .describe('Sort order. Omit to use the default order.'),
-  })
-  .strict();
+export const findPrebuiltRulesSchema = lazySchema(() =>
+  z
+    .object({
+      filter: findPrebuiltRulesFilterSchema
+        .optional()
+        .describe(
+          'Structured filters selecting which installable rules match. Filters are ANDed together; ' +
+            'array values are ORed within a single filter. Omit to match the whole installable catalog.'
+        ),
+      fields: z
+        .array(z.enum(['description', 'query', 'threat', 'note', 'references', 'false_positives']))
+        .optional()
+        .describe(
+          'Opt into deeper per-rule detail beyond the default triage shape (omit for triage only). ' +
+            'Available fields: ' +
+            '`description` (full rule description); ' +
+            '`query` (the detection query/logic; `machine_learning` rules have none); ' +
+            '`threat` (full MITRE ATT&CK/ATLAS mapping incl. techniques and subtechniques — triage gives ' +
+            'tactics only); ' +
+            '`note` (investigation guide / runbook shown when an alert fires); ' +
+            '`references` (external reference URLs); ' +
+            '`false_positives` (known false-positive scenarios).'
+        ),
+      perPage: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .default(10)
+        .describe('Number of results to return (default 10, max 50).'),
+      sort: z
+        .object({
+          field: z
+            .enum(['name', 'risk_score', 'severity'])
+            .describe(
+              'Field to sort by. Use `severity`/`risk_score` for "most severe"/"highest risk" queries.'
+            ),
+          order: z.enum(['asc', 'desc']).default('desc').describe('Sort direction (default desc).'),
+        })
+        .optional()
+        .describe('Sort order. Omit to use the default order.'),
+    })
+    .strict()
+);
 
 const DEFAULT_FIELDS_TO_FETCH = [
   'severity',

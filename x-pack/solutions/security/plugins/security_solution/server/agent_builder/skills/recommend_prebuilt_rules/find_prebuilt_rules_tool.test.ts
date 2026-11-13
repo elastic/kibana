@@ -198,6 +198,16 @@ describe('findPrebuiltRulesSchema', () => {
     expect(findPrebuiltRulesSchema.safeParse({ filter: { enabled: true } }).success).toBe(false);
   });
 
+  it('accepts sub-technique IDs', () => {
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1218.011', 'T1218'] } })
+        .success
+    ).toBe(true);
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['AML.T0024.002'] } }).success
+    ).toBe(true);
+  });
+
   it('rejects malformed MITRE technique IDs', () => {
     expect(
       findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['TA0001'] } }).success
@@ -205,15 +215,15 @@ describe('findPrebuiltRulesSchema', () => {
     expect(
       findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['powershell'] } }).success
     ).toBe(false);
-    // Sub-techniques (T####.###) are not accepted — the filter only matches the technique id.
+    // Only a three-digit sub-technique suffix is valid.
     expect(
-      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1059.001'] } }).success
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1059.01'] } }).success
     ).toBe(false);
     expect(
       findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['AML.'] } }).success
     ).toBe(false);
     expect(
-      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['AML.T0024.002'] } }).success
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1059.001.002'] } }).success
     ).toBe(false);
     // A non-array value is no longer accepted.
     expect(findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: 'T1059' } }).success).toBe(
