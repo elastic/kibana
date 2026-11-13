@@ -205,7 +205,13 @@ export const registerInternalTools = async ({
 
   // load_skill — gated on the skills feature and on the run having at least one skill.
   if (experimentalFeatures.skills && filteredSkills.length > 0) {
-    tools.push(createLoadSkillTool({ analyticsService, trackingService }));
+    tools.push(
+      createLoadSkillTool({
+        analyticsService,
+        trackingService,
+        dynamicToolsEnabled: experimentalFeatures.dynamicTools,
+      })
+    );
   }
 
   // set_conversation_metadata — only when both callback and template are wired.
