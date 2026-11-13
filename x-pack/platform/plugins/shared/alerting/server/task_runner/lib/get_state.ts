@@ -76,9 +76,7 @@ export function getState({
           error: { stack_trace: stack },
         });
       }
-      return persistedAlertsState
-        ? { ...persistedAlertsState, previousStartedAt: startedAt?.toISOString() }
-        : originalState;
+      return persistedAlertsState ?? originalState;
     }
   );
 }

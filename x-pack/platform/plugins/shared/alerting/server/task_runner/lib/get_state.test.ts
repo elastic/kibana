@@ -19,12 +19,11 @@ const originalState: RuleTaskState = {
   previousStartedAt: '2026-11-09T09:59:00.000Z',
 };
 const persistedAlertsState: RuleTaskState = {
-  alertTypeState: { evaluated: 'this run' },
+  ...originalState,
   alertInstances: {
     '1': { meta: { uuid: 'uuid-1' } },
     '2': { meta: { uuid: 'uuid-2' } },
   },
-  alertRecoveredInstances: {},
 };
 
 describe('getState', () => {
@@ -71,10 +70,9 @@ describe('getState', () => {
   });
 
   test('returns the persisted alerts state when the run fails after the alerts are persisted', () => {
-    expect(getStateFor(asErr(new Error('enqueue failed')), persistedAlertsState)).toEqual({
-      ...persistedAlertsState,
-      previousStartedAt: startedAt.toISOString(),
-    });
+    expect(getStateFor(asErr(new Error('enqueue failed')), persistedAlertsState)).toBe(
+      persistedAlertsState
+    );
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('enqueue failed'),
       expect.objectContaining({ tags: ['rule-run-failed', 'framework-error'] })

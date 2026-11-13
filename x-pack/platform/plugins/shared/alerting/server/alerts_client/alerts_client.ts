@@ -334,6 +334,10 @@ export class AlertsClient<
     return this.legacyAlertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
   }
 
+  public getRawTrackedActiveAlert(id: string) {
+    return this.legacyAlertsClient.getRawTrackedActiveAlert(id);
+  }
+
   /**
    * Returns the alert document for a given alert instance ID as it was
    * constructed and indexed during `persistAlerts()` for this execution.

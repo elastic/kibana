@@ -136,6 +136,8 @@ export interface IAlertsClient<
     rawActiveAlerts: Record<string, RawAlertInstance>;
     rawRecoveredAlerts: Record<string, RawAlertInstance>;
   };
+  /** Returns the task state entry of an alert that was active when the run started. */
+  getRawTrackedActiveAlert(id: string): RawAlertInstance | undefined;
   factory(): PublicAlertFactory<
     State,
     Context,

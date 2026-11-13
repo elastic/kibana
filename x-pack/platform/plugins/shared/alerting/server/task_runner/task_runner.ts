@@ -482,23 +482,24 @@ export class TaskRunner<
     // Saved as task state if a later step fails, so it matches the alert documents written above.
     // Copied before actions are scheduled, so alerts whose actions fail to enqueue notify again.
     // Recovered alerts keep their previous entry, so the next run recovers them again.
+    // The rest of the state, such as the rule type state, stays at the previous run, so the next
+    // run evaluates the same data again instead of skipping the data of this run.
     if (this.ruleType.autoRecoverAlerts && this.shouldLogAndScheduleActionsForAlerts()) {
       const { rawActiveAlerts, rawRecoveredAlerts } =
         alertsClient.getRawAlertInstancesForState(true);
       const alertInstances = { ...rawActiveAlerts };
       const alertRecoveredInstances = { ...rawRecoveredAlerts };
-      const { alertInstances: previousAlertInstances = {} } = this.taskInstance.state;
       for (const id of Object.keys(alertsClient.getProcessedAlerts('recovered'))) {
-        if (previousAlertInstances[id]) {
-          alertInstances[id] = previousAlertInstances[id];
+        const previousAlertInstance = alertsClient.getRawTrackedActiveAlert(id);
+        if (previousAlertInstance) {
+          alertInstances[id] = previousAlertInstance;
           delete alertRecoveredInstances[id];
         }
       }
       this.persistedAlertsState = cloneDeep({
-        alertTypeState: updatedRuleTypeState || undefined,
+        ...this.taskInstance.state,
         alertInstances,
         alertRecoveredInstances,
-        summaryActions: this.taskInstance.state.summaryActions,
       });
     }
 
