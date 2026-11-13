@@ -118,9 +118,15 @@ describe('getAesopDriftMonitorTracingWarnings', () => {
 });
 
 describe('uninstallAesopDriftMonitor', () => {
-  const uninstall = async (skillId: string) => {
+  const uninstall = async (skillId: string, legacyOwner?: string) => {
     const uninstallMock = jest.fn().mockResolvedValue(undefined);
-    const client = { uninstall: uninstallMock } as unknown as PluginScopedManagedWorkflowsApi;
+    const getInstalledWorkflowState = jest
+      .fn()
+      .mockResolvedValue(legacyOwner ? { templateValues: { skillId: legacyOwner } } : null);
+    const client = {
+      uninstall: uninstallMock,
+      getInstalledWorkflowState,
+    } as unknown as PluginScopedManagedWorkflowsApi;
     await uninstallAesopDriftMonitor(
       {
         getManagedWorkflowsClient: async () => client,
@@ -132,10 +138,19 @@ describe('uninstallAesopDriftMonitor', () => {
     return uninstallMock.mock.calls.map(([, options]) => options);
   };
 
-  it('removes both the current and the legacy instance', async () => {
-    await expect(uninstall('Find.Rules')).resolves.toEqual([
+  it('removes the legacy instance when it belongs to the same skill', async () => {
+    await expect(uninstall('Find.Rules', 'Find.Rules')).resolves.toEqual([
       { spaceId: 'default', workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix('Find.Rules') },
       { spaceId: 'default', workflowIdSuffix: 'skill-find-rules' },
+    ]);
+  });
+
+  it.each([
+    ['another skill', 'foo-bar'],
+    ['no skill', undefined],
+  ])('keeps a legacy instance owned by %s', async (_label, legacyOwner) => {
+    await expect(uninstall('foo_bar', legacyOwner)).resolves.toEqual([
+      { spaceId: 'default', workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix('foo_bar') },
     ]);
   });
 

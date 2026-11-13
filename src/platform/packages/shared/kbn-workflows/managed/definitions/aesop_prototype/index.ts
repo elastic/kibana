@@ -42,6 +42,8 @@ export interface AesopDriftMonitorWorkflowTemplateValues extends ManagedWorkflow
 
 // The name is rendered raw into a single-quoted YAML const and double-quoted
 // ES|QL literals, so anything outside this set falls back to the skill id.
+// Agent Builder skill names are validated to a subset of it, so a real skill
+// name never takes the fallback.
 const SAFE_SKILL_NAME = /^[A-Za-z0-9 ._-]+$/;
 
 const renderTemplate = (template: string, values: Record<string, string | number>): string =>

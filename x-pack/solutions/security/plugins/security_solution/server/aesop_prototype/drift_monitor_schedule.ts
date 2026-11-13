@@ -61,8 +61,9 @@ export const aesopDriftMonitorWorkflowIdSuffix = (skillId: string): string => {
   return slug ? `skill-${slug}-${hash}` : `skill-${hash}`;
 };
 
-// Suffix format before the id hash was added. Uninstall also removes this one
-// so monitors enabled under the old format are not orphaned.
+// Suffix format before the id hash was added. It is lossy (`foo-bar` and
+// `foo_bar` share it), so uninstall removes a legacy instance only when its
+// stored template values name the same skill.
 const legacyWorkflowIdSuffix = (skillId: string): string | undefined => {
   const slug = skillId
     .toLowerCase()
@@ -189,14 +190,22 @@ export const uninstallAesopDriftMonitor = async (
   { skillId }: { skillId: string }
 ): Promise<void> => {
   const client = await deps.getManagedWorkflowsClient();
-  const suffixes = new Set([aesopDriftMonitorWorkflowIdSuffix(skillId)]);
+  await client.uninstall(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
+    spaceId: deps.spaceId,
+    workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix(skillId),
+  });
   const legacySuffix = legacyWorkflowIdSuffix(skillId);
-  if (legacySuffix) suffixes.add(legacySuffix);
-  for (const workflowIdSuffix of suffixes) {
-    await client.uninstall(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
-      spaceId: deps.spaceId,
-      workflowIdSuffix,
-    });
+  if (legacySuffix) {
+    const legacyState = await client.getInstalledWorkflowState(
+      `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-${legacySuffix}`,
+      deps.spaceId
+    );
+    if (legacyState?.templateValues?.skillId === skillId) {
+      await client.uninstall(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
+        spaceId: deps.spaceId,
+        workflowIdSuffix: legacySuffix,
+      });
+    }
   }
   deps.logger.debug(() => `Uninstalled AESOP drift monitor for skill '${skillId}'`);
 };
