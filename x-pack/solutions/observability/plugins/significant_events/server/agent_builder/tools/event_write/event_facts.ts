@@ -225,6 +225,14 @@ export const computeEventFacts = ({
         )
       : undefined;
 
+  // A continuation that brings no new confirming evidence keeps its score: nothing new supports a
+  // different one. A new event, a reopen or a write with a confirming signal is rated afresh.
+  const keepsStoredConfidence =
+    isContinuation &&
+    !reopens &&
+    latest?.confidence !== undefined &&
+    !(candidate.input.signals ?? []).some(({ verdict }) => verdict === 'confirms');
+
   return {
     candidate,
     rest,
@@ -233,7 +241,7 @@ export const computeEventFacts = ({
     status,
     severity,
     frozenNarrative,
-    confidence: rest.confidence,
+    confidence: keepsStoredConfidence && latest ? latest.confidence : rest.confidence,
   };
 };
 
