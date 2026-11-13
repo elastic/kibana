@@ -8,7 +8,7 @@
 import { OnStart } from '@kbn/core-di';
 import type { ContainerModuleLoadOptions } from 'inversify';
 
-/** Start-time work of the plugin. Empty for now: later phases add their initialisation here. */
+/** Start-time work of the plugin. Empty for now: later phases add their initialisation here. `OnStart` is not awaited, so async work added here must catch its own errors. */
 export function bindOnStart({ bind }: ContainerModuleLoadOptions): void {
-  bind(OnStart).toConstantValue(async () => {});
+  bind(OnStart).toConstantValue(() => {});
 }

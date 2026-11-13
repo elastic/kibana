@@ -33,7 +33,7 @@ function createContainer({ withCloud }: { withCloud: boolean }) {
   return { container, core };
 }
 
-describe('nightshift detection module', () => {
+describe('module', () => {
   // A new binding in the module goes in this list, so a missing dependency fails here and not
   // at Kibana start.
   it('resolves every token the module binds', () => {

@@ -45,45 +45,54 @@ function createService({
 }
 
 describe('AvailabilityService', () => {
-  it('is available when every requirement is met', async () => {
-    const { service } = createService();
+  describe('isAvailable', () => {
+    it('is available when every requirement is met', async () => {
+      const { service } = createService();
 
-    await expect(service.isAvailable()).resolves.toBe(true);
-    await expect(service.getUnavailableReason()).resolves.toBeUndefined();
+      await expect(service.isAvailable()).resolves.toBe(true);
+      await expect(service.getUnavailableReason()).resolves.toBeUndefined();
+    });
+
+    it('is available on a classic deployment without cloud', async () => {
+      const { core } = createService();
+      const license = licenseMock.createLicenseMock();
+      const licensing = licensingMock.createStart();
+      licensing.getLicense.mockResolvedValue(license);
+      const service = new AvailabilityService(
+        core.featureFlags,
+        core.pricing,
+        licensing,
+        undefined
+      );
+
+      await expect(service.isAvailable()).resolves.toBe(true);
+    });
   });
 
-  it('reports the feature flag when Nightshift is off', async () => {
-    const { service } = createService({ flagEnabled: false });
+  describe('getUnavailableReason', () => {
+    it('reports the feature flag when Nightshift is off', async () => {
+      const { service } = createService({ flagEnabled: false });
 
-    await expect(service.isAvailable()).resolves.toBe(false);
-    await expect(service.getUnavailableReason()).resolves.toBe('feature_flag');
-  });
+      await expect(service.isAvailable()).resolves.toBe(false);
+      await expect(service.getUnavailableReason()).resolves.toBe('feature_flag');
+    });
 
-  it('reports the project type on a non-observability serverless project', async () => {
-    const { service } = createService({ projectType: 'security' });
+    it('reports the project type on a non-observability serverless project', async () => {
+      const { service } = createService({ projectType: 'security' });
 
-    await expect(service.getUnavailableReason()).resolves.toBe('project_type');
-  });
+      await expect(service.getUnavailableReason()).resolves.toBe('project_type');
+    });
 
-  it('reports the pricing tier when significant events is not part of it', async () => {
-    const { service } = createService({ tierAvailable: false });
+    it('reports the pricing tier when significant events is not part of it', async () => {
+      const { service } = createService({ tierAvailable: false });
 
-    await expect(service.getUnavailableReason()).resolves.toBe('pricing_tier');
-  });
+      await expect(service.getUnavailableReason()).resolves.toBe('pricing_tier');
+    });
 
-  it('reports the license below enterprise', async () => {
-    const { service } = createService({ hasEnterpriseLicense: false });
+    it('reports the license below enterprise', async () => {
+      const { service } = createService({ hasEnterpriseLicense: false });
 
-    await expect(service.getUnavailableReason()).resolves.toBe('license');
-  });
-
-  it('is available on a classic deployment without cloud', async () => {
-    const { core } = createService();
-    const license = licenseMock.createLicenseMock();
-    const licensing = licensingMock.createStart();
-    licensing.getLicense.mockResolvedValue(license);
-    const service = new AvailabilityService(core.featureFlags, core.pricing, licensing, undefined);
-
-    await expect(service.isAvailable()).resolves.toBe(true);
+      await expect(service.getUnavailableReason()).resolves.toBe('license');
+    });
   });
 });
