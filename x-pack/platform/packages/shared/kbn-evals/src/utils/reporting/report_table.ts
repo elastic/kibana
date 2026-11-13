@@ -19,6 +19,14 @@ interface StatsDisplay {
   count: number;
 }
 
+/** Judge-accounting fields decorating a stats cell, outside the numeric stats shown. */
+interface JudgeAccounting {
+  /** Score documents attempted for this evaluator; absent on pre-upgrade responses. */
+  judgesAttempted?: number;
+  /** Score documents attempted but excluded from the stats above because the score was null. */
+  judgesNullScored?: number;
+}
+
 export interface EvaluatorDisplayOptions {
   decimalPlaces?: number;
   unitSuffix?: string;
@@ -67,12 +75,23 @@ function calculateOverallStats(stats: EvaluatorStats[]): EvaluatorStats[] {
     }
 
     const totalCount = evaluatorStats.reduce((sum, s) => sum + s.stats.count, 0);
+    // Present only when every bucket being pooled reports it, so a partial rollup (mixing
+    // pre-upgrade and post-upgrade responses) doesn't understate the attempted count.
+    const hasAccounting = evaluatorStats.every((s) => s.judgesAttempted !== undefined);
+    const totalAttempted = hasAccounting
+      ? evaluatorStats.reduce((sum, s) => sum + (s.judgesAttempted ?? 0), 0)
+      : undefined;
+    const totalNullScored = hasAccounting
+      ? evaluatorStats.reduce((sum, s) => sum + (s.judgesNullScored ?? 0), 0)
+      : undefined;
 
     if (totalCount === 0) {
       return {
         datasetId: 'overall',
         datasetName: 'Overall',
         evaluatorName,
+        ...(totalAttempted !== undefined && { judgesAttempted: totalAttempted }),
+        ...(totalNullScored !== undefined && { judgesNullScored: totalNullScored }),
         stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0 },
       };
     }
@@ -96,6 +115,8 @@ function calculateOverallStats(stats: EvaluatorStats[]): EvaluatorStats[] {
       datasetId: 'overall',
       datasetName: 'Overall',
       evaluatorName,
+      ...(totalAttempted !== undefined && { judgesAttempted: totalAttempted }),
+      ...(totalNullScored !== undefined && { judgesNullScored: totalNullScored }),
       stats: {
         mean: weightedMean,
         median: weightedMean,
@@ -170,7 +191,8 @@ function formatStatsCell(
   stats: Partial<StatsDisplay>,
   evaluatorName: string,
   isBold: boolean,
-  evaluatorFormats: Map<string, EvaluatorDisplayOptions>
+  evaluatorFormats: Map<string, EvaluatorDisplayOptions>,
+  accounting?: JudgeAccounting
 ): string {
   const colorFn = isBold ? chalk.bold.green : chalk.cyan;
 
@@ -187,29 +209,50 @@ function formatStatsCell(
     ['max', 'max'],
   ];
 
-  return statLabels
-    .filter(
-      ([key]) => stats[key] !== undefined && (!statsToInclude || statsToInclude.includes(key))
-    )
-    .map(([key, label]) => {
-      const value = stats[key] as number;
-      const formatted = Number.isInteger(value) ? value.toFixed(0) : value.toFixed(decimalPlaces);
-      return colorFn(`${label}: ${formatted}${unitSuffix}`);
-    })
-    .join('\n');
+  const attempted = accounting?.judgesAttempted;
+  const count = stats.count;
+  // When every attempt produced a null score, the zeros below are not measurements —
+  // rendering them would read as a genuine mean/median of 0. Show only the warning.
+  const allJudgesFailed = count === 0 && attempted !== undefined && attempted > 0;
+
+  const lines = allJudgesFailed
+    ? []
+    : statLabels
+        .filter(
+          ([key]) => stats[key] !== undefined && (!statsToInclude || statsToInclude.includes(key))
+        )
+        .map(([key, label]) => {
+          const value = stats[key] as number;
+          const formatted = Number.isInteger(value)
+            ? value.toFixed(0)
+            : value.toFixed(decimalPlaces);
+          return colorFn(`${label}: ${formatted}${unitSuffix}`);
+        });
+
+  // Attempted and scored diverge only when at least one judge returned a null score (e.g. every
+  // judge in a multi-judge evaluator failed on an example). Silent on healthy runs, where
+  // attempted equals count and the extra line would be noise.
+  if (attempted !== undefined && count !== undefined && attempted !== count) {
+    lines.push(chalk.yellow(`⚠ scored ${count}/${attempted}`));
+  }
+
+  return lines.join('\n');
 }
 
 function formatEvaluatorScoreGroupCell(
-  statsMap: Map<string, Partial<StatsDisplay>>,
+  statsMap: Map<string, EvaluatorStats>,
   group: EvaluatorDisplayGroup,
   isBold: boolean,
   evaluatorFormats: Map<string, EvaluatorDisplayOptions>
 ): string {
   const sections = group.evaluatorNames
     .map((evaluatorName) => {
-      const stats = statsMap.get(evaluatorName);
-      if (!stats || !stats.count || stats.count === 0) return null;
-      const statsContent = formatStatsCell(stats, evaluatorName, isBold, evaluatorFormats);
+      const stat = statsMap.get(evaluatorName);
+      if (!stat || (stat.stats.count === 0 && (stat.judgesAttempted ?? 0) === 0)) return null;
+      const statsContent = formatStatsCell(stat.stats, evaluatorName, isBold, evaluatorFormats, {
+        judgesAttempted: stat.judgesAttempted,
+        judgesNullScored: stat.judgesNullScored,
+      });
       return statsContent ? `${chalk.white(evaluatorName)}\n${statsContent}` : null;
     })
     .filter((section): section is string => section !== null);
@@ -226,23 +269,26 @@ function formatRowCells(
   isBold: boolean,
   evaluatorFormats: Map<string, EvaluatorDisplayOptions>
 ): string[] {
-  const statsMap = new Map<string, StatsDisplay>();
-  statsForDataset.forEach((s) => statsMap.set(s.evaluatorName, s.stats));
+  const statsMap = new Map<string, EvaluatorStats>();
+  statsForDataset.forEach((s) => statsMap.set(s.evaluatorName, s));
 
   return columnNames.map((columnName) => {
     const group = groupMapping.get(columnName);
     if (group) {
-      const groupStatsMap = new Map<string, Partial<StatsDisplay>>(
+      const groupStatsMap = new Map<string, EvaluatorStats>(
         group.evaluatorNames
           .map((name) => [name, statsMap.get(name)] as const)
-          .filter((entry): entry is [string, StatsDisplay] => entry[1] !== undefined)
+          .filter((entry): entry is [string, EvaluatorStats] => entry[1] !== undefined)
       );
       return formatEvaluatorScoreGroupCell(groupStatsMap, group, isBold, evaluatorFormats);
     }
 
-    const stats = statsMap.get(columnName);
-    if (stats && stats.count > 0) {
-      return formatStatsCell(stats, columnName, isBold, evaluatorFormats);
+    const stat = statsMap.get(columnName);
+    if (stat && (stat.stats.count > 0 || (stat.judgesAttempted ?? 0) > 0)) {
+      return formatStatsCell(stat.stats, columnName, isBold, evaluatorFormats, {
+        judgesAttempted: stat.judgesAttempted,
+        judgesNullScored: stat.judgesNullScored,
+      });
     }
     return isBold ? chalk.bold.green('-') : chalk.gray('-');
   });

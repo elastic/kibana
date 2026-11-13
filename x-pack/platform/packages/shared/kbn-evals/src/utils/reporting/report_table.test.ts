@@ -6,6 +6,8 @@
  */
 
 import type { EvaluatorStats } from '../evals_client';
+import { mapStatsResponse } from '../evals_client';
+import { GetEvaluationExperimentResponse } from '@kbn/evals-common';
 import type { EvaluatorDisplayGroup, EvaluatorDisplayOptions } from './report_table';
 import { createTable } from './report_table';
 
@@ -233,6 +235,86 @@ describe('report_table', () => {
       // Should show "3 x N" format where N is count/repetitions
       // count is 30, so 30/3 = 10
       expect(result).toContain('3 x');
+    });
+
+    it('surfaces a scored/attempted warning when some judge attempts produced no score', () => {
+      const stats: EvaluatorStats[] = [
+        {
+          datasetId: 'test-dataset-id',
+          datasetName: 'test-dataset',
+          evaluatorName: 'Factuality',
+          judgesAttempted: 10,
+          judgesNullScored: 3,
+          stats: { mean: 0.9, median: 0.9, stdDev: 0.1, min: 0.8, max: 1, count: 7 },
+        },
+      ];
+
+      const result = createTable(stats, 1);
+
+      expect(result).toContain('scored 7/10');
+    });
+
+    it('surfaces the warning when every judge attempt failed and the score count is zero', () => {
+      const stats: EvaluatorStats[] = [
+        {
+          datasetId: 'test-dataset-id',
+          datasetName: 'test-dataset',
+          evaluatorName: 'Factuality',
+          judgesAttempted: 10,
+          judgesNullScored: 10,
+          stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0 },
+        },
+      ];
+
+      const result = createTable(stats, 1);
+
+      expect(result).toContain('scored 0/10');
+      // The zeros are not measurements — no mean/median line may render alongside the warning.
+      expect(result).not.toContain('mean: 0');
+    });
+
+    it('omits the scored/attempted warning when every judge attempt produced a score', () => {
+      const stats: EvaluatorStats[] = [
+        {
+          datasetId: 'test-dataset-id',
+          datasetName: 'test-dataset',
+          evaluatorName: 'Factuality',
+          judgesAttempted: 10,
+          judgesNullScored: 0,
+          stats: { mean: 0.9, median: 0.9, stdDev: 0.1, min: 0.8, max: 1, count: 10 },
+        },
+      ];
+
+      const result = createTable(stats, 1);
+
+      expect(result).not.toContain('scored');
+    });
+
+    it('omits the scored/attempted warning when accounting fields are absent (pre-upgrade response)', () => {
+      // Drive a raw pre-upgrade payload through the real schema parse and mapper, not a
+      // hand-built shape: this catches a schema regression where a `.default(0)` would
+      // materialise 0 and render a false "scored N/0" warning on healthy runs.
+      const experiment = mapStatsResponse(
+        GetEvaluationExperimentResponse.parse({
+          experiment_id: 'experiment-123',
+          timestamp: '2026-05-01T11:00:00.000Z',
+          task_model: { id: 'gpt-4', family: 'gpt', provider: 'openai' },
+          total_repetitions: 1,
+          stats: [
+            {
+              dataset_id: 'test-dataset-id',
+              dataset_name: 'test-dataset',
+              evaluator_name: 'Factuality',
+              example_count: 10,
+              stats: { mean: 0.9, median: 0.9, std_dev: 0.1, min: 0.8, max: 1, count: 10 },
+            },
+          ],
+        })
+      );
+
+      const result = createTable(experiment.stats, 1);
+
+      expect(result).not.toContain('scored');
     });
   });
 });
