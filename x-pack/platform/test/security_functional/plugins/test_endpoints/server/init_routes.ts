@@ -37,9 +37,15 @@ export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
 
 const SELF_CLIENT_ES_TARGET = '/internal/test_endpoints/self_client/fake_request';
 const SELF_CLIENT_OAUTH_TARGET = '/internal/test_endpoints/self_client/oauth_me';
+const SELF_CLIENT_PROFILE_TARGET = '/internal/test_endpoints/self_client/current_profile';
 const SELF_CLIENT_TARGET_PATH = schema.maybe(
   schema.oneOf([schema.literal(SELF_CLIENT_ES_TARGET), schema.literal(SELF_CLIENT_OAUTH_TARGET)])
 );
+
+interface CurrentProfileBody {
+  profileId: string | null;
+  profileUid: string | null;
+}
 
 const getReceivedSelfCallHeaders = (headers: Headers, uiam: UiamAPIKeysType | null) => {
   const clientAuthentication = headers[ES_CLIENT_AUTHENTICATION_HEADER];
@@ -848,6 +854,63 @@ export function initRoutes(
         }
         throw error;
       }
+    }
+  );
+
+  router.get(
+    {
+      path: SELF_CLIENT_PROFILE_TARGET,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Security test endpoint verifies how the profile of an API key request resolves.',
+        },
+      },
+      validate: false,
+      options: { access: 'internal' },
+    },
+    async (context, request, response) => {
+      const { userProfile } = await context.core;
+      const profile = await userProfile.getCurrent();
+      const body: CurrentProfileBody = {
+        profileId: await userProfile.getCurrentProfileId(),
+        profileUid: profile?.uid ?? null,
+      };
+      return response.ok({ body });
+    }
+  );
+
+  // Resolves the profile of an API key twice: in-process on a fake request, the way a background
+  // task does, and through a real self HTTP call that is authenticated by the key.
+  router.post(
+    {
+      path: '/test_endpoints/self_client/fake_request_profile',
+      security: {
+        authc: {
+          enabled: false,
+          reason: 'Security test endpoint constructs its own fake request credentials.',
+        },
+        authz: { enabled: false, reason: 'Security test endpoint verifies target authorization.' },
+      },
+      validate: { body: schema.object({ apiKey: schema.string({ maxLength: 1024 }) }) },
+    },
+    async (_context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      const fakeRequest = kibanaRequestFactory({
+        headers: { authorization: `ApiKey ${request.body.apiKey}` },
+      });
+
+      const [profileId, profile] = await Promise.all([
+        coreStart.userProfile.getCurrentProfileId({ request: fakeRequest }),
+        coreStart.userProfile.getCurrent({ request: fakeRequest }),
+      ]);
+      const selfCall = await coreStart.http.selfClient
+        .asScoped(fakeRequest)
+        .fetch<CurrentProfileBody>(SELF_CLIENT_PROFILE_TARGET, { access: 'internal' });
+
+      return response.ok({
+        body: { inProcess: { profileId, profileUid: profile?.uid ?? null }, selfCall },
+      });
     }
   );
 

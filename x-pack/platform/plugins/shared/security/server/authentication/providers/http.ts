@@ -7,7 +7,7 @@
 
 import { timingSafeEqual } from 'crypto';
 
-import type { AuthHeaders, KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedUser, AuthHeaders, KibanaRequest } from '@kbn/core/server';
 import {
   HTTPAuthorizationHeader,
   isUiamBearerCredential,
@@ -138,7 +138,10 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       }
 
       return AuthenticationResult.succeeded(
-        { ...user, http_authentication_scheme: authorizationHeader.scheme.toLowerCase() },
+        {
+          ...(await this.withUiamApiKeyCreator(request, user)),
+          http_authentication_scheme: authorizationHeader.scheme.toLowerCase(),
+        },
         {
           // Even though the `Authorization` header is already present in the HTTP headers of the original request,
           // we still need to expose it to the Core authentication service for consistency.
@@ -172,6 +175,31 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    */
   public getHTTPAuthenticationScheme() {
     return null;
+  }
+
+  /**
+   * Authenticates an internal UIAM API key as the user who created it, as Elasticsearch API keys
+   * already do. The key still identifies itself through `api_key`. Falls back to the key's own
+   * identity when UIAM reports no user creator or the lookup fails.
+   */
+  private async withUiamApiKeyCreator(
+    request: KibanaRequest,
+    user: AuthenticatedUser
+  ): Promise<AuthenticatedUser> {
+    const { uiam } = this.options;
+    if (!uiam) {
+      return user;
+    }
+
+    try {
+      const creator = await uiam.getApiKeyCreator({ request, user });
+      return creator?.type === 'user' ? { ...user, username: String(creator.user_id) } : user;
+    } catch (err) {
+      this.logger.error(
+        `Failed to retrieve the creator of a UIAM API key: ${getDetailedErrorMessage(err)}`
+      );
+      return user;
+    }
   }
 
   private hasVerifiedInternalCallerAttestation(
