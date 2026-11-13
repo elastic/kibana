@@ -384,6 +384,13 @@ export class SlackAppService {
     };
   }
 
+  private async relayRoleExists(request: KibanaRequest, name: string): Promise<boolean> {
+    const { roles } = await this.server.core.elasticsearch.client
+      .asScoped(request)
+      .asCurrentUser.security.queryRole({ query: { term: { name } }, size: 1 });
+    return roles.length > 0;
+  }
+
   private async mintServiceAccountCredential(
     request: KibanaRequest
   ): Promise<MintedRelayCredential> {
@@ -399,6 +406,14 @@ export class SlackAppService {
       throw new SlackAppUnavailableError(
         'Relay UIAM install requires UIAM service accounts. Enable `xpack.security.serviceAccounts` and configure `xpack.security.uiam`.'
       );
+    }
+
+    for (const role of RELAY_SERVICE_ACCOUNT_ROLES) {
+      if (!(await this.relayRoleExists(request, role))) {
+        throw new SlackAppUnavailableError(
+          `The role [${role}] required by the Elastic Slack app does not exist on this deployment.`
+        );
+      }
     }
 
     const { id: serviceAccountId } = await serviceAccounts.create(request, {
