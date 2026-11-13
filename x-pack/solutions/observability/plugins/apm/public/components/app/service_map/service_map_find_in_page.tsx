@@ -46,12 +46,13 @@ function nodeMatchesSearchQuery(node: ServiceMapNode, query: string): boolean {
   if (node.data.label && String(node.data.label).toLowerCase().includes(query)) {
     return true;
   }
-  if (node.id.toLowerCase().includes(query)) {
-    return true;
-  }
-  // Closed group: also match a member service name that is no longer its own node.
+  // Closed groups: match label + members only. Ids like `calls:search` would make
+  // typing "call" hit every calls:* group even when the label is just the busiest service.
   if (isServiceGroupNodeData(node.data)) {
     return node.data.memberServiceIds.some((memberId) => memberId.toLowerCase().includes(query));
+  }
+  if (node.id.toLowerCase().includes(query)) {
+    return true;
   }
   return false;
 }

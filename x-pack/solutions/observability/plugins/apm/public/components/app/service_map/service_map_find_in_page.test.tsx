@@ -178,4 +178,28 @@ describe('ServiceMapFindInPage', () => {
     expectCenteredOn(group);
     expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('1/1');
   });
+
+  it('does not match a closed group on id prefix (e.g. calls:)', async () => {
+    const user = userEvent.setup();
+    const group: ServiceMapNode = {
+      id: 'calls:search',
+      type: 'serviceGroup',
+      position: { x: 100, y: 100 },
+      data: {
+        id: 'calls:search',
+        label: 'search',
+        isService: false,
+        isServiceGroup: true,
+        groupKind: 'calls',
+        memberServiceIds: ['search', 'indexer'],
+        memberCount: 2,
+      },
+    };
+
+    render(<ServiceMapFindInPage nodes={[group, banana]} />);
+
+    await user.type(screen.getByTestId('serviceMapControlsSearch'), 'call');
+    expect(screen.getByTestId('serviceMapFindMatchSummary')).toHaveTextContent('0/0');
+    expect(screen.getByTestId('serviceMapFindNext')).toBeDisabled();
+  });
 });
