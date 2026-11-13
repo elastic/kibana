@@ -13,6 +13,7 @@ import {
   type GetWorkflowMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from './util/authz';
@@ -37,9 +38,34 @@ export const registerSiemWorkflowMigrationsGetRoute = (
         },
       },
       withLicense(
-        async (_context, req, res): Promise<IKibanaResponse<GetWorkflowMigrationResponse>> => {
-          logger.debug(`Workflow migration get is not implemented (${req.params.migration_id})`);
-          return res.notFound({ body: MIGRATION_ID_NOT_FOUND(req.params.migration_id) });
+        async (context, req, res): Promise<IKibanaResponse<GetWorkflowMigrationResponse>> => {
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'workflows'
+          );
+          const { migration_id: migrationId } = req.params;
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const workflowsMigrationsClient =
+              ctx.securitySolution.siemMigrations.getWorkflowsClient();
+            await siemMigrationAuditLogger.logGetMigration({ migrationId });
+
+            const storedMigration = await workflowsMigrationsClient.data.migrations.get(
+              migrationId
+            );
+
+            if (!storedMigration) {
+              return res.notFound({
+                body: MIGRATION_ID_NOT_FOUND(migrationId),
+              });
+            }
+
+            return res.ok({ body: storedMigration });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logGetMigration({ migrationId, error });
+            return res.badRequest({ body: error.message });
+          }
         }
       )
     );

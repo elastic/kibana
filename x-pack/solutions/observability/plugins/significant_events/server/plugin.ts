@@ -18,7 +18,7 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -272,6 +272,13 @@ export class SignificantEventsPlugin
         return alertEventsClientPromise;
       };
 
+      let alertActionsClientPromise: Promise<AlertActionsClientApi> | undefined;
+      const getAlertActionsClient = (): Promise<AlertActionsClientApi> => {
+        alertActionsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertActionsClientWithRequest(request);
+        return alertActionsClientPromise;
+      };
+
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
@@ -280,6 +287,7 @@ export class SignificantEventsPlugin
         logger: this.logger,
         space,
         getAlertEventsClient,
+        getAlertActionsClient,
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
@@ -401,6 +409,7 @@ export class SignificantEventsPlugin
           return true;
         },
         getAlertEventsClient,
+        getAlertActionsClient,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,

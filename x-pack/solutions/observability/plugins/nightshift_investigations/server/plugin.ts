@@ -93,6 +93,7 @@ import {
   DETECTION_SNAPSHOT_SO_TYPES,
   registerDetectionSnapshotTask,
   removeDetectionSnapshotTask,
+  reportAlertsEnteredPipeline,
   scheduleDetectionSnapshotTask,
   setupNightshiftTelemetry,
   type DetectionSnapshotContributor,
@@ -231,11 +232,17 @@ export class NightshiftInvestigationsPlugin
       })
     );
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
+    const telemetry = setupNightshiftTelemetry({
+      analytics: core.analytics,
+      logger: this.logger.get('telemetry'),
+    });
+    this.telemetry = telemetry;
     plugins.alerting?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
     });
     plugins.alertingVTwo?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
+      onStatusChanges: async (payloads) => reportAlertsEnteredPipeline(payloads, telemetry),
     });
     // Single choke point for sandbox access: tools and workflow steps resolve the sandbox through
     // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
@@ -245,11 +252,6 @@ export class NightshiftInvestigationsPlugin
       isNightshiftEnabled: isNightshiftEnabledSync,
       logger: this.logger.get('sandbox'),
     });
-    const telemetry = setupNightshiftTelemetry({
-      analytics: core.analytics,
-      logger: this.logger.get('telemetry'),
-    });
-    this.telemetry = telemetry;
     registerDetectionSnapshotTask({
       taskManager: plugins.taskManager,
       getDeps: async (request) => {

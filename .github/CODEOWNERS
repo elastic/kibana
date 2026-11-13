@@ -573,6 +573,7 @@ src/platform/packages/shared/kbn-chart-icons @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-charts-theme @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
 src/platform/packages/shared/kbn-coloring @elastic/kibana-dashboards
+src/platform/packages/shared/kbn-coloring-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
 src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
@@ -692,6 +693,7 @@ src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-wo
 src/platform/packages/shared/kbn-otel-demo @elastic/streams-ui
 src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/streams-ui
 src/platform/packages/shared/kbn-palettes @elastic/kibana-dashboards
+src/platform/packages/shared/kbn-palettes-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-signals-logs-team
 src/platform/packages/shared/kbn-react-fiber @elastic/appex-sharedux
@@ -779,6 +781,7 @@ src/platform/packages/shared/kbn-visualization-listing-components @elastic/kiban
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-dashboards
+src/platform/packages/shared/kbn-visualizations-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-library @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
@@ -1101,6 +1104,7 @@ x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux
 x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/alertzero-common-layer @elastic/nightshift
+x-pack/platform/packages/shared/kbn-agentic-investigations-impact @elastic/alertzero-common-layer @elastic/nightshift
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
