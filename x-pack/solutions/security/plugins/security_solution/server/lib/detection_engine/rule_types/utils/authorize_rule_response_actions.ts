@@ -77,6 +77,14 @@ const authorizeResponseActions = async <TParams extends RuleParams>({
     request: KibanaRequest
   ) => CheckOsqueryResponseActionAuthz;
 }): Promise<void> => {
+  const hasPayloadActions = (params.responseActions?.length ?? 0) > 0;
+  const hasPreviousActions = (previousParams?.responseActions?.length ?? 0) > 0;
+
+  // No point doing validation if there is nothing to validate.
+  if (!hasPayloadActions && !hasPreviousActions) {
+    return;
+  }
+
   const responseActions = params.responseActions?.map(transformAlertToRuleResponseAction);
 
   try {
