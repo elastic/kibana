@@ -6,7 +6,8 @@ description: >-
   evaluators, and persists the scores as online scores attributed to this
   monitor. When the mean score over the lookback falls below the threshold,
   it proposes rolling the skill back to the content stored before AESOP
-  replaced it, and restores that content if the proposal is approved.
+  replaced it, and restores that content if the proposal is approved. A
+  restored rollback is not proposed again until a new deploy stores a prior.
 enabled: false
 tags:
   - security
@@ -280,6 +281,21 @@ steps:
         Content-Type: application/json
       body:
         content: '{{ steps.get_prior_content.output.document.content }}'
+    on-failure:
+      continue: true
+
+  # The restored content is live again and the stored prior is spent. Without
+  # this the next tick still finds the prior, sees the restored (still low)
+  # scores as drift, and proposes the same rollback again. The delete is a
+  # soft delete the GET above reads as 404; the next A/B deploy stores a new
+  # prior and re-arms the monitor.
+  - name: forget_prior_content
+    type: context-engine.deleteKi
+    if: '${{ steps.restore_skill.output != null and steps.restore_skill.error == null }}'
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+      ki_id: 'skill-prior-{{ consts.SKILL_ID }}'
+      refresh: true
     on-failure:
       continue: true
 
