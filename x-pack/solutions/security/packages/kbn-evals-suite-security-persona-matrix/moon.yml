@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/kbn-client'
   - '@kbn/evals-common'
+  - '@kbn/workflows'
 tags:
   - functional-tests
   - package
