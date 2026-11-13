@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, type ElasticsearchRoleDescriptor } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   apiTest,
@@ -17,66 +17,9 @@ import {
   AB_CONVERSATIONS_PATH,
   expectCreated,
   deleteConversations,
+  editorWithEscalationManage,
+  resolveProfileUid,
 } from '../../fixtures';
-
-const ESCALATIONS_ALL_PRIVILEGE = 'feature_agenticInvestigations.escalations_all';
-
-/**
- * Stateful editor is base Kibana All. Escalation manage is includeIn: 'none', so All
- * can list but cannot update. Tests that verify an assignee (who is not the owner) can
- * reassign need a caller who holds manage_escalations.
- */
-function editorWithEscalationManage(
-  editor: ElasticsearchRoleDescriptor
-): ElasticsearchRoleDescriptor {
-  const applications = (editor.applications ?? []).map((application) => {
-    if (!application.application.startsWith('kibana')) {
-      return application;
-    }
-    return {
-      ...application,
-      privileges: [...application.privileges, ESCALATIONS_ALL_PRIVILEGE],
-    };
-  });
-  if (
-    !applications.some((application) => application.privileges.includes(ESCALATIONS_ALL_PRIVILEGE))
-  ) {
-    throw new Error('editor role has no Kibana application privileges to extend');
-  }
-  return { ...editor, applications };
-}
-
-/**
- * Resolves a user's profile uid by creating a temporary probe conversation as them.
- * The profile uid is the stable `u_*` identifier used for ACL entries and assignees.
- */
-async function resolveProfileUid(
-  apiClient: any,
-  cookieHeader: Record<string, string>
-): Promise<{ uid: string; probeConversationId: string }> {
-  const response = await apiClient.post(AB_CONVERSATIONS_PATH, {
-    headers: { ...PUBLIC_HEADERS, ...cookieHeader },
-    body: {
-      title: '__assignees-spec-probe__',
-      template_id: 'investigation',
-      access_control: { access_mode: 'public' },
-      metadata: { status: 'open' },
-    },
-    responseType: 'json',
-  });
-  if (response.statusCode !== 200 || !response.body.id) {
-    throw new Error(
-      `resolveProfileUid: probe creation failed (${response.statusCode}): ${JSON.stringify(
-        response.body
-      )}`
-    );
-  }
-  const uid = response.body.user?.id as string | undefined;
-  if (!uid) {
-    throw new Error(`resolveProfileUid: response did not include user.id`);
-  }
-  return { uid, probeConversationId: response.body.id };
-}
 
 apiTest.describe(
   'Escalation assignees endpoint — authorization and ACL sync',

@@ -18,47 +18,8 @@ import {
   AB_CONVERSATIONS_PATH,
   expectCreated,
   deleteConversations,
+  resolveProfileUid,
 } from '../../fixtures';
-
-/**
- * Resolves the Kibana user profile uid for a user by having them create a temporary
- * Agent Builder conversation and reading `user.id` from the response.
- *
- * The profile uid is the stable `u_*` identifier the access-control system uses for
- * ACL entries. It differs from the username and is only available once the user has
- * an activated profile (which happens on first interactive login).
- *
- * Returns both the uid and the probe conversation id so the caller can delete it in teardown.
- */
-async function resolveProfileUid(
-  apiClient: any,
-  cookieHeader: Record<string, string>
-): Promise<{ uid: string; probeConversationId: string }> {
-  const response = await apiClient.post(AB_CONVERSATIONS_PATH, {
-    headers: { ...PUBLIC_HEADERS, ...cookieHeader },
-    body: {
-      title: '__profile-uid-probe__',
-      template_id: 'investigation',
-      access_control: { access_mode: 'public' },
-      metadata: { status: 'open' },
-    },
-    responseType: 'json',
-  });
-  if (response.statusCode !== 200 || !response.body.id) {
-    throw new Error(
-      `resolveProfileUid: probe conversation creation failed (${
-        response.statusCode
-      }): ${JSON.stringify(response.body)}`
-    );
-  }
-  const uid = response.body.user?.id as string | undefined;
-  if (!uid) {
-    throw new Error(
-      `resolveProfileUid: response did not include user.id — profile may not be activated yet`
-    );
-  }
-  return { uid, probeConversationId: response.body.id };
-}
 
 /**
  * A collaborator with Agentic Investigations access but no Escalations sub-feature and no
