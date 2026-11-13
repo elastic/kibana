@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { useEntityTablePreferences } from '../../context/entity_table_preferences_context';
-import type { UseEntityListResult } from '../../hooks/use_entity_list';
+import type { EntityListResult } from '../../hooks/use_entity_list';
 import { TableSkeleton } from '../table_skeleton/table_skeleton';
 import { EntityDataGrid } from './entity_data_grid';
 import { EntityTableEmpty, EntityTableLoadError } from '../entity_states/entity_states';
@@ -17,7 +17,7 @@ import { LOADING_ENTITIES_LABEL } from '../entity_states/translations';
 
 export interface EntityTableProps {
   entityType: InventoryType;
-  listResult: UseEntityListResult;
+  listResult: EntityListResult;
 }
 
 export const EntityTable = ({ entityType, listResult }: EntityTableProps) => {

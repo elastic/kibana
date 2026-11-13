@@ -25,10 +25,10 @@ export const INITIAL_LIST_RESPONSE: ListResponse = {
   unavailableColumns: [],
 };
 
-export type UseEntityListResult = FetchResult<ListResponse>;
+export type EntityListResult = FetchResult<ListResponse>;
 
 /** Loads the entities of the type with id `entityType` for the committed time range. */
-export const useEntityList = (entityType: string): UseEntityListResult => {
+export const useEntityList = (entityType: string): EntityListResult => {
   const {
     services: { inventoryApi },
   } = useKibana();

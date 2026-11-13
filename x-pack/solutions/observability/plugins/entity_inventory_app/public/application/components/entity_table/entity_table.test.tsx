@@ -14,7 +14,7 @@ import { HOST_TYPE_FIXTURE } from '../../../__fixtures__/inventory_data';
 import { buildScenarioListResponse } from '../../../__fixtures__/inventory_scenarios';
 import { createAppServicesMock } from '../../../mocks';
 import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
-import type { UseEntityListResult } from '../../hooks/use_entity_list';
+import type { EntityListResult } from '../../hooks/use_entity_list';
 import { INITIAL_LIST_RESPONSE } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
 
@@ -29,7 +29,7 @@ const getHostList = (): ListResponse => {
   return list;
 };
 
-const renderTable = (listResult: Partial<UseEntityListResult>) => {
+const renderTable = (listResult: Partial<EntityListResult>) => {
   const refresh = jest.fn();
   render(
     <I18nProvider>
