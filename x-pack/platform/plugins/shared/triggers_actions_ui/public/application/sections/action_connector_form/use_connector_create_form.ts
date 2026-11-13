@@ -10,10 +10,10 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 import useDebounce from 'react-use/lib/useDebounce';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
-import { connectorTypeIsDual } from '@kbn/connector-specs';
 import type { ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import {
+  getDefaultInboundEventsEnabled,
   isInboundEventsEnabledPayload,
   readClusterInboundEventsEnabled,
 } from '../../lib/inbound_ingress';
@@ -101,9 +101,7 @@ export const useConnectorCreateForm = ({
       secrets: {},
       isMissingSecrets: false,
       isConnectorTypeDeprecated: false,
-      ...(actionTypeId && connectorTypeIsDual(actionTypeId)
-        ? { isInboundEventsEnabled: false }
-        : {}),
+      ...(actionTypeId ? getDefaultInboundEventsEnabled(actionTypeId) : {}),
     };
     return initialConnector ? { ...empty, ...initialConnector } : empty;
   }, [actionTypeId, initialConnector]);

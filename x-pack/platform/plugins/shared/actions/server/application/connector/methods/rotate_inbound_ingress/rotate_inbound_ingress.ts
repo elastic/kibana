@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 
@@ -38,10 +38,7 @@ export async function rotateInboundIngress({
     );
   }
 
-  if (
-    connectorTypeIsDual(actionTypeId) &&
-    !hasInboundEventIdentityAttributes(rawAction.attributes)
-  ) {
+  if (!hasInboundEventIdentityAttributes(rawAction.attributes)) {
     throw Boom.badRequest(
       i18n.translate('xpack.actions.serverSideErrors.rotateInboundIngressNotEnabled', {
         defaultMessage: 'Inbound events are not enabled for this connector.',

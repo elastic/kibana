@@ -15277,7 +15277,6 @@
     "xpack.actions.serverSideErrors.connectorEventIdentityUiamUnsupported": "Impossible d’utiliser une clé API cloud pour enregistrer ce connecteur entrant. Les clés API cloud ne sont prises en charge que dans les environnements sans serveur ; utilisez plutôt une clé API Elasticsearch limitée au projet.",
     "xpack.actions.serverSideErrors.connectorIdConflict": "Un connecteur utilise déjà cet ID : {id}. Choisissez un autre ID.",
     "xpack.actions.serverSideErrors.expirerdLicenseErrorMessage": "Le type d'action {actionTypeId} est désactivé, car votre licence {licenseType} a expiré.",
-    "xpack.actions.serverSideErrors.inboundEventsToggleNotDual": "Les événements entrants ne peuvent être activés que pour les connecteurs qui assurent à la fois l’envoi et la réception.",
     "xpack.actions.serverSideErrors.invalidLicenseErrorMessage": "Le type d'action {actionTypeId} est désactivé, car votre licence {licenseType} ne le prend pas en charge. Veuillez mettre votre licence à niveau.",
     "xpack.actions.serverSideErrors.kibanaManagedAuthTypeForbidden": "Le type d'authentification {authTypeId} est défini par {kibana} et ne peut pas être configuré sur un connecteur. Type d'action : {actionTypeId}.",
     "xpack.actions.serverSideErrors.noConnectorSigningKey": "Ce connecteur ne possède aucune clé de signature. Créez un nouveau connecteur pour obtenir une clé.",

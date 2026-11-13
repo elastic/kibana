@@ -34,7 +34,7 @@ import {
   getConnectorFeatureName,
 } from '@kbn/actions-plugin/common';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
-import { connectorTypeIsDual, connectorTypeIsInboundOnly } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
@@ -63,6 +63,7 @@ import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_generate_callout';
 import {
+  getDefaultInboundEventsEnabled,
   readClusterInboundEventsEnabled,
   shouldRotateInboundAfterSave,
 } from '../../../lib/inbound_ingress';
@@ -193,7 +194,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             isDeprecated: false,
             config: {},
             secrets: {},
-            ...(connectorTypeIsDual(id) ? { isInboundEventsEnabled: false } : {}),
+            ...getDefaultInboundEventsEnabled(id),
           },
         });
       }
@@ -333,10 +334,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     if (actionType == null) {
       return undefined;
     }
-    if (isClusterInboundEventsEnabled && connectorTypeIsInboundOnly(actionType.id)) {
-      return <InboundEventsSaveToGenerateCallout />;
-    }
-    if (connectorTypeIsDual(actionType.id) && isClusterInboundEventsEnabled) {
+    if (isClusterInboundEventsEnabled && connectorTypeHasInboundEvents(actionType.id)) {
       return <InboundEventsSaveToGenerateCallout />;
     }
     return undefined;

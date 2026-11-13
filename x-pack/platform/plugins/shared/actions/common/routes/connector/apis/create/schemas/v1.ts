@@ -60,7 +60,7 @@ const isInboundEventsEnabledCreateField = {
     schema.boolean({
       meta: {
         description:
-          'When true, this connector can receive inbound events. Only valid for connectors that both send and receive. Defaults to false. Generate the webhook token after create.',
+          'When true, this connector can receive inbound events. Only valid for connectors that receive events. Defaults to true for connectors that only receive events, and to false for connectors that also send. Generate the webhook token after create.',
       },
     })
   ),

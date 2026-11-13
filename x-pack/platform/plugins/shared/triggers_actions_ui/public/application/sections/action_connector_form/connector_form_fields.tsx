@@ -10,7 +10,7 @@ import React, { memo, Suspense, useContext } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { connectorTypeIsDual } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
@@ -56,11 +56,17 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   const actionTypeId = actionTypeModel?.id;
   const isDual = actionTypeId != null && connectorTypeIsDual(actionTypeId);
-  const showDualInbound = isDual && isClusterInboundEventsEnabled && showInboundEvents;
+  // Every type that receives events gets the Receive events switch; dual types also get Outbound.
+  const showInboundSection =
+    actionTypeId != null &&
+    connectorTypeHasInboundEvents(actionTypeId) &&
+    isClusterInboundEventsEnabled &&
+    showInboundEvents;
   const showSettingsSection =
-    FieldsComponent !== null || settingsContent != null || showDualInbound;
+    FieldsComponent !== null || settingsContent != null || showInboundSection;
   const showSettingsTitle =
     !isDual &&
+    !showInboundSection &&
     (settingsContent != null || !Boolean(actionTypeModel?.connectorForm?.hideSettingsTitle));
 
   const fieldsComponent =
@@ -92,7 +98,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
       <EuiSpacer size="m" />
       {showSettingsSection ? (
         <>
-          {showDualInbound ? (
+          {showInboundSection ? (
             <InboundEventsFormSection
               canSave={canSave}
               wasLive={savedIsInboundEventsEnabled}
@@ -113,7 +119,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               <EuiSpacer size="s" />
             </>
           ) : null}
-          {!isDual ? settingsContent : null}
+          {!isDual && !showInboundSection ? settingsContent : null}
           {fieldsComponent}
         </>
       ) : null}

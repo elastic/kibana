@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { isUndefined, omit, omitBy } from 'lodash';
 import type { Connector } from '../../types';
@@ -190,7 +190,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     previouslyEnabled,
   });
   const shouldDisableInbound =
-    connectorTypeIsDual(actionTypeId) && requestedInboundEventsEnabled === false;
+    connectorTypeHasInboundEvents(actionTypeId) && requestedInboundEventsEnabled === false;
 
   let previousIdentity: Awaited<ReturnType<typeof loadPreviousConnectorEventIdentity>>;
   if (connectorTypeHasInboundEvents(actionTypeId)) {

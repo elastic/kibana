@@ -13,7 +13,6 @@ import type {
 } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import {
-  connectorTypeIsDual,
   getConnectorSpec,
   type HandleEventsHttpResponse,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
@@ -207,11 +206,8 @@ export async function ingestInboundEvent({
 
   const connectorEventsEnabled = connector.hasPreconfiguredInboundEvents === true;
 
-  if (
-    connectorTypeIsDual(connector.connectorTypeId) &&
-    !connectorEventsEnabled &&
-    connector.hasInboundEventIdentity !== true
-  ) {
+  // Events are off for any connector without an identity or in-memory events, dual or inbound-only.
+  if (!connectorEventsEnabled && connector.hasInboundEventIdentity !== true) {
     return notFound('load_miss', 'inbound_events_disabled');
   }
 

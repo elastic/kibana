@@ -6,15 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  connectorTypeHasInboundEvents,
-  connectorTypeIsDual,
-  connectorTypeIsInboundOnly,
-} from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents, connectorTypeIsInboundOnly } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 
 /**
- * Dual “on” follows last-saver identity. Inbound-only is always on.
+ * Events are on while the connector holds the last saver's identity, or when an in-memory
+ * connector turns them on. Applies to every type with inbound events, dual or inbound-only.
  * The ingest credential is minted later by rotate, not by enable.
  */
 export const resolveInboundEventsEnabled = ({
@@ -26,15 +23,7 @@ export const resolveInboundEventsEnabled = ({
   hasIdentity: boolean;
   /** In-memory connector has events on, with no saved-object identity. */
   eventsEnabled?: boolean;
-}): boolean => {
-  if (connectorTypeIsInboundOnly(actionTypeId)) {
-    return true;
-  }
-  if (eventsEnabled) {
-    return connectorTypeIsDual(actionTypeId);
-  }
-  return connectorTypeIsDual(actionTypeId) && hasIdentity;
-};
+}): boolean => connectorTypeHasInboundEvents(actionTypeId) && (eventsEnabled || hasIdentity);
 
 export const shouldMintInboundIdentity = ({
   actionTypeId,
@@ -42,17 +31,9 @@ export const shouldMintInboundIdentity = ({
 }: {
   actionTypeId: string;
   isInboundEventsEnabled: boolean;
-}): boolean => {
-  if (connectorTypeIsInboundOnly(actionTypeId)) {
-    return true;
-  }
-  return connectorTypeIsDual(actionTypeId) && isInboundEventsEnabled;
-};
+}): boolean => connectorTypeHasInboundEvents(actionTypeId) && isInboundEventsEnabled;
 
-/**
- * Rejects `is_inbound_events_enabled` on types that are not dual.
- * Inbound-only stays always-on by omitting the field.
- */
+/** Rejects `is_inbound_events_enabled` on types without inbound events. */
 export const assertInboundEventsToggleAllowed = ({
   actionTypeId,
   requestedEnabled,
@@ -63,19 +44,19 @@ export const assertInboundEventsToggleAllowed = ({
   if (requestedEnabled === undefined) {
     return;
   }
-  if (connectorTypeIsDual(actionTypeId)) {
+  if (connectorTypeHasInboundEvents(actionTypeId)) {
     return;
   }
   throw Boom.badRequest(
-    i18n.translate('xpack.actions.serverSideErrors.inboundEventsToggleNotDual', {
-      defaultMessage:
-        'Inbound events can only be turned on for connectors that both send and receive.',
+    i18n.translate('xpack.actions.serverSideErrors.inboundEventsToggleNotSupported', {
+      defaultMessage: 'Inbound events can only be turned on for connectors that receive events.',
     })
   );
 };
 
 /**
- * Create: inbound-only is on. Dual omit = off. Dual true = on.
+ * Create: inbound-only omit = on, so receiving is what it does by default. Dual omit = off.
+ * An explicit value wins for both.
  */
 export const resolveCreateInboundEventsEnabled = ({
   actionTypeId,
@@ -84,14 +65,17 @@ export const resolveCreateInboundEventsEnabled = ({
   actionTypeId: string;
   requestedEnabled: boolean | undefined;
 }): boolean => {
-  if (connectorTypeIsInboundOnly(actionTypeId)) {
-    return true;
+  if (!connectorTypeHasInboundEvents(actionTypeId)) {
+    return false;
   }
-  return connectorTypeIsDual(actionTypeId) && requestedEnabled === true;
+  if (requestedEnabled !== undefined) {
+    return requestedEnabled;
+  }
+  return connectorTypeIsInboundOnly(actionTypeId);
 };
 
 /**
- * Update: inbound-only is on. Dual omit = keep previous. Dual explicit = that value.
+ * Update: omit = keep previous. Explicit = that value. Applies to dual and inbound-only.
  */
 export const resolveUpdateInboundEventsEnabled = ({
   actionTypeId,
@@ -102,10 +86,7 @@ export const resolveUpdateInboundEventsEnabled = ({
   requestedEnabled: boolean | undefined;
   previouslyEnabled: boolean;
 }): boolean => {
-  if (connectorTypeIsInboundOnly(actionTypeId)) {
-    return true;
-  }
-  if (!connectorTypeIsDual(actionTypeId)) {
+  if (!connectorTypeHasInboundEvents(actionTypeId)) {
     return false;
   }
   return requestedEnabled === undefined ? previouslyEnabled : requestedEnabled;

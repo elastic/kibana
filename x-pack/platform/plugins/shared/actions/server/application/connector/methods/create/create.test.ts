@@ -1713,7 +1713,7 @@ describe('create()', () => {
       ).toBe(true);
     });
 
-    test('rejects the flag on a non-dual type', async () => {
+    test('rejects the flag on a type without inbound events', async () => {
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(
         getConnectorType({
           id: '.slack',
@@ -1737,9 +1737,7 @@ describe('create()', () => {
             isInboundEventsEnabled: true,
           },
         })
-      ).rejects.toThrow(
-        'Inbound events can only be turned on for connectors that both send and receive.'
-      );
+      ).rejects.toThrow('Inbound events can only be turned on for connectors that receive events.');
       expect(preSaveHook).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
