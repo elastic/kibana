@@ -11,7 +11,7 @@ import {
   isExecutionTerminatedEvent,
   isUserMessageEvent,
 } from '@kbn/agent-builder-common';
-import type { DecisionPredicateQuestion } from '@kbn/agent-builder-server';
+import type { DecisionPredicateQuestion } from '@kbn/inference-common';
 
 export const shouldRespondQuestion: DecisionPredicateQuestion = {
   type: 'predicate',

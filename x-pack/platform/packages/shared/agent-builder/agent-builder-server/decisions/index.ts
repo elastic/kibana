@@ -5,18 +5,4 @@
  * 2.0.
  */
 
-export type {
-  DecisionPredicateQuestion,
-  DecisionChoiceQuestion,
-  DecisionScoreQuestion,
-  DecisionQuestion,
-  DecisionPredicateAnswer,
-  DecisionChoiceAnswer,
-  DecisionScoreAnswer,
-  DecisionAnswer,
-  DecisionAnswerFor,
-  DecisionAnswersFor,
-  DecideParams,
-  DecideResult,
-  DecisionsStart,
-} from './types';
+export type { DecideParams, DecideResult, DecisionsStart } from './types';

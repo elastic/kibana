@@ -15,7 +15,8 @@ import {
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ConversationWithPermissions, ConverseInput } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
-import type { DecideResult, DecisionPredicateAnswer } from '@kbn/agent-builder-server';
+import type { DecideResult } from '@kbn/agent-builder-server';
+import type { DecisionPredicateAnswer } from '@kbn/inference-common';
 import {
   createAgentsServiceStartMock,
   createConversationClientMock,

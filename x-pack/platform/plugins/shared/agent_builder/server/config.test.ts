@@ -11,7 +11,7 @@ describe('decisionModel config', () => {
   it('gives the fast model a 2s budget and the decision models 1s', () => {
     const { decisionModel } = configSchema.validate({});
 
-    expect(decisionModel.eisTimeoutMs).toBe(1000);
+    expect(decisionModel.decisionModelTimeoutMs).toBe(1000);
     expect(decisionModel.fastModelTimeoutMs).toBe(2000);
   });
 
