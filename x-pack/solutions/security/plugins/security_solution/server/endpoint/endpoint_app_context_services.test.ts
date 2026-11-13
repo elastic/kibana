@@ -293,6 +293,58 @@ describe('test endpoint app context services', () => {
     });
   });
 
+  describe('getEndpointAuthz', () => {
+    let service: EndpointAppContextService;
+    let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
+    let fromRequest: jest.Mock;
+
+    const startService = () => {
+      startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+      fromRequest = startContract.fleetStartServices.authz.fromRequest as jest.Mock;
+    };
+
+    beforeEach(() => {
+      service = new EndpointAppContextService();
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it('caches the privilege resolution for the same request', async () => {
+      startService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.getEndpointAuthz(request);
+      await service.getEndpointAuthz(request);
+
+      expect(fromRequest).toHaveBeenCalledTimes(1);
+      expect(fromRequest).toHaveBeenCalledWith(request);
+    });
+
+    it('resolves privileges separately for different requests', async () => {
+      startService();
+
+      await service.getEndpointAuthz(httpServerMock.createKibanaRequest());
+      await service.getEndpointAuthz(httpServerMock.createKibanaRequest());
+
+      expect(fromRequest).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not cache a rejected resolve and retries on the next call', async () => {
+      startService();
+      const request = httpServerMock.createKibanaRequest();
+      fromRequest.mockRejectedValueOnce(new Error('transient'));
+
+      await expect(service.getEndpointAuthz(request)).rejects.toThrow('transient');
+      await expect(service.getEndpointAuthz(request)).resolves.toBeDefined();
+
+      expect(fromRequest).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('getInternalResponseActionsClient', () => {
     let service: EndpointAppContextService;
 
