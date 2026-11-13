@@ -6,7 +6,7 @@ Every setting a user can configure in the Lens editor is part of this API. A fea
 
 ## Adding a setting
 
-This covers a new key, a new value in a union, and a new nested option, in a visualization, a layer or a column. Start from the API: decide how the setting looks there before the UI is final, because a released API field or value cannot change. A new value must leave the meaning of existing values clear. If you cannot settle it, stop and ask instead of shipping the UI alone.
+This covers a new key, a new value in a union, and a new nested option, in a visualization, a layer or a column. Start from the API: decide how the setting looks there before you change the editor, because a released API field or value cannot change. Pick names that fit the existing ones and leave their meaning clear. If a name is a judgment call, add it anyway and list it in your summary, so review settles it before merge. Stop and ask before you change the editor only when the API needs a breaking change to an existing field or value.
 
 A setting is supported when it has:
 
@@ -18,6 +18,7 @@ A setting is supported when it has:
 
 - Leave a new key out of the transforms. They read keys by name, so nothing fails and the setting is silently lost.
 - Leave a new value out of a value mapping. Mappings (`getReversibleMappings`, ternaries) fall back to a default or their last branch, so nothing fails and the setting exports as a different value.
+- Ship the editor change without the API and ask about the API in your summary. Pick a name, add the API, and flag the name for review.
 - Silence a type error in the transforms by excluding the new value (`Exclude<…>`) or by throwing on it at export. When the export throws, the dashboards API drops the whole panel with a `dropped_panel` warning.
 - Add a test that expects the export to fail.
 - Hide the new setting from the round-trip tests with a normalizer `ignore` path ([`tests/utils/validator/normalizers/`](./tests/utils/validator/normalizers/)) or an `excludedFields` entry in `fromApi`. Both skip the comparison, so a lost setting still passes.
