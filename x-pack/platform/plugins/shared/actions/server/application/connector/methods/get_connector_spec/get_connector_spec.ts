@@ -13,7 +13,7 @@ import type { GetConnectorSpecParams, GetConnectorSpecResult } from './types';
 export async function getConnectorSpecAsJsonSchema({
   context,
   id,
-  configurationUtilities,
+  configurationUtilities = context.actionTypeRegistry.getUtils(),
 }: GetConnectorSpecParams): Promise<GetConnectorSpecResult> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
