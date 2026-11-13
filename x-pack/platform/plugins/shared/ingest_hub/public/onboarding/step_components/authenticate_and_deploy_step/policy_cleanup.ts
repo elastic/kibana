@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import type { PolicySettings } from '../../common/policy_settings';

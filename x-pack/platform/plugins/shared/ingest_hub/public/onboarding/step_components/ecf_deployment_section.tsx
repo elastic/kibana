@@ -29,8 +29,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-import { AWS_SERVICES_MAP } from '../aws_service_matrix';
-import type { DataFormat } from '../aws_service_matrix';
+import { AWS_SERVICES_MAP } from '@kbn/fleet-plugin/common';
+import type { DataFormat } from '@kbn/fleet-plugin/common';
 import {
   getEcfServiceConfigs,
   buildEcfUnifiedCloudFormationUrl,

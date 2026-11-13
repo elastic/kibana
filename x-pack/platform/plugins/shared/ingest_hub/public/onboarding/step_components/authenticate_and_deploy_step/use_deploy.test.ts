@@ -15,8 +15,8 @@ import {
   useDeploy,
 } from './use_deploy';
 import { collectDeployResults, buildInstanceStatuses, buildDeployGroups } from './deploy_groups';
-import { buildIacIntegrations } from './package_inputs';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { buildIacIntegrations } from '@kbn/fleet-plugin/common';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 function makeVarDef(
@@ -52,7 +52,7 @@ jest.mock('./policy_cleanup_managed_integrations', () => ({
 
 jest.mock('../../use_aws_service_matrix', () => {
   const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = jest.requireActual(
-    '../../aws_service_matrix'
+    '@kbn/fleet-plugin/common'
   ) as any;
   const policyTemplates = (AWS_SERVICES_STATIC as any[])
     .filter((e: any) => e.packageName === 'aws')

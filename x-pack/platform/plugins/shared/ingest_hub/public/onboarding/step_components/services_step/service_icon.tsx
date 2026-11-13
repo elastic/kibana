@@ -14,7 +14,7 @@ import type { PackageSpecIcon } from '@kbn/fleet-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 const ICON_SIZE = 24;
 

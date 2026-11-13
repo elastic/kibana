@@ -7,14 +7,14 @@
 
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { getDefaultEnabledDataStreams } from '@kbn/fleet-plugin/common';
+import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '@kbn/fleet-plugin/common';
 import type {
   AuthenticateAndDeployStepState,
   ServiceChipState,
 } from '../../onboarding_flow_context';
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
   getCreateDatasetTemplates,
   reconcileInstances,

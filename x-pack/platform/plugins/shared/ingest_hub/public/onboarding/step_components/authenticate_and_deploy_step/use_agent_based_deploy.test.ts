@@ -28,7 +28,8 @@ jest.mock('./use_onboarding_so', () => ({
   useOnboardingSO: jest.fn(),
 }));
 
-jest.mock('./package_inputs', () => ({
+jest.mock('@kbn/fleet-plugin/common', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/common'),
   toSOServiceVars: jest.fn().mockReturnValue({}),
 }));
 
@@ -54,7 +55,7 @@ jest.mock('./use_onboarding_so', () => ({
   })),
 }));
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {

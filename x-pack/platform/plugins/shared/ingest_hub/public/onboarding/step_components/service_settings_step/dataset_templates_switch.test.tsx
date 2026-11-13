@@ -33,7 +33,7 @@ jest.mock('@kbn/fleet-plugin/public', () => {
   };
 });
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { DuplicateServiceModal } from './duplicate_service_modal';
 import { ServiceSettingsFlyout } from './service_settings_flyout';
 import type { ServiceVars } from './use_service_settings';

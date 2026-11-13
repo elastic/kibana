@@ -10,7 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 jest.mock('@kbn/fleet-plugin/public', () => ({ sendGetCloudOnboardingDeployment: jest.fn() }));
 
 import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
 import { useOnboardingDriftDetection } from './use_onboarding_drift_detection';
 

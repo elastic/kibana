@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import { getSourcePolicyName } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { supportsIntegrationSettings } from './integration_settings';
 

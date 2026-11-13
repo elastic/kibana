@@ -7,7 +7,7 @@
 
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 

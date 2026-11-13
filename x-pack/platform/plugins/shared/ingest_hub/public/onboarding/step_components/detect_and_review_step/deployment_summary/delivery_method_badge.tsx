@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 
 interface DeliveryMethodBadgeProps {
   entry: AwsServiceMatrixEntry;

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
-import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
+import { isValidDataStreamIndexPattern } from '../is_valid_namespace';
+
+import type { AwsServiceMatrixEntry } from './aws_service_matrix';
 
 const OTELCOL_INPUT = 'otelcol';
 

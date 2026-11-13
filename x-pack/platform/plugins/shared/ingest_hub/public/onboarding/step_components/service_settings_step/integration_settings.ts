@@ -13,7 +13,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 
 /** Fleet's package policy name limit. */
 export const MAX_POLICY_NAME_LENGTH = 255;

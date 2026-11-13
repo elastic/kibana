@@ -9,11 +9,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
 import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
 
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import {
   toSOAuthMethod,
   type AgentCredentialMethod,
 } from './agent_based_section/credential_method_selector';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { DetectAndReviewStepState } from '../../onboarding_flow_context';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
 import {

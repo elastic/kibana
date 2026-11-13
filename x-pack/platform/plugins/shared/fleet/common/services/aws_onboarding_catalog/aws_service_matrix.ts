@@ -9,9 +9,13 @@
 // Source of truth for deployment mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
-import type { PackageInfo, RegistryVarGroup, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
-import { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from '@kbn/fleet-plugin/common';
-import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
+import type {
+  DeploymentMethod,
+  PackageInfo,
+  RegistryVarGroup,
+  RegistryVarsEntry,
+} from '../../types';
+import { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from '../policy_template';
 
 export type SignalType = 'logs' | 'metrics';
 

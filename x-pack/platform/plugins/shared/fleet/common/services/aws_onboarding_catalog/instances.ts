@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceInstance } from './use_service_settings';
+import type { AwsServiceMatrixEntry } from './aws_service_matrix';
+import type { ServiceInstance } from './types';
 
 /** Duplicate instance ids are `<serviceId>__dup-<n>`. */
 export const DUPLICATE_INSTANCE_ID_SEPARATOR = '__dup-';

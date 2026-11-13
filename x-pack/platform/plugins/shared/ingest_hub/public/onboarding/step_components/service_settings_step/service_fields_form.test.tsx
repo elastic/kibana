@@ -17,7 +17,7 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
 }));
 
 import { ServiceFieldsForm } from './service_fields_form';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 function renderForm(
   service: AwsServiceMatrixEntry,

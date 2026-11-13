@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import { buildDuplicateName, getDuplicateBaseName, getRenamedDuplicate } from './duplicate_name';
 import type { ServiceDataStreamVars, ServiceInstance, ServiceVars } from './use_service_settings';
 

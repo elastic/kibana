@@ -6,13 +6,13 @@
  */
 
 import type { RegistryVarGroup } from '@kbn/fleet-plugin/common';
-import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
-import { getDefaultEnabledDataStreams } from '../../../aws_service_matrix';
-import type { AuthenticateAndDeployStepState } from '../../../onboarding_flow_context';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { getDefaultEnabledDataStreams } from '@kbn/fleet-plugin/common';
+import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '@kbn/fleet-plugin/common';
+import type { PackageInputEntry, AgentCredentialVars } from '@kbn/fleet-plugin/common';
+import { REGION_FIELD_NAMES } from '@kbn/fleet-plugin/common';
 import type { ServiceVars } from '../../service_settings_step/use_service_settings';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../package_inputs';
-import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
-import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
+import type { AuthenticateAndDeployStepState } from '../../../onboarding_flow_context';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
 import {

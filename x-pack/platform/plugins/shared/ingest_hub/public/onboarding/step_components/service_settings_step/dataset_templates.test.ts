@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { getCreateDatasetTemplates, getDatasetTemplatesPolicy } from './dataset_templates';
 import type { ServiceInstance, ServiceVars } from './use_service_settings';
 

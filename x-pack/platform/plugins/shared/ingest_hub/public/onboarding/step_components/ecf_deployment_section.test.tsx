@@ -45,7 +45,8 @@ jest.mock('../core/onboarding_session_storage', () => ({
   getOnboardingSessionKey: jest.fn(() => 'onboarding.aws.ecfLaunchStep'),
 }));
 
-jest.mock('../aws_service_matrix', () => ({
+jest.mock('@kbn/fleet-plugin/common', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/common'),
   AWS_SERVICES_MAP: new Map([
     ['cloudtrail', { ecfLogType: 'cloudtrail', ecfDedicatedTemplate: null }],
     ['waf', { ecfLogType: 'waf', ecfDedicatedTemplate: null }],

@@ -6,12 +6,12 @@
  */
 
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import type {
   AgentBasedDeploymentState,
   AuthenticateAndDeployStepState,
   DetectAndReviewStepState,
 } from '../onboarding_flow_context';
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
 
 /**
  * Contract for the AWS provider adapter within the onboarding flow.

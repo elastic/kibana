@@ -51,7 +51,8 @@ jest.mock('./authenticate_and_deploy_step/use_onboarding_so', () => ({
   useOnboardingSO: jest.fn(),
 }));
 
-jest.mock('./authenticate_and_deploy_step/package_inputs', () => ({
+jest.mock('@kbn/fleet-plugin/common', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/common'),
   buildIacIntegrations: jest.fn(),
 }));
 
@@ -64,8 +65,8 @@ jest.mock('../use_is_self_managed', () => ({
 }));
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
-import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
-import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { buildIacIntegrations } from '@kbn/fleet-plugin/common';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';

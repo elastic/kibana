@@ -8,22 +8,20 @@
 import { useEffect, useState } from 'react';
 import { sendGetAgentlessPolicy, sendGetOnePackagePolicy } from '@kbn/fleet-plugin/public';
 
-/** A var value that points at a secret already stored by Fleet. */
-export interface SecretRefValue {
-  isSecretRef: true;
-  id: string;
-}
+import type {
+  CredentialVarName,
+  ExistingSecretRefs,
+  SecretRefValue,
+} from '@kbn/fleet-plugin/common';
 
-/** Credential var name → the secret ref Fleet currently stores for it. */
-export type ExistingSecretRefs = ReadonlyMap<string, SecretRefValue>;
+export type { ExistingSecretRefs, SecretRefValue, CredentialVarName };
 
 /** Package vars that hold AWS credentials; the only ones the wizard can keep instead of re-ask. */
 export const CREDENTIAL_VAR_NAMES = [
   'access_key_id',
   'secret_access_key',
   'session_token',
-] as const;
-export type CredentialVarName = (typeof CREDENTIAL_VAR_NAMES)[number];
+] as const satisfies readonly CredentialVarName[];
 
 const NO_REFS: ExistingSecretRefs = new Map();
 

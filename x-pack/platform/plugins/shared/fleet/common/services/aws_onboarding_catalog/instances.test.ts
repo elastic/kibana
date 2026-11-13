@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from './aws_service_matrix';
 import { getBaseServiceId, reconcileInstances } from './instances';
-import type { ServiceInstance } from './use_service_settings';
+import type { ServiceInstance } from './types';
 
 const makeService = (id: string, overrides: Partial<AwsServiceMatrixEntry> = {}) =>
   ({ id, name: `${id} name`, showInUI: true, ...overrides } as unknown as AwsServiceMatrixEntry);

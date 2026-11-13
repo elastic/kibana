@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import { ChoiceCards } from '../choice_cards';
 import type { ChoiceCardOption } from '../choice_cards';
 

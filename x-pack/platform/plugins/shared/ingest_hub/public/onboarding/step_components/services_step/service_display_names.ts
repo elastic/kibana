@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 

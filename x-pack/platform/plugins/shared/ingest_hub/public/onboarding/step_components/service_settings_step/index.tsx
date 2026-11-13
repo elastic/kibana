@@ -28,11 +28,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
+import {
+  getFormRegionFieldName as getRegionFieldName,
+  hasConfigurableFlyoutFields,
+} from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { supportsNamespace } from './instance_namespace_field';
 import { deploysAsPolicy, followsGlobalNamespace } from '../../common/effective_namespace';
 import { ecfFamilySupportsNamespace } from '../../ecf_cloudformation';
-import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
 import { getDatasetTemplatesPolicy } from './dataset_templates';
 import {
   DEFAULT_NAMESPACE,

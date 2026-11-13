@@ -10,7 +10,7 @@ import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { DataFormat } from '../../aws_service_matrix';
+import type { DataFormat } from '@kbn/fleet-plugin/common';
 import { ChoiceCards } from '../choice_cards';
 import type { ChoiceCardOption } from '../choice_cards';
 

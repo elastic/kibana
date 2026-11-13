@@ -13,8 +13,8 @@ import type {
   IacRenderedTemplate,
 } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
-import { applyDeploymentMethodView } from './aws_service_matrix';
+import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from '@kbn/fleet-plugin/common';
+import { applyDeploymentMethodView } from '@kbn/fleet-plugin/common';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './core/onboarding_session_storage';

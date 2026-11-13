@@ -12,7 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { NamespaceComboBox } from '@kbn/fleet-plugin/public';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 const INHERITED_NAMESPACE_PLACEHOLDER = 'default';
 

@@ -24,15 +24,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { makeDsView } from '../../aws_service_matrix';
-import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { makeDsView } from '@kbn/fleet-plugin/common';
 import {
   getRequiredTextFields,
   resolveFieldMeta,
   resolveVarGroupSelections,
   toTyped,
-} from './field_config';
+} from '@kbn/fleet-plugin/common';
+import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
 import { MAX_POLICY_NAME_LENGTH } from './integration_settings';

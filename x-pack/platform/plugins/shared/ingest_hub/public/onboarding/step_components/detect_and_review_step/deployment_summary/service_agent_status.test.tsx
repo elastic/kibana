@@ -64,7 +64,7 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   ),
 }));
 
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import type { ServiceAgentInfo } from '../use_service_data_detection';
 import { ServiceAgentStatus } from './service_agent_status';
 

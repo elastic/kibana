@@ -22,8 +22,8 @@
  *   https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
 
-import type { AwsServiceMatrixEntry, EcfLogType } from './aws_service_matrix';
-import { AWS_SERVICES_MAP } from './aws_service_matrix';
+import type { AwsServiceMatrixEntry, EcfLogType } from '@kbn/fleet-plugin/common';
+import { AWS_SERVICES_MAP } from '@kbn/fleet-plugin/common';
 import type {
   ServiceInstance,
   ServiceVars,

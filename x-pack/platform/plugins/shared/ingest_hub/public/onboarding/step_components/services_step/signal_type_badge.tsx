@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { SignalType } from '../../aws_service_matrix';
+import type { SignalType } from '@kbn/fleet-plugin/common';
 
 export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   logs: i18n.translate('xpack.ingestHub.servicesStep.signalType.logs', {

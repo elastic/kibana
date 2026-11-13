@@ -11,13 +11,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { sendUpdateCloudConnector, sendVerifyCloudConnectorIacKey } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { buildIacIntegrations } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import { buildDeployGroups } from './deploy_groups';
 import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import type { DeployGroup } from './deploy_groups';
-import { buildIacIntegrations } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
 import { useMiDeploy } from './use_mi_deploy';
 import {
@@ -35,7 +35,7 @@ export {
   buildStreamVars,
   buildPackageInputs,
   toSOServiceVars,
-} from './package_inputs';
+} from '@kbn/fleet-plugin/common';
 
 export interface UseDeployResult {
   isDeploying: boolean;

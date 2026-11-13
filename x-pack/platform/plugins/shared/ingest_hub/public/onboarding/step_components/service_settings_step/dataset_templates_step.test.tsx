@@ -68,7 +68,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';
 import type { ServiceInstance, ServiceVars } from './use_service_settings';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { ServiceSettingsStep } from '.';
 
 const datasetVar = { name: 'data_stream.dataset', type: 'text', show_user: true, default: 'x' };

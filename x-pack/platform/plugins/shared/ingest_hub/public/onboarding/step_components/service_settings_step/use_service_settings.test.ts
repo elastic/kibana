@@ -25,8 +25,8 @@ import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
 import { getIncompleteInstances, useServiceSettings } from './use_service_settings';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { AWS_SERVICES_MAP } from '@kbn/fleet-plugin/common';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof useOnboardingFlow>;

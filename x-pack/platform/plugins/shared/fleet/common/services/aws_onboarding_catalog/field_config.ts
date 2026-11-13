@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { RegistryVarGroup, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
-import { GENERIC_DATASET_NAME } from '@kbn/fleet-plugin/common';
+import type { RegistryVarGroup, RegistryVarsEntry } from '../../types';
+import { GENERIC_DATASET_NAME } from '../../constants';
 import {
   getVarsControlledByVarGroups,
   isVarRequiredByVarGroup,
   shouldShowVar,
-} from '@kbn/fleet-plugin/common/services';
+} from '../var_group_helpers';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from './aws_service_matrix';
 
 export const AWS_REGION_OPTIONS = [
   'ap-southeast-1',

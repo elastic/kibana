@@ -7,8 +7,8 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import type { AwsServiceMatrixEntry, SignalType } from '../../aws_service_matrix';
-import { isAgentBasedOnly } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, SignalType } from '@kbn/fleet-plugin/common';
+import { isAgentBasedOnly } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 export type SignalFilter = SignalType | 'all';

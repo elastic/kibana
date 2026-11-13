@@ -7,7 +7,7 @@
 
 import { sendGetPackageInfoByKey, sendUpdatePackage } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
 import {
   applyDedicatedNamespaceTemplates,

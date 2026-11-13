@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RegistryVarGroup, RegistryVarsEntry } from '../../types';
+
 import {
   getMissingSourceGroup,
   getStreamVarGroups,
@@ -21,8 +23,7 @@ import {
   toTyped,
   toDraft,
 } from './field_config';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { RegistryVarGroup, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import type { AwsServiceMatrixEntry } from './aws_service_matrix';
 
 function makeVarDef(
   name: string,

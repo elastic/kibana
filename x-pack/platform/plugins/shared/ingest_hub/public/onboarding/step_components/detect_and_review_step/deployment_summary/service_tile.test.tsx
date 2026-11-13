@@ -14,7 +14,7 @@ jest.mock('./service_agent_status', () => ({
 
 import { ServiceTile } from './service_tile';
 import type { ServiceAgentInfo } from '../use_service_data_detection';
-import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
 
 const ENTRY = {

@@ -26,7 +26,7 @@ import {
   useBulkGetAgentPoliciesQuery,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { NOT_RUNNING_GRACE_MS, OTEL_NOT_RUNNING_GRACE_MS } from './agent_detection';
 import { useAgentDetection } from './use_agent_detection';
 

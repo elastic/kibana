@@ -12,10 +12,10 @@ import {
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
+import { getDefaultEnabledDataStreams } from '@kbn/fleet-plugin/common';
+import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '@kbn/fleet-plugin/common';
 import { getEffectiveNamespace } from '../../common/effective_namespace';
-import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
   detectSecretRefs,
   fetchAgentlessSecretRefs,

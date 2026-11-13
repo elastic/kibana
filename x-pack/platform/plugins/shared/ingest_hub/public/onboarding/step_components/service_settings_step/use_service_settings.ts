@@ -16,20 +16,21 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
-import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
-import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { DUPLICATE_INSTANCE_ID_SEPARATOR, reconcileInstances } from './instances';
-import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
-import { toSOMetadataUpdate } from '../authenticate_and_deploy_step/so_settings';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { getDefaultEnabledDataStreams, makeDsView } from '@kbn/fleet-plugin/common';
+import { DUPLICATE_INSTANCE_ID_SEPARATOR, reconcileInstances } from '@kbn/fleet-plugin/common';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
   resolveFieldMeta,
   resolveVarGroupSelections,
   toTyped,
-} from './field_config';
+} from '@kbn/fleet-plugin/common';
+import type { ServiceDataStreamVars, ServiceVars, ServiceInstance } from '@kbn/fleet-plugin/common';
+import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
+import { toSOMetadataUpdate } from '../authenticate_and_deploy_step/so_settings';
 import type { SignalFilter } from '../services_step/use_services_step';
 import {
   AWS_MAIN_PACKAGE_NAME,
@@ -47,55 +48,7 @@ import {
   supportsIntegrationSettings,
 } from './integration_settings';
 
-export interface ServiceDataStreamVars {
-  /** Input types enabled for this data stream. */
-  enabledInputs: string[];
-  /**
-   * Var values keyed by input type, then var name.
-   * e.g. { 'aws-s3': { bucket_arn: 'arn:...' } }
-   */
-  varsByInput: Record<string, Record<string, string | string[]>>;
-  /**
-   * Selected option per stream-level var_group, keyed by input type then group name,
-   * e.g. { 'aws-cloudwatch': { log_group_source: 'log_group_arn' } }. Absent → manifest default
-   * (the group's first option), resolved by `resolveVarGroupSelections`.
-   */
-  varGroupSelectionsByInput?: Record<string, Record<string, string>>;
-}
-
-export interface ServiceVars {
-  /** Data stream ids enabled for this service instance. */
-  enabledDataStreams: string[];
-  /**
-   * Per-data-stream var values. Keys are data stream ids (e.g. 'vpcflow', 'ec2_logs').
-   */
-  varsByDataStream: Record<string, ServiceDataStreamVars>;
-  /**
-   * Data stream namespace of a duplicate's policy. Originals have none and take the global
-   * namespace; a duplicate with none takes it too.
-   */
-  namespace?: string;
-  /**
-   * Whether Fleet creates a dedicated index template for the dataset, as in Fleet's form. The
-   * package policy takes one value, so it is written to every service that deploys in the policy.
-   * Absent means on. Stored beside the vars, so it is never sent as a package var.
-   */
-  createDatasetTemplates?: boolean;
-}
-
-/**
- * A row in the step-2 table. `instanceId` is the stable row identity;
- * `serviceId` is the policy-template / Fleet join key and remains unchanged.
- * Original instances keep instanceId === serviceId for backward compat with
- * session storage written by earlier builds.
- */
-export interface ServiceInstance {
-  instanceId: string;
-  serviceId: string;
-  /** Display name — defaults to service.name, "[Duplicate]"-suffixed for copies. */
-  name: string;
-  isDuplicate: boolean;
-}
+export type { ServiceDataStreamVars, ServiceVars, ServiceInstance };
 
 export interface ServiceSettingsPersistedState {
   globalRegion: string;

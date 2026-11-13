@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
-import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
-import type { CredentialVarName, ExistingSecretRefs, SecretRefValue } from './secret_refs';
+import type { RenderIacTemplateIntegration } from '../../types';
+
+import type { AwsServiceMatrixEntry } from './aws_service_matrix';
+import { getDefaultEnabledDataStreams, makeDsView } from './aws_service_matrix';
+import type {
+  CredentialVarName,
+  ExistingSecretRefs,
+  SecretRefValue,
+  ServiceDataStreamVars,
+  ServiceInstance,
+  ServiceVars,
+  StaticKeyCredentials,
+} from './types';
 import {
   REGION_FIELD_NAMES,
   getStreamVarGroups,
@@ -19,13 +27,8 @@ import {
   resolveVarGroupSelections,
   shouldDefaultCollectS3Logs,
   toTyped,
-} from '../service_settings_step/field_config';
-import { getBaseServiceId } from '../service_settings_step/instances';
-import type {
-  ServiceVars,
-  ServiceDataStreamVars,
-  ServiceInstance,
-} from '../service_settings_step/use_service_settings';
+} from './field_config';
+import { getBaseServiceId } from './instances';
 
 export interface PackageInputEntry {
   enabled: boolean;
@@ -322,7 +325,7 @@ export interface AgentCredentialVars {
  */
 export function buildPackageVars(
   globalRegion: string,
-  staticKeys: AuthenticateAndDeployStepState['staticKeys'],
+  staticKeys: StaticKeyCredentials | undefined,
   pkgVarNames: Set<string>,
   agentCredentials?: AgentCredentialVars,
   existingSecretRefs?: ExistingSecretRefs,

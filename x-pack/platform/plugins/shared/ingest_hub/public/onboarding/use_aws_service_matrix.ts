@@ -9,8 +9,8 @@ import { useCallback, useMemo } from 'react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 
-import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from './aws_service_matrix';
-import type { AwsServiceMatrixEntry } from './aws_service_matrix';
+import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from '@kbn/fleet-plugin/common';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 const PACKAGE_QUERY_OPTIONS = { full: true };
 // Package manifests change only on new releases; 10 min cache avoids repeated EPR requests.

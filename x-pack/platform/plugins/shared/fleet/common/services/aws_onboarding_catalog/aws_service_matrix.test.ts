@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AWS_ONBOARDING_PACKAGE_NAMES } from '@kbn/fleet-plugin/common/constants';
+import { AWS_ONBOARDING_PACKAGE_NAMES } from '../../constants';
+
 import type { AwsServiceMatrixEntry, DeploymentMethod, SignalType } from './aws_service_matrix';
 import {
   AWS_SERVICES_STATIC,

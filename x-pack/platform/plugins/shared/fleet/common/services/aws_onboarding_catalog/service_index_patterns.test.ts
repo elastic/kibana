@@ -6,7 +6,7 @@
  */
 
 import { getServiceIndexPatterns } from './service_index_patterns';
-import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from './aws_service_matrix';
 
 function makeEntry(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMatrixEntry {
   return {

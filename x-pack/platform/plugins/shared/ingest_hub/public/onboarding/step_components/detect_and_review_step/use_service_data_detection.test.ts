@@ -19,7 +19,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import { useGetOutputs } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
 import { useAgentDetection } from './use_agent_detection';
 import { useServiceDataDetection } from './use_service_data_detection';

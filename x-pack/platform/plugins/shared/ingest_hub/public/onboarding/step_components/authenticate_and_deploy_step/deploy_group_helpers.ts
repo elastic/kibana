@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { getEffectiveNamespace } from '../../common/effective_namespace';
 import { getCreateDatasetTemplates as getDatasetTemplatesFlag } from '../service_settings_step/dataset_templates';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
@@ -13,7 +13,7 @@ import type { DeployGroup } from './deploy_groups';
 import { extractErrorMessage } from './deploy_errors';
 import { MAX_POLICY_NAME_LENGTH } from '../service_settings_step/integration_settings';
 
-export { reconcileInstances } from '../service_settings_step/instances';
+export { reconcileInstances } from '@kbn/fleet-plugin/common';
 
 const sanitizeGroupId = (groupId: string): string =>
   groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);

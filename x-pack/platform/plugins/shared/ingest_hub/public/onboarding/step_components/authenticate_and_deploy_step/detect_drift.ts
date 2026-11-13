@@ -7,11 +7,11 @@
 
 import { isEqual } from 'lodash';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
-import { getBaseServiceId } from '../service_settings_step/instances';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { getDefaultEnabledDataStreams } from '@kbn/fleet-plugin/common';
+import { getBaseServiceId } from '@kbn/fleet-plugin/common';
+import { toSOServiceVars } from '@kbn/fleet-plugin/common';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
-import { toSOServiceVars } from './package_inputs';
 
 /**
  * The saved vars as `toSOServiceVars` would write them. Entries saved before duplicates were typed

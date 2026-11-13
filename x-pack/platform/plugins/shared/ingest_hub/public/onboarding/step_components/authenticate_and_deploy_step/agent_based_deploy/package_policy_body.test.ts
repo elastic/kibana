@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import type { ServiceVars } from '../../service_settings_step/use_service_settings';
 import type { DeployGroup } from '../deploy_groups';
 import { buildGroupPackagePolicy } from './package_policy_body';

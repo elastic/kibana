@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
 import type { ServiceAgentInfo } from '../use_service_data_detection';
 import { ServiceTile } from './service_tile';

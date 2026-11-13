@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type { DeploymentMethod } from '../../../aws_service_matrix';
+import type { DeploymentMethod } from '@kbn/fleet-plugin/common';
 import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,

@@ -13,16 +13,16 @@ import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DATA_STREAM_API_ROUTES, isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
 import { useGetOutputs } from '@kbn/fleet-plugin/public';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
+import { getServiceIndexPatterns } from '@kbn/fleet-plugin/common';
 import type { DetectAndReviewStepState, ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
 import {
   deploysAsPolicy,
   getEcfStackNamespace,
   getEffectiveNamespace,
 } from '../../common/effective_namespace';
 import { getPolicySettings } from '../../common/policy_settings';
-import { getServiceIndexPatterns } from '../../common/service_index_patterns';
 import type { HasDataResponse } from '../../../../common/core/detection_api';
 import {
   DEFAULT_SERVICE_SETTINGS,

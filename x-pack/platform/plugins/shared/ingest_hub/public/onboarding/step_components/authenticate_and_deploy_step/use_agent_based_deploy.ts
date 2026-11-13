@@ -7,6 +7,8 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 
+import type { AgentCredentialVars } from '@kbn/fleet-plugin/common';
+import { toSOServiceVars } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import {
@@ -17,9 +19,7 @@ import {
   extractErrorMessage,
   buildAgentPolicyName,
 } from './agent_based_deploy';
-import type { AgentCredentialVars } from './package_inputs';
 import { toSOSettings, toSOSettingsUpdate } from './so_settings';
-import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
 import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import { toSOAuthMethod } from './agent_based_section/credential_method_selector';

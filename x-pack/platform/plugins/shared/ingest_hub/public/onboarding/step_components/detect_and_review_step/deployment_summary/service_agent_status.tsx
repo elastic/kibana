@@ -13,7 +13,7 @@ import {
   LazyAgentlessStatusDetailsFlyout,
   LazyAgentStatusBadge,
 } from '@kbn/fleet-plugin/public';
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import type { AgentIssue } from '../agent_detection';
 import type { ServiceAgentInfo } from '../use_service_data_detection';
 

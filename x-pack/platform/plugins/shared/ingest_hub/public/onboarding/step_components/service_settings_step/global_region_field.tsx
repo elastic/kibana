@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiComboBox, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AWS_REGION_OPTIONS } from './field_config';
+import { AWS_REGION_OPTIONS } from '@kbn/fleet-plugin/common';
 
 interface GlobalRegionFieldProps {
   value: string;

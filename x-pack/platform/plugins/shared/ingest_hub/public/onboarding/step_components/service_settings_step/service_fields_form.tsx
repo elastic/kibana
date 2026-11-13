@@ -30,16 +30,16 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { makeDsView } from '../../aws_service_matrix';
-import type { VarGroupSelections } from './field_config';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { makeDsView } from '@kbn/fleet-plugin/common';
+import type { VarGroupSelections } from '@kbn/fleet-plugin/common';
 import {
   DATASET_VAR_NAME,
   ECF_TRIGGER_VAR_NAMES,
   REGION_FIELD_NAMES,
   getFlyoutFields,
   getMissingSourceGroup,
-  getRegionFieldName,
+  getFormRegionFieldName as getRegionFieldName,
   getRequiredTextFields,
   getStreamVarGroups,
   isAdvancedVar,
@@ -51,7 +51,7 @@ import {
   resolveVarGroupSelections,
   toDraft,
   toTyped,
-} from './field_config';
+} from '@kbn/fleet-plugin/common';
 import type { ServiceDataStreamVars } from './use_service_settings';
 
 function getInputDisplayLabel(input: string, inputTitles?: Record<string, string>): string {

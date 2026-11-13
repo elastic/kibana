@@ -26,7 +26,7 @@ import type {
   NewAgentPolicy,
 } from '@kbn/fleet-plugin/public';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { AgentCredentialVars } from '../package_inputs';
+import type { AgentCredentialVars } from '@kbn/fleet-plugin/common';
 import { fetchPackagePolicySecretRefs, useExistingSecretRefs } from '../secret_refs';
 
 import { useOnboardingFlow } from '../../../onboarding_flow_context';

@@ -13,7 +13,7 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServicesStep } from './use_services_step';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 

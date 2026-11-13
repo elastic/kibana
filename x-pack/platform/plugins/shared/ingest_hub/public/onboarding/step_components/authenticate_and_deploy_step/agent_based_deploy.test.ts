@@ -30,7 +30,7 @@ import {
   buildAgentPolicyName,
 } from './agent_based_deploy';
 import { extractErrorMessage } from './deploy_errors';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
 
 const mockSendCreateAgentPolicy = sendCreateAgentPolicyWithPackagePolicies as jest.Mock;

@@ -22,7 +22,7 @@ import {
   ECF_OTEL_STACK_NAME,
   ECF_CROWDSTRIKE_STACK_NAME,
 } from './ecf_cloudformation';
-import { AWS_SERVICES_MAP } from './aws_service_matrix';
+import { AWS_SERVICES_MAP } from '@kbn/fleet-plugin/common';
 import {
   buildEcfTemplateUrl,
   ECF_FALLBACK_TEMPLATE_VERSION,

@@ -21,7 +21,7 @@ import {
 
 import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 const mockDeleteAgentless = sendDeleteAgentlessPolicy as jest.Mock;
 const mockUpdateAgentless = sendUpdateAgentlessPolicy as jest.Mock;

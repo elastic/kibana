@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { useDuplicates } from './use_duplicates';
 import type { ServiceInstance, ServiceVars } from './use_service_settings';
 

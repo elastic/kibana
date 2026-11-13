@@ -32,7 +32,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import { ServiceIcon } from './service_icon';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 

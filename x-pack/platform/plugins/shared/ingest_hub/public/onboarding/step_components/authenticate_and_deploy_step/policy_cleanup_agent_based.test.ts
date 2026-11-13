@@ -21,7 +21,7 @@ import {
 
 import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 
 const mockDeletePackagePolicy = sendDeletePackagePolicy as jest.Mock;
 const mockUpdatePackagePolicy = sendUpdatePackagePolicy as jest.Mock;

@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
 import type { ServiceAgentInfo } from '../use_service_data_detection';
 import { ServiceStatusIndicator, type AgentErrorReason } from './service_status_indicator';

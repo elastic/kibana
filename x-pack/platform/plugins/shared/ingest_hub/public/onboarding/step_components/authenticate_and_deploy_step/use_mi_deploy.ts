@@ -7,7 +7,8 @@
 
 import { useCallback } from 'react';
 
-import type { AwsServiceMatrixEntry, DataFormat } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DataFormat } from '@kbn/fleet-plugin/common';
+import { toSOServiceVars } from '@kbn/fleet-plugin/common';
 import type {
   AuthenticateAndDeployStepState,
   DetectAndReviewStepState,
@@ -17,7 +18,6 @@ import type { ServiceSettingsPersistedState } from '../service_settings_step/use
 import { buildInstanceStatuses, collectDeployResults, deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 import { toSOSettings, toSOSettingsUpdate } from './so_settings';
-import { toSOServiceVars } from './package_inputs';
 import { fetchAgentlessSecretRefs, withoutCoveredCredentials } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import {

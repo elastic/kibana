@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '@kbn/fleet-plugin/common';
 import {
   ECF_DEFAULT_NAMESPACE,
   ecfFamilySupportsNamespace,

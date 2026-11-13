@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { SignalTypeBadge } from './signal_type_badge';
 import { ServiceIcon } from './service_icon';
 

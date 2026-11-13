@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
-import { offersDatasetTemplates } from './field_config';
+import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
+import { getDefaultEnabledDataStreams, makeDsView } from '@kbn/fleet-plugin/common';
+import { offersDatasetTemplates } from '@kbn/fleet-plugin/common';
 import type { ServiceInstance, ServiceVars } from './use_service_settings';
 
 interface PolicyMember {

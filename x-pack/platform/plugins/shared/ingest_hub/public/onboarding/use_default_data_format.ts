@@ -7,7 +7,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataFormat } from './aws_service_matrix';
+import type { DataFormat } from '@kbn/fleet-plugin/common';
 
 /**
  * Derives the default data format from the active solution.

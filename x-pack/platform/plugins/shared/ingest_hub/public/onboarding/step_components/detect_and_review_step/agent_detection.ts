@@ -11,7 +11,7 @@ import {
   removeVersionSuffixFromPolicyId,
 } from '@kbn/fleet-plugin/common';
 import type { ComponentAlertLevel, PackagePolicyUnitSummary } from '@kbn/fleet-plugin/public';
-import type { DeploymentMethod } from '../../aws_service_matrix';
+import type { DeploymentMethod } from '@kbn/fleet-plugin/common';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 
 export type AgentHealthState = 'healthy' | 'pending' | 'unhealthy';

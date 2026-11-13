@@ -22,9 +22,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_matrix';
-import { makeDsView } from '../../aws_service_matrix';
-import { shouldDefaultCollectS3Logs } from './field_config';
+import type { AwsServiceMatrixEntry, DataStreamInfo } from '@kbn/fleet-plugin/common';
+import { makeDsView } from '@kbn/fleet-plugin/common';
+import { shouldDefaultCollectS3Logs } from '@kbn/fleet-plugin/common';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { isServiceConfigIncomplete } from './use_service_settings';
 import type { DatasetTemplatesPolicy } from './dataset_templates';

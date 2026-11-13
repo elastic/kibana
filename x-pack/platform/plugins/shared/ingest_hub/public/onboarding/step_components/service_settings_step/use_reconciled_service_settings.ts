@@ -8,8 +8,8 @@
 import { useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
+import { reconcileInstances } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { reconcileInstances } from './instances';
 import {
   DEFAULT_SERVICE_SETTINGS,
   SERVICE_SETTINGS_SESSION_KEY,
