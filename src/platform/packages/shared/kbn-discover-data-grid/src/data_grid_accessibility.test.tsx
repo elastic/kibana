@@ -26,7 +26,7 @@ describe('DataGrid accessibility', () => {
     renderGrid();
 
     const grid = screen.getByRole('grid', { name: 'Example data' });
-    expect(grid.getAttribute('aria-rowcount')).toBe('100');
+    expect(grid.getAttribute('aria-rowcount')).toBe('101');
     expect(grid.getAttribute('aria-colcount')).toBe('2');
     expect(screen.getAllByRole('rowgroup')).toHaveLength(2);
 
@@ -38,7 +38,7 @@ describe('DataGrid accessibility', () => {
     expect(headers[0].hasAttribute('tabindex')).toBe(false);
 
     const allRows = screen.getAllByRole('row');
-    expect(allRows.map((row) => row.getAttribute('aria-rowindex'))).toEqual([null, '1', '2', '3']);
+    expect(allRows.map((row) => row.getAttribute('aria-rowindex'))).toEqual(['1', '2', '3', '4']);
     expect(allRows.slice(1)).toHaveLength(3);
     expect(screen.getByRole('gridcell', { name: 'Name 0' }).getAttribute('aria-colindex')).toBe(
       '1'

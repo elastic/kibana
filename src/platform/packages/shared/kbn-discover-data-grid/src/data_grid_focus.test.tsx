@@ -150,7 +150,7 @@ describe('DataGrid keyboard and logical focus', () => {
 
     await expect(pendingFocus).resolves.toEqual({ status: 'completed' });
     const focusedCell = await expectFocus('Name 50');
-    expect(focusedCell.parentElement?.getAttribute('aria-rowindex')).toBe('71');
+    expect(focusedCell.parentElement?.getAttribute('aria-rowindex')).toBe('72');
     outsideButton.remove();
   });
 
@@ -336,7 +336,7 @@ describe('DataGrid keyboard and logical focus', () => {
     rerender(<TestDataGrid gridRows={reorderedRows} />);
 
     const movedCell = await expectFocus('Name 1');
-    expect(movedCell.parentElement?.getAttribute('aria-rowindex')).toBe('3');
+    expect(movedCell.parentElement?.getAttribute('aria-rowindex')).toBe('4');
 
     const rowsWithActiveMovedOffScreen = [
       rows[0],
@@ -346,7 +346,7 @@ describe('DataGrid keyboard and logical focus', () => {
     ];
     rerender(<TestDataGrid gridRows={rowsWithActiveMovedOffScreen} />);
     const offScreenMovedCell = await expectFocus('Name 1');
-    expect(offScreenMovedCell.parentElement?.getAttribute('aria-rowindex')).toBe('52');
+    expect(offScreenMovedCell.parentElement?.getAttribute('aria-rowindex')).toBe('53');
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(51, 'auto');
 
     rerender(
@@ -380,7 +380,7 @@ describe('DataGrid keyboard and logical focus', () => {
 
     const grid = screen.getByRole('grid', { name: 'Example data' });
     await waitFor(() => expect(document.activeElement).toBe(grid));
-    expect(grid.getAttribute('aria-rowcount')).toBe('0');
+    expect(grid.getAttribute('aria-rowcount')).toBe('1');
     expect(grid.getAttribute('tabindex')).toBe('0');
     expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
     await waitFor(() =>
