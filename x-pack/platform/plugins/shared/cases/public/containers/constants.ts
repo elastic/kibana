@@ -60,6 +60,18 @@ export const casesQueriesKeys = {
     ...casesQueriesKeys.userActions,
     'stats',
   ],
+  attachmentHistory: (caseId: string, attachmentId: string) =>
+    [
+      ...casesQueriesKeys.case(caseId),
+      ...casesQueriesKeys.userActions,
+      'history',
+      attachmentId,
+    ] as const,
+  replyCounts: (caseId: string) => [...casesQueriesKeys.case(caseId), 'replies', 'counts'] as const,
+  replies: (caseId: string, parentId: string) =>
+    [...casesQueriesKeys.case(caseId), 'replies', parentId] as const,
+  inbox: (owner: string[]) => [...casesQueriesKeys.all, 'inbox', owner] as const,
+  inboxRead: () => [...casesQueriesKeys.users, 'inbox-read'] as const,
   userProfiles: () => [...casesQueriesKeys.users, 'user-profiles'] as const,
   userProfilesList: (ids: string[]) => [...casesQueriesKeys.userProfiles(), ids] as const,
   currentUser: () => [...casesQueriesKeys.users, 'current-user'] as const,
@@ -82,6 +94,7 @@ export const casesMutationsKeys = {
   pushCase: ['push-case'] as const,
   updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
+  postReply: ['post-reply'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
   bulkDeleteAttachments: ['bulk-delete-attachments'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,

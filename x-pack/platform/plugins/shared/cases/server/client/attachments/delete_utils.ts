@@ -6,10 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
+import { chunk } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 
 import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
+import { AttachmentType } from '../../../common/types/domain';
 import type {
   AttachmentAttributesV2,
   UnifiedAttachmentAttributes,
@@ -38,6 +43,8 @@ import { buildAttachmentTypeFilter } from './type_filter';
 import { emitAttachmentsDeletedEvent, emitAttachmentsDeletedEvents } from './trigger_utils';
 import { collectRelatedAttachmentIds } from './related_deletions';
 
+const MAX_THREAD_PARENTS_PER_QUERY = 100;
+
 interface OwnedAttachment extends AttachmentForDeletion {
   owner: string;
 }
@@ -45,7 +52,7 @@ interface OwnedAttachment extends AttachmentForDeletion {
 export interface DecodedAttachment extends OwnedAttachment {
   attributes: AttachmentAttributesV2;
   /** The attachment fields recorded in the deletion user action. */
-  requestAttributes: AttachmentRequestV2;
+  requestAttributes: AttachmentRequestV2 & { parent_id?: string };
 }
 
 /** Records the deletion in place of the default user action per attachment. */
@@ -101,7 +108,10 @@ export const deleteCaseAttachments = async (
     return caseRead;
   };
 
-  const ownedAttachments = await withCaseOwnerFallback({ attachments, getCase });
+  const ownedAttachments = await withCaseOwnerFallback({
+    attachments: await withThreadReplies({ caseId, attachments }, clientArgs),
+    getCase,
+  });
 
   // Authorized before the case and file checks below, so their error messages cannot tell an
   // unauthorized caller which case an attachment belongs to, or what type it is.
@@ -258,6 +268,36 @@ const recordDeletion = async (
 const hasOwner = (attachment: AttachmentForDeletion): attachment is OwnedAttachment =>
   attachment.owner != null;
 
+const isThreadParent = ({ attributes }: AttachmentForDeletion): boolean =>
+  attributes != null &&
+  (attributes.type === COMMENT_ATTACHMENT_TYPE || attributes.type === AttachmentType.user) &&
+  !('parent_id' in attributes && attributes.parent_id != null);
+
+/** Adds the replies of the deleted comments, so a reply is never left without its comment. */
+const withThreadReplies = async (
+  { caseId, attachments }: { caseId: string; attachments: AttachmentForDeletion[] },
+  { services: { attachmentService } }: CasesClientArgs
+): Promise<AttachmentForDeletion[]> => {
+  const parentIds = attachments.filter(isThreadParent).map(({ id }) => id);
+  const knownIds = new Set(attachments.map(({ id }) => id));
+  const replies: AttachmentForDeletion[] = [];
+
+  for (const ids of chunk(parentIds, MAX_THREAD_PARENTS_PER_QUERY)) {
+    const found = await attachmentService.getter.getCaseAttachmentsForDeletion({
+      caseId,
+      filter: buildFilter({
+        filters: ids,
+        field: 'parent_id',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      }),
+    });
+    replies.push(...found.filter(({ id }) => !knownIds.has(id)));
+  }
+
+  return replies.length > 0 ? [...attachments, ...replies] : attachments;
+};
+
 /**
  * An attachment always shares its case's owner, so a row whose stored owner is unreadable is
  * authorized on the case owner instead.
@@ -293,14 +333,20 @@ const toDecodedAttachment = (
   // The resolved owner, so the user action and event agree with the authorized owner.
   const attributes = { ...storedAttributes, owner };
 
-  // Strips the fields not part of the original request (created_at etc.); the stored fields vary
-  // by attachment type.
+  // A reply keeps its parent, so its deletion stays out of the feed too.
+  const parentId = 'parent_id' in storedAttributes ? storedAttributes.parent_id : undefined;
+
   try {
     return [
       {
         ...attachment,
         attributes,
-        requestAttributes: decodeOrThrowZod(AttachmentRequestSchemaV2)(attributes),
+        requestAttributes: {
+          // Strips the fields not part of the original request (created_at etc.); the stored
+          // fields vary by attachment type.
+          ...decodeOrThrowZod(AttachmentRequestSchemaV2)(attributes),
+          ...(parentId != null ? { parent_id: parentId } : {}),
+        },
       },
     ];
   } catch (error) {

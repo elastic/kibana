@@ -20,6 +20,11 @@ export interface UserActionGet {
 export type GetConnectorsRequest = UserActionGet;
 export type GetUsersRequest = UserActionGet;
 
+export interface AttachmentHistoryRequest {
+  caseId: string;
+  attachmentId: string;
+}
+
 export interface UserActionFind {
   params: UserActionInternalFindRequest;
   caseId: string;

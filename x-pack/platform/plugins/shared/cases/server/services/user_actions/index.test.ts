@@ -146,6 +146,16 @@ describe('CaseUserActionService', () => {
               ],
             },
           },
+          updates: {
+            doc_count: 4,
+            updates: {
+              buckets: [
+                { key: 'user', doc_count: 1 },
+                { key: 'comment', doc_count: 2 },
+                { key: 'lens', doc_count: 1 },
+              ],
+            },
+          },
           nonDeletedCommentUpdates: {
             doc_count: 2,
             comments: {
@@ -214,9 +224,27 @@ describe('CaseUserActionService', () => {
           total_comment_deletions: 3,
           total_comment_creations: 5,
           total_hidden_comment_updates: 6,
+          total_comment_updates: 3,
           total_other_actions: 10,
           total_other_action_deletions: 1,
+          total_replies: 0,
+          total_reply_creations: 0,
         });
+      });
+
+      it('counts thread replies', async () => {
+        const { aggregations } = mockStatsResponse as unknown as {
+          aggregations: Record<string, unknown>;
+        };
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          ...mockStatsResponse,
+          aggregations: { ...aggregations, replies: { doc_count: 4, creations: { doc_count: 3 } } },
+        } as unknown as SavedObjectsFindResponse);
+
+        const stats = await service.getCaseUserActionStats({ caseId: '123' });
+
+        expect(stats.total_replies).toBe(4);
+        expect(stats.total_reply_creations).toBe(3);
       });
 
       it('groups non-deleted comment updates by both attachment saved object types', async () => {

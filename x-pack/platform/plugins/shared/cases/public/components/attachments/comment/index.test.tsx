@@ -77,18 +77,31 @@ describe('getCommentAttachmentType', () => {
       expect(hideDefaultActions).toBe(true);
     });
 
-    it('sets a primary custom action', () => {
+    it('sets primary custom actions for reply and the actions menu', () => {
       const commentType = getCommentAttachmentType();
       const actions = commentType
         .getCreationActivity(attachmentViewProps)
         .getActions?.(attachmentViewProps);
 
-      expect(actions).toHaveLength(1);
-      expect(actions?.[0]).toEqual({
-        type: AttachmentActionType.CUSTOM,
-        isPrimary: true,
-        render: expect.any(Function),
-      });
+      expect(actions).toEqual([
+        { type: AttachmentActionType.CUSTOM, isPrimary: true, render: expect.any(Function) },
+        { type: AttachmentActionType.CUSTOM, isPrimary: true, render: expect.any(Function) },
+      ]);
+    });
+
+    it('sets no actions for a deleted comment', () => {
+      const commentType = getCommentAttachmentType();
+      const props = { ...attachmentViewProps, isDeleted: true };
+      const actions = commentType.getCreationActivity(props).getActions?.(props);
+
+      expect(actions).toEqual([]);
+    });
+
+    it('hides the copy link icon, which moves to the actions menu', () => {
+      const commentType = getCommentAttachmentType();
+      const { hideCopyLinkAction } = commentType.getCreationActivity(attachmentViewProps);
+
+      expect(hideCopyLinkAction).toBe(true);
     });
 
     it('exposes a children component for the comment body', () => {

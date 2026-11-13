@@ -48,6 +48,7 @@ const userActionsStats: CaseUserActionsStats = {
   totalCommentDeletions: 0,
   totalCommentCreations: 2,
   totalHiddenCommentUpdates: 0,
+  totalCommentUpdates: 0,
   totalOtherActions: 3,
   totalOtherActionDeletions: 0,
 };

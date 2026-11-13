@@ -13,7 +13,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { MarkdownRenderer } from './renderer';
 
 export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
-  padding: ${`${euiTheme.size.m} ${euiTheme.size.l}`};
+  padding: ${`${euiTheme.size.s} ${euiTheme.size.s}`};
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;

@@ -48,6 +48,7 @@ import {
   countEventsForID,
 } from '../utils';
 import { decodeOrThrowZod } from '../runtime_types';
+import { parseMentions } from '../../../common/utils/mentions';
 import { extractCommentContent, isUnifiedPayloadCommentAttachment } from '../attachments/comment';
 import type {
   AttachmentAttributesV2,
@@ -69,6 +70,23 @@ const getCommentTextFromPayload = (payload: UnifiedAttachmentPayload): string | 
     return payload.data.content;
   }
   return undefined;
+};
+
+/** Thread and mention attributes stored with a new comment; other attachment types get none. */
+const getCollabAttributes = (
+  payload: UnifiedAttachmentPayload,
+  parentId?: string
+): { parent_id?: string; mentions?: string[] } => {
+  const content = getCommentTextFromPayload(payload);
+
+  if (content == null) {
+    return {};
+  }
+
+  return {
+    ...(parentId != null ? { parent_id: parentId } : {}),
+    mentions: parseMentions(content),
+  };
 };
 
 /**
@@ -160,6 +178,7 @@ export class CaseCommentModel {
         savedObjectId: id,
         updatedAttributes: {
           ...queryRestAttributes,
+          ...(patchCommentText != null ? { mentions: parseMentions(patchCommentText) } : {}),
           updated_at: updatedAt,
           updated_by: this.params.user,
         },
@@ -291,10 +310,13 @@ export class CaseCommentModel {
     createdDate,
     commentReq,
     id,
+    parentId,
   }: {
     createdDate: string;
     commentReq: UnifiedAttachmentPayload;
     id: string;
+    /** Makes the comment a reply in the thread of this comment. */
+    parentId?: string;
   }): Promise<{ model: CaseCommentModel; attachment?: AttachmentSavedObjectTransformedV2 }> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
@@ -313,11 +335,14 @@ export class CaseCommentModel {
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
       const comment = await this.params.services.attachmentService.create({
-        attributes: transformNewComment({
-          createdDate,
-          ...attachment,
-          ...this.params.user,
-        }),
+        attributes: {
+          ...transformNewComment({
+            createdDate,
+            ...attachment,
+            ...this.params.user,
+          }),
+          ...getCollabAttributes(attachment, parentId),
+        },
         references,
         id,
         refresh: true,
@@ -330,7 +355,10 @@ export class CaseCommentModel {
       await Promise.all([
         commentableCase.handleAlertComments([attachment]),
         commentableCase.handleAttackComments([attachment]),
-        this.createCommentUserAction(comment, attachment),
+        this.createCommentUserAction(
+          comment,
+          parentId != null ? { ...attachment, parent_id: parentId } : attachment
+        ),
       ]);
 
       return { model: commentableCase, attachment: comment };
@@ -690,7 +718,7 @@ export class CaseCommentModel {
 
   private async createCommentUserAction(
     comment: SavedObject<AttachmentAttributesV2>,
-    req: UnifiedAttachmentPayload
+    req: UnifiedAttachmentPayload & { parent_id?: string }
   ) {
     await this.params.services.userActionService.creator.createUserAction({
       userAction: {
@@ -795,11 +823,14 @@ export class CaseCommentModel {
       const newlyCreatedAttachments = await this.params.services.attachmentService.bulkCreate({
         attachments: attachmentWithoutDuplicateAlerts.map(({ id, ...attachment }) => {
           return {
-            attributes: transformNewComment({
-              createdDate: new Date().toISOString(),
-              ...attachment,
-              ...this.params.user,
-            }),
+            attributes: {
+              ...transformNewComment({
+                createdDate: new Date().toISOString(),
+                ...attachment,
+                ...this.params.user,
+              }),
+              ...getCollabAttributes(attachment),
+            },
             references: [...caseReference, ...this.getCommentReferences(attachment)],
             id,
           };

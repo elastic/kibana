@@ -7,6 +7,7 @@
 
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 import { FILE_ATTACHMENT_TYPE } from '../../../../constants/attachments';
+import { MAX_COMMENT_LENGTH } from '../../../../constants';
 import { FileAttachmentMetadataSchema, FileAttachmentPayloadSchema } from './v2';
 
 const validFile = {
@@ -84,9 +85,25 @@ describe('FileAttachmentPayloadSchema', () => {
     expect(FileAttachmentPayloadSchema.safeParse(validPayload).success).toBe(true);
   });
 
-  it('rejects a payload carrying `data` (file is reference-shaped)', () => {
+  it('accepts the message text sent with the file in `data.content`', () => {
+    expect(
+      FileAttachmentPayloadSchema.safeParse({ ...validPayload, data: { content: 'see attached' } })
+        .success
+    ).toBe(true);
+  });
+
+  it('rejects `data` keys other than `content`', () => {
     expect(
       FileAttachmentPayloadSchema.safeParse({ ...validPayload, data: { foo: 'bar' } }).success
+    ).toBe(false);
+  });
+
+  it('rejects `data.content` over the comment length limit', () => {
+    expect(
+      FileAttachmentPayloadSchema.safeParse({
+        ...validPayload,
+        data: { content: 'a'.repeat(MAX_COMMENT_LENGTH + 1) },
+      }).success
     ).toBe(false);
   });
 

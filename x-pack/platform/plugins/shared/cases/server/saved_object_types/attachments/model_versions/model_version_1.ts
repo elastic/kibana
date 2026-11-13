@@ -44,7 +44,7 @@ const dataSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-const createSchema = schema.object(
+export const createSchema = schema.object(
   {
     type: schema.string({ maxLength: MAX_ATTACHMENT_TYPE_LENGTH }),
     attachmentId: schema.maybe(

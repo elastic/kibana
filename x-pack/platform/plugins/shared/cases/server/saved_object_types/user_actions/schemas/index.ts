@@ -16,3 +16,7 @@ export {
   userActionCreateSchema as userActionCreateSchemaV3,
   userActionForwardCompatibilitySchema as userActionForwardCompatibilitySchemaV3,
 } from './v3';
+export {
+  userActionCreateSchema as userActionCreateSchemaV4,
+  userActionForwardCompatibilitySchema as userActionForwardCompatibilitySchemaV4,
+} from './v4';

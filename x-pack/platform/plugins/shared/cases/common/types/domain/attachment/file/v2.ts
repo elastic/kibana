@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../constants/attachments';
-import { MAX_TITLE_LENGTH } from '../../../../constants';
+import { MAX_COMMENT_LENGTH, MAX_TITLE_LENGTH } from '../../../../constants';
 import { SingleFileAttachmentMetadataSchema } from '../v1';
 
 export const FileAttachmentMetadataSchema = z
@@ -21,12 +21,19 @@ export const FileAttachmentMetadataSchema = z
   .strict();
 export type FileAttachmentMetadata = z.infer<typeof FileAttachmentMetadataSchema>;
 
-export const FileAttachmentPayloadSchema = z
-  .object({
-    type: z.literal(FILE_ATTACHMENT_TYPE),
-    owner: z.string().max(MAX_TITLE_LENGTH),
-    attachmentId: z.string().max(MAX_TITLE_LENGTH),
-    metadata: FileAttachmentMetadataSchema,
-  })
-  .strict();
+export const FileAttachmentPayloadSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(FILE_ATTACHMENT_TYPE),
+      owner: z.string().max(MAX_TITLE_LENGTH),
+      attachmentId: z.string().max(MAX_TITLE_LENGTH),
+      // The message text sent with the file.
+      data: z
+        .object({ content: z.string().max(MAX_COMMENT_LENGTH) })
+        .strict()
+        .optional(),
+      metadata: FileAttachmentMetadataSchema,
+    })
+    .strict()
+);
 export type FileAttachmentPayload = z.infer<typeof FileAttachmentPayloadSchema>;

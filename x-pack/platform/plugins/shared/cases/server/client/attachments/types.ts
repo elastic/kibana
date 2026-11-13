@@ -178,6 +178,16 @@ export interface UpdateArgs {
   updateRequest: UnifiedAttachmentPayload & { id: string; version: string };
 }
 
+export interface ThreadArgs {
+  caseId: string;
+  /** The id of the comment that starts the thread. */
+  parentId: string;
+}
+
+export interface AddReplyArgs extends ThreadArgs {
+  content: string;
+}
+
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;

@@ -57,11 +57,25 @@ export const UnifiedAttachmentPayloadSchema = z.union([
 ]);
 
 /**
+ * Thread and mention attributes. Only stored on `cases-attachments`, and only for comments.
+ */
+export const UnifiedAttachmentCollabAttributesSchema = lazySchema(() =>
+  z
+    .object({
+      parent_id: z.string().nullable(),
+      mentions: z.array(z.string()),
+    })
+    .partial()
+);
+
+/**
  * Saved Object attributes for Unified Attachments
  * Contains the payload and the basic attributes
  */
-export const UnifiedAttachmentAttributesSchema = UnifiedAttachmentPayloadSchema.and(
-  AttachmentAttributesBasicSchema
+export const UnifiedAttachmentAttributesSchema = lazySchema(() =>
+  UnifiedAttachmentPayloadSchema.and(AttachmentAttributesBasicSchema).and(
+    UnifiedAttachmentCollabAttributesSchema
+  )
 );
 
 /**
@@ -84,12 +98,15 @@ const UnifiedValueAttachmentPayloadPartialSchema = UnifiedValueAttachmentPayload
   owner: true,
 }).partial();
 
-export const UnifiedAttachmentPatchAttributesSchema = z
-  .union([
-    UnifiedReferenceAttachmentPayloadPartialSchema,
-    UnifiedValueAttachmentPayloadPartialSchema,
-  ])
-  .and(AttachmentAttributesBasicSchema.partial());
+export const UnifiedAttachmentPatchAttributesSchema = lazySchema(() =>
+  z
+    .union([
+      UnifiedReferenceAttachmentPayloadPartialSchema,
+      UnifiedValueAttachmentPayloadPartialSchema,
+    ])
+    .and(AttachmentAttributesBasicSchema.partial())
+    .and(UnifiedAttachmentCollabAttributesSchema)
+);
 
 export type UnifiedReferenceAttachmentPayload = z.infer<
   typeof UnifiedReferenceAttachmentPayloadSchema

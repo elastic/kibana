@@ -105,4 +105,24 @@ describe('UserActionsList', () => {
     expect(await screen.findByTestId('test-comment')).toBeInTheDocument();
     expect(screen.queryByTestId('case-user-action-preview-0')).not.toBeInTheDocument();
   });
+
+  it('renders the actions prefix before the collapse toggle and the actions', async () => {
+    const comments = [
+      {
+        username: 'elastic',
+        actionsPrefix: <span data-test-subj="actions-prefix">{'Last edited'}</span>,
+        actions: <span data-test-subj="row-actions" />,
+        children: <div>{'Test comment'}</div>,
+      },
+    ];
+
+    renderWithTestingProviders(<UserActionsList {...defaultProps} comments={comments} />);
+
+    const prefix = await screen.findByTestId('actions-prefix');
+    const collapse = screen.getByTestId('case-user-action-collapse-0');
+    const actions = screen.getByTestId('row-actions');
+
+    expect(prefix.compareDocumentPosition(collapse)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(collapse.compareDocumentPosition(actions)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });

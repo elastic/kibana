@@ -30,7 +30,13 @@ import type {
   BulkDeleteArgs,
   BulkDeleteFileArgs,
   AddFileArgs,
+  AddReplyArgs,
+  ThreadArgs,
 } from './types';
+import type { AttachmentReplyCountsResponse } from '../../../common/types/api/attachment/threads';
+import type { InboxFindResponse } from '../../../common/types/api/inbox/v1';
+import { addReply, getReplies, getReplyCounts } from './threads';
+import { findInbox } from './inbox';
 import { bulkCreate, bulkCreateAndGetCase } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
 import { find, get, getAll, getAllDocumentsAttachedToCase } from './get';
@@ -108,6 +114,22 @@ export interface AttachmentsSubClient {
    * Adds a file attachment to a case. Returns the case with all its attachments.
    */
   addFileAndGetCase(params: AddFileArgs): Promise<Case>;
+  /**
+   * Adds a reply to a comment. Returns the created reply.
+   */
+  addReply(params: AddReplyArgs): Promise<UnifiedAttachment>;
+  /**
+   * Retrieves the replies of a comment, oldest first.
+   */
+  getReplies(params: ThreadArgs): Promise<UnifiedAttachment[]>;
+  /**
+   * Retrieves the reply count, latest repliers and last reply time per comment of a case.
+   */
+  getReplyCounts(params: { caseId: string }): Promise<AttachmentReplyCountsResponse>;
+  /**
+   * Retrieves the mentions of, replies to and case assignments of the current user.
+   */
+  findInbox(params: { owners: string[] }): Promise<InboxFindResponse>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
@@ -129,6 +151,10 @@ const usageCounterByMethod = {
   updateAndGetCase: 'update_attachment',
   addFile: 'add_file_attachment',
   addFileAndGetCase: 'add_file_attachment',
+  addReply: 'add_attachment_reply',
+  getReplies: null,
+  getReplyCounts: null,
+  findInbox: null,
 } as const satisfies Record<keyof AttachmentsSubClient, string | null>;
 
 /**
@@ -200,6 +226,12 @@ export const createAttachmentsSubClient = (
       clientArgs,
       (params: AddFileArgs) => addFileAndGetCase(params, clientArgs, casesClient)
     ),
+    addReply: withUsageCounter(usageCounterByMethod.addReply, clientArgs, (params: AddReplyArgs) =>
+      addReply(params, clientArgs)
+    ),
+    getReplies: (params: ThreadArgs) => getReplies(params, clientArgs),
+    getReplyCounts: (params: { caseId: string }) => getReplyCounts(params, clientArgs),
+    findInbox: (params: { owners: string[] }) => findInbox(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

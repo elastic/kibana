@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment';
+
 import { schema } from '@kbn/config-schema';
 import { sanitizeImageDataUrl } from '@kbn/content-sanitization';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
@@ -30,9 +32,12 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.locale',
   'userSettings.rememberSelectedSpace',
   'userSettings.lastSelectedSpaceId',
+  'userSettings.casesInboxLastReadAt',
 ] as const satisfies readonly UserProfileUpdatePaths[];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
+
+const MAX_ISO_DATE_LENGTH = 64;
 
 const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
 
@@ -68,6 +73,13 @@ const userProfileUpdateSchema = schema.object({
       rememberSelectedSpace: schema.maybe(schema.boolean()),
       lastSelectedSpaceId: schema.maybe(
         schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH }))
+      ),
+      casesInboxLastReadAt: schema.maybe(
+        schema.string({
+          maxLength: MAX_ISO_DATE_LENGTH,
+          validate: (value) =>
+            moment(value, moment.ISO_8601, true).isValid() ? undefined : 'must be an ISO 8601 date',
+        })
       ),
     })
   ),

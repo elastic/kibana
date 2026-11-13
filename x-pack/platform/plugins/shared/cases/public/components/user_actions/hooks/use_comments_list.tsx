@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { EuiCommentProps } from '@elastic/eui';
+import type { UserActionComment } from '../types';
 
 import type { CurrentUserProfile } from '../../types';
 import { UserToolTip } from '../../user_profiles/user_tooltip';
@@ -16,8 +16,8 @@ import { ShowMoreActivities } from '../show_more_activities';
 import * as i18n from '../translations';
 
 interface UseCommentsListArgs {
-  builtInfiniteActions: EuiCommentProps[];
-  builtLastPageActions: EuiCommentProps[];
+  builtInfiniteActions: UserActionComment[];
+  builtLastPageActions: UserActionComment[];
   hasNextPage: boolean | undefined;
   remainingActionCount: number;
   fetchNextPage: (() => void) | undefined;
@@ -37,15 +37,15 @@ export const useCommentsList = ({
   shouldShowCommentEditor,
   currentUserProfile,
   commentEditor,
-}: UseCommentsListArgs): EuiCommentProps[] => {
+}: UseCommentsListArgs): UserActionComment[] => {
   const handleShowMore = useCallback(() => {
     if (fetchNextPage) {
       fetchNextPage();
     }
   }, [fetchNextPage]);
 
-  return useMemo<EuiCommentProps[]>(() => {
-    const items: EuiCommentProps[] = [...builtInfiniteActions];
+  return useMemo<UserActionComment[]>(() => {
+    const items: UserActionComment[] = [...builtInfiniteActions];
 
     if (hasNextPage) {
       items.push({

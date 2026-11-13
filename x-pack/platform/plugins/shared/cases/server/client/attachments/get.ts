@@ -69,7 +69,7 @@ const normalizeDocumentResponse = (
     return acc;
   }, []);
 
-const decodeUnifiedAttachment = (
+export const decodeUnifiedAttachment = (
   attachment: { id: string },
   logger: CasesClientArgs['logger']
 ): UnifiedAttachment | undefined => {

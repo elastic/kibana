@@ -12,6 +12,7 @@ import {
 import { modelVersion1 } from './model_version_1';
 import { modelVersion2 } from './model_version_2';
 import { modelVersion3 } from './model_version_3';
+import { modelVersion4 } from './model_version_4';
 
 describe('cases-user-actions model versions', () => {
   describe('version 1', () => {
@@ -170,6 +171,63 @@ describe('cases-user-actions model versions', () => {
         schema.validate({
           ...workflowUserAction({ type: 'cases.case', id: '1' }),
           source: { type: 'some_future_source', id: '1' },
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('version 4', () => {
+    it('adds the payload.comment.parent_id mapping', () => {
+      expect(modelVersion4.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            payload: {
+              properties: {
+                comment: {
+                  properties: {
+                    parent_id: { type: 'keyword', ignore_above: 1024 },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ]);
+    });
+
+    const replyUserAction = (comment: Record<string, unknown>) => ({
+      action: 'create',
+      created_at: '2020-01-01T00:00:00.000Z',
+      created_by: { username: 'elastic' },
+      owner: 'cases',
+      type: 'comment',
+      payload: { comment },
+    });
+
+    it('accepts a reply comment payload in create', () => {
+      const schema = modelVersion4.schemas?.create;
+      if (!schema) {
+        throw new Error('expected a create schema');
+      }
+
+      expect(() =>
+        schema.validate(
+          replyUserAction({ type: 'comment', data: { content: 'hi' }, parent_id: 'p1' })
+        )
+      ).not.toThrow();
+    });
+
+    it('still validates the workflow origin in create', () => {
+      const schema = modelVersion4.schemas?.create;
+      if (!schema) {
+        throw new Error('expected a create schema');
+      }
+
+      expect(() =>
+        schema.validate({
+          ...replyUserAction({ type: 'comment' }),
+          payload: { origin: { type: 'a'.repeat(MAX_WORKFLOW_ORIGIN_TYPE_LENGTH + 1) } },
         })
       ).toThrow();
     });

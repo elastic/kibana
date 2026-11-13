@@ -16,6 +16,8 @@ import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
 import { decodeOrThrowZod } from '../../../common/runtime_types';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
@@ -173,6 +175,85 @@ export class UserActionFinder {
     }));
   }
 
+  /**
+   * Excludes user-comment edit rows. Covers legacy and unified comments, since user actions
+   * store both with the same payload shape.
+   */
+  public static buildHideCommentEditsFilter(): KueryNode {
+    return fromKueryExpression(
+      `not (${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type: ${UserActionTypes.comment} and ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action: ${UserActionActions.update} and (${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE}))`
+    );
+  }
+
+  /** Excludes the create and delete rows of thread replies; the thread panel shows them. */
+  public static buildHideRepliesFilter(): KueryNode {
+    return fromKueryExpression(
+      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.parent_id: *`
+    );
+  }
+
+  /**
+   * Returns the create and update user actions of a single attachment, oldest first.
+   */
+  public async findAttachmentHistory({
+    caseId,
+    attachmentId,
+    filter,
+  }: {
+    caseId: string;
+    attachmentId: string;
+    filter?: KueryNode;
+  }): Promise<UserActionSavedObjectTransformed[]> {
+    try {
+      this.context.log.debug(
+        `Attempting to find history for attachment id: ${attachmentId} in case id: ${caseId}`
+      );
+
+      const historyFilter = combineFilters([
+        filter,
+        buildFilter({
+          filters: [UserActionTypes.comment],
+          field: 'type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+        buildFilter({
+          filters: [UserActionActions.create, UserActionActions.update],
+          field: 'action',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+      ]);
+
+      const userActions = await this.collectFromPIT(
+        {
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          hasReference: [
+            { type: CASE_COMMENT_SAVED_OBJECT, id: attachmentId },
+            { type: CASE_ATTACHMENT_SAVED_OBJECT, id: attachmentId },
+          ],
+          hasReferenceOperator: 'OR',
+          sortField: defaultSortField,
+          sortOrder: 'asc',
+          filter: historyFilter,
+          perPage: MAX_DOCS_PER_PAGE,
+        },
+        { caseId }
+      );
+
+      return userActions.filter((userAction) =>
+        userAction.references.some(
+          (reference) => reference.type === CASE_SAVED_OBJECT && reference.id === caseId
+        )
+      );
+    } catch (error) {
+      this.context.log.error(
+        `Error finding history for attachment id: ${attachmentId} in case id: ${caseId}: ${error}`
+      );
+      throw error;
+    }
+  }
+
   private static buildFilter(types: FindOptions['types'] = []) {
     const filters = types.map((type) => UserActionFinder.buildFilterType(type));
     return combineFilters(filters, NodeBuilderOperators.or);
@@ -311,6 +392,57 @@ export class UserActionFinder {
       operator: 'or',
       type: CASE_USER_ACTION_SAVED_OBJECT,
     });
+  }
+
+  /** Returns the newest user actions that assigned the user to a case, across all cases. */
+  public async findAssignments({
+    uid,
+    filter,
+    perPage,
+  }: {
+    uid: string;
+    filter?: KueryNode;
+    perPage: number;
+  }): Promise<UserActionSavedObjectTransformed[]> {
+    try {
+      this.context.log.debug('Attempting to find the assignments of a user');
+
+      const response =
+        await this.context.unsecuredSavedObjectsClient.find<UserActionPersistedAttributes>({
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          filter: combineFilters([
+            filter,
+            UserActionFinder.buildGenericTypeFilter(UserActionTypes.assignees),
+            buildFilter({
+              filters: UserActionActions.add,
+              field: 'action',
+              operator: 'or',
+              type: CASE_USER_ACTION_SAVED_OBJECT,
+            }),
+            buildFilter({
+              filters: uid,
+              field: 'payload.assignees.uid',
+              operator: 'or',
+              type: CASE_USER_ACTION_SAVED_OBJECT,
+            }),
+          ]),
+          sortField: defaultSortField,
+          sortOrder: 'desc',
+          page: 1,
+          perPage,
+        });
+
+      const { saved_objects: savedObjects } = transformFindResponseToExternalModel(response);
+      const decoded = bulkDecodeSOAttributes(savedObjects, UserActionTransformedAttributesSchema);
+
+      return savedObjects.map((so) => ({
+        ...so,
+        attributes: decoded.get(so.id) as UserActionTransformedAttributes,
+      }));
+    } catch (error) {
+      this.context.log.error(`Error finding the assignments of a user: ${error}`);
+      throw error;
+    }
   }
 
   public async findStatusChanges({
