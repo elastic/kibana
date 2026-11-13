@@ -116,7 +116,14 @@ export interface WorkflowDetailState {
     connectorIdToEdit?: string;
     /** Position in Monaco editor where the flyout was opened from (for inserting connector ID) */
     insertPosition?: LineColumnPosition;
+    /** Set when a form field opened the flyout: the new connector's id is handed back under it. */
+    requestId?: string;
   };
+  /**
+   * The connector created for a form field (see `connectorFlyout.requestId`), until that field has
+   * taken it. It outlives the flyout, which closes right after creating.
+   */
+  lastCreatedConnector?: { requestId: string; id: string };
 }
 
 export type ActiveTab = 'workflow' | 'executions';

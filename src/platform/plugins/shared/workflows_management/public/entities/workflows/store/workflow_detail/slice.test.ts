@@ -9,6 +9,8 @@
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import {
+  selectConnectorFlyoutRequestId,
+  selectLastCreatedConnector,
   selectTestModalStayInEditor,
   selectTestStepModalOpenStepId,
   selectTestStepModalStayInEditor,
@@ -16,6 +18,10 @@ import {
 } from './selectors';
 import {
   addTreeRun,
+  clearCreatedConnector,
+  closeConnectorFlyout,
+  connectorCreated,
+  openCreateConnectorFlyout,
   openTestModalInEditor,
   openTestStepModalInEditor,
   setIsTestModalOpen,
@@ -93,5 +99,31 @@ describe('stay-in-editor modal flags', () => {
     store.dispatch(openTestModalInEditor());
     store.dispatch(setIsTestModalOpen(true));
     expect(selectTestModalStayInEditor(store.getState())).toBe(false);
+  });
+});
+
+describe('connector created for a form field', () => {
+  it('keeps the request id while the flyout is open and drops it when it closes', () => {
+    const store = createMockStore();
+    store.dispatch(openCreateConnectorFlyout({ connectorType: '.slack', requestId: 'field-1' }));
+    expect(selectConnectorFlyoutRequestId(store.getState())).toBe('field-1');
+
+    store.dispatch(closeConnectorFlyout());
+    expect(selectConnectorFlyoutRequestId(store.getState())).toBeUndefined();
+  });
+
+  it('keeps the created connector after the flyout closes, until it is cleared', () => {
+    const store = createMockStore();
+    store.dispatch(openCreateConnectorFlyout({ connectorType: '.slack', requestId: 'field-1' }));
+    store.dispatch(connectorCreated({ requestId: 'field-1', id: 'abc' }));
+    store.dispatch(closeConnectorFlyout());
+
+    expect(selectLastCreatedConnector(store.getState())).toEqual({
+      requestId: 'field-1',
+      id: 'abc',
+    });
+
+    store.dispatch(clearCreatedConnector());
+    expect(selectLastCreatedConnector(store.getState())).toBeUndefined();
   });
 });

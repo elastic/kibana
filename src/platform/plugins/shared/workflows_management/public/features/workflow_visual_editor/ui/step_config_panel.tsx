@@ -60,6 +60,7 @@ import {
   workflowsEditorChromeOverrides,
 } from '@kbn/workflows-ui';
 import { isReferenceValue } from '@kbn/workflows-yaml';
+import { ConnectorIdField } from './connector_id_field';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
@@ -1777,6 +1778,7 @@ function StepFieldRow({
     (field.kind === 'boolean' ||
       field.kind === 'number' ||
       field.kind === 'select' ||
+      field.kind === 'connector-id' ||
       listIsTags ||
       codeTakesData);
   const sourceToggle = hasSourceToggle ? (
@@ -1800,7 +1802,8 @@ function StepFieldRow({
     />
   ) : undefined;
   // Dropdowns hold text, so their reference is the text form; numbers and yes/no keep their type.
-  const referenceForm: ReferenceForm = field.kind === 'select' ? 'text' : 'value';
+  const referenceForm: ReferenceForm =
+    field.kind === 'select' || field.kind === 'connector-id' ? 'text' : 'value';
 
   const removeControl = onRemove ? (
     <span
@@ -2109,6 +2112,33 @@ function StepFieldRow({
         </StepValidatedFormRow>
       );
     }
+    case 'connector-id':
+      return wrapRow(
+        <StepValidatedFormRow {...rowProps}>
+          {source === 'data' ? (
+            <ReferenceValueBox
+              catalog={referenceCatalog}
+              value={value}
+              form={referenceForm}
+              onChange={handleDataChange}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              ariaLabel={field.label}
+              onExpand={expandFromData}
+              data-test-subj={testSubj}
+            />
+          ) : (
+            <ConnectorIdField
+              field={field}
+              value={value}
+              onChange={onChange}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              testSubj={testSubj}
+            />
+          )}
+        </StepValidatedFormRow>
+      );
     case 'variants':
       return wrapRow(
         <VariantField

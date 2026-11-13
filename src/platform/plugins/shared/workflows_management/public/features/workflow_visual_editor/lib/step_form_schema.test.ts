@@ -487,6 +487,19 @@ describe('step_form_schema', () => {
       );
     });
 
+    it('makes an optional connector-id a connector-id field too, and gives none to a step without one', () => {
+      const optional = getStepFormSchema('slack', [
+        { ...connectors[0], hasConnectorId: 'optional' },
+      ]);
+      expect(optional?.fields.find((f) => f.key === 'connector-id')).toMatchObject({
+        kind: 'connector-id',
+        required: false,
+        stepType: 'slack',
+      });
+      const none = getStepFormSchema('slack', [{ ...connectors[0], hasConnectorId: false }]);
+      expect(none?.fields.some((f) => f.key === 'connector-id')).toBe(false);
+    });
+
     it('derives connector fields from paramsSchema under `with` plus connector-id', () => {
       const schema = getStepFormSchema('slack', connectors);
       expect(schema).toBeDefined();
@@ -495,6 +508,8 @@ describe('step_form_schema', () => {
         path: ['connector-id'],
         required: true,
         label: 'Connector id',
+        kind: 'connector-id',
+        stepType: 'slack',
       });
       expect(byKey.message).toMatchObject({
         path: ['with', 'message'],

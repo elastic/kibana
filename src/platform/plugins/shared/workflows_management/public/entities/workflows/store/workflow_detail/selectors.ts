@@ -272,3 +272,11 @@ export const selectConnectorFlyoutInsertPosition = createSelector(
   selectConnectorFlyout,
   (flyout) => flyout.insertPosition
 );
+export const selectConnectorFlyoutRequestId = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.requestId
+);
+export const selectLastCreatedConnector = createSelector(
+  selectDetail,
+  (detail) => detail.lastCreatedConnector
+);

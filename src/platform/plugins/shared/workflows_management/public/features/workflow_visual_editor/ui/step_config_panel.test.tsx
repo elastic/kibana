@@ -9,12 +9,14 @@
 
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
+import { Provider } from 'react-redux-v7';
 import { parseDocument } from 'yaml';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
 import { z } from '@kbn/zod/v4';
 import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
 
 jest.mock('@kbn/code-editor', () => {
@@ -219,18 +221,20 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPa
   const onRevert = jest.fn();
   const onFragmentChange = jest.fn();
   const view = render(
-    <I18nProvider>
-      <StepConfigPanel
-        mode="edit"
-        stepType="slack"
-        initialFragment={FRAGMENT}
-        connectors={connectors}
-        onClose={onClose}
-        onRevert={onRevert}
-        onFragmentChange={onFragmentChange}
-        {...overrides}
-      />
-    </I18nProvider>
+    <Provider store={createMockStore()}>
+      <I18nProvider>
+        <StepConfigPanel
+          mode="edit"
+          stepType="slack"
+          initialFragment={FRAGMENT}
+          connectors={connectors}
+          onClose={onClose}
+          onRevert={onRevert}
+          onFragmentChange={onFragmentChange}
+          {...overrides}
+        />
+      </I18nProvider>
+    </Provider>
   );
   return { onClose, onRevert, onFragmentChange, unmount: view.unmount };
 };
@@ -1568,13 +1572,13 @@ with:
       within(messageRow).getByTestId('workflowStepConfigDataReferenceExpand')
     ).toBeInTheDocument();
 
-    // connector-id is a required text field — also expandable
+    // connector-id is picked from a list (Fixed | Data), so like a select it has no expand control
     const connectorRow = screen
       .getByTestId('workflowStepConfigField-connector-id')
       .closest('.euiFormRow') as HTMLElement;
     expect(
-      within(connectorRow).getByTestId('workflowStepConfigDataReferenceExpand')
-    ).toBeInTheDocument();
+      within(connectorRow).queryByTestId('workflowStepConfigDataReferenceExpand')
+    ).not.toBeInTheDocument();
   });
 
   it('renders JSON code Inputs as a single-line field with collapsed display; expand keeps formatting', () => {

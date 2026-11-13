@@ -107,6 +107,22 @@ export function getConnectorInstancesForType(
   });
 }
 
+/** A connector's name with its status indicators, e.g. `Name (deprecated)(preconfigured)`. */
+const getConnectorDisplayName = (instance: ConnectorInstance): string => {
+  let connectorName = instance.name;
+  if (instance.isDeprecated) {
+    connectorName += ' (deprecated)';
+  }
+  if (instance.isPreconfigured) {
+    connectorName += ' (preconfigured)';
+  }
+  return connectorName;
+};
+
+/** How a connector reads in a list: its name with status, then its id, for better visibility. */
+export const getConnectorInstanceLabel = (instance: ConnectorInstance): string =>
+  `${getConnectorDisplayName(instance)} • ${instance.id}`;
+
 /**
  * Get a connector instance suggestion object
  */
@@ -115,17 +131,8 @@ function createConnectorSuggestion(
   stepType: string,
   range: monaco.IRange | monaco.languages.CompletionItemRanges
 ): monaco.languages.CompletionItem {
-  let connectorName = instance.name;
-
-  // Add status indicators to connector name
-  if (instance.isDeprecated) {
-    connectorName += ' (deprecated)';
-  }
-  if (instance.isPreconfigured) {
-    connectorName += ' (preconfigured)';
-  }
-  // Create a label that shows both ID and name for better visibility
-  const displayLabel = `${connectorName} • ${instance.id}`;
+  const connectorName = getConnectorDisplayName(instance);
+  const displayLabel = getConnectorInstanceLabel(instance);
 
   return {
     label: displayLabel, // Show both connector ID and name

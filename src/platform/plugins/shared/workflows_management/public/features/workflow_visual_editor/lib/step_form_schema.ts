@@ -32,6 +32,7 @@ export type StepFieldKind =
   | 'number'
   | 'boolean'
   | 'select'
+  | 'connector-id'
   | 'code'
   | 'key-value'
   | 'list'
@@ -76,6 +77,8 @@ export interface StepFormField {
    */
   readonly advanced?: boolean;
   readonly kind: StepFieldKind;
+  /** `connector-id` fields: the step type the connectors are picked for. */
+  readonly stepType?: string;
   readonly language?: StepFieldLanguage;
   readonly options?: readonly string[];
   /** Schema default (from `.default()`), used to pre-fill new steps. */
@@ -826,6 +829,17 @@ const getStepTimeout = (stepType: string): StepFormField | undefined => {
  * `configSchema` → root keys) or a connector contract (`paramsSchema` → `with`,
  * plus `connector-id` when the contract requires one).
  */
+/**
+ * A root-level `connector-id` is chosen among the connectors that fit the step (or typed, or
+ * referenced), so it gets its own kind and knows its step type.
+ */
+const withConnectorIdKind = (stepType: string, fields: readonly StepFormField[]): StepFormField[] =>
+  fields.map((field) =>
+    field.key === 'connector-id' && field.path.length === 1 && field.kind === 'text'
+      ? { ...field, kind: 'connector-id', stepType }
+      : field
+  );
+
 export const getStepFormSchema = (
   stepType: string,
   connectors: readonly ConnectorContractUnion[]
@@ -834,13 +848,13 @@ export const getStepFormSchema = (
   if (builtIn) {
     return {
       stepType,
-      fields: [
+      fields: withConnectorIdKind(stepType, [
         ...fieldsFromObject(stepType, builtIn.configSchema, []),
         ...(LOOP_STEP_TYPES.has(stepType)
           ? fieldsFromObject(stepType, LOOP_ROOT_PROPS_SCHEMA, [])
           : []),
         ...fieldsFromObject(stepType, builtIn.inputSchema, ['with']),
-      ],
+      ]),
       condition: getStepCondition(builtIn.configSchema),
       timeout: getStepTimeout(stepType),
     };
@@ -869,7 +883,7 @@ export const getStepFormSchema = (
   fields.push(...fieldsFromObject(stepType, connector.paramsSchema, ['with']));
   return {
     stepType,
-    fields,
+    fields: withConnectorIdKind(stepType, fields),
     condition: getStepCondition(connector.configSchema),
     timeout: getStepTimeout(stepType),
   };
