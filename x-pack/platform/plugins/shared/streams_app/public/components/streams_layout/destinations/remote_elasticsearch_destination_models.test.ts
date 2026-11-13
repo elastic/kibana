@@ -29,6 +29,7 @@ describe('getRemoteIndexBySignal', () => {
         logsIndex: 'a',
         metricsIndex: 'b',
         tracesIndex: 'c',
+        docsIndex: 'd',
       })
     ).toEqual({});
   });
@@ -40,25 +41,27 @@ describe('getRemoteIndexBySignal', () => {
         logsIndex: '  my-logs ',
         metricsIndex: '   ',
         tracesIndex: 'my-traces',
+        docsIndex: ' my-docs ',
       })
-    ).toEqual({ logs: 'my-logs', traces: 'my-traces' });
+    ).toEqual({ logs: 'my-logs', traces: 'my-traces', docs: 'my-docs' });
   });
 });
 
 describe('createRemoteElasticsearchUnitDestination', () => {
-  it('auto: endpoint and credential only, all signals', () => {
+  it('auto: endpoint and credential only, all signals including docs', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: true,
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
     expect(node).toEqual({
       id: 'central',
       name: 'Central',
       type: REMOTE_ELASTICSEARCH_TYPE,
-      supported_telemetry: ['logs', 'metrics', 'traces'],
+      supported_telemetry: ['logs', 'metrics', 'traces', 'docs'],
       config: [endpointEntry, credentialEntry],
     });
   });
@@ -70,6 +73,7 @@ describe('createRemoteElasticsearchUnitDestination', () => {
       logsIndex: 'logs-billing.otel-default',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
     expect(node.supported_telemetry).toEqual(['logs']);
     expect(node.config).toEqual([
@@ -86,12 +90,50 @@ describe('createRemoteElasticsearchUnitDestination', () => {
       logsIndex: 'logs-billing.otel-default',
       metricsIndex: '',
       tracesIndex: 'traces-billing.otel-prod',
+      docsIndex: '',
     });
     expect(node.supported_telemetry).toEqual(['logs', 'traces']);
     expect(node.config).toEqual([
       endpointEntry,
       { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
       { name: 'index', value: 'traces-billing.otel-prod', telemetry: ['traces'] },
+      credentialEntry,
+    ]);
+  });
+
+  it('fixed, OTel signals plus docs: docs gets its own scoped entry', () => {
+    const node = createRemoteElasticsearchUnitDestination({
+      ...base,
+      auto: false,
+      logsIndex: 'logs-billing.otel-default',
+      metricsIndex: 'metrics-billing.otel-default',
+      tracesIndex: 'traces-billing.otel-default',
+      docsIndex: 'accounting-2026',
+    });
+    expect(node.supported_telemetry).toEqual(['logs', 'metrics', 'traces', 'docs']);
+    expect(node.config).toEqual([
+      endpointEntry,
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
+      { name: 'index', value: 'metrics-billing.otel-default', telemetry: ['metrics'] },
+      { name: 'index', value: 'traces-billing.otel-default', telemetry: ['traces'] },
+      { name: 'index', value: 'accounting-2026', telemetry: ['docs'] },
+      credentialEntry,
+    ]);
+  });
+
+  it('fixed, docs only: one docs-scoped index', () => {
+    const node = createRemoteElasticsearchUnitDestination({
+      ...base,
+      auto: false,
+      logsIndex: '',
+      metricsIndex: '',
+      tracesIndex: '',
+      docsIndex: ' accounting-2026 ',
+    });
+    expect(node.supported_telemetry).toEqual(['docs']);
+    expect(node.config).toEqual([
+      endpointEntry,
+      { name: 'index', value: 'accounting-2026', telemetry: ['docs'] },
       credentialEntry,
     ]);
   });
@@ -200,6 +242,7 @@ describe('remote Elasticsearch view model', () => {
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
     expect(node.description).toBe('Prod cluster');
     expect(toDestinationViewModel(node)?.description).toBe('Prod cluster');
@@ -218,16 +261,38 @@ describe('remote Elasticsearch view model', () => {
   });
 
   it.each([
-    ['auto', { auto: true, logsIndex: '', metricsIndex: '', tracesIndex: '' }, {}],
+    ['auto', { auto: true, logsIndex: '', metricsIndex: '', tracesIndex: '', docsIndex: '' }, {}],
     [
       'one signal',
-      { auto: false, logsIndex: 'logs-a.otel-b', metricsIndex: '', tracesIndex: '' },
+      { auto: false, logsIndex: 'logs-a.otel-b', metricsIndex: '', tracesIndex: '', docsIndex: '' },
       { logs: 'logs-a.otel-b' },
     ],
     [
       'two signals',
-      { auto: false, logsIndex: 'logs-a.otel-b', metricsIndex: '', tracesIndex: 'traces-a.otel-b' },
+      {
+        auto: false,
+        logsIndex: 'logs-a.otel-b',
+        metricsIndex: '',
+        tracesIndex: 'traces-a.otel-b',
+        docsIndex: '',
+      },
       { logs: 'logs-a.otel-b', traces: 'traces-a.otel-b' },
+    ],
+    [
+      'OTel signals plus docs',
+      {
+        auto: false,
+        logsIndex: 'logs-a.otel-b',
+        metricsIndex: 'metrics-a.otel-b',
+        tracesIndex: 'traces-a.otel-b',
+        docsIndex: 'accounting-2026',
+      },
+      {
+        logs: 'logs-a.otel-b',
+        metrics: 'metrics-a.otel-b',
+        traces: 'traces-a.otel-b',
+        docs: 'accounting-2026',
+      },
     ],
   ])('reads back what the builder saved (%s)', (_, form, indexBySignal) => {
     const viewModel = toDestinationViewModel(

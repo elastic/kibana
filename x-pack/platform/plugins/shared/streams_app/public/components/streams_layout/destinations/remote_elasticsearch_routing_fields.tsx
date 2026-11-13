@@ -16,6 +16,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { OtelDataStreamName } from '@kbn/streams-schema';
 import { PREFIXED_DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
+import { DocsIndexField } from './docs_target_fields';
 import { OtelNameFields, useSetOtelName } from './otel_name_fields';
 import {
   EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
@@ -42,6 +43,11 @@ type IndexFields = Record<
   ControllerRenderProps<DestinationCreationFormData, IndexFieldPath>
 >;
 
+type DocsIndexFieldProps = ControllerRenderProps<
+  DestinationCreationFormData,
+  'remoteElasticsearch.docsIndex'
+>;
+
 interface RemoteElasticsearchRoutingFieldsProps {
   errors: DestinationCreationFormErrors;
   disabled: boolean;
@@ -54,7 +60,11 @@ const StaticFields = ({
   errors,
   disabled,
   indexFields,
-}: RemoteElasticsearchRoutingFieldsProps & { indexFields: IndexFields }) => {
+  docsIndexField,
+}: RemoteElasticsearchRoutingFieldsProps & {
+  indexFields: IndexFields;
+  docsIndexField: DocsIndexFieldProps;
+}) => {
   const { control, setValue, resetField } = useFormContext<DestinationCreationFormData>();
   const setOtelName = useSetOtelName('remoteElasticsearch');
   const staticNaming = useWatch({ control, name: 'remoteElasticsearch.staticNaming' });
@@ -94,6 +104,16 @@ const StaticFields = ({
     otelNameErrorText(errors.tracesIndex) ??
     requiredError;
 
+  const docsIndexRow = (
+    <DocsIndexField
+      value={docsIndexField.value}
+      error={errors.docsIndex}
+      disabled={disabled}
+      onChange={docsIndexField.onChange}
+      onBlur={docsIndexField.onBlur}
+    />
+  );
+
   return (
     <>
       <NamingButtonGroup naming={staticNaming} disabled={disabled} onChange={onNamingChange} />
@@ -112,15 +132,16 @@ const StaticFields = ({
               }
             }}
           />
+          <EuiSpacer size="s" />
+          {docsIndexRow}
         </SignalFieldsBox>
       ) : (
         <SignalFieldsBox
           help={requiredError ?? UNNAMED_SIGNALS_HELP}
           isHelpError={Boolean(requiredError)}
         >
-          {PREFIXED_DESTINATION_SIGNALS.map((signal, position) => (
+          {PREFIXED_DESTINATION_SIGNALS.map((signal) => (
             <React.Fragment key={signal}>
-              {position > 0 && <EuiSpacer size="s" />}
               <OtelNameFields
                 signal={signal}
                 value={staticNames[signal]}
@@ -130,8 +151,10 @@ const StaticFields = ({
                 onChange={(name) => setOtelName(signal, name)}
                 onBlur={indexFields[signal].onBlur}
               />
+              <EuiSpacer size="s" />
             </React.Fragment>
           ))}
+          {docsIndexRow}
         </SignalFieldsBox>
       )}
     </>
@@ -148,6 +171,10 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
     metrics: useController({ control, name: getIndexFieldPath('metrics') }).field,
     traces: useController({ control, name: getIndexFieldPath('traces') }).field,
   };
+  const { field: docsIndexField } = useController({
+    control,
+    name: 'remoteElasticsearch.docsIndex',
+  });
   const onModeChange = (nextAuto: boolean) => {
     if (nextAuto === auto) {
       return;
@@ -155,6 +182,7 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
     for (const signal of PREFIXED_DESTINATION_SIGNALS) {
       resetField(getIndexFieldPath(signal));
     }
+    resetField('remoteElasticsearch.docsIndex');
     // `resetField` skips unregistered paths, and naming and name parts are only set with `setValue`.
     setValue(
       'remoteElasticsearch.staticNaming',
@@ -171,7 +199,9 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
       radioName="streamsCreateDestinationRemoteRouting"
       onModeChange={onModeChange}
     >
-      {!auto && <StaticFields {...props} indexFields={indexFields} />}
+      {!auto && (
+        <StaticFields {...props} indexFields={indexFields} docsIndexField={docsIndexField} />
+      )}
     </WritingModePanel>
   );
 };

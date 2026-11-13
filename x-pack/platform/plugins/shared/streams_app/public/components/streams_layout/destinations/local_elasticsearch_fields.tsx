@@ -73,8 +73,6 @@ interface WriteTargetFieldsProps extends LocalElasticsearchFieldsProps {
   resetWriteTargets: () => void;
 }
 
-const DOCS_PREPEND = <SignalPrepend label={DESTINATION_SIGNAL_LABELS.docs} />;
-
 const SignalWritePatternField = ({
   signal,
   value,
@@ -268,7 +266,6 @@ const StaticFields = ({
       disabled={disabled}
       onChange={docsIndexField.onChange}
       onBlur={docsIndexField.onBlur}
-      prepend={DOCS_PREPEND}
     />
   );
 

@@ -124,7 +124,13 @@ export interface ElasticsearchDestinationFormData {
 export interface RemoteElasticsearchDestinationFormData
   extends Pick<
     ElasticsearchDestinationFormData,
-    'auto' | 'staticNaming' | 'staticNames' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+    | 'auto'
+    | 'staticNaming'
+    | 'staticNames'
+    | 'logsIndex'
+    | 'metricsIndex'
+    | 'tracesIndex'
+    | 'docsIndex'
   > {
   endpoint: string;
   apiKey: string;
@@ -214,6 +220,7 @@ export const EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM: RemoteElasticsearchDes
   logsIndex: '',
   metricsIndex: '',
   tracesIndex: '',
+  docsIndex: '',
   endpoint: '',
   apiKey: '',
 };

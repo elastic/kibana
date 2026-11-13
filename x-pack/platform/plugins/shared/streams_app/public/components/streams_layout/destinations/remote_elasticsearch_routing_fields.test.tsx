@@ -63,6 +63,37 @@ describe('RemoteElasticsearchRoutingFields', () => {
     expect(screen.getByRole('radio', { name: 'Automatic' })).toBeChecked();
     expect(screen.queryByTestId('streamsCreateDestinationCustomWritePatterns')).toBeNull();
     expect(screen.queryByTestId('streamsCreateDestinationIndexDataset')).toBeNull();
+    expect(screen.queryByTestId('streamsCreateDestination-docs-index')).toBeNull();
+  });
+
+  it('keeps the docs index out of the shared name in both namings', () => {
+    const { getValues } = renderRouting({ initial: { auto: false } });
+
+    setFieldValue('streamsCreateDestinationIndexDataset', 'billing');
+    expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue('');
+    setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
+    click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
+
+    expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue(
+      'accounting-2026'
+    );
+    click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
+
+    expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue(
+      'accounting-2026'
+    );
+    expect(getValues().remoteElasticsearch).toMatchObject({
+      logsIndex: 'logs-billing.otel-default',
+      metricsIndex: 'metrics-billing.otel-default',
+      tracesIndex: 'traces-billing.otel-default',
+      docsIndex: 'accounting-2026',
+    });
+  });
+
+  it('shows the docs index error', () => {
+    renderRouting({ initial: { auto: false }, errors: { docsIndex: 'uppercase' } });
+
+    expect(screen.getByTestId('streamsCreateDestination-docs-index')).toBeInvalid();
   });
 
   it('writes the shared dataset and namespace to every signal as otel names', () => {
@@ -121,6 +152,7 @@ describe('RemoteElasticsearchRoutingFields', () => {
     click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
     setFieldValue('streamsCreateDestination-logs-indexDataset', 'a');
     setFieldValue('streamsCreateDestination-logs-indexNamespace', 'prod');
+    setFieldValue('streamsCreateDestination-docs-index', 'my-docs');
     click(screen.getByRole('radio', { name: 'Automatic' }));
 
     expect(getValues().remoteElasticsearch).toMatchObject({
@@ -130,6 +162,7 @@ describe('RemoteElasticsearchRoutingFields', () => {
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
   });
 

@@ -131,7 +131,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
-  it('registers the reference-free, alert-outcome and Wiki judges with the evals plugin', () => {
+  it('registers the reference-free, alert-outcome, Wiki, and memory judges with the evals plugin', () => {
     const registerEvaluator = jest.fn();
 
     createPlugin().setup(coreMock.createSetup(), {
@@ -144,11 +144,13 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_rca_reward@1.0.0',
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
-        'nightshift_alert_outcome_rca_accuracy@1.0.0',
+        'nightshift_alert_outcome_rca_accuracy@1.1.0',
         'nightshift_alert_outcome_benign_classification@1.0.0',
         'nightshift_alert_outcome_rca_reporting_gap@1.0.0',
         'nightshift_wiki_pages_read@1.0.0',
         'nightshift_wiki_page_influence@1.0.0',
+        'nightshift_memory_read_judge@1.0.0',
+        'nightshift_memory_write_judge@1.0.0',
       ]
     );
   });

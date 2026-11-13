@@ -10,6 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { discoverPlugins } from './plugin_discovery';
 
 describe('plugin_discovery', () => {
@@ -144,10 +145,29 @@ describe('plugin_discovery', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
 
+    it('only discovers relocated test plugins when requested', () => {
+      for (const id of ['analyticsFtrHelpers', 'applicationUsageTest']) {
+        expect(pluginsWithTest.some((plugin) => plugin.id === id)).toBe(true);
+        expect(pluginsWithoutTest.some((plugin) => plugin.id === id)).toBe(false);
+      }
+    });
+
     it('excludes response ops fixtures unless test plugins are requested', () => {
       expect(pluginsWithoutTest.some((plugin) => plugin.id === 'alertingFixture')).toBe(false);
       expect(pluginsWithTest.some((plugin) => plugin.id === 'alertingFixture')).toBe(true);
     });
+  });
+
+  it('keeps relocated server-only plugins out of default discovery', () => {
+    const statusPlugin = getPackages(REPO_ROOT).find(
+      (pkg) => pkg.manifest.id === '@kbn/status-plugin-a-plugin'
+    );
+    if (!statusPlugin) {
+      throw new Error('statusPluginA test fixture was not found');
+    }
+
+    expect(getPluginPackagesFilter({ server: true })(statusPlugin)).toBe(false);
+    expect(getPluginPackagesFilter({ server: true, testPlugins: true })(statusPlugin)).toBe(true);
   });
 
   describe('discoverPlugins with devOnly', () => {
@@ -191,7 +211,7 @@ describe('discoverPlugins with explicit paths', () => {
   it('includes an explicitly selected test plugin', async () => {
     const pluginPath = Path.resolve(
       REPO_ROOT,
-      'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+      'src/platform/test_plugins/analytics/analytics_ftr_helpers'
     );
     const plugins = await discoverPlugins({
       repoRoot: REPO_ROOT,

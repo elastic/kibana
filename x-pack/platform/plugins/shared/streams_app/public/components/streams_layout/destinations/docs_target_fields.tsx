@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFieldText, EuiFormRow, type EuiFieldTextProps } from '@elastic/eui';
+import { EuiComboBox, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import { writeTargetErrorText } from './write_target_error_text';
+import { SignalPrepend } from './writing_mode_panel';
 import type { DestinationCreationFormErrors } from './types';
 
 const DOCS_INDEX_PLACEHOLDER = i18n.translate(
@@ -31,14 +33,12 @@ export const DocsIndexField = ({
   disabled,
   onChange,
   onBlur,
-  prepend,
 }: {
   value: string;
   error: DestinationCreationFormErrors['docsIndex'];
   disabled: boolean;
   onChange: (index: string) => void;
   onBlur: () => void;
-  prepend?: EuiFieldTextProps['prepend'];
 }) => {
   const errorText = writeTargetErrorText('docs', error, false);
   return (
@@ -62,7 +62,7 @@ export const DocsIndexField = ({
         isInvalid={Boolean(errorText)}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
-        prepend={prepend}
+        prepend={<SignalPrepend label={DESTINATION_SIGNAL_LABELS.docs} />}
         aria-label={i18n.translate('xpack.streams.destinations.docsIndexLabel', {
           defaultMessage: 'Documents index',
         })}

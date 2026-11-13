@@ -645,10 +645,11 @@ describe('CreateDestinationModal', () => {
       setFieldValue('streamsCreateDestinationName', 'Central');
     };
 
-    it('saves one telemetry-scoped otel index per signal for a shared Fixed name', async () => {
+    it('saves one telemetry-scoped index per signal for a shared Fixed name and docs', async () => {
       const { createDestination } = renderModal();
       chooseRemoteFixed();
       setFieldValue(SHARED_DATASET, 'billing');
+      setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
       expect(screen.getByText(SAVED_AS_BILLING)).toBeInTheDocument();
       expect(
         screen.getByTestId('streamsCreateDestinationRemoteElasticsearchApiKey')
@@ -665,6 +666,7 @@ describe('CreateDestinationModal', () => {
           logsIndex: 'logs-billing.otel-default',
           metricsIndex: 'metrics-billing.otel-default',
           tracesIndex: 'traces-billing.otel-default',
+          docsIndex: 'accounting-2026',
           endpoint: 'https://es.example.com:443',
           apiKey: 'remote-key',
         },
@@ -678,6 +680,7 @@ describe('CreateDestinationModal', () => {
         { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
         { name: 'index', value: 'metrics-billing.otel-default', telemetry: ['metrics'] },
         { name: 'index', value: 'traces-billing.otel-default', telemetry: ['traces'] },
+        { name: 'index', value: 'accounting-2026', telemetry: ['docs'] },
       ]);
     });
 
