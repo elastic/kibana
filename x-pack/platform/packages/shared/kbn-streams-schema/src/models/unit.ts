@@ -250,6 +250,11 @@ export const streamsUnitStatsRequestSchema = lazySchema(() =>
   })
 );
 
+/**
+ * Why the stats of a component could not be read. The other fields of the component can still hold
+ * real values, because an error can cover only a part of them, for example the failure rates of a
+ * destination. A value that could not be read is no data: `null`.
+ */
 export const streamsUnitStatsErrorSchema = z.object({
   code: z.string(),
   reason: z.string(),
@@ -284,7 +289,8 @@ const statsFailureBreakdownEntrySchema = lazySchema(() =>
 );
 
 /**
- * Items that failed for one class of reason, per second. `rate` is the whole class, and
+ * What failed for one class of reason, per second, counted in the unit of its `rate` (items for
+ * Elasticsearch, upload attempts for S3). `rate` is the whole class, and
  * `percentage` is the share of all the destination's attempts that it is. `breakdown` splits it by
  * cause, highest rate first and limited to the highest ones. It leaves out a cause with neither a
  * collection nor a reason, so it can cover less than `rate`, and it is missing when it has no

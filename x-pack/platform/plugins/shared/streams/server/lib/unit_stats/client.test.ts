@@ -637,7 +637,7 @@ describe('UnitStatsClient.getStats', () => {
       expect(authRatesQueries(esql)[0]).toContain('destination.id IN ("remote")');
     });
 
-    it('keeps the failure rates and logs a warn when the breakdown query fails', async () => {
+    it('keeps the other stats, puts the error on the destinations of the type, and logs once, when the breakdown query fails', async () => {
       const logger = loggingSystemMock.createLogger();
 
       const response = await run(
@@ -647,26 +647,36 @@ describe('UnitStatsClient.getStats', () => {
         logger
       );
 
-      const esDev = response.components.destinations['es-dev'];
-      expect(esDev.error).toBeUndefined();
+      const { 'es-dev': esDev, 'es-prod': esProd, dbg } = response.components.destinations;
+      // The totals and the series are still there.
+      expect(esDev.events.incoming.rate.value).toBe(4.2);
+      expect(esDev.events.failed.rate).toEqual(rate(2.4));
+      expect(esDev.events.incoming.series.points).not.toHaveLength(0);
+      // The failure rates are no data, beside the error.
+      expect(esDev.error).toEqual({ code: 'error', reason: expect.any(String) });
       expect(esDev.events.failed.authorization).toEqual({
-        rate: rate(1.9),
-        percentage: share(1.9),
+        rate: rate(null),
+        percentage: percentage(null),
       });
+      // `es-prod` needed no failure query, and shares the failed provider, so it has the error too.
+      expect(esProd.error).toEqual(esDev.error);
+      // A destination of a type with no failure queries is not affected.
+      expect(dbg.error).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('destination authentication and authorization breakdown')
+        expect.stringContaining('destination elasticsearch authentication and authorization')
       );
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
     });
 
-    it('keeps the other stats, and logs a warn, when the failure rates query fails', async () => {
+    it('keeps the other stats, puts the error on the destinations of the type, and logs once, when the failure rates query fails', async () => {
       const logger = loggingSystemMock.createLogger();
       const esql = makeEsql({ destinationAuthRates: failWith(responseError(500)) });
 
       const response = await run(esql, {}, unit, logger);
 
       const esDev = response.components.destinations['es-dev'];
-      expect(esDev.error).toBeUndefined();
+      expect(esDev.error).toEqual({ code: 'error', reason: expect.any(String) });
       expect(esDev.events.incoming.rate.value).toBe(4.2);
       expect(esDev.events.failed.rate).toEqual(rate(2.4));
       expect(esDev.events.failed.authentication).toEqual({
@@ -680,8 +690,60 @@ describe('UnitStatsClient.getStats', () => {
       expect(breakdownQueries(esql)).toHaveLength(0);
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('destination authentication and authorization rates')
+        expect.stringContaining('destination elasticsearch authentication and authorization')
       );
+    });
+
+    it('reports an expected cluster state of the failure query like the other queries, at debug', async () => {
+      const logger = loggingSystemMock.createLogger();
+
+      const response = await run(
+        makeEsql({ destinationAuthRates: failWith(responseError(429)) }),
+        {},
+        unit,
+        logger
+      );
+
+      expect(response.components.destinations['es-dev'].error?.code).toBe('unavailable');
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('destination elasticsearch authentication and authorization')
+      );
+    });
+
+    it('keeps a destination type that works when another type fails', async () => {
+      const mixedUnit: StreamsUnit.Configuration = {
+        ...unit,
+        destinations: [
+          ...unit.destinations,
+          { id: 's3-test', type: 's3', supported_telemetry: ['logs'] },
+        ],
+      };
+      const esql = makeEsql({
+        destinationRate: () => ({
+          columns: responses.destinationRate.columns,
+          values: [
+            [4.6, 0, 0.18, 'es-prod'],
+            [4.2, 2.4, 0.17, 'es-dev'],
+            [1.0, 0, 0.2, 's3-test'],
+          ],
+        }),
+        destinationSums: () => ({
+          columns: responses.destinationSums.columns,
+          values: [
+            ...responses.destinationSums.values,
+            [60, 's3-test', '2026-10-19T11:46:00.000Z'],
+          ],
+        }),
+        s3FailedUploadRates: failWith(responseError(500)),
+      });
+
+      const response = await run(esql, {}, mixedUnit);
+
+      const { 'es-dev': esDev, 's3-test': s3 } = response.components.destinations;
+      expect(s3.error).toEqual({ code: 'error', reason: expect.any(String) });
+      expect(esDev.error).toBeUndefined();
+      expect(esDev.events.failed.authorization.rate).toEqual(rate(1.9));
     });
   });
 
@@ -809,7 +871,7 @@ describe('UnitStatsClient.getStats', () => {
       expect(failed.authorization.rate.value).toBeNull();
     });
 
-    it('keeps the other stats, and logs a warn, when the S3 query fails', async () => {
+    it('keeps the other stats, puts the error on the destination, and logs a warn, when the S3 query fails', async () => {
       const logger = loggingSystemMock.createLogger();
 
       const response = await run(
@@ -820,11 +882,13 @@ describe('UnitStatsClient.getStats', () => {
       );
 
       const s3 = response.components.destinations['s3-test'];
-      expect(s3.error).toBeUndefined();
+      expect(s3.error).toEqual({ code: 'error', reason: expect.any(String) });
       expect(s3.events.incoming.rate.value).toBe(1);
+      expect(s3.latency.average.value).toBe(0.2);
       expect(s3.events.failed.authentication.rate.value).toBeNull();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('destination authentication and authorization rates')
+        expect.stringContaining('destination s3 authentication and authorization')
       );
     });
   });

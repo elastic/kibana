@@ -53,32 +53,25 @@ const toClassFailureRate = ({
  * with no class too, and replaces the items-based total of the totals query: the items fail late.
  * A class rate is the sum of the rates of the codes that belong to it, 0 when the destination has
  * duration data and none of its codes is in the class. Its breakdown lists those codes, with no
- * collection. Every percentage is a share of the destination's upload attempts. A destination with no rows has no duration data, and is left out. It never throws:
- * when the query fails, `onFailure` hears about it and the result is empty.
+ * collection. Every percentage is a share of the destination's upload attempts. A destination with
+ * no rows has no duration data, and is left out. A query that fails throws, and the caller reports
+ * it.
  */
 export const getS3AuthFailures = async ({
   runQuery,
   baseParams,
   destinations,
-  onFailure,
 }: {
   runQuery: (query: ComposerQuery) => Promise<EsqlRow[]>;
   baseParams: StatsQueryBaseParams;
   destinations: DestinationQueryRef[];
   parentResults: Record<string, StreamsUnit.StatsDestinationResult>;
-  onFailure: (error: unknown, what: string) => void;
 }): Promise<Record<string, AuthFailureStats>> => {
   if (destinations.length === 0) return {};
 
-  let rows: EsqlRow[];
-  try {
-    rows = await runQuery(
-      buildS3FailedUploadRatesQuery({ ...baseParams, ids: destinations.map(({ id }) => id) })
-    );
-  } catch (error) {
-    onFailure(error, 'destination authentication and authorization rates');
-    return {};
-  }
+  const rows = await runQuery(
+    buildS3FailedUploadRatesQuery({ ...baseParams, ids: destinations.map(({ id }) => id) })
+  );
 
   return Object.fromEntries(
     Object.entries(groupById(rows, STATS_COLUMN.id)).map(

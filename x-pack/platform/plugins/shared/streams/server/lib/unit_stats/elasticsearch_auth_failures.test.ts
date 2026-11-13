@@ -81,18 +81,15 @@ const failWith = (error: Error) => () => {
 describe('getElasticsearchAuthFailures', () => {
   it('asks for nothing, and gives no failures, to destinations whose failed rate is 0', async () => {
     const runQuery = makeRunQuery();
-    const onFailure = jest.fn();
 
     const result = await getElasticsearchAuthFailures({
       runQuery,
       baseParams,
       destinations,
       parentResults: { 'es-prod': resultWithFailedRate(0), 'es-dev': resultWithFailedRate(0) },
-      onFailure,
     });
 
     expect(runQuery).not.toHaveBeenCalled();
-    expect(onFailure).not.toHaveBeenCalled();
     expect(result).toEqual({
       'es-prod': {
         authentication: { rate: rate(0), percentage: pct(0) },
@@ -113,7 +110,6 @@ describe('getElasticsearchAuthFailures', () => {
       baseParams,
       destinations,
       parentResults: { 'es-prod': resultWithFailedRate(null) },
-      onFailure: jest.fn(),
     });
 
     expect(runQuery).not.toHaveBeenCalled();
@@ -131,7 +127,6 @@ describe('getElasticsearchAuthFailures', () => {
         'es-prod': resultWithFailedRate(0, 0),
         'es-dev': resultWithFailedRate(2.4, null),
       },
-      onFailure: jest.fn(),
     });
 
     expect(noIncoming['es-prod'].authentication.percentage).toEqual(noPct);
@@ -152,7 +147,6 @@ describe('getElasticsearchAuthFailures', () => {
       baseParams,
       destinations,
       parentResults,
-      onFailure: jest.fn(),
     });
 
     expect(runQuery).toHaveBeenCalledTimes(2);
@@ -191,7 +185,6 @@ describe('getElasticsearchAuthFailures', () => {
       baseParams,
       destinations,
       parentResults,
-      onFailure: jest.fn(),
     });
 
     expect(runQuery).toHaveBeenCalledTimes(1);
@@ -221,7 +214,6 @@ describe('getElasticsearchAuthFailures', () => {
       baseParams,
       destinations,
       parentResults,
-      onFailure: jest.fn(),
     });
 
     expect(result['es-dev']).toEqual({
@@ -230,44 +222,23 @@ describe('getElasticsearchAuthFailures', () => {
     });
   });
 
-  it('keeps the rates and reports it when the breakdown query fails', async () => {
+  it('throws the error of the breakdown query when it fails', async () => {
     const error = new Error('breakdown failed');
-    const onFailure = jest.fn();
     const runQuery = makeRunQuery({ rates: () => [failing], breakdown: failWith(error) });
 
-    const result = await getElasticsearchAuthFailures({
-      runQuery,
-      baseParams,
-      destinations,
-      parentResults,
-      onFailure,
-    });
-
-    expect(onFailure).toHaveBeenCalledWith(error, 'authentication and authorization breakdown');
-    expect(result['es-dev']).toEqual({
-      authentication: { rate: rate(0.5), percentage: pct(0.5) },
-      authorization: { rate: rate(1.9), percentage: pct(1.9) },
-    });
+    await expect(
+      getElasticsearchAuthFailures({ runQuery, baseParams, destinations, parentResults })
+    ).rejects.toBe(error);
   });
 
-  it('reports it, leaves out the failing destinations, and asks for no breakdown when the rates query fails', async () => {
+  it('throws the error of the rates query when it fails, and asks for no breakdown', async () => {
     const error = new Error('rates failed');
-    const onFailure = jest.fn();
     const runQuery = makeRunQuery({ rates: failWith(error) });
 
-    const result = await getElasticsearchAuthFailures({
-      runQuery,
-      baseParams,
-      destinations,
-      parentResults,
-      onFailure,
-    });
-
-    expect(onFailure).toHaveBeenCalledTimes(1);
-    expect(onFailure).toHaveBeenCalledWith(error, 'authentication and authorization rates');
+    await expect(
+      getElasticsearchAuthFailures({ runQuery, baseParams, destinations, parentResults })
+    ).rejects.toBe(error);
     expect(runQuery).toHaveBeenCalledTimes(1);
-    // `es-prod` needed no query, so it still has its answer.
-    expect(Object.keys(result)).toEqual(['es-prod']);
   });
 
   it('leaves out a destination that the rates query has no row for', async () => {
@@ -278,7 +249,6 @@ describe('getElasticsearchAuthFailures', () => {
       baseParams,
       destinations,
       parentResults,
-      onFailure: jest.fn(),
     });
 
     expect(Object.keys(result)).toEqual(['es-prod']);
@@ -295,14 +265,12 @@ describe('getElasticsearchAuthFailures', () => {
       baseParams,
       destinations: odd,
       parentResults: Object.fromEntries([['constructor', resultWithFailedRate(1)]]),
-      onFailure: jest.fn(),
     });
     const noResult = await getElasticsearchAuthFailures({
       runQuery,
       baseParams,
       destinations: odd,
       parentResults: {},
-      onFailure: jest.fn(),
     });
 
     expect(Object.hasOwn(failingResult, 'constructor')).toBe(true);

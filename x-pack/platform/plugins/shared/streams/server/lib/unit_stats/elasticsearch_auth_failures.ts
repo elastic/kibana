@@ -40,50 +40,34 @@ const noFailuresFound = (attempts: number | null): AuthFailures => ({
 
 /**
  * The failures of destinations that the failed rate shows have some. It asks for the rates first,
- * and then which collections the destinations with such failures wrote to. It never throws: when a
- * query fails, `onFailure` hears about it and the result has what the other query returned. A
- * destination with no rates query result is left out. The collections are missing when their query
- * failed.
+ * and then which collections the destinations with such failures wrote to. A destination with no
+ * rates query result is left out. A query that fails throws, and the caller reports it.
  */
 const queryAuthFailures = async ({
   runQuery,
   params,
   attemptsOf,
-  onFailure,
 }: {
   runQuery: (query: ComposerQuery) => Promise<EsqlRow[]>;
   params: DestinationStatsQueryParams;
   attemptsOf: (id: string) => number | null;
-  onFailure: (error: unknown, what: string) => void;
 }): Promise<Array<[string, AuthFailures]>> => {
-  let rateRows: EsqlRow[];
-  try {
-    rateRows = await runQuery(buildElasticsearchAuthFailureRatesQuery(params));
-  } catch (error) {
-    onFailure(error, 'authentication and authorization rates');
-    return [];
-  }
+  const rateRows = await runQuery(buildElasticsearchAuthFailureRatesQuery(params));
 
   const ratesById = indexById(rateRows, STATS_COLUMN.id);
   const failingIds = Object.entries(ratesById).flatMap(([id, row]) =>
     hasFailures(row) ? [id] : []
   );
 
-  let breakdownById: Record<string, EsqlRow[]> = {};
-  if (failingIds.length > 0) {
-    try {
-      const breakdownRows = await runQuery(
-        buildElasticsearchAuthFailureBreakdownQuery({ ...params, ids: failingIds })
-      );
-      breakdownById = groupById(breakdownRows, STATS_COLUMN.id);
-    } catch (error) {
-      onFailure(error, 'authentication and authorization breakdown');
-    }
-  }
+  const breakdownRows =
+    failingIds.length > 0
+      ? await runQuery(buildElasticsearchAuthFailureBreakdownQuery({ ...params, ids: failingIds }))
+      : [];
+  const breakdownById = groupById(breakdownRows, STATS_COLUMN.id);
 
   return Object.entries(ratesById).map(([id, row]) => {
     // An id is user-defined, so `constructor` must not be read from `Object.prototype`.
-    const breakdownRows = Object.hasOwn(breakdownById, id) ? breakdownById[id] : [];
+    const idBreakdownRows = Object.hasOwn(breakdownById, id) ? breakdownById[id] : [];
 
     return [
       id,
@@ -91,13 +75,13 @@ const queryAuthFailures = async ({
         authentication: toFailureRate({
           rate: numberOrNull(row[STATS_COLUMN.authenticationRate]),
           attempts: attemptsOf(id),
-          breakdownRows,
+          breakdownRows: idBreakdownRows,
           column: STATS_COLUMN.authenticationRate,
         }),
         authorization: toFailureRate({
           rate: numberOrNull(row[STATS_COLUMN.authorizationRate]),
           attempts: attemptsOf(id),
-          breakdownRows,
+          breakdownRows: idBreakdownRows,
           column: STATS_COLUMN.authorizationRate,
         }),
       },
@@ -110,21 +94,19 @@ const queryAuthFailures = async ({
  * `parentResults` are the results of the destinations so far, and the failed rate in each one
  * decides what to ask. Both kinds of failure are failed items, so a failed rate of 0 means none of either,
  * with no query. A destination with no failed rate has no data, and is left out. Only the
- * destinations that fail are asked about. A destination that is left out, or whose queries failed,
- * shows as no data.
+ * destinations that fail are asked about. A destination that is left out shows as no data. A query
+ * that fails throws, and the caller reports it.
  */
 export const getElasticsearchAuthFailures = async ({
   runQuery,
   baseParams,
   destinations,
   parentResults,
-  onFailure,
 }: {
   runQuery: (query: ComposerQuery) => Promise<EsqlRow[]>;
   baseParams: StatsQueryBaseParams;
   destinations: DestinationQueryRef[];
   parentResults: Record<string, StreamsUnit.StatsDestinationResult>;
-  onFailure: (error: unknown, what: string) => void;
 }): Promise<Record<string, AuthFailures>> => {
   // An id is user-defined, so `constructor` must not be read from `Object.prototype`.
   const failedRateOf = ({ id }: DestinationQueryRef): number | null =>
@@ -147,7 +129,6 @@ export const getElasticsearchAuthFailures = async ({
           runQuery,
           params: { ...baseParams, ids: failing.map(({ id }) => id) },
           attemptsOf: incomingRateOf,
-          onFailure,
         })
       : [];
 

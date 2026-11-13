@@ -19,8 +19,21 @@ type GetAuthFailures = (args: {
   baseParams: StatsQueryBaseParams;
   destinations: DestinationQueryRef[];
   parentResults: Record<string, StreamsUnit.StatsDestinationResult>;
-  onFailure: (error: unknown, what: string) => void;
 }) => Promise<Record<string, AuthFailureStats>>;
+
+/** A group of destinations that share a provider, whose provider threw. */
+export interface FailedAuthFailuresGroup {
+  /** The distinct destination types of the group. */
+  types: string[];
+  ids: string[];
+  error: unknown;
+}
+
+export interface DestinationAuthFailures {
+  /** The failures that the providers read, by destination id. */
+  failures: Record<string, AuthFailureStats>;
+  failedGroups: FailedAuthFailuresGroup[];
+}
 
 /**
  * How each destination type reports its authentication and authorization failures. A type that
@@ -37,22 +50,23 @@ const AUTH_FAILURES_BY_TYPE: ReadonlyMap<string, GetAuthFailures> = new Map([
  * The authentication and authorization failures of destinations, by id. The destinations are
  * grouped by how their type reports them, and each group is asked once, in parallel, with the
  * results of the destinations so far (`parentResults`), which tell it which ones to look at. A
- * destination whose type has no way to report them, or that its group left out, is not in the
- * result, and the caller shows it as no data.
+ * destination whose type has no way to report them, or that its group left out, is not in
+ * `failures`, and the caller shows it as no data.
+ *
+ * A group whose provider throws does not stop the others. It is in `failedGroups` with its error,
+ * and the caller reports it.
  */
 export const getDestinationAuthFailures = async ({
   runQuery,
   baseParams,
   destinations,
   parentResults,
-  onFailure,
 }: {
   runQuery: (query: ComposerQuery) => Promise<EsqlRow[]>;
   baseParams: StatsQueryBaseParams;
   destinations: DestinationQueryRef[];
   parentResults: Record<string, StreamsUnit.StatsDestinationResult>;
-  onFailure: (error: unknown, what: string) => void;
-}): Promise<Record<string, AuthFailureStats>> => {
+}): Promise<DestinationAuthFailures> => {
   const destinationsByProvider = new Map<GetAuthFailures, DestinationQueryRef[]>();
   for (const destination of destinations) {
     const provider = AUTH_FAILURES_BY_TYPE.get(destination.type);
@@ -64,11 +78,27 @@ export const getDestinationAuthFailures = async ({
     }
   }
 
-  const results = await Promise.all(
-    [...destinationsByProvider].map(([provider, group]) =>
-      provider({ runQuery, baseParams, destinations: group, parentResults, onFailure })
+  const groups = [...destinationsByProvider];
+  const settled = await Promise.allSettled(
+    groups.map(([provider, group]) =>
+      provider({ runQuery, baseParams, destinations: group, parentResults })
     )
   );
 
-  return Object.fromEntries(results.flatMap((result) => Object.entries(result)));
+  const failures: Record<string, AuthFailureStats> = {};
+  const failedGroups: FailedAuthFailuresGroup[] = [];
+  settled.forEach((outcome, index) => {
+    if (outcome.status === 'fulfilled') {
+      Object.assign(failures, outcome.value);
+      return;
+    }
+    const [, group] = groups[index];
+    failedGroups.push({
+      types: [...new Set(group.map(({ type }) => type))],
+      ids: group.map(({ id }) => id),
+      error: outcome.reason,
+    });
+  });
+
+  return { failures, failedGroups };
 };

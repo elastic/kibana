@@ -261,30 +261,35 @@ export class UnitStatsClient {
       );
 
       // The failed rate of each parent result decides which destinations to ask about their auth
-      // failures. It never throws: a failure is logged here, and the destinations keep their
-      // other stats.
-      const authFailures = await getDestinationAuthFailures({
+      // failures. A destination type whose queries fail is logged once, and its destinations keep
+      // their other stats, with the error beside them and no failure rates.
+      const { failures, failedGroups } = await getDestinationAuthFailures({
         runQuery: (query) => this.runQuery(query),
         baseParams,
         destinations,
         parentResults: results,
-        onFailure: (error, part) => {
-          const failedPart = `destination ${part}`;
-          this.logFailure(toSearchError(error, failedPart), {
-            unitId: baseParams.unitId,
-            what: failedPart,
-          });
-        },
       });
+      const failureErrors = Object.fromEntries(
+        failedGroups.flatMap(({ types, ids: failedIds, error }) => {
+          const failedWhat = `destination ${types.join(', ')} authentication and authorization`;
+          const failure = toSearchError(error, failedWhat);
+          this.logFailure(failure, { unitId: baseParams.unitId, what: failedWhat });
+
+          return failedIds.map((id) => [id, failure.toStatsError()]);
+        })
+      );
 
       return {
         results: Object.fromEntries(
           ids.map((id) => [
             id,
-            withAuthFailures(
-              results[id],
-              Object.hasOwn(authFailures, id) ? authFailures[id] : noAuthFailures()
-            ),
+            {
+              ...withAuthFailures(
+                results[id],
+                Object.hasOwn(failures, id) ? failures[id] : noAuthFailures()
+              ),
+              ...(Object.hasOwn(failureErrors, id) ? { error: failureErrors[id] } : {}),
+            },
           ])
         ),
       };

@@ -37,11 +37,9 @@ const row = (
 const run = ({
   rows = [],
   destinations = [destination('s3-test')],
-  onFailure = jest.fn(),
 }: {
   rows?: EsqlRow[];
   destinations?: DestinationQueryRef[];
-  onFailure?: jest.Mock;
 } = {}) => {
   const runQuery = jest.fn(async () => rows);
   const result = getS3AuthFailures({
@@ -49,10 +47,9 @@ const run = ({
     baseParams,
     destinations,
     parentResults: {},
-    onFailure,
   });
 
-  return { runQuery, onFailure, result };
+  return { runQuery, result };
 };
 
 describe('getS3AuthFailures', () => {
@@ -167,23 +164,17 @@ describe('getS3AuthFailures', () => {
     expect(runQuery).not.toHaveBeenCalled();
   });
 
-  it('tells onFailure and gives no failures when the query fails', async () => {
+  it('throws the error of the query when it fails', async () => {
     const error = new Error('boom');
-    const onFailure = jest.fn();
 
-    const result = await getS3AuthFailures({
-      runQuery: jest.fn().mockRejectedValue(error),
-      baseParams,
-      destinations: [destination('s3-test')],
-      parentResults: {},
-      onFailure,
-    });
-
-    expect(result).toEqual({});
-    expect(onFailure).toHaveBeenCalledWith(
-      error,
-      'destination authentication and authorization rates'
-    );
+    await expect(
+      getS3AuthFailures({
+        runQuery: jest.fn().mockRejectedValue(error),
+        baseParams,
+        destinations: [destination('s3-test')],
+        parentResults: {},
+      })
+    ).rejects.toBe(error);
   });
 
   it('does not read the prototype for a destination id like "constructor"', async () => {
