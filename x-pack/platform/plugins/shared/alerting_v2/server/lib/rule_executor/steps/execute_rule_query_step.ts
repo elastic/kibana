@@ -17,7 +17,6 @@ import { toQueryResponseSizeExceededError } from '../../errors/query_response_si
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
-import { planDeduplication } from '../deduplication_query';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import type { EsqlResponseFormatServiceContract } from '../../services/esql_response_format_service/esql_response_format_service';
@@ -55,11 +54,6 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       const logger = state.logger.withLabels({ step: step.name });
 
       const effectiveQuery = getBreachEsqlQuery(rule.query);
-      // Read-only inspection of the author's query: deduplication engages
-      // only when it declares `METADATA _id, _index, _version` and is not
-      // aggregating. The query itself is never rewritten; see
-      // `planDeduplication` for the eligibility rules.
-      const deduplication = planDeduplication(effectiveQuery);
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
       const timeField = rule.time_field;
 
@@ -111,7 +105,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
           yield {
             type: 'continue',
-            state: { ...state, queryPayload, esqlRowBatch: batch, deduplication },
+            state: { ...state, queryPayload, esqlRowBatch: batch },
             meta: { counters },
           };
         }

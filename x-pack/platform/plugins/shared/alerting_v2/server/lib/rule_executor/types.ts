@@ -8,7 +8,6 @@
 import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type { QueryPayload } from './get_query_payload';
-import type { DeduplicationPlan } from './deduplication_query';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
@@ -37,16 +36,6 @@ export interface RulePipelineState {
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEventDocument>;
-  /**
-   * Rule-event deduplication decision for this run, derived once from the
-   * breach query by `ExecuteRuleQueryStep` (eligible only when the author
-   * declared `METADATA _id, _index, _version` on a non-aggregating query).
-   * `FilterDuplicateEventsStep` and `StoreAlertEventsStep` only assign
-   * deterministic ids when `eligible`; `mvExpandFields` are folded into
-   * those ids. Absent (e.g. before the query step ran) is treated as not
-   * eligible.
-   */
-  readonly deduplication?: DeduplicationPlan;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
   readonly previousAlertStateByGroupHash?: ReadonlyMap<string, LatestAlertEventState>;

@@ -6,16 +6,16 @@
  */
 
 /**
- * Rule-event deduplication for non-aggregating ES|QL rules.
+ * Rule-event deduplication through the `_deduplication_id` result column.
  *
- * A non-aggregating query that declares `METADATA _id, _index, _version`
- * opts into deduplication: the executor derives a deterministic
- * `.rule-events` `_id` from the source document identity, so a source
- * document that is re-matched on consecutive, overlapping lookback windows
- * produces exactly one rule event. The executor never rewrites the query, so
- * a query that omits the clause writes an event on every run. This spec
- * drives the executor through several runs, including a disable/enable
- * cycle, and asserts both behaviours.
+ * A query opts into deduplication by returning a `_deduplication_id` column:
+ * the executor derives a deterministic `.rule-events` `_id` from its value,
+ * so a row that is re-matched on consecutive, overlapping lookback windows
+ * produces exactly one rule event per distinct value. The executor never
+ * inspects or rewrites the query, so a query that omits the column writes an
+ * event on every run. This spec drives the executor through several runs,
+ * including a disable/enable cycle, and asserts both behaviours for
+ * match-based, aggregating and MV_EXPAND queries.
  *
  * We exclude `@kbn/eslint/scout_require_api_client_in_api_test` because the
  * subject is the executor's persisted output, not an HTTP endpoint.
@@ -42,8 +42,8 @@ const SOURCE_INDEX = `test-alerting-v2-rule-event-deduplication-${Date.now().toS
  */
 const LOOKBACK_WINDOW = '10m';
 
-/** The clause a rule author adds to opt a non-aggregating query into deduplication. */
-const IDENTITY_METADATA = 'METADATA _id, _index, _version';
+/** The column a rule author returns to opt a query into deduplication. */
+const DEDUPLICATION_ID = '_deduplication_id';
 
 apiTest.describe(
   'Rule executor - rule-event deduplication',
@@ -81,7 +81,7 @@ apiTest.describe(
             metadata: { name: 'executor-dedup-disable-enable' },
             schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
             query: {
-              base: `FROM ${SOURCE_INDEX} ${IDENTITY_METADATA} | WHERE host.name == "${host}"`,
+              base: `FROM ${SOURCE_INDEX} METADATA _id | WHERE host.name == "${host}" | EVAL ${DEDUPLICATION_ID} = _id`,
             },
           })
         );
@@ -119,14 +119,13 @@ apiTest.describe(
         expect(event.status).toBe('breached');
         expect(event.data['host.name']).toBe(host);
         expect(typeof event.data._id).toBe('string');
-        expect(event.data._index).toBe(SOURCE_INDEX);
-        expect(typeof event.data._version).toBe('number');
+        expect(event.data[DEDUPLICATION_ID]).toBe(event.data._id);
         expect(event.alert?.status).toBe('active');
       }
     );
 
     apiTest(
-      'writes a breach event on every run for a non-aggregating query that omits the identity METADATA',
+      'writes a breach event on every run for a query that does not return _deduplication_id',
       async ({ apiServices }) => {
         const host = 'host-dedup-no-metadata';
 
@@ -143,9 +142,9 @@ apiTest.describe(
           })
         );
 
-        // The executor does not inject METADATA, so without the author's
-        // declaration there is no source identity to hash and the same
-        // document produces a new breach event on every overlapping run.
+        // The executor never rewrites the query, so without the author's
+        // column there is nothing to hash and the same document produces a
+        // new breach event on every overlapping run.
         await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 3, { status: 'breached' });
 
         const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
@@ -155,15 +154,13 @@ apiTest.describe(
 
         for (const event of breachEvents) {
           expect(event.data['host.name']).toBe(host);
-          expect('_id' in event.data).toBe(false);
-          expect('_index' in event.data).toBe(false);
-          expect('_version' in event.data).toBe(false);
+          expect(DEDUPLICATION_ID in event.data).toBe(false);
         }
       }
     );
 
     apiTest(
-      'writes a breach event on every run for an aggregating (STATS BY) query',
+      'writes a single rule event for an aggregating (STATS BY) query that returns _deduplication_id',
       async ({ apiServices }) => {
         const host = 'host-dedup-stats';
 
@@ -177,31 +174,26 @@ apiTest.describe(
             metadata: { name: 'executor-dedup-stats-by' },
             schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
             query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name`,
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | EVAL ${DEDUPLICATION_ID} = host.name`,
             },
           })
         );
 
-        // Aggregated rows are not source documents, so no deterministic `_id`
-        // is derived even though the query could declare METADATA. The same
-        // document therefore produces a new breach event on every overlapping
-        // run, as it did before deduplication existed.
-        await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 3, { status: 'breached' });
+        // Aggregated rows have no source document, but the author can still
+        // name what makes them the same event. Here the group key is the id,
+        // so consecutive runs over the same unchanged document collapse to
+        // one rule event instead of one per run.
+        await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, { status: 'breached' });
+        await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId: rule.id, runs: 2 });
 
-        const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-          status: 'breached',
-        });
-        expect(breachEvents.length).toBeGreaterThanOrEqual(3);
+        const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
+        expect(events).toHaveLength(1);
 
-        const groupHashes = new Set(breachEvents.map((event) => event.group_hash));
-        expect(groupHashes.size).toBe(1);
-
-        for (const event of breachEvents) {
-          expect(event.data.count).toBe(1);
-          expect('_id' in event.data).toBe(false);
-          expect('_index' in event.data).toBe(false);
-          expect('_version' in event.data).toBe(false);
-        }
+        const [event] = events;
+        expect(event.status).toBe('breached');
+        expect(event.data.count).toBe(1);
+        expect(event.data[DEDUPLICATION_ID]).toBe(host);
+        expect('_id' in event.data).toBe(false);
       }
     );
 
@@ -229,15 +221,15 @@ apiTest.describe(
             schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
             grouping: { fields: ['host.ip'] },
             query: {
-              base: `FROM ${SOURCE_INDEX} ${IDENTITY_METADATA} | WHERE host.name == "${host}" | MV_EXPAND host.ip`,
+              base: `FROM ${SOURCE_INDEX} METADATA _id | WHERE host.name == "${host}" | MV_EXPAND host.ip | EVAL ${DEDUPLICATION_ID} = CONCAT(_id, "|", TO_STRING(host.ip))`,
             },
           })
         );
 
-        // One document fans out into three rows that share `_id`, `_index` and
-        // `_version`. The expanded `host.ip` value is folded into each row's
-        // deterministic id, so all three persist on the first run, and later
-        // runs re-matching the same document add nothing.
+        // One document fans out into three rows that share `_id`. The author
+        // folds the expanded `host.ip` value into each row's deduplication id,
+        // so all three persist on the first run, and later runs re-matching
+        // the same document add nothing.
         await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 3, { status: 'breached' });
         await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId: rule.id, runs: 2 });
 
@@ -249,6 +241,9 @@ apiTest.describe(
 
         const sourceIds = new Set(events.map((event) => event.data._id));
         expect(sourceIds.size).toBe(1);
+
+        const deduplicationIds = new Set(events.map((event) => event.data[DEDUPLICATION_ID]));
+        expect(deduplicationIds.size).toBe(3);
 
         const episodeIds = new Set(events.map((event) => event.alert?.id));
         expect(episodeIds.size).toBe(3);

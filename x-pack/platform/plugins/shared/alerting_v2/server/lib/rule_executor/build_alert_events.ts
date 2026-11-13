@@ -77,17 +77,30 @@ function sha256(value: string) {
 }
 
 /**
- * Deterministic `.rule-events` `_id` for a rule event produced from a source
- * document.
+ * Result column a rule author produces to opt a query into rule-event
+ * deduplication.
  *
- * Mirrors the detection engine's ES|QL alert identity: the source document's
- * `_index`, `_id` and `_version` together with the space and rule ids, plus
- * the values of any `MV_EXPAND`ed columns so each expanded row keeps its own
- * identity. Two runs that match the same, unchanged source document therefore
- * produce the same `_id`; `FilterDuplicateEventsStep` drops the second before
- * the director sees it, and anything that slips past collides on the bulk
- * `create` in `StoreAlertEventsStep`. A re-indexed document has a new
- * `_version` and so a new `_id`, and alerts again.
+ * Deduplication is a convention, not a query rewrite: when a row carries this
+ * column, its value identifies the rule event, and the executor derives the
+ * `.rule-events` `_id` from it. The author decides what "the same event"
+ * means by computing the value with any ES|QL they like, for example
+ * `EVAL _deduplication_id = _id` after `METADATA _id` on a match-based query,
+ * `EVAL _deduplication_id = CONCAT(_id, "|", host.ip)` after `MV_EXPAND`, or
+ * `EVAL _deduplication_id = CONCAT(host.name, "|", TO_STRING(bucket))` on an
+ * aggregating query. Rows without the column keep an Elasticsearch-generated
+ * id and are written on every run, as before.
+ */
+export const DEDUPLICATION_ID_COLUMN = '_deduplication_id';
+
+/**
+ * Deterministic `.rule-events` `_id` for a rule event whose row carries a
+ * {@link DEDUPLICATION_ID_COLUMN} value.
+ *
+ * The author's value is scoped by space and rule id so two rules that compute
+ * the same value never collide. Two runs whose rows carry the same value
+ * therefore produce the same `_id`; `FilterDuplicateEventsStep` drops the
+ * second before the director sees it, and anything that slips past collides
+ * on the bulk `create` in `StoreAlertEventsStep`.
  *
  * Pure; never throws. Callers decide *whether* an event qualifies via
  * {@link resolveRuleEventId}; this function only encodes the identity.
@@ -95,44 +108,28 @@ function sha256(value: string) {
 export function buildRuleEventId({
   spaceId,
   ruleId,
-  sourceId,
-  sourceIndex,
-  sourceVersion,
-  expandedValues = [],
+  deduplicationId,
 }: {
   spaceId: string;
   ruleId: string;
-  sourceId: string;
-  sourceIndex: string;
-  sourceVersion: string;
-  /** Values of the `MV_EXPAND`ed columns for this row, in query order. */
-  expandedValues?: readonly unknown[];
+  deduplicationId: string;
 }): string {
-  const expansion = expandedValues.length > 0 ? `|${stableStringify(expandedValues)}` : '';
-  return sha256(`${spaceId}|${ruleId}|${sourceIndex}|${sourceId}|${sourceVersion}${expansion}`);
+  return sha256(`${spaceId}|${ruleId}|${deduplicationId}`);
 }
 
 /**
  * Resolves the deterministic `_id` for a rule event, or `undefined` when
  * Elasticsearch should generate one.
  *
- * Callers must only invoke this for runs whose query `planDeduplication`
- * judged eligible (`state.deduplication.eligible`): a non-aggregating query
- * whose author declared `METADATA _id, _index, _version` and kept the columns
- * through to the result. Eligibility is a property of the query, not of a
- * row, and is decided upstream so that an aggregating query or one that
- * reassigns `_id` is never deduplicated no matter what its rows contain.
- * Within an eligible run an event still qualifies only when it is a
- * `breached` event carrying the complete declared identity — a string
- * `_id`, a string `_index` and a `_version` — plus a value for every
- * `mvExpandFields` column. Anything short of that (`recovered` / `no_data` /
- * continued-breach events, or a row missing a column, as happens for an
- * ES|QL view that does not expose `_id`) falls back to an Elasticsearch-
- * generated id and is written exactly as before deduplication existed.
- *
- * `mvExpandFields` (from `state.deduplication`) names the columns whose
- * per-row values are folded into the id so `MV_EXPAND`ed rows from one
- * document do not collide.
+ * An event qualifies when it is a `breached` event whose row carries a
+ * non-empty {@link DEDUPLICATION_ID_COLUMN} value. The value is taken as the
+ * author produced it: a string is used verbatim, and any other non-null
+ * value (a number, a boolean, a multi-value array) is serialised with a
+ * stable encoding so the same value always yields the same id. Anything
+ * short of that — `recovered` / `no_data` / continued-breach events, which
+ * carry no row data, or a row whose column is absent, `null` or `""` —
+ * falls back to an Elasticsearch-generated id and is written exactly as
+ * before deduplication existed.
  *
  * Used at both deduplication points: `FilterDuplicateEventsStep` resolves ids
  * to pre-check `.rule-events`, and `StoreAlertEventsStep` passes it as
@@ -141,39 +138,23 @@ export function buildRuleEventId({
  * the director's object transformations.
  *
  * Pure; never throws. Returning `undefined` is not an error path — it is the
- * normal outcome for every event that is not a source-document breach.
+ * normal outcome for every event whose row did not opt in.
  */
-export function resolveRuleEventId(
-  event: AlertEventDocument,
-  mvExpandFields: readonly string[] = []
-): string | undefined {
+export function resolveRuleEventId(event: AlertEventDocument): string | undefined {
   const ruleId = event.rule?.id;
-  const sourceId = event.data?._id;
-  const sourceIndex = event.data?._index;
-  const sourceVersion = event.data?._version;
+  const deduplicationId = serializeDeduplicationId(event.data?.[DEDUPLICATION_ID_COLUMN]);
 
-  const expandedValues = mvExpandFields.map((field) => event.data?.[field]);
-
-  const hasSourceIdentity =
-    event.status === 'breached' &&
-    ruleId != null &&
-    typeof sourceId === 'string' &&
-    sourceId !== '' &&
-    typeof sourceIndex === 'string' &&
-    sourceIndex !== '' &&
-    (typeof sourceVersion === 'number' || typeof sourceVersion === 'string') &&
-    expandedValues.every((value) => value !== undefined);
-
-  return hasSourceIdentity
-    ? buildRuleEventId({
-        spaceId: event.space_id,
-        ruleId,
-        sourceId,
-        sourceIndex,
-        sourceVersion: String(sourceVersion),
-        expandedValues,
-      })
+  return event.status === 'breached' && ruleId != null && deduplicationId !== undefined
+    ? buildRuleEventId({ spaceId: event.space_id, ruleId, deduplicationId })
     : undefined;
+}
+
+/** The author's deduplication value as a stable string, or `undefined` when it is absent or empty. */
+function serializeDeduplicationId(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  return typeof value === 'string' ? value : stableStringify(value);
 }
 
 /**

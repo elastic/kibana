@@ -37,10 +37,9 @@ const IDS_QUERY_CHUNK_SIZE = 10_000;
  * `StoreAlertEventsStep`, the second layer. Both layers feed the
  * `ruleEventsDeduplicated` counter with disjoint counts.
  *
- * Runs only when `state.deduplication.eligible` is set by
- * `ExecuteRuleQueryStep`, i.e. the author's query declares
- * `METADATA _id, _index, _version` and is not aggregating; otherwise the
- * batch passes through untouched.
+ * Only events whose row carries the `_deduplication_id` column (see
+ * `DEDUPLICATION_ID_COLUMN`) resolve to a deterministic id; a batch with no
+ * such event passes through without touching Elasticsearch.
  *
  * Failure of the Elasticsearch lookup is not fatal: the affected events are
  * kept and the second layer deduplicates them at write time.
@@ -53,15 +52,8 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['alertEventsBatch'], async (state) => {
-      if (!state.deduplication?.eligible) {
-        return { type: 'continue', state };
-      }
-
       const logger = state.logger.withLabels({ step: this.name });
-      const candidateIds = resolveCandidateIds(
-        state.alertEventsBatch,
-        state.deduplication.mvExpandFields
-      );
+      const candidateIds = resolveCandidateIds(state.alertEventsBatch);
 
       if (candidateIds.size === 0) {
         return { type: 'continue', state };
@@ -138,17 +130,16 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
 /**
  * Maps each event that qualifies for deduplication to its deterministic
  * `_id`, keyed by object identity so the batch can be filtered without
- * recomputing hashes. Events `resolveRuleEventId` declines (aggregated rows,
- * recovered, no_data, continued-breach) are absent from the map and always
- * pass through the step untouched.
+ * recomputing hashes. Events `resolveRuleEventId` declines (rows without
+ * `_deduplication_id`, recovered, no_data, continued-breach) are absent from
+ * the map and always pass through the step untouched.
  */
 const resolveCandidateIds = (
-  events: readonly AlertEventDocument[],
-  mvExpandFields: readonly string[]
+  events: readonly AlertEventDocument[]
 ): ReadonlyMap<AlertEventDocument, string> =>
   new Map(
     events.flatMap((event) => {
-      const id = resolveRuleEventId(event, mvExpandFields);
+      const id = resolveRuleEventId(event);
       return id ? [[event, id] as const] : [];
     })
   );

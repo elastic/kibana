@@ -7,7 +7,6 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type { AlertEventDocument } from '../../../resources/datastreams/alert_events';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
@@ -31,20 +30,15 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
 
       logger.debug({ message: 'Storing alert events batch' });
 
-      // Second deduplication layer: only when the query step judged this run
-      // eligible (the author's query declares the identity METADATA) do
-      // events get a deterministic `_id`, so a re-match the pre-check could
-      // not see collides here instead of being appended.
-      const { deduplication } = state;
+      // Second deduplication layer: an event whose row carries the
+      // `_deduplication_id` column gets a deterministic `_id`, so a re-match
+      // the pre-check could not see collides here instead of being appended.
+      // Every other event returns `undefined` and gets an Elasticsearch-
+      // generated id.
       const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
-        ...(deduplication?.eligible
-          ? {
-              getDocumentId: (doc: AlertEventDocument) =>
-                resolveRuleEventId(doc, deduplication.mvExpandFields),
-            }
-          : {}),
+        getDocumentId: resolveRuleEventId,
       });
 
       logger.debug({ message: 'Bulk-indexed alert events batch' });

@@ -904,24 +904,18 @@ describe('buildQueryRecoveryAlertEvents', () => {
 });
 
 describe('resolveRuleEventId', () => {
-  const sourceRow = { _id: 'doc-1', _index: 'logs-000001', _version: 2, 'host.name': 'a' };
+  const row = { _deduplication_id: 'doc-1', 'host.name': 'a' };
 
-  it('derives the id from space, rule, and source _index/_id/_version only', () => {
+  it('derives the id from space, rule, and the _deduplication_id value only', () => {
     const event = createAlertEvent({
       space_id: 'default',
       rule: { id: 'rule-1', version: 1 },
       status: 'breached',
-      data: sourceRow,
+      data: row,
     });
 
     expect(resolveRuleEventId(event)).toBe(
-      buildRuleEventId({
-        spaceId: 'default',
-        ruleId: 'rule-1',
-        sourceId: 'doc-1',
-        sourceIndex: 'logs-000001',
-        sourceVersion: '2',
-      })
+      buildRuleEventId({ spaceId: 'default', ruleId: 'rule-1', deduplicationId: 'doc-1' })
     );
   });
 
@@ -930,13 +924,13 @@ describe('resolveRuleEventId', () => {
       status: 'breached',
       scheduled_timestamp: '2025-01-01T00:00:00.000Z',
       group_hash: 'g1',
-      data: { ...sourceRow, message: 'first' },
+      data: { ...row, message: 'first', _id: 'x', _version: 1 },
     });
     const b = createAlertEvent({
       status: 'breached',
       scheduled_timestamp: '2025-01-01T00:05:00.000Z',
       group_hash: 'g2',
-      data: { ...sourceRow, message: 'second' },
+      data: { ...row, message: 'second', _id: 'y', _version: 2 },
     });
 
     expect(resolveRuleEventId(a)).toBe(resolveRuleEventId(b));
@@ -945,85 +939,61 @@ describe('resolveRuleEventId', () => {
   it.each([
     ['space', { space_id: 'other' }],
     ['rule', { rule: { id: 'rule-2', version: 1 } }],
-    ['_id', { data: { ...sourceRow, _id: 'doc-2' } }],
-    ['_index', { data: { ...sourceRow, _index: 'logs-000002' } }],
-    ['_version', { data: { ...sourceRow, _version: 3 } }],
+    ['_deduplication_id', { data: { ...row, _deduplication_id: 'doc-2' } }],
   ])('changes when the %s changes', (_label, override) => {
     const base = createAlertEvent({
       space_id: 'default',
       rule: { id: 'rule-1', version: 1 },
       status: 'breached',
-      data: sourceRow,
+      data: row,
     });
     const changed = createAlertEvent({
       space_id: 'default',
       rule: { id: 'rule-1', version: 1 },
       status: 'breached',
-      data: sourceRow,
+      data: row,
       ...override,
     });
 
     expect(resolveRuleEventId(changed)).not.toBe(resolveRuleEventId(base));
   });
 
-  it('returns undefined when the row has no source _id (aggregating queries)', () => {
-    const event = createAlertEvent({ status: 'breached', data: { 'host.name': 'a', count: 3 } });
+  it.each([
+    ['a number', 42, '42'],
+    ['a boolean', true, 'true'],
+    ['a multi-value array', ['10.0.0.1', '10.0.0.2'], '["10.0.0.1","10.0.0.2"]'],
+  ])('serialises %s deterministically', (_label, value, serialised) => {
+    const event = createAlertEvent({
+      space_id: 'default',
+      rule: { id: 'rule-1', version: 1 },
+      status: 'breached',
+      data: { _deduplication_id: value },
+    });
+
+    expect(resolveRuleEventId(event)).toBe(
+      buildRuleEventId({ spaceId: 'default', ruleId: 'rule-1', deduplicationId: serialised })
+    );
+  });
+
+  it('does not treat the source metadata columns as an identity on their own', () => {
+    const event = createAlertEvent({
+      status: 'breached',
+      data: { _id: 'doc-1', _index: 'logs-000001', _version: 2, 'host.name': 'a' },
+    });
     expect(resolveRuleEventId(event)).toBeUndefined();
   });
 
   it.each([
-    ['_index', { _id: 'doc-1', _version: 2 }],
-    ['_version', { _id: 'doc-1', _index: 'logs-000001' }],
-  ])(
-    'falls back to an Elasticsearch-generated id when %s is missing',
-    (_field, partialIdentity) => {
-      const event = createAlertEvent({
-        status: 'breached',
-        data: { ...partialIdentity, 'host.name': 'a' },
-      });
-      expect(resolveRuleEventId(event)).toBeUndefined();
-    }
-  );
-
-  it('does not treat an author-defined _id column as a source identity', () => {
-    const event = createAlertEvent({ status: 'breached', data: { _id: 'host-a', count: 3 } });
+    ['absent', {}],
+    ['null', { _deduplication_id: null }],
+    ['an empty string', { _deduplication_id: '' }],
+  ])('returns undefined when _deduplication_id is %s', (_label, data) => {
+    const event = createAlertEvent({ status: 'breached', data: { ...data, 'host.name': 'a' } });
     expect(resolveRuleEventId(event)).toBeUndefined();
   });
 
-  describe('with MV_EXPAND fields', () => {
-    const base = {
-      space_id: 'default',
-      rule: { id: 'rule-1', version: 1 },
-      status: 'breached' as const,
-    };
-
-    it('gives each expanded row from one document its own id', () => {
-      const rowA = createAlertEvent({ ...base, data: { ...sourceRow, 'host.ip': '10.0.0.1' } });
-      const rowB = createAlertEvent({ ...base, data: { ...sourceRow, 'host.ip': '10.0.0.2' } });
-
-      expect(resolveRuleEventId(rowA, ['host.ip'])).not.toBe(resolveRuleEventId(rowB, ['host.ip']));
-    });
-
-    it('is stable for the same expanded value across runs', () => {
-      const run1 = createAlertEvent({ ...base, data: { ...sourceRow, 'host.ip': '10.0.0.1' } });
-      const run2 = createAlertEvent({ ...base, data: { ...sourceRow, 'host.ip': '10.0.0.1' } });
-
-      expect(resolveRuleEventId(run1, ['host.ip'])).toBe(resolveRuleEventId(run2, ['host.ip']));
-    });
-
-    it('returns undefined when an expanded value is missing from the row', () => {
-      const event = createAlertEvent({ ...base, data: sourceRow });
-      expect(resolveRuleEventId(event, ['host.ip'])).toBeUndefined();
-    });
-
-    it('leaves the id unchanged when no fields are expanded', () => {
-      const event = createAlertEvent({ ...base, data: sourceRow });
-      expect(resolveRuleEventId(event, [])).toBe(resolveRuleEventId(event));
-    });
-  });
-
   it.each(['recovered', 'no_data'] as const)('returns undefined for %s events', (status) => {
-    const event = createAlertEvent({ status, data: sourceRow });
+    const event = createAlertEvent({ status, data: row });
     expect(resolveRuleEventId(event)).toBeUndefined();
   });
 

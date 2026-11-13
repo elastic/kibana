@@ -18,12 +18,8 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
-const ELIGIBLE = { eligible: true, mvExpandFields: [] } as const;
-
 const sourceRow = (id: string) => ({
-  _id: id,
-  _index: 'logs-000001',
-  _version: 1,
+  _deduplication_id: id,
   'host.name': 'a',
 });
 
@@ -52,7 +48,6 @@ describe('FilterDuplicateEventsStep', () => {
 
     const state = createRulePipelineState({
       rule: createRuleResponse(),
-      deduplication: ELIGIBLE,
       alertEventsBatch: [duplicate, fresh],
     });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -71,33 +66,17 @@ describe('FilterDuplicateEventsStep', () => {
     );
   });
 
-  it('passes the batch through without querying when the run is not eligible', async () => {
-    const event = createAlertEvent({ status: 'breached', data: sourceRow('doc-1') });
-    mockExisting([resolveRuleEventId(event)!]);
-
-    const state = createRulePipelineState({
-      rule: createRuleResponse(),
-      deduplication: { eligible: false, mvExpandFields: [] },
-      alertEventsBatch: [event],
-    });
-    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
-
-    expect(result).toEqual({ type: 'continue', state });
-    expect(esClient.search).not.toHaveBeenCalled();
-  });
-
-  it('never drops events without a source _id (recovered, no_data, aggregating rows)', async () => {
+  it('passes the batch through without querying when no row carries _deduplication_id', async () => {
     const recovered = createAlertEvent({ status: 'recovered', data: {} });
     const noData = createAlertEvent({ status: 'no_data', data: {} });
-    const aggregated = createAlertEvent({
+    const plain = createAlertEvent({
       status: 'breached',
-      data: { 'host.name': 'a', count: 3 },
+      data: { _id: 'doc-1', _index: 'logs-000001', _version: 1, 'host.name': 'a', count: 3 },
     });
 
     const state = createRulePipelineState({
       rule: createRuleResponse(),
-      deduplication: ELIGIBLE,
-      alertEventsBatch: [recovered, noData, aggregated],
+      alertEventsBatch: [recovered, noData, plain],
     });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
@@ -111,7 +90,6 @@ describe('FilterDuplicateEventsStep', () => {
 
     const state = createRulePipelineState({
       rule: createRuleResponse(),
-      deduplication: ELIGIBLE,
       alertEventsBatch: [fresh],
     });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -127,7 +105,6 @@ describe('FilterDuplicateEventsStep', () => {
 
     const state = createRulePipelineState({
       rule: createRuleResponse(),
-      deduplication: ELIGIBLE,
       alertEventsBatch: events,
     });
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -144,7 +121,6 @@ describe('FilterDuplicateEventsStep', () => {
 
     const state = createRulePipelineState({
       rule: createRuleResponse(),
-      deduplication: ELIGIBLE,
       alertEventsBatch: [event],
       logger: loggerService,
     });
