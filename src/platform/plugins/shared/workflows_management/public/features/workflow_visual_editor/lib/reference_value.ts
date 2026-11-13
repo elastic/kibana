@@ -102,6 +102,34 @@ export const normalizeReferenceForm = (text: string): string => {
 
 const COMPARISON_OR_LOGIC = /==|!=|<>|<=|>=|<|>|\s(?:contains|and|or)\s/;
 
+interface TypeIndex {
+  /** Type of the first leaf with each path, in catalog order. */
+  readonly leaves: ReadonlyMap<string, string>;
+  /** Type of the last step or trigger entity with each path. */
+  readonly entities: ReadonlyMap<string, string>;
+}
+
+const typeIndexes = new WeakMap<DataReferenceCatalog, TypeIndex>();
+
+/** The catalog's paths and types, read once per catalog however many references ask about them. */
+const typeIndexOf = (catalog: DataReferenceCatalog): TypeIndex => {
+  const cached = typeIndexes.get(catalog);
+  if (cached) return cached;
+  const leaves = new Map<string, string>();
+  const entities = new Map<string, string>();
+  const visit = (items: readonly DataReferenceItem[]): void => {
+    items.forEach((item) => {
+      if (item.isEntity) entities.set(item.path, item.typeLabel);
+      else if (!leaves.has(item.path)) leaves.set(item.path, item.typeLabel);
+      if (item.children) visit(item.children);
+    });
+  };
+  catalog.groups.forEach((group) => visit(group.items));
+  const index = { leaves, entities };
+  typeIndexes.set(catalog, index);
+  return index;
+};
+
 /**
  * Type label of a reference expression, or undefined when it isn't known (the `unknown` icon).
  *
@@ -119,21 +147,6 @@ export const lookupReferenceTypeLabel = (
   if (hasFilter(expression)) return undefined;
   if (COMPARISON_OR_LOGIC.test(blankQuoted(expression))) return 'boolean';
   const path = expression.trim();
-  let entityLabel: string | undefined;
-  const walk = (items: readonly DataReferenceItem[]): string | undefined => {
-    for (const item of items) {
-      if (item.path === path) {
-        if (!item.isEntity) return item.typeLabel;
-        entityLabel = item.typeLabel;
-      }
-      const found = item.children ? walk(item.children) : undefined;
-      if (found) return found;
-    }
-    return undefined;
-  };
-  for (const group of catalog.groups) {
-    const found = walk(group.items);
-    if (found) return found;
-  }
-  return entityLabel;
+  const { leaves, entities } = typeIndexOf(catalog);
+  return leaves.get(path) ?? entities.get(path);
 };

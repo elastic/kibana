@@ -8,7 +8,7 @@
  */
 
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import type { monaco } from '@kbn/code-editor';
 import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
@@ -16,14 +16,10 @@ import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import type { ReferenceCapableBind } from './reference_capable_field';
 import { ReferenceChip } from './reference_chip';
 import { ContainerInSentenceCallout } from './reference_container_callout';
-import {
-  getReferenceChipEditorCss,
-  useReferenceDecorations,
-  useReferenceIconMasks,
-} from './use_reference_decorations';
+import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import type { ReferenceToken } from '../lib/reference_tokens';
-import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
+import { insertTokenAsJsonText } from '../lib/reference_tokens';
 
 type Editor = monaco.editor.IStandaloneCodeEditor;
 
@@ -108,13 +104,10 @@ export function ReferenceTextInput({
   /** Reflected as `data-language` so the field's kind stays inspectable. */
   readonly language?: string;
 }) {
-  const { euiTheme, colorMode } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
-  const masks = useReferenceIconMasks();
   const { value, isOpen, appendControls, registerSelection, openPickerAtRange } = bind;
   const [isEditing, setIsEditing] = useState(false);
-  const [editor, setEditor] = useState<Editor | null>(null);
-  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(() => new Set());
   const pendingRef = useRef<Pending | undefined>({ kind: 'end' });
   const heightPx = parseInt(String(euiTheme.size.xl), 10) || 32;
   const isOpenRef = useRef(isOpen);
@@ -125,16 +118,13 @@ export function ReferenceTextInput({
   const onBlurRef = useRef(onBlur);
   onBlurRef.current = onBlur;
 
-  const tokens = useMemo(
-    () =>
-      findReferenceTokens(value, {
-        catalog,
-        warnContainersInSentence,
-        quotedStringsAreValues: language === 'json',
-      }),
-    [catalog, language, value, warnContainersInSentence]
-  );
-  useReferenceDecorations(editor, value, tokens);
+  const { tokens, chipCss, captureEditor, releaseEditor, warning, dismissWarning } =
+    useReferenceEditor({
+      text: value,
+      catalog,
+      warnContainersInSentence,
+      quotedStringsAreValues: language === 'json',
+    });
 
   const startEditing = useCallback((pending: Pending) => {
     pendingRef.current = pending;
@@ -143,9 +133,9 @@ export function ReferenceTextInput({
 
   const stopEditing = useCallback(() => {
     setIsEditing(false);
-    setEditor(null);
+    releaseEditor();
     registerSelection(null);
-  }, [registerSelection]);
+  }, [registerSelection, releaseEditor]);
 
   // Mousedown only keeps focus on the read view; the action runs on click, once the pointer is
   // released. Opening the picker earlier lets the trailing click count as an "outside click"
@@ -197,7 +187,7 @@ export function ReferenceTextInput({
         onBlurRef.current();
         stopEditing();
       });
-      setEditor((current) => current ?? mounted);
+      captureEditor(mounted);
 
       // Position the caret once, for the interaction that mounted the editor.
       const pending = pendingRef.current;
@@ -220,7 +210,7 @@ export function ReferenceTextInput({
       }
       bridge.setCaret(pending.kind === 'caret' ? pending.offset : valueRef.current.length);
     },
-    [openPickerAtRange, registerSelection, stopEditing]
+    [captureEditor, openPickerAtRange, registerSelection, stopEditing]
   );
 
   const boxCss = {
@@ -289,7 +279,7 @@ export function ReferenceTextInput({
         '.monaco-editor, .monaco-editor-background, .monaco-editor .margin': {
           backgroundColor: 'transparent',
         },
-        ...getReferenceChipEditorCss(euiTheme, masks, colorMode),
+        ...chipCss,
       }}
       data-mode="edit"
     >
@@ -299,9 +289,7 @@ export function ReferenceTextInput({
         value={value}
         onChange={(text, event) => {
           const single = text.replace(/\r?\n/g, ' ');
-          const last = event?.changes?.[event.changes.length - 1];
-          const caret = last ? last.rangeOffset + last.text.length : single.length;
-          onChange(single, Math.min(caret, single.length));
+          onChange(single, caretAfterChange(single, event));
         }}
         height={heightPx}
         aria-label={ariaLabel}
@@ -315,10 +303,6 @@ export function ReferenceTextInput({
     </div>
   );
 
-  const warning = tokens.find(
-    (token) => token.isContainerInSentence && !dismissed.has(token.expression)
-  );
-
   return (
     <>
       <div css={boxCss}>
@@ -329,7 +313,7 @@ export function ReferenceTextInput({
         <ContainerInSentenceCallout
           token={warning}
           onFix={() => onChange(insertTokenAsJsonText(value, warning), value.length)}
-          onDismiss={() => setDismissed((current) => new Set(current).add(warning.expression))}
+          onDismiss={dismissWarning}
           testSubj={testSubj}
         />
       ) : null}
