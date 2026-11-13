@@ -99,6 +99,9 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/app-menu'
+  - '@kbn/logging-mocks'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-server'
 tags:
   - plugin
   - prod
