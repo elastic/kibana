@@ -47,6 +47,7 @@ describe('nightshift agent optimize workflow', () => {
         'connector_id',
         'conversation_id',
         'prompt',
+        'replay',
         'response',
         'round_connector_id',
         'round_id',
@@ -143,8 +144,13 @@ describe('nightshift agent optimize workflow', () => {
         name: 'reinforce_decision_trees',
         type: 'nightshift.decisionTreeReinforce',
       }),
+      expect.objectContaining({
+        name: 'score_memory_online_evals',
+        type: 'nightshift.onlineEvals.scoreMemory',
+        'on-failure': { continue: true },
+      }),
     ]);
-    expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.version).toBe(4);
+    expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.version).toBe(5);
   });
 
   // A parallel branch has no per-branch timeout: it inherits `branch-timeout`. Reinforcement
@@ -225,7 +231,18 @@ describe('nightshift agent optimize workflow', () => {
       connector_id: '{{ steps.resolve_model.output.connector_id }}',
       tool_calls: '${{ inputs.tool_calls }}',
       tool_results: '${{ inputs.tool_results }}',
+      replay: '${{ inputs.replay }}',
     });
+  });
+
+  // An evaluation replays a recorded round under a synthetic conversation id no one can read,
+  // so it has to say so explicitly; ${{ }} keeps the flag a boolean for the step's schema.
+  it('declares an optional boolean replay input and forwards it to reinforcement', () => {
+    const { properties } = workflow.triggers[0].inputs;
+    expect(properties.replay).toEqual(expect.objectContaining({ type: 'boolean' }));
+    expect(
+      workflow.steps.find((step) => step.name === 'reinforce_decision_trees')?.with?.replay
+    ).toBe('${{ inputs.replay }}');
   });
 
   // Proves the sequential phase really compiles: the reinforcement steps become graph nodes
@@ -273,6 +290,7 @@ describe('nightshift agent optimize workflow', () => {
       'resolve_model',
       'ensure_reinforcement_agent',
       'reinforce_decision_trees',
+      'score_memory_online_evals',
     ]);
   });
 

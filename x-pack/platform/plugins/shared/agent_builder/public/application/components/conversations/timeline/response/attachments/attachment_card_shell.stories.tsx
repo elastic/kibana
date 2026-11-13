@@ -195,13 +195,13 @@ export const WithOverflowActions: Story = {
       {
         label: 'Save to library',
         icon: 'save',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: action('save'),
       },
       {
         label: 'Delete',
         icon: 'trash',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: action('delete'),
       },
     ],
@@ -236,7 +236,7 @@ export const SplitButtonWithSecondaryActions: Story = {
       {
         label: 'Delete',
         icon: 'trash',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: action('delete'),
       },
     ],
@@ -263,13 +263,13 @@ export const MenuOnlyWithoutPrimary: Story = {
       {
         label: 'Archive',
         icon: 'folderClosed',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: action('archive'),
       },
       {
         label: 'Delete',
         icon: 'trash',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: action('delete'),
       },
     ],

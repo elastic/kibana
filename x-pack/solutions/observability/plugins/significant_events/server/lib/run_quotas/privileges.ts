@@ -39,7 +39,7 @@ export const assertCanManageRunQuotas = async ({
 }): Promise<void> => {
   if (!(await canManageRunQuotas({ request, server }))) {
     throw Boom.forbidden(
-      'Managing run limits requires Nightshift manage and Nightshift configure in all spaces'
+      'Managing run limits requires nightshift manage and nightshift configure in all spaces'
     );
   }
 };

@@ -15,7 +15,7 @@ export const testSubjectIds = {
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID: 'securitySolutionFlyoutGraphPreviewTitleLink',
   NODE_EXPAND_BUTTON_TEST_ID: 'cloudSecurityGraphNodeExpandButton',
   GRAPH_INVESTIGATION_TEST_ID: 'cloudSecurityGraphGraphInvestigation',
-  GRAPH_GROUPED_NODE_TEST_ID: 'label-node-stacked-shape',
+  GRAPH_GROUPED_NODE_TEST_ID: 'event-node-stacked-shape',
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphNodeExpandPopover',
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID:
     'cloudSecurityGraphGraphInvestigationExploreRelatedEntities',
@@ -29,10 +29,10 @@ export const testSubjectIds = {
     'cloudSecurityGraphGraphInvestigationShowGroupedEntities',
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEntityRelationships',
-  GRAPH_LABEL_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphLabelExpandPopover',
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID:
+  GRAPH_EVENT_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphEventExpandPopover',
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEventsWithThisAction',
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID:
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEventDetails',
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID: 'cloudSecurityGraphGraphInvestigationToggleSearch',
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:

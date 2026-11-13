@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { DecisionTreeTurnKind } from '@kbn/nightshift-decision-trees';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import {
   DECISION_TREE_AI_INDEX_DEST,
   DECISION_TREE_AI_INDEX_ID,
 } from '../../common/decision_trees';
 import {
   embedAccessedTreesMarker,
+  embedRunMarker,
   extractAccessedTreeIds,
   parseAccessedTreesMarker,
   type InvestigationToolCall,
@@ -25,6 +26,7 @@ import { createLearningStore } from './learning_store';
 import { materializeDecisionTrees } from './materialize';
 import { createDecisionTreeStore } from './store';
 import { buildReinforcementPrompt } from './turn';
+import { createDecisionTreeTelemetry } from '../telemetry';
 
 /**
  * Registers the dedicated decision-tree AI index with the Context Engine so it is a managed,
@@ -60,13 +62,19 @@ export const hydrateDecisionTreeWorkspace = async ({
   spaceId,
   prompt,
   signal,
+  analytics,
+  conversationId,
+  roundId,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
   prompt?: string;
   signal?: AbortSignal;
+  analytics: AnalyticsServiceSetup;
+  conversationId?: string;
+  roundId?: string;
 }): Promise<number | { treeCount: number; hydratedIds: string[] }> => {
   const store = createDecisionTreeStore({ esClient, logger, spaceId, signal });
   const accessedTreeIds = parseAccessedTreesMarker(prompt);
@@ -77,6 +85,15 @@ export const hydrateDecisionTreeWorkspace = async ({
     signal,
     ...(accessedTreeIds ? { treeIds: accessedTreeIds } : {}),
   });
+
+  // A marker means this is the reinforcement hydrate, which only writes the trees the investigator
+  // opened; its absence is the investigator hydrate, which writes every tree so the agent can
+  // discover a match through monitors.md.
+  createDecisionTreeTelemetry({ analytics, conversationId, roundId, logger }).reportLoaded({
+    selection: accessedTreeIds ? 'accessed' : 'discover',
+    treeIds: trees.map((tree) => tree.tree_id),
+  });
+
   return {
     treeCount: trees.length,
     hydratedIds: trees.map((tree) => tree.tree_id),
@@ -95,6 +112,7 @@ export const hydrateDecisionTreeWorkspace = async ({
 export const prepareReinforcementTurn = async ({
   turnKind,
   investigationId,
+  roundId,
   earlierAccessedTreeIds = [],
   connectorNames,
   esClient,
@@ -106,6 +124,8 @@ export const prepareReinforcementTurn = async ({
 }: {
   turnKind: DecisionTreeTurnKind;
   investigationId: string;
+  /** The investigator's round, carried to the hydrate hook for telemetry. */
+  roundId?: string;
   /** Trees the investigator opened in the investigation's earlier rounds. */
   earlierAccessedTreeIds?: string[];
   connectorNames: string[];
@@ -164,7 +184,11 @@ export const prepareReinforcementTurn = async ({
   });
   return {
     skipped: false,
-    message: [embedAccessedTreesMarker(editable.map((tree) => tree.tree_id)), message].join('\n'),
+    message: [
+      embedAccessedTreesMarker(editable.map((tree) => tree.tree_id)),
+      embedRunMarker({ conversationId: investigationId, roundId }),
+      message,
+    ].join('\n'),
     treeCount: editable.length,
     turnKind,
     openedTreeIds: editable
