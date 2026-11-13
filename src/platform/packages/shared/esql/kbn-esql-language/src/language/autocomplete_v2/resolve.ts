@@ -8,7 +8,7 @@
  */
 
 import { resolveRole } from '../../esql_js_sim/definitions';
-import type { CursorIR } from '../../esql_js_sim/grammar';
+import type { CursorIR, ExpectedArgument } from '../../esql_js_sim/grammar';
 import type { SuggestionRequest } from './types';
 
 /**
@@ -41,9 +41,18 @@ export const resolve = (ir: CursorIR): SuggestionRequest[] => {
     }
   }
 
+  // A token with no fixed text that a rule takes directly is an argument too, as a METADATA
+  // field: it has a call site and a role like one the grammar gives a rule to.
+  const valueTokens: ExpectedArgument[] = ir.followers.flatMap(
+    ({ class: tokenClass, id, path, token, command }) =>
+      tokenClass === 'value' && id
+        ? [{ id, rule: token, path: [...path, id], command, continues: false }]
+        : []
+  );
+
   // An argument is offered once per role: several paths of the grammar lead to the same one.
   const seen = new Set<string>();
-  for (const argument of ir.arguments) {
+  for (const argument of [...ir.arguments, ...valueTokens]) {
     const resolved = resolveRole(argument.path, argument.rule);
     const key = resolved?.id ?? `${argument.id}|${resolved?.role.kind}`;
 

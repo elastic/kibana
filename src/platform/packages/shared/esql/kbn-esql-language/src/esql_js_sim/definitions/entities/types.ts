@@ -55,4 +55,6 @@ export interface EntityItem {
   hasChildren?: boolean;
   /** The data type, for an entity that has one. */
   type?: string;
+  /** What the entity is or holds, in a few words. */
+  description?: string;
 }

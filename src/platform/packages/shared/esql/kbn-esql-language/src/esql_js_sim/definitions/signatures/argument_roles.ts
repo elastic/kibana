@@ -87,7 +87,8 @@ export const ARGUMENT_ROLES: Readonly<Record<CallSiteId, ArgumentRole>> = {
   },
 
   // Sources.
-  'indexPatternOrSubquery>indexPattern': { kind: 'entity', entityType: 'source' },
+  // A source listed twice adds nothing, so each is listed once.
+  'indexPatternOrSubquery>indexPattern': { kind: 'entity', entityType: 'source', unique: true },
   // FROM's sources may be subqueries, also nested, as `FROM a, (FROM b, (TS c))`.
   'fromCommand>indexPatternAndMetadataFields': {
     kind: 'entity',

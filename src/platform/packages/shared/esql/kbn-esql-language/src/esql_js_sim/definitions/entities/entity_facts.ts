@@ -26,3 +26,30 @@ export const ENTITY_FACTS: Readonly<Record<EntityType, EntityFacts>> = {
 
 /** The kinds of entity, for checking data that names one. */
 export const ENTITY_TYPES = Object.keys(ENTITY_FACTS) as EntityType[];
+
+/**
+ * The values of the entities the language itself defines. The metadata fields a project adds
+ * exist only on serverless.
+ */
+export const METADATA_FIELD_NAMES: readonly string[] = [
+  '_version',
+  '_id',
+  '_index',
+  '_source',
+  '_ignored',
+  '_index_mode',
+  '_score',
+  '_size',
+  '_slice',
+  '_name',
+  '_class',
+];
+
+export const SERVERLESS_METADATA_FIELD_NAMES: readonly string[] = [
+  '_project._id',
+  '_project._alias',
+  '_project._type',
+  '_project._organization',
+  '_project._csp',
+  '_project._region',
+];

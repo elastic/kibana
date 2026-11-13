@@ -222,11 +222,13 @@ describe('resolveRole', () => {
       expect(source('fromCommand')?.role).toEqual({
         kind: 'entity',
         entityType: 'source',
+        unique: true,
         subqueries: true,
       });
       expect(source('timeSeriesCommand')?.role).toEqual({
         kind: 'entity',
         entityType: 'source',
+        unique: true,
         indexMode: 'time_series',
       });
     });
