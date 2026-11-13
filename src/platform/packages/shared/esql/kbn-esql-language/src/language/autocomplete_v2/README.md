@@ -54,6 +54,18 @@ current flow share. The provider tells that engine what the role and the grammar
 While something is written that is not yet a whole expression of the type its role asks for,
 the command cannot go on: no pipe, no keyword and no separator of the command is offered.
 
+A lambda (`v -> v > 1`) is part of an expression (`providers/lambdas.ts`). The grammar allows
+one as any argument of any function; which argument takes one is a fact of the function
+(`FUNCTION_LAMBDAS` in the definitions, empty until a function Kibana knows declares one):
+
+- where that argument starts, only the parameters with the arrow are offered (`x -> `), with
+  names the query does not use; after a parameter's name, only the arrow;
+- in the body, the parameters of every lambda around the cursor are offered next to the
+  columns, and nowhere else. A parameter has the type of the argument whose values it stands
+  for, when the function says which (`valuesOf`);
+- the body is offered as the value of the argument: the expression engine does not know
+  lambdas, so it reads the text with the parameters and the arrow blanked out.
+
 Two things are still borrowed from the current flow here, and go away when the expression
 engine reads the grammar position itself: the syntax tree of the command at the cursor, and
 the names the function definitions use for the places a function is allowed in.
