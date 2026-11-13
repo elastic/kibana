@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readdirSync } from 'fs';
+import { resolve } from 'path';
 import type { KbnServerlessProjectType } from '@kbn/dev-utils';
 import { KBN_CERT_PATH, KBN_KEY_PATH, KBN_SERVERLESS_UIAM_CERTS } from '@kbn/dev-utils';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from './serverless.base.config';
-import { servers as observabilityComplete } from './observability_complete.serverless.config';
-import { servers as observabilityLogsEssentials } from './observability_logs_essentials.serverless.config';
-import { servers as search } from './search.serverless.config';
-import { servers as securityComplete } from './security_complete.serverless.config';
-import { servers as securityEase } from './security_ease.serverless.config';
-import { servers as securityEssentials } from './security_essentials.serverless.config';
-import { servers as vectordb } from './vectordb.serverless.config';
+
+/** Maps the `--serverless=` project type onto the one the UIAM certificates are named for. */
+const UIAM_PROJECT_TYPES: Readonly<Record<string, KbnServerlessProjectType>> = {
+  es: 'search',
+  oblt: 'observability',
+  security: 'security',
+  vectordb: 'vectordb',
+};
 
 const uiamSslArgs = (serverArgs: string[]) =>
   serverArgs.filter(
@@ -26,15 +29,18 @@ const uiamSslArgs = (serverArgs: string[]) =>
       arg.startsWith('--xpack.security.uiam.ssl.key=')
   );
 
-const projectConfigs: Array<[string, ScoutServerConfig, KbnServerlessProjectType]> = [
-  ['search', search, 'search'],
-  ['observability complete', observabilityComplete, 'observability'],
-  ['observability logs essentials', observabilityLogsEssentials, 'observability'],
-  ['security complete', securityComplete, 'security'],
-  ['security essentials', securityEssentials, 'security'],
-  ['security ease', securityEase, 'security'],
-  ['vectordb', vectordb, 'vectordb'],
-];
+const projectTypeOf = (serverArgs: string[]) => {
+  const arg = serverArgs.find((serverArg) => serverArg.startsWith('--serverless='));
+  if (!arg) {
+    throw new Error(`Config has no --serverless= argument: ${serverArgs.join(' ')}`);
+  }
+  return arg.replace('--serverless=', '');
+};
+
+// Read from disk rather than listed here, so a config added later is checked without having to
+// remember this test. UIAM reads Kibana's project type from the certificate, and a config that
+// does not pick one inherits the search certificate of the base config.
+const configFiles = readdirSync(__dirname).filter((file) => file.endsWith('.serverless.config.ts'));
 
 describe('Serverless UIAM client certificate', () => {
   it('presents the search certificate in the base config', () => {
@@ -44,13 +50,21 @@ describe('Serverless UIAM client certificate', () => {
     ]);
   });
 
-  it.each(projectConfigs)(
-    'presents only the project certificate for %s',
-    (_, servers, projectType) => {
-      expect(uiamSslArgs(servers.kbnTestServer.serverArgs)).toEqual([
-        `--xpack.security.uiam.ssl.certificate=${KBN_SERVERLESS_UIAM_CERTS[projectType].certPath}`,
-        `--xpack.security.uiam.ssl.key=${KBN_SERVERLESS_UIAM_CERTS[projectType].keyPath}`,
-      ]);
-    }
-  );
+  it('finds the serverless project configs', () => {
+    expect(configFiles.length).toBeGreaterThan(0);
+  });
+
+  it.each(configFiles)('presents the certificate of its own project type in %s', async (file) => {
+    const { servers } = (await import(resolve(__dirname, file))) as {
+      servers: ScoutServerConfig;
+    };
+    const { serverArgs } = servers.kbnTestServer;
+    const projectType = UIAM_PROJECT_TYPES[projectTypeOf(serverArgs)];
+
+    expect(projectType).toBeDefined();
+    expect(uiamSslArgs(serverArgs)).toEqual([
+      `--xpack.security.uiam.ssl.certificate=${KBN_SERVERLESS_UIAM_CERTS[projectType].certPath}`,
+      `--xpack.security.uiam.ssl.key=${KBN_SERVERLESS_UIAM_CERTS[projectType].keyPath}`,
+    ]);
+  });
 });
