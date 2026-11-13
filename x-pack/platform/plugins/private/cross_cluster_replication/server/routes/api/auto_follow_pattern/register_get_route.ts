@@ -48,7 +48,6 @@ export const registerGetRoute = ({
         const autoFollowPattern = result.patterns[0];
 
         return response.ok({
-          // @ts-expect-error Once #98266 is merged, test this again.
           body: deserializeAutoFollowPattern(autoFollowPattern),
         });
       } catch (error) {
