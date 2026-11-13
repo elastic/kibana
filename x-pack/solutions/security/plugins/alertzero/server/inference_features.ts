@@ -35,9 +35,9 @@ const EFFICIENT_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-4.5-haiku-chat_completion', // Claude Haiku 4.5, GA 2025-10-01
 ];
 
-// The balanced tier covers calls where accuracy matters but which either run often (triaging every
-// alert) or loop over many tool rounds (diagnosing a rule), so frontier latency and cost would
-// multiply by the call or round count. A strong mid-size model is the right rung.
+// The balanced tier covers calls where accuracy matters but which loop over many tool rounds
+// (diagnosing a rule, reconstructing endpoint activity), so frontier latency and cost would
+// multiply by the round count. A strong mid-size model is the right rung.
 const BALANCED_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-5.5-sonnet-chat_completion', // Claude Sonnet 5.5, GA 2026-09-28
   '.openai-gpt-5.6-terra-chat_completion', // GPT-5.6 Terra
@@ -110,7 +110,7 @@ export const registerAlertZeroInferenceFeatures = (
       }),
       featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.efficientDescription', {
         defaultMessage:
-          'Quick, lightweight judgment on calls that run often, such as checking detection coverage. Choose a small, low-cost model.',
+          'Quick, lightweight judgment on calls that run often, such as triaging alerts or checking detection coverage. Choose a small, low-cost model.',
       }),
       recommendedEndpoints: EFFICIENT_RECOMMENDED_ENDPOINTS,
     },
@@ -121,7 +121,7 @@ export const registerAlertZeroInferenceFeatures = (
       }),
       featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.balancedDescription', {
         defaultMessage:
-          'Calls where accuracy matters but that run often or use tools over many steps, such as triaging alerts or diagnosing a noisy rule. Choose a strong mid-size model.',
+          'Calls where accuracy matters but that run often or use tools over many steps, such as diagnosing a noisy rule or reconstructing endpoint activity from telemetry. Choose a strong mid-size model.',
       }),
       recommendedEndpoints: BALANCED_RECOMMENDED_ENDPOINTS,
     },
