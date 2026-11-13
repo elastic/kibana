@@ -4,12 +4,12 @@ Each Worker's global sweep reports the run, and each review reports its own rule
 
 | Workflow | Step | `event` | Where |
 |---|---|---|---|
-| `rule_tuning_worker.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result` |
-| `rule_tuning_review.yaml` | `report_investigation_closed_declined`, `_applied`, `_dismissed` | `worker_investigation_closed` | Right after each close |
-| `rule_tuning_review.yaml` | `report_review_completed_declined` | `rule_tuning_review_completed` | Right before `stop_declined`, in the entry gate's `dismissed` arm |
-| `rule_tuning_review.yaml` | `report_review_completed_undecided` | `rule_tuning_review_completed` | Right before `stop_expired`, in the entry gate's `expired` arm |
-| `rule_tuning_review.yaml` | `report_review_completed` | `rule_tuning_review_completed` | Right before `emit_result` |
-| `coverage_worker.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result` |
+| `tuning_sweep.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result` |
+| `tuning_review.yaml` | `report_investigation_closed_declined`, `_applied`, `_dismissed` | `worker_investigation_closed` | Right after each close |
+| `tuning_review.yaml` | `report_review_completed_declined` | `rule_tuning_review_completed` | Right before `stop_declined`, in the entry gate's `dismissed` arm |
+| `tuning_review.yaml` | `report_review_completed_undecided` | `rule_tuning_review_completed` | Right before `stop_expired`, in the entry gate's `expired` arm |
+| `tuning_review.yaml` | `report_review_completed` | `rule_tuning_review_completed` | Right before `emit_result` |
+| `coverage_sweep.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result` |
 | `coverage_review.yaml` | `report_investigation_closed_resolved`, `_dismissed` | `worker_investigation_closed` | Right after each close in the `close_investigation` switch |
 | `coverage_review.yaml` | `report_investigation_closed_declined` | `worker_investigation_closed` | Right after `close_investigation_declined`, in the entry gate's `dismissed` arm |
 | `coverage_review.yaml` | `report_review_completed_declined` | `rule_coverage_review_completed` | Right before `stop_declined`, in the entry gate's `dismissed` arm |

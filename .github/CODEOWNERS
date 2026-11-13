@@ -3291,6 +3291,19 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
+# AlertZero Detection Watch services
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/detection @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/detection_watch_settings.schema.yaml @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/detection_watch_settings.gen.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/detection_watch.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/to_detection_rule_type.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/to_detection_rule_type.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/custom_settings/rule_coverage @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/custom_settings/rule_tuning @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/detection_rule_workflows.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.detection.fixture.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.detection.test.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/detection.md @elastic/security-detection-engineering
 # AlertZero Worker settings contract
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer

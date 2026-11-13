@@ -8,8 +8,8 @@
  */
 
 import { parse } from 'yaml';
-import { ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW } from '.';
-import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW } from '..';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 
 /**
  * Guards the fail-closed handling of oversized exception recommendations.

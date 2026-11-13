@@ -14,9 +14,9 @@ import {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
   ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW,
-} from '.';
-import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { convertJsonSchemaToZod } from '../../../spec/lib/build_fields_zod_validator';
+} from '..';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
+import { convertJsonSchemaToZod } from '../../../../spec/lib/build_fields_zod_validator';
 
 interface YamlStep {
   name: string;
