@@ -1006,3 +1006,37 @@ describe('createAgentGraph - execute_dynamic_tool', () => {
     expect(result.pendingToolCallIds).toEqual([]);
   });
 });
+
+describe('createAgentGraph attachment events of a tool batch', () => {
+  it('waits for the drain, which may be async, before the next prompt is built', async () => {
+    const event = { id: 'att-evt', type: 'attachment_added' } as unknown as AttachmentTimelineEvent;
+    let drained = false;
+    const drainToolCalls = jest.fn(async () => {
+      await Promise.resolve();
+      drained = true;
+      return [event];
+    });
+    const { graph, researchInvoke, promptFactory } = createTestGraph({
+      runAttachmentEvents: { drainToolCalls } as unknown as RunAttachmentEvents,
+    });
+    // the drain must be done by the time the second prompt is built
+    const drainedAtPrompt: boolean[] = [];
+    promptFactory.getMainPrompt.mockImplementation(async () => {
+      drainedAtPrompt.push(drained);
+      return [];
+    });
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({ content: '', tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }] })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: '{}', artifact: { results: [] } }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(drainedAtPrompt).toEqual([false, true]);
+    expect(result.attachmentEvents).toEqual([event]);
+  });
+});

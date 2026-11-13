@@ -382,3 +382,83 @@ describe('selectTools', () => {
     });
   });
 });
+
+describe('selectTools attachment bound tools', () => {
+  const select = ({ dynamicToolsEnabled }: { dynamicToolsEnabled?: boolean }) => {
+    const attachmentsService = {
+      getTypeDefinition: jest.fn().mockReturnValue({
+        getTools: () => ['text.type_tool'],
+        format: jest.fn().mockResolvedValue({
+          getBoundedTools: jest
+            .fn()
+            .mockResolvedValue([{ id: 'attachment.bound', type: ToolType.builtin }]),
+        }),
+      }),
+      convertAttachmentTool: jest.fn((tool: { id: string }) => createExecutableTool(tool.id)),
+    } as any;
+    const skillTool = createExecutableTool('skill.inline');
+
+    return selectTools({
+      conversation: {
+        attachmentTypes: [{ type: 'text' }],
+        attachmentStateManager: {
+          getActive: jest.fn().mockReturnValue([
+            {
+              id: 'a-1',
+              type: 'text',
+              active: true,
+              current_version: 1,
+              versions: [{ version: 1, data: 'hello', created_at: 'now', content_hash: 'h' }],
+            },
+          ]),
+        },
+      } as any,
+      previousDynamicToolIds: ['skill.inline'],
+      filteredSkills: [
+        { getInlineTools: jest.fn().mockResolvedValue([{ id: 'skill.inline' }]) },
+      ] as any,
+      skills: { convertSkillTool: jest.fn().mockReturnValue(skillTool) } as any,
+      request: {} as any,
+      toolProvider: {
+        list: jest.fn().mockResolvedValue([createExecutableTool('text.type_tool')]),
+      } as any,
+      agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
+      aiIndicesEnabled: false,
+      capabilities: { attachmentTools: true, apiTools: true },
+      attachmentsService,
+      spaceId: 'default',
+      runner: { runInternalTool: jest.fn() } as any,
+      ...(dynamicToolsEnabled === undefined ? {} : { dynamicToolsEnabled }),
+    });
+  };
+
+  const ids = (tools: Array<{ id: string }>) => tools.map((tool) => tool.id);
+
+  it.each([
+    ['by default', undefined],
+    ['when dynamic tools are off', false],
+  ])('keeps them in the native tool list %s', async (_, dynamicToolsEnabled) => {
+    const result = await select({ dynamicToolsEnabled });
+
+    expect(result.staticTools).toContainEqual(
+      expect.objectContaining({ id: 'attachment.bound', origin: ToolOrigin.inline })
+    );
+    expect(ids(result.dynamicTools)).not.toContain('attachment.bound');
+  });
+
+  it('makes them dynamic tools, with inline origin, when dynamic tools are on', async () => {
+    const result = await select({ dynamicToolsEnabled: true });
+
+    expect(ids(result.staticTools)).not.toContain('attachment.bound');
+    expect(result.dynamicTools).toContainEqual(
+      expect.objectContaining({ id: 'attachment.bound', origin: ToolOrigin.inline })
+    );
+  });
+
+  it('keeps the tools of the attachment type and of skills where they were when dynamic tools are on', async () => {
+    const result = await select({ dynamicToolsEnabled: true });
+
+    expect(ids(result.staticTools)).toContain('text.type_tool');
+    expect(ids(result.dynamicTools)).toContain('skill.inline');
+  });
+});

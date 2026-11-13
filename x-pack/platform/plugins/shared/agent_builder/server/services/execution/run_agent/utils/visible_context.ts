@@ -116,8 +116,8 @@ export const renderVisibleContext = async (
   deps: VisibleContextDeps
 ): Promise<BaseMessage[]> => {
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
-  const notices = noticeRendererFor(conversation);
   // the answer agent has no tools, so it should not get dynamic tool definitions
+  const notices = noticeRendererFor(conversation, { withToolDefinitions: phase === 'research' });
   const dynamicToolDefinitions =
     phase === 'research' ? run.compactionSummary?.dynamic_tools : undefined;
   const history = await prepareMessages({
@@ -176,7 +176,7 @@ export const renderUnit = async (
     return [standaloneUserMessageToLangchain(unit.entry.userMessage, notices)];
   }
   if (unit.kind === 'standalone_event') {
-    return [standaloneEventToLangchain(unit.entry.event)];
+    return [standaloneEventToLangchain(unit.entry.event, notices)];
   }
   if (unit.kind === 'current_cycle') {
     return renderCurrentRun({

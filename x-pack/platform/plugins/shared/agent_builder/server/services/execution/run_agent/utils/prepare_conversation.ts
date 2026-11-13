@@ -6,10 +6,12 @@
  */
 
 import type {
+  AttachmentTimelineEvent,
   ConversationEvent,
   ConversationRoundAuthor,
   EventActor,
   ConverseInput,
+  DynamicToolDefinition,
   MetadataFieldValue,
   SubagentEntry,
   UserMessageEventData,
@@ -61,6 +63,12 @@ export interface ProcessedConversation {
   attachmentTypes: ProcessedAttachmentType[];
   /** Description of an attachment type, resolved when rendering (types can appear mid-run). */
   describeAttachmentType?: (type: string) => string | undefined;
+  /**
+   * The definitions of the tools an attachment event makes available through
+   * `execute_dynamic_tool`, resolved before rendering (see `BoundToolDefinitions`). Absent when
+   * dynamic tools are off.
+   */
+  boundToolDefinitions?: (event: AttachmentTimelineEvent) => DynamicToolDefinition[] | undefined;
   /** Where each resume's input attachments render: `prompt_response` id → the items its pause waited on. */
   resumeAnchors?: ResumeAnchors;
   attachmentStateManager: AttachmentStateManager;

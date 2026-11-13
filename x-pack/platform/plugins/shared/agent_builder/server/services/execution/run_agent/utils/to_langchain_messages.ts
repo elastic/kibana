@@ -63,8 +63,14 @@ import {
 
 /** The notice renderer of one prompt build; per-type instructions are given once across it. */
 export const noticeRendererFor = (
-  conversation: Pick<ProcessedConversation, 'attachmentTypes' | 'describeAttachmentType'>,
-  { withTypeInstructions = true }: { withTypeInstructions?: boolean } = {}
+  conversation: Pick<
+    ProcessedConversation,
+    'attachmentTypes' | 'describeAttachmentType' | 'boundToolDefinitions'
+  >,
+  {
+    withTypeInstructions = true,
+    withToolDefinitions = true,
+  }: { withTypeInstructions?: boolean; withToolDefinitions?: boolean } = {}
 ): AttachmentNoticeRenderer => {
   const renderer = createAttachmentNoticeRenderer({
     describeType: (type) =>
@@ -72,6 +78,7 @@ export const noticeRendererFor = (
         ? conversation.describeAttachmentType(type)
         : conversation.attachmentTypes.find((candidate) => candidate.type === type)?.description,
     withTypeInstructions,
+    boundToolDefinitions: withToolDefinitions ? conversation.boundToolDefinitions : undefined,
   });
   const listed = new Set(conversation.attachmentTypes.map(({ type }) => type));
   return {
@@ -295,12 +302,15 @@ export const standaloneEventToLangchain = (
   event: ProcessedStandaloneEvent,
   notices?: AttachmentNoticeRenderer
 ): HumanMessage => {
-  const block = formatConversationEvent(event);
-  const instructions =
-    notices && isAttachmentEvent(event)
-      ? notices.typeInstructions([event.data.attachment_type])
-      : '';
-  return createUserMessage(instructions ? `${block}\n\n${instructions}` : block);
+  let content: string;
+  if (notices && isAttachmentEvent(event)) {
+    // the event's block (with the definitions of the tools it makes available), then its type's
+    // instructions
+    content = notices.render([event]);
+  } else {
+    content = formatConversationEvent(event);
+  }
+  return createUserMessage(content);
 };
 
 /** A standalone user message: a user turn, or earlier context when it is a steer its run never read. */

@@ -19,11 +19,10 @@ import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-commo
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { getLatestVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import type { AiIndexCatalogEntry, ResolvedCapabilities } from '../types';
+import { resolveActiveAttachmentBoundTools } from './attachment_bound_tools';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -45,6 +44,7 @@ export const selectTools = async ({
   attachmentsService,
   spaceId,
   runner,
+  dynamicToolsEnabled = false,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
@@ -59,6 +59,8 @@ export const selectTools = async ({
   capabilities: ResolvedCapabilities;
   spaceId: string;
   runner: ScopedRunner;
+  /** Makes the tools bound to attachments dynamic tools, out of the native tool list. */
+  dynamicToolsEnabled?: boolean;
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -69,11 +71,16 @@ export const selectTools = async ({
     tool_ids: attachmentToolIds,
   };
 
-  const versionedAttachmentBoundTools = await getVersionedAttachmentBoundTools({
+  const versionedAttachmentBoundTools = await resolveActiveAttachmentBoundTools({
     attachmentStateManager: conversation.attachmentStateManager,
     attachmentsService,
     formatContext,
   });
+
+  // Bound tools of an attachment would change the native tool list whenever one is added, so with
+  // dynamic tools on they are reached through `execute_dynamic_tool` instead.
+  const nativeAttachmentBoundTools = dynamicToolsEnabled ? [] : versionedAttachmentBoundTools;
+  const dynamicAttachmentBoundTools = dynamicToolsEnabled ? versionedAttachmentBoundTools : [];
 
   // Only the five generic attachment tools are gated. Tools an attachment type declares
   // (getTools) or binds to one attachment (getBoundedTools) are selected separately and stay.
@@ -103,7 +110,7 @@ export const selectTools = async ({
   });
 
   const staticTools = [
-    ...withOrigin(versionedAttachmentBoundTools, ToolOrigin.inline),
+    ...withOrigin(nativeAttachmentBoundTools, ToolOrigin.inline),
     ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
     ...withOrigin(staticRegistryTools, ToolOrigin.registry),
   ];
@@ -137,12 +144,15 @@ export const selectTools = async ({
     dynamicTools: [
       ...withOrigin(dynamicRegistryTools, ToolOrigin.registry),
       ...withOrigin(dynamicInlineTools, ToolOrigin.inline),
+      ...withOrigin(dynamicAttachmentBoundTools, ToolOrigin.inline),
     ],
   };
 };
 
-const withOrigin = (tools: ExecutableTool[], origin: ToolOrigin): ExecutableToolWithOrigin[] =>
-  tools.map((tool) => ({ ...tool, origin }));
+export const withOrigin = (
+  tools: ExecutableTool[],
+  origin: ToolOrigin
+): ExecutableToolWithOrigin[] => tools.map((tool) => ({ ...tool, origin }));
 
 /**
  * Creates executable tools for managing versioned conversation attachments.
@@ -204,42 +214,6 @@ export const builtinToolToExecutable = ({
       });
     },
   };
-};
-
-const getVersionedAttachmentBoundTools = async ({
-  attachmentStateManager,
-  attachmentsService,
-  formatContext,
-}: {
-  attachmentStateManager: AttachmentStateManager;
-  attachmentsService: AttachmentsService;
-  formatContext: AttachmentFormatContext;
-}): Promise<ExecutableTool[]> => {
-  const tools: ExecutableTool[] = [];
-
-  for (const attachment of attachmentStateManager.getActive()) {
-    const latest = getLatestVersion(attachment);
-    if (!latest) {
-      continue;
-    }
-
-    const definition = attachmentsService.getTypeDefinition(attachment.type);
-    if (!definition) {
-      continue;
-    }
-
-    try {
-      const formatted = await definition.format(toAttachment(attachment, latest), formatContext);
-      const boundedTools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
-      for (const tool of boundedTools) {
-        tools.push(attachmentsService.convertAttachmentTool(tool));
-      }
-    } catch {
-      // Ignore formatting errors; bounded tools are optional.
-    }
-  }
-
-  return tools;
 };
 
 const getToolsForAttachmentTypes = (

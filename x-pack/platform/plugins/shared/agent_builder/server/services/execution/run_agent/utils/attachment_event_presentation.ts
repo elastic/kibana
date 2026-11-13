@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
+import type { AttachmentTimelineEvent, DynamicToolDefinition } from '@kbn/agent-builder-common';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { formatDate } from '../prompts/utils/helpers';
@@ -55,6 +55,22 @@ export const formatAttachmentEvent = (event: AttachmentTimelineEvent): string =>
   });
 };
 
+/**
+ * The tools an attachment event makes available through `execute_dynamic_tool`, one JSON
+ * definition per line. Rendered after the event that announces them.
+ *
+ * The JSON is not escaped (escaping would turn every quote into `&quot;`): like a native tool's
+ * description, and like the definitions `load_skill` and the compaction notice give.
+ */
+export const formatAttachmentTools = (toolDefinitions: readonly DynamicToolDefinition[]): string =>
+  generateXmlTree(
+    {
+      tagName: 'dynamic_tools',
+      children: toolDefinitions.map((definition) => JSON.stringify(definition)),
+    },
+    { escapeContent: false }
+  );
+
 /** Renders attachment events into notices, giving each type's instructions once per prompt. */
 export interface AttachmentNoticeRenderer {
   /** The events' blocks, then the instructions of the types not given yet; '' for no events. */
@@ -66,9 +82,11 @@ export interface AttachmentNoticeRenderer {
 export const createAttachmentNoticeRenderer = ({
   describeType,
   withTypeInstructions = true,
+  boundToolDefinitions,
 }: {
   describeType: (type: string) => string | undefined;
   withTypeInstructions?: boolean;
+  boundToolDefinitions?: (event: AttachmentTimelineEvent) => DynamicToolDefinition[] | undefined;
 }): AttachmentNoticeRenderer => {
   const provided = new Set<string>();
   const typeInstructions = (types: readonly string[]): string => {
@@ -87,7 +105,15 @@ export const createAttachmentNoticeRenderer = ({
       if (events.length === 0) {
         return '';
       }
-      const blocks = events.map(formatAttachmentEvent).join('\n');
+      const blocks = events
+        .flatMap((event) => {
+          const toolDefinitions = boundToolDefinitions?.(event) ?? [];
+          if (toolDefinitions.length === 0) {
+            return [formatAttachmentEvent(event)];
+          }
+          return [formatAttachmentEvent(event), formatAttachmentTools(toolDefinitions)];
+        })
+        .join('\n');
       const instructions = typeInstructions(events.map((event) => event.data.attachment_type));
       return instructions ? `${blocks}\n\n${instructions}` : blocks;
     },

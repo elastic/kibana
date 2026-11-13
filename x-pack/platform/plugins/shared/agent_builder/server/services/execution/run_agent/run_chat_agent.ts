@@ -24,6 +24,7 @@ import {
   AgentExecutionMode,
   EventActorType,
   parseExecutionId,
+  isAttachmentEvent,
   platformCoreTools,
   unreadSettledSteerIds,
 } from '@kbn/agent-builder-common';
@@ -52,6 +53,9 @@ import { historyView, translateLegacySummary } from './utils/context_coverage';
 import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
+import { resolveActiveAttachmentBoundTools } from './utils/attachment_bound_tools';
+import { BoundToolDefinitions } from './utils/bound_tool_definitions';
+import { withOrigin } from './utils/select_tools';
 import { sourceEvents } from '../../conversation/client/source_events';
 import {
   runTimelineExecutionId,
@@ -246,6 +250,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;
+  // With dynamic tools on, the tools bound to an attachment are announced by its events.
+  const attachmentFormatContext = { request, spaceId: context.spaceId };
+  const boundToolDefinitions = experimentalFeatures.dynamicTools
+    ? new BoundToolDefinitions({
+        attachmentStateManager: context.attachmentStateManager,
+        attachmentsService: attachments,
+        formatContext: attachmentFormatContext,
+      })
+    : undefined;
   const runAttachmentEvents = new RunAttachmentEvents({
     attachmentStateManager: context.attachmentStateManager,
     roundId: pendingTurn?.id ?? roundId,
@@ -260,6 +273,22 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           }
     ),
     agentId: agentIdForEvents,
+    // An attachment added or changed by a tool is announced by its event: the tools bound to it
+    // are callable from the next model call, which renders their definitions.
+    onToolCallEvents: boundToolDefinitions
+      ? async (attachmentEvents) => {
+          await boundToolDefinitions.prepare(attachmentEvents);
+          const boundTools = await resolveActiveAttachmentBoundTools({
+            attachmentStateManager: context.attachmentStateManager,
+            attachmentsService: attachments,
+            formatContext: attachmentFormatContext,
+          });
+          await toolManager.addTools({
+            type: ToolManagerToolType.dynamic,
+            tools: withOrigin(boundTools, ToolOrigin.inline),
+          });
+        }
+      : undefined,
   });
   // Everything recorded so far came from the incoming message's attachments.
   const chatInputEvents = runAttachmentEvents.drainChatInput();
@@ -280,6 +309,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       ...processedConversation.nextInput,
       attachment_events: chatInputEvents,
     };
+  }
+  // Resolve the definitions of the attachment events that are about to be rendered.
+  if (boundToolDefinitions) {
+    await boundToolDefinitions.prepare([
+      ...processedConversation.timeline.filter(isAttachmentEvent),
+      ...chatInputEvents,
+    ]);
+    processedConversation.boundToolDefinitions = (event) => boundToolDefinitions.get(event);
   }
   // Only the first execution owns the round's workflow context step.
   const preExecutionWorkflow: PreExecutionWorkflowStepData | undefined = pendingTurn
@@ -333,6 +370,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       request,
       spaceId: context.spaceId,
       runner: context.runner,
+      dynamicToolsEnabled: experimentalFeatures.dynamicTools,
     });
 
     // First add static tools

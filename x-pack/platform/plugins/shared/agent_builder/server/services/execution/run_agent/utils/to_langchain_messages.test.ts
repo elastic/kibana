@@ -16,6 +16,7 @@ import {
 import type {
   CompactionSummary,
   ConversationRoundStep,
+  DynamicToolDefinition,
   ReasoningStep,
   TimelineEvent,
   ToolCallStep,
@@ -31,7 +32,13 @@ import {
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
-import { prepareMessages, groupToolCallSteps } from './to_langchain_messages';
+import {
+  prepareMessages,
+  groupToolCallSteps,
+  noticeRendererFor,
+  standaloneEventToLangchain,
+} from './to_langchain_messages';
+import { formatAttachmentEvent, formatAttachmentTools } from './attachment_event_presentation';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -58,7 +65,11 @@ import {
   timelineFromRounds,
   type ProcessedConversationRound,
 } from '../../../../test_utils/timeline';
-import { eventsForContext, type ProcessedTimelineEvent } from './context_timeline';
+import {
+  eventsForContext,
+  type ProcessedStandaloneEvent,
+  type ProcessedTimelineEvent,
+} from './context_timeline';
 
 describe('prepareMessages', () => {
   const now = new Date().toISOString();
@@ -2132,5 +2143,96 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(result[3].content).toContain('LLM &lt;boom&gt;');
       expect(result[4].content).toContain('third');
     });
+  });
+});
+
+describe('attachment events with bound tool definitions', () => {
+  const definition: DynamicToolDefinition = {
+    tool_id: 'bound.tool',
+    description: 'Fetch the host',
+    parameters: { type: 'object', properties: {} },
+  };
+  const boundToolDefinitions = (event: { id: string }) =>
+    event.id === 'att' ? [definition] : undefined;
+  const conversation = {
+    attachmentTypes: [{ type: 'text', description: 'Plain text' }],
+    boundToolDefinitions,
+  };
+  const instructions = attachmentTypeInstructions([{ type: 'text', description: 'Plain text' }]);
+
+  const standalone = (event: ReturnType<typeof attachmentEventFixture>) =>
+    ({
+      ...event,
+      representation: { type: 'text', value: 'ignored' },
+    } as unknown as ProcessedStandaloneEvent);
+
+  it('renders a standalone event with its definitions, then its type instructions', () => {
+    const event = attachmentEventFixture({ id: 'att', source: 'http_api' });
+    const notices = noticeRendererFor(conversation);
+
+    const message = standaloneEventToLangchain(standalone(event), notices);
+
+    expect(message.content).toBe(
+      `${formatAttachmentEvent(event)}\n${formatAttachmentTools([definition])}\n\n${instructions}`
+    );
+    expect(message.content).toContain(
+      `<dynamic_tools>${JSON.stringify(definition)}</dynamic_tools>`
+    );
+  });
+
+  it('renders a standalone event as before when it has no definitions', () => {
+    const event = attachmentEventFixture({ id: 'other', source: 'http_api' });
+    const notices = noticeRendererFor(conversation);
+
+    const message = standaloneEventToLangchain(standalone(event), notices);
+
+    expect(message.content).toBe(`${formatAttachmentEvent(event)}\n\n${instructions}`);
+  });
+
+  it('renders no definitions when the renderer is asked to leave them out', () => {
+    const event = attachmentEventFixture({ id: 'att', source: 'http_api' });
+    const notices = noticeRendererFor(conversation, { withToolDefinitions: false });
+
+    const message = standaloneEventToLangchain(standalone(event), notices);
+
+    expect(message.content).toBe(`${formatAttachmentEvent(event)}\n\n${instructions}`);
+  });
+
+  it('renders a standalone event without notices from its data alone', () => {
+    const event = attachmentEventFixture({ id: 'att', source: 'http_api' });
+
+    expect(standaloneEventToLangchain(standalone(event)).content).toBe(
+      formatAttachmentEvent(event)
+    );
+  });
+
+  it('renders the input events of a message with their definitions', async () => {
+    const linked = attachmentEventFixture({
+      id: 'att',
+      source: 'chat_input',
+      triggerEventId: 'm1',
+    });
+    const message = {
+      id: 'm1',
+      type: TimelineEventType.userMessage,
+      created_at: T0,
+      actor: { type: 'user', id: 'u' },
+      data: { message: 'note', attachments: [], attachment_events: [linked] },
+    } as unknown as ProcessedTimelineEvent;
+    const processed = {
+      timeline: [message, linked],
+      nextInput: { message: 'next', attachments: [] },
+      attachmentTypes: [],
+      boundToolDefinitions,
+      attachmentStateManager: createAttachmentStateManager([], {
+        getTypeDefinition: () => undefined,
+      }),
+    } as ProcessedConversation;
+
+    const messages = await prepareMessages({ conversation: processed });
+
+    expect(String(messages[0].content)).toContain(
+      `<dynamic_tools>${JSON.stringify(definition)}</dynamic_tools>`
+    );
   });
 });

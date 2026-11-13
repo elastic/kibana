@@ -370,8 +370,9 @@ export const createAgentGraph = ({
 
     const completed = new Set(processed.completedToolCallIds);
     const attachmentEvents =
-      runAttachmentEvents?.drainToolCalls(outcome.toolCalls.map(({ toolCallId }) => toolCallId)) ??
-      [];
+      (await runAttachmentEvents?.drainToolCalls(
+        outcome.toolCalls.map(({ toolCallId }) => toolCallId)
+      )) ?? [];
     return {
       steps: updates,
       toolRenderState: processed.renderState,
