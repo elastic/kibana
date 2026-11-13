@@ -31,6 +31,43 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     {
       code: dedent`
         import { z } from '@kbn/zod';
+        const deferClone = (schema: z.ZodType) => z.lazy(() => schema.clone());
+        export const X = deferClone(z.string());
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        import { ImportedSchema } from './imported';
+        export const X = z.lazy(() => ImportedSchema.clone());
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        import { ImportedSchema } from './imported';
+        const deferClone = (schema: z.ZodType) => z.lazy(() => schema.clone());
+        export const X = deferClone(ImportedSchema);
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Node = lazySchema(() =>
+          z.object({ next: z.lazy(() => Node).optional() })
+        );
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = z.lazy(() => LaterLazyBinding);
+        const LaterLazyBinding = lazySchema(() => z.object({ a: z.string() }));
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
         export const X = z.lazy(() => z.object({ a: z.string() }));
       `,
     },
@@ -275,22 +312,6 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const X = z.lazy(() => {
           return Base.clone();
         });
-      `,
-      errors: [DOUBLE],
-    },
-    {
-      code: dedent`
-        import { z } from '@kbn/zod';
-        import { Base } from './base';
-        export const X = z.lazy(() => Base.clone());
-      `,
-      errors: [DOUBLE],
-    },
-    {
-      code: dedent`
-        import { z, lazySchema } from '@kbn/zod';
-        const Base = lazySchema(() => z.object({ a: z.string() }));
-        export const X = z.lazy(() => Base);
       `,
       errors: [DOUBLE],
     },

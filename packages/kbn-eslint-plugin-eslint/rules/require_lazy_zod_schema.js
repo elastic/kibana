@@ -14,6 +14,7 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.ImportDeclaration} ImportDeclaration */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.VariableDeclarator} VariableDeclarator */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Property} Property */
+/** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
 
 const tsEstree = require('@typescript-eslint/typescript-estree');
 const changedLines = require('./require_lazy_zod_schema_changed_lines');
@@ -628,7 +629,9 @@ const hasBinding = (node, name, sourceCode) => {
 const getReturnedExpression = (fn) => {
   if (
     !fn ||
-    (fn.type !== esTypes.ArrowFunctionExpression && fn.type !== esTypes.FunctionExpression)
+    (fn.type !== esTypes.ArrowFunctionExpression &&
+      fn.type !== esTypes.FunctionExpression &&
+      fn.type !== esTypes.FunctionDeclaration)
   ) {
     return undefined;
   }
@@ -697,41 +700,62 @@ const isLazySchemaBinding = (node, state, sourceCode) => {
 };
 
 /**
- * Identifier bound to `lazySchema(...)`, an import, or a function parameter.
- * @param {Expression} node
- * @param {FileState} state
- * @param {import('eslint').SourceCode} sourceCode
- * @returns {boolean}
+ * Returns X when `returned` is `X.clone()`.
+ * @param {Expression} returned
+ * @returns {Expression | undefined}
  */
-const isPossibleLazySchemaProxy = (node, state, sourceCode) => {
-  if (node.type !== esTypes.Identifier) {
-    return false;
+const getClonedObject = (returned) => {
+  if (returned.type !== esTypes.CallExpression || returned.arguments.length !== 0) {
+    return undefined;
   }
-  if (isLazySchemaBinding(node, state, sourceCode)) {
-    return true;
-  }
-  const definition = findDefinition(node, sourceCode);
-  return definition?.type === 'ImportBinding' || definition?.type === 'Parameter';
+  const callee = unwrapExpression(returned.callee);
+  return callee?.type === esTypes.MemberExpression &&
+    !callee.computed &&
+    callee.property.type === esTypes.Identifier &&
+    callee.property.name === 'clone'
+    ? unwrapExpression(callee.object)
+    : undefined;
 };
 
 /**
- * True when `returned` is `X.clone()` with a possible lazySchema proxy X.
+ * True when `returned` is `X.clone()` with X a same-file lazySchema binding.
  * @param {Expression} returned
  * @param {FileState} state
  * @param {import('eslint').SourceCode} sourceCode
  * @returns {boolean}
  */
-const isCloneOfLazySchemaProxy = (returned, state, sourceCode) => {
-  if (returned.type !== esTypes.CallExpression || returned.arguments.length !== 0) {
-    return false;
+const isCloneOfLazySchemaBinding = (returned, state, sourceCode) => {
+  const target = getClonedObject(returned);
+  return Boolean(target && isLazySchemaBinding(target, state, sourceCode));
+};
+
+/**
+ * Index of the parameter P when the helper returns `z.lazy(() => P.clone())`.
+ * @param {Identifier} callee
+ * @param {FileState} state
+ * @param {import('eslint').SourceCode} sourceCode
+ * @returns {number}
+ */
+const getCloneHelperParamIndex = (callee, state, sourceCode) => {
+  const definition = findDefinition(callee, sourceCode);
+  /** @type {Node | undefined} */
+  let fn;
+  if (definition?.type === 'FunctionName') {
+    fn = definition.node;
+  } else if (definition?.type === 'Variable' && definition.node.init) {
+    fn = unwrapExpression(definition.node.init);
   }
-  const callee = unwrapExpression(returned.callee);
-  return Boolean(
-    callee?.type === esTypes.MemberExpression &&
-      !callee.computed &&
-      callee.property.type === esTypes.Identifier &&
-      callee.property.name === 'clone' &&
-      isPossibleLazySchemaProxy(unwrapExpression(callee.object), state, sourceCode)
+  const lazyCall = getReturnedExpression(fn);
+  if (!fn || !('params' in fn) || !isZodLazyCall(lazyCall, state, sourceCode)) {
+    return -1;
+  }
+  const returned = getReturnedExpression(/** @type {CallExpression} */ (lazyCall).arguments[0]);
+  const target = returned && getClonedObject(returned);
+  if (target?.type !== esTypes.Identifier) {
+    return -1;
+  }
+  return fn.params.findIndex(
+    (param) => param.type === esTypes.Identifier && param.name === target.name
   );
 };
 
@@ -916,14 +940,24 @@ module.exports = {
           doubleWrapped = Boolean(
             returned &&
               (isLazySchemaCall(returned, state, sourceCode) ||
-                isLazySchemaBinding(returned, state, sourceCode) ||
-                isCloneOfLazySchemaProxy(returned, state, sourceCode))
+                isCloneOfLazySchemaBinding(returned, state, sourceCode))
           );
         } else if (isLazySchemaCall(call, state, sourceCode)) {
           doubleWrapped = isZodLazyCall(
             getReturnedExpression(call.arguments[0]),
             state,
             sourceCode
+          );
+        } else if (
+          call.type === esTypes.CallExpression &&
+          call.callee.type === esTypes.Identifier
+        ) {
+          const index = getCloneHelperParamIndex(call.callee, state, sourceCode);
+          const argument = index >= 0 ? call.arguments[index] : undefined;
+          doubleWrapped = Boolean(
+            argument &&
+              argument.type !== esTypes.SpreadElement &&
+              isLazySchemaBinding(argument, state, sourceCode)
           );
         }
         if (
