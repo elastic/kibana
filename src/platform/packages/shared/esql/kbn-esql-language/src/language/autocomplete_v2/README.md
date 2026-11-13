@@ -24,3 +24,6 @@ What is here so far:
   examples.
 - `signature_coverage.test.ts`: the gate for a new command. A command Kibana registers must
   be described, and every position it has must get its role from a signature.
+- `entities/types.ts`: `EntityDefinition`, how the entities of one kind are listed from the
+  editor's callbacks, and `EntityRegistry`, one definition per kind. The registry itself comes
+  with the engine.
