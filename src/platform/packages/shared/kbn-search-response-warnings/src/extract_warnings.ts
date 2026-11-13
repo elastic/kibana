@@ -13,21 +13,40 @@ import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspe
 import type { SearchResponseWarning } from './types';
 
 /**
+ * Elasticsearch reports a reachable remote cluster with no index matching the requested pattern
+ * as skipped, with zero shards and no failures. Unreachable clusters carry failures.
+ */
+const isEmptyCluster = ({ status, _shards, failures }: estypes.ClusterDetails): boolean =>
+  status === 'skipped' && _shards?.total === 0 && !failures?.length;
+
+/**
  * @internal
+ * With `ignoreEmptyClusters`, clusters that have no index matching the requested pattern are not
+ * counted as incomplete and are left out of the warning.
  */
 export function extractWarnings(
   rawResponse: estypes.SearchResponse | ESQLSearchResponse,
   inspectorService: InspectorStartContract,
   requestAdapter: RequestAdapter,
   requestName: string,
-  requestId?: string
+  requestId?: string,
+  { ignoreEmptyClusters = false }: { ignoreEmptyClusters?: boolean } = {}
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
+
+  const clusterDetails = rawResponse._clusters?.details ?? {};
+  const reportableClusters = Object.fromEntries(
+    Object.entries(clusterDetails).filter(
+      ([, details]) => !(ignoreEmptyClusters && isEmptyCluster(details))
+    )
+  );
+  const emptyClustersCount =
+    Object.keys(clusterDetails).length - Object.keys(reportableClusters).length;
 
   // ES|QL supports _clusters in case of CCS but doesnt support _shards and timed_out (yet)
   const isPartial = rawResponse._clusters
     ? rawResponse._clusters.partial > 0 ||
-      rawResponse._clusters.skipped > 0 ||
+      rawResponse._clusters.skipped - emptyClustersCount > 0 ||
       rawResponse._clusters.running > 0
     : ('timed_out' in rawResponse && rawResponse.timed_out) ||
       ('_shards' in rawResponse && rawResponse._shards.failed > 0);
@@ -36,7 +55,7 @@ export function extractWarnings(
       type: 'incomplete',
       requestName,
       clusters: rawResponse._clusters
-        ? rawResponse._clusters.details ?? {}
+        ? reportableClusters
         : {
             '(local)': {
               status: 'partial',

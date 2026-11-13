@@ -243,6 +243,7 @@ export const COURIER_MAX_CONCURRENT_SHARD_REQUEST_ID = 'courier:maxConcurrentSha
 export const COURIER_SET_REQUEST_PREFERENCE_ID = 'courier:setRequestPreference';
 export const SEARCH_INCLUDE_FROZEN_ID = 'search:includeFrozen';
 export const SEARCH_TIMEOUT_ID = 'search:timeout';
+export const SEARCH_IGNORE_EMPTY_CLUSTERS_ID = 'search:ignoreEmptyClusters';
 
 // Query activity settings
 export const QUERY_ACTIVITY_MIN_RUNNING_TIME_ID = 'query_activity:minRunningTime';

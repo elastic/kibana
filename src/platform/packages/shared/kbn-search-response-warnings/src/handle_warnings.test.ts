@@ -110,4 +110,70 @@ describe('handleWarnings', () => {
     expect(callbackMock).toHaveBeenCalledTimes(1);
     expect(addWarningSpy).toHaveBeenCalledTimes(0);
   });
+
+  describe('clusters with no index matching the pattern', () => {
+    const emptyRemoteResponse: estypes.SearchResponse = {
+      took: 5,
+      timed_out: false,
+      _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
+      _clusters: {
+        total: 2,
+        successful: 1,
+        skipped: 1,
+        running: 0,
+        partial: 0,
+        failed: 0,
+        details: {
+          remote_ok: {
+            status: 'successful',
+            indices: 'remote_ok:logs-myapp',
+            took: 3,
+            timed_out: false,
+            _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
+          },
+          remote_empty: {
+            status: 'skipped',
+            indices: 'remote_empty:logs-myapp',
+            took: 0,
+            timed_out: false,
+            _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          },
+        },
+      },
+      hits: { hits: [] },
+    };
+
+    it('should show a notification for them by default', () => {
+      handleWarnings({
+        request: {} as unknown as estypes.SearchRequest,
+        requestAdapter: {} as unknown as RequestAdapter,
+        requestId: '1234',
+        requestName: 'My request',
+        response: emptyRemoteResponse,
+        services: {
+          inspector: {} as unknown as InspectorStart,
+          ...coreStart,
+        },
+      });
+
+      expect(addWarningSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not show a notification for them when ignoreEmptyClusters is enabled', () => {
+      handleWarnings({
+        ignoreEmptyClusters: true,
+        request: {} as unknown as estypes.SearchRequest,
+        requestAdapter: {} as unknown as RequestAdapter,
+        requestId: '1234',
+        requestName: 'My request',
+        response: emptyRemoteResponse,
+        services: {
+          inspector: {} as unknown as InspectorStart,
+          ...coreStart,
+        },
+      });
+
+      expect(addWarningSpy).toHaveBeenCalledTimes(0);
+    });
+  });
 });

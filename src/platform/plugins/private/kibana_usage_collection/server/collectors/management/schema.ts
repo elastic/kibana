@@ -194,6 +194,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'search:ignoreEmptyClusters': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether remote clusters with no index matching the searched pattern are left out of the incomplete results warning.',
+    },
+  },
   'courier:maxConcurrentShardRequests': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

@@ -71,6 +71,7 @@ import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
 import { SearchMethodsService } from '../../common/search';
 import { getEsQueryConfig } from '../../common/es_query';
+import { UI_SETTINGS } from '../../common/constants';
 import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import {
   SessionsClient,
@@ -279,6 +280,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           }
 
           handleWarnings({
+            ignoreEmptyClusters: uiSettings.get(UI_SETTINGS.SEARCH_IGNORE_EMPTY_CLUSTERS),
             request: request.body as estypes.SearchRequest,
             requestAdapter,
             requestId: request.id,
@@ -319,6 +321,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           }
           handleWarnings({
             callback,
+            ignoreEmptyClusters: uiSettings.get(UI_SETTINGS.SEARCH_IGNORE_EMPTY_CLUSTERS),
             request: request.json as estypes.SearchRequest,
             requestAdapter: adapter,
             requestId: request.id,

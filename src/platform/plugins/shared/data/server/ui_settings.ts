@@ -642,5 +642,18 @@ export function getUiSettings(
       schema: schema.number(),
       requiresPageReload: true,
     },
+    [UI_SETTINGS.SEARCH_IGNORE_EMPTY_CLUSTERS]: {
+      name: i18n.translate('data.advancedSettings.searchIgnoreEmptyClusters', {
+        defaultMessage: 'Ignore clusters with no matching indices',
+      }),
+      value: false,
+      description: i18n.translate('data.advancedSettings.searchIgnoreEmptyClustersDesc', {
+        defaultMessage:
+          'Do not warn about remote clusters that are reachable but have no index matching the searched pattern, for example when searching *:logs-myapp and only some clusters contain it. Clusters that are unreachable, time out, or return errors are still reported.',
+      }),
+      type: 'boolean',
+      category: ['search'],
+      schema: schema.boolean(),
+    },
   };
 }
