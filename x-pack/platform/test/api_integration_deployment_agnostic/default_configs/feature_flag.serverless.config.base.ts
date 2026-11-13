@@ -12,6 +12,7 @@ import type { ServerlessProjectType } from '@kbn/es';
 import type { DeploymentAgnosticCommonServices } from '../services';
 import { services } from '../services';
 import { updateKbnServerArguments } from './helpers';
+import { withUiamCertOfProject } from '../../serverless/shared/uiam_cert';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
@@ -89,7 +90,10 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+          ...withUiamCertOfProject(
+            svlSharedConfig.get('kbnTestServer.serverArgs'),
+            options.serverlessProject
+          ),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
           ...(options.serverlessProject === 'oblt'
