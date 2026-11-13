@@ -12,6 +12,7 @@ import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_s
 import { registerInternalTools, type RegisterInternalToolsParams } from './register_internal_tools';
 import { createSubagentTool } from './run_subagent';
 import { createExecuteDynamicTool } from './execute_dynamic_tool';
+import type { ResolvedCapabilities } from '../types';
 
 jest.mock('../../../agents/utils/resolve_allowed_subagents', () => ({
   resolveAllowedSubagents: jest.fn(),
@@ -83,6 +84,8 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
+const defaultCapabilities: ResolvedCapabilities = { attachmentTools: true, apiTools: true };
+
 const register = async (
   context: AgentHandlerContext,
   subagentIds: string[] = ['other-agent'],
@@ -98,6 +101,7 @@ const register = async (
     subagentTracker: {},
     conversationExists: jest.fn(),
     agentConfiguration: { subagent_ids: subagentIds },
+    capabilities: defaultCapabilities,
     ...overrides,
   } as unknown as RegisterInternalToolsParams;
   await registerInternalTools(params);

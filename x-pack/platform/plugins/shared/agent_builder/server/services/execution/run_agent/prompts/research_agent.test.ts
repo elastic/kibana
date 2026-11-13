@@ -40,7 +40,11 @@ describe('getResearchAgentPrompt', () => {
             } as any),
         }),
       },
-      configuration: { instructions: '', aiIndices: [], capabilities: { attachmentTools: true } },
+      configuration: {
+        instructions: '',
+        aiIndices: [],
+        capabilities: { attachmentTools: true, apiTools: true },
+      },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
@@ -271,7 +275,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true },
+          capabilities: { attachmentTools: true, apiTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -289,7 +293,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true },
+          capabilities: { attachmentTools: true, apiTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -368,7 +372,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true },
+          capabilities: { attachmentTools: true, apiTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -394,7 +398,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic', 'my-custom'],
-          capabilities: { attachmentTools: true },
+          capabilities: { attachmentTools: true, apiTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
             { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets' },
@@ -431,7 +435,7 @@ describe('getResearchAgentPrompt', () => {
       configuration: {
         instructions: '',
         aiIndices: [],
-        capabilities: { attachmentTools: true },
+        capabilities: { attachmentTools: true, apiTools: true },
       },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
@@ -473,7 +477,11 @@ describe('getResearchAgentPrompt', () => {
     const systemPrompt = async (overrides: Record<string, any> = {}) =>
       asText((await getResearchAgentPrompt(makeParams(overrides)))[0]);
 
-    const off = { instructions: '', aiIndices: [], capabilities: { attachmentTools: false } };
+    const off = {
+      instructions: '',
+      aiIndices: [],
+      capabilities: { attachmentTools: false, apiTools: true },
+    };
 
     it('replaces the ATTACHMENTS section with the notice and drops inline rendering when off', async () => {
       const prompt = await systemPrompt({ configuration: off });

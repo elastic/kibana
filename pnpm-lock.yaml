@@ -412,6 +412,9 @@ importers:
       '@elastic/eui-theme-borealis':
         specifier: 8.2.0
         version: 8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common':
+        specifier: 10.2.0
+        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
@@ -428,8 +431,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.37.0
-        version: 4.37.0(monaco-editor@0.56.0)
+        specifier: 4.38.0
+        version: 4.38.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -607,6 +610,9 @@ importers:
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
+      '@kbn/agentic-investigations-impact':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-impact
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
@@ -744,10 +750,10 @@ importers:
         version: link:src/platform/packages/private/analytics/utils/analytics_collection_utils
       '@kbn/analytics-ftr-helpers-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/analytics/plugins/analytics_ftr_helpers
+        version: link:src/platform/test_plugins/analytics/analytics_ftr_helpers
       '@kbn/analytics-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/analytics/plugins/analytics_plugin_a
+        version: link:src/platform/test_plugins/analytics/analytics_plugin_a
       '@kbn/announcement-banner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/display/kbn-announcement-banner
@@ -804,13 +810,13 @@ importers:
         version: link:src/core/packages/chrome/app-header
       '@kbn/app-link-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/app_link_test
+        version: link:src/platform/test_plugins/plugin_functional/app_link_test
       '@kbn/app-menu':
         specifier: workspace:*
         version: link:src/core/packages/chrome/app-menu/app-menu
       '@kbn/application-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/usage_collection/plugins/application_usage_test
+        version: link:x-pack/platform/test_plugins/usage_collection/application_usage_test
       '@kbn/as-code-dashboard-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/dashboard-schema
@@ -951,7 +957,7 @@ importers:
         version: link:x-pack/platform/plugins/private/cloud_integrations/cloud_full_story
       '@kbn/cloud-integration-saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cloud_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/cloud_integration/saml_provider
       '@kbn/cloud-links-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/cloud_integrations/cloud_links
@@ -976,6 +982,9 @@ importers:
       '@kbn/coloring':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-coloring
+      '@kbn/coloring-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-coloring-components
       '@kbn/config':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-config
@@ -1125,7 +1134,7 @@ importers:
         version: link:src/core/packages/analytics/server-internal
       '@kbn/core-app-status-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_app_status
+        version: link:src/platform/test_plugins/plugin_functional/core_app_status
       '@kbn/core-application-browser':
         specifier: workspace:*
         version: link:src/core/packages/application/browser
@@ -1347,7 +1356,7 @@ importers:
         version: link:src/core/packages/feature-flags/server-mocks
       '@kbn/core-history-block-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_history_block
+        version: link:src/platform/test_plugins/plugin_functional/core_history_block
       '@kbn/core-http-browser':
         specifier: workspace:*
         version: link:src/core/packages/http/browser
@@ -1362,7 +1371,7 @@ importers:
         version: link:src/core/packages/http/context-server-internal
       '@kbn/core-http-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_http
+        version: link:src/platform/test_plugins/plugin_functional/core_http
       '@kbn/core-http-rate-limiter-browser-internal':
         specifier: workspace:*
         version: link:src/core/packages/http/rate-limiter-browser-internal
@@ -1473,40 +1482,40 @@ importers:
         version: link:src/core/packages/overlays/browser-internal
       '@kbn/core-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_a
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_a
       '@kbn/core-plugin-appleave-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_appleave
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_appleave
       '@kbn/core-plugin-b-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_b
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_b
       '@kbn/core-plugin-chromeless-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_chromeless
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_chromeless
       '@kbn/core-plugin-deep-links-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_deep_links
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_deep_links
       '@kbn/core-plugin-deprecations-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_deprecations
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_deprecations
       '@kbn/core-plugin-dynamic-resolving-a':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a
+        version: link:src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a
       '@kbn/core-plugin-dynamic-resolving-b':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b
+        version: link:src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b
       '@kbn/core-plugin-execution-context-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_execution_context
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_execution_context
       '@kbn/core-plugin-helpmenu-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_helpmenu
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_helpmenu
       '@kbn/core-plugin-initializer-context-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context
+        version: link:src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context
       '@kbn/core-plugin-route-timeouts-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts
+        version: link:src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts
       '@kbn/core-plugins-base-server-internal':
         specifier: workspace:*
         version: link:src/core/packages/plugins/base-server-internal
@@ -1551,7 +1560,7 @@ importers:
         version: link:src/core/packages/pricing/server-internal
       '@kbn/core-provider-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/core_provider_plugin
+        version: link:src/platform/test_plugins/plugin_functional/core_provider_plugin
       '@kbn/core-pubsub-server':
         specifier: workspace:*
         version: link:src/core/packages/pubsub/server
@@ -1978,6 +1987,9 @@ importers:
       '@kbn/discover-customization-examples-plugin':
         specifier: workspace:*
         version: link:examples/discover_customization_examples
+      '@kbn/discover-data-grid':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-discover-data-grid
       '@kbn/discover-enhanced-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/discover_enhanced
@@ -2049,10 +2061,10 @@ importers:
         version: link:x-pack/platform/plugins/shared/elastic_console
       '@kbn/elasticsearch-client-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin
+        version: link:src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin
       '@kbn/elasticsearch-client-xpack-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client
       '@kbn/elasticsearch-home':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/elasticsearch_home
@@ -2262,7 +2274,7 @@ importers:
         version: link:x-pack/platform/test/security_api_integration/plugins/features_provider
       '@kbn/fec-alerts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_execution_context/plugins/alerts
+        version: link:x-pack/platform/test_plugins/functional_execution_context/alerts
       '@kbn/feedback-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/feedback
@@ -2427,7 +2439,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-i18n-react
       '@kbn/iframe-embedded-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_embedded/plugins/iframe_embedded
+        version: link:x-pack/platform/test_plugins/functional_embedded/iframe_embedded
       '@kbn/image-embeddable-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/image_embeddable
@@ -2553,16 +2565,16 @@ importers:
         version: link:x-pack/platform/packages/private/ml/json_schemas
       '@kbn/kbn-health-gateway-status-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/health_gateway/plugins/status
+        version: link:src/platform/test_plugins/health_gateway/status
       '@kbn/kbn-top-nav-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_top_nav
+        version: link:src/platform/test_plugins/plugin_functional/kbn_top_nav
       '@kbn/kbn-tp-custom-visualizations-plugin':
         specifier: workspace:*
         version: link:src/platform/test_plugins/kbn_tp_custom_visualizations
       '@kbn/kbn-tp-run-pipeline-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
+        version: link:src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline
       '@kbn/key-value-metadata-table':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-key-value-metadata-table
@@ -2877,13 +2889,16 @@ importers:
         version: link:src/platform/plugins/shared/newsfeed
       '@kbn/newsfeed-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/common/plugins/newsfeed
+        version: link:src/platform/test_plugins/common/newsfeed
       '@kbn/nightshift-ai':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
       '@kbn/nightshift-decision-trees':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
+      '@kbn/nightshift-detection-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/nightshift_detection
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_investigations
@@ -3016,6 +3031,9 @@ importers:
       '@kbn/palettes':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-palettes
+      '@kbn/palettes-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-palettes-components
       '@kbn/panel-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-panel-loader
@@ -3129,7 +3147,7 @@ importers:
         version: link:x-pack/platform/plugins/private/remote_clusters
       '@kbn/rendering-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/rendering_plugin
+        version: link:src/platform/test_plugins/plugin_functional/rendering_plugin
       '@kbn/repo-info':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-repo-info
@@ -3288,10 +3306,10 @@ importers:
         version: link:x-pack/platform/plugins/shared/sandbox
       '@kbn/saved-object-export-transforms-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_object_export_transforms
+        version: link:src/platform/test_plugins/plugin_functional/saved_object_export_transforms
       '@kbn/saved-object-import-warnings-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_object_import_warnings
+        version: link:src/platform/test_plugins/plugin_functional/saved_object_import_warnings
       '@kbn/saved-object-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
@@ -3303,10 +3321,10 @@ importers:
         version: link:src/platform/plugins/shared/saved_objects_finder
       '@kbn/saved-objects-hidden-from-http-apis-type-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type
+        version: link:src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type
       '@kbn/saved-objects-hidden-type-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_type
+        version: link:src/platform/test_plugins/plugin_functional/saved_objects_hidden_type
       '@kbn/saved-objects-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/saved_objects_management
@@ -3361,6 +3379,9 @@ importers:
       '@kbn/search-assistant':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/search_assistant
+      '@kbn/search-boost-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/search_boost
       '@kbn/search-code-examples':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-search-code-examples
@@ -3559,6 +3580,9 @@ importers:
       '@kbn/securitysolution-timeline-components':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/timeline-components
+      '@kbn/securitysolution-timeline-search-strategy':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/timeline-search-strategy
       '@kbn/securitysolution-utils':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-utils
@@ -3609,7 +3633,7 @@ importers:
         version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/session_notifications
+        version: link:src/platform/test_plugins/plugin_functional/session_notifications
       '@kbn/session-view-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/security/plugins/session_view
@@ -3804,16 +3828,16 @@ importers:
         version: link:x-pack/platform/plugins/shared/stack_connectors
       '@kbn/stack-management-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/usage_collection/plugins/stack_management_usage_test
+        version: link:x-pack/platform/test_plugins/usage_collection/stack_management_usage_test
       '@kbn/state-containers-examples-plugin':
         specifier: workspace:*
         version: link:examples/state_containers_examples
       '@kbn/status-plugin-a-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/server_integration/plugins/status_plugin_a
+        version: link:src/platform/test_plugins/server_integration/status_plugin_a
       '@kbn/status-plugin-b-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/server_integration/plugins/status_plugin_b
+        version: link:src/platform/test_plugins/server_integration/status_plugin_b
       '@kbn/std':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-std
@@ -3879,7 +3903,7 @@ importers:
         version: link:src/platform/plugins/shared/telemetry
       '@kbn/telemetry-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/telemetry
+        version: link:src/platform/test_plugins/plugin_functional/telemetry
       '@kbn/test-feature-usage-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage
@@ -3978,7 +4002,7 @@ importers:
         version: link:src/platform/kbn-ui/react-assembly
       '@kbn/ui-settings-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/ui_settings_plugin
+        version: link:src/platform/test_plugins/plugin_functional/ui_settings_plugin
       '@kbn/ui-shared-deps-npm':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ui-shared-deps-npm
@@ -4059,7 +4083,7 @@ importers:
         version: link:src/platform/plugins/shared/usage_collection
       '@kbn/usage-collection-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/usage_collection
+        version: link:src/platform/test_plugins/plugin_functional/usage_collection
       '@kbn/use-observable':
         specifier: workspace:*
         version: link:src/platform/packages/shared/react/use_observable
@@ -4080,7 +4104,7 @@ importers:
         version: link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
       '@kbn/user-storage-test-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/user_storage/plugins/user_storage_test
+        version: link:src/platform/test_plugins/user_storage
       '@kbn/utility-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-utility-types
@@ -4156,6 +4180,9 @@ importers:
       '@kbn/visualizations-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-visualizations-common
+      '@kbn/visualizations-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-visualizations-components
       '@kbn/visualizations-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/visualizations
@@ -4226,11 +4253,11 @@ importers:
         specifier: 1.7.0
         version: 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)
       '@launchdarkly/node-server-sdk':
-        specifier: 9.14.3
-        version: 9.14.3(supports-color@10.2.2)
+        specifier: 9.16.0
+        version: 9.16.0(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.11
-        version: 2.0.11(@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.1.3
+        version: 2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -4745,8 +4772,8 @@ importers:
         specifier: 1.4.2
         version: 1.4.2
       nodemailer:
-        specifier: 10.1.4
-        version: 10.1.4
+        specifier: 10.3.0
+        version: 10.3.0
       normalize-path:
         specifier: 3.0.0
         version: 3.0.0
@@ -5141,9 +5168,6 @@ importers:
       '@elastic/eui-test-helpers':
         specifier: 2.3.0
         version: 2.3.0(@playwright/test@1.64.1)
-      '@elastic/eui-theme-common':
-        specifier: 10.2.0
-        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -5160,8 +5184,8 @@ importers:
         specifier: 2.1.1
         version: 2.1.1(@jest/expect@29.7.0(supports-color@10.2.2))(@jest/globals@29.7.0(supports-color@10.2.2))
       '@hey-api/openapi-ts':
-        specifier: 0.90.3
-        version: 0.90.3(typescript@6.0.3)
+        specifier: 0.90.10
+        version: 0.90.10(typescript@6.0.3)
       '@jest/console':
         specifier: 29.7.0
         version: 29.7.0
@@ -6333,8 +6357,8 @@ importers:
         specifier: 1.3.14
         version: 1.3.14
       '@types/nodemailer':
-        specifier: 8.0.1
-        version: 8.0.1
+        specifier: 8.0.2
+        version: 8.0.2
       '@types/normalize-path':
         specifier: 3.0.2
         version: 3.0.2
@@ -6885,8 +6909,8 @@ importers:
         specifier: 4.0.2
         version: 4.0.2
       vscode-languageserver-textdocument:
-        specifier: 1.0.12
-        version: 1.0.12
+        specifier: 1.0.16
+        version: 1.0.16
       web-streams-polyfill:
         specifier: 4.3.0
         version: 4.3.0
@@ -6906,8 +6930,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       yaml-language-server:
-        specifier: 1.23.0
-        version: 1.23.0
+        specifier: 2.0.0
+        version: 2.0.0
 
   examples/content_management_examples: {}
 
@@ -8045,6 +8069,8 @@ importers:
 
   src/platform/packages/shared/kbn-coloring: {}
 
+  src/platform/packages/shared/kbn-coloring-components: {}
+
   src/platform/packages/shared/kbn-config: {}
 
   src/platform/packages/shared/kbn-config-schema: {}
@@ -8122,6 +8148,8 @@ importers:
   src/platform/packages/shared/kbn-developer-toolbar: {}
 
   src/platform/packages/shared/kbn-discover-contextual-components: {}
+
+  src/platform/packages/shared/kbn-discover-data-grid: {}
 
   src/platform/packages/shared/kbn-discover-utils: {}
 
@@ -8290,6 +8318,8 @@ importers:
   src/platform/packages/shared/kbn-otel-semantic-conventions: {}
 
   src/platform/packages/shared/kbn-palettes: {}
+
+  src/platform/packages/shared/kbn-palettes-components: {}
 
   src/platform/packages/shared/kbn-profiler: {}
 
@@ -8464,6 +8494,8 @@ importers:
   src/platform/packages/shared/kbn-visualization-utils: {}
 
   src/platform/packages/shared/kbn-visualizations-common: {}
+
+  src/platform/packages/shared/kbn-visualizations-components: {}
 
   src/platform/packages/shared/kbn-workflows: {}
 
@@ -8827,85 +8859,85 @@ importers:
 
   src/platform/test: {}
 
-  src/platform/test/analytics/plugins/analytics_ftr_helpers: {}
-
-  src/platform/test/analytics/plugins/analytics_plugin_a: {}
-
-  src/platform/test/common/plugins/newsfeed: {}
-
-  src/platform/test/health_gateway/plugins/status: {}
-
-  src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline: {}
-
-  src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context: {}
-
-  src/platform/test/plugin_functional/plugins/app_link_test: {}
-
-  src/platform/test/plugin_functional/plugins/core_app_status: {}
-
-  src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a: {}
-
-  src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b: {}
-
-  src/platform/test/plugin_functional/plugins/core_history_block: {}
-
-  src/platform/test/plugin_functional/plugins/core_http: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_a: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_appleave: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_b: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_chromeless: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_deep_links: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_deprecations: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_execution_context: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_helpmenu: {}
-
-  src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts: {}
-
-  src/platform/test/plugin_functional/plugins/core_provider_plugin: {}
-
-  src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
-
   src/platform/test/plugin_functional/plugins/hardening: {}
 
-  src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
+  src/platform/test_plugins/analytics/analytics_ftr_helpers: {}
 
-  src/platform/test/plugin_functional/plugins/rendering_plugin: {}
+  src/platform/test_plugins/analytics/analytics_plugin_a: {}
 
-  src/platform/test/plugin_functional/plugins/saved_object_export_transforms: {}
-
-  src/platform/test/plugin_functional/plugins/saved_object_import_warnings: {}
-
-  src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type: {}
-
-  src/platform/test/plugin_functional/plugins/saved_objects_hidden_type: {}
-
-  src/platform/test/plugin_functional/plugins/session_notifications: {}
-
-  src/platform/test/plugin_functional/plugins/telemetry: {}
-
-  src/platform/test/plugin_functional/plugins/ui_settings_plugin: {}
-
-  src/platform/test/plugin_functional/plugins/usage_collection: {}
-
-  src/platform/test/server_integration/plugins/status_plugin_a: {}
-
-  src/platform/test/server_integration/plugins/status_plugin_b: {}
-
-  src/platform/test/user_storage/plugins/user_storage_test: {}
+  src/platform/test_plugins/common/newsfeed: {}
 
   src/platform/test_plugins/data_search: {}
 
+  src/platform/test_plugins/health_gateway/status: {}
+
+  src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline: {}
+
   src/platform/test_plugins/kbn_tp_custom_visualizations: {}
 
+  src/platform/test_plugins/node_roles_functional/core_plugin_initializer_context: {}
+
   src/platform/test_plugins/otel_metrics: {}
+
+  src/platform/test_plugins/plugin_functional/app_link_test: {}
+
+  src/platform/test_plugins/plugin_functional/core_app_status: {}
+
+  src/platform/test_plugins/plugin_functional/core_dynamic_resolving_a: {}
+
+  src/platform/test_plugins/plugin_functional/core_dynamic_resolving_b: {}
+
+  src/platform/test_plugins/plugin_functional/core_history_block: {}
+
+  src/platform/test_plugins/plugin_functional/core_http: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_a: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_appleave: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_b: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_chromeless: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_deep_links: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_deprecations: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_execution_context: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_helpmenu: {}
+
+  src/platform/test_plugins/plugin_functional/core_plugin_route_timeouts: {}
+
+  src/platform/test_plugins/plugin_functional/core_provider_plugin: {}
+
+  src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin: {}
+
+  src/platform/test_plugins/plugin_functional/kbn_top_nav: {}
+
+  src/platform/test_plugins/plugin_functional/rendering_plugin: {}
+
+  src/platform/test_plugins/plugin_functional/saved_object_export_transforms: {}
+
+  src/platform/test_plugins/plugin_functional/saved_object_import_warnings: {}
+
+  src/platform/test_plugins/plugin_functional/saved_objects_hidden_from_http_apis_type: {}
+
+  src/platform/test_plugins/plugin_functional/saved_objects_hidden_type: {}
+
+  src/platform/test_plugins/plugin_functional/session_notifications: {}
+
+  src/platform/test_plugins/plugin_functional/telemetry: {}
+
+  src/platform/test_plugins/plugin_functional/ui_settings_plugin: {}
+
+  src/platform/test_plugins/plugin_functional/usage_collection: {}
+
+  src/platform/test_plugins/server_integration/status_plugin_a: {}
+
+  src/platform/test_plugins/server_integration/status_plugin_b: {}
+
+  src/platform/test_plugins/user_storage: {}
 
   src/setup_node_env: {}
 
@@ -9108,6 +9140,8 @@ importers:
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
+
+  x-pack/platform/packages/shared/kbn-agentic-investigations-impact: {}
 
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
 
@@ -9409,6 +9443,8 @@ importers:
 
   x-pack/platform/plugins/private/runtime_fields: {}
 
+  x-pack/platform/plugins/private/search_boost: {}
+
   x-pack/platform/plugins/private/snapshot_restore: {}
 
   x-pack/platform/plugins/private/subscription_status: {}
@@ -9587,19 +9623,11 @@ importers:
 
   x-pack/platform/test: {}
 
-  x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
-
   x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
 
   x-pack/platform/test/functional_cors/plugins/kibana_cors_test: {}
 
-  x-pack/platform/test/functional_embedded/plugins/iframe_embedded: {}
-
-  x-pack/platform/test/functional_execution_context/plugins/alerts: {}
-
   x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
-
-  x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client: {}
 
   x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test: {}
 
@@ -9627,11 +9655,15 @@ importers:
 
   x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
 
-  x-pack/platform/test/usage_collection/plugins/application_usage_test: {}
-
-  x-pack/platform/test/usage_collection/plugins/stack_management_usage_test: {}
-
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
+
+  x-pack/platform/test_plugins/cloud_integration/saml_provider: {}
+
+  x-pack/platform/test_plugins/functional_embedded/iframe_embedded: {}
+
+  x-pack/platform/test_plugins/functional_execution_context/alerts: {}
+
+  x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client: {}
 
   x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad: {}
 
@@ -9666,6 +9698,10 @@ importers:
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
 
   x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
+
+  x-pack/platform/test_plugins/usage_collection/application_usage_test: {}
+
+  x-pack/platform/test_plugins/usage_collection/stack_management_usage_test: {}
 
   x-pack/solutions/observability/packages/alert-details: {}
 
@@ -9728,6 +9764,8 @@ importers:
   x-pack/solutions/observability/plugins/metrics_data_access: {}
 
   x-pack/solutions/observability/plugins/nightshift: {}
+
+  x-pack/solutions/observability/plugins/nightshift_detection: {}
 
   x-pack/solutions/observability/plugins/nightshift_investigations: {}
 
@@ -9924,6 +9962,8 @@ importers:
   x-pack/solutions/security/packages/timeline-common: {}
 
   x-pack/solutions/security/packages/timeline-components: {}
+
+  x-pack/solutions/security/packages/timeline-search-strategy: {}
 
   x-pack/solutions/security/packages/upselling: {}
 
@@ -11287,8 +11327,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.37.0':
-    resolution: {integrity: sha512-eHmJU+SSqtAopMs2VPrBRyc381W/giNJEa6ZfAdjhg0Ye0hOmQnXDhqFTXDLn5v0ObWmtDUTzKptwodnGFVjIg==}
+  '@elastic/monaco-esql@4.38.0':
+    resolution: {integrity: sha512-bKvBxq9/u+QWg7HvLsrJphKhi34eKqxiSWSfeJ8O5Cgp1lca10pzCsBqelobzcJd2hQLVAb8EPCK7IySc4vbnA==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11922,8 +11962,8 @@ packages:
     resolution: {integrity: sha512-oS+5yAdwnK20lSeFO1d53Ku+yaGCsY8PcrmSq2GtSs3bsBfRnHAbpPKSVzQcaxAOrzj5NB+f34WhZglVrNayBA==}
     engines: {node: '>= 16'}
 
-  '@hey-api/openapi-ts@0.90.3':
-    resolution: {integrity: sha512-9UT347hVQaph/jwAJJI2l+istWDLw540PTIHUevq9xzRYnHAxC1Aprtv4CYoWkeFv9aMcMrmAbNH7ANPoxEK2A==}
+  '@hey-api/openapi-ts@0.90.10':
+    resolution: {integrity: sha512-o0wlFxuLt1bcyIV/ZH8DQ1wrgODTnUYj/VfCHOOYgXUQlLp9Dm2PjihOz+WYrZLowhqUhSKeJRArOGzvLuOTsg==}
     engines: {node: '>=20.19.0'}
     hasBin: true
     peerDependencies:
@@ -12343,22 +12383,25 @@ packages:
     peerDependencies:
       '@langchain/core': 1.3.0
 
-  '@launchdarkly/js-sdk-common@2.29.0':
-    resolution: {integrity: sha512-WBW4ajbfJO6RGEB4Ax44d7/6jl/HhZOi61dNnCJ3HdHS5znwGV1eh8dUnRFISiIfnodWbpDRaVv4fG8QdKeFWw==}
+  '@launchdarkly/eventsource@0.2.2':
+    resolution: {integrity: sha512-HeM/SWPrgHwdLytYXhRMNvDB7XKWYY3xSFeo9nAZB3Ep8GhDKOC7uefKuAAKjlxRHyvtQpnm/UHgw3EBBRxNnA==}
 
-  '@launchdarkly/js-server-sdk-common@2.24.0':
-    resolution: {integrity: sha512-htPGkkvxiurlOoyNG6oKywg+dC/OV3uEt+Qg0QX2MVgK7VtAw24q1aXIFxItdJ+dS0IMLKbiOho1MQqKAS2btA==}
+  '@launchdarkly/js-sdk-common@2.32.0':
+    resolution: {integrity: sha512-V2sd9W1ocskNtZNx2gmgym+j4YsmsawZE4kwUj631dO9SE6029SLCNY9wl3csS/8/Pe8qTxZv7pvbxh4mIWJqw==}
 
-  '@launchdarkly/node-server-sdk@9.14.3':
-    resolution: {integrity: sha512-d0UbbtBqW5g+XjFNKv/JksQKr37B8cMG+ASyg0RlD/Af7YcSoqNScMto2oXHc8LQ9y6aiCd8VDoANgyWMhJ4cA==}
+  '@launchdarkly/js-server-sdk-common@2.26.0':
+    resolution: {integrity: sha512-FqvrDgy2/dibITqjXz4mY9y6Jksj2ZQ6IoL98VOd7a5WPI2RW51iH39Ra6jVGENR8Vs1Tv0klCBiC3LwJIm9mQ==}
 
-  '@launchdarkly/openfeature-js-server-common@2.0.6':
-    resolution: {integrity: sha512-1zXgkEyChB5OO43WGIIi4TaeMATqVOFYLkv+dijlLGlZIUyRgAZdfbWCr8Ssz+Jeq6aZ/cXOtub7SuEEHSxKjQ==}
+  '@launchdarkly/node-server-sdk@9.16.0':
+    resolution: {integrity: sha512-djgpihWJy/WqZjEKqTvZq8agi+ed6uBbKo18Z8RYDswuSKobweX4q7NVe1PjB6wjbxmsxGbi/wlsPhnrrZi0GQ==}
+
+  '@launchdarkly/openfeature-js-server-common@2.2.1':
+    resolution: {integrity: sha512-pdxqJbZi6Q2iKX4NbvQJ5hWGqXt0amr2525AMplvWbgX+v8TLH3DHdCLWQYyeWtjQib4WsYREa706ehVWhxxdg==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.11':
-    resolution: {integrity: sha512-z949UpCpv3CHxq0URY5cTbfLAVZT1aoU1yQI+3Cr6SPplZ1i+ZIW0+amPUBc/jhXCr7Nzjh/rrWwl1jKIPigWQ==}
+  '@launchdarkly/openfeature-node-server@2.1.3':
+    resolution: {integrity: sha512-kCxs86pZXZsqErzq0jrrIlxG0ZsC2FufMU59YdXcY3f9XbwksHI97uRcqtoOeRJYK4AA5sJ2oJ2MO7c0+noqsw==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -15074,8 +15117,8 @@ packages:
   '@types/node@24.10.13':
     resolution: {integrity: sha512-oH72nZRfDv9lADUBSo104Aq7gPHpQZc4BTx38r9xf9pg5LfP6EzSyH2n7qFmmxRQXh7YlUXODcYsg6PuTDSxGg==}
 
-  '@types/nodemailer@8.0.1':
-    resolution: {integrity: sha512-PxpaInm8V1JQDd4j0ds5HfvWQk8JupS1C0Picb96QJsrrRDjBH+DlK7L4ZdNSqNULhiZRQHc40nLVShaGxXAMw==}
+  '@types/nodemailer@8.0.2':
+    resolution: {integrity: sha512-c7M5ox8p0nEOfbJ2E9Qcmt8/QCu/VzsiAhzBiZbvky2PhKZDHpKB3sQHBM5MEZNkCfBOaS6S9//AGPRTNB7IaA==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -20373,10 +20416,6 @@ packages:
   launch-editor@2.14.2:
     resolution: {integrity: sha512-NHJEb30MGBCkmZXLZwz25t37QR4aY03ZzPYUJXOJaOa92uWwExI9SBQUuIznBYc1xkD7cJNGX7oc3Nl3sq2kQQ==}
 
-  launchdarkly-eventsource@2.3.0:
-    resolution: {integrity: sha512-q0uiciHQVFJLhVwE0/mJzBCiuw6mkBv9kB414IlHTZE1VEoU8pkwt9P2n6w6vyT7rDlA6xZm2LSTjdMBigqbjQ==}
-    engines: {node: '>=0.12.0'}
-
   lazy-ass@2.0.3:
     resolution: {integrity: sha512-/O3/DoQmI1XAhklDvF1dAjFf/epE8u3lzOZegQfLZ8G7Ud5bTRSZiFOpukHCu6jODrCA4gtIdwUCC7htxcDACA==}
     engines: {node: '> 0.8'}
@@ -21439,8 +21478,8 @@ packages:
     resolution: {integrity: sha512-X75ZN8DCLftGM5iKwoYLA3rjnrAEs97MkzvSd4q2746Tgpg8b8XWiBGiBG4ZpgcAqBgtgPHTiAc8ZMCvZuikDw==}
     engines: {node: '>=10'}
 
-  nodemailer@10.1.4:
-    resolution: {integrity: sha512-EsMnOR2oRv4LGnWvHgcVYkkQ4O2j8KO4WTw6l+PHR4sOXo8SAgIraxtEnGDmotjbhv0hDsu3IuDIFZm8iXwO4A==}
+  nodemailer@10.3.0:
+    resolution: {integrity: sha512-LsqM+Sxjap8BMgxQuVvABoEcm9ed2f3h2e0ohB7kV3sl9+4IaXlxC0DT8CQelg/S0he38gT4yT0RH1pvZxHf+A==}
     engines: {node: '>=20.0.0'}
 
   nopt@4.0.3:
@@ -24975,36 +25014,22 @@ packages:
   vm-browserify@1.1.2:
     resolution: {integrity: sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==}
 
-  vscode-json-languageservice@4.1.8:
-    resolution: {integrity: sha512-0vSpg6Xd9hfV+eZAaYN63xVVMOTmJ4GgHxXnkLCh+9RsQBkWKIghzLhW2B9ebfG+LQQg8uLtsQ2aUKjTgE+QOg==}
-    engines: {npm: '>=7.0.0'}
-
-  vscode-jsonrpc@8.2.0:
-    resolution: {integrity: sha512-C+r0eKJUIfiDIfwJhria30+TYWPtuHJXHtI7J0YlOmKAo7ogxP20T0zxB7HZQIFhIyvoBPwWskjxrvAtfjyZfA==}
-    engines: {node: '>=14.0.0'}
-
   vscode-jsonrpc@9.0.3:
     resolution: {integrity: sha512-qETYf9PCl1lVfwR+oBmMfc4vP2nqLNA35ABxorw3j06+xlKRgDVxbLgKm4Y/xPL0YWdeDjLoI4ImICIT3nB0zQ==}
     engines: {node: '>=14.0.0'}
 
-  vscode-languageserver-protocol@3.17.5:
-    resolution: {integrity: sha512-mb1bvRJN8SVznADSGWM9u/b07H7Ecg0I3OgXDuLdn307rl/J3A9YD6/eYOssqhecL27hK1IPZAsaqh00i/Jljg==}
-
   vscode-languageserver-protocol@3.18.4:
     resolution: {integrity: sha512-CCXbyr99dafRJzJH/0Ryk7ly5T8XPmSR0//OuF2w4m+9JiOin7zcAT5iET8GRE7Z9taFBejb3GbM0a0mbjdbrg==}
 
-  vscode-languageserver-textdocument@1.0.12:
-    resolution: {integrity: sha512-cxWNPesCnQCcMPeenjKKsOCKQZ/L6Tv19DTRIGuLWe32lyzWhihGVJ/rcckZXJxfdKCFvRLS3fpBIsV/ZGX4zA==}
+  vscode-languageserver-textdocument@1.0.16:
+    resolution: {integrity: sha512-qeNEuOi9a3qkqRf7Gfez2WL2VwlBTLCNekHBGO9kxPVUp9XuY15yfTJ9jwvOwKI0I2MhUUfZq95NSp+LK1CLQg==}
 
   vscode-languageserver-types@3.17.5:
     resolution: {integrity: sha512-Ld1VelNuX9pdF39h2Hgaeb5hEZM2Z3jUrrMgWQAu82jMtZp7p3vJT3BzToKtZI7NgQssZje5o0zryOrhQvzQAg==}
 
-  vscode-languageserver@9.0.1:
-    resolution: {integrity: sha512-woByF3PDpkHFUreUa7Hos7+pUWdeWMXRd26+ZX2A8cFx6v/JPTtd4/uN0/jB6XQHYaOlHbio03NTHCqrgG5n7g==}
+  vscode-languageserver@10.1.2:
+    resolution: {integrity: sha512-pXPWde3RytdeBVEs6PulOOT5OpeXC5GkWRpcT11f5rNn41jviQsAYPyAqJ/0oVGETQLKPJtYbHNiMPlfLb0NTQ==}
     hasBin: true
-
-  vscode-nls@5.2.0:
-    resolution: {integrity: sha512-RAaHx7B14ZU04EU31pT+rKz2/zSl7xMsfIZuo8pd+KZO6PXtQmpevpq3vxvWNcrGbdmhM/rr5Uw5Mz+NBfhVng==}
 
   vscode-uri@3.2.0:
     resolution: {integrity: sha512-m2gXo3bn0G1kT9InzMf07fTbqMbGtyckj3bH5ktLO+1Ssv+yiATZ4dhwaQv9UZWxJh6E9IFGnQyjgWVDWVBDrg==}
@@ -25369,8 +25394,9 @@ packages:
     resolution: {integrity: sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==}
     engines: {node: '>=18'}
 
-  yaml-language-server@1.23.0:
-    resolution: {integrity: sha512-3qVyCOexLCWw06PQa5kRPwvMWMZ/eZeCRWUvgD6a0OkqL/4iCnxy2WumbWifa937Uo5xhyWJ0uxlU39ljhNh7A==}
+  yaml-language-server@2.0.0:
+    resolution: {integrity: sha512-vT6ZEMTkXJA9Ixo07ByLgPkkt/L22fJdVDGAoB3EpPq3DCfKkMYeEeZdK5ECU6alwFUofhETo94/OV8GUxGuBg==}
+    engines: {node: '>=22.13.0'}
     hasBin: true
 
   yaml@1.10.3:
@@ -27335,7 +27361,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.37.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.38.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.38.0
       monaco-editor: 0.56.0
@@ -28212,12 +28238,12 @@ snapshots:
       js-yaml: 4.3.2
       lodash: 4.18.1
 
-  '@hey-api/openapi-ts@0.90.3(typescript@6.0.3)':
+  '@hey-api/openapi-ts@0.90.10(typescript@6.0.3)':
     dependencies:
       '@hey-api/codegen-core': 0.5.5(typescript@6.0.3)
       '@hey-api/json-schema-ref-parser': 1.2.2
+      '@hey-api/types': 0.1.2
       ansi-colors: 4.1.3
-      c12: 3.3.3
       color-support: 1.1.3
       commander: 14.0.2
       open: 11.0.0
@@ -28776,30 +28802,32 @@ snapshots:
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
       js-tiktoken: 1.0.21
 
-  '@launchdarkly/js-sdk-common@2.29.0': {}
+  '@launchdarkly/eventsource@0.2.2': {}
 
-  '@launchdarkly/js-server-sdk-common@2.24.0':
+  '@launchdarkly/js-sdk-common@2.32.0': {}
+
+  '@launchdarkly/js-server-sdk-common@2.26.0':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.29.0
+      '@launchdarkly/js-sdk-common': 2.32.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.24.0
+      '@launchdarkly/eventsource': 0.2.2
+      '@launchdarkly/js-server-sdk-common': 2.26.0
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
-      launchdarkly-eventsource: 2.3.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.2.1(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.29.0
+      '@launchdarkly/js-sdk-common': 2.32.0
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.11(@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.1.3(@launchdarkly/node-server-sdk@9.16.0(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.14.3(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/node-server-sdk': 9.16.0(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.2.1(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@loaders.gl/core@3.4.7':
@@ -31704,7 +31732,7 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/nodemailer@8.0.1':
+  '@types/nodemailer@8.0.2':
     dependencies:
       '@types/node': 24.10.13
 
@@ -38055,8 +38083,6 @@ snapshots:
       picocolors: 1.1.1
       shell-quote: 1.11.0
 
-  launchdarkly-eventsource@2.3.0: {}
-
   lazy-ass@2.0.3: {}
 
   lazystream@1.0.1:
@@ -39154,7 +39180,7 @@ snapshots:
       path-browserify: 1.0.1
       prettier: 3.9.9
       proxy-disposable: 1.0.0
-      vscode-languageserver-textdocument: 1.0.12
+      vscode-languageserver-textdocument: 1.0.16
       vscode-languageserver-types: 3.17.5
       vscode-uri: 3.2.0
       yaml: 2.9.1
@@ -39396,7 +39422,7 @@ snapshots:
       util: 0.12.5
       vm-browserify: 1.1.2
 
-  nodemailer@10.1.4: {}
+  nodemailer@10.3.0: {}
 
   nopt@4.0.3:
     dependencies:
@@ -43572,37 +43598,20 @@ snapshots:
 
   vm-browserify@1.1.2: {}
 
-  vscode-json-languageservice@4.1.8:
-    dependencies:
-      jsonc-parser: 3.3.1
-      vscode-languageserver-textdocument: 1.0.12
-      vscode-languageserver-types: 3.17.5
-      vscode-nls: 5.2.0
-      vscode-uri: 3.2.0
-
-  vscode-jsonrpc@8.2.0: {}
-
   vscode-jsonrpc@9.0.3: {}
-
-  vscode-languageserver-protocol@3.17.5:
-    dependencies:
-      vscode-jsonrpc: 8.2.0
-      vscode-languageserver-types: 3.17.5
 
   vscode-languageserver-protocol@3.18.4:
     dependencies:
       vscode-jsonrpc: 9.0.3
       vscode-languageserver-types: 3.17.5
 
-  vscode-languageserver-textdocument@1.0.12: {}
+  vscode-languageserver-textdocument@1.0.16: {}
 
   vscode-languageserver-types@3.17.5: {}
 
-  vscode-languageserver@9.0.1:
+  vscode-languageserver@10.1.2:
     dependencies:
-      vscode-languageserver-protocol: 3.17.5
-
-  vscode-nls@5.2.0: {}
+      vscode-languageserver-protocol: 3.18.4
 
   vscode-uri@3.2.0: {}
 
@@ -43964,17 +43973,18 @@ snapshots:
 
   yallist@5.0.0: {}
 
-  yaml-language-server@1.23.0:
+  yaml-language-server@2.0.0:
     dependencies:
       '@vscode/l10n': 0.0.18
       ajv: 8.20.0
       ajv-draft-04: 1.0.0(ajv@8.20.0)
       ajv-i18n: 4.2.0(ajv@8.20.0)
+      jsonc-parser: 3.3.1
+      picomatch: 4.0.7
       prettier: 3.9.9
       request-light: 0.5.8
-      vscode-json-languageservice: 4.1.8
-      vscode-languageserver: 9.0.1
-      vscode-languageserver-textdocument: 1.0.12
+      vscode-languageserver: 10.1.2
+      vscode-languageserver-textdocument: 1.0.16
       vscode-languageserver-types: 3.17.5
       vscode-uri: 3.2.0
       yaml: 2.8.3

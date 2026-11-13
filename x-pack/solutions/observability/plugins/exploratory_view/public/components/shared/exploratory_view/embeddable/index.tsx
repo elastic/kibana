@@ -54,18 +54,8 @@ export function getExploratoryViewEmbeddable(
     });
   };
 
-  return (props: ExploratoryEmbeddableProps) => {
-    useEffect(() => {
-      if (!services.data.search.session.getSessionId()) {
-        services.data.search.session.start();
-      }
-    }, []);
-
+  function ExploratoryViewEmbeddableContent(props: ExploratoryEmbeddableProps) {
     const { dataTypesIndexPatterns, attributes, customHeight } = props;
-
-    if (!dataViewsService || !lens || !attributes || attributes?.length === 0) {
-      return null;
-    }
 
     const series = attributes[0];
 
@@ -148,6 +138,22 @@ export function getExploratoryViewEmbeddable(
         </Wrapper>
       </KibanaContextProvider>
     );
+  }
+
+  return (props: ExploratoryEmbeddableProps) => {
+    useEffect(() => {
+      if (!services.data.search.session.getSessionId()) {
+        services.data.search.session.start();
+      }
+    }, []);
+
+    const { attributes } = props;
+
+    if (!dataViewsService || !lens || !attributes || attributes?.length === 0) {
+      return null;
+    }
+
+    return <ExploratoryViewEmbeddableContent {...props} />;
   };
 }
 

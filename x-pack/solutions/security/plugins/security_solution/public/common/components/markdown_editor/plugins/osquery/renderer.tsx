@@ -15,7 +15,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
+import type { EventHit } from '@kbn/securitysolution-timeline-search-strategy';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import { AlertDataContext } from '../../../../../flyout_v2/document/tools/investigation_guide/components/investigation_guide_view';

@@ -9,7 +9,6 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../logger_service/logger_service.mock';
-import { EsConcurrentModificationError } from './es_concurrent_modification_error';
 import { EsTransientRetryService } from './es_transient_retry_service';
 import { EsUnacknowledgedError } from './es_unacknowledged_error';
 
@@ -87,22 +86,6 @@ describe('EsTransientRetryService', () => {
     const callback = jest
       .fn<Promise<string>, []>()
       .mockRejectedValueOnce(new EsUnacknowledgedError('put pipeline'))
-      .mockResolvedValueOnce('ok');
-
-    const promise = service.retry(callback, { logger });
-    const assertion = expect(promise).resolves.toBe('ok');
-    await flushTimers();
-    await assertion;
-
-    expect(callback).toHaveBeenCalledTimes(2);
-  });
-
-  it('retries concurrent resource modifications and eventually succeeds', async () => {
-    const { logger } = createLogger();
-
-    const callback = jest
-      .fn<Promise<string>, []>()
-      .mockRejectedValueOnce(new EsConcurrentModificationError('data stream deleted'))
       .mockResolvedValueOnce('ok');
 
     const promise = service.retry(callback, { logger });

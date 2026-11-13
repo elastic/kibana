@@ -99,6 +99,12 @@ describe('useRuleMenuPanels', () => {
     expect(result.current).toEqual([]);
   });
 
+  it('returns no panels while the rule is not loaded', () => {
+    const { result } = renderPanels({ rule: undefined, ...ALL_HANDLERS });
+
+    expect(result.current).toEqual([]);
+  });
+
   it('disables run and update API key with a tooltip when the rule is disabled', () => {
     const { result } = renderPanels({ ...ALL_HANDLERS, rule: { ...rule, enabled: false } });
 
