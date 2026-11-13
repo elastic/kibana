@@ -183,9 +183,7 @@ spaceTest.describe(
         const { securityOverviewPage } = pageObjects;
         await securityOverviewPage.navigate(RANGE_WITH_INDICATOR);
 
-        await expect(securityOverviewPage.threatIntelPanel).toContainText(ALT_LABEL_FEED_NAME, {
-          timeout: DATA_LOAD_TIMEOUT_MS,
-        });
+        await expect(securityOverviewPage.threatIntelPanel).toContainText(ALT_LABEL_FEED_NAME);
         await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
           'Showing: 3 indicators'
         );
