@@ -637,7 +637,6 @@ const getStateForFailedCheckTaskRun = async (
     const read = await withTimeout({
       promise: Promise.resolve(resolver?.getCheckTaskState(taskInstance.id)),
       timeoutMs: FAILED_RUN_STATE_READ_TIMEOUT_MS,
-      unref: true,
     });
     if (read.timedout) {
       logger.warn(
