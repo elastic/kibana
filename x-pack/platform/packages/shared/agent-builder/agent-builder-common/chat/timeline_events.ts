@@ -176,6 +176,12 @@ export interface UserMessageEventData {
   attachment_refs?: AttachmentVersionRef[];
   /** @deprecated Written before attachment events became the source of truth; read-only. */
   attachment_context?: string;
+  /**
+   * Set only by the steer endpoint: the message was sent while `execution_id` held the
+   * conversation lock, for the running agent to read at its next check. The id is informational
+   * (telemetry, the per-run cap); a later execution claims a pending steer whatever id it carries.
+   */
+  steer?: { execution_id: string };
 }
 export type UserMessageEvent = BaseTimelineEvent<
   TimelineEventType.userMessage,
@@ -187,6 +193,13 @@ export const isUserMessageEvent = <E extends { type: string }>(
   event: E
 ): event is Extract<E, { type: TimelineEventType.userMessage }> =>
   event.type === TimelineEventType.userMessage;
+
+/** A `user_message` stamped by the steer endpoint (see `UserMessageEventData.steer`). */
+export const isSteerMessageEvent = (event: {
+  type: string;
+  data?: unknown;
+}): event is UserMessageEvent =>
+  isUserMessageEvent(event) && (event as UserMessageEvent).data.steer !== undefined;
 
 export interface AgentMessageEventData {
   message: string;

@@ -6,6 +6,7 @@
  */
 
 import type {
+  UserMessageEvent,
   ConversationAccessControl,
   ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
@@ -56,6 +57,19 @@ export interface MarkPinnedConversationResponse {
 }
 
 export type CreateConversationResponse = ConversationWithPermissions;
+
+export interface SteerConversationRequestBody {
+  message: string;
+  /** Client-generated idempotency key. */
+  event_id: string;
+}
+
+/** Returns the canonical stored event. */
+export interface SteerConversationResponse {
+  event: UserMessageEvent;
+  /** Present and true when an earlier request already stored this `event_id`. */
+  already_stored?: boolean;
+}
 
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;

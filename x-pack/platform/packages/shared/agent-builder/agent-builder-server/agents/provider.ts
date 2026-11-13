@@ -23,6 +23,7 @@ import type {
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
@@ -60,6 +61,12 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
+  /** Mid-run steering requires `getWithVersion`, `peekVersion` and `getUser`. */
+  getWithVersion?(
+    conversationId: string
+  ): Promise<{ conversation: Conversation; seqNo: number; primaryTerm: number }>;
+  peekVersion?(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }>;
+  getUser?(): UserIdAndName;
   /**
    * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a
    * `metadata_updated` activity event attributed via `options.activity` (default: current user).

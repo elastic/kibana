@@ -10,6 +10,9 @@ import { internalTools } from '@kbn/agent-builder-common';
 // check for background executions and other background work every X agent cycles.
 export const BACKGROUND_CHECK_CYCLE_INTERVAL = 3;
 
+// Delivery batch size; independent of the per-run admission limit.
+export const STEERS_PER_CHECK_MAX = 5;
+
 // Context management triggers, relative to the connector's context window.
 export const INTRA_ROUND_COMPACTION_FRACTION = 0.8;
 export const INTRA_ROUND_SUBSTITUTION_FRACTION = 0.5;
@@ -50,6 +53,8 @@ export const steps = {
   handleToolInterrupt: 'handleToolInterrupt',
   prepareToAnswer: 'prepareToAnswer',
   answerAgent: 'answerAgent',
+  forcedAnswer: 'forcedAnswer',
+  checkIncomingAfterAnswer: 'checkIncomingAfterAnswer',
   finalize: 'finalize',
 };
 

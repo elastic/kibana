@@ -9,8 +9,11 @@ import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments
 import type { ConversationEvent } from '@kbn/agent-builder-common';
 import {
   TimelineEventType,
+  analyzeDeliveries,
   isActivityEvent,
   isCurrentFormatAttachmentEvent,
+  isExecutionTerminalEvent,
+  isSteerMessageEvent,
   isTimelineEvent,
 } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
@@ -21,6 +24,7 @@ import {
 import type {
   ExecutionAccumulator,
   GroupedItem,
+  SteerState,
   UnresolvedAttachmentItem,
   UnresolvedCustomEventItem,
   UserEntry,
@@ -36,6 +40,23 @@ import {
   inputRefsByMessageId,
 } from './attachment_event_refs';
 
+/** Delivered steers render inside their turn; undelivered steers remain standalone. */
+const steerPlacement = (events: TimelineDisplayEvent[]) => {
+  const { settled, readByLive, unfinishedReads } = analyzeDeliveries(events);
+  const started = new Set<string>();
+  const ended = new Set<string>();
+  for (const event of events) {
+    if (!event.execution_id) continue;
+    if (event.type === TimelineEventType.executionStarted) started.add(event.execution_id);
+    if (isExecutionTerminalEvent(event)) ended.add(event.execution_id);
+  }
+  return {
+    hasLiveExecution: [...started].some((executionId) => !ended.has(executionId)),
+    carriedByStep: (eventId: string) => settled.has(eventId) || readByLive.has(eventId),
+    readByUnfinished: (eventId: string) => (unfinishedReads.get(eventId) ?? 0) > 0,
+  };
+};
+
 export const groupTimelineEvents = (
   events: ConversationEvent[],
   eventsById: Map<string, TimelineDisplayEvent>,
@@ -45,6 +66,15 @@ export const groupTimelineEvents = (
   // The run-shaped helpers only understand built-in events; narrow once, up front.
   const displayEvents = events.filter(isTimelineDisplayEvent);
   const awaitingPromptEventId = findAwaitingPromptEventId(displayEvents);
+  const steers = steerPlacement(displayEvents);
+  const steerStateOf = (eventId: string): SteerState | undefined =>
+    steers.readByUnfinished(eventId)
+      ? 'read_by_unfinished'
+      : awaitingPromptEventId
+      ? 'before_pause'
+      : steers.hasLiveExecution
+      ? 'waiting'
+      : undefined;
   const answers = answersByPromptId(displayEvents);
   const resolvedToolCalls = resolvedToolCallIds(displayEvents);
   const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
@@ -91,6 +121,12 @@ export const groupTimelineEvents = (
     switch (event.type) {
       case TimelineEventType.userMessage: {
         foldAttachmentRefs(seenAttachmentRefs, event.data.attachment_refs);
+        const isSteer = isSteerMessageEvent(event);
+        // Avoid rendering the message twice.
+        if (isSteer && steers.carriedByStep(event.id)) {
+          break;
+        }
+        const steerState = isSteer ? steerStateOf(event.id) : undefined;
         const attachmentRefs = [
           ...(event.data.attachment_refs ?? []),
           ...(inputRefs.get(event.id) ?? []),
@@ -101,6 +137,7 @@ export const groupTimelineEvents = (
           event,
           ...(attachmentRefs.length > 0 ? { attachmentRefs } : {}),
           ...(event.id === pendingUserMessageId ? { isPending: true } : {}),
+          ...(steerState ? { steerState } : {}),
         });
         break;
       }

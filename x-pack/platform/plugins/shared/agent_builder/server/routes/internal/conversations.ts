@@ -10,6 +10,7 @@ import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
+  STEER_MESSAGE_MAX_LENGTH,
   agentIdMaxLength,
 } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
@@ -19,7 +20,9 @@ import type {
   MarkReadConversationResponse,
   RenameConversationResponse,
   SearchConversationsResponse,
+  SteerConversationResponse,
 } from '../../../common/http_api/conversations';
+import { currentUserActor } from '../../services/conversation/client/rounds_to_events';
 import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
 import type { PatchConversationMetadataResponse } from '../../../common/http_api/patch_metadata';
 import { apiPrivileges } from '../../../common/features';
@@ -322,6 +325,40 @@ export function registerInternalConversationRoutes({
           pagination: { total, page, per_page: perPage },
           results,
         },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/_steer`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: CONVERSATION_ID_MAX_LENGTH }),
+        }),
+        body: schema.object({
+          message: schema.string({ minLength: 1, maxLength: STEER_MESSAGE_MAX_LENGTH }),
+          // Client-generated idempotency key.
+          event_id: schema.string({ minLength: 1, maxLength: 64 }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { message, event_id: eventId } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const { event, alreadyStored } = await client.appendSteer(
+        { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
+        { source: 'http_api' }
+      );
+      return response.ok<SteerConversationResponse>({
+        body: { event, ...(alreadyStored ? { already_stored: true } : {}) },
       });
     })
   );

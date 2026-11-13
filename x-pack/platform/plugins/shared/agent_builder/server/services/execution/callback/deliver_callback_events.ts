@@ -22,6 +22,8 @@ import {
   isExecutionStartedEvent,
   isExecutionTerminalEvent,
   isMessageChunkEvent,
+  isMessageDeliveredEvent,
+  isInterimAnswerEvent,
   isRoundCompleteEvent,
   type ChatEvent,
   type RoundCompleteEvent,
@@ -109,6 +111,9 @@ export const deliverCallbackEvents = ({
           (event) =>
             !isMessageChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
+            // These notifications are included in the completed round's steps.
+            !isMessageDeliveredEvent(event) &&
+            !isInterimAnswerEvent(event) &&
             // Terminal timeline events (terminated / failed / aborted) are never delivered as
             // events: the completion payload and the failure callback are the terminal
             // representations a callback consumer gets.

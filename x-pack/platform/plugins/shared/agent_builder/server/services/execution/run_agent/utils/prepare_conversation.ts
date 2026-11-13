@@ -17,6 +17,7 @@ import type {
 import {
   EventActorType,
   isAttachmentEvent,
+  isSteerMessageEvent,
   isTimelineEvent,
   isMessageEvent,
 } from '@kbn/agent-builder-common';
@@ -45,6 +46,7 @@ import {
   groupTimelineRounds,
   groupTimelineEntries,
   isTimelineStandaloneEvent,
+  isTimelineStandaloneUserMessage,
   isTimelineRound,
   linkedInputEvents,
 } from './context_timeline';
@@ -119,6 +121,13 @@ export const prepareConversation = async ({
   const processedTimeline: ProcessedTimelineEvent[] = [];
   const includedRounds = new Set(effectiveRounds.map((round) => round.id));
   for (const round of groupTimelineEntries(timeline)) {
+    // Steers enter the model context through delivery steps, not standalone history.
+    const standaloneMessage = isTimelineStandaloneUserMessage(round)
+      ? round.userMessage
+      : undefined;
+    if (standaloneMessage && isSteerMessageEvent(standaloneMessage)) {
+      continue;
+    }
     if (isTimelineStandaloneEvent(round)) {
       // Rendered unescaped, so never taken from the stored event.
       const processedEvent = isAttachmentEvent(round.event)

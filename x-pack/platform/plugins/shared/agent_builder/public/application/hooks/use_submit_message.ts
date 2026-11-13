@@ -25,6 +25,11 @@ import { appPaths } from '../utils/app_paths';
  * user is moved to it, by URL in the routed app or by state in the embeddable.
  * `isCreatingConversation` is true while that request is in flight, so the input can hold submits.
  */
+export interface SubmitMessageOptions {
+  /** Handles a rejection before streaming; return true to suppress the default toast. */
+  onRejected?: (error: unknown) => boolean;
+}
+
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();
   const { sendMessage } = useConversationStream();
@@ -46,9 +51,9 @@ export const useSubmitMessage = () => {
   });
 
   const submitMessage = useCallback(
-    async (message: string) => {
+    async (message: string, { onRejected }: SubmitMessageOptions = {}) => {
       if (conversationId) {
-        sendMessage({ message, conversationId });
+        sendMessage({ message, conversationId, ...(onRejected ? { onRejected } : {}) });
         return;
       }
       if (!agentId) {

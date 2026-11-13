@@ -48,11 +48,15 @@ export interface AgentTurnItem {
   triggerAttachmentRefs?: AttachmentVersionRef[];
 }
 
+/** Status shown on standalone steer messages. */
+export type SteerState = 'waiting' | 'read_by_unfinished' | 'before_pause';
+
 export interface UserMessageItem {
   kind: 'userMessage';
   key: string;
   event: UserMessageEvent;
   isPending?: boolean;
+  steerState?: SteerState;
   /** Legacy refs, then the refs of the attachments sent with the message. */
   attachmentRefs?: AttachmentVersionRef[];
 }

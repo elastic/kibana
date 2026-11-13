@@ -360,6 +360,68 @@ describe('useSendMessageMutation', () => {
     expect(mockAddDanger).not.toHaveBeenCalled();
   });
 
+  describe('a rejection the caller handles', () => {
+    const busy = Object.assign(new Error('Conversation busy'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 409 },
+      body: {
+        statusCode: 409,
+        message: 'Conversation busy',
+        attributes: { code: 'conversationBusy' },
+      },
+    });
+
+    it('shows no toast when the caller takes the rejection', async () => {
+      const { bindings, source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([]));
+      const onRejected = jest.fn().mockReturnValue(true);
+
+      act(() => result.current.mutate({ ...vars, onRejected }));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => source.error(busy));
+
+      await waitFor(() =>
+        expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId)
+      );
+      expect(onRejected).toHaveBeenCalledWith(busy);
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('shows the toast when the caller declines the rejection', async () => {
+      const { source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([]));
+      const onRejected = jest.fn().mockReturnValue(false);
+
+      act(() => result.current.mutate({ ...vars, onRejected }));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => source.error(busy));
+
+      await waitFor(() =>
+        expect(mockAddDanger).toHaveBeenCalledWith({ title: 'Conversation busy' })
+      );
+      expect(onRejected).toHaveBeenCalledWith(busy);
+    });
+
+    it('does not consult the caller for an error after the run started', async () => {
+      const { bindings, source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
+      const onRejected = jest.fn().mockReturnValue(true);
+
+      act(() => result.current.mutate({ ...vars, onRejected }));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => {
+        source.next(started as ChatEvent);
+        source.error(busy);
+      });
+
+      await waitFor(() =>
+        expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId)
+      );
+      expect(onRejected).not.toHaveBeenCalled();
+    });
+  });
+
   it.each([502, 503, 504])(
     'does not show a toast for a %s gateway error, which is left to the reattach logic',
     async (status) => {

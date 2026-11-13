@@ -29,6 +29,7 @@ interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting: boolean;
+  showSubmitWhileRunning?: boolean;
   showTriggerModeSelector: boolean;
   triggerMode: ChatTriggerMode;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
@@ -40,6 +41,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   isSubmitting,
+  showSubmitWhileRunning = false,
   showTriggerModeSelector,
   triggerMode,
   onTriggerModeChange,
@@ -100,6 +102,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
                 onSubmit={onSubmit}
                 isSubmitDisabled={isSubmitDisabled}
                 isSubmitting={isSubmitting}
+                showSubmitWhileRunning={showSubmitWhileRunning}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

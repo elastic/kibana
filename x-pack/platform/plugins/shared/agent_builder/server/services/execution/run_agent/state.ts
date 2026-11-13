@@ -52,6 +52,7 @@ export const StateAnnotation = Annotation.Root({
     reducer: lastValue<ResearchOutcome | undefined>(),
     default: () => undefined,
   }),
+  continueAfterAnswer: Annotation<boolean>({ reducer: lastValue<boolean>(), default: () => false }),
   answerOutcome: Annotation<AnswerOutcome | undefined>({
     reducer: lastValue<AnswerOutcome | undefined>(),
     default: () => undefined,
