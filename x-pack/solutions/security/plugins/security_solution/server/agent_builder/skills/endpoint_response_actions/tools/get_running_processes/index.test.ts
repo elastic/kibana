@@ -268,7 +268,7 @@ describe('getRunningProcessesTool', () => {
       {
         endpoint_ids: ['agent-123'],
         comment:
-          'Running processes requested via AI agent: my-host [AI agent conversation: conv-test-1]',
+          'Running processes requested via AI agent: my-host [Executed by AI agent] [AI agent conversation: conv-test-1]',
       },
       { hosts: { 'agent-123': { name: 'my-host' } } }
     );

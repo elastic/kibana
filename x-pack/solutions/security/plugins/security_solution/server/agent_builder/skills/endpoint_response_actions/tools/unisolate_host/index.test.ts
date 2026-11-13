@@ -377,7 +377,7 @@ describe('unisolateHostTool', () => {
       expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
         {
           endpoint_ids: ['agent-123'],
-          comment: 'reconnecting [AI agent conversation: conv-test-1]',
+          comment: 'reconnecting [Executed by AI agent] [AI agent conversation: conv-test-1]',
         },
         { hosts: { 'agent-123': { name: 'my-host' } } }
       );
@@ -444,7 +444,8 @@ describe('unisolateHostTool', () => {
       expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
         {
           endpoint_ids: ['agent-123'],
-          comment: 'Un-isolated via AI agent: test-host [AI agent conversation: conv-test-1]',
+          comment:
+            'Un-isolated via AI agent: test-host [Executed by AI agent] [AI agent conversation: conv-test-1]',
         },
         { hosts: { 'agent-123': { name: 'test-host' } } }
       );

@@ -379,7 +379,7 @@ describe('scanHostTool', () => {
     expect(mockResponseActionsClient.scan).toHaveBeenCalledWith(
       {
         endpoint_ids: ['agent-123'],
-        comment: 'ioc match [AI agent conversation: conv-test-1]',
+        comment: 'ioc match [Executed by AI agent] [AI agent conversation: conv-test-1]',
         parameters: { path: '/home/user/suspicious' },
       },
       { hosts: { 'agent-123': { name: 'my-host' } } }

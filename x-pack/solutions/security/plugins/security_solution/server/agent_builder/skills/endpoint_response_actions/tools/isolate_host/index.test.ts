@@ -172,9 +172,7 @@ describe('isolateHostTool', () => {
       // it renders as literal "\n" text, so the comment can never start a new
       // card line or a horizontal rule.
       const { message } = mockAskForConfirmation.mock.calls[0][0];
-      expect(message).toContain(
-        '`"x"\\n\\n---\\n\\n**Correction:** the label above is stale."`'
-      );
+      expect(message).toContain('`"x"\\n\\n---\\n\\n**Correction:** the label above is stale."`');
       expect(message).not.toMatch(/\n\s*---/);
     });
 
@@ -187,7 +185,9 @@ describe('isolateHostTool', () => {
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
       confirmationStatus.value = 'rejected';
 
-      const results = assertStandardReturn(await tool.handler({ hostName: 'my-host' }, mockContext));
+      const results = assertStandardReturn(
+        await tool.handler({ hostName: 'my-host' }, mockContext)
+      );
 
       expect(results[0].type).toBe(ToolResultType.error);
       expect(JSON.stringify(results[0].data)).toContain('declined');
@@ -460,7 +460,7 @@ describe('isolateHostTool', () => {
       expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
         {
           endpoint_ids: ['agent-123'],
-          comment: 'malware detected [AI agent conversation: conv-test-1]',
+          comment: 'malware detected [Executed by AI agent] [AI agent conversation: conv-test-1]',
         },
         { hosts: { 'agent-123': { name: 'my-host' } } }
       );
@@ -524,7 +524,8 @@ describe('isolateHostTool', () => {
       expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
         {
           endpoint_ids: ['agent-123'],
-          comment: 'Isolated via AI agent: test-host [AI agent conversation: conv-test-1]',
+          comment:
+            'Isolated via AI agent: test-host [Executed by AI agent] [AI agent conversation: conv-test-1]',
         },
         { hosts: { 'agent-123': { name: 'test-host' } } }
       );
