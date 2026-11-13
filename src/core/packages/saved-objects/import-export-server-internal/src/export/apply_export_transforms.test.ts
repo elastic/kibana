@@ -187,33 +187,6 @@ describe('applyExportTransforms', () => {
     expect(result).toEqual([foo1, dolly1, bar1, hello1]);
   });
 
-  it('uses the provided sortFunction when provided', async () => {
-    const foo1 = createObj('foo', 'A');
-    const bar1 = createObj('bar', 'B');
-    const dolly1 = createObj('dolly', 'C');
-    const hello1 = createObj('hello', 'D');
-
-    const fooTransform = createTransform((ctx, objs) => {
-      return [...objs, dolly1];
-    });
-
-    const barTransform = createTransform((ctx, objs) => {
-      return [...objs, hello1];
-    });
-
-    const result = await applyExportTransforms({
-      request,
-      objects: [foo1, bar1],
-      transforms: toMap({
-        foo: fooTransform,
-        bar: barTransform,
-      }),
-      sortFunction: (obj1, obj2) => (obj1.id > obj2.id ? 1 : -1),
-    });
-
-    expect(result).toEqual([foo1, bar1, dolly1, hello1]);
-  });
-
   it('throws when removing objects', async () => {
     const foo1 = createObj('foo', '1', { enabled: true });
     const foo2 = createObj('foo', '2', { enabled: true });

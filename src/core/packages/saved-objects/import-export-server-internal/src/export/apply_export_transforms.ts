@@ -14,20 +14,18 @@ import type {
   SavedObjectsExportTransformContext,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsExportError } from './errors';
-import { getObjKey, type SavedObjectComparator } from './utils';
+import { getObjKey } from './utils';
 
 interface ApplyExportTransformsOptions {
   objects: SavedObject[];
   request: KibanaRequest;
   transforms: Map<string, SavedObjectsExportTransform>;
-  sortFunction?: SavedObjectComparator;
 }
 
 export const applyExportTransforms = async ({
   objects,
   request,
   transforms,
-  sortFunction,
 }: ApplyExportTransformsOptions): Promise<SavedObject[]> => {
   const context = createContext(request);
   const byType = splitByType(objects);
@@ -43,10 +41,6 @@ export const applyExportTransforms = async ({
     } else {
       finalObjects = [...finalObjects, ...typeObjs];
     }
-  }
-
-  if (sortFunction) {
-    finalObjects.sort(sortFunction);
   }
 
   return finalObjects;
