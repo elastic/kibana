@@ -53,6 +53,21 @@ describe('FlyoutTemplate header title icon and description', () => {
     expect(title).toBeInTheDocument();
   });
 
+  it('renders the header title in the heading element set by titleElement', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" titleElement="h2" />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const title = screen.getByRole('heading', { level: 2, name: 'Alert details' });
+    expect(title.id).toMatch(/^flyoutTemplateTitle/);
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
+  });
+
   it('assigns a generated id to the visible header title for flyout labeling', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" aria-label="Hidden override">
