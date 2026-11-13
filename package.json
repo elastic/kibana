@@ -1520,7 +1520,7 @@
     "cacheable-lookup": "6.1.0",
     "camelcase-keys": "7.0.2",
     "canvg": "4.0.3",
-    "cbor2": "2.4.0",
+    "cbor2": "2.4.1",
     "chalk": "4.1.2",
     "cheerio": "1.0.0-rc.12",
     "chroma-js": "2.4.2",
