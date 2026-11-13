@@ -1,0 +1,51 @@
+# Data frame analytics
+
+One batch analysis of a tabular index: one row per entity. The source index is copied to `dest.index` and annotated under `dest.results_field` (default `ml`). The source is left unchanged.
+
+Read `choose-analysis`, `create-job`, `interpret-results`, `troubleshoot`, `esql-result-queries`, or `job-recipes` before acting. This file is only the router and the rules that always apply.
+
+## Tools
+
+| Tool | Privilege | Runs as |
+| --- | --- | --- |
+| `ml.dfa_get_job` | `canGetDataFrameAnalytics`. Model metadata also needs `canGetTrainedModels`. | Internal client, space-filtered |
+| `ml.dfa_explain` | `canCreateDataFrameAnalytics` | Current user (secondary auth) |
+| `ml.dfa_evaluate` | `canGetDataFrameAnalytics` | Current user (secondary auth) |
+| `ml.dfa_create_job` | `canCreateDataFrameAnalytics` | Current user (secondary auth). Does not start. |
+| `ml.dfa_manage_job` | `start`/`stop`: `canStartStopDataFrameAnalytics`. `update`: `canCreateDataFrameAnalytics`. | Internal client for start/stop. Update is the current user. |
+| `ml.dfa_delete_job` | `canDeleteDataFrameAnalytics` | Job delete is the internal client. Destination-index and data view deletes use the current user. |
+| `platform.core.execute_esql` | Index read on the destination index | Current user |
+| `platform.core.create_visualization` | Index read on the destination index | Current user. Confusion matrix grid named with this job's classes. |
+
+Explain, create, evaluate, and update read or write the user's indices. A missing index privilege returns that user's `security_exception`, including the index and the action. Report that reason. Do not describe it as a generic 403.
+
+## Calling ES|QL
+
+Copy a template from `esql-result-queries` into `platform.core.execute_esql`. The confusion matrix counts come from that template. The chart sentence built from those counts goes to `platform.core.create_visualization`, not to `execute_esql`. Do not send these templates through `generate_esql`. Replace `<dest_index>`, `<results_field>`, `<dependent_variable>`, `<prediction_field>`, and `<entity_field>` in the query text. Use `params` only for `?min_score` and `?max_probability`. Parameters are values, not index or field names.
+
+## Mode selector
+
+| User intent | Read |
+| --- | --- |
+| Which analysis, or is this anomaly detection? | `choose-analysis` |
+| Create or change fields and rerun | `create-job`, then `job-recipes`. Ask the business questions there before explain. |
+| What did the model decide, and why? | `interpret-results`, then `esql-result-queries` |
+| Stuck phase, skipped docs, memory, bad metrics | `troubleshoot` |
+| Start, stop, update memory, delete, evaluate | This file's manage rules, then the matching tool |
+
+Finish one mode before starting the next. Create order is explain, then create, then start.
+
+## Rules
+
+1. Streaming, seasonal, or "what broke over time" belongs on `ml.anomaly-detection`. Data frame analytics is one batch.
+2. When the user asks for help creating analytics, ask only business questions. Look at the source index first. Do not ask them to pick an analysis type, training percent, loss, class objective, feature-importance count, memory limit, or include list. Decide those from the data and their answers, then say the choice in plain language. The questions and the mapping are in `create-job`.
+3. The source must be one row per entity. If it is an event stream, describe the transform pivot and stop. This skill does not create transforms.
+4. Exclude identifiers, row numbers, and fields that leak the answer (`FlightDelayMin` and `FlightDelayType` when predicting `FlightDelay`). Latitude and longitude are plain numbers to the model. A perfect test result means a proxy field is still included. A weak model is a field problem before it is a hyperparameter problem.
+5. Leave `eta`, `gamma`, `lambda`, `feature_bag_fraction`, `max_trees`, neighbor count, and outlier method unset. Set `training_percent`, included fields, loss function, class objective, feature-importance count, and `outlier_fraction` only as `create-job` describes.
+6. When `training_percent` is omitted, create and explain count the source index. More than 100000 documents start at 10. A few hundred documents, such as about 700, use 60. Other sizes use 80. If the count fails, the tools use 80. Keep training documents between 200 and 200000. Use 100 only when the user accepts no test split.
+7. Show feature importance and the scatterplot by copying the attachments `ml.dfa_get_job` already created. Call it once with `include_model_metadata: true` and paste `chart_attachment.render` and `scatterplot_attachment.render`. That render tag is the chart. Do not build another feature importance chart from `total_feature_importance` or from a sample of per-row `feature_importance`. Do not call `attachments.read`. Read per-row `feature_importance` from `METADATA _source` with `LIMIT 20` only when the user asks about one row. `ml.feature_importance`, `ml.feature_influence`, and `ml.top_classes` are nested. ES|QL reports `Unknown column` for them. If a render tag is absent, summarize without that chart. For classification, count the confusion matrix for the entire dataset, then call `platform.core.create_visualization` with the sentence in `esql-result-queries`. Name each cell with this job's classes, for example `True Benign` and `False Malignant (false positive)`, and show accuracy and recall from those same counts. Green marks a correct prediction and red marks an incorrect one. Render the `attachment_id` and `version` that tool returns. Quote test-split metrics from `ml.dfa_evaluate` separately.
+8. Quote test-split metrics (`is_training` false) before training metrics. A view of the whole destination index mixes training and test rows. Use `ml.dfa_evaluate` for MSE, MSLE, Huber, R-squared, confusion matrix, precision, recall, and AUC. Outlier evaluation uses the cutoffs 0.25, 0.5, and 0.75.
+9. `ml.dfa_manage_job` start loads stats first. `starting` or `started` returns `already_running` and does not call start. `stopping` does not start; wait until the job is stopped, then start again. Stop `force` defaults to false. Set it only after a non-force stop fails or the state stays `started` or `stopping`.
+10. Update only while the job is `stopped` or `failed`. Updatable fields are `description`, `model_memory_limit`, `max_num_threads`, and `allow_lazy_start`.
+11. Delete always asks the user. Deleting the job also deletes the destination index, every document in it, and the data view whose title matches that index. Pass `dest_index` from `ml.dfa_get_job` so the confirmation names that index. There is no scratch-group guard: these jobs have no groups. Delete `force` defaults to false.
+12. A completed outlier job does not rerun. New rows can change which existing rows look unusual, so create a new job over the whole source. A supervised job that was stopped mid-phase can be started again. A finished supervised job does not score new documents; that needs a new job or a trained-model deploy, which this skill does not create.

@@ -1,0 +1,42 @@
+# Interpret results
+
+Read `ml.dfa_get_job` for `dest_index`, `results_field`, the dependent variable, and `state`. Do not interpret results until `state` is `stopped` and every phase is 100.
+
+## Supervised
+
+`ml.is_training` true means the row was in the training split. Quote metrics from `is_training` false first. `ml.dfa_evaluate` defaults to that split.
+
+Classification columns:
+
+- Ground truth: the dependent variable.
+- Prediction: `{results_field}.{dependent_variable}_prediction`.
+- Confidence: `{results_field}.prediction_probability` (0 to 1) and `{results_field}.prediction_score` (0 or greater). The class with the highest score is the prediction. Score is not probability. It is weighted by `class_assignment_objective`.
+- `top_classes` holds each class name, probability, and score. It is nested. Read it from `_source`, not as a column.
+
+A confusion matrix has actual labels on the rows and predicted labels on the columns. Judge off-diagonal cells in the user's terms. Ride predicted as VirtualRide can be acceptable. A ride predicted as a walk is not.
+
+A perfect test matrix is a warning. The model is usually reading a field that restates the label. Exclude that field and create a new job. Do not treat a perfect score as success.
+
+AUC ROC is one-versus-rest, from 0 to 1. Closer to 1 is better. It requires `num_top_classes` of `-1` or at least the class count, and `class_name` on evaluate.
+
+Regression: use `ml.dfa_evaluate` for R-squared, MSE, MSLE, and Huber. R-squared of 1 is a perfect fit. 0 means predicting the training mean. ES|QL is for residual rows, not for recomputing R-squared.
+
+## Feature importance
+
+Regression and classification importance is SHAP, stored only when `num_top_feature_importance_values` was set. For one row, the values sum to the shift from the training baseline: the predicted number minus the baseline, or the log-odds shift for classification. A negative value pushes the prediction down. A positive value pushes it up. Zeros are omitted, so a row can have fewer values than the configured maximum.
+
+`total_feature_importance` on the trained model is the average magnitude across training rows. The fields that move one row can be different, and every value on that row can be negative. `feature_importance_baseline` is the baseline those per-row values move away from. `ml.dfa_get_job` with `include_model_metadata: true` already turns those totals into `chart_attachment.render`. Copy that exact tag into the same reply while interpreting, showing, or summarizing results. That attachment is the feature importance chart. Do not pull the totals again to plot them, and do not sample per-row feature importance from the results index to draw a chart, a table, or markdown bars. Do not call `attachments.read`. The job id on the chart opens the results explorer. If `chart_attachment` is absent, the job is an outlier job, the model is not ready, or the totals are empty. Summarize without a chart. If one field dominates, the model may be using a proxy. Check that against the business question before dropping the other fields. Use per-row `feature_importance` only when the user asks why one document was predicted the way it was.
+
+## Scatterplot matrix
+
+When the same `ml.dfa_get_job` result includes `scatterplot_attachment.render`, copy that tag into the same reply. The chart samples numeric fields on the destination index, including outlier jobs. It has no time range because these rows are not a time series. The job id on the chart opens the results explorer. Do not call `attachments.read`. If `scatterplot_attachment` is absent, the destination index is missing or it has fewer than two numeric fields.
+
+## Confusion matrix
+
+For classification, show the confusion matrix for the entire dataset with `platform.core.create_visualization`, using the sentence in `esql-result-queries`. Count the cells first. Fill the sentence with this job's name, training percent, and class meanings, and with the counts, accuracy, and recall from those cells. For two classes the cells read like `True Benign: 133` and `False Malignant (false positive): 45`. The grid is green for correct predictions and red for incorrect ones, with the count prominent in each cell. It is a custom content panel, not an attachment from `ml.dfa_get_job`. Render the tool result with `<render_attachment id="{attachment_id}" version="{version}" />`. Keep quoting test-split accuracy from `ml.dfa_evaluate`.
+
+Outlier `feature_influence` is a different number. Values on one document sum to 1 and rank which fields made that row an outlier. Do not compare them to SHAP values. Outlier jobs have no trained-model importance.
+
+## Outlier score
+
+`{results_field}.outlier_score` is 0 to 1. Higher means more unlike the other rows in this job. It summarizes distance and density, not a calibrated probability of "bad". A useful review band is 0.75 and above. `ml.dfa_evaluate` reports precision, recall, and the confusion matrix at 0.25, 0.5, and 0.75 when you have a ground-truth label. If every cutoff has no true outliers and the user knows what share of rows should be unusual, create a new job with that `outlier_fraction`. Leave neighbor count and method at the defaults. Without labels, rank the top scores and name the influential field from `_source`.

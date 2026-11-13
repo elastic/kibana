@@ -299,6 +299,30 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.data).toBe('v1');
     });
 
+    it('reads the only active attachment when attachment_id is omitted', async () => {
+      const attachment = await attachmentManager.add({
+        type: 'text',
+        data: 'only',
+        description: 'Only',
+      });
+      const tool = getTool(attachmentTools.read);
+      expect(tool.schema.safeParse({}).success).toBe(true);
+      const result = (await tool.handler({}, toolContext())) as ToolHandlerStandardReturn;
+
+      expect((result.results[0] as any).data.attachment_id).toBe(attachment.id);
+      expect((result.results[0] as any).data.data).toBe('only');
+    });
+
+    it('names the active attachments when attachment_id is omitted and several exist', async () => {
+      await attachmentManager.add({ type: 'text', data: 'one', description: 'One' });
+      await attachmentManager.add({ type: 'text', data: 'two', description: 'Two' });
+      const tool = getTool(attachmentTools.read);
+      const result = (await tool.handler({}, toolContext())) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0] as any).data.message).toContain('attachment_id is required');
+    });
+
     it('returns error for non-existent attachment', async () => {
       const tool = getTool(attachmentTools.read);
       const result = (await tool.handler(

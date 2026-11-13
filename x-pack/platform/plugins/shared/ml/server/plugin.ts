@@ -73,7 +73,8 @@ import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
 import { inferenceModelRoutes } from './routes/inference_models';
-import { registerAnomalyDetectionAgentBuilder } from './agent_builder/register_anomaly_detection';
+import type { MlClientFactoryDeps } from './agent_builder/ml_client_factory';
+import { registerMlAgentBuilder } from './agent_builder/register_ml_agent_builder';
 import { registerEmbeddables } from './lib/register_embeddables';
 
 export type MlPluginSetup = SharedServices;
@@ -315,26 +316,26 @@ export class MlServerPlugin
       registerCollector(plugins.usageCollection, getIndexForType);
     }
 
-    if (plugins.agentBuilder && this.enabledFeatures.ad) {
-      registerAnomalyDetectionAgentBuilder({
-        agentBuilder: plugins.agentBuilder,
-        resolveMlCapabilities,
-        authorization: plugins.security?.authz,
-        mlLicense: this.mlLicense,
-        enabledFeatures: this.enabledFeatures,
-        mlClientFactoryDeps: {
-          getInternalSavedObjectsClient,
-          getAuditService: () => this.auditService,
-          spacesEnabled: this.spacesPlugin !== undefined,
-          authorization: plugins.security?.authz,
-          mlLicense: this.mlLicense,
-          serverless: this.serverless,
-          isMlReady: () => this.isMlReady,
-          getDataViews,
-          compatibleModuleType: this.compatibleModuleType,
-        },
-      });
-    }
+    const mlClientFactoryDeps: MlClientFactoryDeps = {
+      getInternalSavedObjectsClient,
+      getAuditService: () => this.auditService,
+      spacesEnabled: this.spacesPlugin !== undefined,
+      authorization: plugins.security?.authz,
+      mlLicense: this.mlLicense,
+      serverless: this.serverless,
+      isMlReady: () => this.isMlReady,
+      getDataViews,
+      compatibleModuleType: this.compatibleModuleType,
+    };
+
+    registerMlAgentBuilder({
+      agentBuilder: plugins.agentBuilder,
+      enabledFeatures: this.enabledFeatures,
+      resolveMlCapabilities,
+      authorization: plugins.security?.authz,
+      mlLicense: this.mlLicense,
+      mlClientFactoryDeps,
+    });
 
     return { ...sharedServicesProviders };
   }

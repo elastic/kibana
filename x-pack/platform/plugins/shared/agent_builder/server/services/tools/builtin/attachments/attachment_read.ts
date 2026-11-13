@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import {
   ToolResultType,
@@ -16,14 +16,22 @@ import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
-const attachmentReadSchema = z.object({
-  attachment_id: z.string().describe('ID of the attachment to read'),
-  version: z
-    .number()
-    .min(1)
-    .optional()
-    .describe('Specific version to read (defaults to current version)'),
-});
+const attachmentReadSchema = lazySchema(() =>
+  z.object({
+    attachment_id: z
+      .string()
+      .min(1)
+      .optional()
+      .describe(
+        'ID of the attachment to read. Copy attachment_id from the attachment metadata. Omit only when exactly one attachment is active.'
+      ),
+    version: z
+      .number()
+      .min(1)
+      .optional()
+      .describe('Specific version to read (defaults to current version)'),
+  })
+);
 
 /**
  * Creates the attachment_read tool.
@@ -36,11 +44,18 @@ export const createAttachmentReadTool = ({
   id: attachmentTools.read,
   type: ToolType.builtin,
   description:
-    'Read the content of a conversation attachment by ID. Use this to retrieve data you previously stored or to check the current state of an attachment.',
+    'Read the content of a conversation attachment. Pass {"attachment_id": "<id>"} copied from the attachment metadata. Omit attachment_id only when exactly one attachment is active; that attachment is read. Do not pass an empty id.',
   schema: attachmentReadSchema,
   tags: ['attachment'],
   excludeFromMcp: true,
-  handler: async ({ attachment_id: attachmentId, version }, { attachments: attachmentManager }) => {
+  handler: async ({ attachment_id: providedId, version }, { attachments: attachmentManager }) => {
+    const resolved = resolveAttachmentId(providedId, attachmentManager);
+    if ('error' in resolved) {
+      return {
+        results: [createErrorResult(resolved.error)],
+      };
+    }
+    const attachmentId = resolved.id;
     const attachment = attachmentManager.get(attachmentId, {
       version,
     });
@@ -132,6 +147,28 @@ export const createAttachmentReadTool = ({
     ];
   },
 });
+
+function resolveAttachmentId(
+  attachmentId: string | undefined,
+  attachmentManager: {
+    getActive: () => Array<{ id: string; type: string }>;
+  }
+): { id: string } | { error: string } {
+  if (attachmentId) {
+    return { id: attachmentId };
+  }
+  const active = attachmentManager.getActive();
+  if (active.length === 1) {
+    return { id: active[0].id };
+  }
+  if (active.length === 0) {
+    return { error: 'attachment_id is required. There are no active attachments to read.' };
+  }
+  const listed = active.map((attachment) => `${attachment.id} (${attachment.type})`).join(', ');
+  return {
+    error: `attachment_id is required when more than one attachment is active. Call attachments.read with {"attachment_id":"<id>"}. Active attachments: ${listed}.`,
+  };
+}
 
 const tryGetRepresentation = async ({
   attachment,
