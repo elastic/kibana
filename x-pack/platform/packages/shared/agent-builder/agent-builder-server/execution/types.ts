@@ -386,6 +386,13 @@ export interface AgentExecutionService {
   maybeExecuteAgent(params: ExecuteAgentParams): Promise<MaybeExecuteAgentResult>;
 
   /**
+   * Refuses a caller who could not start a run of `agentId` themselves: no `use` access to the
+   * agent, or no invoke privilege when it is bound to a service account. The check `executeAgent`
+   * runs before any write, for callers that join a run instead of starting one.
+   */
+  assertCanRunAgent(params: { request: KibanaRequest; agentId: string }): Promise<void>;
+
+  /**
    * Retrieve an agent execution by its ID.
    */
   getExecution(executionId: string): Promise<AgentExecution | undefined>;

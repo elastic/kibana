@@ -939,6 +939,16 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     };
   }
 
+  async assertCanRunAgent({
+    request,
+    agentId,
+  }: {
+    request: KibanaRequest;
+    agentId: string;
+  }): Promise<void> {
+    await this.resolveExecutionIdentity({ request, agentId });
+  }
+
   /** Whether the request's credential already is the service account the execution runs as. */
   private requestRunsAs(request: KibanaRequest, runAs: NonNullable<AgentExecution['runAs']>) {
     const principal = this.deps.security.authc.getPrincipal(request);

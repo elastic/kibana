@@ -348,11 +348,16 @@ export function registerInternalConversationRoutes({
       },
     },
     wrapHandler(async (ctx, request, response) => {
-      const { conversations: conversationsService } = getInternalServices();
+      const { conversations: conversationsService, execution: executionService } =
+        getInternalServices();
       const { conversation_id: conversationId } = request.params;
       const { message, event_id: eventId } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
+      // A steer is admitted for whoever could start the run: a member the agent refuses, or one
+      // without the invoke privilege on a bound agent, is turned away as converse turns them away.
+      const { agent_id: agentId } = await client.get(conversationId);
+      await executionService.assertCanRunAgent({ request, agentId });
       const { event, alreadyStored } = await client.appendSteer(
         { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
         { source: 'http_api' }
