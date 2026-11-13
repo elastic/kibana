@@ -248,7 +248,7 @@ describe('KiViewer', () => {
       const { history, services } = renderViewer({}, 'backing-1', { canWrite: true });
       fireEvent.click(screen.getByTestId('contextViewKiEditButton'));
 
-      history.push('/ai_index/sample-ki/knowledge_indicators?doc=ki-2&index=backing-1');
+      history.push('/ai_index/sample-ki/knowledge_documents?doc=ki-2&index=backing-1');
 
       expect(services.overlays.openConfirm).toHaveBeenCalledWith(
         'Your edits to this Knowledge document will be lost.',

@@ -21,25 +21,25 @@ const renderSelectedKi = (path: string) => {
 
 describe('useSelectedKi', () => {
   it('returns undefined without a doc param', () => {
-    const { result } = renderSelectedKi('/ai_index/a/knowledge_indicators');
+    const { result } = renderSelectedKi('/ai_index/a/knowledge_documents');
     expect(result.current.selectedKi).toBeUndefined();
   });
 
   it('reads doc and index from the query', () => {
-    const { result } = renderSelectedKi('/ai_index/a/knowledge_indicators?doc=a%2Fb&index=idx');
+    const { result } = renderSelectedKi('/ai_index/a/knowledge_documents?doc=a%2Fb&index=idx');
     expect(result.current.selectedKi).toEqual({ kiId: 'a/b', index: 'idx' });
   });
 
   it('pushes a new history entry and keeps the path', () => {
-    const { history, result } = renderSelectedKi('/ai_index/a/knowledge_indicators?doc=x&index=i');
+    const { history, result } = renderSelectedKi('/ai_index/a/knowledge_documents?doc=x&index=i');
     act(() => result.current.selectKi({ id: 'ki-2', index: 'idx-2' }));
     expect(history.length).toBe(2);
-    expect(history.location.pathname).toBe('/ai_index/a/knowledge_indicators');
+    expect(history.location.pathname).toBe('/ai_index/a/knowledge_documents');
     expect(result.current.selectedKi).toEqual({ kiId: 'ki-2', index: 'idx-2' });
   });
 
   it('replaces the history entry when asked', () => {
-    const { history, result } = renderSelectedKi('/ai_index/a/knowledge_indicators');
+    const { history, result } = renderSelectedKi('/ai_index/a/knowledge_documents');
     act(() => result.current.selectKi({ id: 'ki-1', index: 'idx' }, { replace: true }));
     expect(history.length).toBe(1);
     expect(history.action).toBe('REPLACE');

@@ -28,7 +28,7 @@ const byTypeQuery = () => mockUseListKiByType.mock.calls.at(-1)?.[0];
 
 const renderPanelHook = () => {
   const history = createMemoryHistory({
-    initialEntries: ['/ai_index/sample-ki/knowledge_indicators'],
+    initialEntries: ['/ai_index/sample-ki/knowledge_documents'],
   });
   return renderHook(() => useListKiPanel(listKiTestAiIndex), {
     wrapper: ({ children }) => <Router history={history}>{children}</Router>,

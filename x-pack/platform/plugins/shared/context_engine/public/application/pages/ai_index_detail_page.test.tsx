@@ -29,7 +29,7 @@ import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_st
 import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
-  getAiIndexKnowledgeIndicatorsPath,
+  getAiIndexKnowledgeDocumentsPath,
 } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
@@ -39,7 +39,7 @@ import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
   CONTEXT_ENGINE_PATHS.detailSources,
-  CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators,
+  CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
 ] as const;
 
 jest.mock('@kbn/esql/public', () => ({
@@ -938,11 +938,11 @@ describe('AiIndexDetailPage', () => {
     expect(services.application.navigateToApp).toHaveBeenCalledWith(
       CONTEXT_ENGINE_APP_ID,
       expect.objectContaining({
-        path: getAiIndexKnowledgeIndicatorsPath(aiIndex.id),
+        path: getAiIndexKnowledgeDocumentsPath(aiIndex.id),
       })
     );
     expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
-    expect(history.location.pathname).toBe(getAiIndexKnowledgeIndicatorsPath(aiIndex.id));
+    expect(history.location.pathname).toBe(getAiIndexKnowledgeDocumentsPath(aiIndex.id));
     await openAppMenuOverflow();
     await waitFor(() => {
       expect(screen.getByTestId('contextListKiPanelDestLink')).toBeInTheDocument();
@@ -992,7 +992,7 @@ describe('AiIndexDetailPage', () => {
         })
     );
     const history = createMemoryHistory({
-      initialEntries: [{ pathname: getAiIndexKnowledgeIndicatorsPath(aiIndex.id) }],
+      initialEntries: [{ pathname: getAiIndexKnowledgeDocumentsPath(aiIndex.id) }],
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
@@ -1030,7 +1030,7 @@ describe('AiIndexDetailPage', () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
     const history = createMemoryHistory({
-      initialEntries: [{ pathname: getAiIndexKnowledgeIndicatorsPath(aiIndex.id) }],
+      initialEntries: [{ pathname: getAiIndexKnowledgeDocumentsPath(aiIndex.id) }],
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
@@ -1053,7 +1053,7 @@ describe('AiIndexDetailPage', () => {
     );
 
     expect(await screen.findByTestId('contextListKiPanel')).toBeInTheDocument();
-    expect(history.location.pathname).toBe(getAiIndexKnowledgeIndicatorsPath(aiIndex.id));
+    expect(history.location.pathname).toBe(getAiIndexKnowledgeDocumentsPath(aiIndex.id));
     expect(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators')).toBeInTheDocument();
   });
 

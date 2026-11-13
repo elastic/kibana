@@ -6,10 +6,9 @@
  */
 
 import {
-  decodeRouteParam,
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
-  getAiIndexKnowledgeIndicatorsPath,
+  getAiIndexKnowledgeDocumentsPath,
   getKiDocQueryParams,
 } from './paths';
 
@@ -25,10 +24,10 @@ describe('getAiIndexSourcesPath', () => {
   });
 });
 
-describe('getAiIndexKnowledgeIndicatorsPath', () => {
-  it('builds the knowledge indicators tab path', () => {
-    expect(getAiIndexKnowledgeIndicatorsPath('my-ai-index')).toBe(
-      '/ai_index/my-ai-index/knowledge_indicators'
+describe('getAiIndexKnowledgeDocumentsPath', () => {
+  it('builds the knowledge documents tab path', () => {
+    expect(getAiIndexKnowledgeDocumentsPath('my-ai-index')).toBe(
+      '/ai_index/my-ai-index/knowledge_documents'
     );
   });
 });
@@ -46,16 +45,5 @@ describe('getKiDocQueryParams', () => {
 
   it('leaves out an empty index', () => {
     expect(getKiDocQueryParams('ki-1', '')).toEqual({ doc: 'ki-1' });
-  });
-});
-
-describe('decodeRouteParam', () => {
-  it('decodes a slash that history left encoded as %2F', () => {
-    expect(decodeRouteParam('a%2Fb')).toBe('a/b');
-  });
-
-  it('returns the value as-is when it is not a valid percent-escape', () => {
-    // history already ran `decodeURI` on this, turning the original `%25` into `%2`
-    expect(decodeRouteParam('ki-1%2')).toBe('ki-1%2');
   });
 });

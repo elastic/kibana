@@ -60,7 +60,7 @@ export const renderListKiWithProviders = (
   const {
     discoverShow = true,
     indexManagementMonitor = true,
-    initialPath = '/ai_index/sample-ki/knowledge_indicators',
+    initialPath = '/ai_index/sample-ki/knowledge_documents',
     canWrite = false,
   } = options;
   const history = createMemoryHistory({ initialEntries: [initialPath] });

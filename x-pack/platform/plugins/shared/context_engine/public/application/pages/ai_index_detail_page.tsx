@@ -47,7 +47,7 @@ import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
-  getAiIndexKnowledgeIndicatorsPath,
+  getAiIndexKnowledgeDocumentsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 
@@ -106,7 +106,7 @@ export const AiIndexDetailPage = () => {
   const isSourcesTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
   const isKnowledgeIndicatorsTab =
-    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators, exact: true }) !== null;
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments, exact: true }) !== null;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
   const [showCreatedCallout, setShowCreatedCallout] = useState(
@@ -256,8 +256,7 @@ export const AiIndexDetailPage = () => {
         id: 'knowledge_indicators',
         label: knowledgeIndicatorsTabLabel,
         isSelected: isKnowledgeIndicatorsTab,
-        onClick: () =>
-          navigateToContextEngine(getAiIndexKnowledgeIndicatorsPath(resolvedAiIndexId)),
+        onClick: () => navigateToContextEngine(getAiIndexKnowledgeDocumentsPath(resolvedAiIndexId)),
         badge: hasKnowledgeIndicators ? summary.total : undefined,
         'data-test-subj': 'contextAiIndexDetailTab-knowledge_indicators',
       });
@@ -382,7 +381,7 @@ export const AiIndexDetailPage = () => {
       <Route path={CONTEXT_ENGINE_PATHS.detailSources} exact>
         {sourcesPanel}
       </Route>
-      <Route path={CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators} exact>
+      <Route path={CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments} exact>
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detail} exact>

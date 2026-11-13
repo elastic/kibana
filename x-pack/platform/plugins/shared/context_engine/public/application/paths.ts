@@ -9,10 +9,7 @@ export const CONTEXT_ENGINE_PATHS = {
   landing: '/',
   detail: '/ai_index/:id',
   detailSources: '/ai_index/:id/sources',
-  detailKnowledgeIndicators: '/ai_index/:id/knowledge_indicators',
-  /** Old Knowledge document page links. They redirect to the Knowledge documents tab. */
-  legacyViewKi: '/ai_index/:id/ki/:kiId',
-  legacyViewKiDocument: '/ai_index/:id/ki/:kiId/document',
+  detailKnowledgeDocuments: '/ai_index/:id/knowledge_documents',
 } as const;
 
 /** Query params that hold the Knowledge document selected on the Knowledge documents tab. */
@@ -23,8 +20,8 @@ export const getAiIndexDetailPath = (id: string): string => `/ai_index/${id}`;
 
 export const getAiIndexSourcesPath = (id: string): string => `/ai_index/${id}/sources`;
 
-export const getAiIndexKnowledgeIndicatorsPath = (id: string): string =>
-  `/ai_index/${id}/knowledge_indicators`;
+export const getAiIndexKnowledgeDocumentsPath = (id: string): string =>
+  `/ai_index/${id}/knowledge_documents`;
 
 /**
  * Query params that select a Knowledge document on the Knowledge documents tab.
@@ -34,19 +31,3 @@ export const getKiDocQueryParams = (kiId: string, index: string): Record<string,
   [KI_DOC_QUERY_PARAM]: kiId,
   ...(index.length > 0 ? { [KI_INDEX_QUERY_PARAM]: index } : {}),
 });
-
-/**
- * Best-effort decode for a KI id read from an old `/ki/:kiId` URL. `history` already runs
- * `decodeURI` once, so a malformed leftover `%` throws here; falling back to
- * the raw value keeps the page from crashing. KI ids are free-form, so for
- * pathological content (e.g. a literal `%41` substring) this may not recover
- * the exact original id, in which case the KI simply fails to load instead
- * of rendering.
- */
-export const decodeRouteParam = (value: string): string => {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-};

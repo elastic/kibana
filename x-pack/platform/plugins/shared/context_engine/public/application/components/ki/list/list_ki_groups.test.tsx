@@ -22,7 +22,7 @@ jest.mock('../../../hooks/use_list_ki_by_type', () => ({
   useListKiByType: (...args: unknown[]) => mockUseListKiByType(...args),
 }));
 
-const TAB_PATH = '/ai_index/sample-ki/knowledge_indicators';
+const TAB_PATH = '/ai_index/sample-ki/knowledge_documents';
 const INDEX = 'ai-index-idx-sample-ki';
 
 const ki = (id: string, type: string, extra: Partial<KiListItem> = {}): KiListItem => ({

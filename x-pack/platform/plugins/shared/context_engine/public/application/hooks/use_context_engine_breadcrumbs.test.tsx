@@ -77,7 +77,7 @@ describe('useContextEngineBreadcrumbs', () => {
 
     renderHook(() =>
       useContextEngineBreadcrumbs([
-        { text: 'my-ai-index', path: '/ai_index/my-ai-index/knowledge_indicators' },
+        { text: 'my-ai-index', path: '/ai_index/my-ai-index/knowledge_documents' },
         { text: 'my-ki' },
       ])
     );
@@ -87,7 +87,7 @@ describe('useContextEngineBreadcrumbs', () => {
       { text: 'Context', href: '/app/context_engine' },
       {
         text: 'my-ai-index',
-        href: '/app/context_engine/ai_index/my-ai-index/knowledge_indicators',
+        href: '/app/context_engine/ai_index/my-ai-index/knowledge_documents',
       },
       { text: 'my-ki', href: undefined },
     ]);
