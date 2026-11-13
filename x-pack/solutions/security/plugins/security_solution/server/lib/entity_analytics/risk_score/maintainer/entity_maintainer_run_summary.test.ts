@@ -7,7 +7,7 @@
 
 import type { RunMetrics } from './instrumentation/run_metrics_tracker';
 import {
-  buildAlertSourceBreakdown,
+  buildAlertSources,
   buildRiskScoreEntityMaintainerRunSummary,
   buildRiskScorePhase0EntityMaintainerRunSummary,
   buildRiskScoreSkipEntityMaintainerRunSummary,
@@ -274,17 +274,22 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
   });
 });
 
-describe('buildAlertSourceBreakdown', () => {
-  it('emits scored and unmatched entries per source and leaves out zero counts', () => {
+describe('buildAlertSources', () => {
+  it('reports every alert as scanned and the scored ones as qualified', () => {
     expect(
-      buildAlertSourceBreakdown({
+      buildAlertSources({
         okta: { scored: 10, unmatched: 0 },
         azure: { scored: 3, unmatched: 4 },
       })
     ).toEqual([
-      { name: 'alerts_scored:okta', count: 10 },
-      { name: 'alerts_scored:azure', count: 3 },
-      { name: 'alerts_unmatched:azure', count: 4 },
+      { id: 'okta', scanned: 10, qualified: 10, outcome: 'producing' },
+      { id: 'azure', scanned: 7, qualified: 3, outcome: 'producing' },
+    ]);
+  });
+
+  it('reports a source whose alerts were all unmatched as empty', () => {
+    expect(buildAlertSources({ gcp: { scored: 0, unmatched: 5 } })).toEqual([
+      { id: 'gcp', scanned: 5, qualified: 0, outcome: 'empty' },
     ]);
   });
 
@@ -293,34 +298,47 @@ describe('buildAlertSourceBreakdown', () => {
       Array.from({ length: 33 }, (_, i) => [`source_${i}`, { scored: 100 - i, unmatched: 1 }])
     );
 
-    const breakdown = buildAlertSourceBreakdown(alertSources);
-    const scored = breakdown.filter(({ name }) => name.startsWith('alerts_scored:'));
+    const sources = buildAlertSources(alertSources);
 
-    expect(scored).toHaveLength(31);
-    expect(scored[0]).toEqual({ name: 'alerts_scored:source_0', count: 100 });
-    expect(scored[29]).toEqual({ name: 'alerts_scored:source_29', count: 71 });
+    expect(sources).toHaveLength(31);
+    expect(sources[0]).toEqual({
+      id: 'source_0',
+      scanned: 101,
+      qualified: 100,
+      outcome: 'producing',
+    });
+    expect(sources[29]).toEqual({
+      id: 'source_29',
+      scanned: 72,
+      qualified: 71,
+      outcome: 'producing',
+    });
     // source_30..source_32 scored 70 + 69 + 68, unmatched 3
-    expect(breakdown).toContainEqual({ name: 'alerts_scored:other', count: 207 });
-    expect(breakdown).toContainEqual({ name: 'alerts_unmatched:other', count: 3 });
+    expect(sources[30]).toEqual({
+      id: 'other',
+      scanned: 210,
+      qualified: 207,
+      outcome: 'producing',
+    });
   });
 
   it('shortens very long source names', () => {
-    const [entry] = buildAlertSourceBreakdown({
+    const [entry] = buildAlertSources({
       [`x${'y'.repeat(300)}`]: { scored: 1, unmatched: 0 },
     });
 
-    expect(entry.name).toBe(`alerts_scored:x${'y'.repeat(99)}`);
+    expect(entry.id).toBe(`x${'y'.repeat(99)}`);
   });
 
   it('returns nothing when there are no alerts', () => {
-    expect(buildAlertSourceBreakdown({})).toEqual([]);
+    expect(buildAlertSources({})).toEqual([]);
   });
 });
 
 describe('buildRiskScoreEntityMaintainerRunSummary alert sources', () => {
   const stages = [{ name: 'base' as const, status: 'success' as const, durationMs: 1 }];
 
-  it('adds the breakdown when there are alert sources', () => {
+  it('adds the sources when there are alert sources', () => {
     const summary = buildRiskScoreEntityMaintainerRunSummary({
       entityType: 'user',
       metrics: emptyMetrics(),
@@ -328,13 +346,13 @@ describe('buildRiskScoreEntityMaintainerRunSummary alert sources', () => {
       alertSources: { okta: { scored: 2, unmatched: 1 } },
     });
 
-    expect(summary.breakdown).toEqual([
-      { name: 'alerts_scored:okta', count: 2 },
-      { name: 'alerts_unmatched:okta', count: 1 },
+    expect(summary.sources).toEqual([
+      { id: 'okta', scanned: 3, qualified: 2, outcome: 'producing' },
     ]);
+    expect(summary).not.toHaveProperty('breakdown');
   });
 
-  it('leaves the breakdown out when there are none', () => {
+  it('leaves the sources out when there are none', () => {
     const withEmpty = buildRiskScoreEntityMaintainerRunSummary({
       entityType: 'user',
       metrics: emptyMetrics(),
@@ -347,7 +365,7 @@ describe('buildRiskScoreEntityMaintainerRunSummary alert sources', () => {
       stages,
     });
 
-    expect(withEmpty).not.toHaveProperty('breakdown');
-    expect(without).not.toHaveProperty('breakdown');
+    expect(withEmpty).not.toHaveProperty('sources');
+    expect(without).not.toHaveProperty('sources');
   });
 });

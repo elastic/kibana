@@ -94,33 +94,35 @@ const MAX_SOURCE_NAME_LENGTH = 100;
 const OTHER_SOURCE = 'other';
 
 /**
- * One `alerts_scored:<source>` and one `alerts_unmatched:<source>` entry per source, for the top
- * sources by alert count. The rest is added up under `other`. Entries with no alerts are left out.
+ * One entry per source, for the top sources by alert count: `scanned` is every alert from the
+ * source and `qualified` the ones scored. The rest is added up under `other`.
  */
-export const buildAlertSourceBreakdown = (
+export const buildAlertSources = (
   alertSources: Readonly<AlertSourceCounts>
-): Array<{ name: string; count: number }> => {
+): NonNullable<EntityMaintainerRunSummary['sources']> => {
   const ranked = Object.entries(alertSources).sort(
     ([nameA, a], [nameB, b]) =>
       b.scored + b.unmatched - (a.scored + a.unmatched) || nameA.localeCompare(nameB)
   );
   const rest = { scored: 0, unmatched: 0 };
-  const entries: Array<{ source: string; scored: number; unmatched: number }> = [];
+  const entries: Array<{ id: string; scored: number; unmatched: number }> = [];
   ranked.forEach(([source, counts], index) => {
     if (index < MAX_ALERT_SOURCES) {
-      entries.push({ source: source.slice(0, MAX_SOURCE_NAME_LENGTH), ...counts });
+      entries.push({ id: source.slice(0, MAX_SOURCE_NAME_LENGTH), ...counts });
     } else {
       rest.scored += counts.scored;
       rest.unmatched += counts.unmatched;
     }
   });
   if (rest.scored + rest.unmatched > 0) {
-    entries.push({ source: OTHER_SOURCE, ...rest });
+    entries.push({ id: OTHER_SOURCE, ...rest });
   }
-  return entries.flatMap(({ source, scored, unmatched }) => [
-    ...(scored > 0 ? [{ name: `alerts_scored:${source}`, count: scored }] : []),
-    ...(unmatched > 0 ? [{ name: `alerts_unmatched:${source}`, count: unmatched }] : []),
-  ]);
+  return entries.map(({ id, scored, unmatched }) => ({
+    id,
+    scanned: scored + unmatched,
+    qualified: scored,
+    outcome: scored > 0 ? 'producing' : 'empty',
+  }));
 };
 
 /** Builds an entity-type summary whose funnel covers base-scoring entity-store outcomes and keeps create failures qualified rather than skipped. */
@@ -133,7 +135,7 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   entityType: string;
   metrics: RunMetrics;
   stages: RiskScoreFrameworkStageSummary[];
-  /** Alerts per source from base scoring; leaves `breakdown` out when absent or empty. */
+  /** Alerts per source from base scoring; leaves `sources` out when absent or empty. */
   alertSources?: Readonly<AlertSourceCounts>;
 }): EntityMaintainerRunSummary => {
   const skipped = metrics.scoresDroppedNotInStore - metrics.entitiesCreateFailed;
@@ -141,7 +143,7 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   const appliedBase = metrics.scoresWrittenEntityStoreBase + metrics.entitiesCreated;
   const failedBase = metrics.scoresFailedBase + metrics.entitiesCreateFailed;
 
-  const breakdown = alertSources ? buildAlertSourceBreakdown(alertSources) : [];
+  const sources = alertSources ? buildAlertSources(alertSources) : [];
 
   // `droppedNotInStore` is reserved for write-time 404s; lookup misses are emitted separately
   // from `metrics.scoresMissingFromStoreBase` as `phase1_base_scoring.scoresMissingFromStore`.
@@ -155,7 +157,7 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
       skipped,
       failed: failedBase,
     },
-    ...(breakdown.length > 0 ? { breakdown } : {}),
+    ...(sources.length > 0 ? { sources } : {}),
     stages,
   };
 };
