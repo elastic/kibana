@@ -17,7 +17,7 @@ import {
 } from '@kbn/es-query';
 
 export const buildFilter = (
-  dataView: FilterableSource,
+  dataSource: FilterableSource,
   controlId: string,
   filterState: Pick<
     OptionsListDSLControlState,
@@ -29,15 +29,15 @@ export const buildFilter = (
     return undefined;
   }
   let newFilter: Filter | undefined;
-  const field = dataView.getFieldByName(fieldName);
+  const field = dataSource.getFieldByName(fieldName);
   if (field) {
     if (filterState.exists_selected) {
-      newFilter = buildExistsFilter(field, dataView);
+      newFilter = buildExistsFilter(field, dataSource);
     } else if (filterState.selected_options && filterState.selected_options.length > 0) {
       newFilter =
         filterState.selected_options.length === 1
-          ? buildPhraseFilter(field, filterState.selected_options[0], dataView)
-          : buildPhrasesFilter(field, filterState.selected_options, dataView);
+          ? buildPhraseFilter(field, filterState.selected_options[0], dataSource)
+          : buildPhrasesFilter(field, filterState.selected_options, dataSource);
     }
   }
   if (newFilter) {

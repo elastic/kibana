@@ -103,12 +103,12 @@ export const DataControlEditorStrings = {
         i18n.translate('controls.controlGroup.manageControl.valuesSourceToggleLabel', {
           defaultMessage: 'Pre-filter field values with a query',
         }),
-      getDefaultValuesQuery: (dataView: FilterableSource | undefined, fieldName?: string) =>
-        dataView
+      getDefaultValuesQuery: (dataSource: FilterableSource | undefined, fieldName?: string) =>
+        dataSource
           ? i18n.translate('controls.controlGroup.manageControl.dataSource.defaultValuesQuery', {
               defaultMessage: defaultValuesQueryDefaultMessage,
               values: {
-                dataViewIndexPattern: dataView.title,
+                dataViewIndexPattern: dataSource.title,
                 fieldName: fieldName ?? '<field-name>',
               },
             })

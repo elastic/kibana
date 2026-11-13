@@ -12,24 +12,24 @@ import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { FilterableSource } from '@kbn/data-source';
 
 export const buildFilter = (
-  dataView: FilterableSource,
+  dataSource: FilterableSource,
   controlId: string,
   filterState: Pick<RangeSliderControlState, 'field_name' | 'value'> & { sectionId?: string }
 ) => {
   let rangeFilter: Filter | undefined;
-  const fieldName = filterState.field_name
-    ? dataView.getFieldByName(filterState.field_name)
+  const field = filterState.field_name
+    ? dataSource.getFieldByName(filterState.field_name)
     : undefined;
   const gte = parseFloat(filterState.value?.[0] ?? '');
   const lte = parseFloat(filterState.value?.[1] ?? '');
 
-  if (filterState.value && dataView && fieldName && (!isNaN(gte) || !isNaN(lte))) {
+  if (filterState.value && field && (!isNaN(gte) || !isNaN(lte))) {
     const params = {
       gte: !isNaN(gte) ? gte : -Infinity,
       lte: !isNaN(lte) ? lte : Infinity,
     } as RangeFilterParams;
 
-    rangeFilter = buildRangeFilter(fieldName, params, dataView);
+    rangeFilter = buildRangeFilter(field, params, dataSource);
     if (rangeFilter) {
       rangeFilter.meta.key = filterState.field_name;
       rangeFilter.meta.type = 'range';

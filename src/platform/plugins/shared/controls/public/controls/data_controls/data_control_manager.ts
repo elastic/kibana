@@ -90,7 +90,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   parentApi: unknown;
   editorStateManager: ReturnType<typeof initializeStateManager<EditorState>>;
   willHaveInitialFilter?: boolean;
-  getInitialFilter?: (dataView: FilterableSource) => Filter | undefined;
+  getInitialFilter?: (dataSource: FilterableSource) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
   const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
     omit(state, 'title'), // this is handled via the label manager
@@ -110,11 +110,11 @@ export const initializeDataControlManager = async <EditorState extends object = 
     dataLoading$.next(loading);
   }
 
-  let resolveInitialDataViewReady: (dataView: FilterableSource) => void;
-  let rejectInitialDataViewReady: (error: Error) => void;
-  const initialDataViewPromise = new Promise<FilterableSource>((resolve, reject) => {
-    resolveInitialDataViewReady = resolve;
-    rejectInitialDataViewReady = reject;
+  let resolveInitialDataSourceReady: (dataSource: FilterableSource) => void;
+  let rejectInitialDataSourceReady: (error: Error) => void;
+  const initialDataSourcePromise = new Promise<FilterableSource>((resolve, reject) => {
+    resolveInitialDataSourceReady = resolve;
+    rejectInitialDataSourceReady = reject;
   });
 
   const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
@@ -136,25 +136,25 @@ export const initializeDataControlManager = async <EditorState extends object = 
         }
       }),
       switchMap(async ([currentDataViewId]) => {
-        let dataView: FilterableSource | undefined;
+        let dataSource: FilterableSource | undefined;
         try {
-          dataView = await dataViewsService.get(currentDataViewId ?? '');
-          return { dataView };
+          dataSource = await dataViewsService.get(currentDataViewId ?? '');
+          return { dataSource };
         } catch (error) {
           return { error };
         }
       })
     )
-    .subscribe(({ dataView, error }) => {
-      if (error || !dataView) {
+    .subscribe(({ dataSource, error }) => {
+      if (error || !dataSource) {
         setBlockingError(error);
-        if (willHaveInitialFilter && getInitialFilter) rejectInitialDataViewReady(error);
+        if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(error);
         return;
       }
-      if (dataView) {
-        resolveInitialDataViewReady(dataView);
+      if (dataSource) {
+        resolveInitialDataSourceReady(dataSource);
       }
-      dataSources$.next(dataView ? [dataView] : undefined);
+      dataSources$.next(dataSource ? [dataSource] : undefined);
     });
 
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
@@ -173,15 +173,15 @@ export const initializeDataControlManager = async <EditorState extends object = 
         filtersLoading$.next(true);
       })
     )
-    .subscribe(([nextDataViews, nextFieldName]) => {
-      const dataView = nextDataViews
-        ? nextDataViews.find(({ id }) => dataControlStateManager.api.dataViewId$.value === id)
+    .subscribe(([nextDataSources, nextFieldName]) => {
+      const dataSource = nextDataSources
+        ? nextDataSources.find(({ id }) => dataControlStateManager.api.dataViewId$.value === id)
         : undefined;
-      if (!dataView) {
+      if (!dataSource) {
         return;
       }
 
-      const field = dataView.getFieldByName(nextFieldName ?? '');
+      const field = dataSource.getFieldByName(nextFieldName ?? '');
       if (!field) {
         setBlockingError(
           new Error(
@@ -198,7 +198,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       field$.next(field);
       if (field) {
         defaultFieldLabel$.next(field.displayName ?? field.name);
-        const formatter = dataView.getFormatterForField?.(field);
+        const formatter = dataSource.getFormatterForField?.(field);
         if (formatter) fieldFormatter.next((value: unknown) => formatter.convertToText(value));
       }
     });
@@ -286,7 +286,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
     } catch (e) {
       setBlockingError(e);
-      if (willHaveInitialFilter && getInitialFilter) rejectInitialDataViewReady(e);
+      if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(e);
     }
   });
 
@@ -294,8 +294,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
   let initialFilter: Filter | undefined;
   if (willHaveInitialFilter && getInitialFilter) {
     try {
-      const initialDataView = await initialDataViewPromise;
-      initialFilter = getInitialFilter(initialDataView);
+      const initialDataSource = await initialDataSourcePromise;
+      initialFilter = getInitialFilter(initialDataSource);
     } catch (e) {
       setBlockingError(e);
     }
