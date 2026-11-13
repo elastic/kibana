@@ -114,4 +114,10 @@ export const registerWorkflowSteps = (
       (m) => m.aesopSelectWinnerStepDefinition
     )
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./aesop_capture_dataset/aesop_capture_dataset_step').then(
+      (m) => m.aesopCaptureDatasetStepDefinition
+    )
+  );
 };

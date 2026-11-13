@@ -28,6 +28,7 @@ import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
 import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints';
 import { aesopSelectWinnerStepDefinition } from './aesop_select_winner';
+import { aesopCaptureDatasetStepDefinition } from './aesop_capture_dataset';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
@@ -57,4 +58,5 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(getAlertEntitiesStepDefinition);
   workflowsExtensions.registerStepDefinition(matchAttackFingerprintsStepDefinition);
   workflowsExtensions.registerStepDefinition(aesopSelectWinnerStepDefinition);
+  workflowsExtensions.registerStepDefinition(aesopCaptureDatasetStepDefinition);
 };
