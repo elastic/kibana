@@ -91,7 +91,6 @@ export const InboundWebhook: ConnectorSpec = {
     types: ['none'],
   },
 
-  // ingestTokenHash is factory-injected for every spec with events.
   schema: lazySchema(() => z.object({})),
 
   actions: {},

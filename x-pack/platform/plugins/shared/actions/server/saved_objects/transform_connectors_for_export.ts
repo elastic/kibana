@@ -49,14 +49,11 @@ function transformConnectorForExport(
     hasInboundEventIdentity: _hasInboundEventIdentity,
     ...exportAttributes
   } = connector.attributes;
-  const { ingestTokenHash: _ingestTokenHash, ...exportConfig } = (exportAttributes.config ??
-    {}) as Record<string, unknown>;
-
   return {
     ...connector,
     attributes: {
       ...exportAttributes,
-      config: exportConfig,
+      config: exportAttributes.config ?? {},
       secrets: {},
       isMissingSecrets,
       apiKey: null,

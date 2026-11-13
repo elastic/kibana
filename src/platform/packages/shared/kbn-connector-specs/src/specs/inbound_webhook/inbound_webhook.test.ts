@@ -36,10 +36,6 @@ describe('InboundWebhook', () => {
     expect(InboundWebhook.test.enabled).toBe(false);
   });
 
-  it('does not declare ingestTokenHash (factory injects it)', () => {
-    expect(InboundWebhook.schema?.shape).not.toHaveProperty('ingestTokenHash');
-  });
-
   it('is allowlisted to declare events', () => {
     expect(SPECS_ALLOWED_EVENTS.has(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID)).toBe(true);
     expect(InboundWebhook.events).toBeDefined();

@@ -91,11 +91,6 @@ const toEmittedHttpResult = (
   };
 };
 
-const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, unknown> => {
-  const { ingestTokenHash: _omit, ...spokeConfig } = config;
-  return spokeConfig;
-};
-
 /**
  * Orchestrates inbound connector event ingest and maps connector HTTP acks to the caller.
  */
@@ -287,7 +282,7 @@ export async function ingestInboundEvent({
         connectorId,
         connectorTypeId,
         spaceId,
-        config: stripIngestTokenHash(connector.config),
+        config: connector.config,
         rawBody: body,
         headers: Object.fromEntries(
           (spec.events.headers ?? []).map((name) => [name, headers[name]])
