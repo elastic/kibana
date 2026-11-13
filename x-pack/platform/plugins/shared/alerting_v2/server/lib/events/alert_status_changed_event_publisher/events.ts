@@ -13,8 +13,9 @@ export const ALERT_STATUS_CHANGED_EVENT_TYPE = 'alert.status.changed' as const;
 /**
  * Domain event published on the alerting bus once per genuine alert status
  * change, after the change is persisted. Published by the rule executor for
- * rule-produced alerts and by the alert events client for alerts written
- * through it.
+ * rule-produced alerts, by the alert events client for alerts written
+ * through it, and by the alert actions client when a user deactivates or
+ * activates an alert.
  *
  * The payload is the `alerting.alertStatusChanged` trigger payload, so the
  * workflow subscriber forwards it unchanged.
