@@ -29,6 +29,7 @@ export const useInitTimelineFromUrlParam = () => {
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
       if (initialState != null) {
+        // Read from the store: this callback runs once on mount, so a selected value would be stale.
         const savePromptDismissed = !!selectTimelineById(store.getState(), TimelineId.active)
           ?.savePromptDismissed;
 

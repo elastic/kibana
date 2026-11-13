@@ -19,6 +19,7 @@ import {
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
   pinEvent,
+  setSavePromptDismissed,
 } from '../actions';
 import { persistNote } from '../../containers/notes/api';
 import { selectTimelineById } from '../selectors';
@@ -73,6 +74,8 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
         });
 
         refreshTimelines(store.getState());
+        // Notes do not go through `setChanged`, so re-arm the unsaved changes prompt here.
+        store.dispatch(setSavePromptDismissed({ id: localTimelineId, dismissed: false }));
 
         await store.dispatch(
           updateNote({

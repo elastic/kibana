@@ -25,8 +25,7 @@ let mockUrlState: TimelineUrl | null = null;
 jest.mock('../../utils/global_query_string', () => ({
   // Mirrors the real hook: calls the initializer once on mount with the parsed URL param.
   useInitializeUrlParam: (_key: string, onInitialize: (state: unknown) => void) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { useEffect } = require('react');
+    const { useEffect } = jest.requireActual('react');
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => onInitialize(mockUrlState), []);
   },
@@ -36,10 +35,8 @@ jest.mock('../../utils/global_query_string', () => ({
 // which the `timelineChangedMiddleware` turns into `changed: true`.
 jest.mock('../../../timelines/components/open_timeline/helpers', () => ({
   useQueryTimelineById: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { useDispatch: useReduxDispatch } = require('react-redux-v7');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { timelineActions: actions } = require('../../../timelines/store');
+    const { useDispatch: useReduxDispatch } = jest.requireActual('react-redux-v7');
+    const { timelineActions: actions } = jest.requireActual('../../../timelines/store');
     const dispatch = useReduxDispatch();
     return () =>
       dispatch(

@@ -14,6 +14,7 @@ import type { MemoryHistory } from 'history';
 import type { AppLeaveActionFactory, AppLeaveHandler } from '@kbn/core-application-browser';
 import { AppLeaveActionType } from '@kbn/core-application-browser';
 import { TimelineId } from '../../../../common/types';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { createMockStore } from '../../mock';
 import { timelineActions } from '../../../timelines/store';
 import { selectTimelineById } from '../../../timelines/store/selectors';
@@ -159,6 +160,74 @@ describe('useTimelineSavePrompt', () => {
       await flushPromises();
 
       expect(mockOpenConfirm).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('saved draft', () => {
+    // Adding a note or pinning an event saves the timeline as a draft without marking it changed.
+    const makeSavedDraft = () => {
+      store.dispatch(timelineActions.setChanged({ id: TimelineId.active, changed: false }));
+      store.dispatch(
+        timelineActions.updateTimeline({
+          id: TimelineId.active,
+          timeline: {
+            ...selectTimelineById(store.getState(), TimelineId.active),
+            status: TimelineStatusEnum.draft,
+            updated: 1,
+          },
+        })
+      );
+    };
+
+    it('prompts when leaving a saved draft', () => {
+      makeSavedDraft();
+      renderPromptHook();
+
+      expect(leaveToOtherApp()).toEqual(
+        expect.objectContaining({ type: AppLeaveActionType.confirm })
+      );
+    });
+
+    it('does not prompt again after the user confirmed leaving', async () => {
+      mockOpenConfirm.mockResolvedValue(true);
+      makeSavedDraft();
+
+      const { unmount } = renderPromptHook();
+      act(() => {
+        history.push('/findings');
+      });
+      await flushPromises();
+      expect(mockOpenConfirm).toHaveBeenCalledTimes(1);
+      unmount();
+
+      history.push('/entity_analytics');
+      renderPromptHook();
+      act(() => {
+        history.push('/findings');
+      });
+      await flushPromises();
+
+      expect(mockOpenConfirm).toHaveBeenCalledTimes(1);
+      expect(leaveToOtherApp()).toEqual({ type: AppLeaveActionType.default });
+    });
+
+    it('prompts again once the prompt is re-armed', () => {
+      makeSavedDraft();
+      store.dispatch(
+        timelineActions.setSavePromptDismissed({ id: TimelineId.active, dismissed: true })
+      );
+      renderPromptHook();
+      expect(leaveToOtherApp()).toEqual({ type: AppLeaveActionType.default });
+
+      act(() => {
+        store.dispatch(
+          timelineActions.setSavePromptDismissed({ id: TimelineId.active, dismissed: false })
+        );
+      });
+
+      expect(leaveToOtherApp()).toEqual(
+        expect.objectContaining({ type: AppLeaveActionType.confirm })
+      );
     });
   });
 

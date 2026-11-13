@@ -86,8 +86,8 @@ export const useTimelineSavePrompt = (
 
       if (
         !getIsTimelineVisible(relativePath) &&
-        ((changed && !savePromptDismissed) ||
-          (timelineStatus === TimelineStatusEnum.draft && updated != null))
+        !savePromptDismissed &&
+        (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
         confirmSaveTimeline();
       } else {
@@ -132,8 +132,8 @@ export const useTimelineSavePrompt = (
       // Confirm when the user has made any changes to a timeline
       if (
         !(nextAppId ?? '').includes(APP_ID) &&
-        ((changed && !savePromptDismissed) ||
-          (timelineStatus === TimelineStatusEnum.draft && updated != null))
+        !savePromptDismissed &&
+        (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
         // `nextAppId` is undefined for the browser `beforeunload` prompt, which never unmounts the app.
         appLeavePromptPendingRef.current = nextAppId != null;
