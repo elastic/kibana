@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/lens-common'
+  - '@kbn/visualizations-common'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
   - '@kbn/data-plugin'
@@ -55,6 +56,8 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/ui-callout'
+  - '@kbn/core-spaces-common'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
