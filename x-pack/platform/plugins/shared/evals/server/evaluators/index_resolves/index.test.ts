@@ -180,18 +180,21 @@ describe('skill-index-resolves', () => {
     expect(resolveIndexMock).toHaveBeenCalledWith(expect.objectContaining({ name: 'my-index' }));
   });
 
-  it.each(['`host.name`', '`process.entity_id`', '`@timestamp`', '`event.category`'])(
-    'does not treat the backticked field path %s as an index',
-    async (field) => {
-      const { esClient, resolveIndexMock } = createEsClient();
-      await indexResolvesEvaluator.evaluate({
-        trace: { traceId, esClient },
-        round: round(`Group by ${field} to count`),
-        log,
-      });
-      expect(resolveIndexMock).not.toHaveBeenCalled();
-    }
-  );
+  it.each([
+    '`host.name`',
+    '`process.entity_id`',
+    '`@timestamp`',
+    '`event.category`',
+    '`kubernetes.labels.app-name`',
+  ])('does not treat the backticked field path %s as an index', async (field) => {
+    const { esClient, resolveIndexMock } = createEsClient();
+    await indexResolvesEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round(`Group by ${field} to count`),
+      log,
+    });
+    expect(resolveIndexMock).not.toHaveBeenCalled();
+  });
 
   it('still resolves a backticked index with a known shape', async () => {
     const { esClient, resolveIndexMock } = createEsClient();

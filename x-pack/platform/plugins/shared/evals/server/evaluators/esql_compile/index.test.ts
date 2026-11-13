@@ -68,7 +68,21 @@ describe('esql-compile', () => {
       expect.objectContaining({
         method: 'POST',
         path: '/_query',
-        body: { query: 'FROM logs-*\n| LIMIT 10 | LIMIT 0' },
+        body: { query: 'FROM logs-*\n| LIMIT 10\n| LIMIT 0' },
+      })
+    );
+  });
+
+  it('keeps LIMIT 0 out of a trailing line comment', async () => {
+    const { esClient, requestMock } = createEsClient();
+    await esqlCompileEvaluator.evaluate({
+      trace: { traceId, esClient },
+      round: round('```esql\nFROM logs-* | WHERE x > 1 // check\n```'),
+      log,
+    });
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: { query: 'FROM logs-* | WHERE x > 1 // check\n| LIMIT 0' },
       })
     );
   });
@@ -83,7 +97,7 @@ describe('esql-compile', () => {
     expect(requestMock).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/_query',
-        body: { query: 'FROM logs-*\n| WHERE x > 1 | LIMIT 0' },
+        body: { query: 'FROM logs-*\n| WHERE x > 1\n| LIMIT 0' },
       })
     );
   });
@@ -143,7 +157,7 @@ describe('esql-compile', () => {
       log,
     });
     expect(requestMock).toHaveBeenCalledWith(
-      expect.objectContaining({ body: { query: 'FROM logs-* | LIMIT 1 | LIMIT 0' } })
+      expect.objectContaining({ body: { query: 'FROM logs-* | LIMIT 1\n| LIMIT 0' } })
     );
   });
 });

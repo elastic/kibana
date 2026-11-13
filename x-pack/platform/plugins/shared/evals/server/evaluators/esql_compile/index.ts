@@ -50,7 +50,8 @@ const verifyQuery = async (
   esClient: ElasticsearchClient,
   rawQuery: string
 ): Promise<QueryCheckResult> => {
-  const query = `${rawQuery} | LIMIT 0`;
+  // On its own line so a trailing `//` comment cannot swallow it.
+  const query = `${rawQuery}\n| LIMIT 0`;
 
   try {
     await (

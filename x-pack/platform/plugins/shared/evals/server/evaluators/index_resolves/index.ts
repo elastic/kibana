@@ -26,7 +26,8 @@ const KIBANA_HIDDEN_PREFIX_SHAPE =
 const DATA_STREAM_SHAPE = /^(?:logs|metrics|traces|synthetics)-(?=[\w.-]*[.*])[\w.*-]+$/;
 // ECS-style field paths (`host.name`, `process.entity_id`, `@timestamp`) are
 // backticked in ES|QL as often as index names are.
-const FIELD_PATH_SHAPE = /^@?[a-z_][a-z0-9_]*(?:\.@?[a-z0-9_]+)*$/i;
+// Segments after the first may hold hyphens (`kubernetes.labels.app-name`).
+const FIELD_PATH_SHAPE = /^@?[a-z_][a-z0-9_]*(?:\.@?[a-z0-9_-]+)*$/i;
 
 const FILE_EXTENSION =
   /\.(?:txt|json|ya?ml|md|jsx?|tsx?|py|log|csv|xml|html?|png|jpe?g|conf|cfg|ini|sh|exe|dll|pdf|zip|gz)$/i;
