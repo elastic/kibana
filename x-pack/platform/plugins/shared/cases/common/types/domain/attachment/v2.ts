@@ -13,6 +13,7 @@ import {
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../constants/attachments';
 import {
   AlertAttachmentAttributesRt,
@@ -135,6 +136,7 @@ const UnifiedDocumentAttachmentAttributesRt = rt.intersection([
       rt.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
       rt.literal(STACK_ALERT_ATTACHMENT_TYPE),
       rt.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
+      rt.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
     ]),
     attachmentId: rt.union([rt.string, rt.array(rt.string)]),
     owner: rt.string,
