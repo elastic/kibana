@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-
 export interface DecisionPredicateQuestion {
   type: 'predicate';
   instructions: string;
@@ -63,35 +61,30 @@ export type DecisionAnswersFor<Q extends readonly DecisionQuestion[]> = {
   [I in keyof Q]: DecisionAnswerFor<Q[I]>;
 };
 
-export interface DecideParams {
-  /** The request whose user the decision model is called as. */
-  request: KibanaRequest;
+export interface DecideOptions {
   /** The text the decision model reads. */
   input: string;
+  /** The `decision` inference endpoint to use. Defaults to the first one the cluster lists. */
+  inferenceId?: string;
   abortSignal?: AbortSignal;
 }
 
-/**
- * Outcome of a decision. Problems with the decision model are reported as `unavailable` or
- * `failed` rather than thrown, so each caller picks its own fallback.
- */
-export type DecideResult<T> =
-  | ({ status: 'decided'; inferenceId: string } & T)
-  | { status: 'unavailable' }
-  | { status: 'failed'; error: Error };
+/** A decision, with the inference endpoint that made it. */
+export type DecideResponse<T> = { inferenceId: string } & T;
 
 /**
- * Decision models: fast, cheap answers to bounded questions.
+ * Asks a decision model bounded questions about an input: fast, cheap answers with
+ * probabilities. Throws an inference request error with status 404 when the cluster has no
+ * usable `decision` endpoint.
  */
-export interface DecisionsStart {
-  /** Asks the cluster's decision model one question about the input. */
-  decide<const Q extends DecisionQuestion>(
-    params: DecideParams,
-    question: Q
-  ): Promise<DecideResult<{ answer: DecisionAnswerFor<Q> }>>;
+export interface DecideAPI {
+  /** Asks one question about the input. */
+  <const Q extends DecisionQuestion>(options: DecideOptions, question: Q): Promise<
+    DecideResponse<{ answer: DecisionAnswerFor<Q> }>
+  >;
   /** Asks several questions about the same input in one call; answers follow the questions' order. */
-  decide<const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
-    params: DecideParams,
+  <const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
+    options: DecideOptions,
     ...questions: Q
-  ): Promise<DecideResult<{ answers: DecisionAnswersFor<Q> }>>;
+  ): Promise<DecideResponse<{ answers: DecisionAnswersFor<Q> }>>;
 }

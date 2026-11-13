@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { DecisionAnswer, DecisionQuestion } from '@kbn/agent-builder-server';
+import type { DecisionAnswer, DecisionQuestion } from '@kbn/inference-common';
+import { createInferenceProviderError } from '@kbn/inference-common';
 import { questionKey } from './question_keys';
 
 interface RawProbability {
@@ -28,7 +29,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 
 const requireNumber = (value: unknown, field: string, name: string): number => {
   if (typeof value !== 'number') {
-    throw new Error(`Decision answer [${name}] has no numeric [${field}]`);
+    throw createInferenceProviderError(`Decision answer [${name}] has no numeric [${field}]`);
   }
   return value;
 };
@@ -40,7 +41,7 @@ const toProbabilities = (
   name: string
 ): Record<string, number> => {
   if (!Array.isArray(value)) {
-    throw new Error(`Decision answer [${name}] has no [probabilities] list`);
+    throw createInferenceProviderError(`Decision answer [${name}] has no [probabilities] list`);
   }
 
   return Object.fromEntries(
@@ -60,7 +61,7 @@ const toAnswer = (raw: RawAnswer, name: string): DecisionAnswer => {
       };
     case 'choice':
       if (typeof raw.choice !== 'string') {
-        throw new Error(`Decision answer [${name}] has no [choice]`);
+        throw createInferenceProviderError(`Decision answer [${name}] has no [choice]`);
       }
       return {
         type: 'choice',
@@ -76,7 +77,9 @@ const toAnswer = (raw: RawAnswer, name: string): DecisionAnswer => {
         probabilities: toProbabilities(raw.probabilities, 'label', name),
       };
     default:
-      throw new Error(`Decision answer [${name}] has unknown type [${String(raw.type)}]`);
+      throw createInferenceProviderError(
+        `Decision answer [${name}] has unknown type [${String(raw.type)}]`
+      );
   }
 };
 
@@ -92,7 +95,7 @@ export const parseDecisionResponse = (
   const answers = isObject(decision) ? decision.answers : undefined;
 
   if (!isObject(answers)) {
-    throw new Error('Decision response has no [decision.answers]');
+    throw createInferenceProviderError('Decision response has no [decision.answers]');
   }
 
   return questions.map((question, index) => {
@@ -100,11 +103,11 @@ export const parseDecisionResponse = (
     const raw = answers[name];
 
     if (!isObject(raw)) {
-      throw new Error(`Decision response has no answer for question [${name}]`);
+      throw createInferenceProviderError(`Decision response has no answer for question [${name}]`);
     }
 
     if (raw.type !== question.type) {
-      throw new Error(
+      throw createInferenceProviderError(
         `Decision answer [${name}] has type [${String(raw.type)}], expected [${question.type}]`
       );
     }

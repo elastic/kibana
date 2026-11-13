@@ -44,11 +44,6 @@ describe('ToolsService', () => {
             scheduledDelay: 1000,
             opik_distributed_tracing: false,
           },
-          decisionModel: {
-            eisTimeoutMs: 1000,
-            fastModelTimeoutMs: 2000,
-            unavailableTtlMs: 3600000,
-          },
         },
       });
 
@@ -68,11 +63,6 @@ describe('ToolsService', () => {
             exporters: [],
             scheduledDelay: 1000,
             opik_distributed_tracing: false,
-          },
-          decisionModel: {
-            eisTimeoutMs: 1000,
-            fastModelTimeoutMs: 2000,
-            unavailableTtlMs: 3600000,
           },
         },
       });

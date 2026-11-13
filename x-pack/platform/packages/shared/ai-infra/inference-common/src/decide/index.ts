@@ -6,17 +6,17 @@
  */
 
 export type {
-  DecisionPredicateQuestion,
-  DecisionChoiceQuestion,
-  DecisionScoreQuestion,
-  DecisionQuestion,
-  DecisionPredicateAnswer,
-  DecisionChoiceAnswer,
-  DecisionScoreAnswer,
+  DecideAPI,
+  DecideOptions,
+  DecideResponse,
   DecisionAnswer,
   DecisionAnswerFor,
   DecisionAnswersFor,
-  DecideParams,
-  DecideResult,
-  DecisionsStart,
-} from './types';
+  DecisionChoiceAnswer,
+  DecisionChoiceQuestion,
+  DecisionPredicateAnswer,
+  DecisionPredicateQuestion,
+  DecisionQuestion,
+  DecisionScoreAnswer,
+  DecisionScoreQuestion,
+} from './api';

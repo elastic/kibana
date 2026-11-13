@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createDecisionProviders, DecisionService } from './decision_service';
+export { createDecideApi } from './create_decide_api';

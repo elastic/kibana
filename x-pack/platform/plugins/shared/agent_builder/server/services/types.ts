@@ -29,7 +29,6 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
   CallbacksSetup,
-  DecisionsStart,
   HooksServiceSetup,
   HooksServiceStart,
 } from '@kbn/agent-builder-server';
@@ -91,7 +90,6 @@ export interface InternalStartServices {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
-  decisions: DecisionsStart;
   taskHandler: TaskHandler;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
