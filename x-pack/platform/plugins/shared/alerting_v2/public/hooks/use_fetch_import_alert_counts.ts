@@ -6,7 +6,8 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { PluginStart, useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { useService } from '@kbn/core-di-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { runEsqlAsyncSearch } from '@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search';
 import { esqlResponseToObjectRows } from '@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows';
