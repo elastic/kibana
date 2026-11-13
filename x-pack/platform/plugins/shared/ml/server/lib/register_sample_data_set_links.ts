@@ -32,7 +32,7 @@ export function registerSampleDataSetLinks(
           },
           getPath: (objectId) => getCreateJobPath('sample_data_ecommerce', objectId),
           label: sampleDataLinkLabel,
-          icon: 'machineLearningApp',
+          icon: 'productML',
         },
       ]);
     } catch (error) {
@@ -48,7 +48,7 @@ export function registerSampleDataSetLinks(
           },
           getPath: (objectId) => getCreateJobPath('sample_data_weblogs', objectId),
           label: sampleDataLinkLabel,
-          icon: 'machineLearningApp',
+          icon: 'productML',
         },
       ]);
     } catch (error) {

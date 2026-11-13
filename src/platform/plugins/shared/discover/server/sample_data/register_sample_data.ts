@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import type { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/common';
-import { APP_ICON } from '../../common';
 
 function getDiscoverPathForSampleDataset(objId: string) {
   // TODO: remove the time range from the URL query when saved search objects start supporting time range configuration
@@ -36,7 +35,7 @@ export function registerSampleData(sampleDataRegistry: SampleDataRegistrySetup) 
           sampleObject: sampleSavedSearchObject,
           getPath: getDiscoverPathForSampleDataset,
           label: linkLabel,
-          icon: APP_ICON,
+          icon: 'productDiscover',
           order: -1,
         },
       ]);
