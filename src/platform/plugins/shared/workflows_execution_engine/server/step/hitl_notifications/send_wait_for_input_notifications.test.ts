@@ -7,11 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SERVICENOW_COMMENT_MAX_LENGTH } from './hitl_connector_helpers';
+import {
+  escapeSlackMrkdwnText,
+  SERVICENOW_COMMENT_MAX_LENGTH,
+  SLACK_SECTION_TEXT_MAX_LENGTH,
+} from './hitl_connector_helpers';
 import { sendWaitForInputNotifications } from './send_wait_for_input_notifications';
 
 describe('sendWaitForInputNotifications', () => {
   const renderTemplate = (template: string) => template;
+
+  it('escapes a default Slack API section so the step text cannot add a link', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
+      },
+      stepMessage: 'See <https://evil.example|click>',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    const blocks = JSON.parse(execute.mock.calls[0][0].input.subActionParams.text).blocks;
+    expect(blocks[0].text.text).toBe('See &lt;https:\u2060//evil.example|click&gt;');
+    expect(blocks[1].type).toBe('actions');
+  });
+
+  it('shortens an escaped Slack API section to 3000 characters and keeps the button', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+    const stepMessage = 'host <node> & status ok\n'.repeat(100);
+
+    await sendWaitForInputNotifications({
+      channels: {
+        slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
+      },
+      stepMessage,
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    const escaped = escapeSlackMrkdwnText(stepMessage);
+    const blocks = JSON.parse(execute.mock.calls[0][0].input.subActionParams.text).blocks;
+    const section = blocks.find((block: { type: string }) => block.type === 'section');
+
+    expect(escaped.length).toBeGreaterThan(SLACK_SECTION_TEXT_MAX_LENGTH);
+    expect(section.text.text.length).toBeLessThanOrEqual(SLACK_SECTION_TEXT_MAX_LENGTH);
+    expect(escaped.startsWith(section.text.text)).toBe(true);
+    expect(section.text.text).not.toMatch(/&(?!amp;|lt;|gt;)/);
+    expect(blocks.some((block: { type: string }) => block.type === 'actions')).toBe(true);
+  });
 
   it('sends slack_api #channel values as channelNames and ids as channelIds', async () => {
     const execute = jest.fn().mockResolvedValue({ status: 'ok' });
