@@ -31,6 +31,8 @@ export const isInvestigationRunQuotaGroup = (
   INVESTIGATION_RUN_QUOTA_GROUPS.some((candidate) => candidate === group);
 
 export const MIN_RUN_LIMIT = 0;
+/** Stored investigation limit meaning no limit, since 0 denies every investigation. */
+export const UNLIMITED_RUN_LIMIT = -1;
 export const MAX_RUN_LIMIT = 10_000;
 export const DEFAULT_RUN_QUOTA_TIME_ZONE = 'UTC';
 
@@ -66,9 +68,9 @@ export const isRunQuotaReached = ({
   limit: number;
   count: number;
 }): boolean =>
-  (isInvestigationRunQuotaGroup(group) ? investigationLimitsEnabled : enabled) &&
-  limit > MIN_RUN_LIMIT &&
-  count >= limit;
+  isInvestigationRunQuotaGroup(group)
+    ? investigationLimitsEnabled && limit !== UNLIMITED_RUN_LIMIT && count >= limit
+    : enabled && limit > MIN_RUN_LIMIT && count >= limit;
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
   enabled: true,

@@ -10,6 +10,9 @@ import { schema } from '@kbn/config-schema';
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
+  UNLIMITED_RUN_LIMIT,
+  isInvestigationRunQuotaGroup,
+  RUN_QUOTA_GROUPS,
   type RunQuotaGroup,
   type RunQuotaSettings,
 } from '../../../common/run_quotas';
@@ -47,6 +50,26 @@ const runQuotaSettingsAttributesV1 = schema.object({
 const runQuotaSettingsAttributesV2 = runQuotaSettingsAttributesV1.extends({
   investigationLimitsEnabled: schema.maybe(schema.boolean()),
 });
+
+const runQuotaSettingsAttributesV3 = runQuotaSettingsAttributesV2.extends({
+  limits: schema.recordOf(
+    schema.string({ maxLength: RUN_QUOTA_GROUP_MAX_LENGTH }),
+    schema.number({ min: UNLIMITED_RUN_LIMIT, max: MAX_RUN_LIMIT, validate: validateInteger })
+  ),
+});
+
+export const backfillUnlimitedInvestigationLimits = (
+  limits: Record<string, number>
+): Record<string, number> =>
+  Object.fromEntries(
+    Object.entries(limits).map(([group, limit]) => [
+      group,
+      RUN_QUOTA_GROUPS.some((known) => known === group && isInvestigationRunQuotaGroup(known)) &&
+      limit === MIN_RUN_LIMIT
+        ? UNLIMITED_RUN_LIMIT
+        : limit,
+    ])
+  );
 
 const runQuotaLedgerAttributesV1 = schema.object({
   date: schema.string({ maxLength: RUN_QUOTA_DATE_MAX_LENGTH }),
@@ -92,6 +115,20 @@ export const runQuotaSettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: runQuotaSettingsAttributesV2.extends({}, { unknowns: 'ignore' }),
         create: runQuotaSettingsAttributesV2.extends({}, { unknowns: 'allow' }),
+      },
+    },
+    '3': {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: ({ attributes }) => ({
+            attributes: { limits: backfillUnlimitedInvestigationLimits(attributes.limits) },
+          }),
+        },
+      ],
+      schemas: {
+        forwardCompatibility: runQuotaSettingsAttributesV3.extends({}, { unknowns: 'ignore' }),
+        create: runQuotaSettingsAttributesV3.extends({}, { unknowns: 'allow' }),
       },
     },
   },

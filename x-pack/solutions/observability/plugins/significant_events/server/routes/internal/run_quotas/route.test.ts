@@ -121,6 +121,12 @@ describe('Significant Events run quota routes', () => {
     expect(putRoute.params.safeParse({ body: { limits: { investigation: null } } }).success).toBe(
       true
     );
+    expect(putRoute.params.safeParse({ body: { limits: { investigation: 0 } } }).success).toBe(
+      true
+    );
+    expect(
+      putRoute.params.safeParse({ body: { activateLimits: { investigation: 0 } } }).success
+    ).toBe(true);
     expect(putRoute.params.safeParse({ body: { activateLimits: { detection: 15 } } }).success).toBe(
       true
     );
@@ -139,8 +145,8 @@ describe('Significant Events run quota routes', () => {
       { limits: { detection: -1 } },
       { limits: { detection: 10_001 } },
       { limits: { detection: 1.5 } },
-      { limits: { investigation: 0 } },
-      { limits: { manual_investigation: 0 } },
+      { limits: { investigation: -1 } },
+      { limits: { manual_investigation: -1 } },
       { limits: { total_investigation: 10_001 } },
       { limits: { memory: 1 } },
       { activateLimits: {} },
@@ -274,7 +280,7 @@ describe('Significant Events run quota routes', () => {
     });
   });
 
-  it('stores unlimited investigation limits as zero and leaves omitted ones untouched', async () => {
+  it('stores unlimited investigation limits as the sentinel and leaves omitted ones untouched', async () => {
     jest.mocked(patchRunQuotaSettings).mockResolvedValue(defaultSettings);
 
     await putRoute.handler({
@@ -286,7 +292,7 @@ describe('Significant Events run quota routes', () => {
       },
     } as never);
     expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
-      limits: { investigation: 0, manual_investigation: 0, total_investigation: 7 },
+      limits: { investigation: -1, manual_investigation: -1, total_investigation: 7 },
     });
 
     await putRoute.handler({
@@ -303,7 +309,7 @@ describe('Significant Events run quota routes', () => {
     } as never);
     expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
       activateLimits: { detection: 5 },
-      limits: { investigation: 0 },
+      limits: { investigation: -1 },
     });
   });
 

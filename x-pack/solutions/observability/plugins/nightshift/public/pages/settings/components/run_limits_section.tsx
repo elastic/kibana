@@ -256,7 +256,7 @@ export const RunLimitsSection = ({
         >
           {warnings.loweringGroups.map((group) => {
             const limit = draftState.draft.limits[group];
-            return isFiniteRunLimit(limit) ? (
+            return isFiniteRunLimit(limit, group) ? (
               <p key={group}>
                 {i18n.translate(
                   'xpack.nightshift.settings.runLimits.loweringEnabledGroupWarningDescription',

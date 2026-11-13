@@ -42,8 +42,8 @@ const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse
   limits: {
     detection: 100,
     investigation: 30,
-    manual_investigation: 0,
-    total_investigation: 0,
+    manual_investigation: -1,
+    total_investigation: -1,
     ki_extraction: 20,
   },
   counts: {
@@ -155,8 +155,8 @@ describe('RunLimitsSection', () => {
         limits: {
           detection: 100,
           investigation: 30,
-          manual_investigation: 0,
-          total_investigation: 0,
+          manual_investigation: -1,
+          total_investigation: -1,
           ki_extraction: 20,
         },
         counts: {
@@ -297,7 +297,7 @@ describe('RunLimitsSection', () => {
       response({
         limits: {
           detection: 100,
-          investigation: 0,
+          investigation: -1,
           manual_investigation: 5,
           total_investigation: 10,
           ki_extraction: 20,
@@ -324,14 +324,39 @@ describe('RunLimitsSection', () => {
     );
   });
 
+  it('keeps a typed zero as a limit under the shared switch', async () => {
+    setup(
+      response({
+        limits: {
+          detection: 100,
+          investigation: 4,
+          manual_investigation: 5,
+          total_investigation: 10,
+          ki_extraction: 20,
+        },
+      }),
+      ['investigation', 'manual_investigation', 'total_investigation'],
+      'automations',
+      true
+    );
+
+    const manual = screen.getByTestId('nightshiftRunLimitInput-manual_investigation');
+    fireEvent.change(manual, { target: { value: '0' } });
+    expect(manual).toHaveValue(0);
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Save lower limits' }));
+
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ limits: { manual_investigation: 0 } }));
+  });
+
   it('keeps the inputs while the last finite limit is cleared under the shared switch', () => {
     setup(
       response({
         limits: {
           detection: 100,
           investigation: 4,
-          manual_investigation: 0,
-          total_investigation: 0,
+          manual_investigation: -1,
+          total_investigation: -1,
           ki_extraction: 20,
         },
       }),
@@ -356,7 +381,7 @@ describe('RunLimitsSection', () => {
     const groups = ['investigation', 'manual_investigation', 'total_investigation'] as const;
     const limits = {
       detection: 100,
-      investigation: 0,
+      investigation: -1,
       manual_investigation: 6,
       total_investigation: 9,
       ki_extraction: 20,
@@ -530,8 +555,8 @@ describe('RunLimitsSection', () => {
         limits: {
           detection: 0,
           investigation: 30,
-          manual_investigation: 0,
-          total_investigation: 0,
+          manual_investigation: -1,
+          total_investigation: -1,
           ki_extraction: 20,
         },
         counts: {
@@ -670,8 +695,8 @@ describe('RunLimitsSection', () => {
     const limits = {
       detection: 100,
       investigation: 4,
-      manual_investigation: 0,
-      total_investigation: 0,
+      manual_investigation: -1,
+      total_investigation: -1,
       ki_extraction: 20,
     };
     const { rerender } = setup(response({ limits }), groups, 'automations', true);
@@ -700,8 +725,8 @@ describe('RunLimitsSection', () => {
         limits: {
           detection: 90,
           investigation: 30,
-          manual_investigation: 0,
-          total_investigation: 0,
+          manual_investigation: -1,
+          total_investigation: -1,
           ki_extraction: 20,
         },
         counts: {

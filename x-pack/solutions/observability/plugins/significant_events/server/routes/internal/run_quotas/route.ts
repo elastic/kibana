@@ -14,6 +14,8 @@ import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
   RUN_QUOTA_GROUPS,
+  UNLIMITED_RUN_LIMIT,
+  isInvestigationRunQuotaGroup,
   type RunQuotaGroup,
   type RunQuotaSettingsPatch,
   type RunQuotasResponse,
@@ -35,13 +37,7 @@ import {
 } from '../../../lib/run_quotas';
 
 const investigationLimitUpdateSchema = lazySchema(() =>
-  z
-    .number()
-    .int()
-    .min(MIN_RUN_LIMIT + 1)
-    .max(MAX_RUN_LIMIT)
-    .nullable()
-    .optional()
+  z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).nullable().optional()
 );
 
 const investigationLimitsUpdateShape = {
@@ -63,31 +59,28 @@ const limitsUpdateSchema = lazySchema(() =>
     })
 );
 
-const activateLimitsSchema = z
-  .object({
-    detection: z
-      .number()
-      .int()
-      .min(MIN_RUN_LIMIT + 1)
-      .max(MAX_RUN_LIMIT)
-      .optional(),
-    investigation: z
-      .number()
-      .int()
-      .min(MIN_RUN_LIMIT + 1)
-      .max(MAX_RUN_LIMIT)
-      .optional(),
-    ki_extraction: z
-      .number()
-      .int()
-      .min(MIN_RUN_LIMIT + 1)
-      .max(MAX_RUN_LIMIT)
-      .optional(),
-  })
-  .strict()
-  .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
-    message: 'At least one run limit to activate is required',
-  });
+const activateLimitsSchema = lazySchema(() =>
+  z
+    .object({
+      detection: z
+        .number()
+        .int()
+        .min(MIN_RUN_LIMIT + 1)
+        .max(MAX_RUN_LIMIT)
+        .optional(),
+      investigation: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
+      ki_extraction: z
+        .number()
+        .int()
+        .min(MIN_RUN_LIMIT + 1)
+        .max(MAX_RUN_LIMIT)
+        .optional(),
+    })
+    .strict()
+    .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
+      message: 'At least one run limit to activate is required',
+    })
+);
 
 const settingsUpdateSchema = lazySchema(() =>
   z.union([
@@ -125,9 +118,14 @@ const toStoredLimits = (
   limits: Partial<Record<RunQuotaGroup, number | null>>
 ): Partial<Record<RunQuotaGroup, number>> =>
   Object.fromEntries(
-    Object.entries(limits).flatMap(([group, limit]) =>
-      limit === undefined ? [] : [[group, limit ?? MIN_RUN_LIMIT]]
-    )
+    RUN_QUOTA_GROUPS.flatMap((group) => {
+      const limit = limits[group];
+      if (limit === undefined) {
+        return [];
+      }
+      const unlimited = isInvestigationRunQuotaGroup(group) ? UNLIMITED_RUN_LIMIT : MIN_RUN_LIMIT;
+      return [[group, limit ?? unlimited]];
+    })
   );
 
 const toStoredPatch = (body: z.infer<typeof settingsUpdateSchema>): RunQuotaSettingsPatch => {

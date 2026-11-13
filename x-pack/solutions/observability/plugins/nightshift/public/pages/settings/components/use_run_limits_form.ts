@@ -83,7 +83,7 @@ export const useRunLimitsForm = ({
       const next = effectiveDraftState.draft.limits[group];
       return (
         next !== effectiveDraftState.saved.limits[group] &&
-        isLowerFiniteLimit(effectiveDraftState.saved.limits[group], next) &&
+        isLowerFiniteLimit(group, effectiveDraftState.saved.limits[group], next) &&
         response.counts[group] >= next
       );
     });
