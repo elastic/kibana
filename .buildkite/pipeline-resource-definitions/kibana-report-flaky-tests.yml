@@ -45,6 +45,9 @@ spec:
         FLAKY_TESTS_UPDATE_ISSUES: 'true'
         # Days to wait after a comment before the issue can get another; reopens always comment.
         FLAKY_TESTS_COMMENT_COOLDOWN_DAYS: '3'
+        # Close the open per-test issues of a suite's flaky tests as duplicates of its issue, rather
+        # than count them as tracking it, now that CI no longer updates them
+        FLAKY_TESTS_REPLACE_PER_TEST_ISSUES: 'true'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true
