@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -17,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   profilingCo2PerKWH,
@@ -65,8 +67,21 @@ export function Settings() {
     },
   } = useProfilingDependencies();
 
-  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings({ settingsKeys: SETTINGS_KEYS, settingsClient: settings.client });
+  const {
+    fields,
+    isLoading,
+    loadError,
+    handleFieldChange,
+    unsavedChanges,
+    saveAll,
+    isSaving,
+    cleanUnsavedChanges,
+  } = useEditableSettings({
+    settingsKeys: SETTINGS_KEYS,
+    settingsClient: settings.client,
+    metadataClient: settings.metadata,
+    scope: 'namespace',
+  });
 
   async function handleSave() {
     try {
@@ -104,6 +119,18 @@ export function Settings() {
           </EuiText>
         </EuiTitle>
         <EuiSpacer />
+        {loadError && (
+          <>
+            <KbnDangerCallout
+              title={i18n.translate('xpack.profiling.settings.load.error', {
+                defaultMessage: 'Unable to load settings',
+              })}
+              text={loadError.message}
+              data-test-subj="profilingSettingsLoadError"
+            />
+            <EuiSpacer />
+          </>
+        )}
         {[
           {
             label: i18n.translate('xpack.profiling.settings.co2Section', {
@@ -266,8 +293,19 @@ export function Settings() {
                     <EuiSpacer size="m" />
                   </>
                 ) : null}
+                {isLoading && (
+                  <EuiFlexGroup justifyContent="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="xl" data-test-subj="profilingSettingsLoading" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
                 {item.settings.map((settingKey) => {
                   const field = fields[settingKey];
+                  if (!field) {
+                    return null;
+                  }
+
                   return (
                     <FieldRowProvider
                       {...{

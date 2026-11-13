@@ -14,8 +14,21 @@ Manages the state for a page that edits a fixed list of UI settings: the `FieldD
 ```tsx
 import { useEditableSettings } from '@kbn/management-settings-hooks';
 
-const { fields, unsavedChanges, handleFieldChange, cleanUnsavedChanges, saveAll, isSaving } =
-  useEditableSettings({ settingsKeys: [mySettingId], settingsClient: settings.client });
+const {
+  fields,
+  isLoading,
+  loadError,
+  unsavedChanges,
+  handleFieldChange,
+  cleanUnsavedChanges,
+  saveAll,
+  isSaving,
+} = useEditableSettings({
+  settingsKeys: [mySettingId],
+  settingsClient: settings.client,
+  metadataClient: settings.metadata,
+  scope: 'namespace',
+});
 
 const onSave = async () => {
   const { requiresReload } = await saveAll();
@@ -25,5 +38,6 @@ const onSave = async () => {
 };
 ```
 
-- `fields` contains only the requested settings that are registered, keyed by setting ID, and refreshes when one of them changes.
+- `fields` contains only the requested settings that are registered, keyed by setting ID, and refreshes when one of them changes. It is empty until the setting definitions load.
+- The setting definitions (name, description, options, etc.) are not part of the bootstrap payload, so the hook fetches them with `metadataClient.getAll(scope)`. The page must render the `isLoading` and `loadError` states, as described in the `@kbn/management-settings-application` README.
 - `saveAll` rejects with the combined error messages when any update fails. Showing toasts is up to the caller.

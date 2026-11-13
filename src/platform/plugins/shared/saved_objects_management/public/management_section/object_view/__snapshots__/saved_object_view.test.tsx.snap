@@ -33,6 +33,9 @@ exports[`SavedObjectEdition should render normally 1`] = `
           "set": [MockFunction],
           "validateValue": [MockFunction],
         },
+        "metadata": Object {
+          "getAll": [MockFunction],
+        },
       },
       "theme": Object {
         "getTheme": [MockFunction],

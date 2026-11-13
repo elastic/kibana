@@ -9,7 +9,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty, keyBy, pick, pickBy } from 'lodash';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type {
+  IUiSettingsClient,
+  IUiSettingsMetadataClient,
+  UiSettingsMetadataState,
+} from '@kbn/core-ui-settings-browser';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import type {
@@ -17,13 +22,17 @@ import type {
   OnFieldChangeFn,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
-import { normalizeSettings } from '@kbn/management-settings-utilities';
+import { mergeSettingDefinitions, normalizeSettings } from '@kbn/management-settings-utilities';
 
 export interface UseEditableSettingsParams {
   /** The IDs of the settings to edit. */
   settingsKeys: readonly string[];
   /** The client the settings are read from and saved to. */
   settingsClient: IUiSettingsClient;
+  /** The client the setting definitions (name, description, options, etc.) are fetched from. */
+  metadataClient: IUiSettingsMetadataClient;
+  /** The scope of `settingsClient`, which selects the definitions to fetch. */
+  scope: UiSettingsScope;
 }
 
 export interface SaveAllResult {
@@ -35,8 +44,15 @@ export interface SaveAllResult {
 }
 
 export interface UseEditableSettingsResult {
-  /** Field definitions for the requested settings that are registered, keyed by setting ID. */
+  /**
+   * Field definitions for the requested settings that are registered, keyed by setting ID.
+   * Empty until the setting definitions load.
+   */
   fields: Record<string, FieldDefinition>;
+  /** True while the setting definitions are being fetched. */
+  isLoading: boolean;
+  /** The error from fetching the setting definitions, if it failed. */
+  loadError?: Error;
   unsavedChanges: Record<string, UnsavedFieldChange>;
   handleFieldChange: OnFieldChangeFn;
   cleanUnsavedChanges: () => void;
@@ -50,15 +66,17 @@ export interface UseEditableSettingsResult {
 
 const getSettingsFields = (
   settingsKeys: readonly string[],
-  settingsClient: IUiSettingsClient
-): Record<string, FieldDefinition> =>
-  keyBy(
-    getFieldDefinitions(
-      pick(normalizeSettings(settingsClient.getAll()), settingsKeys),
-      settingsClient
-    ),
-    'id'
-  );
+  settingsClient: IUiSettingsClient,
+  definitions: UiSettingsMetadataState
+): Record<string, FieldDefinition> => {
+  if (isEmpty(definitions)) {
+    return {};
+  }
+
+  const settings = normalizeSettings(mergeSettingDefinitions(definitions, settingsClient.getAll()));
+
+  return keyBy(getFieldDefinitions(pick(settings, settingsKeys), settingsClient), 'id');
+};
 
 /**
  * React hook for editing a fixed list of UI settings: their field definitions, unsaved changes, and saving.
@@ -66,14 +84,44 @@ const getSettingsFields = (
 export const useEditableSettings = ({
   settingsKeys,
   settingsClient,
+  metadataClient,
+  scope,
 }: UseEditableSettingsParams): UseEditableSettingsResult => {
   // Callers often build the keys array inline, so key the memo on its contents.
   const settingsKeysJson = JSON.stringify(settingsKeys);
   const trackedKeys = useMemo<string[]>(() => JSON.parse(settingsKeysJson), [settingsKeysJson]);
 
+  const [definitions, setDefinitions] = useState<UiSettingsMetadataState>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<Error>();
   const [settingsVersion, setSettingsVersion] = useState(0);
   const [allUnsavedChanges, setUnsavedChanges] = useState<Record<string, UnsavedFieldChange>>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    let isCurrent = true;
+    setIsLoading(true);
+    setLoadError(undefined);
+
+    metadataClient.getAll(scope).then(
+      (result) => {
+        if (isCurrent) {
+          setDefinitions(result);
+          setIsLoading(false);
+        }
+      },
+      (error: Error) => {
+        if (isCurrent) {
+          setLoadError(error);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [metadataClient, scope]);
 
   useEffect(() => {
     const subscription = settingsClient.getUpdate$().subscribe(({ key }) => {
@@ -86,10 +134,10 @@ export const useEditableSettings = ({
   }, [settingsClient, trackedKeys]);
 
   const fields = useMemo(
-    () => getSettingsFields(trackedKeys, settingsClient),
+    () => getSettingsFields(trackedKeys, settingsClient, definitions),
     // The client is mutable, so `settingsVersion` stands in for its tracked values changing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trackedKeys, settingsClient, settingsVersion]
+    [trackedKeys, settingsClient, definitions, settingsVersion]
   );
 
   // A change to a key that is no longer tracked is hidden from the form, so it must not be saved.
@@ -195,6 +243,8 @@ export const useEditableSettings = ({
 
   return {
     fields,
+    isLoading,
+    loadError,
     unsavedChanges,
     handleFieldChange,
     cleanUnsavedChanges,

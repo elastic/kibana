@@ -9,8 +9,10 @@
 
 export type {
   PublicUiSettingsParams,
-  UiSettingsState,
+  UiSettingsMetadataState,
+  UiSettingsRuntimeState,
   IUiSettingsClient,
+  IUiSettingsMetadataClient,
   SettingsStart,
   SettingsSetup,
 } from './src/types';

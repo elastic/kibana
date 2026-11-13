@@ -270,6 +270,94 @@ function renderTestCases(
       expect(getValue).toHaveBeenCalledTimes(1);
     });
 
+    it.each([false, true])(
+      'injects only the runtime fields of setting definitions (isAnonymousPage: %s)',
+      async (isAnonymousPage) => {
+        const definition = {
+          name: 'Title',
+          value: 'Kibana',
+          type: 'string' as const,
+          readonly: true,
+          readonlyMode: 'ui' as const,
+          sensitive: true,
+          description: 'The title of the page',
+          category: ['general'],
+          options: ['Kibana', 'Elastic'],
+          requiresPageReload: true,
+        };
+        const noValueDefinition = {
+          name: 'Empty',
+          description: 'A setting with no default value',
+          category: ['general'],
+        };
+        uiSettings.client.getRegistered.mockReturnValue({
+          'page:title': definition,
+          'page:empty': noValueDefinition,
+        });
+        uiSettings.globalClient.getRegistered.mockReturnValue({
+          'global:title': definition,
+          'global:empty': noValueDefinition,
+        });
+
+        const [render] = await getRender();
+        const { body: content } = await render(createKibanaRequest(), uiSettings, {
+          isAnonymousPage,
+        });
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+        const runtimeEntry = {
+          name: 'Title',
+          value: 'Kibana',
+          type: 'string',
+          readonly: true,
+          readonlyMode: 'ui',
+          sensitive: true,
+        };
+        const noValueEntry = { name: 'Empty' };
+        expect(data.legacyMetadata.uiSettings.defaults).toEqual({
+          'page:title': runtimeEntry,
+          'page:empty': noValueEntry,
+        });
+        expect(data.legacyMetadata.globalUiSettings.defaults).toEqual({
+          'global:title': runtimeEntry,
+          'global:empty': noValueEntry,
+        });
+      }
+    );
+
+    it('injects the resolved async default `getValue` of global settings', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.globalClient.getRegistered.mockReturnValue({
+        registered: { name: 'title', value: 'static-default', getValue },
+      });
+
+      const [render] = await getRender();
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(data.legacyMetadata.globalUiSettings.defaults.registered.value).toBe('async-default');
+    });
+
+    it('does not resolve async default `getValue` of global settings for anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.globalClient.getRegistered.mockReturnValue({
+        registered: { name: 'title', value: 'static-default', getValue },
+      });
+
+      const [render] = await getRender();
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(getValue).not.toHaveBeenCalled();
+      expect(data.legacyMetadata.globalUiSettings.defaults.registered.value).toBe('static-default');
+    });
+
     it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {

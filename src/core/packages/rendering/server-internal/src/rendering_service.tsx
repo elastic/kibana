@@ -20,11 +20,12 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
-import type { UserSettings } from '@kbn/core-user-settings-server-internal';
+import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
   type ThemeName,
+  type UiSettingsRuntimeEntry,
   parseDarkModeValue,
   parseThemeNameValue,
   type UiSettingsParams,
@@ -205,40 +206,27 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
-    // Grouping all async HTTP requests to run them concurrently for performance reasons.
-    // Anonymous pages skip user-scoped values and async default values (the latter typically
-    // call ES via `asCurrentUser`, which would 401 on an unauthenticated request).
-    const [
+    const {
       defaultSettings,
-      settingsUserValues = {},
-      globalSettingsUserValues = {},
-      { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
-      userStorageResult = { available: false, values: {} },
-    ] = await Promise.all(
-      isAnonymousPage
-        ? [uiSettings.client?.getRegistered() ?? {}]
-        : ([
-            withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
-            uiSettings.client?.getUserProvided(true),
-            uiSettings.globalClient?.getUserProvided(true),
-            userSettings?.getUserSettings(request),
-            // user storage
-            this.fetchUserStorage(request),
-          ] as [
-            ReturnType<typeof withAsyncDefaultValues>,
-            Promise<Record<string, UserProvidedValues>>,
-            Promise<Record<string, UserProvidedValues>>,
-            Promise<UserSettings> | undefined,
-            Promise<{ available: boolean; values: Record<string, unknown> }>
-          ])
-    );
+      globalSettingsDefaultValues,
+      settingsUserValues,
+      globalSettingsUserValues,
+      userSettingDarkMode,
+      userSettingLocale,
+      userStorageResult,
+    } = await this.loadSettingsForRender({
+      request,
+      uiSettings,
+      userSettings,
+      isAnonymousPage,
+    });
 
     const settings = {
-      defaults: defaultSettings,
+      defaults: toRuntimeDefaults(defaultSettings),
       user: settingsUserValues,
     };
     const globalSettings = {
-      defaults: uiSettings.globalClient?.getRegistered() ?? {},
+      defaults: toRuntimeDefaults(globalSettingsDefaultValues),
       user: globalSettingsUserValues,
     };
 
@@ -425,6 +413,70 @@ export class RenderingService {
     };
   }
 
+  /**
+   * Loads the default and user-provided UI settings values needed to render the page, along
+   * with the user's dark mode/locale preferences and user storage values.
+   *
+   * Anonymous pages skip user-scoped values and async default values (the latter typically call
+   * ES via `asCurrentUser`, which would 401 on an unauthenticated request), so they only need the
+   * two synchronous `getRegistered()` calls. All other pages run every request concurrently for
+   * performance reasons.
+   */
+  private async loadSettingsForRender({
+    request,
+    uiSettings,
+    userSettings,
+    isAnonymousPage,
+  }: {
+    request: KibanaRequest;
+    uiSettings: { client: IUiSettingsClient; globalClient: IUiSettingsClient };
+    userSettings: InternalUserSettingsServiceSetup | undefined;
+    isAnonymousPage: boolean;
+  }) {
+    if (isAnonymousPage) {
+      const [defaultSettings, globalSettingsDefaultValues] = await Promise.all([
+        uiSettings.client?.getRegistered() ?? {},
+        uiSettings.globalClient?.getRegistered() ?? {},
+      ]);
+
+      return {
+        defaultSettings,
+        globalSettingsDefaultValues,
+        settingsUserValues: {} as Record<string, UserProvidedValues>,
+        globalSettingsUserValues: {} as Record<string, UserProvidedValues>,
+        userSettingDarkMode: undefined as DarkModeValue | undefined,
+        userSettingLocale: undefined as string | undefined,
+        userStorageResult: { available: false, values: {} },
+      };
+    }
+
+    const [
+      defaultSettings,
+      globalSettingsDefaultValues,
+      settingsUserValues = {},
+      globalSettingsUserValues = {},
+      { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
+      userStorageResult = { available: false, values: {} },
+    ] = await Promise.all([
+      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
+      withAsyncDefaultValues(request, uiSettings.globalClient?.getRegistered()),
+      uiSettings.client?.getUserProvided(true),
+      uiSettings.globalClient?.getUserProvided(true),
+      userSettings?.getUserSettings(request),
+      this.fetchUserStorage(request),
+    ]);
+
+    return {
+      defaultSettings,
+      globalSettingsDefaultValues,
+      settingsUserValues,
+      globalSettingsUserValues,
+      userSettingDarkMode,
+      userSettingLocale,
+      userStorageResult,
+    };
+  }
+
   public async stop() {}
 
   private async fetchUserStorage(
@@ -496,4 +548,25 @@ const withAsyncDefaultValues = async (
   );
 
   return updatedSettings;
+};
+
+/**
+ * Strip full UiSettingsParams down to the minimal fields needed by the browser
+ * runtime client: value, type, name, readonly, readonlyMode, and sensitive.
+ */
+const toRuntimeDefaults = (
+  fullDefaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>
+): Record<string, UiSettingsRuntimeEntry> => {
+  const slim: Record<string, UiSettingsRuntimeEntry> = {};
+  for (const [key, def] of Object.entries(fullDefaults)) {
+    const entry: UiSettingsRuntimeEntry = {};
+    if (def.value !== undefined) entry.value = def.value;
+    if (def.name) entry.name = def.name;
+    if (def.type) entry.type = def.type;
+    if (def.readonly) entry.readonly = def.readonly;
+    if (def.readonlyMode) entry.readonlyMode = def.readonlyMode;
+    if (def.sensitive) entry.sensitive = def.sensitive;
+    slim[key] = entry;
+  }
+  return slim;
 };
