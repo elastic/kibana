@@ -13,6 +13,7 @@ import {
   calculateFactualScore,
   calculateProceduralFidelityScore,
   calculateRelevanceScore,
+  deriveCorrectnessSummary,
 } from './scoring';
 import type { CorrectnessAnalysis } from './types';
 
@@ -48,7 +49,7 @@ export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceD
       throw new Error('Inference client is required for correctness evaluator');
     }
 
-    const analysis = await runLlmJudge<CorrectnessAnalysis>({
+    const judged = await runLlmJudge<CorrectnessAnalysis>({
       inferenceClient,
       prompt: LlmCorrectnessEvaluationPrompt,
       toolName: 'analyze',
@@ -58,6 +59,10 @@ export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceD
         ground_truth_response: referenceData!.expected,
       },
     });
+    const analysis = {
+      ...judged,
+      summary: judged.summary ?? deriveCorrectnessSummary(judged.analysis),
+    };
 
     return {
       scores: [

@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { EVALS_EVALUATE_URL, EVALS_ONLINE_SCORES_URL, EVALS_SCORES_URL } from '@kbn/evals-common';
+import {
+  EVALS_EVALUATE_TIMEOUT_MS,
+  EVALS_EVALUATE_URL,
+  EVALS_ONLINE_SCORES_URL,
+  EVALS_SCORES_URL,
+} from '@kbn/evals-common';
 import type { EvalsTaskProvider, TaskProviderRegistry } from '../task_providers/types';
 import {
+  evaluateTrace,
   evaluateWorkBatch,
   normalizeReferenceData,
   persistOnlineScores,
@@ -549,5 +555,29 @@ describe('persistOnlineScores', () => {
       },
     });
     expect(response).toEqual({ created: 2, skipped: 1, failed_evaluators: 1 });
+  });
+});
+
+describe('evaluateTrace', () => {
+  it('raises the self-client timeout above its default for the evaluate call', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { results: [] },
+    });
+    const runtime = {
+      ...createRuntime([]),
+      callKibanaApi: callKibanaApi as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    await evaluateTrace(runtime, {
+      traceId: VALID_TRACE_ID,
+      evaluators: [{ name: 'correctness', connector_id: 'conn-1' }],
+    });
+
+    expect(callKibanaApi).toHaveBeenCalledWith(
+      expect.objectContaining({ path: EVALS_EVALUATE_URL, timeout: EVALS_EVALUATE_TIMEOUT_MS })
+    );
+    expect(EVALS_EVALUATE_TIMEOUT_MS).toBeGreaterThan(60_000);
   });
 });
