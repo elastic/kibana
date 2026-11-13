@@ -962,7 +962,7 @@ export const ENTITY_STORE_SOURCE_STATE_EVENT = {
     namespace: keywordField('Kibana space the entity store belongs to (e.g. "default")'),
     entityType: keywordField('Entity type (e.g. "user", "host", "service", "generic")'),
     source: keywordField(
-      'Value of entity.source (event.module, event.dataset or data_stream.dataset), the top 30 per type, the rest under "other"'
+      'Value of entity.source (event.module, event.dataset or data_stream.dataset), the top 30 per type'
     ),
     sourceKind: keywordField(
       '"integration" when the source matches a Fleet-managed package, "custom" otherwise'

@@ -9,7 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_RELATIONSHIP_COLLECT_LEAVES } from '../../../common/domain/definitions/common_fields';
-import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
+import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
+import { executeEsqlQuery, isPartialEsqlResponse } from '../../infra/elasticsearch/esql';
 import type {
   EntityMetadataEventPayload,
   EntitySourceStateEventPayload,
@@ -102,17 +103,21 @@ export const toSourceKind = (
 /** Names of the packages installed by Fleet, read from their index templates. */
 export const getFleetPackageNames = async (
   esClient: ElasticsearchClient,
-  logger: Logger
+  logger: Logger,
+  signal: AbortSignal
 ): Promise<Set<string>> => {
   const packages = new Set<string>();
   try {
-    const response = await esClient.indices.getIndexTemplate({
-      name: '*',
-      filter_path: [
-        'index_templates.index_template._meta.package.name',
-        'index_templates.index_template._meta.managed_by',
-      ],
-    });
+    const response = await esClient.indices.getIndexTemplate(
+      {
+        name: '*',
+        filter_path: [
+          'index_templates.index_template._meta.package.name',
+          'index_templates.index_template._meta.managed_by',
+        ],
+      },
+      { signal }
+    );
     for (const { index_template: template } of response.index_templates ?? []) {
       const meta = template?._meta as { managed_by?: string; package?: { name?: string } };
       if (meta?.managed_by === 'fleet' && meta.package?.name) {
@@ -293,7 +298,12 @@ const esqlRows = async (
   query: string,
   signal: AbortSignal
 ): Promise<Array<Record<string, unknown>>> => {
-  const { columns, values } = await executeEsqlQuery({ esClient, query, signal });
+  const response = await executeEsqlQuery({ esClient, query, signal });
+  // A shard failure returns incomplete counts without throwing. Fail the part so it is left out.
+  if (isPartialEsqlResponse(response)) {
+    throw new Error('ES|QL query returned partial results');
+  }
+  const { columns, values } = response;
   return values.map((row) =>
     Object.fromEntries(columns.map((column, idx) => [column.name, row[idx]]))
   );
@@ -329,20 +339,21 @@ const getSameIdDifferentCase = async (
   };
 };
 
-// Joins a source and a group in one TOP entry. Neither can contain it: it is outside the id and
-// source charsets the store writes.
-const SOURCE_GROUP_SEPARATOR = '\u241f';
-
+// A TOP entry joins a source and a group as `<length of source>:<source><group>`. The length
+// prefix keeps the split reversible whatever characters a custom source or group contains.
 const parseGroupsBySource = (entries: string[]): Map<string, Set<string>> => {
   const groupsBySource = new Map<string, Set<string>>();
   for (const entry of entries) {
-    const at = entry.indexOf(SOURCE_GROUP_SEPARATOR);
-    if (at <= 0) {
+    const colon = entry.indexOf(':');
+    const length = Number(entry.slice(0, colon));
+    if (colon <= 0 || !Number.isInteger(length)) {
       continue;
     }
-    const source = entry.slice(0, at);
+    // ES|QL `LENGTH` counts code points, not UTF-16 units.
+    const characters = Array.from(entry.slice(colon + 1));
+    const source = characters.slice(0, length).join('');
     const groups = groupsBySource.get(source) ?? new Set<string>();
-    groups.add(entry.slice(at + SOURCE_GROUP_SEPARATOR.length));
+    groups.add(characters.slice(length).join(''));
     groupsBySource.set(source, groups);
   }
   return groupsBySource;
@@ -368,7 +379,7 @@ const getSharedValuePairs = async (
     | MV_EXPAND ${SOURCE_FIELD}
     | MV_EXPAND v
     | STATS BY v, ${SOURCE_FIELD}, grp
-    | STATS srcs = COUNT_DISTINCT(${SOURCE_FIELD}), sourceGroups = TOP(CONCAT(${SOURCE_FIELD}, "${SOURCE_GROUP_SEPARATOR}", grp), 100) BY v
+    | STATS srcs = COUNT_DISTINCT(${SOURCE_FIELD}), sourceGroups = TOP(CONCAT(TO_STRING(LENGTH(${SOURCE_FIELD})), ":", ${SOURCE_FIELD}, grp), 100) BY v
     | WHERE srcs > 1
     | LIMIT ${SHARED_VALUE_ROW_LIMIT}`,
     signal
@@ -411,7 +422,14 @@ const PRIMARY_IDENTIFIER_SCRIPTS: Partial<Record<EntityType, string>> = {
     if (doc['${UNTYPED_ID_FIELD}'].size() == 0) { emit('other'); return; }
     String id = doc['${UNTYPED_ID_FIELD}'].value;
     String ns = doc['entity.namespace'].size() > 0 ? doc['entity.namespace'].value : '';
-    if (ns == 'local') { emit('local'); return; }
+    if (ns == 'local') {
+      if (doc['user.name'].size() > 0) {
+        String name = doc['user.name'].value;
+        for (def h : doc['host.id']) { if (id.equalsIgnoreCase(name + '@' + h + '@local')) { emit('user.name@host.id'); return; } }
+      }
+      emit('other');
+      return;
+    }
     for (def v : doc['user.email']) { if (id.equalsIgnoreCase(v + '@' + ns)) { emit('user.email'); return; } }
     for (def v : doc['user.id']) { if (id.equalsIgnoreCase(v + '@' + ns)) { emit('user.id'); return; } }
     if (doc['user.name'].size() > 0) {
@@ -488,8 +506,17 @@ const getSourceResolution = async (
   esClient: ElasticsearchClient,
   index: string,
   entityType: EntityType,
+  sourceNames: string[],
   signal: AbortSignal
 ): Promise<Map<string, SourceResolution>> => {
+  const result = new Map<string, SourceResolution>();
+  if (sourceNames.length === 0) {
+    return result;
+  }
+  // Only the reported sources, so the row limit cannot cut one of them off and read as zero.
+  const reportedSources = sourceNames
+    .map((name) => `"${escapeEsqlStringLiteral(name)}"`)
+    .join(', ');
   const rows = await esqlRows(
     esClient,
     `FROM ${index}
@@ -499,11 +526,11 @@ const getSourceResolution = async (
     | EVAL role = CASE(${RESOLVED_TO_FIELD} IS NOT NULL, "resolved", members > 1, "target", "standalone")
     | WHERE role != "resolved" AND ${SOURCE_FIELD} IS NOT NULL
     | MV_EXPAND ${SOURCE_FIELD}
+    | WHERE ${SOURCE_FIELD} IN (${reportedSources})
     | STATS entities = COUNT(*) BY ${SOURCE_FIELD}, role
     | LIMIT ${GROUP_SIZE_ROW_LIMIT}`,
     signal
   );
-  const result = new Map<string, SourceResolution>();
   for (const row of rows) {
     const source = String(row[SOURCE_FIELD]);
     const entry = result.get(source) ?? { targets: 0, standalone: 0 };
@@ -603,7 +630,7 @@ export const collectEntityMetadata = async ({
   }
 
   const resolutionResult = await part('sourceResolution', (s) =>
-    getSourceResolution(esClient, index, entityType, s)
+    getSourceResolution(esClient, index, entityType, [...sources.keys()], s)
   );
   collection.push(resolutionResult);
 
