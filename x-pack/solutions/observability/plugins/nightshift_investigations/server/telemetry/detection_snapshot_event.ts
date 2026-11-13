@@ -42,9 +42,14 @@ export interface DetectionSnapshotEvent extends Partial<DetectionSnapshotKnowled
   sandbox_allowlist_hosts: number;
 }
 
-const count = (description: string, optional = false) => ({
+const count = (description: string) => ({
   type: 'long' as const,
-  _meta: { description, ...(optional ? { optional: true as const } : {}) },
+  _meta: { description },
+});
+
+const optionalCount = (description: string) => ({
+  type: 'long' as const,
+  _meta: { description, optional: true as const },
 });
 
 const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
@@ -86,23 +91,22 @@ const detectionSnapshotSchema: RootSchema<DetectionSnapshotEvent> = {
     type: 'boolean',
     _meta: { description: 'Whether Semantic Memory is enabled in this deployment.' },
   },
-  memory_pages: count('Active Semantic Memory pages; absent when memory is disabled.', true),
+  memory_pages: optionalCount('Active Semantic Memory pages; absent when memory is disabled.'),
   custom_context_snippets: count('Custom context snippets configured in Settings.'),
   sandbox_allowlist_hosts: count('Sandbox egress allowlist entries configured in Settings.'),
-  knowledge_indicators_features: count('Feature Knowledge Indicators that are not deleted.', true),
-  knowledge_indicators_queries: count('Query Knowledge Indicators that are not deleted.', true),
-  significant_event_rules: count(
-    'Distinct Significant Event rules backing a Query Knowledge Indicator.',
-    true
+  knowledge_indicators_features: optionalCount(
+    'Feature Knowledge Indicators that are not deleted.'
   ),
-  significant_event_rules_active: count(
-    'Significant Event rules that exist and are enabled.',
-    true
+  knowledge_indicators_queries: optionalCount('Query Knowledge Indicators that are not deleted.'),
+  significant_event_rules: optionalCount(
+    'Distinct Significant Event rules backing a Query Knowledge Indicator.'
   ),
-  significant_events_total: count('Significant Events in the space, open or closed.', true),
-  significant_events_open: count(
-    'Significant Events whose current status is `active` or `recovering`.',
-    true
+  significant_event_rules_active: optionalCount(
+    'Significant Event rules that exist and are enabled.'
+  ),
+  significant_events_total: optionalCount('Significant Events in the space, open or closed.'),
+  significant_events_open: optionalCount(
+    'Significant Events whose current status is `active` or `recovering`.'
   ),
 };
 
