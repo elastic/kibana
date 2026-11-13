@@ -6,20 +6,28 @@
  */
 
 import { esql } from '@elastic/esql';
+import { esqlTimeRange } from './esql_time_range';
 
 /**
  * Builds an ES|QL query string that counts documents in one or more indices,
- * optionally filtered by a KQL expression. Time filtering is expected to be
- * applied via the `filter` parameter on the ES|QL query API by the caller.
+ * optionally restricted to a `[start, end]` time range and a KQL expression.
  */
 export function buildCountQuery({
   index,
+  start,
+  end,
   kql,
 }: {
   index: string | string[];
+  start?: number;
+  end?: number;
   kql?: string;
 }): string {
   let query = esql.from(Array.isArray(index) ? index : [index]);
+
+  if (start !== undefined && end !== undefined) {
+    query = query.where`${esqlTimeRange(start, end)}`;
+  }
 
   if (kql) {
     query = query.where`KQL(${esql.str(kql)})`;

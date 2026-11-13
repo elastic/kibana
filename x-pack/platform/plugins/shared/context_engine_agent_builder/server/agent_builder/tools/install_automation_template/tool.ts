@@ -16,18 +16,24 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { getSaveAutomationErrorMessage } from '../save_automation/handler';
-import { installAutomationTemplateHandler, type InstallAutomationTemplateParams } from './handler';
-
-const MAX_SOURCE_INDEX_LENGTH = 1024;
-const MAX_FIELD_NAME_LENGTH = 256;
-const MAX_CORPUS_FILTER_LENGTH = 2000;
-/** Per-item runs fail at around 2,800 items on serverless (elastic/kibana#298948). */
-const MAX_DOCUMENTS_LIMIT = 2_000;
-const MAX_BODY_CHARS_LIMIT = 50_000;
-const MAX_UNITS_LIMIT = MAX_DOCUMENTS_LIMIT;
-const MAX_KIS_LENGTH = 50_000;
-/** One KI per source, so the list is capped at the 100-KI onboarding budget (`strategy_catalog`, "The KI budget"). */
-const MAX_INDEX_METADATA_SOURCES = 100;
+import type { InstallAutomationTemplateParams } from '../../../automation_templates/install_automation_template';
+import {
+  automationNameSchema,
+  DEFAULT_BODY_MAX_CHARS,
+  DEFAULT_MAX_DOCUMENTS,
+  DEFAULT_MAX_UNITS,
+  findDuplicate,
+  MAX_BODY_CHARS_LIMIT,
+  MAX_CORPUS_FILTER_LENGTH,
+  MAX_DOCUMENTS_LIMIT,
+  MAX_FIELD_NAME_LENGTH,
+  MAX_INDEX_METADATA_SOURCES,
+  MAX_KIS_LENGTH,
+  MAX_METRIC_FIELDS,
+  MAX_SOURCE_INDEX_LENGTH,
+  MAX_UNITS_LIMIT,
+} from '../../../automation_templates/template_params';
+import { installAutomationTemplateHandler } from './handler';
 
 /**
  * Which arguments belong to which template. Anything listed against another template is rejected
@@ -40,8 +46,6 @@ const TEMPLATE_FIELDS = {
   targeted_ki_writer: ['kis'],
 } as const;
 
-const MAX_METRIC_FIELDS = 10;
-
 /** index_metadata takes either `sources` or `sourceIndex` + `categoryField`; checked separately. */
 const REQUIRED_TEMPLATE_FIELDS = {
   document_orchestration: ['titleField', 'bodyField', 'sourceIndex'],
@@ -49,9 +53,6 @@ const REQUIRED_TEMPLATE_FIELDS = {
   unit_profile: ['unitKey', 'activityField', 'breakdownField', 'sourceIndex'],
   targeted_ki_writer: ['kis'],
 } as const;
-
-const findDuplicate = (values: readonly string[]): string | undefined =>
-  values.find((item, position) => values.indexOf(item) !== position);
 
 const installAutomationTemplateSchema = lazySchema(() =>
   z
@@ -67,17 +68,9 @@ const installAutomationTemplateSchema = lazySchema(() =>
           targeted_ki_writer     → name, kis  (no sourceIndex)
         `
         ),
-      name: z
-        .string()
-        .min(1)
-        .max(200)
-        .refine((v) => v.trim().length > 0, {
-          message: 'name must not be blank or whitespace-only',
-        })
-        .refine((v) => !v.includes('/'), { message: 'name must not contain a forward slash' })
-        .describe(
-          'REQUIRED. Human-readable name for this automation within the AI index (e.g. "kb-articles-docs", "product-profile"). No forward slashes. Installing the same template with the same name replaces that automation in place; a different name installs an additional copy. Must be provided on every call.'
-        ),
+      name: automationNameSchema.describe(
+        'REQUIRED. Human-readable name for this automation within the AI index (e.g. "kb-articles-docs", "product-profile"). No forward slashes. Installing the same template with the same name replaces that automation in place; a different name installs an additional copy. Must be provided on every call.'
+      ),
       sourceIndex: z
         .string()
         .min(1)
@@ -313,8 +306,8 @@ const toInstallParams = (
       titleField: input.titleField,
       bodyField: input.bodyField,
       corpusFilter: input.corpusFilter ?? '',
-      maxDocuments: input.maxDocuments ?? 50,
-      bodyMaxChars: input.bodyMaxChars ?? 12000,
+      maxDocuments: input.maxDocuments ?? DEFAULT_MAX_DOCUMENTS,
+      bodyMaxChars: input.bodyMaxChars ?? DEFAULT_BODY_MAX_CHARS,
       name,
     };
   }
@@ -333,7 +326,7 @@ const toInstallParams = (
       breakdownField: input.breakdownField,
       corpusFilter: input.corpusFilter ?? '',
       metricFields: input.metricFields ?? [],
-      maxUnits: input.maxUnits ?? 100,
+      maxUnits: input.maxUnits ?? DEFAULT_MAX_UNITS,
       name,
     };
   }
@@ -378,7 +371,7 @@ export const createInstallAutomationTemplateTool = ({
   },
   description: dedent`
     Install an automation template on the Context Engine AI index attached to this conversation.
-    Do not pass an AI index id; do not write the YAML yourself; do not start a subagent.
+    Do not pass an AI index id; do not write the YAML yourself.
 
     IMPORTANT: install templates one at a time — never call this tool in parallel for the same AI
     index. Concurrent calls cause a "modified concurrently" error; always wait for each call to
@@ -416,6 +409,24 @@ export const createInstallAutomationTemplateTool = ({
         getSecurityStart,
         getWorkflowsManagement,
       });
+
+      if (result.valid === false) {
+        const details = result.validationErrors?.length
+          ? ` ${result.validationErrors.join('; ')}`
+          : '';
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  `Automation template was saved as workflow "${result.workflowId}" but its ` +
+                  `definition is invalid, so it cannot be enabled or run.${details}`,
+              },
+            },
+          ],
+        };
+      }
 
       return {
         results: [

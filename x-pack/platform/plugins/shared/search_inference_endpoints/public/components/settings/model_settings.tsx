@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { AppHeader } from '@kbn/app-header';
+import { BottomBar } from '@kbn/management-settings-components-form';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
@@ -28,8 +29,10 @@ import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
 import { getModelStatus, isModelDeprecated } from '../../utils/eis_utils';
-import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
+import { EisModelStatus, type EndpointDeprecationInfo, type EndpointEfforts } from '../../types';
 import { ModelsCallout } from './models_callout';
+
+const NO_EFFORTS: EndpointEfforts = {};
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -37,19 +40,24 @@ export const ModelSettings: React.FC = () => {
     isSaving: isFeatureSaving,
     isDirty: isFeatureDirty,
     assignments,
+    efforts,
     effectiveRecommendedEndpoints,
+    effectiveRecommendedEfforts,
     sections,
     invalidEndpointIds,
     hasSavedObject,
     dirtyFeatureIds,
     updateEndpoints,
+    updateEfforts,
     save: saveFeatures,
+    reset: resetFeatures,
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
   const {
     state: defaultModelState,
     isDirty: isDefaultModelDirty,
+    dirtyFields: dirtyDefaultModelFields,
     save: saveDefaultModel,
     reset: resetDefaultModel,
   } = defaultModelSettings;
@@ -117,12 +125,14 @@ export const ModelSettings: React.FC = () => {
   }, [deprecatedEndpointsMap, sections, assignments, defaultModelState.defaultModelId]);
 
   const isDirty = isFeatureDirty || isDefaultModelDirty;
+  const unsavedChangesCount = dirtyDefaultModelFields.size + dirtyFeatureIds.size;
   const hasNoModels = !connectorsLoading && connectors && !connectors.length;
   const hasAdvancedSettingsSavePermission = application.capabilities.advancedSettings.save === true;
 
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
+  const [discardVersion, setDiscardVersion] = useState(0);
 
   useEffect(() => {
     if (!isDirty) {
@@ -173,8 +183,14 @@ export const ModelSettings: React.FC = () => {
     usageTracker,
   ]);
 
-  const handleDiscardAndLeave = useCallback(() => {
+  const handleDiscard = useCallback(() => {
+    resetFeatures();
     resetDefaultModel();
+    setDiscardVersion((version) => version + 1);
+  }, [resetFeatures, resetDefaultModel]);
+
+  const handleDiscardAndLeave = useCallback(() => {
+    handleDiscard();
     unblockRef.current?.();
     unblockRef.current = null;
     if (pendingLocation) {
@@ -185,7 +201,7 @@ export const ModelSettings: React.FC = () => {
       application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
-  }, [application, http.basePath, pendingLocation, resetDefaultModel]);
+  }, [application, http.basePath, pendingLocation, handleDiscard]);
 
   const showFeatureSections = enableAi && featureSpecificModels;
 
@@ -376,17 +392,22 @@ export const ModelSettings: React.FC = () => {
                       endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
                       effectiveRecommendedEndpoints:
                         effectiveRecommendedEndpoints[f.featureId] ?? f.recommendedEndpoints,
+                      efforts: efforts[f.featureId] ?? NO_EFFORTS,
+                      effectiveRecommendedEfforts:
+                        effectiveRecommendedEfforts[f.featureId] ?? NO_EFFORTS,
                       feature: f,
                       hasSavedObject: hasSavedObject[f.featureId] ?? false,
                       isFeatureDirty: dirtyFeatureIds.has(f.featureId),
                     }))}
                     onEndpointsChange={updateEndpoints}
+                    onEffortsChange={updateEfforts}
                     invalidEndpointIds={invalidEndpointIds}
                     deprecatedEndpointsMap={deprecatedEndpointsMap}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
                     globalDefaultId={defaultModelState.defaultModelId}
                     canManage={canManage}
+                    discardVersion={discardVersion}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>
@@ -395,6 +416,17 @@ export const ModelSettings: React.FC = () => {
           </>
         )}
       </EuiPageTemplate.Section>
+
+      {canManage && isDirty && (
+        <BottomBar
+          onSaveAll={handleSave}
+          onClearAllUnsaved={handleDiscard}
+          hasInvalidChanges={!defaultModelValidation.isValid}
+          isLoading={isFeatureSaving}
+          unsavedChangesCount={unsavedChangesCount}
+          hiddenChangesCount={0}
+        />
+      )}
 
       {pendingLocation && (
         <UnsavedChangesModal

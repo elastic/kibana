@@ -32,6 +32,7 @@ import { CASES_TOAST_MESSAGES_TITLES } from '../../../cases/constants';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
+import { getLogRateAnalysisDefaultTitle } from '../../../embeddables/log_rate_analysis/default_title';
 
 interface LogRateAnalysisAttachmentsMenuProps {
   windowParameters?: WindowParameters;
@@ -255,7 +256,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
             defaultMessage: 'Log rate analysis',
           })}
           documentInfo={{
-            title: 'Log rate analysis',
+            title: getLogRateAnalysisDefaultTitle(),
           }}
           onClose={() => setDashboardAttachmentReady(false)}
           onSave={onSave}

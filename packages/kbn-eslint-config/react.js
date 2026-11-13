@@ -41,7 +41,7 @@ module.exports = {
   },
 
   rules: {
-    'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-    'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
+    // `react-hooks/*` rules run in oxlint (.oxlint/react.mts); the plugin stays registered so
+    // `eslint-disable` directives naming them resolve.
   },
 }

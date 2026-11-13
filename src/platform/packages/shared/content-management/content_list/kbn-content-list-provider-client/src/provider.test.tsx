@@ -16,6 +16,8 @@ import {
   type OpenContentEditorParams,
 } from '@kbn/content-management-content-editor';
 import {
+  contentListKeys,
+  contentListQueryClient,
   CREATED_BY_FILTER_ID,
   type FindItemsParams,
   TAG_FILTER_ID,
@@ -174,6 +176,32 @@ describe('ContentListClientProvider', () => {
 
       // onFetchSuccess is optional and not set by the client provider.
       expect(result.current.dataSource.onFetchSuccess).toBeUndefined();
+    });
+  });
+
+  describe('filter facet invalidation', () => {
+    it('invalidates facet queries when the item snapshot changes', async () => {
+      const invalidateQueries = jest
+        .spyOn(contentListQueryClient, 'invalidateQueries')
+        .mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ id: 'facet-list' }),
+      });
+
+      await act(async () => {
+        await result.current.dataSource.findItems({
+          searchQuery: '',
+          filters: {},
+          page: { index: 0, size: 20 },
+        });
+      });
+
+      expect(invalidateQueries).toHaveBeenCalledWith({
+        queryKey: contentListKeys.allFilterFacets('facet-list-listing'),
+      });
+
+      invalidateQueries.mockRestore();
     });
   });
 

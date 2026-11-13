@@ -8,7 +8,7 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import type { ObservabilityOnboardingPluginStartDeps } from '../plugin';
 import { createCallApi } from '../services/rest/create_call_api';
 

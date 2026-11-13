@@ -85,9 +85,11 @@ export const bulkMigrateLegacyActions = async ({
       // put frequencies into existing actions
       // the situation when both action in rule and legacy exist should be rare one
       // but if it happens, we put frequency in existing actions per-action level
+      // an action that has a frequency already keeps it: a migration retried after a failed cleanup
+      // must not overwrite the frequencies saved since the first one
       const existingActionsWithFrequencies: RawRuleAction[] = actions.map((action) => ({
         ...action,
-        frequency: {
+        frequency: action.frequency ?? {
           summary: true,
           notifyWhen: rule.attributes.notifyWhen ?? 'onActiveAlert',
           throttle: rule.attributes.throttle ?? null,

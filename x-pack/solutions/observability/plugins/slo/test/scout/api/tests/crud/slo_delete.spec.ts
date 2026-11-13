@@ -35,8 +35,8 @@ apiTest.describe(
     let transformHelper: SloTransformAssertions;
     let pipelineHelper: SloPipelineAssertions;
 
-    apiTest.beforeAll(async ({ apiClient, esClient, samlAuth, requestAuth, sloHostsDataForge }) => {
-      await sloHostsDataForge.setup();
+    apiTest.beforeAll(async ({ apiClient, apiServices, esClient, samlAuth, requestAuth }) => {
+      await apiServices.slo.deleteAllSLOs();
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
       transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
@@ -45,8 +45,8 @@ apiTest.describe(
       pipelineHelper = createSloPipelineAssertions(esClient);
     });
 
-    apiTest.afterAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.teardown();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
     apiTest('deletes SLO and related resources', async ({ apiClient, esClient }) => {
@@ -87,7 +87,7 @@ apiTest.describe(
           });
           return sloSummaryResponseAfterDeletion.hits.hits.length === 0;
         },
-        { timeoutMs: 60_000, intervalMs: 2000, label: 'SLO summary data deleted' }
+        { timeoutMs: 60_000, label: 'SLO summary data deleted' }
       );
 
       await pollUntilTrue(
@@ -102,7 +102,7 @@ apiTest.describe(
           });
           return sloRollupResponseAfterDeletion.hits.hits.length <= 1;
         },
-        { timeoutMs: 60_000, intervalMs: 2000, label: 'SLO rollup data deleted' }
+        { timeoutMs: 60_000, label: 'SLO rollup data deleted' }
       );
     });
 

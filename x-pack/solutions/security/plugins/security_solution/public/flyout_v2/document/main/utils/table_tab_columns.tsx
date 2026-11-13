@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiText, EuiToolTip, type EuiBasicTableColumn } from '@elastic/eui';
 import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldFromBrowserField } from '../tabs/table_tab';
 import { TableFieldNameCell } from '../../../shared/components/table_field_name_cell';
@@ -60,10 +60,6 @@ export type ColumnsProvider = (providerOptions: {
    */
   onTogglePinned: (field: string, action: 'pin' | 'unpin') => void;
   /**
-   * Resolved entity store id for host/user preview links for this document
-   */
-  entityId?: string;
-  /**
    * Wraps each value cell with cell actions (filter for/out, copy, etc.). The caller decides
    * what to inject (real security cell actions in Security Solution, no-op elsewhere).
    */
@@ -89,7 +85,6 @@ export const getTableTabColumns: ColumnsProvider = ({
   getLinkValue,
   ruleId,
   onTogglePinned,
-  entityId,
   renderCellActions,
   hit,
   renderFlyoutLink,
@@ -150,7 +145,6 @@ export const getTableTabColumns: ColumnsProvider = ({
             getLinkValue={getLinkValue}
             ruleId={ruleId}
             values={values}
-            entityId={entityId}
             hit={hit}
             renderFlyoutLink={renderFlyoutLink}
           />

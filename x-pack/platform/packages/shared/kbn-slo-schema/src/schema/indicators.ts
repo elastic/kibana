@@ -5,32 +5,57 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { allOrAnyString } from './common';
-import { MAX_KEYWORD_LENGTH } from './limits';
+import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
 
 const kqlQuerySchema = z.string().describe('the KQL query to filter the documents with.');
 
-const filterMetaSchema = z
-  .object({
-    alias: z.string().nullable().optional(),
-    disabled: z.boolean().optional(),
-    negate: z.boolean().optional(),
-    // controlledBy is there to identify who owns the filter
-    controlledBy: z.string().optional(),
-    // allows grouping of filters
-    group: z.string().optional(),
-    // index and type are optional only because when you create a new filter, there are no defaults
-    index: z.string().optional(),
-    isMultiIndex: z.boolean().optional(),
-    type: z.string().optional(),
-    key: z.string().optional(),
-    field: z.string().optional(),
-    params: z.any().optional(),
-    value: z.string().optional(),
-  })
-  .meta({ id: 'SLOFilterMeta', description: 'Defines properties for a filter' });
+const rangeFilterBoundSchema = lazySchema(() =>
+  z.union([z.number(), z.string().max(MAX_KEYWORD_LENGTH)]).optional()
+);
+
+// Mirrors FilterMeta['value'] from @kbn/es-query: a range filter stores its params, a phrases filter its values.
+const filterMetaValueSchema = lazySchema(() =>
+  z.union([
+    z.string(),
+    z.object({
+      from: rangeFilterBoundSchema,
+      to: rangeFilterBoundSchema,
+      gt: rangeFilterBoundSchema,
+      lt: rangeFilterBoundSchema,
+      gte: rangeFilterBoundSchema,
+      lte: rangeFilterBoundSchema,
+      format: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    }),
+    z
+      .array(z.union([z.string().max(MAX_KEYWORD_LENGTH), z.number(), z.boolean()]))
+      .max(MAX_ARRAY_LENGTH),
+  ])
+);
+
+const filterMetaSchema = lazySchema(() =>
+  z
+    .object({
+      alias: z.string().nullable().optional(),
+      disabled: z.boolean().optional(),
+      negate: z.boolean().optional(),
+      // controlledBy is there to identify who owns the filter
+      controlledBy: z.string().optional(),
+      // allows grouping of filters
+      group: z.string().optional(),
+      // index and type are optional only because when you create a new filter, there are no defaults
+      index: z.string().optional(),
+      isMultiIndex: z.boolean().optional(),
+      type: z.string().optional(),
+      key: z.string().optional(),
+      field: z.string().optional(),
+      params: z.any().optional(),
+      value: filterMetaValueSchema.optional(),
+    })
+    .meta({ id: 'SLOFilterMeta', description: 'Defines properties for a filter' })
+);
 
 const filtersSchema = z.array(
   z

@@ -19,8 +19,8 @@ import {
   investigationRoundInputsSchema,
   withToolResults,
 } from '../investigation_round';
-import { runMemoryOptimize } from '../memory/register_memory';
-import type { NightshiftTelemetryClient } from '../telemetry';
+import { isMemoryOptimizeSkipped, runMemoryOptimize } from '../memory/register_memory';
+import { trackBackgroundActivity, type NightshiftTelemetryClient } from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { withTimeout } from './with_timeout';
 
@@ -146,38 +146,58 @@ export const memoryOptimizeStepDefinition = ({
             },
           },
           async (span) => {
-            const res = await withTimeout(
-              async (signal) =>
-                runMemoryOptimize({
-                  request,
-                  agentId: context.input.agent_id,
-                  userMessage: context.input.prompt,
-                  assistantMessage: context.input.response,
-                  toolCalls: withToolResults(
-                    (context.input.tool_calls ?? []) as InvestigationToolCall[],
-                    context.input.tool_results ?? []
-                  ),
-                  conversationId: context.input.conversation_id,
-                  roundId: context.input.round_id,
-                  roundIndex: context.input.round_index,
-                  recalledIds: context.input.recalled_ids ?? [],
-                  esClient: context.contextManager.getScopedEsClient(),
-                  spaceId,
-                  signal,
-                  logger,
-                  getAgentBuilder,
-                  getInference,
-                  getSavedObjects,
-                  getUiSettings,
-                  requestedConnectorId: context.input.connector_id,
-                  roundConnectorId: context.input.round_connector_id,
-                  interactionId: workflowExecutionId,
-                }),
-              OPTIMIZE_TIMEOUT_MS,
-              `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`,
-              context.abortSignal
+            const res = await trackBackgroundActivity<
+              Awaited<ReturnType<typeof runMemoryOptimize>>
+            >(
+              {
+                telemetry,
+                activity: 'memory_optimize',
+                workflowExecutionId,
+                conversationId: context.input.conversation_id,
+                roundId: context.input.round_id,
+                // The same results `nightshift-semantic-memory-optimized` reports as a failure.
+                isFailure: (result) =>
+                  result === undefined ||
+                  (!isMemoryOptimizeSkipped(result) && result.writeFailureCount > 0),
+              },
+              (modelUsage) =>
+                withTimeout(
+                  async (signal) =>
+                    runMemoryOptimize({
+                      request,
+                      agentId: context.input.agent_id,
+                      userMessage: context.input.prompt,
+                      assistantMessage: context.input.response,
+                      toolCalls: withToolResults(
+                        (context.input.tool_calls ?? []) as InvestigationToolCall[],
+                        context.input.tool_results ?? []
+                      ),
+                      conversationId: context.input.conversation_id,
+                      roundId: context.input.round_id,
+                      roundIndex: context.input.round_index,
+                      recalledIds: context.input.recalled_ids ?? [],
+                      esClient: context.contextManager.getScopedEsClient(),
+                      spaceId,
+                      signal,
+                      logger,
+                      getAgentBuilder,
+                      getInference,
+                      getSavedObjects,
+                      getUiSettings,
+                      requestedConnectorId: context.input.connector_id,
+                      roundConnectorId: context.input.round_connector_id,
+                      interactionId: workflowExecutionId,
+                      modelUsage,
+                    }),
+                  OPTIMIZE_TIMEOUT_MS,
+                  `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`,
+                  context.abortSignal
+                )
             );
             summary = res;
+            if (isMemoryOptimizeSkipped(res)) {
+              return res;
+            }
             if (res?.openedIds) {
               span?.setAttribute('nightshift.opened_ids', JSON.stringify(res.openedIds));
             }
@@ -201,11 +221,16 @@ export const memoryOptimizeStepDefinition = ({
           ...(context.input.round_id ? { round_id: context.input.round_id } : {}),
           workflow_execution_id: workflowExecutionId,
           outcome: 'failure',
-          ...(summary && summary.writeFailureCount > 0
+          ...(summary && !isMemoryOptimizeSkipped(summary) && summary.writeFailureCount > 0
             ? { write_failure_count: summary.writeFailureCount }
             : {}),
         });
         throw error;
+      }
+
+      // A deliberate skip is neither a success nor a failure, so it reports nothing.
+      if (isMemoryOptimizeSkipped(summary)) {
+        return { output: { status: 'ok' as const, skipped: true } };
       }
 
       if (!summary) {

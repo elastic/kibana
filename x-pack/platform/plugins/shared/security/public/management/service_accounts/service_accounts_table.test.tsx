@@ -119,6 +119,46 @@ describe('ServiceAccountsTable', () => {
     expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 
+  it.each([
+    [{ type: 'user' as const, username: 'operator' }, 'operator'],
+    [
+      {
+        type: 'api_key' as const,
+        variant: 'stack' as const,
+        apiKeyId: 'key-1',
+        apiKeyName: 'deploy',
+        displayName: 'Night Operator',
+      },
+      'deploy (Night Operator)',
+    ],
+    [
+      {
+        type: 'api_key' as const,
+        variant: 'stack' as const,
+        apiKeyId: 'key-1',
+        displayName: 'ada',
+      },
+      'API key key-1 (ada)',
+    ],
+    [
+      {
+        type: 'api_key' as const,
+        variant: 'uiam' as const,
+        apiKeyId: 'key-1',
+        apiKeyName: 'deploy',
+      },
+      'deploy',
+    ],
+    [
+      { type: 'service_account' as const, serviceAccountId: 'kibana/automation' },
+      'kibana/automation',
+    ],
+  ])('names the creator %j as %s', (createdBy, label) => {
+    renderTable({ serviceAccounts: [{ ...firstAccount, createdBy }] });
+
+    expect(screen.getByText(label)).toBeVisible();
+  });
+
   it('marks only disabled accounts', () => {
     renderTable();
 

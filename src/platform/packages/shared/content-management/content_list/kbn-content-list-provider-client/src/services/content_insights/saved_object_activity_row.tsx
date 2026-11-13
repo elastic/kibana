@@ -16,7 +16,7 @@ import {
   ViewsStats,
   type ContentInsightsClientPublic,
 } from '@kbn/content-management-content-insights-public';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { ContentListItem } from '@kbn/content-list-provider';
 
 /**
  * Props for {@link SavedObjectActivityRow}.
@@ -34,9 +34,13 @@ export interface SavedObjectActivityRowProps {
    * `updatedBy`, `updatedAt`, and `managed` for the activity card and uses
    * `id` to fetch view stats.
    */
-  item: UserContentCommonSchema;
+  item: ContentListItem;
   /** Plural entity label used by the activity card's "no creator/updater" tip. */
   entityNamePlural?: string;
+  /**
+   * Whether Kibana versioning is enabled.
+   */
+  isKibanaVersioningEnabled?: boolean;
 }
 
 /**
@@ -60,8 +64,12 @@ export const SavedObjectActivityRow = ({
   service,
   item,
   entityNamePlural,
+  isKibanaVersioningEnabled,
 }: SavedObjectActivityRowProps) => (
-  <ContentInsightsProvider contentInsightsClient={service}>
+  <ContentInsightsProvider
+    contentInsightsClient={service}
+    isKibanaVersioningEnabled={isKibanaVersioningEnabled}
+  >
     <EuiFormRow
       fullWidth
       label={
@@ -84,9 +92,18 @@ export const SavedObjectActivityRow = ({
       }
     >
       <>
-        <ActivityView {...{ item, entityNamePlural }} />
+        <ActivityView
+          item={{
+            createdAt: item.createdAt,
+            createdBy: item.createdBy,
+            updatedAt: item.updatedAt?.toISOString(),
+            updatedBy: item.updatedBy,
+            managed: item.managed,
+          }}
+          entityNamePlural={entityNamePlural}
+        />
         <EuiSpacer size="s" />
-        <ViewsStats {...{ item }} />
+        <ViewsStats item={item} />
       </>
     </EuiFormRow>
   </ContentInsightsProvider>

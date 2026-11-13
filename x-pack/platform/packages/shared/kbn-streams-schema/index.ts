@@ -11,6 +11,7 @@ export * as StreamsV2Examples from './src/v2/__examples__';
 export {
   collectUnitComponentIds,
   findDuplicateUnitComponentIds,
+  streamsComponentValidationRequestSchema,
   streamsConfigEntrySchema,
   streamsOttlRoutingContextSchema,
   streamsPipelineConfigEntrySchema,
@@ -33,12 +34,13 @@ export {
   streamsUnitStatsRequestSchema,
   streamsUnitStatsResponseSchema,
   streamsUnitStatsSeriesSchema,
+  streamsUnitStatsSourceResultSchema,
   streamsUnitUiMetadataSchema,
   streamsUnitUpsertRequestSchema,
 } from './src/models/unit';
 export type { StreamsUnit } from './src/models/unit';
 export {
-  AUTO_WRITE_PATTERN_BY_SIGNAL,
+  AUTO_WRITE_PATTERNS_BY_SIGNAL,
   UNIT_DESTINATION_SIGNALS,
   getSignalTargetsWritePatterns,
   getUnitDestinationSignalTargets,
@@ -83,6 +85,13 @@ export type {
   CatalogueUiWidth,
   CatalogueValueKind,
   ComponentCatalogue,
+  ComponentValidationRequest,
+  ComponentValidationResult,
+} from './src/models/component_catalogue';
+export {
+  STALE_COMPONENT_CATALOGUE_HEADER,
+  SUPPORTED_COMPONENT_CATALOGUE_SCHEMA_VERSIONS,
+  isSupportedCatalogueSchemaVersion,
 } from './src/models/component_catalogue';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';

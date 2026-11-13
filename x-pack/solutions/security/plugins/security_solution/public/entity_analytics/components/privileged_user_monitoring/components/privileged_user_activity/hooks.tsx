@@ -7,19 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { encode } from '@kbn/rison';
 import * as E from 'fp-ts/Either';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { EVENT_TITLE } from '../../../../../flyout_v2/shared/constants/flyout_titles';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { SCOPE_ID } from '../../constants';
 import {
   generateListESQLQuery,
   generateVisualizationESQLQuery,
@@ -106,32 +102,19 @@ export const usePrivilegedUserActivityParams = (
     [esqlSource]
   );
 
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openRightPanel } = useExpandableFlyoutApi();
   const { openDocumentFlyoutFromIndex } = useFlyoutApi();
 
   const openDocument = useCallback(
     (id: string, indexName: string) => {
-      if (enableNewFlyout) {
-        openDocumentFlyoutFromIndex({
-          documentId: id,
-          indexName,
-          renderCellActions: cellActionRenderer,
-          origin: FLYOUT_ORIGIN.PRIVILEGED_USER_ACTIVITY_TABLE,
-          title: EVENT_TITLE,
-        });
-      } else {
-        openRightPanel({
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id,
-            indexName,
-            scopeId: SCOPE_ID,
-          },
-        });
-      }
+      openDocumentFlyoutFromIndex({
+        documentId: id,
+        indexName,
+        renderCellActions: cellActionRenderer,
+        origin: FLYOUT_ORIGIN.PRIVILEGED_USER_ACTIVITY_TABLE,
+        title: EVENT_TITLE,
+      });
     },
-    [enableNewFlyout, openDocumentFlyoutFromIndex, openRightPanel]
+    [openDocumentFlyoutFromIndex]
   );
 
   const columns = useMemo(

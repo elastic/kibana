@@ -27,6 +27,9 @@ export const useFilesContext = () => {
   return ctx;
 };
 
+/** Returns whether the component is rendered inside a `FilesContext`, without throwing. */
+export const useHasFilesContext = (): boolean => Boolean(useContext(FilesContextObject));
+
 interface ContextProps {
   /**
    * A files client that will be used process uploads.

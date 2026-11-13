@@ -444,7 +444,7 @@ const ActionsConnectorsList = ({
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModeTitle',
         {
-          defaultMessage: 'Authentication',
+          defaultMessage: 'Credential scope',
         }
       ),
       sortable: false,
@@ -458,7 +458,7 @@ const ActionsConnectorsList = ({
             <EuiFlexItem grow={false}>
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModeShared',
-                { defaultMessage: 'Service account' }
+                { defaultMessage: 'Shared credentials' }
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

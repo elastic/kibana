@@ -147,6 +147,23 @@ describe('AgentExecutionClient', () => {
     });
   });
 
+  describe('get', () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const getClient = createAgentExecutionClient({ logger: loggerMock.create(), esClient });
+
+    it("passes the caller's abort signal to the read", async () => {
+      const { signal } = new AbortController();
+      esClient.get.mockRejectedValueOnce(
+        Object.assign(new Error('not found'), { meta: { statusCode: 404 } })
+      );
+
+      expect(await getClient.get('gone', { signal })).toBeUndefined();
+      expect(esClient.get).toHaveBeenCalledWith(expect.objectContaining({ id: 'gone' }), {
+        signal,
+      });
+    });
+  });
+
   describe('peek', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const peekClient = createAgentExecutionClient({ logger: loggerMock.create(), esClient });

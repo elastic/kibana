@@ -60,20 +60,14 @@ export const persistScoresToEntityStore = async ({
   logger,
   entityType,
   scores,
-  enabled,
   refresh,
 }: {
   crudClient: EntityUpdateClient;
   logger: ScopedLogger;
   entityType: EntityType;
   scores: EntityRiskScoreRecord[];
-  enabled: boolean;
   refresh?: EntityStoreRefresh;
 }): Promise<{ docsWritten: number; errorsCount: number }> => {
-  if (!enabled) {
-    return { docsWritten: 0, errorsCount: 0 };
-  }
-
   const { docsWritten, unexpectedErrors } = await persistRiskScoresToEntityStore({
     crudClient,
     logger,

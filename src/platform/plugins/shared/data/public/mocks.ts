@@ -40,6 +40,12 @@ const createStartContract = (): Start => {
     dataViews: dataViewsMock,
     datatableUtilities: createDatatableUtilitiesMock(),
     search: searchServiceMock.createStartContract(),
+    replayCache: {
+      get: jest.fn().mockReturnValue({ hit: false }),
+      set: jest.fn(),
+      delete: jest.fn(),
+      clear: jest.fn(),
+    },
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     dateRangePickerPresets: createDateRangePickerPresetsServiceMock(),

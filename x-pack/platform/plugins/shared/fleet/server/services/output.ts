@@ -6,7 +6,7 @@
  */
 import { v5 as uuidv5 } from 'uuid';
 import { escapeQuotes } from '@kbn/es-query';
-import { omit } from 'lodash';
+import { isPlainObject, omit } from 'lodash';
 import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
@@ -164,6 +164,40 @@ const isBeatsSOOutput = (attrs: OutputSOAttributes): attrs is BeatsOutputSOAttri
 const isOtlpSOOutput = (attrs: OutputSOAttributes): attrs is OutputSoOtlpAttributes =>
   isOtlpOutput(attrs);
 
+/**
+ * A saved object update merges a map into the stored one key by key, so a header that an update
+ * leaves out would be kept. Returns the update's headers with every stored header it leaves out
+ * set to `null`, which removes it.
+ */
+export function withRemovedOtlpHeaders(
+  headers: Record<string, string>,
+  storedHeaders: Record<string, string> | null | undefined
+): Record<string, string | null> {
+  const keys = new Set(Object.keys(headers));
+  const removedHeaders = Object.keys(storedHeaders ?? {}).filter((key) => !keys.has(key));
+
+  return removedHeaders.length
+    ? { ...Object.fromEntries(removedHeaders.map((key) => [key, null])), ...headers }
+    : headers;
+}
+
+/** Drops the headers that an update removed, which the saved object keeps as `null`. */
+function omitRemovedOtlpHeaders(
+  exporter: OutputSoOtlpAttributes['otlp_exporter']
+): OutputSoOtlpAttributes['otlp_exporter'] {
+  const headers = exporter?.headers as Record<string, string | null> | null | undefined;
+  if (!headers || !isPlainObject(headers) || !Object.values(headers).includes(null)) {
+    return exporter;
+  }
+
+  // Object.fromEntries defines own properties, so a header named `__proto__` stays a header
+  const storedHeaders: Record<string, string> = Object.fromEntries(
+    Object.entries(headers).filter((entry): entry is [string, string] => entry[1] !== null)
+  );
+
+  return { ...exporter, headers: storedHeaders };
+}
+
 export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
   const logger = appContextService.getLogger();
   // the references of the secrets an update removed are kept as `null` by the saved object update
@@ -194,7 +228,13 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   if (isOtlpSOOutput(soAttributes)) {
     const { output_id: outputId, ...attributes } = soAttributes;
     // canonical id placed last so attributes.id cannot shadow it
-    return { ...attributes, id: outputId ?? so.id };
+    return {
+      ...attributes,
+      ...(attributes.otlp_exporter && {
+        otlp_exporter: omitRemovedOtlpHeaders(attributes.otlp_exporter),
+      }),
+      id: outputId ?? so.id,
+    };
   }
 
   const { output_id: outputId, ...attributes } = soAttributes as unknown as OutputSoBaseAttributes &
@@ -1563,6 +1603,21 @@ class OutputService {
           originalOutput.otlp_exporter
         );
       }
+    }
+
+    if (
+      isOtlpOutput(updateData) &&
+      isOtlpOutput(originalOutput) &&
+      isPlainObject(updateData.otlp_exporter?.headers)
+    ) {
+      // headers replace the stored ones: remove the stored headers this update leaves out
+      updateData.otlp_exporter = {
+        ...updateData.otlp_exporter,
+        headers: withRemovedOtlpHeaders(
+          updateData.otlp_exporter.headers!,
+          originalOutput.otlp_exporter?.headers
+        ) as Record<string, string>,
+      };
     }
 
     if (isOtlpOutput(updateData) && updateData.otlp_exporter) {

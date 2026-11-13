@@ -9,7 +9,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import { encodeFlyout, FLYOUT_PARAM_KEY } from '@kbn/cloud-security-posture/src/utils/query_utils';
+import { FLYOUT_PARAM_KEY } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import {
   encodeFlyoutV2UrlParam,
   toEntityDescriptorMode,
@@ -31,9 +31,6 @@ import {
   ServicePanelKey,
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
-import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
-import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
-import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityAttachmentIdentifier } from './entity_attachment/types';
 import { isFlyoutCapableIdentifierType } from './entity_attachment/types';
@@ -63,9 +60,11 @@ export interface EntityAnalyticsFlyoutNavigationState {
     id: string;
     params: Record<string, unknown>;
   };
+  /**
+   * Entity details tab to open as a tool flyout on top of the entity flyout.
+   */
   left?: {
-    id: string;
-    params: Record<string, unknown>;
+    path?: Partial<EntityDetailsPath>;
   };
 }
 
@@ -125,7 +124,7 @@ const getEntityToolDescriptor = (
   left: EntityAnalyticsFlyoutNavigationState['left'],
   context: EntityDescriptorContext
 ): FlyoutDescriptor | null => {
-  const path = left?.params.path as { tab?: string; subTab?: string } | undefined;
+  const path = left?.path;
   if (!path?.tab) return null;
 
   const { entityType, entityName, entityId, scopeId } = context;
@@ -216,31 +215,14 @@ export const buildEntityFlyoutV2NavigationState = (
 };
 
 const getEntityAnalyticsNavigationPathWithFlyout = (
-  flyout: EntityAnalyticsFlyoutNavigationState,
-  isNewFlyoutEnabled: boolean,
-  descriptors?: FlyoutV2UrlParamValue | null
+  descriptors: FlyoutV2UrlParamValue | null
 ): string | undefined => {
+  if (!descriptors) return undefined;
+
   const searchParams = getEntityAnalyticsStateSearchParams();
+  // Drop any legacy expandable-flyout param so it can't be restored on top of the new flyout.
   searchParams.delete(FLYOUT_PARAM_KEY);
-  searchParams.delete(FLYOUT_V2_URL_PARAM);
-
-  if (isNewFlyoutEnabled) {
-    if (!descriptors) return undefined;
-    searchParams.set(FLYOUT_V2_URL_PARAM, encodeFlyoutV2UrlParam(descriptors));
-    return `?${searchParams.toString()}`;
-  }
-
-  const encodedFlyoutSearch = encodeFlyout(flyout);
-  if (encodedFlyoutSearch == null) {
-    return undefined;
-  }
-
-  const flyoutValue = new URLSearchParams(encodedFlyoutSearch).get(FLYOUT_PARAM_KEY);
-  if (flyoutValue == null) {
-    return undefined;
-  }
-
-  searchParams.set(FLYOUT_PARAM_KEY, flyoutValue);
+  searchParams.set(FLYOUT_V2_URL_PARAM, encodeFlyoutV2UrlParam(descriptors));
   return `?${searchParams.toString()}`;
 };
 
@@ -363,67 +345,24 @@ export const buildEntityRightPanel = (
 };
 
 /**
- * Builds the expandable-flyout `left` (details) panel for a host/user/service
- * entity. Parameterized by `scopeId`, left-tab `path`, and `isRiskScoreExist`
+ * Builds the `left` entry (the entity details tab to open as a tool flyout) for a
+ * host/user/service entity.
  *
  * Returns `null` for generic entities and when `entityStoreId` is missing.
  */
 export const buildEntityLeftPanel = ({
   identifier,
-  scopeId,
   path,
-  isRiskScoreExist,
 }: {
   identifier: EntityAttachmentIdentifier;
-  scopeId: string;
   path: Partial<EntityDetailsPath>;
-  isRiskScoreExist: boolean;
 }): EntityAnalyticsFlyoutNavigationState['left'] | null => {
-  const { identifierType, identifier: displayName, entityStoreId } = identifier;
+  const { identifierType, entityStoreId } = identifier;
   if (!entityStoreId || !isFlyoutCapableIdentifierType(identifierType)) {
     return null;
   }
 
-  switch (identifierType) {
-    case 'host':
-      return {
-        id: HostDetailsPanelKey,
-        params: {
-          hostName: displayName,
-          entityId: entityStoreId,
-          entityStoreEntityId: entityStoreId,
-          scopeId,
-          isRiskScoreExist,
-          path,
-        },
-      };
-    case 'user':
-      return {
-        id: UserDetailsPanelKey,
-        params: {
-          userName: displayName,
-          identityFields: { 'user.name': displayName },
-          entityId: entityStoreId,
-          entityStoreEntityId: entityStoreId,
-          scopeId,
-          isRiskScoreExist,
-          path,
-        },
-      };
-    case 'service':
-      return {
-        id: ServiceDetailsPanelKey,
-        params: {
-          identityFields: { 'service.name': displayName },
-          entityStoreEntityId: entityStoreId,
-          scopeId,
-          isRiskScoreExist,
-          path,
-        },
-      };
-    default:
-      return null;
-  }
+  return { path };
 };
 
 const openSecurityAgentBuilderChatPreservingConversation = (
@@ -539,9 +478,9 @@ export const getServiceNameForServiceDetailsUrl = (row: SecurityEntityExploreRow
 };
 
 /**
- * Opens Entity Analytics home with a serialized expandable-flyout state (same URL shape as the
- * product Entity Analytics page). Used from Agent Builder canvas where the in-page flyout
- * provider is not mounted on the attachment surface.
+ * Opens Entity Analytics home with the given entity flyout state, encoded in the new flyout URL
+ * param (same URL shape as the product Entity Analytics page). Used from Agent Builder canvas
+ * where the in-page flyout provider is not mounted on the attachment surface.
  */
 export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   application,
@@ -551,7 +490,6 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   chrome,
   openSidebarConversation,
   searchSession,
-  isNewFlyoutEnabled = false,
 }: {
   application: ApplicationStart;
   appId: string;
@@ -564,11 +502,10 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
    * navigating. See `clearSearchSessionBeforeSecurityNavigation` below for the rationale.
    */
   searchSession?: ISessionService;
-  /** Whether to encode the destination using the new EUI flyout URL contract. */
-  isNewFlyoutEnabled?: boolean;
 }): void => {
-  const descriptors = isNewFlyoutEnabled ? buildEntityFlyoutV2NavigationState(flyout) : null;
-  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout, isNewFlyoutEnabled, descriptors);
+  const path = getEntityAnalyticsNavigationPathWithFlyout(
+    buildEntityFlyoutV2NavigationState(flyout)
+  );
   if (path == null) {
     return;
   }

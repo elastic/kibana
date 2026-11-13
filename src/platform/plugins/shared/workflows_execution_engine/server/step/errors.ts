@@ -9,8 +9,12 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
+import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 
 export const DEFAULT_MAX_STEP_SIZE = '10mb';
+
+/** The `error.type` of a response or output over the step size limit. */
+export const STEP_SIZE_LIMIT_EXCEEDED = 'StepSizeLimitExceeded';
 
 /**
  * Normalizes a thrown step error into an {@link ExecutionError} for persistence.
@@ -30,6 +34,14 @@ export function toExecutionError(error: Error): ExecutionError {
       type: 'KibanaApiCallError',
       message: error.message,
       details: { status: error.status },
+    });
+  }
+  if (error instanceof CallKibanaApiResponseTooLargeError) {
+    return new ExecutionError({
+      type: STEP_SIZE_LIMIT_EXCEEDED,
+      message: error.message,
+      details: { limitBytes: error.limitBytes },
+      retryable: false,
     });
   }
   return ExecutionError.fromError(error);
@@ -151,7 +163,8 @@ export class ResponseSizeLimitError extends ExecutionError {
       : `Configure 'max-step-size' at the step or workflow level to increase the limit, or reduce the response size (e.g., filter fields, limit results).`;
 
     super({
-      type: 'StepSizeLimitExceeded',
+      type: STEP_SIZE_LIMIT_EXCEEDED,
+      retryable: false,
       message: `Step "${stepName}" output exceeded the ${formatBytes(
         limitBytes
       )} size limit. ${actualSizeMessage}${contentLengthMessage}${estimatedOutputMessage}${suggestedLimitMessage}`,
