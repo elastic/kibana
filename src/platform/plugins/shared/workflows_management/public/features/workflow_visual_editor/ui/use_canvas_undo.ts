@@ -22,9 +22,17 @@ const OWN_UNDO_TARGETS =
 /**
  * ⌘Z / Ctrl+Z on the canvas delegates to the undo stack of the main Monaco editor (ADR-0005).
  *
- * While the graph is showing, that editor trails the store by the sync debounce. An undo then would
- * roll back to older text and write it to the store, dropping the last edit, so the key press is
- * swallowed until the editor has caught up; pressing again a moment later works.
+ * Who owns undo, in one place:
+ *  - Focus in a Monaco editor or a form control: that control's own undo (see `OWN_UNDO_TARGETS`).
+ *  - Anywhere else, the canvas: the main editor's undo stack, which is the only history the
+ *    workflow has. The visual editor keeps none of its own.
+ *  - While the graph is showing, that editor trails the store by the sync debounce
+ *    (`useInactiveDebouncedValue`), kept so that typing does not add an undo entry per keystroke.
+ *    An undo then would roll back to older text and write it to the store, dropping the last edit,
+ *    so the key press is swallowed until the editor has caught up; pressing again a moment later
+ *    works.
+ *  - An undo changes the YAML under an open step panel; the shell notices
+ *    (`resolveExternalStepFragment`) and gives the panel the step as it now is (`syncedFragment`).
  */
 export const useCanvasUndo = (
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | null> | undefined,

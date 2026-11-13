@@ -9,23 +9,15 @@
 
 import { isEqual } from 'lodash';
 import { parseDocument } from 'yaml';
+import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
 
 /**
- * Step keys whose change alters what the canvas draws: the node id (`name`), its kind (`type`), the
- * nested bodies, the case and branch edge labels, and the error port (`on-failure`). The list errs
- * toward flushing: a key missing here costs a late canvas repaint (the computation debounce), never a
- * lost edit.
+ * Step keys whose change alters what the canvas draws: the node id (`name`), its kind (`type`), and
+ * every place the step can hold child steps (`steps`, `else`, cases, branches, `default` and the
+ * error ports), which `@kbn/workflows` lists once. The list errs toward flushing: a key missing here
+ * costs a late canvas repaint (the computation debounce), never a lost edit.
  */
-const STRUCTURAL_STEP_KEYS = [
-  'name',
-  'type',
-  'steps',
-  'else',
-  'default',
-  'cases',
-  'branches',
-  'on-failure',
-] as const;
+const STRUCTURAL_STEP_KEYS = ['name', 'type', ...STEP_CHILD_CONTAINER_KEYS] as const;
 
 const toStepMap = (fragment: string): Record<string, unknown> | undefined => {
   const doc = parseDocument(fragment);

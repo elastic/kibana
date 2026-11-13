@@ -9,12 +9,23 @@
 
 import { isPlainObject } from './is_plain_object';
 
-/** The step lists nested in a step: loop/if bodies, switch cases and parallel branches. */
-const nestedBodies = (step: Record<string, unknown>): unknown[] => [
+/** The step lists of a parallel step's own body: its `steps`, or each branch's `steps`. */
+const parallelBodies = (step: Record<string, unknown>): unknown[] => [
   step.steps,
-  step.else,
-  ...(Array.isArray(step.cases) ? step.cases.map((c) => isPlainObject(c) && c.steps) : []),
   ...(Array.isArray(step.branches) ? step.branches.map((b) => isPlainObject(b) && b.steps) : []),
+];
+
+/** The `fallback` list of an `on-failure` / `iteration-on-failure` handler. */
+const fallbackOf = (handler: unknown): unknown => isPlainObject(handler) && handler.fallback;
+
+/** Every step list nested in a step, in any container: bodies, cases, branches and fallbacks. */
+const nestedBodies = (step: Record<string, unknown>): unknown[] => [
+  ...parallelBodies(step),
+  step.else,
+  step.default,
+  ...(Array.isArray(step.cases) ? step.cases.map((c) => isPlainObject(c) && c.steps) : []),
+  fallbackOf(step['on-failure']),
+  fallbackOf(step['iteration-on-failure']),
 ];
 
 /**
@@ -26,10 +37,9 @@ export const isInParallelBody = (steps: unknown, stepName: string): boolean => {
   if (!Array.isArray(steps)) return false;
   return steps.some((step) => {
     if (!isPlainObject(step)) return false;
-    const bodies = nestedBodies(step);
     if (
       step.type === 'parallel' &&
-      bodies.some(
+      parallelBodies(step).some(
         (body) =>
           Array.isArray(body) &&
           body.some((child) => isPlainObject(child) && child.name === stepName)
@@ -37,6 +47,6 @@ export const isInParallelBody = (steps: unknown, stepName: string): boolean => {
     ) {
       return true;
     }
-    return bodies.some((body) => isInParallelBody(body, stepName));
+    return nestedBodies(step).some((body) => isInParallelBody(body, stepName));
   });
 };
