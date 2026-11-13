@@ -1416,6 +1416,7 @@ x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-signals-log
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/nightshift @elastic/nightshift
+x-pack/solutions/observability/plugins/nightshift_detection @elastic/nightshift
 x-pack/solutions/observability/plugins/nightshift_investigations @elastic/nightshift
 x-pack/solutions/observability/plugins/nightshift_sources @elastic/nightshift
 x-pack/solutions/observability/plugins/observability @elastic/observability-ui
