@@ -332,6 +332,7 @@ export const importPluginOverrides: OxlintOverride[] = [
     files: inDirs(
       [
         'kbn-evals-suite-alert-analysis-workflow',
+        'kbn-evals-suite-alertzero-endpoint-analysis',
         'kbn-evals-suite-alerts-rag',
         'kbn-evals-suite-attack-discovery-fp-tp',
         'kbn-evals-suite-attack-discovery',
