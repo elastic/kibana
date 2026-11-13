@@ -70,7 +70,11 @@ export interface TriggerEventsContract {
 export interface WorkflowsExecutionEnginePluginStart {
   serviceAccountBindings: Pick<
     CoreStart['security']['serviceAccounts'],
-    'isEnabled' | 'bindWorkload' | 'unbindWorkload' | 'getWorkloadBinding'
+    | 'isEnabled'
+    | 'bindWorkload'
+    | 'unbindWorkload'
+    | 'getWorkloadBinding'
+    | 'getWorkloadServiceAccountSummary'
   >;
   __internalStorage: {
     workflowExecutionsDataClient: WorkflowExecutionsDataClient;
