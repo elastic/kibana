@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTaskTypeOptions, orderTaskTypes } from './helpers';
+import { getTaskTypeOptions, omitEmptyFieldValues, orderTaskTypes } from './helpers';
 
 describe('orderTaskTypes', () => {
   it('moves chat_completion to the front while preserving the order of the rest', () => {
@@ -35,5 +35,76 @@ describe('getTaskTypeOptions', () => {
       { id: 'chat_completion', label: 'chat_completion', value: 'chat_completion' },
       { id: 'completion', label: 'completion', value: 'completion' },
     ]);
+  });
+});
+
+describe('omitEmptyFieldValues', () => {
+  it('removes null, undefined, and empty string values from dynamic fields', () => {
+    expect(
+      omitEmptyFieldValues({
+        config: {
+          inferenceId: 'openai-text_embedding-1',
+          provider: 'openai',
+          taskType: 'text_embedding',
+          providerConfig: {
+            model_id: 'text-embedding-3-small',
+            organization_id: null,
+            dimensions: undefined,
+            url: '',
+          },
+          taskTypeConfig: { user: '', input_type: null },
+        },
+        secrets: {
+          providerSecrets: { api_key: null, client_secret: 'secret' },
+        },
+      })
+    ).toEqual({
+      config: {
+        inferenceId: 'openai-text_embedding-1',
+        provider: 'openai',
+        taskType: 'text_embedding',
+        providerConfig: { model_id: 'text-embedding-3-small' },
+        taskTypeConfig: {},
+      },
+      secrets: {
+        providerSecrets: { client_secret: 'secret' },
+      },
+    });
+  });
+
+  it('keeps zero, false, lists, and maps', () => {
+    const providerConfig = {
+      max_input_tokens: 0,
+      enabled: false,
+      scopes: ['api'],
+      headers: { 'x-custom': 'value' },
+    };
+
+    expect(
+      omitEmptyFieldValues({
+        config: {
+          inferenceId: 'openai-text_embedding-1',
+          provider: 'openai',
+          taskType: 'text_embedding',
+          providerConfig,
+        },
+        secrets: { providerSecrets: {} },
+      }).config.providerConfig
+    ).toEqual(providerConfig);
+  });
+
+  it('does not add missing dynamic field groups', () => {
+    const result = omitEmptyFieldValues({
+      config: {
+        inferenceId: 'openai-text_embedding-1',
+        provider: 'openai',
+        taskType: 'text_embedding',
+      },
+      secrets: {},
+    });
+
+    expect(result.config).not.toHaveProperty('providerConfig');
+    expect(result.config).not.toHaveProperty('taskTypeConfig');
+    expect(result.secrets).not.toHaveProperty('providerSecrets');
   });
 });

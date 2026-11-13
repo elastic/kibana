@@ -6,9 +6,10 @@
  */
 
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { omitBy } from 'lodash';
 import { isEmpty } from 'lodash/fp';
 import { FieldType } from '../types/types';
-import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
+import type { Config, ConfigEntryView, InferenceEndpoint, InferenceProvider } from '../types/types';
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
 import {
@@ -50,6 +51,28 @@ export const generateInferenceEndpointId = (config: Config) => {
     .toString(36)
     .slice(2)}`;
   return inferenceEndpointId;
+};
+
+const isEmptyFieldValue = (value: unknown): boolean =>
+  value === null || value === undefined || value === '';
+
+export const omitEmptyFieldValues = (inferenceEndpoint: InferenceEndpoint): InferenceEndpoint => {
+  const { config, secrets } = inferenceEndpoint;
+  const { providerConfig, taskTypeConfig } = config;
+  const { providerSecrets } = secrets;
+
+  return {
+    ...inferenceEndpoint,
+    config: {
+      ...config,
+      ...(providerConfig && { providerConfig: omitBy(providerConfig, isEmptyFieldValue) }),
+      ...(taskTypeConfig && { taskTypeConfig: omitBy(taskTypeConfig, isEmptyFieldValue) }),
+    },
+    secrets: {
+      ...secrets,
+      ...(providerSecrets && { providerSecrets: omitBy(providerSecrets, isEmptyFieldValue) }),
+    },
+  };
 };
 
 export const getNonEmptyValidator = (
