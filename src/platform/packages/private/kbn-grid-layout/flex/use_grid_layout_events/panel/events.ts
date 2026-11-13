@@ -25,7 +25,6 @@ import {
   isLayoutInteractive,
 } from '../state_manager_selectors';
 import type { UserInteractionEvent } from '../../../grid/use_grid_layout_events/types';
-import type { FlexKeyboardInteraction } from '../../types';
 import {
   cancelAction,
   commitAction,
@@ -51,47 +50,29 @@ export const useGridLayoutPanelEvents = ({
 
   const lastRequestedPanelPosition = useRef<FlexPanelData | undefined>(undefined);
 
-  // keyboard drags and resizes are announced to screen reader users; pointer interactions are not
-  const announce = useCallback(
-    (type: FlexKeyboardInteraction['type']) => {
-      gridLayoutStateManager.keyboardInteraction$.next({ type, interactionType, panelId });
-    },
-    [gridLayoutStateManager, interactionType, panelId]
-  );
-
   const onStart = useCallback(
     (ev: UserInteractionEvent) => {
       // a cancelled interaction restores the layout but not this cache, so clear it for each new interaction
       lastRequestedPanelPosition.current = undefined;
       startAction(ev, interactionType, gridLayoutStateManager, panelId);
-      if (isKeyboardEvent(ev)) announce('start');
     },
-    [gridLayoutStateManager, interactionType, panelId, announce]
+    [gridLayoutStateManager, interactionType, panelId]
   );
 
-  const commitAndAnnounce = useCallback(() => {
-    const wasKeyboardInteraction = hasPanelInteractionStartedWithKeyboard(gridLayoutStateManager);
+  const onEnd = useCallback(() => {
     commitAction(gridLayoutStateManager);
-    // announced after the commit so a resize reports the width it snapped to
-    if (wasKeyboardInteraction) announce('end');
-  }, [gridLayoutStateManager, announce]);
-
-  const onEnd = commitAndAnnounce;
+  }, [gridLayoutStateManager]);
 
   const onBlur = useCallback(() => {
     // make sure the user hasn't started another interaction in the meantime
     if (gridLayoutStateManager.activePanelEvent$.value?.id === panelId) {
-      commitAndAnnounce();
+      onEnd();
     }
-  }, [gridLayoutStateManager, panelId, commitAndAnnounce]);
+  }, [gridLayoutStateManager, panelId, onEnd]);
 
-  const onCancel = useCallback(
-    (announceEvent?: boolean) => {
-      cancelAction(gridLayoutStateManager);
-      if (announceEvent) announce('cancel');
-    },
-    [gridLayoutStateManager, announce]
-  );
+  const onCancel = useCallback(() => {
+    cancelAction(gridLayoutStateManager);
+  }, [gridLayoutStateManager]);
 
   const onMove = useCallback(
     (ev: UserInteractionEvent) => {
@@ -108,7 +89,6 @@ export const useGridLayoutPanelEvents = ({
       ) {
         if (interactionType === 'drag') {
           moveKeyboardDragAction(ev, gridLayoutStateManager);
-          announce('move');
           return;
         }
         const activePanel = gridLayoutStateManager.activePanelEvent$.value;
@@ -120,10 +100,9 @@ export const useGridLayoutPanelEvents = ({
           getSensorPosition(ev)
         );
         moveAction(ev, gridLayoutStateManager, pointerPixel, lastRequestedPanelPosition);
-        announce('move');
       }
     },
-    [gridLayoutStateManager, interactionType, announce]
+    [gridLayoutStateManager, interactionType]
   );
 
   const startInteraction = useCallback(
@@ -137,7 +116,7 @@ export const useGridLayoutPanelEvents = ({
           onStart,
           onMove,
           onEnd,
-          onCancel: () => onCancel(false), // pointer events to do not support screen reader announcements
+          onCancel,
           scrollContainer: gridLayoutStateManager.scrollContainer$.getValue(),
         });
       } else if (isTouchEvent(e)) {
@@ -155,7 +134,7 @@ export const useGridLayoutPanelEvents = ({
           onMove,
           onEnd,
           onBlur,
-          onCancel: () => onCancel(true),
+          onCancel,
         });
       }
     },

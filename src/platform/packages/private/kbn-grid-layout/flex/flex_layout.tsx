@@ -11,7 +11,6 @@ import classNames from 'classnames';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 
-import { EuiScreenReaderOnly } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { GridPanel, GridPanelDragPreview } from './grid_panel';
@@ -25,7 +24,6 @@ import type {
 import type { GridLayoutContextType } from './use_grid_layout_context';
 import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { useKeyboardAnnouncements } from './use_keyboard_announcements';
 import { getLayoutInOrder } from './utils/resolve_grid_section';
 
 export type GridLayoutProps = {
@@ -52,7 +50,6 @@ export const FlexLayout = ({
     gridSettings,
     accessMode,
   });
-  const keyboardAnnouncement = useKeyboardAnnouncements(gridLayoutStateManager);
   const [elementsInOrder, setElementsInOrder] = useState<FlexLayoutElementsInOrder>([]);
 
   /**
@@ -121,12 +118,6 @@ export const FlexLayout = ({
         })}
         <GridPanelDragPreview />
       </div>
-      {/* rendered outside the list so that the list only contains list items */}
-      <EuiScreenReaderOnly>
-        <div role="status" aria-live="assertive" data-test-subj="kbnFlexLayout--announcements">
-          {keyboardAnnouncement}
-        </div>
-      </EuiScreenReaderOnly>
     </GridLayoutContext.Provider>
   );
 };

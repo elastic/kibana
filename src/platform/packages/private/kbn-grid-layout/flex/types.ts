@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
 import type { ActivePanelEvent, FlexPanelData } from './grid_panel';
@@ -35,13 +35,6 @@ export interface FlexLayoutData {
 
 export type FlexLayoutElementsInOrder = Array<{ id: string }>;
 
-/** A step of a keyboard drag or resize, emitted so it can be announced to screen reader users */
-export interface FlexKeyboardInteraction {
-  type: 'start' | 'move' | 'end' | 'cancel';
-  interactionType: 'drag' | 'resize';
-  panelId: string;
-}
-
 export interface FlexLayoutStateManager {
   gridLayout$: BehaviorSubject<FlexLayoutData>;
   accessMode$: BehaviorSubject<GridAccessMode>;
@@ -52,7 +45,6 @@ export interface FlexLayoutStateManager {
 
   activePanelEvent$: BehaviorSubject<ActivePanelEvent | undefined>;
   layoutUpdated$: Observable<FlexLayoutData>;
-  keyboardInteraction$: Subject<FlexKeyboardInteraction>;
 
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;

@@ -13,7 +13,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { getKeyboardResizeInstructions } from '../use_keyboard_announcements';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutPanelEvents, getDefaultResizeOptions } from '../use_grid_layout_events';
 
@@ -48,12 +47,8 @@ export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
     };
   }, [gridLayoutStateManager, panelId]);
 
-  // jsx-a11y doesn't know `aria-description` (ARIA 1.3) and would flag it if we didn't spread
-  const descriptionProps = { 'aria-description': getKeyboardResizeInstructions() };
-
   return (
     <button
-      {...descriptionProps}
       ref={buttonRef}
       css={styles}
       onMouseDown={startDrag}
