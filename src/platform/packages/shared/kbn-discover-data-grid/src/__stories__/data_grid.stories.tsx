@@ -24,14 +24,14 @@ const columns = [
     id: 'field',
     header: 'Field',
     getValue: (row) => row.field,
-    getAccessibilityValue: ({ value }) => value,
+    getTextValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
     getValue: (row) => row.value,
-    getAccessibilityValue: ({ value }) => value,
+    getTextValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
 ];
@@ -77,7 +77,7 @@ const ConfigurableDataGrid = ({ rowCount, columnCount, height }: ConfigurableDat
           id: `column-${columnNumber}`,
           header: `Column ${columnNumber}`,
           getValue: (row) => row.values[columnIndex] ?? '',
-          getAccessibilityValue: ({ value }) => value,
+          getTextValue: ({ value }) => value,
           renderCell: ({ value }) => value,
         });
       }),

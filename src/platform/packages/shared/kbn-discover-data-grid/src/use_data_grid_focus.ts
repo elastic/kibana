@@ -42,7 +42,7 @@ interface UseDataGridFocusResult {
   readonly api: DataGridApi;
   readonly focusCell: DataGridApi['focusCell'];
   readonly registerCell: (address: DataGridCellAddress, element: HTMLDivElement | null) => void;
-  readonly enterNavigationMode: (address: DataGridCellAddress) => void;
+  readonly activateFocusedCell: (address: DataGridCellAddress) => void;
   readonly releaseFocusOwnership: () => void;
 }
 
@@ -102,17 +102,29 @@ export const useDataGridFocus = ({
   const modelRef = useRef(currentModel);
   modelRef.current = currentModel;
 
+  // Tracks the logical active cell and initializes it to the first available cell.
   const [activeCell, setActiveCell] = useState<DataGridCellAddress | null>(() =>
     getFirstDataGridCell(currentModel)
   );
   const activeCellRef = useRef(activeCell);
   activeCellRef.current = activeCell;
 
+  // Maps logical cell addresses to the DOM elements that are currently mounted.
   const cellElementsRef = useRef(new Map<string, Map<string, HTMLDivElement>>());
+
+  // Tracks a valid focus target whose DOM element has not mounted yet.
   const pendingFocusRef = useRef<PendingFocusCommand | null>(null);
+
+  // Identifies the latest focus request so stale mounts cannot complete older work.
   const focusRequestGenerationRef = useRef(0);
+
+  // Records which request still has permission to move browser focus.
   const focusOwnershipRef = useRef<number | null>(null);
+
+  // Remembers an active cell whose focused DOM element was removed by virtualization.
   const lostOwnedFocusRef = useRef<DataGridCellAddress | null>(null);
+
+  // Keeps stable callbacks connected to the latest virtualizer and announcement handlers.
   const scrollToRowRef = useRef(scrollToRow);
   scrollToRowRef.current = scrollToRow;
   const onCommandFailureRef = useRef(onCommandFailure);
@@ -120,6 +132,7 @@ export const useDataGridFocus = ({
   const onRowsBecameEmptyRef = useRef(onRowsBecameEmpty);
   onRowsBecameEmptyRef.current = onRowsBecameEmpty;
 
+  // Cancels pending focus work and invalidates its permission to move focus.
   const cancelPendingFocus = useCallback((reason: 'superseded' | 'grid_unmounted') => {
     focusRequestGenerationRef.current += 1;
     focusOwnershipRef.current = null;
@@ -132,6 +145,7 @@ export const useDataGridFocus = ({
     pendingFocus.resolve({ status: 'cancelled', reason });
   }, []);
 
+  // Fails pending focus work and reports the reason to the consumer.
   const failPendingFocus = useCallback((reason: DataGridCommandFailureReason) => {
     const pendingFocus = pendingFocusRef.current;
     if (!pendingFocus) {
@@ -144,6 +158,7 @@ export const useDataGridFocus = ({
     onCommandFailureRef.current(reason);
   }, []);
 
+  // Validates a logical address and resolves its current row index for virtualization.
   const resolveAddress = useCallback(
     (
       address: DataGridCellAddress
@@ -161,6 +176,7 @@ export const useDataGridFocus = ({
     []
   );
 
+  // Commits and focuses a mounted cell after bringing it into view.
   const commitFocusedCell = useCallback(
     (address: DataGridCellAddress, element: HTMLDivElement): void => {
       activeCellRef.current = address;
@@ -173,6 +189,7 @@ export const useDataGridFocus = ({
     []
   );
 
+  // Runs a cancellable focus transaction, waiting for the target cell to mount when needed.
   const focusCell = useCallback<DataGridApi['focusCell']>(
     (address) => {
       cancelPendingFocus('superseded');
@@ -206,6 +223,7 @@ export const useDataGridFocus = ({
     [cancelPendingFocus, commitFocusedCell, failPendingFocus, resolveAddress]
   );
 
+  // Scrolls to a logical cell without changing the active cell or DOM focus.
   const scrollToCell = useCallback<DataGridApi['scrollToCell']>(
     (address) => {
       cancelPendingFocus('superseded');
@@ -224,6 +242,7 @@ export const useDataGridFocus = ({
     [cancelPendingFocus, resolveAddress]
   );
 
+  // Tracks mounted cells and completes pending or restorable focus when elements appear.
   const registerCell = useCallback(
     (address: DataGridCellAddress, element: HTMLDivElement | null) => {
       const previousElement = setAddressedElement(cellElementsRef.current, address, element);
@@ -268,7 +287,8 @@ export const useDataGridFocus = ({
     [commitFocusedCell, failPendingFocus, gridRef, resolveAddress]
   );
 
-  const enterNavigationMode = useCallback(
+  // Makes a directly focused cell active and cancels stale focus work.
+  const activateFocusedCell = useCallback(
     (address: DataGridCellAddress) => {
       cancelPendingFocus('superseded');
       activeCellRef.current = address;
@@ -278,11 +298,13 @@ export const useDataGridFocus = ({
     [cancelPendingFocus]
   );
 
+  // Cancels pending work when the grid no longer owns browser focus.
   const releaseFocusOwnership = useCallback(() => {
     cancelPendingFocus('superseded');
     lostOwnedFocusRef.current = null;
   }, [cancelPendingFocus]);
 
+  // Reconciles active and pending focus with row or column model changes before paint.
   useLayoutEffect(() => {
     const previousModel = previousModelRef.current;
     const previousActiveCell = activeCellRef.current;
@@ -334,6 +356,7 @@ export const useDataGridFocus = ({
     }
   }, [columnIds, currentModel, failPendingFocus, focusCell, gridRef, resolveAddress, rowIds]);
 
+  // Cancels pending focus work when the grid unmounts.
   useEffect(
     () => () => {
       cancelPendingFocus('grid_unmounted');
@@ -341,6 +364,7 @@ export const useDataGridFocus = ({
     [cancelPendingFocus]
   );
 
+  // Releases focus ownership when focus moves outside the grid.
   useEffect(() => {
     const onDocumentFocusIn = (event: FocusEvent) => {
       const target = event.target;
@@ -361,7 +385,7 @@ export const useDataGridFocus = ({
     api,
     focusCell,
     registerCell,
-    enterNavigationMode,
+    activateFocusedCell,
     releaseFocusOwnership,
   };
 };

@@ -34,16 +34,16 @@ describe('DataGrid keyboard and logical focus', () => {
     focusElement(firstCell);
 
     fireEvent.keyDown(firstCell, { key: 'ArrowRight' });
-    const valueZero = await expectFocus('Value 0');
+    const valueZero = await expectFocus('0');
     fireEvent.keyDown(valueZero, { key: 'ArrowDown' });
-    const valueOne = await expectFocus('Value 1');
+    const valueOne = await expectFocus('1');
     fireEvent.keyDown(valueOne, { key: 'Home' });
     const nameOne = await expectFocus('Name 1');
     fireEvent.keyDown(nameOne, { key: 'End' });
-    const valueOneAgain = await expectFocus('Value 1');
+    const valueOneAgain = await expectFocus('1');
 
     fireEvent.keyDown(valueOneAgain, { key: 'End', ctrlKey: true });
-    const lastCell = await expectFocus('Value 99');
+    const lastCell = await expectFocus('99');
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(99, 'auto');
 
     fireEvent.keyDown(lastCell, { key: 'Home', metaKey: true });
@@ -66,7 +66,7 @@ describe('DataGrid keyboard and logical focus', () => {
     expect(await runFocusCommand(apiRef.current, 'row-99', 'value')).toEqual({
       status: 'completed',
     });
-    const lastCell = await expectFocus('Value 99');
+    const lastCell = await expectFocus('99');
     fireEvent.keyDown(lastCell, { key: 'ArrowDown' });
     fireEvent.keyDown(lastCell, { key: 'ArrowRight' });
     expect(document.activeElement).toBe(lastCell);
@@ -205,7 +205,7 @@ describe('DataGrid keyboard and logical focus', () => {
     expect(await runFocusCommand(apiRef.current, 'row-50', 'value')).toEqual({
       status: 'completed',
     });
-    await expectFocus('Value 50');
+    await expectFocus('50');
 
     expect(await runFocusCommand(apiRef.current, 'missing', 'value')).toEqual({
       status: 'failed',
@@ -327,12 +327,12 @@ describe('DataGrid keyboard and logical focus', () => {
 
   it('moves focus to the nearest surviving identity when active data is removed', async () => {
     const { rerender } = renderGrid();
-    const activeCell = screen.getByRole('gridcell', { name: 'Value 1' });
+    const activeCell = screen.getByRole('gridcell', { name: '1' });
     focusElement(activeCell);
     const rowsWithoutActive = [rows[0], ...rows.slice(2)];
 
     rerender(<TestDataGrid gridRows={rowsWithoutActive} />);
-    await expectFocus('Value 2');
+    await expectFocus('2');
 
     rerender(<TestDataGrid gridRows={rowsWithoutActive} gridColumns={[columns[0]]} />);
     await expectFocus('Name 2');

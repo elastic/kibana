@@ -22,7 +22,7 @@ export interface DataGridColumnOptions<TRow extends object, TValue> {
   header: ReactNode;
   ariaLabel?: string;
   getValue: (row: TRow) => TValue;
-  getAccessibilityValue: (context: DataGridCellContext<TRow, TValue>) => string;
+  getTextValue: (context: DataGridCellContext<TRow, TValue>) => string;
   renderCell: (context: DataGridCellContext<TRow, TValue>) => ReactNode;
 }
 
@@ -35,7 +35,7 @@ interface InternalDataGridCellContext<TRow extends object> {
 
 interface InternalDataGridColumn<TRow extends object> {
   getValue: (row: TRow) => unknown;
-  getAccessibilityValue: (context: InternalDataGridCellContext<TRow>, value: unknown) => string;
+  getTextValue: (context: InternalDataGridCellContext<TRow>, value: unknown) => string;
   renderCell: (context: InternalDataGridCellContext<TRow>, value: unknown) => ReactNode;
 }
 
@@ -57,7 +57,7 @@ const createDataGridColumn = <TRow extends object, TValue>({
   header,
   ariaLabel,
   getValue,
-  getAccessibilityValue,
+  getTextValue,
   renderCell,
 }: DataGridColumnOptions<TRow, TValue>): DataGridColumn<TRow> => ({
   id,
@@ -65,8 +65,8 @@ const createDataGridColumn = <TRow extends object, TValue>({
   ariaLabel,
   [internalColumnDefinition]: {
     getValue,
-    getAccessibilityValue: ({ row, ...context }, value) =>
-      getAccessibilityValue({
+    getTextValue: ({ row, ...context }, value) =>
+      getTextValue({
         ...context,
         row,
         value: value as TValue,
@@ -90,11 +90,11 @@ export const getDataGridColumnValue = <TRow extends object>(
   row: TRow
 ): unknown => column[internalColumnDefinition].getValue(row);
 
-export const getDataGridCellAccessibilityValue = <TRow extends object>(
+export const getDataGridCellTextValue = <TRow extends object>(
   column: DataGridColumn<TRow>,
   context: InternalDataGridCellContext<TRow>,
   value: unknown
-): string => column[internalColumnDefinition].getAccessibilityValue(context, value);
+): string => column[internalColumnDefinition].getTextValue(context, value);
 
 export const renderDataGridCell = <TRow extends object>(
   column: DataGridColumn<TRow>,

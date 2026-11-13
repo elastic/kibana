@@ -153,14 +153,14 @@ export const columns = [
     id: 'name',
     header: 'Name',
     getValue: (row) => row.name,
-    getAccessibilityValue: ({ value }) => value,
+    getTextValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
     getValue: (row) => row.value,
-    getAccessibilityValue: ({ value }) => `Value ${value}`,
+    getTextValue: ({ value }) => value.toLocaleString(),
     renderCell: ({ value }) => value.toLocaleString(),
   }),
 ];
@@ -170,7 +170,7 @@ export const columnsWithAriaLabel = [
     header: 'Name',
     ariaLabel: 'Full name',
     getValue: (row) => row.name,
-    getAccessibilityValue: ({ value }) => value,
+    getTextValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
 ];

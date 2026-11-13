@@ -34,14 +34,14 @@ const columns = [
     id: 'name',
     header: 'Name',
     getValue: (row) => row.name,
-    getAccessibilityValue: ({ value }) => value,
+    getTextValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
     getValue: (row) => row.value,
-    getAccessibilityValue: ({ value }) => value,
+    getTextValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
 ];
@@ -75,11 +75,12 @@ rendered header needs a different accessible name, such as an icon-only or abbre
 Row virtualization is enabled by default. Its estimated height and overscan can be tuned through
 `virtualization.rows`; omitting those options uses the package defaults.
 
-Each column must provide a `getAccessibilityValue` callback. It is the semantic and clipboard value
-for a cell and is deliberately separate from `renderCell`, so visual React content never has to be
-inspected or converted back into text. Phase 1 `renderCell` output is read-only visual content and
-must not include tabbable descendants such as links, buttons, or inputs. Interactive controls and
-complex cell content will be introduced through public capabilities that preserve the grid's
+Each column must provide a `getTextValue` callback. It returns the canonical plain-text cell value
+used as the default accessible name and focused-cell clipboard value. It should match the visible
+data semantically and is deliberately separate from `renderCell`, so visual React content never has
+to be inspected or converted back into text. Phase 1 `renderCell` output is read-only visual content
+and must not include tabbable descendants such as links, buttons, or inputs. Interactive controls
+and complex cell content will be introduced through public capabilities that preserve the grid's
 composite tab stop without inspecting or rewriting consumer DOM.
 
 ## Keyboard and focus behavior
@@ -91,8 +92,9 @@ are not part of the keyboard navigation plane.
 - Arrow keys move one cell without wrapping.
 - Home and End move to the first and last cell in the current row.
 - Ctrl/Cmd+Home and Ctrl/Cmd+End move to the first and last body cell.
-- Cmd+C on macOS and Ctrl+C elsewhere copy the column-provided accessibility value unless the user
-  has an explicit text selection.
+- The browser's copy command copies the column-provided text value unless the user has an explicit
+  text selection. Multi-cell text selections are copied as tab-separated columns and
+  newline-separated rows, matching EUIDataGrid.
 
 Consumers that need semantic control can pass `apiRef` and call `focusCell` or `scrollToCell` with a
 stable `{ rowId, columnId }` address. Commands return explicit completed, failed, or cancelled

@@ -43,9 +43,7 @@ describe('DataGrid accessibility', () => {
     expect(screen.getByRole('gridcell', { name: 'Name 0' }).getAttribute('aria-colindex')).toBe(
       '1'
     );
-    expect(screen.getByRole('gridcell', { name: 'Value 0' }).getAttribute('aria-colindex')).toBe(
-      '2'
-    );
+    expect(screen.getByRole('gridcell', { name: '0' }).getAttribute('aria-colindex')).toBe('2');
   });
 
   it('requires a non-empty grid accessible name', () => {
@@ -72,7 +70,7 @@ describe('DataGrid accessibility', () => {
 
     focusElement(firstCell);
     fireEvent.keyDown(firstCell, { key: 'ArrowRight' });
-    const secondCell = await expectFocus('Value 0');
+    const secondCell = await expectFocus('0');
     expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
     expect(secondCell.getAttribute('tabindex')).toBe('0');
 
@@ -99,7 +97,7 @@ describe('DataGrid accessibility', () => {
 
   it('copies the accessible cell value when no text is selected', async () => {
     renderGrid();
-    const cell = screen.getByRole('gridcell', { name: 'Value 0' });
+    const cell = screen.getByRole('gridcell', { name: '0' });
     focusElement(cell);
     const setData = jest.fn();
 
@@ -108,7 +106,7 @@ describe('DataGrid accessibility', () => {
       await Promise.resolve();
     });
 
-    expect(setData).toHaveBeenCalledWith('text/plain', 'Value 0');
+    expect(setData).toHaveBeenCalledWith('text/plain', '0');
     await waitFor(() =>
       expect(screen.getByRole('status').textContent).toContain('Cell value copied.')
     );

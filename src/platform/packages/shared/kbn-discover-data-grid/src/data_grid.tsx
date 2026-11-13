@@ -8,7 +8,13 @@
  */
 
 import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { keys, useEuiMemoizedStyles, useResizeObserver } from '@elastic/eui';
+import {
+  keys,
+  OverrideCopiedTabularContent,
+  tabularCopyMarkers,
+  useEuiMemoizedStyles,
+  useResizeObserver,
+} from '@elastic/eui';
 import { createColumnHelper, metaHelper, tableFeatures, useTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
@@ -199,107 +205,112 @@ export const DataGrid = <TRow extends object>({
 
   return (
     <>
-      <div
-        ref={scrollContainerRef}
-        role="grid"
-        tabIndex={focus.activeCell && activeRowIsMounted ? -1 : 0}
-        aria-label={ariaLabel}
-        aria-colcount={columns.length}
-        aria-rowcount={tableRows.length}
-        className={className}
-        css={styles.grid}
-        style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
-        onFocus={onGridFocus}
-        onKeyDownCapture={(event) => {
-          if (event.key === keys.TAB) {
-            focus.releaseFocusOwnership();
-          }
-        }}
-      >
-        <div ref={setHeaderRowGroupElement} role="rowgroup" css={styles.headerRowGroup}>
-          {headerGroups.map((headerGroup) => (
-            <div
-              key={headerGroup.id}
-              role="row"
-              css={styles.headerRow}
-              style={{ gridTemplateColumns }}
-            >
-              {headerGroup.headers.map((header, columnIndex) => (
-                <div
-                  key={header.id}
-                  role="columnheader"
-                  aria-colindex={columnIndex + 1}
-                  aria-label={header.column.columnDef.meta?.ariaLabel}
-                  css={styles.headerCell}
-                >
-                  {header.isPlaceholder ? null : (
-                    <div css={styles.headerContent}>
-                      <table.FlexRender header={header} />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
+      <OverrideCopiedTabularContent>
         <div
-          role="rowgroup"
-          css={styles.virtualCanvas}
-          style={{ blockSize: rowVirtualizer.getTotalSize() }}
-        >
-          {virtualRows.map((virtualRow) => {
-            const row = tableRows[virtualRow.index];
-            if (!row) {
-              throw new Error(`Cannot render the data grid row at index ${virtualRow.index}.`);
+          ref={scrollContainerRef}
+          role="grid"
+          tabIndex={focus.activeCell && activeRowIsMounted ? -1 : 0}
+          aria-label={ariaLabel}
+          aria-colcount={columns.length}
+          aria-rowcount={tableRows.length}
+          className={className}
+          css={styles.grid}
+          style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
+          onFocus={onGridFocus}
+          onKeyDownCapture={(event) => {
+            if (event.key === keys.TAB) {
+              focus.releaseFocusOwnership();
             }
-
-            return (
+          }}
+        >
+          <div ref={setHeaderRowGroupElement} role="rowgroup" css={styles.headerRowGroup}>
+            {headerGroups.map((headerGroup) => (
               <div
-                key={row.id}
-                ref={rowVirtualizer.measureElement}
+                key={headerGroup.id}
                 role="row"
-                aria-rowindex={virtualRow.index + 1}
-                data-index={virtualRow.index}
-                data-striped={virtualRow.index % 2 === 1}
-                css={styles.row}
-                style={{
-                  gridTemplateColumns,
-                  transform: `translateY(${virtualRow.start - headerHeight}px)`,
-                }}
+                css={styles.headerRow}
+                style={{ gridTemplateColumns }}
               >
-                {row.getAllCells().map((cell, columnIndex) => {
-                  const column = columnsById.get(cell.column.id);
-                  if (!column) {
-                    throw new Error(`Cannot resolve data grid column "${cell.column.id}".`);
-                  }
-                  const address = { rowId: row.id, columnId: column.id };
-                  return (
-                    <DataGridCell
-                      key={cell.id}
-                      address={address}
-                      row={row.original}
-                      displayIndex={row.getDisplayIndex()}
-                      column={column}
-                      value={cell.getValue()}
-                      columnIndex={columnIndex}
-                      rowIds={rowIds}
-                      columnIds={columnIds}
-                      activeCell={focus.activeCell}
-                      cellStyles={styles.cell}
-                      focusCell={focus.focusCell}
-                      registerCell={focus.registerCell}
-                      enterNavigationMode={focus.enterNavigationMode}
-                      announceCopySuccess={announceCopySuccess}
-                      announceCopyFailure={announceCopyFailure}
-                    />
-                  );
-                })}
+                {headerGroup.headers.map((header, columnIndex) => (
+                  <div
+                    key={header.id}
+                    role="columnheader"
+                    aria-colindex={columnIndex + 1}
+                    aria-label={header.column.columnDef.meta?.ariaLabel}
+                    css={styles.headerCell}
+                  >
+                    {header.isPlaceholder ? null : (
+                      <div css={styles.headerContent}>
+                        <table.FlexRender header={header} />
+                      </div>
+                    )}
+                    {columnIndex === headerGroup.headers.length - 1
+                      ? tabularCopyMarkers.hiddenNewline
+                      : tabularCopyMarkers.hiddenTab}
+                  </div>
+                ))}
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          <div
+            role="rowgroup"
+            css={styles.virtualCanvas}
+            style={{ blockSize: rowVirtualizer.getTotalSize() }}
+          >
+            {virtualRows.map((virtualRow) => {
+              const row = tableRows[virtualRow.index];
+              if (!row) {
+                throw new Error(`Cannot render the data grid row at index ${virtualRow.index}.`);
+              }
+
+              return (
+                <div
+                  key={row.id}
+                  ref={rowVirtualizer.measureElement}
+                  role="row"
+                  aria-rowindex={virtualRow.index + 1}
+                  data-index={virtualRow.index}
+                  data-striped={virtualRow.index % 2 === 1}
+                  css={styles.row}
+                  style={{
+                    gridTemplateColumns,
+                    transform: `translateY(${virtualRow.start - headerHeight}px)`,
+                  }}
+                >
+                  {row.getAllCells().map((cell, columnIndex) => {
+                    const column = columnsById.get(cell.column.id);
+                    if (!column) {
+                      throw new Error(`Cannot resolve data grid column "${cell.column.id}".`);
+                    }
+                    const address = { rowId: row.id, columnId: column.id };
+                    return (
+                      <DataGridCell
+                        key={cell.id}
+                        address={address}
+                        row={row.original}
+                        displayIndex={row.getDisplayIndex()}
+                        column={column}
+                        value={cell.getValue()}
+                        columnIndex={columnIndex}
+                        rowIds={rowIds}
+                        columnIds={columnIds}
+                        activeCell={focus.activeCell}
+                        cellStyles={styles.cell}
+                        focusCell={focus.focusCell}
+                        registerCell={focus.registerCell}
+                        activateFocusedCell={focus.activateFocusedCell}
+                        announceCopySuccess={announceCopySuccess}
+                        announceCopyFailure={announceCopyFailure}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </OverrideCopiedTabularContent>
       {liveRegion}
     </>
   );
