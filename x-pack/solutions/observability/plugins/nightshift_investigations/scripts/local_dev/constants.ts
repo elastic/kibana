@@ -27,7 +27,7 @@ export const EVAL_SANDBOX_PORT = 9090;
  * only the `sandbox` block; the ORCA key is read from `golden`, which the evals own and rotate.
  */
 export const LOCAL_DEV_VAULT_SECRET = 'nightshift-local-dev';
-export const ORCA_VAULT_SECRET = 'golden';
+export const ORCA_VAULT_SECRET = 'nightshift';
 
 /** The same id and name as the eval's ORCA connector, since ORCA questions name the connector. */
 export const ORCA_CONNECTOR_ID = 'orcabench-es';
