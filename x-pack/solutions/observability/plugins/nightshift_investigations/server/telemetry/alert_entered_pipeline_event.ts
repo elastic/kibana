@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
 import type { AlertStatusChangedOptIn } from '@kbn/alerting-v2-plugin/server';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
+import { toAlertFingerprint } from './alert_identity';
 
 export const NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT = 'nightshift-alert-entered-pipeline';
 export const ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY = 0.1;
@@ -87,18 +87,12 @@ export const isAlertEnteredPipelineSampled = (
   return sample < probability;
 };
 
-// Rule group hashes are only unique within a rule; hashing every path keeps the sampler input hex.
-export const toAlertFingerprint = ({ spaceId, source, alert, rule }: AlertStatusChange): string =>
-  createHash('sha256')
-    .update(`${spaceId}:${source}:${rule?.id ?? ''}:${alert.groupHash}`)
-    .digest('hex');
-
 export const reportAlertsEnteredPipeline = (
   payloads: readonly AlertStatusChange[],
   telemetry: AlertEnteredPipelineReporter
 ): void => {
   for (const payload of payloads) {
-    const { spaceId, source, alert } = payload;
+    const { spaceId, source, alert, rule } = payload;
     const isNewEpisode =
       (alert.previousStatus === null || alert.previousStatus === 'inactive') &&
       (alert.status === 'pending' || alert.status === 'active');
@@ -107,7 +101,12 @@ export const reportAlertsEnteredPipeline = (
       continue;
     }
 
-    const fingerprint = toAlertFingerprint(payload);
+    const fingerprint = toAlertFingerprint({
+      spaceId,
+      source,
+      ruleId: rule?.id,
+      groupHash: alert.groupHash,
+    });
     if (!isAlertEnteredPipelineSampled(fingerprint)) {
       continue;
     }
@@ -117,7 +116,7 @@ export const reportAlertsEnteredPipeline = (
       fingerprint,
       group_hash: alert.groupHash,
       space_id: spaceId,
-      source_kind: payload.rule === null ? 'external' : 'elastic_configured',
+      source_kind: rule === null ? 'external' : 'elastic_configured',
       sampling_probability: ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
     });
   }

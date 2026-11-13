@@ -40,6 +40,13 @@ export {
   type OnlineEvalScoreEvent,
 } from './online_eval_score_event';
 export {
+  alertIdentityOf,
+  toAlertFingerprint,
+  triggeringAlertOf,
+  type AlertIdentity,
+  type AlertSourceKind,
+} from './alert_identity';
+export {
   ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
   NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT,
   isAlertEnteredPipelineSampled,
