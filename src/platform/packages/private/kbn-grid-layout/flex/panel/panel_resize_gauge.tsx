@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useEffect, useState } from 'react';
+import { combineLatest, skip } from 'rxjs';
+import { usePanelState } from './use_panel_state';
+import { resizeGaugeStyles } from '../../common/resize_styles';
+import { useGridLayoutContext } from '../use_grid_layout_context';
+
+export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
+  const [width, setWidth] = useState(0);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const panel$ = usePanelState({ panelId });
+  const { gridLayoutStateManager } = useGridLayoutContext();
+
+  useEffect(() => {
+    /** Update the styles via a subscription to prevent re-renders */
+    const activePanelStyleSubscription = combineLatest([
+      gridLayoutStateManager.activePanelEvent$,
+      panel$,
+    ])
+      .pipe(skip(1))
+      .subscribe(([activePanel, currentPanel]) => {
+        const ref = currentPanel && gridLayoutStateManager.panelRefs.current[currentPanel.id];
+        const isResizingThisPanel =
+          Boolean(ref) && activePanel?.type === 'resize' && activePanel.id === currentPanel?.id;
+
+        setIsResizing(isResizingThisPanel);
+        if (isResizingThisPanel && currentPanel) setWidth(Math.round(currentPanel.width));
+      });
+
+    return () => {
+      activePanelStyleSubscription.unsubscribe();
+    };
+  }, [panel$, gridLayoutStateManager]);
+
+  return isResizing ? (
+    <div css={resizeGaugeStyles} className="kbnFlexPanel--resizeGauge">
+      <div className="kbnFlexPanel--resizeGauge--inner">
+        <span className="kbnFlexPanel--resizeGauge--text">{width}</span>
+      </div>
+    </div>
+  ) : null;
+});
+
+ResizeGauge.displayName = 'kbnFlexLayoutResizeGauge';

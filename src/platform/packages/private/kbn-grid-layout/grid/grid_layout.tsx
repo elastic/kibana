@@ -9,7 +9,6 @@
 
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest } from 'rxjs';
 import { cloneDeep } from 'lodash';
 
 import { css } from '@emotion/react';
@@ -67,6 +66,9 @@ export const GridLayout = ({
     accessMode,
   });
   const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
+  const [isMobileView, setIsMobileView] = useState<boolean>(
+    gridLayoutStateManager.isMobileView$.getValue()
+  );
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -156,27 +158,14 @@ export const GridLayout = ({
     });
 
     /**
-     * This subscription adds and/or removes the necessary class names related to styling for
-     * mobile view and a static (non-interactable) grid layout
+     * This subscription adds and/or removes the necessary class name related to styling for
+     * mobile view
      */
-    const gridLayoutClassSubscription = combineLatest([
-      gridLayoutStateManager.accessMode$,
-      gridLayoutStateManager.isMobileView$,
-    ]).subscribe(([currentAccessMode, isMobileView]) => {
-      if (!layoutRef) return;
-
-      if (isMobileView) {
-        layoutRef.current?.classList.add('kbnGrid--mobileView');
-      } else {
-        layoutRef.current?.classList.remove('kbnGrid--mobileView');
+    const gridLayoutClassSubscription = gridLayoutStateManager.isMobileView$.subscribe(
+      (newIsMobileView) => {
+        setIsMobileView(newIsMobileView);
       }
-
-      if (currentAccessMode === 'VIEW') {
-        layoutRef.current?.classList.add('kbnGrid--static');
-      } else {
-        layoutRef.current?.classList.remove('kbnGrid--static');
-      }
-    });
+    );
 
     return () => {
       renderSubscription.unsubscribe();
@@ -204,7 +193,11 @@ export const GridLayout = ({
             layoutRef.current = divElement;
             setDimensionsRef(divElement);
           }}
-          className={classNames('kbnGrid', className)}
+          className={classNames(
+            'kbnGrid',
+            { 'kbnGrid--static': accessMode === 'VIEW', 'kbnGrid--mobileView': isMobileView },
+            className
+          )}
           css={[styles.layout, styles.hasActivePanel, styles.singleColumn, styles.hasExpandedPanel]}
         >
           {elementsInOrder.map((element) => {

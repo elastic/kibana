@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -181,7 +182,7 @@ export function DashboardApp({
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
-    <>
+    <div css={pinnedPanelActiveStyles}>
       {dashboardApi && dashboardInternalApi && (
         <>
           <DashboardTabTitleSetter dashboardApi={dashboardApi} />
@@ -214,6 +215,17 @@ export function DashboardApp({
         showPlainSpinner={showPlainSpinner}
         getCreationOptions={getCreationOptions}
       />
-    </>
+    </div>
   );
 }
+
+const pinnedPanelActiveStyles = css({
+  // keep the wrapper out of layout so DashboardRenderer's `flex: auto` still fills the viewport
+  // height; the maximized panel (absolute, height: 100%) depends on that height
+  display: 'contents',
+  '&:has(.kbnFlexPanel--active) *': {
+    // disable pointer events and user select on drag + resize
+    userSelect: 'none',
+    pointerEvents: 'none',
+  },
+});

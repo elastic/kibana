@@ -8,7 +8,7 @@
  */
 
 import { fireEvent } from '@testing-library/react';
-import type { PointerPosition } from '../use_grid_layout_events/types';
+import type { PointerPosition } from '../../common/types';
 
 class TouchEventFake extends Event {
   constructor(public touches: PointerPosition[]) {

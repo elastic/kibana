@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, waitFor } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import { buildMockDashboardApi } from '../mocks';
@@ -20,6 +21,8 @@ import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import type { DashboardPinnedPanelsState } from '@kbn/as-code-dashboard-schema';
 
 jest.mock('../dashboard_api/load_dashboard_api');
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: EuiProvider });
 
 describe('Dashboard Renderer', () => {
   dataService.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);

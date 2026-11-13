@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { FlexLayout } from './flex/flex_layout';
+export type { FlexLayoutData, FlexLayoutSettings } from './flex/types';
+
 export { GridLayout } from './grid/grid_layout';
-export type { GridLayoutData, GridSettings, GridAccessMode } from './grid/types';
 export type { GridPanelData } from './grid/grid_panel';
 export type { GridSectionData } from './grid/grid_section';
-
+export type { GridAccessMode, GridLayoutData, GridSettings } from './grid/types';
+export { handleAutoscroll, startAutoScroll, stopAutoScroll } from './common/sensors/autoscroll';
 export { isLayoutEqual } from './grid/utils/equality_checks';
-export {
-  startAutoScroll,
-  stopAutoScroll,
-  handleAutoscroll,
-} from './grid/use_grid_layout_events/sensors/autoscroll';

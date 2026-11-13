@@ -11,15 +11,11 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription, of } from 'rxjs';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import {
-  EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
   EuiIcon,
-  transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -39,7 +35,6 @@ import {
 } from '@kbn/controls-schemas/src/types';
 import type { ControlsRendererParentApi } from '../types';
 import { apiPublishesLabel } from '../utils';
-import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
 import { ControlLabelTooltip } from './control_label_tooltip';
@@ -47,22 +42,18 @@ import { useIndicateRelatedPanelsSelector } from '../hooks';
 
 export const ControlPanel = ({
   parentApi,
-  control: { id, grow, width, type },
-  setControlPanelRef,
+  control: { id, type },
+  setDragHandles,
 }: {
   parentApi: ControlsRendererParentApi;
   control: Required<PinnedControlLayoutState>;
-  setControlPanelRef: (id: string, ref: HTMLElement | null) => void;
+  setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }) => {
   const styles = useMemoCss(controlPanelStyles);
 
   const [api, setApi] = useState<
     (DefaultEmbeddableApi & Partial<HasCustomPrepend> & Partial<PublishesTooltipLabel>) | null
   >(null);
-
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id,
-  });
 
   const [viewMode, disabledActionIds, relatedPanelsIndicatorId] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
@@ -75,6 +66,12 @@ export const ControlPanel = ({
   const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // the drag handle only exists while editing; the flex layout wires its drag events to it
+    setDragHandles?.([dragHandleRef.current]);
+  }, [setDragHandles, api, viewMode]);
 
   useEffect(() => {
     return () => {
@@ -138,14 +135,6 @@ export const ControlPanel = ({
     };
   }, [api, selectedPanel]);
 
-  const setRefs = useCallback(
-    (ref: HTMLElement | null) => {
-      setNodeRef(ref);
-      setControlPanelRef(id, ref);
-    },
-    [id, setNodeRef, setControlPanelRef]
-  );
-
   const onApiAvailable = useCallback(
     (controlApi: DefaultEmbeddableApi) => {
       setApi(controlApi);
@@ -200,18 +189,7 @@ export const ControlPanel = ({
   );
 
   return (
-    <EuiFlexItem
-      component="li"
-      ref={setRefs}
-      style={{
-        transition,
-        transform: CSS.Translate.toString(transform),
-      }}
-      grow={Boolean(grow)}
-      data-test-subj="control-frame"
-      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
-      className={`controlFrameWrapper--${width}`}
-    >
+    <div data-test-subj="control-frame" css={styles.controlFrame}>
       <FloatingActions
         data-test-subj="control-frame-floating-actions"
         api={api}
@@ -246,8 +224,7 @@ export const ControlPanel = ({
                       isEditable={isEditable}
                       controlTitle={panelLabel}
                       className="controlFrame__dragHandle"
-                      {...attributes}
-                      {...listeners}
+                      dragHandleRef={dragHandleRef}
                     />
                     <api.CustomPrependComponent />
                   </>
@@ -258,8 +235,7 @@ export const ControlPanel = ({
                       controlTitle={panelLabel}
                       className="controlFrame__dragHandle"
                       highContrast={isIndicatingRelatedPanels}
-                      {...attributes}
-                      {...listeners}
+                      dragHandleRef={dragHandleRef}
                     >
                       {!enableIndicateRelatedPanels && controlLabel}
                     </DragHandle>
@@ -281,16 +257,15 @@ export const ControlPanel = ({
           </EuiFormControlLayout>
         </EuiFormRow>
       </FloatingActions>
-    </EuiFlexItem>
+    </div>
   );
 };
 
 const controlPanelStyles = {
-  draggingItem: css({
-    opacity: 0,
-    visibility: 'hidden',
+  controlFrame: css({
+    width: '100%',
+    height: '100%',
   }),
-  controlWidthStyles,
   tooltipStyles: {
     height: '100%',
   },
@@ -323,8 +298,8 @@ const controlPanelStyles = {
         outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
       },
       '&.controlFrame__formControlLayout--selected': {
-        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
-        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.1),
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
+        backgroundColor: euiTheme.colors.backgroundLightPrimary,
         '& div, & button': {
           backgroundColor: 'transparent',
         },

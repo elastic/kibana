@@ -10,8 +10,8 @@
 import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-utils';
 import type { GridLayoutStateManager } from '../../types';
 import { updateClientY } from '../keyboard_utils';
-import type { UserKeyboardEvent } from '../sensors/keyboard/types';
-import { KeyboardCode } from '../sensors/keyboard/types';
+import type { UserKeyboardEvent } from '../../../common/sensors/keyboard/types';
+import { KeyboardCode } from '../../../common/sensors/keyboard/types';
 
 export const getNextKeyboardPosition = (
   ev: UserKeyboardEvent,

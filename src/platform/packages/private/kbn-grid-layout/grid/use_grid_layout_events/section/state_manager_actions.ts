@@ -14,8 +14,8 @@ import type { GridSectionData } from '../../grid_section';
 import type { GridLayoutStateManager, OrderedLayout } from '../../types';
 import { getPanelKeysInOrder, getSectionsInOrder } from '../../utils/resolve_grid_section';
 import { resolveSections } from '../../utils/section_management';
-import { getSensorType } from '../sensors';
-import type { PointerPosition, UserInteractionEvent } from '../types';
+import { getSensorType } from '../../../common/sensors';
+import type { PointerPosition, UserInteractionEvent } from '../../../common/types';
 
 let startingLayout: OrderedLayout | undefined;
 

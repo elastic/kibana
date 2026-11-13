@@ -9,7 +9,11 @@
 
 import type { BehaviorSubject } from 'rxjs';
 
-import type { ControlsGroupState, PinnedControlLayoutState } from '@kbn/controls-schemas';
+import type {
+  ControlsGroupState,
+  ControlWidth,
+  PinnedControlLayoutState,
+} from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   CanIndicateRelatedChildren,
@@ -21,6 +25,8 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
+export type { ControlWidth };
 
 type ControlState = ControlsGroupState[number];
 export type ControlPanelState = Pick<ControlState, 'width' | 'grow'> & { order: number };
