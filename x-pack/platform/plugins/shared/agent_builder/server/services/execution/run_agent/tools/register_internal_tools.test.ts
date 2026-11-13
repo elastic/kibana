@@ -32,6 +32,9 @@ jest.mock('./ask_user_question', () => ({
   createAskUserQuestionTool: () => ({ id: 'ask_user_question' }),
 }));
 jest.mock('./load_skill', () => ({ createLoadSkillTool: () => ({ id: 'load_skill' }) }));
+jest.mock('./search_relevant_skills', () => ({
+  createSearchRelevantSkillsTool: () => ({ id: 'search_relevant_skills' }),
+}));
 jest.mock('./execute_dynamic_tool', () => ({
   createExecuteDynamicTool: jest.fn(() => ({ id: 'execute_dynamic_tool' })),
 }));
@@ -80,7 +83,11 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
-const register = async (context: AgentHandlerContext, subagentIds: string[] = ['other-agent']) => {
+const register = async (
+  context: AgentHandlerContext,
+  subagentIds: string[] = ['other-agent'],
+  overrides: Record<string, unknown> = {}
+) => {
   const params = {
     context,
     agentId: 'agent-1',
@@ -91,6 +98,7 @@ const register = async (context: AgentHandlerContext, subagentIds: string[] = ['
     subagentTracker: {},
     conversationExists: jest.fn(),
     agentConfiguration: { subagent_ids: subagentIds },
+    ...overrides,
   } as unknown as RegisterInternalToolsParams;
   await registerInternalTools(params);
 };
@@ -224,5 +232,47 @@ describe('registerInternalTools - execute_dynamic_tool', () => {
 
     expect(addedToolIds(toolManager)).toContain('execute_dynamic_tool');
     expect(createExecuteDynamicTool).toHaveBeenCalledWith({ toolManager });
+  });
+});
+
+describe('registerInternalTools - skill tools', () => {
+  const skillsContext = () =>
+    createContext({
+      experimentalFeatures: {
+        skills: true,
+        aiIndices: false,
+        relevantSkills: true,
+        backgroundWake: false,
+        bash: false,
+        apiDiscovery: false,
+        dynamicTools: false,
+      },
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resolveAllowedSubagentsMock.mockResolvedValue([]);
+  });
+
+  it('registers neither skill tool when the run has no skills', async () => {
+    const { context, toolManager } = skillsContext();
+
+    await register(context, [], { filteredSkills: [], relevantSkillsEnabled: true });
+
+    expect(addedToolIds(toolManager)).not.toContain('load_skill');
+    expect(addedToolIds(toolManager)).not.toContain('search_relevant_skills');
+  });
+
+  it('registers both skill tools when the run has a skill', async () => {
+    const { context, toolManager } = skillsContext();
+
+    await register(context, [], {
+      filteredSkills: [{ id: 'a.alpha' }],
+      relevantSkillsEnabled: true,
+    });
+
+    expect(addedToolIds(toolManager)).toEqual(
+      expect.arrayContaining(['load_skill', 'search_relevant_skills'])
+    );
   });
 });

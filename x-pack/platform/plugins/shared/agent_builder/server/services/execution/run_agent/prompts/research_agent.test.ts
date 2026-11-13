@@ -171,6 +171,45 @@ describe('getResearchAgentPrompt', () => {
     expect(system).not.toMatch(/- alpha \(.+SKILL\.md\)/);
   });
 
+  it.each([true, false])(
+    'omits the SKILLS section and every skill rule when the agent has no skills (relevant skills: %s)',
+    async (relevantSkillsEnabled) => {
+      const messages = await getResearchAgentPrompt(
+        makeParams({
+          experimentalFeatures: { bash: false, skills: true },
+          relevantSkillsEnabled,
+          skills: [],
+        })
+      );
+      const system = asText(messages[0]);
+
+      expect(system).not.toContain('## SKILLS');
+      expect(system).not.toContain('search_relevant_skills');
+      expect(system).not.toContain('Skill scope');
+      expect(system).not.toContain('Exception: always load applicable skills');
+      expect(system).not.toContain('Load applicable skills first');
+      expect(system).not.toContain('**Cross-scope**');
+      expect(system).toContain('1. Honor explicit user preference');
+    }
+  );
+
+  it('keeps every skill rule when the agent has a skill', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: { bash: false, skills: true },
+        relevantSkillsEnabled: false,
+        skills: [alphaSkill],
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain('5) Skill scope');
+    expect(system).toContain('Exception: always load applicable skills');
+    expect(system).toContain('1. Load applicable skills first');
+    expect(system).toContain('2. Honor explicit user preference');
+    expect(system).toContain('**Cross-scope**');
+  });
+
   it('injects the <relevant_skills> notice after previous rounds when the run has a relevant_skills step', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
