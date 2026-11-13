@@ -91,6 +91,7 @@ const DEFAULT_ARGS = [
 ];
 
 const DIAGNOSTIC_TIME = 5 * 1000;
+const FAILED_SETUP_CLOSE_TIMEOUT = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
@@ -144,8 +145,9 @@ export class HeadlessChromiumDriverFactory {
         `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
       );
 
+      let browser: Browser | undefined;
+
       (async () => {
-        let browser: Browser | undefined;
         try {
           // `puppeteer` is ESM-only (v25+), so it must be imported lazily. A static
           // import compiles to a top-level `require` that forces Jest to parse the
@@ -171,6 +173,8 @@ export class HeadlessChromiumDriverFactory {
           );
           return;
         }
+
+        this.handleBrowserPipeErrors(browser, logger);
 
         const page = await browser.newPage();
         const devTools = await page.target().createCDPSession();
@@ -257,7 +261,7 @@ export class HeadlessChromiumDriverFactory {
           page
         );
 
-        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
+        const error$ = Rx.merge(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
           mergeMap((err) => Rx.throwError(err))
         );
 
@@ -276,8 +280,39 @@ export class HeadlessChromiumDriverFactory {
             logger.error(error);
           });
         });
-      })().catch(() => {});
+      })().catch(async (error) => {
+        // Browser died during page setup; without this the job hangs until it times out.
+        logger.error(`Error setting up the Chromium browser page: ${error}`);
+        // Erroring releases the capture semaphore, and the next capture reuses this userDataDir,
+        // so the browser must be gone first or its profile lock can fail that launch too.
+        await this.closeBrowserAfterFailedSetup(browser, logger);
+        observer.error(
+          new errors.FailedToSpawnBrowserError(
+            `Error setting up the Chromium browser page! ${error}`
+          )
+        );
+      });
     });
+  }
+
+  private async closeBrowserAfterFailedSetup(
+    browser: Browser | undefined,
+    logger: Logger
+  ): Promise<void> {
+    if (!browser) {
+      return;
+    }
+
+    try {
+      await Rx.firstValueFrom(
+        Rx.defer(async () => browser.close()).pipe(Rx.timeout(FAILED_SETUP_CLOSE_TIMEOUT))
+      );
+    } catch (closeError) {
+      logger.debug(
+        `Error closing the browser after a failed page setup, killing it: ${closeError}`
+      );
+      browser.process()?.kill('SIGKILL');
+    }
   }
 
   /**
@@ -361,6 +396,19 @@ export class HeadlessChromiumDriverFactory {
     );
 
     return Rx.merge(consoleMessages$, uncaughtExceptionPageError$, pageRequestFailed$);
+  }
+
+  handleBrowserPipeErrors(browser: Browser, logger: Logger): void {
+    // Puppeteer drops its pipe error listeners on disconnect, so an EPIPE from an in-flight write
+    // would become an uncaughtException and kill Kibana. Logging is enough: getPageExit reports the exit.
+    const stdio = browser.process()?.stdio ?? [];
+    for (const stream of stdio) {
+      stream?.on('error', (error: Error) => {
+        logger
+          .get('headless-browser-process')
+          .debug(`Browser process pipe error (the browser has likely exited): ${error.message}`);
+      });
+    }
   }
 
   getProcessLogger(browser: Browser, logger: Logger): Rx.Observable<void> {
