@@ -21,6 +21,13 @@ export const getKeyboardDragInstructions = (): string =>
       'Press Space or Enter to pick up this panel, then use the arrow keys to move it. Press Space or Enter again to drop it, or Escape to cancel.',
   });
 
+/** Describes the keyboard resize interaction; set as the `aria-description` of every resize handle */
+export const getKeyboardResizeInstructions = (): string =>
+  i18n.translate('kbnGridLayout.flex.keyboardResize.instructions', {
+    defaultMessage:
+      'Press Space or Enter to start resizing this panel, then use the left and right arrow keys to change its width. Press Space or Enter again to apply the new width, or Escape to cancel.',
+  });
+
 const getPosition = (
   { gridLayout$ }: FlexLayoutStateManager,
   panelId: string
@@ -32,7 +39,10 @@ const getPosition = (
   };
 };
 
-const getMessage = (
+const getWidth = ({ gridLayout$ }: FlexLayoutStateManager, panelId: string): number =>
+  Math.round(gridLayout$.getValue()[panelId]?.width ?? 0);
+
+const getDragMessage = (
   type: FlexKeyboardInteraction['type'],
   label: string,
   position: number,
@@ -63,9 +73,39 @@ const getMessage = (
   }
 };
 
+const getResizeMessage = (
+  type: FlexKeyboardInteraction['type'],
+  label: string,
+  width: number
+): string => {
+  switch (type) {
+    case 'start':
+      return i18n.translate('kbnGridLayout.flex.keyboardResize.started', {
+        defaultMessage:
+          'Resizing {label}, width {width} pixels. Use the left and right arrow keys to change the width, Space or Enter to apply it, or Escape to cancel.',
+        values: { label, width },
+      });
+    case 'move':
+      return i18n.translate('kbnGridLayout.flex.keyboardResize.moved', {
+        defaultMessage: '{label} width {width} pixels.',
+        values: { label, width },
+      });
+    case 'end':
+      return i18n.translate('kbnGridLayout.flex.keyboardResize.applied', {
+        defaultMessage: 'Resize applied. {label} width {width} pixels.',
+        values: { label, width },
+      });
+    case 'cancel':
+      return i18n.translate('kbnGridLayout.flex.keyboardResize.cancelled', {
+        defaultMessage: 'Resize cancelled. {label} width returned to {width} pixels.',
+        values: { label, width },
+      });
+  }
+};
+
 /**
- * Turns the steps of a keyboard drag into messages for a live region, since the only visual
- * feedback of a keyboard drag is the panel moving.
+ * Turns the steps of a keyboard drag or resize into messages for a live region, since the only
+ * visual feedback of these interactions is the panel moving or changing size.
  */
 export const useKeyboardAnnouncements = (
   gridLayoutStateManager: FlexLayoutStateManager
@@ -73,18 +113,25 @@ export const useKeyboardAnnouncements = (
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    let lastPosition: number | undefined;
+    let lastValue: number | undefined;
     const subscription = gridLayoutStateManager.keyboardInteraction$.subscribe(
-      ({ type, panelId }) => {
-        const { position, total } = getPosition(gridLayoutStateManager, panelId);
-        // moving against the edge of the layout doesn't change anything, so there is nothing to say
-        if (type === 'move' && position === lastPosition) return;
-        lastPosition = type === 'start' || type === 'move' ? position : undefined;
-
+      ({ type, interactionType, panelId }) => {
         const label = i18n.translate('kbnGridLayout.flex.keyboardDrag.defaultLabel', {
           defaultMessage: 'Panel',
         });
-        setMessage(getMessage(type, label, position, total));
+        const isResize = interactionType === 'resize';
+        const { position, total } = getPosition(gridLayoutStateManager, panelId);
+        const value = isResize ? getWidth(gridLayoutStateManager, panelId) : position;
+
+        // moving against a limit (the edge of the layout, or the min/max width) doesn't change anything, so there is nothing to say
+        if (type === 'move' && value === lastValue) return;
+        lastValue = type === 'start' || type === 'move' ? value : undefined;
+
+        setMessage(
+          isResize
+            ? getResizeMessage(type, label, value)
+            : getDragMessage(type, label, position, total)
+        );
       }
     );
     return () => subscription.unsubscribe();

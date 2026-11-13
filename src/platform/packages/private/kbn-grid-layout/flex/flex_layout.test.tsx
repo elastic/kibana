@@ -503,15 +503,41 @@ describe('FlexLayout', () => {
           );
         });
 
-        it('does not announce resizes', async () => {
+        it('describes the keyboard interaction on the resize handle', () => {
+          renderFlexLayout();
+
+          expect(getHandle('panel1', 'resize').getAttribute('aria-description')).toMatch(
+            /Space or Enter to start resizing.*arrow keys.*Escape to cancel/
+          );
+        });
+
+        it('announces the start, the width after each step, and the applied width', async () => {
           renderFlexLayout();
           getHandle('panel1', 'resize').focus();
 
           await pressKey('[Enter]');
-          await pressKey('[ArrowRight]');
-          await pressKey('[Enter]');
+          expect(getAnnouncement()).toHaveTextContent(/Resizing Panel, width \d+ pixels.*Escape/);
 
-          expect(getAnnouncement()).toBeEmptyDOMElement();
+          await pressKey('[ArrowLeft]');
+          expect(getAnnouncement()).toHaveTextContent(/^Panel width \d+ pixels\.$/);
+
+          await pressKey('[Enter]');
+          expect(getAnnouncement()).toHaveTextContent(/Resize applied. Panel width \d+ pixels/);
+        });
+
+        it('announces the original width when the resize is cancelled', async () => {
+          renderFlexLayout();
+          getHandle('panel1', 'resize').focus();
+
+          await pressKey('[Enter]');
+          const [, startWidth] =
+            /width (\d+) pixels/.exec(getAnnouncement().textContent ?? '') ?? [];
+          await pressKey('[ArrowLeft]');
+          await pressKey('{Escape}');
+
+          expect(getAnnouncement()).toHaveTextContent(
+            `Resize cancelled. Panel width returned to ${startWidth} pixels.`
+          );
         });
       });
 

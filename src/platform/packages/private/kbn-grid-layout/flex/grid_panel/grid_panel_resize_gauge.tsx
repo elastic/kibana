@@ -57,7 +57,8 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   }, [panel$, gridLayoutStateManager]);
 
   return isResizing ? (
-    <div css={outerStyles} className="kbnFlexPanel--resizeGauge">
+    // hidden from assistive technology because the width is announced through EuiScreenReader
+    <div css={outerStyles} className="kbnFlexPanel--resizeGauge" aria-hidden="true">
       <div className="kbnFlexPanel--resizeGauge--inner">
         <span className="kbnFlexPanel--resizeGauge--text">
           {i18n.translate('kbnGridLayout.flex.resizeGauge.width', {

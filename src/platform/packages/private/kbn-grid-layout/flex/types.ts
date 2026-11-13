@@ -35,9 +35,10 @@ export interface FlexLayoutData {
 
 export type FlexLayoutElementsInOrder = Array<{ id: string }>;
 
-/** A step of a keyboard drag, emitted so it can be announced to screen reader users */
+/** A step of a keyboard drag or resize, emitted so it can be announced to screen reader users */
 export interface FlexKeyboardInteraction {
   type: 'start' | 'move' | 'end' | 'cancel';
+  interactionType: 'drag' | 'resize';
   panelId: string;
 }
 

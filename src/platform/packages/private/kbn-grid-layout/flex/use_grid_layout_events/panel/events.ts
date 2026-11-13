@@ -51,12 +51,12 @@ export const useGridLayoutPanelEvents = ({
 
   const lastRequestedPanelPosition = useRef<FlexPanelData | undefined>(undefined);
 
-  // keyboard drags are announced to screen reader users; resizes and pointer drags are not
+  // keyboard drags and resizes are announced to screen reader users; pointer interactions are not
   const announce = useCallback(
     (type: FlexKeyboardInteraction['type']) => {
-      gridLayoutStateManager.keyboardInteraction$.next({ type, panelId });
+      gridLayoutStateManager.keyboardInteraction$.next({ type, interactionType, panelId });
     },
-    [gridLayoutStateManager, panelId]
+    [gridLayoutStateManager, interactionType, panelId]
   );
 
   const onStart = useCallback(
@@ -64,17 +64,17 @@ export const useGridLayoutPanelEvents = ({
       // a cancelled interaction restores the layout but not this cache, so clear it for each new interaction
       lastRequestedPanelPosition.current = undefined;
       startAction(ev, interactionType, gridLayoutStateManager, panelId);
-      if (interactionType === 'drag' && isKeyboardEvent(ev)) announce('start');
+      if (isKeyboardEvent(ev)) announce('start');
     },
     [gridLayoutStateManager, interactionType, panelId, announce]
   );
 
   const commitAndAnnounce = useCallback(() => {
-    const wasKeyboardDrag =
-      interactionType === 'drag' && hasPanelInteractionStartedWithKeyboard(gridLayoutStateManager);
+    const wasKeyboardInteraction = hasPanelInteractionStartedWithKeyboard(gridLayoutStateManager);
     commitAction(gridLayoutStateManager);
-    if (wasKeyboardDrag) announce('end');
-  }, [gridLayoutStateManager, interactionType, announce]);
+    // announced after the commit so a resize reports the width it snapped to
+    if (wasKeyboardInteraction) announce('end');
+  }, [gridLayoutStateManager, announce]);
 
   const onEnd = commitAndAnnounce;
 
@@ -87,8 +87,8 @@ export const useGridLayoutPanelEvents = ({
 
   const onCancel = useCallback(() => {
     cancelAction(gridLayoutStateManager);
-    if (interactionType === 'drag') announce('cancel');
-  }, [gridLayoutStateManager, interactionType, announce]);
+    announce('cancel');
+  }, [gridLayoutStateManager, announce]);
 
   const onMove = useCallback(
     (ev: UserInteractionEvent) => {
@@ -117,6 +117,7 @@ export const useGridLayoutPanelEvents = ({
           getSensorPosition(ev)
         );
         moveAction(ev, gridLayoutStateManager, pointerPixel, lastRequestedPanelPosition);
+        announce('move');
       }
     },
     [gridLayoutStateManager, interactionType, announce]
