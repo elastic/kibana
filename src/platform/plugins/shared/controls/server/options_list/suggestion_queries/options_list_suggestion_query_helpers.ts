@@ -22,6 +22,9 @@ export const getSortType = (sort?: OptionsListSortingType) => {
 export const getEscapedRegexQuery = (q: string = '') =>
   q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
+export const getEscapedWildcardQuery = (q: string = '') =>
+  q.replace(/[?*]/g, (match) => `\\${match}`);
+
 export const getIpBuckets = (
   rawEsResult: any,
   combinedBuckets: EsBucket[],

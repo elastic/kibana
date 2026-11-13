@@ -11,7 +11,6 @@ import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 
 import { isValidSearch } from '../../../common/options_list/is_valid_search';
-import { getOptionsListSearchFilter } from '../../../common/options_list/search_filter';
 import type {
   OptionsListRequestBody,
   OptionsListSuggestions,
@@ -27,8 +26,19 @@ export const getExactMatchAggregationBuilder: () => OptionsListSuggestionAggrega
   exactMatchAggregationBuilder;
 
 const exactMatchAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
-  buildSearchFilter: (request: OptionsListRequestBody) =>
-    getOptionsListSearchFilter({ ...request, searchTechnique: 'exact' }),
+  buildSearchFilter: ({ fieldName, fieldSpec, searchString }: OptionsListRequestBody) => {
+    if (!isValidSearch({ searchString, fieldType: fieldSpec?.type, searchTechnique: 'exact' })) {
+      return undefined;
+    }
+    return {
+      term: {
+        [fieldName]: {
+          value: searchString,
+          case_insensitive: fieldSpec?.type === 'string',
+        },
+      },
+    };
+  },
   buildAggregation: ({ fieldName, fieldSpec, searchString }: OptionsListRequestBody) => {
     if (!isValidSearch({ searchString, fieldType: fieldSpec?.type, searchTechnique: 'exact' })) {
       return {};

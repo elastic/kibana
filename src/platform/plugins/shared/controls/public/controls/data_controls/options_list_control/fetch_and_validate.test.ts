@@ -65,9 +65,10 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
   });
 
   beforeEach(() => {
-    fetchSpy = jest.spyOn(coreServices.http, 'fetch').mockResolvedValue({
-      suggestions: [],
-      totalCardinality: 0,
+    fetchSpy = jest.spyOn(coreServices.http, 'fetch');
+    mockGetESQLResults.mockReset();
+    mockGetESQLResults.mockResolvedValue({
+      response: { columns: [{ name: 'host', type: 'keyword' }], values: [] },
     });
   });
 
@@ -97,15 +98,15 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     const subscription = suggestions$.subscribe(() => {});
 
     await new Promise((resolve) => setTimeout(resolve, 200));
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const firstBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
+    expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
+    const firstBody = mockGetESQLResults.mock.calls[0][0];
     expect(firstBody.filter).toBeUndefined();
 
     filters$.next([phraseFilter('host', 'mainframe')]);
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
-    const secondBody = JSON.parse(fetchSpy.mock.calls[1][1].body);
+    expect(mockGetESQLResults).toHaveBeenCalledTimes(2);
+    const secondBody = mockGetESQLResults.mock.calls[1][0];
     expect(secondBody.filter).toBeDefined();
     expect(JSON.stringify(secondBody.filter)).toContain('mainframe');
 
@@ -160,7 +161,7 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     subscription.unsubscribe();
   }, 10000);
 
-  it('forwards the parent CPS project routing into the fetch request body', async () => {
+  it('forwards the parent CPS project routing into the ES|QL request', async () => {
     const filters$ = new BehaviorSubject<unknown>([]);
     const parentQuery$ = new BehaviorSubject<unknown>(undefined);
     const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
@@ -184,8 +185,8 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
+    expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
+    const body = mockGetESQLResults.mock.calls[0][0];
     expect(body.projectRouting).toBe('_alias:*');
 
     subscription.unsubscribe();
@@ -226,16 +227,16 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
       subscription.unsubscribe();
     });
 
-    it('should pass AbortSignal to HTTP fetch', () => {
-      expect(fetchSpy).toHaveBeenCalled();
-      const fetchOptions = fetchSpy.mock.calls[0][1];
-      expect(fetchOptions.signal).toBeInstanceOf(AbortSignal);
-      expect(fetchOptions.signal.aborted).toBe(false);
+    it('should pass AbortSignal to the ES|QL request', () => {
+      expect(mockGetESQLResults).toHaveBeenCalled();
+      const { signal } = mockGetESQLResults.mock.calls[0][0];
+      expect(signal).toBeInstanceOf(AbortSignal);
+      expect(signal.aborted).toBe(false);
     });
 
     it('should abort previous request when new request starts', async () => {
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      const firstSignal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
+      expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
+      const firstSignal: AbortSignal = mockGetESQLResults.mock.calls[0][0].signal;
       expect(firstSignal.aborted).toBe(false);
 
       filters$.next([phraseFilter('host', 'mainframe')]);
@@ -245,8 +246,8 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     }, 10000);
 
     it('cancelRequests() should abort in-flight request', () => {
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      const signal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
+      expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
+      const signal: AbortSignal = mockGetESQLResults.mock.calls[0][0].signal;
       expect(signal.aborted).toBe(false);
 
       cancelRequests();

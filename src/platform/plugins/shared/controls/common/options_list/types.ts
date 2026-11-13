@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { OptionsListDSLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 import type { FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, TimeRange } from '@kbn/es-query';
@@ -58,14 +59,14 @@ export type OptionsListDSLFetchBody = {
 } & OptionsListRequestBody;
 
 /**
- * Serialized body for POST `/internal/controls/optionsList/fetch` — ES|QL branch.
+ * Request of the options of an ES|QL control. It is run from the browser, not by the server route.
  */
 export interface OptionsListESQLFetchBody {
   kind: 'esql';
   esql: string;
   timeRange?: TimeRange;
-  /** Pre-built ES DSL bool used as `params.filter` on the ES|QL `_query` endpoint to pre-filter the pipeline. */
-  filter?: { bool: BoolQuery };
+  /** ES DSL query used as `params.filter` on the ES|QL `_query` endpoint to pre-filter the pipeline. */
+  filter?: estypes.QueryDslQueryContainer;
   sort?: OptionsListDSLControlState['sort'];
   esqlVariables?: ESQLControlVariable[];
   searchString?: string;

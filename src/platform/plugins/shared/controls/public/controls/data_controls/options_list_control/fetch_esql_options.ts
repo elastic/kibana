@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-
 import { esqlColumnValuesToOptionsListResponse } from '../../../../common/options_list/esql_response';
 import { getESQLSingleColumnValues } from '../../../../common/options_list/get_esql_single_column_values';
 import type {
@@ -16,43 +14,45 @@ import type {
   OptionsListResponse,
 } from '../../../../common/options_list/types';
 import { dataService } from '../../../services/kibana_services';
+import { getControlsTimezone } from '../../utils';
 
 /**
- * The request of the options of a field of an ES|QL source. It is run from the browser, so that
- * aborting it cancels the query in Elasticsearch, which a request to the server route does not.
+ * Runs the ES|QL request of an options list from the browser, as the ES|QL controls do, so that
+ * aborting it cancels the query in Elasticsearch.
  */
-export type OptionsListEsqlSourceFetchBody = Omit<OptionsListESQLFetchBody, 'kind' | 'filter'> & {
-  kind: 'esql-source';
-  /** The dashboard filters and the search of the control, as the DSL filter of the ES|QL request. */
-  filter?: estypes.QueryDslQueryContainer;
-};
-
-export const fetchEsqlSourceOptions = async (
+export const fetchEsqlOptions = async (
   {
     esql,
+    timeRange,
     filter,
+    esqlVariables,
     sort,
+    searchString,
+    searchTechnique,
     selectedOptions,
     ignoreValidations,
     projectRouting,
-  }: OptionsListEsqlSourceFetchBody,
+  }: OptionsListESQLFetchBody,
   abortSignal: AbortSignal
 ): Promise<OptionsListResponse> => {
   const result = await getESQLSingleColumnValues({
     query: esql,
     search: dataService.search.search,
     signal: abortSignal,
+    timeRange,
     filter,
-    esqlVariables: [],
+    esqlVariables: esqlVariables ?? [],
+    timezone: getControlsTimezone(),
     projectRouting,
   });
   if (!getESQLSingleColumnValues.isSuccess(result)) {
     return { error: result.errors[0] };
   }
-  // the search is already in the filter of the request, so it is not applied again to the values
   return esqlColumnValuesToOptionsListResponse(result, {
-    sort,
+    searchString,
+    searchTechnique,
     selectedOptions,
     ignoreValidations,
+    sort,
   });
 };

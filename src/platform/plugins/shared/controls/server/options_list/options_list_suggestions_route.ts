@@ -12,18 +12,14 @@ import type { Observable } from 'rxjs';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
 
 import { SELECTIONS_MAX } from '@kbn/controls-constants';
 import type { StartDeps } from '../plugin';
 
-import { esqlColumnValuesToOptionsListResponse } from '../../common/options_list/esql_response';
-import { getESQLSingleColumnValues } from '../../common/options_list/get_esql_single_column_values';
 import type {
   OptionsListDSLFetchBody,
-  OptionsListESQLFetchBody,
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../common/options_list/types';
@@ -65,14 +61,6 @@ const dslFetchBodySchema = optionsListFetchBodyCommonSchema.extends({
   runPastTimeout: schema.maybe(schema.boolean()),
 });
 
-const esqlFetchBodySchema = optionsListFetchBodyCommonSchema.extends({
-  kind: schema.literal('esql'),
-  esql: schema.string(),
-  timeRange: schema.maybe(schema.any()),
-  filter: schema.maybe(schema.any()),
-  esqlVariables: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
-});
-
 export const setupOptionsListSuggestionsRoute = (
   core: CoreSetup<StartDeps>,
   getAutocompleteSettings: KqlPluginSetup['autocomplete']['getAutocompleteSettings']
@@ -96,28 +84,18 @@ export const setupOptionsListSuggestionsRoute = (
         version: '1',
         validate: {
           request: {
-            body: schema.oneOf([dslFetchBodySchema, esqlFetchBodySchema]),
+            body: dslFetchBodySchema,
           },
         },
       },
       async (context, request, response) => {
         try {
-          const [, { data }] = await core.getStartServices();
-
-          const suggestionsResponse =
-            request.body.kind === 'dsl'
-              ? await getOptionsListDslSuggestions({
-                  abortedEvent$: request.events.aborted$,
-                  request: request.body,
-                  esClient: (await context.core).elasticsearch.client.asCurrentUser,
-                  getAutocompleteSettings,
-                })
-              : await getOptionsListEsqlSuggestions({
-                  abortedEvent$: request.events.aborted$,
-                  request: request.body,
-                  searchAsScoped: data.search.asScoped(request),
-                  uiSettingsClient: (await context.core).uiSettings.client,
-                });
+          const suggestionsResponse = await getOptionsListDslSuggestions({
+            abortedEvent$: request.events.aborted$,
+            request: request.body,
+            esClient: (await context.core).elasticsearch.client.asCurrentUser,
+            getAutocompleteSettings,
+          });
 
           return response.ok({ body: suggestionsResponse });
         } catch (e) {
@@ -210,44 +188,4 @@ const getOptionsListDslSuggestions = async ({
     invalidSelections,
     isPartial: Boolean(rawEsResult.terminated_early || rawEsResult.timed_out),
   };
-};
-
-const getOptionsListEsqlSuggestions = async ({
-  abortedEvent$,
-  request,
-  searchAsScoped,
-  uiSettingsClient,
-}: {
-  request: OptionsListESQLFetchBody;
-  abortedEvent$: Observable<void>;
-  searchAsScoped: { search: import('@kbn/search-types').ISearchGeneric };
-  uiSettingsClient: { get: <T = unknown>(key: string) => Promise<T> };
-}): Promise<OptionsListResponse> => {
-  const abortController = new AbortController();
-  abortedEvent$.subscribe(() => abortController.abort());
-
-  const timezone = (await uiSettingsClient.get(UI_SETTINGS.DATEFORMAT_TZ)) as string | undefined;
-
-  const result = await getESQLSingleColumnValues({
-    query: request.esql,
-    search: searchAsScoped.search,
-    signal: abortController.signal,
-    timeRange: request.timeRange,
-    filter: request.filter,
-    esqlVariables: request.esqlVariables ?? [],
-    timezone,
-    projectRouting: request.projectRouting,
-  });
-
-  if (getESQLSingleColumnValues.isSuccess(result)) {
-    return esqlColumnValuesToOptionsListResponse(result, {
-      searchString: request.searchString,
-      searchTechnique: request.searchTechnique,
-      selectedOptions: request.selectedOptions,
-      ignoreValidations: request.ignoreValidations,
-      sort: request.sort,
-    });
-  }
-
-  return { error: result.errors[0] };
 };

@@ -18,13 +18,11 @@ import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import { getOptionsListSearchFilter } from '../../../../common/options_list/search_filter';
 import type {
   OptionsListESQLFetchBody,
   OptionsListSuccessResponse,
   OptionsListUnifiedFetchBody,
 } from '../../../../common/options_list/types';
-import type { OptionsListEsqlSourceFetchBody } from './fetch_esql_source_options';
 import {
   buildESQLPreFilter,
   buildOptionsListDashboardFilters,
@@ -35,7 +33,7 @@ import {
 export type BuildOptionsListFetchBodyResult =
   | {
       outcome: 'fetch';
-      body: OptionsListUnifiedFetchBody | OptionsListEsqlSourceFetchBody;
+      body: OptionsListUnifiedFetchBody;
       showLoadingSuggestions: boolean;
     }
   | {
@@ -117,14 +115,22 @@ export function buildOptionsListFetchBody({
   selectedOptions: OptionsListSelection[];
   ignoreValidations: boolean | undefined;
 }): BuildOptionsListFetchBodyResult {
-  if (valuesSource === ControlValuesSource.ESQL) {
-    if (!esqlQuery) {
+  const dataSource = dataSources?.[0];
+  if (
+    valuesSource === ControlValuesSource.ESQL ||
+    (dataSource && isEsqlFilterableSource(dataSource))
+  ) {
+    const esql =
+      valuesSource === ControlValuesSource.ESQL
+        ? esqlQuery
+        : dataSource && field && getFieldValuesQuery(dataSource, field.name);
+    if (!esql) {
       return { outcome: 'empty', response: { suggestions: [] } };
     }
 
     const body = buildEsqlFetchBody({
-      esql: esqlQuery,
-      dataSource: dataSources?.[0],
+      esql,
+      dataSource,
       fetchContext,
       useGlobalFilters,
       sort,
@@ -137,48 +143,12 @@ export function buildOptionsListFetchBody({
     return { outcome: 'fetch', body, showLoadingSuggestions: false };
   }
 
-  const dataSource = dataSources?.[0];
   if (
     !dataSource ||
     !field ||
     !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
   ) {
     return { outcome: 'empty', response: { suggestions: [], totalCardinality: 0 } };
-  }
-
-  if (isEsqlFilterableSource(dataSource)) {
-    const esql = getFieldValuesQuery(dataSource, field.name);
-    const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
-    const filter = [
-      buildESQLPreFilter({
-        fetchContext,
-        useGlobalFilters,
-        dataSource,
-        timeRange,
-        esqlQuery: esql,
-      }),
-      getOptionsListSearchFilter({
-        searchString,
-        searchTechnique,
-        fieldName: field.name,
-        fieldSpec: getFilterableFieldSpec(field),
-      }),
-    ].filter((query): query is NonNullable<typeof query> => Boolean(query));
-
-    return {
-      outcome: 'fetch',
-      showLoadingSuggestions: true,
-      body: {
-        kind: 'esql-source',
-        esql,
-        filter: filter.length ? { bool: { filter } } : undefined,
-        sort,
-        selectedOptions,
-        ignoreValidations,
-        isReload: fetchContext.isReload,
-        projectRouting: fetchContext.projectRouting,
-      },
-    };
   }
 
   const filters = buildOptionsListDashboardFilters(dataSource, fetchContext, useGlobalFilters);

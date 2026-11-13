@@ -12,14 +12,18 @@ import { get } from 'lodash';
 
 import { getIpRangeQuery } from '../../../common/options_list/ip_search';
 import { isValidSearch } from '../../../common/options_list/is_valid_search';
-import { getOptionsListSearchFilter } from '../../../common/options_list/search_filter';
+import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
 import type {
   OptionsListRequestBody,
   OptionsListSuggestions,
 } from '../../../common/options_list/types';
 import type { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
-import { getIpBuckets, getSortType } from './options_list_suggestion_query_helpers';
+import {
+  getEscapedWildcardQuery,
+  getIpBuckets,
+  getSortType,
+} from './options_list_suggestion_query_helpers';
 
 /**
  * Type-specific search suggestion aggregations. These queries are highly impacted by the field type.
@@ -49,9 +53,30 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
    * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.
    */
   textOrKeywordOrNested: {
-    buildSearchFilter: (request: OptionsListRequestBody) => {
-      // date fields are not currently searchable
-      return request.fieldSpec?.type === 'date' ? undefined : getOptionsListSearchFilter(request);
+    buildSearchFilter: ({
+      searchTechnique,
+      searchString,
+      fieldName,
+      fieldSpec,
+    }: OptionsListRequestBody) => {
+      const hasSearchString = searchString && searchString.length > 0;
+      if (!hasSearchString || fieldSpec?.type === 'date') {
+        // we can assume that this is only ever called with a search string, and date fields are not
+        // currently searchable; so, if any of these things is true, this is invalid.
+        return undefined;
+      }
+
+      return {
+        [(searchTechnique ?? getDefaultSearchTechnique(fieldSpec?.type ?? 'string')) as string]: {
+          [fieldName]: {
+            value:
+              searchTechnique === 'wildcard'
+                ? `*${getEscapedWildcardQuery(searchString)}*`
+                : searchString,
+            case_insensitive: true,
+          },
+        },
+      };
     },
     buildAggregation: ({
       searchString,

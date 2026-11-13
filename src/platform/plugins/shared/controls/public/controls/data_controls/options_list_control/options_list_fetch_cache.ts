@@ -21,8 +21,7 @@ import type {
   OptionsListUnifiedFetchBody,
 } from '../../../../common/options_list/types';
 import { coreServices } from '../../../services/kibana_services';
-import type { OptionsListEsqlSourceFetchBody } from './fetch_esql_source_options';
-import { fetchEsqlSourceOptions } from './fetch_esql_source_options';
+import { fetchEsqlOptions } from './fetch_esql_options';
 
 const REQUEST_CACHE_SIZE = 50; // only store a max of 50 responses
 const REQUEST_CACHE_TTL = 1000 * 60; // time to live = 1 minute
@@ -43,9 +42,7 @@ export class OptionsListFetchCache {
     });
   }
 
-  private getRequestHash = (
-    request: OptionsListUnifiedFetchBody | OptionsListEsqlSourceFetchBody
-  ) => {
+  private getRequestHash = (request: OptionsListUnifiedFetchBody) => {
     // round timeRange to the minute to avoid cache misses
     const roundedTimeRange = (timeRange?: TimeRange) =>
       timeRange
@@ -115,7 +112,7 @@ export class OptionsListFetchCache {
   };
 
   public async runFetchRequest(
-    request: OptionsListUnifiedFetchBody | OptionsListEsqlSourceFetchBody,
+    request: OptionsListUnifiedFetchBody,
     abortSignal: AbortSignal
   ): Promise<OptionsListResponse> {
     const requestHash = this.getRequestHash(request);
@@ -124,8 +121,8 @@ export class OptionsListFetchCache {
     }
 
     const result =
-      request.kind === 'esql-source'
-        ? await fetchEsqlSourceOptions(request, abortSignal)
+      request.kind === 'esql'
+        ? await fetchEsqlOptions(request, abortSignal)
         : await coreServices.http.fetch<OptionsListResponse>(
             `/internal/controls/optionsList/fetch`,
             {

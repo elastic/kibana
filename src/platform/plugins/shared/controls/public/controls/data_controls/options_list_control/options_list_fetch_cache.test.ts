@@ -10,10 +10,10 @@
 import { setStubKibanaServices } from '../../../services/mocks';
 import { coreServices } from '../../../services/kibana_services';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { fetchEsqlSourceOptions } from './fetch_esql_source_options';
+import { fetchEsqlOptions } from './fetch_esql_options';
 
-jest.mock('./fetch_esql_source_options', () => ({
-  fetchEsqlSourceOptions: jest.fn(),
+jest.mock('./fetch_esql_options', () => ({
+  fetchEsqlOptions: jest.fn(),
 }));
 
 describe('OptionsListFetchCache', () => {
@@ -24,6 +24,7 @@ describe('OptionsListFetchCache', () => {
   });
 
   beforeEach(() => {
+    (fetchEsqlOptions as jest.Mock).mockReset();
     fetchSpy = jest.spyOn(coreServices.http, 'fetch').mockResolvedValue({
       suggestions: [{ value: 'a' }],
       totalCardinality: 1,
@@ -72,23 +73,20 @@ describe('OptionsListFetchCache', () => {
     invalidSelections: [] as string[],
   };
 
-  it('POSTs ES|QL requests to the unified fetch route with the pre-built filter', async () => {
-    fetchSpy.mockResolvedValueOnce(okSuggestionsResponse);
+  it('runs ES|QL requests from the browser with the abort signal, not through the server route', async () => {
+    (fetchEsqlOptions as jest.Mock).mockResolvedValueOnce(okSuggestionsResponse);
     const cache = new OptionsListFetchCache();
     const filter = phraseFilter('host', 'mainframe');
+    const { signal } = new AbortController();
 
-    await cache.runFetchRequest(baseEsqlRequest({ filter }), new AbortController().signal);
+    await cache.runFetchRequest(baseEsqlRequest({ filter }), signal);
 
-    expect(fetchSpy).toHaveBeenCalledWith('/internal/controls/optionsList/fetch', {
-      version: '1',
-      body: JSON.stringify(baseEsqlRequest({ filter })),
-      signal: expect.any(AbortSignal),
-      method: 'POST',
-    });
+    expect(fetchEsqlOptions).toHaveBeenCalledWith(baseEsqlRequest({ filter }), signal);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('refetches when the filter changes between calls', async () => {
-    fetchSpy.mockResolvedValue(okSuggestionsResponse);
+    (fetchEsqlOptions as jest.Mock).mockResolvedValue(okSuggestionsResponse);
     const cache = new OptionsListFetchCache();
 
     await cache.runFetchRequest(
@@ -100,22 +98,22 @@ describe('OptionsListFetchCache', () => {
       new AbortController().signal
     );
 
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(fetchEsqlOptions).toHaveBeenCalledTimes(2);
   });
 
   it('serves the cached response when called twice with the same filter', async () => {
-    fetchSpy.mockResolvedValueOnce(okSuggestionsResponse);
+    (fetchEsqlOptions as jest.Mock).mockResolvedValueOnce(okSuggestionsResponse);
     const cache = new OptionsListFetchCache();
     const filter = phraseFilter('host', 'mainframe');
 
     await cache.runFetchRequest(baseEsqlRequest({ filter }), new AbortController().signal);
     await cache.runFetchRequest(baseEsqlRequest({ filter }), new AbortController().signal);
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchEsqlOptions).toHaveBeenCalledTimes(1);
   });
 
   it('refetches when the filter goes from undefined to a bool', async () => {
-    fetchSpy.mockResolvedValue(okSuggestionsResponse);
+    (fetchEsqlOptions as jest.Mock).mockResolvedValue(okSuggestionsResponse);
     const cache = new OptionsListFetchCache();
 
     await cache.runFetchRequest(
@@ -127,64 +125,20 @@ describe('OptionsListFetchCache', () => {
       new AbortController().signal
     );
 
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(fetchEsqlOptions).toHaveBeenCalledTimes(2);
   });
 
-  describe('request of a field of an ES|QL source', () => {
-    const baseSourceRequest = (overrides: Record<string, unknown> = {}) => ({
-      kind: 'esql-source' as const,
-      esql: 'FROM logs-* | STATS BY host',
-      selectedOptions: [],
-      ...overrides,
-    });
+  it('refetches when the query changes', async () => {
+    (fetchEsqlOptions as jest.Mock).mockResolvedValue(okSuggestionsResponse);
+    const cache = new OptionsListFetchCache();
 
-    beforeEach(() => {
-      (fetchEsqlSourceOptions as jest.Mock).mockReset();
-      (fetchEsqlSourceOptions as jest.Mock).mockResolvedValue(okSuggestionsResponse);
-    });
+    await cache.runFetchRequest(baseEsqlRequest(), new AbortController().signal);
+    await cache.runFetchRequest(
+      baseEsqlRequest({ esql: 'FROM logs | STATS BY other' }),
+      new AbortController().signal
+    );
 
-    it('runs from the browser with the abort signal, and does not call the server route', async () => {
-      const cache = new OptionsListFetchCache();
-      const { signal } = new AbortController();
-
-      await cache.runFetchRequest(baseSourceRequest(), signal);
-
-      expect(fetchEsqlSourceOptions).toHaveBeenCalledWith(baseSourceRequest(), signal);
-      expect(fetchSpy).not.toHaveBeenCalled();
-    });
-
-    it('serves the cached response for the same request and refetches when the filter changes', async () => {
-      const cache = new OptionsListFetchCache();
-      const prefix = (value: string) => ({ prefix: { host: { value } } });
-
-      await cache.runFetchRequest(
-        baseSourceRequest({ filter: prefix('ma') }),
-        new AbortController().signal
-      );
-      await cache.runFetchRequest(
-        baseSourceRequest({ filter: prefix('ma') }),
-        new AbortController().signal
-      );
-      expect(fetchEsqlSourceOptions).toHaveBeenCalledTimes(1);
-
-      await cache.runFetchRequest(
-        baseSourceRequest({ filter: prefix('mac') }),
-        new AbortController().signal
-      );
-      expect(fetchEsqlSourceOptions).toHaveBeenCalledTimes(2);
-    });
-
-    it('refetches when the query changes', async () => {
-      const cache = new OptionsListFetchCache();
-
-      await cache.runFetchRequest(baseSourceRequest(), new AbortController().signal);
-      await cache.runFetchRequest(
-        baseSourceRequest({ esql: 'FROM logs-* | STATS BY other' }),
-        new AbortController().signal
-      );
-
-      expect(fetchEsqlSourceOptions).toHaveBeenCalledTimes(2);
-    });
+    expect(fetchEsqlOptions).toHaveBeenCalledTimes(2);
   });
 
   describe('CPS project routing', () => {
@@ -221,7 +175,7 @@ describe('OptionsListFetchCache', () => {
     });
 
     it('refetches when the ES|QL project routing changes between calls', async () => {
-      fetchSpy.mockResolvedValue(okSuggestionsResponse);
+      (fetchEsqlOptions as jest.Mock).mockResolvedValue(okSuggestionsResponse);
       const cache = new OptionsListFetchCache();
 
       await cache.runFetchRequest(
@@ -233,13 +187,13 @@ describe('OptionsListFetchCache', () => {
         new AbortController().signal
       );
 
-      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(fetchEsqlOptions).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('ignoreValidations', () => {
-    it('returns invalidSelections from the server response', async () => {
-      fetchSpy.mockResolvedValueOnce({
+    it('returns invalidSelections from the response', async () => {
+      (fetchEsqlOptions as jest.Mock).mockResolvedValueOnce({
         suggestions: [{ value: 'mainframe' }],
         totalCardinality: 1,
         invalidSelections: ['cloud'],
@@ -258,7 +212,7 @@ describe('OptionsListFetchCache', () => {
     });
 
     it('refetches when ignoreValidations is toggled so cache stays consistent', async () => {
-      fetchSpy.mockResolvedValue(okSuggestionsResponse);
+      (fetchEsqlOptions as jest.Mock).mockResolvedValue(okSuggestionsResponse);
       const cache = new OptionsListFetchCache();
       const selectedOptions = ['mainframe', 'cloud'];
 
@@ -271,11 +225,11 @@ describe('OptionsListFetchCache', () => {
         new AbortController().signal
       );
 
-      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(fetchEsqlOptions).toHaveBeenCalledTimes(2);
     });
 
     it('caches across selection changes when validations are ignored', async () => {
-      fetchSpy.mockResolvedValueOnce(okSuggestionsResponse);
+      (fetchEsqlOptions as jest.Mock).mockResolvedValueOnce(okSuggestionsResponse);
       const cache = new OptionsListFetchCache();
 
       await cache.runFetchRequest(
@@ -287,7 +241,7 @@ describe('OptionsListFetchCache', () => {
         new AbortController().signal
       );
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchEsqlOptions).toHaveBeenCalledTimes(1);
     });
   });
 });

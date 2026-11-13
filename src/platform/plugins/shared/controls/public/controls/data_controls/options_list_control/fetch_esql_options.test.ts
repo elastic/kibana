@@ -8,7 +8,7 @@
  */
 
 import { dataService } from '../../../services/kibana_services';
-import { fetchEsqlSourceOptions } from './fetch_esql_source_options';
+import { fetchEsqlOptions } from './fetch_esql_options';
 
 const mockGetESQLResults = jest.fn();
 jest.mock('@kbn/esql-utils', () => ({
@@ -16,9 +16,9 @@ jest.mock('@kbn/esql-utils', () => ({
   getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
 }));
 
-describe('fetchEsqlSourceOptions', () => {
+describe('fetchEsqlOptions', () => {
   const request = {
-    kind: 'esql-source' as const,
+    kind: 'esql' as const,
     esql: 'FROM logs-* | STATS BY host',
     filter: { bool: { filter: [{ prefix: { host: { value: 'ma', case_insensitive: true } } }] } },
     sort: { by: '_key' as const, direction: 'asc' as const },
@@ -35,7 +35,7 @@ describe('fetchEsqlSourceOptions', () => {
     });
     const { signal } = new AbortController();
 
-    await fetchEsqlSourceOptions(request, signal);
+    await fetchEsqlOptions(request, signal);
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -53,7 +53,7 @@ describe('fetchEsqlSourceOptions', () => {
       response: { columns: [column], values: [['mainframe'], ['macbook']] },
     });
 
-    expect(await fetchEsqlSourceOptions(request, new AbortController().signal)).toEqual({
+    expect(await fetchEsqlOptions(request, new AbortController().signal)).toEqual({
       suggestions: [{ value: 'macbook' }, { value: 'mainframe' }],
       totalCardinality: 2,
       invalidSelections: ['gone'],
@@ -65,6 +65,6 @@ describe('fetchEsqlSourceOptions', () => {
     const error = new Error('query failed');
     mockGetESQLResults.mockRejectedValue(error);
 
-    expect(await fetchEsqlSourceOptions(request, new AbortController().signal)).toEqual({ error });
+    expect(await fetchEsqlOptions(request, new AbortController().signal)).toEqual({ error });
   });
 });

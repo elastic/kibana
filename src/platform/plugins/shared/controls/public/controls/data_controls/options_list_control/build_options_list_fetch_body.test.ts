@@ -65,53 +65,53 @@ describe('buildOptionsListFetchBody', () => {
       ...overrides,
     });
 
-  describe('field of an ES|QL source', () => {
-    it('asks the FROM target of the source with an ES|QL query run from the browser', () => {
-      const result = build(esqlSource, field);
+  describe('ES|QL', () => {
+    const esqlRequest = {
+      kind: 'esql',
+      sort: { by: '_key', direction: 'asc' },
+      searchString: 'ma',
+      searchTechnique: 'prefix',
+      selectedOptions: ['web-01'],
+      ignoreValidations: false,
+      projectRouting: '_alias:*',
+    };
 
-      expect(result).toMatchObject({
+    it('asks the FROM target of an ES|QL source with a query on the field', () => {
+      expect(build(esqlSource, field)).toMatchObject({
         outcome: 'fetch',
-        body: {
-          kind: 'esql-source',
-          esql: 'FROM logs-* | STATS BY host',
-          sort: { by: '_key', direction: 'asc' },
-          selectedOptions: ['web-01'],
-          ignoreValidations: false,
-          projectRouting: '_alias:*',
-        },
+        body: { ...esqlRequest, esql: 'FROM logs-* | STATS BY host' },
       });
     });
 
-    it('filters the query with both the dashboard filters and the search of the control', () => {
+    it('asks the query that the user writes, with the same request as for an ES|QL source', () => {
+      const result = build(dataViewSource, dataViewField, {
+        valuesSource: ControlValuesSource.ESQL,
+        esqlQuery: 'FROM logs-* | STATS BY host',
+      });
+
+      expect(result).toEqual(build(esqlSource, field));
+    });
+
+    it('pre-filters the query with the dashboard filters, and leaves the search to the values', () => {
       const result = build(esqlSource, field);
 
       expect(result).toMatchObject({
-        body: {
-          filter: {
-            bool: {
-              filter: [
-                { bool: { filter: [{ match_phrase: { host: 'mainframe' } }] } },
-                { prefix: { host: { value: 'ma', case_insensitive: true } } },
-              ],
-            },
-          },
-        },
+        body: { filter: { bool: { filter: [{ match_phrase: { host: 'mainframe' } }] } } },
       });
+      expect(
+        result.outcome === 'fetch' &&
+          result.body.kind === 'esql' &&
+          JSON.stringify(result.body.filter)
+      ).not.toContain('prefix');
     });
 
-    it('has only the dashboard filters when there is nothing to search', () => {
-      const result = build(esqlSource, field, { searchString: '' });
+    it('has nothing to fetch without the query of the user, or the field of an ES|QL source', () => {
+      const empty = { outcome: 'empty', response: { suggestions: [] } };
 
-      expect(result.outcome === 'fetch' && JSON.stringify(result.body)).not.toContain('prefix');
-    });
-
-    it('has nothing to fetch when the search is not valid for the type of the field', () => {
-      const result = build(esqlSource, { ...field, type: 'number' }, { searchString: 'abc' });
-
-      expect(result).toEqual({
-        outcome: 'empty',
-        response: { suggestions: [], totalCardinality: 0 },
-      });
+      expect(
+        build(dataViewSource, dataViewField, { valuesSource: ControlValuesSource.ESQL })
+      ).toEqual(empty);
+      expect(build(esqlSource, undefined as unknown as FilterableField)).toEqual(empty);
     });
   });
 
