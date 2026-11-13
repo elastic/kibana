@@ -20,7 +20,13 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_TYPE,
+  type FlyoutOrigin,
+  type GraphEntryPoint,
+} from '../../../../common/lib/telemetry';
+import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
@@ -90,6 +96,11 @@ export interface UserProps {
    * Stable identifier for the user panel context (defaults to `scopeId` or a static fallback).
    */
   contextID?: string;
+  /**
+   * Where the graph reached from this flyout was opened from (e.g. the AI chat attachment). Used by
+   * the graph preview and the graph view it opens; defaults to the entity flyout entry point.
+   */
+  graphEntryPoint?: GraphEntryPoint;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -109,6 +120,7 @@ export const User: FC<UserProps> = memo(function User({
   mode: requestedMode = 'single',
   scopeId = '',
   contextID,
+  graphEntryPoint,
 }) {
   const { services } = useKibana();
   const { uiSettings } = services;
@@ -143,6 +155,7 @@ export const User: FC<UserProps> = memo(function User({
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
+  const entryPoint = graphEntryPoint ?? getGraphEntryPoint({ mode: 'entity' });
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
@@ -394,6 +407,7 @@ export const User: FC<UserProps> = memo(function User({
             title: userName,
             flyoutType: FLYOUT_TYPE.USER,
             origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
+            entryPoint,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -451,6 +465,7 @@ export const User: FC<UserProps> = memo(function User({
       onOpenUser,
       onShowRelatedEntityFromGraph,
       onShowRelatedEntityFromResolution,
+      entryPoint,
     ]
   );
 
@@ -512,6 +527,7 @@ export const User: FC<UserProps> = memo(function User({
             hideHeaderIcons
             riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             isGroupView={isGroupView}
+            graphEntryPoint={entryPoint}
           />
         )}
       </EuiFlyoutBody>

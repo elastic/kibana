@@ -87,7 +87,9 @@ describe('transport selection', () => {
     service.makeCallbackRequest({ callbackUrl, payload: failurePayload, retry: false });
 
   it('posts the exact serialized JSON body through fetch without a signature', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 200 }));
 
     await deliver(createCallbackDeliveryService());
 
@@ -106,7 +108,7 @@ describe('transport selection', () => {
     const fetchMock = jest.spyOn(global, 'fetch');
     const relayClient = {
       isRelayOrigin: jest.fn().mockReturnValue(true),
-      postCallback: jest.fn().mockResolvedValue({ status: 204 }),
+      postCallback: jest.fn().mockResolvedValue({ status: 204, headers: new Headers() }),
     };
 
     await deliver(createCallbackDeliveryService(jest.fn(), relayClient));
@@ -121,7 +123,9 @@ describe('transport selection', () => {
   });
 
   it('posts through fetch when the URL is not a Relay origin', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 200 }));
     const relayClient = {
       isRelayOrigin: jest.fn().mockReturnValue(false),
       postCallback: jest.fn(),
@@ -412,6 +416,44 @@ describe('makeCallbackRequest', () => {
     expect(transport).toHaveBeenCalledTimes(1);
   });
 
+  it('waits for the Retry-After delay instead of the backoff before retrying', async () => {
+    jest.useFakeTimers();
+    const transport = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new CallbackDeliveryError('throttled', { retryable: true, retryAfterMs: 30_000 })
+      )
+      .mockResolvedValueOnce(undefined);
+
+    const delivery = deliverThrough(transport, true);
+
+    await jest.advanceTimersByTimeAsync(29_999);
+    expect(transport).toHaveBeenCalledTimes(1);
+
+    await jest.advanceTimersByTimeAsync(1);
+    await expect(delivery).resolves.toBeUndefined();
+    expect(transport).toHaveBeenCalledTimes(2);
+  });
+
+  it('caps a Retry-After delay at 60 seconds and still retries', async () => {
+    jest.useFakeTimers();
+    const transport = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new CallbackDeliveryError('throttled', { retryable: true, retryAfterMs: 3_600_000 })
+      )
+      .mockResolvedValueOnce(undefined);
+
+    const delivery = deliverThrough(transport, true);
+
+    await jest.advanceTimersByTimeAsync(59_999);
+    expect(transport).toHaveBeenCalledTimes(1);
+
+    await jest.advanceTimersByTimeAsync(1);
+    await expect(delivery).resolves.toBeUndefined();
+    expect(transport).toHaveBeenCalledTimes(2);
+  });
+
   it('throws after exhausting retryable delivery errors', async () => {
     jest.useFakeTimers();
     const transport = jest.fn().mockRejectedValue(serverError());
@@ -423,5 +465,95 @@ describe('makeCallbackRequest', () => {
 
     await deliveryExpectation;
     expect(transport).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('makeCallbackRequest response classification', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+  });
+
+  const deliver = (retry: boolean) =>
+    createCallbackDeliveryService().makeCallbackRequest({
+      callbackUrl,
+      payload: failurePayload,
+      retry,
+    });
+
+  it('retries a 429 without Retry-After on the default backoff', async () => {
+    jest.useFakeTimers();
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValueOnce(new Response(null, { status: 429 }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }));
+
+    const delivery = deliver(true);
+
+    await jest.advanceTimersByTimeAsync(200);
+
+    await expect(delivery).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('honors the Retry-After header of a 429 response', async () => {
+    jest.useFakeTimers();
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValueOnce(new Response(null, { status: 429, headers: { 'Retry-After': '5' } }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }));
+
+    const delivery = deliver(true);
+
+    await jest.advanceTimersByTimeAsync(4_999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await jest.advanceTimersByTimeAsync(1);
+    await expect(delivery).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('honors the Retry-After of a Relay callback response', async () => {
+    jest.useFakeTimers();
+    const relayClient = {
+      isRelayOrigin: jest.fn().mockReturnValue(true),
+      postCallback: jest
+        .fn()
+        .mockResolvedValueOnce({ status: 429, headers: new Headers({ 'Retry-After': '5' }) })
+        .mockResolvedValueOnce({ status: 204, headers: new Headers() }),
+    };
+
+    const delivery = createCallbackDeliveryService(jest.fn(), relayClient).makeCallbackRequest({
+      callbackUrl,
+      payload: failurePayload,
+      retry: true,
+    });
+
+    await jest.advanceTimersByTimeAsync(4_999);
+    expect(relayClient.postCallback).toHaveBeenCalledTimes(1);
+
+    await jest.advanceTimersByTimeAsync(1);
+    await expect(delivery).resolves.toBeUndefined();
+    expect(relayClient.postCallback).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry a 429 when retry is false', async () => {
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 429, headers: { 'Retry-After': '5' } }));
+
+    await expect(deliver(false)).rejects.toThrow('Callback delivery failed with status 429');
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry a 4xx other than 429', async () => {
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 400, headers: { 'Retry-After': '5' } }));
+
+    await expect(deliver(true)).rejects.toThrow('Callback delivery failed with status 400');
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

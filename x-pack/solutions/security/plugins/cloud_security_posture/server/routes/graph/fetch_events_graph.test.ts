@@ -486,10 +486,10 @@ describe('regroupEvents', () => {
     expect(result[0].targetIdsCount).toBe(2);
   });
 
-  it('enriched and unenriched targets from the same row share one label node', () => {
+  it('enriched and unenriched targets from the same row share one event node', () => {
     // One ES|QL row with an enriched target (type Host) and an unenriched target (null)
     // that share the same single document. They form two type groups, but because the label
-    // node is keyed on documents only, both groups share the same labelNodeId — the label node
+    // node is keyed on documents only, both groups share the same eventNodeId — the event node
     // then fans out to both targets via separate edges (see parse_records dedup).
     const record = buildEventEsqlRow({
       actorEntityId: 'user:actor',
@@ -509,13 +509,13 @@ describe('regroupEvents', () => {
     const result = regroupEvents([record], enrichmentMap);
 
     expect(result).toHaveLength(2);
-    const labelIds = result.map((g) => g.labelNodeId);
+    const labelIds = result.map((g) => g.eventNodeId);
     expect(labelIds[0]).toBe(labelIds[1]);
-    // Single document → labelNodeId is the raw document _id.
+    // Single document → eventNodeId is the raw document _id.
     expect(labelIds[0]).toBe('doc-shared');
   });
 
-  it('labelNodeId is SHA-256 of sorted document _ids across merged rows', () => {
+  it('eventNodeId is SHA-256 of sorted document _ids across merged rows', () => {
     const record1 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       docIds: ['doc-a'],
@@ -532,10 +532,10 @@ describe('regroupEvents', () => {
     const [group] = regroupEvents([record1, record2], new Map());
 
     // Multiple documents → hashIds sorts inputs before hashing.
-    const expectedLabelNodeId = createHash('sha256')
+    const expectedEventNodeId = createHash('sha256')
       .update(['doc-a', 'doc-b'].join(','))
       .digest('hex');
-    expect(group.labelNodeId).toBe(expectedLabelNodeId);
+    expect(group.eventNodeId).toBe(expectedEventNodeId);
   });
 
   it('does not double-count uniqueEventsCount when the same doc appears in multiple rows', () => {

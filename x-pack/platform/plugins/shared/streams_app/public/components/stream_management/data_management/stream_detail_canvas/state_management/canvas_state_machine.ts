@@ -160,6 +160,9 @@ export const canvasStateMachine = setup({
           }
         : {}
     ),
+    restoreNodePositions: assign(({ event }) =>
+      event.type === 'nodes.positions.restore' ? { nodePositions: event.positions } : {}
+    ),
     prepareChangedUnitSave: assign(({ event }) => {
       if (event.type !== 'unit.changed') {
         return {};
@@ -232,6 +235,7 @@ export const canvasStateMachine = setup({
         savingComponentIntent: undefined,
         savingSecrets: undefined,
         processingRollbackUnit: undefined,
+        processingRollbackNodePositions: undefined,
         processingSaveIds: undefined,
         routingDiagnostics: [],
         error: undefined,
@@ -475,6 +479,9 @@ export const canvasStateMachine = setup({
         },
         'nodes.positions.change': {
           actions: 'storeNodePositions',
+        },
+        'nodes.positions.restore': {
+          actions: 'restoreNodePositions',
         },
         'unit.stage': {
           guard: 'canEditUnit',

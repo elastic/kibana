@@ -288,8 +288,8 @@ export const getSession = async (
         filter: [
           { term: { [SOURCE_SESSION_ID_FIELD]: sessionId } },
           { term: { [SOURCE_SERVICE_NAME_FIELD]: serviceName } },
-          // No upper bound: events after the last checkpoint keep the timeline current at any
-          // transform frequency. Session ids are random UUIDs, so this can't reach another session.
+          // No upper bound: events the summary hasn't seen yet keep the timeline current. Session
+          // ids are random UUIDs, so this can't reach another session.
           ...(Number.isFinite(startMs)
             ? [
                 {
