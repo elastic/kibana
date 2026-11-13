@@ -113,6 +113,32 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
     });
 
   describe('successful alert retrieval', () => {
+    it('reads missing anonymization fields with the internal user, not the run credential', async () => {
+      mockGetAnonymizedAlerts.mockResolvedValue(mockAnonymizedAlertStrings);
+
+      const internalEsClient = mockCoreStart.elasticsearch.client.asInternalUser;
+      (internalEsClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [{ _id: '1', _source: { allowed: true, anonymized: false, field: 'host.name' } }],
+        },
+      });
+      (mockEsClient.search as jest.Mock).mockClear();
+
+      const stepDefinition = createStepDefinition();
+
+      await stepDefinition.handler({
+        ...mockContext,
+        input: { ...defaultProps, anonymization_fields: [] },
+      } as any);
+
+      expect(internalEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: '.kibana-elastic-ai-assistant-anonymization-fields-default',
+        })
+      );
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
     it('returns anonymized alerts as strings', async () => {
       mockGetAnonymizedAlerts.mockResolvedValue(mockAnonymizedAlertStrings);
 

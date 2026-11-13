@@ -77,6 +77,7 @@ describe('getDefaultEsqlQueryTool', () => {
       await tool.handler({}, mockContext);
 
       expect(mockBuildDefaultEsqlQuery).toHaveBeenCalledWith({
+        anonymizationFieldsEsClient: mockEsClient.asInternalUser,
         esClient: mockEsClient.asCurrentUser,
         logger: mockLogger,
         spaceId: 'test-space',

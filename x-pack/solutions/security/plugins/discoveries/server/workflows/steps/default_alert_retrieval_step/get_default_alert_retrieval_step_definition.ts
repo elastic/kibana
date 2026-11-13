@@ -77,7 +77,12 @@ export const getDefaultAlertRetrievalStepDefinition = ({
         const resolvedAnonymizationFields = ensureRequiredAnonymizationFields(
           anonymizationFields.length > 0
             ? anonymizationFields
-            : await fetchAnonymizationFields({ esClient, spaceId })
+            : await fetchAnonymizationFields({
+                // Kibana-owned configuration: read as the internal user so the
+                // run's credential does not need index privileges on it.
+                esClient: coreStart.elasticsearch.client.asInternalUser,
+                spaceId,
+              })
         );
 
         // Retrieve and anonymize alerts

@@ -26,6 +26,10 @@ const mockEsClient = {
   search: jest.fn(),
 } as unknown as ElasticsearchClient;
 
+const mockInternalEsClient = {
+  search: jest.fn(),
+} as unknown as ElasticsearchClient;
+
 const mockLogger = {
   debug: jest.fn(),
   error: jest.fn(),
@@ -41,6 +45,7 @@ const mockGetStartServices = jest.fn().mockResolvedValue({
   coreStart: {
     elasticsearch: {
       client: {
+        asInternalUser: mockInternalEsClient,
         asScoped: jest.fn().mockReturnValue({
           asCurrentUser: mockEsClient,
         }),
@@ -90,7 +95,7 @@ describe('GET /internal/attack_discovery/attack_discovery/queries/esql/default',
     });
   });
 
-  it('calls buildDefaultEsqlQuery with the user-scoped ES client and spaceId', async () => {
+  it('calls buildDefaultEsqlQuery with the user-scoped ES client, the internal client for anonymization fields, and spaceId', async () => {
     const { handleGetDefaultEsqlQuery } = await import('./get_default_esql_query');
 
     await handleGetDefaultEsqlQuery({
@@ -100,6 +105,7 @@ describe('GET /internal/attack_discovery/attack_discovery/queries/esql/default',
     });
 
     expect(mockBuildDefaultEsqlQuery).toHaveBeenCalledWith({
+      anonymizationFieldsEsClient: mockInternalEsClient,
       esClient: mockEsClient,
       logger: mockLogger,
       spaceId: 'default',

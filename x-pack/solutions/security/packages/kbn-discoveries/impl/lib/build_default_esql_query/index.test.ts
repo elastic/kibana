@@ -208,6 +208,36 @@ describe('buildDefaultEsqlQuery', () => {
       );
     });
 
+    it('reads anonymization fields with anonymizationFieldsEsClient when provided', async () => {
+      const anonymizationFieldsEsClient = {
+        search: jest.fn().mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: '1',
+                _source: { allowed: true, anonymized: false, field: 'host.name' },
+              },
+            ],
+          },
+        }),
+      } as unknown as ElasticsearchClient;
+
+      (mockEsClient.fieldCaps as jest.Mock).mockResolvedValueOnce(
+        mockFieldCapsResponse(['host.name'])
+      );
+
+      const result = await buildDefaultEsqlQuery({
+        anonymizationFieldsEsClient,
+        esClient: mockEsClient,
+        logger: mockLogger,
+        spaceId: DEFAULT_SPACE_ID,
+      });
+
+      expect(anonymizationFieldsEsClient.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+      expect(result).toContain('      host.name');
+    });
+
     it('calls fetchAnonymizationFields via esClient.search', async () => {
       await buildDefaultEsqlQuery({
         esClient: mockEsClient,
