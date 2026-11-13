@@ -7,11 +7,13 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { coreMock } from '@kbn/core/public/mocks';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   canAccessAlertingV2Rules,
   hasAlertingV2Capability,
   isAlertingV2AvailableInSolution,
   isAlertingV2Enabled,
+  isAlertingV2ImportsAvailable,
   shouldShowAlertingV2CreateRuleFlyout,
   shouldShowV1ObservabilityAlertsTable,
 } from './is_alerting_v2_enabled';
@@ -264,5 +266,57 @@ describe('canAccessAlertingV2Rules', () => {
     core.settings.globalClient.get = <T>(_key: string) => false as T;
 
     expect(canAccessAlertingV2Rules(core)).toBe(false);
+  });
+});
+
+describe('isAlertingV2ImportsAvailable', () => {
+  let core: CoreStart;
+
+  const setExperimentalFeatures = (value: boolean | undefined) => {
+    core.settings.client.get = <T>(key: string, defaultOverride?: T) =>
+      (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID && value !== undefined
+        ? value
+        : defaultOverride) as T;
+  };
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { read: true },
+    };
+    setExperimentalFeatures(true);
+  });
+
+  it('returns true with rules access and experimental features on', () => {
+    expect(isAlertingV2ImportsAvailable(core)).toBe(true);
+  });
+
+  it('returns false while experimental features are off', () => {
+    setExperimentalFeatures(false);
+
+    expect(isAlertingV2ImportsAvailable(core)).toBe(false);
+  });
+
+  it('returns false when experimental features are not set', () => {
+    setExperimentalFeatures(undefined);
+
+    expect(isAlertingV2ImportsAvailable(core)).toBe(false);
+  });
+
+  it('returns false without rules access', () => {
+    const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+      core.application.capabilities;
+    core.application.capabilities = capabilitiesWithoutRules;
+
+    expect(isAlertingV2ImportsAvailable(core)).toBe(false);
+  });
+
+  it('returns false while alerting v2 is disabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+
+    expect(isAlertingV2ImportsAvailable(core)).toBe(false);
   });
 });

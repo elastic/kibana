@@ -10,6 +10,7 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
 /**
  * Feature ids from `@kbn/alerting-v2-plugin/common/feature_privileges`.
@@ -45,6 +46,10 @@ export const hasAlertingV2Capability = (
   return featureCapabilities?.all === true || featureCapabilities?.read === true;
 };
 
+const isAlertingV2EnabledSetting = ({ globalClient }: CoreStart['settings']): boolean =>
+  globalClient.isDeclared(ALERTING_V2_ENABLED_SETTING_ID) &&
+  globalClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID) === true;
+
 /**
  * Returns whether Alerting v2 UI surfaces should be shown based on the
  * `alerting:v2:enabled` advanced setting.
@@ -58,14 +63,8 @@ export const hasAlertingV2Capability = (
  * The setting is read without a default override so the registered default applies. It is only
  * registered where the Alerting v2 plugin runs, so an undeclared setting resolves to `false`.
  */
-export const isAlertingV2Enabled: (core: CoreStart) => boolean = (core) => {
-  const { globalClient } = core.settings;
-
-  return (
-    globalClient.isDeclared(ALERTING_V2_ENABLED_SETTING_ID) &&
-    globalClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID) === true
-  );
-};
+export const isAlertingV2Enabled: (core: CoreStart) => boolean = (core) =>
+  isAlertingV2EnabledSetting(core.settings);
 
 const OBSERVABILITY_SOLUTION_NAV_ID = 'oblt';
 
@@ -114,3 +113,19 @@ export const shouldShowV1ObservabilityAlertsTable = (core: CoreStart): boolean =
 export const canAccessAlertingV2Rules = (core: CoreStart): boolean => {
   return isAlertingV2Enabled(core) && hasAlertingV2Capability(core, 'rules');
 };
+
+/**
+ * Returns whether the settings turn on the Import alerts page: `alerting:v2:enabled` plus the
+ * space-scoped Agent Builder experimental features setting. Privileges are checked separately.
+ */
+export const areAlertingV2ImportsEnabled = (settings: CoreStart['settings']): boolean =>
+  isAlertingV2EnabledSetting(settings) &&
+  // Agent Builder registers this setting; the default covers deployments without it.
+  settings.client.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, false) === true;
+
+/**
+ * Returns whether the Import alerts page should be shown: the settings that turn it on
+ * ({@link areAlertingV2ImportsEnabled}) plus Alerting v2 rules access.
+ */
+export const isAlertingV2ImportsAvailable = (core: CoreStart): boolean =>
+  areAlertingV2ImportsEnabled(core.settings) && hasAlertingV2Capability(core, 'rules');

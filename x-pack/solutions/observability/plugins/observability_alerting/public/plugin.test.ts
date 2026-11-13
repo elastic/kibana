@@ -76,6 +76,7 @@ describe('ObservabilityAlertingPlugin', () => {
           EpisodesPage: () => null,
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
+          ImportsPage: () => null,
           CreateRuleOptionsFlyout: () => null,
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(

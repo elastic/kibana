@@ -34,6 +34,7 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_IMPORTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -173,6 +174,7 @@ export const ObservabilityAlertingApp = ({
     EpisodesPage,
     ActionPoliciesPage,
     ExecutionHistoryPage,
+    ImportsPage,
     createAlertingV2HostApp: createHost,
   } = alertingVTwo;
 
@@ -299,6 +301,16 @@ export const ObservabilityAlertingApp = ({
               coreStart={coreStart}
               setBreadcrumbs={setBreadcrumbs}
               hostApp={hostApp}
+            />
+          </EuiPageSection>
+        </Route>
+        <Route path={OBSERVABILITY_ALERTING_IMPORTS_PATH}>
+          <EuiPageSection paddingSize="m">
+            <ImportsPage
+              coreStart={coreStart}
+              setBreadcrumbs={setBreadcrumbs}
+              hostApp={hostApp}
+              privilegeCheck={privilegeCheck}
             />
           </EuiPageSection>
         </Route>

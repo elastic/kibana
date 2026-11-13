@@ -343,6 +343,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       EpisodesPage: jest.fn(() => null),
       ActionPoliciesPage: jest.fn(() => null),
       ExecutionHistoryPage: jest.fn(() => null),
+      ImportsPage: jest.fn(() => null),
       createAlertingV2HostApp: jest.fn(),
     },
     trackUiMetric: jest.fn(),
