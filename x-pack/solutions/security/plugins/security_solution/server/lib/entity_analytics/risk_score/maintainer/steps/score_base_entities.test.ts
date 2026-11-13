@@ -403,7 +403,6 @@ describe('score_base_entities', () => {
         writer: {
           bulk: jest.fn().mockResolvedValue({ errors: [], docs_written: 1, took: 1 }),
         } as unknown as RiskEngineDataWriter,
-        idBasedRiskScoringEnabled: true,
         createMissingEntities: false,
         ...(entityStoreRefresh === undefined ? {} : { entityStoreRefresh }),
         ...baseParams,
@@ -468,7 +467,6 @@ describe('score_base_entities', () => {
           logger,
           writer,
           pageTimings,
-          idBasedRiskScoringEnabled: false,
           createMissingEntities: false,
         })
       ).rejects.toBe(failure);
@@ -505,7 +503,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer,
-        idBasedRiskScoringEnabled: false,
         createMissingEntities: false,
         ...baseParams,
       });
@@ -517,7 +514,7 @@ describe('score_base_entities', () => {
       expect(writtenScores[0].id_value).toBe('user:in-store@okta');
 
       expect(summary.scoresWrittenRiskIndex).toBe(1);
-      expect(summary.scoresWrittenEntityStore).toBe(0);
+      expect(summary.scoresWrittenEntityStore).toBe(1);
       expect(summary.scoresCalculated).toBe(2);
       expect(summary.scoresDroppedNotInStore).toBe(1);
       expect(summary.scoresMissingFromStore).toBe(1);
@@ -594,7 +591,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer,
-        idBasedRiskScoringEnabled: true,
         createMissingEntities: false,
         ...baseParams,
       });
@@ -632,7 +628,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer,
-        idBasedRiskScoringEnabled: false,
         createMissingEntities: false,
         ...baseParams,
       });
@@ -708,7 +703,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer,
-        idBasedRiskScoringEnabled: true,
         createMissingEntities: true,
         ...baseParams,
       });
@@ -762,7 +756,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer,
-        idBasedRiskScoringEnabled: true,
         createMissingEntities: true,
         ...baseParams,
       });
@@ -811,7 +804,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer,
-        idBasedRiskScoringEnabled: true,
         createMissingEntities: true,
         ...baseParams,
       });
@@ -858,7 +850,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer,
-        idBasedRiskScoringEnabled: true,
         createMissingEntities: true,
         ...baseParams,
       });
@@ -886,7 +877,6 @@ describe('score_base_entities', () => {
         crudClient,
         logger,
         writer,
-        idBasedRiskScoringEnabled: true,
         createMissingEntities: false,
         ...baseParams,
       });
@@ -921,7 +911,6 @@ describe('score_base_entities', () => {
       now: baseParams.now,
       watchlistConfigs: baseParams.watchlistConfigs,
       calculationRunId: baseParams.calculationRunId,
-      idBasedRiskScoringEnabled: true,
     };
 
     it('writes a zero score carrying the criticality on the entity record', async () => {

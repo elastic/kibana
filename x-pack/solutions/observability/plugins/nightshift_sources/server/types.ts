@@ -28,4 +28,6 @@ export interface NightshiftSourcesServerStart {
    * and emits the audit event. `configure_nightshift` cannot use it.
    */
   getSourcesClient: GetSourcesClient;
+  scheduleSourceVolumeTask: (request: KibanaRequest) => Promise<void>;
+  removeSourceVolumeTask: () => Promise<void>;
 }

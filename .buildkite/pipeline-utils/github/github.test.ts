@@ -170,6 +170,24 @@ describe('github', () => {
       );
     });
 
+    it('passes the abort signal to every GitHub request', async () => {
+      const { signal } = new AbortController();
+      paginate.mockResolvedValue([]);
+
+      await upsertComment(
+        { commentBody: 'new', commentContext: 'ctx', clearPrevious: false, signal },
+        'elastic',
+        'kibana',
+        1
+      );
+
+      expect(paginate).toHaveBeenCalledWith(
+        client.issues.listComments,
+        expect.objectContaining({ request: { signal } })
+      );
+      expect(createComment).toHaveBeenCalledWith(expect.objectContaining({ request: { signal } }));
+    });
+
     it('posts nothing when there is no comment and createIfMissing is false', async () => {
       paginate.mockResolvedValue([]);
 

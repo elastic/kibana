@@ -154,17 +154,14 @@ describe('computeEventFacts', () => {
     signals,
     candidateOverrides,
     stored,
-    source,
   }: {
     signals: SignalEntry[];
     candidateOverrides?: Partial<EventsWriteInput>;
     stored?: SignificantEvent;
-    source?: 'discovery';
   }) => {
     return computeEventFacts({
       candidate: makeCandidate(signals, candidateOverrides, stored),
       timestamp: TS_NOW,
-      source,
     });
   };
 
@@ -231,28 +228,5 @@ describe('computeEventFacts', () => {
     });
 
     expect(result.severity).toBe('medium');
-  });
-
-  describe('investigation lock', () => {
-    const investigated = (signals: SignalEntry[]) =>
-      makeStored(signals, {
-        severity: 'medium',
-        investigations: [
-          { workflow_execution_id: 'wf-1', started_at: TS_EARLIER, completed_at: TS_EARLIER },
-        ],
-      });
-
-    it('keeps the stored tier of a completed investigation over the proposal', () => {
-      const signal = makeSignal();
-
-      const result = facts({
-        signals: [signal],
-        candidateOverrides: { severity: 'high' },
-        stored: investigated([signal]),
-        source: 'discovery',
-      });
-
-      expect(result.severity).toBe('medium');
-    });
   });
 });

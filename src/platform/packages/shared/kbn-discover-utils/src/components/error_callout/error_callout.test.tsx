@@ -106,4 +106,30 @@ describe('ErrorCallout', () => {
     expect(link).toBeVisible();
     expect(link).toHaveAttribute('href', ESQL_HREF);
   });
+
+  describe('with AI help', () => {
+    it('shows the help in the callout together with the message and the ES|QL reference', () => {
+      renderErrorCallout(
+        <ErrorCallout
+          error={new Error('My error')}
+          title="Error title"
+          isEsqlMode
+          esqlReferenceHref="https://example.com/esql"
+          aiHelp={<div data-test-subj="aiHelp">AI help</div>}
+        />
+      );
+
+      expect(screen.getByTestId('discoverErrorCalloutWide')).toContainElement(
+        screen.getByTestId('aiHelp')
+      );
+      expect(screen.getByTestId('discoverErrorCalloutMessage')).toHaveTextContent('My error');
+      expect(screen.getByTestId('discoverErrorCalloutESQLReferenceButton')).toBeVisible();
+    });
+
+    it('keeps the standard callout when there is no AI help', () => {
+      renderErrorCallout(<ErrorCallout error={new Error('My error')} title="Error title" />);
+
+      expect(screen.queryByTestId('discoverErrorCalloutWide')).not.toBeInTheDocument();
+    });
+  });
 });

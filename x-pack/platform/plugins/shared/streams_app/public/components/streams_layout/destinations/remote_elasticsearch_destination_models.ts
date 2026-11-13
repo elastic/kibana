@@ -6,7 +6,11 @@
  */
 
 import type { UnitDestination } from '@kbn/streams-schema';
-import { DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
+import {
+  DESTINATION_SIGNALS,
+  PREFIXED_DESTINATION_SIGNALS,
+  SIGNAL_INDEX_FIELDS,
+} from './destination_models';
 import {
   REMOTE_ELASTICSEARCH_TYPE,
   type DestinationSignal,
@@ -15,7 +19,7 @@ import {
 
 type RemoteRoutingFormData = Pick<
   RemoteElasticsearchDestinationFormData,
-  'auto' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+  'auto' | 'logsIndex' | 'metricsIndex' | 'tracesIndex' | 'docsIndex'
 >;
 
 export const remoteElasticsearchCredentialName = (id: string): string => `${id}-api-key`;
@@ -28,18 +32,22 @@ export const getRemoteIndexBySignal = (
   if (form.auto) {
     return indexBySignal;
   }
-  for (const signal of DESTINATION_SIGNALS) {
+  for (const signal of PREFIXED_DESTINATION_SIGNALS) {
     const index = form[SIGNAL_INDEX_FIELDS[signal]].trim();
     if (index) {
       indexBySignal[signal] = index;
     }
   }
+  const docsIndex = form.docsIndex.trim();
+  if (docsIndex) {
+    indexBySignal.docs = docsIndex;
+  }
   return indexBySignal;
 };
 
 /**
- * One node per remote cluster. Fixed saves one unscoped `index` when all filled signals share a
- * name, otherwise one telemetry-scoped `index` per signal.
+ * One node per remote cluster. Fixed saves one unscoped `index` when all filled OTel signals share
+ * a name, otherwise one telemetry-scoped `index` per signal. Docs always gets its own scoped entry.
  */
 export const createRemoteElasticsearchUnitDestination = ({
   id,
@@ -50,21 +58,32 @@ export const createRemoteElasticsearchUnitDestination = ({
   logsIndex,
   metricsIndex,
   tracesIndex,
+  docsIndex,
 }: {
   id: string;
   name: string;
   description?: string;
   endpoint: string;
 } & RemoteRoutingFormData): UnitDestination => {
-  const indexBySignal = getRemoteIndexBySignal({ auto, logsIndex, metricsIndex, tracesIndex });
-  const indexed = DESTINATION_SIGNALS.flatMap((signal) => {
+  const indexBySignal = getRemoteIndexBySignal({
+    auto,
+    logsIndex,
+    metricsIndex,
+    tracesIndex,
+    docsIndex,
+  });
+  const indexed = PREFIXED_DESTINATION_SIGNALS.flatMap((signal) => {
     const value = indexBySignal[signal];
     return value ? [{ signal, value }] : [];
   });
-  const indexEntries =
+  const otelIndexEntries =
     new Set(indexed.map(({ value }) => value)).size === 1
       ? [{ name: 'index', value: indexed[0].value }]
       : indexed.map(({ signal, value }) => ({ name: 'index', value, telemetry: [signal] }));
+  // A scoped entry wins over the unscoped one, so the shared OTel name never reaches docs.
+  const docsIndexEntries = indexBySignal.docs
+    ? [{ name: 'index', value: indexBySignal.docs, telemetry: ['docs' as const] }]
+    : [];
 
   const trimmedDescription = description?.trim();
   return {
@@ -72,10 +91,13 @@ export const createRemoteElasticsearchUnitDestination = ({
     name,
     ...(trimmedDescription ? { description: trimmedDescription } : {}),
     type: REMOTE_ELASTICSEARCH_TYPE,
-    supported_telemetry: auto ? [...DESTINATION_SIGNALS] : indexed.map(({ signal }) => signal),
+    supported_telemetry: auto
+      ? [...DESTINATION_SIGNALS]
+      : DESTINATION_SIGNALS.filter((signal) => indexBySignal[signal]),
     config: [
       { name: 'endpoint', value: endpoint.trim() },
-      ...indexEntries,
+      ...otelIndexEntries,
+      ...docsIndexEntries,
       { name: 'api_key', value: { credential: remoteElasticsearchCredentialName(id) } },
     ],
   };

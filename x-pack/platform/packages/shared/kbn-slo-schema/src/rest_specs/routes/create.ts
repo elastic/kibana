@@ -36,9 +36,13 @@ const createSLOParamsSchema = lazySchema(() =>
   })
 );
 
-const createSLOResponseSchema = z.object({
-  id: sloIdSchema,
-});
+const createSLOResponseSchema = lazySchema(() =>
+  z
+    .object({
+      id: sloIdSchema,
+    })
+    .meta({ id: 'SLOCreateResponse', additionalProperties: true })
+);
 
 type CreateSLOInput = z.input<typeof createSLOParamsSchema.shape.body>;
 type CreateSLOParams = z.output<typeof createSLOParamsSchema.shape.body>;

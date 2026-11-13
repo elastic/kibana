@@ -22,11 +22,13 @@ import type { IconType } from '@elastic/eui';
 import {
   GroupedAttachmentList,
   GroupedAttachmentRow,
-  impactEntityFlyoutType,
   ShowMoreFooter,
   type GroupedAttachmentRowAction,
-  type ImpactEntityTarget,
 } from '@kbn/agentic-investigations-common';
+import {
+  impactEntityFlyoutType,
+  type ImpactEntityTarget,
+} from '@kbn/agentic-investigations-impact';
 import type { Impact } from '../../../common/impact/impact';
 import { unionEntities } from '../../../common/impact/union_entities';
 import type { InvestigationEvidence } from '../../../common/evidence';
@@ -107,7 +109,7 @@ const ImpactEntityRow = ({
       {entity.evidence && isExpanded && (
         <div
           css={css`
-            padding: 0 ${euiTheme.size.base} 12px;
+            padding: ${euiTheme.size.m} ${euiTheme.size.xl};
           `}
           data-test-subj="investigationImpactEntityEvidence"
         >

@@ -15,7 +15,7 @@ export const checkOasSnapshot = (): readonly Step[] => [
   gateStep({
     command: '.buildkite/scripts/steps/checks/capture_oas_snapshot.sh',
     label: 'Check OAS Snapshot',
-    agents: spotAgent('n2d-standard-2', spotZones.n2dPreemptible),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
     key: 'check_oas_snapshot',
     timeout_in_minutes: 60,
     retry: retry.agentLoss,

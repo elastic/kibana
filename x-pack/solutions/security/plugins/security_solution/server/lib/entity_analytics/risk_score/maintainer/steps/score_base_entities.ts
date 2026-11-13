@@ -58,7 +58,6 @@ interface ScoreBaseEntitiesParams {
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
-  idBasedRiskScoringEnabled: boolean;
   createMissingEntities: boolean;
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
   /** Entity store `refresh` for the per-page writes. Omit to wait, as single-entity runs do. */
@@ -207,7 +206,6 @@ export const calculateBaseEntityScores = async function* ({
 
 export const scoreBaseEntities = async ({
   writer,
-  idBasedRiskScoringEnabled,
   createMissingEntities: createMissingEntitiesEnabled,
   refresh,
   entityStoreRefresh,
@@ -308,7 +306,6 @@ export const scoreBaseEntities = async ({
         logger: params.logger,
         entityType: params.entityType,
         scores: entityStoreScores,
-        enabled: idBasedRiskScoringEnabled,
         refresh: entityStoreRefresh,
       })
     );
@@ -520,7 +517,6 @@ export const persistZeroBaseScore = async ({
   watchlistConfigs,
   calculationRunId,
   writer,
-  idBasedRiskScoringEnabled,
   refresh,
 }: {
   crudClient: EntityUpdateClient;
@@ -531,7 +527,6 @@ export const persistZeroBaseScore = async ({
   watchlistConfigs: Map<string, WatchlistObject>;
   calculationRunId: string;
   writer: RiskEngineDataWriter;
-  idBasedRiskScoringEnabled: boolean;
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
 }): Promise<number> => {
   const entities = await fetchEntitiesByIds({
@@ -575,7 +570,6 @@ export const persistZeroBaseScore = async ({
     logger,
     entityType,
     scores,
-    enabled: idBasedRiskScoringEnabled,
   });
 
   return scoresWrittenRiskIndex;

@@ -8,9 +8,9 @@
 import { connectable, from, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
+import type { RunContext, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import type { AgentExecution, AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import {
   AgentExecutionMode,
   ExecutionStatus,
@@ -24,6 +24,7 @@ import {
 } from '../execution_runner';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { releaseActiveExecution } from '../utils/conversations';
+import { reportToParent, wakeParent } from '../utils/wake_parent';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
 import type { SurfacesService } from '../../surfaces';
@@ -35,6 +36,15 @@ export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
   surfacesService: SurfacesService;
+  taskManager: TaskManagerStartContract;
+  getExecutionService: () => AgentExecutionService;
+}
+
+export interface WakeParentParams {
+  childExecutionId: string;
+  fakeRequest: KibanaRequest;
+  /** Task Manager's abort signal for the run: cancelled on timeout or when the task is reclaimed. */
+  signal: AbortSignal;
 }
 
 /**
@@ -51,6 +61,8 @@ export interface TaskHandler {
     runAs?: TaskRunAsContext;
   }): Promise<void>;
   cancel(params: { executionId: string }): Promise<void>;
+  /** Retries a wake that found the parent busy; `done: false` asks the task to try again later. */
+  wakeParent(params: WakeParentParams): Promise<{ done: boolean }>;
 }
 
 /**
@@ -102,6 +114,7 @@ class TaskHandlerImpl implements TaskHandler {
     if (execution.status === ExecutionStatus.aborted) {
       this.logger.info(`Execution ${executionId} was aborted before it started; skipping`);
       await this.releaseAbortedExecution({ execution, fakeRequest, runAs });
+      await this.reportSettledToParent({ execution, executionClient, fakeRequest });
       return;
     }
 
@@ -211,6 +224,38 @@ class TaskHandlerImpl implements TaskHandler {
       abortMonitor.stop();
       heartbeatReporter.stop();
     }
+
+    await this.reportSettledToParent({ execution, executionClient, fakeRequest });
+  }
+
+  /**
+   * Reports a settled background sub-agent to its parent. A bound execution has no caller
+   * credential to wake its parent with; the execution service refuses a background run of a bound
+   * agent, so none has a parent to report to.
+   */
+  private async reportSettledToParent({
+    execution,
+    executionClient,
+    fakeRequest,
+  }: {
+    execution: AgentExecution;
+    executionClient: AgentExecutionClient;
+    fakeRequest?: KibanaRequest;
+  }): Promise<void> {
+    if (!fakeRequest) {
+      return;
+    }
+    await reportToParent({
+      execution,
+      request: fakeRequest,
+      executionClient,
+      conversationService: this.deps.conversationService,
+      executionService: this.deps.getExecutionService(),
+      uiSettings: this.deps.uiSettings,
+      savedObjects: this.deps.savedObjects,
+      taskManager: this.deps.taskManager,
+      logger: this.logger,
+    });
   }
 
   /** Records the execution's failed or aborted status. */
@@ -291,6 +336,25 @@ class TaskHandlerImpl implements TaskHandler {
         `Failed to release conversation ${conversationId} after execution ${executionId} was aborted before it started: ${error.message}`
       );
     }
+  }
+
+  async wakeParent({
+    childExecutionId,
+    fakeRequest,
+    signal,
+  }: WakeParentParams): Promise<{ done: boolean }> {
+    const result = await wakeParent({
+      request: fakeRequest,
+      childExecutionId,
+      executionClient: this.createExecutionClient(),
+      conversationService: this.deps.conversationService,
+      executionService: this.deps.getExecutionService(),
+      uiSettings: this.deps.uiSettings,
+      savedObjects: this.deps.savedObjects,
+      signal,
+    });
+    this.logger.debug(`Wake of the parent of background execution ${childExecutionId}: ${result}`);
+    return { done: result !== 'busy' };
   }
 
   /** Task Manager cancelled the task (timeout or Kibana shutdown). */

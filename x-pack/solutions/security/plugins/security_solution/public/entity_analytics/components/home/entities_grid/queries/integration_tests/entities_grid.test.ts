@@ -218,12 +218,12 @@ const FILTER_CASES: readonly FilterCase[] = [
     ['user:alice@okta', 'user:bob@okta'],
   ],
   [
-    // Unknown is also the absence of a level: host:h3 has none.
+    // Unknown is also the absence of a level: host:h3 has none, service:payments stores Unknown.
     'an unknown risk level filter',
     { entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Unknown] } },
     'entity.name',
     'asc',
-    ['host:h3'],
+    ['service:payments', 'host:h3'],
   ],
   [
     'an unknown risk level filter with a risk level',
@@ -235,7 +235,7 @@ const FILTER_CASES: readonly FilterCase[] = [
     },
     'entity.name',
     'asc',
-    ['host:h1', 'host:h3'],
+    ['service:payments', 'host:h1', 'host:h3'],
   ],
   [
     // host:h1 is high impact itself, and extreme through one of its aliases.

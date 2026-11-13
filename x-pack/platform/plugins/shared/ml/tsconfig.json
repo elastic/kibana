@@ -52,6 +52,7 @@
     "@kbn/deeplinks-ml",
     "@kbn/content-management-utils",
     "@kbn/embeddable-plugin",
+    "@kbn/es-errors",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/es-ui-shared-plugin",
@@ -165,6 +166,8 @@
     "@kbn/core-http-common",
     "@kbn/core-rendering-browser",
     "@kbn/app-header",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/date-range-picker",
+    "@kbn/date-range-picker-presets"
   ]
 }

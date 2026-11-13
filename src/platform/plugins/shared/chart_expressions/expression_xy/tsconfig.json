@@ -42,7 +42,9 @@
     "@kbn/field-formats-common",
     "@kbn/visualizations-common",
     "@kbn/ui-actions-plugin",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/palettes-components",
+    "@kbn/visualizations-components"
   ],
   "exclude": [
     "target/**/*",

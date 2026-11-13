@@ -30,10 +30,9 @@ import {
   getDefaultRiskEngineConfiguration,
 } from '../../risk_engine/utils/saved_object_configuration';
 import {
-  buildScopedInternalSavedObjectsClientUnsafe,
-  buildInternalSavedObjectsClientUnsafe,
-} from '../tasks/helpers';
-import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
+  buildNamespacedInternalSavedObjectsClientUnsafe,
+  buildInternalSavedObjectsClientWithoutSpacesUnsafe,
+} from '../../utils/internal_saved_objects_client';
 import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
 import { buildAlertFilters } from './steps/build_alert_filters';
@@ -96,8 +95,8 @@ interface InitializedRunContext {
   coreStart: CoreStart;
   pluginsStart: PluginsStart;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
-  soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
-  internalSoClient: ReturnType<typeof buildInternalSavedObjectsClientUnsafe>;
+  namespacedSoClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
+  watchlistSoClient: ReturnType<typeof buildInternalSavedObjectsClientWithoutSpacesUnsafe>;
   riskScoreDataClient: RiskScoreDataClient;
   lookupIndex: string;
 }
@@ -105,12 +104,7 @@ interface InitializedRunContext {
 interface LoadedRunConfig {
   configuration: RiskEngineConfiguration;
   alertsIndex: string;
-  idBasedRiskScoringEnabled: boolean;
-  /**
-   * Gates the risk score maintainer's create-if-missing path (Phase 1 base scoring only).
-   * Requires both `idBasedRiskScoringEnabled` and the `riskScoreCreateMissingEntitiesEnabled`
-   * experimental feature flag, so creation can be enabled independently of dual-write.
-   */
+  /** Gates the risk score maintainer's create-if-missing path (Phase 1 base scoring only). */
   createMissingEntitiesEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
@@ -141,19 +135,22 @@ export const createRiskScoreMaintainer = ({
       const namespace = status.metadata.namespace;
       const [coreStart] = await getStartServices();
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const namespacedSoClient = buildNamespacedInternalSavedObjectsClientUnsafe({
+        coreStart,
+        namespace,
+      });
 
       const riskScoreDataClient = new RiskScoreDataClient({
         logger,
         kibanaVersion,
         esClient,
         namespace,
-        soClient,
+        soClient: namespacedSoClient,
         auditLogger,
       });
 
       logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-      await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
+      await initSavedObjects({ savedObjectsClient: namespacedSoClient, logger, namespace });
       await riskScoreDataClient.init();
       await ensureLookupIndexReady({
         esClient,
@@ -195,9 +192,8 @@ export const createRiskScoreMaintainer = ({
           }
 
           const runConfig = await loadRunConfiguration({
-            coreStart: runContext.coreStart,
-            soClient: runContext.soClient,
-            internalSoClient: runContext.internalSoClient,
+            namespacedSoClient: runContext.namespacedSoClient,
+            watchlistSoClient: runContext.watchlistSoClient,
             esClient: runContext.esClient,
             riskScoreDataClient: runContext.riskScoreDataClient,
             namespace: runContext.namespace,
@@ -229,7 +225,7 @@ export const createRiskScoreMaintainer = ({
               entityTypes: runConfig.entityTypes,
               esqlProfiling: runConfig.esqlProfiling,
               esqlProfilingInterval: runConfig.esqlProfilingInterval,
-              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+              idBasedRiskScoringEnabled: true,
             })
           );
           try {
@@ -237,7 +233,7 @@ export const createRiskScoreMaintainer = ({
             telemetryReporter.clearGlobalSkipReason();
             const phase0LookupStage = telemetryReporter.startPhase0LookupBuildStage({
               namespace: runContext.namespace,
-              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+              idBasedRiskScoringEnabled: true,
             });
             const phase0StartedAtMs = Date.now();
             try {
@@ -347,7 +343,7 @@ export const createRiskScoreMaintainer = ({
               durationMs: maintainerRunDurationMs,
               stage0Ms,
               entityTypesProcessed: runConfig.entityTypes.length,
-              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+              idBasedRiskScoringEnabled: true,
             });
             logger.info(
               'Risk score maintainer totals',
@@ -383,19 +379,22 @@ const initializeRunContext = async ({
 }): Promise<InitializedRunContext> => {
   const [coreStart, pluginsStart] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
-  const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
-  const internalSoClient = buildInternalSavedObjectsClientUnsafe({ coreStart });
+  const namespacedSoClient = buildNamespacedInternalSavedObjectsClientUnsafe({
+    coreStart,
+    namespace,
+  });
+  const watchlistSoClient = buildInternalSavedObjectsClientWithoutSpacesUnsafe({ coreStart });
   const riskScoreDataClient = new RiskScoreDataClient({
     logger,
     kibanaVersion,
     esClient,
     namespace,
-    soClient,
+    soClient: namespacedSoClient,
     auditLogger,
   });
 
   logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-  await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
+  await initSavedObjects({ savedObjectsClient: namespacedSoClient, logger, namespace });
   await riskScoreDataClient.init();
   const { lookupIndex } = await ensureLookupIndexReady({
     esClient,
@@ -409,8 +408,8 @@ const initializeRunContext = async ({
     coreStart,
     pluginsStart,
     esClient,
-    soClient,
-    internalSoClient,
+    namespacedSoClient,
+    watchlistSoClient,
     riskScoreDataClient,
     lookupIndex,
   };
@@ -476,7 +475,7 @@ const checkRunPrerequisites = async ({
   telemetryReporter.reportGlobalSkipIfChanged({
     namespace,
     skipReason,
-    idBasedRiskScoringEnabled: false,
+    idBasedRiskScoringEnabled: true,
   });
   frameworkTelemetry.report(buildRiskScoreSkipEntityMaintainerRunSummary({ skipReason }));
   logger.debug('Risk score maintainer run skipped due to insufficient license or feature disabled');
@@ -484,9 +483,8 @@ const checkRunPrerequisites = async ({
 };
 
 const loadRunConfiguration = async ({
-  coreStart,
-  soClient,
-  internalSoClient,
+  namespacedSoClient,
+  watchlistSoClient,
   esClient,
   riskScoreDataClient,
   namespace,
@@ -494,9 +492,8 @@ const loadRunConfiguration = async ({
   entityAnalyticsConfig,
   experimentalFeatures,
 }: {
-  coreStart: CoreStart;
-  soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
-  internalSoClient: ReturnType<typeof buildInternalSavedObjectsClientUnsafe>;
+  namespacedSoClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
+  watchlistSoClient: ReturnType<typeof buildInternalSavedObjectsClientWithoutSpacesUnsafe>;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
   riskScoreDataClient: RiskScoreDataClient;
   namespace: string;
@@ -505,16 +502,13 @@ const loadRunConfiguration = async ({
   experimentalFeatures: ExperimentalFeatures;
 }): Promise<LoadedRunConfig> => {
   const configuration: RiskEngineConfiguration =
-    (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
+    (await getConfiguration({ savedObjectsClient: namespacedSoClient, logger, namespace })) ??
     getDefaultRiskEngineConfiguration({ namespace });
   const dataViewId = configuration.dataViewId ?? getAlertsIndex(namespace);
   const { index: alertsIndex } = await riskScoreDataClient.getRiskInputsIndex({ dataViewId });
-  const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-  const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(uiSettingsClient);
-  const createMissingEntitiesEnabled =
-    idBasedRiskScoringEnabled && experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
+  const createMissingEntitiesEnabled = experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
   const watchlistConfigs = await fetchWatchlistConfigs({
-    soClient: internalSoClient,
+    soClient: watchlistSoClient,
     esClient,
     namespace,
     logger,
@@ -532,7 +526,6 @@ const loadRunConfiguration = async ({
   return {
     configuration,
     alertsIndex,
-    idBasedRiskScoringEnabled,
     createMissingEntitiesEnabled,
     watchlistConfigs,
     writer,
@@ -593,7 +586,7 @@ const executeEntityTypeRun = async ({
   const runTelemetry = telemetryReporter.forRun({
     namespace: runContext.namespace,
     entityType,
-    idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+    idBasedRiskScoringEnabled: true,
   });
   let skipRemainingStages = false;
   const checkAbortBetweenStages = () => {
@@ -647,7 +640,6 @@ const executeEntityTypeRun = async ({
           sampleSize: runConfig.sampleSize,
           watchlistConfigs: runConfig.watchlistConfigs,
           abortSignal,
-          idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
           createMissingEntities: runConfig.createMissingEntitiesEnabled,
           writer: runConfig.writer,
           // The run never reads these writes back; one refresh before reset-to-zero covers them.
@@ -740,7 +732,6 @@ const executeEntityTypeRun = async ({
             calculationRunId,
             watchlistConfigs: runConfig.watchlistConfigs,
             abortSignal,
-            idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             writer: runConfig.writer,
             alertFilters,
             entityStoreRefresh: false,
@@ -846,7 +837,6 @@ const executeEntityTypeRun = async ({
               spaceId: runContext.namespace,
               entityType,
               logger: runLogger,
-              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
               crudClient,
               watchlistConfigs: runConfig.watchlistConfigs,
               calculationRunId,
@@ -1012,7 +1002,7 @@ const executeEntityTypeRun = async ({
       scoreDistributions: scoreDistributionsMs,
       prune: pruneMs,
     },
-    idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+    idBasedRiskScoringEnabled: true,
     namespace: runContext.namespace,
   });
   runLogger.info(

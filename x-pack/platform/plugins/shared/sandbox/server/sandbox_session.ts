@@ -14,6 +14,8 @@ import type {
   ReadFileResult,
   WriteFileResult,
 } from './grpc_client';
+import type { SandboxRpcResult } from './rpc';
+import { SandboxRpcError, sandboxRpcLogMeta } from './rpc';
 
 /**
  * A per-session handle to a gVisor sandbox pod.
@@ -43,6 +45,16 @@ import type {
  * late-arriving UNAVAILABLE from an already-replaced pod does not incorrectly
  * flip `isReset` back to `true`, and a late-arriving success from an old pod
  * does not prematurely clear a `true` set by a newer eviction.
+ *
+ * **Logging every call**
+ *
+ * Every method resolves with `{ value, rpc }`, and a failed call rejects with a
+ * {@link SandboxRpcError} that carries the same `rpc`. `rpc` holds what the call reports about
+ * itself: the proxy's request id, the method, the gRPC status and the duration. Log it with
+ * {@link sandboxRpcLogMeta} together with what only you know, such as the tool call or the
+ * workflow step that issued the RPC. That joins one call across Kibana, the Elastic Cloud proxy
+ * and sandbox-api, which is what an investigation of an incident needs. The client writes a debug
+ * line for every call as well, but it knows only the conversation.
  */
 export interface SandboxSession {
   /**
@@ -57,19 +69,23 @@ export interface SandboxSession {
   readonly isReset: boolean;
 
   /** Runs a shell command inside the sandbox pod and streams stdout/stderr. */
-  runCommand(params: RunCommandParams): Promise<RunCommandResult>;
+  runCommand(params: RunCommandParams): Promise<SandboxRpcResult<RunCommandResult>>;
 
   /** Reads one or more files from the sandbox pod's filesystem. */
-  readFiles(requests: Array<{ path: string; maxReadBytes?: number }>): Promise<ReadFileResult[]>;
+  readFiles(
+    requests: Array<{ path: string; maxReadBytes?: number }>
+  ): Promise<SandboxRpcResult<ReadFileResult[]>>;
 
   /** Writes one or more files to the sandbox pod's filesystem. */
-  writeFiles(files: Array<{ path: string; content: Buffer }>): Promise<WriteFileResult[]>;
+  writeFiles(
+    files: Array<{ path: string; content: Buffer }>
+  ): Promise<SandboxRpcResult<WriteFileResult[]>>;
 
   /** Creates directories (including parents) inside the sandbox pod. */
-  mkdirs(paths: string[]): Promise<boolean[]>;
+  mkdirs(paths: string[]): Promise<SandboxRpcResult<boolean[]>>;
 
   /** Returns metadata (existence, size, type) for paths inside the sandbox pod. */
-  statFiles(paths: string[]): Promise<FileMetadata[]>;
+  statFiles(paths: string[]): Promise<SandboxRpcResult<FileMetadata[]>>;
 }
 
 // ---------------------------------------------------------------------------
@@ -97,25 +113,27 @@ export class SandboxSessionImpl implements SandboxSession {
     return this._isReset;
   }
 
-  async runCommand(params: RunCommandParams): Promise<RunCommandResult> {
+  async runCommand(params: RunCommandParams): Promise<SandboxRpcResult<RunCommandResult>> {
     return this.execute(() => this.apiClient.runCommand(this.sessionId, params));
   }
 
   async readFiles(
     requests: Array<{ path: string; maxReadBytes?: number }>
-  ): Promise<ReadFileResult[]> {
+  ): Promise<SandboxRpcResult<ReadFileResult[]>> {
     return this.execute(() => this.apiClient.readFiles(this.sessionId, requests));
   }
 
-  async writeFiles(files: Array<{ path: string; content: Buffer }>): Promise<WriteFileResult[]> {
+  async writeFiles(
+    files: Array<{ path: string; content: Buffer }>
+  ): Promise<SandboxRpcResult<WriteFileResult[]>> {
     return this.execute(() => this.apiClient.writeFiles(this.sessionId, files));
   }
 
-  async mkdirs(paths: string[]): Promise<boolean[]> {
+  async mkdirs(paths: string[]): Promise<SandboxRpcResult<boolean[]>> {
     return this.execute(() => this.apiClient.mkdirs(this.sessionId, paths));
   }
 
-  async statFiles(paths: string[]): Promise<FileMetadata[]> {
+  async statFiles(paths: string[]): Promise<SandboxRpcResult<FileMetadata[]>> {
     return this.execute(() => this.apiClient.statFiles(this.sessionId, paths));
   }
 
@@ -132,7 +150,8 @@ export class SandboxSessionImpl implements SandboxSession {
         this._generation++;
         this._isReset = true;
         this.logger.warn(
-          `Sandbox pod evicted for session ${this.sessionId} — isReset set for next call`
+          `Sandbox pod evicted for session ${this.sessionId} — isReset set for next call`,
+          err instanceof SandboxRpcError ? sandboxRpcLogMeta(err.rpc) : undefined
         );
       }
       throw err;

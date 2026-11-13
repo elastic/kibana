@@ -16,9 +16,9 @@ import {
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
 
 /**
- * A placeholder for the sections an agent has not written yet, shown under everything the
- * investigation has so far while it is still being worked on. A short note says more is coming, and
- * the skeleton stands in for a section heading and its body, so the flyout does not read as finished.
+ * A placeholder for the sections an agent has not written yet, shown while it works on an
+ * investigation that has nothing to show so far. A short note says more is coming, and the skeleton
+ * stands in for a section heading and its body, so the flyout does not read as empty.
  */
 export const OverviewLoadingSection = memo(() => (
   <EuiFlexGroup
