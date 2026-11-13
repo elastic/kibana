@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getDateISORange } from '@kbn/timerange';
-import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
@@ -42,7 +42,7 @@ import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { SessionsFilters } from './components/sessions_filters';
 import { SessionsKpis } from './components/sessions_kpis';
-import { EnableSessionsPrompt, SessionsStatusCallout } from './components/sessions_status_prompts';
+import { EnableSessionsPrompt } from './components/sessions_status_prompts';
 import {
   SESSIONS_HIDDEN_BY_DEFAULT,
   SESSIONS_OPTIONAL_COLUMNS,
@@ -237,11 +237,10 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
         />
       );
     }
-    return hasActiveFilters ? (
-      <NoMatchingSessionsPrompt onClear={clearFilters} />
-    ) : (
-      noSessionsPrompt
-    );
+    if (hasActiveFilters) {
+      return <NoMatchingSessionsPrompt onClear={clearFilters} />;
+    }
+    return noSessionsPrompt;
   };
 
   return (
@@ -268,32 +267,6 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
       )}
       <SessionsKpis kpis={response?.kpis} isLoading={isLoading} formatters={formatters} />
       <EuiSpacer size="m" />
-      {response && response.failedSummaries > 0 && (
-        <>
-          <KbnWarningCallout
-            data-test-subj="digitalExperienceSessionsFailedSummaries"
-            size="s"
-            title={
-              // They are counted by search, facets and duration, but can't be checked for errors.
-              state.hasErrors
-                ? i18n.translate(
-                    'xpack.digitalExperience.sessions.failedSummariesWithErrorsFilterTitle',
-                    {
-                      defaultMessage:
-                        '{count, plural, one {# session} other {# sessions}} in this time range could not be summarized, so {count, plural, one {it is} other {they are}} missing from the list and totals, and whether {count, plural, one {it} other {they}} had errors is unknown.',
-                      values: { count: response.failedSummaries },
-                    }
-                  )
-                : i18n.translate('xpack.digitalExperience.sessions.failedSummariesTitle', {
-                    defaultMessage:
-                      '{count, plural, one {# session} other {# sessions}} in this time range could not be summarized, so {count, plural, one {it is} other {they are}} missing from the list and totals.',
-                    values: { count: response.failedSummaries },
-                  })
-            }
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
         <EuiFlexItem>
           <SessionsFilters
@@ -333,10 +306,7 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
   );
 }
 
-/**
- * The Sessions tab of an application: sets sessions up when they aren't yet, flags when they need
- * attention, and lists the application's sessions.
- */
+/** The Sessions tab of an application: sets sessions up when they aren't yet, and lists them. */
 export function SessionsTab({
   serviceName,
   source,
@@ -346,10 +316,10 @@ export function SessionsTab({
 }) {
   const { application } = useKibanaServices();
   const canManage = canManageSessions(application.capabilities);
-  const { status, loading, error, refresh, enable, enabling, enableError } = useSessionsStatus();
-  const enableProps = { canManage, onEnable: enable, enabling, enableError };
+  const { status, error, refresh, enable, enabling, enableError } = useSessionsStatus();
 
-  if (error) {
+  // A failed background refresh keeps the last status.
+  if (error && !status) {
     return (
       <LoadErrorPrompt
         data-test-subj="digitalExperienceSessionsStatusError"
@@ -363,17 +333,23 @@ export function SessionsTab({
       />
     );
   }
-  if (loading || !status) {
+  if (!status) {
     return statusLoadingPrompt;
   }
   if (!status.installed) {
-    return <EnableSessionsPrompt {...enableProps} />;
+    return (
+      <EnableSessionsPrompt
+        canManage={canManage}
+        onEnable={enable}
+        enabling={enabling}
+        enableError={enableError}
+      />
+    );
   }
   return (
     <>
       {/* Clears the page header's tabs. */}
       <EuiSpacer size="m" />
-      <SessionsStatusCallout status={status} {...enableProps} />
       <SessionsList serviceName={serviceName} source={source} />
     </>
   );

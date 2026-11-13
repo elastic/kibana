@@ -40,7 +40,10 @@ import {
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from '../server/client/investigations_client';
 import type { WorkflowSubjectInput } from '../server/client/investigation_subjects';
-import { createRoutingTestContext } from '../server/lib/notifications/notification_routing.mock';
+import {
+  createRoutingTestContext,
+  getTestIsomerRuntime,
+} from '../server/lib/notifications/notification_routing.mock';
 import type { NotificationExecution } from '../server/lib/notifications/notification_delivery';
 import { handleInvestigationFailureStepDefinition } from '../server/step_definitions/handle_investigation_failure';
 import { sweepInvestigationFailuresStepDefinition } from '../server/step_definitions/sweep_investigation_failures';
@@ -211,6 +214,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       getUnsuccessfulRun: client.getUnsuccessfulRun.bind(client),
       isLatestInvestigationRun: client.isLatestInvestigationRun.bind(client),
       getInvestigationExecutionContext: client.getInvestigationExecutionContext.bind(client),
+      getLifecycleCorrelation: client.getLifecycleCorrelation.bind(client),
       getLifecycleSubject: async () => ({
         subject: { type: 'manual', id: 'question' },
         triggerType: 'manual',
@@ -218,6 +222,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       }),
     })) as never,
     getActions: () => ({ getActionsClientWithRequestInSpace: async () => ({ execute }) } as never),
+    getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient: async () => routing.client,
     getTriggerEmitter: () => emitter,
   };

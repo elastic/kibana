@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/performance_metrics';
+// This entry point is loaded on both the server and the browser; keep it free of React.
+// React context/hooks live in `@kbn/ebt-tools/react`.
 
 export * from './src/performance_metric_events';
 

@@ -10,8 +10,8 @@
 import type { IKbnPalette } from '@kbn/palettes';
 import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 
-import type { ColorMapping } from '../../shared_components';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '../../shared_components';
+import type { ColorMapping } from '../../color_mapping/config';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '../../color_mapping/config/default_color_mapping';
 import { getConfigFromPalette } from './get_config_from_palette';
 
 const palettes = getKbnPalettes({ name: 'borealis', darkMode: false });

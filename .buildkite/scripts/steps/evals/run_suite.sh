@@ -342,7 +342,7 @@ EOF
       EVAL_NOTIFY_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
       
       # Enable the suite owner notify step when there is somewhere to send triage:
-      # - weekly: the suite's team channel
+      # - weekly and daily: their channel, on the default branch only
       # - any run: a PR comment (PR context) or EVAL_SLACK_NOTIFICATION_CHANNEL
       enable_suite_owner_notify="false"
       if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]] && [[ "${BUILDKITE_BRANCH:-}" == "${EVAL_NOTIFY_BRANCH}" ]]; then
@@ -350,7 +350,13 @@ EOF
       elif [[ -n "${resolved_pr_number}" ]]; then
         enable_suite_owner_notify="true"
       elif [[ -n "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}" ]]; then
-        enable_suite_owner_notify="true"
+        # A daily build on another branch (possible by overriding the pipeline's branch filter)
+        # would otherwise report that branch as a daily regression.
+        if [[ "${KBN_EVALS_DAILY:-}" =~ ^(1|true)$ ]] && [[ "${BUILDKITE_BRANCH:-}" != "${EVAL_NOTIFY_BRANCH}" ]]; then
+          echo "Daily evals on ${BUILDKITE_BRANCH:-?}: skipping the Slack notification (only ${EVAL_NOTIFY_BRANCH} posts)"
+        else
+          enable_suite_owner_notify="true"
+        fi
       fi
 
       if [[ "${enable_suite_owner_notify}" == "true" ]]; then
@@ -361,6 +367,7 @@ EOF
         env:
           KBN_EVALS: "1"
           KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
+          KBN_EVALS_DAILY: "${KBN_EVALS_DAILY:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"

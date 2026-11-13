@@ -12,7 +12,7 @@ import {
   entityStoreIdType,
   impactEntityFlyoutType,
   type ImpactEntityTarget,
-} from '@kbn/agentic-investigations-common';
+} from '@kbn/agentic-investigations-impact';
 import type { FlyoutDescriptor } from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import { GroupedAttachmentFlyoutOpener } from './grouped_attachments/flyout_opener';

@@ -19,13 +19,11 @@ import type { InventoryListResponse } from './types';
 export type FixtureScenario =
   | 'normal'
   | 'truncated'
-  | 'countFailed'
   | 'withDiagnostics'
   | 'empty'
   | 'allSourcesFailed';
 
 const TRUNCATED_ROW_COUNT = 250;
-const TRUNCATED_TOTAL = 12_345;
 
 const SOURCE_ERRORS = [
   {
@@ -62,32 +60,24 @@ export const buildScenarioListResponse = (
 
   switch (scenario) {
     case 'truncated':
-      return {
-        ...base,
-        rows: buildRows(TRUNCATED_ROW_COUNT),
-        total: TRUNCATED_TOTAL,
-        truncated: true,
-      };
-    case 'countFailed':
-      return { ...base, rows: buildRows(TRUNCATED_ROW_COUNT), total: null, truncated: true };
+      return { ...base, rows: buildRows(TRUNCATED_ROW_COUNT), truncated: true };
     case 'withDiagnostics': {
       const rows = buildRows(NORMAL_ROW_COUNT);
       return {
         ...base,
         rows,
-        total: rows.length,
         truncated: false,
         errors: SOURCE_ERRORS.slice(0, 1),
         unavailableColumns: UNAVAILABLE_COLUMNS,
       };
     }
     case 'empty':
-      return { ...base, rows: [], total: 0, truncated: false };
+      return { ...base, rows: [], truncated: false };
     case 'allSourcesFailed':
-      return { ...base, rows: [], total: null, truncated: true, errors: SOURCE_ERRORS };
+      return { ...base, rows: [], truncated: false, errors: SOURCE_ERRORS };
     case 'normal': {
       const rows = buildRows(NORMAL_ROW_COUNT);
-      return { ...base, rows, total: rows.length, truncated: false };
+      return { ...base, rows, truncated: false };
     }
   }
 };
