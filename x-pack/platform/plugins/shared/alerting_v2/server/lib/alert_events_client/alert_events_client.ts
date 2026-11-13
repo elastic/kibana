@@ -137,9 +137,8 @@ export class AlertEventsClient {
         ? 1
         : undefined;
 
-    // No `rule` object — no backing rule saved object. `connector.id` names the inbound
-    // connector of an imported alert. A caller-supplied timestamp is honored as `@timestamp`;
-    // otherwise ES sets it at ingest.
+    // No `rule` object — no backing rule saved object. A caller-supplied timestamp is
+    // honored as `@timestamp`; otherwise ES sets it at ingest.
     const doc: AlertEventDocument = {
       ...(event.timestamp != null ? { '@timestamp': event.timestamp } : {}),
       scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
@@ -147,7 +146,6 @@ export class AlertEventsClient {
       data: event.data ?? {},
       status,
       source,
-      ...(event.connector_id != null ? { connector: { id: event.connector_id } } : {}),
       type: alertEventType.alert,
       alert: {
         id: episodeId,

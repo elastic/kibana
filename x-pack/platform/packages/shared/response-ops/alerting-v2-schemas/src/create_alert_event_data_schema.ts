@@ -67,9 +67,6 @@ const createAlertEventBodyBaseObjectSchema = lazySchema(() =>
         .max(MAX_FINGERPRINT_FIELDS)
         .optional(),
       rule_id: z.string().min(1).max(ID_MAX_LENGTH).optional(),
-      // The connector that received the payload, for alerts imported through an inbound connector.
-      // Stored as `connector.id`; it does not take part in the series identity.
-      connector_id: z.string().min(1).max(ID_MAX_LENGTH).optional(),
 
       alert_status: externalAlertStatusSchema.optional(),
       data: z
