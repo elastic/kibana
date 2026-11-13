@@ -9,8 +9,7 @@ import { render } from '@testing-library/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { TestProviders } from '../../../../common/mock';
-import { HOST_PREVIEW_BANNER, HostEntityOverview } from './host_entity_overview';
-import { HostPreviewPanelKey } from '../../../../flyout/entity_details/host_right';
+import { HostEntityOverview } from './host_entity_overview';
 import type { HostEntity } from '../../../../../common/api/entity_analytics';
 import {
   ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
@@ -20,13 +19,10 @@ import {
   ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
-  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
@@ -43,7 +39,6 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
@@ -108,7 +103,6 @@ const renderHostEntityContent = (
 
 describe('<HostEntityContent />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
     (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
@@ -159,34 +153,6 @@ describe('<HostEntityContent />', () => {
       expect(container).toHaveTextContent(hostName);
       expect(container.querySelector('a, button')).toBeNull();
       container.click();
-      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
-    });
-
-    it('opens host preview when clicking on title with enableEntityLinks', () => {
-      mockUseRiskScore.mockReturnValue({ data: riskLevel });
-
-      const { getByTestId } = render(
-        <TestProviders>
-          <HostEntityOverview
-            hostName={hostName}
-            identityFields={identityFields}
-            scopeId={panelContextValue.scopeId}
-            enableEntityLinks
-          />
-        </TestProviders>
-      );
-
-      getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: HostPreviewPanelKey,
-        params: {
-          contextID: panelContextValue.scopeId,
-          hostName,
-          scopeId: panelContextValue.scopeId,
-          banner: HOST_PREVIEW_BANNER,
-          entityId: undefined,
-        },
-      });
     });
   });
 
@@ -212,39 +178,6 @@ describe('<HostEntityContent />', () => {
 
       const { getByTestId } = renderHostEntityContent();
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('opens host alert details when clicking alert count with enableEntityLinks', () => {
-      (useAlertsByStatus as jest.Mock).mockReturnValue({
-        isLoading: false,
-        items: mockAlertData,
-      });
-      mockFlyoutApi.openFlyout.mockClear();
-
-      const { getByTestId } = render(
-        <TestProviders>
-          <HostEntityOverview
-            hostName={hostName}
-            identityFields={identityFields}
-            scopeId={panelContextValue.scopeId}
-            enableEntityLinks
-          />
-        </TestProviders>
-      );
-
-      getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
-      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith(
-        expect.objectContaining({
-          left: expect.objectContaining({
-            params: expect.objectContaining({
-              path: {
-                tab: 'csp_insights',
-                subTab: 'alertsTabId',
-              },
-            }),
-          }),
-        })
-      );
     });
 
     it('should render misconfiguration when data is available', () => {

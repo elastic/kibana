@@ -7,7 +7,6 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -18,31 +17,41 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../hooks/use_kibana';
+import { EXPLORE_LIVE_EXAMPLE_HREF } from '../../../common/live_example';
+import {
+  type IntroBannerDismissal,
+  useIntroBannerDismissal,
+} from '../../../components/use_intro_banner_dismissal';
 import { IntroBannerVideo } from './intro_banner_video';
-
-const EXPLORE_LIVE_EXAMPLE_HREF: string | undefined = undefined;
 
 const MEDIA_WIDTH_PX = 368;
 const MEDIA_HEIGHT_PX = 239;
 const COPY_PADDING_INLINE_PX = 32;
 
-const getDismissedStorageKey = (basePath: string): string =>
-  `nightshift.onboarding.introBannerDismissed:${basePath || 'default'}`;
-
 const dismissLabel = i18n.translate('xpack.nightshift.onboarding.dismissIntroBanner', {
   defaultMessage: 'Dismiss intro banner',
 });
 
-export function OnboardingIntroBanner(): React.ReactElement | null {
-  const { euiTheme } = useEuiTheme();
-  const { http } = useKibana().services;
-  const [isDismissed = false, setIsDismissed] = useLocalStorage<boolean>(
-    getDismissedStorageKey(http.basePath.get()),
-    false
-  );
+export function OnboardingIntroBanner({
+  dismissal,
+}: {
+  dismissal?: IntroBannerDismissal;
+}): React.ReactElement | null {
+  return dismissal ? <IntroBanner dismissal={dismissal} /> : <StoredIntroBanner />;
+}
 
-  if (isDismissed) return null;
+const StoredIntroBanner = (): React.ReactElement => {
+  const dismissal = useIntroBannerDismissal();
+  return <IntroBanner dismissal={dismissal} />;
+};
+
+const IntroBanner = ({
+  dismissal,
+}: {
+  dismissal: IntroBannerDismissal;
+}): React.ReactElement | null => {
+  const { euiTheme } = useEuiTheme();
+  if (dismissal.isDismissed) return null;
 
   return (
     <EuiPanel
@@ -96,26 +105,24 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
             })}
           </p>
         </EuiText>
-        {EXPLORE_LIVE_EXAMPLE_HREF && (
-          <div
-            css={css`
-              margin-top: ${euiTheme.size.m};
-            `}
+        <div
+          css={css`
+            margin-top: ${euiTheme.size.m};
+          `}
+        >
+          <EuiButton
+            size="s"
+            iconType="external"
+            iconSide="right"
+            href={EXPLORE_LIVE_EXAMPLE_HREF}
+            target="_blank"
+            data-test-subj="nightshiftOnboardingExploreLiveExample"
           >
-            <EuiButton
-              size="s"
-              iconType="external"
-              iconSide="right"
-              href={EXPLORE_LIVE_EXAMPLE_HREF}
-              target="_blank"
-              data-test-subj="nightshiftOnboardingExploreLiveExample"
-            >
-              {i18n.translate('xpack.nightshift.onboarding.exploreLiveExampleButton', {
-                defaultMessage: 'Explore live example',
-              })}
-            </EuiButton>
-          </div>
-        )}
+            {i18n.translate('xpack.nightshift.onboarding.exploreLiveExampleButton', {
+              defaultMessage: 'Explore live example',
+            })}
+          </EuiButton>
+        </div>
       </div>
       <div
         css={css`
@@ -130,11 +137,11 @@ export function OnboardingIntroBanner(): React.ReactElement | null {
             color="text"
             iconType="cross"
             aria-label={dismissLabel}
-            onClick={() => setIsDismissed(true)}
+            onClick={dismissal.dismiss}
             data-test-subj="nightshiftOnboardingIntroBannerDismiss"
           />
         </EuiToolTip>
       </div>
     </EuiPanel>
   );
-}
+};

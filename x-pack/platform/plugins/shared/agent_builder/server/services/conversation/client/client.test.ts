@@ -2413,6 +2413,30 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('writes with the requested refresh so the change is searchable on return', async () => {
+      getTemplateMock.mockReturnValue(
+        makeTemplate('tmpl-a', {
+          severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          metadata: { status: 'open' },
+        })
+      );
+
+      await client.patchMetadata(
+        'conversation-1',
+        { severity: 'high' },
+        { source: 'http_api', refresh: 'wait_for' }
+      );
+
+      expect(mockEsClient.index.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ refresh: 'wait_for' })
+      );
+    });
+
     describe('access', () => {
       const otherUserDocument = (accessMode: ConversationAccessControlMode): Document => {
         const document = createConversationDocumentWithTemplate({ templateId: 'tmpl-a' });

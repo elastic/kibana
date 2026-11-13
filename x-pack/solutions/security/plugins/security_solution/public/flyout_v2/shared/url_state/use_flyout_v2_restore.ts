@@ -22,6 +22,7 @@ import { PageScope } from '../../../data_view_manager/constants';
 import type { FlyoutApi } from '../../use_flyout_api';
 import { useFlyoutApi } from '../../use_flyout_api';
 import { getAttackAlertIds } from '../../attack/utils/get_attack_alert_ids';
+import { getGraphEntryPointFromOrigin } from '../utils/get_graph_entry_point';
 import type {
   AnalyzerDescriptor,
   AttackCorrelationsDescriptor,
@@ -210,6 +211,9 @@ export const openDescriptorAsStart = (
   const { kind } = descriptor;
   const origin = originOverride ?? descriptor.origin;
   const originParams = origin ? { origin } : {};
+  // Read the descriptor's own origin, not the restore override: a cold restore carries none
+  // (default entry point), while a view opened from the AI chat attachment carries its origin.
+  const graphEntryPoint = getGraphEntryPointFromOrigin(descriptor.origin);
 
   switch (kind) {
     // --- Document main flyouts ---
@@ -429,17 +433,38 @@ export const openDescriptorAsStart = (
     // --- Entity main flyouts ---
     case 'host': {
       const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
-      api.openHostFlyout({ hostName, entityId, scopeId, mode, ...originParams });
+      api.openHostFlyout({
+        hostName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'user': {
       const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
-      api.openUserFlyout({ userName, entityId, scopeId, mode, ...originParams });
+      api.openUserFlyout({
+        userName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'service': {
       const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
-      api.openServiceFlyout({ serviceName, entityId, scopeId, mode, ...originParams });
+      api.openServiceFlyout({
+        serviceName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'genericEntity': {
@@ -563,6 +588,10 @@ export const openDescriptorAsStart = (
         scopeId: d.scopeId,
         entityName: d.entityName,
         ...originParams,
+        // Read the descriptor's own origin, not the restore override: a cold restore carries none,
+        // so nothing is reported, while a descriptor created by an in-session action (such as the
+        // AI chat attachment) carries its origin.
+        entryPoint: getGraphEntryPointFromOrigin(descriptor.origin),
         onShowEntity: noop,
         onShowOriginatingEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
@@ -678,6 +707,9 @@ export const openDescriptorAsChild = (
   const { kind } = descriptor;
   const origin = originOverride ?? descriptor.origin;
   const originParams = origin ? { origin } : {};
+  // Read the descriptor's own origin, not the restore override: a cold restore carries none
+  // (default entry point), while a view opened from the AI chat attachment carries its origin.
+  const graphEntryPoint = getGraphEntryPointFromOrigin(descriptor.origin);
 
   switch (kind) {
     // Main flyouts that have an explicit AsChild variant
@@ -699,17 +731,38 @@ export const openDescriptorAsChild = (
     }
     case 'host': {
       const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
-      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, mode, ...originParams });
+      api.openHostFlyoutAsChild({
+        hostName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'user': {
       const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
-      api.openUserFlyoutAsChild({ userName, entityId, scopeId, mode, ...originParams });
+      api.openUserFlyoutAsChild({
+        userName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'service': {
       const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
-      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, mode, ...originParams });
+      api.openServiceFlyoutAsChild({
+        serviceName,
+        entityId,
+        scopeId,
+        mode,
+        ...originParams,
+        graphEntryPoint,
+      });
       break;
     }
     case 'genericEntity': {

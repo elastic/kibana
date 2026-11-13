@@ -804,7 +804,7 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     }
   );
 
-  it('rates an event with no confirming signal low, and caps its confidence', async () => {
+  it('rates an event with no confirming signal low, and stores the confidence as submitted', async () => {
     await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
       inputs: [
@@ -825,7 +825,7 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
       ],
     });
 
-    expect(writtenDocs()[0]).toMatchObject({ severity: 'low', confidence: 0.3 });
+    expect(writtenDocs()[0]).toMatchObject({ severity: 'low', confidence: 0.8 });
   });
 
   it('sets aside a refuting continuation of an unknown event without failing the batch', async () => {

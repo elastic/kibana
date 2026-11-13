@@ -100,6 +100,11 @@ jest.mock('./content', () => {
             props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP })
           }
         />
+        <button
+          type="button"
+          data-test-subj="openGraphView"
+          onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW })}
+        />
         {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
           <button
             key={subTab as string}
@@ -726,6 +731,46 @@ describe('<Service />', () => {
         fireEvent.click(renderResolved().getByTestId('openResolutionGroup'));
         expect(mockFlyoutApi.openEntityResolution).toHaveBeenCalledWith(
           expect.objectContaining({ entityType: 'service', mode: 'resolved' })
+        );
+      });
+
+      it('opens the graph view from the entity flyout entry point', () => {
+        fireEvent.click(renderResolved().getByTestId('openGraphView'));
+        expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityId: mockProps.entityId,
+            scopeId: mockProps.scopeId,
+            entryPoint: 'entity_flyout',
+          })
+        );
+      });
+
+      it('opens the graph view and renders the content with the graph entry point it was opened with', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord, [aliasRecord]);
+        const { getByTestId } = render(
+          <TestProviders>
+            <Service {...mockProps} mode="resolved" graphEntryPoint="ai_chat_attachment" />
+          </TestProviders>
+        );
+
+        expect(mockContentProps).toHaveBeenLastCalledWith(
+          expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+        );
+        fireEvent.click(getByTestId('openGraphView'));
+        expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityId: mockProps.entityId,
+            entryPoint: 'ai_chat_attachment',
+          })
+        );
+      });
+
+      it('renders the content with the entity flyout entry point when none is given', () => {
+        renderResolved();
+
+        expect(mockContentProps).toHaveBeenLastCalledWith(
+          expect.objectContaining({ graphEntryPoint: 'entity_flyout' })
         );
       });
     });
