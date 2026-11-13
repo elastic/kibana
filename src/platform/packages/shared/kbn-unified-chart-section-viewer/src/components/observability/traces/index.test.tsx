@@ -107,21 +107,20 @@ describe('TraceMetricsGrid', () => {
     expect(jest.mocked(TracesLatencyMapView)).not.toHaveBeenCalled();
   });
 
-  it('offers the switcher with the RED charts as the default when the latency map flag is on', async () => {
+  it('offers the switcher with the latency map as the default when the flag is on', async () => {
     await renderGrid({ latencyMapEnabled: true });
-    expect(screen.getByTestId('tracesLatencyMapToggle')).toBeInTheDocument();
-    expect(jest.mocked(TraceMetricsProvider)).toHaveBeenCalled();
-    expect(jest.mocked(TracesLatencyMapView)).not.toHaveBeenCalled();
+    expect(screen.getByTestId('tracesHealthMetricsToggle')).toBeInTheDocument();
+    expect(jest.mocked(TracesLatencyMapView)).toHaveBeenCalled();
   });
 
-  it('switches to the latency map and hides the breakdown selector there', async () => {
+  it('switches to the RED charts, where the breakdown selector shows', async () => {
     await renderGrid({ latencyMapEnabled: true });
-    expect(screen.getByTestId('unifiedBreakdownSelector')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByTestId('tracesLatencyMapToggle'));
-
-    expect(jest.mocked(TracesLatencyMapView)).toHaveBeenCalled();
     expect(screen.queryByTestId('unifiedBreakdownSelector')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('tracesHealthMetricsToggle'));
+
+    expect(jest.mocked(TraceMetricsProvider)).toHaveBeenCalled();
+    expect(screen.getByTestId('unifiedBreakdownSelector')).toBeInTheDocument();
   });
 
   it('starts on the latency map when the query arrives with a selection', async () => {

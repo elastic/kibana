@@ -20,7 +20,6 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { UnifiedBreakdownFieldSelector, resolveBreakdownField } from '@kbn/unified-histogram';
-import { isSelectionCondition } from '@kbn/trace-latency-map';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
@@ -41,20 +40,20 @@ export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
 const CHART_VIEW_OPTIONS: Array<EuiButtonGroupOptionProps & { id: TracesChartView }> = [
   {
-    id: 'metrics',
-    label: i18n.translate('metricsExperience.traces.healthMetricsView', {
-      defaultMessage: 'Health metrics',
-    }),
-    iconType: 'visLine',
-    'data-test-subj': 'tracesHealthMetricsToggle',
-  },
-  {
     id: 'latencyMap',
     label: i18n.translate('metricsExperience.traces.latencyMapView', {
       defaultMessage: 'Latency map',
     }),
     iconType: 'chartHeatmap',
     'data-test-subj': 'tracesLatencyMapToggle',
+  },
+  {
+    id: 'metrics',
+    label: i18n.translate('metricsExperience.traces.healthMetricsView', {
+      defaultMessage: 'Health metrics',
+    }),
+    iconType: 'visLine',
+    'data-test-subj': 'tracesHealthMetricsToggle',
   },
 ];
 
@@ -119,10 +118,11 @@ function TraceMetricsGrid({
   const latencyMapEnabled = useFeatureFlag(FEATURE_FLAGS.IS_TRACES_LATENCY_MAP_ENABLED, false);
   const latencyMapAvailable =
     latencyMapEnabled && !!query && 'esql' in query && !!actions.updateESQLQuery;
-  // A query arriving with a selection (a shared URL, a reload) starts on the map that drew
-  // it; the choice is otherwise kept per tab.
-  const [chartView = 'metrics', setChartView] = useTracesRestorableState('chartView', () =>
-    filters.some(isSelectionCondition) ? 'latencyMap' : undefined
+  // The map is the default view when it is available (which also covers a query arriving
+  // with a selection); the choice is kept per tab. Without the map, the RED charts as ever.
+  const [chartView = 'latencyMap', setChartView] = useTracesRestorableState(
+    'chartView',
+    'latencyMap'
   );
   const view: TracesChartView = latencyMapAvailable ? chartView : 'metrics';
 

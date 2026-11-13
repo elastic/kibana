@@ -37,29 +37,28 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'shows the RED charts by default and the latency map on demand',
+      'shows the latency map by default and the RED charts on demand',
       async ({ pageObjects }) => {
         const { charts } = pageObjects.tracesExperience;
 
-        await spaceTest.step('the RED charts are the default view', async () => {
-          await expect(charts.redMetricsCharts).toBeVisible();
-          await expect(charts.latencyMapToggle).toBeVisible();
-          // The grid wrapper is shared, so the RED view shows by its own charts.
-          await expect(charts.getChartTitle('Throughput')).toBeVisible();
-          await expect(charts.latencyMap).toBeHidden();
-        });
-
-        await spaceTest.step('the switcher brings up the latency map', async () => {
-          await charts.latencyMapToggle.click();
+        await spaceTest.step('the latency map is the default view', async () => {
           await expect(charts.latencyMap).toBeVisible();
+          await expect(charts.healthMetricsToggle).toBeVisible();
           await charts.waitForLatencyMapReady();
           await expect(charts.latencyMapLegend).toBeVisible();
         });
 
-        await spaceTest.step('and back to the RED charts', async () => {
+        await spaceTest.step('the switcher brings up the RED charts', async () => {
           await charts.healthMetricsToggle.click();
           await expect(charts.latencyMap).toBeHidden();
+          await expect(charts.redMetricsCharts).toBeVisible();
+          // The grid wrapper is shared, so the RED view shows by its own charts.
           await expect(charts.getChartTitle('Throughput')).toBeVisible();
+        });
+
+        await spaceTest.step('and back to the latency map', async () => {
+          await charts.latencyMapToggle.click();
+          await expect(charts.latencyMap).toBeVisible();
         });
       }
     );
@@ -70,7 +69,7 @@ spaceTest.describe(
         const { charts } = pageObjects.tracesExperience;
         const { discover } = pageObjects;
 
-        await charts.latencyMapToggle.click();
+        // The map is the default view.
         await charts.waitForLatencyMapReady();
         await discover.waitUntilSearchingHasFinished();
         const hitsBeforeSelection = await discover.getHitCountInt();
@@ -117,7 +116,7 @@ spaceTest.describe(
       async ({ pageObjects, page }) => {
         const { charts } = pageObjects.tracesExperience;
 
-        await charts.latencyMapToggle.click();
+        // The map is the default view.
         await charts.waitForLatencyMapReady();
         await charts.dragLatencyMapSelection();
         await expect(charts.latencyMapSelectionBar).toBeVisible();
@@ -135,7 +134,7 @@ spaceTest.describe(
     spaceTest('a click on a cell opens the document flyout', async ({ pageObjects }) => {
       const { charts } = pageObjects.tracesExperience;
 
-      await charts.latencyMapToggle.click();
+      // The map is the default view.
       await charts.waitForLatencyMapReady();
 
       // The middle of the map sits in the dense 100ms band of the test data.
