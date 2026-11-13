@@ -123,6 +123,26 @@ describe('ExpressionRow', () => {
     expect(valueMatch).toBeTruthy();
   });
 
+  it('should expose the expanded state on the expand row button', async () => {
+    const expression = {
+      metric: 'system.load.1',
+      comparator: COMPARATORS.GREATER_THAN,
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+      aggType: 'avg',
+    };
+    const { wrapper, update } = await setup(expression as MetricExpression);
+    const button = () => wrapper.find('button[data-test-subj="expandRow"]');
+
+    expect(button().prop('aria-expanded')).toBe(true);
+
+    button().simulate('click');
+    await update();
+
+    expect(button().prop('aria-expanded')).toBe(false);
+  });
+
   it('should render a helpText for the of expression', async () => {
     const expression = {
       metric: 'system.load.1',
