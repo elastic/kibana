@@ -2896,6 +2896,9 @@ importers:
       '@kbn/nightshift-decision-trees':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
+      '@kbn/nightshift-detection-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/nightshift_detection
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_investigations
@@ -9761,6 +9764,8 @@ importers:
   x-pack/solutions/observability/plugins/metrics_data_access: {}
 
   x-pack/solutions/observability/plugins/nightshift: {}
+
+  x-pack/solutions/observability/plugins/nightshift_detection: {}
 
   x-pack/solutions/observability/plugins/nightshift_investigations: {}
 

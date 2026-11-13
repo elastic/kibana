@@ -11,7 +11,6 @@ import type {
   ExistingAlertIdentityProps,
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
@@ -814,48 +813,6 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
   },
 };
 
-const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
-  {
-    ...optionalWorkflowExecutionTelemetrySchema,
-    ...existingAlertIdentitySchema,
-    success: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the investigation attachment succeeded',
-      },
-    },
-    event_uuid: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Deprecated — superseded by `event_id`. The identifier of the significant event the investigation was attached to',
-        optional: true,
-      },
-    },
-    event_id: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'The stable event id of the significant event the investigation was attached to; the same value as `fingerprint`, kept for compatibility',
-        optional: true,
-      },
-    },
-    investigation_id: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Agent Builder conversation ID of the attached investigation; joins to nightshift-investigation-started.investigation_id',
-      },
-    },
-    error_message: {
-      type: 'text',
-      _meta: {
-        description: 'Error message when investigation attachment fails',
-        optional: true,
-      },
-    },
-  };
-
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
   ...optionalWorkflowExecutionTelemetrySchema,
   ...alertCreationAttemptIdentitySchema,
@@ -984,7 +941,6 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
 export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
-  agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
