@@ -100,16 +100,22 @@ export function createEventStatusUpdateTool({
           logger,
           description: 'event_status_update telemetry',
           track: () =>
-            telemetry.trackAgentToolEventStatusUpdate({
-              workflow_execution_id: workflowExecutionId,
-              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
-              success:
-                data.updated === 1 ||
-                data.reason === 'already_in_state' ||
-                data.reason === 'not_a_breach',
-              event_id: toolParams.event_id,
-              status: toolParams.status,
-            }),
+            telemetry.trackAgentToolEventStatusUpdate(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ...existingAlertIdentity({
+                  eventId: toolParams.event_id,
+                  spaceId: request.spaceId,
+                }),
+                success:
+                  data.updated === 1 ||
+                  data.reason === 'already_in_state' ||
+                  data.reason === 'not_a_breach',
+                event_id: toolParams.event_id,
+                status: toolParams.status,
+              },
+              request
+            ),
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
@@ -120,14 +126,20 @@ export function createEventStatusUpdateTool({
           logger,
           description: 'failed event_status_update telemetry',
           track: () =>
-            telemetry.trackAgentToolEventStatusUpdate({
-              workflow_execution_id: workflowExecutionId,
-              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
-              success: false,
-              event_id: toolParams.event_id,
-              status: toolParams.status,
-              error_message: message,
-            }),
+            telemetry.trackAgentToolEventStatusUpdate(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ...existingAlertIdentity({
+                  eventId: toolParams.event_id,
+                  spaceId: request.spaceId,
+                }),
+                success: false,
+                event_id: toolParams.event_id,
+                status: toolParams.status,
+                error_message: message,
+              },
+              request
+            ),
         });
         return {
           results: [

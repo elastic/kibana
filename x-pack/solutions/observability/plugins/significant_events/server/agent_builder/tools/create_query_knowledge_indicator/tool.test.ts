@@ -268,7 +268,8 @@ describe('ki_query_create tool', () => {
     await invokeHandler(tool as never, { ...queryParams, id: 'query-1' }, createMockToolContext());
 
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, knowledge_indicator_id: 'query-1' })
+      expect.objectContaining({ success: false, knowledge_indicator_id: 'query-1' }),
+      expect.anything()
     );
   });
 
@@ -287,7 +288,8 @@ describe('ki_query_create tool', () => {
 
     expect(queryClient.upsertQuery).not.toHaveBeenCalled();
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ ki_kind: 'query', success: false })
+      expect.objectContaining({ ki_kind: 'query', success: false }),
+      expect.anything()
     );
   });
 });

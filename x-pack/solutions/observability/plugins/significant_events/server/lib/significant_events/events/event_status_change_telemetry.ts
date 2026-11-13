@@ -13,14 +13,12 @@ import {
   type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ENTITY_TYPE } from '../../telemetry/ebt/constants';
-import type {
-  EbtTelemetryClient,
-  EventStatusChangedProps,
-  SignificantEventActor,
-} from '../../telemetry/ebt';
+import type { EventStatusChangedProps, SignificantEventActor } from '../../telemetry/ebt';
 import type { StatusChange } from './lifecycle/lifecycle_controller';
 
-export type EventStatusChangeReporter = Pick<EbtTelemetryClient, 'trackEventStatusChanged'>;
+export interface EventStatusChangeReporter {
+  trackEventStatusChanged: (params: EventStatusChangedProps) => void;
+}
 
 /** Who writes a version and, when the lifecycle decided its status, the change they submitted. */
 export interface WriteOrigin {

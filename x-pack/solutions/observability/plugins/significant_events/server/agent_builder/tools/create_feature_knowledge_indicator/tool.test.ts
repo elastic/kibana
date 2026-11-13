@@ -174,7 +174,8 @@ describe('ki_feature_create tool', () => {
         source_id: 'logs.test',
         space_id: 'space-a',
         knowledge_indicator_id: 'feature-1',
-      })
+      }),
+      expect.anything()
     );
   });
 
@@ -256,7 +257,8 @@ describe('ki_feature_create tool', () => {
       expect.objectContaining({
         success: true,
         source_id: 'source-uuid',
-      })
+      }),
+      expect.anything()
     );
   });
 
@@ -338,7 +340,8 @@ describe('ki_feature_create tool', () => {
 
     expect(featureClient.bulk).not.toHaveBeenCalled();
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ ki_kind: 'feature', success: false })
+      expect.objectContaining({ ki_kind: 'feature', success: false }),
+      expect.anything()
     );
   });
 });

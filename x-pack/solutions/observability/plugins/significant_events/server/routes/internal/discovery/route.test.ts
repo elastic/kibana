@@ -97,11 +97,14 @@ it('passes a strict connector override and request-scoped resolver to the discov
     step: 'discovery',
     requestedId: 'model-alias',
   });
-  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).toHaveBeenCalledWith({
-    workflow_execution_id: 'execution-1',
-    execution_id: 'execution-1',
-    space_id: 'space-a',
-  });
+  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).toHaveBeenCalledWith(
+    {
+      workflow_execution_id: 'execution-1',
+      execution_id: 'execution-1',
+      space_id: 'space-a',
+    },
+    expect.anything()
+  );
 });
 
 describe('discovery started report', () => {
@@ -111,24 +114,26 @@ describe('discovery started report', () => {
 
   it('reports the run with the execution that started it', async () => {
     const track = jest.fn();
+    const request = { spaceId: 'default' };
 
     await startedRoute.handler({
       params: {
         body: { workflow_execution_id: 'discovery-1', parent_workflow_execution_id: 'review-1' },
       },
-      request: { spaceId: 'default' },
+      request,
       getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
-      getSpaceId: jest.fn().mockResolvedValue('space-a'),
       server: {},
       telemetry: { trackSignificantEventsDiscoveryStarted: track },
     } as unknown as StartedParams);
 
-    expect(track).toHaveBeenCalledWith({
-      parent_workflow_execution_id: 'review-1',
-      workflow_execution_id: 'discovery-1',
-      space_id: 'space-a',
-      alert_source: 'elastic.significant_events',
-    });
+    expect(track).toHaveBeenCalledWith(
+      {
+        parent_workflow_execution_id: 'review-1',
+        workflow_execution_id: 'discovery-1',
+        alert_source: 'elastic.significant_events',
+      },
+      request
+    );
   });
 });
 
@@ -180,11 +185,11 @@ describe('discovery completed report', () => {
 
     await expect(completedRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
 
-    const [[reported]] = track.mock.calls;
+    const [[reported, reportedRequest]] = track.mock.calls;
+    expect(reportedRequest).toBe(handlerParams.request);
     expect(reported).toMatchObject({
       parent_workflow_execution_id: 'orchestrator-1',
       workflow_execution_id: 'discovery-1',
-      space_id: 'space-a',
       alert_source: 'elastic.significant_events',
       outcome: 'completed',
       has_work: true,

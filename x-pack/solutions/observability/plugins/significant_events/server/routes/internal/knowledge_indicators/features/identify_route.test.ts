@@ -533,7 +533,8 @@ describe('inferred feature identification route', () => {
         run_id: 'run-1',
         workflow_execution_id: 'workflow-run-1',
         parent_workflow_execution_id: 'onboarding-run-1',
-      })
+      }),
+      expect.anything()
     );
   });
 
