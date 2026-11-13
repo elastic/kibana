@@ -127,7 +127,46 @@ describe('declarative connector registry', () => {
     createSpy.mockRestore();
   });
 
-  it('runs the test action and returns the response body', async () => {
+  it('lets the executor set a Retry-After date after one declarative request', async () => {
+    const { client, requests } = createRecordingAxiosClient({}, () => ({
+      data: { error: 'rate' },
+      status: 429,
+      headers: { 'retry-after': '2' },
+    }));
+    const configUtils = actionsConfigMock.create();
+    const materialized = materializeDeclarativeConnectorSpec(
+      parseDeclarativeConnectorSpec(loadFixture('abuseipdb-1.1.0.yaml'))
+    );
+    const actionType = createConnectorTypeFromSpec(materialized, {
+      getActionsConfigurationUtilities: () => configUtils,
+      getAxiosInstanceWithAuth: jest.fn().mockResolvedValue(client),
+      getCredential: jest.fn(),
+      getClientLeasePool: jest.fn().mockReturnValue({ acquire: jest.fn(), lease: jest.fn() }),
+      getRelayClient: jest.fn(),
+    } as unknown as ActionsPluginSetupContract);
+    const beforeRequest = Date.now();
+    const result = await actionType.executor!({
+      actionId: 'connector-1',
+      config: { baseUrl: 'https://api.abuseipdb.com' },
+      secrets: { authType: 'none' },
+      params: {
+        subAction: 'checkIp',
+        subActionParams: { ipAddress: '1.2.3.4', maxAgeInDays: 90, verbose: false },
+      },
+      logger: loggingSystemMock.create().get(),
+      configurationUtilities: configUtils,
+      connectorUsageCollector: {} as never,
+      services: {} as never,
+    } as Parameters<NonNullable<typeof actionType.executor>>[0]);
+
+    expect(requests).toHaveLength(1);
+    expect(result.status).toBe('error');
+    expect(result.retry).toBeInstanceOf(Date);
+    expect((result.retry as Date).getTime()).toBeGreaterThanOrEqual(beforeRequest + 2000);
+    expect((result.retry as Date).getTime()).toBeLessThanOrEqual(Date.now() + 2000);
+  });
+
+  it('runs the test action and returns the unwrapped data', async () => {
     const { client, requests } = createRecordingAxiosClient({}, () => ({
       data: { data: { abuseConfidenceScore: 0 } },
       status: 200,
@@ -159,7 +198,7 @@ describe('declarative connector registry', () => {
 
     expect(result).toEqual({
       status: 'ok',
-      data: { data: { abuseConfidenceScore: 0 } },
+      data: { abuseConfidenceScore: 0 },
       actionId: 'connector-1',
     });
     expect(requests[0]).toEqual(

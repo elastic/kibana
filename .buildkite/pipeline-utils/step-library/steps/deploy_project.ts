@@ -8,25 +8,20 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { retry, spotAgent, spotZones } from '../presets.ts';
+import { gcpImageAgent, onDemandAgent } from '../presets.ts';
 import type { Step } from '../types.ts';
 
+// Project deploy keys are only granted to kibana-deploy-project-from-pr, so the PR build hands the deploy off to it
 export const deployProjectSteps = (): readonly Step[] => [
   commandStep({
-    command: '.buildkite/scripts/steps/artifacts/docker_image.sh',
-    label: 'Build Project Image',
-    key: 'build_project_image',
-    agents: spotAgent('n2-standard-16', spotZones.n2),
-    timeout_in_minutes: 90,
-    retry: retry.agentLoss,
-  }),
-  commandStep({
-    command: '.buildkite/scripts/steps/serverless/deploy.sh',
-    label: 'Deploy Project',
+    command: '.buildkite/scripts/steps/trigger_from_pr.sh kibana-deploy-project-from-pr',
+    label: 'Trigger Project Deployment',
     key: 'deploy_project',
-    agents: spotAgent('n2-standard-4', spotZones.n2),
+    agents: {
+      ...gcpImageAgent('kibana-minimal-ubuntu-2604'),
+      ...onDemandAgent('n2-standard-2'),
+    },
     timeout_in_minutes: 10,
-    depends_on: ['build_project_image'],
-    retry: retry.agentLoss,
+    retry: { automatic: [{ exit_status: -1, limit: 1 }] },
   }),
 ];

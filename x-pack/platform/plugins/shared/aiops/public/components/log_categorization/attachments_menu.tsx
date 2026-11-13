@@ -37,6 +37,7 @@ import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-rand
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
+import { getPatternAnalysisDefaultTitle } from '../../embeddables/pattern_analysis/default_title';
 
 interface AttachmentsMenuProps {
   randomSamplerMode: RandomSamplerOption;
@@ -259,7 +260,7 @@ export const AttachmentsMenu = ({
             defaultMessage: 'Log pattern analysis',
           })}
           documentInfo={{
-            title: 'Log pattern analysis',
+            title: getPatternAnalysisDefaultTitle(),
           }}
           onClose={() => setDashboardAttachmentReady(false)}
           onSave={onSave}

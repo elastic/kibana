@@ -15,15 +15,15 @@ type Props = {
 } & Pick<React.ComponentProps<typeof EuiBetaBadge>, 'size' | 'style'>;
 
 export function TechnicalPreviewBadge({ icon, size, style }: Props) {
+  const label = i18n.translate('xpack.apm.technicalPreviewBadgeLabel', {
+    defaultMessage: 'Technical preview',
+  });
+
   return (
     <EuiBetaBadge
-      label={i18n.translate('xpack.apm.technicalPreviewBadgeLabel', {
-        defaultMessage: 'Technical preview',
-      })}
-      aria-label={i18n.translate('xpack.apm.technicalPreviewBadge.ariaLabel', {
-        defaultMessage:
-          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-      })}
+      label={label}
+      // The tooltip already describes the badge via aria-describedby, so the name stays short
+      aria-label={label}
       tooltipContent={i18n.translate('xpack.apm.technicalPreviewBadgeDescription', {
         defaultMessage:
           'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
