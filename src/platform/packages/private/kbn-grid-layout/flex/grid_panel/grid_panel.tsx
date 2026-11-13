@@ -99,8 +99,8 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           ref.style.zIndex = `${euiTheme.levels.modal}`;
           if (activePanel.type === 'resize') {
             // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
-            ref.style.flexGrow = '0';
             ref.style.flexShrink = '0';
+            ref.style.flexGrow = '0';
             ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
           } else if (activePanel.sensorType === 'keyboard') {
             // keyboard "drags" move the panel by changing its order, so it stays in the flow
@@ -118,16 +118,19 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           // siblings stay pinned (see above) until the resize ends
           if (activePanel?.type === 'resize') return;
 
-          ref.style.flexShrink = '';
           ref.classList.remove('kbnFlexPanel--active');
           ref.style.zIndex = `auto`;
+
           // if the panel is not being dragged and/or resized, undo any fixed position styles
           ref.style.position = '';
           ref.style.left = ``;
           ref.style.top = ``;
-          ref.style.flexGrow = currentPanel.grow ? '1' : '0';
           ref.style.width = `${currentPanel.width}px`;
+          ref.style.height = ``;
+
           ref.style.order = `${currentPanel.order + 1}`;
+          ref.style.flexShrink = '';
+          ref.style.flexGrow = currentPanel.grow ? '1' : '0';
         }
       });
 

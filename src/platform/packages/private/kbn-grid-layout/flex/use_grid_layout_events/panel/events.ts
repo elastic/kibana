@@ -85,10 +85,13 @@ export const useGridLayoutPanelEvents = ({
     }
   }, [gridLayoutStateManager, panelId, commitAndAnnounce]);
 
-  const onCancel = useCallback(() => {
-    cancelAction(gridLayoutStateManager);
-    announce('cancel');
-  }, [gridLayoutStateManager, announce]);
+  const onCancel = useCallback(
+    (announceEvent?: boolean) => {
+      cancelAction(gridLayoutStateManager);
+      if (announceEvent) announce('cancel');
+    },
+    [gridLayoutStateManager, announce]
+  );
 
   const onMove = useCallback(
     (ev: UserInteractionEvent) => {
@@ -134,6 +137,7 @@ export const useGridLayoutPanelEvents = ({
           onStart,
           onMove,
           onEnd,
+          onCancel: () => onCancel(false), // pointer events to do not support screen reader announcements
           scrollContainer: gridLayoutStateManager.scrollContainer$.getValue(),
         });
       } else if (isTouchEvent(e)) {
@@ -151,7 +155,7 @@ export const useGridLayoutPanelEvents = ({
           onMove,
           onEnd,
           onBlur,
-          onCancel,
+          onCancel: () => onCancel(true),
         });
       }
     },

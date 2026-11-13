@@ -186,6 +186,23 @@ describe('ControlsRenderer drag and drop through the control drag handles', () =
     expect(getOrders(getLastControls())).toEqual({ control1: 2, control2: 0, control3: 1 });
   });
 
+  it('restores the original order when Escape is pressed during a mouse drag', () => {
+    renderControls(getControls());
+
+    const handle = getHandle('control1');
+    fireEvent.mouseDown(handle, { clientX: 0, clientY: 0, button: 0 });
+    fireEvent.mouseMove(document, { clientX: 2 * PANEL_SPACING + 100, clientY: 0 });
+    fireEvent.keyDown(document, { key: 'Escape', code: 'Escape' });
+    fireEvent.mouseUp(document);
+
+    expect(getPanelIdsInOrder()).toEqual(['control1', 'control2', 'control3']);
+    expect(onControlsChanged).not.toHaveBeenCalled();
+
+    // listeners were torn down, so further pointer movement does nothing
+    fireEvent.mouseMove(document, { clientX: 2 * PANEL_SPACING + 100, clientY: 0 });
+    expect(getPanelIdsInOrder()).toEqual(['control1', 'control2', 'control3']);
+  });
+
   it('reorders the controls with touch and emits the new order once', () => {
     renderControls(getControls());
 
