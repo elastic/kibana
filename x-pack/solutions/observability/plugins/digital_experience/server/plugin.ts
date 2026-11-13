@@ -22,6 +22,7 @@ import type {
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
+import { createSessionsReadableCache } from './services/sessions/sessions_readable';
 import { registerSessionsTask } from './services/sessions/sessions_task';
 
 interface DigitalExperienceSetupDeps {
@@ -61,6 +62,7 @@ export class Plugin
       taskManager.registerCanEncryptedSavedObjects(encryptedSavedObjects.canEncrypt);
     }
 
+    const sessionsReadable = createSessionsReadableCache();
     const { buildFlavor } = this.initializerContext.env.packageInfo;
     registerRoutes({
       core,
@@ -73,7 +75,7 @@ export class Plugin
         sessionsSettings: this.config.sessions,
         getSessionsServices: async () => {
           const [, pluginsStart] = await core.getStartServices();
-          return { taskManager: pluginsStart.taskManager, canEncrypt };
+          return { taskManager: pluginsStart.taskManager, canEncrypt, sessionsReadable };
         },
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,

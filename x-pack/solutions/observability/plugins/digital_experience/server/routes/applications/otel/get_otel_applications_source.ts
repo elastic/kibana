@@ -7,14 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import {
-  SESSIONS_LOOKBACK_DAYS,
-  type SessionsSettings,
-  type SessionsStatus,
-} from '../../../../common/sessions';
+import { SESSIONS_LOOKBACK_DAYS, type SessionsSettings } from '../../../../common/sessions';
 import { createDigitalExperienceTracedEsClient } from '../../../lib/create_digital_experience_traced_es_client';
 import { describeError, isAccessDenied } from '../../../lib/helpers/errors';
-import { getSessionsStatus } from '../../../services/sessions/sessions_status';
+import type { SessionsReadableCache } from '../../../services/sessions/sessions_readable';
 import type { SourceApplications } from '../types';
 import type { GetOtelApplicationsParams } from './get_otel_applications';
 import { getOtelApplications } from './get_otel_applications';
@@ -22,13 +18,12 @@ import { getSessionsApplications } from './get_sessions_applications';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** The status changes at most once a run, while the list is refreshed often. */
-const SESSIONS_STATUS_TTL_MS = 30_000;
-
 interface GetOtelApplicationsFromBestSourceParams extends GetOtelApplicationsParams {
   /** Reads the summaries task's status; `undefined` without Task Manager, so without sessions. */
   taskManager: TaskManagerStartContract | undefined;
   sessionsSettings: SessionsSettings;
+  /** Whether the sessions can be read, shared by the requests of one refresh. */
+  sessionsReadable: SessionsReadableCache;
   logger: Logger;
 }
 
@@ -39,47 +34,6 @@ interface GetOtelApplicationsFromBestSourceParams extends GetOtelApplicationsPar
 const sessionsLookbackStart = (now: number): number =>
   Math.floor((now - SESSIONS_LOOKBACK_DAYS * DAY_MS) / DAY_MS) * DAY_MS;
 
-/** Sessions that are set up, healthy and caught up with the events since they were enabled. */
-const isReadable = ({ installed, health, rebuilding }: SessionsStatus): boolean =>
-  installed && health === 'healthy' && !rebuilding;
-
-/** The latest read of the status, shared by the requests of the next `SESSIONS_STATUS_TTL_MS`. */
-let sessionsReadable: { expiresAt: number; result: Promise<boolean> } | undefined;
-
-/** Forgets the shared status read; the tests, which share this module, start from none. */
-export const clearSessionsStatusCache = (): void => {
-  sessionsReadable = undefined;
-};
-
-/**
- * Whether the sessions can be read, from a status that requests share, so it is not tied to the
- * abort signal of the one that read it. A failed read is not remembered.
- */
-const areSessionsReadable = ({
-  taskManager,
-  sessionsSettings,
-  logger,
-}: GetOtelApplicationsFromBestSourceParams): Promise<boolean> => {
-  if (!taskManager) {
-    return Promise.resolve(false);
-  }
-  const now = Date.now();
-  if (sessionsReadable && sessionsReadable.expiresAt > now) {
-    return sessionsReadable.result;
-  }
-  const result: Promise<boolean> = getSessionsStatus({ taskManager, settings: sessionsSettings })
-    .then(isReadable)
-    .catch((error) => {
-      logger.debug(`Could not read the sessions status: ${describeError(error)}`);
-      if (sessionsReadable?.result === result) {
-        sessionsReadable = undefined;
-      }
-      return false;
-    });
-  sessionsReadable = { expiresAt: now + SESSIONS_STATUS_TTL_MS, result };
-  return result;
-};
-
 /**
  * Whether the sessions index holds the whole time range: the range is within the lookback, and the
  * sessions are readable.
@@ -87,7 +41,12 @@ const areSessionsReadable = ({
 const sessionsCoverTimeRange = async (
   params: GetOtelApplicationsFromBestSourceParams
 ): Promise<boolean> =>
-  params.start >= sessionsLookbackStart(Date.now()) && areSessionsReadable(params);
+  params.start >= sessionsLookbackStart(Date.now()) &&
+  params.sessionsReadable.areSessionsReadable({
+    taskManager: params.taskManager,
+    settings: params.sessionsSettings,
+    logger: params.logger,
+  });
 
 /**
  * The EDOT Browser applications, from the sessions index when it can answer and from the raw
@@ -100,7 +59,7 @@ const sessionsCoverTimeRange = async (
 export const getOtelApplicationsFromBestSource = async (
   params: GetOtelApplicationsFromBestSourceParams
 ): Promise<SourceApplications> => {
-  const { taskManager, sessionsSettings, logger, ...searchParams } = params;
+  const { taskManager, sessionsSettings, sessionsReadable, logger, ...searchParams } = params;
   const { esClient, signal, start, end, environment } = searchParams;
 
   if (await sessionsCoverTimeRange(params)) {

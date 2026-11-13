@@ -13,9 +13,10 @@ import { getSessionsStatus } from '../../../services/sessions/sessions_status';
 import type { SourceApplications } from '../types';
 import { getOtelApplications } from './get_otel_applications';
 import {
-  clearSessionsStatusCache,
-  getOtelApplicationsFromBestSource,
-} from './get_otel_applications_source';
+  createSessionsReadableCache,
+  type SessionsReadableCache,
+} from '../../../services/sessions/sessions_readable';
+import { getOtelApplicationsFromBestSource } from './get_otel_applications_source';
 import { getSessionsApplications } from './get_sessions_applications';
 
 jest.mock('../../../services/sessions/sessions_status');
@@ -49,6 +50,9 @@ const FROM_RAW: SourceApplications = {
 const status = (overrides: Partial<SessionsStatus> = {}) =>
   ({ installed: true, health: 'healthy', rebuilding: false, ...overrides } as SessionsStatus);
 
+/** One per test, so a test's requests share an answer and the next test starts without one. */
+let sessionsReadable: SessionsReadableCache;
+
 const setup = ({
   start = NOW - DAY_MS,
   signal,
@@ -60,6 +64,7 @@ const setup = ({
   const result = getOtelApplicationsFromBestSource({
     esClient,
     taskManager,
+    sessionsReadable,
     sessionsSettings: SETTINGS,
     logger,
     start,
@@ -73,7 +78,7 @@ const setup = ({
 describe('getOtelApplicationsFromBestSource', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    clearSessionsStatusCache();
+    sessionsReadable = createSessionsReadableCache();
     jest.useFakeTimers().setSystemTime(NOW);
     mockedStatus.mockResolvedValue(status());
     mockedSessions.mockResolvedValue(FROM_SESSIONS);

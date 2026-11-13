@@ -47,7 +47,6 @@ const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   currentVersion: 1,
   rebuilding: false,
   apiKeyInvalid: false,
-  reason: null,
   lagSeconds: 30,
   summarizedUntil: '2026-10-20T10:05:00.000Z',
   lastRunAt: '2026-10-20T10:06:00.000Z',
@@ -322,7 +321,6 @@ describe('SessionsTab', () => {
         sessionsStatus: status({
           apiKeyInvalid: true,
           health: 'degraded',
-          reason: 'The API key was invalidated',
         }),
       });
       renderTab({ manageSessions: false });
@@ -337,11 +335,10 @@ describe('SessionsTab', () => {
     });
   });
 
-  it('shows a failing run of the summaries task with its reason', async () => {
+  it('shows a failing run of the summaries task with its error', async () => {
     respondWith({
       sessionsStatus: status({
         health: 'degraded',
-        reason: 'Summarizing sessions failed: search_phase_execution_exception',
         lastError: {
           message: 'search_phase_execution_exception',
           at: '2026-10-20T10:06:00.000Z',
@@ -351,13 +348,18 @@ describe('SessionsTab', () => {
     renderTab();
 
     expect(await screen.findByTestId('digitalExperienceSessionsDegraded')).toHaveTextContent(
-      'Summarizing sessions failed: search_phase_execution_exception'
+      'The task that builds sessions failed: search_phase_execution_exception'
     );
     expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
   });
 
-  it('points to the server logs for a failing run without a reason', async () => {
-    respondWith({ sessionsStatus: status({ health: 'degraded', reason: null }) });
+  it('points to the server logs for a user who may not see why a run failed', async () => {
+    respondWith({
+      sessionsStatus: status({
+        health: 'degraded',
+        lastError: { message: null, at: '2026-10-20T10:06:00.000Z' },
+      }),
+    });
     renderTab();
 
     expect(await screen.findByTestId('digitalExperienceSessionsDegraded')).toHaveTextContent(

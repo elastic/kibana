@@ -18,6 +18,7 @@ import {
 } from '../../services/sessions/enable_sessions';
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
+import { createSessionsReadableCache } from '../../services/sessions/sessions_readable';
 import { getSessionsStatus } from '../../services/sessions/sessions_status';
 import type { SessionsServices } from '../create_digital_experience_server_route';
 import { getSession } from './get_session';
@@ -49,7 +50,6 @@ const status: SessionsStatus = {
   currentVersion: 1,
   rebuilding: false,
   apiKeyInvalid: false,
-  reason: null,
   lagSeconds: 90,
   summarizedUntil: '2026-10-27T11:58:30.000Z',
   lastRunAt: '2026-10-27T11:59:30.000Z',
@@ -79,7 +79,11 @@ const runHandler = (
   {
     params = {},
     authzResult,
-    services = { taskManager: taskManagerMock.createStart(), canEncrypt: true },
+    services = {
+      taskManager: taskManagerMock.createStart(),
+      canEncrypt: true,
+      sessionsReadable: createSessionsReadableCache(),
+    },
   }: {
     params?: Record<string, unknown>;
     authzResult?: Record<string, boolean>;
@@ -178,7 +182,11 @@ describe('sessions routes', () => {
 
     it('reads the status without Task Manager, which reports sessions missing', async () => {
       const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
-        services: { taskManager: undefined, canEncrypt: true },
+        services: {
+          taskManager: undefined,
+          canEncrypt: true,
+          sessionsReadable: createSessionsReadableCache(),
+        },
       });
 
       await result;
@@ -239,7 +247,11 @@ describe('sessions routes', () => {
 
     it('passes on whether Kibana can store the API key', async () => {
       const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, {
-        services: { taskManager: taskManagerMock.createStart(), canEncrypt: false },
+        services: {
+          taskManager: taskManagerMock.createStart(),
+          canEncrypt: false,
+          sessionsReadable: createSessionsReadableCache(),
+        },
       });
 
       await result;
@@ -249,7 +261,11 @@ describe('sessions routes', () => {
 
     it('answers 500 without Task Manager, which builds the session summaries', async () => {
       const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, {
-        services: { taskManager: undefined, canEncrypt: true },
+        services: {
+          taskManager: undefined,
+          canEncrypt: true,
+          sessionsReadable: createSessionsReadableCache(),
+        },
       });
 
       expect(await clientErrorOf(result)).toEqual(

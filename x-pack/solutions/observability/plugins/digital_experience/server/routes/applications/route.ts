@@ -66,13 +66,14 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
               environment,
             });
 
-    const { taskManager } = await getSessionsServices();
+    const { taskManager, sessionsReadable } = await getSessionsServices();
     return getApplications({
       getOtelApplications: () =>
         getOtelApplicationsFromBestSource({
           esClient,
           taskManager,
           sessionsSettings,
+          sessionsReadable,
           start,
           end,
           environment,

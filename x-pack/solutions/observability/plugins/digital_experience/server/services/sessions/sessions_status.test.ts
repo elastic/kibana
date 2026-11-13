@@ -14,7 +14,7 @@ import {
   SESSIONS_VERSION,
   type SessionsStatus,
 } from '../../../common/sessions';
-import { RUN_FAILED_MESSAGE, getSessionsStatus } from './sessions_status';
+import { getSessionsStatus } from './sessions_status';
 import type { SessionsTaskState } from './sessions_task';
 
 type TaskUserScope = NonNullable<ConcreteTaskInstance['userScope']>;
@@ -48,7 +48,6 @@ const MISSING: SessionsStatus = {
   currentVersion: SESSIONS_VERSION,
   rebuilding: false,
   apiKeyInvalid: false,
-  reason: null,
   lagSeconds: null,
   summarizedUntil: null,
   lastRunAt: null,
@@ -117,7 +116,6 @@ describe('getSessionsStatus', () => {
       currentVersion: SESSIONS_VERSION,
       rebuilding: false,
       apiKeyInvalid: false,
-      reason: null,
       lagSeconds: 90,
       summarizedUntil: healthyState.checkpoint,
       lastRunAt: healthyState.lastRunAt,
@@ -179,7 +177,6 @@ describe('getSessionsStatus', () => {
         expect.objectContaining({
           health: 'lagging',
           lagSeconds: 900,
-          reason: 'Session summaries are 15 minutes behind the events.',
         })
       );
     });
@@ -204,7 +201,7 @@ describe('getSessionsStatus', () => {
       expect(status).toEqual(
         expect.objectContaining({ health: 'degraded', apiKeyInvalid: true, enabledBy: 'ana' })
       );
-      expect(status.reason).toContain('must enable sessions again');
+      expect(status.apiKeyInvalid).toBe(true);
     });
 
     it('is degraded when the rejected key is the one the task has', async () => {
@@ -252,7 +249,6 @@ describe('getSessionsStatus', () => {
       expect(await statusOf({ ...healthyState, lastError })).toEqual(
         expect.objectContaining({
           health: 'degraded',
-          reason: 'The last run failed: esql timed out',
           lastError,
         })
       );
@@ -267,8 +263,10 @@ describe('getSessionsStatus', () => {
       });
 
       expect(status.health).toBe('degraded');
-      expect(status.reason).toContain('API key');
-      expect(status.reason).not.toContain('security_exception');
+      expect(status.apiKeyInvalid).toBe(true);
+      expect(status.health).toBe('degraded');
+      // Both are reported; which one the user is asked to act on is the tab's call.
+      expect(status.lastError?.message).toBe('security_exception');
     });
 
     it('reports a failing run before lag', async () => {
@@ -300,8 +298,7 @@ describe('getSessionsStatus', () => {
       expect(status).toEqual(
         expect.objectContaining({
           health: 'degraded',
-          reason: RUN_FAILED_MESSAGE,
-          lastError: { message: RUN_FAILED_MESSAGE, at },
+          lastError: { message: null, at },
         })
       );
       expect(JSON.stringify(status)).not.toContain('ana');

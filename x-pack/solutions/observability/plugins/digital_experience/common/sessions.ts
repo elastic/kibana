@@ -81,7 +81,11 @@ export interface SessionsSettings {
 }
 
 export interface SessionsRunError {
-  message: string;
+  /**
+   * What Elasticsearch or the task reported, for users who may see those details; `null` for
+   * everyone else, who are told a run failed without being told why.
+   */
+  message: string | null;
   at: string;
 }
 
@@ -102,7 +106,6 @@ export interface SessionsStatus {
    * manage sessions privilege enables sessions again.
    */
   apiKeyInvalid: boolean;
-  reason: string | null;
   /** How far the summaries are behind, in seconds: every event before `summarizedUntil` is in. */
   lagSeconds: number | null;
   summarizedUntil: string | null;

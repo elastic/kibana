@@ -16,6 +16,7 @@ import {
   SESSIONS_VERSION,
   sessionsLagThresholdSeconds,
   type SessionsHealth,
+  type SessionsRunError,
   type SessionsSettings,
   type SessionsStatus,
 } from '../../../common/sessions';
@@ -28,7 +29,6 @@ const MISSING_STATUS: SessionsStatus = {
   currentVersion: SESSIONS_VERSION,
   rebuilding: false,
   apiKeyInvalid: false,
-  reason: null,
   lagSeconds: null,
   summarizedUntil: null,
   lastRunAt: null,
@@ -37,16 +37,6 @@ const MISSING_STATUS: SessionsStatus = {
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
 };
-
-const API_KEY_INVALID_REASON =
-  'The API key the session summaries are built with was invalidated or has expired. A user with the Digital Experience "Set up session summaries" privilege must enable sessions again.';
-
-/**
- * The last run's error for users who can't set sessions up: Elasticsearch errors can name the user
- * who enabled them, their roles and indices.
- */
-export const RUN_FAILED_MESSAGE =
-  'The last run failed. A user with the Digital Experience "Set up session summaries" privilege can see why.';
 
 const getTask = async (
   taskManager: TaskManagerStartContract
@@ -61,43 +51,26 @@ const getTask = async (
   }
 };
 
-/** Health and reason, the worst first: an unusable key, a failing run, then a lagging one. */
+/** Health, the worst first: an unusable key, a failing run, then one that is behind. */
 const healthOf = ({
   apiKeyInvalid,
   lastError,
   lagging,
-  lagSeconds,
 }: {
   apiKeyInvalid: boolean;
-  lastError: SessionsTaskState['lastError'];
+  lastError: SessionsRunError | null;
   lagging: boolean;
-  lagSeconds: number | null;
-}): { health: SessionsHealth; reason: string | null } => {
-  if (apiKeyInvalid) {
-    return { health: 'degraded', reason: API_KEY_INVALID_REASON };
+}): SessionsHealth => {
+  if (apiKeyInvalid || lastError) {
+    return 'degraded';
   }
-  if (lastError) {
-    return {
-      health: 'degraded',
-      reason:
-        lastError.message === RUN_FAILED_MESSAGE
-          ? RUN_FAILED_MESSAGE
-          : `The last run failed: ${lastError.message}`,
-    };
-  }
-  if (lagging && lagSeconds !== null) {
-    return {
-      health: 'lagging',
-      reason: `Session summaries are ${Math.round(lagSeconds / 60)} minutes behind the events.`,
-    };
-  }
-  return { health: 'healthy', reason: null };
+  return lagging ? 'lagging' : 'healthy';
 };
 
 /**
  * The sessions status, from the summaries task and what its last run recorded. Without Task
  * Manager, nothing can build sessions, so they're missing. Who enabled sessions and why the last
- * run failed are only included `withDetails`, for users who can set sessions up.
+ * run failed are only told `withDetails`, to users who can set sessions up.
  */
 export const getSessionsStatus = async ({
   taskManager,
@@ -131,10 +104,10 @@ export const getSessionsStatus = async ({
     state.failedApiKeyId !== task.userScope.apiKeyId;
   const apiKeyInvalid = !task.userScope || (state.apiKeyInvalid === true && !replacedKeyFailed);
   const recordedError = replacedKeyFailed ? null : state.lastError ?? null;
-  const lastError =
-    recordedError && !withDetails
-      ? { ...recordedError, message: RUN_FAILED_MESSAGE }
-      : recordedError;
+  // Elasticsearch errors can name the user who enabled sessions, their roles and indices, so
+  // only users who can set sessions up are told why a run failed; the others just that one did.
+  const lastError: SessionsRunError | null =
+    recordedError && !withDetails ? { ...recordedError, message: null } : recordedError;
   const lagging =
     !rebuilding &&
     lagSeconds !== null &&
@@ -143,7 +116,7 @@ export const getSessionsStatus = async ({
   return {
     ...MISSING_STATUS,
     installed: true,
-    ...healthOf({ apiKeyInvalid, lastError, lagging, lagSeconds }),
+    health: healthOf({ apiKeyInvalid, lastError, lagging }),
     installedVersion,
     rebuilding,
     apiKeyInvalid,
