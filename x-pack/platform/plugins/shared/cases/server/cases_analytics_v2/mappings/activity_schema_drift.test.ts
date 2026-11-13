@@ -264,6 +264,24 @@ const PER_TYPE_FIXTURES: {
     { bulkAttachments: { attachmentType: 'security.alert', count: 3 } },
     { action: 'delete' }
   ),
+  merge: makeUserActionSO(
+    'merge',
+    {
+      merge: {
+        destination: { id: 'case-2', title: 'Destination', incrementalId: null },
+        sources: [
+          {
+            id: 'case-1',
+            title: 'Original',
+            incrementalId: 1,
+            copied: { alerts: 2, events: 0, observables: 1, other: 0 },
+          },
+        ],
+        closedSources: true,
+      },
+    },
+    { action: 'update' }
+  ),
 };
 
 // ----- Layer 1: doc-builder output ⊆ activity mapping (per-type) -----

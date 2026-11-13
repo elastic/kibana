@@ -592,6 +592,14 @@ const incrementTemplateUsageStats = async (
 };
 
 /**
+ * Internal-only options: no HTTP route sets them.
+ */
+export interface BulkUpdateCasesOptions {
+  /** Changes the status without syncing the status of the cases' alerts. */
+  skipAlertSync?: boolean;
+}
+
+/**
  * Updates the specified cases with new values
  *
  * @ignore
@@ -599,7 +607,8 @@ const incrementTemplateUsageStats = async (
 export const bulkUpdate = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient
+  casesClient: CasesClient,
+  options?: BulkUpdateCasesOptions
 ): Promise<CasesPatchResponse> => {
   const {
     services: {
@@ -996,6 +1005,7 @@ export const bulkUpdate = async (
     // attached to the case to the new status.
     const casesWithStatusChangedAndSynced = casesToUpdate.filter(({ updateReq, originalCase }) => {
       return (
+        options?.skipAlertSync !== true &&
         originalCase != null &&
         updateReq.status != null &&
         originalCase.attributes.status !== updateReq.status &&
@@ -1007,6 +1017,7 @@ export const bulkUpdate = async (
     // attached to the case to the current status.
     const casesWithSyncSettingChangedToOn = casesToUpdate.filter(({ updateReq, originalCase }) => {
       return (
+        options?.skipAlertSync !== true &&
         originalCase != null &&
         updateReq.settings?.syncAlerts != null &&
         originalCase.attributes.settings.syncAlerts !== updateReq.settings.syncAlerts &&

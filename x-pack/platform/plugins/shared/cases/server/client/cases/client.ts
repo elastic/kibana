@@ -29,6 +29,10 @@ import type {
   BulkAddObservablesRequest,
   BulkDeleteObservablesRequest,
   CasesPatchResponse,
+  MergeCasesPreviewRequest,
+  MergeCasesPreviewResponse,
+  MergeCasesRequest,
+  MergeCasesResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -72,6 +76,8 @@ import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
 import { withUsageCounter } from '../usage_counters';
+import { merge } from './merge/merge';
+import { mergePreview } from './merge/preview';
 
 /**
  * API for interacting with the cases entities.
@@ -188,6 +194,14 @@ export interface CasesSubClient {
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
    */
   getApplicableFields(params: GetApplicableFieldsParams): Promise<ApplicableFieldsResponse>;
+  /**
+   * Computes field defaults, conflicts, and attachment counts for merging cases. Writes nothing.
+   */
+  mergePreview(params: MergeCasesPreviewRequest): Promise<MergeCasesPreviewResponse>;
+  /**
+   * Merges cases into a new case or into one of them, copying their attachments.
+   */
+  merge(params: MergeCasesRequest): Promise<MergeCasesResponse>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
@@ -215,6 +229,8 @@ const usageCounterByMethod = {
   bulkAddObservables: 'bulk_add_observables',
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
+  mergePreview: null,
+  merge: 'merge_cases',
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
 /**
@@ -296,6 +312,11 @@ export const createCasesSubClient = (
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
+    mergePreview: (params: MergeCasesPreviewRequest) =>
+      mergePreview(params, clientArgs, casesClient),
+    merge: withUsageCounter(usageCounterByMethod.merge, clientArgs, (params: MergeCasesRequest) =>
+      merge(params, clientArgs, casesClient)
+    ),
   };
 
   return Object.freeze(casesSubClient);

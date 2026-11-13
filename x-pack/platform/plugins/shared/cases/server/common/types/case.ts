@@ -69,6 +69,7 @@ export interface CasePersistedAttributes {
    * a response, and only the write codec for new cases keeps it.
    */
   extract_observables_source?: string;
+  merged_into?: string | null;
 }
 
 type CasePersistedCustomFields = Array<{

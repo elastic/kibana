@@ -72,6 +72,10 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
   workflowTagAggs: () => [...casesQueriesKeys.all, 'workflow-tag-aggs'] as const,
+  mergePreview: (caseIds: string[], destinationCaseId?: string) =>
+    [...casesQueriesKeys.all, 'merge-preview', caseIds, destinationCaseId ?? null] as const,
+  mergeDestinations: (ids: string[]) =>
+    [...casesQueriesKeys.all, 'merge-destinations', ids] as const,
 };
 
 export const casesMutationsKeys = {
@@ -101,6 +105,7 @@ export const casesMutationsKeys = {
   bulkDeleteTemplates: ['bulk-delete-templates'] as const,
   bulkExportTemplates: ['bulk-export-templates'] as const,
   changeAppliedTemplate: ['change-applied-template'] as const,
+  mergeCases: ['merge-cases'] as const,
 };
 
 export const inferenceKeys = {

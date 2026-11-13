@@ -16,7 +16,9 @@ import {
   modelVersion8,
   modelVersion9,
   modelVersion11,
+  modelVersion12,
 } from '.';
+import { basicESCaseFields } from '../../../services/test_utils';
 
 describe('Model versions', () => {
   describe('version 1', () => {
@@ -273,6 +275,35 @@ describe('Model versions', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('version 12', () => {
+    it('returns version 12 changes correctly', () => {
+      expect(modelVersion12.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "merged_into": Object {
+                "type": "keyword",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+
+    it('keeps merged_into on create', () => {
+      const createSchema = modelVersion12.schemas?.create;
+
+      expect(
+        createSchema?.validate({
+          ...basicESCaseFields,
+          total_observables: 0,
+          merged_into: 'destination-id',
+        })
+      ).toEqual(expect.objectContaining({ merged_into: 'destination-id' }));
     });
   });
 });

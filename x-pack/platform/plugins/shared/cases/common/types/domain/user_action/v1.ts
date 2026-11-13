@@ -43,6 +43,7 @@ import { TemplateUserActionSchema } from './template/v1';
 import { ExtendedFieldsUserActionSchema } from './extended_fields/v1';
 import { WorkflowUserActionSchema } from './workflow/v1';
 import { BulkAttachmentsUserActionSchema } from './bulk_attachments/v1';
+import { MergeUserActionSchema } from './merge/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionSchema } from './status/v1';
@@ -88,23 +89,26 @@ export const CaseUserActionInjectedIdsSchema = z.object({
   comment_id: z.string().nullable(),
 });
 
-const BasicUserActionsSchema = z.union([
-  DescriptionUserActionSchema,
-  TagsUserActionSchema,
-  TitleUserActionSchema,
-  SettingsUserActionSchema,
-  StatusUserActionSchema,
-  SeverityUserActionSchema,
-  AssigneesUserActionSchema,
-  DeleteCaseUserActionSchema,
-  CategoryUserActionSchema,
-  CustomFieldsUserActionSchema,
-  ObservablesUserActionSchema,
-  ExtendedFieldsUserActionSchema,
-  TemplateUserActionSchema,
-  WorkflowUserActionSchema,
-  BulkAttachmentsUserActionSchema,
-]);
+const BasicUserActionsSchema = lazySchema(() =>
+  z.union([
+    DescriptionUserActionSchema,
+    TagsUserActionSchema,
+    TitleUserActionSchema,
+    SettingsUserActionSchema,
+    StatusUserActionSchema,
+    SeverityUserActionSchema,
+    AssigneesUserActionSchema,
+    DeleteCaseUserActionSchema,
+    CategoryUserActionSchema,
+    CustomFieldsUserActionSchema,
+    ObservablesUserActionSchema,
+    ExtendedFieldsUserActionSchema,
+    TemplateUserActionSchema,
+    WorkflowUserActionSchema,
+    BulkAttachmentsUserActionSchema,
+    MergeUserActionSchema,
+  ])
+);
 
 const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);
 const CommonUserActionsWithoutIdsSchema = z.union([
@@ -202,6 +206,8 @@ export type ExtendedFieldsUserAction = UserAction<z.infer<typeof ExtendedFieldsU
 export type TemplateUserAction = UserAction<z.infer<typeof TemplateUserActionSchema>>;
 export type WorkflowUserAction = UserAction<z.infer<typeof WorkflowUserActionSchema>>;
 export type BulkAttachmentsUserAction = UserAction<z.infer<typeof BulkAttachmentsUserActionSchema>>;
+export type MergeUserAction = UserAction<z.infer<typeof MergeUserActionSchema>>;
 export type { BulkAttachmentsPayload } from './bulk_attachments/v1';
+export type { MergeCaseSnapshot, MergeCopiedTotals, MergePayload, MergeSource } from './merge/v1';
 export { WorkflowUserActionSchema, WorkflowOriginSchema } from './workflow/v1';
 export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from './workflow/v1';

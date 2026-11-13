@@ -19,6 +19,7 @@ import { CaseDetailsAppHeader } from './components/case_details_header';
 import { CaseViewTabContent } from './components/case_view_tab_content';
 import { CaseDetailsTour } from './tour/case_details_tour';
 import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
+import { MergedIntoCallout } from '../merge_cases/merged_into_callout';
 
 export type CaseViewPageComponentProps = Omit<CaseViewPageProps, 'fetchCase'>;
 
@@ -47,6 +48,12 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
         onShowMetricsChange={setShowMetrics}
       />
       <CasesPageBody>
+        {caseData.mergedInto != null && (
+          <>
+            <MergedIntoCallout destinationId={caseData.mergedInto} />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {showMetrics && <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />}
         <EuiSpacer size="l" />
         {KibanaServices.getConfig()?.attachments?.enabled === true && (

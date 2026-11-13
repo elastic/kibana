@@ -24,7 +24,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CaseStatuses } from '../../../../common/types/domain';
 
 import { tableColumnPresetDateRelative } from '../../../utils/table_column_presets';
-import type { ActionConnector } from '../../../../common/types/domain';
+import type { ActionConnector, MergeCaseSnapshot } from '../../../../common/types/domain';
 import type { CaseUI } from '../../../../common/ui/types';
 import type { CasesColumnSelection } from '../types';
 import { getEmptyCellValue } from '../../empty_value';
@@ -41,6 +41,7 @@ import { AssigneesColumn } from '../components/assignees_column';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../incremental_id';
 import { severities } from '../../severity/config';
+import { MergedIntoBadge } from '../../merge_cases/merged_into_badge';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
 
@@ -65,6 +66,7 @@ export interface GetCasesColumn {
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
   disabledCases?: Set<string>;
+  mergeDestinations?: Map<string, MergeCaseSnapshot>;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -81,6 +83,7 @@ export const useCasesColumns = ({
   disableActions = false,
   selectedColumns,
   disabledCases,
+  mergeDestinations,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -289,12 +292,28 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
         sortable: true,
-        render: (status: CaseUI['status']) => {
-          if (status != null) {
+        render: (status: CaseUI['status'], theCase: CaseUI) => {
+          if (status == null) {
+            return getEmptyCellValue();
+          }
+
+          if (theCase.mergedInto == null) {
             return <Status status={status} />;
           }
 
-          return getEmptyCellValue();
+          return (
+            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+              <EuiFlexItem grow={false}>
+                <Status status={status} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <MergedIntoBadge
+                  destinationId={theCase.mergedInto}
+                  destinations={mergeDestinations}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
         },
       },
       severity: {
@@ -361,7 +380,15 @@ export const useCasesColumns = ({
         width: '8em',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
+    [
+      assignCaseAction,
+      casesColumnsConfig,
+      connectors,
+      isSelectorView,
+      userProfiles,
+      disabledCases,
+      mergeDestinations,
+    ]
   );
 
   const allColumnsDict = useMemo(

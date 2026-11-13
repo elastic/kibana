@@ -2453,6 +2453,7 @@ describe('CasesService', () => {
       'time_to_resolve',
       'time_to_investigate',
       'template',
+      'merged_into',
       CASE_EXTENDED_FIELDS,
       CASE_EXTENDED_FIELDS_LABELS,
       CASE_EXTENDED_FIELDS_CONTROLS

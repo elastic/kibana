@@ -29,6 +29,10 @@ import type {
   UpdateSummary,
   CasesPatchResponse,
   BulkDeleteAttachmentsRequest,
+  MergeCasesPreviewRequest,
+  MergeCasesPreviewResponse,
+  MergeCasesRequest,
+  MergeCasesResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -74,6 +78,8 @@ import {
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+  INTERNAL_MERGE_CASES_PREVIEW_URL,
+  INTERNAL_MERGE_CASES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -754,3 +760,26 @@ export const getSimilarCases = async ({
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
 };
+
+export const getMergeCasesPreview = async ({
+  request,
+  signal,
+}: {
+  request: MergeCasesPreviewRequest;
+  signal?: AbortSignal;
+}): Promise<MergeCasesPreviewResponse> =>
+  KibanaServices.get().http.fetch<MergeCasesPreviewResponse>(INTERNAL_MERGE_CASES_PREVIEW_URL, {
+    method: 'POST',
+    body: JSON.stringify(request),
+    signal,
+  });
+
+export const mergeCases = async ({
+  request,
+}: {
+  request: MergeCasesRequest;
+}): Promise<MergeCasesResponse> =>
+  KibanaServices.get().http.fetch<MergeCasesResponse>(INTERNAL_MERGE_CASES_URL, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });

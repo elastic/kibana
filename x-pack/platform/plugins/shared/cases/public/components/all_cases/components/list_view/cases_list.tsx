@@ -19,6 +19,7 @@ import {
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { CasesFindResponseUI, CaseUI } from '../../../../../common/ui/types';
+import type { MergeCaseSnapshot } from '../../../../../common/types/domain';
 import type { CasesColumnSelection, EuiBasicTableOnChange } from '../../types';
 import { CASES_TABLE_PER_PAGE_VALUES } from '../../types';
 import { CaseListItem } from './case_list_item';
@@ -34,6 +35,7 @@ const DEFAULT_PAGE_SIZE = 10;
 interface CasesListProps {
   data: CasesFindResponseUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
+  mergeDestinations?: Map<string, MergeCaseSnapshot>;
   isLoading: boolean;
   pagination: Pagination;
   onChange: (change: EuiBasicTableOnChange) => void;
@@ -48,6 +50,7 @@ export const CasesList: React.FC<CasesListProps> = React.memo(
   ({
     data,
     userProfiles,
+    mergeDestinations,
     isLoading,
     pagination,
     onChange,
@@ -149,6 +152,7 @@ export const CasesList: React.FC<CasesListProps> = React.memo(
               <CaseListItem
                 theCase={theCase}
                 userProfiles={userProfiles}
+                mergeDestinations={mergeDestinations}
                 disableActions={disableActions}
                 selectedFields={selectedFields}
                 isSelected={selectedCaseIds.has(theCase.id)}

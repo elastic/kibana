@@ -224,4 +224,15 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).not.toHaveProperty('extract_observables_source');
     });
   });
+
+  describe('Model version 11 to 12', () => {
+    it('does not add merged_into to existing cases', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 11,
+        toVersion: 12,
+      });
+      expect(migrated.attributes).not.toHaveProperty('merged_into');
+    });
+  });
 });

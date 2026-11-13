@@ -118,6 +118,8 @@ const buildFullAttributes = (): {
   extended_fields: { riskScore_as_long: '42' },
   // Server-owned and telemetry-only: `buildCaseDoc` does not emit it, so Layer 1 stays unaffected.
   extract_observables_source: 'rule',
+  // Not emitted by `buildCaseDoc` yet: merged cases are not modelled in analytics v2.
+  merged_into: 'destination-case-id',
 });
 
 const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>

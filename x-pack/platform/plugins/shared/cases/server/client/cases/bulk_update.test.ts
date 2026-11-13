@@ -3178,6 +3178,44 @@ describe('update', () => {
         expect(updatedAttributes).not.toHaveProperty('closeReason');
       });
 
+      it('closes the case without syncing alert status when skipAlertSync is set', async () => {
+        const alertComment = {
+          ...mockCaseComments[3],
+          score: 0,
+          references: [
+            {
+              ...mockCaseComments[3].references[0],
+              id: mockCases[0].id,
+            },
+          ],
+        };
+
+        clientArgs.services.caseService.getAllCaseComments.mockImplementation(async ({ id }) => {
+          const savedObjects = [id].flat().includes(mockCases[0].id) ? [alertComment] : [];
+          return { saved_objects: savedObjects, total: savedObjects.length, per_page: 10, page: 1 };
+        });
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock,
+          { skipAlertSync: true }
+        );
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+        expect(
+          clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes
+        ).toEqual(expect.objectContaining({ status: CaseStatuses.closed }));
+      });
+
       it('does not propagate empty closeReason values to alerts', async () => {
         const alertComment = {
           ...mockCaseComments[3],

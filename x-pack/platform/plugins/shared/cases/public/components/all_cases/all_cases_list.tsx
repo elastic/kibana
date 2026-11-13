@@ -15,6 +15,7 @@ import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
 import type { EuiBasicTableOnChange } from './types';
 
 import { SortFieldCase } from '../../../common/ui/types';
+import type { MergeCaseSnapshot } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
 import { FieldType } from '../../../common/types/domain/template/fields';
 import { useCasesColumns } from './hooks/use_cases_columns';
@@ -31,6 +32,7 @@ import { CasesListOnboarding } from './onboarding/cases_list_onboarding';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useGetMergeDestinations } from '../../containers/use_get_merge_destinations';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesConfig } from '../../common/lib/kibana';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
@@ -49,6 +51,8 @@ import {
   useCasesListPageViewEBT,
   useCasesListViewModeChangedEBT,
 } from '../../analytics/use_cases_list_ebt';
+
+const NO_MERGE_DESTINATIONS = new Map<string, MergeCaseSnapshot>();
 
 const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
@@ -116,6 +120,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { data: userProfiles } = useBulkGetUserProfiles({
       uids: Array.from(assigneesFromCases),
     });
+
+    const mergeDestinationIds = useMemo(
+      () => data.cases.flatMap(({ mergedInto }) => (mergedInto != null ? [mergedInto] : [])),
+      [data.cases]
+    );
+    const { data: mergeDestinations = NO_MERGE_DESTINATIONS } =
+      useGetMergeDestinations(mergeDestinationIds);
 
     const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
       useGetCurrentUserProfile();
@@ -250,6 +261,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       disableActions: selectedCases.length > 0,
       selectedColumns,
       disabledCases,
+      mergeDestinations,
     });
 
     const activeFilterDimensions = useMemo(
@@ -402,6 +414,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           <CasesList
             data={data}
             userProfiles={userProfiles ?? new Map()}
+            mergeDestinations={mergeDestinations}
             isLoading={isLoadingCases}
             pagination={pagination}
             onChange={tableOnChangeCallback}

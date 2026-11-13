@@ -159,6 +159,14 @@ export const WORKFLOW_RAN = i18n.translate('xpack.cases.caseView.userActions.wor
   defaultMessage: 'ran a workflow',
 });
 
+export const MERGED_CASES = i18n.translate('xpack.cases.caseView.userActions.mergedCases', {
+  defaultMessage: 'merged cases',
+});
+
+export const MERGE_DETAILS = i18n.translate('xpack.cases.caseView.userActions.mergeDetails', {
+  defaultMessage: 'Details',
+});
+
 export const ATTACHMENTS_REMOVED = i18n.translate(
   'xpack.cases.caseView.userActions.attachmentsRemoved',
   {

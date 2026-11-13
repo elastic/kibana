@@ -26,6 +26,8 @@ import { useCloseCaseModal } from './use_close_case_modal';
 import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 import { useRunWorkflowAction } from '../../actions/run_workflow/use_run_workflow_action';
 import { RunCaseWorkflowModal } from '../../workflows/run_case_workflow_modal';
+import { useMergeAction } from '../../actions/merge/use_merge_action';
+import { MergeCasesFlyout } from '../../merge_cases/merge_cases_flyout';
 import * as i18n from '../translations';
 
 interface UseBulkActionsProps {
@@ -79,6 +81,11 @@ export const useBulkActions = ({
   });
 
   const runWorkflowAction = useRunWorkflowAction({
+    onAction,
+    onActionSuccess,
+  });
+
+  const mergeAction = useMergeAction({
     onAction,
     onActionSuccess,
   });
@@ -152,6 +159,10 @@ export const useBulkActions = ({
       mainPanelItems.push(runWorkflowAction.getAction(selectedCases));
     }
 
+    if (mergeAction.canMerge) {
+      mainPanelItems.push(mergeAction.getAction(selectedCases));
+    }
+
     if (canUpdate) {
       mainPanelItems.push(tagsAction.getAction(selectedCases));
     }
@@ -191,6 +202,7 @@ export const useBulkActions = ({
     canAssign,
     deleteAction,
     isDisabled,
+    mergeAction,
     runWorkflowAction,
     selectedCases,
     severityAction,
@@ -229,6 +241,13 @@ export const useBulkActions = ({
             onClose={assigneesAction.onFlyoutClosed}
             selectedCases={selectedCases}
             onSaveAssignees={assigneesAction.onSaveAssignees}
+          />
+        ) : null}
+        {mergeAction.isFlyoutOpen ? (
+          <MergeCasesFlyout
+            selectedCases={mergeAction.casesToMerge}
+            onClose={mergeAction.onFlyoutClosed}
+            onMerged={mergeAction.onMerged}
           />
         ) : null}
       </>
