@@ -13,7 +13,6 @@ import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../lib/maintenance/maintenance_service';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
-import { registerInlineSourceViewHook } from './hooks/inline_source_view';
 
 /**
  * Registers the significant events agent-builder tools and attachments at setup.
@@ -43,7 +42,6 @@ export const registerStreamsAgentBuilder = async ({
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, server, logger });
-  registerInlineSourceViewHook({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderTools({
     agentBuilder,
     getScopedClients,
