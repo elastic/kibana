@@ -337,9 +337,11 @@ function escapeEsqlString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+// The source clause must match what the derivation reads. A plain comparison on a multi-valued field
+// is NULL, so a document that derives its namespace from `['bob', 'alice']` would be dropped.
 function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpec): string {
   if (spec.type === 'condition') {
-    return `(${conditionToESQL(spec.condition)})`;
+    return `(${conditionToESQL(spec.condition, { reduceMultiValued: true })})`;
   }
 
   const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
@@ -351,8 +353,10 @@ function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpe
 
   const disjuncts = spec.values.map((v) => {
     const escaped = escapeEsqlString(v);
-    const exactConds = exactMatchFields.map((f) => `(${f} == "${escaped}")`);
-    const prefixConds = prefixMatchFields.map((f) => `STARTS_WITH(${f}, "${escaped}")`);
+    const exactConds = exactMatchFields.map((f) => `(${esqlIdentityValue(f)} == "${escaped}")`);
+    const prefixConds = prefixMatchFields.map(
+      (f) => `STARTS_WITH(${esqlIdentityValue(f)}, "${escaped}")`
+    );
     const parts = [...exactConds, ...prefixConds];
     return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
   });

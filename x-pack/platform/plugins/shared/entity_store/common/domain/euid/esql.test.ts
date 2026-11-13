@@ -119,9 +119,15 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        `((${esqlIdentityValue(
-          'user.email'
-        )} == "alice@example.com") AND (((event.module == "okta") OR STARTS_WITH(data_stream.dataset, "okta")) OR ((event.module == "entityanalytics_okta") OR STARTS_WITH(data_stream.dataset, "entityanalytics_okta"))))`
+        `((${esqlIdentityValue('user.email')} == "alice@example.com") AND (((${esqlIdentityValue(
+          'event.module'
+        )} == "okta") OR STARTS_WITH(${esqlIdentityValue(
+          'data_stream.dataset'
+        )}, "okta")) OR ((${esqlIdentityValue(
+          'event.module'
+        )} == "entityanalytics_okta") OR STARTS_WITH(${esqlIdentityValue(
+          'data_stream.dataset'
+        )}, "entityanalytics_okta"))))`
       );
     });
 
@@ -149,7 +155,15 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
           'user.email'
         )} IS NULL) AND (${esqlIdentityValue('user.id')} IS NULL) AND (${esqlIdentityValue(
           'user.domain'
-        )} IS NULL) AND (((event.module == "azure") OR STARTS_WITH(data_stream.dataset, "azure")) OR ((event.module == "entityanalytics_entra_id") OR STARTS_WITH(data_stream.dataset, "entityanalytics_entra_id"))))`
+        )} IS NULL) AND (((${esqlIdentityValue(
+          'event.module'
+        )} == "azure") OR STARTS_WITH(${esqlIdentityValue(
+          'data_stream.dataset'
+        )}, "azure")) OR ((${esqlIdentityValue(
+          'event.module'
+        )} == "entityanalytics_entra_id") OR STARTS_WITH(${esqlIdentityValue(
+          'data_stream.dataset'
+        )}, "entityanalytics_entra_id"))))`
       );
     });
 
@@ -175,9 +189,15 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        `((${esqlIdentityValue(
-          'user.email'
-        )} == "alice@example.com") AND (((event.module == "okta") OR STARTS_WITH(data_stream.dataset, "okta")) OR ((event.module == "entityanalytics_okta") OR STARTS_WITH(data_stream.dataset, "entityanalytics_okta"))))`
+        `((${esqlIdentityValue('user.email')} == "alice@example.com") AND (((${esqlIdentityValue(
+          'event.module'
+        )} == "okta") OR STARTS_WITH(${esqlIdentityValue(
+          'data_stream.dataset'
+        )}, "okta")) OR ((${esqlIdentityValue(
+          'event.module'
+        )} == "entityanalytics_okta") OR STARTS_WITH(${esqlIdentityValue(
+          'data_stream.dataset'
+        )}, "entityanalytics_okta"))))`
       );
     });
 
@@ -192,7 +212,11 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
           'user.domain'
         )} == "corp.com") AND (${esqlIdentityValue('user.email')} IS NULL) AND (${esqlIdentityValue(
           'user.id'
-        )} IS NULL) AND ((event.module == "entityanalytics_ad") OR STARTS_WITH(data_stream.dataset, "entityanalytics_ad")))`
+        )} IS NULL) AND ((${esqlIdentityValue(
+          'event.module'
+        )} == "entityanalytics_ad") OR STARTS_WITH(${esqlIdentityValue(
+          'data_stream.dataset'
+        )}, "entityanalytics_ad")))`
       );
     });
 
@@ -203,9 +227,9 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        `((${esqlIdentityValue(
-          'user.email'
-        )} == "romulo@elastic.co") AND ((event.module == "aws") OR STARTS_WITH(data_stream.dataset, "aws")))`
+        `((${esqlIdentityValue('user.email')} == "romulo@elastic.co") AND ((${esqlIdentityValue(
+          'event.module'
+        )} == "aws") OR STARTS_WITH(${esqlIdentityValue('data_stream.dataset')}, "aws")))`
       );
     });
 
@@ -217,10 +241,40 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        `((${esqlIdentityValue(
-          'user.email'
-        )} == "romulo@elastic.co") AND ((event.module == "aws") OR STARTS_WITH(data_stream.dataset, "aws")))`
+        `((${esqlIdentityValue('user.email')} == "romulo@elastic.co") AND ((${esqlIdentityValue(
+          'event.module'
+        )} == "aws") OR STARTS_WITH(${esqlIdentityValue('data_stream.dataset')}, "aws")))`
       );
+    });
+  });
+
+  describe('user source clause on multi-valued fields', () => {
+    // A plain comparison on a multi-valued field is NULL. The derivation reads these fields reduced,
+    // so the filter has to as well, or it drops events the entity was derived from.
+    const withoutReduced = (query: string, ...fields: string[]) =>
+      fields.reduce((rest, field) => rest.split(esqlIdentityValue(field)).join(''), query);
+
+    it('local user: reduces the fields of the local namespace condition', () => {
+      const result = getEuidEsqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
+        user: { name: 'alice' },
+        host: { id: 'h' },
+      });
+
+      expect(result).toContain(esqlIdentityValue('user.name'));
+      expect(withoutReduced(result!, 'user.name', 'host.id')).not.toMatch(/user\.name|host\.id/);
+    });
+
+    it('idp user: reduces the source fields of the namespace match', () => {
+      const result = getEuidEsqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
+        user: { email: 'alice@example.com' },
+        event: { kind: 'asset', module: 'okta' },
+      });
+
+      expect(result).toContain(esqlIdentityValue('event.module'));
+      expect(result).toContain(`STARTS_WITH(${esqlIdentityValue('data_stream.dataset')}, "okta")`);
+      expect(
+        withoutReduced(result!, 'user.email', 'event.module', 'data_stream.dataset')
+      ).not.toMatch(/user\.email|event\.module|data_stream\.dataset/);
     });
   });
 
