@@ -45,6 +45,7 @@ import { getOpsgenieConnectorType } from './opsgenie';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import { getMcpConnectorType } from './mcp';
+import { getSshHostConnectorType } from './ssh_host';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
@@ -109,4 +110,5 @@ export function registerConnectorTypes({
     );
   }
   actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
+  actions.registerSubActionConnectorType(getSshHostConnectorType());
 }

@@ -194,7 +194,7 @@ describe('Stack Connectors Plugin', () => {
       });
 
       // SubAction Connectors
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(15);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(16);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
