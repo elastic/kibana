@@ -31,7 +31,7 @@ type PatchCall = [url: string, options: { version: string; body: string }];
 
 const patchBody = ([, { body }]: PatchCall) => JSON.parse(body);
 
-const setup = (accountResult: Record<string, unknown>) => {
+const setup = (accountResult: Record<string, unknown>, { enabled = false } = {}) => {
   const patch = jest.fn(async (..._args: PatchCall) => ({ worker: { settingsRevision: 8 } }));
   (useKibana as jest.Mock).mockReturnValue({
     services: {
@@ -53,6 +53,7 @@ const setup = (accountResult: Record<string, unknown>) => {
     workers: [
       {
         id: WORKER_ID,
+        enabled,
         settings: { serviceAccountId: 'kibana/bound' },
         settingsRevision: 3,
       },
@@ -135,6 +136,28 @@ describe('useEnableWorkers', () => {
     await enable();
 
     expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.workers.list() });
+  });
+
+  it('skips a worker the previous press already enabled with its binding kept', async () => {
+    const { patch, enable } = setup(
+      { ok: true, serviceAccountId: 'kibana/bound' },
+      { enabled: true }
+    );
+
+    await enable();
+
+    expect(patch.mock.calls.map(([url]) => url)).not.toContain(buildWorkerUrl(WORKER_ID));
+  });
+
+  it('still sends a worker that is on but whose account was replaced', async () => {
+    const { patch, enable } = setup(
+      { ok: true, serviceAccountId: 'kibana/new' },
+      { enabled: true }
+    );
+
+    await enable();
+
+    expect(patch.mock.calls.map(([url]) => url)).toContain(buildWorkerUrl(WORKER_ID));
   });
 
   it('does not clear the binding when the account is unusable', async () => {
