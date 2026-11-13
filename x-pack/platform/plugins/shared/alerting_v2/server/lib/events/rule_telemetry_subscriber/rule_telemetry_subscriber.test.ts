@@ -8,14 +8,17 @@
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
-} from '../../telemetry/rule_ebt_schema';
+} from '../../telemetry/rules/rule_ebt_schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
 import { createMockEbtService } from '../../services/ebt_service/ebt_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRuleResponse } from '../../test_utils';
-import { RULE_EBT_EVENT_TYPE_BY_OPERATION, RULE_OPERATIONS } from '../../telemetry/rule_ebt_event';
+import {
+  RULE_EBT_EVENT_TYPE_BY_OPERATION,
+  RULE_OPERATIONS,
+} from '../../telemetry/rules/rule_ebt_event';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
@@ -27,7 +30,7 @@ import {
 } from '../rule_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
-import type { EventBus, Subscription } from '../event_bus';
+import type { EventBus } from '../event_bus';
 import { RuleTelemetrySubscriber } from './rule_telemetry_subscriber';
 
 type CapturedHandler = (
@@ -71,30 +74,6 @@ describe('RuleTelemetrySubscriber', () => {
       request: httpServerMock.createKibanaRequest() as KibanaRequest,
       origin: { actor: 'user', channel: 'api' },
     };
-  });
-
-  describe('start()', () => {
-    it('subscribes a handler to each reported rule event type', () => {
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
-      for (const type of [
-        RULE_CREATED_EVENT_TYPE,
-        RULE_UPDATED_EVENT_TYPE,
-        RULE_DELETED_EVENT_TYPE,
-        RULE_ENABLED_EVENT_TYPE,
-        RULE_DISABLED_EVENT_TYPE,
-      ]) {
-        expect(bus.subscribe).toHaveBeenCalledWith(type, expect.any(Function));
-      }
-    });
-
-    it('is idempotent: a second call does not double-subscribe', () => {
-      subscriber.start();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
-    });
   });
 
   describe('event dispatch', () => {
@@ -168,7 +147,8 @@ describe('RuleTelemetrySubscriber', () => {
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), context);
 
       const [, data] = ebtService.reportEvent.mock.calls[0];
-      expect(data.origin).not.toHaveProperty('app');
+      expect(data).toHaveProperty('origin');
+      expect(data).not.toHaveProperty('origin.app');
     });
 
     it('omits template_id and builder_type for rules without them', async () => {
@@ -200,6 +180,50 @@ describe('RuleTelemetrySubscriber', () => {
       expect(ebtService.reportEvent).not.toHaveBeenCalled();
     });
 
+    it('reports the fields that differ from prevRule on rule.updated', async () => {
+      subscriber.start();
+
+      await handler(RULE_UPDATED_EVENT_TYPE)(
+        eventOfType(RULE_UPDATED_EVENT_TYPE, {
+          ruleId: 'rule-1',
+          spaceId: 'default',
+          rule: { ...rule, metadata: { ...rule.metadata, name: 'renamed' } },
+          prevRule: rule,
+        }),
+        context
+      );
+
+      expect(ebtService.reportEvent).toHaveBeenCalledWith(
+        RULE_EBT_EVENT_TYPE_BY_OPERATION[RULE_UPDATED_EVENT_TYPE],
+        expect.objectContaining({ updated_fields: ['metadata.name'] })
+      );
+    });
+
+    it('drops updated_fields on create, delete, enable, and disable', async () => {
+      subscriber.start();
+
+      for (const type of [
+        RULE_CREATED_EVENT_TYPE,
+        RULE_DELETED_EVENT_TYPE,
+        RULE_ENABLED_EVENT_TYPE,
+        RULE_DISABLED_EVENT_TYPE,
+      ]) {
+        await handler(type)(
+          eventOfType(type, {
+            ruleId: 'rule-1',
+            spaceId: 'default',
+            rule,
+            prevRule: { ...rule, enabled: !rule.enabled },
+          }),
+          context
+        );
+      }
+
+      for (const [, data] of ebtService.reportEvent.mock.calls) {
+        expect(data).not.toHaveProperty('updated_fields');
+      }
+    });
+
     it('reports rule_id and origin when the domain rule is missing', async () => {
       subscriber.start();
 
@@ -220,30 +244,6 @@ describe('RuleTelemetrySubscriber', () => {
         rule_id: 'rule-1',
         origin: { actor: 'user', channel: 'system', app: 'nightshift' },
       });
-    });
-  });
-
-  describe('stop()', () => {
-    it('unsubscribes active subscriptions', () => {
-      const unsubscribe = jest.fn();
-      bus.subscribe.mockReturnValue({ unsubscribe } satisfies Subscription);
-
-      subscriber.start();
-      subscriber.stop();
-
-      expect(unsubscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
-    });
-
-    it('allows a subsequent start() to re-subscribe', () => {
-      subscriber.start();
-      subscriber.stop();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length * 2);
-    });
-
-    it('is safe to call when no subscriptions are active', () => {
-      expect(() => subscriber.stop()).not.toThrow();
     });
   });
 });

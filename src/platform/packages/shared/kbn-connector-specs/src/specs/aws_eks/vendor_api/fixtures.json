@@ -1,0 +1,19 @@
+{
+  "updateClusterAccessConfig": {
+    "input": {
+      "authenticationMode": "API"
+    }
+  },
+  "updateClusterConfig": {
+    "input": {
+      "supportType": "STANDARD"
+    }
+  },
+  "updateNodegroupConfig": {
+    "input": {
+      "labelsToAdd": {
+        "workload": "batch"
+      }
+    }
+  }
+}

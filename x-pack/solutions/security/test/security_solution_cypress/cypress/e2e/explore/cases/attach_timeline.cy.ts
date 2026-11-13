@@ -8,8 +8,7 @@
 import { login } from '../../../tasks/login';
 import { visitTimeline } from '../../../tasks/navigation';
 import {
-  attachTimelineToNewCase,
-  attachTimelineToExistingCase,
+  attachTimelineToCase,
   addNewCase,
   selectCase,
   getCasesAttachmentsEnabled,
@@ -53,26 +52,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
     it('attach timeline to a new case', function () {
       visitTimeline(this.myTimeline.savedObjectId);
       getCasesAttachmentsEnabled().then((attachmentsEnabled) => {
-        attachTimelineToNewCase();
-
-        if (attachmentsEnabled) {
-          createCaseFromTimelineFlyout();
-          navigateToCaseFromSuccessToaster();
-          cy.get(TIMELINE_CASE_ATTACHMENT_LINK(this.myTimeline.savedObjectId)).should('exist');
-        } else {
-          expectLegacyTimelineLink(
-            DESCRIPTION_INPUT,
-            this.myTimeline.savedObjectId,
-            this.myTimeline.title
-          );
-        }
-      });
-    });
-
-    it('attach timeline to an existing case with no case', function () {
-      visitTimeline(this.myTimeline.savedObjectId);
-      getCasesAttachmentsEnabled().then((attachmentsEnabled) => {
-        attachTimelineToExistingCase();
+        attachTimelineToCase();
         addNewCase();
 
         if (attachmentsEnabled) {
@@ -102,7 +82,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
     it('attach timeline to an existing case', function () {
       visitTimeline(this.timelineId);
       getCasesAttachmentsEnabled().then((attachmentsEnabled) => {
-        attachTimelineToExistingCase();
+        attachTimelineToCase();
         selectCase(this.caseId);
 
         if (attachmentsEnabled) {
@@ -116,11 +96,11 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
 
     it('modal can be re-opened once closed', function () {
       visitTimeline(this.timelineId);
-      attachTimelineToExistingCase();
+      attachTimelineToCase();
       cy.get('[data-test-subj="all-cases-modal-cancel-button"]').click();
 
       cy.get('[data-test-subj="all-cases-modal"]').should('not.exist');
-      attachTimelineToExistingCase();
+      attachTimelineToCase();
       cy.get('[data-test-subj="all-cases-modal"]').should('be.visible');
     });
   });

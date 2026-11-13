@@ -15,6 +15,18 @@ export {
 
 export type { NormalizeLogSamplesResult } from './upload_samples_limits';
 
+export {
+  LOG_SAMPLE_SIGNATURE_BYTES,
+  validateLogSampleContent,
+  validateLogSampleFileName,
+  validateLogSampleFileSignature,
+} from './log_sample_validation';
+
+export type {
+  LogSampleContentValidationResult,
+  LogSampleValidationResult,
+} from './log_sample_validation';
+
 export type {
   ApproveIntegrationRequest,
   CreateAutoImportIntegrationResponse,
@@ -85,7 +97,7 @@ export {
   type AutomaticImportTelemetryEventPayload,
 } from './telemetry/types';
 
-export { MAX_STRING_LENGTH } from './constants';
+export { MAX_STRING_LENGTH, MAX_USER_CONTEXT_DESCRIPTION_LENGTH } from './constants';
 
 export {
   DATA_STREAM_PHASES,

@@ -11,7 +11,6 @@ import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getSession } from '../../sessions/get_session';
 import { listSessions } from '../../sessions/list_sessions';
 import { enableSessions, getSessionsStatus } from '../../sessions/sessions_setup';
-import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
 import {
@@ -32,17 +31,7 @@ jest.mock('../../sessions/sessions_setup', () => ({
 
 type Endpoint = keyof typeof sessionsRouteRepository;
 
-const settings = { frequency: '1m', partitions: 1 };
-
-const status = {
-  installed: true,
-  health: 'healthy',
-  state: 'started',
-  installedVersion: 1,
-  currentVersion: 1,
-  needsUpdate: false,
-  reason: null,
-};
+const status = { installed: true };
 
 const START = '2026-10-27T10:00:00.000Z';
 const END = '2026-10-28T10:00:00.000Z';
@@ -58,24 +47,23 @@ const esError = (statusCode: number) =>
 
 const runHandler = (
   endpoint: Endpoint,
-  {
-    params = {},
-    authzResult,
-  }: { params?: Record<string, unknown>; authzResult?: Record<string, boolean> } = {}
+  { params = {} }: { params?: Record<string, unknown> } = {}
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
+  coreContext.featureFlags.getBooleanValue.mockResolvedValue(true);
   const logger = loggingSystemMock.createLogger();
   const handler = sessionsRouteRepository[endpoint].handler as unknown as (
     resources: unknown
   ) => Promise<unknown>;
+  const request = {};
   const result = handler({
     params,
     context: { core: Promise.resolve(coreContext) },
-    request: { authzResult },
+    request,
     logger,
-    sessionsSettings: settings,
+    isServerless: true,
   });
-  return { result, coreContext, logger };
+  return { result, coreContext, logger, request };
 };
 
 /** The client error a handler threw: status code, message and attributes. */
@@ -104,7 +92,8 @@ const querySchemaOf = () =>
 
 describe('sessions routes', () => {
   beforeEach(() => {
-    jest.mocked(getSessionsStatus).mockResolvedValue(status as never);
+    jest.mocked(getSessionsStatus).mockResolvedValue(status);
+    jest.mocked(enableSessions).mockResolvedValue();
   });
 
   afterEach(() => {
@@ -113,6 +102,7 @@ describe('sessions routes', () => {
 
   it.each<[Endpoint, string]>([
     [SESSIONS_ENABLE_ENDPOINT, 'manage_digital_experience_sessions'],
+    [SESSIONS_STATUS_ENDPOINT, 'read_digital_experience'],
     [SESSIONS_LIST_ENDPOINT, 'read_digital_experience'],
     [SESSION_DETAIL_ENDPOINT, 'read_digital_experience'],
   ])('%s requires %s', (endpoint, privilege) => {
@@ -121,62 +111,15 @@ describe('sessions routes', () => {
     });
   });
 
-  it('requires read for status, and checks the manage sessions privilege to show the enabler', () => {
-    expect(sessionsRouteRepository[SESSIONS_STATUS_ENDPOINT].security).toEqual({
-      authz: {
-        requiredPrivileges: ['read_digital_experience'],
-        extendedPrivileges: ['manage_digital_experience_sessions'],
-      },
-    });
-  });
-
   describe('status', () => {
-    const enabled = {
-      ...status,
-      enabledBy: 'ana',
-      enabledAt: '2026-10-27T11:00:00.000Z',
-      authorization: { roles: ['superuser'], apiKeyName: null, serviceAccount: null },
-      transforms: [
-        {
-          id: 'digital-experience-sessions-1',
-          enabledBy: 'ana',
-          enabledAt: '2026-10-27T11:00:00.000Z',
-          authorization: { roles: ['superuser'], apiKeyName: null, serviceAccount: null },
-        },
-      ],
-    };
+    it('reports whether sessions are set up, read as the internal user', async () => {
+      const { result, coreContext } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
-    it.each([
-      [true, enabled],
-      [
-        false,
-        {
-          ...enabled,
-          enabledBy: null,
-          enabledAt: null,
-          authorization: null,
-          transforms: [
-            {
-              id: 'digital-experience-sessions-1',
-              enabledBy: null,
-              enabledAt: null,
-              authorization: null,
-            },
-          ],
-        },
-      ],
-    ])(
-      'shows who enabled sessions only to managers (manage sessions: %s)',
-      async (canManage, body) => {
-        jest.mocked(getSessionsStatus).mockResolvedValue(enabled as never);
-        // The router fills `authzResult` from the route's extended privileges.
-        const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
-          authzResult: { manage_digital_experience_sessions: canManage },
-        });
-
-        expect(await result).toEqual(body);
-      }
-    );
+      expect(await result).toEqual(status);
+      expect(getSessionsStatus).toHaveBeenCalledWith(
+        coreContext.elasticsearch.client.asInternalUser
+      );
+    });
 
     it('answers 500 without the Elasticsearch details when the status read fails', async () => {
       jest.mocked(getSessionsStatus).mockRejectedValue(esError(500));
@@ -193,19 +136,16 @@ describe('sessions routes', () => {
   });
 
   describe('enable', () => {
-    it('enables sessions as the current user, records them, audits it and returns the status', async () => {
+    it('enables sessions for the current user, audits it and returns the status', async () => {
       const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
       // The handler reads the user after awaiting the request context.
       coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
 
       expect(await result).toEqual(status);
-      expect(enableSessions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esClient: coreContext.elasticsearch.client,
-          settings,
-          enabledBy: 'ana',
-        })
-      );
+      expect(enableSessions).toHaveBeenCalledWith({
+        esClient: coreContext.elasticsearch.client,
+        isServerless: true,
+      });
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'User [ana] enabled Digital Experience sessions',
@@ -220,21 +160,15 @@ describe('sessions routes', () => {
     it.each([
       [
         'missing privileges',
-        new SessionsPrivilegesError(['cluster:manage_transform']),
+        new SessionsPrivilegesError(['cluster:manage_index_templates']),
         403,
-        { missingPrivileges: ['cluster:manage_transform'] },
+        { missingPrivileges: ['cluster:manage_index_templates'] },
       ],
       [
         'a filtered source read',
         new SessionsRestrictedReadError(['logs-*.otel-*'], 'filtered'),
         403,
         { restrictedIndices: ['logs-*.otel-*'], reason: 'filtered' },
-      ],
-      [
-        'transforms from a newer version',
-        new SessionsNewerVersionError(2, 1),
-        409,
-        { installedVersion: 2, currentVersion: 1 },
       ],
     ])('answers %s with its reason, and audits the failure', async (_name, error, code, data) => {
       jest.mocked(enableSessions).mockRejectedValue(error);
@@ -275,6 +209,8 @@ describe('sessions routes', () => {
           start: START,
           end: END,
           browser: 'Chrome',
+          hasErrors: true,
+          minDurationMs: 10_000,
           sortField: 'start_time',
           sortDirection: 'desc',
           page: 0,
@@ -293,6 +229,7 @@ describe('sessions routes', () => {
       page: 0,
       perPage: 25,
       facets: { browsers: 'Chrome', os: undefined, countries: undefined, entryPages: undefined },
+      filters: { hasErrors: true, minDurationMs: 10_000, maxDurationMs: undefined },
     });
   });
 
@@ -333,6 +270,24 @@ describe('sessions routes', () => {
 
     it('rejects a start that is not before the end', () => {
       expect(querySchemaOf().safeParse({ start: range.end, end: range.start }).success).toBe(false);
+    });
+
+    it('parses the errors and duration filters', () => {
+      expect(
+        querySchemaOf().parse({
+          ...range,
+          hasErrors: 'true',
+          minDurationMs: '10000',
+          maxDurationMs: '60000',
+        })
+      ).toMatchObject({ hasErrors: true, minDurationMs: 10_000, maxDurationMs: 60_000 });
+      expect(querySchemaOf().parse({ ...range, hasErrors: 'false' }).hasErrors).toBe(false);
+      expect(querySchemaOf().safeParse({ ...range, hasErrors: 'yes please' }).success).toBe(false);
+      expect(querySchemaOf().safeParse({ ...range, minDurationMs: '-1' }).success).toBe(false);
+      expect(
+        querySchemaOf().safeParse({ ...range, minDurationMs: '60000', maxDurationMs: '60000' })
+          .success
+      ).toBe(false);
     });
 
     it('only accepts the shared sort fields, and bounded paging', () => {

@@ -34,7 +34,6 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataSourceService } from '@kbn/data-source';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -66,6 +65,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -157,7 +157,6 @@ export interface DiscoverServices {
   locator: DiscoverAppLocator;
   contextLocator: DiscoverContextAppLocator;
   singleDocLocator: DiscoverSingleDocLocator;
-  expressions: ExpressionsStart;
   charts: ChartsPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
@@ -175,6 +174,7 @@ export interface DiscoverServices {
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
+  licensing?: LicensingPluginStart;
   embeddableEditor: EmbeddableEditorService;
   logger: Logger;
   feedback?: DiscoverStartPlugins['feedback'];
@@ -288,7 +288,6 @@ export const buildServices = ({
     locator,
     contextLocator,
     singleDocLocator,
-    expressions: plugins.expressions,
     charts: plugins.charts,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,
@@ -306,6 +305,7 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     cps: plugins.cps,
+    licensing: plugins.licensing,
     embeddableEditor: new EmbeddableEditorService(
       plugins.embeddable.getStateTransfer(),
       core.application

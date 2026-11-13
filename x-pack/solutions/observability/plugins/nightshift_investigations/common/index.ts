@@ -8,11 +8,20 @@
 import type { Severity } from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
 
-export { telemetryTargetNameSchema } from './telemetry_targets';
-
 export type { Severity } from '@kbn/significant-events-schema';
 
-export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
+export type { AlertSourceMode } from './automation_limits';
+
+export {
+  MAX_RULE_NAMES,
+  MAX_ALERT_SOURCES,
+  MAX_ALERT_SOURCE_LENGTH,
+  CLASSIC_ALERT_SOURCE,
+  UNIVERSAL_ALERT_SOURCE,
+  EXTERNAL_ALERT_SOURCE,
+  MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
+} from './automation_limits';
+export { isScheduleOnlyAutomation } from './automation_run';
 export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
 export type { PresetSchedule } from './automation_schedule';
 
@@ -46,6 +55,7 @@ export {
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
   MAX_INVESTIGATION_NOTIFICATIONS,
+  MAX_V2_ALERT_DATA_LENGTH,
   v2AlertSnapshotSchema,
 } from './schemas';
 
@@ -68,6 +78,8 @@ export interface StartInvestigationRequest {
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
+  /** Optional operator guidance for this round, limited to 5,000 characters. */
+  instructions?: string;
   /** Optional upper bound for this investigation workflow run, in seconds. */
   timeout_seconds?: number;
   /**
@@ -77,7 +89,6 @@ export interface StartInvestigationRequest {
   source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
-  telemetry_target?: string;
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
@@ -129,6 +140,8 @@ export interface StartInvestigationResponse {
    * after a first start the id may not resolve yet.
    */
   investigation_id: string;
+  /** The execution started for an automation, used to follow its investigation after dispatch. */
+  execution_id?: string;
 }
 
 export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
@@ -145,19 +158,19 @@ export const DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID = 'manual';
 export type SeverityCounts = Record<Severity, number>;
 
 export {
-  CORTEX_AI_INDEX_ID,
-  CORTEX_AI_INDEX_DEST,
-  CORTEX_ENTITY_TYPES,
-  CORTEX_PAGE_STATUSES,
-  CORTEX_ENTITY_TYPE_BUCKETS,
-  type CortexEntityType,
-  type CortexPageStatus,
-  type CortexPageSummary,
-  type CortexPage,
-  type CortexStats,
-  type ListCortexPagesResponse,
-  type GetCortexPageResponse,
-} from './cortex';
+  WIKI_AI_INDEX_ID,
+  WIKI_AI_INDEX_DEST,
+  WIKI_ENTITY_TYPES,
+  WIKI_PAGE_STATUSES,
+  WIKI_ENTITY_TYPE_BUCKETS,
+  type WikiEntityType,
+  type WikiPageStatus,
+  type WikiPageSummary,
+  type WikiPage,
+  type WikiStats,
+  type ListWikiPagesResponse,
+  type GetWikiPageResponse,
+} from './wiki';
 
 export {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
@@ -177,6 +190,21 @@ export {
   type SandboxConnectorType,
   type GetSandboxConnectorTypesResponse,
 } from './sandbox_connectors';
+
+export {
+  SANDBOX_ALLOWLIST_API_PATH,
+  MAX_SANDBOX_ALLOWLIST_HOSTS,
+  MAX_SANDBOX_ALLOWLIST_HOST_LENGTH,
+  MAX_SANDBOX_ALLOWLIST_RULE_LENGTH,
+  MAX_SANDBOX_ALLOWLIST_RAW_HOST_LENGTH,
+  normalizeSandboxAllowlistHost,
+  validateSandboxAllowlist,
+  type SandboxAllowlistHostResult,
+  type SandboxAllowlistValidation,
+  type GetSandboxAllowlistResponse,
+  type PutSandboxAllowlistRequest,
+  type PutSandboxAllowlistResponse,
+} from './sandbox_allowlist';
 export {
   CUSTOM_CONTEXT_API_PATH,
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
@@ -211,6 +239,7 @@ export {
 export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_TAG,
   DECISION_TREE_DOC_TYPES,
   type DecisionTreeDocType,
   type DecisionTreeStatus,
@@ -258,33 +287,13 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
-export {
-  getNightshiftRoleName,
-  getNightshiftServiceAccountName,
-  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
-  type EnableInvestigatorServiceAccountBody,
-  type InvestigatorServiceAccountStatus,
-  type NightshiftBoundWorkflowStatus,
-  type NightshiftServiceAccountIds,
-  type NightshiftServiceAccountInfo,
-  type NightshiftServiceAccountKind,
+export type {
+  EnableInvestigatorServiceAccountBody,
+  InvestigatorServiceAccountStatus,
+  NightshiftBoundWorkflowStatus,
+  NightshiftServiceAccountInfo,
+  NightshiftUnboundAutomation,
 } from './service_account';
-export {
-  createHttpServiceAccountsApi,
-  ensureNightshiftServiceAccounts,
-  getSecurityRoleUrl,
-  NightshiftServiceAccountSetupError,
-  SECURITY_ROLE_API_VERSION,
-  SECURITY_SERVICE_ACCOUNT_URL,
-  type ListedServiceAccount,
-  type ListedServiceAccountsPage,
-  type NightshiftServiceAccountsApi,
-  type NightshiftServiceAccountSetupErrorCode,
-} from './ensure_service_accounts';
-export {
-  ensureNightshiftServiceAccountRoles,
-  NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
-} from './service_account_roles';
 
 export {
   KNOWLEDGE_PURGE_CONFIRMATION,

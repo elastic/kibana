@@ -14,7 +14,6 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
     kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_saved_search_only_dashboard'],
   }),
-  dashboardName: 'Ecommerce Dashboard with Saved Search only',
-  dashboardLinkSubj: 'dashboardListingTitleLink-[eCommerce]-Saved-Search-Dashboard',
+  dashboardTitle: '[eCommerce] Saved Search Dashboard',
   visualizationCount: 1,
 });

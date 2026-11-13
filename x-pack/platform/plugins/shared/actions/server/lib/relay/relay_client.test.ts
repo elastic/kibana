@@ -378,6 +378,37 @@ describe('RelayClient', () => {
     );
   });
 
+  describe('listAvailableChannels', () => {
+    it('GETs the available filter and maps channels, keeping truncated', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: {
+          channels: [{ scope_id: 'C1', display_name: 'alerts', extra: 'dropped' }],
+          truncated: true,
+        },
+      } as never);
+
+      await expect(createClient().listAvailableChannels('team/A')).resolves.toEqual({
+        channels: [{ scope_id: 'C1', display_name: 'alerts' }],
+        truncated: true,
+      });
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team%2FA/channels?status=available',
+          method: 'get',
+        })
+      );
+    });
+
+    it('rejects a response without a channels array', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+
+      await expect(createClient().listAvailableChannels('team-A')).rejects.toBeInstanceOf(
+        RelayRequestError
+      );
+    });
+  });
+
   describe('listBindings', () => {
     it('GETs a single page and maps SUB entries with their display snapshot, exposing next_cursor', async () => {
       requestMock.mockResolvedValue({
@@ -453,6 +484,111 @@ describe('RelayClient', () => {
         bindings: [],
         nextCursor: undefined,
       });
+    });
+  });
+
+  describe('readMessages', () => {
+    const body = {
+      channel: { id: 'C123', name: 'alerts' },
+      order: 'newest_first',
+      messages: [
+        {
+          ts: '1700000000.000200',
+          thread_ts: '1700000000.000200',
+          reply_count: 2,
+          author: { id: 'U1', is_bot: false },
+          text: 'checkout is down',
+        },
+        { ts: '1700000000.000100', author: { name: 'Elastic', is_bot: true }, text: 'alert' },
+      ],
+      truncated: true,
+    };
+
+    it('GETs the channel window and maps the snake_case body', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: body } as never);
+
+      await expect(
+        createClient().readMessages({
+          tenantKey: 'team-A',
+          channelId: 'C123',
+          oldest: '1699990000',
+          latest: '1700000000',
+          limit: 50,
+        })
+      ).resolves.toEqual({
+        channel: { id: 'C123', name: 'alerts' },
+        messages: [
+          {
+            ts: '1700000000.000200',
+            threadTs: '1700000000.000200',
+            replyCount: 2,
+            author: { id: 'U1', name: undefined, isBot: false },
+            text: 'checkout is down',
+          },
+          {
+            ts: '1700000000.000100',
+            author: { id: undefined, name: 'Elastic', isBot: true },
+            text: 'alert',
+          },
+        ],
+        truncated: true,
+      });
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/channels/C123/messages?oldest=1699990000&latest=1700000000&limit=50',
+          method: 'get',
+        })
+      );
+    });
+
+    it('rejects a body without messages', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: { channel: { id: 'C123' } } } as never);
+
+      await expect(
+        createClient().readMessages({ tenantKey: 'team-A', channelId: 'C123' })
+      ).rejects.toThrow(/missing expected `channel` or `messages`/);
+    });
+
+    it('carries the reason and Retry-After of a refusal', async () => {
+      requestMock.mockResolvedValue({
+        status: 429,
+        data: { reason: 'throttled', message: 'rate limited by slack' },
+        headers: { 'retry-after': '17' },
+      } as never);
+
+      const error = await createClient()
+        .readMessages({ tenantKey: 'team-A', channelId: 'C123' })
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(RelayRequestError);
+      expect(error).toMatchObject({ statusCode: 429, reason: 'throttled', retryAfterSeconds: 17 });
+    });
+  });
+
+  describe('readThread', () => {
+    it('GETs the thread path with the encoded ts', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: { channel: { id: 'C123', name: 'alerts' }, messages: [] },
+      } as never);
+
+      await expect(
+        createClient().readThread({
+          tenantKey: 'team-A',
+          channelId: 'C123',
+          threadTs: '1700000000.000100',
+          oldest: '1700000001',
+        })
+      ).resolves.toEqual({
+        channel: { id: 'C123', name: 'alerts' },
+        messages: [],
+        truncated: false,
+      });
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/channels/C123/threads/1700000000.000100?oldest=1700000001',
+        })
+      );
     });
   });
 

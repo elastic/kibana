@@ -282,37 +282,39 @@ export const DiscoverSessionInline = ({
   }, [application, data, effectiveTimeRange, embeddableApi, locator, registerActionButtons]);
 
   return (
-    <SearchEmbeddableToolbarProvider value={toolbarSlot}>
-      {blockingError && (
-        <>
-          {toolbarLeftSide}
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <div
-        css={css`
-          height: ${INLINE_TABLE_HEIGHT}px;
-          overflow: hidden;
-        `}
-      >
-        <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
-          key={embeddableKey}
-          maybeId={undefined}
-          type={SEARCH_EMBEDDABLE_TYPE}
-          getParentApi={() => parentApi}
-          onApiAvailable={setEmbeddableApi}
-          hidePanelChrome
-        />
-      </div>
-      {isSaveModalOpen && (
-        <SavedObjectSaveModalDashboard
-          objectType={saveModalObjectType}
-          documentInfo={{ title: data.title ?? '', description: data.description }}
-          canSaveByReference={false}
-          onClose={closeSaveModal}
-          onSave={onSaveToDashboard}
-        />
-      )}
-    </SearchEmbeddableToolbarProvider>
+    <div data-test-subj="discoverAgentBuilderSessionCard">
+      <SearchEmbeddableToolbarProvider value={toolbarSlot}>
+        {blockingError && (
+          <>
+            {toolbarLeftSide}
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <div
+          css={css`
+            height: ${INLINE_TABLE_HEIGHT}px;
+            overflow: hidden;
+          `}
+        >
+          <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
+            key={embeddableKey}
+            maybeId={undefined}
+            type={SEARCH_EMBEDDABLE_TYPE}
+            getParentApi={() => parentApi}
+            onApiAvailable={setEmbeddableApi}
+            hidePanelChrome
+          />
+        </div>
+        {isSaveModalOpen && (
+          <SavedObjectSaveModalDashboard
+            objectType={saveModalObjectType}
+            documentInfo={{ title: data.title ?? '', description: data.description }}
+            canSaveByReference={false}
+            onClose={closeSaveModal}
+            onSave={onSaveToDashboard}
+          />
+        )}
+      </SearchEmbeddableToolbarProvider>
+    </div>
   );
 };

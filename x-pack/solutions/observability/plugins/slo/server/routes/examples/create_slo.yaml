@@ -1,0 +1,401 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createSloKqlExample:
+          summary: Create an SLO with a KQL indicator
+          value:
+            name: My Service Availability
+            description: Availability of my web service measured by successful HTTP responses
+            indicator:
+              type: sli.kql.custom
+              params:
+                index: logs-*
+                good: 'request.status_code : "2xx"'
+                total: 'request.status_code : *'
+                filter: 'field.environment : "production" and service.name : "my-service"'
+                timestampField: '@timestamp'
+            timeWindow:
+              duration: 30d
+              type: rolling
+            budgetingMethod: occurrences
+            objective:
+              target: 0.99
+            tags:
+              - production
+              - web-service
+            settings:
+              syncDelay: 5m
+              frequency: 5m
+        createSloKqlWithFiltersExample:
+          summary: Create an SLO with a KQL indicator that combines KQL queries and filters
+          value:
+            name: Checkout Availability
+            description: Successful checkout requests, excluding health checks
+            indicator:
+              type: sli.kql.custom
+              params:
+                index: logs-*
+                good:
+                  kqlQuery: 'http.response.status_code < 500'
+                  filters:
+                    - meta:
+                        alias: null
+                        disabled: false
+                        negate: true
+                        key: url.path
+                        field: url.path
+                        type: phrase
+                        params:
+                          query: /healthz
+                      query:
+                        match_phrase:
+                          url.path: /healthz
+                total:
+                  kqlQuery: 'url.path : "/checkout*"'
+                  filters: []
+                timestampField: '@timestamp'
+            timeWindow:
+              duration: 7d
+              type: rolling
+            budgetingMethod: occurrences
+            objective:
+              target: 0.995
+        createSloMetricCustomExample:
+          summary: Create an SLO with a custom metric indicator
+          value:
+            name: Request Payload Efficiency
+            description: Share of the bytes received that were served successfully
+            indicator:
+              type: sli.metric.custom
+              params:
+                index: metrics-*
+                good:
+                  metrics:
+                    - name: A
+                      aggregation: sum
+                      field: network.bytes_ok
+                  equation: A
+                total:
+                  metrics:
+                    - name: A
+                      aggregation: sum
+                      field: network.bytes_total
+                  equation: A
+                filter: 'service.name : "my-service"'
+                timestampField: '@timestamp'
+            timeWindow:
+              duration: 30d
+              type: rolling
+            budgetingMethod: occurrences
+            objective:
+              target: 0.99
+        createSloHistogramExample:
+          summary: Create an SLO with a histogram indicator
+          value:
+            name: Request Latency
+            description: Requests served in less than 300 ms
+            indicator:
+              type: sli.histogram.custom
+              params:
+                index: metrics-*
+                good:
+                  field: latency.histogram
+                  aggregation: range
+                  from: 0
+                  to: 300
+                total:
+                  field: latency.histogram
+                  aggregation: value_count
+                filter: 'service.name : "my-service"'
+                timestampField: '@timestamp'
+            timeWindow:
+              duration: 30d
+              type: rolling
+            budgetingMethod: occurrences
+            objective:
+              target: 0.95
+        createSloTimesliceMetricExample:
+          summary: Create an SLO with a timeslice metric indicator and the timeslices budgeting method
+          value:
+            name: CPU Usage Under 80 Percent
+            description: Minutes in which the average CPU usage stays below 80 percent
+            indicator:
+              type: sli.metric.timeslice
+              params:
+                index: metrics-system.cpu-*
+                metric:
+                  metrics:
+                    - name: A
+                      aggregation: avg
+                      field: system.cpu.total.norm.pct
+                  equation: A
+                  comparator: LT
+                  threshold: 0.8
+                filter: 'host.name : "web-01"'
+                timestampField: '@timestamp'
+            timeWindow:
+              duration: 30d
+              type: rolling
+            budgetingMethod: timeslices
+            objective:
+              target: 0.99
+              timesliceTarget: 0.95
+              timesliceWindow: 5m
+        createSloTimeslicesBudgetingExample:
+          summary: Create an SLO that uses the timeslices budgeting method with a KQL indicator
+          value:
+            name: Search Availability By Timeslice
+            description: Five minute slices in which at least 95 percent of the searches succeed
+            indicator:
+              type: sli.kql.custom
+              params:
+                index: logs-*
+                good: 'event.outcome : "success"'
+                total: 'event.action : "search"'
+                timestampField: '@timestamp'
+            timeWindow:
+              duration: 7d
+              type: rolling
+            budgetingMethod: timeslices
+            objective:
+              target: 0.99
+              timesliceTarget: 0.95
+              timesliceWindow: 5m
+        createSloApmLatencyExample:
+          summary: Create an SLO with an APM latency indicator
+          value:
+            name: Checkout Service Latency
+            description: Transactions of the checkout service served in less than 500 ms
+            indicator:
+              type: sli.apm.transactionDuration
+              params:
+                service: checkout
+                environment: production
+                transactionType: request
+                transactionName: '*'
+                threshold: 500
+                index: metrics-apm*,apm*
+            timeWindow:
+              duration: 30d
+              type: rolling
+            budgetingMethod: occurrences
+            objective:
+              target: 0.99
+        createSloApmAvailabilityExample:
+          summary: Create an SLO with an APM availability indicator
+          value:
+            name: Checkout Service Availability
+            description: Transactions of the checkout service that do not fail
+            indicator:
+              type: sli.apm.transactionErrorRate
+              params:
+                service: checkout
+                environment: production
+                transactionType: request
+                transactionName: '*'
+                index: metrics-apm*,apm*
+            timeWindow:
+              duration: 30d
+              type: rolling
+            budgetingMethod: occurrences
+            objective:
+              target: 0.995
+        createSloSyntheticsAvailabilityExample:
+          summary: Create an SLO with a Synthetics availability indicator
+          value:
+            name: Login Page Uptime
+            description: Availability of the login page monitor
+            indicator:
+              type: sli.synthetics.availability
+              params:
+                monitorIds:
+                  - value: 5c1a5e6e-6a9c-4c8d-93f6-5d1a8b1d6a11
+                    label: Login page
+                tags:
+                  - value: production
+                    label: production
+                projects: []
+                index: synthetics-*
+            timeWindow:
+              duration: 30d
+              type: rolling
+            budgetingMethod: occurrences
+            objective:
+              target: 0.99
+        createSloGroupByExample:
+          summary: Create an SLO that generates one instance per host
+          value:
+            name: Host Availability
+            description: Availability of each host, reported as one SLO instance per host.name
+            indicator:
+              type: sli.kql.custom
+              params:
+                index: logs-*
+                good: 'event.outcome : "success"'
+                total: 'event.outcome : *'
+                timestampField: '@timestamp'
+            timeWindow:
+              duration: 30d
+              type: rolling
+            budgetingMethod: occurrences
+            objective:
+              target: 0.99
+            groupBy:
+              - host.name
+        createSloCalendarAlignedExample:
+          summary: Create an SLO with a monthly calendar aligned time window
+          value:
+            name: Monthly Service Availability
+            description: Availability measured on calendar months
+            indicator:
+              type: sli.kql.custom
+              params:
+                index: logs-*
+                good: 'request.status_code : "2xx"'
+                total: 'request.status_code : *'
+                timestampField: '@timestamp'
+            timeWindow:
+              duration: 1M
+              type: calendarAligned
+            budgetingMethod: occurrences
+            objective:
+              target: 0.99
+            settings:
+              syncDelay: 5m
+              frequency: 1m
+              preventInitialBackfill: true
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          createSloResponse:
+            summary: Create SLO response
+            value:
+              id: 8853df00-ae2e-11ed-90af-09bb6422b258
+  '400':
+    description: Bad request
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/400_response
+        examples:
+          badRequestIndicatorTypeExample:
+            summary: Unknown indicator type
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: |-
+                [
+                  {
+                    "code": "invalid_union",
+                    "errors": [],
+                    "note": "No matching discriminator",
+                    "discriminator": "type",
+                    "options": [
+                      "sli.apm.transactionDuration",
+                      "sli.apm.transactionErrorRate",
+                      "sli.synthetics.availability",
+                      "sli.kql.custom",
+                      "sli.metric.custom",
+                      "sli.metric.timeslice",
+                      "sli.histogram.custom"
+                    ],
+                    "path": [
+                      "indicator",
+                      "type"
+                    ],
+                    "message": "Invalid discriminator value. Expected 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate' | 'sli.synthetics.availability' | 'sli.kql.custom' | 'sli.metric.custom' | 'sli.metric.timeslice' | 'sli.histogram.custom'"
+                  }
+                ]
+          badRequestMissingFieldExample:
+            summary: Missing required field
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: |-
+                [
+                  {
+                    "expected": "string",
+                    "code": "invalid_type",
+                    "path": [
+                      "name"
+                    ],
+                    "message": "Invalid input: expected string, received undefined"
+                  }
+                ]
+          badRequestDurationExample:
+            summary: Invalid duration
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: |-
+                [
+                  {
+                    "code": "custom",
+                    "message": "Invalid duration: 30x, must be {duration}{unit}, for example 30d",
+                    "path": [
+                      "timeWindow",
+                      "duration"
+                    ]
+                  }
+                ]
+          badRequestObjectiveExample:
+            summary: Objective target out of range (domain validation, for example a target of 1.5)
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Invalid objective.target'
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Forbidden
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]'
+  '409':
+    description: Conflict - The SLO id already exists
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/409_response
+        examples:
+          conflictExample:
+            summary: Conflict
+            value:
+              statusCode: 409
+              error: Conflict
+              message: 'SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists'
+  '503':
+    description: Service unavailable - The operation did not complete within the request deadline
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/503_response
+        examples:
+          serviceUnavailableExample:
+            summary: Service unavailable
+            value:
+              statusCode: 503
+              error: Service Unavailable
+              message: 'Operation did not complete within 60000ms'

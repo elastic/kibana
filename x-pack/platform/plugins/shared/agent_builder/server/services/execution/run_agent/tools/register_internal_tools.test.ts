@@ -12,6 +12,7 @@ import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_s
 import { registerInternalTools, type RegisterInternalToolsParams } from './register_internal_tools';
 import { createSubagentTool } from './run_subagent';
 import { createExecuteDynamicTool } from './execute_dynamic_tool';
+import type { ResolvedCapabilities } from '../types';
 
 jest.mock('../../../agents/utils/resolve_allowed_subagents', () => ({
   resolveAllowedSubagents: jest.fn(),
@@ -60,7 +61,7 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
       aiIndices: false,
       sml: false,
       relevantSkills: false,
-      todos: false,
+      backgroundWake: false,
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
@@ -72,7 +73,6 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     agentRegistry: {},
     filesystemService: {},
     bashService: undefined,
-    todoStateManager: {},
     selfClient: {},
     parentExecutionId: undefined,
     conversationAccess: 'readWrite',
@@ -81,7 +81,11 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
-const register = async (context: AgentHandlerContext, subagentIds: string[] = ['other-agent']) => {
+const register = async (
+  context: AgentHandlerContext,
+  subagentIds: string[] = ['other-agent'],
+  capabilities: ResolvedCapabilities = { attachmentTools: true, apiTools: true }
+) => {
   const params = {
     context,
     agentId: 'agent-1',
@@ -92,6 +96,7 @@ const register = async (context: AgentHandlerContext, subagentIds: string[] = ['
     subagentTracker: {},
     conversationExists: jest.fn(),
     agentConfiguration: { subagent_ids: subagentIds },
+    capabilities,
   } as unknown as RegisterInternalToolsParams;
   await registerInternalTools(params);
 };
@@ -178,6 +183,19 @@ describe('registerInternalTools - subagents', () => {
       );
     }
   );
+
+  it.each([true, false])(
+    'passes the background wake setting (%s) to run_subagent',
+    async (backgroundWake) => {
+      const { context } = createContext({ experimentalFeatures: { backgroundWake } });
+
+      await register(context);
+
+      expect(createSubagentTool).toHaveBeenCalledWith(
+        expect.objectContaining({ backgroundWakeEnabled: backgroundWake })
+      );
+    }
+  );
 });
 
 describe('registerInternalTools - execute_dynamic_tool', () => {
@@ -201,7 +219,7 @@ describe('registerInternalTools - execute_dynamic_tool', () => {
         skills: false,
         aiIndices: false,
         relevantSkills: false,
-        todos: false,
+        backgroundWake: false,
         bash: false,
         apiDiscovery: false,
         dynamicTools: true,

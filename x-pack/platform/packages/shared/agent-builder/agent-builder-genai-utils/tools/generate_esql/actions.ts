@@ -47,6 +47,7 @@ export interface ExecuteQueryAction {
   success: boolean;
   results?: EsqlResponse;
   error?: string;
+  timedOut?: boolean;
 }
 
 export interface ValidateQueryAction {
@@ -141,7 +142,9 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
         ? [
             createAIMessage('Now you can execute the query'),
             createUserMessage(
-              `I tried executing the query and got the following error:
+              action.timedOut
+                ? formatTimedOutExecution(action)
+                : `I tried executing the query and got the following error:
 
 \`\`\`
 ${action.error}
@@ -161,6 +164,7 @@ Can you fix the query?`
               content: {
                 success: action.success,
                 error: action.error,
+                ...(action.timedOut ? { timedOut: true } : {}),
               },
               wrapToolResult: false,
             }),
@@ -237,3 +241,22 @@ Can you fix the query?`
     }
   }
 };
+
+/**
+ * A timed-out query is not broken, it is too expensive: "fix the query" would get the same query
+ * back. Ask for a cheaper one instead, naming what actually narrows an ES|QL scan.
+ */
+const formatTimedOutExecution = (action: ExecuteQueryAction): string =>
+  `I tried executing the query and it timed out:
+
+\`\`\`
+${action.error}
+\`\`\`
+
+The query is valid but too expensive to run as written, so do not resubmit it unchanged or with cosmetic changes. Write a cheaper query:
+- restrict the time range on the timestamp field as described in the instructions, if the query does not already,
+- filter as early as possible on selective, indexed fields,
+- avoid matching on metadata fields such as \`_id\` without another selective condition,
+- keep only the fields that are needed and use a small LIMIT.
+
+If the request cannot be made cheaper, write the most selective query that still answers it.`;

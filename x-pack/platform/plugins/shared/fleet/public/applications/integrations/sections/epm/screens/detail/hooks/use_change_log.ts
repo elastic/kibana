@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 
 import { useGetFileByPathQuery } from '../../../../../hooks';
 import { useYaml } from '../../../../../../../services';
-import { getBreakingChanges, parseYamlChangelog } from '../utils';
+import { getBreakingChanges, getBreakingChangesInRange, parseYamlChangelog } from '../utils';
 
 /**
  * @param packageName the package to get the changelog for
@@ -35,9 +35,13 @@ export const useChangelog = (
   }, [yaml, data, latestVersion, currentVersion]);
 
   const breakingChanges = useMemo(() => {
-    const _breakingChanges = getBreakingChanges(changelog);
+    // The changelog includes the current version, which must not be reported as a breaking change
+    // of the upgrade. The range matches the server-side check of upgrade APIs.
+    const _breakingChanges = currentVersion
+      ? getBreakingChangesInRange(changelog, currentVersion, latestVersion)
+      : getBreakingChanges(changelog);
     return _breakingChanges.length > 0 ? _breakingChanges : null;
-  }, [changelog]);
+  }, [changelog, currentVersion, latestVersion]);
 
   return {
     changelog,
