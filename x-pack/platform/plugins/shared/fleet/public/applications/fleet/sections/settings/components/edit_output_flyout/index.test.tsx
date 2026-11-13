@@ -2635,6 +2635,25 @@ describe('EditOutputFlyout', () => {
         ).toBeNull();
       });
 
+      it('should clear the HTTP endpoint error when switching back to gRPC', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        selectProtocol(utils, 'HTTP/Protobuf');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText('Specify a URL such as https://collector.example.com:4318')
+          ).toBeInTheDocument();
+        });
+
+        selectProtocol(utils, 'gRPC');
+
+        expect(
+          utils.queryByText('Specify a URL such as https://collector.example.com:4318')
+        ).toBeNull();
+        expect(utils.getByTestId('saveApplySettingsBtn')).not.toBeDisabled();
+      });
+
       it('should send only the settings of the new protocol when switching from gRPC to HTTP', async () => {
         const { utils } = renderFlyout(otlpOutput);
         selectProtocol(utils, 'HTTP/Protobuf');

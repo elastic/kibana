@@ -46,6 +46,10 @@ const headersToRows = (
   return rows.length ? rows : [{ key: '', value: '' }];
 };
 
+// an HTTP endpoint is a URL, which an endpoint kept from gRPC may not be
+const getOtlpEndpointValidator = (protocol: string) =>
+  protocol === otlpProtocol.HttpProtobuf ? validateOtlpHttpEndpoint : validateOtlpEndpoint;
+
 const toInputValue = (value: string | number | null | undefined) =>
   value === null || value === undefined ? '' : `${value}`;
 
@@ -67,12 +71,7 @@ export function useOtlpInputs(
 
   const otlpEndpointInput = useInput(
     exporter?.endpoint ?? '',
-    // an HTTP endpoint is a URL, which an endpoint kept from gRPC may not be
-    validateIfSelected(
-      otlpProtocolInput.value === otlpProtocol.HttpProtobuf
-        ? validateOtlpHttpEndpoint
-        : validateOtlpEndpoint
-    ),
+    validateIfSelected(getOtlpEndpointValidator(otlpProtocolInput.value)),
     disabled
   );
   const otlpCompressionInput = useInput(
@@ -310,6 +309,13 @@ export function changeOtlpProtocol(inputs: OtlpInputs, protocol: OtlpProtocol) {
     return;
   }
   inputs.otlpProtocolInput.setValue(protocol);
+
+  // the endpoint is kept, but an error shown for the previous protocol may not apply to the new one
+  if (inputs.otlpEndpointInput.errors) {
+    inputs.otlpEndpointInput.setErrors(
+      getOtlpEndpointValidator(protocol)(inputs.otlpEndpointInput.value)
+    );
+  }
 
   [...grpcTextInputs(inputs), ...httpTextInputs(inputs)].forEach((input) => {
     input.setValue('');
