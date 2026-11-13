@@ -29,7 +29,7 @@ export const ListKiSearchBox = ({
   onChange,
   onCommit,
 }: ListKiSearchBoxProps) => {
-  // Search as the user types (prototype), after a short pause.
+  // Search as the user types, after a short pause.
   useEffect(() => {
     const timeoutId = setTimeout(() => onCommit(value), LIST_KI_SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timeoutId);

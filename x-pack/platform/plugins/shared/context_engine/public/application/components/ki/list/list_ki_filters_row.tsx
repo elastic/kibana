@@ -15,7 +15,6 @@ import { ListKiSortSelect } from './list_ki_sort_select';
 import { ListKiStatusFilter } from './list_ki_status_filter';
 import { ListKiTypeFilter as ListKiTypeFilterButton } from './list_ki_type_filter';
 
-/** Prototype search field width. */
 const SEARCH_MAX_WIDTH = '340px';
 const SEARCH_MIN_WIDTH = '200px';
 
@@ -81,7 +80,6 @@ export const ListKiFiltersRow = ({
       <div>
         <ListKiSortSelect sort={sort} />
       </div>
-      {/* Today's Type filter stays until the type tiles replace it (PR 2). */}
       <EuiFilterGroup>
         <ListKiTypeFilterButton
           typeFilter={typeFilter}

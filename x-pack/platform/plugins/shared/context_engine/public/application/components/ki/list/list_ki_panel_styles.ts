@@ -9,11 +9,11 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemo } from 'react';
 
-/** Under this width the list and the viewer stack in one column (prototype value). */
+/** Under this width the list and the viewer stack in one column. */
 const KNOWLEDGE_DOCUMENTS_NARROW_BREAKPOINT = '1100px';
 const narrowMedia = `@media (max-width: ${KNOWLEDGE_DOCUMENTS_NARROW_BREAKPOINT})`;
 
-/** Space the list keeps for the page header, tabs and filters above it (prototype value). */
+/** Space the list keeps for the page header, tabs and filters above it. */
 const LIST_MAX_HEIGHT = 'calc(100vh - 300px)';
 
 export const useListKiPanelStyles = () => {

@@ -9,7 +9,6 @@ import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemo } from 'react';
 
-/** Row title line height (prototype value). */
 const ROW_TITLE_LINE_HEIGHT = 1.4;
 
 export const useListKiGroupsStyles = () => {
@@ -89,7 +88,6 @@ export const useListKiGroupsStyles = () => {
       rowUpdated: css({
         color: euiTheme.colors.textSubdued,
       }),
-      // Same "Load more" look as the old list footer: a small button in the middle.
       groupFooter: css({
         display: 'flex',
         justifyContent: 'center',

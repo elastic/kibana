@@ -13,7 +13,6 @@ import React, { useCallback, useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import { getListKiStatusFilterLabel, type ListKiStatusFilterValue } from './list_ki_helpers';
 
-/** Prototype order. */
 const STATUS_FILTER_OPTIONS: ListKiStatusFilterValue[] = [
   'active',
   'expired',

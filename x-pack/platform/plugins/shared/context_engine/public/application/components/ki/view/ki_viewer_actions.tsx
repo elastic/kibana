@@ -22,7 +22,7 @@ interface KiViewerActionsProps {
 }
 
 /**
- * Edit and Delete under the document (prototype). A deleted document gets Restore instead of
+ * Edit and Delete under the document. A deleted document gets Restore instead of
  * Delete, and Edit is disabled because the API refuses edits until the document is restored.
  */
 export const KiViewerActions = ({
