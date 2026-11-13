@@ -133,7 +133,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(agentParams.nextInput).toEqual({ message: 'reinforcement turn prompt' });
     expect(agentParams.conversation?.id).not.toBe(ELIGIBLE_ROUND_INPUTS.conversation_id);
     expect(telemetryMetadata).toMatchObject({
-      pluginId: 'nightshift_investigation_memory',
+      pluginId: 'nightshift_investigation_decision_tree',
       aggregateBy: 'nightshift',
       productSolution: 'observability',
       productFeature: 'nightshift',
@@ -185,7 +185,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(resolveNightshiftModelForRequest).toHaveBeenCalledWith(
       expect.objectContaining({ step: 'investigation', roundConnectorId: 'round-connector' })
     );
-    expect(roundFixture.agentRuns[0].defaultConnectorId).toBe('round-connector');
+    expect(roundFixture.agentRuns[0].defaultModel).toEqual({ connectorId: 'round-connector' });
   });
 
   // `${{ }}` keeps an array; Liquid `{{ }}` would stringify it to "[object Object]" and the

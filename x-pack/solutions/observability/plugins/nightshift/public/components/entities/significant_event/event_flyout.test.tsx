@@ -135,6 +135,7 @@ const mockAddSuccess = jest.fn();
 const mockSignificantEventsFetch = jest.fn();
 const mockInvestigationsFetch = jest.fn();
 let mockCanManage = false;
+let mockCanCloseEvent = true;
 
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
@@ -177,6 +178,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
             show: true,
             manage: mockCanManage,
           },
+          alerting_v2_alerts: { all: mockCanCloseEvent },
         },
         getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
       },
@@ -227,6 +229,7 @@ describe('EventFlyout', () => {
     mockOpenConversationDetails.mockClear();
     mockReportEvent.mockClear();
     mockCanManage = false;
+    mockCanCloseEvent = true;
     mockSignificantEventsFetch.mockResolvedValue({ updated: 1, ignored: 0, status: 'inactive' });
     mockInvestigationsFetch.mockResolvedValue({ investigation_id: 'investigation-new' });
     mockUseInvestigation.mockReturnValue({
@@ -517,7 +520,7 @@ describe('EventFlyout', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
-  it('only offers Mark inactive for live events with manage access', async () => {
+  it('only offers Mark inactive for live events with manage and Alerts access', async () => {
     mockCanManage = true;
     mockSubjectInvestigation.mockReturnValue({ id: 'conv-1', in_progress: false });
     const event: SignificantEventResponse = { ...mockEvent, status: 'recovering' };
@@ -530,6 +533,13 @@ describe('EventFlyout', () => {
     });
     expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
 
+    mockCanCloseEvent = false;
+    await act(async () => {
+      rerender(<EventFlyout event={event} onClose={jest.fn()} />);
+    });
+    expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
+
+    mockCanCloseEvent = true;
     mockCanManage = false;
     await act(async () => {
       rerender(<EventFlyout event={event} onClose={jest.fn()} />);

@@ -29,6 +29,7 @@ import {
 } from '../../../../common/lib/authentication/users';
 import {
   bulkCreateAttachments,
+  bulkCreateAttachmentsRaw,
   bulkDeleteAttachmentReferences,
   bulkDeleteAttachments,
   createCase,
@@ -248,6 +249,52 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(attack).to.be.ok();
         expect(attack.attachmentId).to.eql(AD_HOC_ATTACK_ID);
         expect(attack.metadata.index).to.eql(AD_HOC_ATTACK_INDEX);
+      });
+
+      it('returns no attachments when the attack and its alerts are already attached', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+        const params = [
+          attackAttachment,
+          ...alertAttachments,
+        ] as unknown as BulkCreateUnifiedAttachmentsRequest;
+
+        await bulkCreateAttachmentsRaw({ supertest, caseId: postedCase.id, params });
+
+        const { body: createdAttachments } = await bulkCreateAttachmentsRaw({
+          supertest,
+          caseId: postedCase.id,
+          params,
+        });
+
+        // The add-to-existing-case modal reads an empty result as "nothing was added".
+        expect(createdAttachments).to.eql([]);
+        const comments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(comments.length).to.be(1 + ALERT_IDS.length);
+      });
+
+      it('returns only the alerts when the attack is already attached', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+
+        await bulkCreateAttachmentsRaw({
+          supertest,
+          caseId: postedCase.id,
+          params: [attackAttachment] as unknown as BulkCreateUnifiedAttachmentsRequest,
+        });
+
+        const { body: createdAttachments } = await bulkCreateAttachmentsRaw({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            attackAttachment,
+            ...alertAttachments,
+          ] as unknown as BulkCreateUnifiedAttachmentsRequest,
+        });
+
+        // Security reads a posted attack missing from the result as already attached.
+        expect(
+          createdAttachments.some(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
+        ).to.be(false);
+        expect(createdAttachments.length).to.be(ALERT_IDS.length);
       });
     });
 

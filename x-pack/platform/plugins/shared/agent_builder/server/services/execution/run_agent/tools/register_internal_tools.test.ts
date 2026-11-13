@@ -11,6 +11,7 @@ import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_subagents';
 import { registerInternalTools, type RegisterInternalToolsParams } from './register_internal_tools';
 import { createSubagentTool } from './run_subagent';
+import { createSendMessageTool } from './send_message';
 import { createExecuteDynamicTool } from './execute_dynamic_tool';
 import type { ResolvedCapabilities } from '../types';
 
@@ -24,7 +25,7 @@ jest.mock('./run_subagent', () => ({
   createSubagentTool: jest.fn(() => ({ id: 'run_subagent' })),
 }));
 jest.mock('./send_message', () => ({
-  createSendMessageTool: () => ({ id: 'send_message_to_agent' }),
+  createSendMessageTool: jest.fn(() => ({ id: 'send_message_to_agent' })),
 }));
 jest.mock('./sleep', () => ({ createSleepTool: () => ({ id: 'sleep' }) }));
 jest.mock('./read_file', () => ({ createReadFileTool: () => ({ id: 'read_file' }) }));
@@ -33,6 +34,9 @@ jest.mock('./ask_user_question', () => ({
   createAskUserQuestionTool: () => ({ id: 'ask_user_question' }),
 }));
 jest.mock('./load_skill', () => ({ createLoadSkillTool: () => ({ id: 'load_skill' }) }));
+jest.mock('./search_relevant_skills', () => ({
+  createSearchRelevantSkillsTool: () => ({ id: 'search_relevant_skills' }),
+}));
 jest.mock('./execute_dynamic_tool', () => ({
   createExecuteDynamicTool: jest.fn(() => ({ id: 'execute_dynamic_tool' })),
 }));
@@ -68,7 +72,7 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: false },
-    defaultConnectorId: 'connector-1',
+    defaultModel: { connectorId: 'connector-1' },
     subAgentExecutor: {},
     agentRegistry: {},
     filesystemService: {},
@@ -81,10 +85,12 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
+const defaultCapabilities: ResolvedCapabilities = { attachmentTools: true, apiTools: true };
+
 const register = async (
   context: AgentHandlerContext,
   subagentIds: string[] = ['other-agent'],
-  capabilities: ResolvedCapabilities = { attachmentTools: true, apiTools: true }
+  overrides: Record<string, unknown> = {}
 ) => {
   const params = {
     context,
@@ -96,7 +102,8 @@ const register = async (
     subagentTracker: {},
     conversationExists: jest.fn(),
     agentConfiguration: { subagent_ids: subagentIds },
-    capabilities,
+    capabilities: defaultCapabilities,
+    ...overrides,
   } as unknown as RegisterInternalToolsParams;
   await registerInternalTools(params);
 };
@@ -171,6 +178,19 @@ describe('registerInternalTools - subagents', () => {
     );
   });
 
+  it("hands the parent's model source to run_subagent and send_message", async () => {
+    const { context } = createContext({ defaultModel: { featureId: 'parent_feature' } });
+
+    await register(context);
+
+    expect(createSubagentTool).toHaveBeenCalledWith(
+      expect.objectContaining({ parentModel: { featureId: 'parent_feature' } })
+    );
+    expect(createSendMessageTool).toHaveBeenCalledWith(
+      expect.objectContaining({ parentModel: { featureId: 'parent_feature' } })
+    );
+  });
+
   it.each([true, false])(
     'passes the API discovery setting (%s) to run_subagent',
     async (apiDiscovery) => {
@@ -230,5 +250,47 @@ describe('registerInternalTools - execute_dynamic_tool', () => {
 
     expect(addedToolIds(toolManager)).toContain('execute_dynamic_tool');
     expect(createExecuteDynamicTool).toHaveBeenCalledWith({ toolManager });
+  });
+});
+
+describe('registerInternalTools - skill tools', () => {
+  const skillsContext = () =>
+    createContext({
+      experimentalFeatures: {
+        skills: true,
+        aiIndices: false,
+        relevantSkills: true,
+        backgroundWake: false,
+        bash: false,
+        apiDiscovery: false,
+        dynamicTools: false,
+      },
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resolveAllowedSubagentsMock.mockResolvedValue([]);
+  });
+
+  it('registers neither skill tool when the run has no skills', async () => {
+    const { context, toolManager } = skillsContext();
+
+    await register(context, [], { filteredSkills: [], relevantSkillsEnabled: true });
+
+    expect(addedToolIds(toolManager)).not.toContain('load_skill');
+    expect(addedToolIds(toolManager)).not.toContain('search_relevant_skills');
+  });
+
+  it('registers both skill tools when the run has a skill', async () => {
+    const { context, toolManager } = skillsContext();
+
+    await register(context, [], {
+      filteredSkills: [{ id: 'a.alpha' }],
+      relevantSkillsEnabled: true,
+    });
+
+    expect(addedToolIds(toolManager)).toEqual(
+      expect.arrayContaining(['load_skill', 'search_relevant_skills'])
+    );
   });
 });

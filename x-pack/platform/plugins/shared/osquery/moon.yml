@@ -73,7 +73,6 @@ dependsOn:
   - '@kbn/crypto'
   - '@kbn/test-es-server'
   - '@kbn/core-lifecycle-server'
-  - '@kbn/core-saved-objects-api-server-internal'
   - '@kbn/core-http-server-utils'
   - '@kbn/core-spaces-common'
   - '@kbn/core-http-server'

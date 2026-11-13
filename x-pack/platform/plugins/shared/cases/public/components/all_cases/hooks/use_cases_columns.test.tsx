@@ -583,6 +583,34 @@ describe('useCasesColumns ', () => {
     expect(screen.queryByText('This item is already added to this case')).not.toBeInTheDocument();
   });
 
+  it('disables the select button while the already attached cases are loading', async () => {
+    const theCase = useGetCasesMockState.data.cases[0];
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          disabledCases: new Set<string>(),
+          isLoadingDisabledCases: true,
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const assignActionColumn = result.current.columns[
+      result.current.columns.length - 1
+    ] as unknown as {
+      render: (theCase: (typeof useGetCasesMockState.data.cases)[number]) => JSX.Element;
+    };
+
+    renderWithTestingProviders(assignActionColumn.render(theCase));
+
+    const button = screen.getByTestId(`cases-table-row-select-${theCase.id}`);
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent('Select');
+  });
+
   it('does not shows the actions if the user does not have the right permissions', async () => {
     const { result } = renderHook(() => useCasesColumns(useCasesColumnsProps), {
       wrapper: (props) => <TestProviders {...props} permissions={readCasesPermissions()} />,

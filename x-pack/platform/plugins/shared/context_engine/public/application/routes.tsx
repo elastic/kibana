@@ -9,11 +9,13 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { ContextLandingPage } from './context_landing_page';
 import { AiIndexDetailPage } from './pages/ai_index_detail_page';
+import { DreamingTemplatePage } from './pages/dreaming_template_page';
 import { KiPage } from './pages/ki_page';
 import { CONTEXT_ENGINE_PATHS } from './paths';
 
 export const ContextEngineRoutes = () => (
   <Routes>
+    <Route path={CONTEXT_ENGINE_PATHS.dreamingTemplate} exact component={DreamingTemplatePage} />
     <Route
       path={[CONTEXT_ENGINE_PATHS.viewKi, CONTEXT_ENGINE_PATHS.viewKiDocument]}
       exact
@@ -24,6 +26,7 @@ export const ContextEngineRoutes = () => (
         CONTEXT_ENGINE_PATHS.detail,
         CONTEXT_ENGINE_PATHS.detailSources,
         CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators,
+        CONTEXT_ENGINE_PATHS.detailSettings,
       ]}
       exact
       component={AiIndexDetailPage}

@@ -96,7 +96,7 @@ describe('remember tool', () => {
     assertContextEngineWriteAccessMock.mockResolvedValue();
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });
     index.mockResolvedValue({ _id: 'generated-memory-id' });
@@ -190,9 +190,10 @@ describe('remember tool', () => {
     });
   });
 
-  it('rejects an AI index that does not have memory enabled', async () => {
+  it('rejects a managed AI index registered with memory_enabled false', async () => {
     get.mockResolvedValue({
       id: 'support',
+      managed: true,
       memory_enabled: false,
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });
@@ -466,7 +467,7 @@ describe('remember tool', () => {
     });
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'data_stream', value: 'ai-index-ds-support' },
     });
 
@@ -618,7 +619,7 @@ describe('remember tool', () => {
   it('uses create semantics when writing a new memory to a data stream', async () => {
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'data_stream', value: 'ai-index-ds-support' },
     });
 

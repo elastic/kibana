@@ -166,6 +166,7 @@ describe('renderFailingSuiteIssueBody', () => {
   it('is matched as about the suite by the issue matcher, and as its file by other blocks', () => {
     const issue = describeIssue({
       number: 7,
+      id: 1007,
       html_url: 'https://github.com/elastic/kibana/issues/7',
       node_id: 'n7',
       title: failingSuiteIssueTitle(suite),

@@ -17,3 +17,15 @@ export const mockOpsCollector = {
 jest.doMock('./ops_metrics_collector', () => ({
   OpsMetricsCollector: jest.fn().mockImplementation(() => mockOpsCollector),
 }));
+
+export const mockEluMonitor = {
+  collect: jest.fn(),
+  reset: jest.fn(),
+};
+
+export const MockEventLoopUtilizationMonitor = jest.fn().mockImplementation(() => mockEluMonitor);
+
+jest.doMock('@kbn/core-metrics-collectors-server-internal', () => ({
+  ...jest.requireActual('@kbn/core-metrics-collectors-server-internal'),
+  EventLoopUtilizationMonitor: MockEventLoopUtilizationMonitor,
+}));

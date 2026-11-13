@@ -83,6 +83,8 @@ export const handleInvestigationFailureStepDefinition = (
           }
         },
       });
+      // After notifications, so the reads it makes never delay them.
+      await client.reportRunEnded(investigationId, executionId, 'failed');
       return { output };
     },
   });

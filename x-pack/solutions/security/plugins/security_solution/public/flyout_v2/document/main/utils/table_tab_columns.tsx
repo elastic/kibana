@@ -60,10 +60,6 @@ export type ColumnsProvider = (providerOptions: {
    */
   onTogglePinned: (field: string, action: 'pin' | 'unpin') => void;
   /**
-   * Resolved entity store id for host/user preview links for this document
-   */
-  entityId?: string;
-  /**
    * Wraps each value cell with cell actions (filter for/out, copy, etc.). The caller decides
    * what to inject (real security cell actions in Security Solution, no-op elsewhere).
    */
@@ -89,7 +85,6 @@ export const getTableTabColumns: ColumnsProvider = ({
   getLinkValue,
   ruleId,
   onTogglePinned,
-  entityId,
   renderCellActions,
   hit,
   renderFlyoutLink,
@@ -150,7 +145,6 @@ export const getTableTabColumns: ColumnsProvider = ({
             getLinkValue={getLinkValue}
             ruleId={ruleId}
             values={values}
-            entityId={entityId}
             hit={hit}
             renderFlyoutLink={renderFlyoutLink}
           />

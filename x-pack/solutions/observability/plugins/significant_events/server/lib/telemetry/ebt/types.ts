@@ -143,21 +143,6 @@ interface EventStatusChangedProps extends ExistingAlertIdentityProps {
   workflow_execution_id?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps
-  extends ExistingAlertIdentityProps,
-    OptionalWorkflowExecutionTelemetryProps {
-  success: boolean;
-  /**
-   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
-   * events; new events populate `event_id` instead.
-   */
-  event_uuid?: string;
-  /** Stable event_id slug. Optional for rolling-deploy compatibility with pre-#1517 nodes. */
-  event_id?: string;
-  investigation_id: string;
-  error_message?: string;
-}
-
 interface DiscoveryTriggeredProps extends WorkflowExecutionTelemetryProps {
   /** @deprecated Use `workflow_execution_id`. */
   execution_id: string;
@@ -258,7 +243,6 @@ export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,
-  type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,

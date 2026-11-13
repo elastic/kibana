@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import chroma from 'chroma-js';
+import { isColorDark } from '@elastic/eui';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 import type {
@@ -19,7 +21,6 @@ import {
   reversePalette,
   getPaletteStops,
   CUSTOM_PALETTE,
-  enforceColorContrast,
   getColorsFromMapping,
   DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
@@ -126,7 +127,9 @@ export function getContrastColor(
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;
-  return enforceColorContrast(color, backgroundColor) ? lightColor : darkColor;
+  const finalColor =
+    chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
+  return isColorDark(...finalColor.rgb()) ? lightColor : darkColor;
 }
 
 export function getNumericValue(rowValue?: unknown) {

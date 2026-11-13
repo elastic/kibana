@@ -412,6 +412,9 @@ importers:
       '@elastic/eui-theme-borealis':
         specifier: 8.2.0
         version: 8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common':
+        specifier: 10.2.0
+        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
@@ -515,14 +518,14 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
       '@hapi/hapi':
-        specifier: 21.4.10
-        version: 21.4.10
+        specifier: 21.4.12
+        version: 21.4.12
       '@hapi/inert':
-        specifier: 7.1.2
-        version: 7.1.2
+        specifier: 7.1.3
+        version: 7.1.3
       '@hapi/wreck':
-        specifier: 18.1.2
-        version: 18.1.2
+        specifier: 18.1.3
+        version: 18.1.3
       '@hello-pangea/dnd':
         specifier: 18.0.1
         version: 18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -607,6 +610,9 @@ importers:
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
+      '@kbn/agentic-investigations-impact':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-impact
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
@@ -976,6 +982,9 @@ importers:
       '@kbn/coloring':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-coloring
+      '@kbn/coloring-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-coloring-components
       '@kbn/config':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-config
@@ -2887,6 +2896,9 @@ importers:
       '@kbn/nightshift-decision-trees':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
+      '@kbn/nightshift-detection-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/nightshift_detection
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_investigations
@@ -3019,6 +3031,9 @@ importers:
       '@kbn/palettes':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-palettes
+      '@kbn/palettes-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-palettes-components
       '@kbn/panel-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-panel-loader
@@ -4165,6 +4180,9 @@ importers:
       '@kbn/visualizations-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-visualizations-common
+      '@kbn/visualizations-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-visualizations-components
       '@kbn/visualizations-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/visualizations
@@ -4379,8 +4397,8 @@ importers:
         specifier: 9.3.1
         version: 9.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@tanstack/react-virtual':
-        specifier: 3.13.12
-        version: 3.13.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 3.14.23
+        version: 3.14.23(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@turf/along':
         specifier: 6.0.1
         version: 6.0.1
@@ -4455,7 +4473,7 @@ importers:
         version: 2.0.5
       brok:
         specifier: 6.0.0
-        version: 6.0.0(@hapi/hapi@21.4.10)
+        version: 6.0.0(@hapi/hapi@21.4.12)
       byte-size:
         specifier: 9.0.1
         version: 9.0.1
@@ -5150,9 +5168,6 @@ importers:
       '@elastic/eui-test-helpers':
         specifier: 2.3.0
         version: 2.3.0(@playwright/test@1.64.1)
-      '@elastic/eui-theme-common':
-        specifier: 10.2.0
-        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -8054,6 +8069,8 @@ importers:
 
   src/platform/packages/shared/kbn-coloring: {}
 
+  src/platform/packages/shared/kbn-coloring-components: {}
+
   src/platform/packages/shared/kbn-config: {}
 
   src/platform/packages/shared/kbn-config-schema: {}
@@ -8302,6 +8319,8 @@ importers:
 
   src/platform/packages/shared/kbn-palettes: {}
 
+  src/platform/packages/shared/kbn-palettes-components: {}
+
   src/platform/packages/shared/kbn-profiler: {}
 
   src/platform/packages/shared/kbn-profiling-utils: {}
@@ -8475,6 +8494,8 @@ importers:
   src/platform/packages/shared/kbn-visualization-utils: {}
 
   src/platform/packages/shared/kbn-visualizations-common: {}
+
+  src/platform/packages/shared/kbn-visualizations-components: {}
 
   src/platform/packages/shared/kbn-workflows: {}
 
@@ -9120,6 +9141,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
 
+  x-pack/platform/packages/shared/kbn-agentic-investigations-impact: {}
+
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
 
   x-pack/platform/packages/shared/kbn-ai-tools: {}
@@ -9741,6 +9764,8 @@ importers:
   x-pack/solutions/observability/plugins/metrics_data_access: {}
 
   x-pack/solutions/observability/plugins/nightshift: {}
+
+  x-pack/solutions/observability/plugins/nightshift_detection: {}
 
   x-pack/solutions/observability/plugins/nightshift_investigations: {}
 
@@ -11807,8 +11832,8 @@ packages:
     resolution: {integrity: sha512-A+po2d/dVoY7cYajycYI43ZbYMXukuopIsqCjh5QzsBCipDtdofHntljDlpccMjIfTy6UOkg+5KPriwYch2bXA==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/ammo@6.0.1':
-    resolution: {integrity: sha512-pmL+nPod4g58kXrMcsGLp05O2jF4P2Q3GiL8qYV7nKYEh3cGf+rV4P5Jyi2Uq0agGhVU63GtaSAfBEZOlrJn9w==}
+  '@hapi/ammo@6.0.2':
+    resolution: {integrity: sha512-YeVEkur58mIJ2wxIuIDGKDgpiNEmLOGswggGarZu/VORUPLBjOUPiaZSl2oFZGECqt3yPSNFBiHTwOQH51U+vA==}
 
   '@hapi/b64@6.0.1':
     resolution: {integrity: sha512-ZvjX4JQReUmBheeCq+S9YavcnMMHWqx3S0jHNXWIM1kQDxB9cyfSycpVvjfrKcIS8Mh5N3hmu/YKo4Iag9g2Kw==}
@@ -11851,8 +11876,8 @@ packages:
     resolution: {integrity: sha512-dvD8+Y/Okc0fh0blqaYCLIrcy0+1LqIhMr7hjk8elLQZ9mkw2hKFB9dFKuRfWf+1nvHpGlW+PwccqkdebynQbg==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/hapi@21.4.10':
-    resolution: {integrity: sha512-G0l7tch1/85Gkyasmmjvjam2IWbx/9zCp4AQx4nZ/nn/rrrmVmRvFejj2ZGe5j3wFZVCLt2+Zeg95ImFFom+7w==}
+  '@hapi/hapi@21.4.12':
+    resolution: {integrity: sha512-TT6ERrp5qv/pN3ubNILjI1/MZfXQMUum2IVWH2hHR23LHj1We5gsI8WFavfaNRax+T8W2qSUkri9l7FA72/Xdw==}
     engines: {node: '>=14.15.0'}
 
   '@hapi/heavy@8.0.1':
@@ -11864,8 +11889,8 @@ packages:
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
 
-  '@hapi/inert@7.1.2':
-    resolution: {integrity: sha512-fr0XmsYTUhahIbioBemFlc+o4ro4bj1HPMKN3dG9m6XC+UkF9fdVYfb7uNoDj0vO+HdXendbKk6YEfZG9ToeTQ==}
+  '@hapi/inert@7.1.3':
+    resolution: {integrity: sha512-ohdCQ7CKoC+Tr9KzeU7o1AoDf0TnfIKPrEs6MYnvzbmDRhkZo4HPvIQGEibvSNFqSDuOQZ6quIB4Y3CGD3VE+g==}
 
   '@hapi/iron@7.0.1':
     resolution: {integrity: sha512-tEZnrOujKpS6jLKliyWBl3A9PaE+ppuL/+gkbyPPDb/l2KSKQyH4lhMkVb+sBhwN+qaxxlig01JRqB8dk/mPxQ==}
@@ -11877,8 +11902,8 @@ packages:
     resolution: {integrity: sha512-uv3dtYuB4IsNaha+tigWmN8mQw/O9Qzl5U26Gm4ZcJVtDdB1AVJOwX3X5wOX+A07qzpEZnOMBAm8jjSqGsU6Nw==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/pez@6.1.1':
-    resolution: {integrity: sha512-yg2OS1tC0S1sHXvhUtWsfRn6lrKl9jKtRhZ+EI0woOW/gqX5vM2PZ1459ypCvCYDRLJ9nIyueeEH5MJV1ZDqIg==}
+  '@hapi/pez@6.1.3':
+    resolution: {integrity: sha512-hit/Yb7jYv/rAKDMTJJIhPslxHgt9WxmFfUvZ97rHLsq+HpI6eQE6HbGhFE/fhOHT8llkRETcjJX4+7ut7GF3w==}
 
   '@hapi/pinpoint@2.0.1':
     resolution: {integrity: sha512-EKQmr16tM8s16vTT3cA5L0kZZcTMU5DUOZTuvpnY738m+jyP3JIUj+Mm1xc1rsLkGBQ/gVnfKYPwOmPg1tUR4Q==}
@@ -11895,8 +11920,8 @@ packages:
   '@hapi/statehood@8.2.1':
     resolution: {integrity: sha512-xf72TG/QINW26jUu+uL5H+crE1o8GplIgfPWwPZhnAGJzetIVAQEQYvzq+C0aEVHg5/lMMtQ+L9UryuSa5Yjkg==}
 
-  '@hapi/subtext@8.1.3':
-    resolution: {integrity: sha512-WTpEZQjBP3UJ3gGunNl3w5Ao1EOJsuu2vttZ2KEcG+csSLxc0dI6VIkl2md2jDlHiQ2ARAoqdSUScy05A/NHtA==}
+  '@hapi/subtext@8.1.5':
+    resolution: {integrity: sha512-VSoL75dYqMfs2URprWPu9RXdL/+c5pZ5L0siSa3ZKg0VQKGQn2Yncd05Jl/154VvVYO/ymrOW3TR/a9psp1+kA==}
 
   '@hapi/teamwork@6.0.1':
     resolution: {integrity: sha512-52OXRslUfYwXAOG8k58f2h2ngXYQGP0x5RPOo+eWA/FtyLgHjGMrE3+e9LSXP/0q2YfHAK5wj9aA9DTy1K+kyQ==}
@@ -11918,8 +11943,8 @@ packages:
   '@hapi/vise@5.0.1':
     resolution: {integrity: sha512-XZYWzzRtINQLedPYlIkSkUr7m5Ddwlu99V9elh8CSygXstfv3UnWIXT0QD+wmR0VAG34d2Vx3olqcEhRRoTu9A==}
 
-  '@hapi/wreck@18.1.2':
-    resolution: {integrity: sha512-3dMnV2pfhQiyEqu8DL3VBmxkdLiRDiiUDuG79Dp+UK1gL9ZxAfDOUhB6k3D5MLqcgJJ1IARyGFhwoc1NITr/pg==}
+  '@hapi/wreck@18.1.3':
+    resolution: {integrity: sha512-PZ1FQpk5DWbEFFYiHu/kCkWeSHwUhAxDSUdv6Zsp1qi2coUP22cnYQlp647KCSsCc4uFB4LOTsHo9f5k7vgtHg==}
 
   '@hello-pangea/dnd@18.0.1':
     resolution: {integrity: sha512-xojVWG8s/TGrKT1fC8K2tIWeejJYTAeJuj36zM//yEm/ZrnZUSFGS15BpO+jGZT1ybWvyXmeDJwPYb4dhWlbZQ==}
@@ -14635,8 +14660,8 @@ packages:
     peerDependencies:
       react: '>=18'
 
-  '@tanstack/react-virtual@3.13.12':
-    resolution: {integrity: sha512-Gd13QdxPSukP8ZrkbgS2RwoZseTTbQPLnQEn7HY/rqtM+8Zt95f7xKC7N0EsKs7aoz0WzZ+fditZux+F8EzYxA==}
+  '@tanstack/react-virtual@3.14.23':
+    resolution: {integrity: sha512-Oyy58qQwdaQieA+A4WUDtnh9D1rv5FZvGdw8og9Xeyh88V6HH94vMSyV5i9ATIbYNe9t5Ix0WXRo9NOTpHDkYw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -14648,8 +14673,8 @@ packages:
     resolution: {integrity: sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ==}
     engines: {node: '>=20'}
 
-  '@tanstack/virtual-core@3.13.12':
-    resolution: {integrity: sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA==}
+  '@tanstack/virtual-core@3.19.8':
+    resolution: {integrity: sha512-Oz/SYBo/aVPyQkwtOw7Q23myITUgFIof2glQqydYJAPL6mH2SkJDkvDKZTklB+7gv5jGLZQhyTcd7SO1A1EODQ==}
 
   '@tediousjs/connection-string@1.1.0':
     resolution: {integrity: sha512-z9ZBWEG+8pIB5V1zYzlRPXx0oRJ5H7coPnMQK8EZOw03UTPI9Umn6viL36f5w+CuqkKsnCM50RVStpjZmR0Bng==}
@@ -27991,7 +28016,7 @@ snapshots:
     dependencies:
       '@hapi/hoek': 11.0.7
 
-  '@hapi/ammo@6.0.1':
+  '@hapi/ammo@6.0.2':
     dependencies:
       '@hapi/hoek': 11.0.7
 
@@ -28051,12 +28076,12 @@ snapshots:
       '@hapi/boom': 10.0.1
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
-      '@hapi/wreck': 18.1.2
+      '@hapi/wreck': 18.1.3
 
-  '@hapi/hapi@21.4.10':
+  '@hapi/hapi@21.4.12':
     dependencies:
       '@hapi/accept': 6.0.3
-      '@hapi/ammo': 6.0.1
+      '@hapi/ammo': 6.0.2
       '@hapi/boom': 10.0.1
       '@hapi/bounce': 3.0.2
       '@hapi/call': 9.0.1
@@ -28069,7 +28094,7 @@ snapshots:
       '@hapi/shot': 6.0.3
       '@hapi/somever': 4.1.1
       '@hapi/statehood': 8.2.1
-      '@hapi/subtext': 8.1.3
+      '@hapi/subtext': 8.1.5
       '@hapi/teamwork': 6.0.1
       '@hapi/topo': 6.0.2
       '@hapi/validate': 2.0.1
@@ -28084,9 +28109,9 @@ snapshots:
 
   '@hapi/hoek@9.3.0': {}
 
-  '@hapi/inert@7.1.2':
+  '@hapi/inert@7.1.3':
     dependencies:
-      '@hapi/ammo': 6.0.1
+      '@hapi/ammo': 6.0.2
       '@hapi/boom': 10.0.1
       '@hapi/bounce': 3.0.2
       '@hapi/hoek': 11.0.7
@@ -28111,7 +28136,7 @@ snapshots:
       '@hapi/hoek': 11.0.7
       '@hapi/vise': 5.0.1
 
-  '@hapi/pez@6.1.1':
+  '@hapi/pez@6.1.3':
     dependencies:
       '@hapi/b64': 6.0.1
       '@hapi/boom': 10.0.1
@@ -28147,15 +28172,15 @@ snapshots:
       '@hapi/iron': 7.0.1
       '@hapi/validate': 2.0.1
 
-  '@hapi/subtext@8.1.3':
+  '@hapi/subtext@8.1.5':
     dependencies:
       '@hapi/boom': 10.0.1
       '@hapi/bourne': 3.0.0
       '@hapi/content': 6.0.3
       '@hapi/file': 3.0.0
       '@hapi/hoek': 11.0.7
-      '@hapi/pez': 6.1.1
-      '@hapi/wreck': 18.1.2
+      '@hapi/pez': 6.1.3
+      '@hapi/wreck': 18.1.3
 
   '@hapi/teamwork@6.0.1': {}
 
@@ -28178,7 +28203,7 @@ snapshots:
     dependencies:
       '@hapi/hoek': 11.0.7
 
-  '@hapi/wreck@18.1.2':
+  '@hapi/wreck@18.1.3':
     dependencies:
       '@hapi/boom': 10.0.1
       '@hapi/bourne': 3.0.0
@@ -31162,9 +31187,9 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@tanstack/react-virtual@3.13.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@tanstack/react-virtual@3.14.23(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@tanstack/virtual-core': 3.13.12
+      '@tanstack/virtual-core': 3.19.8
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -31174,7 +31199,7 @@ snapshots:
     dependencies:
       '@tanstack/store': 0.11.2
 
-  '@tanstack/virtual-core@3.13.12': {}
+  '@tanstack/virtual-core@3.19.8': {}
 
   '@tediousjs/connection-string@1.1.0': {}
 
@@ -31547,7 +31572,7 @@ snapshots:
 
   '@types/hapi__cookie@12.0.5':
     dependencies:
-      '@hapi/hapi': 21.4.10
+      '@hapi/hapi': 21.4.12
       '@types/node': 24.10.13
       joi: 17.13.9
 
@@ -33152,9 +33177,9 @@ snapshots:
     dependencies:
       object.entries: 1.1.9
 
-  brok@6.0.0(@hapi/hapi@21.4.10):
+  brok@6.0.0(@hapi/hapi@21.4.12):
     dependencies:
-      '@hapi/hapi': 21.4.10
+      '@hapi/hapi': 21.4.12
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
 
