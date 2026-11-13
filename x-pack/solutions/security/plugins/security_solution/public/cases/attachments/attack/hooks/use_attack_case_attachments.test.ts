@@ -138,6 +138,72 @@ describe('useAttackCaseAttachments', () => {
     });
   });
 
+  describe('attacks already on the case', () => {
+    const theCase = { totalAlerts: 0 } as CaseUI;
+
+    const createdAttack = (attachmentId: string) =>
+      ({
+        id: `comment-${attachmentId}`,
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId,
+        metadata: { index: ATTACK_INDEX, title: 'A multi-stage attack', alertCount: 2 },
+      } as unknown as CaseUI['comments'][number]);
+
+    const createdAlerts = (attachmentId: string[]) =>
+      ({
+        id: `comment-alerts-${attachmentId.join('-')}`,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId,
+        metadata: { index: ALERTS_INDEX },
+      } as unknown as CaseUI['comments'][number]);
+
+    it('warns when the server did not create a posted attack', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(theCase, [createdAlerts(['alert-1', 'alert-2'])]);
+
+      expect(appToasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(appToasts.addWarning).toHaveBeenCalledWith({
+        title: '1 attack was already attached to this case and was not added again.',
+      });
+    });
+
+    it('does not warn when the server created every posted attack', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(theCase, [
+        createdAttack('attack-1'),
+        createdAlerts(['alert-1', 'alert-2']),
+      ]);
+
+      expect(appToasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('counts only the posted attacks the server did not create', () => {
+      const { result } = renderHook(() =>
+        useAttackCaseAttachments([
+          attack({ id: 'attack-1' }),
+          attack({ id: 'attack-2' }),
+          attack({ id: 'attack-3' }),
+        ])
+      );
+
+      result.current?.onAttached(theCase, [createdAttack('attack-3')]);
+
+      expect(appToasts.addWarning).toHaveBeenCalledWith({
+        title: '2 attacks were already attached to this case and were not added again.',
+      });
+    });
+
+    it('only reports truncation when there are no created attachments', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(theCase);
+
+      expect(appToasts.addWarning).not.toHaveBeenCalled();
+    });
+  });
+
   it('does not warn while building the attachments, even when they are truncated', () => {
     const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 
