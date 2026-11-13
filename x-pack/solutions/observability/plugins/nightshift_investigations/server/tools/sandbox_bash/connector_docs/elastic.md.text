@@ -23,20 +23,19 @@ shown below, before querying.
 ## Query guidance
 
 - Replace `logs-*` in the examples below with the indices you found, or those the custom context names.
-- Before your first query, list the cluster's remotes with `GET /_remote/info`, even when local
-  indices look relevant: many deployments keep little locally and hold production telemetry on
-  remote clusters named by cloud, region or team (for example `prod-aws-us-east-1`). Skip it
-  only when the space's custom context already names the remotes to use.
-- Never conclude that telemetry is unavailable from local indices alone. If the cluster has
-  remotes, check the ones matching the incident's region, team or service (for example
-  `GET /_resolve/index/<remote>:*<service>*`) and name the clusters you checked.
+- The "Local Elasticsearch" connector reaches only its own project and may not call `GET /` or
+  `GET /_remote/info`; skip the remote steps below for it. With any other connector:
+  - Before your first query, list the cluster's remotes with `GET /_remote/info`, even when local
+    indices look relevant: many deployments keep little locally and hold production telemetry on
+    remote clusters named by cloud, region or team (for example `prod-aws-us-east-1`). Skip it
+    only when the space's custom context already names the remotes to use.
+  - Never conclude that telemetry is unavailable from local indices alone. If the cluster has
+    remotes, check the ones matching the incident's region, team or service (for example
+    `GET /_resolve/index/<remote>:*<service>*`) and name the clusters you checked.
 - Name each remote explicitly as `remote:index`; never use wildcard remote names in
   `_resolve/cluster`, `_resolve/index` or searches. To check many remotes, query them in parallel
   with a short per-request timeout, as in the last example below: a sequential loop over dozens of
   remotes exceeds the sandbox command timeout and returns nothing.
-- Exception: the "Local Elasticsearch" connector reaches only its own project and may not call
-  `GET /` or `GET /_remote/info`. That applies to that connector alone; with any other connector,
-  list its remotes as above.
 - Query a specific data stream, not a broad `logs-*`: on large clusters a broad pattern scans
   every data stream and times out. Find candidates with
   `GET /_resolve/index/<remote>:logs-*<keyword>*`, then query the one you need. The response has
