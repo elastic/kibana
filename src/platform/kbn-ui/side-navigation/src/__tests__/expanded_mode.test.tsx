@@ -352,6 +352,37 @@ describe('Expanded mode', () => {
 
       /**
        * GIVEN not all primary menu items fit the menu height
+       * AND I opened the "More" popover by clicking it
+       * WHEN the primary menu items change and the menu is measured again
+       * THEN the "More" popover should stay open
+       */
+      it('should keep the "More" popover open when the primary items change', async () => {
+        const { rerender } = render(
+          <TestComponent isCollapsed={false} items={securityMock.navItems} />
+        );
+
+        await user.click(await screen.findByTestId(moreMenuId));
+
+        expect(await screen.findByTestId(popoverId('More'))).toBeInTheDocument();
+
+        const { primaryItems } = securityMock.navItems;
+        const updatedItems = {
+          ...securityMock.navItems,
+          primaryItems: primaryItems.map((item, index) =>
+            index === primaryItems.length - 1 ? { ...item, label: `${item.label} (updated)` } : item
+          ),
+        };
+
+        rerender(<TestComponent isCollapsed={false} items={updatedItems} />);
+
+        const primaryMenu = screen.getByTestId(primaryNavigationId);
+        await waitFor(() => expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'true'));
+
+        expect(screen.getByTestId(popoverId('More'))).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
        * AND the navigation renders in expanded mode
        * WHEN I hover over the "More" primary menu item
        * THEN I should see a popover with secondary menu

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -125,7 +125,18 @@ export const Navigation = ({
     useResponsiveMenu(isCollapsed, items.primaryItems, (items.overflowItems?.length ?? 0) > 0);
 
   const allOverflowItems = [...overflowMenuItems, ...(items.overflowItems ?? [])];
-  const hasMoreMenu = allOverflowItems.length > 0;
+  const hasOverflowItems = allOverflowItems.length > 0;
+
+  // While a new item set is measured, every item sits in the primary menu and nothing overflows.
+  // Keep "More" mounted through that pass if it was shown before, so its popover keeps its open state.
+  const wasMoreMenuShownRef = useRef(false);
+  useLayoutEffect(() => {
+    if (isOverflowMeasured) {
+      wasMoreMenuShownRef.current = hasOverflowItems;
+    }
+  }, [isOverflowMeasured, hasOverflowItems]);
+
+  const hasMoreMenu = hasOverflowItems || (!isOverflowMeasured && wasMoreMenuShownRef.current);
 
   const setSize = visibleMenuItems.length + (hasMoreMenu ? 1 : 0);
 
