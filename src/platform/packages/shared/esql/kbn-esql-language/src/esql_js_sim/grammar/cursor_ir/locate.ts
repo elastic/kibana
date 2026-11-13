@@ -29,6 +29,7 @@ import type {
   TokenClass,
   TypedWord,
   WordKind,
+  WrittenArgument,
   WrittenCommand,
 } from './types';
 
@@ -212,13 +213,18 @@ const openBrackets = (textBefore: string): string[] => {
  * where an argument or a value can come, then the brackets that are still open. Whatever the
  * parser reads from the added text is left out again.
  */
-const toCommands = (textBefore: string, expectsValue: boolean): WrittenCommand[] => {
+const toCommands = (
+  textBefore: string,
+  requiredTokens: string,
+  expectsValue: boolean
+): WrittenCommand[] => {
   const caret = textBefore.length;
-  const closers = openBrackets(textBefore)
+  const unfinished = `${textBefore}${requiredTokens}`;
+  const closers = openBrackets(unfinished)
     .reverse()
     .map((opener) => CLOSER_OF[opener] ?? '')
     .join('');
-  const finished = `${textBefore}${expectsValue ? CURSOR_MARKER : ''}${closers}`;
+  const finished = `${unfinished}${expectsValue ? CURSOR_MARKER : ''}${closers}`;
 
   return describeCommands(finished)
     .filter(({ start }) => start < caret)
@@ -273,6 +279,76 @@ const toPosition = (
   return previous && COMPLETE.includes(previous.class) ? 'after_argument' : 'start_of_argument';
 };
 
+interface Expectation {
+  position: CursorPosition;
+  expected: ExpectedArgument[];
+  followers: Follower[];
+}
+
+// After a complete argument nothing has to follow, so nothing is added.
+const expectsValue = ({ position, expected, followers }: Expectation): boolean =>
+  position !== 'after_argument' &&
+  (expected.length > 0 || followers.some((follower) => follower.class === 'value'));
+
+// The tokens after which the text could stop or go on freely: none of them is required.
+const OPTIONAL: readonly TokenClass[] = ['end', 'pipe', 'closer', 'separator', 'terminator'];
+const MAX_REQUIRED_TOKENS = 4;
+
+/**
+ * The text with the tokens the grammar requires next, as `IN (` after `a NOT`. Where the text
+ * stops on a token that needs another one, the parser cannot read the command at all, and
+ * what is written of it would be lost.
+ */
+const withRequiredTokens = (
+  textBefore: string,
+  expectation: Expectation
+): { text: string; expectsValue: boolean } => {
+  let text = textBefore;
+  let current = expectation;
+
+  for (let added = 0; added < MAX_REQUIRED_TOKENS; added++) {
+    const [required] = current.followers;
+    const isRequired =
+      current.position === 'start_of_argument' &&
+      !expectsValue(current) &&
+      required?.text !== undefined &&
+      current.followers.every((follower) => !OPTIONAL.includes(follower.class));
+
+    if (!isRequired) {
+      break;
+    }
+
+    text = `${text} ${required.text} `;
+    const location = locateCursor(text, text.length);
+    const expected = toArguments(location);
+    const followers = toFollowers(location);
+
+    current = {
+      position: toPosition(location, expected, followers, toPrevious(location)),
+      expected,
+      followers,
+    };
+  }
+
+  return { text, expectsValue: expectsValue(current) };
+};
+
+/**
+ * What is written in the command the cursor is in: the last command to start whose text
+ * reaches the cursor. A command that is closed before the cursor, as a subquery, does not.
+ */
+const getInnermost = (
+  commands: WrittenCommand[],
+  textBefore: string
+): WrittenArgument[] | undefined =>
+  commands
+    .filter(({ end }) => textBefore.slice(end).trim() === '')
+    .reduce<WrittenCommand | undefined>(
+      (innermost, command) =>
+        !innermost || command.start >= innermost.start ? command : innermost,
+      undefined
+    )?.arguments;
+
 /** The most frequent value, so a stray candidate does not decide the command. */
 const mostFrequent = (values: Array<string | undefined>): string | undefined => {
   const counts = new Map<string, number>();
@@ -312,14 +388,14 @@ export const locate = (text: string, offset: number): CursorIR => {
 
   const position = toPosition(location, expected, followers, previous);
 
+  const textBefore = text.slice(0, caret);
+  const required = location.inComment
+    ? { text: textBefore, expectsValue: false }
+    : withRequiredTokens(textBefore, { position, expected, followers });
   const commands = location.inComment
     ? []
-    : toCommands(
-        text.slice(0, caret),
-        // After a complete argument nothing has to follow, so nothing is added.
-        position !== 'after_argument' &&
-          (expected.length > 0 || followers.some((follower) => follower.class === 'value'))
-      );
+    : toCommands(textBefore, required.text.slice(caret), required.expectsValue);
+  const written = getInnermost(commands, textBefore) ?? [];
 
   return {
     position,
@@ -336,7 +412,7 @@ export const locate = (text: string, offset: number): CursorIR => {
     ...(onlyFollower && { onlyFollower }),
     word,
     next: toNext(text, offset),
-    written: commands.findLast(({ start }) => start === location.segment.start)?.arguments ?? [],
+    written,
     commands,
   };
 };

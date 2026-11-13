@@ -433,6 +433,33 @@ describe('locate', () => {
       expect(ir.written.map(({ text }) => text)).toEqual(['KEEP', 'c', ',']);
     });
 
+    it('is the first command of a branch when the cursor is in it', () => {
+      const ir = at('FROM a | FORK (WHERE b > c ');
+
+      expect(ir.written.map(({ text }) => text)).toEqual(['WHERE', 'b', '>', 'c']);
+    });
+
+    it('is the command around a subquery once the subquery is closed', () => {
+      const ir = at('FROM a | WHERE b IN (FROM c | KEEP d) ');
+
+      expect(ir.written[0].text).toBe('WHERE');
+    });
+
+    it.each([
+      ['FROM a | WHERE b NOT ', ['WHERE', 'b', 'NOT']],
+      ['FROM a | WHERE b IN ', ['WHERE', 'b', 'IN']],
+      ['FROM a | WHERE b IS ', ['WHERE', 'b', 'IS']],
+      ['FROM a | WHERE b IS NOT ', ['WHERE', 'b', 'IS', 'NOT']],
+      ['FROM a | SORT b NULLS ', ['SORT', 'b', 'NULLS']],
+    ])(
+      'keeps what is written in %j, which stops on a token that needs another',
+      (query, written) => {
+        const ir = at(query);
+
+        expect(ir.written.map(({ text }) => text)).toEqual(written);
+      }
+    );
+
     it('is empty where a command starts', () => {
       expect(at('FROM a | ').written).toEqual([]);
       expect(at('').written).toEqual([]);
