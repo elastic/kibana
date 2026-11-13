@@ -903,7 +903,15 @@ class ConversationClientImpl implements ConversationClient {
           const currentEvents = current.events ?? [];
           const stored = currentEvents.find((event) => event.id === eventId);
           if (stored) {
-            throw new SteerSignal('already_stored', { createdAt: stored.created_at });
+            // Answered with the run it was stamped with, which may have ended since.
+            const stampedId =
+              stored.type === TimelineEventType.userMessage
+                ? (stored as UserMessageEvent).data.steer?.execution_id
+                : undefined;
+            throw new SteerSignal('already_stored', {
+              createdAt: stored.created_at,
+              executionId: stampedId,
+            });
           }
           const held = current.active_execution?.execution_id;
           if (!held || isExecutionStale(current.execution)) {
@@ -939,7 +947,7 @@ class ConversationClientImpl implements ConversationClient {
         case 'already_stored':
           return {
             eventId,
-            executionId: holderId ?? '',
+            executionId: error.meta.executionId ?? '',
             createdAt: error.meta.createdAt ?? createdAt,
             alreadyStored: true,
           };

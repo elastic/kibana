@@ -50,16 +50,18 @@ export interface AgentTurnItem {
 
 /**
  * What happened to a message sent while the agent ran, derived from the document. A message the
- * live or a finished run picked up renders as a step instead and has no state here.
+ * live or a finished run picked up renders as a step instead and has no state here; neither has
+ * one that no run read before the conversation went idle, which reads as a plain message the next
+ * run will see.
  */
-export type SteerState = 'waiting' | 'read_by_unfinished' | 'not_read' | 'before_pause';
+export type SteerState = 'waiting' | 'read_by_unfinished' | 'before_pause';
 
 export interface UserMessageItem {
   kind: 'userMessage';
   key: string;
   event: UserMessageEvent;
   isPending?: boolean;
-  /** Set on a steer no finished run has read yet. */
+  /** Set on a steer that still waits for a run to read it. */
   steerState?: SteerState;
   /** Legacy refs, then the refs of the attachments sent with the message. */
   attachmentRefs?: AttachmentVersionRef[];

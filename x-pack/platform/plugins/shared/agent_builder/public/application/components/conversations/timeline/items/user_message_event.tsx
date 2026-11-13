@@ -32,9 +32,6 @@ const steerLabels: Record<SteerState, string> = {
   read_by_unfinished: i18n.translate('xpack.agentBuilder.conversation.steer.readByUnfinished', {
     defaultMessage: 'Read by a run that did not finish; will be read again',
   }),
-  not_read: i18n.translate('xpack.agentBuilder.conversation.steer.notRead', {
-    defaultMessage: 'Not read by that run; will be read on the next one',
-  }),
   before_pause: i18n.translate('xpack.agentBuilder.conversation.steer.beforePause', {
     defaultMessage: 'Will be read after you answer the prompt',
   }),

@@ -23,6 +23,7 @@ import {
   isExecutionTerminalEvent,
   isMessageChunkEvent,
   isMessageDeliveredEvent,
+  isInterimAnswerEvent,
   isRoundCompleteEvent,
   type ChatEvent,
   type RoundCompleteEvent,
@@ -110,8 +111,10 @@ export const deliverCallbackEvents = ({
           (event) =>
             !isMessageChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
-            // A steer pickup is loop plumbing for the attached client, not a callback event.
+            // A steer pickup, and the answer it interrupted, are loop plumbing for the attached
+            // client, not callback events; the round's steps carry both.
             !isMessageDeliveredEvent(event) &&
+            !isInterimAnswerEvent(event) &&
             // Terminal timeline events (terminated / failed / aborted) are never delivered as
             // events: the completion payload and the failure callback are the terminal
             // representations a callback consumer gets.

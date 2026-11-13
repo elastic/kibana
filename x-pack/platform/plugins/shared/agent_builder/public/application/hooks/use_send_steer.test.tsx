@@ -273,6 +273,47 @@ describe('useSendSteer', () => {
       expect(steerIdOfCall(1)).toBe(steerIdOfCall(0));
       expect(steerIdOfCall(2)).not.toBe(steerIdOfCall(0));
     });
+
+    it('recognises the same text as its retry until a request was answered', async () => {
+      steer.mockRejectedValueOnce(networkError());
+      steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+      const { result } = renderHook(() => useSendSteer());
+
+      expect(result.current.isUnansweredSteer('hello')).toBe(false);
+      await act(async () => {
+        await result.current.sendSteer('hello');
+      });
+      expect(result.current.isUnansweredSteer('hello')).toBe(true);
+      expect(result.current.isUnansweredSteer('hello again')).toBe(false);
+
+      await act(async () => {
+        await result.current.sendSteer('hello');
+      });
+      expect(result.current.isUnansweredSteer('hello')).toBe(false);
+    });
+
+    it('retries through the steer path once the run has ended and starts the next run when nothing was stored', async () => {
+      steer.mockRejectedValueOnce(networkError());
+      steer.mockRejectedValueOnce(
+        steerRefusal({ error: 'no_active_execution', already_stored: false })
+      );
+      const { result } = renderHook(() => useSendSteer());
+
+      await act(async () => {
+        await result.current.sendSteer('hello');
+      });
+      let sent: boolean | undefined;
+      await act(async () => {
+        sent = await result.current.sendSteer('hello');
+      });
+
+      expect(sent).toBe(true);
+      expect(steerIdOfCall(1)).toBe(steerIdOfCall(0));
+      expect(sendMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'hello', conversationId })
+      );
+      expect(recordSteer).not.toHaveBeenCalled();
+    });
   });
 
   describe('when the ordinary send is refused because a run took the conversation', () => {
@@ -286,7 +327,7 @@ describe('useSendSteer', () => {
         await result.current.sendSteer('hello', { onUnsent });
       });
       const { onRejected } = sendMessage.mock.calls[0][0];
-      return { onRejected, onUnsent };
+      return { onRejected, onUnsent, result };
     };
 
     it('steers the new run once, under the same id, and handles the rejection', async () => {
@@ -354,6 +395,102 @@ describe('useSendSteer', () => {
       expect(steer).toHaveBeenCalledTimes(1);
       expect(addErrorToast).not.toHaveBeenCalled();
       expect(onUnsent).not.toHaveBeenCalled();
+    });
+
+    it('keeps the id when the steer of the new run gets no answer, so the resend retries it', async () => {
+      const { onRejected, onUnsent, result } = await fallBackToConverse();
+      steer.mockRejectedValueOnce(networkError());
+      steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+
+      act(() => {
+        onRejected(busyRejection());
+      });
+      await waitFor(() => expect(onUnsent).toHaveBeenCalledWith('hello'));
+
+      expect(result.current.isUnansweredSteer('hello')).toBe(true);
+      await act(async () => {
+        await result.current.sendSteer('hello');
+      });
+      expect(steer).toHaveBeenCalledTimes(3);
+      expect(steerIdOfCall(2)).toBe(steerIdOfCall(0));
+    });
+  });
+
+  describe('steering the run that refused an ordinary send', () => {
+    const steerIfBusyHandler = () => {
+      const onUnsent = jest.fn();
+      const { result } = renderHook(() => useSendSteer());
+      const onRejected = result.current.steerIfBusy('hello', { onUnsent });
+      return { onRejected, onUnsent, result };
+    };
+
+    it('steers the run under a new id and shows the message waiting', async () => {
+      steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+      const { onRejected, onUnsent } = steerIfBusyHandler();
+
+      let handled: boolean | undefined;
+      act(() => {
+        handled = onRejected(busyRejection());
+      });
+
+      expect(handled).toBe(true);
+      await waitFor(() => expect(recordSteer).toHaveBeenCalledTimes(1));
+      expect(steer).toHaveBeenCalledWith({
+        conversationId,
+        message: 'hello',
+        eventId: expect.any(String),
+      });
+      expect(addErrorToast).not.toHaveBeenCalled();
+      expect(onUnsent).not.toHaveBeenCalled();
+    });
+
+    it('gives the text back with the reason when the run refuses the steer', async () => {
+      steer.mockRejectedValueOnce(steerRefusal({ error: 'awaiting_prompt' }));
+      const { onRejected, onUnsent } = steerIfBusyHandler();
+
+      act(() => {
+        onRejected(busyRejection());
+      });
+
+      await waitFor(() =>
+        expect(addErrorToast).toHaveBeenCalledWith({
+          title: expect.stringMatching(/waiting for your answer/),
+        })
+      );
+      expect(onUnsent).toHaveBeenCalledWith('hello');
+    });
+
+    it('keeps the id when the steer gets no answer, so the resend retries it', async () => {
+      steer.mockRejectedValueOnce(networkError());
+      steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+      const { onRejected, onUnsent, result } = steerIfBusyHandler();
+
+      act(() => {
+        onRejected(busyRejection());
+      });
+      await waitFor(() => expect(onUnsent).toHaveBeenCalledWith('hello'));
+
+      expect(result.current.isUnansweredSteer('hello')).toBe(true);
+      await act(async () => {
+        await result.current.sendSteer('hello');
+      });
+      expect(steer).toHaveBeenCalledTimes(2);
+      expect(steerIdOfCall(1)).toBe(steerIdOfCall(0));
+    });
+
+    it('leaves any other rejection to the send path', () => {
+      const { onRejected } = steerIfBusyHandler();
+
+      expect(onRejected(httpError({ status: 403, message: 'Forbidden' }))).toBe(false);
+      expect(steer).not.toHaveBeenCalled();
+    });
+
+    it('does nothing without a conversation', () => {
+      useConversationId.mockReturnValue(undefined);
+      const { onRejected } = steerIfBusyHandler();
+
+      expect(onRejected(busyRejection())).toBe(false);
+      expect(steer).not.toHaveBeenCalled();
     });
   });
 });

@@ -253,6 +253,27 @@ describe('renderHistorySteps', () => {
     expect(types(messages)).toEqual(['human', 'human', 'human']);
   });
 
+  it('renders an interim answer as the AI turn before the message that made the run continue', async () => {
+    const steps: ConversationRoundStep[] = [
+      { type: ConversationRoundStepType.interimAnswer, message: 'first answer' },
+      {
+        type: ConversationRoundStepType.deliveredMessage,
+        event_id: 'e1',
+        author: { type: 'user', id: 'u1' },
+        is_run_owner: true,
+        message: 'use a table',
+        delivered_at: '2026-01-01T00:00:00.000Z',
+        cycle: 1,
+        after_answer: true,
+        redelivered: 0,
+      } as ConversationRoundStep,
+    ];
+    const messages = await renderHistorySteps({ steps });
+    expect(types(messages)).toEqual(['ai', 'human']);
+    expect(messages[0].content).toBe('first answer');
+    expect(String(messages[1].content)).toContain('while you were writing the answer above');
+  });
+
   it('renders workflow model context before relevant skills and never renders workflow state', async () => {
     const messages = await renderHistorySteps({
       steps: [

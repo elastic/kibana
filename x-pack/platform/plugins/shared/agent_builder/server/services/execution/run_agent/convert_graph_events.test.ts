@@ -10,6 +10,7 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { Logger } from '@kbn/logging';
 import type { ChatAgentEvent } from '@kbn/agent-builder-common';
 import {
+  EventActorType,
   ChatEventType,
   ConversationRoundStepType,
   ToolOrigin,
@@ -203,6 +204,34 @@ describe('convertGraphEvents', () => {
       }),
     ]);
     expect(events).toEqual([{ type: ChatEventType.backgroundAgentComplete, data: { execution } }]);
+  });
+
+  it('emits interim_answer then message_delivered from the check after the answer', async () => {
+    const delivered = {
+      event_id: 'e1',
+      author: { type: EventActorType.user, id: 'u1' },
+      is_run_owner: true,
+      message: 'use a table',
+      delivered_at: '2026-01-01T00:00:00.000Z',
+      cycle: 1,
+      after_answer: true,
+      redelivered: 0,
+    };
+    const events = await collect([
+      chainEnd(steps.checkIncomingAfterAnswer, {
+        steps: [
+          stepUpdates.append({
+            type: ConversationRoundStepType.interimAnswer,
+            message: 'the first answer',
+          }),
+          stepUpdates.append({ type: ConversationRoundStepType.deliveredMessage, ...delivered }),
+        ],
+      }),
+    ]);
+    expect(events).toEqual([
+      { type: ChatEventType.interimAnswer, data: { message: 'the first answer' } },
+      { type: ChatEventType.messageDelivered, data: delivered },
+    ]);
   });
 
   it('emits substitution_applied for substitution appends, and nothing for a compaction request', async () => {

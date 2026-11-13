@@ -30,6 +30,7 @@ import {
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isMessageDeliveredEvent,
+  isInterimAnswerEvent,
   isPromptRequestEvent,
   isReasoningEvent,
   isSubstitutionAppliedEvent,
@@ -43,6 +44,7 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   createDeliveredMessageStep,
+  createInterimAnswerStep,
   createReasoningStep,
   createSubstitutionStep,
   createToolCallStep,
@@ -277,6 +279,14 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
           tool_call_group_id: event.data.tool_call_group_id,
         })
       )
+    );
+  }
+
+  if (isInterimAnswerEvent(event)) {
+    // The answer written so far moves into the steps; the run goes on and the next chunks start
+    // the answer that follows the message it read.
+    return withStreamingEvent(
+      withAppendedStep({ ...state, message: '' }, createInterimAnswerStep(event.data))
     );
   }
 

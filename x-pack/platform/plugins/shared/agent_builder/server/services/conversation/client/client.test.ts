@@ -23,6 +23,7 @@ import {
   isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
   isConversationWriteConflictError,
+  isNoActiveExecutionError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
 import {
@@ -6432,6 +6433,71 @@ describe('ConversationClient', () => {
       const conversation = await client.get('conversation-1');
 
       expect(conversation.active_execution).toEqual(activeExecution('e1'));
+    });
+
+    describe('appendSteer', () => {
+      const actor = { type: EventActorType.user, id: 'user-1', username: 'test-user' } as const;
+      const steerId = '9c2e0f11-0000-4000-8000-0000000000bb';
+      const storedSteer = {
+        id: steerId,
+        type: TimelineEventType.userMessage,
+        created_at: '2026-10-26T10:00:05.000Z',
+        actor,
+        data: { message: 'use a table', steer: { execution_id: 'e1' } },
+      } as ConversationEvent;
+
+      const appendSteer = () =>
+        client.appendSteer(
+          { id: 'conversation-1', message: 'use a table', eventId: steerId, actor },
+          { source: 'http_api' }
+        );
+
+      it('stamps the message with the live holder and stores it', async () => {
+        mockGetDocumentResponse(documentWithHolder('e1'));
+        liveHolder();
+
+        const result = await appendSteer();
+
+        expect(result).toEqual({
+          eventId: steerId,
+          executionId: 'e1',
+          createdAt: expect.any(String),
+          alreadyStored: false,
+        });
+        const events = indexedSource().events as ConversationEvent[];
+        expect(events[events.length - 1]).toMatchObject({
+          id: steerId,
+          type: TimelineEventType.userMessage,
+          data: { message: 'use a table', steer: { execution_id: 'e1' } },
+        });
+      });
+
+      it('answers a retry with the run the message was stamped with, also once that run has ended', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder(undefined, { events: [userMessage, storedSteer] })
+        );
+
+        const result = await appendSteer();
+
+        expect(result).toEqual({
+          eventId: steerId,
+          executionId: 'e1',
+          createdAt: '2026-10-26T10:00:05.000Z',
+          alreadyStored: true,
+        });
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses without a live holder and says nothing is stored', async () => {
+        mockGetDocumentResponse(documentWithHolder('e1'));
+        staleHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isNoActiveExecutionError(error)).toBe(true);
+        expect((error as { meta: { alreadyStored: boolean } }).meta.alreadyStored).toBe(false);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
     });
   });
 });

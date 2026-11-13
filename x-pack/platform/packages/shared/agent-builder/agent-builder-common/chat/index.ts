@@ -125,6 +125,10 @@ export {
   type DeliveredMessageStepData,
   createDeliveredMessageStep,
   isDeliveredMessageStep,
+  type InterimAnswerStep,
+  type InterimAnswerStepData,
+  createInterimAnswerStep,
+  isInterimAnswerStep,
 } from './conversation';
 export {
   settledMessageIds,
@@ -206,6 +210,10 @@ export {
   type MessageDeliveredEventData,
   createMessageDeliveredEvent,
   isMessageDeliveredEvent,
+  type InterimAnswerEvent,
+  type InterimAnswerEventData,
+  createInterimAnswerEvent,
+  isInterimAnswerEvent,
   type SubagentRosterUpdatedEvent,
   type SubagentRosterUpdatedEventData,
   createSubagentRosterUpdatedEvent,

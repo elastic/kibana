@@ -252,7 +252,9 @@ export const formatDeliveredMessageNotice = (step: DeliveredMessageStep): string
   const who = step.is_run_owner
     ? 'the user who started this run'
     : `another participant (${getEventActorDisplayName(step.author)})`;
-  const arrival = step.tool_call_group_id
+  const arrival = step.after_answer
+    ? `while you were writing the answer above, at cycle ${step.cycle}`
+    : step.tool_call_group_id
     ? `after the tool calls that just returned, at cycle ${step.cycle}`
     : `before the first model call of this run`;
   return generateXmlTree({
@@ -260,7 +262,12 @@ export const formatDeliveredMessageNotice = (step: DeliveredMessageStep): string
     children: [
       {
         tagName: 'message',
-        children: [`A message from ${who} arrived during this run, ${arrival}.`],
+        children: [
+          `A message from ${who} arrived during this run, ${arrival}.` +
+            (step.after_answer
+              ? ' The user has seen that answer. Respond to the message and continue from the answer; do not repeat it.'
+              : ''),
+        ],
       },
       ...(step.redelivered > 0
         ? [

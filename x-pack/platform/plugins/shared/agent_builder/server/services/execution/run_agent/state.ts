@@ -52,6 +52,8 @@ export const StateAnnotation = Annotation.Root({
     reducer: lastValue<ResearchOutcome | undefined>(),
     default: () => undefined,
   }),
+  /** Set by the check after a handover: a message arrived during the answer, the loop goes on. */
+  continueAfterAnswer: Annotation<boolean>({ reducer: lastValue<boolean>(), default: () => false }),
   answerOutcome: Annotation<AnswerOutcome | undefined>({
     reducer: lastValue<AnswerOutcome | undefined>(),
     default: () => undefined,

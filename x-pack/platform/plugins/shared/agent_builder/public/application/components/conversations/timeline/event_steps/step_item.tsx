@@ -14,6 +14,7 @@ import {
   isBackgroundAgentCompleteStep,
   isAskUserQuestionStep,
   isDeliveredMessageStep,
+  isInterimAnswerStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
   VersionedAttachment,
@@ -25,6 +26,7 @@ import { CompactionStep } from './steps/compaction_step';
 import { BackgroundAgentStep } from './steps/background_agent_step';
 import { AskUserQuestionStepEvent } from './steps/ask_user_question_step';
 import { DeliveredMessageStep } from './steps/delivered_message_step';
+import { InterimAnswerStep } from './steps/interim_answer_step';
 
 interface StepItemProps {
   step: ConversationRoundStep;
@@ -67,6 +69,17 @@ export const StepItem: React.FC<StepItemProps> = ({
   }
   if (isDeliveredMessageStep(step)) {
     return <DeliveredMessageStep step={step} />;
+  }
+  if (isInterimAnswerStep(step)) {
+    return (
+      <InterimAnswerStep
+        step={step}
+        steps={steps}
+        conversationAttachments={conversationAttachments}
+        attachmentRefs={attachmentRefs}
+        conversationId={conversationId}
+      />
+    );
   }
   return null;
 };

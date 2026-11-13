@@ -25,6 +25,7 @@ import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { createAgentGraph } from './graph';
 import type { BackgroundExecutionService } from './background_execution_service';
+import type { IncomingMessages } from './incoming_messages';
 import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { stepUpdates } from './step_state';
 import type { PromptFactory } from './prompts';
@@ -62,6 +63,7 @@ const createTestGraph = ({
   runAttachmentEvents,
   cycleHooks,
   backgroundExecutionService,
+  incomingMessages,
 }: {
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
@@ -71,6 +73,7 @@ const createTestGraph = ({
   runAttachmentEvents?: RunAttachmentEvents;
   cycleHooks?: CycleHookRuntime;
   backgroundExecutionService?: BackgroundExecutionService;
+  incomingMessages?: IncomingMessages;
 } = {}) => {
   const researchInvoke = jest.fn();
   const structuredInvoke = jest.fn();
@@ -120,6 +123,7 @@ const createTestGraph = ({
     runAttachmentEvents,
     cycleHooks,
     backgroundExecutionService,
+    incomingMessages,
     contextManagement: {
       connector: { connectorId: 'test-connector' } as InferenceConnector,
       resultStore: createToolResultStoreMock(),
@@ -192,6 +196,77 @@ describe('createAgentGraph', () => {
     expect(toolManager.recordToolUse).toHaveBeenCalledWith('test-tool');
     expect(result.finalAnswer).toBe('answer after tool call');
     expect(result.errorCount).toBe(0);
+  });
+
+  describe('a message that arrives while the answer is written', () => {
+    const steer = (eventId: string) => ({
+      event_id: eventId,
+      author: { type: 'user' as const, id: 'user-1' },
+      is_run_owner: true,
+      message: `m-${eventId}`,
+      delivered_at: '2026-01-01T00:00:00.000Z',
+      cycle: 1,
+      after_answer: true,
+      redelivered: 0,
+    });
+
+    it('keeps the answer as an interim step, reads the message and answers again in the same run', async () => {
+      const drain = jest
+        .fn()
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([steer('s1')]);
+      drain.mockResolvedValue([]);
+      const { graph, researchInvoke, promptFactory } = createTestGraph({
+        incomingMessages: { drain },
+      });
+      researchInvoke
+        .mockResolvedValueOnce(new AIMessage({ content: 'first answer' }))
+        .mockResolvedValueOnce(new AIMessage({ content: 'second answer' }));
+
+      const result = await graph.invoke({ cycleLimit: 10 });
+
+      expect(result.finalAnswer).toBe('second answer');
+      expect(result.steps).toEqual([
+        { type: ConversationRoundStepType.interimAnswer, message: 'first answer' },
+        { type: ConversationRoundStepType.deliveredMessage, ...steer('s1') },
+      ]);
+      // first pass check, the check after the first answer, the check after the second
+      expect(drain.mock.calls.map(([args]) => args)).toEqual([
+        { cycle: 0, lastToolCallGroupId: undefined },
+        { cycle: 1, lastToolCallGroupId: undefined, afterAnswer: true },
+        { cycle: 2, lastToolCallGroupId: undefined, afterAnswer: true },
+      ]);
+      // the second call sees the interim answer and the delivered message
+      expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith({
+        run: expect.objectContaining({ steps: result.steps }),
+      });
+      expect(researchInvoke).toHaveBeenCalledTimes(2);
+    });
+
+    it('ends the run as before when nothing arrived during the answer', async () => {
+      const drain = jest.fn().mockResolvedValue([]);
+      const { graph, researchInvoke } = createTestGraph({ incomingMessages: { drain } });
+      researchInvoke.mockResolvedValueOnce(new AIMessage({ content: 'the answer' }));
+
+      const result = await graph.invoke({ cycleLimit: 10 });
+
+      expect(result.finalAnswer).toBe('the answer');
+      expect(result.steps).toEqual([]);
+      expect(drain).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not check again once the cycle budget is spent', async () => {
+      const drain = jest.fn().mockResolvedValue([steer('s1')]);
+      const { graph, researchInvoke } = createTestGraph({ incomingMessages: { drain } });
+      researchInvoke.mockResolvedValue(new AIMessage({ content: 'answer' }));
+
+      // cycle 0: the first pass reads s1; the answer at cycle 1 is past the budget of 0
+      const result = await graph.invoke({ cycleLimit: 0 });
+
+      expect(result.finalAnswer).toBe('answer');
+      expect(drain).toHaveBeenCalledTimes(1);
+      expect(researchInvoke).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('checks pending background work on the first pass of a run resumed mid-cycle', async () => {
@@ -357,7 +432,7 @@ describe('createAgentGraph', () => {
     });
   });
 
-  it('spans five nodes per tool-calling cycle: a run that spends its whole budget fits in 5n + 7', async () => {
+  it('spans five nodes per tool-calling cycle: a run that spends its whole budget fits in 5n + 8', async () => {
     // `getRecursionLimit` in run_chat_agent relies on this count; adding a node to the cycle must bump it.
     const cycleLimit = 3;
     const { graph, researchInvoke } = createTestGraph();
@@ -371,8 +446,9 @@ describe('createAgentGraph', () => {
           })
         : new AIMessage({ content: 'done' });
     });
-    // the hidden start node counts, then init, the cycles, the answering cycle and finalize
-    const nodes = 5 * cycleLimit + 7;
+    // the hidden start node counts, then init, the cycles, the answering cycle, the check after
+    // the answer and finalize
+    const nodes = 5 * cycleLimit + 8;
 
     await expect(graph.invoke({ cycleLimit }, { recursionLimit: nodes - 1 })).rejects.toThrow(
       /recursion limit/i

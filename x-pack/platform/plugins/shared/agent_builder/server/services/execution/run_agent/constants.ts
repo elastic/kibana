@@ -56,6 +56,7 @@ export const steps = {
   prepareToAnswer: 'prepareToAnswer',
   answerAgent: 'answerAgent',
   forcedAnswer: 'forcedAnswer',
+  checkIncomingAfterAnswer: 'checkIncomingAfterAnswer',
   finalize: 'finalize',
 };
 

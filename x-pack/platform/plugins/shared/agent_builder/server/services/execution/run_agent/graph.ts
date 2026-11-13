@@ -27,6 +27,7 @@ import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import {
   ConversationRoundStepType,
   createDeliveredMessageStep,
+  createInterimAnswerStep,
   isDeliveredMessageStep,
   isSubagentRosterUpdatedStep,
   isToolCallStep,
@@ -287,7 +288,47 @@ export const createAgentGraph = ({
         return steps.executeTool;
       }
     }
-    // handover
+    // handover: the answer is written; a message that arrived meanwhile is read before it ends
+    return steps.checkIncomingAfterAnswer;
+  };
+
+  /**
+   * The last check of a run, after the model answered. A message that arrived while the answer
+   * was written is read now and the run continues from that answer, so nothing sent mid-run waits
+   * for the next run except what lands after this check. The answer stays as an interim step: the
+   * user has read it and the model must see it. Past the cycle budget the run ends as it is.
+   */
+  const checkIncomingAfterAnswer = async (state: StateType): Promise<StateUpdate> => {
+    const outcome = state.researchOutcome;
+    if (
+      !incomingMessages ||
+      outcome?.type !== 'handover' ||
+      state.currentCycle > state.cycleLimit
+    ) {
+      return { continueAfterAnswer: false };
+    }
+    const lastToolCallGroupId = [...state.steps].reverse().find(isToolCallStep)?.tool_call_group_id;
+    const delivered = await incomingMessages.drain({
+      cycle: state.currentCycle,
+      lastToolCallGroupId,
+      afterAnswer: true,
+    });
+    if (delivered.length === 0) {
+      return { continueAfterAnswer: false };
+    }
+    return {
+      continueAfterAnswer: true,
+      steps: [
+        stepUpdates.append(createInterimAnswerStep({ message: outcome.message })),
+        ...delivered.map((data) => stepUpdates.append(createDeliveredMessageStep(data))),
+      ],
+    };
+  };
+
+  const checkIncomingAfterAnswerEdge = async (state: StateType) => {
+    if (state.continueAfterAnswer) {
+      return steps.contextManagement;
+    }
     return structuredOutput ? steps.prepareToAnswer : steps.finalize;
   };
 
@@ -460,6 +501,7 @@ export const createAgentGraph = ({
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
+    .addNode(steps.checkIncomingAfterAnswer, checkIncomingAfterAnswer)
     .addNode(steps.finalize, finalize)
     .addEdge(_START_, steps.init)
     .addEdge(steps.init, steps.checkBackgroundWork)
@@ -486,6 +528,11 @@ export const createAgentGraph = ({
         [steps.contextManagement]: steps.contextManagement,
         [steps.executeTool]: steps.executeTool,
         [steps.prepareToAnswer]: steps.prepareToAnswer,
+        [steps.checkIncomingAfterAnswer]: steps.checkIncomingAfterAnswer,
+      })
+      .addConditionalEdges(steps.checkIncomingAfterAnswer, checkIncomingAfterAnswerEdge, {
+        [steps.contextManagement]: steps.contextManagement,
+        [steps.prepareToAnswer]: steps.prepareToAnswer,
       })
       .addEdge(steps.prepareToAnswer, steps.answerAgent)
       .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
@@ -500,6 +547,10 @@ export const createAgentGraph = ({
         [steps.contextManagement]: steps.contextManagement,
         [steps.executeTool]: steps.executeTool,
         [steps.forcedAnswer]: steps.forcedAnswer,
+        [steps.checkIncomingAfterAnswer]: steps.checkIncomingAfterAnswer,
+      })
+      .addConditionalEdges(steps.checkIncomingAfterAnswer, checkIncomingAfterAnswerEdge, {
+        [steps.contextManagement]: steps.contextManagement,
         [steps.finalize]: steps.finalize,
       })
       .addEdge(steps.forcedAnswer, steps.finalize);

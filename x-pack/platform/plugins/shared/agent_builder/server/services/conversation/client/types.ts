@@ -19,6 +19,7 @@ import type {
   PreExecutionWorkflowStep,
   SubagentRosterUpdatedStep,
   DeliveredMessageStep,
+  InterimAnswerStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -227,7 +228,8 @@ export type PersistentConversationRoundStep =
   | SubagentRosterUpdatedStep
   | SubstitutionStep
   | InjectedContextStep
-  | DeliveredMessageStep;
+  | DeliveredMessageStep
+  | InterimAnswerStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.

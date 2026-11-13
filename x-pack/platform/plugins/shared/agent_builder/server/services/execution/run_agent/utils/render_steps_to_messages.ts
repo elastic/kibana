@@ -20,6 +20,7 @@ import {
   isBackgroundAgentCompleteStep,
   isDeliveredMessageStep,
   isInjectedContextStep,
+  isInterimAnswerStep,
   isPreExecutionWorkflowStep,
   isReasoningStep,
   isRelevantSkillsStep,
@@ -458,6 +459,9 @@ const renderSteps = async (
           interrupted ? formatDeliveredMessageReference(step) : formatDeliveredMessageNotice(step)
         )
       );
+    } else if (isInterimAnswerStep(step)) {
+      // What the model answered before a message made it continue: its own words, verbatim.
+      messages.push(new AIMessage({ content: step.message }));
     } else if (isSubagentRosterUpdatedStep(step)) {
       messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
     } else if (isRelevantSkillsStep(step)) {

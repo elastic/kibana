@@ -154,6 +154,60 @@ export const useSendSteer = () => {
     [conversationsService, conversationStreamService, currentUser]
   );
 
+  /**
+   * Whether the message is the text of a steer request that got no answer. A resend of it is a
+   * retry under the same id, through `sendSteer`, also once the run has ended: the server then
+   * reports the message stored, or lets it start the next run, but never stores it twice.
+   */
+  const isUnansweredSteer = useCallback(
+    (message: string): boolean => {
+      const unanswered = unansweredRef.current;
+      return (
+        unanswered !== undefined &&
+        unanswered.conversationId === conversationId &&
+        unanswered.message === message
+      );
+    },
+    [conversationId]
+  );
+
+  /**
+   * The `onRejected` handler of an ordinary send: when a run took the conversation before the send
+   * acquired it, the message steers that run once, under the given id, so the attempts still amount
+   * to one stored message. Any other rejection is left to the send path.
+   */
+  const steerAfterBusy = useCallback(
+    ({
+        message,
+        eventId,
+        onUnsent,
+      }: {
+        message: string;
+        eventId: string;
+        onUnsent?: (message: string) => void;
+      }) =>
+      (error: unknown): boolean => {
+        if (!conversationId || !isConversationBusyRejection(error)) {
+          return false;
+        }
+        void attemptSteer({ targetConversationId: conversationId, message, eventId }).then(
+          (retry) => {
+            if (retry.kind === 'stored') {
+              return;
+            }
+            if (retry.kind === 'unanswered') {
+              unansweredRef.current = { conversationId, message, eventId };
+            }
+            // The new run gone again is not raced a third time: the text goes back to the user.
+            addErrorToast({ title: retry.kind === 'refused' ? retry.title : labels.failed });
+            onUnsent?.(message);
+          }
+        );
+        return true;
+      },
+    [conversationId, attemptSteer, addErrorToast]
+  );
+
   const sendSteer = useCallback(
     async (message: string, { onUnsent }: SendSteerOptions = {}): Promise<boolean> => {
       if (!conversationId) {
@@ -161,10 +215,7 @@ export const useSendSteer = () => {
       }
       // The same text after an unanswered request is a retry of it, under the same id.
       const unanswered = unansweredRef.current;
-      const eventId =
-        unanswered?.conversationId === conversationId && unanswered.message === message
-          ? unanswered.eventId
-          : uuidv4();
+      const eventId = unanswered && isUnansweredSteer(message) ? unanswered.eventId : uuidv4();
       unansweredRef.current = undefined;
       setIsSending(true);
       try {
@@ -188,25 +239,7 @@ export const useSendSteer = () => {
             sendMessage({
               message,
               conversationId,
-              onRejected: (error) => {
-                if (!isConversationBusyRejection(error)) {
-                  return false;
-                }
-                // Another run took the conversation meanwhile: it is steered once, under the same
-                // id, so the earlier attempts and this one still amount to one stored message.
-                void attemptSteer({ targetConversationId: conversationId, message, eventId }).then(
-                  (retry) => {
-                    if (retry.kind === 'stored') {
-                      return;
-                    }
-                    addErrorToast({
-                      title: retry.kind === 'refused' ? retry.title : labels.failed,
-                    });
-                    onUnsent?.(message);
-                  }
-                );
-                return true;
-              },
+              onRejected: steerAfterBusy({ message, eventId, onUnsent }),
             });
             return true;
         }
@@ -214,8 +247,15 @@ export const useSendSteer = () => {
         setIsSending(false);
       }
     },
-    [conversationId, attemptSteer, sendMessage, addErrorToast]
+    [conversationId, isUnansweredSteer, attemptSteer, sendMessage, addErrorToast, steerAfterBusy]
   );
 
-  return { sendSteer, isSending };
+  /** For an ordinary send of `message`: steers the run that refused it as busy, under a new id. */
+  const steerIfBusy = useCallback(
+    (message: string, { onUnsent }: SendSteerOptions = {}) =>
+      steerAfterBusy({ message, eventId: uuidv4(), onUnsent }),
+    [steerAfterBusy]
+  );
+
+  return { sendSteer, steerIfBusy, isUnansweredSteer, isSending };
 };

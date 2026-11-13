@@ -14,6 +14,8 @@ import type { BackgroundAgentCompleteStep, ChatAgentEvent } from '@kbn/agent-bui
 import {
   ChatEventType,
   createMessageDeliveredEvent,
+  createInterimAnswerEvent,
+  isInterimAnswerStep,
   createSubstitutionAppliedEvent,
   isBackgroundAgentCompleteStep,
   isCompactionStep,
@@ -327,6 +329,27 @@ export const convertGraphEvents = ({
           if (bgEvents.length > 0) {
             return of(...bgEvents);
           }
+        }
+
+        // A message read after the answer: the answer becomes an interim step, then the pickup.
+        if (
+          isRootGraphNodeEnd(event, graphName) &&
+          matchName(event, steps.checkIncomingAfterAnswer)
+        ) {
+          const output = event.data.output as { steps?: RunStepUpdate[] };
+          const continued: ChatAgentEvent[] = [];
+          for (const update of output.steps ?? []) {
+            if (update.type !== 'append') {
+              continue;
+            }
+            if (isInterimAnswerStep(update.step)) {
+              continued.push(createInterimAnswerEvent({ message: update.step.message }));
+            } else if (isDeliveredMessageStep(update.step)) {
+              const { type, ...data } = update.step;
+              continued.push(createMessageDeliveredEvent(data));
+            }
+          }
+          return continued.length > 0 ? of(...continued) : EMPTY;
         }
 
         return EMPTY;

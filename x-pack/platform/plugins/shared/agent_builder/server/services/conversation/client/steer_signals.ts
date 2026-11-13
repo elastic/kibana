@@ -20,6 +20,6 @@ export type SteerSignalKind =
 export class SteerSignal {
   constructor(
     public readonly kind: SteerSignalKind,
-    public readonly meta: { alreadyStored?: boolean; createdAt?: string } = {}
+    public readonly meta: { alreadyStored?: boolean; createdAt?: string; executionId?: string } = {}
   ) {}
 }

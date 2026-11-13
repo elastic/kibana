@@ -76,8 +76,15 @@ jest.mock('../../../hooks/use_submit_message', () => ({
   useSubmitMessage: jest.fn(),
 }));
 const mockSendSteer = jest.fn();
+const mockSteerIfBusy = jest.fn();
+const mockIsUnansweredSteer = jest.fn();
 jest.mock('../../../hooks/use_send_steer', () => ({
-  useSendSteer: () => ({ sendSteer: mockSendSteer, isSending: false }),
+  useSendSteer: () => ({
+    sendSteer: mockSendSteer,
+    steerIfBusy: mockSteerIfBusy,
+    isUnansweredSteer: mockIsUnansweredSteer,
+    isSending: false,
+  }),
 }));
 jest.mock('../../../hooks/use_send_user_message', () => ({
   useSendUserMessage: jest.fn(),
@@ -85,6 +92,7 @@ jest.mock('../../../hooks/use_send_user_message', () => ({
 jest.mock('../../../hooks/use_toasts', () => ({
   useToasts: jest.fn(),
 }));
+const steerIfBusyHandler = jest.fn();
 const mockOnEditorRender = jest.fn();
 jest.mock('./message_editor', () => ({
   useMessageEditor: jest.fn(),
@@ -273,6 +281,8 @@ describe('ConversationInput', () => {
     mockedUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
     sendUserMessage.mockResolvedValue({ id: 'conv-1' });
     mockSendSteer.mockResolvedValue(true);
+    mockIsUnansweredSteer.mockReturnValue(false);
+    mockSteerIfBusy.mockReturnValue(steerIfBusyHandler);
     mockedUseSendUserMessage.mockReturnValue({
       mutateAsync: sendUserMessage,
       isLoading: false,
@@ -307,8 +317,32 @@ describe('ConversationInput', () => {
     fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
     expect(submitMessage).toHaveBeenCalledTimes(1);
-    expect(submitMessage).toHaveBeenCalledWith('hello agent');
+    expect(submitMessage).toHaveBeenCalledWith('hello agent', { onRejected: steerIfBusyHandler });
     expect(editorController.clear).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets a send refused as busy steer the run that took the conversation', () => {
+    renderInput(<ConversationInput />);
+
+    fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+    expect(mockSteerIfBusy).toHaveBeenCalledWith('hello agent', { onUnsent: expect.any(Function) });
+    const { onUnsent } = mockSteerIfBusy.mock.calls[0][1];
+    onUnsent('hello agent');
+    expect(editorController.setContent).toHaveBeenCalledWith('hello agent');
+  });
+
+  it('retries an unanswered steer through the steer path once the run has ended', async () => {
+    mockedUseConversationId.mockReturnValue('conv-1');
+    mockIsUnansweredSteer.mockImplementation((message: string) => message === 'hello agent');
+    renderInput(<ConversationInput />);
+
+    fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+    expect(mockIsUnansweredSteer).toHaveBeenCalledWith('hello agent');
+    expect(mockSendSteer).toHaveBeenCalledWith('hello agent', { onUnsent: expect.any(Function) });
+    expect(submitMessage).not.toHaveBeenCalled();
+    await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
   });
 
   it('holds the submit until it knows whether the agent picks its own model', () => {
@@ -462,7 +496,7 @@ describe('ConversationInput', () => {
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(submitMessage).toHaveBeenCalledWith('hello agent', expect.anything());
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
 
@@ -519,7 +553,7 @@ describe('ConversationInput', () => {
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(submitMessage).toHaveBeenCalledWith('hello agent', expect.anything());
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
 

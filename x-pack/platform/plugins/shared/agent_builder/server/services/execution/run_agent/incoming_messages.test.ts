@@ -103,6 +103,20 @@ describe('createIncomingMessages', () => {
     expect(delivered[0]).toMatchObject({ cycle: 0, redelivered: 0, message: 'm-s2' });
   });
 
+  it('marks a message read after the answer so the notice and the placement say so', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([steer('s1')]),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+
+    const delivered = await incoming.drain({ cycle: 2, afterAnswer: true });
+
+    expect(delivered[0]).toMatchObject({ event_id: 's1', cycle: 2, after_answer: true });
+    expect(delivered[0]).not.toHaveProperty('tool_call_group_id');
+  });
+
   it('skips the body read when the version did not change', async () => {
     const { client, incoming } = setup();
     client.getWithVersion.mockResolvedValue({

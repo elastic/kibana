@@ -114,6 +114,7 @@ export enum ConversationRoundStepType {
   substitution = 'substitution',
   injectedContext = 'injected_context',
   deliveredMessage = 'delivered_message',
+  interimAnswer = 'interim_answer',
 }
 
 // tool call step
@@ -347,6 +348,11 @@ export interface DeliveredMessageStepData {
   cycle: number;
   /** The tool call group that preceded the pickup, for placement. */
   tool_call_group_id?: string;
+  /**
+   * True when the run had already written its answer when it read the message; that answer is the
+   * `interim_answer` step before this one and the run continued from it.
+   */
+  after_answer?: boolean;
   /** How many earlier executions read the same message without finishing. */
   redelivered: number;
 }
@@ -367,6 +373,29 @@ export const isDeliveredMessageStep = (
   step: ConversationRoundStep
 ): step is DeliveredMessageStep => {
   return step.type === ConversationRoundStepType.deliveredMessage;
+};
+
+/**
+ * An answer the run had written when a message that arrived meanwhile made it continue. The
+ * round's response is the last answer; this one stays among the steps, so the transcript keeps
+ * what the user already read and the model sees what it already said.
+ */
+export interface InterimAnswerStepData {
+  message: string;
+}
+
+export type InterimAnswerStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.interimAnswer,
+  InterimAnswerStepData
+>;
+
+export const createInterimAnswerStep = (data: InterimAnswerStepData): InterimAnswerStep => ({
+  type: ConversationRoundStepType.interimAnswer,
+  ...data,
+});
+
+export const isInterimAnswerStep = (step: ConversationRoundStep): step is InterimAnswerStep => {
+  return step.type === ConversationRoundStepType.interimAnswer;
 };
 
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
@@ -491,7 +520,8 @@ export type ConversationRoundStep =
   | SubagentRosterUpdatedStep
   | SubstitutionStep
   | InjectedContextStep
-  | DeliveredMessageStep;
+  | DeliveredMessageStep
+  | InterimAnswerStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.

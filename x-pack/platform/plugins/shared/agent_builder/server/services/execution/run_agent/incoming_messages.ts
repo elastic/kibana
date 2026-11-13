@@ -16,7 +16,12 @@ export interface IncomingMessages {
    * Claims every pending steer the conversation holds that this execution has not delivered yet,
    * for the loop to put in front of the model. Returns step data; the graph node wraps it.
    */
-  drain(args: { cycle: number; lastToolCallGroupId?: string }): Promise<DeliveredMessageStepData[]>;
+  drain(args: {
+    cycle: number;
+    lastToolCallGroupId?: string;
+    /** The run had written its answer when it checked; the steps carry it as an interim answer. */
+    afterAnswer?: boolean;
+  }): Promise<DeliveredMessageStepData[]>;
 }
 
 /**
@@ -46,7 +51,7 @@ export const createIncomingMessages = ({
   const deliveredThisExecution = new Set<string>();
   let stopped = false;
 
-  const drain: IncomingMessages['drain'] = async ({ cycle, lastToolCallGroupId }) => {
+  const drain: IncomingMessages['drain'] = async ({ cycle, lastToolCallGroupId, afterAnswer }) => {
     if (stopped) {
       return [];
     }
@@ -88,6 +93,7 @@ export const createIncomingMessages = ({
           delivered_at: deliveredAt,
           cycle,
           ...(lastToolCallGroupId ? { tool_call_group_id: lastToolCallGroupId } : {}),
+          ...(afterAnswer ? { after_answer: true } : {}),
           redelivered: unfinishedReadCount(events, event.id),
         };
       });

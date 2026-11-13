@@ -29,6 +29,7 @@ import type {
   RoundInput,
   BackgroundExecutionState,
   DeliveredMessageStepData,
+  InterimAnswerStepData,
   SubagentRosterEntry,
   SubstitutionStepData,
 } from './conversation';
@@ -64,6 +65,7 @@ export enum ChatEventType {
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
   messageDelivered = 'message_delivered',
+  interimAnswer = 'interim_answer',
   subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
@@ -576,6 +578,25 @@ export const isMessageDeliveredEvent = (
   return event.type === ChatEventType.messageDelivered;
 };
 
+/**
+ * The answer streamed so far became an `interim_answer` step: a message arrived while it was
+ * written and the run continues. The next chunks start the next answer.
+ */
+export type InterimAnswerEventData = InterimAnswerStepData;
+
+export type InterimAnswerEvent = ChatEventBase<ChatEventType.interimAnswer, InterimAnswerEventData>;
+
+export const createInterimAnswerEvent = (data: InterimAnswerEventData): InterimAnswerEvent => ({
+  type: ChatEventType.interimAnswer,
+  data,
+});
+
+export const isInterimAnswerEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is InterimAnswerEvent => {
+  return event.type === ChatEventType.interimAnswer;
+};
+
 export interface SubagentRosterUpdatedEventData {
   /** Full active roster at time of emission. */
   roster: SubagentRosterEntry[];
@@ -668,6 +689,7 @@ export type ChatAgentEvent =
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
   | MessageDeliveredEvent
+  | InterimAnswerEvent
   | SubagentRosterUpdatedEvent
   | SubstitutionAppliedEvent
   | UserQuestionAskedEvent

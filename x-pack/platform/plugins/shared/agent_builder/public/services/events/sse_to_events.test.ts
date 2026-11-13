@@ -126,6 +126,20 @@ describe('sseToEvents', () => {
     expect(streamingEvent(state)?.data.message).toBe('Hello');
   });
 
+  it('moves the answer written so far into a step when the run reads a message after it', () => {
+    const interim = {
+      type: ChatEventType.interimAnswer,
+      data: { message: 'first answer' },
+    } as ChatEvent;
+    const state = fold(executionStarted(), chunk('first answer'), interim, chunk('second'));
+
+    expect(stepOf(state, executionStepEventId(ROUND_ID, 0, 0))).toEqual({
+      type: ConversationRoundStepType.interimAnswer,
+      message: 'first answer',
+    });
+    expect(streamingEvent(state)?.data.message).toBe('second');
+  });
+
   it('patches the same step event through tool call, progress and result', () => {
     const stepId = executionStepEventId(ROUND_ID, 0, 0);
     const state = fold(

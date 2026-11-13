@@ -7,7 +7,11 @@
 
 import type { AIMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  EventActorType,
+  ExecutionStatus,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
@@ -15,6 +19,7 @@ import {
   EXECUTION_FAILED_NOTICE_MAX_LENGTH,
   createCycleLimitSystemMessage,
   formatAwaitingPromptNotice,
+  formatDeliveredMessageNotice,
   formatExecutionAbortedNotice,
   formatExecutionFailedNotice,
   formatHandover,
@@ -120,6 +125,35 @@ describe('formatRetryNotice', () => {
   it('renders nothing for non-recoverable errors', () => {
     const error = createAgentExecutionError('boom', AgentExecutionErrorCode.unknownError, {});
     expect(formatRetryNotice(error)).toEqual([]);
+  });
+});
+
+describe('formatDeliveredMessageNotice', () => {
+  const delivered = {
+    type: ConversationRoundStepType.deliveredMessage as const,
+    event_id: 'e1',
+    author: { type: EventActorType.user, id: 'u1', username: 'sid' },
+    is_run_owner: true,
+    message: 'use a table',
+    delivered_at: '2026-01-01T00:00:00.000Z',
+    cycle: 2,
+    redelivered: 0,
+  };
+
+  it('places a message read after a tool batch at that batch', () => {
+    const notice = formatDeliveredMessageNotice({ ...delivered, tool_call_group_id: 'g1' });
+
+    expect(notice).toContain('after the tool calls that just returned, at cycle 2');
+    expect(notice).toContain('<user_message>use a table</user_message>');
+    expect(notice).not.toContain('do not repeat it');
+  });
+
+  it('tells the model the user has seen the answer when the message was read after it', () => {
+    const notice = formatDeliveredMessageNotice({ ...delivered, after_answer: true });
+
+    expect(notice).toContain('while you were writing the answer above, at cycle 2');
+    expect(notice).toContain('The user has seen that answer.');
+    expect(notice).toContain('do not repeat it');
   });
 });
 

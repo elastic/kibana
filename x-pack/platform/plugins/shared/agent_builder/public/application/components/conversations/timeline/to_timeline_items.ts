@@ -42,7 +42,8 @@ import {
 
 /**
  * Where each steer stands: picked up by a run that is live or finished (the step carries it, the
- * message item is dropped), read only by runs that did not finish, or not read at all.
+ * message item is dropped), read only by runs that did not finish, or still waiting. One no run
+ * read before the conversation went idle is a plain message: nothing to say about it.
  */
 const steerPlacement = (events: TimelineDisplayEvent[]) => {
   const terminals = new Map<string, TimelineEventType>();
@@ -80,14 +81,14 @@ export const groupTimelineEvents = (
   const displayEvents = events.filter(isTimelineDisplayEvent);
   const awaitingPromptEventId = findAwaitingPromptEventId(displayEvents);
   const steers = steerPlacement(displayEvents);
-  const steerStateOf = (eventId: string): SteerState =>
+  const steerStateOf = (eventId: string): SteerState | undefined =>
     steers.readByUnfinished(eventId)
       ? 'read_by_unfinished'
       : awaitingPromptEventId
       ? 'before_pause'
       : steers.hasLiveExecution
       ? 'waiting'
-      : 'not_read';
+      : undefined;
   const answers = answersByPromptId(displayEvents);
   const resolvedToolCalls = resolvedToolCallIds(displayEvents);
   const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
@@ -140,6 +141,7 @@ export const groupTimelineEvents = (
         if (isSteer && steers.carriedByStep(event.id)) {
           break;
         }
+        const steerState = isSteer ? steerStateOf(event.id) : undefined;
         const attachmentRefs = [
           ...(event.data.attachment_refs ?? []),
           ...(inputRefs.get(event.id) ?? []),
@@ -150,7 +152,7 @@ export const groupTimelineEvents = (
           event,
           ...(attachmentRefs.length > 0 ? { attachmentRefs } : {}),
           ...(event.id === pendingUserMessageId ? { isPending: true } : {}),
-          ...(isSteer ? { steerState: steerStateOf(event.id) } : {}),
+          ...(steerState ? { steerState } : {}),
         });
         break;
       }
