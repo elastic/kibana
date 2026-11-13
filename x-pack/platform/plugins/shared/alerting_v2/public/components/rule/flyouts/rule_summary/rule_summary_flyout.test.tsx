@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { EuiHealthProps } from '@elastic/eui';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
@@ -45,6 +47,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useRuleAutoAttach: jest.fn(),
 }));
 
@@ -68,6 +71,7 @@ jest.mock('../../../../services/user_capabilities', () => ({
 
 jest.mock('@kbn/core-di-browser', () => {
   const canRead = jest.fn(() => true);
+  let agentBuilder: unknown = {};
   return {
     useService: (token: unknown) => {
       if (token === 'http') {
@@ -76,15 +80,22 @@ jest.mock('@kbn/core-di-browser', () => {
       if (token === 'UserCapabilities') {
         return { canRead, canWrite: () => true };
       }
+      if (token === Symbol.for('plugin.start.agentBuilder')) {
+        return agentBuilder;
+      }
       return {};
     },
     CoreStart: (key: string) => key,
     mockCanRead: canRead,
+    setMockAgentBuilder: (next: unknown) => {
+      agentBuilder = next;
+    },
   };
 });
 
-const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
+const { mockCanRead, setMockAgentBuilder } = jest.requireMock('@kbn/core-di-browser') as {
   mockCanRead: jest.Mock;
+  setMockAgentBuilder: (agentBuilder: unknown) => void;
 };
 
 jest.mock('../../rule_conditions', () => ({
@@ -150,6 +161,7 @@ const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
 
 describe('RuleSummaryFlyout', () => {
   beforeEach(() => {
+    setMockAgentBuilder({});
     mockCanRead.mockImplementation(() => true);
     mockUseFetchRuleExecutions.mockReturnValue({
       data: { items: [], total: 0, page: 1, per_page: 1 },
@@ -549,6 +561,65 @@ describe('RuleSummaryFlyout', () => {
       renderFlyout();
 
       expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
+    });
+  });
+
+  describe('Add to chat', () => {
+    const ruleAttachment = {
+      id: 'rule:rule-1',
+      type: RULE_ATTACHMENT_TYPE,
+      origin: 'rule-1',
+      data: baseRule,
+    };
+
+    it('hides the button when Agent Builder cannot open chat', () => {
+      renderFlyout();
+
+      expect(screen.queryByTestId('ruleSummaryFlyoutAddToChatButton')).not.toBeInTheDocument();
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
+    });
+
+    it('opens a new conversation with the rule when chat is unbound', () => {
+      const openChat = jest.fn();
+      const addAttachment = jest.fn();
+      setMockAgentBuilder({
+        openChat,
+        addAttachment,
+        events: { ui: { activeConversation$: new BehaviorSubject(null) } },
+      });
+
+      renderFlyout();
+
+      const footer = screen.getByTestId('ruleSummaryFlyoutFooter');
+      const text = footer.textContent ?? '';
+      expect(text.indexOf('Add to chat')).toBeLessThan(text.indexOf('Take action'));
+
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutAddToChatButton'));
+
+      expect(openChat).toHaveBeenCalledWith({
+        autoSendInitialMessage: false,
+        newConversation: true,
+        attachments: [ruleAttachment],
+      });
+      expect(addAttachment).not.toHaveBeenCalled();
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
+    });
+
+    it('attaches the rule to the bound conversation', () => {
+      const openChat = jest.fn();
+      const addAttachment = jest.fn();
+      setMockAgentBuilder({
+        openChat,
+        addAttachment,
+        events: { ui: { activeConversation$: new BehaviorSubject({ id: 'conv-1' }) } },
+      });
+
+      renderFlyout();
+
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutAddToChatButton'));
+
+      expect(addAttachment).toHaveBeenCalledWith(ruleAttachment);
+      expect(openChat).not.toHaveBeenCalled();
     });
   });
 });

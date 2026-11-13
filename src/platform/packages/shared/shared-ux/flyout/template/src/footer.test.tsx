@@ -255,6 +255,37 @@ describe('FlyoutTemplate footer', () => {
       expect(onClick).toHaveBeenCalledTimes(1);
     });
 
+    it('uses the shared Add to chat label and icon, and sits left of the primary action', async () => {
+      const onClick = jest.fn();
+      renderTemplate(
+        <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
+          <FlyoutTemplate.Body>
+            <span>content</span>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction
+              variant="ai"
+              iconType="addToChat"
+              onClick={onClick}
+              data-test-subj="addToChat"
+            />
+            <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      );
+
+      const button = screen.getByRole('button', { name: 'Add to chat' });
+      expect(button).toHaveAttribute('data-test-subj', 'addToChat');
+      expect(button.querySelector('[data-euiicon-type="addToChat"]')).toBeInTheDocument();
+      expect(screen.getByTestId('withFooterFooter').querySelector('linearGradient')).not.toBeNull();
+
+      const text = screen.getByTestId('withFooterFooter').textContent ?? '';
+      expect(text.indexOf('Add to chat')).toBeLessThan(text.indexOf('Save'));
+
+      await userEvent.click(button);
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
     it('does not apply AI styling without the variant', () => {
       renderTemplate(
         <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
