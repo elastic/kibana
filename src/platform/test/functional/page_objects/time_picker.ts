@@ -56,6 +56,30 @@ export class TimePickerPageObject extends FtrService {
   }
 
   /**
+   * Converts a date string typed into the picker to the ISO string Kibana
+   * stores in the URL, parsing it in the configured timezone so it matches what
+   * the picker itself produces. Falls back to moment's auto-detection so
+   * callers can pass dates in any format (e.g. a custom `dateFormat`).
+   */
+  private toIsoInTimezone(value: string, timezone: string): string {
+    const parsed = moment.tz(value, TimePickerPageObject.LEGACY_DATE_FORMAT, true, timezone);
+    return (parsed.isValid() ? parsed : moment.tz(value, timezone)).toISOString();
+  }
+
+  /**
+   * The `_g` time segment Kibana writes to the URL once an absolute range has
+   * been committed, used both to skip redundant work and to confirm that an
+   * apply click actually landed.
+   */
+  private async getGlobalTimeUrlSegment(fromTime: string, toTime: string): Promise<string> {
+    const timezone = await this.getConfiguredTimezone();
+    return `time:(from:'${this.toIsoInTimezone(fromTime, timezone)}',to:'${this.toIsoInTimezone(
+      toTime,
+      timezone
+    )}'`;
+  }
+
+  /**
    * Detects whether the page is using the new DateRangePicker or the legacy
    * EuiSuperDatePicker. Not cached because different apps may use different
    * picker variants within the same test suite.
@@ -252,24 +276,26 @@ export class TimePickerPageObject extends FtrService {
    * @param {Boolean} force time picker force update, default is false
    */
   public async setAbsoluteRange(fromTime: string, toTime: string, force = false) {
-    if (!force) {
-      const currentUrl = decodeURI(await this.browser.getCurrentUrl());
-      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
-      const startMoment = moment.utc(fromTime, DEFAULT_DATE_FORMAT).toISOString();
-      const endMoment = moment.utc(toTime, DEFAULT_DATE_FORMAT).toISOString();
-      if (currentUrl.includes(`time:(from:'${startMoment}',to:'${endMoment}'`)) {
-        this.log.debug(
-          `We already have the desired start (${fromTime}) and end (${toTime}) in the URL, returning from setAbsoluteRange`
-        );
-        return;
-      }
+    const expectedTimeInUrl = await this.getGlobalTimeUrlSegment(fromTime, toTime);
+    const currentUrl = decodeURI(await this.browser.getCurrentUrl());
+    if (!force && currentUrl.includes(expectedTimeInUrl)) {
+      this.log.debug(
+        `We already have the desired start (${fromTime}) and end (${toTime}) in the URL, returning from setAbsoluteRange`
+      );
+      return;
     }
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
 
     if (await this.isNewDateRangePicker()) {
       await this.setAbsoluteRangeNewPicker(fromTime, toTime);
     } else {
-      await this.setAbsoluteRangeLegacyPicker(fromTime, toTime);
+      // Neither a forced re-apply nor an app that keeps global time out of the
+      // URL (hashed `_g`, embedded pickers) leaves a committed value to wait on.
+      await this.setAbsoluteRangeLegacyPicker(
+        fromTime,
+        toTime,
+        !force && currentUrl.includes('time:(') ? expectedTimeInUrl : undefined
+      );
     }
 
     await this.header.awaitGlobalLoadingIndicatorHidden();
@@ -281,14 +307,8 @@ export class TimePickerPageObject extends FtrService {
     // contain ISO strings. Convert the expected start time to ISO for matching,
     // using the configured timezone so it matches what the picker's parser produces.
     const tz = await this.getConfiguredTimezone();
-    // Try the legacy format first; fall back to moment's auto-detection
-    // so callers can pass dates in any format (e.g. custom dateFormat).
-    const parsedFrom = moment.tz(fromTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
-    const parsedTo = moment.tz(toTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
-    const expectedFromISO = (
-      parsedFrom.isValid() ? parsedFrom : moment.tz(fromTime, tz)
-    ).toISOString();
-    const expectedToISO = (parsedTo.isValid() ? parsedTo : moment.tz(toTime, tz)).toISOString();
+    const expectedFromISO = this.toIsoInTimezone(fromTime, tz);
+    const expectedToISO = this.toIsoInTimezone(toTime, tz);
     await this.retry.waitFor(`date range to be set to ${rangeText}`, async () => {
       // Tooltips can sometimes hide the picker, so move mouse directly to it instead of direct click
       const picker = await this.testSubjects.find('dateRangePickerControlButton');
@@ -329,7 +349,11 @@ export class TimePickerPageObject extends FtrService {
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
-  private async setAbsoluteRangeLegacyPicker(fromTime: string, toTime: string) {
+  private async setAbsoluteRangeLegacyPicker(
+    fromTime: string,
+    toTime: string,
+    expectedTimeInUrl?: string
+  ) {
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
       await this.showStartEndTimes();
@@ -377,6 +401,28 @@ export class TimePickerPageObject extends FtrService {
     }
     // The picker re-renders as its date popover closes, so a bare resolve-and-click can be swallowed.
     await this.testSubjects.clickWhenNotDisabled(submitButton);
+
+    if (!expectedTimeInUrl) {
+      return;
+    }
+
+    // A click racing a consumer that disables the button (ML feeds its in-flight
+    // HTTP count into the picker) is dropped silently; re-applying is idempotent.
+    await this.retry.tryForTime(
+      20_000,
+      async () => {
+        const currentUrl = decodeURI(await this.browser.getCurrentUrl());
+        if (!currentUrl.includes(expectedTimeInUrl)) {
+          throw new Error(
+            `Applying the absolute range ${fromTime} to ${toTime} did not commit it: expected the URL to contain "${expectedTimeInUrl}", got "${currentUrl}"`
+          );
+        }
+      },
+      async () => {
+        await this.testSubjects.clickWhenNotDisabled(submitButton);
+      },
+      1_000
+    );
   }
 
   public async isOff() {
