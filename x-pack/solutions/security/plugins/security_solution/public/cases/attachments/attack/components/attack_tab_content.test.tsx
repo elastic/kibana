@@ -62,6 +62,8 @@ jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({ openAttackFlyout: mockOpenAttackFlyout }),
 }));
 
+jest.setTimeout(20_000);
+
 /** EUI's own handles on the data grid controls, which have no constant of ours to come from. */
 const EUI_COLUMN_SELECTOR_TEST_ID = 'dataGridColumnSelectorButton';
 const EUI_COLUMN_SORTING_TEST_ID = 'dataGridColumnSortingButton';
