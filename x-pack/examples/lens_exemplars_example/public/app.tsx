@@ -6,19 +6,12 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import type { BehaviorSubject } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonGroup,
   EuiCodeBlock,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
@@ -26,12 +19,11 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTextArea,
-  EuiTitle,
 } from '@elastic/eui';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { LensConfigBuilder, lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
-import { EXEMPLARS_APP_ID, EXEMPLARS_EXTENSION_ID, type Exemplar } from './exemplars_extension';
+import { EXEMPLARS_APP_ID, EXEMPLARS_EXTENSION_ID } from './exemplars_extension';
 import type { StartDependencies } from './plugin';
 
 const PRESETS = {
@@ -71,38 +63,11 @@ const getAttributes = (
     })
   ) as TypedLensByValueInput['attributes'];
 
-const ExemplarFlyout = ({ exemplar, onClose }: { exemplar: Exemplar; onClose: () => void }) => (
-  <EuiFlyout onClose={onClose} size="s" aria-labelledby="exemplarFlyoutTitle">
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="s">
-        <h2 id="exemplarFlyoutTitle">Exemplar</h2>
-      </EuiTitle>
-      {exemplar.simulated && <EuiBadge color="hollow">Simulated</EuiBadge>}
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody>
-      <EuiDescriptionList
-        type="row"
-        compressed
-        listItems={Object.entries(exemplar.fields)
-          .filter(([, value]) => value != null)
-          .map(([title, value]) => ({ title, description: String(value) }))}
-      />
-    </EuiFlyoutBody>
-  </EuiFlyout>
-);
-
-export const App = ({
-  plugins,
-  selectedExemplar$,
-}: {
-  plugins: StartDependencies;
-  selectedExemplar$: BehaviorSubject<Exemplar | undefined>;
-}) => {
+export const App = ({ plugins }: { plugins: StartDependencies }) => {
   const [presetId, setPresetId] = useState<PresetId>('sampleLogs');
   const [draftQuery, setDraftQuery] = useState<string>(PRESETS.sampleLogs);
   const [query, setQuery] = useState<string>(PRESETS.sampleLogs);
   const [showExemplars, setShowExemplars] = useState(true);
-  const selectedExemplar = useObservable(selectedExemplar$, undefined);
 
   const LensComponent = plugins.lens.EmbeddableComponent;
   const extensions = useMemo(() => ({ [EXEMPLARS_EXTENSION_ID]: showExemplars }), [showExemplars]);
@@ -125,9 +90,9 @@ export const App = ({
             text={
               <p>
                 Nothing is stored in the chart. The extension matches ES|QL layers with a STATS
-                command rendered by this app, and fetches its points after the chart has loaded.
-                Keep the <code>bucket</code> and <code>value</code> column names when editing the
-                query.
+                command rendered by this app, a dashboard or Discover, and fetches its points after
+                the chart has loaded. Keep the <code>bucket</code> and <code>value</code> column
+                names when editing the query.
               </p>
             }
           />
@@ -174,7 +139,7 @@ export const App = ({
               attributes={attributes.value}
               timeRange={TIME_RANGE}
               viewMode="view"
-              executionContext={{ type: 'application', name: EXEMPLARS_APP_ID }}
+              executionContext={{ type: EXEMPLARS_APP_ID }}
               extensions={extensions}
             />
           ) : (
@@ -182,12 +147,6 @@ export const App = ({
           )}
         </EuiPageSection>
       </EuiPageBody>
-      {selectedExemplar && (
-        <ExemplarFlyout
-          exemplar={selectedExemplar}
-          onClose={() => selectedExemplar$.next(undefined)}
-        />
-      )}
     </EuiPage>
   );
 };

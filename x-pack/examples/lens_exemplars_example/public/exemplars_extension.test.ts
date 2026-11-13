@@ -18,11 +18,28 @@ const LOGS_QUERY =
 const TS_QUERY =
   'TS metrics-* | STATS value = AVG(http.server.request.duration) BY TBUCKET(5 minutes)';
 
-const getContext = (surface: string, esql: string): LensExtensionMatchContext => ({
+const getContext = (
+  esql: string,
+  executionContext: LensExtensionMatchContext['executionContext']
+): LensExtensionMatchContext => ({
   visualizationType: 'lnsXY',
   layers: [{ layerId: 'layer1', esql }],
-  executionContext: { type: 'application', name: surface },
+  executionContext,
 });
+
+const LENS_CHILD_CONTEXT = { type: 'lens', name: 'lnsXY' };
+const EXAMPLE_APP_CONTEXT = { type: EXEMPLARS_APP_ID, child: LENS_CHILD_CONTEXT };
+const DASHBOARD_CONTEXT = {
+  type: 'dashboard',
+  description: 'My dashboard',
+  child: LENS_CHILD_CONTEXT,
+};
+const DISCOVER_CONTEXT = {
+  type: 'discover',
+  name: 'unified_histogram',
+  description: 'fetch chart data and total hits',
+  child: LENS_CHILD_CONTEXT,
+};
 
 const table: Datatable = {
   type: 'datatable',
@@ -67,12 +84,27 @@ describe('exemplars extension', () => {
     });
 
     it('applies to STATS layers rendered by the example app', () => {
-      const context = getContext(EXEMPLARS_APP_ID, LOGS_QUERY);
+      const context = getContext(LOGS_QUERY, EXAMPLE_APP_CONTEXT);
+      expect(extension.isApplicable(context, context.layers[0])).toBe(true);
+    });
+
+    it('applies to STATS layers rendered by a dashboard', () => {
+      const context = getContext(LOGS_QUERY, DASHBOARD_CONTEXT);
+      expect(extension.isApplicable(context, context.layers[0])).toBe(true);
+    });
+
+    it('applies to STATS layers rendered by the Discover histogram', () => {
+      const context = getContext(LOGS_QUERY, DISCOVER_CONTEXT);
       expect(extension.isApplicable(context, context.layers[0])).toBe(true);
     });
 
     it('does not apply on other surfaces', () => {
-      const context = getContext('dashboards', LOGS_QUERY);
+      const context = getContext(LOGS_QUERY, { type: 'visualize', child: LENS_CHILD_CONTEXT });
+      expect(extension.isApplicable(context, context.layers[0])).toBe(false);
+    });
+
+    it('does not apply when the surface only sets a name', () => {
+      const context = getContext(LOGS_QUERY, { type: 'application', name: EXEMPLARS_APP_ID });
       expect(extension.isApplicable(context, context.layers[0])).toBe(false);
     });
 
@@ -82,7 +114,7 @@ describe('exemplars extension', () => {
         onExemplarClick: jest.fn(),
         isEnabled: () => isEnabled,
       });
-      const context = getContext(EXEMPLARS_APP_ID, LOGS_QUERY);
+      const context = getContext(LOGS_QUERY, EXAMPLE_APP_CONTEXT);
 
       expect(flaggedExtension.isApplicable(context, context.layers[0])).toBe(false);
 

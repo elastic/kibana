@@ -17,6 +17,13 @@ export const EXEMPLARS_APP_ID = 'lens_exemplars_example';
 export const EXEMPLARS_EXTENSION_ID = 'lensExemplarsExample.exemplars';
 export const EXEMPLARS_FEATURE_FLAG = 'lensExemplarsExample.enabled';
 
+/** `executionContext.type` of the surfaces drawing exemplars: this example app, Dashboard and Discover. */
+const SUPPORTED_SURFACE_TYPES: ReadonlySet<string> = new Set([
+  EXEMPLARS_APP_ID,
+  'dashboard',
+  'discover',
+]);
+
 const EXEMPLARS_LIMIT = 200;
 const SIMULATED_EXEMPLARS_LIMIT = 30;
 const TIMESTAMP_COLUMN = '@timestamp';
@@ -67,7 +74,7 @@ interface CreateExemplarsExtensionParams {
   readonly isEnabled: () => boolean;
 }
 
-/** Lens extension drawing clickable exemplars over the XY charts of this example app. */
+/** Lens extension drawing clickable exemplars over the XY charts of this example app, dashboards and Discover. */
 export const createExemplarsExtension = ({
   onExemplarClick,
   isEnabled,
@@ -81,7 +88,8 @@ export const createExemplarsExtension = ({
     isApplicable: ({ executionContext }, { esql }) => {
       return (
         isEnabled() &&
-        executionContext?.name === EXEMPLARS_APP_ID &&
+        executionContext?.type !== undefined &&
+        SUPPORTED_SURFACE_TYPES.has(executionContext.type) &&
         esql !== undefined &&
         queryHasStatsCommand(esql) &&
         getExemplarsQuery(esql) !== undefined

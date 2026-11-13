@@ -8,10 +8,15 @@ points over XY charts. Nothing is stored in the chart: Lens evaluates the extens
 render time, fetches the overlay after the chart data has loaded, and routes clicks on the
 points back to the extension.
 
-The extension applies to ES|QL layers with a `STATS` command rendered by this app:
+The extension applies to ES|QL layers with a `STATS` command rendered by this app, a dashboard
+or the Discover histogram. It matches on the `executionContext.type` each surface passes to Lens
+(`lens_exemplars_example`, `dashboard`, `discover`):
 
 - On `TS` metrics queries it fetches real exemplars with the ES|QL `SET exemplars` setting.
 - On any other query it simulates exemplars with the largest raw samples of the aggregated field.
+
+Clicking an exemplar opens its fields in a flyout. The plugin opens it with
+`core.overlays.openFlyout`, so it works on dashboards and in Discover too, not only in this app.
 
 The "Show exemplars" switch uses the runtime-only `extensions` prop of the Lens component.
 

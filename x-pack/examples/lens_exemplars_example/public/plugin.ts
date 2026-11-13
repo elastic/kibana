@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
@@ -31,14 +31,16 @@ export interface StartDependencies {
 export class LensExemplarsExamplePlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
-  private readonly selectedExemplar$ = new BehaviorSubject<Exemplar | undefined>(undefined);
+  private coreStart?: CoreStart;
   private isExemplarsEnabled = false;
   private featureFlagSubscription?: Subscription;
 
   public setup(core: CoreSetup<StartDependencies>, { developerExamples, lens }: SetupDependencies) {
     lens.registerExtension(
       createExemplarsExtension({
-        onExemplarClick: (exemplar) => this.selectedExemplar$.next(exemplar),
+        onExemplarClick: (exemplar) => {
+          void this.openExemplarFlyout(exemplar);
+        },
         isEnabled: () => this.isExemplarsEnabled,
       })
     );
@@ -47,7 +49,7 @@ export class LensExemplarsExamplePlugin
       id: EXEMPLARS_APP_ID,
       title: 'Lens exemplars example',
       visibleIn: [],
-      mount: mount(core, this.selectedExemplar$),
+      mount: mount(core),
     });
 
     developerExamples.register({
@@ -67,6 +69,7 @@ export class LensExemplarsExamplePlugin
   }
 
   public start(core: CoreStart) {
+    this.coreStart = core;
     this.featureFlagSubscription = core.featureFlags
       .getBooleanValue$(EXEMPLARS_FEATURE_FLAG, false)
       .subscribe((enabled) => {
@@ -76,5 +79,13 @@ export class LensExemplarsExamplePlugin
 
   public stop() {
     this.featureFlagSubscription?.unsubscribe();
+  }
+
+  private async openExemplarFlyout(exemplar: Exemplar) {
+    if (!this.coreStart) {
+      return;
+    }
+    const { openExemplarFlyout } = await import('./exemplar_flyout');
+    openExemplarFlyout(this.coreStart, exemplar);
   }
 }
