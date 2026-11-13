@@ -41,8 +41,11 @@ describe('getWritableMemoryAiIndex', () => {
     get.mockResolvedValue(aiIndex);
   });
 
-  it('returns an AI index that is not managed when global memory is on', async () => {
-    await expect(run()).resolves.toBe(aiIndex);
+  it('returns an AI index without dreaming set up when global memory is on', async () => {
+    const { dreaming, ...withoutDreaming } = aiIndex;
+    get.mockResolvedValue(withoutDreaming);
+
+    await expect(run()).resolves.toEqual(withoutDreaming);
 
     expect(get).toHaveBeenCalledWith('support', 'space-1');
   });
@@ -53,27 +56,17 @@ describe('getWritableMemoryAiIndex', () => {
     await expect(run()).rejects.toThrow('Context Engine memory is not enabled.');
   });
 
-  it('rejects writes to a managed AI index without dreaming set up', async () => {
-    get.mockResolvedValue({ ...aiIndex, managed: true });
-
-    await expect(run()).rejects.toThrow("AI index 'support' does not take memories.");
-  });
-
-  it('accepts writes to a managed AI index once its dreaming is set up, even paused', async () => {
-    const managed = {
-      ...aiIndex,
-      managed: true,
-      dreaming: { enabled: false, facts: [{ type: 'preference' }] },
-    };
+  it('accepts writes to a managed AI index whose registration does not opt out', async () => {
+    const managed = { ...aiIndex, managed: true };
     get.mockResolvedValue(managed);
 
     await expect(run()).resolves.toEqual(managed);
   });
 
-  it('rejects writes to an AI index saved with memory_enabled false', async () => {
-    get.mockResolvedValue({ ...aiIndex, memory_enabled: false });
+  it('rejects writes to a managed AI index registered with memory_enabled false', async () => {
+    get.mockResolvedValue({ ...aiIndex, managed: true, memory_enabled: false });
 
-    await expect(run()).rejects.toThrow("AI index 'support' does not take memories.");
+    await expect(run()).rejects.toThrow("AI index 'support' does not have memory enabled.");
   });
 
   it('rejects index-pattern destinations', async () => {

@@ -433,8 +433,15 @@ describe('describeAiIndex', () => {
   });
 
   describe('without dreaming set up', () => {
-    it('renders memory capability for an AI index that is not managed, without dreamed types', async () => {
-      const response = await describeAiIndex({ ...params, includeMemory: true });
+    it.each([
+      ['an AI index that is not managed', false],
+      ['a managed AI index', true],
+    ])('renders memory capability for %s, without dreamed types', async (_kind, managed) => {
+      const response = await describeAiIndex({
+        ...params,
+        aiIndex: { ...aiIndex, managed },
+        includeMemory: true,
+      });
 
       expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
         expect.objectContaining({ dreamedPrefixes: [], dreamedTypes: [] })
@@ -447,20 +454,10 @@ describe('describeAiIndex', () => {
       );
     });
 
-    it('follows the memory_enabled the AI index was saved with', async () => {
+    it('omits memory capability for a managed AI index registered with memory_enabled false', async () => {
       const response = await describeAiIndex({
         ...params,
-        aiIndex: { ...aiIndex, memory_enabled: false },
-        includeMemory: true,
-      });
-
-      expect(response).not.toContain('\nMemory\n');
-    });
-
-    it('omits memory capability for a managed AI index', async () => {
-      const response = await describeAiIndex({
-        ...params,
-        aiIndex: { ...aiIndex, managed: true },
+        aiIndex: { ...aiIndex, managed: true, memory_enabled: false },
         includeMemory: true,
       });
 
@@ -468,19 +465,18 @@ describe('describeAiIndex', () => {
     });
   });
 
-  it('renders memory capability for a managed AI index once dreaming is set up', async () => {
+  it('omits memory capability for a managed AI index registered with memory_enabled false, even with dreaming set up', async () => {
     const response = await describeAiIndex({
       ...params,
       aiIndex: {
         ...aiIndex,
         managed: true,
+        memory_enabled: false,
         dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       },
       includeMemory: true,
     });
 
-    expect(response).toContain(
-      '\nMemory\nThis AI index takes memories: dreaming is set up for it.'
-    );
+    expect(response).not.toContain('\nMemory\n');
   });
 });

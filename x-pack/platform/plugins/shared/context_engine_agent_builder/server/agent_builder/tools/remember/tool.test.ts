@@ -190,10 +190,11 @@ describe('remember tool', () => {
     });
   });
 
-  it('rejects a managed AI index whose dreaming is not set up', async () => {
+  it('rejects a managed AI index registered with memory_enabled false', async () => {
     get.mockResolvedValue({
       id: 'support',
       managed: true,
+      memory_enabled: false,
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });
 
@@ -204,7 +205,7 @@ describe('remember tool', () => {
         {
           type: ToolResultType.error,
           data: {
-            message: "Failed to store memory: AI index 'support' does not take memories.",
+            message: "Failed to store memory: AI index 'support' does not have memory enabled.",
           },
         },
       ],

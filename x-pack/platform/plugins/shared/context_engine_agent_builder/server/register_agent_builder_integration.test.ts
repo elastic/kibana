@@ -135,7 +135,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
           managed: true,
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
-          dreaming: { enabled: true, facts: [{ type: 'preference' }] },
         },
       ],
     });
@@ -150,14 +149,19 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     ]);
   });
 
-  it('falls back to the saved memory_enabled, then to not managed, without dreaming set up', async () => {
+  it('reports memory for every AI index, unless a managed registration opts out', async () => {
     const { resolver } = setup({
       aiIndices: [
-        { id: 'custom', managed: false, dest: { type: 'index', value: 'idx-custom' } },
+        {
+          id: 'custom',
+          managed: false,
+          memory_enabled: false,
+          dest: { type: 'index', value: 'idx-custom' },
+        },
         { id: 'managed', managed: true, dest: { type: 'index', value: 'idx-managed' } },
         {
           id: 'opted-out',
-          managed: false,
+          managed: true,
           memory_enabled: false,
           dest: { type: 'index', value: 'idx-opted-out' },
         },
@@ -166,7 +170,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     expect(await resolver({ ids: ['custom', 'managed', 'opted-out'], request })).toEqual([
       { id: 'custom', esqlTarget: 'idx-custom', memoryEnabled: true },
-      { id: 'managed', esqlTarget: 'idx-managed', memoryEnabled: false },
+      { id: 'managed', esqlTarget: 'idx-managed', memoryEnabled: true },
       { id: 'opted-out', esqlTarget: 'idx-opted-out', memoryEnabled: false },
     ]);
   });

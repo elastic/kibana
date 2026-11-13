@@ -1102,6 +1102,29 @@ describe('AiIndexService', () => {
       );
     });
 
+    it('reads memory_enabled from the registration for a managed AI index', async () => {
+      mockSearchHits(
+        storedHit(
+          { ...aiIndexDocument, id: 'elastic', managed: true },
+          { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') }
+        )
+      );
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        managedBootstrap: {
+          isManaged: (id) => id === 'elastic',
+          getManagedIds: () => ['elastic'],
+          getRegistration: () => ({ ...properties, memory_enabled: false }),
+          ensure: jest.fn(),
+        },
+      });
+
+      await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ managed: true, memory_enabled: false })
+      );
+    });
+
     it('returns a user-owned AI index squatting a managed id as stored', async () => {
       const squatter: AiIndexDocument = { ...aiIndexDocument, id: 'elastic', managed: false };
       mockSearchHits(storedHit(squatter));

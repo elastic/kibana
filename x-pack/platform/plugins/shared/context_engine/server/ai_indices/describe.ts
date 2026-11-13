@@ -7,13 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexItem, KiTypeCount } from '../../common/http_api/ai_indices';
-import { RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES } from '../../common/memory';
+import { RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES, takesMemories } from '../../common/memory';
 import {
   dreamingTypesOf,
   ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
   isDreamingConfigured,
-  takesMemories,
   type DreamingEntityType,
   type DreamingFactType,
 } from '../../common/dreaming';

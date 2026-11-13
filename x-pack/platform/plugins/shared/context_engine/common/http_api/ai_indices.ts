@@ -88,8 +88,8 @@ export interface AiIndexFeedbackAnalysis {
 export interface AiIndexProperties {
   description?: string;
   /**
-   * @deprecated Ignored; see `takesMemories`. Still accepted so existing callers keep compiling and
-   * working.
+   * Set `false` on a managed registration to keep memories out of the AI index; see
+   * `takesMemories`. Ignored from API callers, whose AI indices always take memories.
    */
   memory_enabled?: boolean;
   dest: AiIndexDest;
@@ -111,7 +111,7 @@ export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces' | 'mem
 export interface AiIndexItem extends AiIndexHttpItem {
   /** What the AI index learns from its memories, and how often. Set through the internal dreaming route. */
   dreaming?: AiIndexDreamingConfig;
-  /** The `memory_enabled` the AI index was saved with before it was deprecated; see `takesMemories`. */
+  /** For a managed AI index, the `memory_enabled` of its registration; see `takesMemories`. */
   memory_enabled?: boolean;
 }
 

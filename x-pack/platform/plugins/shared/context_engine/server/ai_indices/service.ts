@@ -87,6 +87,7 @@ const mergeManagedAiIndex = (
 ): AiIndexDocument => ({
   ...document,
   dest: registration.dest,
+  memory_enabled: registration.memory_enabled,
 });
 
 /** Properties without the ones the service accepts and ignores. */
