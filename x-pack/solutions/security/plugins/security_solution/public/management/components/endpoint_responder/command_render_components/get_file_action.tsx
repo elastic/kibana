@@ -34,7 +34,9 @@ export const GetFileActionResult = memo<
           endpoint_ids: [endpointId],
           comment: comment?.[0],
           parameters: {
-            path: path[0],
+            // A single `--path` is sent as `path`. Multiple `--path` arguments (which are only
+            // allowed for the Endpoint agent type) are sent as `paths`
+            ...(path.length > 1 ? { paths: path } : { path: path[0] }),
             ...(force ? { force: true } : {}),
           },
         }
