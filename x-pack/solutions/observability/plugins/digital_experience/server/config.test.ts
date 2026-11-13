@@ -5,20 +5,37 @@
  * 2.0.
  */
 
+import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
 import { config } from './config';
 
 describe('digital_experience config', () => {
   const sessionsDefaults = { frequency: '1m', concurrency: 2 };
 
-  it('is disabled by default', () => {
-    expect(config.schema.validate({})).toEqual({ enabled: false, sessions: sessionsDefaults });
+  it('only holds the sessions settings', () => {
+    expect(config.schema.validate({})).toEqual({ sessions: sessionsDefaults });
   });
 
-  it('can be enabled', () => {
-    expect(config.schema.validate({ enabled: true })).toEqual({
-      enabled: true,
-      sessions: sessionsDefaults,
+  it('no longer accepts an enabled key in the schema', () => {
+    expect(() => config.schema.validate({ enabled: true })).toThrow(/enabled/);
+  });
+
+  it('drops the deprecated enabled key with a warning', () => {
+    const { deprecations } = config;
+    if (!deprecations) {
+      throw new Error('The digital_experience config declares no deprecations');
+    }
+
+    const { levels, messages, migrated } = getDeprecationsFor({
+      provider: deprecations,
+      settings: { enabled: true },
+      path: 'xpack.digital_experience',
     });
+
+    expect(migrated).not.toHaveProperty('xpack.digital_experience.enabled');
+    expect(levels).toEqual(['warning']);
+    expect(messages).toEqual([
+      'You no longer need to configure "xpack.digital_experience.enabled".',
+    ]);
   });
 
   it('accepts a sessions frequency', () => {

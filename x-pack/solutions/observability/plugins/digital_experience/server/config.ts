@@ -25,7 +25,6 @@ export const validateFrequency = (value: string): string | undefined => {
 };
 
 const digitalExperienceConfig = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
   sessions: schema.object({
     /** How often the summaries task looks for changed sessions. Longer is cheaper but staler. */
     frequency: schema.string({
@@ -48,6 +47,7 @@ const digitalExperienceConfig = schema.object({
 
 export const config: PluginConfigDescriptor = {
   schema: digitalExperienceConfig,
+  deprecations: ({ unused }) => [unused('enabled', { level: 'warning' })],
 };
 
 export type DigitalExperienceConfig = TypeOf<typeof digitalExperienceConfig>;

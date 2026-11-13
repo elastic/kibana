@@ -9,7 +9,8 @@ import { X509Certificate } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { Agent, fetch } from 'undici';
 
-import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { getKbnServerlessUiamCert, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import type { KbnServerlessProjectType } from '@kbn/dev-utils';
 import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
@@ -24,22 +25,35 @@ import { COMMON_UNSAFE_HEADERS } from '../fixtures';
 
 const UIAM_AUTHENTICATE_URL = `${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/authentication/_authenticate`;
 
+/** Maps the `--serverless=` project type onto the one the UIAM certificates are named for. */
+const UIAM_PROJECT_TYPES: Readonly<Record<string, KbnServerlessProjectType>> = {
+  es: 'search',
+  oblt: 'observability',
+  security: 'security',
+  vectordb: 'vectordb',
+};
+
 /**
- * The certificate identity UIAM derives Kibana's project service account from: the `EIDENT.…` DNS
- * SAN of the client certificate Kibana presents to UIAM. A cross-region destination (the Nightshift
- * Relay) receives this SAN from its ingress proxy and forwards it to UIAM as `X-Client-Sans`.
+ * The certificate identity UIAM derives Kibana's project service account from: the `EIDENT.` DNS
+ * entry of the client certificate Kibana presents to UIAM. A cross-region destination (the
+ * Nightshift Relay) receives that entry from its ingress proxy and forwards it to UIAM as
+ * `X-Client-Sans`.
+ *
+ * The entry names the project type, and Kibana presents the certificate of the project it runs as,
+ * so this has to follow the project under test rather than name one of them.
  */
-const kibanaClientSans = (() => {
-  const { subjectAltName } = new X509Certificate(readFileSync(KBN_CERT_PATH));
+const kibanaClientSans = (projectType: string | undefined) => {
+  const { certPath } = getKbnServerlessUiamCert(UIAM_PROJECT_TYPES[projectType ?? '']);
+  const { subjectAltName } = new X509Certificate(readFileSync(certPath));
   const eident = subjectAltName
     ?.split(',')
     .map((san) => san.trim())
     .find((san) => san.startsWith('DNS:EIDENT.'));
   if (!eident) {
-    throw new Error(`Kibana dev certificate has no EIDENT SAN: ${subjectAltName}`);
+    throw new Error(`Kibana dev certificate ${certPath} has no EIDENT entry: ${subjectAltName}`);
   }
   return eident.replace('DNS:', 'DNS=');
-})();
+};
 
 // Plays the role of the cross-region destination: it authenticates to UIAM with its own service
 // certificate (locally, the same dev certificate) and forwards the caller's identity.
@@ -86,12 +100,12 @@ apiTest.describe('[NON-MKI] UIAM system identity', { tag: tags.serverless.all },
 
   apiTest(
     "should be accepted by UIAM when a destination forwards it with Kibana's certificate identity",
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const token = await mintToken(apiClient);
 
       const response = await authenticateAtUiam(
         token,
-        { 'X-Client-Sans': kibanaClientSans },
+        { 'X-Client-Sans': kibanaClientSans(config.projectType) },
         destinationAgent
       );
       expect(response.status).toBe(200);
@@ -128,11 +142,16 @@ apiTest.describe('[NON-MKI] UIAM system identity', { tag: tags.serverless.all },
 
   apiTest(
     'should be rejected by UIAM when presented with the forwarded SANs but not over mTLS',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const token = await mintToken(apiClient);
       expect(
-        (await authenticateAtUiam(token, { 'X-Client-Sans': kibanaClientSans }, anonymousAgent))
-          .status
+        (
+          await authenticateAtUiam(
+            token,
+            { 'X-Client-Sans': kibanaClientSans(config.projectType) },
+            anonymousAgent
+          )
+        ).status
       ).toBe(401);
     }
   );

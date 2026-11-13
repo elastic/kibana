@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { notFound } from '@hapi/boom';
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { DIGITAL_EXPERIENCE_ENABLED_FLAG } from '../../common/feature_flags';
 import type { SessionsSettings } from '../../common/sessions';
 import { describeError, toClientError } from '../lib/helpers/errors';
 
@@ -44,6 +46,11 @@ export const createDigitalExperienceServerRoute: typeof createServerRoute = ({
   createServerRoute({
     ...route,
     handler: async (resources) => {
+      const { featureFlags } = await resources.context.core;
+      if (!(await featureFlags.getBooleanValue(DIGITAL_EXPERIENCE_ENABLED_FLAG, false))) {
+        throw notFound();
+      }
+
       try {
         return await handler(resources);
       } catch (error) {

@@ -35,6 +35,7 @@ const runHandler = ({
 }) => {
   const context = {
     core: Promise.resolve({
+      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
       elasticsearch: { client: { asCurrentUser: {}, asInternalUser: {} } },
       savedObjects: { client: {} },
       uiSettings: { client: { get: jest.fn().mockResolvedValue(false) } },

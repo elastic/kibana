@@ -87,6 +87,7 @@ const runHandler = (
   } = {}
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
+  coreContext.featureFlags.getBooleanValue.mockResolvedValue(true);
   const logger = loggingSystemMock.createLogger();
   const handler = sessionsRouteRepository[endpoint].handler as unknown as (
     resources: unknown

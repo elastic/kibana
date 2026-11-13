@@ -70,10 +70,11 @@ spaceTest.describe(
           timeout: 20_000,
         });
         await pageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
+        // `saveDashboard` only waits for the modal to close; wait for the saved
+        // dashboard to render before navigating away.
+        await expect(pageObjects.dashboard.getAppTitle()).toContainText(DASHBOARD_NAME);
         await page.goBack();
-        await expect(
-          page.testSubj.locator(`dashboardListingTitleLink-${DASHBOARD_NAME.split(' ').join('-')}`)
-        ).toBeVisible();
+        await expect(pageObjects.dashboard.getDashboardListingLink(DASHBOARD_NAME)).toBeVisible();
       }
     );
   }
