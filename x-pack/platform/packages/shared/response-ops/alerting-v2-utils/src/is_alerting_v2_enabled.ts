@@ -122,10 +122,3 @@ export const areAlertingV2ImportsEnabled = (settings: CoreStart['settings']): bo
   isAlertingV2EnabledSetting(settings) &&
   // Agent Builder registers this setting; the default covers deployments without it.
   settings.client.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, false) === true;
-
-/**
- * Returns whether the Import alerts page should be shown: the settings that turn it on
- * ({@link areAlertingV2ImportsEnabled}) plus Alerting v2 rules access.
- */
-export const isAlertingV2ImportsAvailable = (core: CoreStart): boolean =>
-  areAlertingV2ImportsEnabled(core.settings) && hasAlertingV2Capability(core, 'rules');
