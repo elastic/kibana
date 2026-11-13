@@ -9,7 +9,7 @@
 
 import { of } from 'rxjs';
 import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
-import { createSandbox } from 'sinon';
+import sinon from 'sinon';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -42,7 +42,7 @@ describe('File', () => {
   let soClient: ISavedObjectsRepository;
   let fileMetadaClient: FileMetadataClient;
 
-  const sandbox = createSandbox();
+  const sandbox = sinon.createSandbox();
   const fileKind = 'fileKind';
 
   beforeAll(() => {
