@@ -34,7 +34,8 @@ export function ErrorsMenu({
         <EuiButtonEmpty
           size="xs"
           color="danger"
-          iconType="warning"
+          iconType="arrowDown"
+          iconSide="right"
           isDisabled={isDisabled}
           onClick={() => setIsOpen((open) => !open)}
           data-test-subj="traceLatencyMapErrorsMenu"

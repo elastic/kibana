@@ -114,7 +114,8 @@ export function MapHeader({
           button={
             <EuiButtonEmpty
               size="xs"
-              iconType="sortDown"
+              iconType="arrowDown"
+              iconSide="right"
               isDisabled={isDisabled || !stats}
               onClick={() => setIsSlowestOpen((open) => !open)}
               data-test-subj="traceLatencyMapSelectSlowest"
