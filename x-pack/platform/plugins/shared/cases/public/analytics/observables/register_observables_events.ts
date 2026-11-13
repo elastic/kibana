@@ -6,7 +6,10 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { CASES_OBSERVABLES_DELETED_EVENT_TYPE } from '../../../common/constants';
+import {
+  CASES_OBSERVABLES_DELETED_EVENT_TYPE,
+  CASES_OBSERVABLES_EXTRACTED_EVENT_TYPE,
+} from '../../../common/constants';
 
 /**
  * Registers the browser event for observable deletion. One event per confirmed user action — a
@@ -36,6 +39,35 @@ export const registerObservablesEvents = ({
           description:
             'Whether the confirmed delete removed a single observable ("single") or the ' +
             'current selection ("bulk"). The number of deleted observables is not reported',
+          optional: false,
+        },
+      },
+    },
+  });
+
+  analyticsService.registerEventType({
+    eventType: CASES_OBSERVABLES_EXTRACTED_EVENT_TYPE,
+    schema: {
+      owner: {
+        type: 'keyword',
+        _meta: {
+          description: 'The solution ID (owner) of the case on which observables were extracted',
+          optional: false,
+        },
+      },
+      status: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The outcome of the extraction: "extracted", "no_new_observables", "cap_reached", ' +
+            'or "alerts_not_found"',
+          optional: false,
+        },
+      },
+      new_observables_count: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of new observables that the extraction saved on the case',
           optional: false,
         },
       },

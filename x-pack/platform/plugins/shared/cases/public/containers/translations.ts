@@ -95,6 +95,48 @@ export const OBSERVABLES_BULK_REMOVED = (count: number) =>
     defaultMessage: '{count, plural, one {# observable removed} other {# observables removed}}',
   });
 
+export const OBSERVABLES_EXTRACTED = (count: number) =>
+  i18n.translate('xpack.cases.caseView.observables.extracted', {
+    values: { count },
+    defaultMessage:
+      '{count, plural, one {# new observable extracted} other {# new observables extracted}}',
+  });
+
+export const NO_NEW_OBSERVABLES_FOUND = i18n.translate(
+  'xpack.cases.caseView.observables.noNewObservablesFound',
+  {
+    defaultMessage: 'No new observables found',
+  }
+);
+
+export const OBSERVABLES_LIMIT_REACHED = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.extractLimitReached', {
+    values: { max },
+    defaultMessage:
+      'No new observables extracted. The case already has the maximum of {max} observables.',
+  });
+
+export const NO_ALERTS_FOUND_TO_EXTRACT = i18n.translate(
+  'xpack.cases.caseView.observables.noAlertsFoundToExtract',
+  {
+    defaultMessage: 'No alerts or events found to extract observables from',
+  }
+);
+
+export const ATTACHED_ALERTS_NOT_READABLE = i18n.translate(
+  'xpack.cases.caseView.observables.attachedAlertsNotReadable',
+  {
+    defaultMessage: "Attached alerts and events couldn't be read",
+  }
+);
+
+export const ATTACHED_ALERTS_NOT_READABLE_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.observables.attachedAlertsNotReadableDescription',
+  {
+    defaultMessage: 'They might have been deleted, or you might not have access to their indices.',
+  }
+);
+
 export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observables.updated', {
   defaultMessage: 'Observable updated',
 });

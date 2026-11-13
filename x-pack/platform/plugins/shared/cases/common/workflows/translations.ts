@@ -461,6 +461,28 @@ export const ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const EXTRACT_OBSERVABLES_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.extractObservables.label',
+  {
+    defaultMessage: 'Cases - Extract observables from case alerts',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.extractObservables.description',
+  {
+    defaultMessage: 'Extracts observables from the alerts and events attached to a case',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.extractObservables.documentation.details',
+  {
+    defaultMessage:
+      'This step reads the alerts and events attached to a case and adds the new observables to it. The step fails when observable extraction is turned off for the case. The output has the updated case, a status, the number of new observables, and the number of alerts and events that were requested and found. If this step is used by a workflow triggered by `cases.observablesAdded`, set `on.workflowEvents: ignore` on the trigger to prevent self-triggered loops.',
+  }
+);
+
 export const ADD_TAG_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addTag.label', {
   defaultMessage: 'Cases - Add tag to case',
 });

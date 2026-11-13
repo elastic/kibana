@@ -19,6 +19,7 @@ import {
   deleteCasesStepDefinition,
   deleteObservableStepDefinition,
   bulkDeleteObservablesStepDefinition,
+  extractObservablesStepDefinition,
   findSimilarCasesStepDefinition,
   findCasesStepDefinition,
   getAllAttachmentsStepDefinition,
@@ -59,6 +60,7 @@ describe('new cases public step definitions', () => {
     updateObservableStepDefinition,
     deleteObservableStepDefinition,
     bulkDeleteObservablesStepDefinition,
+    extractObservablesStepDefinition,
     getCasesStepDefinition,
     deleteAttachmentsStepDefinition,
   ];

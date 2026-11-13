@@ -151,6 +151,21 @@ export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
   }
 );
 
+export const EXTRACT_OBSERVABLES_BUTTON = i18n.translate(
+  'xpack.cases.caseView.observables.extractObservablesButton',
+  {
+    defaultMessage: 'Extract observables',
+  }
+);
+
+export const EXTRACT_OBSERVABLES_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.cases.caseView.observables.extractObservablesDisabledTooltip',
+  {
+    defaultMessage:
+      'Turn on auto-extract observables for this case to extract observables from its alerts and events.',
+  }
+);
+
 export const AGENT_ID = i18n.translate('xpack.cases.caseView.observables.agentId', {
   defaultMessage: 'Agent id',
 });
