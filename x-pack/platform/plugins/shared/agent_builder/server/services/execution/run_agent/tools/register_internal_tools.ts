@@ -51,7 +51,7 @@ export interface RegisterInternalToolsParams {
   updateConversationMetadata?: (updates: Record<string, MetadataFieldValue>) => Promise<unknown>;
   /** Active conversation template, used to validate values written by the LLM. */
   conversationTemplate?: ConversationTemplate;
-  /** The agent's resolved skills, used by the `search_relevant_skills` tool. */
+  /** The agent's resolved skills. When empty, neither `load_skill` nor `search_relevant_skills` is registered. */
   filteredSkills: InternalSkillDefinition[];
   /**
    * Effective on/off for context-aware skill filtering (flag AND a dedicated fast model configured).
@@ -78,7 +78,8 @@ export interface RegisterInternalToolsParams {
 /**
  * Registers internal builtin tools (sub-agent, sleep, load_skill, API tools) into the
  * active ToolManager, gated by their respective experimental-features flags, the agent's
- * capabilities and execution-mode constraints.
+ * capabilities, execution-mode constraints and, for the skill tools, the run having at least
+ * one skill.
  */
 export const registerInternalTools = async ({
   context,
@@ -203,8 +204,8 @@ export const registerInternalTools = async ({
     tools.push(createAskUserQuestionTool());
   }
 
-  // load_skill — gated on the skills feature only.
-  if (experimentalFeatures.skills) {
+  // load_skill — gated on the skills feature and on the run having at least one skill.
+  if (experimentalFeatures.skills && filteredSkills.length > 0) {
     tools.push(
       createLoadSkillTool({
         analyticsService,
@@ -225,8 +226,9 @@ export const registerInternalTools = async ({
   }
 
   // search_relevant_skills — context-aware skill discovery. Gated on the effective enablement
-  // (flag AND a dedicated fast model), since the tool relies on the fast model too.
-  if (relevantSkillsEnabled) {
+  // (flag AND a dedicated fast model), since the tool relies on the fast model too, and on the
+  // run having at least one skill to search.
+  if (relevantSkillsEnabled && filteredSkills.length > 0) {
     tools.push(
       createSearchRelevantSkillsTool({ modelProvider, filteredSkills, logger, abortSignal })
     );
