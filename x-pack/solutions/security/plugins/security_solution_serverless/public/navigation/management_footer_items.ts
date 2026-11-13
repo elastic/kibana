@@ -152,6 +152,7 @@ export const createManagementFooterItemsTree = (
               breadcrumbStatus: 'hidden',
               badgeType: 'new',
             },
+            { link: 'management:housekeeping', breadcrumbStatus: 'hidden' },
           ],
         },
         {
