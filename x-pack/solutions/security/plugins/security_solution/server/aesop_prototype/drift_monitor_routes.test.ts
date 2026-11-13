@@ -12,7 +12,10 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import type { StartPlugins } from '../plugin';
 import type { SecuritySolutionPluginRouter, SecuritySolutionRequestHandlerContext } from '../types';
-import { AESOP_DRIFT_MONITOR_ROUTE_PATH } from '../../common/aesop_prototype';
+import {
+  AESOP_DRIFT_MONITOR_ROUTE_PATH,
+  AESOP_DRIFT_MONITOR_THRESHOLD,
+} from '../../common/aesop_prototype';
 import { enableAesopDriftMonitor, uninstallAesopDriftMonitor } from './drift_monitor_schedule';
 import { registerAesopDriftMonitorRoutes } from './drift_monitor_routes';
 
@@ -114,6 +117,39 @@ describe('registerAesopDriftMonitorRoutes', () => {
     expect(mockResponse.ok).toHaveBeenCalledWith({
       body: { document_id: 'doc-1', warnings: [] },
     });
+  });
+
+  it('passes the drift threshold and investigation id to the monitor', async () => {
+    await postHandler()(
+      createContext(),
+      postRequest({ skill_id: 'triage', drift_threshold: 0.6, investigation_id: 'inv-1' }),
+      mockResponse
+    );
+
+    expect(enableMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ driftThreshold: 0.6, investigationId: 'inv-1' })
+    );
+  });
+
+  it('defaults the drift threshold and leaves the investigation id unset', () => {
+    const { value } = validate('post', AESOP_DRIFT_MONITOR_ROUTE_PATH, 'body', {
+      skill_id: 'triage',
+    });
+
+    expect(value).toEqual(
+      expect.objectContaining({ drift_threshold: AESOP_DRIFT_MONITOR_THRESHOLD })
+    );
+    expect((value as { investigation_id?: string }).investigation_id).toBeUndefined();
+  });
+
+  it.each([-0.1, 1.1])('rejects a drift threshold of %s', (driftThreshold) => {
+    const { error } = validate('post', AESOP_DRIFT_MONITOR_ROUTE_PATH, 'body', {
+      skill_id: 'triage',
+      drift_threshold: driftThreshold,
+    });
+
+    expect(error).toBeDefined();
   });
 
   it('falls back to no name when the skill cannot be resolved', async () => {

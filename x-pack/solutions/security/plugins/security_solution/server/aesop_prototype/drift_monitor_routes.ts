@@ -16,6 +16,7 @@ import type { SecuritySolutionPluginRouter, SecuritySolutionRequestHandlerContex
 import {
   AESOP_DRIFT_MONITOR_ROUTE_PATH,
   AESOP_DRIFT_MONITOR_ROUTES_API_VERSION,
+  AESOP_DRIFT_MONITOR_THRESHOLD,
 } from '../../common/aesop_prototype';
 import { initSecurityManagedWorkflowsClient } from '../workflows/managed_workflows';
 import type {
@@ -55,6 +56,8 @@ const bodySchema = schema.object({
   skill_id: skillIdSchema,
   interval_minutes: schema.number({ min: 5, max: 1440, defaultValue: 60 }),
   lookback_minutes: schema.number({ min: 5, max: 10080, defaultValue: 120 }),
+  drift_threshold: schema.number({ min: 0, max: 1, defaultValue: AESOP_DRIFT_MONITOR_THRESHOLD }),
+  investigation_id: schema.maybe(schema.string({ maxLength: 512 })),
 });
 
 export const registerAesopDriftMonitorRoutes = ({
@@ -147,6 +150,8 @@ export const registerAesopDriftMonitorRoutes = ({
             skillName: await resolveSkillName(request, skillId),
             intervalMinutes: request.body.interval_minutes,
             lookbackMinutes: request.body.lookback_minutes,
+            driftThreshold: request.body.drift_threshold,
+            investigationId: request.body.investigation_id,
           });
           return response.ok({ body: { document_id: documentId, warnings } });
         } catch (error) {

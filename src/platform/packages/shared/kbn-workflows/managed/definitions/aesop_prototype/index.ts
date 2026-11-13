@@ -22,7 +22,7 @@ export const AESOP_EXPLORER_WORKFLOW_ID = 'system-security-aesop-explorer';
 export const AESOP_AB_COMPARE_WORKFLOW = {
   id: AESOP_AB_COMPARE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 2,
+  version: 3,
   billable: false,
   yaml: AESOP_AB_COMPARE_YAML,
   management: {
@@ -41,6 +41,10 @@ export interface AesopDriftMonitorWorkflowTemplateValues extends ManagedWorkflow
   intervalMinutes: number;
   /** How far back each run looks for traces to grade. */
   lookbackMinutes: number;
+  /** Mean online score below which the monitor proposes a rollback. */
+  driftThreshold?: number;
+  /** The investigation a rollback proposal is raised under; no proposal is raised without one. */
+  investigationId?: string;
 }
 
 // The name is rendered raw into a single-quoted YAML const and double-quoted
@@ -48,6 +52,11 @@ export interface AesopDriftMonitorWorkflowTemplateValues extends ManagedWorkflow
 // Agent Builder skill names are validated to a subset of it, so a real skill
 // name never takes the fallback.
 const SAFE_SKILL_NAME = /^[A-Za-z0-9 ._-]+$/;
+
+const toYamlSingleQuoted = (value: string): string => value.replace(/'/g, "''");
+
+// Instances stored before the threshold existed re-render with this value.
+const DEFAULT_DRIFT_THRESHOLD = 0.8;
 
 const renderTemplate = (template: string, values: Record<string, string | number>): string =>
   Object.entries(values).reduce(
@@ -61,18 +70,29 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   pluginId: 'securitySolution',
   // Bump on every YAML edit: yamlTemplate hashing does not see the imported
   // YAML, so installed instances only re-render on a version bump.
-  version: 7,
+  version: 8,
   billable: false,
   // When the name is missing (instances stored before skillName existed, or an
   // enable that could not resolve it) the monitor matches on the id, so it only
   // finds traces when name equals id. Re-enabling stores the current name.
-  yamlTemplate: ({ skillId, skillName, intervalMinutes, lookbackMinutes }) =>
+  yamlTemplate: ({
+    skillId,
+    skillName,
+    intervalMinutes,
+    lookbackMinutes,
+    driftThreshold,
+    investigationId,
+  }) =>
     renderTemplate(AESOP_DRIFT_MONITOR_YAML, {
       __SKILL_ID__: skillId,
       // Instances stored before skillName existed re-render without it.
       __SKILL_NAME__: skillName && SAFE_SKILL_NAME.test(skillName) ? skillName : skillId,
       __INTERVAL_MINUTES__: intervalMinutes,
       __LOOKBACK_MINUTES__: lookbackMinutes,
+      __DRIFT_THRESHOLD__: Number.isFinite(driftThreshold)
+        ? Number(driftThreshold)
+        : DEFAULT_DRIFT_THRESHOLD,
+      __INVESTIGATION_ID__: toYamlSingleQuoted(investigationId ?? ''),
     }),
   management: {
     lifecycle: 'dynamic',
@@ -99,7 +119,6 @@ export interface AesopExplorerWorkflowTemplateValues extends ManagedWorkflowTemp
 }
 
 // Rendered into single-quoted YAML scalars, so a quote is doubled.
-const toYamlSingleQuoted = (value: string): string => value.replace(/'/g, "''");
 
 /** AESOP prototype: per-space explorer that proposes skill candidates to the A/B compare; enabling an instance schedules it. */
 export const AESOP_EXPLORER_WORKFLOW = {

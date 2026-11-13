@@ -624,6 +624,7 @@ steps:
         x-elastic-internal-origin: 'Kibana'
       body:
         skill_id: '{{ variables.target_skill_id }}'
+        investigation_id: '{{ inputs.investigation_id }}'
     on-failure:
       continue: true
 

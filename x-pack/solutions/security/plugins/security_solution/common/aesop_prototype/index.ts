@@ -58,6 +58,9 @@ export const AESOP_DRIFT_MONITOR_INTERVAL_MINUTES = 60;
 /** Traces older than this are not graded by the drift monitor. */
 export const AESOP_DRIFT_MONITOR_LOOKBACK_MINUTES = 120;
 
+/** Mean online score below which the drift monitor proposes rolling the skill back. */
+export const AESOP_DRIFT_MONITOR_THRESHOLD = 0.8;
+
 /** API version for the internal drift-monitor routes the A/B workflow calls. */
 export const AESOP_DRIFT_MONITOR_ROUTES_API_VERSION = '1';
 

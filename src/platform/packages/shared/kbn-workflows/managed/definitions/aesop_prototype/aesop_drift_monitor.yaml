@@ -4,19 +4,29 @@ description: >-
   AESOP prototype: online evaluation of a deployed skill. Every tick reads
   the newest agent traces that invoked the skill, grades each with the CODE
   evaluators, and persists the scores as online scores attributed to this
-  monitor.
+  monitor. When the mean score over the lookback falls below the threshold,
+  it proposes rolling the skill back to the content stored before AESOP
+  replaced it, and restores that content if the proposal is approved.
 enabled: false
 tags:
   - security
   - aesop_prototype
   - scheduled
 settings:
-  timeout: '45m'
+  # A rollback proposal parks this run until an analyst decides (72h window),
+  # so the ceiling covers the window plus grading. While it is parked the
+  # concurrency key below drops further ticks, which also keeps one pending
+  # proposal per skill.
+  timeout: '96h'
   concurrency:
     key: 'aesop-drift-__SKILL_ID__'
     strategy: drop
     max: 1
 consts:
+  AI_INDEX_ID: aesop
+  # Unquoted so it renders as a YAML number the comparison below can use.
+  DRIFT_THRESHOLD: __DRIFT_THRESHOLD__
+  INVESTIGATION_ID: '__INVESTIGATION_ID__'
   SKILL_ID: '__SKILL_ID__'
   SKILL_NAME: '__SKILL_NAME__'
   # LiquidJS has no array literal, so `| default: []` does not produce one.
@@ -28,6 +38,12 @@ outputs:
     type: number
   - name: evaluator_failures
     type: number
+  - name: mean_score
+    type: number
+  - name: rollback_proposed
+    type: boolean
+  - name: rolled_back
+    type: boolean
 triggers:
   - type: scheduled
     with:
@@ -156,6 +172,117 @@ steps:
       scores_persisted: '${{ variables.scores_persisted | default: 0 }}'
       evaluator_failures: '${{ variables.evaluator_failures | default: 0 }}'
 
+  # ----------------------------------------------------------------------
+  # Drift check. The mean of every online score this monitor has persisted
+  # over the lookback, including the scores written above. No scores gives a
+  # null mean and a zero count, which never counts as drift.
+  # ----------------------------------------------------------------------
+  - name: read_scores
+    type: elasticsearch.esql.query
+    timeout: '60s'
+    with:
+      allow_partial_results: false
+      filter:
+        bool:
+          filter:
+            - range:
+                '@timestamp':
+                  gte: 'now-__LOOKBACK_MINUTES__m'
+      query: |-
+        SET unmapped_fields="nullify";
+        FROM .evaluation-online-scores
+        | WHERE monitor.id == "aesop-drift-{{ consts.SKILL_ID }}"
+        | STATS mean = AVG(score.value), n = COUNT(*)
+    on-failure:
+      continue: true
+
+  - name: resolve_drift
+    type: data.set
+    with:
+      read_ok: '${{ steps.read_scores.error == null and steps.read_scores.output.values != null and steps.read_scores.output.values.size > 0 }}'
+      mean_score: '${{ steps.read_scores.output.values[0][0] | default: 0 }}'
+      score_count: '${{ steps.read_scores.output.values[0][1] | default: 0 }}'
+
+  - name: resolve_drifted
+    type: data.set
+    with:
+      drifted: '${{ steps.resolve_drift.output.read_ok == true and steps.resolve_drift.output.score_count > 0 and steps.resolve_drift.output.mean_score < consts.DRIFT_THRESHOLD }}'
+
+  # The content AESOP stored when it replaced the skill. A skill AESOP created
+  # has none (nothing to roll back to), and a failed read skips the proposal.
+  - name: get_prior_content
+    type: kibana.request
+    if: '${{ steps.resolve_drifted.output.drifted == true }}'
+    timeout: '30s'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/context_engine/ai_index/{{ consts.AI_INDEX_ID }}/kis/skill-prior-{{ consts.SKILL_ID }}'
+      headers:
+        elastic-api-version: '1'
+        x-elastic-internal-origin: 'Kibana'
+    on-failure:
+      continue: true
+
+  - name: resolve_rollback
+    type: data.set
+    with:
+      can_propose: >-
+        ${{ steps.resolve_drifted.output.drifted == true
+          and steps.get_prior_content.error == null
+          and steps.get_prior_content.output.document.content != null
+          and consts.INVESTIGATION_ID != blank }}
+
+  - name: propose_rollback
+    type: workflow.execute
+    if: '${{ steps.resolve_rollback.output.can_propose == true }}'
+    # Same route into the gate as the A/B compare: default run-as mode,
+    # `origin: alertzero` for the decision queue.
+    with:
+      workflow-id: system-create-proposal
+      inputs:
+        origin: alertzero
+        conversationId: '{{ consts.INVESTIGATION_ID }}'
+        title: 'AESOP: roll back {{ consts.SKILL_ID }}'
+        comment: |-
+          **AESOP: roll back `{{ consts.SKILL_ID }}` to its previous content?**
+
+          The deployed skill's mean online score is {{ steps.resolve_drift.output.mean_score | round: 3 }} over {{ steps.resolve_drift.output.score_count }} scores in the last __LOOKBACK_MINUTES__ minutes, below the threshold of {{ consts.DRIFT_THRESHOLD }}.
+
+          **Previous content**
+          ```markdown
+          {{ steps.get_prior_content.output.document.content | truncate: 20000, "" }}
+          ```
+
+          **On approval**
+          If you approve, the agent PUTs the previous content back onto `{{ consts.SKILL_ID }}` under your identity. If you dismiss, nothing changes.
+        impact: medium
+        confidence: medium
+        autoApprove: false
+        expiresIn: '72h'
+    on-failure:
+      continue: true
+
+  - name: resolve_decision
+    type: data.set
+    with:
+      approved: '${{ steps.propose_rollback.output.decision == "approved" }}'
+
+  - name: restore_skill
+    type: kibana.request
+    if: '${{ steps.resolve_decision.output.approved == true }}'
+    timeout: '30s'
+    with:
+      method: PUT
+      path: '/s/{{ workflow.spaceId }}/api/agent_builder/skills/{{ consts.SKILL_ID }}'
+      headers:
+        kbn-xsrf: 'true'
+        elastic-api-version: '2023-10-31'
+        Content-Type: application/json
+      body:
+        content: '{{ steps.get_prior_content.output.document.content }}'
+    on-failure:
+      continue: true
+
   - name: emit_result
     type: workflow.output
     status: completed
@@ -163,3 +290,6 @@ steps:
       traces_graded: '${{ variables.traces_graded }}'
       scores_persisted: '${{ variables.scores_persisted }}'
       evaluator_failures: '${{ variables.evaluator_failures | plus: variables.traces_found | minus: variables.traces_graded }}'
+      mean_score: '${{ steps.resolve_drift.output.mean_score }}'
+      rollback_proposed: '${{ steps.resolve_rollback.output.can_propose == true and steps.propose_rollback.error == null }}'
+      rolled_back: '${{ steps.restore_skill.output != null and steps.restore_skill.error == null }}'

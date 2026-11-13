@@ -21,6 +21,7 @@ import type { SecurityManagedWorkflowsClient } from '../workflows/managed_workfl
 import {
   AESOP_DRIFT_MONITOR_INTERVAL_MINUTES,
   AESOP_DRIFT_MONITOR_LOOKBACK_MINUTES,
+  AESOP_DRIFT_MONITOR_THRESHOLD,
 } from '../../common/aesop_prototype';
 
 /**
@@ -121,6 +122,9 @@ interface AesopDriftMonitorEnableParams {
   skillName?: string;
   intervalMinutes?: number;
   lookbackMinutes?: number;
+  driftThreshold?: number;
+  /** Investigation a rollback proposal is raised under; without one the monitor never proposes. */
+  investigationId?: string;
 }
 
 // Both values are rendered raw into a single-quoted YAML const and ES|QL string
@@ -132,6 +136,8 @@ export const buildTemplateValues = ({
   skillName,
   intervalMinutes,
   lookbackMinutes,
+  driftThreshold,
+  investigationId,
 }: AesopDriftMonitorEnableParams): AesopDriftMonitorWorkflowTemplateValues => {
   if (skillId.length > skillIdMaxLength || !skillIdRegexp.test(skillId)) {
     throw new Error(`Invalid skill id for the AESOP drift monitor: '${skillId}'`);
@@ -141,6 +147,8 @@ export const buildTemplateValues = ({
     skillName: skillName && SAFE_SKILL_NAME.test(skillName) ? skillName : skillId,
     intervalMinutes: intervalMinutes ?? AESOP_DRIFT_MONITOR_INTERVAL_MINUTES,
     lookbackMinutes: lookbackMinutes ?? AESOP_DRIFT_MONITOR_LOOKBACK_MINUTES,
+    driftThreshold: driftThreshold ?? AESOP_DRIFT_MONITOR_THRESHOLD,
+    investigationId: investigationId ?? '',
   };
 };
 
@@ -169,7 +177,14 @@ export const getAesopDriftMonitorTracingWarnings = async (
 /** Install (disabled) + enable the monitor instance for one skill. */
 export const enableAesopDriftMonitor = async (
   deps: AesopDriftMonitorRequestDeps,
-  { skillId, skillName, intervalMinutes, lookbackMinutes }: AesopDriftMonitorEnableParams
+  {
+    skillId,
+    skillName,
+    intervalMinutes,
+    lookbackMinutes,
+    driftThreshold,
+    investigationId,
+  }: AesopDriftMonitorEnableParams
 ): Promise<{ documentId: string }> => {
   const { workflowsManagement, logger, spaceId } = deps;
   if (!workflowsManagement) {
@@ -185,7 +200,14 @@ export const enableAesopDriftMonitor = async (
   await client.install(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
     spaceId,
     workflowIdSuffix,
-    values: buildTemplateValues({ skillId, skillName, intervalMinutes, lookbackMinutes }),
+    values: buildTemplateValues({
+      skillId,
+      skillName,
+      intervalMinutes,
+      lookbackMinutes,
+      driftThreshold,
+      investigationId,
+    }),
   });
 
   // Installing writes the workflow document and stops there. Enabling is what puts the

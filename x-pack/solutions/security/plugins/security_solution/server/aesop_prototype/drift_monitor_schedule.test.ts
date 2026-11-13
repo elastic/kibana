@@ -14,6 +14,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { SecurityManagedWorkflowsClient } from '../workflows/managed_workflows';
+import { AESOP_DRIFT_MONITOR_THRESHOLD } from '../../common/aesop_prototype';
 import {
   aesopDriftMonitorDocumentId,
   aesopDriftMonitorWorkflowIdSuffix,
@@ -62,6 +63,21 @@ describe('buildTemplateValues', () => {
     expect(buildTemplateValues({ skillId: 'triage', skillName: 'Alert triage' })).toEqual(
       expect.objectContaining({ skillId: 'triage', skillName: 'Alert triage' })
     );
+  });
+
+  it('defaults the drift threshold and leaves the investigation id blank', () => {
+    expect(buildTemplateValues({ skillId: 'triage' })).toEqual(
+      expect.objectContaining({
+        driftThreshold: AESOP_DRIFT_MONITOR_THRESHOLD,
+        investigationId: '',
+      })
+    );
+  });
+
+  it('carries an explicit drift threshold and investigation id', () => {
+    expect(
+      buildTemplateValues({ skillId: 'triage', driftThreshold: 0.5, investigationId: 'inv-1' })
+    ).toEqual(expect.objectContaining({ driftThreshold: 0.5, investigationId: 'inv-1' }));
   });
 
   it('falls back to the skill id when the name is unknown', () => {
