@@ -329,7 +329,12 @@ export const useDataGridFocus = ({
     }
 
     if (areDataGridCellAddressesEqual(previousActiveCell, reconciledActiveCell)) {
-      if (logicalOrderChanged && lostOwnedFocusRef.current && reconciledActiveCell) {
+      if (
+        !pendingFocusRef.current &&
+        logicalOrderChanged &&
+        lostOwnedFocusRef.current &&
+        reconciledActiveCell
+      ) {
         lostOwnedFocusRef.current = null;
         void focusCell(reconciledActiveCell);
       }
@@ -350,7 +355,10 @@ export const useDataGridFocus = ({
       return;
     }
 
-    if (lostOwnedFocusRef.current || document.activeElement === gridRef.current) {
+    if (
+      !pendingFocusRef.current &&
+      (lostOwnedFocusRef.current || document.activeElement === gridRef.current)
+    ) {
       lostOwnedFocusRef.current = null;
       void focusCell(reconciledActiveCell);
     }

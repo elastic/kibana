@@ -154,6 +154,38 @@ describe('DataGrid keyboard and logical focus', () => {
     outsideButton.remove();
   });
 
+  it('preserves pending focus when reordering unmounts the active row', async () => {
+    virtualizerTestHarness.delayMounts();
+    const apiRef = createRef<DataGridApi>();
+    const { rerender } = renderGrid({ apiRef });
+    focusElement(screen.getByRole('gridcell', { name: 'Name 0' }));
+    if (!apiRef.current) {
+      throw new Error('Expected a data grid API.');
+    }
+
+    let pendingFocus: Promise<DataGridCommandResult> | undefined;
+    act(() => {
+      pendingFocus = apiRef.current?.focusCell({ rowId: 'row-50', columnId: 'name' });
+    });
+    expect(virtualizerTestHarness.pendingScrollCount).toBe(1);
+
+    const rowsWithoutActive = rows.slice(1);
+    const reorderedRows = [
+      ...rowsWithoutActive.slice(0, 70),
+      rows[0],
+      ...rowsWithoutActive.slice(70),
+    ];
+    rerender(<TestDataGrid gridRows={reorderedRows} apiRef={apiRef} />);
+
+    expect(screen.queryByRole('gridcell', { name: 'Name 0' })).toBeNull();
+    expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(49, 'auto');
+    expect(virtualizerTestHarness.pendingScrollCount).toBe(2);
+    virtualizerTestHarness.flushScroll(1);
+
+    await expect(pendingFocus).resolves.toEqual({ status: 'completed' });
+    await expectFocus('Name 50');
+  });
+
   it('does not reclaim focus when a delayed destination mounts after Tab leaves the grid', async () => {
     virtualizerTestHarness.delayMounts();
     const apiRef = createRef<DataGridApi>();
