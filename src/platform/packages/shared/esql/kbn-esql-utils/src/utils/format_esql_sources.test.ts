@@ -15,17 +15,15 @@ describe('formatEsqlSources', () => {
     expect(formatEsqlSources('my-view')).toBe('my-view');
   });
 
-  it('keeps the remote cluster and the selector of a source', () => {
-    expect(formatEsqlSources('remote:logs-*')).toBe('remote:logs-*');
-    expect(formatEsqlSources('logs-*::data')).toBe('logs-*::data');
+  it('quotes the source of a remote cluster and the one with a selector, as the editor does', () => {
+    expect(formatEsqlSources('remote:logs-*')).toBe('"remote:logs-*"');
+    expect(formatEsqlSources('logs-*::data')).toBe('"logs-*::data"');
   });
 
   it('quotes a source that cannot be written without quotes', () => {
     expect(formatEsqlSources('logs=archive')).toBe('"logs=archive"');
     expect(formatEsqlSources('<logs-{now/d}>,other-*')).toBe('"<logs-{now/d}>", other-*');
     expect(formatEsqlSources('my index')).toBe('"my index"');
-    expect(formatEsqlSources('remote:logs=archive')).toBe('remote:"logs=archive"');
-    expect(formatEsqlSources('logs::data=1')).toBe('"logs::data=1"');
   });
 
   it('escapes the quotes and backslashes of a quoted source', () => {
