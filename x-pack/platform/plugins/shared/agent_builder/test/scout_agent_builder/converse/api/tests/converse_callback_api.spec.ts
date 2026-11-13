@@ -243,6 +243,11 @@ apiTest.describe(
         },
       ]);
 
+      // execution_terminated carries the same rendered surface payload.
+      expect(isExecutionTerminatedEvent(terminated) && terminated.surface_payload).toStrictEqual(
+        surfacePayload
+      );
+
       const conversationId = getConversationId(callbackRequests);
       expect(conversationId.length).toBeGreaterThan(0);
       expect(accepted.conversation_id).toBe(conversationId);

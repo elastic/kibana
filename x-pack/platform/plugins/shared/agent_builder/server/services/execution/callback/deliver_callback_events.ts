@@ -7,6 +7,7 @@
 
 import {
   EMPTY,
+  concat,
   from,
   concatMap,
   concatWith,
@@ -25,9 +26,11 @@ import {
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isRoundCompleteEvent,
+  type ChatCallbackEvent,
   type ChatEvent,
   type ExecutionTerminatedEvent,
   type RoundCompleteEvent,
+  type SurfacePayload,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { SurfacesService } from '../../surfaces';
@@ -42,8 +45,8 @@ import type { CallbackDeliveryService } from './callback_delivery_service';
  * completes, so they are only delivered after the conversation has been persisted. Both carry the
  * same idempotency key, so a consumer acts on whichever it handles first. If the stream errors
  * first (e.g. the persistence write failed), both are skipped and a failure callback is sent
- * instead. round_complete carries the response message ready to post on the round's surface,
- * which is never stored.
+ * instead. Both carry the response message ready to post on the round's surface, which is never
+ * stored.
  */
 export const deliverCallbackEvents = ({
   execution,
@@ -81,7 +84,7 @@ export const deliverCallbackEvents = ({
     return Promise.resolve();
   }
 
-  const deliverEvent = (event: ChatEvent) => {
+  const deliverEvent = (event: ChatCallbackEvent) => {
     const isTerminal = isExecutionTerminatedEvent(event) || isRoundCompleteEvent(event);
     const delivery = callbackDeliveryService.makeCallbackRequest({
       payload: {
@@ -137,26 +140,30 @@ export const deliverCallbackEvents = ({
         // Deliver the buffered terminal events last, only on successful completion. On a stream
         // error concatWith propagates it to catchError below, skipping these deliveries.
         concatWith(
-          defer(() => (executionTerminatedEvent ? deliverEvent(executionTerminatedEvent) : EMPTY)),
           defer(() => {
-            if (!roundCompleteEvent) {
-              return EMPTY;
-            }
-
-            const completedEvent: RoundCompleteEvent = roundCompleteEvent;
-
             // The response message ready to post on the round's surface, such as Slack.
-            const surfacePayload = surfacesService.renderPayload(completedEvent, {
-              originType: execution.agentParams.origin?.type,
-              agentId: execution.agentId,
-              request,
-              spaceId: execution.spaceId,
-            });
+            const surfacePayload: Promise<SurfacePayload | undefined> = roundCompleteEvent
+              ? surfacesService.renderPayload(roundCompleteEvent, {
+                  originType: execution.agentParams.origin?.type,
+                  agentId: execution.agentId,
+                  request,
+                  spaceId: execution.spaceId,
+                })
+              : Promise.resolve(undefined);
 
-            return from(surfacePayload).pipe(
-              concatMap((payload) => deliverEvent({ ...completedEvent, surface_payload: payload }))
-            );
-          })
+            return from(surfacePayload);
+          }).pipe(
+            concatMap((surfacePayload) =>
+              concat(
+                executionTerminatedEvent
+                  ? deliverEvent({ ...executionTerminatedEvent, surface_payload: surfacePayload })
+                  : EMPTY,
+                roundCompleteEvent
+                  ? deliverEvent({ ...roundCompleteEvent, surface_payload: surfacePayload })
+                  : EMPTY
+              )
+            )
+          )
         ),
         catchError((error) => {
           const failureDelivery = callbackDeliveryService.makeCallbackRequest({

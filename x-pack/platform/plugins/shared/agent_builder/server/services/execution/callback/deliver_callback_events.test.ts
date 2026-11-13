@@ -17,6 +17,8 @@ import {
   ConversationOriginType,
   createRequestAbortedError,
   TimelineEventType,
+  type ChatCallbackEventResponse,
+  type ChatCallbackExecutionTerminatedEvent,
   type ChatEvent,
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
@@ -390,6 +392,61 @@ describe('deliverCallbackEvents', () => {
       },
     ]);
     expect(roundCompleteEvent).not.toHaveProperty('surface_payload');
+  });
+
+  it('adds the same surface payload to execution_terminated and round_complete, rendering it once', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
+    const executionTerminatedEvent = createExecutionTerminatedEvent();
+    const roundCompleteEvent = createRoundCompleteEvent('There are **3** alerts.');
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(roundCompleteEvent, executionTerminatedEvent),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const [terminated, completed] = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as ChatCallbackEventResponse).event
+    );
+
+    expect(renderPayload).toHaveBeenCalledTimes(1);
+    expect(terminated).toEqual({
+      ...executionTerminatedEvent,
+      surface_payload: { text: expect.any(String), blocks: expect.any(Array) },
+    });
+    expect(completed).toMatchObject({ type: ChatEventType.roundComplete });
+    expect((terminated as ChatCallbackExecutionTerminatedEvent).surface_payload).toEqual(
+      (completed as RoundCompleteEvent).surface_payload
+    );
+    expect(executionTerminatedEvent).not.toHaveProperty('surface_payload');
+
+    renderPayload.mockRestore();
+  });
+
+  it('delivers execution_terminated without a surface payload when there is no round_complete', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(createExecutionTerminatedEvent()),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const [[{ payload }]] = service.makeCallbackRequest.mock.calls;
+
+    expect(renderPayload).not.toHaveBeenCalled();
+    expect(
+      ((payload as ChatCallbackEventResponse).event as ChatCallbackExecutionTerminatedEvent)
+        .surface_payload
+    ).toBeUndefined();
+
+    renderPayload.mockRestore();
   });
 
   it('renders attachments through their type mapping, and leaves out the others', async () => {
