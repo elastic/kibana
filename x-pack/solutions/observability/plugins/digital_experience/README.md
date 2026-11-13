@@ -441,8 +441,13 @@ outright, such as one with a value longer than its mapping takes, is left out wi
 instead, so a single session can't hold up the window and everything behind it. Events that arrive later than the sync
 delay after their `@timestamp` are only summarized when another event of their session arrives.
 
+Once an hour, after the summaries are written, a run deletes the summaries of sessions that ended
+more than 31 days ago. It waits for that deletion, so a failure is logged, and it only logs it: a
+run's checkpoint survives, and the next attempt waits for the hour.
+
 Readers don't depend on how summaries are built. A new `SESSIONS_VERSION` makes the task rebuild
-every summary into the new index. The task stands down instead when its state comes from a newer
+every summary into the new index and delete the indices of *older* versions; a newer version's
+index is left alone. The task stands down instead when its state comes from a newer
 `SESSIONS_VERSION`, after a rollback or while a rolling upgrade still has older nodes: that version
 owns the index and its template, so rebuilding as this one would overwrite them and restart the
 backfill.
@@ -565,7 +570,8 @@ spaces, as the task and index serve every space. The user also needs these Elast
 when any is missing the request fails with a 403 listing them, before anything is written:
 
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
-- `digital-experience-sessions-*`: `read`, `view_index_metadata`, `index`, `create_index`
+- `digital-experience-sessions-*`: `read`, `view_index_metadata`, `index`, `create_index`, `delete`,
+  `delete_index`
 - On serverless, the cluster privilege `read_security` (the predefined `admin` role has it; custom
   roles may not)
 
