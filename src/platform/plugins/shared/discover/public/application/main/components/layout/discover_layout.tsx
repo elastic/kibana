@@ -68,6 +68,7 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
+  useCurrentTabRuntimeState,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -336,8 +337,17 @@ export function DiscoverLayout() {
     return () => onAddColumnWithTracking(draggingFieldName);
   }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
+  const chartBreakdownFieldNames = useCurrentTabRuntimeState(
+    (tab) => tab.chartBreakdownFieldNames$
+  );
+
   const onDropFieldToChart = useMemo(() => {
-    if (!draggingFieldName || !canSetBreakdownField || draggingFieldName === breakdownField) {
+    if (
+      !draggingFieldName ||
+      !canSetBreakdownField ||
+      draggingFieldName === breakdownField ||
+      (chartBreakdownFieldNames && !chartBreakdownFieldNames.includes(draggingFieldName))
+    ) {
       return undefined;
     }
 
@@ -353,6 +363,7 @@ export function DiscoverLayout() {
     draggingFieldName,
     canSetBreakdownField,
     breakdownField,
+    chartBreakdownFieldNames,
     currentDataSource,
     onAddBreakdownField,
   ]);

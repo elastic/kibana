@@ -44,6 +44,8 @@ interface TabRuntimeState {
   dataStateContainer?: DiscoverDataStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramConfig: UnifiedHistogramConfig;
+  /** Fields reported by a custom chart section as the only ones it can use as a breakdown. */
+  chartBreakdownFieldNames: string[];
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
@@ -61,7 +63,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<
   TabRuntimeState,
-  'currentDataSource' | 'cascadedLeafDataSource'
+  'currentDataSource' | 'cascadedLeafDataSource' | 'chartBreakdownFieldNames'
 >;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
@@ -122,6 +124,7 @@ export const createTabRuntimeState = ({
       localStorageKeyPrefix: undefined,
       layoutPropsMap: initialValues?.unifiedHistogramLayoutPropsMap ?? {},
     }),
+    chartBreakdownFieldNames$: new BehaviorSubject<string[] | undefined>(undefined),
     scopedProfilesManager$: new BehaviorSubject(scopedProfilesManager),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),

@@ -15,6 +15,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
+import { isEqual } from 'lodash';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
@@ -245,6 +246,21 @@ const CustomChartSectionWrapper = ({
     setUnifiedHistogramApi(api);
   }, [setUnifiedHistogramApi, api]);
 
+  const runtimeStateManager = useRuntimeStateManager();
+  const setBreakdownFieldNames = useCallback(
+    (fieldNames: string[] | undefined) => {
+      const { chartBreakdownFieldNames$ } = selectTabRuntimeState(
+        runtimeStateManager,
+        currentTabId
+      );
+
+      if (!isEqual(chartBreakdownFieldNames$.getValue(), fieldNames)) {
+        chartBreakdownFieldNames$.next(fieldNames);
+      }
+    },
+    [runtimeStateManager, currentTabId]
+  );
+
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
@@ -294,6 +310,7 @@ const CustomChartSectionWrapper = ({
         isTabSelected,
         ...unifiedHistogramProps,
         setLensRequestAdapter: api.setLensRequestAdapter,
+        setBreakdownFieldNames,
         initialState: metricsGridState,
         onInitialStateChange,
       })}
