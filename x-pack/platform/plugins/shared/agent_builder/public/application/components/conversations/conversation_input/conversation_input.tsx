@@ -517,10 +517,14 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       return;
     }
 
-    // A failure settled after the submit: the composer has moved on, so the text is put back.
+    // A failure settled after the submit: the text goes back into the composer unless something
+    // newer was typed meanwhile, which is never overwritten.
     const restoreUnsent = (unsent: string) => {
+      if (lastEditorContentRef.current !== '') {
+        return;
+      }
       lastEditorContentRef.current = unsent;
-      messageEditorController.setContent(unsent);
+      messageEditorControllerRef.current?.setContent(unsent);
     };
 
     // A resend of a steer that got no answer is its retry, under the same id, also once the run has
@@ -536,15 +540,15 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
         );
         return;
       }
+      // Cleared at the submit, as for an ordinary send, so edits made during the request are kept.
+      lastEditorContentRef.current = '';
+      clearDraft();
+      messageEditorController.clear();
+      onSubmit?.();
       sendSteer(content, { onUnsent: restoreUnsent }).then((sent) => {
         if (!sent) {
-          lastEditorContentRef.current = content;
-          return;
+          restoreUnsent(content);
         }
-        lastEditorContentRef.current = '';
-        clearDraft();
-        messageEditorController.clear();
-        onSubmit?.();
       });
       return;
     }

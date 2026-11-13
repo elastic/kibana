@@ -896,14 +896,10 @@ class ConversationClientImpl implements ConversationClient {
           if (isPublicConversation(current.access_control)) {
             throw new SteerSignal('not_steerable');
           }
-          // Checked before the holder: the lock is free while a round waits on a prompt.
-          if (getPendingResumeRound(current) !== undefined) {
-            throw new SteerSignal('awaiting_prompt');
-          }
+          // A retry is answered first, whatever the run has done since: paused on a prompt or ended.
           const currentEvents = current.events ?? [];
           const stored = currentEvents.find((event) => event.id === eventId);
           if (stored) {
-            // Answered with the run it was stamped with, which may have ended since.
             const stampedId =
               stored.type === TimelineEventType.userMessage
                 ? (stored as UserMessageEvent).data.steer?.execution_id
@@ -912,6 +908,10 @@ class ConversationClientImpl implements ConversationClient {
               createdAt: stored.created_at,
               executionId: stampedId,
             });
+          }
+          // Checked before the holder: the lock is free while a round waits on a prompt.
+          if (getPendingResumeRound(current) !== undefined) {
+            throw new SteerSignal('awaiting_prompt');
           }
           const held = current.active_execution?.execution_id;
           if (!held || isExecutionStale(current.execution)) {

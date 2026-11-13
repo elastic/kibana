@@ -6488,6 +6488,30 @@ describe('ConversationClient', () => {
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
 
+      it('answers a retry as stored while the run it was stamped with waits on a prompt', async () => {
+        const pausedOnPrompt = {
+          id: 'e1_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2026-10-26T10:00:06.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'e1',
+          data: { outcome: { type: 'prompt_requested', prompts: [] } },
+        } as unknown as ConversationEvent;
+        mockGetDocumentResponse(
+          documentWithHolder(undefined, { events: [userMessage, storedSteer, pausedOnPrompt] })
+        );
+
+        const result = await appendSteer();
+
+        expect(result).toEqual({
+          eventId: steerId,
+          executionId: 'e1',
+          createdAt: '2026-10-26T10:00:05.000Z',
+          alreadyStored: true,
+        });
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
       it('refuses without a live holder and says nothing is stored', async () => {
         mockGetDocumentResponse(documentWithHolder('e1'));
         staleHolder();

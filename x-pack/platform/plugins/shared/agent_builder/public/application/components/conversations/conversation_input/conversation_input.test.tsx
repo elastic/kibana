@@ -601,6 +601,55 @@ describe('ConversationInput', () => {
 
         expect(editorController.setContent).toHaveBeenCalledWith('hello agent');
       });
+
+      it('puts the text back into an empty composer when the steer is refused', async () => {
+        mockSendSteer.mockResolvedValue(false);
+        renderInput(<ConversationInput />);
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+        await waitFor(() =>
+          expect(editorController.setContent).toHaveBeenCalledWith('hello agent')
+        );
+      });
+
+      describe('with text typed while the steer is pending', () => {
+        const typeMeanwhile = (content: string) => {
+          editorController.getContent.mockReturnValue(content);
+          const lastOptions =
+            mockedUseMessageEditor.mock.calls[mockedUseMessageEditor.mock.calls.length - 1][0];
+          act(() => lastOptions?.onContentChange?.());
+        };
+
+        it('clears the composer at the submit and keeps the newer text on success', async () => {
+          let settle: (sent: boolean) => void = () => {};
+          mockSendSteer.mockReturnValue(new Promise<boolean>((resolve) => (settle = resolve)));
+          renderInput(<ConversationInput />);
+
+          fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+          expect(editorController.clear).toHaveBeenCalledTimes(1);
+          typeMeanwhile('a second thought');
+
+          await act(async () => settle(true));
+
+          expect(editorController.clear).toHaveBeenCalledTimes(1);
+          expect(editorController.setContent).not.toHaveBeenCalled();
+        });
+
+        it('keeps the newer text when the steer fails', async () => {
+          let settle: (sent: boolean) => void = () => {};
+          mockSendSteer.mockReturnValue(new Promise<boolean>((resolve) => (settle = resolve)));
+          renderInput(<ConversationInput />);
+
+          fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+          typeMeanwhile('a second thought');
+
+          await act(async () => settle(false));
+
+          expect(editorController.setContent).not.toHaveBeenCalled();
+          expect(editorController.clear).toHaveBeenCalledTimes(1);
+        });
+      });
     });
   });
 
