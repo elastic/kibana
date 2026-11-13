@@ -44,11 +44,16 @@
 import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
+import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { runAlertAnalysisWorkflow, type ClassificationMethod } from '../src/workflow_task';
+import {
+  deleteConversations,
+  runAlertAnalysisWorkflow,
+  type ClassificationMethod,
+} from '../src/workflow_task';
 import { configureAlertAnalysisWorkflow, ensureAlertsIndex } from '../src/space_config';
 import {
   classificationAccuracy,
@@ -80,23 +85,41 @@ evaluate.describe(
   () => {
     // Alerts created by tasks, deleted after each run; afterAll sweeps any that slipped through.
     const createdAlertIds = new Set<string>();
+    // Conversations this run stored that the per-example delete could not remove.
+    const leftoverConversationIds = new Set<string>();
 
     evaluate.beforeAll(async ({ esClient }: { esClient: EsClient }) => {
       await ensureAlertsIndex(esClient);
     });
 
-    evaluate.afterAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
-      if (createdAlertIds.size === 0) {
-        return;
+    evaluate.afterAll(
+      async ({
+        esClient,
+        fetch,
+        log,
+      }: {
+        esClient: EsClient;
+        fetch: HttpHandler;
+        log: ToolingLog;
+      }) => {
+        if (leftoverConversationIds.size > 0) {
+          log.info(
+            `Retrying delete of ${leftoverConversationIds.size} leftover agent conversations`
+          );
+          await deleteConversations({ fetch, log, conversationIds: [...leftoverConversationIds] });
+        }
+        if (createdAlertIds.size === 0) {
+          return;
+        }
+        log.info(`Deleting ${createdAlertIds.size} leftover alert-analysis eval alerts`);
+        await esClient.deleteByQuery({
+          index: ALERTS_INDEX,
+          query: { ids: { values: [...createdAlertIds] } },
+          refresh: true,
+          conflicts: 'proceed',
+        });
       }
-      log.info(`Deleting ${createdAlertIds.size} leftover alert-analysis eval alerts`);
-      await esClient.deleteByQuery({
-        index: ALERTS_INDEX,
-        query: { ids: { values: [...createdAlertIds] } },
-        refresh: true,
-        conflicts: 'proceed',
-      });
-    });
+    );
 
     const METHODS: Array<{
       method: ClassificationMethod;
@@ -205,7 +228,7 @@ evaluate.describe(
                 });
 
                 try {
-                  return await runAlertAnalysisWorkflow({
+                  const verdict = await runAlertAnalysisWorkflow({
                     fetch,
                     log,
                     traceEsClient,
@@ -213,6 +236,10 @@ evaluate.describe(
                     alertIndex,
                     classificationMethod: method,
                   });
+                  verdict.undeletedConversationIds?.forEach((id) =>
+                    leftoverConversationIds.add(id)
+                  );
+                  return verdict;
                 } finally {
                   await esClient
                     .delete({ index: alertIndex, id: uniqueAlertId, refresh: true })
