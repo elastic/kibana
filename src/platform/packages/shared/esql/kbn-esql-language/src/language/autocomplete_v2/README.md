@@ -25,9 +25,22 @@ cursor and from the command signatures in `../../esql_js_sim`. Rules, enforced b
    the request and knows the editor only through the context (`context.ts`).
 4. **Present** (in `suggest.ts` for now): the final list.
 
-What the engine offers today: command names, with the license, tier, time-series and
-"hidden after" gates of the registered commands; keywords; the pipe, the separator of a list
-and the next line. Arguments are resolved to their roles and not provided yet.
+What the engine offers today:
+
+- Command names, with the license, tier, time-series and "hidden after" gates of the
+  registered commands.
+- Keywords, the pipe, the separator of a list and the next line.
+- Arguments with the roles `column` (by type, each listed once where the role says so),
+  `new_name` (a free name with its assignment) and `constant` (its allowed values). The other
+  roles are resolved and not provided yet.
+
+The columns a command can read are those of the query before the cursor (`pipeline.ts`): the
+commands before it in its pipeline, plus the outer pipeline for a branch, and only the
+subquery's own commands for a subquery. They are fetched on the first request, so a position
+that offers no column asks the editor for none.
+
+An item for an argument ends with a space, and reopens the suggestions, unless the argument is
+an item of a list. There a separator can follow, and it is offered on the name itself.
 
 `__tests__/scenarios/parity.test.ts` runs every scenario table through this flow and keeps,
 in a snapshot, how many rows of each command already match the current flow.

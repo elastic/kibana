@@ -29,7 +29,7 @@ import type {
   TokenClass,
   TypedWord,
   WordKind,
-  WrittenArgument,
+  WrittenCommand,
 } from './types';
 
 /** A chain of rules, outermost first, with the ATN state that called each one when known. */
@@ -205,38 +205,39 @@ const openBrackets = (textBefore: string): string[] => {
 };
 
 /**
- * What is written in the command that starts at `commandStart`, the innermost one if several do.
+ * The commands written before the cursor, with what is written in each.
  *
  * The parser recovers from an unfinished command by guessing, which can rearrange what was
  * written. So the text is finished first with what the grammar expects at the cursor: a name
  * where an argument or a value can come, then the brackets that are still open. Whatever the
  * parser reads from the added text is left out again.
  */
-const toWritten = (
-  textBefore: string,
-  commandStart: number,
-  expectsValue: boolean
-): WrittenArgument[] => {
+const toCommands = (textBefore: string, expectsValue: boolean): WrittenCommand[] => {
   const caret = textBefore.length;
   const closers = openBrackets(textBefore)
     .reverse()
     .map((opener) => CLOSER_OF[opener] ?? '')
     .join('');
   const finished = `${textBefore}${expectsValue ? CURSOR_MARKER : ''}${closers}`;
-  const command = describeCommands(finished).findLast(({ start }) => start === commandStart);
 
-  return (command?.arguments ?? [])
+  return describeCommands(finished)
     .filter(({ start }) => start < caret)
-    .map((argument) => ({
-      ...argument,
-      text: argument.text.slice(0, caret - argument.start),
-      end: Math.min(argument.end, caret),
-      ...(argument.end > caret && { open: true }),
-      ancestors: argument.ancestors.map((ancestor) => ({
-        ...ancestor,
-        end: Math.min(ancestor.end, caret),
-        open: ancestor.end > caret || (ancestor.end === caret && !expectsValue),
-      })),
+    .map((command) => ({
+      ...command,
+      end: Math.min(command.end, caret),
+      arguments: command.arguments
+        .filter(({ start }) => start < caret)
+        .map((argument) => ({
+          ...argument,
+          text: argument.text.slice(0, caret - argument.start),
+          end: Math.min(argument.end, caret),
+          ...(argument.end > caret && { open: true }),
+          ancestors: argument.ancestors.map((ancestor) => ({
+            ...ancestor,
+            end: Math.min(ancestor.end, caret),
+            open: ancestor.end > caret || (ancestor.end === caret && !expectsValue),
+          })),
+        })),
     }));
 };
 
@@ -311,6 +312,15 @@ export const locate = (text: string, offset: number): CursorIR => {
 
   const position = toPosition(location, expected, followers, previous);
 
+  const commands = location.inComment
+    ? []
+    : toCommands(
+        text.slice(0, caret),
+        // After a complete argument nothing has to follow, so nothing is added.
+        position !== 'after_argument' &&
+          (expected.length > 0 || followers.some((follower) => follower.class === 'value'))
+      );
+
   return {
     position,
     command,
@@ -326,15 +336,7 @@ export const locate = (text: string, offset: number): CursorIR => {
     ...(onlyFollower && { onlyFollower }),
     word,
     next: toNext(text, offset),
-    written:
-      location.inComment || location.segment.start === caret
-        ? []
-        : toWritten(
-            text.slice(0, caret),
-            location.segment.start,
-            // After a complete argument nothing has to follow, so nothing is added.
-            position !== 'after_argument' &&
-              (expected.length > 0 || followers.some((follower) => follower.class === 'value'))
-          ),
+    written: commands.findLast(({ start }) => start === location.segment.start)?.arguments ?? [],
+    commands,
   };
 };
