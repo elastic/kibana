@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SESSIONS_INDEX } from '../../../common/sessions';
 import {
   IDS_PER_QUERY,
@@ -85,6 +85,8 @@ const setUp = ({
 const paramOf = (params: estypes.EsqlNamedValue[], name: string) =>
   params.find((param) => name in param)?.[name];
 
+const logger = loggingSystemMock.createLogger();
+
 const run = (esClient: ReturnType<typeof setUp>, overrides = {}) =>
   summarizeSessions({
     esClient,
@@ -94,6 +96,7 @@ const run = (esClient: ReturnType<typeof setUp>, overrides = {}) =>
     windowMs: INITIAL_WINDOW_MS,
     budgetMs: 45_000,
     concurrency: 2,
+    logger,
     ...overrides,
   });
 
@@ -294,6 +297,31 @@ describe('summarizeSessions', () => {
 
     await expect(run(esClient)).rejects.toThrow(
       'Writing session summaries failed: security_exception: denied'
+    );
+  });
+
+  it('leaves out a summary Elasticsearch refuses, rather than retrying it forever', async () => {
+    const esClient = setUp();
+    const ownLogger = loggingSystemMock.createLogger();
+    esClient.bulk.mockResolvedValue({
+      errors: true,
+      took: 1,
+      items: [
+        {
+          index: {
+            status: 400,
+            error: { type: 'document_parsing_exception', reason: 'value too long' },
+          },
+        },
+      ],
+    } as estypes.BulkResponse);
+
+    // The window still completes, so the checkpoint moves past the session it could not write.
+    await expect(run(esClient, { logger: ownLogger })).resolves.toEqual(
+      expect.objectContaining({ caughtUp: true })
+    );
+    expect(ownLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('document_parsing_exception')
     );
   });
 

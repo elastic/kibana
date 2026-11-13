@@ -70,7 +70,14 @@ export interface SessionDocument {
   search: string[];
 }
 
-const keyword = { type: 'keyword' } as const;
+/**
+ * A browser can set a value of any length, and a keyword term over Lucene's 32 KB limit fails the
+ * whole bulk request. A longer value stays in `_source` but is not indexed, so it drops out of
+ * search and the facets instead of stalling every summary behind it.
+ */
+const MAX_KEYWORD_LENGTH = 1024;
+
+const keyword = { type: 'keyword', ignore_above: MAX_KEYWORD_LENGTH } as const;
 const count = { type: 'long' } as const;
 
 export const sessionsIndexMappings = {
@@ -92,8 +99,7 @@ export const sessionsIndexMappings = {
     entry_page: keyword,
     exit_page: keyword,
     journey: keyword,
-    // Set by the browser, so bounded like the environments the routes accept.
-    environment: { type: 'keyword', ignore_above: 1024 },
+    environment: keyword,
     user: { properties: { key: keyword } },
     user_agent: {
       properties: { browser: keyword, browser_version: keyword, os: keyword, device: keyword },
@@ -138,6 +144,12 @@ export const putSessionsIndexTemplate = async (
 ): Promise<void> => {
   await internalClient.indices.putIndexTemplate(sessionsIndexTemplate, { signal });
 };
+
+/** Whether the sessions index of this version exists. */
+export const sessionsIndexExists = async (
+  client: ElasticsearchClient,
+  signal?: AbortSignal
+): Promise<boolean> => client.indices.exists({ index: SESSIONS_INDEX }, { signal });
 
 /** Creates the sessions index of this version unless it exists; true when it was created. */
 export const createSessionsIndex = async (

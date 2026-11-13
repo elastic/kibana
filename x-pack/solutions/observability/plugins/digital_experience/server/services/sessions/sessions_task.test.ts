@@ -15,7 +15,11 @@ import {
 import { TaskCost, type TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SESSIONS_TASK_ID, SESSIONS_TASK_TYPE, SESSIONS_VERSION } from '../../../common/sessions';
-import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
+import {
+  createSessionsIndex,
+  putSessionsIndexTemplate,
+  sessionsIndexExists,
+} from './sessions_index';
 import {
   NO_API_KEY_MESSAGE,
   apiKeyIdOf,
@@ -89,6 +93,7 @@ describe('runSessionsTask', () => {
     internalClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
     jest.mocked(createSessionsIndex).mockResolvedValue(false);
+    jest.mocked(sessionsIndexExists).mockResolvedValue(true);
     jest.mocked(summarizeSessions).mockResolvedValue(summarized);
   });
 
@@ -164,6 +169,7 @@ describe('runSessionsTask', () => {
         windowMs: INITIAL_WINDOW_MS,
         budgetMs: 45_000,
         concurrency: 2,
+        logger,
       });
       expect(result.state).toEqual(expect.objectContaining({ version: SESSIONS_VERSION }));
     });
@@ -205,6 +211,7 @@ describe('runSessionsTask', () => {
     });
 
     it('rebuilds from the lookback when the index was deleted', async () => {
+      jest.mocked(sessionsIndexExists).mockResolvedValue(false);
       jest.mocked(createSessionsIndex).mockResolvedValue(true);
       jest.mocked(summarizeSessions).mockResolvedValue({ ...summarized, caughtUp: false });
 
@@ -214,8 +221,8 @@ describe('runSessionsTask', () => {
         expect.objectContaining({ checkpoint: null, windowMs: INITIAL_WINDOW_MS })
       );
       expect(state.caughtUp).toBe(false);
-      // Only a new version replaces the template.
-      expect(putSessionsIndexTemplate).not.toHaveBeenCalled();
+      // The template goes back first, or the new index would get dynamic mappings.
+      expect(putSessionsIndexTemplate).toHaveBeenCalledWith(internalClient, signal);
     });
 
     it('stays caught up when one run falls behind, and runs again right away', async () => {

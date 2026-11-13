@@ -7,7 +7,7 @@
 
 import { setImmediate as yieldToEventLoop } from 'timers/promises';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import {
   SESSIONS_INDEX,
@@ -68,6 +68,7 @@ export interface SummarizeSessionsParams {
   budgetMs: number;
   /** Summary queries run at once, each with its own batch of sessions. */
   concurrency: number;
+  logger: Logger;
 }
 
 export interface SummarizeSessionsResult {
@@ -123,10 +124,19 @@ const countChangedSessions = async (
   return typeof row?.sessions === 'number' ? row.sessions : 0;
 };
 
+/**
+ * Whether another run could get past this bulk failure. Elasticsearch answers 400 when it refuses
+ * the document itself, such as a value no mapping accepts, and every retry hits that again, so
+ * those are left out rather than stalling the window and every session behind it. Anything else,
+ * such as a 403 once the key loses access or a 429 from a busy cluster, is worth retrying.
+ */
+const isRetryable = (status: number | undefined): boolean => status !== 400;
+
 const writeSessions = async (
   esClient: ElasticsearchClient,
   documents: SessionDocument[],
-  signal: AbortSignal
+  signal: AbortSignal,
+  logger: Logger
 ): Promise<void> => {
   for (let start = 0; start < documents.length; start += BULK_SIZE) {
     const operations = documents.slice(start, start + BULK_SIZE).flatMap((document) => [
@@ -139,10 +149,22 @@ const writeSessions = async (
       document,
     ]);
     const response = await esClient.bulk({ operations }, { signal });
-    if (response.errors) {
-      const failed = response.items.find((item) => item.index?.error)?.index?.error;
-      throw new Error(
-        `Writing session summaries failed: ${failed?.type ?? 'unknown'}: ${failed?.reason ?? ''}`
+    if (!response.errors) {
+      continue;
+    }
+    const failures = response.items.flatMap((item) => (item.index?.error ? [item.index] : []));
+    const retryable = failures.find(({ status }) => isRetryable(status));
+    if (retryable) {
+      const { type, reason } = retryable.error ?? {};
+      throw new Error(`Writing session summaries failed: ${type ?? 'unknown'}: ${reason ?? ''}`);
+    }
+    const [rejected] = failures;
+    if (rejected) {
+      const { type, reason } = rejected.error ?? {};
+      logger.warn(
+        `Elasticsearch rejected ${failures.length} session ${
+          failures.length === 1 ? 'summary, which is' : 'summaries, which are'
+        } left out: ${type ?? 'unknown'}: ${reason ?? ''}`
       );
     }
   }
@@ -182,7 +204,8 @@ const summarizeBatch = async (
   esClient: ElasticsearchClient,
   window: RebuildWindow,
   batch: string[],
-  signal: AbortSignal
+  signal: AbortSignal,
+  logger: Logger
 ): Promise<BatchResult> => {
   const response = await queryEsql(esClient, sessionSummaryQuery(window, batch), signal);
   if (response.values.length >= ESQL_MAX_ROWS && batch.length > 1) {
@@ -190,7 +213,7 @@ const summarizeBatch = async (
     return { halves: [batch.slice(0, half), batch.slice(half)] };
   }
   const documents = await toSessionDocumentsInChunks(response);
-  await writeSessions(esClient, documents, signal);
+  await writeSessions(esClient, documents, signal, logger);
   return { written: documents.length };
 };
 
@@ -204,14 +227,15 @@ const summarizeSessionIds = async (
   window: RebuildWindow,
   ids: string[],
   signal: AbortSignal,
-  concurrency: number
+  concurrency: number,
+  logger: Logger
 ): Promise<number> => {
   const batches = chunk(ids, SESSIONS_PER_QUERY);
   let written = 0;
   while (batches.length > 0) {
     const round = batches.splice(0, Math.max(1, concurrency));
     const results = await Promise.allSettled(
-      round.map((batch) => summarizeBatch(esClient, window, batch, signal))
+      round.map((batch) => summarizeBatch(esClient, window, batch, signal, logger))
     );
     for (const result of results) {
       if (result.status === 'rejected') {
@@ -241,6 +265,7 @@ export const summarizeSessions = async ({
   windowMs,
   budgetMs,
   concurrency,
+  logger,
 }: SummarizeSessionsParams): Promise<SummarizeSessionsResult> => {
   const until = now - SESSIONS_SYNC_DELAY_SECONDS * 1000;
   const earliest = lookbackStart(now);
@@ -266,7 +291,8 @@ export const summarizeSessions = async ({
           },
           ids,
           signal,
-          concurrency
+          concurrency,
+          logger
         );
       }
       from = to;

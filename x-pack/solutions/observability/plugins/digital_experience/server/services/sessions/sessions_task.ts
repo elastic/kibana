@@ -20,7 +20,11 @@ import {
   type SessionsSettings,
 } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
-import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
+import {
+  createSessionsIndex,
+  putSessionsIndexTemplate,
+  sessionsIndexExists,
+} from './sessions_index';
 import { INITIAL_WINDOW_MS, summarizeSessions } from './summarize_sessions';
 
 /** No window starts after this much of a run, so it ends well before its timeout. */
@@ -141,7 +145,10 @@ export const runSessionsTask = async ({
   // A deleted index, or a new version, is rebuilt from the lookback, also after a failed run.
   let rebuild = state.version !== SESSIONS_VERSION;
   try {
-    if (rebuild) {
+    // The template has to be in place before the index is created, or the index gets dynamic
+    // mappings and nothing repairs it until the next version. Put it while rebuilding, and
+    // whenever the index is missing, which covers a template that was deleted by hand.
+    if (rebuild || !(await sessionsIndexExists(esClient, signal))) {
       await putSessionsIndexTemplate(internalClient, signal);
     }
     const created = await createSessionsIndex(esClient, signal);
@@ -154,6 +161,7 @@ export const runSessionsTask = async ({
       windowMs: rebuild ? INITIAL_WINDOW_MS : state.windowMs ?? INITIAL_WINDOW_MS,
       budgetMs: RUN_BUDGET_MS,
       concurrency,
+      logger,
     });
 
     const caughtUp = (!rebuild && state.caughtUp === true) || result.caughtUp;

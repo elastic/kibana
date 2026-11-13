@@ -258,7 +258,9 @@ run after sessions are enabled, it starts from 30 days ago, at the start of that
 catches up window by window, oldest first, and status reports `rebuilding` until it has. A window
 grows while it holds few sessions and halves when it holds more than 320,000, so a run always
 finishes the windows it starts. Failures are kept in the task's state, not thrown, so the next run
-retries from the same checkpoint, and status shows the error. Events that arrive later than the sync
+retries from the same checkpoint, and status shows the error. A summary Elasticsearch refuses
+outright, such as one with a value longer than its mapping takes, is left out with a warning
+instead, so a single session can't hold up the window and everything behind it. Events that arrive later than the sync
 delay after their `@timestamp` are only summarized when another event of their session arrives.
 
 Readers don't depend on how summaries are built. A new `SESSIONS_VERSION` makes the task rebuild
@@ -271,8 +273,10 @@ The journey lists distinct pages in first-view order (revisits are not repeated)
 page-view URLs, and the exit page is the one viewed last. Each attribute group (environment, user,
 user agent, geo) comes from its own latest event that carries any of its fields, and each attribute
 from the first of its fields that has a value (`SESSION_ATTRIBUTE_FIELDS`). A session bounced when
-it has exactly one page view. Sessions without a captured page view (only clicks or errors) aren't
-bounces, and the bounce rate is over sessions with at least one page view. `page_view_count` counts
+it never left the page it landed on, counted from the distinct pages it saw rather than its page
+views, as a browser can report more than one of those for the same page. Sessions without a captured
+page (only clicks or errors) aren't bounces, and the bounce rate is over sessions with at least one
+page view. `page_view_count` counts
 page loads and in-app navigations (`documentLoad`, `browser.navigation`); `page_load_count`,
 `js_error_count` and the HTTP request counts use the applications list's own definitions. The
 summary also keeps a lowercased `search` field (`wildcard`) of the session id, user, browser, OS,

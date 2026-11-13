@@ -129,13 +129,16 @@ const webVitalOf = (event: OtelEventFields): { name: CoreWebVital; value: number
   return vital && value != null ? { name: vital, value } : null;
 };
 
-/** The kind of a raw event, from the same event names the session summaries count. */
+/**
+ * The kind of a raw event. Errors are the exceptions the summary's `js_error_count` counts, so the
+ * page journey and the summary above it agree; a failed request stays a span, counted separately.
+ */
 const classify = (event: OtelEventFields): SessionTimelineEventKind => {
   const name = eventNameOf(event);
   if (name === EVENT_WEB_VITAL) {
     return 'web_vital';
   }
-  if (name === EVENT_EXCEPTION || attributeString(event, EVENT_OUTCOME) === 'failure') {
+  if (name === EVENT_EXCEPTION) {
     return 'error';
   }
   if (isOneOf(name, CLICK_EVENTS)) {

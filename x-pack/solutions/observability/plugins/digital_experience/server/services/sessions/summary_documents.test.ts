@@ -116,12 +116,29 @@ describe('toSessionDocuments', () => {
     });
   });
 
-  it('counts a single page view as a bounce, but not a session without one', () => {
-    const [single] = toSessionDocuments([summaryRow({ page_view_count: 1 })]);
-    const [none] = toSessionDocuments([summaryRow({ page_view_count: 0 })]);
+  it('counts a visit that never left its landing page as a bounce', () => {
+    const [single] = toSessionDocuments([summaryRow({ pages: ['https://shop.example/'] })]);
+    const [several] = toSessionDocuments([
+      summaryRow({ pages: ['https://shop.example/', 'https://shop.example/cart'] }),
+    ]);
+    const [none] = toSessionDocuments([summaryRow()]);
 
     expect(single.bounced).toBe(true);
+    expect(several.bounced).toBe(false);
+    // Without a captured page there was none to leave.
     expect(none.bounced).toBe(false);
+  });
+
+  it('bounces on the pages seen, not the page views reported for one page', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({
+        pages: ['https://shop.example/', 'https://shop.example/?ref=ad'],
+        page_view_count: 2,
+      }),
+    ]);
+
+    expect(document.bounced).toBe(true);
+    expect(document.page_view_count).toBe(2);
   });
 
   it('takes the entry and exit page from the last view when the journey is empty', () => {

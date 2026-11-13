@@ -135,7 +135,7 @@ describe('buildTimeline', () => {
     );
   });
 
-  it('counts a failed outcome as an error, and tells spans from logs by their duration', () => {
+  it('counts only exceptions as errors, and tells spans from logs by their duration', () => {
     const timeline = buildTimeline(
       [
         {
@@ -152,7 +152,8 @@ describe('buildTimeline', () => {
     );
 
     expect(timeline.map(({ kind, name, detail }) => ({ kind, name, detail }))).toEqual([
-      { kind: 'error', name: 'Error', detail: '500' },
+      // A failed request stays a span: the summary counts it as a failed request, not a JS error.
+      { kind: 'span', name: 'HTTP GET', detail: null },
       { kind: 'span', name: 'HTTP GET', detail: null },
       { kind: 'log', name: 'app.log', detail: null },
     ]);
