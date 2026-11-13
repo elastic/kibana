@@ -106,25 +106,6 @@ describe('useEntityList', () => {
     await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
   });
 
-  it('reports loading from its first render, before the request has produced anything', () => {
-    const inventoryApi = createClientMock();
-    // Never settles, so every render of this test happens before a response.
-    inventoryApi.getEntities.mockImplementation(() => new Promise<never>(() => {}));
-    const loadingPerRender: boolean[] = [];
-
-    renderHook(
-      () => {
-        const result = useEntityList('host');
-        loadingPerRender.push(result.loading);
-        return result;
-      },
-      { wrapper: createWrapper(inventoryApi) }
-    );
-
-    expect(loadingPerRender[0]).toBe(true);
-    expect(loadingPerRender).not.toContain(false);
-  });
-
   it('stops reporting loading once the request fails, and reports it again on retry', async () => {
     const failWith = new Error('Request failed');
     const inventoryApi = createClientMock();

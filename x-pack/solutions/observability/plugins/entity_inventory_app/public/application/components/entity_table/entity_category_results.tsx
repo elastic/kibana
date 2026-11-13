@@ -20,22 +20,17 @@ import {
 const TYPES_EBT_DETAIL = 'types';
 
 export interface EntityCategoryResultsProps {
-  /** The type ids the page lists; when absent, every type of the `types` response is listed. */
-  entityTypes?: readonly string[];
-  /** Lists every type whose id starts with this prefix, in addition to `entityTypes`. */
-  entityTypePrefix?: string;
+  /** Lists every type whose id starts with this prefix; when absent, every type of the `types` response. */
+  entityTypeIdPrefix?: string;
 }
 
 /**
- * One section per entity type of the page, in the order of the `types` response. A type the page
- * asks for that the response does not have gets a "not available" prompt instead of a section.
+ * One section per entity type of the page, in the order of the `types` response. A prefix that no
+ * type of the response starts with gets a "not available" prompt instead of a section.
  * One truncation callout above the sections names every type whose shown list was truncated.
  */
-export const EntityCategoryResults = ({
-  entityTypes,
-  entityTypePrefix,
-}: EntityCategoryResultsProps) => {
-  const { types, loading, error, refresh } = useEntityTypes();
+export const EntityCategoryResults = ({ entityTypeIdPrefix }: EntityCategoryResultsProps) => {
+  const { types: availableEntityTypes, loading, error, refresh } = useEntityTypes();
   const [truncatedTypes, setTruncatedTypes] = useState<ReadonlySet<string>>(() => new Set());
   const onTruncatedChange = useCallback((type: string, truncated: boolean) => {
     setTruncatedTypes((previous) => {
@@ -61,21 +56,14 @@ export const EntityCategoryResults = ({
       />
     );
   }
-  if (loading || !types) {
+  if (loading || !availableEntityTypes) {
     return <EntityTableLoading />;
   }
 
-  const isFiltered = entityTypes !== undefined || entityTypePrefix !== undefined;
-  const pageTypes = isFiltered
-    ? types.filter(
-        ({ type }) =>
-          entityTypes?.includes(type) || (entityTypePrefix && type.startsWith(entityTypePrefix))
-      )
-    : types;
-  const missingTypes = (entityTypes ?? []).filter((id) => !types.some(({ type }) => type === id));
-  if (entityTypePrefix && !types.some(({ type }) => type.startsWith(entityTypePrefix))) {
-    missingTypes.push(`${entityTypePrefix}*`);
-  }
+  const pageTypes = availableEntityTypes.filter(({ type }) =>
+    type.startsWith(entityTypeIdPrefix ?? '')
+  );
+  const isPrefixUnmatched = Boolean(entityTypeIdPrefix) && pageTypes.length === 0;
   const truncatedTypeNames = pageTypes
     .filter(({ type }) => truncatedTypes.has(type))
     .map(({ name }) => name);
@@ -92,11 +80,11 @@ export const EntityCategoryResults = ({
           <EntityTypeResults entityType={entityType} onTruncatedChange={onTruncatedChange} />
         </EuiFlexItem>
       ))}
-      {missingTypes.map((id) => (
-        <EuiFlexItem key={id} grow={false}>
-          <EntityTableTypeNotAvailable entityType={id} />
+      {isPrefixUnmatched && (
+        <EuiFlexItem grow={false}>
+          <EntityTableTypeNotAvailable entityType={`${entityTypeIdPrefix}*`} />
         </EuiFlexItem>
-      ))}
+      )}
     </EuiFlexGroup>
   );
 };

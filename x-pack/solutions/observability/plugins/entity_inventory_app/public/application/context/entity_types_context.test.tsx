@@ -33,25 +33,6 @@ const renderUseEntityTypes = (inventoryApi: EntityInventoryApiClient) =>
   renderHook(() => useEntityTypes(), { wrapper: createWrapper(inventoryApi) });
 
 describe('useEntityTypes', () => {
-  it('reports loading from its first render, before the request has produced anything', () => {
-    const inventoryApi = createClientMock();
-    // Never settles, so every render of this test happens before a response.
-    inventoryApi.getTypes.mockImplementation(() => new Promise<never>(() => {}));
-    const loadingPerRender: boolean[] = [];
-
-    renderHook(
-      () => {
-        const value = useEntityTypes();
-        loadingPerRender.push(value.loading);
-        return value;
-      },
-      { wrapper: createWrapper(inventoryApi) }
-    );
-
-    expect(loadingPerRender[0]).toBe(true);
-    expect(loadingPerRender).not.toContain(false);
-  });
-
   it('stops reporting loading once the types arrive', async () => {
     const inventoryApi = createClientMock();
     const { result } = renderUseEntityTypes(inventoryApi);

@@ -56,9 +56,9 @@ const NewRangeButton = () => {
 
 const renderResults = (
   inventoryApi: EntityInventoryApiClient,
-  entityTypes: readonly string[] = ['host']
+  entityTypeIdPrefix: string | null = 'host'
 ) => {
-  const results = (types: readonly string[]) => (
+  const results = (prefix: string | null) => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
@@ -66,7 +66,7 @@ const renderResults = (
             <EntityInventorySearchProvider entityCategory="hosts">
               <EntityTypesProvider>
                 <NewRangeButton />
-                <EntityCategoryResults entityTypes={types} />
+                <EntityCategoryResults entityTypeIdPrefix={prefix ?? undefined} />
               </EntityTypesProvider>
             </EntityInventorySearchProvider>
           </EntityTablePreferencesProvider>
@@ -74,8 +74,8 @@ const renderResults = (
       </EuiProvider>
     </I18nProvider>
   );
-  const { rerender, ...rest } = render(results(entityTypes));
-  return { ...rest, showType: (type: string) => rerender(results([type])) };
+  const { rerender, ...rest } = render(results(entityTypeIdPrefix));
+  return { ...rest, showType: (type: string) => rerender(results(type)) };
 };
 
 const renderScenario = (scenario: FixtureScenario) =>
@@ -149,10 +149,7 @@ describe('EntityCategoryResults', () => {
 
     it('shows one callout above the sections naming the limit and the truncated type', async () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
-      renderResults({ ...fixtureClient, getEntities: truncateTypes(['host']) }, [
-        'host',
-        'k8s.deployment',
-      ]);
+      renderResults({ ...fixtureClient, getEntities: truncateTypes(['host']) }, null);
 
       const callout = await screen.findByTestId('entityInventoryTruncationCallout');
       expect(callout).toHaveTextContent('Entity limit reached');
@@ -170,10 +167,10 @@ describe('EntityCategoryResults', () => {
 
     it('shows a single callout naming every truncated type', async () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
-      renderResults({ ...fixtureClient, getEntities: truncateTypes(['host', 'k8s.deployment']) }, [
-        'host',
-        'k8s.deployment',
-      ]);
+      renderResults(
+        { ...fixtureClient, getEntities: truncateTypes(['host', 'k8s.deployment']) },
+        null
+      );
 
       await waitFor(() =>
         expect(screen.getByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
@@ -271,10 +268,10 @@ describe('EntityCategoryResults', () => {
   });
 
   it('says the type is not available when it is not registered, without a retry', async () => {
-    renderResults(createFixtureEntityInventoryApiClient(), ['service']);
+    renderResults(createFixtureEntityInventoryApiClient(), 'service');
 
     expect(await screen.findByTestId('entityInventoryTypeNotAvailable')).toHaveTextContent(
-      getTypeNotAvailableTitle('service')
+      getTypeNotAvailableTitle('service*')
     );
     expect(screen.queryByRole('button', { name: RETRY_LABEL })).not.toBeInTheDocument();
   });
@@ -453,7 +450,7 @@ describe('EntityCategoryResults', () => {
 
   describe('sections', () => {
     it('renders one section per type in the order of the types response, titled by its name', async () => {
-      renderResults(createFixtureEntityInventoryApiClient(), ['k8s.deployment', 'host']);
+      renderResults(createFixtureEntityInventoryApiClient(), null);
 
       await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
       const sections = screen.getAllByTestId('entityInventoryTypeSection');
@@ -481,7 +478,7 @@ describe('EntityCategoryResults', () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
       const getTypes = jest.fn(fixtureClient.getTypes);
       const getEntities = jest.fn(fixtureClient.getEntities);
-      renderResults({ getTypes, getEntities }, ['host', 'k8s.deployment']);
+      renderResults({ getTypes, getEntities }, null);
       await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
 
       fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
@@ -506,7 +503,7 @@ describe('EntityCategoryResults', () => {
             : fixtureClient.getEntities(...args);
         }
       );
-      renderResults({ ...fixtureClient, getEntities }, ['host', 'k8s.deployment']);
+      renderResults({ ...fixtureClient, getEntities }, null);
 
       expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
         'Request failed'
@@ -534,18 +531,6 @@ describe('EntityCategoryResults', () => {
 
       expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
       expect(getTypes).toHaveBeenCalledTimes(2);
-    });
-
-    it('lists the found types and says a missing one is not available', async () => {
-      renderResults(createFixtureEntityInventoryApiClient(), ['service', 'host']);
-
-      expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
-        'data-entity-type',
-        'host'
-      );
-      expect(screen.getByTestId('entityInventoryTypeNotAvailable')).toHaveTextContent(
-        getTypeNotAvailableTitle('service')
-      );
     });
   });
 });

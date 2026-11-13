@@ -14,23 +14,12 @@ import { EntityCategoryResults } from '../application/components/entity_table/en
 import { EntityInventoryPageFilterControls } from '../application/filters/page_filter_controls';
 import type { EntityInventoryEntityCategory } from '../types';
 
-interface PageEntityTypes {
-  entityTypes?: readonly string[];
-  entityTypePrefix?: string;
-}
-
-/**
- * The entity types each page lists, one section per type; a page without an entry, All resources,
- * lists every type of the `types` response. The only place in the app that names a type: it is
- * replaced by filtering the `types` response by category when entity definitions carry one.
- */
-// TODO: remove the `k8s.` prefix match and filter the `types` response by category once entity
-// definitions carry one.
-const ENTITY_TYPES_BY_CATEGORY: Readonly<
-  Partial<Record<EntityInventoryEntityCategory, PageEntityTypes>>
+// TODO: filter the `types` response by category once entity definitions carry one.
+const ENTITY_TYPE_ID_PREFIX_BY_CATEGORY: Readonly<
+  Partial<Record<EntityInventoryEntityCategory, string>>
 > = {
-  hosts: { entityTypes: ['host'] },
-  kubernetes: { entityTypePrefix: 'k8s.' },
+  hosts: 'host',
+  kubernetes: 'k8s.',
 };
 
 const EntityInventoryPage = ({
@@ -43,7 +32,9 @@ const EntityInventoryPage = ({
       entityCategory={entityCategory}
       secondaryControls={<EntityInventoryPageFilterControls />}
     >
-      <EntityCategoryResults {...ENTITY_TYPES_BY_CATEGORY[entityCategory]} />
+      <EntityCategoryResults
+        entityTypeIdPrefix={ENTITY_TYPE_ID_PREFIX_BY_CATEGORY[entityCategory]}
+      />
     </EntityInventoryPageShell>
   );
 };
