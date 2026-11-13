@@ -41,10 +41,6 @@ export const UNNAMED_SIGNALS_HELP = i18n.translate(
   { defaultMessage: 'Unnamed signals will be ignored and skipped.' }
 );
 
-export const INDEX_NAME_PREPEND = i18n.translate('xpack.streams.destinations.indexNamePrepend', {
-  defaultMessage: 'Index name',
-});
-
 /** Mode radios shared by the local and remote writing mode steps, with the mode's fields below. */
 export const WritingModePanel = ({
   auto,
@@ -202,4 +198,48 @@ export const SignalPrepend = ({ label }: { label: string }) => {
       `}
     />
   );
+};
+
+const useReadOnlyPrependBorder = () => {
+  const { euiTheme } = useEuiTheme();
+  return `${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border}`;
+};
+
+/** Fixed text in a field (`logs-`, `.otel-`, `Documents`), shaded like the read-only prepend in Figma. */
+export const ReadOnlyPrepend = ({
+  label,
+  slot = 'prepend',
+}: {
+  label: string;
+  slot?: 'prepend' | 'delimiter';
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const border = useReadOnlyPrependBorder();
+  // Negative margins cancel the padding EUI puts around a prepend and a delimiter, so the shading reaches the box edges.
+  const margin =
+    slot === 'prepend'
+      ? `-${euiTheme.size.xs}`
+      : `0 calc(-1 * (${euiTheme.size.xs} + ${euiTheme.size.xxs}))`;
+  return (
+    <span
+      css={css`
+        display: flex;
+        align-self: stretch;
+        align-items: center;
+        margin: ${margin};
+        white-space: nowrap;
+        background-color: ${euiTheme.components.forms.prependBackground};
+        ${slot === 'delimiter' ? `border-inline: ${border};` : ''}
+      `}
+    >
+      {/* Centred 12px text sits 2px above the 14px input text, so drop it onto the input's line. */}
+      <EuiFormPrepend label={label} css={css({ insetBlockStart: euiTheme.size.xxs })} />
+    </span>
+  );
+};
+
+/** For the input after a ReadOnlyPrepend, which EUI lays 1px over the prepend, so the input draws the line between them. */
+export const useAfterReadOnlyPrependStyles = () => {
+  const border = useReadOnlyPrependBorder();
+  return css({ borderInlineStart: border, borderStartStartRadius: 0, borderEndStartRadius: 0 });
 };

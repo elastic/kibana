@@ -8,7 +8,7 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { css } from '@emotion/react';
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormControlLayoutDelimited, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   OTEL_TYPE_SEPARATOR,
@@ -20,7 +20,7 @@ import {
 import { SIGNAL_INDEX_FIELDS, composeOtelIndex } from './destination_models';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import type { DestinationCreationFormData, PrefixedDestinationSignal } from './types';
-import { INDEX_NAME_PREPEND, SignalPrepend } from './writing_mode_panel';
+import { ReadOnlyPrepend, useAfterReadOnlyPrependStyles } from './writing_mode_panel';
 
 const DATASET_PLACEHOLDER = i18n.translate('xpack.streams.destinations.otelDatasetPlaceholder', {
   defaultMessage: 'e.g. billing',
@@ -103,6 +103,9 @@ const hasInvalidFilledPart = ({ dataset, namespace }: OtelDataStreamName): boole
 // A long name has no hyphen to break at.
 const helpTextStyles = css({ overflowWrap: 'anywhere' });
 
+// The delimited layout centres its inputs for ranges, but a name reads left to right.
+const nameInputStyles = css({ textAlign: 'left' });
+
 interface OtelNameFieldsProps {
   /** Omitted for the shared name, which every signal gets. */
   signal?: PrefixedDestinationSignal;
@@ -127,21 +130,21 @@ const OtelNameInputs = ({
   onBlur,
 }: OtelNameFieldsProps & { id?: string; 'aria-describedby'?: string }) => {
   const ariaLabels = getAriaLabels(signal);
-  const isInvalid = Boolean(errorText);
+  const afterPrependStyles = useAfterReadOnlyPrependStyles();
+  const datasetStyles = signal ? [nameInputStyles, afterPrependStyles] : nameInputStyles;
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={3}>
+    <EuiFormControlLayoutDelimited
+      fullWidth
+      isInvalid={Boolean(errorText)}
+      isDisabled={disabled}
+      prepend={signal ? <ReadOnlyPrepend label={`${signal}-`} /> : undefined}
+      startControl={
         <EuiFieldText
+          controlOnly
           id={id}
-          fullWidth
+          css={datasetStyles}
           value={value.dataset}
           disabled={disabled}
-          isInvalid={isInvalid}
-          prepend={
-            <SignalPrepend
-              label={signal ? DESTINATION_SIGNAL_LABELS[signal] : INDEX_NAME_PREPEND}
-            />
-          }
           onChange={(event) => onChange({ ...value, dataset: event.target.value })}
           onBlur={onBlur}
           placeholder={DATASET_PLACEHOLDER}
@@ -149,14 +152,14 @@ const OtelNameInputs = ({
           aria-describedby={describedBy}
           data-test-subj={`${testSubjPrefix}Dataset`}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
+      }
+      delimiter={<ReadOnlyPrepend slot="delimiter" label={OTEL_TYPE_SEPARATOR} />}
+      endControl={
         <EuiFieldText
-          fullWidth
+          controlOnly
+          css={nameInputStyles}
           value={value.namespace}
           disabled={disabled}
-          isInvalid={isInvalid}
-          prepend={OTEL_TYPE_SEPARATOR}
           onChange={(event) => onChange({ ...value, namespace: event.target.value })}
           onBlur={onBlur}
           placeholder={NAMESPACE_PLACEHOLDER}
@@ -164,8 +167,8 @@ const OtelNameInputs = ({
           aria-describedby={describedBy}
           data-test-subj={`${testSubjPrefix}Namespace`}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      }
+    />
   );
 };
 

@@ -122,6 +122,19 @@ describe('RemoteElasticsearchRoutingFields', () => {
     expect(getValues().elasticsearch).toEqual(EMPTY_DESTINATION_CREATION_FORM.elasticsearch);
   });
 
+  it('frames each name with its signal prefix and the otel separator', () => {
+    renderRouting({ initial: { auto: false } });
+
+    expect(screen.queryByText('logs-')).toBeNull();
+    expect(screen.getByText('.otel-')).toBeInTheDocument();
+    click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
+
+    for (const prefix of ['logs-', 'metrics-', 'traces-']) {
+      expect(screen.getByText(prefix)).toBeInTheDocument();
+    }
+    expect(screen.getAllByText('.otel-')).toHaveLength(3);
+  });
+
   it('names signals individually and copies a single filled name back to shared', () => {
     const { getValues } = renderRouting({ initial: { auto: false } });
 

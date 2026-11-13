@@ -157,6 +157,8 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
       [euiTheme.size.xl, euiTheme.size.s, euiTheme.size.base],
       (xl, s, base) => -(xl + s - base)
     ),
+    // Step content also gets a `base` right padding that Figma doesn't have, which wraps the card copy.
+    marginInlineEnd: mathWithUnits(euiTheme.size.base, (base) => -base),
   });
   const modalTitleId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationModalTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationForm' });

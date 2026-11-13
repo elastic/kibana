@@ -49,7 +49,7 @@ export const DESTINATION_TYPE_DEFINITIONS: readonly DestinationTypeDefinition[] 
     available: true,
     label: REMOTE_ELASTICSEARCH_LABEL,
     description: i18n.translate('xpack.streams.destinations.remoteElasticsearchDescription', {
-      defaultMessage: 'Write to another Elasticsearch cluster using its endpoint and an API key.',
+      defaultMessage: 'Write to another Elasticsearch cluster using its endpoint and API key.',
     }),
     testSubject: 'streamsCreateDestinationRemoteElasticsearch',
   },

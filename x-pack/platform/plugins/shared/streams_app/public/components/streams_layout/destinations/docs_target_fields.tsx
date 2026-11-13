@@ -10,7 +10,7 @@ import { EuiComboBox, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import { writeTargetErrorText } from './write_target_error_text';
-import { SignalPrepend } from './writing_mode_panel';
+import { ReadOnlyPrepend, useAfterReadOnlyPrependStyles } from './writing_mode_panel';
 import type { DestinationCreationFormErrors } from './types';
 
 const DOCS_INDEX_PLACEHOLDER = i18n.translate(
@@ -41,6 +41,7 @@ export const DocsIndexField = ({
   onBlur: () => void;
 }) => {
   const errorText = writeTargetErrorText('docs', error, false);
+  const afterPrependStyles = useAfterReadOnlyPrependStyles();
   return (
     <EuiFormRow
       fullWidth
@@ -57,12 +58,13 @@ export const DocsIndexField = ({
     >
       <EuiFieldText
         fullWidth
+        css={afterPrependStyles}
         value={value}
         disabled={disabled}
         isInvalid={Boolean(errorText)}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
-        prepend={<SignalPrepend label={DESTINATION_SIGNAL_LABELS.docs} />}
+        prepend={<ReadOnlyPrepend label={DESTINATION_SIGNAL_LABELS.docs} />}
         aria-label={i18n.translate('xpack.streams.destinations.docsIndexLabel', {
           defaultMessage: 'Documents index',
         })}
