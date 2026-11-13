@@ -7,29 +7,15 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EntityTable } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import type { BasicEntityData, EntityTableRow } from './types';
-import { FLYOUT_PREVIEW_LINK_TEST_ID } from '../../../../shared/components/test_ids';
-import { mockFlyoutApi } from '../../../../document_details/shared/mocks/mock_flyout_context';
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
 
 const renderedFieldValue = 'testValue1';
 
 const testField: EntityTableRow<BasicEntityData> = {
   label: 'testLabel',
   field: 'testField',
-  getValues: (data: unknown) => [renderedFieldValue],
-  renderField: (field: string) => <>{field}</>,
-};
-
-const testFieldWithPreview: EntityTableRow<BasicEntityData> = {
-  label: 'testIP',
-  field: 'host.ip',
   getValues: (data: unknown) => [renderedFieldValue],
   renderField: (field: string) => <>{field}</>,
 };
@@ -44,7 +30,6 @@ const mockProps = {
 describe('EntityTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('renders correctly', () => {
@@ -108,18 +93,5 @@ describe('EntityTable', () => {
     });
 
     expect(queryByTestId('test-custom-render')).toBeInTheDocument();
-  });
-
-  it('it renders link to open in preview if the field has a preview link', () => {
-    const props = {
-      ...mockProps,
-      entityFields: [testFieldWithPreview],
-    };
-
-    const { getByTestId } = render(<EntityTable {...props} />, { wrapper: TestProviders });
-
-    expect(getByTestId(FLYOUT_PREVIEW_LINK_TEST_ID)).toBeInTheDocument();
-    getByTestId(FLYOUT_PREVIEW_LINK_TEST_ID).click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalled();
   });
 });

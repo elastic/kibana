@@ -343,7 +343,7 @@ describe(
       // Create the rule and populate alerts ONCE for the whole describe.
       // Calling `loadRuleAlerts` (which toggles the rule off/on) in `beforeEach`
       // caused the rule to hit its max-alert-limit across the 3 tests and the
-      // `ruleSwitch` aria-checked update to stall.
+      // enabled badge update to stall.
       before(() => {
         initializeDataViews();
         // Scope alerts to those carrying `host.os.name` so the `{{host.os.name}}`

@@ -23,8 +23,6 @@ import {
   HOST_DETAILS_INFO_TEST_ID,
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
   HOST_DETAILS_LINK_TEST_ID,
-  HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
-  HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
   HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
   HOST_DETAILS_VULNERABILITIES_TEST_ID,
   HOST_DETAILS_ALERT_COUNT_TEST_ID,
@@ -32,18 +30,10 @@ import {
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/user_entity_overview';
-import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
@@ -173,7 +163,6 @@ const renderHostDetails = (contextValue: DocumentDetailsContext) =>
 describe('<HostDetails />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
     mockUseObservedHost.mockReturnValue(mockObservedHostResult);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
@@ -190,21 +179,6 @@ describe('<HostDetails />', () => {
     const { getByTestId } = renderHostDetails(mockContextValue);
     expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID))).toBeInTheDocument();
     expect(getByTestId(HOST_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render host name as clicable link', () => {
-    const { getByTestId } = renderHostDetails(mockContextValue);
-    expect(getByTestId(HOST_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
-
-    getByTestId(HOST_DETAILS_LINK_TEST_ID).click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: HostPreviewPanelKey,
-      params: {
-        hostName: defaultProps.hostName,
-        scopeId: defaultProps.scopeId,
-        banner: HOST_PREVIEW_BANNER,
-      },
-    });
   });
 
   describe('Host overview', () => {
@@ -240,7 +214,6 @@ describe('<HostDetails />', () => {
         </TestProviders>
       );
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)).toBeInTheDocument();
     });
 
     it('should render the related user table with correct dates and indices', () => {
@@ -253,7 +226,6 @@ describe('<HostDetails />', () => {
         skip: false,
       });
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)).toBeInTheDocument();
     });
 
     it('should render user risk score column when license and capabilities are valid', () => {
@@ -297,34 +269,6 @@ describe('<HostDetails />', () => {
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID).textContent).toContain(
         'No users identified'
       );
-    });
-
-    it('should render user name as clicable link', () => {
-      const { getAllByTestId } = renderHostDetails(mockContextValue);
-      expect(getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID).length).toBe(1);
-
-      getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)[0].click();
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: UserPreviewPanelKey,
-        params: {
-          contextID: defaultProps.scopeId,
-          userName: 'test user',
-          scopeId: defaultProps.scopeId,
-          banner: USER_PREVIEW_BANNER,
-          entityId: undefined,
-        },
-      });
-
-      getAllByTestId(HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID)[0].click();
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenNthCalledWith(2, {
-        id: NetworkPreviewPanelKey,
-        params: {
-          ip: '100.XXX.XXX',
-          flowTarget: 'source',
-          scopeId: defaultProps.scopeId,
-          banner: NETWORK_PREVIEW_BANNER,
-        },
-      });
     });
   });
 

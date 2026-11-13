@@ -9,12 +9,15 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { estypes } from '@elastic/elasticsearch';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../common/feature';
-import type { OverviewFilters } from '../../common/overview_filters';
+import type { OverviewSearchParams, OverviewFilters } from '../../common/overview_filters';
+import { readOverviewFilters } from '../../common/overview_filters_param';
 import { MAX_SERVICE_NAME_LENGTH } from '../lib/constants';
 import { createDigitalExperienceTracedEsClient } from '../lib/create_digital_experience_traced_es_client';
+import { kueryToQuery } from '../lib/helpers/kuery';
 import type { DigitalExperienceRouteHandlerResources } from './create_digital_experience_server_route';
-import { filteredTimeRangeQuery, timeRangeQuery } from './params';
+import { documentFilteredTimeRangeQuery, filteredTimeRangeQuery, timeRangeQuery } from './params';
 
 // The routes of one application's tabs (e.g. its errors) share the Overview route's params and
 // privileges.
@@ -28,6 +31,8 @@ export interface ApplicationSearchParams {
   environment?: string;
   /** Only the data of the selected browser, OS, device and country, and the page loads of the page. */
   filters?: OverviewFilters;
+  /** Only the documents this query (the Overview's KQL, as a query) matches. */
+  kuery?: estypes.QueryDslQueryContainer;
 }
 
 /** A tab's search params and the client that runs its searches. */
@@ -59,6 +64,16 @@ export const filteredApplicationTabRouteParams = lazySchema(() => {
   });
 });
 
+/** The params of a tab's route whose data has no page URL: the filters but the page. */
+export const documentFilteredApplicationTabRouteParams = lazySchema(() => {
+  return z.object({
+    path: z.object({
+      serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
+    }),
+    query: documentFilteredTimeRangeQuery(),
+  });
+});
+
 /**
  * The search params of a tab's route, the ISO range as epoch milliseconds, and the current user's
  * client, whose searches stop when the request is aborted.
@@ -66,16 +81,16 @@ export const filteredApplicationTabRouteParams = lazySchema(() => {
 export const toApplicationSearch = async ({
   params: {
     path: { serviceName },
-    query: { start, end, environment, browser, os, device, country, pageUrl },
+    query: { start, end, environment, filters, kuery },
   },
   context,
   logger,
   request,
 }: Pick<DigitalExperienceRouteHandlerResources, 'context' | 'logger'> & {
-  // The filters are those of `filteredApplicationTabRouteParams`; the other routes have none.
+  // The filters are those of `filteredApplicationTabRouteParams` (or the errors' variant); the network route has none.
   params: {
     path: z.infer<typeof applicationTabRouteParams>['path'];
-    query: z.infer<typeof applicationTabRouteParams>['query'] & OverviewFilters;
+    query: z.infer<typeof applicationTabRouteParams>['query'] & OverviewSearchParams;
   };
   request: Pick<KibanaRequest, 'events'>;
 }): Promise<ApplicationSearch> => {
@@ -85,7 +100,8 @@ export const toApplicationSearch = async ({
     start: Date.parse(start),
     end: Date.parse(end),
     environment,
-    filters: { browser, os, device, country, pageUrl },
+    filters: readOverviewFilters(filters),
+    kuery: kueryToQuery(kuery),
     esClient: createDigitalExperienceTracedEsClient({
       client: elasticsearch.client.asCurrentUser,
       logger,

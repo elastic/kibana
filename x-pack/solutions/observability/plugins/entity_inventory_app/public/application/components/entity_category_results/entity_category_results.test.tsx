@@ -1,0 +1,555 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { EntityInventoryApiClient } from '../../../inventory_api/client';
+import { createFixtureEntityInventoryApiClient } from '../../../__fixtures__/inventory_client';
+import {
+  HOST_TYPE_FIXTURE,
+  K8S_DEPLOYMENT_TYPE_FIXTURE,
+} from '../../../__fixtures__/inventory_data';
+import type { FixtureScenario } from '../../../__fixtures__/inventory_scenarios';
+import {
+  buildScenarioListResponse,
+  createScenarioEntityInventoryApiClient,
+} from '../../../__fixtures__/inventory_scenarios';
+import { createAppServicesMock } from '../../../mocks';
+import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
+import {
+  EntityInventorySearchProvider,
+  useEntityInventorySearch,
+} from '../../context/search_context';
+import { EntityTypesProvider } from '../../context/entity_types_context';
+import { EntityCategoryResults } from './entity_category_results';
+import {
+  EMPTY_BODY,
+  LOAD_ERROR_TITLE,
+  RETRY_LABEL,
+  EMPTY_WITH_FAILURES_BODY,
+  getEmptyTitle,
+  getEmptyWithFailuresTitle,
+  getTypeNotAvailableTitle,
+} from '../entity_states/translations';
+import { getSourceErrorText } from '../entity_section/translations';
+
+// EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
+jest.setTimeout(30_000);
+
+// The callout is not memoized, so it renders exactly when the page renders while it is shown.
+const mockTruncationCalloutRender = jest.fn();
+jest.mock('./truncation_callout', () => {
+  const actual = jest.requireActual<typeof import('./truncation_callout')>('./truncation_callout');
+  return {
+    ...actual,
+    EntityTableTruncationCallout: () => {
+      mockTruncationCalloutRender();
+      return actual.EntityTableTruncationCallout();
+    },
+  };
+});
+
+const NEW_RANGE_LABEL = 'Pick a new range';
+
+const NewRangeButton = () => {
+  const { submit } = useEntityInventorySearch();
+  return (
+    <button onClick={() => submit({ dateRange: { from: 'now-1h', to: 'now' } })}>
+      {NEW_RANGE_LABEL}
+    </button>
+  );
+};
+
+const renderResults = (
+  inventoryApi: EntityInventoryApiClient,
+  entityTypeIdPrefix: string | null = 'host'
+) => {
+  const results = (prefix: string | null) => (
+    <I18nProvider>
+      <EuiProvider>
+        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+          <EntityTablePreferencesProvider>
+            <EntityInventorySearchProvider entityCategory="hosts">
+              <EntityTypesProvider>
+                <NewRangeButton />
+                <EntityCategoryResults entityTypeIdPrefix={prefix ?? undefined} />
+              </EntityTypesProvider>
+            </EntityInventorySearchProvider>
+          </EntityTablePreferencesProvider>
+        </KibanaContextProvider>
+      </EuiProvider>
+    </I18nProvider>
+  );
+  const { rerender, ...rest } = render(results(entityTypeIdPrefix));
+  return { ...rest, showType: (type: string) => rerender(results(type)) };
+};
+
+const renderScenario = (scenario: FixtureScenario) =>
+  renderResults(createScenarioEntityInventoryApiClient({ scenario }));
+
+describe('EntityCategoryResults', () => {
+  it('shows a loading prompt until the entities arrive, then the table', async () => {
+    renderScenario('normal');
+
+    expect(screen.getByTestId('entityInventoryTableLoading')).toBeInTheDocument();
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'host'
+    );
+    expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
+  });
+
+  it('shows a spinner and no section while the types load', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getTypes = jest.fn(() => new Promise<never>(() => {}));
+    renderResults({ ...fixtureClient, getTypes });
+
+    expect(screen.getByTestId('entityInventoryTableLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTypeSection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableSkeleton')).not.toBeInTheDocument();
+  });
+
+  it('shows a table skeleton while a section loads its first list, then the table', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    let finishLoad: () => void = () => {};
+    const getEntities = jest.fn(
+      (...args: Parameters<EntityInventoryApiClient['getEntities']>) =>
+        new Promise<Awaited<ReturnType<EntityInventoryApiClient['getEntities']>>>((resolve) => {
+          finishLoad = () => resolve(fixtureClient.getEntities(...args));
+        })
+    );
+    renderResults({ ...fixtureClient, getEntities });
+
+    const section = await screen.findByTestId('entityInventoryTypeSection');
+    const skeleton = within(section).getByTestId('entityInventoryTableSkeleton');
+    const headerRows = within(skeleton).getAllByTestId('entityInventoryTableSkeletonHeaderRow');
+    expect(headerRows).toHaveLength(1);
+    expect(headerRows[0].textContent).toBe('');
+    expect(within(skeleton).getAllByTestId(/^entityInventoryTableSkeletonRow\d+$/)).toHaveLength(8);
+    expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+
+    finishLoad();
+
+    expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableSkeleton')).not.toBeInTheDocument();
+  });
+
+  describe('truncation', () => {
+    const truncateTypes =
+      (truncatedTypes: readonly string[]) =>
+      async (...args: Parameters<EntityInventoryApiClient['getEntities']>) => {
+        const [type] = args;
+        const scenario: FixtureScenario = truncatedTypes.includes(type) ? 'truncated' : 'normal';
+        return createScenarioEntityInventoryApiClient({ scenario }).getEntities(...args);
+      };
+
+    it('shows one callout above the sections when a type is truncated', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      renderResults({ ...fixtureClient, getEntities: truncateTypes(['host']) }, null);
+
+      const callout = await screen.findByTestId('entityInventoryTruncationCallout');
+      expect(callout).toHaveTextContent('Entity limit reached');
+      expect(callout).toHaveTextContent(
+        'We can only show a limited number of entities at a time. Use filters to slice and dice further your data.'
+      );
+      const [firstShown] = document.querySelectorAll(
+        '[data-test-subj="entityInventoryTruncationCallout"], [data-test-subj="entityInventoryTypeSection"]'
+      );
+      expect(firstShown).toBe(callout);
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+    });
+
+    it('shows a single callout when several types are truncated', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      renderResults(
+        { ...fixtureClient, getEntities: truncateTypes(['host', 'k8s.deployment']) },
+        null
+      );
+
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+      expect(screen.getAllByTestId('entityInventoryTruncationCallout')).toHaveLength(1);
+    });
+
+    it('does not render the page again when a second truncated type arrives', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getTruncatedEntities = truncateTypes(['host', 'k8s.deployment']);
+      let releaseDeploymentList = () => {};
+      const deploymentListHeld = new Promise<void>((resolve) => {
+        releaseDeploymentList = resolve;
+      });
+      const getEntities = async (...args: Parameters<EntityInventoryApiClient['getEntities']>) => {
+        const [type] = args;
+        if (type === 'k8s.deployment') {
+          await deploymentListHeld;
+        }
+        return getTruncatedEntities(...args);
+      };
+      mockTruncationCalloutRender.mockClear();
+      renderResults({ ...fixtureClient, getEntities }, null);
+
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(1));
+      expect(screen.getByTestId('entityInventoryTruncationCallout')).toBeInTheDocument();
+      const calloutRendersWithOneTruncatedType = mockTruncationCalloutRender.mock.calls.length;
+
+      // The flag is already true, so the second report must not render the page, and with it the
+      // callout, again.
+      releaseDeploymentList();
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+
+      expect(mockTruncationCalloutRender).toHaveBeenCalledTimes(calloutRendersWithOneTruncatedType);
+      expect(screen.getAllByTestId('entityInventoryTruncationCallout')).toHaveLength(1);
+    });
+  });
+
+  describe('source errors', () => {
+    const getScenarioErrors = (scenario: FixtureScenario) =>
+      buildScenarioListResponse('host', scenario)?.errors ?? [];
+
+    it('keeps the table and lists the failed sources in the tooltip of an indicator in the section header', async () => {
+      renderScenario('withDiagnostics');
+
+      const section = await screen.findByTestId('entityInventoryTypeSection');
+      expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
+      fireEvent.mouseOver(within(section).getByTestId('entityInventorySourceErrorsIndicator'));
+
+      const tooltip = await screen.findByRole('tooltip');
+      const errors = getScenarioErrors('withDiagnostics');
+      expect(errors.length).toBeGreaterThan(0);
+      errors.forEach((sourceError) =>
+        expect(tooltip).toHaveTextContent(getSourceErrorText(sourceError))
+      );
+    });
+
+    it('never shows the unavailable columns of the response', async () => {
+      renderScenario('withDiagnostics');
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(buildScenarioListResponse('host', 'withDiagnostics')?.unavailableColumns).not.toEqual(
+        []
+      );
+      expect(screen.queryByText(/is not available in/)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventoryDiagnosticsCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows no indicator when every source answered', async () => {
+      renderScenario('normal');
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows an empty prompt when no entities match', async () => {
+    renderScenario('empty');
+
+    const empty = await screen.findByTestId('entityInventoryTableEmpty');
+    expect(empty).toHaveTextContent(getEmptyTitle(HOST_TYPE_FIXTURE.name));
+    expect(empty).toHaveTextContent(EMPTY_BODY);
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+  });
+
+  it('explains an empty result caused by failing sources', async () => {
+    renderScenario('allSourcesFailed');
+
+    const empty = await screen.findByTestId('entityInventoryTableEmpty');
+    expect(empty).toHaveTextContent(getEmptyWithFailuresTitle(HOST_TYPE_FIXTURE.name));
+    expect(empty).toHaveTextContent(EMPTY_WITH_FAILURES_BODY);
+    expect(empty).not.toHaveTextContent(EMPTY_BODY);
+    expect(screen.getByTestId('entityInventorySourceErrorsIndicator')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
+  });
+
+  it('shows the error with a retry that lists again', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getEntities = jest
+      .fn(fixtureClient.getEntities)
+      .mockRejectedValueOnce(new Error('Request failed'));
+    renderResults({ ...fixtureClient, getEntities });
+
+    const error = await screen.findByTestId('entityInventoryTableError');
+    expect(error).toHaveTextContent(LOAD_ERROR_TITLE);
+    expect(error).toHaveTextContent('Request failed');
+
+    fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(getEntities).toHaveBeenCalledTimes(2);
+  });
+
+  it('says the type is not available when it is not registered, without a retry', async () => {
+    renderResults(createFixtureEntityInventoryApiClient(), 'service');
+
+    expect(await screen.findByTestId('entityInventoryTypeNotAvailable')).toHaveTextContent(
+      getTypeNotAvailableTitle('service*')
+    );
+    expect(screen.queryByRole('button', { name: RETRY_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('shows the columns and rows of the new type when the type changes', async () => {
+    const { showType } = renderResults(createFixtureEntityInventoryApiClient());
+    expect(await screen.findByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
+
+    showType('k8s.deployment');
+
+    await waitFor(() =>
+      expect(screen.getByTestId('entityInventoryTable')).toHaveAttribute(
+        'data-entity-type',
+        'k8s.deployment'
+      )
+    );
+    expect(screen.getByTestId('dataGridHeaderCell-kubernetes.namespace')).toBeInTheDocument();
+    expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
+  });
+
+  it('keeps the rows up with a progress bar while a new range loads', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    let finishReload: () => void = () => {};
+    const getEntities = jest
+      .fn(fixtureClient.getEntities)
+      .mockImplementationOnce(fixtureClient.getEntities)
+      .mockImplementationOnce(
+        (...args) =>
+          new Promise((resolve) => {
+            finishReload = () => resolve(fixtureClient.getEntities(...args));
+          })
+      );
+    renderResults({ ...fixtureClient, getEntities });
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableReloading')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTableReloading')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
+
+    finishReload();
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('entityInventoryTableReloading')).not.toBeInTheDocument()
+    );
+    expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
+  });
+
+  describe('column and sort choices', () => {
+    const hideColumn = (columnId: string) => {
+      fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${columnId}`));
+      const hide = within(screen.getByTestId(`dataGridHeaderCellActionGroup-${columnId}`))
+        .getAllByRole('button')
+        .find((button) => button.textContent === 'Hide column');
+      if (!hide) {
+        throw new Error('No hide action');
+      }
+      fireEvent.click(hide);
+    };
+
+    it('survive a range with no entities and a failed reload of the same type', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const emptyClient = createScenarioEntityInventoryApiClient({ scenario: 'empty' });
+      const getEntities = jest
+        .fn(fixtureClient.getEntities)
+        .mockImplementationOnce(fixtureClient.getEntities)
+        .mockImplementationOnce(emptyClient.getEntities)
+        .mockRejectedValueOnce(new Error('Request failed'))
+        .mockImplementation(fixtureClient.getEntities);
+      renderResults({ ...fixtureClient, getEntities });
+      expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
+      hideColumn('cloud.account.id');
+      await waitFor(() =>
+        expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+      expect(await screen.findByTestId('entityInventoryTableEmpty')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+      expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(screen.getByTestId('dataGridHeaderCell-host.name')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
+    });
+
+    it('survive a switch to another type and back', async () => {
+      const { showType } = renderResults(createFixtureEntityInventoryApiClient());
+      expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
+      hideColumn('cloud.account.id');
+      await waitFor(() =>
+        expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
+      );
+
+      showType('k8s.deployment');
+      expect(
+        await screen.findByTestId('dataGridHeaderCell-kubernetes.namespace')
+      ).toBeInTheDocument();
+      showType('host');
+
+      expect(await screen.findByTestId('dataGridHeaderCell-last_seen')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows the error, not the previous results, when a later load fails', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    const getEntities = jest
+      .fn(fixtureClient.getEntities)
+      .mockImplementationOnce(fixtureClient.getEntities)
+      .mockRejectedValueOnce(new Error('Request failed'));
+    renderResults({ ...fixtureClient, getEntities });
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
+      'Request failed'
+    );
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+  });
+
+  it('shows no count and no source errors of the previous results after a failed reload', async () => {
+    const diagnosticsClient = createScenarioEntityInventoryApiClient({
+      scenario: 'withDiagnostics',
+    });
+    const getEntities = jest
+      .fn(diagnosticsClient.getEntities)
+      .mockImplementationOnce(diagnosticsClient.getEntities)
+      .mockRejectedValueOnce(new Error('Request failed'));
+    renderResults({ ...diagnosticsClient, getEntities });
+    expect(await screen.findByTestId('entityInventoryTypeSectionCount')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventorySourceErrorsIndicator')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTypeSectionCount')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventorySourceErrorsIndicator')).not.toBeInTheDocument();
+  });
+
+  it('shows the table skeleton, not the previous rows, while a retry after a failed reload loads', async () => {
+    const fixtureClient = createFixtureEntityInventoryApiClient();
+    let finishRetry: () => void = () => {};
+    const getEntities = jest
+      .fn(fixtureClient.getEntities)
+      .mockImplementationOnce(fixtureClient.getEntities)
+      .mockRejectedValueOnce(new Error('Request failed'))
+      .mockImplementationOnce(
+        (...args) =>
+          new Promise((resolve) => {
+            finishRetry = () => resolve(fixtureClient.getEntities(...args));
+          })
+      );
+    renderResults({ ...fixtureClient, getEntities });
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+    expect(await screen.findByTestId('entityInventoryTableError')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
+
+    expect(await screen.findByTestId('entityInventoryTableSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTypeSectionCount')).not.toBeInTheDocument();
+
+    finishRetry();
+
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventoryTypeSectionCount')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTableSkeleton')).not.toBeInTheDocument();
+  });
+
+  describe('sections', () => {
+    it('renders one section per type in the order of the types response, titled by its name', async () => {
+      renderResults(createFixtureEntityInventoryApiClient(), null);
+
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+      const sections = screen.getAllByTestId('entityInventoryTypeSection');
+      expect(sections.map((section) => section.getAttribute('data-entity-type'))).toEqual([
+        'host',
+        'k8s.deployment',
+      ]);
+      expect(sections[0]).toHaveTextContent(HOST_TYPE_FIXTURE.name);
+      expect(sections[1]).toHaveTextContent(K8S_DEPLOYMENT_TYPE_FIXTURE.name);
+    });
+
+    it('counts the listed entities of each section, with a plus when the list is truncated', async () => {
+      const { unmount } = renderScenario('normal');
+      const count = await screen.findByTestId('entityInventoryTypeSectionCount');
+      expect(count).toHaveTextContent(/^\d+$/);
+      unmount();
+
+      renderScenario('truncated');
+      expect(await screen.findByTestId('entityInventoryTypeSectionCount')).toHaveTextContent(
+        '250+'
+      );
+    });
+
+    it('requests the types once and the list of each section by its type id', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getTypes = jest.fn(fixtureClient.getTypes);
+      const getEntities = jest.fn(fixtureClient.getEntities);
+      renderResults({ getTypes, getEntities }, null);
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+
+      fireEvent.click(screen.getByRole('button', { name: NEW_RANGE_LABEL }));
+      await waitFor(() => expect(getEntities).toHaveBeenCalledTimes(4));
+
+      expect(getTypes).toHaveBeenCalledTimes(1);
+      expect(getEntities.mock.calls.map(([type]) => type).sort()).toEqual([
+        'host',
+        'host',
+        'k8s.deployment',
+        'k8s.deployment',
+      ]);
+    });
+
+    it('keeps the other sections when the list of one type fails', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getEntities = jest.fn(
+        (...args: Parameters<EntityInventoryApiClient['getEntities']>) => {
+          const [type] = args;
+          return type === 'host'
+            ? Promise.reject(new Error('Request failed'))
+            : fixtureClient.getEntities(...args);
+        }
+      );
+      renderResults({ ...fixtureClient, getEntities }, null);
+
+      expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
+        'Request failed'
+      );
+      expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+        'data-entity-type',
+        'k8s.deployment'
+      );
+    });
+
+    it('shows the error of the types request with a retry that requests them again', async () => {
+      const fixtureClient = createFixtureEntityInventoryApiClient();
+      const getTypes = jest
+        .fn(fixtureClient.getTypes)
+        .mockRejectedValueOnce(new Error('Types failed'));
+      const getEntities = jest.fn(fixtureClient.getEntities);
+      renderResults({ getTypes, getEntities });
+
+      expect(await screen.findByTestId('entityInventoryTableError')).toHaveTextContent(
+        'Types failed'
+      );
+      expect(getEntities).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('button', { name: RETRY_LABEL }));
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(getTypes).toHaveBeenCalledTimes(2);
+    });
+  });
+});

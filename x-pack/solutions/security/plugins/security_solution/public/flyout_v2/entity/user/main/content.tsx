@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import type { GraphEntryPoint } from '../../../../common/lib/telemetry';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
@@ -110,6 +111,8 @@ export interface ContentProps {
    * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
    */
   isGroupView?: boolean;
+  /** Where the flyout was opened from; reported by the graph preview telemetry. */
+  graphEntryPoint?: GraphEntryPoint;
 }
 
 /**
@@ -140,6 +143,7 @@ export const Content = ({
   onShowEntity,
   riskScoreQueryId,
   isGroupView = false,
+  graphEntryPoint,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
@@ -234,6 +238,7 @@ export const Content = ({
             scopeId={scopeId}
             openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
             hideHeaderIcons={hideHeaderIcons}
+            graphEntryPoint={graphEntryPoint}
           />
           <EuiHorizontalRule margin="m" />
         </>

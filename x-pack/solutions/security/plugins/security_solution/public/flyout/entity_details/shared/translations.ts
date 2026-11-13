@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const USER = i18n.translate('xpack.securitySolution.flyout.entityDetails.host.userLabel', {
-  defaultMessage: 'User',
-});
-
 export const NO_CORRESPONDING_ENTITY_EXISTS = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.noCorrespondingEntityExists',
   {

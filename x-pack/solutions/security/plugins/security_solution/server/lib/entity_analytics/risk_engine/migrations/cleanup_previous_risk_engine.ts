@@ -7,16 +7,15 @@
 
 import { first } from 'lodash/fp';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import { removeRiskScoringTask } from '../../risk_score/tasks/risk_scoring_task';
 import type { RiskEngineConfiguration } from '../../types';
 import { stopTransform, deleteTransform, getLatestTransformId } from '../../utils/transforms';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 import { MAX_PER_PAGE } from './update_risk_score_mappings';
 
 /**
- * Cleans up the legacy risk engine's ES "latest" transform and the risk_engine:risk_scoring
- * Kibana task per space when migrating to Entity Store V2.
- * Does not delete transform destination indices or templates.
+ * Stops and deletes the legacy risk engine latest-index transform for each space that still
+ * has a risk engine configuration. Does not delete transform destination indices or templates.
+ * The old `risk_engine:risk_scoring` task type is retired through Task Manager `REMOVED_TYPES`.
  */
 export const cleanupLegacyRiskEngine = async ({
   logger,
@@ -67,11 +66,6 @@ export const cleanupLegacyRiskEngine = async ({
           logger.error(
             `Failed to delete legacy latest transform ${transformId} for namespace ${namespace}: ${message}`
           );
-        });
-
-        await removeRiskScoringTask({ logger, namespace, taskManager }).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          logger.error(`Failed to remove risk scoring task for namespace ${namespace}: ${message}`);
         });
       }
     }

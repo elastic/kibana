@@ -1,0 +1,78 @@
+{
+  "summary": "Financial knowledge. Content includes reports, budgets, and compliance records. The assistant uses it to answer questions about metrics, budgets, forecasts and audit results.",
+  "rationale": "Finance questions are about numbers and who owns them. Tying each metric to the report it appears in and the department that owns it, and each audit to the departments it covers, lets the assistant say where a figure came from and how it has changed.",
+  "dreaming": {
+    "instructions": "Record figures backed by a report, budget or compliance record: financial metrics, budget decisions, audit results, spending policies, and forecasts. Keep exact amounts, units, currencies and periods, and the comparison a figure is given against. Record each metric once per period, from its most authoritative source.\n\nSkip:\n- Speculative market commentary without data backing.\n- Duplicate reporting of the same metric across documents.\n- Personal financial data of individual employees. Never record it.",
+    "facts": [
+      {
+        "type": "metric",
+        "description": "A reported figure for a period, such as \"Q3 revenue was $4.2M, up 15% YoY\"."
+      },
+      {
+        "type": "budget_item",
+        "description": "A budget decision, such as \"engineering headcount budget increased to 12 FTEs\"."
+      },
+      {
+        "type": "compliance",
+        "description": "An audit or compliance result, such as \"SOX audit passed with zero findings in 2024\"."
+      },
+      {
+        "type": "policy",
+        "description": "A financial rule, such as \"expense reports over $500 require VP approval\"."
+      },
+      {
+        "type": "forecast",
+        "description": "A projection and what it assumes, such as \"projected runway is 18 months at current burn rate\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "department",
+          "description": "A team or cost center, such as engineering or sales.",
+          "attributes": [
+            "owner"
+          ]
+        },
+        {
+          "type": "report",
+          "description": "A financial report or filing, by period.",
+          "attributes": [
+            "period",
+            "published_date"
+          ]
+        },
+        {
+          "type": "audit",
+          "description": "An audit or compliance review.",
+          "attributes": [
+            "framework",
+            "year",
+            "result"
+          ]
+        },
+        {
+          "type": "financial_metric",
+          "description": "A measure tracked over time, such as revenue, burn rate or headcount.",
+          "attributes": [
+            "unit"
+          ]
+        }
+      ]
+    },
+    "relationships": [
+      {
+        "type": "reported_in",
+        "description": "A metric appears in a report."
+      },
+      {
+        "type": "owned_by",
+        "description": "A metric or budget belongs to a department."
+      },
+      {
+        "type": "covers",
+        "description": "An audit covers a department."
+      }
+    ]
+  }
+}

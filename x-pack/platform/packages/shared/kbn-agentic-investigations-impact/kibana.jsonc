@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/agentic-investigations-impact",
+  "owner": ["@elastic/alertzero-common-layer", "@elastic/nightshift"],
+  "group": "platform",
+  "visibility": "shared"
+}

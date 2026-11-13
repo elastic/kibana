@@ -7,16 +7,16 @@
 
 import type { MsearchRequestItem, MsearchResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 
 interface ProbeAiIndicesParams {
   esClient: ElasticsearchClient;
-  aiIndices: AiIndexHttpItem[];
+  aiIndices: AiIndexItem[];
   logger: Logger;
 }
 
 export interface ProbedAiIndex {
-  aiIndex: AiIndexHttpItem;
+  aiIndex: AiIndexItem;
   /** Absent when readable. `privilege` is true for a refusal, false for unavailability. */
   failure?: { reason: string; privilege: boolean };
 }
@@ -85,7 +85,7 @@ export const probeAiIndices = async ({
 /** Keeps the AI Indices whose probe succeeded, dropping failures of either kind. */
 export const filterReadableAiIndices = async (
   params: ProbeAiIndicesParams
-): Promise<AiIndexHttpItem[]> =>
+): Promise<AiIndexItem[]> =>
   (await probeAiIndices(params))
     .filter(({ failure }) => failure === undefined)
     .map(({ aiIndex }) => aiIndex);

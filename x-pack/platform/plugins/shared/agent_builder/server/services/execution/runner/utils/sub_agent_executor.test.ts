@@ -8,6 +8,8 @@
 import { EMPTY } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
+import { ChatTriggerMode } from '@kbn/agent-builder-common';
+import type { ModelSource } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import { createSubAgentExecutor } from './sub_agent_executor';
 
@@ -141,6 +143,71 @@ describe('createSubAgentExecutor', () => {
     });
   });
 
+  describe('model source', () => {
+    const runAll = async (
+      executor: ReturnType<typeof createExecutor>,
+      modelSource: ModelSource | undefined
+    ) => {
+      await executor.executeSubAgent({
+        agentId: 'child',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        modelSource,
+      });
+      await executor.createSubAgent({
+        agentId: 'child',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        conversationId: 'conversation-id',
+        parentConversationId: 'parent-conversation-id',
+        subagentName: 'child',
+        modelSource,
+      });
+      await executor.sendToSubAgent({
+        agentId: 'child',
+        conversationId: 'conversation-id',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        modelSource,
+      });
+      return executeAgent.mock.calls.map(([call]) => call.params);
+    };
+
+    it('passes inferenceFeatureId and no connectorId to executeAgent for a feature source', async () => {
+      const calls = await runAll(createExecutor({ enabled: false }), {
+        featureId: 'parent_feature',
+      });
+
+      expect(calls).toHaveLength(3);
+      for (const params of calls) {
+        expect(params.inferenceFeatureId).toBe('parent_feature');
+        expect(params.connectorId).toBeUndefined();
+      }
+    });
+
+    it('passes connectorId and no inferenceFeatureId to executeAgent for a connector source', async () => {
+      const calls = await runAll(createExecutor({ enabled: false }), {
+        connectorId: 'parent-connector',
+      });
+
+      expect(calls).toHaveLength(3);
+      for (const params of calls) {
+        expect(params.connectorId).toBe('parent-connector');
+        expect(params.inferenceFeatureId).toBeUndefined();
+      }
+    });
+
+    it('passes neither when no source is forwarded', async () => {
+      const calls = await runAll(createExecutor({ enabled: false }), undefined);
+
+      expect(calls).toHaveLength(3);
+      for (const params of calls) {
+        expect(params.connectorId).toBeUndefined();
+        expect(params.inferenceFeatureId).toBeUndefined();
+      }
+    });
+  });
+
   describe('per-delegation pre-approvals', () => {
     const delegated: AutoApprovedApi[] = [
       { target: 'kibana', api: 'alerting.delete-alerting-rule-id' },
@@ -206,4 +273,84 @@ describe('createSubAgentExecutor', () => {
       );
     });
   });
+});
+
+describe('createSubAgentExecutor and background sub-agents', () => {
+  it('runs a background sub-agent on its own task, waking the parent only when asked to', async () => {
+    const executor = createExecutorWith({ enabled: false });
+    const background = { parentTriggerMode: ChatTriggerMode.Always };
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      background,
+    });
+    await executor.createSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      conversationId: 'conversation-id',
+      parentConversationId: 'parent-conversation-id',
+      subagentName: 'child',
+      background,
+    });
+    await executor.sendToSubAgent({
+      agentId: 'child',
+      prompt: 'and then',
+      parentExecutionId: 'parent-execution-id',
+      conversationId: 'conversation-id',
+      background,
+    });
+
+    expect(executeAgentMock).toHaveBeenCalledTimes(3);
+    for (const [params] of executeAgentMock.mock.calls) {
+      expect(params.params.parentTriggerMode).toBe(ChatTriggerMode.Always);
+      expect(params.useTaskManager).toBe(true);
+      expect(params.requestImmediateClaim).toBe(true);
+    }
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      background: { parentTriggerMode: ChatTriggerMode.Never },
+    });
+    expect(executeAgentMock.mock.calls[3][0].params.parentTriggerMode).toBe(ChatTriggerMode.Never);
+
+    // No wake asked for: the run still gets its own task, and the result waits for the next run.
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      background: {},
+    });
+    expect(executeAgentMock.mock.calls[4][0].params.parentTriggerMode).toBeUndefined();
+    expect(executeAgentMock.mock.calls[4][0].useTaskManager).toBe(true);
+  });
+
+  it('leaves a foreground sub-agent alone', async () => {
+    const executor = createExecutorWith({ enabled: false });
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+    });
+
+    expect(executeAgentMock.mock.calls[0][0].params.parentTriggerMode).toBeUndefined();
+    expect(executeAgentMock.mock.calls[0][0].useTaskManager).toBeUndefined();
+  });
+
+  let executeAgentMock: jest.Mock;
+
+  const createExecutorWith = (interactivity: InteractivityConfig) => {
+    executeAgentMock = jest.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
+    return createSubAgentExecutor({
+      request: httpServerMock.createKibanaRequest(),
+      getExecutionService: () =>
+        ({ executeAgent: executeAgentMock } as unknown as AgentExecutionService),
+      interactivity,
+    });
+  };
 });

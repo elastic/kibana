@@ -42,8 +42,8 @@ const createActionRow = (overrides: Partial<EpisodeActionRow> = {}): EpisodeActi
   last_ack_action: null,
   last_assignee_uid: null,
   last_ack_actor: null,
-  last_deactivate_action: null,
-  last_deactivate_actor: null,
+  last_lifecycle_action: null,
+  last_lifecycle_actor: null,
   last_tags: null,
   ...overrides,
 });
@@ -62,13 +62,13 @@ const createClient = ({
   snoozeRows = [],
 }: CreateClientOptions = {}) => {
   // Answers by query shape, since the first two queries run in parallel.
-  const executeQueryRows = jest.fn(async ({ query }: { query: string; filter?: unknown }) => {
+  const executeQuery = jest.fn(async ({ query }: { query: string; filter?: unknown }) => {
     if (query.includes('STATS last_snooze_action')) return snoozeRows;
     if (query.includes('alert_id IN')) return actionRows;
     if (query.includes('JSON_EXTRACT')) return dataRows;
     return episodeRows;
   });
-  const queryService = { executeQueryRows };
+  const queryService = { executeQuery };
 
   const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
 
@@ -76,7 +76,7 @@ const createClient = ({
 };
 
 const getQueries = (queryService: ReturnType<typeof createClient>['queryService']) =>
-  queryService.executeQueryRows.mock.calls.map(([{ query }]) => query);
+  queryService.executeQuery.mock.calls.map(([{ query }]) => query);
 
 describe('EpisodesClient', () => {
   describe('get', () => {
@@ -138,7 +138,7 @@ describe('EpisodesClient', () => {
         episode_data: '{"host":"web-01"}',
       });
 
-      const dataCall = queryService.executeQueryRows.mock.calls.find(([{ query }]) =>
+      const dataCall = queryService.executeQuery.mock.calls.find(([{ query }]) =>
         query.includes('JSON_EXTRACT')
       );
       expect(dataCall?.[0]).toMatchObject({ filter: EPISODE_DATA_FILTER });
@@ -187,15 +187,15 @@ describe('EpisodesClient', () => {
     };
 
     it('returns event rows from the shared episode events query', async () => {
-      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-        executeQueryRows: jest.fn().mockResolvedValueOnce([eventRow]),
+      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQuery'>> = {
+        executeQuery: jest.fn().mockResolvedValueOnce([eventRow]),
       };
       const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
 
       await expect(client.getEvents(EPISODE_ID)).resolves.toEqual([eventRow]);
 
-      expect(queryService.executeQueryRows).toHaveBeenCalledTimes(1);
-      const [{ query }] = queryService.executeQueryRows.mock.calls[0];
+      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
+      const [{ query }] = queryService.executeQuery.mock.calls[0];
       expect(query).toContain(`space_id == "${SPACE_ID}"`);
       expect(query).toContain(`episode.id == "${EPISODE_ID}"`);
       expect(query).toContain('type == "alert"');
@@ -206,8 +206,8 @@ describe('EpisodesClient', () => {
     });
 
     it('forwards time-range, status, and limit filters to the shared query', async () => {
-      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-        executeQueryRows: jest.fn().mockResolvedValueOnce([]),
+      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQuery'>> = {
+        executeQuery: jest.fn().mockResolvedValueOnce([]),
       };
       const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
 
@@ -220,7 +220,7 @@ describe('EpisodesClient', () => {
         limit: 1001,
       });
 
-      const [{ query }] = queryService.executeQueryRows.mock.calls[0];
+      const [{ query }] = queryService.executeQuery.mock.calls[0];
       expect(query).toContain('@timestamp >= "2026-08-03T00:00:00.000Z"');
       expect(query).toContain('@timestamp <= "2026-08-03T01:00:00.000Z"');
       expect(query).toContain(`episode.status == "${ALERT_EPISODE_STATUS.ACTIVE}"`);

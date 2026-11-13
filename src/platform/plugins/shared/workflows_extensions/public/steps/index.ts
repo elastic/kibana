@@ -38,4 +38,7 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(() =>
     import('./data/data_concat_step').then((m) => m.dataConcatStepDefinition)
   );
+  stepRegistry.register(() =>
+    import('./workflow/get_last_run_step').then((m) => m.getLastRunStepDefinition)
+  );
 };
