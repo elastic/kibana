@@ -35,14 +35,18 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   public catchError(failedContext: StepExecutionRuntime): void {
-    const shouldRetry = failedContext.contextManager.evaluateBooleanExpressionInContext(
-      this.node.configuration.condition || true,
-      {
-        error: failedContext.getCurrentStepResult()?.error,
-      }
-    );
+    const error = failedContext.getCurrentStepResult()?.error;
+    const { condition } = this.node.configuration;
 
-    if (!shouldRetry) {
+    if (!condition && error?.retryable === false) {
+      this.workflowLogger.logDebug(`Error "${error.type}" is not retryable, propagating error.`);
+      return;
+    }
+
+    if (
+      condition &&
+      !failedContext.contextManager.evaluateBooleanExpressionInContext(condition, { error })
+    ) {
       this.workflowLogger.logDebug(`Condition for retry step not met, propagating error.`);
       return;
     }

@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export type CreateIntegrationSideCardButtonComponent = React.ComponentType;
+export interface CreateIntegrationSideCardButtonProps {
+  /** Shows the AI create action. Requires the Automatic Import `create` capability. */
+  canCreate: boolean;
+  /** Shows the upload package link. Requires the Fleet privilege to upload packages. */
+  canUpload: boolean;
+}
+
+export type CreateIntegrationSideCardButtonComponent =
+  React.ComponentType<CreateIntegrationSideCardButtonProps>;

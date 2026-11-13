@@ -14,6 +14,7 @@ import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import {
   cancelTask,
   createIndex,
+  deleteIndex,
   pollTaskUntil,
   startReindex,
   toReindexResult,
@@ -193,6 +194,26 @@ export class HistorySnapshotClient {
       const message = getErrorMessage(err);
       this.logger.error(`Failed to reschedule history snapshot task: ${message}`);
       throw err;
+    }
+    await this.resumePausedCycle(taskId);
+  }
+
+  /**
+   * A new interval replaces the short continuation delay of a cycle that is paused between runs.
+   * Run the task now so the cycle is not postponed by up to the new interval.
+   */
+  private async resumePausedCycle(taskId: string): Promise<void> {
+    try {
+      const task = await this.taskManager.get(taskId);
+      if (task.state?.run) {
+        await this.taskManager.runSoon(taskId);
+      }
+    } catch (err) {
+      this.logger.warn(
+        `History snapshot: failed to resume the paused cycle after rescheduling: ${getErrorMessage(
+          err
+        )}`
+      );
     }
   }
 
@@ -402,6 +423,21 @@ export class HistorySnapshotClient {
     return { ...run, esTaskId, phaseStartedAt: moment.utc().toISOString() };
   }
 
+  /**
+   * Starts the copy again after its Elasticsearch task was lost. The new reindex reads a fresh view
+   * of latest, so the partial destination can hold documents that were deleted since, and the old
+   * snapshot time would stamp new documents with an earlier time. Start over with an empty
+   * destination and a new snapshot time; `cycleStartedAt` keeps the schedule anchor.
+   */
+  private async restartCopy(
+    run: HistorySnapshotRun,
+    abortSignal?: AbortSignal
+  ): Promise<HistorySnapshotRun> {
+    await deleteIndex(this.esClient, run.historySnapshotIndex);
+    await createIndex(this.esClient, run.historySnapshotIndex, { throwIfExists: false });
+    return this.startCopy({ ...run, timestampNow: moment.utc().toISOString() }, abortSignal);
+  }
+
   private async advance(
     initialRun: HistorySnapshotRun,
     onRunChange: (run: HistorySnapshotRun) => void,
@@ -416,6 +452,18 @@ export class HistorySnapshotClient {
       return this.completeCycle(run.historySnapshotIndex, run.docCount ?? 0);
     }
 
+    // A disable that arrives during the run cannot see an Elasticsearch task that is not in the task
+    // state yet, so check before each step that starts or keeps one.
+    const stopIfDisabled = async (): Promise<RunHistorySnapshotResult | undefined> => {
+      const { historySnapshot } = await this.globalStateClient.findOrThrow();
+      if (historySnapshot?.status === 'started') {
+        return undefined;
+      }
+      this.logger.info('History snapshot was disabled during the run, cancelling it');
+      await this.cancelRun(run);
+      return { ok: true, skipped: true };
+    };
+
     while (true) {
       const poll = await pollTaskUntil<ReindexResponse>({
         esClient: this.esClient,
@@ -428,14 +476,17 @@ export class HistorySnapshotClient {
       });
 
       if (poll.status === 'pending') {
-        return { ok: true, inProgress: true, run };
+        const stopped = await stopIfDisabled();
+        return stopped ?? { ok: true, inProgress: true, run };
       }
 
       if (poll.status === 'missing') {
+        const stopped = await stopIfDisabled();
+        if (stopped) return stopped;
         this.logger.warn(
-          `History snapshot reindex task ${run.esTaskId} no longer exists; starting it again`
+          `History snapshot reindex task ${run.esTaskId} no longer exists; starting the copy again from an empty index`
         );
-        run = await this.startCopy(run, abortSignal);
+        run = await this.restartCopy(run, abortSignal);
         onRunChange(run);
         continue;
       }

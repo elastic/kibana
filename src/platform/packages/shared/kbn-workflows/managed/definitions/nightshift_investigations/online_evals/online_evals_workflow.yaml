@@ -51,10 +51,6 @@ triggers:
           type: string
           maxLength: 1024
           description: The investigation workflow run that was scored.
-        judge_connector_id:
-          type: string
-          maxLength: 256
-          description: The connector every judge calls.
         entry_point:
           type: string
           enum:
@@ -72,7 +68,6 @@ triggers:
         - round_id
         - round_kind
         - investigation_started_at
-        - judge_connector_id
       additionalProperties: false
 
 steps:
@@ -90,9 +85,29 @@ steps:
         - name: nightshift_rca_reward
         - name: nightshift_investigation_process
         - name: nightshift_conclusion_quality
-      judge_connector_id: '{{ inputs.judge_connector_id }}'
       investigation_started_at: '{{ inputs.investigation_started_at }}'
       # `${{ }}` passes a missing optional input as undefined; `{{ }}` would pass an empty string.
+      investigation_ended_at: '${{ inputs.investigation_ended_at }}'
+      investigation_execution_id: '${{ inputs.investigation_execution_id }}'
+      entry_point: '${{ inputs.entry_point }}'
+      alert_rule_type: '${{ inputs.alert_rule_type }}'
+
+  # An alert recovery grades the first round against the recovery round's conclusion, the ground
+  # truth. The recovery round itself isn't graded.
+  - name: score_alert_outcome
+    type: nightshift.onlineEvals.score
+    if: "${{ inputs.round_kind == 'alert_recovery' }}"
+    with:
+      investigation_id: '{{ inputs.investigation_id }}'
+      round_id: '{{ inputs.round_id }}'
+      round_kind: '{{ inputs.round_kind }}'
+      graded_report: first_round
+      evaluator_set: reference_based
+      evaluators:
+        - name: nightshift_alert_outcome_rca_accuracy
+        - name: nightshift_alert_outcome_benign_classification
+        - name: nightshift_alert_outcome_rca_reporting_gap
+      investigation_started_at: '{{ inputs.investigation_started_at }}'
       investigation_ended_at: '${{ inputs.investigation_ended_at }}'
       investigation_execution_id: '${{ inputs.investigation_execution_id }}'
       entry_point: '${{ inputs.entry_point }}'

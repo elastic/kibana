@@ -27,10 +27,11 @@ import type { StatsBatch, StatsComponents } from './types';
 // The entries functions do not read the window. A batch just carries it.
 const WINDOW: StatsWindow = { kind: 'default' };
 
-const EMPTY: StatsComponents = { destination: {}, processor: {} };
+const EMPTY: StatsComponents = { destination: {}, processor: {}, source: {} };
 
 const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
 const processor = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'processor', id });
+const source = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'source', id });
 
 const REFS = [destination('es-prod'), processor('uppercase-message')];
 
@@ -478,5 +479,88 @@ describe('clearValues', () => {
 
   it('leaves nothing when nothing is registered', () => {
     expect(clearValues(EMPTY)).toEqual(EMPTY);
+  });
+});
+
+describe('source components', () => {
+  const REASON = 'Service Unavailable';
+  // A destination next to the source shows that the kinds stay apart.
+  const MIXED = [destination('es-prod'), source('otlp-input')];
+
+  const fetchedComponents = () =>
+    mergeFetchedStats(registerAll(MIXED), batchOf(MIXED), responseFor('data', MIXED), MERGED_AT);
+
+  it('marks a source without a value as loading', () => {
+    const components = markBatchLoading(registerAll(MIXED), batchOf([source('otlp-input')]));
+
+    expect(components.source['otlp-input'].entry).toEqual({ status: 'loading' });
+    expect(components.destination['es-prod'].entry).toBeUndefined();
+  });
+
+  it('writes the result of a source and stamps when it arrived', () => {
+    const components = fetchedComponents();
+
+    expect(components.source['otlp-input']).toMatchObject({
+      registrants: ['registrant-source-otlp-input'],
+      entry: { status: 'ready', stats: { acceptedRate: 3700 } },
+      fetchedAt: MERGED_AT,
+    });
+    expect(components.destination['es-prod'].entry?.status).toBe('ready');
+  });
+
+  it('keeps the same entry object when a refresh returns equal values', () => {
+    const first = fetchedComponents();
+    const second = mergeFetchedStats(
+      first,
+      batchOf(MIXED),
+      responseFor('data', MIXED),
+      MERGED_AT + 30_000
+    );
+
+    expect(second.source['otlp-input'].entry).toBe(first.source['otlp-input'].entry);
+    expect(second.source['otlp-input'].fetchedAt).toBe(MERGED_AT + 30_000);
+  });
+
+  it('keeps the value of a source, marked stale, when the whole request failed', () => {
+    const fetched = fetchedComponents();
+    const components = markBatchFailed(fetched, batchOf(MIXED), REASON);
+
+    expect(components.source['otlp-input'].entry).toEqual({
+      ...fetched.source['otlp-input'].entry,
+      status: 'stale',
+    });
+  });
+
+  it('shows an error for a source without a value when its request failed', () => {
+    const response: MappedStatsResponse = {
+      ...mapFailedRequest(MIXED, REASON),
+      window: { start: 'start', end: 'end' },
+    };
+
+    const components = mergeFetchedStats(registerAll(MIXED), batchOf(MIXED), response, MERGED_AT);
+
+    expect(components.source['otlp-input'].entry).toEqual({
+      status: 'error',
+      error: { code: STATS_REQUEST_FAILED_ERROR_CODE, reason: REASON },
+    });
+  });
+
+  it('drops a source that is no longer in the unit, and keeps one that is', () => {
+    const fetched = fetchedComponents();
+
+    expect(
+      dropRemovedComponents(fetched, new Set(['es-prod'])).source['otlp-input']
+    ).toBeUndefined();
+    expect(dropRemovedComponents(fetched, new Set(['otlp-input'])).source['otlp-input']).toBe(
+      fetched.source['otlp-input']
+    );
+  });
+
+  it('clears the value of a source and keeps who shows it', () => {
+    const components = clearValues(fetchedComponents());
+
+    expect(components.source['otlp-input']).toEqual({
+      registrants: ['registrant-source-otlp-input'],
+    });
   });
 });

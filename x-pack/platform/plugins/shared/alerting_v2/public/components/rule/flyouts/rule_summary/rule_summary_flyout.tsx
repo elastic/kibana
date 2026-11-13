@@ -31,6 +31,12 @@ import {
   RuleSummaryBody,
   RuleSummaryInvestigationSection,
 } from '../../rule_summary';
+import {
+  DISABLED_TAKE_ACTION_PANELS,
+  RULE_SUMMARY_FLYOUT_TITLE,
+  RuleSummaryLoadingBody,
+  RuleSummaryNotFoundBody,
+} from '../rule_summary_state_bodies';
 
 const LAST_EXECUTION_HEALTH_COLOR: Record<RuleExecutionOutcome, 'success' | 'danger'> = {
   success: 'success',
@@ -38,7 +44,10 @@ const LAST_EXECUTION_HEALTH_COLOR: Record<RuleExecutionOutcome, 'success' | 'dan
 };
 
 export interface RuleSummaryFlyoutProps {
-  rule: RuleApiResponse;
+  ruleId: string;
+  /** Unset while loading, or when the rule failed to load or does not exist. */
+  rule?: RuleApiResponse;
+  isLoading?: boolean;
   onClose: () => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
@@ -53,7 +62,9 @@ export interface RuleSummaryFlyoutProps {
 }
 
 export const RuleSummaryFlyout = ({
+  ruleId,
   rule,
+  isLoading = false,
   onClose,
   onEdit,
   onClone,
@@ -73,11 +84,11 @@ export const RuleSummaryFlyout = ({
   const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
-  const lastExecution = useRuleLastExecution(rule.id);
+  const lastExecution = useRuleLastExecution(ruleId);
   const takeActionPanels = useRuleMenuPanels({
     rule,
     canWrite,
-    detailsLink: getRuleDetailsLink(rulesLocators, rule.id),
+    detailsLink: getRuleDetailsLink(rulesLocators, ruleId),
     onEdit,
     onClone,
     onDelete,
@@ -87,8 +98,8 @@ export const RuleSummaryFlyout = ({
     onViewChangeHistory,
   });
 
-  const kindLabel = RULE_KIND_LABELS[rule.kind] ?? rule.kind;
-  const enabledLabel = rule.enabled
+  const kindLabel = rule ? RULE_KIND_LABELS[rule.kind] ?? rule.kind : undefined;
+  const enabledLabel = rule?.enabled
     ? i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
         defaultMessage: 'Enabled',
       })
@@ -123,6 +134,22 @@ export const RuleSummaryFlyout = ({
     return lastExecution.value;
   };
 
+  const renderBody = () => {
+    if (isLoading) {
+      return <RuleSummaryLoadingBody />;
+    }
+    if (!rule) {
+      return <RuleSummaryNotFoundBody />;
+    }
+    return (
+      <RuleSummaryBody rule={rule}>
+        <RuleSummaryAboutSection />
+        <RuleSummaryInvestigationSection />
+        <RuleSummaryArtifactsSection />
+      </RuleSummaryBody>
+    );
+  };
+
   return (
     <FlyoutTemplate
       type="overlay"
@@ -131,82 +158,85 @@ export const RuleSummaryFlyout = ({
       ownFocus={false}
       session={session}
       onClose={onClose}
+      flyoutMenuProps={{ title: RULE_SUMMARY_FLYOUT_TITLE }}
       data-test-subj="ruleSummaryFlyout"
     >
-      <Header title={rule.metadata.name} description={updatedAtFormatted}>
-        <Badge color="hollow" data-test-subj="universalRulesBadge">
-          {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.universalRulesBadge', {
-            defaultMessage: 'Universal',
-          })}
-        </Badge>
-        <Badge
-          color="hollow"
-          iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
-          data-test-subj="kindBadge"
-        >
-          {kindLabel}
-        </Badge>
-        <Badge
-          color={rule.enabled ? 'success' : 'default'}
-          data-test-subj={rule.enabled ? 'enabledBadge' : 'disabledBadge'}
-        >
-          {enabledLabel}
-        </Badge>
-        <InfoBlock
-          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
-            defaultMessage: 'Enabled',
-          })}
-          data-test-subj="ruleSummaryFlyoutEnabledBlock"
-        >
-          {isToggleLoading ? (
-            <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutEnabledSpinner" size="m" />
-          ) : (
-            <EuiSwitch
-              compressed
-              checked={rule.enabled}
-              disabled={!canWrite}
-              showLabel={false}
-              label={enabledLabel}
-              onChange={() => onToggleEnabled(rule)}
-              data-test-subj="ruleSummaryFlyoutEnabledSwitch"
-            />
-          )}
-        </InfoBlock>
-        {lastExecution.visible && (
-          <InfoBlock
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
-              defaultMessage: 'Last execution',
-            })}
-            data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
-          >
-            {renderLastExecutionValue()}
-          </InfoBlock>
+      <Header
+        title={rule?.metadata.name ?? RULE_SUMMARY_FLYOUT_TITLE}
+        description={rule ? updatedAtFormatted : undefined}
+        isLoading={isLoading}
+      >
+        {rule && (
+          <>
+            <Badge color="hollow" data-test-subj="universalRulesBadge">
+              {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.universalRulesBadge', {
+                defaultMessage: 'Universal',
+              })}
+            </Badge>
+            <Badge
+              color="hollow"
+              iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
+              data-test-subj="kindBadge"
+            >
+              {kindLabel}
+            </Badge>
+            <Badge
+              color={rule.enabled ? 'success' : 'default'}
+              data-test-subj={rule.enabled ? 'enabledBadge' : 'disabledBadge'}
+            >
+              {enabledLabel}
+            </Badge>
+            <InfoBlock
+              title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.enabled', {
+                defaultMessage: 'Enabled',
+              })}
+              data-test-subj="ruleSummaryFlyoutEnabledBlock"
+            >
+              {isToggleLoading ? (
+                <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutEnabledSpinner" size="m" />
+              ) : (
+                <EuiSwitch
+                  compressed
+                  checked={rule.enabled}
+                  disabled={!canWrite}
+                  showLabel={false}
+                  label={enabledLabel}
+                  onChange={() => onToggleEnabled(rule)}
+                  data-test-subj="ruleSummaryFlyoutEnabledSwitch"
+                />
+              )}
+            </InfoBlock>
+            {lastExecution.visible && (
+              <InfoBlock
+                title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
+                  defaultMessage: 'Last execution',
+                })}
+                data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
+              >
+                {renderLastExecutionValue()}
+              </InfoBlock>
+            )}
+            <InfoBlock
+              title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
+                defaultMessage: 'Created by',
+              })}
+              data-test-subj="ruleSummaryFlyoutCreatedByBlock"
+            >
+              {createdByDisplay}
+            </InfoBlock>
+            <InfoBlock
+              title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.updatedBy', {
+                defaultMessage: 'Updated by',
+              })}
+              data-test-subj="ruleSummaryFlyoutUpdatedByBlock"
+            >
+              {updatedByDisplay}
+            </InfoBlock>
+          </>
         )}
-        <InfoBlock
-          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
-            defaultMessage: 'Created by',
-          })}
-          data-test-subj="ruleSummaryFlyoutCreatedByBlock"
-        >
-          {createdByDisplay}
-        </InfoBlock>
-        <InfoBlock
-          title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.updatedBy', {
-            defaultMessage: 'Updated by',
-          })}
-          data-test-subj="ruleSummaryFlyoutUpdatedByBlock"
-        >
-          {updatedByDisplay}
-        </InfoBlock>
       </Header>
 
-      <Body>
-        <RuleSummaryBody rule={rule}>
-          <RuleSummaryAboutSection />
-          <RuleSummaryInvestigationSection />
-          <RuleSummaryArtifactsSection />
-        </RuleSummaryBody>
-      </Body>
+      <Body>{renderBody()}</Body>
 
       <Footer>
         <Footer.PrimaryActionMenu
@@ -214,7 +244,8 @@ export const RuleSummaryFlyout = ({
             defaultMessage: 'Take action',
           })}
           aria-label={RULE_MENU_ARIA_LABEL}
-          panels={takeActionPanels}
+          panels={rule ? takeActionPanels : DISABLED_TAKE_ACTION_PANELS}
+          isDisabled={!rule}
           data-test-subj="ruleSummaryFlyoutTakeActionButton"
         />
       </Footer>

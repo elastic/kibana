@@ -14,7 +14,10 @@ import { WorkflowExecuteSyncStrategy } from './workflow_execute_sync_strategy';
 import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
-import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import {
+  INPUT_RECORDED_STATE_KEY,
+  type StepExecutionRuntime,
+} from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 
 const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
@@ -185,6 +188,26 @@ describe('WorkflowExecuteSyncStrategy', () => {
       );
     });
 
+    it('starts the child when step state only records that input was written', async () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({
+        [INPUT_RECORDED_STATE_KEY]: true,
+      });
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        { param1: 'value1' },
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('waiting');
+      expect(mockEngine.executeWorkflow).toHaveBeenCalled();
+      expect(mockExecRepo.getWorkflowExecutionById).toHaveBeenCalledWith('child-exec-1', 'default');
+    });
+
     it('should propagate isTestRun flag', async () => {
       (mockStepRuntime.workflowExecution as any).isTestRun = true;
 
@@ -203,6 +226,91 @@ describe('WorkflowExecuteSyncStrategy', () => {
         expect.any(Object),
         mockRequest
       );
+    });
+
+    it('fails the step instead of waiting when the child is already terminal after start', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.FAILED,
+        error: { type: 'MissingExecutionIdentityError', message: 'no execution identity attached' },
+      } as any);
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toBe('no execution identity attached');
+      expect(mockStepRuntime.setCurrentStepState).toHaveBeenCalledWith(
+        expect.objectContaining({ executionId: 'child-exec-1' })
+      );
+      expect(mockStepRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('still waits when the child is not yet terminal after start', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.RUNNING,
+      } as any);
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('waiting');
+      expect(mockStepRuntime.tryEnterWaitUntil).toHaveBeenCalledWith(
+        undefined,
+        ExecutionStatus.WAITING_FOR_CHILD
+      );
+    });
+
+    it('returns cancelled without waiting when the step is aborted during the child read', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockImplementation(async () => {
+        mockStepRuntime.abortController.abort();
+        return { id: 'child-exec-1', status: ExecutionStatus.RUNNING } as any;
+      });
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result).toEqual({ status: 'cancelled' });
+      expect(mockStepRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('still waits when reading the child after start throws', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockRejectedValue(new Error('es down'));
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('waiting');
+      expect(mockStepRuntime.tryEnterWaitUntil).toHaveBeenCalled();
     });
 
     it('should return failed when engine throws', async () => {

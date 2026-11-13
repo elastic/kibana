@@ -27,7 +27,7 @@ jest.mock('@kbn/monaco', () => {
   };
 });
 
-const createMockEditor = () => {
+const createMockEditor = (lineCount = 3) => {
   const decorationsCollection = {
     clear: jest.fn(),
     set: jest.fn(),
@@ -37,7 +37,13 @@ const createMockEditor = () => {
     editor: {
       createDecorationsCollection: jest.fn(() => decorationsCollection),
       getModel: jest.fn(() => ({
-        getLineMaxColumn: jest.fn((lineNum: number) => 80),
+        getLineCount: jest.fn(() => lineCount),
+        getLineMaxColumn: jest.fn((lineNum: number) => {
+          if (lineNum < 1 || lineNum > lineCount) {
+            throw new Error('Illegal value for lineNumber');
+          }
+          return 80;
+        }),
       })),
     } as unknown as monaco.editor.IStandaloneCodeEditor,
     decorationsCollection,
@@ -152,8 +158,27 @@ describe('useLineDifferencesDecorations', () => {
     expect(decorationsCollection.clear).toHaveBeenCalled();
   });
 
-  it('handles when original has more lines than current', () => {
-    const { editor } = createMockEditor();
+  it('skips deleted lines that no longer exist in the model', () => {
+    const { editor } = createMockEditor(2);
+
+    renderHook(() =>
+      useLineDifferencesDecorations({
+        editor,
+        isEditorMounted: true,
+        highlightDiff: true,
+        originalValue: 'line1\nline2\nline3\nline4',
+        currentValue: 'line1\nchanged',
+      })
+    );
+
+    expect(editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
+    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
+    expect(decorations).toHaveLength(1);
+    expect(decorations[0].range.startLineNumber).toBe(2);
+  });
+
+  it('does not create decorations when only trailing lines were deleted', () => {
+    const { editor } = createMockEditor(1);
 
     renderHook(() =>
       useLineDifferencesDecorations({
@@ -165,9 +190,6 @@ describe('useLineDifferencesDecorations', () => {
       })
     );
 
-    expect(editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
-    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
-    // Lines 2 and 3 differ (missing in current)
-    expect(decorations).toHaveLength(2);
+    expect(editor.createDecorationsCollection).not.toHaveBeenCalled();
   });
 });

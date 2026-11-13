@@ -100,23 +100,23 @@ describe('recall usage', () => {
   const recallOutput = (overrides: Partial<InvestigationTaskOutput> = {}) =>
     output({
       tool_call_trajectory: [
-        step('nightshift_sandbox_view_file', { file_path: '/workspace/cortex/db.md' }),
+        step('nightshift_sandbox_view_file', { file_path: '/workspace/wiki/db.md' }),
         step('nightshift_sandbox_view_file', { file_path: '/workspace/memories/one.md' }),
         step('nightshift_sandbox_view_file', { file_path: '/workspace/memories/two.md' }),
       ],
       ...overrides,
     });
 
-  it('scores a redirect by cortex and counts only memories that were read and cited', async () => {
+  it('scores a redirect by wiki and counts only memories that were read and cited', async () => {
     const { deps, prompt } = judgeReturning({
-      cortex_influence: 'redirected',
-      cortex_reasoning: 'Switched to the DB after reading it.',
+      wiki_influence: 'redirected',
+      wiki_reasoning: 'Switched to the DB after reading it.',
       memories_cited: ['memories/one.md', 'memories/never_read.md'],
       memories_reasoning: 'The report repeats memory one.',
     });
-    const [cortex, memories] = createRecallUsageEvaluators(deps);
+    const [wiki, memories] = createRecallUsageEvaluators(deps);
     const params = { ...example, output: recallOutput() };
-    expect(await cortex.evaluate(params)).toMatchObject({ score: 1, label: 'redirected' });
+    expect(await wiki.evaluate(params)).toMatchObject({ score: 1, label: 'redirected' });
     expect(await memories.evaluate(params)).toMatchObject({
       score: 1,
       label: 'cited',
@@ -130,8 +130,8 @@ describe('recall usage', () => {
 
   it('counts each memory file a recursive grep exposed, not the directory', async () => {
     const { deps } = judgeReturning({
-      cortex_influence: 'none',
-      cortex_reasoning: '',
+      wiki_influence: 'none',
+      wiki_reasoning: '',
       memories_cited: ['memories/one.md', 'memories/two.md', 'memories'],
       memories_reasoning: '',
     });
@@ -155,27 +155,27 @@ describe('recall usage', () => {
     });
   });
 
-  it('scores a confirmatory cortex read as 0 and an unrecognized label as none', async () => {
+  it('scores a confirmatory wiki read as 0 and an unrecognized label as none', async () => {
     const { deps } = judgeReturning({
-      cortex_influence: 'confirmatory',
-      cortex_reasoning: '',
+      wiki_influence: 'confirmatory',
+      wiki_reasoning: '',
       memories_cited: [],
       memories_reasoning: '',
     });
-    const [cortex, memories] = createRecallUsageEvaluators(deps);
+    const [wiki, memories] = createRecallUsageEvaluators(deps);
     const params = { ...example, output: recallOutput() };
-    expect(await cortex.evaluate(params)).toMatchObject({ score: 0, label: 'confirmatory' });
+    expect(await wiki.evaluate(params)).toMatchObject({ score: 0, label: 'confirmatory' });
     expect(await memories.evaluate(params)).toMatchObject({ score: 0, label: 'not_cited' });
 
-    const { deps: oddDeps } = judgeReturning({ cortex_influence: 'bogus' });
-    const [oddCortex] = createRecallUsageEvaluators(oddDeps);
-    expect(await oddCortex.evaluate({ ...example, output: recallOutput() })).toMatchObject({
+    const { deps: oddDeps } = judgeReturning({ wiki_influence: 'bogus' });
+    const [oddWiki] = createRecallUsageEvaluators(oddDeps);
+    expect(await oddWiki.evaluate({ ...example, output: recallOutput() })).toMatchObject({
       score: 0,
       label: 'none',
     });
   });
 
-  it('is n/a, without calling the judge, when no cortex or memory file was read', async () => {
+  it('is n/a, without calling the judge, when no wiki or memory file was read', async () => {
     const { deps, prompt } = judgeReturning({});
     for (const evaluator of createRecallUsageEvaluators(deps)) {
       expect(await evaluator.evaluate({ ...example, output: output() })).toMatchObject({

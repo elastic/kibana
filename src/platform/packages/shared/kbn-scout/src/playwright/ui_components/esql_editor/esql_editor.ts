@@ -14,6 +14,13 @@ import { LookupIndexEditor } from './lookup_index_editor';
 
 const SELECT_SUGGESTION_TIMEOUT_MS = 30_000;
 const SUGGESTION_ATTEMPT_TIMEOUT_MS = 2_000;
+/**
+ * `@kbn/esql-editor` is code-split (see `esql/public/create_editor.tsx`), so nothing below
+ * `ESQLEditor` exists until that chunk is downloaded. This budget covers a bundle download
+ * over the network, not a render, which the default 10s `actionTimeout` doesn't fit on
+ * Cloud deployments.
+ */
+const EDITOR_READY_TIMEOUT_MS = 30_000;
 
 export interface EsqlControlOptions {
   variableName?: string;
@@ -98,7 +105,9 @@ export class EsqlEditor {
 
   /** Waits until the Monaco instance is mounted; its text model doesn't exist before that. */
   async waitReady(): Promise<void> {
-    await this.editor.getByTestId('kibanaCodeEditor').waitFor({ state: 'visible' });
+    await this.editor
+      .getByTestId('kibanaCodeEditor')
+      .waitFor({ state: 'visible', timeout: EDITOR_READY_TIMEOUT_MS });
   }
 
   /** Replaces the query in this editor (and only this one) and returns the applied value. */

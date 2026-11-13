@@ -32,6 +32,24 @@ describe('VectorDB navigation tree', () => {
     );
   });
 
+  it('includes Search boost with a New badge next to Index Management', () => {
+    const { body } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const dataManagement = body.find((item) => item.title === 'Data management');
+    const indicesSection = dataManagement?.children?.find(
+      (item) => item.title === 'Indices and data streams'
+    );
+
+    expect(indicesSection?.children?.[0]).toEqual(
+      expect.objectContaining({ link: 'management:index_management' })
+    );
+    expect(indicesSection?.children?.[1]).toEqual(
+      expect.objectContaining({ link: 'management:search_boost', badgeType: 'new' })
+    );
+  });
+
   it('includes only organization-level Cloud links in Admin and Settings > Organization', () => {
     const { footer } = createNavigationTree({
       ...core.application,

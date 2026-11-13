@@ -6,7 +6,7 @@
  */
 
 import type { FormEvent } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiText,
@@ -41,29 +41,42 @@ const formatOptions = (
   excludedValues?: string[],
   showCount?: boolean
 ): EuiSelectableOption[] => {
-  const uniqueValues: Record<string, { count: number; tooltip?: string }> = {};
+  const uniqueValues: Record<string, { count?: number; tooltip?: string }> = {};
 
   values?.forEach(({ label, count, tooltip }) => {
     uniqueValues[label] = { count, tooltip };
   });
 
+  // Apply reads `options`, not `selectedValue`. Keep applied selections in the
+  // list when suggestions omit them (search filter, or a refetch of the
+  // already-filtered set) so Apply cannot drop them. They have no known count,
+  // so none is shown rather than a misleading 0.
+  const ensureLabel = (label: string) => {
+    if (uniqueValues[label] === undefined) {
+      uniqueValues[label] = {};
+    }
+  };
+  selectedValue?.forEach(ensureLabel);
+  excludedValues?.forEach(ensureLabel);
+
   return Object.entries(uniqueValues).map(([label, { count, tooltip }]) => {
-    const counter = (
-      <Counter>
-        <EuiText size="xs">{count}</EuiText>
-      </Counter>
-    );
+    const counter =
+      count === undefined ? null : (
+        <Counter>
+          <EuiText size="xs">{count}</EuiText>
+        </Counter>
+      );
     const tooltipIcon = <EuiIconTip type="question" color="subdued" content={tooltip} />;
 
     let append: EuiSelectableOption['append'] = null;
-    if (showCount && tooltip) {
+    if (showCount && counter && tooltip) {
       append = (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>{counter}</EuiFlexItem>
           <EuiFlexItem grow={false}>{tooltipIcon}</EuiFlexItem>
         </EuiFlexGroup>
       );
-    } else if (showCount) {
+    } else if (showCount && counter) {
       append = counter;
     } else if (tooltip) {
       append = tooltipIcon;
@@ -76,6 +89,28 @@ const formatOptions = (
       ...(excludedValues?.includes(label) ? { checked: 'off' } : {}),
     };
   });
+};
+
+const hasSameLabels = (first: EuiSelectableOption[], second: EuiSelectableOption[]): boolean =>
+  first.length === second.length &&
+  isEqual(map(first, 'label').sort(), map(second, 'label').sort());
+
+// Rebuilds the list from fresh suggestions while keeping what the user has checked so far,
+// including checked options the new suggestions no longer list.
+const carryOverChecks = (
+  next: EuiSelectableOption[],
+  current: EuiSelectableOption[]
+): EuiSelectableOption[] => {
+  const currentByLabel = new Map(current.map((option) => [option.label, option]));
+  const nextLabels = new Set(next.map(({ label }) => label));
+
+  const merged = next.map(({ checked: _checked, ...option }) => {
+    const checked = currentByLabel.get(option.label)?.checked;
+    return checked ? { ...option, checked } : option;
+  });
+  const omitted = current.filter(({ label, checked }) => checked && !nextLabels.has(label));
+
+  return [...merged, ...omitted];
 };
 
 export function FieldValueSelection({
@@ -118,10 +153,31 @@ export function FieldValueSelection({
     setIsLogicalAND(useLogicalAND);
   }, [useLogicalAND]);
 
+  const valuesKey = JSON.stringify(values);
+  const selectedValueKey = JSON.stringify(selectedValue);
+
+  const previousSelectedValueKey = useRef(selectedValueKey);
+
   useEffect(() => {
-    setOptions(formatOptions(values, selectedValue, excludedValue, showCount));
+    const selectionChanged = previousSelectedValueKey.current !== selectedValueKey;
+    previousSelectedValueKey.current = selectedValueKey;
+
+    setOptions((current) => {
+      const next = formatOptions(values, selectedValue, excludedValue, showCount);
+      if (!(isPopoverOpen || forceOpen) || selectionChanged) {
+        return next;
+      }
+      // New suggestions can arrive while the popover is open (a refetch, or results for
+      // the typed search). Show them, but keep the checks made so far: rebuilding from
+      // props alone would wipe them. A changed applied selection takes precedence.
+      const merged = carryOverChecks(next, current);
+      // Replacing the options regenerates the rows, which swallows a click that lands
+      // mid-update. Count-only changes are not worth that, so keep the list as is.
+      return hasSameLabels(merged, current) ? current : merged;
+    });
+    // values/selectedValue are represented by the serialized keys above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(values), JSON.stringify(selectedValue), showCount, excludedValue]);
+  }, [valuesKey, selectedValueKey, showCount, excludedValue, isPopoverOpen, forceOpen]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -130,6 +186,7 @@ export function FieldValueSelection({
   const closePopover = () => {
     setIsPopoverOpen(false);
     setForceOpen?.(false);
+    setQuery('');
   };
 
   const onChange = (optionsN: EuiSelectableOption[]) => {
@@ -324,6 +381,7 @@ export function FieldValueSelection({
 
                     setIsPopoverOpen(false);
                     setForceOpen?.(false);
+                    setQuery('');
                   }}
                 >
                   {i18n.translate('xpack.observabilityShared.fieldValueSelection.apply', {

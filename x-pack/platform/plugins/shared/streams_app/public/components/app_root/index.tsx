@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import {
   BreadcrumbsContextProvider,
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { rememberClassicTabOrigin } from '../../hooks/use_streams_home_link';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
@@ -37,6 +38,9 @@ export function AppRoot({
   isServerless: boolean;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
+
+  // Leaving Streams resets the Classic tab origin.
+  useEffect(() => () => rememberClassicTabOrigin(), []);
 
   const context = {
     appParams: appMountParameters,

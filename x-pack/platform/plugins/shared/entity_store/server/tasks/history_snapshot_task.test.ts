@@ -206,6 +206,30 @@ describe('runHistorySnapshotTask — schedule reconciliation', () => {
       });
     });
 
+    it('skips to the next occurrence after now when the cycle outlasted its interval', async () => {
+      jest.setSystemTime(new Date('2026-11-03T09:20:00.000Z'));
+      mockFind.mockResolvedValue({
+        historySnapshot: { status: 'started', frequency: '1h', retentionDays: 60 },
+      });
+      mockRunHistorySnapshot.mockResolvedValue({
+        ok: true,
+        historySnapshotIndex: run.historySnapshotIndex,
+        docCount: 1,
+        resetCount: 1,
+      });
+
+      const result = await buildRunner({
+        schedule: { interval: '1h' },
+        state: { namespace: 'default', run },
+      }).run();
+
+      // An hourly cycle that started at 08:00 and ended at 09:20 does not drift to 09:52.
+      expect(result).toEqual({
+        state: { namespace: 'default' },
+        runAt: new Date('2026-11-03T10:00:00.000Z'),
+      });
+    });
+
     it('drops the saved run when the cycle fails', async () => {
       mockRunHistorySnapshot.mockResolvedValue({ ok: false, error: new Error('boom') });
 

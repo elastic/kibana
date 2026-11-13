@@ -136,16 +136,27 @@ export const WorkflowExecutionList = ({
     });
   }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
 
+  const showExecutionName =
+    Boolean(filters.runName?.trim()) || Boolean(executions?.hasNamedExecution);
+
   const columns = useMemo(
     () =>
       getExecutionHistoryColumns({
         euiTheme,
+        showExecutionName,
         showExecutor,
         executedByUserProfiles,
         showUnresolvedExecutors,
         timeZoneSetting,
       }),
-    [euiTheme, showExecutor, executedByUserProfiles, showUnresolvedExecutors, timeZoneSetting]
+    [
+      euiTheme,
+      showExecutionName,
+      showExecutor,
+      executedByUserProfiles,
+      showUnresolvedExecutors,
+      timeZoneSetting,
+    ]
   );
 
   const handleRowClick = useCallback(
@@ -346,6 +357,7 @@ export const WorkflowExecutionList = ({
               filters={filters}
               onFiltersChange={onFiltersChange}
               availableExecutedByOptions={availableExecutedByOptions}
+              showExecutionName={showExecutionName}
               showExecutor={showExecutor}
             />
           </EuiFlexItem>

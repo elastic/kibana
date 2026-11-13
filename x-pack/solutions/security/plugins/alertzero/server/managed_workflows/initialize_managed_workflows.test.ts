@@ -33,6 +33,13 @@ const makeState = (spaceId: string) => ({
 const createDependencies = () => {
   const client = {
     install: jest.fn(async (_id: string, _options: Record<string, unknown>) => undefined),
+    installMany: jest.fn(
+      async (
+        _items: ReadonlyArray<{ id: string; spaceId: string }>
+      ): Promise<{ failed: Array<{ id: string; spaceId: string; error: Error }> }> => ({
+        failed: [],
+      })
+    ),
     uninstall: jest.fn(async (_id: string, _options: Record<string, unknown>) => undefined),
     ready: jest.fn(async () => undefined),
     execute: jest.fn(),
@@ -48,38 +55,57 @@ const createDependencies = () => {
 };
 
 describe('initializeManagedWorkflows', () => {
-  it('installs only global workflows before reconciliation', async () => {
+  it('installs only global workflows, in one batch, before reconciliation', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual([
-      ...ALERTZERO_RULE_WORKFLOW_IDS,
-      ...ALERTZERO_ACTION_WORKFLOW_IDS,
-      ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
-      ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
-      ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
-      ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
-      ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
-      ...ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
-    ]);
-    expect(client.install).not.toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ workflowIdSuffix: expect.any(String) })
+    expect(client.installMany).toHaveBeenCalledTimes(1);
+    expect(client.installMany).toHaveBeenCalledWith(
+      [
+        ...ALERTZERO_RULE_WORKFLOW_IDS,
+        ...ALERTZERO_ACTION_WORKFLOW_IDS,
+        ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+        ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
+        ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
+        ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
+        ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
+        ...ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
+      ].map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
     );
+    expect(client.install).not.toHaveBeenCalled();
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
-  it('does not reconcile when a required rule workflow install fails', async () => {
+  it('logs each workflow that failed to install and does not reconcile', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
-    client.install.mockRejectedValueOnce(new Error('rule workflow install failed'));
+    client.installMany.mockResolvedValueOnce({
+      failed: [
+        {
+          id: ALERTZERO_RULE_WORKFLOW_IDS[0],
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+          error: new Error('rule workflow install failed'),
+        },
+      ],
+    });
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.ready).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('rule workflow install failed')
+      `Failed to install managed AlertZero workflow "${ALERTZERO_RULE_WORKFLOW_IDS[0]}": rule workflow install failed`
     );
+    expect(client.ready).not.toHaveBeenCalled();
+  });
+
+  it('does not reconcile when the batch install fails as a whole', async () => {
+    const { client, workflowsExtensions, logger } = createDependencies();
+    client.installMany.mockRejectedValueOnce(new Error('search failed'));
+
+    await expect(initializeManagedWorkflows({ workflowsExtensions, logger })).resolves.toBe(client);
+
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('search failed'));
+    expect(client.ready).not.toHaveBeenCalled();
   });
 
   it('returns the managed client when ready reconciliation fails', async () => {
@@ -163,6 +189,7 @@ describe('initializeManagedWorkflows', () => {
       });
 
       expect(client.install).not.toHaveBeenCalledWith(RULE_TUNING_ID, expect.anything());
+      expect(client.installMany.mock.calls[0][0].map(({ id }) => id)).not.toContain(RULE_TUNING_ID);
     });
 
     it('logs a warning when listInstalledWorkflowStates throws', async () => {

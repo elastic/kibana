@@ -7,7 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_STATS_READ_PRIVILEGE } from '../../../../common/constants';
 import type { StreamDocsStat } from '../../../../common';
 import { createServerRoute } from '../../create_server_route';
 import {
@@ -25,7 +25,7 @@ const degradedDocCountsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: z.object({
@@ -54,7 +54,7 @@ const degradedDocCountsForStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: lazySchema(() =>
@@ -79,7 +79,7 @@ const totalDocCountsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: z.object({
@@ -111,7 +111,7 @@ const totalDocCountsForStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: lazySchema(() =>
@@ -140,7 +140,7 @@ const failedDocCountsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: z.object({
@@ -171,7 +171,7 @@ const failedDocCountsForStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: lazySchema(() =>
@@ -199,7 +199,7 @@ const ingestionDocCountsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: z.object({
@@ -231,7 +231,7 @@ const ingestionDocCountsForStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_STATS_READ_PRIVILEGE],
     },
   },
   params: lazySchema(() =>

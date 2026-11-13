@@ -13,6 +13,7 @@ import type { JsonSchema, OpenApiDocument } from '../openapi/types';
 import { createShapeConverter, isRequired } from './shape_schema';
 import type { SmithyModel } from './smithy_model';
 import {
+  isSmithyModel,
   collectOperations,
   documentationOf,
   endpointPrefixOf,
@@ -70,18 +71,47 @@ const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/
 export const isAwsJsonModel = (model: SmithyModel, service?: string): boolean =>
   protocolsOf(pickService(model, service)[1]).some((protocol) => protocol in AWS_JSON_VERSIONS);
 
+/** Marks an OpenAPI document of an awsJson service, which is served by `X-Amz-Target`. */
+export const AWS_JSON_EXTENSION = 'x-amz-json';
+
+/** What serving an awsJson document needs beyond its operations. */
+export interface AwsJsonServiceInfo {
+  /** The protocol version, `1.0` or `1.1`. */
+  readonly version: string;
+  /** The service shape's name, which `X-Amz-Target` starts with. */
+  readonly targetPrefix: string;
+  /** The first label of the regional host, such as `monitoring`. */
+  readonly endpointPrefix: string;
+}
+
+const serviceInfoOf = (document: OpenApiDocument): AwsJsonServiceInfo | undefined => {
+  const info = document[AWS_JSON_EXTENSION];
+  return isRecord(info) &&
+    typeof info.version === 'string' &&
+    typeof info.targetPrefix === 'string' &&
+    typeof info.endpointPrefix === 'string'
+    ? {
+        version: info.version,
+        targetPrefix: info.targetPrefix,
+        endpointPrefix: info.endpointPrefix,
+      }
+    : undefined;
+};
+
+/** Whether an OpenAPI document describes an awsJson service, as `toAwsJsonDocument` writes it. */
+export const isAwsJsonDocument = (document: OpenApiDocument): boolean =>
+  serviceInfoOf(document) !== undefined;
+
 /**
- * Serves a Smithy model of an AWS JSON RPC service (`awsJson1_0` or `awsJson1_1`), such as
- * CloudWatch or CloudWatch Logs. Requests are `POST /` to a regional host with the operation in
- * `X-Amz-Target` (`<Service>.<Operation>`) and the input as a JSON document by member name; the
- * operations go through the emulator like OpenAPI ones, so their input is validated and their
- * output comes from fixtures, recordings or samples. Errors are awsJson errors: `__type` and
- * `message` in the body.
+ * Describes a Smithy model of an AWS JSON RPC service (`awsJson1_0` or `awsJson1_1`) as an
+ * OpenAPI document: an operation per Smithy operation at `POST /<Operation>` on the regional
+ * host, with the input and output documents by member name and the modeled errors. The
+ * `x-amz-json` extension names what `createAwsJsonService` needs to serve it.
  */
-export const createAwsJsonService = (
+export const toAwsJsonDocument = (
   model: SmithyModel,
   { service: id }: { readonly service?: string } = {}
-): AwsJsonService => {
+): OpenApiDocument => {
   const [serviceId, service] = pickService(model, id);
   const protocol = protocolsOf(service).find((trait) => trait in AWS_JSON_VERSIONS);
   if (!protocol) {
@@ -92,55 +122,10 @@ export const createAwsJsonService = (
   const version = AWS_JSON_VERSIONS[protocol];
   const contentType = `application/x-amz-json-${version}`;
   const endpointPrefix = endpointPrefixOf(serviceId, service);
-  // Operations with an `@endpoint` host prefix, such as `data.`, are served from a subdomain.
-  const host = new RegExp(
-    `^(?:[a-z0-9-]+\\.)*(${escapeRegExp(endpointPrefix)}\\.[a-z0-9-]+\\.amazonaws\\.com)$`
-  );
   const targetPrefix = shapeName(serviceId);
   // awsJson documents name members as modeled, ignoring `@jsonName`.
   const converter = createShapeConverter(model, { jsonNames: false, nonNumericFloats: true });
   const { components } = converter;
-
-  const resolveSchema = (schema: unknown, depth = 0): JsonSchema => {
-    if (!isRecord(schema) || depth > 32) {
-      return {};
-    }
-    if (typeof schema.$ref === 'string') {
-      return resolveSchema(components[schema.$ref.split('/').pop() ?? ''], depth + 1);
-    }
-    return Array.isArray(schema.allOf) && schema.allOf.length === 1
-      ? resolveSchema(schema.allOf[0], depth + 1)
-      : schema;
-  };
-
-  // Servers treat null structure and union members as absent. Nulls in lists, sparse maps and
-  // documents are values, and stay.
-  const withoutNulls = (value: unknown, schema: unknown): unknown => {
-    const target = resolveSchema(schema);
-    if (Array.isArray(value)) {
-      return value.map((item) => withoutNulls(item, target.items));
-    }
-    if (!isRecord(value)) {
-      return value;
-    }
-    const variants = Array.isArray(target.oneOf)
-      ? target.oneOf.map((variant) => resolveSchema(variant))
-      : [];
-    const isStructure = isRecord(target.properties) || variants.length > 0;
-    const properties: Record<string, unknown> = isRecord(target.properties)
-      ? target.properties
-      : Object.assign({}, ...variants.map(({ properties: own }) => (isRecord(own) ? own : {})));
-    return Object.fromEntries(
-      Object.entries(value).flatMap(([key, member]) =>
-        isStructure
-          ? member === null
-            ? []
-            : [[key, withoutNulls(member, properties[key])]]
-          : [[key, withoutNulls(member, target.additionalProperties)]]
-      )
-    );
-  };
-
   // A structure's members as a JSON document, registered as a component; error documents also
   // carry their `__type`.
   const toContentSchema = (
@@ -163,7 +148,6 @@ export const createAwsJsonService = (
     [contentType]: { schema },
   });
 
-  const operations = new Set<string>();
   const paths: Record<string, unknown> = {};
   for (const operationId of collectOperations(model, serviceId)) {
     const operation = model.shapes[operationId];
@@ -171,7 +155,6 @@ export const createAwsJsonService = (
       continue;
     }
     const name = shapeName(operationId);
-    operations.add(name);
     const input = toContentSchema(operation.input?.target, `${name}RequestContent`);
     const errors = new Map<string, JsonSchema[]>();
     for (const { target } of [...(operation.errors ?? []), ...(service.errors ?? [])]) {
@@ -215,6 +198,93 @@ export const createAwsJsonService = (
     };
   }
 
+  return {
+    openapi: '3.0.3',
+    info: {
+      title: String(service.traits?.['smithy.api#title'] ?? targetPrefix),
+      version: service.version ?? '1',
+    },
+    servers: regionalServers(endpointPrefix),
+    paths,
+    components: { schemas: components, ...sigv4SecuritySchemes(service) },
+    ...sigv4Security(service),
+    [AWS_JSON_EXTENSION]: { version, targetPrefix, endpointPrefix },
+  };
+};
+
+/**
+ * Serves a Smithy model of an AWS JSON RPC service (`awsJson1_0` or `awsJson1_1`), such as
+ * CloudWatch or CloudWatch Logs. Requests are `POST /` to a regional host with the operation in
+ * `X-Amz-Target` (`<Service>.<Operation>`) and the input as a JSON document by member name; the
+ * operations go through the emulator like OpenAPI ones, so their input is validated and their
+ * output comes from fixtures, recordings or samples. Errors are awsJson errors: `__type` and
+ * `message` in the body.
+ */
+export const createAwsJsonService = (
+  spec: SmithyModel | OpenApiDocument,
+  options: { readonly service?: string } = {}
+): AwsJsonService => {
+  const document = isSmithyModel(spec) ? toAwsJsonDocument(spec, options) : spec;
+  const info = serviceInfoOf(document);
+  if (!info) {
+    throw new Error(`The document has no ${AWS_JSON_EXTENSION}, so it isn't an awsJson service`);
+  }
+  const { version, targetPrefix, endpointPrefix } = info;
+  const protocol = `aws.protocols#awsJson${version.replace('.', '_')}`;
+  const contentType = `application/x-amz-json-${version}`;
+  // Operations with an `@endpoint` host prefix, such as `data.`, are served from a subdomain.
+  const host = new RegExp(
+    `^(?:[a-z0-9-]+\\.)*(${escapeRegExp(endpointPrefix)}\\.[a-z0-9-]+\\.amazonaws\\.com)$`
+  );
+  const { components: documentComponents, paths } = document;
+  const components: Record<string, unknown> =
+    isRecord(documentComponents) && isRecord(documentComponents.schemas)
+      ? documentComponents.schemas
+      : {};
+  const operations = new Set(
+    Object.keys(isRecord(paths) ? paths : {}).map((operationPath) => operationPath.slice(1))
+  );
+
+  const resolveSchema = (schema: unknown, depth = 0): JsonSchema => {
+    if (!isRecord(schema) || depth > 32) {
+      return {};
+    }
+    if (typeof schema.$ref === 'string') {
+      return resolveSchema(components[schema.$ref.split('/').pop() ?? ''], depth + 1);
+    }
+    return Array.isArray(schema.allOf) && schema.allOf.length === 1
+      ? resolveSchema(schema.allOf[0], depth + 1)
+      : schema;
+  };
+
+  // Servers treat null structure and union members as absent. Nulls in lists, sparse maps and
+  // documents are values, and stay.
+  const withoutNulls = (value: unknown, schema: unknown): unknown => {
+    const target = resolveSchema(schema);
+    if (Array.isArray(value)) {
+      return value.map((item) => withoutNulls(item, target.items));
+    }
+    if (!isRecord(value)) {
+      return value;
+    }
+    const variants = Array.isArray(target.oneOf)
+      ? target.oneOf.map((variant) => resolveSchema(variant))
+      : [];
+    const isStructure = isRecord(target.properties) || variants.length > 0;
+    const properties: Record<string, unknown> = isRecord(target.properties)
+      ? target.properties
+      : Object.assign({}, ...variants.map(({ properties: own }) => (isRecord(own) ? own : {})));
+    return Object.fromEntries(
+      Object.entries(value).flatMap(([key, member]) =>
+        isStructure
+          ? member === null
+            ? []
+            : [[key, withoutNulls(member, properties[key])]]
+          : [[key, withoutNulls(member, target.additionalProperties)]]
+      )
+    );
+  };
+
   const error = (
     statusCode: number,
     type: string,
@@ -231,17 +301,7 @@ export const createAwsJsonService = (
   };
 
   return {
-    document: {
-      openapi: '3.0.3',
-      info: {
-        title: String(service.traits?.['smithy.api#title'] ?? targetPrefix),
-        version: service.version ?? '1',
-      },
-      servers: regionalServers(endpointPrefix),
-      paths,
-      components: { schemas: components, ...sigv4SecuritySchemes(service) },
-      ...sigv4Security(service),
-    },
+    document,
     matches: (url) => host.test(url.hostname),
     route: (request) => {
       const { method, url, headers, body } = request;

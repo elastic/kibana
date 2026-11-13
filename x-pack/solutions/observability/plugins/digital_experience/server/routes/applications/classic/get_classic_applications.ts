@@ -38,5 +38,6 @@ export const getClassicApplications = async ({
       aggregations?.environmentNotDefined.doc_count ?? 0
     ),
     pageLoadsOverTime: toTimeSeries(aggregations?.inEnvironment.pageLoadsOverTime?.histogram),
+    sessionsOverTime: null,
   };
 };
