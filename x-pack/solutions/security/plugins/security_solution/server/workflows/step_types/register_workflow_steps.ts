@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 import { setAlertStatusStepDefinition } from './set_alert_status_step/set_alert_status_step';
@@ -30,11 +31,16 @@ import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprin
 import { aesopSelectWinnerStepDefinition } from './aesop_select_winner';
 import { aesopCaptureDatasetStepDefinition } from './aesop_capture_dataset';
 
+export interface RegisterWorkflowStepsDeps {
+  experimentalFeatures: Pick<ExperimentalFeatures, 'aesopPrototypeEnabled'>;
+}
+
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  deps: RegisterWorkflowStepsDeps
 ): void => {
   workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
   workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
@@ -57,6 +63,9 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(getAlertEntitiesStepDefinition);
   workflowsExtensions.registerStepDefinition(matchAttackFingerprintsStepDefinition);
-  workflowsExtensions.registerStepDefinition(aesopSelectWinnerStepDefinition);
-  workflowsExtensions.registerStepDefinition(aesopCaptureDatasetStepDefinition);
+
+  if (deps.experimentalFeatures.aesopPrototypeEnabled) {
+    workflowsExtensions.registerStepDefinition(aesopSelectWinnerStepDefinition);
+    workflowsExtensions.registerStepDefinition(aesopCaptureDatasetStepDefinition);
+  }
 };

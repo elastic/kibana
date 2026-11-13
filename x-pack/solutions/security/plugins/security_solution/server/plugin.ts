@@ -917,7 +917,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions);
+      registerWorkflowSteps(plugins.workflowsExtensions, {
+        experimentalFeatures: config.experimentalFeatures,
+      });
       registerEndpointWorkflowSteps(plugins.workflowsExtensions, {
         experimentalFeatures: config.experimentalFeatures,
         analytics: core.analytics,

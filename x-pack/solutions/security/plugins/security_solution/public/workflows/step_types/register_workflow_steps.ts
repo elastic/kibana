@@ -6,12 +6,18 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+
+export interface RegisterWorkflowStepsDeps {
+  experimentalFeatures: Pick<ExperimentalFeatures, 'aesopPrototypeEnabled'>;
+}
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
+  deps: RegisterWorkflowStepsDeps
 ): void => {
   workflowsExtensions.registerStepDefinition(() =>
     import('./render_alert_narrative_step').then((m) => m.renderAlertNarrativeStepDefinition)
@@ -109,15 +115,17 @@ export const registerWorkflowSteps = (
     )
   );
 
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./aesop_select_winner/aesop_select_winner_step').then(
-      (m) => m.aesopSelectWinnerStepDefinition
-    )
-  );
+  if (deps.experimentalFeatures.aesopPrototypeEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./aesop_select_winner/aesop_select_winner_step').then(
+        (m) => m.aesopSelectWinnerStepDefinition
+      )
+    );
 
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./aesop_capture_dataset/aesop_capture_dataset_step').then(
-      (m) => m.aesopCaptureDatasetStepDefinition
-    )
-  );
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./aesop_capture_dataset/aesop_capture_dataset_step').then(
+        (m) => m.aesopCaptureDatasetStepDefinition
+      )
+    );
+  }
 };

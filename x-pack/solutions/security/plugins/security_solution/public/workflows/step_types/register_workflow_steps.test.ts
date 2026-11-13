@@ -35,12 +35,13 @@ import { aesopCaptureDatasetStepDefinition } from './aesop_capture_dataset/aesop
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
+const enabled = { experimentalFeatures: { aesopPrototypeEnabled: true } };
 
 describe('registerWorkflowSteps (public)', () => {
   it('calls registerStepDefinition synchronously for all steps', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions);
+    registerWorkflowSteps(workflowsExtensions, enabled);
 
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(23);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
@@ -49,7 +50,7 @@ describe('registerWorkflowSteps (public)', () => {
   it('async loaders resolve to each step definition', async () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions);
+    registerWorkflowSteps(workflowsExtensions, enabled);
 
     const [
       loader1,
@@ -100,5 +101,20 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader21()).resolves.toBe(matchAttackFingerprintsStepDefinition);
     await expect(loader22()).resolves.toBe(aesopSelectWinnerStepDefinition);
     await expect(loader23()).resolves.toBe(aesopCaptureDatasetStepDefinition);
+  });
+
+  it('does not register the AESOP steps when the prototype is disabled', async () => {
+    const workflowsExtensions = createWorkflowsExtensionsMock();
+
+    registerWorkflowSteps(workflowsExtensions, {
+      experimentalFeatures: { aesopPrototypeEnabled: false },
+    });
+
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(21);
+    const loaded = await Promise.all(
+      workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => (arg as StepLoader)())
+    );
+    expect(loaded).not.toContain(aesopSelectWinnerStepDefinition);
+    expect(loaded).not.toContain(aesopCaptureDatasetStepDefinition);
   });
 });
