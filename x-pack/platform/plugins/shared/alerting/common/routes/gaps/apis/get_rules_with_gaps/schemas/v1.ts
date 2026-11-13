@@ -44,6 +44,10 @@ export const getRuleIdsWithGapBodySchema = schema.object(
     sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     excluded_reasons: optionalExcludedGapReasonsSchema,
     gap_auto_fill_scheduler_id: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
+    // Only these rules (saved object ids). The list can be long, for example all rules of a group.
+    rule_ids: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), { maxSize: 10000 })
+    ),
   },
   {
     validate({ start, end }) {

@@ -17,6 +17,7 @@ import type {
   KQL_FUNCTION_NOT,
   KQL_FUNCTION_OR,
   KQL_FUNCTION_RANGE,
+  KQL_FUNCTION_TERMS,
 } from '../functions';
 import { functions } from '../functions';
 import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
@@ -31,7 +32,8 @@ export type KqlFunctionName =
   | typeof KQL_FUNCTION_NESTED
   | typeof KQL_FUNCTION_NOT
   | typeof KQL_FUNCTION_OR
-  | typeof KQL_FUNCTION_RANGE;
+  | typeof KQL_FUNCTION_RANGE
+  | typeof KQL_FUNCTION_TERMS;
 
 export interface KqlFunctionNode extends KueryNode {
   arguments: unknown[];
@@ -94,6 +96,8 @@ export function toElasticsearchQuery(
     return functions.or.toElasticsearchQuery(node, indexPattern, config, context);
   if (functions.range.isNode(node))
     return functions.range.toElasticsearchQuery(node, indexPattern, config, context);
+  if (functions.terms.isNode(node))
+    return functions.terms.toElasticsearchQuery(node, indexPattern, config, context);
   throw new Error(`Unknown KQL function: "${node.function}"`);
 }
 
@@ -105,5 +109,6 @@ export function toKqlExpression(node: KqlFunctionNode): string {
   if (functions.not.isNode(node)) return functions.not.toKqlExpression(node);
   if (functions.or.isNode(node)) return functions.or.toKqlExpression(node);
   if (functions.range.isNode(node)) return functions.range.toKqlExpression(node);
+  if (functions.terms.isNode(node)) return functions.terms.toKqlExpression(node);
   throw new Error(`Unknown KQL function: "${node.function}"`);
 }

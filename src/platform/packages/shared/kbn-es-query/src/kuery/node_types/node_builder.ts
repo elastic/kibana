@@ -24,6 +24,13 @@ export const nodeBuilder = {
   and: (nodes: KueryNode[]): KueryNode => {
     return nodes.length === 1 ? nodes[0] : nodeTypes.function.buildNode('and', nodes);
   },
+  /**
+   * One Elasticsearch `terms` query for a list of exact values. Use it instead of `or` of many
+   * `is` nodes: that creates one bool clause per value and can hit the max clause count.
+   */
+  terms: (fieldName: string, values: Array<string | number | boolean>): KueryNode => {
+    return nodeTypes.function.buildNode('terms', fieldName, values);
+  },
   range: (
     fieldName: string,
     operator: keyof Pick<RangeFilterParams, 'gt' | 'gte' | 'lt' | 'lte'>,

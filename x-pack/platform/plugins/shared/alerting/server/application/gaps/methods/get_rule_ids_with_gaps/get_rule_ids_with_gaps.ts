@@ -50,6 +50,18 @@ import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/u
  *   values ('error' | 'unfilled' | 'in_progress' | 'filled') are returned.
  */
 const MAX_RULES_TO_FETCH = 10000;
+const emptySummary = () => ({
+  totalUnfilledDurationMs: 0,
+  totalInProgressDurationMs: 0,
+  totalFilledDurationMs: 0,
+  totalErrorDurationMs: 0,
+  totalDurationMs: 0,
+  rulesByGapFillStatus: { unfilled: 0, inProgress: 0, filled: 0, error: 0 },
+});
+
+/** Above this many rule ids, the ids filter the aggregation buckets instead of the query. */
+const MAX_RULE_IDS_IN_QUERY = 100;
+
 export async function getRuleIdsWithGaps(
   context: RulesClientContext,
   params: GetRuleIdsWithGapsParams
@@ -114,7 +126,16 @@ export async function getRuleIdsWithGaps(
       filter = `${filter} AND (${ruleTypesFilter})`;
     }
 
-    if (ruleIdsFilter?.length) {
+    if (ruleIdsFilter && ruleIdsFilter.length === 0) {
+      // An explicit empty list (for example an empty rule group) matches no rule.
+      return { total: 0, ruleIds: [], latestGapTimestamp: undefined, summary: emptySummary() };
+    }
+
+    // A short id list goes into the query. A long one (for example all rules of a rule group)
+    // would create one bool clause per id, so it is applied to the per-rule buckets below instead.
+    const allowedRuleIds =
+      ruleIdsFilter && ruleIdsFilter.length > MAX_RULE_IDS_IN_QUERY ? new Set(ruleIdsFilter) : undefined;
+    if (ruleIdsFilter?.length && !allowedRuleIds) {
       const ruleIdsFilterKql = [...new Set(ruleIdsFilter)]
         .map((ruleId) => `rule.id: "${ruleId}"`)
         .join(' OR ');
@@ -182,7 +203,7 @@ export async function getRuleIdsWithGaps(
       },
     };
 
-    for (const b of buckets) {
+    for (const b of buckets.filter((bucket) => !allowedRuleIds || allowedRuleIds.has(String(bucket.key)))) {
       const sums = extractGapDurationSums(b);
       const exhaustedInfo = schedulerContext?.enabled
         ? getExhaustedRetryGapsInfo(b)
