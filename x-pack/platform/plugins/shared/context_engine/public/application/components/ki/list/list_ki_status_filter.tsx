@@ -5,67 +5,72 @@
  * 2.0.
  */
 
+import { EuiSelect, type EuiSelectOption } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
-import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
-import { getListKiStatusFilterLabel } from './list_ki_helpers';
-import { ListKiFilterButton, type ListKiFilterOption } from './list_ki_filter_button';
+import { getListKiStatusFilterLabel, type ListKiStatusFilterValue } from './list_ki_helpers';
 
-const STATUS_FILTER_MIN_WIDTH = '12rem';
-const STATUS_FILTER_BUTTON_MIN_WIDTH = '7.25rem';
-
-const LIST_KI_STATUS_FILTER_OPTIONS: KiLifecycleStatus[] = [
+/** Prototype order. */
+const STATUS_FILTER_OPTIONS: ListKiStatusFilterValue[] = [
   'active',
+  'expired',
   'deleted',
   'verification_failed',
+  'all',
 ];
 
+// WIP: needs list API sort/expired (#305092). Visible but disabled until the API can filter by expiry.
+const WIP_STATUS_FILTER_OPTIONS: ReadonlySet<ListKiStatusFilterValue> = new Set(['expired']);
+
+const isStatusFilterValue = (value: string): value is ListKiStatusFilterValue =>
+  STATUS_FILTER_OPTIONS.some((option) => option === value);
+
 interface ListKiStatusFilterProps {
-  statusFilter: KiLifecycleStatus;
-  onStatusFilterChange: (status: KiLifecycleStatus) => void;
+  statusFilter: ListKiStatusFilterValue;
+  onStatusFilterChange: (status: ListKiStatusFilterValue) => void;
 }
 
 export const ListKiStatusFilter = ({
   statusFilter,
   onStatusFilterChange,
 }: ListKiStatusFilterProps) => {
-  const buttonLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusFilterLabel', {
-    defaultMessage: 'Status',
-  });
-
-  const statusFilterLegend = i18n.translate(
-    'xpack.contextEngine.aiIndexDetail.listKi.statusFilterLegend',
-    { defaultMessage: 'Filter Knowledge Indicators by lifecycle status' }
+  const options = useMemo(
+    (): EuiSelectOption[] =>
+      STATUS_FILTER_OPTIONS.map((value) => ({
+        value,
+        text: getListKiStatusFilterLabel(value),
+        disabled: WIP_STATUS_FILTER_OPTIONS.has(value),
+      })),
+    []
   );
 
-  const options = useMemo((): Array<ListKiFilterOption<KiLifecycleStatus>> => {
-    const ebtProps = getEbtProps({
-      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-      action: CONTEXT_ENGINE_UI_EBT.action.listKi.FILTER_STATUS,
-    });
-
-    return LIST_KI_STATUS_FILTER_OPTIONS.map((value) => ({
-      value,
-      label: getListKiStatusFilterLabel(value),
-      checked: value === statusFilter ? 'on' : undefined,
-      'data-test-subj': `contextListKiStatusFilter-${value}`,
-      ...ebtProps,
-    }));
-  }, [statusFilter]);
+  const handleChange = useCallback(
+    ({ target: { value } }: ChangeEvent<HTMLSelectElement>) => {
+      // WIP: needs list API sort/expired (#305092). Expired is a noop until then.
+      if (!isStatusFilterValue(value) || WIP_STATUS_FILTER_OPTIONS.has(value)) {
+        return;
+      }
+      onStatusFilterChange(value);
+    },
+    [onStatusFilterChange]
+  );
 
   return (
-    <ListKiFilterButton
-      buttonLabel={buttonLabel}
-      legend={statusFilterLegend}
-      panelMinWidth={STATUS_FILTER_MIN_WIDTH}
-      buttonMinWidth={STATUS_FILTER_BUTTON_MIN_WIDTH}
+    <EuiSelect
       options={options}
-      hasActiveFilters
-      numActiveFilters={1}
-      onChange={onStatusFilterChange}
-      buttonTestSubj="contextListKiStatusFilters"
+      value={statusFilter}
+      onChange={handleChange}
+      aria-label={i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusFilterLegend', {
+        defaultMessage: 'Filter Knowledge documents by status',
+      })}
+      data-test-subj="contextListKiStatusFilter"
+      {...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+        action: CONTEXT_ENGINE_UI_EBT.action.listKi.FILTER_STATUS,
+      })}
     />
   );
 };

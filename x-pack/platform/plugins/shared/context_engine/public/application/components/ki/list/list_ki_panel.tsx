@@ -10,7 +10,7 @@ import React from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import { ListKiBody } from './list_ki_body';
 import { ListKiFooter } from './list_ki_footer';
-import { ListKiHeader } from './list_ki_header';
+import { ListKiFiltersRow } from './list_ki_filters_row';
 import { useListKiPanel } from './use_list_ki_panel';
 import { useListKiPanelStyles } from './list_ki_panel_styles';
 
@@ -27,8 +27,8 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
     onTypeFilterChange,
     statusFilter,
     onStatusFilterChange,
+    sort,
     searchText,
-    submittedQuery,
     onSearchTextChange,
     onSearchSubmit,
     kis,
@@ -38,7 +38,6 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
     isFetching,
     error,
     loadMore,
-    onSearchSubmitClick,
   } = useListKiPanel(aiIndex);
 
   const styles = useListKiPanelStyles();
@@ -46,18 +45,17 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
 
   return (
     <EuiPanel hasBorder paddingSize="l" css={styles.panel} data-test-subj="contextListKiPanel">
-      <ListKiHeader
+      <ListKiFiltersRow
         searchText={searchText}
-        submittedQuery={submittedQuery}
         isSearchLoading={isRefetching}
         onSearchTextChange={onSearchTextChange}
         onSearchSubmit={onSearchSubmit}
+        statusFilter={statusFilter}
+        onStatusFilterChange={onStatusFilterChange}
+        sort={sort}
         typeFilter={typeFilter}
         summary={summary}
         onTypeFilterChange={onTypeFilterChange}
-        statusFilter={statusFilter}
-        onStatusFilterChange={onStatusFilterChange}
-        onSearchSubmitClick={onSearchSubmitClick}
       />
 
       <div css={styles.split} data-test-subj="contextListKiSplit">
