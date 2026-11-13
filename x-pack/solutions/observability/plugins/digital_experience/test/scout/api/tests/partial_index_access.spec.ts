@@ -15,8 +15,7 @@ import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 const { APPLICATIONS_IN_TIME_RANGE_PATH, COMMON_HEADERS, SERVICE_NAME, createRole } = testData;
 
 /**
- * Reads the EDOT Browser indices only. Classic RUM also reads `traces-apm*` and `logs-apm*`, which
- * this role is denied.
+ * Reads the EDOT Browser indices only, so not the Classic RUM archive's `apm-*` indices.
  */
 const OTEL_ONLY_INDICES_ROLE = {
   ...createRole({ digital_experience: ['read'], apm: ['read'] }),

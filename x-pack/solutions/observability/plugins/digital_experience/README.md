@@ -48,14 +48,16 @@ privileges like the app.
   response lists it in `unavailableSources`). A source the user can only partly read is listed in
   `partiallyAvailableSources` and gets its own warning, as Elasticsearch skips the indices of a
   wildcard the user can't read instead of failing, so rows may be missing. The check resolves the
-  source's patterns to the open indices, aliases and data streams that exist, then asks
-  `security.hasPrivileges` for `read` on those names, so unused defaults such as `apm-*` don't count
-  and a role narrower than the wildcard still passes when it covers every existing index. Classic
-  RUM leaves out the EDOT wildcards of the default APM indices, and both sources leave out the Agent
-  Builder OTel indices, as in APM Diagnostics. EDOT Browser has no warning when the sessions index
-  answered, as it is summarized with the access of the user who enabled sessions. With security disabled, or
-  if the check fails, no warning is shown. It doesn't name the indices, and document- or
-  field-level security isn't reported.
+  index expression the source's search sends (exclusions included) to the open indices, aliases
+  and data streams that exist, then asks `security.hasPrivileges` for `read` on those names: an
+  index or data stream counts as readable directly or through an alias the expression matches.
+  Unused defaults such as `apm-*` don't count, and a role narrower than the wildcard passes when it
+  covers every existing index. Classic RUM leaves out the EDOT wildcards of the default APM
+  indices, both sources leave out the Agent Builder OTel indices, as in APM Diagnostics, and remote
+  (CCS or CPS) patterns aren't checked. EDOT Browser has no warning when the sessions index
+  answered, as it is summarized with the access of the user who enabled sessions. With security
+  disabled, or if the check fails, no warning is shown. It doesn't name the indices, and document-
+  or field-level security isn't reported.
 - **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
   is kept in local storage; drag over it to zoom into that range. The sessions are counted only
   while the applications are read from the sessions index, so the toggle disables **Sessions**, and

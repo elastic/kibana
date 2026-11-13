@@ -45,7 +45,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
     const internalEsClient = elasticsearch.client.asInternalUser;
-    // APMEventClient cancels its own searches; the OTel ones get this signal.
+    // APMEventClient cancels its own searches; the OTel ones and the access checks get this signal.
     const signal = getRequestAbortedSignal(request.events.aborted$);
 
     const { apmDataAccess } = plugins;
@@ -87,6 +87,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
             },
             // The default APM indices include the EDOT ones, which hold no Classic RUM data.
             ignoredPatterns: [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+            signal,
             logger,
           })
       : undefined;
@@ -108,6 +109,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
           esClient,
           internalEsClient,
           getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+          signal,
           logger,
         }),
       hasPartialClassicAccess,
