@@ -11,11 +11,13 @@ import { readdirSync } from 'fs';
 import { resolve } from 'path';
 import type { KbnServerlessProjectType } from '@kbn/dev-utils';
 import { KBN_CERT_PATH, KBN_KEY_PATH, KBN_SERVERLESS_UIAM_CERTS } from '@kbn/dev-utils';
+import type { ServerlessProjectType } from '@kbn/es';
+import { isServerlessProjectType } from '@kbn/es';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from './serverless.base.config';
 
 /** Maps the `--serverless=` project type onto the one the UIAM certificates are named for. */
-const UIAM_PROJECT_TYPES: Readonly<Record<string, KbnServerlessProjectType>> = {
+const UIAM_PROJECT_TYPES: Readonly<Record<ServerlessProjectType, KbnServerlessProjectType>> = {
   es: 'search',
   oblt: 'observability',
   security: 'security',
@@ -29,12 +31,18 @@ const uiamSslArgs = (serverArgs: string[]) =>
       arg.startsWith('--xpack.security.uiam.ssl.key=')
   );
 
-const projectTypeOf = (serverArgs: string[]) => {
+const projectTypeOf = (serverArgs: string[]): ServerlessProjectType => {
   const arg = serverArgs.find((serverArg) => serverArg.startsWith('--serverless='));
   if (!arg) {
     throw new Error(`Config has no --serverless= argument: ${serverArgs.join(' ')}`);
   }
-  return arg.replace('--serverless=', '');
+
+  const projectType = arg.replace('--serverless=', '');
+  if (!isServerlessProjectType(projectType)) {
+    throw new Error(`Config has an unknown --serverless= project type: ${projectType}`);
+  }
+
+  return projectType;
 };
 
 // Read from disk rather than listed here, so a config added later is checked without having to
@@ -61,7 +69,6 @@ describe('Serverless UIAM client certificate', () => {
     const { serverArgs } = servers.kbnTestServer;
     const projectType = UIAM_PROJECT_TYPES[projectTypeOf(serverArgs)];
 
-    expect(projectType).toBeDefined();
     expect(uiamSslArgs(serverArgs)).toEqual([
       `--xpack.security.uiam.ssl.certificate=${KBN_SERVERLESS_UIAM_CERTS[projectType].certPath}`,
       `--xpack.security.uiam.ssl.key=${KBN_SERVERLESS_UIAM_CERTS[projectType].keyPath}`,
