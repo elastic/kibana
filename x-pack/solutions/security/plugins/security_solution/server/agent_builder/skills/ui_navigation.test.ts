@@ -12,6 +12,7 @@ import {
   ENTITY_RESOLUTION_PANEL,
   buildResolutionFlyoutTemplate,
   buildWatchlistEditPath,
+  WATCHLISTS_UI_NAVIGATION_CONTENT,
 } from './ui_navigation';
 import {
   HostPanelKey,
@@ -75,5 +76,41 @@ describe('buildWatchlistEditPath', () => {
     expect(buildWatchlistEditPath('wl-123')).toBe(
       '/app/security/entity_analytics_management/watchlists?editWatchlistId=wl-123'
     );
+  });
+});
+
+// The eval suite (kbn-evals-suite-entity-analytics, "UI navigation — watchlist edit flyout") grades the
+// agent reply against this section, so the reply shape has to be stated explicitly.
+describe('WATCHLISTS_UI_NAVIGATION_CONTENT reply-shape contract', () => {
+  const flat = WATCHLISTS_UI_NAVIGATION_CONTENT.replace(/\s+/g, ' ');
+
+  it('states the required reply shape as an ordered checklist of decline, why, link', () => {
+    const decline = flat.indexOf('**Decline**');
+    const why = flat.indexOf('**Why**');
+    const link = flat.indexOf('**The link**');
+
+    expect(flat).toContain('**Required reply shape.**');
+    expect(decline).toBeGreaterThan(-1);
+    expect(why).toBeGreaterThan(decline);
+    expect(link).toBeGreaterThan(why);
+  });
+
+  it('requires the bare-tab destination reply to tell the user to pick a watchlist from the list', () => {
+    const destination = flat.indexOf('**No specific watchlist**');
+    const pick = flat.search(/tell the user to pick the watchlist from the list/i);
+
+    expect(destination).toBeGreaterThan(-1);
+    expect(pick).toBeGreaterThan(destination);
+  });
+
+  it('says a missing CSV attachment does not change the destination', () => {
+    expect(flat).toContain('A missing attachment does not change the destination.');
+    expect(flat).toMatch(/do \*\*not\*\* ask them to attach it/i);
+  });
+
+  it('keeps the CSV-upload intent on the edit-flyout destination', () => {
+    const intent = flat.indexOf('**Upload a CSV**');
+    expect(intent).toBeGreaterThan(-1);
+    expect(flat.slice(intent)).toMatch(/edit flyout/i);
   });
 });
