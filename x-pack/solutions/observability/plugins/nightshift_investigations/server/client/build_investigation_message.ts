@@ -317,6 +317,7 @@ export function buildAlertRecoveredFollowUpMessage({
     '1. Examine all available signals before, during, and after the recovery: metrics, logs, traces, topology, deployments, rollbacks, code and configuration changes, operational actions, and relevant discussions or incident records.',
     '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. In your reply, lower the confidence of or dismiss hypotheses contradicted by the evidence.',
     '3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved.',
+    '4. State whether the alert needed remediation, such as a rollback, configuration change, or code fix, or was benign: noise, a transient condition that ended on its own, or an expected artifact. Say so if it is unknown.',
   ].join('\n');
 }
 

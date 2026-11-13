@@ -52,6 +52,20 @@ export interface WriteWorkflowDocumentWithOccParams {
   ifPrimaryTerm: number;
 }
 
+export interface WorkflowDocumentBulkWrite {
+  id: string;
+  document: WorkflowProperties;
+  /** The stored document this write replaces, guarded by its seq_no; omit to create. */
+  previous?: VersionedWorkflowDocument;
+}
+
+export type WorkflowDocumentBulkWriteResult =
+  | { status: 'written' }
+  | { status: 'conflict' }
+  /** Elasticsearch was too busy (429) and did not write it, so it can be retried. */
+  | { status: 'rejected'; error: Error }
+  | { status: 'failed'; error: Error };
+
 export interface ReadModifyWriteWorkflowDocumentParams {
   request?: KibanaRequest;
   mutate: (existing: WorkflowProperties) => WorkflowProperties;

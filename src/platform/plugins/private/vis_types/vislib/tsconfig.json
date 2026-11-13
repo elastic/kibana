@@ -42,6 +42,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/chart-expressions-common",
     "@kbn/visualizations-common",
+    "@kbn/visualizations-components",
   ],
   "exclude": [
     "target/**/*",
