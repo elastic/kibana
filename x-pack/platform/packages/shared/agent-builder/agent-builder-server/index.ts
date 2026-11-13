@@ -258,3 +258,4 @@ export {
   getAgentConnectorDetail,
   resolveAllowedConnectorIds,
 } from './agent_connectors';
+export type { DecideParams, DecideResult, DecisionsStart } from './decisions';
