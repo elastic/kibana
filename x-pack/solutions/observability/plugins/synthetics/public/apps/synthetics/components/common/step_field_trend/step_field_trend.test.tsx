@@ -86,4 +86,27 @@ describe('getLast48Intervals', () => {
       to: '2021-12-03T15:23:41.072Z',
     });
   });
+
+  it('returns the same values when synthetic _source returns timespan.lte instead of lt', () => {
+    const withTimespan = (timespan: { gte: string; lt?: string; lte?: string }): JourneyStep => ({
+      ...step,
+      monitor: { ...step.monitor, timespan },
+    });
+
+    // 1 minute span, so 48 minutes difference
+    const stored = withTimespan({
+      gte: '2021-12-01T12:54:28.098Z',
+      lt: '2021-12-01T12:55:28.098Z',
+    });
+    const synthetic = withTimespan({
+      gte: '2021-12-01T12:54:28.098Z',
+      lte: '2021-12-01T12:55:28.097Z',
+    });
+
+    expect(getLast48Intervals(synthetic)).toEqual({
+      from: '2021-12-03T14:35:41.072Z',
+      to: '2021-12-03T15:23:41.072Z',
+    });
+    expect(getLast48Intervals(synthetic)).toEqual(getLast48Intervals(stored));
+  });
 });

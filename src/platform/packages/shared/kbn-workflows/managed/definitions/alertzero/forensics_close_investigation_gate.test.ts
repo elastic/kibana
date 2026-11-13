@@ -128,6 +128,11 @@ describe('Forensics close investigation gate', () => {
         type: 'integer',
         minimum: 0,
       });
+      // Optional: a containment gate that settled normally has nothing to add.
+      expect(trigger?.inputs?.properties?.caveat).toMatchObject({
+        type: 'string',
+        maxLength: 2000,
+      });
     });
 
     // The reasons end up in the action's input, so they must be values the action takes.
@@ -281,6 +286,25 @@ describe('Forensics close investigation gate', () => {
 
       expect(render()).not.toContain('Its assessment');
       expect(render('')).not.toContain('Its assessment');
+    });
+
+    // Whatever went wrong before the question changes what Approve means, so it is read
+    // first; without one the card reads as it always has.
+    it('leads with the caveat the run passed, when there is one', () => {
+      const render = (caveat?: string) =>
+        liquid.parseAndRenderSync(build.comment, {
+          inputs: { ...inputs, ...(caveat === undefined ? {} : { caveat }) },
+        });
+
+      const withCaveat = render('1 containment proposal(s) did not reach the approval queue.');
+      expect(
+        withCaveat.startsWith(
+          '**Before you close:** 1 containment proposal(s) did not reach the approval queue.\n\nEndpoint analysis is done with this Investigation.'
+        )
+      ).toBe(true);
+      expect(withCaveat).toContain('**Dismiss** keeps everything open.');
+      expect(render().startsWith('Endpoint analysis is done with this Investigation.')).toBe(true);
+      expect(render('')).toBe(render());
     });
 
     // An approval can reach at most the alerts the attack lists: one another open
@@ -465,7 +489,7 @@ describe('Forensics close investigation gate', () => {
       expect(evaluate(decision.expired, approved)).toBe(false);
     });
 
-    it('journals each outcome, naming the analyst and what the Investigation does next', () => {
+    it('journals each outcome and what the Investigation does next', () => {
       const message = String((outcome?.with?.inputs as { message?: string })?.message);
       const render = (
         resolved: Record<string, boolean>,
@@ -485,10 +509,10 @@ describe('Forensics close investigation gate', () => {
       expect(
         render({ approved: true }, { decidedBy: { username: 'ana' } }, 'Ransomware staged.')
       ).toBe(
-        'ana approved closing this Investigation. Endpoint analysis assessed it as `resolved`: Ransomware staged.'
+        'Approved closing this Investigation. Endpoint analysis assessed it as `resolved`: Ransomware staged.'
       );
       expect(render({ approved: true }, { decidedBy: { username: 'ana' } })).toBe(
-        'ana approved closing this Investigation. Endpoint analysis assessed it as `resolved`.'
+        'Approved closing this Investigation. Endpoint analysis assessed it as `resolved`.'
       );
       expect(
         liquid.parseAndRenderSync(message, {
@@ -505,7 +529,7 @@ describe('Forensics close investigation gate', () => {
           },
         })
       ).toBe(
-        'ana approved closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident: Scheduled backup tooling.'
+        'Approved closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident: Scheduled backup tooling.'
       );
       expect(
         render(
@@ -517,16 +541,36 @@ describe('Forensics close investigation gate', () => {
           }
         )
       ).toBe(
-        'ana chose to keep this Investigation open (risk_accepted): Known tooling. Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.'
+        'Chose to keep this Investigation open (risk_accepted): Known tooling. Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.'
       );
       expect(render({ dismissed: true })).toBe(
-        'An analyst chose to keep this Investigation open (no reason given). Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.'
+        'Chose to keep this Investigation open (no reason given). Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.'
       );
       expect(render({ expired: true }, undefined, undefined, 'expired')).toBe(
         'The Close Investigation proposal expired with no decision. The Investigation stays open.'
       );
       expect(render({}, undefined, undefined, 'failed')).toBe(
         'The Close Investigation proposal ended as `failed`. The Investigation stays open.'
+      );
+    });
+
+    // On serverless an API key can be the decider, and its username is not readable. The proposal
+    // card already shows who decided, so the journal note does not repeat it.
+    it('does not name the decider, even when decidedBy is present', () => {
+      const message = String((outcome?.with?.inputs as { message?: string })?.message);
+      const username = 'kcoM-oC2SUmTy-Gcu7F5zw';
+      const note = liquid.parseAndRenderSync(message, {
+        inputs,
+        steps: {
+          resolve_decision: { output: { approved: true } },
+          read_proposal_decision: { output: { decidedBy: { username } } },
+          create_and_gate_proposal: { output: { status: 'succeeded' } },
+        },
+      });
+
+      expect(note).not.toContain(username);
+      expect(note).toBe(
+        'Approved closing this Investigation. Endpoint analysis assessed it as `resolved`.'
       );
     });
 

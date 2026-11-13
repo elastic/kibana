@@ -29,12 +29,14 @@ export interface TelemetryPluginUsageCollectorOptions {
   currentKibanaVersion: string;
   config$: Observable<TelemetryConfigType>;
   getSavedObjectsClient: () => ISavedObjectsRepository | undefined;
+  getIsOptedInFromFeatureFlag: () => boolean | undefined;
 }
 
 export function createCollectorFetch({
   currentKibanaVersion,
   config$,
   getSavedObjectsClient,
+  getIsOptedInFromFeatureFlag,
 }: TelemetryPluginUsageCollectorOptions) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
     const {
@@ -61,6 +63,7 @@ export function createCollectorFetch({
         telemetrySavedObject,
         allowChangingOptInStatus,
         configTelemetryOptIn,
+        isOptedInFromFeatureFlag: getIsOptedInFromFeatureFlag(),
       }),
       last_reported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
       usage_fetcher: getTelemetrySendUsageFrom({

@@ -13,11 +13,6 @@ import { WorkflowYamlPreview } from './workflow_yaml_preview';
 import { WorkflowsUiServicesProvider } from '../../../context';
 import { createMockWorkflowsUiServices } from '../../../context/__mocks__/mocks';
 
-jest.mock('../../../hooks/use_workflows_monaco_theme', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
-
 const mockGetTypeIconDataUrl = jest.fn(
   async (_params: { type: string; kind: string }) => 'data:image/svg+xml;base64,AAA'
 );

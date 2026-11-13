@@ -6,15 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
@@ -24,10 +16,16 @@ import { FieldControl } from '../field_control';
 import { toControlId } from '../field_helpers';
 import { FieldList } from '../field_list';
 import { useDefinitionFormContext } from '../form_context';
-import { allowsItemTelemetry, createInitialItem, ITEM_TELEMETRY_KEY } from '../serialize';
+import {
+  allowsItemTelemetry,
+  createInitialItem,
+  ITEM_TELEMETRY_KEY,
+  readItemScope,
+} from '../serialize';
 import { useRowKeys } from '../use_row_keys';
-import { isObjectValue, joinPointer, type FormValue } from '../values';
+import { isObjectValue, joinPointer, type FormValue, type ObjectValue } from '../values';
 import { RemoveButton } from './remove_button';
+import { SignalPicker } from './signal_picker';
 
 /** Cap for arrays whose catalogue definition sets no `max_items`. */
 const DEFAULT_MAX_ARRAY_ITEMS = 5;
@@ -39,38 +37,27 @@ const removeItemLabel = i18n.translate('xpack.streams.componentDefinitionForm.ar
 function ItemTelemetry({
   value,
   onChange,
+  pointer,
 }: {
   value: FormValue | undefined;
   onChange: (value: FormValue | undefined) => void;
+  pointer: string;
 }) {
-  const { telemetry } = useDefinitionFormContext();
-  const selected = (Array.isArray(value) ? value : []).flatMap((signal) =>
-    typeof signal === 'string' ? [{ label: signal }] : []
-  );
-  const label = i18n.translate('xpack.streams.componentDefinitionForm.array.itemTelemetry', {
-    defaultMessage: 'Applies to',
-  });
+  const { telemetry, errors } = useDefinitionFormContext();
   return (
-    <EuiFormRow
-      fullWidth
-      label={label}
+    <SignalPicker
+      label={i18n.translate('xpack.streams.componentDefinitionForm.array.itemTelemetry', {
+        defaultMessage: 'Applies to',
+      })}
       helpText={i18n.translate('xpack.streams.componentDefinitionForm.array.itemTelemetryHelp', {
         defaultMessage: 'Leave empty to apply to every signal.',
       })}
-    >
-      <EuiComboBox
-        compressed
-        fullWidth
-        aria-label={label}
-        options={telemetry.map((signal) => ({ label: signal }))}
-        selectedOptions={selected}
-        onChange={(next) => {
-          const signals = next.map(({ label: signal }) => signal);
-          onChange(signals.length > 0 ? signals : undefined);
-        }}
-        data-test-subj="componentDefinitionFormItemTelemetry"
-      />
-    </EuiFormRow>
+      options={telemetry}
+      selected={readItemScope(value)}
+      error={errors[pointer]}
+      onChange={(signals) => onChange(signals.length > 0 ? signals : undefined)}
+      dataTestSubj="componentDefinitionFormItemTelemetry"
+    />
   );
 }
 
@@ -89,7 +76,11 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
   const canRemove = items.length > (field.min_items ?? 0);
   const maxItems = field.max_items ?? DEFAULT_MAX_ARRAY_ITEMS;
   const canAdd = items.length < maxItems;
-  const showItemTelemetry = allowsItemTelemetry(field) && context.telemetry.length > 1;
+  // An item that already has a scope keeps its picker, so a scope the processor's signals no
+  // longer cover can still be fixed.
+  const showItemTelemetry = (item: ObjectValue) =>
+    allowsItemTelemetry(field) &&
+    (context.telemetry.length > 1 || readItemScope(item[ITEM_TELEMETRY_KEY]).length > 0);
 
   const setItem = (index: number, item: FormValue | undefined) =>
     onChange(items.map((current, position) => (position === index ? item ?? '' : current)));
@@ -156,8 +147,9 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
                               onChange={(next) => setItem(index, next)}
                               pointer={itemPointer}
                             />
-                            {showItemTelemetry ? (
+                            {showItemTelemetry(objectItem) ? (
                               <ItemTelemetry
+                                pointer={joinPointer(itemPointer, ITEM_TELEMETRY_KEY)}
                                 value={objectItem[ITEM_TELEMETRY_KEY]}
                                 onChange={(signals) => {
                                   const rest = omit(objectItem, ITEM_TELEMETRY_KEY);

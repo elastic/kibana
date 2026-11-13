@@ -12,7 +12,8 @@ import React from 'react';
 import type { EuiBadgeProps, UseEuiTheme } from '@elastic/eui';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getLogLevelCoalescedValue, getLogLevelColor } from '../utils';
+import { getLogLevelCoalescedValue } from '../utils';
+import { getLogLevelColor } from '../utils/get_log_level_color';
 
 const badgeCss = ({ euiTheme }: UseEuiTheme) => css`
   max-width: calc(${euiTheme.size.base} * 7.5);

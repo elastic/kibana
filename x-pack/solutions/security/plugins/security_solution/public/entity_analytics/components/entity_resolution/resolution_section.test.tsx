@@ -14,9 +14,6 @@ import { RESOLUTION_SECTION_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './te
 import { useResolutionGroup } from './hooks/use_resolution_group';
 
 jest.mock('./hooks/use_resolution_group');
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
-}));
 
 const mockUseResolutionGroup = useResolutionGroup as jest.Mock;
 

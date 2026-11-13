@@ -10,7 +10,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
@@ -168,22 +168,18 @@ describe('RulesClient', () => {
       },
     };
 
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-
     return new RulesClient(
       clientRequest,
       rulesSavedObjectService,
       taskManager,
       userService,
       'space-1',
-      pluginConfigAccessor,
+      createConfigServiceMock(config),
       rulesSavedObjectService,
       ruleEventPublisher,
       loggerService,
       artifactTypeRegistry,
-      'user',
-      rulesClientOptions
+      { actor: 'user', options: rulesClientOptions }
     );
   }
 
@@ -3317,10 +3313,17 @@ describe('RulesClient', () => {
 
       // Rotation updates the existing task in place (preserving its schedule
       // interval) and regenerates the key while invalidating the old one.
+      // `includeRunningTasks` keeps the rotation independent of the rule's run
+      // cadence: a task that is mid-run rotates instead of being skipped.
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['task:fallback'],
         { interval: '5m' },
-        expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
+        expect.objectContaining({
+          request,
+          regenerateApiKey: true,
+          cloneApiKey: true,
+          includeRunningTasks: true,
+        })
       );
 
       // Only audit metadata is stamped — no rule state is changed.
@@ -3351,6 +3354,8 @@ describe('RulesClient', () => {
           }),
         ]
       );
+      const [, [rotated]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
+      expect(rotated.prevRule).toEqual(expect.objectContaining({ id: 'rule-1' }));
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });
@@ -3414,8 +3419,10 @@ describe('RulesClient', () => {
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
         { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
       ]);
-      // A running task is skipped by bulkUpdateSchedules — absent from both
-      // `tasks` and `errors`. Its real status is then observed via bulkGet.
+      // `includeRunningTasks` means a mid-run task is normally rotated, but it can
+      // still be skipped if it moved into `running` after the update read it.
+      // A skipped task is absent from both `tasks` and `errors`, so its real
+      // status is then observed via bulkGet.
       taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([]));
       taskManager.bulkGet.mockResolvedValueOnce(
         taskStatusResult([{ id: 'task:fallback', status: 'running' }])
@@ -4413,8 +4420,32 @@ describe('RulesClient', () => {
             }),
           ]
         );
+        const [, [emitted]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
+        expect(emitted.prevRule).toEqual(expect.objectContaining({ version: 4 }));
         const { attrs: savedAttrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(savedAttrs.version).toBe(5);
+      });
+
+      it('emits the pre-update rule on a name and schedule PATCH', async () => {
+        const client = createClient();
+        mockGetExistingRule('rule-id-wf-fields');
+
+        await client.updateRule({
+          id: 'rule-id-wf-fields',
+          data: { metadata: { name: 'renamed' }, schedule: { every: '5m' } },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(
+          { request, origin: { actor: 'user', channel: 'api' } },
+          [
+            expect.objectContaining({
+              ruleId: 'rule-id-wf-fields',
+              prevRule: expect.objectContaining({
+                metadata: expect.objectContaining({ name: 'rule-1' }),
+              }),
+            }),
+          ]
+        );
       });
 
       it('emits only ruleUpdated for a content update on a disabled rule (no lifecycle event via the update path)', async () => {

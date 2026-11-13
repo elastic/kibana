@@ -92,6 +92,7 @@ export class ToolsService {
         savedObjects,
         topSnippetsDefaults: config.topSnippets,
       },
+      logger,
     });
 
     // Compute the set of tool types that have health tracking enabled

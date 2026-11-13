@@ -211,10 +211,6 @@ export interface EntityFlyoutApi {
  * `useOpenFlyout`) and the per-flyout properties so call sites don't repeat them. `useOpenFlyout`
  * also reports open/close telemetry for every method below.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useEntityFlyoutApi = (): EntityFlyoutApi => {
@@ -688,13 +684,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Entity tool flyouts.
   const openEntityRiskInputs = useCallback(
     ({ title, origin, ...props }: OpenEntityRiskInputsParams) => {
-      const { entityType, entityName, entityId, subTab } = props;
+      const { entityType, entityName, entityId, subTab, scopeId } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
         entityType: entityType as string,
         entityName,
         entityId,
         ...(subTab ? { subTab } : {}),
+        scopeId,
       });
       // Entity tools open session:'start' (roots): the entity main is not persisted alongside the
       // tool, so closing the tool clears the param rather than reverting to the entity.

@@ -40,6 +40,7 @@ plugins:
     - discoverCustomizationExamples
     - discoveries
     - embeddable_alerts_table
+    - entity_inventory
     - entity_store
     - error_boundary_example
     - esql_views
@@ -89,6 +90,7 @@ plugins:
     - saved_objects_management
     - saved_objects_tagging
     - searchExamples
+    - search_boost
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
@@ -104,6 +106,7 @@ plugins:
     - snapshot_restore
     - spaces
     - stack_connectors
+    - stateContainersExamples
     - streams
     - streams_app
     - subscription_status
@@ -119,13 +122,13 @@ plugins:
     - vegaSandboxExample
     - vis_types/timeseries
     - vis_types/vega
+    - visualizations
     - watcher
     - workflows_extensions
     - workflows_management
     - workflowsExtensionsExample
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
-    - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
 packages:
   enabled:
@@ -146,8 +149,8 @@ excluded_configs:
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
-  - x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts
-  - x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts
+  - x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts
+  - x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/playwright.config.ts
   - x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/playwright.config.ts
   - x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts

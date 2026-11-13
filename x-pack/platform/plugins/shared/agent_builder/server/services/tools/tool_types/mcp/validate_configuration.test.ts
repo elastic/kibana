@@ -130,6 +130,14 @@ describe('MCP validate_configuration', () => {
   });
 
   describe('validateToolName', () => {
+    beforeEach(() => {
+      mockActionsClient.get.mockResolvedValue({
+        id: 'test-connector-id',
+        actionTypeId: MCP_CONNECTOR_TYPE_ID,
+        name: 'My MCP Connector',
+      });
+    });
+
     it('should pass validation when tool exists on connector', async () => {
       mockActionsClient.execute.mockResolvedValue({
         status: 'ok',
@@ -152,6 +160,29 @@ describe('MCP validate_configuration', () => {
           subActionParams: {},
         },
       });
+    });
+
+    it('should throw error without listing tools when the connector is not an MCP connector', async () => {
+      mockActionsClient.get.mockResolvedValue({
+        id: 'test-connector-id',
+        actionTypeId: '.pagerduty_mcp',
+        name: 'PagerDuty',
+      });
+
+      await expect(
+        validateToolName({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+          toolName: 'tool_two',
+        })
+      ).rejects.toThrow();
+
+      expect(mockCreateBadRequestError).toHaveBeenCalledWith(
+        `Unable to verify tool 'tool_two' on connector 'test-connector-id'. ` +
+          `Ensure the connector has successfully connected to the MCP server.`
+      );
+      expect(mockActionsClient.execute).not.toHaveBeenCalled();
     });
 
     it('should throw error when tool is not found on connector', async () => {

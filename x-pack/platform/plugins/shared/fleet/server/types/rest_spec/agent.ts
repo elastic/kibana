@@ -11,7 +11,12 @@ import semverIsValid from 'semver/functions/valid';
 
 import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
 
-import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
+import {
+  SO_SEARCH_LIMIT,
+  AGENTS_PREFIX,
+  AGENT_MAPPINGS,
+  FLEET_SCHEMA_NAME_MAX_LENGTH,
+} from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
 
@@ -77,7 +82,8 @@ export const GetAgentsRequestSchema = {
         meta: { description: 'Number of results per page' },
       }),
       kuery: schema.maybe(
-        schema.string({
+        schema.searchFilter.warn({
+          label: 'fleet.agents.kuery',
           meta: { description: 'A KQL query string to filter results' },
           validate: (value: string) => {
             const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
@@ -99,6 +105,10 @@ export const GetAgentsRequestSchema = {
         defaultValue: false,
         meta: { description: 'When true, include CPU and memory metrics in the response' },
       }),
+      withPendingRestart: schema.boolean({
+        defaultValue: false,
+        meta: { description: 'When true, include the pending restart action of each agent' },
+      }),
       showUpgradeable: schema.boolean({
         defaultValue: false,
         meta: { description: 'When true, only return agents that are upgradeable' },
@@ -107,7 +117,12 @@ export const GetAgentsRequestSchema = {
         defaultValue: false,
         meta: { description: 'When true, return a summary of agent statuses in the response' },
       }),
-      sortField: schema.maybe(schema.string({ meta: { description: 'Field to sort results by' } })),
+      sortField: schema.maybe(
+        schema.querySortField.warn({
+          label: 'fleet.agents.sortField',
+          meta: { description: 'Field to sort results by' },
+        })
+      ),
       sortOrder: schema.maybe(
         schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
           meta: { description: 'Sort order, ascending or descending' },
@@ -187,7 +202,16 @@ export const MigrateOptionsSchema = {
   proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxy_url: schema.maybe(schema.string()),
   staging: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  tags: schema.maybe(
+    schema.arrayOf(
+      schema.displayName.warn({
+        minLength: 0,
+        maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+        label: 'fleet.agents.migrate.tags',
+      }),
+      { maxSize: 10 }
+    )
+  ),
   replace_token: schema.maybe(schema.string()),
 };
 
@@ -203,7 +227,16 @@ export const BulkMigrateOptionsSchema = {
   proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxy_url: schema.maybe(schema.string()),
   staging: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  tags: schema.maybe(
+    schema.arrayOf(
+      schema.displayName.warn({
+        minLength: 0,
+        maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+        label: 'fleet.agents.bulk_migrate.tags',
+      }),
+      { maxSize: 10 }
+    )
+  ),
 };
 
 export const AgentComponentStateSchema = schema.oneOf([
@@ -288,6 +321,13 @@ export const AgentResponseSchema = schema.object({
       memory_size_byte_avg: schema.maybe(schema.number()),
     })
   ),
+  pending_restart: schema.maybe(
+    schema.object({
+      action_id: schema.string(),
+      created_at: schema.string(),
+      expiration: schema.maybe(schema.string()),
+    })
+  ),
   type: schema.oneOf([
     schema.literal('PERMANENT'),
     schema.literal('EPHEMERAL'),
@@ -298,6 +338,7 @@ export const AgentResponseSchema = schema.object({
   enrolled_at: schema.string(),
   unenrolled_at: schema.maybe(schema.string()),
   unenrollment_started_at: schema.maybe(schema.string()),
+  unenrolled_reason: schema.maybe(schema.string()),
   audit_unenrolled_reason: schema.maybe(schema.string()),
   upgraded_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   upgrade_started_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
@@ -431,19 +472,29 @@ export const GetAgentResponseSchema = schema.object({
 
 export const GetOneAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.get_one_agent.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   query: schema.object({
     withMetrics: schema.boolean({
       defaultValue: false,
       meta: { description: 'When true, include CPU and memory metrics in the response' },
     }),
+    withPendingRestart: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, include the pending restart action of the agent' },
+    }),
   }),
 };
 
 export const GetAgentEffectiveConfigRequestSchema = {
   params: schema.object({
-    agentId: schema.string({
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.get_agent_effective_config.agentId',
       meta: { description: 'The agent ID to get effective config of' },
     }),
   }),
@@ -458,7 +509,11 @@ export const PostNewAgentActionRequestSchema = {
     action: NewAgentActionSchema,
   }),
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_new_agent_action.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
 };
 
@@ -483,13 +538,23 @@ export const PostNewAgentActionResponseSchema = schema.object({
 
 export const PostCancelActionRequestSchema = {
   params: schema.object({
-    actionId: schema.string({ meta: { description: 'The ID of the action to cancel' } }),
+    actionId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_cancel_action.actionId',
+      meta: { description: 'The ID of the action to cancel' },
+    }),
   }),
 };
 
 export const PostRetrieveAgentsByActionsRequestSchema = {
   body: schema.object({
-    actionIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+    actionIds: schema.arrayOf(
+      schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.agents.retrieve_agents_by_actions.actionIds',
+      }),
+      { maxSize: 1000 }
+    ),
   }),
 };
 
@@ -499,7 +564,11 @@ export const PostRetrieveAgentsByActionsResponseSchema = schema.object({
 
 export const PostAgentUnenrollRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_unenroll.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.nullable(
     schema.object({
@@ -559,7 +628,11 @@ export const PostBulkAgentUnenrollRequestSchema = {
 
 export const PostRemoveCollectorRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The collector agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_remove_collector.agentId',
+      meta: { description: 'The collector agent ID' },
+    }),
   }),
 };
 
@@ -588,7 +661,11 @@ function validateVersion(s: string) {
 
 export const PostAgentUpgradeRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_upgrade.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.object({
     source_uri: schema.maybe(schema.string()),
@@ -625,16 +702,27 @@ export const PostBulkAgentUpgradeRequestSchema = {
 
 export const PostAgentReassignRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_reassign.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.object({
-    policy_id: schema.string(),
+    policy_id: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_reassign.policy_id',
+    }),
   }),
 };
 
 export const PostRequestDiagnosticsActionRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_request_diagnostics_action.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.nullable(
     schema.object({
@@ -662,7 +750,11 @@ export const PostBulkRequestDiagnosticsActionRequestSchema = {
 
 export const ListAgentUploadsRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.list_agent_uploads.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
 };
 
@@ -690,14 +782,22 @@ export const ListAgentUploadsResponseSchema = schema.object({
 
 export const GetAgentUploadFileRequestSchema = {
   params: schema.object({
-    fileId: schema.string({ meta: { description: 'The ID of the uploaded file' } }),
+    fileId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.get_agent_upload_file.fileId',
+      meta: { description: 'The ID of the uploaded file' },
+    }),
     fileName: schema.string({ meta: { description: 'The name of the uploaded file' } }),
   }),
 };
 
 export const DeleteAgentUploadFileRequestSchema = {
   params: schema.object({
-    fileId: schema.string({ meta: { description: 'The ID of the uploaded file' } }),
+    fileId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.delete_agent_upload_file.fileId',
+      meta: { description: 'The ID of the uploaded file' },
+    }),
   }),
 };
 
@@ -708,7 +808,10 @@ export const DeleteAgentUploadFileResponseSchema = schema.object({
 
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
-    policy_id: schema.string(),
+    policy_id: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_bulk_agent_reassign.policy_id',
+    }),
     agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
@@ -718,7 +821,11 @@ export const PostBulkAgentReassignRequestSchema = {
 
 export const DeleteAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.delete_agent.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
 };
 
@@ -728,17 +835,34 @@ export const DeleteAgentResponseSchema = schema.object({
 
 export const UpdateAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.update_agent.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.object({
     user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+    tags: schema.maybe(
+      schema.arrayOf(
+        schema.displayName.warn({
+          minLength: 0,
+          maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+          label: 'fleet.agents.update_agent.tags',
+        }),
+        { maxSize: 10 }
+      )
+    ),
   }),
 };
 
 export const MigrateSingleAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.migrate_single_agent.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.object({
     uri: schema.uri(),
@@ -767,8 +891,26 @@ export const BulkMigrateAgentsResponseSchema = schema.oneOf([ActionIdSchema, Dry
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
     agents: bulkAgentsSchema(),
-    tagsToAdd: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-    tagsToRemove: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+    tagsToAdd: schema.maybe(
+      schema.arrayOf(
+        schema.displayName.warn({
+          minLength: 0,
+          maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+          label: 'fleet.agents.bulk_update_agent_tags.tagsToAdd',
+        }),
+        { maxSize: 10 }
+      )
+    ),
+    tagsToRemove: schema.maybe(
+      schema.arrayOf(
+        schema.displayName.warn({
+          minLength: 0,
+          maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+          label: 'fleet.agents.bulk_update_agent_tags.tagsToRemove',
+        }),
+        { maxSize: 10 }
+      )
+    ),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
     dryRun: schema.maybe(schema.boolean()),
@@ -779,14 +921,30 @@ export const PostBulkActionResponseSchema = schema.oneOf([ActionIdSchema, DryRun
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
-    policyId: schema.maybe(schema.string({ meta: { description: 'Filter by agent policy ID' } })),
-    policyIds: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 1000 }), schema.string()], {
-        meta: { description: 'Filter by one or more agent policy IDs' },
+    policyId: schema.maybe(
+      schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.agent_status.policyId',
+        meta: { description: 'Filter by agent policy ID' },
       })
     ),
+    policyIds: schema.maybe(
+      schema.oneOf(
+        [
+          schema.arrayOf(
+            schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_status.policyIds' }),
+            { maxSize: 1000 }
+          ),
+          schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_status.policyIds' }),
+        ],
+        {
+          meta: { description: 'Filter by one or more agent policy IDs' },
+        }
+      )
+    ),
     kuery: schema.maybe(
-      schema.string({
+      schema.searchFilter.warn({
+        label: 'fleet.agent_status.kuery',
         meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
@@ -819,13 +977,26 @@ export const GetAgentStatusResponseSchema = schema.object({
 export const GetAgentDataRequestSchema = {
   query: schema.object({
     agentsIds: schema.oneOf(
-      [schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()],
+      [
+        schema.arrayOf(
+          schema.savedObjectId.warn({
+            minLength: 0,
+            label: 'fleet.agents.get_agent_data.agentsIds',
+          }),
+          { maxSize: 10000 }
+        ),
+        schema.string(),
+      ],
       {
         meta: { description: 'Agent IDs to check data for, as an array or comma-separated string' },
       }
     ),
     pkgName: schema.maybe(
-      schema.string({ meta: { description: 'Filter by integration package name' } })
+      schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.agents.get_agent_data.pkgName',
+        meta: { description: 'Filter by integration package name' },
+      })
     ),
     pkgVersion: schema.maybe(
       schema.string({ meta: { description: 'Filter by integration package version' } })
@@ -1007,7 +1178,9 @@ export const GetAvailableAgentVersionsResponseSchema = schema.object({
 
 export const ChangeAgentPrivilegeLevelRequestSchema = {
   params: schema.object({
-    agentId: schema.string({
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.change_agent_privilege_level.agentId',
       meta: { description: 'The agent ID to change privilege level for' },
     }),
   }),
@@ -1048,7 +1221,9 @@ export const BulkChangeAgentsPrivilegeLevelResponseSchema = schema.oneOf([
 
 export const PostAgentRollbackRequestSchema = {
   params: schema.object({
-    agentId: schema.string({
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_rollback.agentId',
       meta: { description: 'The agent ID to rollback' },
     }),
   }),
@@ -1072,6 +1247,17 @@ export const PostAgentRestartRequestSchema = {
       meta: { description: 'The agent ID to restart' },
     }),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.maybe(
+        schema.boolean({
+          meta: {
+            description: 'Restart the agent even if it already has a pending restart action.',
+          },
+        })
+      ),
+    })
+  ),
 };
 
 export const PostAgentRestartResponseSchema = ActionIdOrMessageSchema;
@@ -1081,6 +1267,13 @@ export const PostBulkAgentRestartRequestSchema = {
     agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number({ min: 1 })),
     includeInactive: schema.boolean({ defaultValue: false }),
+    force: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Restart agents even if they already have a pending restart action.',
+        },
+      })
+    ),
   }),
 };
 

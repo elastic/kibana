@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        ...findTestPluginPaths(resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths(resolve(__dirname, '../../test_plugins/usage_collection')),
       ],
     },
 

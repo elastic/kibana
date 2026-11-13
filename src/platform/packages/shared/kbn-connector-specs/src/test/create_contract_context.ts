@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { generateKeyPairSync } from 'crypto';
+import { generateKeyPairSync, webcrypto } from 'crypto';
 import { Readable } from 'stream';
 import axios from 'axios';
 import type { Emulator, EmulatorOptions } from '@kbn/connector-emulate';
-import { createEmulatorFetch } from '@kbn/connector-emulate';
+import { createEmulatorFetch, issueAccessToken } from '@kbn/connector-emulate';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
 import { authTypeSpecs } from '../../server';
@@ -22,10 +22,6 @@ import type {
   NormalizedAuthType,
 } from '../connector_spec';
 import { getSchemaForAuthType } from '../lib';
-
-// The mock accepts any credential, so OAuth auth types get a fixed token. Like the actions
-// plugin's getToken, it includes the token type, as auth types use it as the header value.
-const ACCESS_TOKEN = 'Bearer contract-mock-access-token';
 
 export interface ContractContextOptions extends EmulatorOptions {
   readonly connector: ConnectorSpec;
@@ -65,6 +61,18 @@ const samplePrivateKey = (): string => {
   return privateKey;
 };
 
+const sampleServiceAccountJson = (): string =>
+  JSON.stringify({
+    type: 'service_account',
+    project_id: 'contract-mock',
+    private_key_id: 'contract-mock',
+    private_key: samplePrivateKey(),
+    client_email: 'contract-mock@contract-mock.iam.gserviceaccount.com',
+    client_id: 'contract-mock',
+    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: 'https://oauth2.googleapis.com/token',
+  });
+
 const FORM_BOUNDARY = 'contract-mock-boundary';
 
 // The http adapter sends FormData as multipart; axios' fetch adapter would label it
@@ -91,6 +99,7 @@ const toMultipart = async (form: FormData): Promise<Buffer> => {
 
 // Secrets whose schema takes any string, but that auth types decode.
 const DECODED_PLACEHOLDERS: Readonly<Record<string, () => string>> = {
+  serviceAccountJson: sampleServiceAccountJson,
   accountKey: () => Buffer.from('contract-mock-accountKey').toString('base64'),
 };
 
@@ -114,6 +123,11 @@ const toSecrets = (
     const fallback = field.safeParse(undefined);
     if (fallback.success && fallback.data !== undefined) {
       secrets[key] = fallback.data;
+      continue;
+    }
+    // A sampled scope would be scope checked, though nobody configured it; left out, the auth
+    // type requests its own default, as it would in Kibana.
+    if (key === 'scope' && fallback.success) {
       continue;
     }
     const options = field instanceof z.ZodEnum ? field.options : [];
@@ -140,12 +154,46 @@ const silentLogger: Logger = {
   get: () => silentLogger,
 };
 
-const createAuthContext = (): AuthContext => ({
+const createAuthContext = (mockFetch: typeof fetch): AuthContext => ({
   getCustomHostSettings: () => undefined,
-  getToken: async () => ACCESS_TOKEN,
+  // A token the mock issued for the requested scopes, so it can check them. Like the actions
+  // plugin's getToken, it includes the token type, as auth types use it as the header value.
+  getToken: async ({ scope }) => `Bearer ${issueAccessToken(scope)}`,
   logger: silentLogger,
   sslSettings: {},
+  fetchTestOnly: mockFetch,
 });
+
+// Auth types sign with Web Crypto, which jest environments leave out.
+const ensureWebCrypto = () => {
+  if (!globalThis.crypto?.subtle) {
+    Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true });
+  }
+};
+
+let guards = 0;
+let globalFetch: typeof fetch | undefined;
+
+/**
+ * Runs `run` with the global `fetch` failing, so code that should use the context's `fetch`
+ * can't reach the network unnoticed.
+ */
+const withoutGlobalFetch = async <T>(run: () => Promise<T>): Promise<T> => {
+  if (guards++ === 0) {
+    globalFetch = globalThis.fetch;
+    globalThis.fetch = async (input) => {
+      const url = input instanceof Request ? input.url : String(input);
+      throw new Error(`${url} was requested with the global fetch, bypassing the contract mock`);
+    };
+  }
+  try {
+    return await run();
+  } finally {
+    if (--guards === 0 && globalFetch) {
+      globalThis.fetch = globalFetch;
+    }
+  }
+};
 
 /**
  * Builds an action context whose client is answered in-process by the contract mock: a real
@@ -197,7 +245,10 @@ export const createContractContext = async ({
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
-  await findAuthType(id).configure(createAuthContext(), client, authSecrets);
+  ensureWebCrypto();
+  await withoutGlobalFetch(() =>
+    findAuthType(id).configure(createAuthContext(mock.fetch), client, authSecrets)
+  );
 
   const ctx: ActionContext = {
     client,
@@ -207,6 +258,7 @@ export const createContractContext = async ({
     getClient: async (clientType) => {
       throw new Error(`Client ${String(clientType)} is not available in contract tests`);
     },
+    fetchTestOnly: mock.fetch,
   };
 
   const runAction = async (name: string, input: unknown): Promise<unknown> => {
@@ -215,7 +267,7 @@ export const createContractContext = async ({
       throw new Error(`${connector.metadata.id} has no action ${name}`);
     }
     const parsed = await action.input.parseAsync(input);
-    return action.handler(ctx, parsed);
+    return withoutGlobalFetch(() => action.handler(ctx, parsed));
   };
 
   return { ctx, mock, runAction };
