@@ -24,13 +24,13 @@ import { createInvestigationTimelineAttachmentType } from './investigation_timel
 import { createSiemReadinessAttachmentType } from './siem_readiness';
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
 import { createRuleMigrationItemsAttachmentType } from './rule_migration_items';
-import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
  * Registers all security agent builder attachments with the agentBuilder plugin.
  *
  * The `security.rule.preview` attachment is gated behind
- * `experimentalFeatures.rulePreviewAttachmentEnabled` so it stays dark until explicitly enabled
+ * `experimentalFeatures.rulePreviewAttachmentEnabled` and the SIEM Readiness attachment behind
+ * `experimentalFeatures.siemReadinessAgentBuilder` so they stay dark until explicitly enabled
  * per environment.
  */
 export const registerAttachments = async (
@@ -64,7 +64,7 @@ export const registerAttachments = async (
     agentBuilder.attachments.registerType(createInvestigationIocsAttachmentType());
   }
   agentBuilder.attachments.registerType(createRuleAttachmentType(core, logger));
-  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+  if (experimentalFeatures.siemReadinessAgentBuilder) {
     agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
   }
 

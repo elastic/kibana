@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ScoutServerConfig } from '../../../../../types';
+import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+
+/**
+ * Custom Scout stateful server configuration for SIEM Readiness evals.
+ * Enables the `siemReadinessAgentBuilder` experimental flag in Security
+ * Solution, which is what registers the `siem-readiness` skill, its four
+ * `security.siem_readiness.*` tools and its attachment.
+ *
+ * The `agentBuilder:experimentalFeatures` UI setting is deliberately NOT set
+ * here: the suite enables it in beforeAll via the uiSettings API and unsets it
+ * in afterAll, and a value covered by `--uiSettings.overrides.*` is read-only,
+ * which makes that setup call fail with HTTP 400.
+ *
+ * Without this set the suite runs against a tree where the capability is dark
+ * (the flag defaults to off and is not exposed as an Advanced Setting), so every
+ * criterion that names the skill or its tools is unscoreable.
+ *
+ * Usage:
+ *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_siem_readiness
+ */
+export const servers: ScoutServerConfig = {
+  ...evalsTracingConfig,
+  kbnTestServer: {
+    ...evalsTracingConfig.kbnTestServer,
+    serverArgs: [
+      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        'siemReadinessAgentBuilder',
+      ])}`,
+    ],
+  },
+};
