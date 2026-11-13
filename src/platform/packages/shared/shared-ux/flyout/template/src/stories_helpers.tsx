@@ -298,6 +298,7 @@ export const headerZone = (
     }
     {...buildTitleIconProps(args)}
     isLoading={args.titleIsLoading}
+    loadingLabel="Loading details"
     description={args.description ? HEADER_DESCRIPTION : undefined}
     {...headerProps}
   >
