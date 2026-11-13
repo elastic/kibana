@@ -365,7 +365,7 @@ export const CONFIDENCE_CONTRACT_RULE = dedent`
     - that it agrees with itself and with the knowledge-base topology where both speak: signals disagree when one shows the operation healthy while another shows it failing, or when they name different failing places for the same operation; different failures on connected paths are not a disagreement, and an edge the evidence does not show is context;
     - where it fails (a service, operation or scope).
     With every check shown the score is near the top of the range. Each check not shown lowers it by how far it weakens support for the symptom.
-    These never lower the score: anything that was not measured (a reach, outcome or rate, or a check whose query failed); a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
+    These never lower the score: a figure that was not measured about a failure the evidence does show (a reach, outcome or rate, including one whose query failed); a cause that is not established; a service or dependency the knowledge base does not cover; an empty blast_radius (unknown, not none).
     The score never reflects how strong or unusual the detection was.
   `;
 

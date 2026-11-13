@@ -404,7 +404,7 @@ Reading `breakdown`:
 - The rows are the top groups, not all of them: say so when the result has as many rows as its limit.
 - Name the field ("by `service.name`"), then the top 3 groups that matter: each value in backticks
   (as the returned-text bullet allows) with the whole percent of its own lines that fail, in log
-  lines, never requests ("`{value}` 91% of its lines"), and "and N others" for the rest. The share shows
+  lines, never the operation's attempts ("`{value}` 91% of its lines"), and "and N others" for the rest. The share shows
   how concentrated the failure is in a value: near zero is background. Give no first or last time
   per group, and do not infer group presence from the `baseline` onset.
 
