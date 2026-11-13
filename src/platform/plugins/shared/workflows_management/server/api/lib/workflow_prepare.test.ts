@@ -14,6 +14,7 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
+  keepEnabledUnlessDeclared,
   prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
@@ -400,6 +401,49 @@ describe('applyYamlUpdate', () => {
     });
 
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+});
+
+describe('keepEnabledUnlessDeclared', () => {
+  const zodSchema = getWorkflowZodSchema({});
+  const workflowYaml = (enabledLine?: string) =>
+    [
+      'version: "1"',
+      'name: Alert context',
+      ...(enabledLine ? [enabledLine] : []),
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: log',
+      '    type: console',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+  const prepare = async (yaml: string, enabled: boolean) =>
+    keepEnabledUnlessDeclared(
+      yaml,
+      await applyYamlUpdate({ workflowYaml: yaml, zodSchema, triggerDefinitions: [] }),
+      enabled
+    );
+
+  it('keeps the current enabled state when the YAML does not set one', async () => {
+    const patch = await prepare(workflowYaml(), false);
+
+    expect(patch.enabled).toBe(false);
+    expect(patch.definition?.enabled).toBe(false);
+  });
+
+  it('uses the enabled state the YAML declares', async () => {
+    const patch = await prepare(workflowYaml('enabled: true'), false);
+
+    expect(patch.enabled).toBe(true);
+    expect(patch.definition?.enabled).toBe(true);
+  });
+
+  it('leaves invalid YAML stored as disabled', async () => {
+    const patch = await prepare('name: Broken\nsteps: oops', true);
+
+    expect(patch).toMatchObject({ valid: false, enabled: false, definition: null });
   });
 });
 

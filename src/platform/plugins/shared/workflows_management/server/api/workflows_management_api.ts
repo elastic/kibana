@@ -79,6 +79,14 @@ import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_
 import type { LoadAlertDocumentsRequest, LoadedAlertDocuments } from './lib/load_alert_documents';
 import { loadAlertDocuments } from './lib/load_alert_documents';
 import type { StepExecutionListResult } from './lib/search_step_executions';
+import type { WorkflowDependentsLookup } from './lib/workflow_dependents_impact';
+import {
+  analyzeWorkflowDependentsImpact,
+  analyzeWorkflowRemovalImpact,
+  hasCallerFacingChanges,
+  parseDraftDefinition,
+  summarizeSaveImpact,
+} from './lib/workflow_dependents_impact';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
@@ -101,6 +109,11 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import type {
+  WorkflowDependentsImpactResponse,
+  WorkflowSaveDependentsImpact,
+} from '../../common/lib/workflow_dependents/api';
+import type { RemovalImpact } from '../../common/lib/workflow_dependents/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
 import {
   EPHEMERAL_WORKFLOW_ID,
@@ -330,6 +343,13 @@ export interface ExecuteWorkflowResult {
 const isExecuteInlineWorkflowParams = (
   params: ExecuteWorkflowParams
 ): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
+
+/** The enabled flag lives on the document; callers fail when it is off, so fold it in. */
+const withEnabledState = ({
+  definition,
+  enabled,
+}: Pick<WorkflowPartialDetailDto, 'definition' | 'enabled'>): unknown =>
+  definition ? { ...definition, enabled: enabled ?? definition.enabled } : definition;
 
 export class WorkflowsManagementApi {
   private smlClient: Pick<
@@ -637,7 +657,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest,
     options?: { allowManagedWorkflowMutation?: boolean }
-  ): Promise<UpdatedWorkflowResponseDto> {
+  ): Promise<UpdatedWorkflowResponseDto & { dependentsImpact?: WorkflowSaveDependentsImpact }> {
     await this.assertWorkflowAccess(id, spaceId, 'edit', request);
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
@@ -653,7 +673,119 @@ export class WorkflowsManagementApi {
     }
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
     this.notifySml(id, spaceId, 'update', request);
-    return result;
+    if (workflow.yaml === undefined && workflow.enabled === undefined) {
+      return result;
+    }
+    const dependentsImpact = await this.getSaveDependentsImpact(originalWorkflow, spaceId, request);
+    return dependentsImpact ? { ...result, dependentsImpact } : result;
+  }
+
+  /** Grades the workflows that run a workflow, and the ones it runs, against draft YAML. */
+  public async getWorkflowDependentsImpact(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest,
+    yaml?: string
+  ): Promise<WorkflowDependentsImpactResponse> {
+    const workflow = await this.getWorkflow(id, spaceId, request);
+    if (!workflow) throw new WorkflowNotFoundError(id);
+    const savedDefinition = withEnabledState(workflow);
+    const draft =
+      yaml === undefined
+        ? undefined
+        : await this.getDraftDefinition(yaml, workflow, spaceId, request);
+    return analyzeWorkflowDependentsImpact({
+      workflowId: id,
+      savedDefinition,
+      draftDefinition: draft?.definition ?? savedDefinition,
+      isDraftValid: draft?.isValid ?? true,
+      lookup: await this.getDependentsLookup(spaceId, request),
+    });
+  }
+
+  // What saving `yaml` would store. Invalid YAML is stored without a definition, so the parsed
+  // YAML stands in to describe the calls; syntax errors throw.
+  private async getDraftDefinition(
+    yaml: string,
+    workflow: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ definition: unknown; isValid: boolean }> {
+    const parsedDraft = parseDraftDefinition(yaml);
+    const storedDraft = await this.workflowsService.getDefinitionToStore(
+      yaml,
+      workflow,
+      spaceId,
+      request
+    );
+    return { definition: storedDraft ?? parsedDraft, isValid: storedDraft !== null };
+  }
+
+  /** Lists the workflows that fail when the given workflows are turned off or deleted. */
+  public async getWorkflowRemovalImpact(
+    ids: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<RemovalImpact> {
+    return analyzeWorkflowRemovalImpact(ids, await this.getDependentsLookup(spaceId, request));
+  }
+
+  private async getDependentsLookup(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDependentsLookup> {
+    const access = await this.workflowsService.getAccessControl();
+    const accessControlFilter = await access.readFilter(request);
+    return {
+      findIndexedCallers: (ids) =>
+        this.workflowsService.findWorkflowsCalling(ids, spaceId, { accessControlFilter }),
+      findUnindexedWorkflows: () =>
+        this.workflowsService.findWorkflowsCalling([], spaceId, {
+          accessControlFilter,
+          includeUnindexed: true,
+        }),
+      getWorkflowsByIds: async (ids) => {
+        const workflows = await this.workflowsService.getWorkflowsSourceByIds(
+          ids,
+          spaceId,
+          ['name', 'enabled', 'definition'],
+          { accessControlFilter }
+        );
+        return workflows.map((workflow) => ({
+          id: workflow.id,
+          name: workflow.name ?? workflow.id,
+          enabled: workflow.enabled ?? true,
+          definition: withEnabledState(workflow),
+        }));
+      },
+    };
+  }
+
+  /** Lists the callers a completed save broke; never fails the save itself. */
+  private async getSaveDependentsImpact(
+    originalWorkflow: WorkflowDetailDto,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowSaveDependentsImpact | undefined> {
+    try {
+      const updatedWorkflow = await this.workflowsService.getWorkflow(originalWorkflow.id, spaceId);
+      if (!updatedWorkflow) return undefined;
+      const savedDefinition = withEnabledState(originalWorkflow);
+      const draftDefinition = withEnabledState(updatedWorkflow);
+      if (!hasCallerFacingChanges(savedDefinition, draftDefinition)) return undefined;
+      const { analysis } = await analyzeWorkflowDependentsImpact({
+        workflowId: originalWorkflow.id,
+        savedDefinition,
+        draftDefinition,
+        lookup: await this.getDependentsLookup(spaceId, request),
+      });
+      return summarizeSaveImpact(analysis);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to analyze the workflows that run ${originalWorkflow.id}: ${error.message}`
+      );
+      return undefined;
+    }
   }
 
   public async restoreWorkflowVersion(

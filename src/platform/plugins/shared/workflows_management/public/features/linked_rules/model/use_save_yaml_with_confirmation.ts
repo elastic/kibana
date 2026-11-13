@@ -17,27 +17,37 @@ import {
   selectWorkflow,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { useConfirmBreakingChange } from '../../workflow_dependents/model/workflow_dependents_context';
 
-/** Saves the YAML after confirming any disable; resolves to false when the user cancels. */
+/**
+ * Saves the YAML after confirming a disable, or else any change that breaks workflows calling this
+ * one; resolves to false when the user cancels.
+ */
 export const useSaveYamlWithConfirmation = (
   confirmDisable: ConfirmDisableWorkflows
 ): (() => Promise<boolean>) => {
   const saveYaml = useSaveYaml();
   const store = useStore<RootState>();
+  const confirmBreakingChange = useConfirmBreakingChange();
 
   return useCallback(async () => {
-    const state = store.getState();
-    const workflow = selectWorkflow(state);
-    const yamlString = selectYamlString(state);
-    if (
-      workflow?.enabled &&
-      yamlString &&
-      parseDocument(yamlString).get('enabled') === false &&
-      !(await confirmDisable([workflow.id]))
-    ) {
-      return false;
-    }
+    // The draft can change while a check is pending, so check again until the checked draft is
+    // the one being saved.
+    let yamlString: string | undefined;
+    do {
+      yamlString = selectYamlString(store.getState());
+      const workflow = selectWorkflow(store.getState());
+      const disables =
+        workflow?.enabled && yamlString && parseDocument(yamlString).get('enabled') === false;
+      // Disabling stops every caller, and the disable dialog already lists them.
+      const confirmed = disables
+        ? await confirmDisable([workflow.id])
+        : !confirmBreakingChange || (await confirmBreakingChange(yamlString));
+      if (!confirmed) {
+        return false;
+      }
+    } while (selectYamlString(store.getState()) !== yamlString);
     await saveYaml();
     return true;
-  }, [confirmDisable, saveYaml, store]);
+  }, [confirmBreakingChange, confirmDisable, saveYaml, store]);
 };

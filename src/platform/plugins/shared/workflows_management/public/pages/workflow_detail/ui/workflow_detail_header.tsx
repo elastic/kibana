@@ -34,6 +34,11 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
 import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
+import { useWorkflowDependentsContext } from '../../../features/workflow_dependents/model/workflow_dependents_context';
+import {
+  getCalledWorkflowsBadge,
+  getDependentsBadge,
+} from '../../../features/workflow_dependents/ui/get_dependents_badge';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { getSaveWorkflowTooltipContent } from '../../../shared/ui';
@@ -160,6 +165,11 @@ export const WorkflowDetailHeader = React.memo(
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
     }, [saveYaml]);
+
+    const workflowDependents = useWorkflowDependentsContext();
+    const openLinks = workflowDependents?.openLinks;
+    const openDependents = useCallback(() => openLinks?.('usedBy'), [openLinks]);
+    const openCalledWorkflows = useCallback(() => openLinks?.('runs'), [openLinks]);
 
     const updateWorkflow = useUpdateWorkflow();
 
@@ -375,6 +385,21 @@ export const WorkflowDetailHeader = React.memo(
         });
       }
 
+      const dependentsBadge = getDependentsBadge({
+        analysis: workflowDependents?.dependents.analysis,
+        onClick: openDependents,
+      });
+      if (dependentsBadge) {
+        result.push(dependentsBadge);
+      }
+      const calledBadge = getCalledWorkflowsBadge({
+        calledWorkflows: workflowDependents?.dependents.calledWorkflows,
+        onClick: openCalledWorkflows,
+      });
+      if (calledBadge) {
+        result.push(calledBadge);
+      }
+
       return result;
     }, [
       isManagedWorkflow,
@@ -383,6 +408,10 @@ export const WorkflowDetailHeader = React.memo(
       savedLabel,
       highlightDiff,
       setHighlightDiff,
+      workflowDependents?.dependents.analysis,
+      workflowDependents?.dependents.calledWorkflows,
+      openDependents,
+      openCalledWorkflows,
     ]);
 
     const appMenu = useMemo<AppMenuConfig>(() => {

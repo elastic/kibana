@@ -84,6 +84,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/types';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
 import {
@@ -360,6 +361,16 @@ export class WorkflowsService {
     return this.crudService.getWorkflow(id, spaceId, options);
   }
 
+  public async getDefinitionToStore(
+    yaml: string,
+    workflow: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflow['definition'] | null> {
+    await this.ensureInitialized();
+    return this.crudService.getDefinitionToStore(yaml, workflow, spaceId, request);
+  }
+
   public async getHistoryForWorkflow(
     id: string,
     spaceId: string,
@@ -513,6 +524,18 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto[]> {
     await this.ensureInitialized();
     return this.searchService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+  }
+
+  public async findWorkflowsCalling(
+    workflowIds: string[],
+    spaceId: string,
+    options: {
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      includeUnindexed?: boolean;
+    }
+  ): Promise<WorkflowLookupItem[]> {
+    await this.ensureInitialized();
+    return this.searchService.findWorkflowsCalling(workflowIds, spaceId, options);
   }
 
   public async getWorkflows(

@@ -16,6 +16,8 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
+import type { WorkflowDependentsContextValue } from '../../workflow_dependents/model/workflow_dependents_context';
+import { WorkflowDependentsContext } from '../../workflow_dependents/model/workflow_dependents_context';
 
 const mockSaveYaml = jest.fn();
 jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
@@ -27,9 +29,13 @@ const buildYaml = (enabled: boolean) =>
 
 describe('useSaveYamlWithConfirmation', () => {
   const confirmDisable = jest.fn();
+  let store: ReturnType<typeof createMockStore>;
 
-  const renderSave = (...yamlEnabledEdits: boolean[]) => {
-    const store = createMockStore();
+  const renderSave = (
+    yamlEnabledEdits: boolean[],
+    confirmBreakingChange?: WorkflowDependentsContextValue['confirmBreakingChange']
+  ) => {
+    store = createMockStore();
     store.dispatch(
       setWorkflow({
         id: 'wf-1',
@@ -46,7 +52,19 @@ describe('useSaveYamlWithConfirmation', () => {
     );
     yamlEnabledEdits.forEach((enabled) => store.dispatch(setYamlString(buildYaml(enabled))));
     const { result } = renderHook(() => useSaveYamlWithConfirmation(confirmDisable), {
-      wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
+      wrapper: ({ children }) => (
+        <TestWrapper store={store}>
+          {confirmBreakingChange ? (
+            <WorkflowDependentsContext.Provider
+              value={{ confirmBreakingChange } as unknown as WorkflowDependentsContextValue}
+            >
+              {children}
+            </WorkflowDependentsContext.Provider>
+          ) : (
+            children
+          )}
+        </TestWrapper>
+      ),
     });
     return result.current;
   };
@@ -57,7 +75,7 @@ describe('useSaveYamlWithConfirmation', () => {
   });
 
   it('saves without confirmation when the workflow stays enabled', async () => {
-    await expect(renderSave(true)()).resolves.toBe(true);
+    await expect(renderSave([true])()).resolves.toBe(true);
 
     expect(confirmDisable).not.toHaveBeenCalled();
     expect(mockSaveYaml).toHaveBeenCalled();
@@ -66,7 +84,7 @@ describe('useSaveYamlWithConfirmation', () => {
   it('saves after the user confirms disabling the workflow', async () => {
     confirmDisable.mockResolvedValue(true);
 
-    await expect(renderSave(false)()).resolves.toBe(true);
+    await expect(renderSave([false])()).resolves.toBe(true);
 
     expect(confirmDisable).toHaveBeenCalledWith(['wf-1']);
     expect(mockSaveYaml).toHaveBeenCalled();
@@ -75,7 +93,7 @@ describe('useSaveYamlWithConfirmation', () => {
   it('confirms a disable that is not yet in the computed workflow definition', async () => {
     confirmDisable.mockResolvedValue(true);
 
-    await renderSave(true, false)();
+    await renderSave([true, false])();
 
     expect(confirmDisable).toHaveBeenCalledWith(['wf-1']);
   });
@@ -83,8 +101,46 @@ describe('useSaveYamlWithConfirmation', () => {
   it('does not save when the user cancels disabling the workflow', async () => {
     confirmDisable.mockResolvedValue(false);
 
-    await expect(renderSave(false)()).resolves.toBe(false);
+    await expect(renderSave([false])()).resolves.toBe(false);
 
+    expect(mockSaveYaml).not.toHaveBeenCalled();
+  });
+
+  it('does not save when the user cancels a change that breaks workflows calling this one', async () => {
+    const confirmBreakingChange = jest.fn().mockResolvedValue(false);
+
+    await expect(renderSave([true], confirmBreakingChange)()).resolves.toBe(false);
+
+    expect(confirmBreakingChange).toHaveBeenCalled();
+    expect(confirmDisable).not.toHaveBeenCalled();
+    expect(mockSaveYaml).not.toHaveBeenCalled();
+  });
+
+  it('asks only for the disable when the draft disables a workflow that others run', async () => {
+    confirmDisable.mockResolvedValue(true);
+    const confirmBreakingChange = jest.fn().mockResolvedValue(true);
+
+    await expect(renderSave([false], confirmBreakingChange)()).resolves.toBe(true);
+
+    expect(confirmDisable).toHaveBeenCalledTimes(1);
+    expect(confirmBreakingChange).not.toHaveBeenCalled();
+    expect(mockSaveYaml).toHaveBeenCalled();
+  });
+
+  it('checks the draft again when it changes while the check is pending', async () => {
+    const editedYaml = `${buildYaml(true)}\n`;
+    const confirmBreakingChange = jest
+      .fn()
+      .mockImplementationOnce(async () => {
+        store.dispatch(setYamlString(editedYaml));
+        return true;
+      })
+      .mockResolvedValueOnce(false);
+
+    await expect(renderSave([true], confirmBreakingChange)()).resolves.toBe(false);
+
+    expect(confirmBreakingChange).toHaveBeenNthCalledWith(1, buildYaml(true));
+    expect(confirmBreakingChange).toHaveBeenNthCalledWith(2, editedYaml);
     expect(mockSaveYaml).not.toHaveBeenCalled();
   });
 });
