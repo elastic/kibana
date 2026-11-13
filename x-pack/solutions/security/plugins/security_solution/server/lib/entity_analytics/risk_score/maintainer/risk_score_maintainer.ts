@@ -30,7 +30,6 @@ import {
   getDefaultRiskEngineConfiguration,
 } from '../../risk_engine/utils/saved_object_configuration';
 import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
-import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
 import { buildAlertFilters } from './steps/build_alert_filters';
