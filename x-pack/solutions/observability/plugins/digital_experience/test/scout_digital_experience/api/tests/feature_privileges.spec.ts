@@ -14,29 +14,53 @@ const { COMMON_HEADERS, createRole } = testData;
 
 interface CapabilitiesResponse {
   navLinks: Record<string, boolean>;
-  digital_experience: { show: boolean; save: boolean; manageSessions: boolean };
+  digital_experience: {
+    show: boolean;
+    save: boolean;
+    manageSessions: boolean;
+    configureSessions: boolean;
+  };
 }
+
+const NO_SESSIONS_PRIVILEGES = { manageSessions: false, configureSessions: false } as const;
 
 const CAPABILITY_CASES = [
   {
-    title: 'resolves show and save, but not managing sessions, for the all privilege',
+    title: 'resolves show and save, but no sessions privilege, for the all privilege',
     role: createRole({ digital_experience: ['all'] }),
-    expected: { navLink: true, show: true, save: true, manageSessions: false },
+    expected: { navLink: true, show: true, save: true, ...NO_SESSIONS_PRIVILEGES },
   },
   {
     title: 'resolves show only for the read privilege',
     role: createRole({ digital_experience: ['read'] }),
-    expected: { navLink: true, show: true, save: false, manageSessions: false },
+    expected: { navLink: true, show: true, save: false, ...NO_SESSIONS_PRIVILEGES },
   },
   {
     title: 'resolves managing sessions only with the manage_sessions sub-feature privilege',
     role: createRole({ digital_experience: ['read', 'manage_sessions'] }),
-    expected: { navLink: true, show: true, save: false, manageSessions: true },
+    expected: {
+      navLink: true,
+      show: true,
+      save: false,
+      manageSessions: true,
+      configureSessions: false,
+    },
+  },
+  {
+    title: 'resolves configuring sessions only with the configure_sessions sub-feature privilege',
+    role: createRole({ digital_experience: ['read', 'configure_sessions'] }),
+    expected: {
+      navLink: true,
+      show: true,
+      save: false,
+      manageSessions: false,
+      configureSessions: true,
+    },
   },
   {
     title: 'resolves no access without the digital_experience privilege',
     role: createRole({ apm: ['read'] }),
-    expected: { navLink: false, show: false, save: false, manageSessions: false },
+    expected: { navLink: false, show: false, save: false, ...NO_SESSIONS_PRIVILEGES },
   },
 ] as const;
 
@@ -78,6 +102,13 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
                   api: ['manage_digital_experience_sessions'],
                   ui: ['manageSessions'],
                 },
+                {
+                  id: 'configure_sessions',
+                  includeIn: 'none',
+                  api: ['configure_digital_experience_sessions'],
+                  ui: ['configureSessions'],
+                  savedObject: { all: ['digital-experience-sessions-settings'], read: [] },
+                },
               ],
             },
           ],
@@ -103,6 +134,7 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
         show: expected.show,
         save: expected.save,
         manageSessions: expected.manageSessions,
+        configureSessions: expected.configureSessions,
       });
     });
   }

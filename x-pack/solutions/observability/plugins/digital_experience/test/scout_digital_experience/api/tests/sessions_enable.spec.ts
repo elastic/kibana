@@ -19,7 +19,7 @@ const { COMMON_HEADERS, SESSIONS_ENABLE_PATH } = testData;
 const FILTERED_READ_ROLE: KibanaRole = {
   elasticsearch: {
     // `read_security` lets the user read their own roles on Serverless.
-    cluster: ['manage_index_templates', 'read_security'],
+    cluster: ['read_security'],
     indices: [
       {
         names: [...SESSIONS_SOURCE_INDICES],
@@ -28,7 +28,14 @@ const FILTERED_READ_ROLE: KibanaRole = {
       },
       {
         names: [SESSIONS_INDEX_PATTERN],
-        privileges: ['read', 'index', 'create_index', 'delete', 'delete_index'],
+        privileges: [
+          'read',
+          'view_index_metadata',
+          'index',
+          'create_index',
+          'delete',
+          'delete_index',
+        ],
       },
     ],
   },
@@ -40,8 +47,8 @@ const FILTERED_READ_ROLE: KibanaRole = {
 // As an interactive user: on Serverless that is a UIAM user, who may not read their own
 // privileges, unlike the operator user behind `kbnClient`.
 apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
-  apiTest.afterAll(async ({ esClient }) => {
-    await deleteSessionsData(esClient);
+  apiTest.afterAll(async ({ esClient, kbnClient }) => {
+    await deleteSessionsData(esClient, kbnClient);
   });
 
   apiTest('enables sessions for an admin', async ({ apiClient, samlAuth }) => {
@@ -53,7 +60,9 @@ apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIEN
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual({ installed: true });
+    // The summaries task is scheduled, and building from the lookback until it catches up.
+    expect(response.body).toMatchObject({ installed: true, apiKeyInvalid: false });
+    expect(response.body.health).not.toBe('missing');
   });
 
   apiTest(

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   AreaSeries,
   Axis,
@@ -46,6 +45,7 @@ import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../../../ebt_constants';
+import { usePersistedChoice } from '../../../../hooks/use_persisted_choice';
 import { useFormatters } from '../../../../hooks/use_formatters';
 import { loadTimeLabel, PAGE_LOADS_LABEL } from '../../../../labels';
 import type { TimeRangeSelect } from '../../../../utils/brush_time_range';
@@ -105,7 +105,9 @@ const toPercentile = (value: string): OverviewPercentile =>
   OVERVIEW_PERCENTILES.find((percentile) => String(percentile) === value) ??
   DEFAULT_OVERVIEW_PERCENTILE;
 
-type TrendChartType = 'area' | 'bar';
+const TREND_CHART_TYPES = ['area', 'bar'] as const;
+
+type TrendChartType = (typeof TREND_CHART_TYPES)[number];
 
 const CHART_TYPE_OPTIONS: Array<{ id: TrendChartType; label: string; iconType: string }> = [
   {
@@ -123,16 +125,6 @@ const CHART_TYPE_OPTIONS: Array<{ id: TrendChartType; label: string; iconType: s
     iconType: 'chartBarVertical',
   },
 ];
-
-const toChartType = (value: string | undefined): TrendChartType =>
-  value === 'bar' ? 'bar' : 'area';
-
-/** The chart type the user last picked, kept across visits; areas by default. */
-const useTrendChartType = (): [TrendChartType, (chartType: TrendChartType) => void] => {
-  const [saved, setSaved] = useLocalStorage<TrendChartType>(CHART_TYPE_STORAGE_KEY, 'area');
-  // Anything else in the storage, e.g. from an older version, falls back to areas.
-  return [toChartType(saved), setSaved];
-};
 
 /** One metric over the time range, as areas or bars on the shared time axis. */
 function TrendChart({
@@ -280,7 +272,12 @@ export function OverviewTrends({
 }) {
   const { euiTheme } = useEuiTheme();
   const { formatNumber } = useFormatters();
-  const [chartType, setChartType] = useTrendChartType();
+  // The chart type the user last picked, kept across visits; areas by default.
+  const [chartType, setChartType] = usePersistedChoice(
+    CHART_TYPE_STORAGE_KEY,
+    TREND_CHART_TYPES,
+    'area'
+  );
 
   const hasPageLoads = points.some((point) => point.pageLoads > 0);
   const hasLoadTimes = points.some((point) => point.loadTimePercentileMs !== null);
@@ -339,7 +336,7 @@ export function OverviewTrends({
             isIconOnly
             options={CHART_TYPE_OPTIONS}
             idSelected={chartType}
-            onChange={(id) => setChartType(toChartType(id))}
+            onChange={setChartType}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -6,7 +6,7 @@
  */
 
 import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { getSessionsApplications } from './get_sessions_applications';
 
 const sum = (value: number) => ({ value });
@@ -25,8 +25,8 @@ const ALL_GOOD = { good: 1, needsImprovement: 0, poor: 0 };
 
 const application = (key: string, overrides: Record<string, unknown> = {}) => ({
   key,
-  // The sessions of the application that overlap the time range.
-  doc_count: 1,
+  // The sessions of the application that started in the time range.
+  startedSessions: { doc_count: 1 },
   environments: terms(),
   pageLoads: sum(1),
   jsErrors: sum(0),
@@ -41,22 +41,24 @@ const application = (key: string, overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+/** The buckets of the page loads over time, of the sessions that started in the time range. */
+const startedInRange = (buckets: unknown[] = []) => ({ pageLoadsOverTime: { buckets } });
+
 const setup = (aggregations: unknown) => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  esClient.search.mockResolvedValue({ aggregations } as never);
-  return esClient;
+  const search = jest.fn().mockResolvedValue({ aggregations });
+  return { tracedEsClient: { search } as unknown as TracedElasticsearchClient, search };
 };
 
 describe('getSessionsApplications', () => {
   it('maps the sessions buckets to application summaries, with the samples and ratings summed', async () => {
-    const esClient = setup({
+    const { tracedEsClient } = setup({
       environments: terms('production', 'staging'),
       environmentNotDefined: { doc_count: 0 },
       inEnvironment: {
         applications: {
           buckets: [
             application('web', {
-              doc_count: 40,
+              startedSessions: { doc_count: 40 },
               environments: terms('production', 'canary'),
               pageLoads: sum(12),
               jsErrors: sum(3),
@@ -73,17 +75,20 @@ describe('getSessionsApplications', () => {
             application('no-metrics'),
           ],
         },
-        pageLoadsOverTime: { buckets: [] },
+        startedInRange: startedInRange(),
       },
     });
 
-    await expect(getSessionsApplications({ esClient, start: 1, end: 2 })).resolves.toMatchObject({
+    await expect(
+      getSessionsApplications({ tracedEsClient, start: 1, end: 2 })
+    ).resolves.toMatchObject({
       applications: [
         {
           serviceName: 'web',
           source: 'otel',
           environments: ['production', 'canary'],
           pageLoads: { count: 12 },
+          // The sessions that started in the range, not those that overlap it.
           sessions: { count: 40 },
           webVitals: {
             lcp: { p75Ms: 2412.5, sampleCount: 10, ratings: ALL_GOOD },
@@ -103,6 +108,7 @@ describe('getSessionsApplications', () => {
         {
           serviceName: 'no-metrics',
           environments: [],
+          sessions: { count: 1 },
           webVitals: { lcp: { p75Ms: null, sampleCount: 0, ratings: null } },
           jsErrors: { count: 0, perPageLoad: 0 },
           httpRequests: { count: 0, failedCount: 0, failedRatio: null },
@@ -113,84 +119,82 @@ describe('getSessionsApplications', () => {
   });
 
   it('has no ratio without page loads', async () => {
-    const esClient = setup({
+    const { tracedEsClient } = setup({
       environments: terms(),
       environmentNotDefined: { doc_count: 0 },
       inEnvironment: {
         applications: {
           buckets: [application('only-errors', { pageLoads: sum(0), jsErrors: sum(2) })],
         },
-        pageLoadsOverTime: { buckets: [] },
+        startedInRange: startedInRange(),
       },
     });
 
-    const { applications } = await getSessionsApplications({ esClient, start: 1, end: 2 });
+    const { applications } = await getSessionsApplications({ tracedEsClient, start: 1, end: 2 });
 
     expect(applications[0].jsErrors).toEqual({ count: 2, perPageLoad: null });
   });
 
   it('lists every environment of the time range, and "Not defined" when sessions have none', async () => {
-    const esClient = setup({
+    const { tracedEsClient } = setup({
       environments: terms('production', 'staging'),
       environmentNotDefined: { doc_count: 2 },
-      inEnvironment: { applications: { buckets: [] }, pageLoadsOverTime: { buckets: [] } },
+      inEnvironment: { applications: { buckets: [] }, startedInRange: startedInRange() },
     });
 
-    const { environments } = await getSessionsApplications({ esClient, start: 1, end: 2 });
+    const { environments } = await getSessionsApplications({ tracedEsClient, start: 1, end: 2 });
 
     expect(environments).toEqual(['production', 'staging', ENVIRONMENT_NOT_DEFINED_VALUE]);
   });
 
-  it('charts the page loads of the sessions that started in each bucket', async () => {
-    const esClient = setup({
+  describe('over time', () => {
+    const aggregations = {
       environments: terms(),
       environmentNotDefined: { doc_count: 0 },
       inEnvironment: {
         applications: { buckets: [] },
-        pageLoadsOverTime: {
-          buckets: [
-            { key: 1000, doc_count: 5, pageLoads: sum(7) },
-            { key: 2000, doc_count: 0, pageLoads: sum(0) },
-          ],
-        },
+        startedInRange: startedInRange([
+          { key: 1000, doc_count: 5, pageLoads: sum(7) },
+          { key: 2000, doc_count: 0, pageLoads: sum(0) },
+        ]),
       },
+    };
+
+    it('charts the page loads of the sessions that started in each bucket', async () => {
+      const { tracedEsClient } = setup(aggregations);
+
+      const { pageLoadsOverTime } = await getSessionsApplications({
+        tracedEsClient,
+        start: 1,
+        end: 2,
+      });
+
+      expect(pageLoadsOverTime).toEqual([
+        { timestamp: 1000, count: 7 },
+        { timestamp: 2000, count: 0 },
+      ]);
     });
 
-    const { pageLoadsOverTime } = await getSessionsApplications({ esClient, start: 1, end: 2 });
+    it('counts the sessions that started in each bucket, which the buckets already count', async () => {
+      const { tracedEsClient } = setup(aggregations);
 
-    expect(pageLoadsOverTime).toEqual([
-      { timestamp: 1000, count: 7 },
-      { timestamp: 2000, count: 0 },
-    ]);
-  });
+      const { sessionsOverTime } = await getSessionsApplications({
+        tracedEsClient,
+        start: 1,
+        end: 2,
+      });
 
-  it('counts the sessions that started in each bucket, which the buckets already count', async () => {
-    const esClient = setup({
-      environments: terms(),
-      environmentNotDefined: { doc_count: 0 },
-      inEnvironment: {
-        applications: { buckets: [] },
-        pageLoadsOverTime: {
-          buckets: [
-            { key: 1000, doc_count: 5, pageLoads: sum(7) },
-            { key: 2000, doc_count: 0, pageLoads: sum(0) },
-          ],
-        },
-      },
+      expect(sessionsOverTime).toEqual([
+        { timestamp: 1000, count: 5 },
+        { timestamp: 2000, count: 0 },
+      ]);
     });
-
-    const { sessionsOverTime } = await getSessionsApplications({ esClient, start: 1, end: 2 });
-
-    expect(sessionsOverTime).toEqual([
-      { timestamp: 1000, count: 5 },
-      { timestamp: 2000, count: 0 },
-    ]);
   });
 
   it('returns nothing without aggregations, e.g. when the index does not exist', async () => {
-    const esClient = setup(undefined);
+    const { tracedEsClient } = setup(undefined);
 
-    await expect(getSessionsApplications({ esClient, start: 1, end: 2 })).resolves.toEqual({
+    await expect(getSessionsApplications({ tracedEsClient, start: 1, end: 2 })).resolves.toEqual({
       applications: [],
       environments: [],
       pageLoadsOverTime: [],
@@ -198,22 +202,15 @@ describe('getSessionsApplications', () => {
     });
   });
 
-  it('passes the abort signal and searches the sessions index as the current user', async () => {
-    const esClient = setup(undefined);
-    const { signal } = new AbortController();
+  it('searches the sessions index in a span of its own', async () => {
+    const { tracedEsClient, search } = setup(undefined);
 
-    await getSessionsApplications({
-      esClient,
-      start: 1,
-      end: 2,
-      environment: 'production',
-      signal,
-    });
+    await getSessionsApplications({ tracedEsClient, start: 1, end: 2, environment: 'production' });
 
-    expect(esClient.search).toHaveBeenCalledTimes(1);
-    expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'digital-experience-sessions-*' }),
-      { signal }
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledWith(
+      'get_digital_experience_otel_applications_from_sessions',
+      expect.objectContaining({ index: 'digital-experience-sessions-*' })
     );
   });
 });

@@ -20,3 +20,11 @@ export const canManageSessions = (capabilities: Capabilities): boolean =>
   Boolean(
     capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.[DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions]
   );
+
+/** Whether the user can change the session summaries settings, a separate sub-feature privilege. */
+export const canConfigureSessions = (capabilities: Capabilities): boolean =>
+  Boolean(
+    capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.[
+      DIGITAL_EXPERIENCE_UI_PRIVILEGES.configureSessions
+    ]
+  );

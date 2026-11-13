@@ -21,7 +21,7 @@ import {
   type OverviewFilters,
 } from '../../../common/overview_filters';
 import { EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
-import { SOURCE_URL_FIELD } from '../../sessions/source_fields';
+import { SOURCE_URL_FIELD } from './source_fields';
 import { environmentFilter } from '../helpers/environment';
 import { ENVIRONMENT_FIELDS, eventCount } from './queries';
 
@@ -37,9 +37,9 @@ const FIELD_VALUE_LABELS: Record<string, Record<string, string>> = Object.fromEn
 );
 
 /**
- * The fields each filter reads, in priority order. The sessions' lists come first, so a browser,
- * OS, device or country means the same in the Overview and the Sessions where they have one; the
- * device then falls back to `browser.mobile`.
+ * The fields each filter reads, in priority order. The session summaries' lists come first, so a
+ * browser, OS, device or country means the same in the Overview and the Sessions where they have
+ * one; the device then falls back to `browser.mobile`.
  */
 const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   browser: SESSION_ATTRIBUTE_FIELDS.browser,
@@ -60,7 +60,7 @@ export const filterFieldOf = (name: OverviewFilterName): string =>
   FILTER_SOURCE_FIELDS[name].length > 1 ? runtimeFieldOf(name) : FILTER_SOURCE_FIELDS[name][0];
 
 /**
- * Takes the first non-empty value of the fields, like the sessions do, so a
+ * Takes the first non-empty value of the fields, like the session summaries do, so a
  * document with the same value in both scopes is counted once. Unmapped fields are skipped: the
  * OTel indices map only what their data had. A field with `params.labels` says its value in other
  * words, e.g. `true` as "Mobile"; a value without a label is skipped.

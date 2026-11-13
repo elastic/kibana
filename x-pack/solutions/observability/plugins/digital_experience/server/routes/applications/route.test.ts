@@ -7,6 +7,7 @@
 
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
 import { APPLICATIONS_ENDPOINT, applicationsRouteRepository } from './route';
@@ -18,6 +19,7 @@ const mockedClassic = jest.mocked(getClassicApplications);
 
 const START = '2021-01-18T12:00:00.000Z';
 const END = '2021-01-18T13:00:00.000Z';
+const getSessionsSettings = jest.fn(async () => ({ frequency: '1m', concurrency: 2 }));
 const mockedOtel = jest.mocked(getOtelApplicationsFromBestSource);
 
 const runHandler = ({
@@ -39,6 +41,7 @@ const runHandler = ({
     }),
   };
   const getApmIndices = jest.fn().mockResolvedValue({});
+  const taskManager = taskManagerMock.createStart();
   const handler = applicationsRouteRepository[APPLICATIONS_ENDPOINT].handler as unknown as (
     resources: unknown
   ) => Promise<{
@@ -52,9 +55,11 @@ const runHandler = ({
     plugins: { apmDataAccess: withApmDataAccess ? { getApmIndices } : undefined },
     isServerless,
     isUxEnabled,
+    getSessionsSettings,
+    getSessionsServices: async () => ({ taskManager, canEncrypt: true }),
     logger: loggingSystemMock.createLogger(),
   });
-  return { result, getApmIndices };
+  return { result, getApmIndices, taskManager };
 };
 
 describe('GET /internal/digital_experience/applications', () => {
@@ -109,11 +114,19 @@ describe('GET /internal/digital_experience/applications', () => {
     );
   });
 
-  it('lets the OTel source check the sessions with the internal user', async () => {
-    await runHandler({ isServerless: false }).result;
+  it('lets the OTel source read the sessions status from Task Manager with the effective settings', async () => {
+    const { result, taskManager } = runHandler({ isServerless: false });
+    await result;
 
     expect(mockedOtel).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: {}, internalEsClient: {} })
+      expect.objectContaining({
+        esClient: {},
+        taskManager,
+        getSessionsSettings,
+      })
+    );
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.not.objectContaining({ internalEsClient: expect.anything() })
     );
   });
 

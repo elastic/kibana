@@ -10,24 +10,21 @@ import type {
   SecurityIndicesPrivileges,
   SecurityUserIndicesPrivileges,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { escapeRegExp } from 'lodash';
-import { setTimeout as sleep } from 'timers/promises';
-import {
-  SESSIONS_INDEX,
-  SESSIONS_INDEX_PATTERN,
-  SESSIONS_SOURCE_INDICES,
-  type SessionsStatus,
-} from '../../common/sessions';
-import { sessionsIndexTemplate } from './sessions_spec';
+import { SESSIONS_INDEX_PATTERN, SESSIONS_SOURCE_INDICES } from '../../../common/sessions';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
 import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 
-export const REQUIRED_CLUSTER_PRIVILEGES = ['manage_index_templates'] as const;
+/**
+ * What the summaries task does with the API key granted on the user's behalf: read the events with
+ * ES|QL, and write, expire and rebuild the summaries. Kibana's internal user puts the index template.
+ */
 export const REQUIRED_SOURCE_INDEX_PRIVILEGES = ['read', 'view_index_metadata'] as const;
 export const REQUIRED_DEST_INDEX_PRIVILEGES = [
   'read',
+  'view_index_metadata',
   'index',
   'create_index',
   'delete',
@@ -41,7 +38,7 @@ export const getMissingSessionsPrivileges = async (
   const response = await client.security.hasPrivileges({
     // On Serverless, checking the source read for document- and field-level security reads the
     // user's roles, which needs `read_security`.
-    cluster: [...REQUIRED_CLUSTER_PRIVILEGES, ...(isServerless ? ['read_security'] : [])],
+    cluster: isServerless ? ['read_security'] : [],
     index: [
       { names: [...SESSIONS_SOURCE_INDICES], privileges: [...REQUIRED_SOURCE_INDEX_PRIVILEGES] },
       { names: [SESSIONS_INDEX_PATTERN], privileges: [...REQUIRED_DEST_INDEX_PRIVILEGES] },
@@ -233,9 +230,9 @@ export const getRestrictedSourceIndices = async (
 };
 
 /**
- * Throws unless the user can set sessions up: the privileges the setup needs, and unrestricted
- * reads of the source data. Runs as the user, as an API key with role descriptors can't answer the
- * read check.
+ * Throws unless the user can set sessions up: the privileges the summaries task needs, and
+ * unrestricted reads of the source data, as every reader of the summaries sees what it read. Runs
+ * as the user, as an API key with role descriptors can't answer the read check.
  */
 export const checkSessionsPrivileges = async (
   client: ElasticsearchClient,
@@ -251,69 +248,3 @@ export const checkSessionsPrivileges = async (
     throw new SessionsRestrictedReadError(restricted.indices, restricted.reason);
   }
 };
-
-/**
- * Sets sessions up for the user behind `esClient`: checks they can set sessions up, then puts the
- * sessions index template and creates the index with their credentials. Safe to call repeatedly.
- */
-export const enableSessions = async ({
-  esClient,
-  isServerless,
-}: {
-  esClient: IScopedClusterClient;
-  /** Serverless also needs `read_security` for the document- and field-level check. */
-  isServerless: boolean;
-}): Promise<void> => {
-  const user = esClient.asCurrentUser;
-  await checkSessionsPrivileges(user, { isServerless });
-  await user.indices.putIndexTemplate(sessionsIndexTemplate);
-  // Created without checking first, as `indices.exists` needs `view_index_metadata`.
-  await createUnlessExists(user, SESSIONS_INDEX);
-  await waitUntilSearchable(user);
-};
-
-const createUnlessExists = async (client: ElasticsearchClient, index: string): Promise<void> => {
-  try {
-    await client.indices.create({ index });
-  } catch (error) {
-    const exists =
-      isResponseError(error) && error.body?.error?.type === 'resource_already_exists_exception';
-    if (!exists) {
-      throw error;
-    }
-  }
-};
-
-/** How long, and how often, enabling checks that the sessions index accepts searches. */
-const SEARCHABLE_TIMEOUT_MS = 30_000;
-const SEARCHABLE_RETRY_MS = 250;
-
-/**
- * The UI lists sessions as soon as enabling returns, but a just-created index answers searches
- * with a 503 (no shard available) for a moment, even once its health is yellow. Waits until a
- * count stops answering 503, or gives up after the timeout, as the first list read can still be
- * retried.
- */
-const waitUntilSearchable = async (client: ElasticsearchClient): Promise<void> => {
-  const deadline = Date.now() + SEARCHABLE_TIMEOUT_MS;
-  while (true) {
-    try {
-      await client.count({ index: SESSIONS_INDEX, ignore_unavailable: true });
-      return;
-    } catch (error) {
-      const unavailable = isResponseError(error) && error.statusCode === 503;
-      if (!unavailable || Date.now() >= deadline) {
-        return;
-      }
-    }
-    await sleep(SEARCHABLE_RETRY_MS);
-  }
-};
-
-/** Whether sessions are set up. Reads index metadata only, so the internal user can call it. */
-export const getSessionsStatus = async (
-  client: ElasticsearchClient,
-  { signal }: { signal?: AbortSignal } = {}
-): Promise<SessionsStatus> => ({
-  installed: await client.indices.exists({ index: SESSIONS_INDEX }, { signal }),
-});
