@@ -10,7 +10,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createConnectorCatalogStorage } from './connector_catalog_storage';
 import { CONNECTOR_TYPE_CATALOG_INDEX } from './constants';
-import type { StoredCatalogDefinition } from './types';
+import type { ConnectorCatalogStorage, StoredCatalogDefinition } from './types';
 
 const createResponseError = (statusCode: number, type: string): errors.ResponseError =>
   new errors.ResponseError({
@@ -31,13 +31,14 @@ const definition: StoredCatalogDefinition = {
 
 describe('createConnectorCatalogStorage', () => {
   const esClient = elasticsearchClientMock.createElasticsearchClient();
-  const storage = createConnectorCatalogStorage({
-    esClient,
-    logger: loggingSystemMock.createLogger(),
-  });
+  let storage: ConnectorCatalogStorage;
 
   beforeEach(() => {
     jest.resetAllMocks();
+    storage = createConnectorCatalogStorage({
+      esClient,
+      logger: loggingSystemMock.createLogger(),
+    });
     // Lets the adapter bootstrap run on writes: no template, no index yet.
     esClient.info.mockResolvedValue({ version: { build_flavor: 'default' } } as never);
     esClient.indices.putIndexTemplate.mockResolvedValue({ acknowledged: true });
@@ -51,8 +52,17 @@ describe('createConnectorCatalogStorage', () => {
 
   describe('lazy index setup', () => {
     it('does not touch Elasticsearch when created', () => {
-      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(esClient.indices.create).not.toHaveBeenCalled();
+      const freshClient = elasticsearchClientMock.createElasticsearchClient();
+
+      createConnectorCatalogStorage({
+        esClient: freshClient,
+        logger: loggingSystemMock.createLogger(),
+      });
+
+      expect(freshClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(freshClient.indices.create).not.toHaveBeenCalled();
+      expect(freshClient.info).not.toHaveBeenCalled();
+      expect(freshClient.indices.get).not.toHaveBeenCalled();
     });
 
     it('installs the template with the write alias, mappings before the first write', async () => {
@@ -160,10 +170,54 @@ describe('createConnectorCatalogStorage', () => {
       expect(esClient.search).not.toHaveBeenCalled();
     });
 
-    it('returns an empty list when the index is missing', async () => {
+    it('returns an empty list when mget answers with a per-document index-not-found error', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _index: CONNECTOR_TYPE_CATALOG_INDEX,
+            _id: 'definition:.a@1.0.0',
+            error: {
+              type: 'index_not_found_exception',
+              reason: `no such index [${CONNECTOR_TYPE_CATALOG_INDEX}]`,
+            },
+          },
+        ],
+      });
+
+      await expect(storage.getDefinitions([{ id: '.a', version: '1.0.0' }])).resolves.toEqual([]);
+    });
+
+    it('returns an empty list when mget throws a 404 for the index', async () => {
       esClient.mget.mockRejectedValue(createResponseError(404, 'index_not_found_exception'));
 
       await expect(storage.getDefinitions([{ id: '.a', version: '1.0.0' }])).resolves.toEqual([]);
+    });
+
+    it('rejects and names the document when mget returns another per-document error', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _index: CONNECTOR_TYPE_CATALOG_INDEX,
+            _id: 'definition:.catalog-test@1.0.0',
+            found: true,
+            _source: { type: 'definition', ...definition },
+          },
+          {
+            _index: CONNECTOR_TYPE_CATALOG_INDEX,
+            _id: 'definition:.broken@1.0.0',
+            error: { type: 'no_shard_available_action_exception', reason: 'shard is down' },
+          },
+        ],
+      });
+
+      await expect(
+        storage.getDefinitions([
+          { id: '.catalog-test', version: '1.0.0' },
+          { id: '.broken', version: '1.0.0' },
+        ])
+      ).rejects.toThrow(
+        'definition:.broken@1.0.0": no_shard_available_action_exception: shard is down'
+      );
     });
   });
 

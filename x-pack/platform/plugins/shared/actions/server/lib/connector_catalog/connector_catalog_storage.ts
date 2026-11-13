@@ -31,6 +31,8 @@ interface DefinitionSource extends StoredCatalogDefinition {
   type: 'definition';
 }
 
+const INDEX_NOT_FOUND_ERROR_TYPE = 'index_not_found_exception';
+
 const isResponseErrorWithStatus = (error: unknown, statusCode: number): boolean =>
   error instanceof errors.ResponseError && error.statusCode === statusCode;
 
@@ -108,7 +110,16 @@ export const createConnectorCatalogStorage = ({
           { signal }
         );
         return response.docs.flatMap((doc) => {
-          if (!('found' in doc) || !doc.found || !doc._source) {
+          if ('error' in doc) {
+            // `_mget` answers 200 with an error on each document when the index is missing.
+            if (doc.error.type === INDEX_NOT_FOUND_ERROR_TYPE) {
+              return [];
+            }
+            throw new Error(
+              `Failed to read connector catalog definition "${doc._id}": ${doc.error.type}: ${doc.error.reason}`
+            );
+          }
+          if (!doc.found || !doc._source) {
             return [];
           }
           const { connectorId, version, yaml, contentHash, catalogVersion } = doc._source;
