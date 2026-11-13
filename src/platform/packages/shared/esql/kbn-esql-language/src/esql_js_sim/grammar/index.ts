@@ -8,6 +8,7 @@
  */
 
 // The public entry of the simulated `@elastic/esql-grammar` package. Kibana code imports only this file.
+export { describeCommands } from './cursor_ir/describe_commands';
 export { locate } from './cursor_ir/locate';
 export type {
   CallSiteId,
@@ -15,9 +16,14 @@ export type {
   CursorPosition,
   ExpectedArgument,
   Follower,
+  NextToken,
   PreviousToken,
   TokenClass,
   TypedWord,
+  WordKind,
+  WrittenAncestor,
+  WrittenArgument,
+  WrittenCommand,
 } from './cursor_ir/types';
 export { GRAMMAR_LABELS } from './grammar_labels/grammar_labels.generated';
 export { getCalledRules, getCallSites } from './grammar_labels/call_sites';

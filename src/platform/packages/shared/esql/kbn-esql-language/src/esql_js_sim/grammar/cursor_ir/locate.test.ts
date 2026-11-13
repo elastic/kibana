@@ -314,12 +314,175 @@ describe('locate', () => {
 
   describe('word', () => {
     it('names the expected keyword the word spells in full, in any case', () => {
-      expect(at('FROM a | LIMIT 10 by').word).toEqual({ text: 'by', start: 18, keyword: 'BY' });
-      expect(at('FROM a | LIMIT 10 B').word).toEqual({ text: 'B', start: 18 });
+      expect(at('FROM a | LIMIT 10 by').word).toMatchObject({
+        text: 'by',
+        start: 18,
+        keyword: 'BY',
+      });
+      expect(at('FROM a | LIMIT 10 B').word?.keyword).toBeUndefined();
     });
 
     it('names no keyword that is not expected there', () => {
-      expect(at('FROM a | SORT b AS').word).toEqual({ text: 'AS', start: 16 });
+      expect(at('FROM a | SORT b AS').word).toMatchObject({ text: 'AS', start: 16 });
+      expect(at('FROM a | SORT b AS').word?.keyword).toBeUndefined();
+    });
+
+    it.each([
+      ['FROM a | KEEP b', 'b', 'name'],
+      ['FROM a | KEEP lo*', 'lo*', 'pattern'],
+      ['FROM logs-', 'logs-', 'name'],
+      ['FROM a | KEEP `b c`', '`b c`', 'quoted_name'],
+      ['FROM a | LIMIT 10', '10', 'number'],
+      ['FROM a | WHERE b == "x"', '"x"', 'string'],
+      ['FROM a | WHERE b == "x', '"x', 'string'],
+    ])('%j is typing %j, a %s', (query, text, kind) => {
+      expect(at(query).word).toMatchObject({ text, kind });
+    });
+
+    it('says whether the lexer reads the word as a whole token', () => {
+      expect(at('FROM a | WHERE b == "x"')).toMatchObject({
+        position: 'start_of_argument',
+        word: { complete: true },
+      });
+      expect(at('FROM a | WHERE b == "x')).toMatchObject({
+        position: 'inside_string',
+        word: { complete: false },
+      });
+      expect(at('FROM a | KEEP `b c')).toMatchObject({ word: { complete: false } });
+    });
+
+    it('gives the whole argument a glued word continues', () => {
+      expect(at('FROM a | EVAL x = a.b').word).toMatchObject({
+        text: 'b',
+        argument: { text: 'a.b', start: 18 },
+      });
+      expect(at('FROM cl:idx').word).toMatchObject({
+        text: 'idx',
+        argument: { text: 'cl:idx', start: 5 },
+      });
+    });
+
+    it('does not join a word to an argument it is not glued to', () => {
+      expect(at('FROM a | LIMIT 10 by').word?.argument).toBeUndefined();
+      expect(at('FROM a | KEEP b').word?.argument).toBeUndefined();
+    });
+  });
+
+  describe('next token', () => {
+    it.each([
+      ['FROM a | WHERE b IN (1, ▮)', { token: 'RP', class: 'closer' }],
+      ['SET a = 1▮;', { token: 'SEMICOLON', class: 'terminator' }],
+      ['FROM a | LIMIT ▮ | KEEP b', { token: 'PIPE', class: 'pipe' }],
+      ['FROM a | KEEP ▮b', { token: 'ID_PATTERN', class: 'value' }],
+    ])('%j', (query, next) => {
+      expect(at(query).next).toEqual(next);
+    });
+
+    it('is absent at the end of the query', () => {
+      expect(at('FROM a | LIMIT ').next).toBeUndefined();
+      expect(at('FROM a | LIMIT ▮  ').next).toBeUndefined();
+    });
+  });
+
+  describe('only follower', () => {
+    it('names the token when nothing else can come next', () => {
+      expect(at('FROM a | FILLNULL 0 ').onlyFollower).toBe('ON');
+      expect(at('FROM a | DISSECT b "p" APPEND_SEPARATOR ').onlyFollower).toBe('ASSIGN');
+      expect(at('FROM a METADATA ').onlyFollower).toBe('UNQUOTED_SOURCE');
+    });
+
+    it('is absent when an argument or several tokens can come next', () => {
+      expect(at('FROM a | KEEP ').onlyFollower).toBeUndefined();
+      expect(at('FROM a | LIMIT 10 ').onlyFollower).toBeUndefined();
+    });
+  });
+
+  describe('written arguments', () => {
+    const texts = (ir: CursorIR, id: string): string[] =>
+      ir.written.filter((argument) => argument.id === id).map(({ text }) => text);
+
+    it('lists what is written in the command before the cursor', () => {
+      const ir = at('FROM a | ENRICH p ON f WITH x = y, ');
+
+      expect(texts(ir, 'enrichCommand.policyName')).toEqual(['p']);
+      expect(texts(ir, 'enrichCommand.matchField')).toEqual(['f']);
+      expect(texts(ir, 'enrichWithClause.newName')).toEqual(['x']);
+    });
+
+    it('uses the call sites of the expected arguments', () => {
+      const ir = at('FROM a | KEEP b, c, ');
+
+      expect(texts(ir, ir.arguments[0].id)).toEqual(['b', 'c']);
+    });
+
+    it('leaves the word being typed out', () => {
+      expect(texts(at('FROM a | KEEP b, c'), 'qualifiedNamePatterns>qualifiedNamePattern')).toEqual(
+        ['b']
+      );
+    });
+
+    it('leaves what follows the cursor out', () => {
+      expect(
+        texts(at('FROM a | KEEP b, ▮, d'), 'qualifiedNamePatterns>qualifiedNamePattern')
+      ).toEqual(['b']);
+    });
+
+    it('is the innermost command only', () => {
+      const ir = at('FROM a | FORK (WHERE b | KEEP c, ');
+
+      expect(ir.written.map(({ text }) => text)).toEqual(['KEEP', 'c', ',']);
+    });
+
+    it('is empty where a command starts', () => {
+      expect(at('FROM a | ').written).toEqual([]);
+      expect(at('').written).toEqual([]);
+    });
+
+    it('keeps what was written when the command is unfinished', () => {
+      const ir = at('FROM a | EVAL x = 1, y = FN(b, ');
+
+      expect(texts(ir, 'field>qualifiedName')).toEqual(['x', 'y']);
+      expect(texts(ir, 'functionExpression>functionName')).toEqual(['FN']);
+      expect(ir.written.some(({ text }) => text.includes('esql_cursor_marker'))).toBe(false);
+    });
+
+    it('marks the argument the cursor is in as open, with its text so far', () => {
+      expect(at('FROM a | EVAL x = a.b').written.at(-1)).toMatchObject({
+        rule: 'qualifiedName',
+        text: 'a.',
+        open: true,
+      });
+      expect(at('FROM a | KEEP b, ').written.some(({ open }) => open)).toBe(false);
+    });
+
+    it('says which places above an argument the cursor is still in', () => {
+      const openIds = (ir: CursorIR): string[] =>
+        (ir.written.at(-1)?.ancestors ?? []).filter(({ open }) => open).map(({ id }) => id);
+
+      expect(openIds(at('FROM a | EVAL x = FN(b, '))).toContain(
+        'primaryExpression>functionExpression'
+      );
+      expect(openIds(at('FROM a | EVAL x = FN(b) '))).toEqual([]);
+    });
+
+    describe('lambda', () => {
+      const parameters = (ir: CursorIR): Array<[string, boolean | undefined]> =>
+        ir.written
+          .filter(({ id }) => id === 'lambda>identifier')
+          .map(({ text, ancestors }) => [text, ancestors.at(-1)?.open]);
+
+      it('reports the parameters of the lambda the cursor is in as in scope', () => {
+        expect(parameters(at('FROM a | EVAL x = FN(b, v -> '))).toEqual([['v', true]]);
+        expect(parameters(at('FROM a | EVAL x = FN(b, (v, w) -> v + '))).toEqual([
+          ['v', true],
+          ['w', true],
+        ]);
+        expect(parameters(at('FROM a | EVAL x = FN(b, v -> v'))).toEqual([['v', true]]);
+      });
+
+      it('reports the parameters of a closed lambda as out of scope', () => {
+        expect(parameters(at('FROM a | EVAL x = FN(b, v -> v + 1) + '))).toEqual([['v', false]]);
+      });
     });
   });
 });

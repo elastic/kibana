@@ -39,6 +39,8 @@ export interface ExpectedRule {
   continuation: boolean;
   /** For a continuation, the slot's text typed before the cursor, e.g. `a.b`; otherwise empty. */
   text: string;
+  /** Offset of the slot's first token. */
+  start: number;
   /** Type of the last token before the slot, e.g. `AS` in `RENAME a AS b.c`. */
   previousTokenType?: number;
 }
@@ -73,8 +75,8 @@ export interface CursorLocation {
   expectedRules: ExpectedRule[];
   /** The command is complete at the cursor, so a pipe may follow. */
   commandCanEnd: boolean;
-  /** The word being typed, if any. */
-  partial?: { text: string; start: number };
+  /** The word being typed, if any. `complete`: the lexer made one token of the whole of it. */
+  partial?: { text: string; start: number; complete: boolean };
   /** Type of the last token before the cursor, or before the word being typed. */
   previousTokenType?: number;
   /** Whitespace or a comment separates the previous token from the cursor or the word typed. */

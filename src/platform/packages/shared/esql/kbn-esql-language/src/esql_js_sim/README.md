@@ -48,8 +48,27 @@ What `grammar/` holds so far:
   `separator`, `opener`, `closer`, `pipe`, `terminator`, `value`, `end`) and, when it has one,
   its fixed text. The class is read from the token's text and from whether it is expected
   inside an expression rule. No token is named in the code.
-- `previous`: the token before the cursor, and `word`: the word being typed, with the expected
-  keyword it spells in full.
+- `previous` and `next`: the tokens before and after the cursor.
+- `word`: the word being typed. It is any token with no fixed text (a name, a pattern, a
+  number, a string) or a keyword that touches the cursor. It has a kind, whether the lexer
+  reads it as a whole token, the expected keyword it spells in full, and the whole argument
+  it continues (`a.b` for the word `b`).
+- `onlyFollower`: the token that must come next, when nothing else can.
+- `written`: what is already written in the command, as described below.
+
+## Written arguments
+
+`describeCommands(text)` lists the commands of a query and, for each, every argument and token
+written in it: its call site (the same ids `locate` gives for what it expects), text, range,
+its position among the siblings with the same call site, and the call sites above it. It reads
+the parse tree only and needs no cursor, so validation can use it too.
+
+`locate` gives the written arguments of the command around the cursor. The parser recovers
+from an unfinished command by guessing, which can rearrange what was written, so `locate`
+first finishes the text with a placeholder name where a value is expected and with the
+brackets that are still open, and leaves out what the parser read from the added text. The
+argument the cursor is in and the places above it that the cursor is still inside are marked
+`open`. That is how the parameters of a lambda are known to be in scope: their lambda is open.
 
 A command the grammar has and Kibana has not registered is located like any other.
 

@@ -192,7 +192,7 @@ describe('locateCursor', () => {
     it('is the word being typed', () => {
       const { partial } = locate('FROM a | LIM');
 
-      expect(partial).toEqual({ text: 'LIM', start: 9 });
+      expect(partial).toMatchObject({ text: 'LIM', start: 9 });
       expect(tokenNames('FROM a | LIM')).toEqual(expect.arrayContaining(['LIMIT']));
     });
 
@@ -204,7 +204,7 @@ describe('locateCursor', () => {
       ['FROM a | KEEP `my fi', '`my fi', ['qualifiedNamePattern']],
       ['FROM a | EVAL x = "ab', '"ab', EXPRESSION_RULES],
     ])('covers the unterminated quote in %j', (text, partialText, rules) => {
-      expect(locate(text).partial).toEqual({
+      expect(locate(text).partial).toMatchObject({
         text: partialText,
         start: text.length - partialText.length,
       });
@@ -216,7 +216,7 @@ describe('locateCursor', () => {
     it('is the start of a decimal being typed', () => {
       const { partial, expectedRules } = locate(' FROM a | SAMPLE .');
 
-      expect(partial).toEqual({ text: '.', start: 17 });
+      expect(partial).toMatchObject({ text: '.', start: 17 });
       expect(expectedRules.map(({ rule }) => rule)).toEqual(['constant']);
     });
 
@@ -233,7 +233,7 @@ describe('locateCursor', () => {
     ])('is the word being typed in %j however it ends', (text, partialText) => {
       const { partial, expectedRules } = locate(text);
 
-      expect(partial).toEqual({ text: partialText, start: text.length - partialText.length });
+      expect(partial).toMatchObject({ text: partialText, start: text.length - partialText.length });
       expect(expectedRules.map(({ rule }) => rule)).toContain('indexPattern');
     });
   });
@@ -321,7 +321,7 @@ describe('locateCursor', () => {
     it('keeps them in the word they directly follow', () => {
       const { partial, expectedRules } = locate('FROM a | ENRICH _any:');
 
-      expect(partial).toEqual({ text: '_any:', start: 16 });
+      expect(partial).toMatchObject({ text: '_any:', start: 16 });
       expect(expectedRules.map(({ rule }) => rule)).toEqual(['enrichPolicyName']);
     });
 
