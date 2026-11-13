@@ -10,21 +10,18 @@ import { i18n } from '@kbn/i18n';
 import type { ConversationTemplateBriefCardRenderProps } from '@kbn/agent-builder-browser';
 import {
   registerAgenticInvestigationTemplateUI,
-  type CloseInvestigationModalRenderProps,
   type EscalationModalRenderProps,
   type OverviewSlotRenderProps,
   type LiveStateSlotRenderProps,
   type SeveritySlotRenderProps,
-  type TitleSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
-import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
+import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import {
   ProposedActionsBoundary,
   ProposedActionsCountBoundary,
 } from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
-import { NEW_INVESTIGATION_TITLE } from './translations';
 import { copyLink } from '../../shared/copy_link';
 import type { TemplateDefinition } from '../../registry/types';
 
@@ -51,6 +48,7 @@ export const investigationTemplate: TemplateDefinition = {
     services,
     escalationsEnabled,
     makeLazyWithProviders,
+    loadFlyoutProvider,
     groupedAttachments,
     renderAssignees,
     renderStatus,
@@ -72,13 +70,6 @@ export const investigationTemplate: TemplateDefinition = {
           React.createElement(ConnectedEscalationModal, props)
         );
       return GatedEscalationModal;
-    });
-
-    const LazyManageEscalationsGate = makeLazyWithProviders<React.PropsWithChildren>(async () => {
-      const { PrivilegeGate } = await import('../../shared/privileges/privilege_gate');
-      const ManageEscalationsGate: React.FC<React.PropsWithChildren> = ({ children }) =>
-        React.createElement(PrivilegeGate, { privilege: 'manageEscalations' }, children);
-      return ManageEscalationsGate;
     });
 
     // Shares `getSharedInvestigationsQueryClient()` with a solution's queue page rather than
@@ -152,11 +143,6 @@ export const investigationTemplate: TemplateDefinition = {
       return ConnectedSeverityPicker;
     });
 
-    const LazyInvestigationTitle = makeLazyWithSharedClient<TitleSlotRenderProps>(async () => {
-      const { InvestigationTitle } = await import('./flyout/header_title');
-      return InvestigationTitle;
-    });
-
     const LazyInvestigationBriefCard =
       makeLazyWithSharedClient<ConversationTemplateBriefCardRenderProps>(async () => {
         const [{ InvestigationBriefCard }, { createInvestigationCardsLoader }] = await Promise.all([
@@ -179,30 +165,6 @@ export const investigationTemplate: TemplateDefinition = {
         React.createElement(LazyInvestigationBriefCard, props)
       );
 
-    const LazyConnectedCloseInvestigationModal =
-      makeLazyWithProviders<CloseInvestigationModalRenderProps>(async () => {
-        const [{ ConnectedCloseInvestigationModal }, { PrivilegeGate }] = await Promise.all([
-          import('../../shared/connected_status/connected_close_investigation_modal'),
-          import('../../shared/privileges/privilege_gate'),
-        ]);
-        const GatedCloseInvestigationModal: React.FC<CloseInvestigationModalRenderProps> = (
-          props
-        ) =>
-          React.createElement(
-            PrivilegeGate,
-            { privilege: 'manageInvestigations' },
-            React.createElement(ConnectedCloseInvestigationModal, props)
-          );
-        return GatedCloseInvestigationModal;
-      });
-
-    const renderCloseInvestigationModal = (props: CloseInvestigationModalRenderProps) =>
-      React.createElement(
-        EscalationModalBoundary,
-        null,
-        React.createElement(LazyConnectedCloseInvestigationModal, props)
-      );
-
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
       templateId,
@@ -216,10 +178,9 @@ export const investigationTemplate: TemplateDefinition = {
       renderSeverity: (props) =>
         React.createElement(
           EscalationModalBoundary,
-          null,
+          { inline: true },
           React.createElement(LazySeverityPicker, props)
         ),
-      renderCloseInvestigationModal,
       renderOverview: (props) =>
         React.createElement(
           EscalationModalBoundary,
@@ -231,18 +192,6 @@ export const investigationTemplate: TemplateDefinition = {
           React.Suspense,
           { fallback: null },
           React.createElement(LazyInvestigationLiveState, props)
-        ),
-      // Agent Builder titles an investigation on its first round. While the title chunk loads, an
-      // untitled one shows the generic title rather than Agent Builder's placeholder.
-      renderTitle: (props) =>
-        React.createElement(
-          React.Suspense,
-          {
-            fallback: isInvestigationTitlePending(props.title)
-              ? NEW_INVESTIGATION_TITLE
-              : props.title,
-          },
-          React.createElement(LazyInvestigationTitle, props)
         ),
       briefCard: InvestigationBriefCardWithFallback,
       // The flyout's Copy link button confirms success itself; only a failure needs a toast.
@@ -256,14 +205,24 @@ export const investigationTemplate: TemplateDefinition = {
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,
-      wrapEscalationButton: escalationsEnabled
-        ? (button) =>
-            React.createElement(
-              React.Suspense,
-              { fallback: null },
-              React.createElement(LazyManageEscalationsGate, null, button)
-            )
-        : undefined,
+      // The header's title, read from the investigation it polls with the overview; and, with
+      // escalations, whether the user may open one.
+      loadDetailsFlyoutContext: async () => {
+        const [Provider, { useInvestigationTitle }, escalationPrivileges] = await Promise.all([
+          loadFlyoutProvider({ getQueryClient: getSharedInvestigationsQueryClient }),
+          import('./flyout/use_investigation_title'),
+          escalationsEnabled
+            ? import('../../../escalations/hooks/use_escalation_privileges')
+            : undefined,
+        ]);
+        return {
+          Provider,
+          useTitle: useInvestigationTitle,
+          ...(escalationPrivileges && {
+            useCanOpenEscalation: escalationPrivileges.useCanManageEscalations,
+          }),
+        };
+      },
       // Listing and deciding proposals needs the proposals plugin, which is optional here.
       renderProposedActions: proposals
         ? (props) =>

@@ -45,6 +45,8 @@ export type {
   ConversationTemplateUIDefinition,
   ConversationTemplateBriefCardRenderProps,
   ConversationTemplateDetailsFlyoutRenderProps,
+  ConversationTemplateDetailsFlyoutDescriptor,
+  ConversationTemplateDetailsFlyoutModule,
   ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
 } from './templates';

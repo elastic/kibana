@@ -25,7 +25,7 @@ export const DetailsBlock = memo<{
         >
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <h3>{title}</h3>
+              <h4>{title}</h4>
             </EuiTitle>
           </EuiFlexItem>
           {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}

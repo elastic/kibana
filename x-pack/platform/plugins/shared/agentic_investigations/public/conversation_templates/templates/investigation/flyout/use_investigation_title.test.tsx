@@ -5,25 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderHook } from '@testing-library/react';
 import { DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
-import { InvestigationTitle } from './header_title';
+import { useInvestigationTitle } from './use_investigation_title';
 
 jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
 
 const renderTitle = (title: string) =>
-  render(
-    <EuiProvider>
-      <I18nProvider>
-        <InvestigationTitle conversationId="conv-1" title={title} />
-      </I18nProvider>
-    </EuiProvider>
-  );
+  renderHook(() => useInvestigationTitle({ conversationId: 'conv-1', title })).result.current;
 
 const alertSubject = {
   type: 'alert',
@@ -32,15 +23,13 @@ const alertSubject = {
   created_at: '2026-07-28T14:00:00.000Z',
 };
 
-describe('InvestigationTitle', () => {
+describe('useInvestigationTitle', () => {
   it("shows the conversation's title once Agent Builder generated it", () => {
     mockUseInvestigation.mockReturnValue({
       data: { title: DEFAULT_CONVERSATION_TITLE, title_pending: true, subjects: [alertSubject] },
     });
 
-    renderTitle('Checkout latency spike after deploy');
-
-    expect(screen.getByTestId('investigationFlyoutTitle')).toHaveTextContent(
+    expect(renderTitle('Checkout latency spike after deploy')).toBe(
       'Checkout latency spike after deploy'
     );
   });
@@ -50,9 +39,7 @@ describe('InvestigationTitle', () => {
       data: { title: DEFAULT_CONVERSATION_TITLE, title_pending: true, subjects: [alertSubject] },
     });
 
-    renderTitle(DEFAULT_CONVERSATION_TITLE);
-
-    expect(screen.getByTestId('investigationFlyoutTitle')).toHaveTextContent('Checkout latency');
+    expect(renderTitle(DEFAULT_CONVERSATION_TITLE)).toBe('Checkout latency');
   });
 
   it('takes a title generated since the conversation was read from the investigation', () => {
@@ -60,18 +47,12 @@ describe('InvestigationTitle', () => {
       data: { title: 'Checkout latency spike', title_pending: false, subjects: [alertSubject] },
     });
 
-    renderTitle(DEFAULT_CONVERSATION_TITLE);
-
-    expect(screen.getByTestId('investigationFlyoutTitle')).toHaveTextContent(
-      'Checkout latency spike'
-    );
+    expect(renderTitle(DEFAULT_CONVERSATION_TITLE)).toBe('Checkout latency spike');
   });
 
   it('shows a generic title before the investigation is read', () => {
     mockUseInvestigation.mockReturnValue({ data: undefined });
 
-    renderTitle(DEFAULT_CONVERSATION_TITLE);
-
-    expect(screen.getByTestId('investigationFlyoutTitle')).toHaveTextContent('New investigation');
+    expect(renderTitle(DEFAULT_CONVERSATION_TITLE)).toBe('New investigation');
   });
 });

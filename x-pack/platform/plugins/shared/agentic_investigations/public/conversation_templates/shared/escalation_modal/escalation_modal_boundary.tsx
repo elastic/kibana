@@ -38,17 +38,37 @@ const Spinner: React.FC<{ label: string }> = ({ label }) => (
   </EuiFlexGroup>
 );
 
+const INLINE_LOADING_LABEL = i18n.translate('xpack.agenticInvestigations.inlineContent.loading', {
+  defaultMessage: 'Loading…',
+});
+
 export interface EscalationModalBoundaryProps {
-  /** Accessible label for the loading spinner. Defaults to "Loading escalation modal…". */
+  /**
+   * Accessible label for the loading spinner. Defaults to "Loading escalation modal…", or to
+   * "Loading…" when `inline`.
+   */
   loadingLabel?: string;
+  /**
+   * Loads behind a small spinner that takes no extra height, for content in a tight spot such as
+   * a flyout header's info block.
+   */
+  inline?: boolean;
 }
 
 export const EscalationModalBoundary: React.FC<
   React.PropsWithChildren<EscalationModalBoundaryProps>
-> = ({ children, loadingLabel }) => (
+> = ({ children, loadingLabel, inline = false }) => (
   <KibanaErrorBoundaryProvider>
     <KibanaErrorBoundary>
-      <React.Suspense fallback={<Spinner label={loadingLabel ?? LOADING_LABEL} />}>
+      <React.Suspense
+        fallback={
+          inline ? (
+            <EuiLoadingSpinner size="s" aria-label={loadingLabel ?? INLINE_LOADING_LABEL} />
+          ) : (
+            <Spinner label={loadingLabel ?? LOADING_LABEL} />
+          )
+        }
+      >
         {children}
       </React.Suspense>
     </KibanaErrorBoundary>

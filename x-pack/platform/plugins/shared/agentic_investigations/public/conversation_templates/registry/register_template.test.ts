@@ -90,22 +90,23 @@ describe('registerTemplate', () => {
 
     expect(investigation.renderAssignees).toEqual(expect.any(Function));
     expect(investigation.renderStatus).toEqual(expect.any(Function));
-    expect(investigation.renderCloseInvestigationModal).toEqual(expect.any(Function));
     expect(investigation.renderEscalationModal).toEqual(expect.any(Function));
-    expect(investigation.wrapEscalationButton).toEqual(expect.any(Function));
+    expect(investigation.loadDetailsFlyoutContext).toEqual(expect.any(Function));
     expect(escalation.renderAssignees).toEqual(expect.any(Function));
     expect(escalation.renderStatus).toEqual(expect.any(Function));
     expect(escalation.renderLinkedInvestigations).toEqual(expect.any(Function));
+    expect(escalation.loadDetailsFlyoutContext).toEqual(expect.any(Function));
   });
 
-  it('offers no escalate action when escalations are disabled', () => {
+  it('offers no escalate action when escalations are disabled', async () => {
     const { investigation, escalation } = register({ escalationsEnabled: false });
 
     expect(investigation.renderEscalationModal).toBeUndefined();
-    expect(investigation.wrapEscalationButton).toBeUndefined();
+    const context = await investigation.loadDetailsFlyoutContext();
+    expect(context.useCanOpenEscalation).toBeUndefined();
+    expect(context.useTitle).toEqual(expect.any(Function));
     // The investigation's own write actions are unaffected.
     expect(investigation.renderStatus).toEqual(expect.any(Function));
-    expect(investigation.renderCloseInvestigationModal).toEqual(expect.any(Function));
     expect(escalation).toBeUndefined();
   });
 
@@ -114,7 +115,8 @@ describe('registerTemplate', () => {
 
     expect(investigation.renderOverview).toEqual(expect.any(Function));
     expect(investigation.renderLiveState).toEqual(expect.any(Function));
-    expect(investigation.renderTitle).toEqual(expect.any(Function));
+    // The title is read from the query API through the flyout context's hook.
+    expect(investigation.loadDetailsFlyoutContext).toEqual(expect.any(Function));
     expect(investigation.briefCard).toEqual(expect.any(Function));
   });
 
@@ -129,27 +131,25 @@ describe('registerTemplate', () => {
   });
 
   describe('the escalation button without the UI capability', () => {
-    const renderButton = (manageEscalations: boolean) => {
+    const renderButton = async (manageEscalations: boolean) => {
       const core = coreMock.createStart();
       core.http.get.mockResolvedValue({
         investigations: { read: true, manage: true },
         escalations: { read: manageEscalations, manage: manageEscalations },
       });
       const { investigation } = register({ core });
-      render(
-        React.createElement(
-          React.Fragment,
-          null,
-          investigation.wrapEscalationButton(
-            React.createElement('button', { type: 'button' }, 'Open escalation')
-          )
-        )
-      );
+      // The flyout calls the hook inside the context's provider, as Agent Builder does here.
+      const { Provider, useCanOpenEscalation } = await investigation.loadDetailsFlyoutContext();
+      const EscalationButton = () =>
+        useCanOpenEscalation()
+          ? React.createElement('button', { type: 'button' }, 'Open escalation')
+          : null;
+      render(React.createElement(Provider, null, React.createElement(EscalationButton)));
       return core;
     };
 
     it('shows the button when the probe reports the escalations manage privilege', async () => {
-      const core = renderButton(true);
+      const core = await renderButton(true);
 
       expect(await screen.findByRole('button', { name: 'Open escalation' })).toBeInTheDocument();
       expect(core.http.get).toHaveBeenCalledWith('/internal/investigations/_privileges', {
@@ -158,7 +158,7 @@ describe('registerTemplate', () => {
     });
 
     it('hides the button when the probe reports no escalations manage privilege', async () => {
-      const core = renderButton(false);
+      const core = await renderButton(false);
 
       await waitFor(() => expect(core.http.get).toHaveBeenCalled());
       expect(screen.queryByRole('button', { name: 'Open escalation' })).not.toBeInTheDocument();

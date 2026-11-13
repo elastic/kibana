@@ -73,6 +73,11 @@ const ConnectedAssigneesInner = ({
     buttonIconSize,
   });
 
+  // Without the picker, an empty avatar stack would leave the header's Assignees block blank.
+  if (!canManage && stableUids.length === 0) {
+    return <>{CONNECTED_ASSIGNEES_LABELS.none}</>;
+  }
+
   return <AssignToUsers {...getPickerProps(items[0])} />;
 };
 

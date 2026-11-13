@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import type { QueryClient } from '@kbn/react-query';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   FlyoutGroupedAttachmentsRegistry,
@@ -33,6 +34,15 @@ export type MakeLazyWithProviders = <P extends object>(
   getComponent: () => Promise<React.ComponentType<P>>
 ) => React.LazyExoticComponent<React.ComponentType<P>>;
 
+/**
+ * Loads a provider with `KibanaContextProvider` and a `QueryClientProvider`, for hooks a template
+ * adds to its conversation details flyout through `loadDetailsFlyoutContext`. The query client is
+ * its own unless `getQueryClient` supplies one to share.
+ */
+export type LoadFlyoutProvider = (options?: {
+  getQueryClient?: () => Promise<QueryClient>;
+}) => Promise<React.ComponentType<{ children: React.ReactNode }>>;
+
 /** What a template's `register` receives; the shared render props are created once for all templates. */
 export interface TemplateRegistrationContext {
   templateId: string;
@@ -42,6 +52,7 @@ export interface TemplateRegistrationContext {
   /** When false, no template offers escalation actions. */
   escalationsEnabled: boolean;
   makeLazyWithProviders: MakeLazyWithProviders;
+  loadFlyoutProvider: LoadFlyoutProvider;
   groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   renderAssignees: RenderAssignees;
   renderStatus: RenderStatus;
