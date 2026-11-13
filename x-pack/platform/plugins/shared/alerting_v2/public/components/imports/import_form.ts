@@ -6,14 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SEVERITY_LEVELS } from '@kbn/alerting-v2-schemas';
+import { ID_MAX_LENGTH, SEVERITY_LEVELS } from '@kbn/alerting-v2-schemas';
 
 export type ImportSeverity = (typeof SEVERITY_LEVELS)[number];
 
 export interface ImportFormState {
   name: string;
   description: string;
-  source: string;
   defaultSeverity: ImportSeverity;
   fingerprintField: string;
 }
@@ -21,14 +20,13 @@ export interface ImportFormState {
 export const DEFAULT_IMPORT_FORM_STATE: ImportFormState = {
   name: '',
   description: '',
-  source: '',
   defaultSeverity: 'medium',
   fingerprintField: '',
 };
 
+// The name is also the source of the imported alerts, so it follows the source rules.
 const RESERVED_SOURCE_PREFIX = 'elastic';
-const MAX_SOURCE_LENGTH = 100;
-const MAX_NAME_LENGTH = 256;
+const MAX_NAME_LENGTH = ID_MAX_LENGTH;
 
 /** Dotted path of letters, digits, underscores and dashes, for example `labels.env`. */
 const FINGERPRINT_FIELD_PATTERN = /^[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)*$/;
@@ -48,19 +46,6 @@ export const SEVERITY_OPTIONS = SEVERITY_LEVELS.map((level) => ({
   text: SEVERITY_LABELS[level],
 }));
 
-/** A slug of the name that never starts with the reserved `elastic` prefix. */
-export const toImportSource = (name: string): string => {
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, MAX_SOURCE_LENGTH);
-  if (slug === '') {
-    return '';
-  }
-  return slug.startsWith(RESERVED_SOURCE_PREFIX) ? `custom-${slug}` : slug;
-};
-
 export const validateName = (value: string): string | true => {
   const trimmed = value.trim();
   if (trimmed === '') {
@@ -68,26 +53,15 @@ export const validateName = (value: string): string | true => {
       defaultMessage: 'A name is required.',
     });
   }
+  if (trimmed.startsWith(RESERVED_SOURCE_PREFIX)) {
+    return i18n.translate('xpack.alertingV2.imports.form.name.reserved', {
+      defaultMessage: 'The name cannot start with "elastic". That prefix is reserved.',
+    });
+  }
   if (trimmed.length > MAX_NAME_LENGTH) {
     return i18n.translate('xpack.alertingV2.imports.form.name.tooLong', {
       defaultMessage: 'The name must be at most {max} characters.',
       values: { max: MAX_NAME_LENGTH },
-    });
-  }
-  return true;
-};
-
-export const validateSource = (value: string): string | true => {
-  const trimmed = value.trim();
-  if (trimmed.startsWith(RESERVED_SOURCE_PREFIX)) {
-    return i18n.translate('xpack.alertingV2.imports.form.source.reserved', {
-      defaultMessage: 'The source cannot start with "elastic". That prefix is reserved.',
-    });
-  }
-  if (trimmed.length > MAX_SOURCE_LENGTH) {
-    return i18n.translate('xpack.alertingV2.imports.form.source.tooLong', {
-      defaultMessage: 'The source must be at most {max} characters.',
-      values: { max: MAX_SOURCE_LENGTH },
     });
   }
   return true;

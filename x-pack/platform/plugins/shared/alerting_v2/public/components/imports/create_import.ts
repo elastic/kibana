@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { WorkflowApi } from '@kbn/workflows-ui';
 import { buildImportWorkflowYaml } from './build_import_workflow_yaml';
-import { toImportSource } from './import_form';
 import type { ImportFormState } from './import_form';
 
 const INBOUND_WEBHOOK_CONNECTOR_TYPE_ID = '.inboundWebhook';
@@ -95,7 +94,6 @@ export const createImport = async ({
   values: ImportFormState;
 }): Promise<CreatedImport> => {
   const name = values.name.trim();
-  const source = values.source.trim() || toImportSource(name) || 'import';
   const fingerprintField = values.fingerprintField.trim();
   // A lowercase UUID is also a valid workflow id.
   const id = uuidv4();
@@ -127,7 +125,8 @@ export const createImport = async ({
       yaml: buildImportWorkflowYaml({
         name,
         connectorId: connector.id,
-        source,
+        // The import's name is the source shown on its alerts.
+        source: name,
         severity: values.defaultSeverity,
         ...(fingerprintField !== '' ? { fingerprintField } : {}),
       }),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import type { FieldPath, RegisterOptions } from 'react-hook-form';
 import { useCreateImport } from '../../hooks/use_create_import';
 import type { ImportSetupStep } from './create_import';
@@ -35,10 +35,8 @@ import { ImportCredentials } from './import_credentials';
 import {
   DEFAULT_IMPORT_FORM_STATE,
   SEVERITY_OPTIONS,
-  toImportSource,
   validateFingerprintField,
   validateName,
-  validateSource,
 } from './import_form';
 import type { ImportFormState } from './import_form';
 
@@ -79,12 +77,10 @@ export const ImportSetupFlyout = ({ onClose }: ImportSetupFlyoutProps) => {
   } = useCreateImport();
 
   const {
-    control,
     register,
     handleSubmit,
-    setValue,
     getValues,
-    formState: { errors, isValid, dirtyFields },
+    formState: { errors, isValid },
   } = useForm<ImportFormState>({
     mode: 'onChange',
     defaultValues: DEFAULT_IMPORT_FORM_STATE,
@@ -98,16 +94,6 @@ export const ImportSetupFlyout = ({ onClose }: ImportSetupFlyoutProps) => {
     const { ref, ...rest } = register(fieldName, options);
     return { ...rest, inputRef: ref };
   };
-
-  const name = useWatch({ control, name: 'name' });
-  const isSourceEdited = dirtyFields.source === true;
-
-  // The source follows the name until the user edits it.
-  useEffect(() => {
-    if (!isSourceEdited) {
-      setValue('source', toImportSource(name), { shouldValidate: true });
-    }
-  }, [name, isSourceEdited, setValue]);
 
   const submit = handleSubmit((values) => {
     resetCreate();
@@ -223,25 +209,6 @@ export const ImportSetupFlyout = ({ onClose }: ImportSetupFlyoutProps) => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate('xpack.alertingV2.imports.form.source.label', {
-                defaultMessage: 'Source',
-              })}
-              helpText={i18n.translate('xpack.alertingV2.imports.form.source.help', {
-                defaultMessage: 'The source name shown on imported alerts.',
-              })}
-              isInvalid={errors.source !== undefined}
-              error={errors.source?.message}
-            >
-              <EuiFieldText
-                fullWidth
-                isInvalid={errors.source !== undefined}
-                data-test-subj="importFormSource"
-                {...registerField('source', { validate: validateSource })}
-              />
-            </EuiFormRow>
 
             <EuiFormRow
               fullWidth
