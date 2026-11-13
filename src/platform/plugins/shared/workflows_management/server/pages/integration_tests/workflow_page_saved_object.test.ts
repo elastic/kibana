@@ -192,7 +192,7 @@ describe('workflow-page saved object', () => {
         getWorkflowPageSavedObjectId(ref('workflow-schema')),
         { enabled: false }
       )
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual(expect.objectContaining({ attributes: { enabled: false } }));
     await expect(
       partiallyUpdateWorkflowPage(
         spaceClient('team'),

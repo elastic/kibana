@@ -167,6 +167,22 @@ describe('WorkflowPagesClient', () => {
       );
     });
 
+    it('reads the page once and builds the result from the update', async () => {
+      const { client, scopedClient } = await setup();
+      await client.setAccess(key, { level: 'secret_link' });
+      scopedClient.get.mockClear();
+
+      await expect(client.setEnabled(key, false)).resolves.toEqual(
+        expect.objectContaining({
+          access: { level: 'secret_link' },
+          enabled: false,
+          online: false,
+          updatedBy: 'profile-alice',
+        })
+      );
+      expect(scopedClient.get).toHaveBeenCalledTimes(1);
+    });
+
     it('takes a page offline when the access level is removed', async () => {
       const { client } = await setup();
       await client.setAccess(key, { level: 'secret_link' });

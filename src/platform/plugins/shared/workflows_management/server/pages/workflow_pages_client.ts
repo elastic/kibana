@@ -200,17 +200,17 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
       await authorize();
       const id = getWorkflowPageSavedObjectId(ref);
       // Reads first, so an update cannot create a page that the lifecycle never made.
-      const { version } = await scopedClient.get<WorkflowPageAttributes>(
+      const existing = await scopedClient.get<WorkflowPageAttributes>(
         WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
         id
       );
-      await partiallyUpdateWorkflowPage(scopedClient, id, attributes, {
-        version,
+      const updated = await partiallyUpdateWorkflowPage(scopedClient, id, attributes, {
+        version: existing.version,
         refresh: 'wait_for',
       });
       audit();
       return toPageDto(
-        await scopedClient.get<WorkflowPageAttributes>(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id),
+        { ...existing, ...updated, attributes: { ...existing.attributes, ...attributes } },
         canEncrypt
       );
     } catch (error) {

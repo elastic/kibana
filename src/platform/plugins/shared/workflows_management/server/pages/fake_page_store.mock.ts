@@ -102,13 +102,22 @@ export const createFakeStore = () => {
           if (options?.version && options.version !== doc.version) {
             throw SavedObjectsErrorHelpers.createConflictError(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id);
           }
+          const version = nextVersion();
           docs.set(k, {
             ...doc,
             attributes: { ...doc.attributes, ...attributes },
-            version: nextVersion(),
+            version,
             updated_by: user,
           });
-          return { id, type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE, attributes, references: [] };
+          // Core returns the changed attributes and the new metadata, not the whole page.
+          return {
+            id,
+            type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+            attributes,
+            references: [],
+            version,
+            updated_by: user,
+          };
         }
       ),
       bulkDelete: jest.fn(

@@ -14,6 +14,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsServiceSetup,
   SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowPageRef } from './page_secret';
@@ -99,11 +100,11 @@ export const partiallyUpdateWorkflowPage = async (
   id: string,
   attributes: PartiallyUpdatableWorkflowPageAttributes,
   options: Pick<SavedObjectsUpdateOptions<WorkflowPageAttributes>, 'version' | 'refresh'> = {}
-): Promise<void> => {
+): Promise<SavedObjectsUpdateResponse<WorkflowPageAttributes>> => {
   const { access, enabled } = attributes;
   // Drops other options at runtime too: `mergeAttributes: false` and `upsert` corrupt the page.
   const { version, refresh } = options;
-  await client.update<WorkflowPageAttributes>(
+  return client.update<WorkflowPageAttributes>(
     WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
     id,
     {

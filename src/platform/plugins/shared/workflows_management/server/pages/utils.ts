@@ -48,7 +48,10 @@ export const toPageDto = (
     created_by: createdBy,
     updated_at: updatedAt,
     updated_by: updatedBy,
-  }: SavedObject<WorkflowPageAttributes>,
+  }: Pick<
+    SavedObject<WorkflowPageAttributes>,
+    'attributes' | 'created_at' | 'created_by' | 'updated_at' | 'updated_by'
+  >,
   canEncrypt: boolean
 ): WorkflowPageDto => {
   const { workflowId, pageId, access, enabled } = attributes;
