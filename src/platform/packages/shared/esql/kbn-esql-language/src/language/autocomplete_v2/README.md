@@ -20,7 +20,7 @@ cursor and from the command signatures in `../../esql_js_sim`. Rules, enforced b
 1. **Locate** (`esql_js_sim/grammar`): where the cursor is in the grammar.
 2. **Resolve** (`resolve.ts`): what has to be offered there, as a list of requests. A request
    is a kind of thing: the names of commands, a token, the end of the command, an argument
-   with its role. It is pure: nothing is fetched.
+   with its role, an expression with its role. It is pure: nothing is fetched.
 3. **Provide** (`providers/`): the items for each request. A provider is chosen by the kind of
    the request and knows the editor only through the context (`context.ts`).
 4. **Present** (in `suggest.ts` for now): the final list.
@@ -34,10 +34,29 @@ What the engine offers today:
   `new_name` (a free name with its assignment), `constant` (its allowed values), `entity`,
   `map` (the keys not used yet, and the values of the key before the cursor), `option_name`
   (the options not used and not in conflict with a used one) and `dependent_value` (the role
-  the name gives it, listed in the signature or defined by the named entity). Expressions and
-  sublanguages are resolved and not provided yet.
+  the name gives it, listed in the signature or defined by the named entity).
+- Expressions, by the mode and the types of their role. Sublanguages are resolved and not
+  provided yet.
 
 Inside an open string only a value is offered: the value of a map key or a constant.
+
+An expression is one request, whatever the cursor is nested in: its operands, its operators,
+its brackets and the arguments of its functions are offered together
+(`providers/expressions.ts`). The items come from the expression engine the commands of the
+current flow share. The provider tells that engine what the role and the grammar know:
+
+- which functions and operators apply, from the mode of the role (and the roles around it: a
+  filter inside an aggregation);
+- the types the role accepts, whether subqueries may appear, where full-text functions may;
+- what is written of the expression: the grammar gives where it starts, and the node of the
+  syntax tree that starts there is handed over.
+
+While something is written that is not yet a whole expression of the type its role asks for,
+the command cannot go on: no pipe, no keyword and no separator of the command is offered.
+
+Two things are still borrowed from the current flow here, and go away when the expression
+engine reads the grammar position itself: the syntax tree of the command at the cursor, and
+the names the function definitions use for the places a function is allowed in.
 
 Entities come from `entities/registry.ts`: one definition per kind, each turning what the
 editor provides today into entities, in a scope. The scope is all a definition gets: the index

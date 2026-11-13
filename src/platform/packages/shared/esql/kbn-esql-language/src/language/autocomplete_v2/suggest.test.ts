@@ -365,4 +365,105 @@ describe('suggest (v2)', () => {
       expect(await textsAt('SET unknown_setting = ')).toEqual([]);
     });
   });
+
+  describe('expressions', () => {
+    // The columns of a query are cached by its text: these tests read a source of their own.
+    const callbacks = createCallbacks({
+      columns: [
+        { name: 'k', type: 'keyword', userDefined: false },
+        { name: 'n', type: 'long', userDefined: false },
+      ],
+    });
+    const currentTextsAt = async (query: string): Promise<string[]> =>
+      (await currentSuggest(query, query.length, callbacks)).map(({ text }) => text);
+
+    it('offers columns and functions where an expression starts', async () => {
+      const texts = await textsAt('FROM e | WHERE ', callbacks);
+
+      expect(texts).toEqual(expect.arrayContaining(['k ', 'n ', 'ABS($0)']));
+    });
+
+    it('offers the operators that fit what is written of the expression', async () => {
+      const texts = await textsAt('FROM e | WHERE n ', callbacks);
+
+      expect(texts).toEqual(expect.arrayContaining(['> $0', '+ $0']));
+      expect(texts).not.toContain('LIKE $0');
+    });
+
+    it('lets the command go on only once the expression has the type its role asks for', async () => {
+      expect(await textsAt('FROM e | WHERE n ', callbacks)).not.toContain('| ');
+      expect(await textsAt('FROM e | WHERE n > 1 ', callbacks)).toEqual(
+        expect.arrayContaining(['| ', 'AND $0'])
+      );
+    });
+
+    it('offers the operands of the type an operator needs', async () => {
+      const texts = await textsAt('FROM e | WHERE n > ', callbacks);
+
+      expect(texts).toContain('n');
+      expect(texts).not.toContain('k');
+    });
+
+    it('offers the arguments of a function by its signature', async () => {
+      const texts = await textsAt('FROM e | EVAL a = TO_UPPER(', callbacks);
+
+      expect(texts).toContain('k');
+      expect(texts).not.toContain('n');
+    });
+
+    it('offers the expression once, whatever the cursor is nested in', async () => {
+      const texts = await textsAt('FROM e | WHERE n > 1 AND ', callbacks);
+
+      expect(texts.filter((text) => text === 'ABS($0)')).toHaveLength(1);
+    });
+
+    describe('by the mode of the role', () => {
+      it('offers aggregations, and columns only as their arguments', async () => {
+        const start = await textsAt('FROM e | STATS ', callbacks);
+
+        expect(start).toContain('AVG($0)');
+        expect(start).not.toContain('n ');
+        expect(await textsAt('FROM e | STATS AVG(', callbacks)).toContain('n');
+      });
+
+      it('offers grouping functions in a grouping and not in a scalar expression', async () => {
+        expect(await textsAt('FROM e | STATS AVG(n) BY ', callbacks)).toContain('CATEGORIZE($0)');
+        expect(await textsAt('FROM e | EVAL a = ', callbacks)).not.toContain('CATEGORIZE($0)');
+      });
+
+      it('offers full-text functions in a filter, also the filter of an aggregation', async () => {
+        expect(await textsAt('FROM e | WHERE ', callbacks)).toContain('MATCH($0)');
+        expect(await textsAt('FROM e | STATS AVG(n) WHERE ', callbacks)).toContain('MATCH($0)');
+        expect(await textsAt('FROM e | SORT ', callbacks)).not.toContain('MATCH($0)');
+      });
+
+      it('offers no column where the value is a constant', async () => {
+        const texts = await textsAt('ROW a = ', callbacks);
+
+        expect(texts).toContain('ABS($0)');
+        expect(texts).not.toContain('n ');
+      });
+    });
+
+    it.each([
+      'FROM e | WHERE ',
+      'FROM e | WHERE k',
+      'FROM e | WHERE k ',
+      'FROM e | WHERE n > ',
+      'FROM e | WHERE n > 1 ',
+      'FROM e | WHERE n > 1 AND ',
+      'FROM e | WHERE (n ',
+      'FROM e | WHERE k IS ',
+      'FROM e | WHERE ABS(',
+      'FROM e | WHERE n IN (',
+      'FROM e | WHERE n::',
+      'FROM e | EVAL a = ',
+      'FROM e | EVAL a = n + ',
+      'FROM e | EVAL a = ROUND(n, ',
+    ])('offers at the end of %j what the current flow offers', async (query) => {
+      expect((await textsAt(query, callbacks)).sort()).toEqual(
+        (await currentTextsAt(query)).sort()
+      );
+    });
+  });
 });

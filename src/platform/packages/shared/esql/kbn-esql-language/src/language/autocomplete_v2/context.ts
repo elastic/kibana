@@ -11,7 +11,7 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { EsqlQuery } from '@elastic/esql';
 import type { ICommand } from '../../commands/registry/registry';
-import type { GetColumnsByTypeFn } from '../../commands/registry/types';
+import type { ColumnsMap } from '../shared/columns_retrieval_helpers';
 import { locate, type CursorIR } from '../../esql_js_sim/grammar';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getNesting, getQueryBeforeCursor } from './pipeline';
@@ -25,30 +25,28 @@ const isSame = (first: string[], second: string[]): boolean =>
 const PLACEHOLDER_NAME = 'esql_placeholder_name';
 const NAME_RULES: readonly string[] = ['qualifiedName', 'qualifiedNamePattern', 'identifier'];
 
+type ColumnRetriever = ReturnType<typeof getColumnsByTypeRetriever>;
+
 /** The columns of the query before the cursor, fetched on the first request only. */
-const createColumnsGetter = (
+const createColumnsGetters = (
   text: string,
   ir: CursorIR,
   callbacks: ESQLCallbacks | undefined
-): GetColumnsByTypeFn => {
-  let retriever: GetColumnsByTypeFn | undefined;
+): Pick<SuggestionContext, 'getColumnsByType' | 'getColumnMap'> => {
+  let retriever: ColumnRetriever | undefined;
+  const getRetriever = (): ColumnRetriever | undefined => {
+    const query = getQueryBeforeCursor(text, ir);
 
-  return async (...args) => {
-    if (!retriever) {
-      const query = getQueryBeforeCursor(text, ir);
-
-      if (!query) {
-        return [];
-      }
-
-      retriever = getColumnsByTypeRetriever(
-        EsqlQuery.fromSrc(query).ast,
-        query,
-        callbacks
-      ).getColumnsByType;
+    if (!retriever && query) {
+      retriever = getColumnsByTypeRetriever(EsqlQuery.fromSrc(query).ast, query, callbacks);
     }
 
-    return retriever(...args);
+    return retriever;
+  };
+
+  return {
+    getColumnsByType: async (...args) => (await getRetriever()?.getColumnsByType(...args)) ?? [],
+    getColumnMap: async () => (await getRetriever()?.getColumnMap()) ?? (new Map() as ColumnsMap),
   };
 };
 
@@ -58,6 +56,7 @@ const createColumnsGetter = (
  */
 export const createContext = async (
   text: string,
+  offset: number,
   ir: CursorIR,
   callbacks: ESQLCallbacks | undefined
 ): Promise<SuggestionContext> => {
@@ -78,9 +77,11 @@ export const createContext = async (
 
   return {
     callbacks,
+    text,
+    offset,
     ir,
     afterName: locate(afterNameText, afterNameText.length),
-    getColumnsByType: createColumnsGetter(text, ir, callbacks),
+    ...createColumnsGetters(text, ir, callbacks),
     usedNames: new Set(
       ir.commands.flatMap(({ arguments: written }) =>
         written

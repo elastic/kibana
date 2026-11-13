@@ -12,7 +12,8 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ICommand } from '../../commands/registry/registry';
 import type { GetColumnsByTypeFn } from '../../commands/registry/types';
-import type { ResolvedRole } from '../../esql_js_sim/definitions';
+import type { ColumnsMap } from '../shared/columns_retrieval_helpers';
+import type { CallSiteId, ExpressionRole, ResolvedRole } from '../../esql_js_sim/definitions';
 import type { CursorIR, ExpectedArgument, Follower } from '../../esql_js_sim/grammar';
 
 /**
@@ -27,11 +28,19 @@ export type SuggestionRequest =
   /** The end of the command: the next line. */
   | { kind: 'end_of_command' }
   /** An argument, with the role its signature gives it. */
-  | { kind: 'argument'; argument: ExpectedArgument; resolved?: ResolvedRole };
+  | { kind: 'argument'; argument: ExpectedArgument; resolved?: ResolvedRole }
+  /**
+   * An expression the cursor is in, or that starts at the cursor. `entry` is the call site of
+   * the whole expression, whatever the cursor is nested in.
+   */
+  | { kind: 'expression'; role: ExpressionRole; resolved: ResolvedRole; entry: CallSiteId };
 
 /** What providers know beyond the request: the editor, and the query before the cursor. */
 export interface SuggestionContext {
   callbacks: ESQLCallbacks | undefined;
+  /** The whole text of the editor, and where the cursor is in it. */
+  text: string;
+  offset: number;
   /** The cursor, as the grammar describes it. */
   ir: CursorIR;
   /**
@@ -44,6 +53,8 @@ export interface SuggestionContext {
    * commands before it, and only when a provider asks.
    */
   getColumnsByType: GetColumnsByTypeFn;
+  /** The same columns by name, for the type of what is written. */
+  getColumnMap: () => Promise<ColumnsMap>;
   /** Every name written in the query, to pick a new one that is not taken. */
   usedNames: Set<string>;
   /** Whether the license reaches a level; undefined when the editor does not say. */
