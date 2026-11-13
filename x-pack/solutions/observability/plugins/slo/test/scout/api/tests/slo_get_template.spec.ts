@@ -85,7 +85,7 @@ apiTest.describe(
       expect(res).toHaveStatusCode(404);
       const body = res.body as { message?: string };
       expect(body.message).toContain(
-        'SLO Template with id [non-existent-template-id-scout] not found'
+        'SLO Template with ID [non-existent-template-id-scout] not found'
       );
     });
   }

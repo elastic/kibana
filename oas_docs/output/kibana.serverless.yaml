@@ -69197,7 +69197,7 @@ paths:
                             0,
                             "sloId"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -69209,7 +69209,7 @@ paths:
                             0,
                             "sloId"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -69369,7 +69369,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -69379,7 +69379,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -69737,7 +69737,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -69747,7 +69747,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -70259,7 +70259,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -70269,7 +70269,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -70527,7 +70527,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -70537,7 +70537,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -70817,7 +70817,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -70827,7 +70827,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -71016,7 +71016,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -71026,7 +71026,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -71214,7 +71214,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -71224,7 +71224,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400

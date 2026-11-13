@@ -59,7 +59,7 @@ export async function cleanupOrphanSummaries(
 
       if (nextDelete.length > 0) {
         logger.debug(
-          `Deleting ${nextDelete.length} SLO ids from the summary index (including all their instances)`
+          `Deleting ${nextDelete.length} SLO IDs from the summary index (including all their instances)`
         );
 
         await esClient.deleteByQuery(
