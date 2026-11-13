@@ -43,6 +43,20 @@ import {
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
 
+// The callout is not memoized, so it renders exactly when the page renders while it is shown.
+const mockTruncationCalloutRender = jest.fn();
+jest.mock('./entity_table_callouts', () => {
+  const actual =
+    jest.requireActual<typeof import('./entity_table_callouts')>('./entity_table_callouts');
+  return {
+    ...actual,
+    EntityTableTruncationCallout: () => {
+      mockTruncationCalloutRender();
+      return actual.EntityTableTruncationCallout();
+    },
+  };
+});
+
 const NEW_RANGE_LABEL = 'Pick a new range';
 
 const NewRangeButton = () => {
@@ -133,21 +147,14 @@ describe('EntityCategoryResults', () => {
 
   describe('truncation', () => {
     const truncateTypes =
-      (truncatedTypes: readonly string[], rowsWhenTruncated: 'rows' | 'noRows' = 'rows') =>
+      (truncatedTypes: readonly string[]) =>
       async (...args: Parameters<EntityInventoryApiClient['getEntities']>) => {
         const [type] = args;
-        const scenario: FixtureScenario = !truncatedTypes.includes(type)
-          ? 'normal'
-          : rowsWhenTruncated === 'rows'
-          ? 'truncated'
-          : 'empty';
-        const list = await createScenarioEntityInventoryApiClient({ scenario }).getEntities(
-          ...args
-        );
-        return { ...list, truncated: list.truncated || truncatedTypes.includes(type) };
+        const scenario: FixtureScenario = truncatedTypes.includes(type) ? 'truncated' : 'normal';
+        return createScenarioEntityInventoryApiClient({ scenario }).getEntities(...args);
       };
 
-    it('shows one callout above the sections naming the limit and the truncated type', async () => {
+    it('shows one callout above the sections when a type is truncated', async () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
       renderResults({ ...fixtureClient, getEntities: truncateTypes(['host']) }, null);
 
@@ -156,8 +163,6 @@ describe('EntityCategoryResults', () => {
       expect(callout).toHaveTextContent(
         'We can only show a limited number of entities at a time. Use filters to slice and dice further your data.'
       );
-      expect(callout).toHaveTextContent(HOST_TYPE_FIXTURE.name);
-      expect(callout).not.toHaveTextContent(K8S_DEPLOYMENT_TYPE_FIXTURE.name);
       const [firstShown] = document.querySelectorAll(
         '[data-test-subj="entityInventoryTruncationCallout"], [data-test-subj="entityInventoryTypeSection"]'
       );
@@ -165,30 +170,45 @@ describe('EntityCategoryResults', () => {
       await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
     });
 
-    it('shows a single callout naming every truncated type', async () => {
+    it('shows a single callout when several types are truncated', async () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
       renderResults(
         { ...fixtureClient, getEntities: truncateTypes(['host', 'k8s.deployment']) },
         null
       );
 
-      await waitFor(() =>
-        expect(screen.getByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
-          K8S_DEPLOYMENT_TYPE_FIXTURE.name
-        )
-      );
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
       expect(screen.getAllByTestId('entityInventoryTruncationCallout')).toHaveLength(1);
-      expect(screen.getByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
-        HOST_TYPE_FIXTURE.name
-      );
     });
 
-    it('shows no callout when a truncated list has no rows', async () => {
+    it('does not render the page again when a second truncated type arrives', async () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
-      renderResults({ ...fixtureClient, getEntities: truncateTypes(['host'], 'noRows') });
+      const getTruncatedEntities = truncateTypes(['host', 'k8s.deployment']);
+      let releaseDeploymentList = () => {};
+      const deploymentListHeld = new Promise<void>((resolve) => {
+        releaseDeploymentList = resolve;
+      });
+      const getEntities = async (...args: Parameters<EntityInventoryApiClient['getEntities']>) => {
+        const [type] = args;
+        if (type === 'k8s.deployment') {
+          await deploymentListHeld;
+        }
+        return getTruncatedEntities(...args);
+      };
+      mockTruncationCalloutRender.mockClear();
+      renderResults({ ...fixtureClient, getEntities }, null);
 
-      expect(await screen.findByTestId('entityInventoryTableEmpty')).toBeInTheDocument();
-      expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(1));
+      expect(screen.getByTestId('entityInventoryTruncationCallout')).toBeInTheDocument();
+      const calloutRendersWithOneTruncatedType = mockTruncationCalloutRender.mock.calls.length;
+
+      // The flag is already true, so the second report must not render the page, and with it the
+      // callout, again.
+      releaseDeploymentList();
+      await waitFor(() => expect(screen.getAllByTestId('entityInventoryTable')).toHaveLength(2));
+
+      expect(mockTruncationCalloutRender).toHaveBeenCalledTimes(calloutRendersWithOneTruncatedType);
+      expect(screen.getAllByTestId('entityInventoryTruncationCallout')).toHaveLength(1);
     });
   });
 

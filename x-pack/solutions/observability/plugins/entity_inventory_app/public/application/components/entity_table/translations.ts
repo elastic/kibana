@@ -36,17 +36,6 @@ export const TRUNCATION_BODY = i18n.translate(
   }
 );
 
-export const getTruncatedTypesText = (typeNames: readonly string[]) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.truncatedTypes', {
-    defaultMessage: 'Entity types over the limit: {typeNames}',
-    values: {
-      typeNames: new Intl.ListFormat(i18n.getLocale(), {
-        style: 'long',
-        type: 'conjunction',
-      }).format(typeNames),
-    },
-  });
-
 export const SOURCE_ERRORS_TITLE = i18n.translate(
   'xpack.entityInventoryApp.entityTable.sourceErrors.title',
   { defaultMessage: 'Some data sources failed' }

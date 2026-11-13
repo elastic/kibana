@@ -54,8 +54,7 @@ const SourceErrorsIndicator = ({ errors }: { errors: readonly SourceError[] }) =
 
 export interface EntityTypeResultsProps {
   entityType: InventoryType;
-  /** Called with `true` while the section shows a truncated list with rows, else `false`. */
-  onTruncatedChange: (type: string, truncated: boolean) => void;
+  onTruncatedChange: (truncated: boolean) => void;
 }
 
 /**
@@ -73,14 +72,16 @@ export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeR
   const accordionId = useGeneratedHtmlId({ prefix: 'entityInventoryTypeSection' });
   const listResult = useEntityList(type);
   const { data: list, loading, error } = listResult;
-  const isTruncated = !loading && !error && list.truncated && list.rows.length > 0;
-  // A reload keeps the previous rows up, so the count stays while they are on screen.
+  const { truncated } = list;
   const showEntityCount = !error && (!loading || list.rows.length > 0);
 
   useEffect(() => {
-    onTruncatedChange(type, isTruncated);
-    return () => onTruncatedChange(type, false);
-  }, [type, isTruncated, onTruncatedChange]);
+    if (!truncated) {
+      return;
+    }
+    onTruncatedChange(true);
+    return () => onTruncatedChange(false);
+  }, [truncated, onTruncatedChange]);
 
   return (
     <EuiPanel
@@ -111,7 +112,7 @@ export const EntityTypeResults = ({ entityType, onTruncatedChange }: EntityTypeR
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow" data-test-subj="entityInventoryTypeSectionCount">
-                  {getEntityCountValue({ count: list.rows.length, truncated: list.truncated })}
+                  {getEntityCountValue({ count: list.rows.length, truncated })}
                 </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>

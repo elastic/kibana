@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityTypes } from '../../context/entity_types_context';
 import { EntityTypeResults } from './entity_type_results';
@@ -27,25 +27,11 @@ export interface EntityCategoryResultsProps {
 /**
  * One section per entity type of the page, in the order of the `types` response. A prefix that no
  * type of the response starts with gets a "not available" prompt instead of a section.
- * One truncation callout above the sections names every type whose shown list was truncated.
+ * One truncation callout shows above the sections while any of their lists is truncated.
  */
 export const EntityCategoryResults = ({ entityTypeIdPrefix }: EntityCategoryResultsProps) => {
   const { data: availableEntityTypes, loading, error, refresh } = useEntityTypes();
-  const [truncatedTypes, setTruncatedTypes] = useState<ReadonlySet<string>>(() => new Set());
-  const onTruncatedChange = useCallback((type: string, truncated: boolean) => {
-    setTruncatedTypes((previous) => {
-      if (previous.has(type) === truncated) {
-        return previous;
-      }
-      const next = new Set(previous);
-      if (truncated) {
-        next.add(type);
-      } else {
-        next.delete(type);
-      }
-      return next;
-    });
-  }, []);
+  const [isTruncated, setIsTruncated] = useState(false);
 
   if (error && !loading) {
     return (
@@ -66,20 +52,17 @@ export const EntityCategoryResults = ({ entityTypeIdPrefix }: EntityCategoryResu
     type.startsWith(entityTypeIdPrefix ?? '')
   );
   const isPrefixUnmatched = Boolean(entityTypeIdPrefix) && pageTypes.length === 0;
-  const truncatedTypeNames = pageTypes
-    .filter(({ type }) => truncatedTypes.has(type))
-    .map(({ name }) => name);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {truncatedTypeNames.length > 0 && (
+      {isTruncated && (
         <EuiFlexItem grow={false}>
-          <EntityTableTruncationCallout typeNames={truncatedTypeNames} />
+          <EntityTableTruncationCallout />
         </EuiFlexItem>
       )}
       {pageTypes.map((entityType) => (
         <EuiFlexItem key={entityType.type} grow={false}>
-          <EntityTypeResults entityType={entityType} onTruncatedChange={onTruncatedChange} />
+          <EntityTypeResults entityType={entityType} onTruncatedChange={setIsTruncated} />
         </EuiFlexItem>
       ))}
       {isPrefixUnmatched && (

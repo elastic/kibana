@@ -7,21 +7,16 @@
 
 import React from 'react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { TRUNCATION_BODY, TRUNCATION_TITLE, getTruncatedTypesText } from './translations';
+import { TRUNCATION_BODY, TRUNCATION_TITLE } from './translations';
 
-/** Warns that the lists of `typeNames` hold only the most recently seen entities. */
-export const EntityTableTruncationCallout = ({ typeNames }: { typeNames: readonly string[] }) => (
+/** Warns that at least one list holds only the most recently seen entities. */
+export const EntityTableTruncationCallout = () => (
   // Rendered only once a section shows a truncated list, so it announces itself when it appears.
   <KbnWarningCallout
     announceOnMount
     size="s"
     title={TRUNCATION_TITLE}
-    text={
-      <>
-        <p>{TRUNCATION_BODY}</p>
-        <p>{getTruncatedTypesText(typeNames)}</p>
-      </>
-    }
+    text={TRUNCATION_BODY}
     data-test-subj="entityInventoryTruncationCallout"
   />
 );
