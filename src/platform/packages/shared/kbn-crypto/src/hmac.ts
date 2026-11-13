@@ -11,7 +11,10 @@ import crypto from 'crypto';
 
 const HEX = /^[0-9a-fA-F]+$/;
 
-/** HMAC-SHA256 hex digest of `bindingParts` joined by `|`, keyed by `token`. */
+/**
+ * HMAC-SHA256 hex digest of `bindingParts` joined by `|`, keyed by `token`.
+ * Parts must not contain `|`, otherwise different inputs can collide.
+ */
 export const computeTokenHmac = (token: string, ...bindingParts: [string, ...string[]]): string =>
   crypto.createHmac('sha256', token).update(bindingParts.join('|')).digest('hex');
 

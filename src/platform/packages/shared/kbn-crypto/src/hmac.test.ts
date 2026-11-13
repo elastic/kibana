@@ -19,6 +19,12 @@ describe('computeTokenHmac', () => {
     );
   });
 
+  it('collides when a binding part contains |', () => {
+    expect(computeTokenHmac('secret-token', 'a|b', 'c')).toBe(
+      computeTokenHmac('secret-token', 'a', 'b|c')
+    );
+  });
+
   it('changes when the token or any binding part changes', () => {
     const base = computeTokenHmac('secret-token', 'conn-1', 'default');
     expect(computeTokenHmac('other-token', 'conn-1', 'default')).not.toBe(base);
