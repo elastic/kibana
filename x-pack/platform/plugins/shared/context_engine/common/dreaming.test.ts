@@ -17,7 +17,6 @@ import {
   isDreamedKiType,
   isDreamingAutomation,
   isDreamingConfigured,
-  takesMemories,
   validateDreamingTypes,
 } from './dreaming';
 
@@ -113,23 +112,6 @@ describe('isDreamingConfigured', () => {
   it('is not set up without a config, or switched off with nothing to build', () => {
     expect(isDreamingConfigured(undefined)).toBe(false);
     expect(isDreamingConfigured({ enabled: false })).toBe(false);
-  });
-});
-
-describe('takesMemories', () => {
-  it('takes memories while dreaming is set up', () => {
-    expect(takesMemories({ managed: true, dreaming: { enabled: true } })).toBe(true);
-    expect(
-      takesMemories({ managed: false, memory_enabled: false, dreaming: { enabled: true } })
-    ).toBe(true);
-  });
-
-  it('falls back to the saved memory_enabled, then to not managed, without dreaming', () => {
-    expect(takesMemories({ managed: false })).toBe(true);
-    expect(takesMemories({ managed: true })).toBe(false);
-    expect(takesMemories({ managed: true, memory_enabled: true })).toBe(true);
-    expect(takesMemories({ managed: false, memory_enabled: false })).toBe(false);
-    expect(takesMemories({ managed: true, dreaming: { enabled: false } })).toBe(false);
   });
 });
 

@@ -190,28 +190,6 @@ describe('remember tool', () => {
     });
   });
 
-  it('rejects a managed AI index whose dreaming is not set up', async () => {
-    get.mockResolvedValue({
-      id: 'support',
-      managed: true,
-      dest: { type: 'index', value: 'ai-index-idx-support' },
-    });
-
-    const result = await run(params, 'conversation-1');
-
-    expect(result).toEqual({
-      results: [
-        {
-          type: ToolResultType.error,
-          data: {
-            message: "Failed to store memory: AI index 'support' does not take memories.",
-          },
-        },
-      ],
-    });
-    expect(index).not.toHaveBeenCalled();
-  });
-
   it('creates a memory with server-derived session metadata', async () => {
     const result = await run({ ...params, sessionId: 'ignored-session-id' }, 'conversation-1');
 

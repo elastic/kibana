@@ -6,7 +6,6 @@
  */
 
 import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { takesMemories } from '@kbn/context-engine-plugin/common/dreaming';
 import type { AiIndexItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import type { CoreStart } from '@kbn/core/server';
@@ -36,9 +35,6 @@ export const getWritableMemoryAiIndex = async ({
 
   if (!memoryEnabled) {
     throw new Error('Context Engine memory is not enabled.');
-  }
-  if (!takesMemories(aiIndex)) {
-    throw new Error(`AI index '${aiIndexId}' does not take memories.`);
   }
   if (isIndexPattern(aiIndex.dest.value)) {
     throw new Error(

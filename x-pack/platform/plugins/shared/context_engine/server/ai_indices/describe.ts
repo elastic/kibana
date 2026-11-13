@@ -13,7 +13,6 @@ import {
   ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
   isDreamingConfigured,
-  takesMemories,
   type DreamingEntityType,
   type DreamingFactType,
 } from '../../common/dreaming';
@@ -160,10 +159,6 @@ const memorySection = (
   types: DreamedTypes,
   dreamedTypeCounts: KiTypeCount[]
 ): string[] => {
-  if (!takesMemories(aiIndex)) {
-    return [];
-  }
-
   const includeFacts = types.facts.length > 0;
   const dreamedKinds = dreamedKindsText(types);
   const queries = buildMemoryExampleQueries(target, { includeFacts });

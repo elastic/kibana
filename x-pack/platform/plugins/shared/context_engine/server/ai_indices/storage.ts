@@ -32,8 +32,6 @@ const storageSettings = {
       space: types.keyword({}),
       description: types.text({}),
       managed: types.boolean({}),
-      // No longer set by clients; kept on documents that have it, for `takesMemories`.
-      memory_enabled: types.boolean({}),
       date_created: types.date({}),
       date_modified: types.date({}),
       dest: types.object({
@@ -73,8 +71,6 @@ interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
   dreaming?: AiIndexDreamingConfig;
-  // Set by clients before it was deprecated; kept through writes, for `takesMemories`.
-  memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
   managed?: boolean;

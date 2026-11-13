@@ -153,21 +153,6 @@ export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined
   dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
 
 /**
- * Whether an AI index takes memories: while its dreaming config is set up, since dreaming reads
- * them; otherwise as the deprecated `memory_enabled` it was saved with says, or when it is not
- * managed.
- */
-export const takesMemories = ({
-  dreaming,
-  managed,
-  memory_enabled: memoryEnabled,
-}: {
-  dreaming?: AiIndexDreamingConfig;
-  managed: boolean;
-  memory_enabled?: boolean;
-}): boolean => isDreamingConfigured(dreaming) || (memoryEnabled ?? !managed);
-
-/**
  * Ids of the dreaming workflows attached to an AI index as automations start with these. They copy
  * the ids in `@kbn/workflows/managed`, which the browser can't import without the workflow YAML.
  */

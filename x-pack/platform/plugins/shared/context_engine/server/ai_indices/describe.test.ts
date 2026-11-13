@@ -394,13 +394,6 @@ describe('describeAiIndex', () => {
     );
   });
 
-  it('omits memory capability when dreaming is not set up', async () => {
-    const response = await describeAiIndex(params);
-
-    expect(response).not.toContain('\nMemory\n');
-    expect(response).not.toContain('platform.context_engine.remember');
-  });
-
   it('keeps fact and entity types in the counts and queries of an AI index that does not dream', async () => {
     describeAiIndexAggregationsMock.mockResolvedValue({
       kiTypeCounts: [
@@ -432,43 +425,28 @@ describe('describeAiIndex', () => {
     expect(response.endsWith(exampleQueriesBlock)).toBe(true);
   });
 
-  describe('without dreaming set up', () => {
-    it('renders memory capability for an AI index that is not managed, without dreamed types', async () => {
-      const response = await describeAiIndex({ ...params, includeMemory: true });
-
-      expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
-        expect.objectContaining({ dreamedPrefixes: [], dreamedTypes: [] })
-      );
-      expect(response).toContain('\nMemory\nThis AI index takes memories.\n');
-      expect(response).not.toContain('dreaming is set up');
-      expect(response).not.toContain('Fact types');
-      expect(response).toContain(
-        'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:'
-      );
+  it.each([
+    ['an AI index that is not managed', false],
+    ['a managed AI index', true],
+  ])('renders memory capability for %s without dreaming set up', async (_kind, managed) => {
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: { ...aiIndex, managed },
+      includeMemory: true,
     });
 
-    it('follows the memory_enabled the AI index was saved with', async () => {
-      const response = await describeAiIndex({
-        ...params,
-        aiIndex: { ...aiIndex, memory_enabled: false },
-        includeMemory: true,
-      });
-
-      expect(response).not.toContain('\nMemory\n');
-    });
-
-    it('omits memory capability for a managed AI index', async () => {
-      const response = await describeAiIndex({
-        ...params,
-        aiIndex: { ...aiIndex, managed: true },
-        includeMemory: true,
-      });
-
-      expect(response).not.toContain('\nMemory\n');
-    });
+    expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ dreamedPrefixes: [], dreamedTypes: [] })
+    );
+    expect(response).toContain('\nMemory\nThis AI index takes memories.\n');
+    expect(response).not.toContain('dreaming is set up');
+    expect(response).not.toContain('Fact types');
+    expect(response).toContain(
+      'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:'
+    );
   });
 
-  it('renders memory capability for a managed AI index once dreaming is set up', async () => {
+  it('says a managed AI index takes memories for dreaming once dreaming is set up', async () => {
     const response = await describeAiIndex({
       ...params,
       aiIndex: {

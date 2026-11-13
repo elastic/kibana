@@ -152,12 +152,9 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
 
 const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
 
-/** What the public API returns for an AI index: no dreaming config, no deprecated `memory_enabled`. */
-const toPublicAiIndex = ({
-  dreaming: _dreaming,
-  memory_enabled: _memoryEnabled,
-  ...aiIndex
-}: AiIndexItem): AiIndexHttpItem => aiIndex;
+/** What the public API returns for an AI index: no dreaming config. */
+const toPublicAiIndex = ({ dreaming: _dreaming, ...aiIndex }: AiIndexItem): AiIndexHttpItem =>
+  aiIndex;
 
 const findAiIndex = async (
   aiIndexService: AiIndexService,
@@ -345,8 +342,7 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const { security, elasticsearch } = await ctx.core;
         const auditLogger = security.audit.logger;
-        // `memory_enabled` is accepted for older clients and ignored.
-        const { id, memory_enabled: _memoryEnabled, ...properties } = request.body;
+        const { id, ...properties } = request.body;
         try {
           await validateEsqlSources(properties.sources);
           await validateConnectorSources({
@@ -439,8 +435,7 @@ export const registerAiIndexRoutes = ({
           const spaceId = resolveSpaceId(await getSpaces(), request);
           const aiIndexService = getAiIndexService();
           const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
-          // `memory_enabled` is accepted for older clients and ignored.
-          const { memory_enabled: _memoryEnabled, ...properties } = request.body;
+          const properties = request.body;
           await validateEsqlSources(properties.sources);
           await validateConnectorSources({
             sources: properties.sources,

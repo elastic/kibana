@@ -15,7 +15,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Redirect, useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
-import { takesMemories } from '../../../common/dreaming';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
@@ -27,7 +26,6 @@ import {
 } from '../components/ai_index_detail';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
-import { useAiIndexDreaming } from '../hooks/use_ai_index_dreaming';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
@@ -120,10 +118,6 @@ export const AiIndexDetailPage = () => {
   const [showCreatedCallout, setShowCreatedCallout] = useState(
     () => location.state?.aiIndexCreated === true
   );
-  const { dreaming } = useAiIndexDreaming(resolvedAiIndexId, {
-    enabled: isMemoryEnabled && showCreatedCallout,
-  });
-
   // Hide the callout as soon as the user adds a source.
   useEffect(() => {
     if (showCreatedCallout && aiIndex && aiIndex.sources.length > 0) {
@@ -294,9 +288,7 @@ export const AiIndexDetailPage = () => {
       {showCreatedCallout && (
         <AiIndexCreatedCallout
           onDismiss={() => setShowCreatedCallout(false)}
-          showMemory={
-            isMemoryEnabled && takesMemories({ managed: aiIndex?.managed ?? false, dreaming })
-          }
+          showMemory={isMemoryEnabled}
         />
       )}
       <DescriptionPanel

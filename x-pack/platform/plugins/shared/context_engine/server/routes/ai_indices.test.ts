@@ -498,19 +498,6 @@ describe('ai indices routes', () => {
       ).toThrow("'dreaming' was unexpected");
     });
 
-    it('accepts the deprecated memory_enabled from older clients and ignores it', async () => {
-      aiIndexService.create.mockResolvedValue(undefined);
-
-      await callRoute('POST', AI_INDEX_PATH, { body: { ...postBody, memory_enabled: true } });
-
-      const { id, ...properties } = postBody;
-      expect(aiIndexService.create).toHaveBeenCalledWith(
-        'customer_support',
-        defaultSpaceId,
-        properties
-      );
-    });
-
     it('returns 409 when the id already exists', async () => {
       aiIndexService.create.mockRejectedValue(new AiIndexAlreadyExistsError('customer_support'));
 
@@ -689,21 +676,6 @@ describe('ai indices routes', () => {
           dreaming: { enabled: true },
         })
       ).toThrow("'dreaming' was unexpected");
-    });
-
-    it('accepts the deprecated memory_enabled from older clients and ignores it', async () => {
-      aiIndexService.put.mockResolvedValue('updated');
-
-      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
-        ...putRequest,
-        body: { ...putRequest.body, memory_enabled: false },
-      });
-
-      expect(aiIndexService.put).toHaveBeenCalledWith(
-        'customer_support',
-        defaultSpaceId,
-        putRequest.body
-      );
     });
 
     it('returns 400 when the dest is invalid', async () => {
@@ -2616,9 +2588,9 @@ describe('ai indices routes', () => {
       expect(aiIndexService.setDreaming).not.toHaveBeenCalled();
     });
 
-    it('leaves the config and memory_enabled out of the public AI index', async () => {
-      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, dreaming, memory_enabled: false });
-      readService.list.mockResolvedValue([{ ...aiIndexItem, dreaming, memory_enabled: false }]);
+    it('leaves the config out of the public AI index', async () => {
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, dreaming });
+      readService.list.mockResolvedValue([{ ...aiIndexItem, dreaming }]);
 
       await callRoute('GET', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'customer_support' } });
       await callRoute('GET', AI_INDEX_PATH, {});
@@ -2867,14 +2839,8 @@ describe('ai indices routes', () => {
       expect(() => validateBody(validBody)).not.toThrow();
     });
 
-    it('leaves memory_enabled unset for the service default', () => {
-      expect(validateBody(validBody)).not.toHaveProperty('memory_enabled');
-    });
-
-    it('still accepts the deprecated memory_enabled', () => {
-      expect(validateBody({ ...validBody, memory_enabled: true })).toMatchObject({
-        memory_enabled: true,
-      });
+    it('rejects memory_enabled', () => {
+      expect(() => validateBody({ ...validBody, memory_enabled: true })).toThrow(/memory_enabled/);
     });
 
     it('rejects a missing id', () => {
@@ -3015,14 +2981,8 @@ describe('ai indices routes', () => {
       expect(() => validateBody(validBody)).not.toThrow();
     });
 
-    it('leaves memory_enabled unset for the service default', () => {
-      expect(validateBody(validBody)).not.toHaveProperty('memory_enabled');
-    });
-
-    it('still accepts the deprecated memory_enabled', () => {
-      expect(validateBody({ ...validBody, memory_enabled: true })).toMatchObject({
-        memory_enabled: true,
-      });
+    it('rejects memory_enabled', () => {
+      expect(() => validateBody({ ...validBody, memory_enabled: true })).toThrow(/memory_enabled/);
     });
 
     it('accepts empty automations and sources arrays', () => {
