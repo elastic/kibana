@@ -23,7 +23,7 @@ import {
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { LensConfigBuilder, lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
-import { EXEMPLARS_APP_ID, EXEMPLARS_EXTENSION_ID } from './exemplars_extension';
+import { EXEMPLARS_APP_ID, EXEMPLARS_OVERLAY_PROVIDER_ID } from './exemplars_overlay_provider';
 import type { StartDependencies } from './plugin';
 
 const PRESETS = {
@@ -70,7 +70,10 @@ export const App = ({ plugins }: { plugins: StartDependencies }) => {
   const [showExemplars, setShowExemplars] = useState(true);
 
   const LensComponent = plugins.lens.EmbeddableComponent;
-  const extensions = useMemo(() => ({ [EXEMPLARS_EXTENSION_ID]: showExemplars }), [showExemplars]);
+  const xyOverlayProviders = useMemo(
+    () => ({ [EXEMPLARS_OVERLAY_PROVIDER_ID]: showExemplars }),
+    [showExemplars]
+  );
   const attributes = useMemo(() => {
     try {
       return { value: getAttributes(query, plugins.data.dataViews) };
@@ -86,10 +89,10 @@ export const App = ({ plugins }: { plugins: StartDependencies }) => {
         <EuiPageSection paddingSize="s">
           <KbnInfoCallout
             size="s"
-            title="Exemplars are drawn by a Lens extension registered by this plugin"
+            title="Exemplars are drawn by a Lens XY overlay provider registered by this plugin"
             text={
               <p>
-                Nothing is stored in the chart. The extension matches ES|QL layers with a STATS
+                Nothing is stored in the chart. The provider matches ES|QL layers with a STATS
                 command rendered by this app, a dashboard or Discover, and fetches its points after
                 the chart has loaded. Keep the <code>bucket</code> and <code>value</code> column
                 names when editing the query.
@@ -140,7 +143,7 @@ export const App = ({ plugins }: { plugins: StartDependencies }) => {
               timeRange={TIME_RANGE}
               viewMode="view"
               executionContext={{ type: EXEMPLARS_APP_ID }}
-              extensions={extensions}
+              xyOverlayProviders={xyOverlayProviders}
             />
           ) : (
             <EuiCodeBlock language="text">{attributes.error}</EuiCodeBlock>

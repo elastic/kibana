@@ -9,9 +9,9 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import type { LensExtension, LensRuntimeState } from '@kbn/lens-common';
-import { createLensExtensionRegistry } from './extension_registry';
-import { loadExtensionOverlays } from './load_extension_overlays';
+import type { LensXYOverlayProvider, LensRuntimeState } from '@kbn/lens-common';
+import { createXYOverlayProviderRegistry } from './provider_registry';
+import { loadXYOverlays } from './load_xy_overlays';
 
 const ESQL = 'TS metrics-* | STATS AVG(http.server.request.duration) BY TBUCKET(1m)';
 const TIME_RANGE = { from: 'now-15m', to: 'now' };
@@ -43,9 +43,8 @@ const createAttributes = (ignoreGlobalFilters: boolean) =>
     },
   } as unknown as LensRuntimeState['attributes']);
 
-const extension: LensExtension = {
+const provider: LensXYOverlayProvider = {
   id: 'test.exemplars',
-  visualizationTypes: ['lnsXY'],
   isApplicable: () => true,
   fetchOverlay: async ({ executeEsql }) => {
     const { rows } = await executeEsql('SET exemplars=true;', { title: 'Exemplars' });
@@ -59,11 +58,11 @@ const extension: LensExtension = {
 
 const load = async (ignoreGlobalFilters: boolean) => {
   const esql = jest.fn().mockResolvedValue({ datatable });
-  const registry = createLensExtensionRegistry();
-  registry.register(extension);
+  const registry = createXYOverlayProviderRegistry();
+  registry.register(provider);
   const requestsAdapter = new RequestAdapter();
 
-  const result = await loadExtensionOverlays({
+  const result = await loadXYOverlays({
     registry,
     attributes: createAttributes(ignoreGlobalFilters),
     searchContext: {
@@ -82,8 +81,8 @@ const load = async (ignoreGlobalFilters: boolean) => {
   return { esql, result, requestsAdapter };
 };
 
-describe('loadExtensionOverlays', () => {
-  it('runs extension queries with the chart search scope, session and inspector', async () => {
+describe('loadXYOverlays', () => {
+  it('runs provider queries with the chart search scope, session and inspector', async () => {
     const { esql, result, requestsAdapter } = await load(false);
 
     expect(esql).toHaveBeenCalledWith(

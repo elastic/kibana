@@ -21,7 +21,7 @@ import type {
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { LensPluginStartDependencies } from '../plugin';
-import type { LensExtensionRegistry } from '../extensions';
+import type { XYOverlayProviderRegistry } from '../xy_overlay_providers';
 
 export type LensEmbeddableStartServices = Simplify<
   LensPluginStartDependencies & {
@@ -40,6 +40,6 @@ export type LensEmbeddableStartServices = Simplify<
     theme: ThemeServiceStart;
     uiSettings: IUiSettingsClient;
     attributeService: LensAttributesService;
-    extensionRegistry: LensExtensionRegistry;
+    xyOverlayProviderRegistry: XYOverlayProviderRegistry;
   }
 >;

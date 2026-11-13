@@ -20,7 +20,7 @@ import {
   isLensOverlayPointClickEvent,
 } from '../../types_guards';
 import { inferTimeField } from '../../utils';
-import { dispatchOverlayPointClick } from '../../extensions';
+import { dispatchOverlayPointClick } from '../../xy_overlay_providers';
 
 import { addLog } from '../logger';
 import type { LensEmbeddableStartServices } from '../types';
@@ -30,7 +30,7 @@ export const prepareEventHandler =
     api: LensApi,
     getState: GetStateType,
     callbacks: LensPublicCallbacks,
-    { data, uiActions, visualizationMap, extensionRegistry }: LensEmbeddableStartServices,
+    { data, uiActions, visualizationMap, xyOverlayProviderRegistry }: LensEmbeddableStartServices,
     disableTriggers: boolean | undefined
   ) =>
   async (event: ExpressionRendererEvent) => {
@@ -41,7 +41,11 @@ export const prepareEventHandler =
 
     if (isLensOverlayPointClickEvent(event)) {
       const { overlayId, layerId, pointId } = event.data;
-      dispatchOverlayPointClick(extensionRegistry, { extensionId: overlayId, layerId, pointId });
+      dispatchOverlayPointClick(xyOverlayProviderRegistry, {
+        providerId: overlayId,
+        layerId,
+        pointId,
+      });
       return;
     }
 

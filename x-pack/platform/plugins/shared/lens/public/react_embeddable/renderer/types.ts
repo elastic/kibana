@@ -12,7 +12,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, ViewMode, useSearchApi } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-publishing';
 
-import type { LensExtensionsRuntimeConfig, LensRuntimeState } from '@kbn/lens-common';
+import type { LensXYOverlayProvidersConfig, LensRuntimeState } from '@kbn/lens-common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 type SearchApi = ReturnType<typeof useSearchApi>;
@@ -34,7 +34,7 @@ interface GeneralLensApi {
   reload$: BehaviorSubject<void>;
   disableTriggers$: BehaviorSubject<boolean>;
   projectRouting$: PublishingSubject<ProjectRouting | undefined>;
-  extensions$: BehaviorSubject<LensExtensionsRuntimeConfig | undefined>;
+  xyOverlayProviders$: BehaviorSubject<LensXYOverlayProvidersConfig | undefined>;
 }
 
 export type LensParentApi = SearchApi &

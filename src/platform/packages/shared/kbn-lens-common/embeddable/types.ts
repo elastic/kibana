@@ -50,7 +50,7 @@ import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { Ast } from '@kbn/interpreter';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
-import type { LensExtensionsRuntimeConfig } from '../extensions/types';
+import type { LensXYOverlayProvidersConfig } from '../xy_overlay_providers/types';
 import type {
   IndexPatternMap,
   IndexPatternRef,
@@ -314,9 +314,9 @@ export type LensComponentProps = Simplify<
        */
       onApiAvailable?: (api: unknown) => void;
       /**
-       * Runtime-only switches for registered Lens extensions, never persisted
+       * Runtime-only switches for registered XY overlay providers, never persisted
        */
-      extensions?: LensExtensionsRuntimeConfig;
+      xyOverlayProviders?: LensXYOverlayProvidersConfig;
     }
 >;
 

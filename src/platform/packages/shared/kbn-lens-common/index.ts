@@ -317,18 +317,18 @@ export type {
 } from './locator_types';
 export type { NavigateToLensLayer, NavigateToLensContext } from './convert_to_lens_types';
 export type {
-  LensExtension,
-  LensExtensionLayer,
-  LensExtensionMatchContext,
-  LensExtensionFetchContext,
-  LensExtensionOverlay,
-  LensExtensionOverlayData,
-  LensExtensionRequestMeta,
-  LensExtensionsRuntimeConfig,
-  LensOverlayPoint,
-  LensOverlayPointClickEvent,
-  LensPointsOverlay,
-} from './extensions/types';
+  LensXYOverlayProvider,
+  LensXYOverlayLayer,
+  LensXYOverlayMatchContext,
+  LensXYOverlayFetchContext,
+  LensXYOverlay,
+  LensXYOverlayData,
+  LensXYOverlayRequestMeta,
+  LensXYOverlayProvidersConfig,
+  LensXYOverlayPoint,
+  LensXYOverlayPointClickEvent,
+  LensXYPointsOverlay,
+} from './xy_overlay_providers/types';
 
 /**
  * Constants are used by both the expression language and the lens code

@@ -47,7 +47,7 @@ import {
   getMergedSearchContext,
   type MergedSearchContext,
 } from './expressions/merged_search_context';
-import { getExtensionFailureMessage, loadExtensionOverlays } from '../extensions';
+import { getXYOverlayProviderFailureMessage, loadXYOverlays } from '../xy_overlay_providers';
 import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
 import {
@@ -59,7 +59,7 @@ import {
 import { addLog } from './logger';
 import {
   apiHasLensComponentCallbacks,
-  apiPublishesLensExtensionsConfig,
+  apiPublishesXYOverlayProvidersConfig,
   apiHasUserMessages,
   hasTablesAdapter,
   isPartialInspectorAdapters,
@@ -209,8 +209,8 @@ export function loadEmbeddableData(
 
   // Stable for the same reason: the chart subscribes once and receives overlays after it renders.
   const overlays$ = new BehaviorSubject<readonly XYOverlay[]>([]);
-  const extensions$ = apiPublishesLensExtensionsConfig(parentApi)
-    ? parentApi.extensions$
+  const xyOverlayProviders$ = apiPublishesXYOverlayProvidersConfig(parentApi)
+    ? parentApi.xyOverlayProviders$
     : undefined;
   let overlaysAbortController: AbortController | undefined;
   let lastOverlaysInput:
@@ -222,11 +222,11 @@ export function loadEmbeddableData(
     lastOverlaysInput = { state, searchContext };
     const abortController = new AbortController();
     overlaysAbortController = abortController;
-    const { overlays, failures } = await loadExtensionOverlays({
-      registry: services.extensionRegistry,
+    const { overlays, failures } = await loadXYOverlays({
+      registry: services.xyOverlayProviderRegistry,
       attributes: state.attributes,
       executionContext: getExecutionContext(),
-      runtimeConfig: extensions$?.getValue(),
+      runtimeConfig: xyOverlayProviders$?.getValue(),
       searchContext,
       searchSessionId: api.searchSessionId$.getValue(),
       requestsAdapter: api.getInspectorAdapters().requests,
@@ -236,11 +236,9 @@ export function loadEmbeddableData(
     if (abortController.signal.aborted) {
       return;
     }
-    overlays$.next(
-      overlays.map(({ extensionId, ...overlay }) => ({ ...overlay, id: extensionId }))
-    );
+    overlays$.next(overlays.map(({ providerId, ...overlay }) => ({ ...overlay, id: providerId })));
     if (failures.length) {
-      addUserMessages(failures.map(getExtensionFailureMessage));
+      addUserMessages(failures.map(getXYOverlayProviderFailureMessage));
       updateMessages(getUserMessages('embeddableBadge'));
     }
   };
@@ -308,9 +306,9 @@ export function loadEmbeddableData(
       // Render can still go wrong, so perfor a new check
       dispatchBlockingErrorIfAny();
 
-      // fetched after the base data so extensions never delay the chart
+      // fetched after the base data so overlay providers never delay the chart
       loadOverlays(currentState, searchContext).catch((error) =>
-        addLog(`Failed to load extension overlays: ${error}`)
+        addLog(`Failed to load XY overlays: ${error}`)
       );
     };
 
@@ -468,16 +466,16 @@ export function loadEmbeddableData(
           }
         }
       }),
-    // toggling extensions only refreshes the overlays, the base chart is untouched
-    ...(extensions$
+    // toggling overlay providers only refreshes the overlays, the base chart is untouched
+    ...(xyOverlayProviders$
       ? [
-          extensions$.pipe(waitUntilChanged()).subscribe(() => {
+          xyOverlayProviders$.pipe(waitUntilChanged()).subscribe(() => {
             if (!lastOverlaysInput) {
               return;
             }
             overlays$.next([]);
             loadOverlays(lastOverlaysInput.state, lastOverlaysInput.searchContext).catch((error) =>
-              addLog(`Failed to load extension overlays: ${error}`)
+              addLog(`Failed to load XY overlays: ${error}`)
             );
           }),
         ]

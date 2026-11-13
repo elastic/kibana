@@ -9,12 +9,12 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   queryHasStatsCommand,
   queryHasTsSourceCommand,
-  type LensExtension,
-  type LensOverlayPoint,
+  type LensXYOverlayProvider,
+  type LensXYOverlayPoint,
 } from '@kbn/lens-common';
 
 export const EXEMPLARS_APP_ID = 'lens_exemplars_example';
-export const EXEMPLARS_EXTENSION_ID = 'lensExemplarsExample.exemplars';
+export const EXEMPLARS_OVERLAY_PROVIDER_ID = 'lensExemplarsExample.exemplars';
 export const EXEMPLARS_FEATURE_FLAG = 'lensExemplarsExample.enabled';
 
 /** `executionContext.type` of the surfaces drawing exemplars: this example app, Dashboard and Discover. */
@@ -68,23 +68,22 @@ export const getExemplarsQuery = (esql: string): ExemplarsQuery | undefined => {
   };
 };
 
-interface CreateExemplarsExtensionParams {
+interface CreateExemplarsOverlayProviderParams {
   readonly onExemplarClick: (exemplar: Exemplar) => void;
   /** Latest value of the feature flag; read on every chart load, so a change applies on the next reload. */
   readonly isEnabled: () => boolean;
 }
 
-/** Lens extension drawing clickable exemplars over the XY charts of this example app, dashboards and Discover. */
-export const createExemplarsExtension = ({
+/** Lens XY overlay provider drawing clickable exemplars on the XY charts of this example app, dashboards and Discover. */
+export const createExemplarsOverlayProvider = ({
   onExemplarClick,
   isEnabled,
-}: CreateExemplarsExtensionParams): LensExtension => {
+}: CreateExemplarsOverlayProviderParams): LensXYOverlayProvider => {
   const exemplarsById = new Map<string, Exemplar>();
   let nextId = 0;
 
   return {
-    id: EXEMPLARS_EXTENSION_ID,
-    visualizationTypes: ['lnsXY'],
+    id: EXEMPLARS_OVERLAY_PROVIDER_ID,
     isApplicable: ({ executionContext }, { esql }) => {
       return (
         isEnabled() &&
@@ -108,7 +107,7 @@ export const createExemplarsExtension = ({
           'This request queries Elasticsearch to fetch the exemplars drawn on the chart.',
       });
 
-      const points = rows.flatMap((row): LensOverlayPoint[] => {
+      const points = rows.flatMap((row): LensXYOverlayPoint[] => {
         const timestamp = String(row[TIMESTAMP_COLUMN]);
         const x = Date.parse(timestamp);
         const value = Number(row[VALUE_COLUMN]);

@@ -11,11 +11,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
-  createExemplarsExtension,
+  createExemplarsOverlayProvider,
   EXEMPLARS_APP_ID,
   EXEMPLARS_FEATURE_FLAG,
   type Exemplar,
-} from './exemplars_extension';
+} from './exemplars_overlay_provider';
 import { mount } from './mount';
 
 export interface SetupDependencies {
@@ -36,8 +36,8 @@ export class LensExemplarsExamplePlugin
   private featureFlagSubscription?: Subscription;
 
   public setup(core: CoreSetup<StartDependencies>, { developerExamples, lens }: SetupDependencies) {
-    lens.registerExtension(
-      createExemplarsExtension({
+    lens.registerXYOverlayProvider(
+      createExemplarsOverlayProvider({
         onExemplarClick: (exemplar) => {
           void this.openExemplarFlyout(exemplar);
         },
@@ -56,7 +56,7 @@ export class LensExemplarsExamplePlugin
       appId: EXEMPLARS_APP_ID,
       title: 'Lens exemplars',
       description:
-        'Register a Lens extension that draws clickable exemplars over XY charts at render time, without storing anything in the chart.',
+        'Register a Lens XY overlay provider that draws clickable exemplars on top of XY charts at render time, without storing anything in the chart.',
       links: [
         {
           label: 'README',

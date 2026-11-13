@@ -6,12 +6,12 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { LensExtensionMatchContext } from '@kbn/lens-common';
+import type { LensXYOverlayMatchContext } from '@kbn/lens-common';
 import {
-  createExemplarsExtension,
+  createExemplarsOverlayProvider,
   EXEMPLARS_APP_ID,
   getExemplarsQuery,
-} from './exemplars_extension';
+} from './exemplars_overlay_provider';
 
 const LOGS_QUERY =
   'FROM kibana_sample_data_logs | STATS value = AVG(bytes) BY bucket = BUCKET(@timestamp, 50)';
@@ -20,9 +20,8 @@ const TS_QUERY =
 
 const getContext = (
   esql: string,
-  executionContext: LensExtensionMatchContext['executionContext']
-): LensExtensionMatchContext => ({
-  visualizationType: 'lnsXY',
+  executionContext: LensXYOverlayMatchContext['executionContext']
+): LensXYOverlayMatchContext => ({
   layers: [{ layerId: 'layer1', esql }],
   executionContext,
 });
@@ -50,7 +49,7 @@ const table: Datatable = {
   ],
 };
 
-describe('exemplars extension', () => {
+describe('exemplars overlay provider', () => {
   describe('getExemplarsQuery', () => {
     it('uses SET exemplars on TS queries', () => {
       expect(getExemplarsQuery(TS_QUERY)).toEqual({
@@ -78,56 +77,56 @@ describe('exemplars extension', () => {
   });
 
   describe('rules', () => {
-    const extension = createExemplarsExtension({
+    const provider = createExemplarsOverlayProvider({
       onExemplarClick: jest.fn(),
       isEnabled: () => true,
     });
 
     it('applies to STATS layers rendered by the example app', () => {
       const context = getContext(LOGS_QUERY, EXAMPLE_APP_CONTEXT);
-      expect(extension.isApplicable(context, context.layers[0])).toBe(true);
+      expect(provider.isApplicable(context, context.layers[0])).toBe(true);
     });
 
     it('applies to STATS layers rendered by a dashboard', () => {
       const context = getContext(LOGS_QUERY, DASHBOARD_CONTEXT);
-      expect(extension.isApplicable(context, context.layers[0])).toBe(true);
+      expect(provider.isApplicable(context, context.layers[0])).toBe(true);
     });
 
     it('applies to STATS layers rendered by the Discover histogram', () => {
       const context = getContext(LOGS_QUERY, DISCOVER_CONTEXT);
-      expect(extension.isApplicable(context, context.layers[0])).toBe(true);
+      expect(provider.isApplicable(context, context.layers[0])).toBe(true);
     });
 
     it('does not apply on other surfaces', () => {
       const context = getContext(LOGS_QUERY, { type: 'visualize', child: LENS_CHILD_CONTEXT });
-      expect(extension.isApplicable(context, context.layers[0])).toBe(false);
+      expect(provider.isApplicable(context, context.layers[0])).toBe(false);
     });
 
     it('does not apply when the surface only sets a name', () => {
       const context = getContext(LOGS_QUERY, { type: 'application', name: EXEMPLARS_APP_ID });
-      expect(extension.isApplicable(context, context.layers[0])).toBe(false);
+      expect(provider.isApplicable(context, context.layers[0])).toBe(false);
     });
 
     it('follows the latest feature flag value on each evaluation', () => {
       let isEnabled = false;
-      const flaggedExtension = createExemplarsExtension({
+      const flaggedProvider = createExemplarsOverlayProvider({
         onExemplarClick: jest.fn(),
         isEnabled: () => isEnabled,
       });
       const context = getContext(LOGS_QUERY, EXAMPLE_APP_CONTEXT);
 
-      expect(flaggedExtension.isApplicable(context, context.layers[0])).toBe(false);
+      expect(flaggedProvider.isApplicable(context, context.layers[0])).toBe(false);
 
       isEnabled = true;
-      expect(flaggedExtension.isApplicable(context, context.layers[0])).toBe(true);
+      expect(flaggedProvider.isApplicable(context, context.layers[0])).toBe(true);
     });
   });
 
   it('draws valid rows and opens the clicked exemplar', async () => {
     const onExemplarClick = jest.fn();
-    const extension = createExemplarsExtension({ onExemplarClick, isEnabled: () => true });
+    const provider = createExemplarsOverlayProvider({ onExemplarClick, isEnabled: () => true });
 
-    const overlay = await extension.fetchOverlay({
+    const overlay = await provider.fetchOverlay({
       layer: { layerId: 'layer1', esql: LOGS_QUERY },
       abortSignal: new AbortController().signal,
       executeEsql: jest.fn().mockResolvedValue(table),
@@ -139,8 +138,8 @@ describe('exemplars extension', () => {
       points: [{ id: 'exemplar-0', x: Date.parse('2026-11-10T10:00:00.000Z'), y: 1200 }],
     });
 
-    extension.onPointClick?.({
-      extensionId: extension.id,
+    provider.onPointClick?.({
+      providerId: provider.id,
       layerId: 'layer1',
       pointId: 'exemplar-0',
     });

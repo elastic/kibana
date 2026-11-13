@@ -9,17 +9,17 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import {
   queryHasStatsCommand,
   queryHasTsSourceCommand,
-  type LensExtension,
-  type LensExtensionFetchContext,
-  type LensExtensionLayer,
-  type LensExtensionMatchContext,
+  type LensXYOverlayProvider,
+  type LensXYOverlayFetchContext,
+  type LensXYOverlayLayer,
+  type LensXYOverlayMatchContext,
 } from '@kbn/lens-common';
 import {
-  createLensExtensionRegistry,
+  createXYOverlayProviderRegistry,
   dispatchOverlayPointClick,
-  getExtensionMatchContext,
-  resolveActiveExtensions,
-  runActiveExtensions,
+  getXYOverlayMatchContext,
+  resolveActiveProviders,
+  runActiveProviders,
 } from '.';
 
 const TS_QUERY = 'TS metrics-* | STATS AVG(http.server.request.duration) BY TBUCKET(1m)';
@@ -34,9 +34,10 @@ const exemplarsTable: Datatable = {
   rows: [{ '@timestamp': 1000, value: 42, trace_id: 'abc' }],
 };
 
-const createExemplarsExtension = (overrides: Partial<LensExtension> = {}): LensExtension => ({
+const createExemplarsOverlayProvider = (
+  overrides: Partial<LensXYOverlayProvider> = {}
+): LensXYOverlayProvider => ({
   id: 'observability.exemplars',
-  visualizationTypes: ['lnsXY'],
   isApplicable: ({ executionContext }, { esql }) =>
     executionContext?.name === 'discover' &&
     esql !== undefined &&
@@ -78,8 +79,8 @@ const createAttributes = (esqlByLayer: Record<string, string>) => ({
 const getContext = (
   esqlByLayer: Record<string, string>,
   surface = 'discover'
-): LensExtensionMatchContext => {
-  const context = getExtensionMatchContext({
+): LensXYOverlayMatchContext => {
+  const context = getXYOverlayMatchContext({
     attributes: createAttributes(esqlByLayer),
     executionContext: { name: surface },
   });
@@ -89,19 +90,19 @@ const getContext = (
   return context;
 };
 
-describe('Lens extensions', () => {
+describe('Lens XY overlay providers', () => {
   describe('registry', () => {
     it('rejects duplicate ids', () => {
-      const registry = createLensExtensionRegistry();
-      registry.register(createExemplarsExtension());
+      const registry = createXYOverlayProviderRegistry();
+      registry.register(createExemplarsOverlayProvider());
 
-      expect(() => registry.register(createExemplarsExtension())).toThrow(
-        'Lens extension "observability.exemplars" is already registered'
+      expect(() => registry.register(createExemplarsOverlayProvider())).toThrow(
+        'Lens XY overlay provider "observability.exemplars" is already registered'
       );
     });
   });
 
-  describe('getExtensionMatchContext', () => {
+  describe('getXYOverlayMatchContext', () => {
     it('exposes ES|QL layers by id', () => {
       expect(getContext({ layer1: TS_QUERY }).layers).toEqual([
         { layerId: 'layer1', esql: TS_QUERY },
@@ -110,34 +111,42 @@ describe('Lens extensions', () => {
 
     it('returns undefined without a visualization type', () => {
       expect(
-        getExtensionMatchContext({ attributes: { visualizationType: null, state: {} } })
+        getXYOverlayMatchContext({ attributes: { visualizationType: null, state: {} } })
+      ).toBeUndefined();
+    });
+
+    it('returns undefined for charts that cannot render overlays', () => {
+      expect(
+        getXYOverlayMatchContext({
+          attributes: { ...createAttributes({ layer1: TS_QUERY }), visualizationType: 'lnsMetric' },
+        })
       ).toBeUndefined();
     });
   });
 
-  describe('resolveActiveExtensions', () => {
-    const extensions = [createExemplarsExtension()];
+  describe('resolveActiveProviders', () => {
+    const providers = [createExemplarsOverlayProvider()];
 
     it('activates only on layers matching the rules', () => {
       const context = getContext({ metrics: TS_QUERY, logs: 'FROM logs-* | LIMIT 10' });
 
       expect(
-        resolveActiveExtensions({ extensions, context }).map(({ layer }) => layer.layerId)
+        resolveActiveProviders({ providers, context }).map(({ layer }) => layer.layerId)
       ).toEqual(['metrics']);
     });
 
     it('respects surface rules', () => {
       const context = getContext({ metrics: TS_QUERY }, 'dashboards');
 
-      expect(resolveActiveExtensions({ extensions, context })).toEqual([]);
+      expect(resolveActiveProviders({ providers, context })).toEqual([]);
     });
 
-    it('lets the host turn an extension off at runtime', () => {
+    it('lets the host turn a provider off at runtime', () => {
       const context = getContext({ metrics: TS_QUERY });
 
       expect(
-        resolveActiveExtensions({
-          extensions,
+        resolveActiveProviders({
+          providers,
           context,
           runtimeConfig: { 'observability.exemplars': false },
         })
@@ -145,27 +154,27 @@ describe('Lens extensions', () => {
     });
 
     it('treats a throwing rule as not applicable', () => {
-      const throwing = createExemplarsExtension({
+      const throwing = createExemplarsOverlayProvider({
         isApplicable: () => {
           throw new Error('boom');
         },
       });
 
       expect(
-        resolveActiveExtensions({ extensions: [throwing], context: getContext({ a: TS_QUERY }) })
+        resolveActiveProviders({ providers: [throwing], context: getContext({ a: TS_QUERY }) })
       ).toEqual([]);
     });
   });
 
-  describe('runActiveExtensions', () => {
+  describe('runActiveProviders', () => {
     const layer = { layerId: 'metrics', esql: TS_QUERY };
 
     const createRunContext = (
-      executeEsql: LensExtensionFetchContext['executeEsql'],
+      executeEsql: LensXYOverlayFetchContext['executeEsql'],
       abortSignal = new AbortController().signal
     ) => ({
       abortSignal,
-      getFetchContext: (fetchLayer: LensExtensionLayer): LensExtensionFetchContext => ({
+      getFetchContext: (fetchLayer: LensXYOverlayLayer): LensXYOverlayFetchContext => ({
         layer: fetchLayer,
         abortSignal,
         executeEsql,
@@ -175,8 +184,8 @@ describe('Lens extensions', () => {
     it('runs the derived query and stamps the owning ids on the overlay', async () => {
       const executeEsql = jest.fn().mockResolvedValue(exemplarsTable);
 
-      const { overlays, failures } = await runActiveExtensions({
-        activeExtensions: [{ extension: createExemplarsExtension(), layer }],
+      const { overlays, failures } = await runActiveProviders({
+        activeProviders: [{ provider: createExemplarsOverlayProvider(), layer }],
         ...createRunContext(executeEsql),
       });
 
@@ -188,31 +197,31 @@ describe('Lens extensions', () => {
         {
           type: 'points',
           title: 'Exemplars',
-          extensionId: 'observability.exemplars',
+          providerId: 'observability.exemplars',
           layerId: 'metrics',
           points: [{ id: 'abc', x: 1000, y: 42 }],
         },
       ]);
     });
 
-    it('isolates a failing extension from the others', async () => {
-      const failing = createExemplarsExtension({
+    it('isolates a failing provider from the others', async () => {
+      const failing = createExemplarsOverlayProvider({
         id: 'failing',
         fetchOverlay: () => Promise.reject(new Error('no access to exemplars-*')),
       });
 
-      const { overlays, failures } = await runActiveExtensions({
-        activeExtensions: [
-          { extension: failing, layer },
-          { extension: createExemplarsExtension(), layer },
+      const { overlays, failures } = await runActiveProviders({
+        activeProviders: [
+          { provider: failing, layer },
+          { provider: createExemplarsOverlayProvider(), layer },
         ],
         ...createRunContext(jest.fn().mockResolvedValue(exemplarsTable)),
       });
 
-      expect(overlays.map(({ extensionId }) => extensionId)).toEqual(['observability.exemplars']);
+      expect(overlays.map(({ providerId }) => providerId)).toEqual(['observability.exemplars']);
       expect(failures).toEqual([
         {
-          extensionId: 'failing',
+          providerId: 'failing',
           layerId: 'metrics',
           error: new Error('no access to exemplars-*'),
         },
@@ -223,8 +232,8 @@ describe('Lens extensions', () => {
       const abortController = new AbortController();
       abortController.abort();
 
-      const result = await runActiveExtensions({
-        activeExtensions: [{ extension: createExemplarsExtension(), layer }],
+      const result = await runActiveProviders({
+        activeProviders: [{ provider: createExemplarsOverlayProvider(), layer }],
         ...createRunContext(jest.fn().mockResolvedValue(exemplarsTable), abortController.signal),
       });
 
@@ -233,11 +242,11 @@ describe('Lens extensions', () => {
   });
 
   describe('dispatchOverlayPointClick', () => {
-    it('routes the click to the owning extension', () => {
+    it('routes the click to the owning provider', () => {
       const onPointClick = jest.fn();
-      const registry = createLensExtensionRegistry();
-      registry.register(createExemplarsExtension({ onPointClick }));
-      const event = { extensionId: 'observability.exemplars', layerId: 'metrics', pointId: 'abc' };
+      const registry = createXYOverlayProviderRegistry();
+      registry.register(createExemplarsOverlayProvider({ onPointClick }));
+      const event = { providerId: 'observability.exemplars', layerId: 'metrics', pointId: 'abc' };
 
       dispatchOverlayPointClick(registry, event);
 

@@ -17,7 +17,7 @@ import {
   type LensApiCallbacks,
   type LensPublicCallbacks,
   type LensComponentForwardedProps,
-  type LensExtensionsRuntimeConfig,
+  type LensXYOverlayProvidersConfig,
   type UserMessage,
   LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
@@ -48,10 +48,10 @@ export const isLensApi = (api: unknown): api is LensApi => {
   );
 };
 
-export function apiPublishesLensExtensionsConfig(
+export function apiPublishesXYOverlayProvidersConfig(
   api: unknown
-): api is { extensions$: PublishingSubject<LensExtensionsRuntimeConfig | undefined> } {
-  return isObject(api) && 'extensions$' in api && isObservable(api.extensions$);
+): api is { xyOverlayProviders$: PublishingSubject<LensXYOverlayProvidersConfig | undefined> } {
+  return isObject(api) && 'xyOverlayProviders$' in api && isObservable(api.xyOverlayProviders$);
 }
 
 export function apiHasLensComponentCallbacks(api: unknown): api is LensPublicCallbacks {

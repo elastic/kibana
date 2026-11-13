@@ -47,7 +47,7 @@ export function prepareInlineEditPanel(
     | 'theme'
     | 'uiSettings'
     | 'attributeService'
-    | 'extensionRegistry'
+    | 'xyOverlayProviderRegistry'
   >,
   navigateToLensEditor?: (
     stateTransfer: EmbeddableStateTransfer,

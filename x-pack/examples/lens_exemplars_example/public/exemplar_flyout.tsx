@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { Exemplar } from './exemplars_extension';
+import type { Exemplar } from './exemplars_overlay_provider';
 
 const FLYOUT_TITLE_ID = 'lensExemplarsExampleFlyoutTitle';
 

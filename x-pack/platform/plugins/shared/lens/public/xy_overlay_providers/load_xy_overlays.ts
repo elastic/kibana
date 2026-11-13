@@ -19,20 +19,20 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type {
-  LensExtensionLayer,
-  LensExtensionRequestMeta,
-  LensExtensionsRuntimeConfig,
+  LensXYOverlayLayer,
+  LensXYOverlayRequestMeta,
+  LensXYOverlayProvidersConfig,
   LensRuntimeState,
   TextBasedLayer,
   TextBasedPersistedState,
 } from '@kbn/lens-common';
-import type { LensExtensionRegistry } from './extension_registry';
-import { getExtensionMatchContext, resolveActiveExtensions } from './resolve_active_extensions';
-import { runActiveExtensions, type LensExtensionsRunResult } from './run_active_extensions';
+import type { XYOverlayProviderRegistry } from './provider_registry';
+import { getXYOverlayMatchContext, resolveActiveProviders } from './resolve_active_providers';
+import { runActiveProviders, type XYOverlaysRunResult } from './run_active_providers';
 
-const EMPTY_RESULT: LensExtensionsRunResult = { overlays: [], failures: [] };
+const EMPTY_RESULT: XYOverlaysRunResult = { overlays: [], failures: [] };
 
-interface ExtensionsSearchContext {
+interface XYOverlaysSearchContext {
   readonly timeRange?: TimeRange;
   readonly filters: Filter[];
   readonly query: Array<Query | AggregateQuery>;
@@ -41,12 +41,12 @@ interface ExtensionsSearchContext {
   readonly isApproximate?: boolean;
 }
 
-interface LoadExtensionOverlaysParams {
-  readonly registry: LensExtensionRegistry;
+interface LoadXYOverlaysParams {
+  readonly registry: XYOverlayProviderRegistry;
   readonly attributes: LensRuntimeState['attributes'];
   readonly executionContext?: KibanaExecutionContext;
-  readonly runtimeConfig?: LensExtensionsRuntimeConfig;
-  readonly searchContext: ExtensionsSearchContext;
+  readonly runtimeConfig?: LensXYOverlayProvidersConfig;
+  readonly searchContext: XYOverlaysSearchContext;
   readonly searchSessionId?: string;
   readonly requestsAdapter?: RequestAdapter;
   readonly abortSignal: AbortSignal;
@@ -55,14 +55,14 @@ interface LoadExtensionOverlaysParams {
 
 const getTextBasedLayer = (
   attributes: LensRuntimeState['attributes'],
-  { layerId }: LensExtensionLayer
+  { layerId }: LensXYOverlayLayer
 ): TextBasedLayer | undefined =>
   (attributes.state.datasourceStates.textBased as TextBasedPersistedState | undefined)?.layers[
     layerId
   ];
 
-/** Resolves the extensions matching the chart and fetches their overlays with the chart's search scope. */
-export const loadExtensionOverlays = async ({
+/** Resolves the providers matching the chart and fetches their overlays with the chart's search scope. */
+export const loadXYOverlays = async ({
   registry,
   attributes,
   executionContext,
@@ -72,17 +72,17 @@ export const loadExtensionOverlays = async ({
   requestsAdapter,
   abortSignal,
   data,
-}: LoadExtensionOverlaysParams): Promise<LensExtensionsRunResult> => {
-  const context = getExtensionMatchContext({ attributes, executionContext });
+}: LoadXYOverlaysParams): Promise<XYOverlaysRunResult> => {
+  const context = getXYOverlayMatchContext({ attributes, executionContext });
   if (!context) {
     return EMPTY_RESULT;
   }
-  const activeExtensions = resolveActiveExtensions({
-    extensions: registry.getAll(),
+  const activeProviders = resolveActiveProviders({
+    providers: registry.getAll(),
     context,
     runtimeConfig,
   });
-  if (!activeExtensions.length) {
+  if (!activeProviders.length) {
     return EMPTY_RESULT;
   }
 
@@ -91,8 +91,8 @@ export const loadExtensionOverlays = async ({
 
   const executeEsql = async (
     esql: string,
-    layer: LensExtensionLayer,
-    { title, description }: LensExtensionRequestMeta
+    layer: LensXYOverlayLayer,
+    { title, description }: LensXYOverlayRequestMeta
   ): Promise<Datatable> => {
     const textBasedLayer = getTextBasedLayer(attributes, layer);
     const ignoreGlobalFilters = Boolean(textBasedLayer?.ignoreGlobalFilters);
@@ -126,8 +126,8 @@ export const loadExtensionOverlays = async ({
     return datatable;
   };
 
-  return runActiveExtensions({
-    activeExtensions,
+  return runActiveProviders({
+    activeProviders,
     abortSignal,
     getFetchContext: (layer) => ({
       layer,

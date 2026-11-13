@@ -13,20 +13,19 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 /**
- * Narrow, stable view of a chart layer exposed to extensions, so they never read Lens internal state.
+ * Narrow, stable view of an XY chart layer exposed to overlay providers, so they never read Lens internal state.
  */
-export interface LensExtensionLayer {
+export interface LensXYOverlayLayer {
   readonly layerId: string;
   /** ES|QL query of the layer; undefined for form-based layers. */
   readonly esql?: string;
 }
 
 /**
- * Everything an extension rule can inspect to decide whether it applies to a chart.
+ * Everything an overlay provider can inspect to decide whether it applies to an XY chart.
  */
-export interface LensExtensionMatchContext {
-  readonly visualizationType: string;
-  readonly layers: readonly LensExtensionLayer[];
+export interface LensXYOverlayMatchContext {
+  readonly layers: readonly LensXYOverlayLayer[];
   /** Identifies the surface rendering the chart (Discover, Dashboards, ...). */
   readonly executionContext?: KibanaExecutionContext;
 }
@@ -34,16 +33,16 @@ export interface LensExtensionMatchContext {
 /**
  * How a request made through `executeEsql` is labelled in the Inspector.
  */
-export interface LensExtensionRequestMeta {
+export interface LensXYOverlayRequestMeta {
   readonly title: string;
   readonly description?: string;
 }
 
 /**
- * Context passed to an extension when fetching its overlay for one layer.
+ * Context passed to an overlay provider when fetching its overlay for one layer.
  */
-export interface LensExtensionFetchContext {
-  readonly layer: LensExtensionLayer;
+export interface LensXYOverlayFetchContext {
+  readonly layer: LensXYOverlayLayer;
   readonly timeRange?: TimeRange;
   readonly filters?: readonly Filter[];
   readonly query?: Query | AggregateQuery;
@@ -53,11 +52,11 @@ export interface LensExtensionFetchContext {
    * Runs an ES|QL query with the same search scope, session and datatable mapping as the chart,
    * and lists the request in the chart Inspector under `meta.title`.
    */
-  readonly executeEsql: (esql: string, meta: LensExtensionRequestMeta) => Promise<Datatable>;
+  readonly executeEsql: (esql: string, meta: LensXYOverlayRequestMeta) => Promise<Datatable>;
 }
 
-export interface LensOverlayPoint {
-  /** Stable id, sent back on click so the extension can resolve its own data. */
+export interface LensXYOverlayPoint {
+  /** Stable id, sent back on click so the provider can resolve its own data. */
   readonly id: string;
   readonly x: number;
   readonly y: number;
@@ -66,45 +65,44 @@ export interface LensOverlayPoint {
 /**
  * Points drawn over an XY chart, bound to the Y axis of the layer they belong to.
  */
-export interface LensPointsOverlay {
+export interface LensXYPointsOverlay {
   readonly type: 'points';
-  readonly extensionId: string;
+  readonly providerId: string;
   readonly layerId: string;
   readonly title: string;
-  readonly points: readonly LensOverlayPoint[];
+  readonly points: readonly LensXYOverlayPoint[];
 }
 
-export type LensExtensionOverlay = LensPointsOverlay;
+export type LensXYOverlay = LensXYPointsOverlay;
 
-/** Overlay as returned by an extension; Lens adds the owning extension and layer ids. */
-export type LensExtensionOverlayData = Omit<LensExtensionOverlay, 'extensionId' | 'layerId'>;
+/** Overlay as returned by a provider; Lens adds the owning provider and layer ids. */
+export type LensXYOverlayData = Omit<LensXYOverlay, 'providerId' | 'layerId'>;
 
-export interface LensOverlayPointClickEvent {
-  readonly extensionId: string;
+export interface LensXYOverlayPointClickEvent {
+  readonly providerId: string;
   readonly layerId: string;
   readonly pointId: string;
 }
 
 /**
- * A capability a plugin adds to existing Lens charts. Nothing is persisted: Lens evaluates
- * `isApplicable` at render time for every layer of every chart of a supported visualization type.
+ * Draws an overlay on top of existing Lens XY charts, the only charts that render overlays.
+ * Nothing is persisted: Lens evaluates `isApplicable` at render time for every layer of every XY chart.
  *
  * @experimental
  */
-export interface LensExtension {
+export interface LensXYOverlayProvider {
   /** Namespaced id, e.g. `observability.exemplars`. */
   readonly id: string;
-  readonly visualizationTypes: readonly string[];
-  readonly isApplicable: (context: LensExtensionMatchContext, layer: LensExtensionLayer) => boolean;
+  readonly isApplicable: (context: LensXYOverlayMatchContext, layer: LensXYOverlayLayer) => boolean;
   /** Resolves to undefined when there is nothing to draw. Rejections never break the base chart. */
   readonly fetchOverlay: (
-    context: LensExtensionFetchContext
-  ) => Promise<LensExtensionOverlayData | undefined>;
-  readonly onPointClick?: (event: LensOverlayPointClickEvent) => void;
+    context: LensXYOverlayFetchContext
+  ) => Promise<LensXYOverlayData | undefined>;
+  readonly onPointClick?: (event: LensXYOverlayPointClickEvent) => void;
 }
 
 /**
- * Runtime-only switches set by the host rendering the chart, keyed by extension id.
- * `false` turns an extension off; `true` or a missing entry lets its rules decide.
+ * Runtime-only switches set by the host rendering the chart, keyed by overlay provider id.
+ * `false` turns a provider off; `true` or a missing entry lets its rules decide.
  */
-export type LensExtensionsRuntimeConfig = Readonly<Record<string, boolean>>;
+export type LensXYOverlayProvidersConfig = Readonly<Record<string, boolean>>;
