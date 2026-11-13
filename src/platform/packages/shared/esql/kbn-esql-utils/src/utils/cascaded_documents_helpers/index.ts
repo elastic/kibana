@@ -411,6 +411,8 @@ function handleStatsByColumnLeafOperation(
 ): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
+  // keep the header of the editor query (SET, LET), the commands copied below still need it
+  cascadeOperationQuery.ast.header = editorQuery.ast.header;
   const columnDefinition = getFieldDefinitionFromArg(columnNode.arg);
   let operationColumnName = columnDefinition.name;
 
@@ -515,6 +517,8 @@ function handleStatsByCategorizeLeafOperation(
 ): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
+  // keep the header of the editor query (SET, LET), the commands copied below still need it
+  cascadeOperationQuery.ast.header = editorQuery.ast.header;
 
   // include all the existing commands right up until the operating stats command
   editorQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd, idx, arr) => {
