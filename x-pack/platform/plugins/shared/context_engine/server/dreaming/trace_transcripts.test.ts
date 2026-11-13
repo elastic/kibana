@@ -18,7 +18,6 @@ const assistant = (text: string) => ({
   parts: [{ type: 'text', content: text }],
 });
 
-/** The shapes Agent Builder records on a `chat` span, as stored in its traces data stream. */
 const toolCalls = {
   role: 'assistant',
   parts: [

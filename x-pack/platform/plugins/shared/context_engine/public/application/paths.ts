@@ -25,7 +25,7 @@ export const getAiIndexKnowledgeIndicatorsPath = (id: string): string =>
 
 export const getAiIndexSettingsPath = (id: string): string => `/ai_index/${id}/settings`;
 
-/** The step after creating an AI index with memory: pick an example dreaming config. */
+/** Path of the page for picking an example dreaming config for a new AI index with memory. */
 export const getAiIndexDreamingTemplatePath = (id: string): string =>
   `/ai_index/${id}/dreaming_template`;
 

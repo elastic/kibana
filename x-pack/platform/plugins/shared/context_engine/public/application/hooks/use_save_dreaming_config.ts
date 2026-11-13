@@ -36,7 +36,6 @@ export const useSaveDreamingConfig = () => {
     mutationFn: ({ aiIndexId, config }) => setAiIndexDreaming(http, { aiIndexId, config }),
     onSuccess: (data, { aiIndexId }) => {
       queryClient.setQueryData(contextEngineQueryKeys.aiIndex.dreaming(aiIndexId), data);
-      // Saving dreaming attaches or detaches its workflows in the AI index's automations.
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.detail(aiIndexId) });
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
     },
@@ -57,7 +56,6 @@ export const useSaveDreamingConfig = () => {
         await mutateAsync(args);
         return true;
       } catch {
-        // The error toast is surfaced by the mutation's onError handler.
         return false;
       }
     },

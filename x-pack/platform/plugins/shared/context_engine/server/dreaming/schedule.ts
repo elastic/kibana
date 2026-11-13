@@ -102,13 +102,6 @@ export const dreamingTemplateValuesFor = (
   };
 };
 
-/**
- * The workflows of an AI index that dreams. Trace dreaming has no switch of its own: it runs with
- * dreaming, and each run skips itself while the AI index has no trace sources. Its batch workflow
- * is what it runs per batch, so it is installed first and is not an automation of the AI index.
- * The relationships workflow links what the dreaming workflows write, so it comes after them, and
- * each run skips itself while the dreaming config has no relationship types.
- */
 const DREAMING_WORKFLOWS = [
   {
     definitionId: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,

@@ -43,7 +43,7 @@ export interface ResolveRelationshipsContext {
   ends: ReadonlyMap<string, DreamedKi>;
   /** The current relationships the change set refers to, by id. */
   existing: ReadonlyMap<string, DreamedKi>;
-  /** When linking stored facts and entities: their ids. Every relationship has an end among them. */
+  /** The ids of the stored KIs being linked; each relationship needs an end among them. */
   items?: ReadonlySet<string>;
 }
 

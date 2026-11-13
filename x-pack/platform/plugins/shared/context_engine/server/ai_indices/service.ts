@@ -90,13 +90,11 @@ const mergeManagedAiIndex = (
   memory_enabled: registration.memory_enabled,
 });
 
-/** Properties without the ones the service accepts and ignores. */
 const withoutIgnoredProperties = ({
   memory_enabled: _memoryEnabled,
   ...properties
 }: AiIndexProperties): AiIndexProperties => properties;
 
-/** What a whole-record write keeps from the document it replaces: the fields clients cannot set. */
 const keptFields = (
   existing: AiIndexDocument | undefined
 ): Pick<AiIndexDocument, 'dreaming' | 'memory_enabled'> => ({
@@ -337,11 +335,7 @@ export class AiIndexService {
     return feedbackAnalysis;
   }
 
-  /**
-   * Replaces only the dreaming config, leaving the rest of the entry untouched. Like
-   * {@link setFeedbackAnalysis} this is permitted on managed entries: what an AI index learns from
-   * its memories is operator preference, not part of the definition its plugin owns.
-   */
+  /** Replaces the dreaming config of an AI index, managed or not, leaving the rest untouched. */
   async setDreaming(
     aiIndexId: string,
     spaceId: string,

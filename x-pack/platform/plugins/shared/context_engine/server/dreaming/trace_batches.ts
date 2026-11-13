@@ -7,7 +7,6 @@
 
 import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
 
-/** A rough count of the tokens a text costs a model: English averages about 4 characters each. */
 const CHARS_PER_TOKEN = 4;
 
 export const estimateTokens = ({
@@ -25,15 +24,12 @@ const groupInOrder = <T>(items: T[], keyOf: (item: T) => string): T[][] => {
   return [...groups.values()];
 };
 
-/** Characters of a long round's opening that its later parts repeat, so each reads on its own. */
 const PART_OPENING_CHARS = 300;
-/** Characters a part's header takes besides the opening it repeats. */
 const PART_HEADER_CHARS = 64;
 
 /**
- * A round's transcript in parts that each fit `batchTokens`, split between lines (a line longer
- * than a part is split too). Every part keeps the round's id, so the facts written from any of them
- * cite the round; the parts after the first open with how the round began.
+ * Splits a round's transcript into parts that each fit `batchTokens` and keep the round's id.
+ * Parts after the first open with how the round began.
  */
 export const splitRound = (
   round: TraceTranscriptMemory,
@@ -87,10 +83,8 @@ const conversationOf = (round: TraceTranscriptMemory): string => {
 };
 
 /**
- * Batches rounds for the dreaming model, a model call each: rounds that share permissions, each
- * conversation's rounds together and in order, whole conversations packed up to `batchTokens`. A
- * conversation larger than that is split between its rounds, and a round larger than it into parts
- * (see {@link splitRound}).
+ * Batches rounds that share permissions for the dreaming model, packing whole conversations in
+ * order up to `batchTokens` and splitting larger ones between rounds or into parts.
  */
 export const batchByConversation = (
   rounds: TraceTranscriptMemory[],

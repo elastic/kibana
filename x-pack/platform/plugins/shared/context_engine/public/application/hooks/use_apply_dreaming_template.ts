@@ -21,8 +21,8 @@ interface ApplyDreamingTemplateArgs {
 }
 
 /**
- * Saves an example dreaming config, as filled in during onboarding, on an AI index and turns
- * dreaming on. Resolves to whether it saved; a failure shows a toast.
+ * Saves an example dreaming config on an AI index and turns dreaming on.
+ * Resolves to whether it saved; a failure shows a toast.
  */
 export const useApplyDreamingTemplate = () => {
   const {
@@ -39,7 +39,6 @@ export const useApplyDreamingTemplate = () => {
       setAiIndexDreaming(http, { aiIndexId, config: { enabled: true, ...config } }),
     onSuccess: (data, { aiIndexId }) => {
       queryClient.setQueryData(contextEngineQueryKeys.aiIndex.dreaming(aiIndexId), data);
-      // Saving dreaming attaches its workflows to the AI index's automations.
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.detail(aiIndexId) });
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.list() });
     },
@@ -60,7 +59,6 @@ export const useApplyDreamingTemplate = () => {
         await mutateAsync(args);
         return true;
       } catch {
-        // The error toast is surfaced by the mutation's onError handler.
         return false;
       }
     },

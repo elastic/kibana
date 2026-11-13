@@ -70,7 +70,6 @@ export const AutomationsPanel = ({
   const { automations, isCreating, isBusy, deleteAutomation, createAndAttach } =
     useAutomationsEditor({ aiIndex, onSaved });
   const isMemoryEnabled = useMemoryEnabled();
-  // Hidden only here: the editor still saves the full list, so its dreaming workflows stay attached.
   const visibleAutomations = useMemo(
     () =>
       isMemoryEnabled

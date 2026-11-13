@@ -503,7 +503,6 @@ describe('automation template rendering', () => {
     const promptSteps = (yaml: string): TemplateStep[] =>
       allSteps(parse(yaml).steps).filter((step) => step.type === 'ai.prompt');
 
-    /** Renders each model step's connector fields the way the engine does, for a given const. */
     const renderConnectorFields = (yaml: string, connectorId: string): string[][] => {
       const definition = parse(yaml);
       const consts = { ...definition.consts, connector_id: connectorId };

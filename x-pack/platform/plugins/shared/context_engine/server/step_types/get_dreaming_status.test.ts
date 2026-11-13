@@ -104,7 +104,6 @@ describe('getDreamingStatusStepDefinition', () => {
     ).resolves.toEqual({
       output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
     });
-    // Memory dreaming does not need trace sources.
     await expect(run()).resolves.toEqual({ output: { dream: true } });
   });
 
@@ -126,7 +125,6 @@ describe('getDreamingStatusStepDefinition', () => {
         reason: "AI index 'support' has no relationship types to link with.",
       },
     });
-    // Relationship types without entity types link nothing.
     await expect(
       run({ source: 'relationships', get: get({ ...withTypes, entities: undefined }) })
     ).resolves.toEqual({

@@ -30,7 +30,7 @@ import {
   type DreamingRelationshipType,
 } from '../../../../common/dreaming';
 
-/** Lowercase, with spaces and dashes as underscores, as names are typed. */
+/** Lowercases a typed type name and replaces runs of spaces and dashes with underscores. */
 export const normalizeTypeName = (value: string): string =>
   value.toLowerCase().replace(/[\s-]+/g, '_');
 
@@ -60,7 +60,6 @@ const nameError = (name: string, taken: readonly string[]): string | undefined =
 
 interface TypeModalProps {
   title: string;
-  /** Whether the form can be saved; errors show only after a save is tried. */
   isValid: boolean;
   onSave: () => void;
   onClose: () => void;
@@ -173,7 +172,6 @@ const DescriptionField = ({
   </EuiFormRow>
 );
 
-/** The type with its description, left out when blank. */
 const withDescription = <T extends object>(
   value: T,
   description: string
@@ -184,7 +182,6 @@ const withDescription = <T extends object>(
 
 interface FactTypeModalProps {
   initial?: DreamingFactType;
-  /** Names other fact types already use. */
   taken: readonly string[];
   onSave: (factType: DreamingFactType) => void;
   onClose: () => void;
@@ -232,7 +229,6 @@ export const FactTypeModal = ({ initial, taken, onSave, onClose }: FactTypeModal
 
 interface RelationshipTypeModalProps {
   initial?: DreamingRelationshipType;
-  /** Names other relationship types already use. */
   taken: readonly string[];
   onSave: (relationshipType: DreamingRelationshipType) => void;
   onClose: () => void;

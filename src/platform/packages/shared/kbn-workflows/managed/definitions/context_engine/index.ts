@@ -70,7 +70,7 @@ export interface ContextEngineDreamingWorkflowTemplateValues extends ManagedWork
   instructions: string;
   factTypes: Array<{ type: string; description?: string }>;
   entityTypes: Array<{ type: string; description?: string; attributes?: string[] }>;
-  /** Empty: the relationships step is skipped. */
+  /** The relationship types to link; when empty, the relationships step is skipped. */
   relationshipTypes: Array<{ type: string; description?: string }>;
 }
 
@@ -141,8 +141,7 @@ export type ContextEngineTraceDreamingBatchWorkflowTemplateValues =
 
 /**
  * Extracts long-term facts and entities from one batch of agent rounds, without reading the AI
- * index's existing ones. Trace dreaming runs a read's batches at once, each with this workflow, as
- * a parallel step can only run straight-line steps.
+ * index's existing ones.
  */
 export const CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW = {
   id: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,

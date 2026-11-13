@@ -152,7 +152,6 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
 
 const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
 
-/** What the public API returns for an AI index: no dreaming config, no deprecated `memory_enabled`. */
 const toPublicAiIndex = ({
   dreaming: _dreaming,
   memory_enabled: _memoryEnabled,
@@ -247,7 +246,6 @@ export const registerAiIndexRoutes = ({
     spaceId: string
   ) => ImprovementsServiceApi;
   aiIndexChanges: Pick<AiIndexChangeNotifier, 'notify'>;
-  /** Whether the global memory setting is on, which dreaming needs too. */
   isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
   getActions: () => Promise<ActionsPluginStart>;
   getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
@@ -255,7 +253,6 @@ export const registerAiIndexRoutes = ({
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
   analyticsService: ContextEngineAnalyticsService;
 }) => {
-  /** Reads the saved AI index back and tells the change handlers what the save changed. */
   const notifySaved = async ({
     aiIndexId,
     spaceId,
@@ -345,7 +342,6 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const { security, elasticsearch } = await ctx.core;
         const auditLogger = security.audit.logger;
-        // `memory_enabled` is accepted for older clients and ignored.
         const { id, memory_enabled: _memoryEnabled, ...properties } = request.body;
         try {
           await validateEsqlSources(properties.sources);
@@ -439,7 +435,6 @@ export const registerAiIndexRoutes = ({
           const spaceId = resolveSpaceId(await getSpaces(), request);
           const aiIndexService = getAiIndexService();
           const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
-          // `memory_enabled` is accepted for older clients and ignored.
           const { memory_enabled: _memoryEnabled, ...properties } = request.body;
           await validateEsqlSources(properties.sources);
           await validateConnectorSources({
@@ -1084,7 +1079,6 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Get the dreaming configuration of an AI Index
   router.versioned
     .get({
       path: AI_INDEX_DREAMING_PATH,
@@ -1121,7 +1115,6 @@ export const registerAiIndexRoutes = ({
       })
     );
 
-  // Update the dreaming configuration of an AI Index
   router.versioned
     .put({
       path: AI_INDEX_DREAMING_PATH,

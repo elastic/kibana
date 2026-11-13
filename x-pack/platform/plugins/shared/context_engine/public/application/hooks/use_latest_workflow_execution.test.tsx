@@ -33,7 +33,6 @@ interface FakeRuns {
   active: Array<{ id: string; status: ExecutionStatus }>;
 }
 
-/** Answers the newest-run query from `latest` and the active-run query from `active`. */
 const serveRuns = (runs: FakeRuns) =>
   mockGetWorkflowExecutions.mockImplementation(async (_workflowId, query) => ({
     results: query.statuses ? runs.active : runs.latest,
@@ -58,7 +57,6 @@ const renderLatest = (options?: { enabled?: boolean; awaitedExecutionId?: string
 
 const { setImmediate: realSetImmediate } = jest.requireActual<typeof import('timers')>('timers');
 
-/** react-query schedules its notifications with setTimeout(0), which fake timers hold back. */
 const settle = () =>
   act(async () => {
     for (let i = 0; i < 3; i++) {
@@ -175,7 +173,6 @@ describe('useLatestWorkflowExecution', () => {
       expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-1' }));
       expect(latestRunQueries()).toBe(1);
 
-      // A scheduled run starts and is only discovered by the idle poll.
       runs.latest = [{ id: 'run-2', status: ExecutionStatus.RUNNING }];
       runs.active = [{ id: 'run-2', status: ExecutionStatus.RUNNING }];
       await advance(IDLE_REFETCH_MS - 1);
@@ -184,13 +181,11 @@ describe('useLatestWorkflowExecution', () => {
       expect(latestRunQueries()).toBe(2);
       expect(result.current.isRunning).toBe(true);
 
-      // While it runs, the row polls at the running interval.
       await advance(RUNNING_REFETCH_MS - 1);
       expect(latestRunQueries()).toBe(2);
       await advance(1);
       expect(latestRunQueries()).toBe(3);
 
-      // Once it completes, polling falls back to the idle interval.
       runs.latest = [{ id: 'run-2', status: ExecutionStatus.COMPLETED }];
       runs.active = [];
       await advance(RUNNING_REFETCH_MS);

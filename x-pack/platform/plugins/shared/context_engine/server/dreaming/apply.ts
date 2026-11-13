@@ -122,7 +122,6 @@ export const addReferences = (
 const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReference[] =>
   sourceMemoryIds.map((id) => ({ uri: memoryUri(id), relation: 'derived_from' }));
 
-/** Builds the KI to store; undefined when it would not change. */
 type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
 
 type BuildPermittedDocument = (
@@ -163,7 +162,6 @@ const hiddenFrom = ({ spaceId }: ApplyContext, revision: KiRevision | undefined)
   return source !== undefined && !isVisibleInSpace(source.permissions, spaceId);
 };
 
-/** The permissions of the batch's memories, which all share them. */
 const batchPermissions = ({
   spaceId,
   memoryPermissions,
@@ -411,7 +409,6 @@ const upsert = (context: ApplyContext, operation: UpsertOperation): Promise<Writ
 
 type DeleteResult = 'deleted' | 'skipped' | 'rejected';
 
-/** Whether this batch may delete a KI: it exists, and has the permissions of the batch's memories. */
 const deletable = async (
   context: ApplyContext,
   kiId: string
@@ -473,7 +470,6 @@ const deleteDocument = async (context: ApplyContext, kiId: string): Promise<Dele
   }
 };
 
-/** Deletes a KI, and the relationships that link it. */
 const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResult> => {
   const { esClient, dest, abortSignal, dryRun } = context;
   const deleted = await deleteDocument(context, kiId);

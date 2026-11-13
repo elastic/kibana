@@ -350,8 +350,6 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    // Three attempts for dreaming, then one each for the trace dreaming batch, trace dreaming and
-    // relationships.
     expect(client.uninstall).toHaveBeenCalledTimes(6);
   });
 

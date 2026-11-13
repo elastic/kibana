@@ -33,7 +33,6 @@ import { InvalidTemplateParamsError } from '../errors';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
 interface WithName {
-  /** Human-readable name scoped to the AI index. Used for name-based lookup and injected as the workflow name. */
   name: string;
 }
 
@@ -87,8 +86,8 @@ const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: stri
 };
 
 /**
- * The workflow YAML an install saves: the template rendered for the AI index, named after the
- * automation. Throws {@link InvalidTemplateParamsError} when the parameters cannot be rendered.
+ * Renders the template for the AI index as workflow YAML named after the automation.
+ * Throws {@link InvalidTemplateParamsError} when the parameters cannot be rendered.
  */
 export const renderAutomationTemplate = (
   params: InstallAutomationTemplateParams,
@@ -100,15 +99,12 @@ export const renderAutomationTemplate = (
   } catch (error) {
     throw new InvalidTemplateParamsError(error instanceof Error ? error.message : String(error));
   }
-  // The server derives the workflow id from the name, so ids stay scoped to names rather than to
-  // AI index ids. Changing the name of an existing automation changes its ki_ids, which are
-  // prefixed with automation_name; KIs written under the old name are not cleaned up.
   return yaml.replace(/^name: .*/m, `name: ${JSON.stringify(params.name)}`);
 };
 
 /**
- * The automation on the AI index with exactly the requested name, if one exists. A workflow tagged
- * as a different template is never matched, so one template cannot overwrite another.
+ * Finds the id of the workflow on the AI index with exactly the requested name, if one exists.
+ * A workflow tagged as a different template is never matched.
  */
 export const findInstalledTemplateWorkflowId = async ({
   aiIndexId,
@@ -143,7 +139,6 @@ export const findInstalledTemplateWorkflowId = async ({
     try {
       workflow = await workflowsManagement.getWorkflow(automation.value, spaceId, request);
     } catch (error) {
-      // A failed read is not "not installed". Creating here would attach a second copy.
       logger.error(
         `Failed to read workflow "${automation.value}" while installing ${template}: ${
           error instanceof Error ? error.message : String(error)
@@ -156,9 +151,6 @@ export const findInstalledTemplateWorkflowId = async ({
       continue;
     }
 
-    // Matching is by exact name only. A workflow carrying a different template's tag is skipped
-    // to prevent cross-template overwrites. Return immediately on match so later unrelated
-    // workflow reads cannot block an already-found replacement target.
     if (workflow.name === templateName) {
       const hasOtherTemplateTag = Object.values(AUTOMATION_TEMPLATE_TAGS).some(
         (tag) => tag !== templateTag && workflow.tags?.includes(tag)
@@ -175,7 +167,6 @@ export const findInstalledTemplateWorkflowId = async ({
 /**
  * Installs an automation template on an AI index as the caller: renders it, then creates the
  * workflow, or overwrites the one with the same template and name, and attaches it to the index.
- * Shared by the agent tool and the install route.
  */
 export const installAutomationTemplate = async ({
   aiIndexId,

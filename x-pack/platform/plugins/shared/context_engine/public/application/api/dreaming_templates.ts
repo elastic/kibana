@@ -18,7 +18,6 @@ interface FetchArgs {
 
 const getAsset = <T>(http: HttpStart, file: string, { signal }: FetchArgs): Promise<T> =>
   http.get<T>(http.staticAssets.getPluginAssetHref(`${DREAMING_TEMPLATES_ASSET_DIR}/${file}`), {
-    // The href already carries the base path, or points at the CDN.
     prependBasePath: false,
     ...(signal ? { signal } : {}),
   });

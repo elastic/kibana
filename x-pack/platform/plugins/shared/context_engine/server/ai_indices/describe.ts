@@ -94,7 +94,6 @@ const configuredDreamedTypes = ({ dreaming }: AiIndexItem): DreamedTypes => {
   return { facts, entities };
 };
 
-/** The prefixes of the kinds a config dreams, so ordinary retrieval leaves out only what dreaming writes. */
 const dreamedPrefixesOf = ({ facts, entities }: DreamedTypes): string[] => [
   ...(facts.length > 0 ? [FACT_TYPE_PREFIX] : []),
   ...(entities.length > 0 ? [ENTITY_TYPE_PREFIX] : []),

@@ -173,7 +173,6 @@ const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; valu
   sources: [],
 });
 
-// Takes memories without scheduling a dreaming workflow.
 const MEMORY_DREAMING_CONFIG = {
   enabled: false,
   facts: [{ type: 'note', description: 'A detail worth keeping' }],
@@ -183,8 +182,8 @@ const MEMORY_DREAMING_CONFIG = {
 };
 
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
-// `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables
-// only the behavior it exercises.
+// `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables only the
+// behavior it exercises.
 apiTest.describe('context engine AI index describe API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let describeCredentials: RoleApiCredentials;

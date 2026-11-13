@@ -114,7 +114,6 @@ export const AiIndexDetailPage = () => {
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators, exact: true }) !== null;
   const isSettingsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
-  // Dreaming is the only setting so far.
   const showSettingsTab = isMemoryEnabled;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 

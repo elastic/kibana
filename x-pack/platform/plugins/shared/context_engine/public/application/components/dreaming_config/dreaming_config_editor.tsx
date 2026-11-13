@@ -46,7 +46,7 @@ export interface DreamingConfigDraft {
   relationships: DreamingRelationshipType[];
 }
 
-/** A draft of a saved or proposed config. Entities are on when it has entity types. */
+/** Builds a draft from a dreaming config; entities default to on when it has entity types. */
 export const draftOf = (
   { facts, entities, relationships }: DreamingTypesConfig,
   { entitiesEnabled }: { entitiesEnabled?: boolean } = {}
@@ -257,16 +257,11 @@ const replaced = <T,>(items: readonly T[], index: number | undefined, item: T): 
 
 interface DreamingConfigEditorProps {
   draft: DreamingConfigDraft;
-  /** Absent for a config that can't be changed here, such as a managed AI index's. */
   onChange?: (draft: DreamingConfigDraft) => void;
-  /** Entity types to start from when entities are turned on with none. */
   suggestedEntities?: DreamingEntities;
 }
 
-/**
- * What dreaming learns: fact types, then entity types, which are off until turned on, then
- * relationship types. Each type is added and edited in a modal.
- */
+/** Edits the fact, entity and relationship types dreaming learns, each type in a modal. */
 export const DreamingConfigEditor = ({
   draft,
   onChange,

@@ -67,7 +67,7 @@ export const getAiIndexDreaming = (
     ...(signal ? { signal } : {}),
   });
 
-/** Replaces an AI index's dreaming config. Works on managed AI indices too. */
+/** Replaces an AI index's dreaming config, including on managed AI indices. */
 export const setAiIndexDreaming = (
   http: HttpStart,
   { aiIndexId, config }: { aiIndexId: string; config: AiIndexDreamingConfig }

@@ -33,7 +33,6 @@ const roundsResponse = (rows: Array<[string, string]>) => ({
   values: rows.map(([lastAt, traceId]) => [lastAt, traceId]),
 });
 
-/** A `chat` span as stored: attributes as an object with dotted keys, messages as JSON strings. */
 const chatHit = (traceId: string, question: string, answer: string) => ({
   _source: {
     trace_id: traceId,
@@ -228,7 +227,6 @@ describe('readTraceTranscripts', () => {
       query: 'FROM my-spans',
     };
     esClient.esql.query
-      // The agent source is full at size 2: rounds after trace-b may be missing from it.
       .mockResolvedValueOnce(
         roundsResponse([
           ['2026-11-11T12:10:00.000Z', 'trace-a'],
@@ -279,7 +277,6 @@ describe('readTraceTranscripts', () => {
     expect(capped.resume_from).toBe('2026-11-11T12:20:00.000Z');
     expect(capped.resume_after).toBe('trace-b');
 
-    // A round larger than the budget is still read, so the cursor moves on.
     const tiny = await read(1);
     expect(tiny.memories.map(({ id }) => id)).toEqual(['trace:trace-a']);
     expect(tiny.resume_after).toBe('trace-a');

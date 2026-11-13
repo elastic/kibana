@@ -8,7 +8,6 @@
 import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
 import { batchByConversation, estimateTokens, splitRound } from './trace_batches';
 
-/** A round of `tokens` estimated tokens: its title and content are 4 characters a token. */
 const round = (
   id: string,
   conversation: string | undefined,

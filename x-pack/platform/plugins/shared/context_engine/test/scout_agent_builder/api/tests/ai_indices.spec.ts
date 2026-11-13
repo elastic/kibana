@@ -280,7 +280,6 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       const response = await apiClient.put(path, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        // Older clients still send `memory_enabled`; it is accepted and ignored.
         body: { ...aiIndexBody, description: 'Updated description', memory_enabled: false },
       });
 

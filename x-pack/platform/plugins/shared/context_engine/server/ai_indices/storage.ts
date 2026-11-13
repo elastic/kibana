@@ -32,7 +32,6 @@ const storageSettings = {
       space: types.keyword({}),
       description: types.text({}),
       managed: types.boolean({}),
-      // No longer set by clients; managed AI indices read it from their registration.
       memory_enabled: types.boolean({}),
       date_created: types.date({}),
       date_modified: types.date({}),
@@ -63,7 +62,6 @@ const storageSettings = {
           allowed_actions: types.keyword({}),
         },
       }),
-      // Read back whole and never queried.
       dreaming: types.object({ enabled: false }),
     },
   },
@@ -73,7 +71,6 @@ interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
   dreaming?: AiIndexDreamingConfig;
-  // Set by clients before it was deprecated; kept through writes.
   memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
@@ -87,9 +84,8 @@ interface AiIndexDocumentFields {
   traces?: AiIndexTrace[];
 }
 
-/** A dreaming config as stored, which may still hold the relationship types it once had. */
+/** A dreaming config as stored; its entities may hold relationship `edges`, dropped on read. */
 export type StoredDreamingConfig = Omit<AiIndexDreamingConfig, 'entities'> & {
-  // Written before relationships left the dreaming config; dropped on read.
   entities?:
     | (DreamingEntities & {
         edges?: Array<{

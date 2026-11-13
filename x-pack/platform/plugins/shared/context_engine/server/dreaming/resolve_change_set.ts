@@ -19,10 +19,8 @@ import { batchKeyOf, entityId, factId, TRACE_ROUND_ID_PREFIX } from './ids';
 import { audienceKeyOf, type KiPermissions } from './permissions';
 
 const NEW_REF_PREFIX = 'new:';
-/** How fact ids start: a ref like it that names no existing fact is a made-up id, not a new key. */
 const FACT_ID_PREFIX = 'fact-';
 
-/** The id of a memory the model was shown: as cited, or a round cited without its `trace:` prefix. */
 const shownIdOf = (id: string, shown: ReadonlySet<string>): string =>
   !shown.has(id) && shown.has(`${TRACE_ROUND_ID_PREFIX}${id}`)
     ? `${TRACE_ROUND_ID_PREFIX}${id}`
@@ -50,7 +48,7 @@ export interface ResolveContext {
   memories: ReadonlyMap<string, string | undefined>;
   /** The current facts and entities the change set refers to, by id. */
   existing: ReadonlyMap<string, DreamedKi>;
-  /** The permissions of each memory the model was shown; new entities are kept apart by those of their sources. */
+  /** The permissions of each memory the model was shown, which key new entities by audience. */
   memoryPermissions: ReadonlyMap<string, KiPermissions | undefined>;
 }
 

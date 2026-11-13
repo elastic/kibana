@@ -58,7 +58,7 @@ const loadErrorTitle = i18n.translate('xpack.contextEngine.dreamingTemplate.load
   defaultMessage: 'Unable to load the examples',
 });
 
-/** The choice of starting from nothing instead of an example. */
+/** The template ID for starting from scratch instead of from an example. */
 export const CUSTOM_TEMPLATE_ID = 'custom';
 
 const EMPTY_DRAFT: DreamingConfigDraft = draftOf({});
@@ -68,7 +68,6 @@ const Highlight = ({ children }: { children: React.ReactNode }) => {
   return <span css={{ color: euiTheme.colors.textPrimary }}>{children}</span>;
 };
 
-/** Outlined chips; the picked one is tinted and checked. */
 const usePillStyles = () => {
   const { euiTheme } = useEuiTheme();
   const base = css`
@@ -129,10 +128,9 @@ const Pill = ({
 };
 
 /**
- * The step after creating an AI index with memory, on one screen: pick the example closest to
- * what's being built, or start from scratch, describe it, and shape what dreaming learns: fact
- * types, then entity types if wanted. Applying turns dreaming on; skipping saves
- * nothing. Either way it continues to the AI index's own onboarding.
+ * Sets up dreaming for a new AI index with memory, from an example config or from scratch.
+ * Applying turns dreaming on, skipping saves nothing, and both continue to the AI index's
+ * onboarding.
  */
 export const DreamingTemplatePage = () => {
   const { id: aiIndexId } = useParams<{ id: string }>();
@@ -148,7 +146,6 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { templates, isLoading, error } = useDreamingTemplates();
   const [pickedId, setPickedId] = useState<string>();
-  // Until edited, the description and the types are the example's.
   const [editedSummary, setEditedSummary] = useState<string>();
   const [edited, setEdited] = useState<{ id: string; draft: DreamingConfigDraft }>();
   const selectedId = pickedId ?? templates[0]?.id;

@@ -12,9 +12,8 @@ import type { DreamingScheduleService } from './schedule';
 export const DREAMING_CHANGE_HANDLER_ID = 'dreaming_schedule';
 
 /**
- * Reconciles the dreaming workflow of an AI index when its dreaming config or dest is saved. While
- * dreaming is unavailable, it only removes workflows: of a deleted AI index, or of one that no
- * longer dreams.
+ * Reconciles the dreaming workflows of an AI index when its dreaming config or dest is saved.
+ * While dreaming is unavailable, it only removes workflows.
  */
 export const createDreamingChangeHandler = (
   getScheduleService: () => DreamingScheduleService,

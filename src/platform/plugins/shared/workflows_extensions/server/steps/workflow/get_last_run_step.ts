@@ -16,7 +16,6 @@ import { createServerStepDefinition } from '../../step_registry/types';
 
 const HOUR_MS = 60 * 60 * 1000;
 const DEFAULT_WINDOW_HOURS = 24;
-/** A few, so the run in progress can be skipped if history ever lists it as completed. */
 const LAST_RUNS_READ = 3;
 
 interface LastSuccess {

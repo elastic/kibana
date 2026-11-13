@@ -53,7 +53,7 @@ import {
 } from '../dreaming_config/dreaming_config_editor';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 
-/** Tallest the JSON gets before it scrolls. */
+/** Maximum height of the dreaming config JSON, in pixels, before it scrolls. */
 export const DREAMING_JSON_MAX_HEIGHT = 480;
 
 const sameTypes = (a: DreamingConfigDraft, b: DreamingConfigDraft): boolean =>
@@ -109,7 +109,6 @@ interface DreamingEditorProps {
   dreaming: AiIndexDreamingConfig;
 }
 
-/** Whether and how often dreaming runs, its instructions and the types it builds, then saved. */
 const DreamingEditor = ({ aiIndexId, dreaming }: DreamingEditorProps) => {
   const saved = useMemo(() => draftOf(dreaming), [dreaming]);
   const [edited, setEdited] = useState<DreamingConfigDraft>();
@@ -257,8 +256,8 @@ interface DreamingPanelProps {
 }
 
 /**
- * What the AI index's dreaming learns and how often it runs, editable as in onboarding, with its
- * config as JSON in a modal. An AI index that was never set up links to the setup.
+ * Shows and edits what an AI index's dreaming learns and how often it runs.
+ * An AI index without dreaming set up links to the setup instead.
  */
 export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
   const { navigateToContextEngine } = useNavigation();
@@ -303,12 +302,7 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
       {isLoading ? (
         <EuiSkeletonText lines={3} data-test-subj="contextAiIndexDreamingLoading" />
       ) : isSetUp ? (
-        <DreamingEditor
-          // Saved edits come back as a new config; start the editor over from it.
-          key={JSON.stringify(dreaming)}
-          aiIndexId={aiIndex.id}
-          dreaming={dreaming}
-        />
+        <DreamingEditor key={JSON.stringify(dreaming)} aiIndexId={aiIndex.id} dreaming={dreaming} />
       ) : (
         <>
           <KbnInfoCallout

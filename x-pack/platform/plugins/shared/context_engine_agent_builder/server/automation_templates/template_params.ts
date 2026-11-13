@@ -11,13 +11,13 @@ export const MAX_AUTOMATION_NAME_LENGTH = 200;
 export const MAX_SOURCE_INDEX_LENGTH = 1024;
 export const MAX_FIELD_NAME_LENGTH = 256;
 export const MAX_CORPUS_FILTER_LENGTH = 2000;
-/** Per-item runs fail at around 2,800 items on serverless (elastic/kibana#298948). */
+/** Caps per-item runs below the roughly 2,800 items at which they fail on serverless. */
 export const MAX_DOCUMENTS_LIMIT = 2_000;
 export const MAX_BODY_CHARS_LIMIT = 50_000;
 export const MAX_UNITS_LIMIT = MAX_DOCUMENTS_LIMIT;
 export const MAX_KIS_LENGTH = 50_000;
 export const MAX_METRIC_FIELDS = 10;
-/** One KI per source, so the list is capped at the 100-KI onboarding budget (`strategy_catalog`, "The KI budget"). */
+/** Caps sources at the 100-KI onboarding budget, since each source produces one KI. */
 export const MAX_INDEX_METADATA_SOURCES = 100;
 
 export const DEFAULT_MAX_DOCUMENTS = 50;

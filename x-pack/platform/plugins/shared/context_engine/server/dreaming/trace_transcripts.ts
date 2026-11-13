@@ -11,20 +11,11 @@ export const MAX_TEXT_PART_CHARS = 16_000;
 export const MAX_TOOL_ARGUMENTS_CHARS = 2000;
 /** Characters kept of one tool result, such as a page an agent opened or the rows a query returned. */
 export const MAX_TOOL_RESULT_CHARS = 16_000;
-/**
- * Characters kept of a whole round, about 400k tokens: a round longer than a dreaming batch is read
- * in parts, so this only bounds what one read holds. Its start (the question) and end (the
- * answer) are kept.
- */
+/** Characters kept of a whole round, about 400k tokens; a longer round keeps its start and end. */
 export const MAX_ROUND_CHARS = 1_600_000;
 
 const ELLIPSIS = ' […]';
 
-/**
- * A message part as Agent Builder traces record it (OTel GenAI semantic conventions 1.37): `text`
- * with `content`, `tool_call` with `name` and `arguments`, or `tool_call_response` with `response`.
- * Read from stored traces, so every field is checked rather than trusted.
- */
 interface MessagePart {
   type: string;
   [key: string]: unknown;
@@ -86,23 +77,25 @@ export const parseMessages = (value: unknown): Message[] => {
   });
 };
 
-/** Agent Builder opens each user message with who sent it and when; that is not what they said. */
 const SENDER_HEADER = /^\[User: [^\]\n]*\]\s*/;
 
-/** Agent Builder wraps tool results as `{"response":"<tool_result>…</tool_result>"}`. */
+const parseJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+};
+
 const unwrapToolResult = (response: unknown): string => {
   let text = asText(response);
-  try {
-    const parsed: unknown = JSON.parse(text);
-    if (
-      parsed &&
-      typeof parsed === 'object' &&
-      typeof (parsed as { response?: unknown }).response === 'string'
-    ) {
-      text = (parsed as { response: string }).response;
-    }
-  } catch {
-    // Not JSON: keep it as it is.
+  const parsed = parseJson(text);
+  if (
+    parsed &&
+    typeof parsed === 'object' &&
+    typeof (parsed as { response?: unknown }).response === 'string'
+  ) {
+    text = (parsed as { response: string }).response;
   }
   return text.replace(/^\s*<tool_result>/, '').replace(/<\/tool_result>\s*$/, '');
 };
@@ -120,16 +113,10 @@ const textOf = ({ role, parts }: Message): string =>
 const isUserTurn = (message: Message): boolean =>
   message.role === 'user' && textOf(message).length > 0;
 
-/** Whether a user message is what the user sent: Agent Builder heads it with the sender. */
 const isSentByUser = ({ role, parts }: Message): boolean =>
   role === 'user' &&
   parts.some((part) => part.type === 'text' && SENDER_HEADER.test(asText(part.content).trim()));
 
-/**
- * One message as transcript lines: who spoke, what they said, the tools called and what came back.
- * With `onlySentUserMessages`, user messages Agent Builder adds itself, such as attachment events,
- * are left out.
- */
 const renderMessage = (message: Message, onlySentUserMessages: boolean): string[] => {
   const lines: string[] = [];
   const text = textOf(message);
@@ -161,7 +148,6 @@ const renderMessage = (message: Message, onlySentUserMessages: boolean): string[
   return lines;
 };
 
-/** Keeps the start and the end of a long round: the question and the answer matter most. */
 const capRound = (text: string): string => {
   if (text.length <= MAX_ROUND_CHARS) {
     return text;
@@ -181,12 +167,8 @@ const lastIndexOf = (messages: Message[], matches: (message: Message) => boolean
 };
 
 /**
- * The transcript of one round from its last `chat` span. That span's input holds the whole
- * conversation sent to the model, earlier rounds included, so the round starts at the last message
- * the user sent, and Agent Builder's own user messages after it are left out. Without sender
- * headers, as from another source, it starts at the last user message. The span's output is the
- * answer. Undefined when the spans hold no conversation text, as when the tracing privacy settings
- * leave prompts and responses out.
+ * Builds the transcript of one round from its last `chat` span, starting at the last user message.
+ * Returns undefined when the spans hold no conversation text.
  */
 export const buildRoundTranscript = ({ lastChat }: RoundSpans): string | undefined => {
   if (!lastChat) {
@@ -197,7 +179,6 @@ export const buildRoundTranscript = ({ lastChat }: RoundSpans): string | undefin
 
   const sent = lastIndexOf(input, isSentByUser);
   const start = sent !== -1 ? sent : lastIndexOf(input, isUserTurn);
-  // Without a user message this round's turns cannot be told from earlier rounds': keep the answer.
   const roundInput = start === -1 ? [] : input.slice(start);
 
   const lines = [...roundInput, ...output].flatMap((message) =>

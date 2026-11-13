@@ -15,7 +15,6 @@ import { getDreamingTemplate, listDreamingTemplates } from '../api/dreaming_temp
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
-// Static files that only change with a Kibana upgrade.
 const STATIC = { staleTime: Infinity, cacheTime: Infinity } as const;
 
 /** Lists the example dreaming configs offered when an AI index is created. */
@@ -35,7 +34,7 @@ export const useDreamingTemplates = (): {
   return { templates: data?.templates ?? [], isLoading, error: error ?? undefined };
 };
 
-/** Loads one example dreaming config; nothing while `id` is undefined. */
+/** Loads one example dreaming config; loads nothing while `id` is undefined. */
 export const useDreamingTemplate = (
   id: string | undefined
 ): { template: DreamingTemplate | undefined; isLoading: boolean; error: Error | undefined } => {
@@ -53,7 +52,7 @@ export const useDreamingTemplate = (
 
 export type LoadedDreamingTemplate = DreamingTemplateSummary & DreamingTemplate;
 
-/** Every example dreaming config, loaded, in `index.json` order. */
+/** Loads every example dreaming config, in `index.json` order. */
 export const useAllDreamingTemplates = (): {
   templates: LoadedDreamingTemplate[];
   isLoading: boolean;

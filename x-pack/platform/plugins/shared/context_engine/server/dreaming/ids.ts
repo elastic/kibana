@@ -34,7 +34,7 @@ export const slugify = (name: string): string => {
   return lossless ? slug : `${slug}-${shortHash(identity)}`;
 };
 
-/** The KI id of an entity, from its type, name and audience; a slug never holds `--`, so they cannot run together. */
+/** The KI id of an entity, from its type, name and audience. */
 export const entityId = (type: string, name: string, audience?: string): string =>
   `entity-${slugify(type)}--${slugify(name)}${audience ? `--${audience}` : ''}`;
 
@@ -46,7 +46,7 @@ export const factId = (executionId: string, batchKey: string, ref: string): stri
 export const relationshipKey = (from: string, relation: string, to: string): string =>
   `${from}|${relation}|${to}`;
 
-/** The KI id of a relationship, from its key, so proposing it again updates it. */
+/** The KI id of a relationship, derived from its key. */
 export const relationshipId = (key: string): string => `relationship-${shortHash(key)}`;
 
 /** The key of a batch of memories. */

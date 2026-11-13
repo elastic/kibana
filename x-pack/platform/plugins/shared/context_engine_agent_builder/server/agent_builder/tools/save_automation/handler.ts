@@ -798,9 +798,8 @@ export const saveAutomationHandler = async ({
 };
 
 /**
- * Creates or overwrites a workflow and attaches it to an AI index, outside any conversation. A
- * newly created workflow is deleted again when attaching it fails. Callers check Context Engine
- * write access first.
+ * Creates or overwrites a workflow and attaches it to an AI index, deleting a newly created
+ * workflow when attaching it fails. Callers must check Context Engine write access first.
  */
 export const saveWorkflowToAiIndex = async ({
   aiIndexId,

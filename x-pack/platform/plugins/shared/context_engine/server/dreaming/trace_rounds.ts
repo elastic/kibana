@@ -17,10 +17,9 @@ import { TRACE_ROUND_ID_PREFIX } from './ids';
 import { estimateTokens } from './trace_batches';
 import { buildRoundTranscript } from './trace_transcripts';
 
-/** The memory type of a round read from traces, as the dreaming model and the apply step see it. */
+/** The memory type of a round read from traces. */
 export const TRACE_ROUND_TYPE = 'trace.round';
 
-/** Rounds whose spans are loaded per search: each last `chat` span holds a whole conversation. */
 const SPAN_LOAD_BATCH = 10;
 
 const OPERATION_FIELD = 'attributes.gen_ai.operation.name';
@@ -57,18 +56,12 @@ export const targetOfTraceQuery = (query: string): string => {
 /** How long before the cursor a round may have started and still end after it. */
 export const ROUND_LOOKBACK_MS = 60 * 60 * 1000;
 
-/** A span ends `duration` nanoseconds after it starts; spans are exported when they end. */
 const SPAN_END = 'TO_DATETIME(TO_LONG(@timestamp) + duration / 1000000)';
 
 const isUnknownDurationError = (error: unknown): boolean =>
   /unknown column \[duration\]/i.test(formatErrorMessage(error));
 
-/**
- * The rounds a trace source query finds that ended after the cursor and no later than `until`.
- * A round ends with the last span the query selects, so a round still running at `until` is left
- * for the next read rather than read half done. Spans without a `duration`, from a source that does
- * not keep it, end when they start.
- */
+/** Finds the rounds of a trace source query that ended after the cursor and by `until`. */
 export const findTraceRounds = async ({
   esClient,
   query,
@@ -155,7 +148,6 @@ interface LoadedRound {
   conversationTitle?: string;
 }
 
-/** The latest span of an operation in each round, one search per batch of rounds. */
 const latestSpanPerRound = async (
   esClient: ElasticsearchClient,
   target: string,
@@ -254,10 +246,8 @@ const toMemory = (
 });
 
 /**
- * Reads the rounds every trace source of an AI index found since the cursor, oldest first, as
- * transcripts. A source that hit `size` may hold more rounds than it returned, so the read stops at
- * the earliest such boundary, and the cursor moves only as far as what was read. A source that fails
- * is reported and the others are still read.
+ * Reads the rounds of an AI index's trace sources since the cursor as transcripts, oldest first.
+ * A source that fails is reported in `sources` and does not stop the others from being read.
  */
 export const readTraceTranscripts = async ({
   esClient,
@@ -344,7 +334,6 @@ export const readTraceTranscripts = async ({
     }
     const memory = toMemory(round, spans, transcript, spaceId);
     const memoryTokens = estimateTokens(memory);
-    // The first round is always read, so a round larger than the budget does not stall the cursor.
     if (memories.length > 0 && tokens + memoryTokens > maxTokens) {
       break;
     }

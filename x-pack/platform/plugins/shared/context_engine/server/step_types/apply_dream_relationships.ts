@@ -37,9 +37,8 @@ import {
 const INACTIVE_STATUSES: ReadonlySet<string> = new Set(['deleted', 'verification_failed']);
 
 /**
- * Linking stored facts and entities, without the memories behind them: each memory an end cites
- * stands for that end's permissions, which its KI took from it. A relationship is then based on
- * the memories its ends cite, takes their permissions, and is rejected when its ends differ.
+ * Maps each memory the given relationship ends cite to the permissions of the end citing it, for
+ * linking stored facts and entities without the memories behind them.
  */
 export const permissionsOfCitedMemories = (
   ends: Iterable<DreamedKi>

@@ -50,9 +50,8 @@ export const samePermissions = (
 ): boolean => canonicalPrivileges(privilegesOf(a)) === canonicalPrivileges(privilegesOf(b));
 
 /**
- * The permissions of a KI built from others, all visible in `spaceId`: theirs when they all have
- * the same ones; otherwise visible only in that space, to whoever can see every restricted one
- * there. Undefined when none is restricted.
+ * The permissions of a KI built from others: theirs when they all match, otherwise visible only in
+ * `spaceId` to whoever can see every restricted source there. Undefined when none is restricted.
  */
 export const derivedPermissions = (
   sources: ReadonlyArray<KiPermissions | undefined>,

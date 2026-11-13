@@ -171,7 +171,6 @@ export const softDeleteKi = async (
     });
   }
 
-  // Runs for an already-deleted KI too, so a retry finishes a cleanup that failed partway.
   const deletedRelationshipIds: string[] = [];
   const { type } = revision.source;
   if (deleteLinkedRelationships && typeof type === 'string' && isDreamedKiType(type)) {

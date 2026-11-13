@@ -152,10 +152,6 @@ export const dreamingTypesOf = ({
 export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
   dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
 
-/**
- * Ids of the dreaming workflows attached to an AI index as automations start with these. They copy
- * the ids in `@kbn/workflows/managed`, which the browser can't import without the workflow YAML.
- */
 const DREAMING_AUTOMATION_WORKFLOW_ID_PREFIXES: readonly string[] = [
   'system-context-engine-dreaming-',
   'system-context-engine-trace-dreaming-',

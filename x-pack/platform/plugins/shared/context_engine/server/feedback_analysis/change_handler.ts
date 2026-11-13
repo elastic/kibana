@@ -16,8 +16,6 @@ export const createFeedbackAnalysisChangeHandler = (
 ): AiIndexChangeHandler => ({
   id: FEEDBACK_ANALYSIS_CHANGE_HANDLER_ID,
   fields: ['feedback_analysis'],
-  // Saving the configuration unchanged still reconciles: enabling re-mints the API key the
-  // scheduled runs use, so the schedule follows whoever last saved it.
   when: 'saved',
   onChange: async ({ aiIndexId, spaceId, request, current }) => {
     if (!current) {

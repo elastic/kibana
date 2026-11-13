@@ -14,9 +14,7 @@ import {
 } from '@kbn/workflows';
 import { useWorkflowsApi, type GetWorkflowExecutionsParams } from '@kbn/workflows-ui';
 
-/** Polled this often while a run is in progress, so the row shows it finish. */
 const RUNNING_REFETCH_MS = 3_000;
-/** And this often otherwise, so a scheduled run shows up without a reload. */
 const IDLE_REFETCH_MS = 30_000;
 
 const NON_TERMINAL_STATUSES = ExecutionStatusValues.filter((status) => !isTerminalStatus(status));
@@ -61,8 +59,6 @@ export const useLatestWorkflowExecution = (
         size: 1,
         omitStepRuns: true,
       };
-      // A scheduled tick that overlaps a run is recorded as a newer SKIPPED run, so the
-      // active run is looked up on its own rather than inferred from the latest one.
       const [latest, active] = await Promise.all([
         api.getWorkflowExecutions(workflowId, production),
         api.getWorkflowExecutions(workflowId, { ...production, statuses: NON_TERMINAL_STATUSES }),

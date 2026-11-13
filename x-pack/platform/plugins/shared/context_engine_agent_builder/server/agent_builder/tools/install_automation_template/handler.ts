@@ -44,7 +44,7 @@ const aiIndexIdFromAttachments = (attachments: AttachmentStateManager): string =
 
 /**
  * Installs a template on the AI index attached to the conversation, then points the
- * conversation's workflow attachment at the saved workflow, as saving any automation does.
+ * conversation's workflow attachment at the saved workflow.
  */
 export const installAutomationTemplateHandler = async ({
   params,

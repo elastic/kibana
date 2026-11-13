@@ -45,7 +45,6 @@ const runLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.r
 const runningLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.running', {
   defaultMessage: 'Running. Open the execution.',
 });
-/** The icon a finished run is shown with; a running one already shows the spinner. */
 const statusIcon = (
   status: ExecutionStatus
 ): { type: string; color: 'success' | 'danger' | 'subdued'; label: string } | undefined => {
@@ -95,7 +94,6 @@ const statusIcon = (
   }
 };
 
-/** When the workflow last ran and how it ended, linking to that execution. */
 const LastExecution = ({
   execution,
   href,
@@ -113,7 +111,6 @@ const LastExecution = ({
     );
   }
   const icon = statusIcon(execution.status);
-  // Skipped runs may have no start time, so the status stands in for it.
   const when = execution.startedAt ? (
     <FormattedRelative value={new Date(execution.startedAt)} />
   ) : (
