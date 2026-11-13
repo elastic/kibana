@@ -296,6 +296,15 @@ function highestAnomaly(members: ServiceNodeData[]): ServiceNodeData['serviceAno
   return worst;
 }
 
+function markEdgeBidirectional(existing: ServiceMapEdge, from?: ServiceMapEdge): ServiceMapEdge {
+  const stroke = existing.style?.stroke ?? DEFAULT_EDGE_STYLE.stroke;
+  return {
+    ...existing,
+    markerStart: existing.markerStart ?? from?.markerStart ?? createEdgeMarker(stroke),
+    data: { ...existing.data, isBidirectional: true },
+  };
+}
+
 function rewriteEdges(
   edges: ServiceMapEdge[],
   remapEndpoint: (id: string) => string,
@@ -319,17 +328,24 @@ function rewriteEdges(
     }
 
     const id = getEdgeId(source, target);
+    const reverseId = getEdgeId(target, source);
     const existing = merged.get(id);
+    const reversed = merged.get(reverseId);
+
     if (existing) {
-      // e.g. checkout→postgres and cart→postgres both become shop→postgres.
-      // Keep bidirectional markers if any member edge had them (app-a→c + app-b↔c).
+      // Same direction after remap (checkout→postgres + cart→postgres → shop→postgres).
+      // Keep bidirectional markers if any member edge had them.
       if (edge.data?.isBidirectional && !existing.data?.isBidirectional) {
-        const stroke = existing.style?.stroke ?? DEFAULT_EDGE_STYLE.stroke;
-        merged.set(id, {
-          ...existing,
-          markerStart: existing.markerStart ?? edge.markerStart ?? createEdgeMarker(stroke),
-          data: { ...existing.data, isBidirectional: true },
-        });
+        merged.set(id, markEdgeBidirectional(existing, edge));
+      }
+      continue;
+    }
+
+    if (reversed) {
+      // Opposite direction after remap (checkout→billing + ledger→cart → shop↔finance).
+      // Keep the first orientation; mark it bidirectional like markBidirectionalConnections.
+      if (!reversed.data?.isBidirectional) {
+        merged.set(reverseId, markEdgeBidirectional(reversed, edge));
       }
       continue;
     }

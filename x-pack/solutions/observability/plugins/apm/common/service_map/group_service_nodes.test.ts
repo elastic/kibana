@@ -196,6 +196,32 @@ describe('groupServiceNodes', () => {
     expect(toPostgres?.markerEnd).toBeDefined();
   });
 
+  it('merges opposite remapped edges into one bidirectional edge', () => {
+    // checkout→billing and ledger→cart become shop→finance and finance→shop; keep one ↔ edge.
+    const nodes = [
+      serviceNode('checkout'),
+      serviceNode('cart'),
+      serviceNode('billing'),
+      serviceNode('ledger'),
+      ...ILLUSTRATION_GROUPING.services
+        .filter((n) => !['checkout', 'cart', 'billing', 'ledger'].includes(n))
+        .map((n) => serviceNode(n)),
+    ];
+    const edges = [edge('checkout', 'billing'), edge('ledger', 'cart')];
+
+    const { edges: nextEdges } = groupServiceNodes(nodes, edges, ILLUSTRATION_GROUPING);
+    const betweenGroups = nextEdges.filter(
+      (e) =>
+        (e.source === 'service.namespace:shop' && e.target === 'service.namespace:finance') ||
+        (e.source === 'service.namespace:finance' && e.target === 'service.namespace:shop')
+    );
+
+    expect(betweenGroups).toHaveLength(1);
+    expect(betweenGroups[0].data?.isBidirectional).toBe(true);
+    expect(betweenGroups[0].markerStart).toBeDefined();
+    expect(betweenGroups[0].markerEnd).toBeDefined();
+  });
+
   it('keeps the transaction type with the most requests', () => {
     const grouping: ServiceMapGrouping = {
       services: ['alpha', 'beta'],
