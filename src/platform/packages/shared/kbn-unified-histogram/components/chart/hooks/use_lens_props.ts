@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
@@ -33,9 +34,11 @@ export type LensProps = Pick<
 export const useLensProps = ({
   fetch$,
   onLoad,
+  executionContext,
 }: {
   fetch$: UnifiedHistogramFetch$;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+  executionContext?: KibanaExecutionContext;
 }) => {
   const buildLensProps = useCallback(
     ({ fetchParams, lensVisServiceState }: UnifiedHistogramFetch$Arguments) => {
@@ -56,10 +59,11 @@ export const useLensProps = ({
           attributes,
           onLoad,
           lastReloadRequestTime: fetchParams.lastReloadRequestTime,
+          executionContext,
         }),
       };
     },
-    [onLoad]
+    [onLoad, executionContext]
   );
 
   // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
@@ -85,6 +89,7 @@ export const getLensProps = ({
   isApproximate,
   onLoad,
   lastReloadRequestTime,
+  executionContext,
 }: {
   searchSessionId: string | undefined;
   timeRange: TimeRange;
@@ -93,6 +98,7 @@ export const getLensProps = ({
   isApproximate?: boolean;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
   lastReloadRequestTime?: number;
+  executionContext?: KibanaExecutionContext;
 }): LensProps => ({
   id: 'unifiedHistogramLensComponent',
   viewMode: 'view',
@@ -104,6 +110,7 @@ export const getLensProps = ({
   searchSessionId,
   executionContext: {
     description: 'fetch chart data and total hits',
+    ...executionContext,
   },
   onLoad,
   lastReloadRequestTime,

@@ -59,6 +59,11 @@ const LENS_ACTIONS_OPTIONS: UseUnifiedHistogramProps['lensActionsOptions'] = {
   telemetrySource: 'discover',
 };
 
+const HISTOGRAM_EXECUTION_CONTEXT: UseUnifiedHistogramProps['executionContext'] = {
+  type: 'discover',
+  name: 'unified_histogram',
+};
+
 const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [
   'externalVisContext',
   'breakdownField',
@@ -426,6 +431,7 @@ export const useDiscoverHistogram = (
       services,
       localStorageKeyPrefix: 'discover',
       lensActionsOptions: LENS_ACTIONS_OPTIONS,
+      executionContext: HISTOGRAM_EXECUTION_CONTEXT,
       initialState: {
         chartHidden,
         topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
