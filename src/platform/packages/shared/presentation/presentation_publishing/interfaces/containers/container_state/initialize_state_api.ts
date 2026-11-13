@@ -29,7 +29,7 @@ export const initializeStateApi = <StateType extends object = object>({
 }: Omit<HasSerializableState<StateType>, 'latestState$'> &
   HasUniqueId &
   HasParentApi & {
-    getComparators: () => StateComparators<StateType>;
+    getComparators: (state: StateType) => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
   }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
   const latestState$ = anyStateChange$.pipe(
@@ -57,7 +57,7 @@ export const initializeStateApi = <StateType extends object = object>({
     map(([currentState, lastSavedState]) => {
       // check state equality
       return !areComparatorsEqual(
-        getComparators(),
+        getComparators(currentState),
         lastSavedState,
         currentState,
         defaultState,

@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export { deserializeLayout } from './deserialize_layout';
+export {
+  areLayoutsEqual,
+  arePanelLayoutsEqual,
+  arePinnedPanelLayoutsEqual,
+} from './are_layouts_equal';
+export {
+  arePanelConfigsEqual,
+  arePinnedPanelConfigsEqual,
+  type GetComparators,
+} from './are_panel_configs_equal';
+export { assignMissingIds, getGeneratedIdPrefix } from './missing_ids';
+export type { DashboardChildState, DashboardLayout, DashboardLayoutPanel } from './layout_types';

@@ -8,6 +8,7 @@
  */
 
 import type { ZodObjectType } from '@kbn/zod';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import type { getDrilldownRegistry } from '../drilldowns/registry';
 import type { EmbeddableServerDefinition } from './types';
 
@@ -61,6 +62,11 @@ export function getEmbeddableServerRegistry(
         ...(typeof throwOnUnmappedPanel === 'boolean' ? { throwOnUnmappedPanel } : {}),
       };
     },
+    getComparators: async (
+      type: string,
+      embeddableState: object
+    ): Promise<StateComparators<object> | undefined> =>
+      registry[type]?.getComparators?.(embeddableState),
     resetCache: () => {
       schemaCache = {};
     },

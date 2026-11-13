@@ -74,8 +74,8 @@ import {
   areLayoutsEqual,
   arePanelLayoutsEqual,
   arePinnedPanelLayoutsEqual,
-} from './are_layouts_equal';
-import { deserializeLayout } from './deserialize_layout';
+} from '../../../common/dashboard_state/layout/are_layouts_equal';
+import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,

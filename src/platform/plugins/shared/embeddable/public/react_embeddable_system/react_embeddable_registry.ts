@@ -63,7 +63,7 @@ export const getEmbeddableDefinition = async <
 >(
   key: string
 ): Promise<EmbeddablePublicDefinition<SerializedState, Api> | undefined> => {
-  return registry[key]?.();
+  return registry[key]?.() as Promise<EmbeddablePublicDefinition<SerializedState, Api> | undefined>;
 };
 
 export function closeSetup() {

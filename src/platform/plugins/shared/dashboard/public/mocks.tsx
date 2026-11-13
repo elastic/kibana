@@ -13,7 +13,7 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardStart } from './plugin';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
-import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
+import { deserializeLayout } from '../common/dashboard_state/layout/deserialize_layout';
 import type { DashboardReadResponseBody } from '../server';
 import { DEFAULT_DASHBOARD_STATE } from '../common/default_dashboard_state';
 import type { DashboardApi, DashboardInternalApi } from './dashboard_api/types';

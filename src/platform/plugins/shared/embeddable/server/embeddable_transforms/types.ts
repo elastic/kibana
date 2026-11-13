@@ -9,6 +9,8 @@
 
 import type { ZodObjectType } from '@kbn/zod';
 import type { Reference } from '@kbn/content-management-utils';
+import type { MaybePromise } from '@kbn/utility-types';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '../../common';
 import type { GetDrilldownsSchemaFnType } from '../drilldowns/types';
 
@@ -74,6 +76,16 @@ export type EmbeddableServerDefinition<
    */
   // TODO - make required once all embeddables have schemas
   getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ZodObjectType | undefined;
+
+  /**
+   * Returns comparators used to determine whether two states are equal.
+   * Containers, such as dashboard, use comparators to compare embeddable state.
+   * May be async so comparator code can be loaded on demand instead of with the plugin.
+   * Keep in sync with the comparators returned by the embeddable public definition.
+   */
+  getComparators?: (
+    embeddableState: EmbeddableState
+  ) => MaybePromise<StateComparators<EmbeddableState>>;
 
   /**
    * Throws error when panel config is not supported.
