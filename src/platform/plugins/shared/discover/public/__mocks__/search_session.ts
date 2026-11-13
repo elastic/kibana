@@ -15,16 +15,26 @@ import { DiscoverSearchSessionManager } from '../application/main/state_manageme
 export function createSearchSessionMock(
   session = dataPluginMock.createStartContract().search.session as jest.Mocked<
     DataPublicPluginStart['search']['session']
+  >,
+  replayCache = dataPluginMock.createStartContract().replayCache as jest.Mocked<
+    DataPublicPluginStart['replayCache']
+  >,
+  timefilter = dataPluginMock.createStartContract().query.timefilter.timefilter as jest.Mocked<
+    DataPublicPluginStart['query']['timefilter']['timefilter']
   >
 ) {
   const history = createMemoryHistory();
   const searchSessionManager = new DiscoverSearchSessionManager({
     history,
     session,
+    replayCache,
+    timefilter,
   });
   return {
     history,
     session,
+    replayCache,
+    timefilter,
     searchSessionManager,
   };
 }

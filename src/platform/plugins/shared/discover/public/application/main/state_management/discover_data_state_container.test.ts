@@ -34,6 +34,7 @@ import {
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 import * as resolveEsqlSourceModule from '../data_fetching/resolve_esql_source';
+import { ScopedDiscoverEBTManager } from '../../../ebt_manager/scoped_discover_ebt_manager';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -51,9 +52,21 @@ const mockFetchDocuments = jest.mocked(fetchDocuments);
 const mockFetchEsql = jest.mocked(fetchEsql);
 
 describe('test getDataStateContainer', () => {
+  let trackQueryPerformanceEvent: jest.SpiedFunction<
+    ScopedDiscoverEBTManager['trackQueryPerformanceEvent']
+  >;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockFetchDocuments.mockResolvedValue({ records: [] });
+    trackQueryPerformanceEvent = jest.spyOn(
+      ScopedDiscoverEBTManager.prototype,
+      'trackQueryPerformanceEvent'
+    );
+  });
+
+  afterEach(() => {
+    trackQueryPerformanceEvent.mockRestore();
   });
 
   test('return is valid', async () => {
@@ -64,6 +77,110 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
+  describe('replay cache', () => {
+    const cachedTimeRange = {
+      from: '2021-08-31T20:00:00.000Z',
+      to: '2021-08-31T21:00:00.000Z',
+      mode: 'absolute' as const,
+    };
+    const cachedReplay = {
+      hit: true as const,
+      sessionId: 'cached-session',
+      timeRange: cachedTimeRange,
+      lastFetched: '2021-08-31T21:00:00.000Z',
+    };
+
+    const setup = async () => {
+      const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+      await toolkit.initializeTabs();
+      const tabId = toolkit.getCurrentTab().id;
+      const { replayCache, search, query } = toolkit.services.data;
+      jest.mocked(search.session.start).mockReturnValue('new-session');
+      jest.mocked(replayCache.get).mockReturnValue(cachedReplay);
+
+      return { toolkit, tabId, query };
+    };
+
+    test('initial fetch replays the cached session and time range', async () => {
+      const { toolkit, tabId } = await setup();
+
+      await toolkit.initializeSingleTab({ tabId });
+
+      expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+        searchSessionId: 'cached-session',
+        timeRangeAbsolute: cachedTimeRange,
+        replayCacheLastFetched: cachedReplay.lastFetched,
+      });
+    });
+
+    test('refresh after a replay starts a new session with the current time range', async () => {
+      const { toolkit, tabId, query } = await setup();
+      const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
+
+      dataStateContainer.fetch();
+
+      await waitFor(() =>
+        expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+          searchSessionId: 'new-session',
+          timeRangeAbsolute: query.timefilter.timefilter.getAbsoluteTime(),
+          replayCacheLastFetched: undefined,
+        })
+      );
+    });
+
+    test('marks replayed loads on the performance events and still reports a later refresh', async () => {
+      const { toolkit, tabId } = await setup();
+      const reportedEvents: Array<{ eventName: string; isReplayedLoad?: boolean }> = [];
+      trackQueryPerformanceEvent.mockImplementation(({ eventName }) => ({
+        reportEvent: ({ isReplayedLoad }) => {
+          reportedEvents.push({ eventName, isReplayedLoad });
+        },
+      }));
+      const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
+      await waitFor(() =>
+        expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE)
+      );
+
+      dataStateContainer.fetch();
+      await waitFor(() =>
+        expect(reportedEvents).toContainEqual({
+          eventName: 'discoverFetchAll',
+          isReplayedLoad: false,
+        })
+      );
+
+      expect(reportedEvents).toEqual([
+        { eventName: 'discoverFetchAllRequestsOnly', isReplayedLoad: true },
+        { eventName: 'discoverFetchAll', isReplayedLoad: true },
+        { eventName: 'discoverFetchAllRequestsOnly', isReplayedLoad: false },
+        { eventName: 'discoverFetchAll', isReplayedLoad: false },
+      ]);
+    });
+  });
+
+  test('completes the load after Cancel', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId, appState: { query: { esql: 'FROM logs' } } })
+    );
+
+    const response = Promise.withResolvers<Awaited<ReturnType<typeof fetchEsql>>>();
+    mockFetchEsql.mockReturnValueOnce(response.promise);
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    await waitFor(() => expect(mockFetchEsql).toHaveBeenCalled());
+
+    dataStateContainer.cancel();
+    response.reject(new Error('The query was canceled'));
+    await waitFor(() =>
+      expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE)
+    );
   });
 
   test('fetch clears skipInitialFetch so later query switches do not return to the empty state', async () => {

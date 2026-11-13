@@ -14,6 +14,7 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { getSideEffectFunction, type KibanaContext } from '..';
+import { getAbsoluteTimeRange } from '../../query/timefilter/get_time';
 
 declare global {
   interface Window {
@@ -150,12 +151,18 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
         : undefined;
 
+      let timeRange = input?.timeRange;
+
+      if (timeRange && input?.now !== undefined) {
+        timeRange = getAbsoluteTimeRange(timeRange, { forceNow: new Date(input.now) });
+      }
+
       const { datatable } = await searchService.esql(
         {
           query,
           locale,
           kibanaQueryContext: {
-            timeRange: input?.timeRange,
+            timeRange,
             timeField,
             kibanaFilters: [
               ...(ignoreGlobalFilters ? [] : input?.filters ?? []),

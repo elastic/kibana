@@ -10,6 +10,7 @@
 import type { History, Location } from 'history';
 import { filter } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import {
   createQueryParamObservable,
   getQueryParams,
@@ -22,6 +23,20 @@ import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../constants';
 export interface DiscoverSearchSessionManagerDeps {
   history: History;
   session: DataPublicPluginStart['search']['session'];
+  replayCache: DataPublicPluginStart['replayCache'];
+  /**
+   * Starting a session moves "now" forward, so we read the time range right after the start.
+   * Read it earlier and `now-15m` would still be based on the previous session's "now".
+   */
+  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
+}
+
+/** The search session of a tab fetch and the absolute time range it loads. */
+export interface TabSearchSession {
+  searchSessionId: string;
+  isSearchSessionRestored: boolean;
+  timeRangeAbsolute: TimeRange;
+  replayCacheLastFetched?: string;
 }
 
 /**
@@ -75,6 +90,36 @@ export class DiscoverSearchSessionManager {
   }
 
   /**
+   * Gets the session of a tab fetch and caches it, replaying the cached one on an initial load with the same context key
+   */
+  getTabSearchSession({
+    tabId,
+    initial,
+    contextKey,
+  }: {
+    tabId: string;
+    initial: boolean;
+    contextKey: string;
+  }): TabSearchSession {
+    if (initial && !this.hasSearchSessionIdInURL()) {
+      const replayedSession = this.replayTabSearchSession(tabId, contextKey);
+
+      if (replayedSession) {
+        return replayedSession;
+      }
+    }
+
+    return this.startTabSearchSession(tabId, contextKey);
+  }
+
+  /**
+   * Discards the cached session of a tab
+   */
+  forgetTab(tabId: string) {
+    this.deps.replayCache.delete(getReplayCacheAssetId(tabId));
+  }
+
+  /**
    * Pushes the provided search session ID to the URL
    * @param searchSessionId - the search session ID to push to the URL
    */
@@ -119,4 +164,51 @@ export class DiscoverSearchSessionManager {
 
   private getSearchSessionIdFromURL = () =>
     getQueryParams(this.deps.history.location)[SEARCH_SESSION_ID_QUERY_PARAM] as string | undefined;
+
+  /**
+   * Returns the replay cache entry for a tab, if its context key still matches
+   */
+  private replayTabSearchSession(tabId: string, contextKey: string) {
+    const { replayCache, session } = this.deps;
+    const replay = replayCache.get(getReplayCacheAssetId(tabId), contextKey);
+
+    if (!replay.hit) {
+      return undefined;
+    }
+
+    if (!session.isCurrentSession(replay.sessionId)) {
+      session.continue(replay.sessionId);
+    }
+
+    return {
+      searchSessionId: replay.sessionId,
+      isSearchSessionRestored: false,
+      timeRangeAbsolute: replay.timeRange,
+      replayCacheLastFetched: replay.lastFetched,
+    };
+  }
+
+  /**
+   * Starts or restores a session for a tab and caches it, unless it was restored from the URL
+   */
+  private startTabSearchSession(tabId: string, contextKey: string) {
+    const { replayCache, timefilter } = this.deps;
+    const assetId = getReplayCacheAssetId(tabId);
+    const { searchSessionId, isSearchSessionRestored } = this.getNextSearchSessionId();
+    const timeRangeAbsolute = timefilter.getAbsoluteTime();
+
+    if (!isSearchSessionRestored) {
+      replayCache.set(assetId, {
+        sessionId: searchSessionId,
+        timeRange: { ...timeRangeAbsolute, mode: 'absolute' },
+        contextKey,
+      });
+    } else {
+      replayCache.delete(assetId);
+    }
+
+    return { searchSessionId, isSearchSessionRestored, timeRangeAbsolute };
+  }
 }
+
+const getReplayCacheAssetId = (tabId: string) => `discover:${tabId}`;
