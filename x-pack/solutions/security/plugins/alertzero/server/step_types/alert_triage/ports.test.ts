@@ -14,7 +14,11 @@ import {
   fetchDecisionCandidates,
   type DecisionCursor,
   fetchTriageAlerts,
+  findAlertIdsByTag,
+  findAlertIdsClosedAsOther,
+  findAlertsNotClosedAsFalsePositive,
   findKeyTagsWithVerdicts,
+  findOpenAlertIds,
   listLiveExecutionIds,
   loadAlertsByIds,
   readKeyHistory,
@@ -746,10 +750,19 @@ describe('closeStillOpenAlertsAsFalsePositive', () => {
 });
 
 describe('countClosedByDecision', () => {
+  it('fails instead of granting a full allowance when the response has no total', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: {} } });
+
+    await expect(
+      countClosedByDecision({ callKibanaApi }, 'fp-decision-1', Date.parse('2026-10-27'))
+    ).rejects.toThrow('Close count missing');
+  });
+
   it.each([
     [{ value: 7 }, 7],
     [12, 12],
-    [undefined, 0],
   ])('reads the total %p as %p', async (total, expected) => {
     const callKibanaApi = jest
       .fn()
@@ -765,5 +778,52 @@ describe('countClosedByDecision', () => {
     expect(JSON.stringify(callKibanaApi.mock.calls[0][0].body.query)).toContain(
       'az:closed_by_decision:fp-decision-1'
     );
+  });
+});
+
+// The signals search route returns the raw Elasticsearch body, so a failed shard or a timeout comes
+// back as an HTTP 200 with part of the hits. Each of these helpers drives a write or a cap, where a
+// missing hit or bucket would read as "none".
+describe('helpers that drive a write, on a partial search result', () => {
+  const helpers: Array<[string, (api: { callKibanaApi: jest.Mock }) => Promise<unknown>]> = [
+    ['countClosedByDecision', (api) => countClosedByDecision(api, 'fp-decision-1', 0)],
+    [
+      'findKeyTagsWithVerdicts',
+      (api) => findKeyTagsWithVerdicts(api, ['k1'], ['az:true_positive']),
+    ],
+    ['findAlertIdsClosedAsOther', (api) => findAlertIdsClosedAsOther(api, ['a'])],
+    ['findAlertIdsByTag', (api) => findAlertIdsByTag(api, 'az:closed_by_decision:fp-decision-1')],
+    ['findOpenAlertIds', (api) => findOpenAlertIds(api, ['a'])],
+    ['findAlertsNotClosedAsFalsePositive', (api) => findAlertsNotClosedAsFalsePositive(api, ['a'])],
+  ];
+  const complete = {
+    timed_out: false,
+    _shards: { total: 2, successful: 2, failed: 0 },
+    hits: { total: { value: 0 }, hits: [] },
+    aggregations: { keys: { buckets: [] } },
+  };
+
+  it.each(helpers)('%s accepts a complete result', async (_name, call) => {
+    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: complete });
+
+    await expect(call({ callKibanaApi })).resolves.toBeDefined();
+  });
+
+  it.each(helpers)('%s throws when a shard failed', async (_name, call) => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { ...complete, _shards: { total: 2, successful: 1, failed: 1 } },
+    });
+
+    await expect(call({ callKibanaApi })).rejects.toThrow('partial result');
+  });
+
+  it.each(helpers)('%s throws when the search timed out', async (_name, call) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { ...complete, timed_out: true } });
+
+    await expect(call({ callKibanaApi })).rejects.toThrow('partial result');
   });
 });

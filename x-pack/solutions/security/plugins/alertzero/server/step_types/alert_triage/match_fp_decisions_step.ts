@@ -69,14 +69,18 @@ const MGET_CHUNK = 1000;
 const MAX_PAGES = 10;
 
 /**
- * The candidates whose matches `on` only tags, as shadow does. shortcut: a cloud key is the action
- * plus the account, so one approval covers every actor of that action in the account; act on it
- * once a guard limits the share of a rule one decision covers, sized from shadow data.
+ * The matched candidates whose matches `on` only tags, as shadow does. shortcut: a cloud key is the
+ * action plus the account, so one approval covers every actor of that action in the account; act on
+ * it once a guard limits the share of a rule one decision covers, sized from shadow data.
  */
-const heldInShadowIds = (candidates: readonly MatchCandidate[]): Set<string> =>
+const heldInShadowIds = (
+  candidates: readonly MatchCandidate[],
+  matched: ReadonlySet<string>
+): Set<string> =>
   new Set(
     candidates
-      .filter(({ doc }) => {
+      .filter(({ id, doc }) => {
+        if (!matched.has(id)) return false;
         const { strict } = buildPatternKeys(doc);
         return strict !== undefined && describePatternKey(strict).kind === 'cloud';
       })
@@ -398,7 +402,11 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             });
 
             if (mode === 'on') {
-              const held = heldInShadowIds(found.candidates);
+              // Only matched alerts can be held, so only their keys are built again.
+              const held = heldInShadowIds(
+                found.candidates,
+                new Set([...matches.wouldClose.values(), ...matches.wouldSkip.values()].flat())
+              );
               const skip = splitHeld(matches.wouldSkip, held);
               const closing = splitHeld(matches.wouldClose, held);
               // A dismissed pattern is a verdict of its own: `az:inconclusive` takes the alert out of
@@ -472,12 +480,19 @@ const noteText = (decision: StoredDecision, action: 'closed' | 'skipped'): strin
 };
 
 interface MgetResponse {
-  docs: Array<{ _id: string; found?: boolean; _source?: Record<string, unknown> }>;
+  docs: Array<{
+    _id: string;
+    found?: boolean;
+    _source?: Record<string, unknown>;
+    error?: { type?: string; reason?: string };
+  }>;
 }
 
 /**
  * Reads the decisions of the given key hashes by their ids: one read per hash and kind, no search,
  * so no field mapping is needed and expiry is checked here. A missing index means no decisions.
+ * A document that could not be read throws: read as missing, an unread dismissal would let the
+ * approval of the same key close alerts the dismissal protects.
  */
 const readDecisions = async ({
   mget,
@@ -507,6 +522,13 @@ const readDecisions = async ({
       throw error;
     }
     for (const doc of response.docs) {
+      if (doc.error !== undefined) {
+        throw new Error(
+          `Decision ${doc._id} could not be read: ${doc.error.type ?? 'unknown'} ${
+            doc.error.reason ?? ''
+          }`.trim()
+        );
+      }
       if (doc.found !== true) continue;
       const decision = readActiveDecision({ id: doc._id, source: doc._source, now });
       const hash = idToHash.get(doc._id);

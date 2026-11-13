@@ -346,6 +346,28 @@ export const tagAlerts =
     }
   };
 
+/** What a search response says about its own completeness. */
+interface SearchCompleteness {
+  timed_out?: boolean;
+  _shards?: { failed?: number };
+}
+
+/**
+ * Throws when a search answered with part of the result: a shard failed or the search timed out.
+ * The signals search route returns the raw Elasticsearch body, so an HTTP 200 can be incomplete,
+ * and a missing hit or bucket would then read as "none" where the caller acts on it.
+ */
+const assertCompleteSearch = ({ timed_out: timedOut, _shards: shards }: SearchCompleteness) => {
+  const failedShards = shards?.failed ?? 0;
+  if (timedOut === true || failedShards > 0) {
+    throw new Error(
+      `The alerts search returned a partial result (timed_out: ${
+        timedOut === true
+      }, failed shards: ${failedShards})`
+    );
+  }
+};
+
 /**
  * Closes the given alerts as false positives, but only those that are still `open` when the write
  * runs, so an alert an analyst acknowledged after the search is left alone. The status route cannot
@@ -442,7 +464,7 @@ export const findOpenAlertIds = async (
   { callKibanaApi }: KibanaApi,
   alertIds: readonly string[]
 ): Promise<string[]> => {
-  const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
     body: {
@@ -458,6 +480,7 @@ export const findOpenAlertIds = async (
       },
     },
   });
+  assertCompleteSearch(body);
   return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };
 
@@ -469,7 +492,7 @@ export const findAlertsNotClosedAsFalsePositive = async (
   { callKibanaApi }: KibanaApi,
   alertIds: readonly string[]
 ): Promise<string[]> => {
-  const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
     body: {
@@ -492,15 +515,19 @@ export const findAlertsNotClosedAsFalsePositive = async (
       },
     },
   });
+  assertCompleteSearch(body);
   return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };
 
-/** The ids of the alerts that carry a tag, up to one page. Used by revoke to find what to put back. */
+/**
+ * The ids of the alerts that carry a tag, up to one page. Used by revoke to find what to put back.
+ * A partial result throws: an empty page from a failed shard would read as "nothing left".
+ */
 export const findAlertIdsByTag = async (
   { callKibanaApi }: KibanaApi,
   tag: string
 ): Promise<string[]> => {
-  const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
     body: {
@@ -509,6 +536,7 @@ export const findAlertIdsByTag = async (
       query: { bool: { filter: [{ term: { [ALERT_FIELDS.tags]: tag } }] } },
     },
   });
+  assertCompleteSearch(body);
   return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };
 
@@ -546,13 +574,16 @@ export const writeAlertNotes = async (
  * Alerts one decision closed in the last 24 hours, for its daily cap. shortcut: it relies on
  * `kibana.alert.workflow_status_updated_at`, which every closed alert carries; if a mapping lacks
  * it the count is 0 and only the per-sweep cap applies. Upgrade to a stored counter if that matters.
+ * A partial result or a missing total throws, so the caller closes nothing on an undercount.
  */
 export const countClosedByDecision = async (
   { callKibanaApi }: KibanaApi,
   decisionId: string,
   since: number
 ): Promise<number> => {
-  const { body } = await callKibanaApi<{ hits?: { total?: { value?: number } | number } }>({
+  const { body } = await callKibanaApi<
+    SearchCompleteness & { hits?: { total?: { value?: number } | number } }
+  >({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
     body: {
@@ -574,8 +605,11 @@ export const countClosedByDecision = async (
       },
     },
   });
+  assertCompleteSearch(body);
   const total = body.hits?.total;
-  return typeof total === 'number' ? total : total?.value ?? 0;
+  const count = typeof total === 'number' ? total : total?.value;
+  if (count === undefined) throw new Error('Close count missing from the search response');
+  return count;
 };
 
 /** One count query, no writes: open alerts older than the look-back that were never triaged. */
@@ -705,9 +739,11 @@ export const findKeyTagsWithVerdicts = async (
   const found = new Set<string>();
   for (let from = 0; from < keyTags.length; from += BLOCKED_KEYS_CHUNK) {
     const chunk = keyTags.slice(from, from + BLOCKED_KEYS_CHUNK);
-    const { body } = await callKibanaApi<{
-      aggregations?: { keys?: { buckets?: Array<{ key: string }> } };
-    }>({
+    const { body } = await callKibanaApi<
+      SearchCompleteness & {
+        aggregations?: { keys?: { buckets?: Array<{ key: string }> } };
+      }
+    >({
       method: 'POST',
       path: SIGNALS_SEARCH_PATH,
       body: {
@@ -726,6 +762,8 @@ export const findKeyTagsWithVerdicts = async (
         },
       },
     });
+    // A failed shard can drop a bucket, and a dropped bucket would let a blocked key through.
+    assertCompleteSearch(body);
     const buckets = body.aggregations?.keys?.buckets;
     if (buckets === undefined) throw new Error('Key verdicts missing from the search response');
     for (const { key } of buckets) found.add(key);
@@ -903,7 +941,7 @@ export const findAlertIdsClosedAsOther = async (
   // The search reads no `_source` and the filter runs in Elasticsearch, so a chunk can be large.
   for (let from = 0; from < alertIds.length; from += CLOSE_REASON_CHUNK_SIZE) {
     const ids = alertIds.slice(from, from + CLOSE_REASON_CHUNK_SIZE);
-    const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+    const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
       method: 'POST',
       path: SIGNALS_SEARCH_PATH,
       body: {
@@ -921,6 +959,7 @@ export const findAlertIdsClosedAsOther = async (
         },
       },
     });
+    assertCompleteSearch(body);
     found.push(...(body.hits?.hits ?? []).map(({ _id }) => _id));
   }
   return found;
