@@ -220,11 +220,17 @@ describe('StepIoService', () => {
           }),
         ],
       });
-      const upserted = stepExecutionRepository.bulkUpsert.mock.calls[0][0] as Array<{
-        input?: unknown;
-        output?: unknown;
-      }>;
-      expect(upserted).toEqual(
+      const [mirrored, metadata] = stepExecutionRepository.bulkUpsert.mock.calls.map(
+        (call) => call[0] as Array<{ id?: string; input?: unknown; output?: unknown }>
+      );
+      expect(mirrored).toEqual([
+        expect.objectContaining({
+          id: 'step-1',
+          input: { foo: 'bar' },
+          output: { result: 'done' },
+        }),
+      ]);
+      expect(metadata).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             id: 'step-1',
@@ -233,7 +239,7 @@ describe('StepIoService', () => {
           }),
         ])
       );
-      for (const document of upserted) {
+      for (const document of metadata) {
         expect(document.input).toBeUndefined();
         expect(document.output).toBeUndefined();
       }
@@ -290,6 +296,56 @@ describe('StepIoService', () => {
           }),
         ],
       });
+      expect(state.getWorkflowExecution().error).toBeNull();
+    });
+
+    it('keeps a failed output in memory and copies only the side that was stored', async () => {
+      const { state, service, ioClient, stepExecutionRepository } = buildHarness();
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        status: ExecutionStatus.COMPLETED,
+      });
+      service.setStepInput('step-1', { foo: 'bar' });
+      service.setStepOutput('step-1', { result: 'done' });
+      ioClient.bulkCreate.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          { id: 'input:step-1' },
+          {
+            id: 'output:step-1',
+            error: { type: 'es_rejected_execution_exception', reason: 'busy' },
+          },
+        ],
+      });
+
+      await service.flush();
+
+      expect(service.getStepInput('step-1')).toEqual({ foo: 'bar' });
+      expect(service.getStepOutput('step-1')).toEqual({ result: 'done' });
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
+        expect.objectContaining({ id: 'step-1', input: { foo: 'bar' } }),
+      ]);
+      const mirrored = stepExecutionRepository.bulkUpsert.mock.calls[0][0] as Array<{
+        output?: unknown;
+      }>;
+      expect(mirrored[0].output).toBeUndefined();
+    });
+
+    it('does not evict an input or copy it when the create throws', async () => {
+      const { state, service, ioClient, stepExecutionRepository } = buildHarness();
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        status: ExecutionStatus.COMPLETED,
+      });
+      service.setStepInput('step-1', { foo: 'bar' });
+      ioClient.bulkCreate.mockRejectedValueOnce(new Error('connection reset'));
+
+      await service.flush();
+
+      expect(service.getStepInput('step-1')).toEqual({ foo: 'bar' });
+      expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
     });
   });
 

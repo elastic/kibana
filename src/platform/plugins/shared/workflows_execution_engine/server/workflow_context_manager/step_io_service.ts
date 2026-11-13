@@ -116,7 +116,9 @@ export interface StepIoWriter extends StepIoReader {
  * step impl should not be able to drive a flush or evict outputs.
  */
 export interface StepIoLifecycle {
-  flush(): Promise<void>;
+  /** Flushes queued IO. Returns true when a create failed and was put back. */
+  flush(): Promise<boolean>;
+  hasPendingIo(): boolean;
   flushStepChanges(): Promise<void>;
   load(): Promise<void>;
   prepareForRead(args: PrepareForReadArgs): Promise<void>;
@@ -533,12 +535,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /**
    * Creates pending input and output documents and runs IO bookkeeping
-   * (deferred output eviction + immediate input eviction) on the flushed step ids.
-   * Execution metadata is flushed by {@link WorkflowExecutionState.flush}.
+   * (deferred output eviction + immediate input eviction) on the stored step ids.
+   * Returns true when a create failed and was put back. Execution metadata is
+   * flushed by {@link WorkflowExecutionState.flush}.
    */
-  public async flush(): Promise<void> {
-    const flushedIds = await this.persistPendingIo();
-    this.runDeferredEvictionCycle(flushedIds);
+  public async flush(): Promise<boolean> {
+    const { storedIds, failed } = await this.persistPendingIo();
+    this.runDeferredEvictionCycle(storedIds);
+    return failed;
+  }
+
+  /** True when an input or output is queued and not yet stored. */
+  public hasPendingIo(): boolean {
+    return this.pendingIoChanges.size > 0;
   }
 
   /**
@@ -1245,15 +1254,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /**
    * Creates each pending input or output once. Returns the step ids whose IO
-   * was queued, so the eviction cycle can run. A failed create is recorded on
-   * the workflow execution and does not discard metadata.
+   * was stored, so the eviction cycle can drop those copies from memory. A
+   * failed create stays queued and is not evicted. A successful create clears
+   * a previous persistence error.
    */
-  private async persistPendingIo(): Promise<ReadonlyArray<string>> {
+  private async persistPendingIo(): Promise<{
+    storedIds: ReadonlyArray<string>;
+    failed: boolean;
+  }> {
     const ioPartials = this.pendingIoChanges;
     this.pendingIoChanges = new Map();
 
     if (ioPartials.size === 0) {
-      return [];
+      return { storedIds: [], failed: false };
     }
 
     const documents: Array<{
@@ -1288,7 +1301,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     if (documents.length === 0) {
-      return flushedIds;
+      return { storedIds: flushedIds, failed: false };
     }
 
     const restorePending = (onlyIds?: ReadonlyArray<string>) => {
@@ -1319,14 +1332,29 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       }
     };
 
+    let failedSides = new Map<string, { input?: boolean; output?: boolean }>();
     try {
       const response = await this.ioClient.bulkCreate({ documents });
       if (response.errors) {
         const failed = response.items.filter((item) => item.error);
-        restorePending(failed.map((item) => item.id));
+        const failedIds = failed.map((item) => item.id);
+        restorePending(failedIds);
+        const parsed = this.failedSidesFromIoDocuments(failedIds);
+        // An id this service did not write cannot be mapped back to a step.
+        // Keep every payload from this batch in memory.
+        if (!parsed || failed.length === 0) {
+          restorePending();
+          this.recordIoFailure(
+            `Failed to create ${failed.length} execution IO document(s): ${JSON.stringify(failed)}`
+          );
+          return { storedIds: [], failed: true };
+        }
+        failedSides = parsed;
         this.recordIoFailure(
           `Failed to create ${failed.length} execution IO document(s): ${JSON.stringify(failed)}`
         );
+      } else {
+        this.clearIoFailure();
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -1334,10 +1362,69 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       // Any other failure keeps the latest value for the next flush.
       if (!message.includes('document already exists')) {
         restorePending();
+        this.recordIoFailure(message);
+        return { storedIds: [], failed: true };
       }
       this.recordIoFailure(message);
     }
-    return flushedIds;
+
+    const storedIds = flushedIds.filter((id) => !failedSides.has(id));
+    await this.mirrorPayloadsForPreviousNodes(ioPartials, failedSides);
+    return { storedIds, failed: failedSides.size > 0 };
+  }
+
+  private failedSidesFromIoDocuments(
+    ids: ReadonlyArray<string>
+  ): Map<string, { input?: boolean; output?: boolean }> | undefined {
+    const failed = new Map<string, { input?: boolean; output?: boolean }>();
+    for (const id of ids) {
+      const parsed = parseExecutionIoId(id);
+      if (!parsed) {
+        return undefined;
+      }
+      const current = failed.get(parsed.executionId) ?? {};
+      failed.set(parsed.executionId, { ...current, [parsed.type]: true });
+    }
+    return failed;
+  }
+
+  /**
+   * Copies a stored payload onto the step document so a previous-version node
+   * can read it during a rolling upgrade. This is not the metadata write: a
+   * failure here leaves the IO document in place and does not fail the run.
+   */
+  private async mirrorPayloadsForPreviousNodes(
+    ioPartials: ReadonlyMap<string, { input?: JsonValue; output?: JsonValue | null }>,
+    failedSides: ReadonlyMap<string, { input?: boolean; output?: boolean }>
+  ): Promise<void> {
+    const documents: Array<Partial<EsWorkflowStepExecution>> = [];
+    for (const [id, ioPart] of ioPartials) {
+      if (this.state.getStepExecution(id)) {
+        const failed = failedSides.get(id);
+        const document: Partial<EsWorkflowStepExecution> = { id };
+        if (ioPart.input !== undefined && !failed?.input) {
+          document.input = ioPart.input;
+        }
+        if ('output' in ioPart && !failed?.output) {
+          document.output = ioPart.output ?? null;
+        }
+        if (document.input !== undefined || document.output !== undefined) {
+          documents.push(document);
+        }
+      }
+    }
+    if (documents.length === 0) {
+      return;
+    }
+    try {
+      await this.stepRepository.bulkUpsert(documents);
+    } catch (error) {
+      this.logger?.warn(
+        `Could not copy step payloads onto the step document for a previous-version node: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   private recordIoFailure(message: string): void {
@@ -1346,6 +1433,12 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       this.state.updateWorkflowExecution({
         error: { type: 'ExecutionIoPersistError', message },
       });
+    }
+  }
+
+  private clearIoFailure(): void {
+    if (this.state.getWorkflowExecution().error?.type === 'ExecutionIoPersistError') {
+      this.state.updateWorkflowExecution({ error: null });
     }
   }
 
