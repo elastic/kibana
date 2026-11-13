@@ -73,6 +73,13 @@ describe('is_filter_applicable', () => {
     expect(isFilterApplicable(buildPhraseFilter('fieldA'), [])).toBe(true);
   });
 
+  it('considers an ES|QL filter applicable even if its column is not a field of the data views', () => {
+    const esqlFilter = buildPhraseFilter('size_class');
+    esqlFilter.meta.esql = { type: 'string' };
+
+    expect(isFilterApplicable(esqlFilter, [dataView])).toBe(true);
+  });
+
   it('considers a phrase filter applicable if its key exists in the current data view', () => {
     expect(isFilterApplicable(buildPhraseFilter('fieldA'), [dataView])).toBe(true);
   });

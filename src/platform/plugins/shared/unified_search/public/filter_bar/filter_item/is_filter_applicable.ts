@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter } from '@kbn/es-query';
+import { isEsqlFilter, type Filter } from '@kbn/es-query';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 
 import type { FilterableSource } from '@kbn/data-source';
@@ -28,6 +28,9 @@ export const getFilterKeys = (filter: Filter): string[] => {
 export const isFilterApplicable = (filter: Filter, dataViews: FilterableSource[]): boolean => {
   // Any filter is applicable if no data views were provided to FilterBar.
   if (!dataViews.length) return true;
+
+  // ES|QL filters are on columns created by the query, they are not fields of any data view
+  if (isEsqlFilter(filter)) return true;
 
   const allFields = dataViews.flatMap((dataView) => dataView.fields.map((field) => field.name));
 

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { Filter, DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import {
+  isEsqlFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
@@ -62,7 +63,10 @@ export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataVie
   const fieldName = getFilterField(filter);
   const field = indexPattern?.fields.find((f) => f.name === fieldName);
   const fieldType = field?.type;
-  const valueFormatter = getValueFormatter(indexPattern, fieldName);
+  // ES|QL filters are on columns created by the query, which are not fields of the dataset
+  const valueFormatter = isEsqlFilter(filter)
+    ? undefined
+    : getValueFormatter(indexPattern, fieldName);
 
   if (isPhraseFilter(filter) || isScriptedPhraseFilter(filter)) {
     return getPhraseDisplayValue(filter, valueFormatter, fieldType);

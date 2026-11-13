@@ -178,23 +178,32 @@ const getEsqlDataView = async (indexPattern: string): Promise<DataView> => {
 };
 
 const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: RawColumnValue) => {
-  // A computed column (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
-  // filterable field, so the field check isn't enough: fieldName would resolve to that
-  // unrelated field, but the value shown is the computed one, not the raw field's value.
-  // Bail out before resolving the data view.
-  if (isUnfilterableComputedColumn(column)) {
-    return [];
-  }
-
   const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
 
   if (!indexPattern) {
     return [];
   }
 
-  // Prefer `sourceField` (index field name). Fall back to `column.name` when it is not a string
+  // Prefer `sourceField` (the column name in the query output). Fall back to `column.name` when it
+  // is not a string, as it can be a custom label
   const sourceFieldName = column.meta?.sourceParams?.sourceField;
   const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
+
+  // A column created by the query (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
+  // filterable field, so the field check isn't enough: fieldName would resolve to that
+  // unrelated field, but the value shown is the computed one, not the raw field's value.
+  // It can't be a DSL filter, so it is an ES|QL one that is applied to the queries that have the column.
+  if (isUnfilterableComputedColumn(column)) {
+    // the date columns can't be filtered with a value, brushing updates the time range instead
+    if (column.meta?.type === 'date') {
+      return [];
+    }
+    const dataView = await getEsqlDataView(indexPattern);
+    return buildRawColumnFilter(fieldName, value, column, dataView).map((filter) => ({
+      ...filter,
+      meta: { ...filter.meta, esql: { type: column.meta?.type, esType: column.meta?.esType } },
+    }));
+  }
 
   const dataView = await getEsqlDataView(indexPattern);
   const field = dataView.getFieldByName(fieldName);

@@ -95,6 +95,7 @@ export {
   isExistsFilter,
   isFilter,
   isFilterDisabled,
+  isEsqlFilter,
   isFilterPinned,
   isFilters,
   isMatchAllFilter,

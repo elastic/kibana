@@ -12,7 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import type { Filter } from '../filters';
-import { cleanFilter, isFilterDisabled } from '../filters';
+import { cleanFilter, isEsqlFilter, isFilterDisabled } from '../filters';
 import type { BoolQuery, DataViewBase } from './types';
 import { fromNestedFilter } from './from_nested_filter';
 import { fromCombinedFilter } from './from_combined_filter';
@@ -76,7 +76,10 @@ export const buildQueryFromFilters = (
   }
 ): BoolQuery => {
   const { ignoreFilterIfFieldNotInIndex = false } = options;
-  const filters = inputFilters.filter((filter) => filter && !isFilterDisabled(filter));
+  // ES|QL filters can't be expressed as DSL, ES|QL requests apply them to the query itself
+  const filters = inputFilters.filter(
+    (filter) => filter && !isFilterDisabled(filter) && !isEsqlFilter(filter)
+  );
 
   const filtersToESQueries = (negate: boolean) => {
     return filters
