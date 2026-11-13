@@ -19,6 +19,9 @@ export const MANAGER_DS_FLOW_INTEGRATION_ID = 'scout_ds_manager_flow';
 
 export const MANAGER_DS_FLOW_DATA_STREAM_ID = 'scout_ds_manager_flow_ds';
 
+/** Upper bound for Task Manager to claim and finish a data stream analysis task. */
+export const DATA_STREAM_TASK_SETTLE_TIMEOUT_MS = 30_000;
+
 export const dataStreamsApiBasePath = (integrationId: string): string =>
   `api/automatic_import/integrations/${integrationId}/data_streams`;
 

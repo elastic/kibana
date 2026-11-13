@@ -23,6 +23,5 @@
     "@kbn/coloring",
     "@kbn/i18n",
     "@kbn/field-formats-plugin",
-    "@kbn/css-utils",
   ]
 }

@@ -18,11 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  isInvestigationRunQuotaGroup,
-  isRunQuotaReached,
-  type RunQuotaGroup,
-} from '@kbn/significant-events-plugin/common';
+import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import {
   isDetectionRunQuotaGroup,
@@ -30,7 +26,6 @@ import {
 } from '../../../components/ui/run_quota_reached_callout';
 import { isFiniteRunLimit, RUN_QUOTA_GROUPS } from './run_limit_draft';
 import { RunLimitRow, RUN_QUOTA_GROUP_LABELS } from './run_limit_row';
-import { RunQuotaExhaustionCallout } from './run_quota_exhaustion_callout';
 import { SettingsSectionRow } from './settings_section';
 import type { RunLimitsForm } from './use_run_limits_form';
 
@@ -38,14 +33,12 @@ export const RunLimitsSection = ({
   groups = RUN_QUOTA_GROUPS,
   form,
   description,
-  exhaustionCallouts,
   onSave,
   onConfirmSave,
 }: {
   groups?: readonly RunQuotaGroup[];
   form: RunLimitsForm;
   description?: ReactNode;
-  exhaustionCallouts: 'automations' | 'groups';
   onSave: () => Promise<void>;
   onConfirmSave: () => Promise<void>;
 }) => {
@@ -110,16 +103,6 @@ export const RunLimitsSection = ({
 
         {!quotas.isLoading && !quotas.isError && response && draftState && (
           <>
-            {exhaustionCallouts === 'automations' ? (
-              <RunQuotaExhaustionCallout
-                enabled={response.enabled}
-                investigationLimitsEnabled={response.investigationLimitsEnabled}
-                limits={response.limits}
-                counts={response.counts}
-                groups={groups.filter(isInvestigationRunQuotaGroup)}
-              />
-            ) : null}
-
             <EuiForm component="div">
               {sharedSwitch ? (
                 <>
@@ -140,7 +123,6 @@ export const RunLimitsSection = ({
               ) : null}
               {groups.map((group, index) => {
                 const showGroupCallout =
-                  exhaustionCallouts === 'groups' &&
                   isDetectionRunQuotaGroup(group) &&
                   isRunQuotaReached({
                     group,
@@ -198,7 +180,7 @@ export const RunLimitsSection = ({
                   })}
                   text={i18n.translate('xpack.nightshift.settings.runLimits.readOnlyDescription', {
                     defaultMessage:
-                      'Changing daily limits requires the Nightshift Manage and Configure privileges in all spaces.',
+                      'Changing daily limits requires the nightshift Manage and Configure privileges in all spaces.',
                   })}
                 />
               </>

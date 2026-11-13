@@ -14,6 +14,8 @@ export {
   type AgentDefinition,
   type AgentApprovals,
   type AgentConfiguration,
+  type AgentCapabilities,
+  type AgentCapabilityConfig,
   type AgentConfigurationInput,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,

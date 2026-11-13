@@ -145,7 +145,8 @@ describe('Significant Events run quota workflow contracts', () => {
   });
 
   it('places discovery and KI gates before their expensive work', () => {
-    expect(definitions.discovery.steps.slice(0, 3).map(({ name }) => name)).toEqual([
+    expect(definitions.discovery.steps.slice(0, 4).map(({ name }) => name)).toEqual([
+      'report_discovery_started',
       'bootstrap_cleanup_workflow',
       'check_budget',
       'exit_if_budget_denied',
@@ -184,6 +185,17 @@ describe('Significant Events run quota workflow contracts', () => {
 
     expect(discoveryDenial.steps).toEqual([
       expect.objectContaining({
+        type: 'kibana.request',
+        with: expect.objectContaining({
+          path: expect.stringContaining('/discovery/_completed'),
+          body: expect.objectContaining({
+            outcome: 'completed',
+            has_work: false,
+            budget_denied: true,
+          }),
+        }),
+      }),
+      expect.objectContaining({
         type: 'workflow.output',
         with: {
           processedCount: 0,
@@ -213,30 +225,6 @@ describe('Significant Events run quota workflow contracts', () => {
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
           keepAliveRefreshed: 0,
         },
-      })
-    );
-  });
-
-  it('starts investigations after eligibility, event resolution, and deduplication', () => {
-    const orderedSteps = [
-      'gate_investigatable_severity',
-      'resolve_active_event',
-      'guard_resolved_event',
-      'guard_missing_investigation',
-      'trigger_investigation',
-    ];
-    const indexes = orderedSteps.map((name) => stepIndex(definitions.discovery, name));
-
-    expect(indexes.every((index) => index >= 0)).toBe(true);
-    expect(indexes).toEqual([...indexes].sort((left, right) => left - right));
-  });
-
-  it('delegates automatic investigation admission to the trigger step and fails open', () => {
-    expect(findStep(definitions.discovery, 'trigger_investigation')).toEqual(
-      expect.objectContaining({
-        type: 'nightshift.triggerInvestigation',
-        with: expect.objectContaining({ trigger_type: 'automatic' }),
-        'on-failure': { continue: true },
       })
     );
   });

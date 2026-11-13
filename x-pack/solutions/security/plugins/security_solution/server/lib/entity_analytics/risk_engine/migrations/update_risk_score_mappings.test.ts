@@ -48,7 +48,9 @@ describe('updateRiskScoreMappings', () => {
       ...coreStart,
       savedObjects: {
         createInternalRepository: jest.fn().mockReturnValue(soClient),
-        getScopedClient: jest.fn().mockReturnValue(soClient),
+        getUnsafeInternalClient: jest
+          .fn()
+          .mockReturnValue({ asScopedToNamespace: jest.fn().mockReturnValue(soClient) }),
       },
       elasticsearch: { client: { asInternalUser: esClient } },
     },

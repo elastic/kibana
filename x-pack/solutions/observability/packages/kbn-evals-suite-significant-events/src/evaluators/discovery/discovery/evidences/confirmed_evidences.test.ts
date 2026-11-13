@@ -38,26 +38,23 @@ describe('confirmedEvidencesEvaluator', () => {
     expect(result.score).toBe(0);
   });
 
-  it('accepts an open event that confirms nothing when it is rated low with little confidence', async () => {
+  it('accepts an open event that confirms nothing when it is rated low, whatever its confidence', async () => {
     const events = [
       {
         status: 'active',
         severity: 'low',
-        confidence: 0.3,
+        confidence: 0.9,
         signals: [{ type: 'detection', description: 'No rows.', verdict: 'inconclusive' }],
       },
     ];
     expect((await evaluate(events, [esqlStep])).score).toBe(1);
   });
 
-  it.each([
-    ['severity', { severity: 'medium', confidence: 0.2 }],
-    ['confidence', { severity: 'low', confidence: 0.5 }],
-  ])('scores 0 for an unconfirmed open event rated too high on %s', async (_label, rating) => {
+  it('scores 0 for an unconfirmed open event rated above low', async () => {
     const events = [
       {
         status: 'active',
-        ...rating,
+        severity: 'medium',
         signals: [{ type: 'detection', description: 'No rows.', verdict: 'inconclusive' }],
       },
     ];

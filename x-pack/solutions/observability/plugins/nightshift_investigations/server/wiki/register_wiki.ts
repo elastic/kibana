@@ -16,11 +16,13 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID } from '@kbn/nightshift-shared';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import {
-  createInvestigationMemoryTelemetry,
+  createInvestigationBackgroundTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
+import type { ModelUsageCollector } from '../lib/model_usage_collector';
 import { WIKI_AI_INDEX_DEST, WIKI_AI_INDEX_ID } from '../../common/wiki';
 import { SANDBOX_TOOL_IDS } from '../agents/investigation';
 import { usesKnowledge } from '../agents/agent_policy';
@@ -88,7 +90,7 @@ export const hydrateWikiWorkspace = async ({
   conversationId,
   logger,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
@@ -140,6 +142,7 @@ export const runWikiOptimize = async ({
   getSavedObjects,
   getUiSettings,
   logger,
+  modelUsage,
 }: {
   request: KibanaRequest;
   agentId?: string;
@@ -161,13 +164,14 @@ export const runWikiOptimize = async ({
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
+  modelUsage?: ModelUsageCollector;
 }): Promise<WikiOptimizeResult | undefined> => {
   // Only the Nightshift knowledge agents write to Wiki: their post-execution hook runs this
   // workflow, and other agents' rounds must not edit the wiki. An unidentified caller is refused
   // rather than trusted — the optimize workflow has a manual trigger, so it can be run without an
   // agent id.
   if (!usesKnowledge(agentId)) {
-    logger.info('Wiki optimizer skipped — round was not produced by a Nightshift knowledge agent');
+    logger.info('Wiki optimizer skipped — round was not produced by a nightshift knowledge agent');
     return undefined;
   }
 
@@ -216,7 +220,11 @@ export const runWikiOptimize = async ({
     inference: getInference(),
     savedObjects: getSavedObjects(),
     uiSettings: getUiSettings(),
-    telemetryMetadata: createInvestigationMemoryTelemetry(interactionId),
+    telemetryMetadata: createInvestigationBackgroundTelemetry(
+      NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID,
+      interactionId
+    ),
+    modelUsage,
     logger,
   });
   if (!model) {

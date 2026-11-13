@@ -783,7 +783,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   ]);
   const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
-  const contextMenuItems = useMemo(() => {
+  const getContextMenuItems = () => {
     const items = [];
     if (anomaly.customUrls !== undefined) {
       anomaly.customUrls.forEach((customUrl, index) => {
@@ -1020,22 +1020,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
 
     return items;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    dataViewId,
-    dataViewIdWithTemporary,
-    openInDiscoverUrl,
-    openInDiscoverUrlError,
-    viewExamplesUrlError,
-    viewExamples,
-    viewSeries,
-    canConfigureRules,
-    canCreateMlAlerts,
-    isCategorizationAnomalyRecord,
-  ]);
+  };
 
   return (
-    <EuiContextMenuPanel items={contextMenuItems} data-test-subj="mlAnomaliesListRowActionsMenu" />
+    <EuiContextMenuPanel
+      items={getContextMenuItems()}
+      data-test-subj="mlAnomaliesListRowActionsMenu"
+    />
   );
 };
 

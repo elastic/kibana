@@ -43,9 +43,6 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   ],
 };
 
-/** @internal */
-export const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
-
 export class SecureSpacesClientWrapper implements ISpacesClient {
   private readonly useRbac: boolean;
 

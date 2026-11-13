@@ -6,7 +6,10 @@
  */
 
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import {
+  ENDPOINT_CAPABILITIES,
+  GET_FILE_MAX_PATHS,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
@@ -136,7 +139,7 @@ describe('When using get-file action from response actions console', () => {
     await enterConsoleCommand(renderResult, user, 'get-file --path=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Invalid argument value: --path. Argument cannot be empty'
+      'Argument --path must have a value'
     );
   });
 
@@ -150,6 +153,162 @@ describe('When using get-file action from response actions console', () => {
         path: GET_FILE_ROUTE,
         version: '2023-10-31',
       });
+    });
+  });
+
+  describe('and multiple `--path` arguments', () => {
+    const multiPathCommand = 'get-file --path="one/two" --path="three/four"';
+    const capabilitiesWithoutMultiPath = (): EndpointCapabilities[] =>
+      ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_multi_path');
+
+    it('should call the `get_file` api with `paths` when `--path` is used multiple times', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, multiPathCommand);
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"paths":["one/two","three/four"]}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should error if the endpoint does not support the `get_file_multi_path` capability', async () => {
+      await render(capabilitiesWithoutMultiPath());
+      await enterConsoleCommand(renderResult, user, multiPathCommand);
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'Invalid argument value: --path. This version of the Endpoint does not support retrieving multiple paths'
+      );
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
+    });
+
+    it('should still send `path` for a single `--path` when the endpoint does not support multiple paths', async () => {
+      await render(capabilitiesWithoutMultiPath());
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should error if any of the `--path` values is empty', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --path=""');
+
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument --path must have a value'
+      );
+    });
+
+    it('should error if `--path` is used more than the maximum number of times allowed', async () => {
+      await render();
+      await enterConsoleCommand(
+        renderResult,
+        user,
+        `get-file ${Array.from(
+          { length: GET_FILE_MAX_PATHS + 1 },
+          (_, index) => `--path="path/${index}"`
+        ).join(' ')}`,
+        { paste: true }
+      );
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        `Invalid argument value: --path. Argument can be used at most ${GET_FILE_MAX_PATHS} times`
+      );
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
+    });
+
+    it('should only accept one `--path` for non-endpoint agent types', async () => {
+      getConsoleCommandsOptions.agentType = 'sentinel_one';
+      await render();
+      await enterConsoleCommand(renderResult, user, multiPathCommand);
+
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument can only be used once: --path'
+      );
+    });
+  });
+
+  describe('and the `--force` argument is used', () => {
+    it('should include `force` in the request body', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two","force":true}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should not include `force` in the request body when `--force` is not used', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledTimes(1);
+      });
+
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.stringContaining('force') })
+      );
+    });
+
+    it('should display the `--force` argument in the command help', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent('--force');
+      });
+    });
+
+    it('should not display the `--force` argument in the command help if the Endpoint does not support the `get_file_force` capability', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toBeInTheDocument();
+      });
+
+      expect(renderResult.getByTestId('test-helpOutput')).not.toHaveTextContent('--force');
+    });
+
+    it('should error if `--force` is used and the Endpoint does not support the `get_file_force` capability', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --force'
+      );
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
+    });
+
+    it('should still allow `get-file` without `--force` when the capability is not supported', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('should error if `--force` is used with a non-endpoint agent type', async () => {
+      getConsoleCommandsOptions.agentType = 'sentinel_one';
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --force'
+      );
     });
   });
 
@@ -238,6 +397,7 @@ describe('When using get-file action from response actions console', () => {
     'ra_get-file_error_upload-timeout',
     'ra_get-file_error_queue-timeout',
     'ra_get-file_error_not-enough-free-space',
+    'ra_get-file_error_file-locked',
   ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',

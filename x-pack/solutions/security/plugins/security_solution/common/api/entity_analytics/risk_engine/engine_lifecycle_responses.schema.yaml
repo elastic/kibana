@@ -1,0 +1,91 @@
+openapi: 3.0.0
+
+info:
+  title: Risk engine lifecycle responses
+  version: '1'
+
+paths: {}
+
+components:
+  schemas:
+    RiskEngineStatus:
+      type: string
+      enum:
+        - 'NOT_INSTALLED'
+        - 'DISABLED'
+        - 'ENABLED'
+
+    RiskEngineTaskStatusValues:
+      type: string
+      enum:
+        - 'idle'
+        - 'claiming'
+        - 'running'
+        - 'failed'
+        - 'should_delete'
+        - 'unrecognized'
+        - 'dead_letter'
+
+    RiskEngineTaskStatus:
+      type: object
+      required:
+        - status
+        - runAt
+      properties:
+        status:
+          $ref: '#/components/schemas/RiskEngineTaskStatusValues'
+        runAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+
+    RiskEngineStatusResponse:
+      type: object
+      required:
+        - risk_engine_status
+      properties:
+        risk_engine_status:
+          $ref: '#/components/schemas/RiskEngineStatus'
+        risk_engine_task_status:
+          $ref: '#/components/schemas/RiskEngineTaskStatus'
+
+    InitRiskEngineResult:
+      type: object
+      required:
+        - risk_engine_enabled
+        - risk_engine_resources_installed
+        - risk_engine_configuration_created
+        - errors
+      properties:
+        risk_engine_enabled:
+          type: boolean
+        risk_engine_resources_installed:
+          type: boolean
+        risk_engine_configuration_created:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+
+    InitRiskEngineResponse:
+      type: object
+      required:
+        - result
+      properties:
+        result:
+          $ref: '#/components/schemas/InitRiskEngineResult'
+
+    EnableRiskEngineResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+
+    DisableRiskEngineResponse:
+      type: object
+      properties:
+        success:
+          type: boolean

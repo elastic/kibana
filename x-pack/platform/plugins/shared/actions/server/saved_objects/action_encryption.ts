@@ -30,3 +30,8 @@ export const actionEncryptedRegistrationV3: EncryptedSavedObjectTypeRegistration
   attributesToIncludeInAAD: ACTION_ATTRIBUTES_INCLUDED_IN_AAD,
   enforceRandomId: false,
 };
+
+export const actionEncryptedRegistrationV4: EncryptedSavedObjectTypeRegistration = {
+  ...actionEncryptedRegistrationV3,
+  attributesToIncludeInAAD: new Set([...ACTION_ATTRIBUTES_INCLUDED_IN_AAD, 'specVersion']),
+};

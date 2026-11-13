@@ -92,12 +92,15 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
         : new FeatureNotEnabledError(
             'Significant events is not available on the current pricing tier.'
           ),
-    license: async ({ licensing }) =>
-      (await licensing.getLicense()).hasAtLeast('enterprise')
+    // `hasAtLeast` only compares the license type, so an expired license needs the activity check.
+    license: async ({ licensing }) => {
+      const license = await licensing.getLicense();
+      return license.isActive && license.hasAtLeast('enterprise')
         ? undefined
         : new FeatureNotEnabledError(
             'An Enterprise license or higher is required to use significant events.'
-          ),
+          );
+    },
     ...pluginRequirements,
   };
 

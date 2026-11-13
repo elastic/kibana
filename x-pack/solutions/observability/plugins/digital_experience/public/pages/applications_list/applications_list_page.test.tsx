@@ -76,10 +76,12 @@ const app = ({
   fcp = 1200 as number | null,
   ttfb = 900 as number | null,
   httpRequests = { count: 8, failedCount: 1 },
+  sessions = null as number | null,
 }: Partial<{
   serviceName: string;
   source: ApplicationSummary['source'];
   pageLoads: number;
+  sessions: number | null;
   lcp: number | null;
   inp: number | null;
   cls: number | null;
@@ -91,6 +93,7 @@ const app = ({
   source,
   environments: [],
   pageLoads: { count: pageLoads },
+  sessions: sessions === null ? null : { count: sessions },
   webVitals: {
     lcp: { p75Ms: lcp, ...vital(lcp) },
     inp: { p75Ms: inp, ...vital(inp) },
@@ -109,8 +112,10 @@ const app = ({
 const respondWith = (
   applications: ApplicationSummary[],
   environments: string[] = [],
-  unavailableSources: Array<ApplicationSummary['source']> = []
-) => mockFetch.mockResolvedValue({ applications, environments, unavailableSources });
+  unavailableSources: Array<ApplicationSummary['source']> = [],
+  sessionsOverTime: Array<{ timestamp: number; count: number }> | null = null
+) =>
+  mockFetch.mockResolvedValue({ applications, environments, unavailableSources, sessionsOverTime });
 
 // `isServerless` leaves out the ux plugin, as serverless does.
 const renderPage = ({ isServerless = false } = {}) => {
@@ -365,6 +370,62 @@ describe('ApplicationsListPage', () => {
 
     expect(screen.getAllByTestId('digitalExperienceApplicationLink')).toHaveLength(1);
     expect(screen.getByTestId('digitalExperienceSummary-applications')).toHaveTextContent('2');
+  });
+
+  it('totals the sessions of the EDOT Browser applications in the summary', async () => {
+    respondWith([
+      app({ serviceName: 'shop', source: 'otel', sessions: 1200 }),
+      app({ serviceName: 'docs', source: 'otel', sessions: 34 }),
+      // Classic RUM has no sessions, and does not stop the others from adding up.
+      app({ serviceName: 'legacy', source: 'classic' }),
+    ]);
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceSummary-sessions')).toHaveTextContent('1,234');
+  });
+
+  it('offers the sessions in the chart when the applications were read from the sessions index', async () => {
+    respondWith(
+      [app({ serviceName: 'shop', source: 'otel', sessions: 3 })],
+      [],
+      [],
+      [{ timestamp: 0, count: 3 }]
+    );
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceChartMetric-sessions')).toBeEnabled();
+  });
+
+  it('disables the sessions in the chart when they were not counted', async () => {
+    respondWith([app({ serviceName: 'shop', source: 'otel', sessions: null })]);
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceChartMetric-sessions')).toBeDisabled();
+  });
+
+  it('disables the sessions in the chart for Classic RUM, which has none', async () => {
+    mockSourceFilter('classic');
+    respondWith(
+      [app({ serviceName: 'legacy', source: 'classic' })],
+      [],
+      [],
+      [{ timestamp: 0, count: 3 }]
+    );
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceChartMetric-sessions')).toBeDisabled();
+  });
+
+  it('shows no sessions total when the applications were read from the raw events', async () => {
+    respondWith([app({ serviceName: 'shop', source: 'otel', sessions: null })]);
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceSummary-sessions')).toHaveTextContent('—');
   });
 
   it('ignores a source in the URL where the source filter is not shown', async () => {

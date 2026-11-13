@@ -45,6 +45,7 @@ export function runReportFlakyTestIssuesCli() {
       const dryRun = flagsReader.boolean('dry-run');
       const omitSkippedTests = flagsReader.boolean('omit-skipped-tests');
       const updateIssues = flagsReader.boolean('update-issues');
+      const replacePerTestIssues = flagsReader.boolean('replace-per-test-issues');
       const token = process.env.GITHUB_TOKEN;
       if (!token) {
         throw createFlagError('GITHUB_TOKEN must be set to read and write GitHub issues');
@@ -95,6 +96,9 @@ export function runReportFlakyTestIssuesCli() {
           (updateIssues
             ? `, suite issues of suites flaky again are refreshed and commented on, with ` +
               `${commentCooldownDays} days between comments at least`
+            : '') +
+          (replacePerTestIssues
+            ? `, open per-test issues don't count and are closed as duplicates of the suite issue`
             : '')
       );
 
@@ -109,6 +113,7 @@ export function runReportFlakyTestIssuesCli() {
         omitSkippedTests,
         updateIssues,
         commentCooldownDays,
+        replacePerTestIssues,
         dryRun,
       });
 
@@ -137,11 +142,14 @@ export function runReportFlakyTestIssuesCli() {
         issue when every one of its tests has one in either repository, a per-test issue about it
         or an issue about the suite or its file, open or closed after the test last failed; a
         single test without one is enough for the suite issue to be filed, which links the closed
-        issues it takes over from. Flaky tests skipped since are left out. A suite
+        issues it replaces. Flaky tests skipped since are left out. A suite
         with an issue of its own in --github-repo has it refreshed: the body's metadata records
         this report, a comment with its numbers is posted when the suite failed since the issue
         was filed or last commented on, and that was --comment-cooldown-days ago at least, and
-        an issue closed before such a failure is reopened. The body's text stays as filed.
+        an issue closed before such a failure is reopened. The body's text stays as filed. With
+        --replace-per-test-issues, open per-test issues in --github-repo don't count, and those
+        about a suite's flaky tests are closed as duplicates of its issue once it is filed or
+        refreshed.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -157,7 +165,7 @@ export function runReportFlakyTestIssuesCli() {
           'max-new-issues',
           'comment-cooldown-days',
         ],
-        boolean: ['dry-run', 'omit-skipped-tests', 'update-issues'],
+        boolean: ['dry-run', 'omit-skipped-tests', 'update-issues', 'replace-per-test-issues'],
         default: {
           input: DEFAULT_INPUT,
           'summary-path': DEFAULT_SUMMARY_PATH,
@@ -169,6 +177,7 @@ export function runReportFlakyTestIssuesCli() {
           'dry-run': false,
           'omit-skipped-tests': true,
           'update-issues': true,
+          'replace-per-test-issues': false,
         },
         help: `
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
@@ -180,6 +189,7 @@ export function runReportFlakyTestIssuesCli() {
           --no-omit-skipped-tests  Keep flaky tests that were skipped since
           --no-update-issues    Skip suites with an issue of their own instead of refreshing it
           --comment-cooldown-days  Days to wait after a comment before the issue can get another; reopens always comment [default: ${DEFAULT_COMMENT_COOLDOWN_DAYS}]
+          --replace-per-test-issues  Close the open per-test issues of a suite's flaky tests as duplicates of its issue, rather than count them as tracking it
           --dry-run             Read issues and log what would be filed or updated without writing
         `,
       },

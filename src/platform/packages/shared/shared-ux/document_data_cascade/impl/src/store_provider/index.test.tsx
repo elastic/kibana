@@ -8,8 +8,19 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { DataCascadeProvider } from '.';
+import { act, render, renderHook, screen } from '@testing-library/react';
+import {
+  DataCascadeProvider,
+  useDataCascadeActions,
+  useDataCascadeState,
+  type GroupNode,
+  type LeafNode,
+} from '.';
+
+const useStore = () => ({
+  state: useDataCascadeState<GroupNode, LeafNode>(),
+  actions: useDataCascadeActions<GroupNode, LeafNode>(),
+});
 
 describe('DataCascadeProvider', () => {
   it('should render children', () => {
@@ -24,5 +35,65 @@ describe('DataCascadeProvider', () => {
     );
 
     expect(screen.getByText('Test Child')).toBeInTheDocument();
+  });
+
+  it('preserves loaded children and expansion when the input data has not changed', () => {
+    const data = [{ id: 'parent' }];
+    const { result, rerender } = renderHook(useStore, {
+      wrapper: ({ children }) => (
+        <DataCascadeProvider data={data} cascadeGroups={['group1', 'group2']}>
+          {children}
+        </DataCascadeProvider>
+      ),
+    });
+
+    act(() => result.current.actions.setExpandedRows({ parent: true }));
+    act(() =>
+      result.current.actions.setRowGroupNodeData({ id: 'parent', data: [{ id: 'child' }] })
+    );
+    act(() => result.current.actions.setExpandedRows({ parent: true, child: true }));
+    act(() =>
+      result.current.actions.setRowGroupNodeData({ id: 'child', data: [{ id: 'grandchild' }] })
+    );
+    rerender();
+
+    expect(result.current.state.groupNodes).toEqual([
+      { id: 'parent', children: [{ id: 'child', children: [{ id: 'grandchild' }] }] },
+    ]);
+    expect(result.current.state.table.expanded).toEqual({ parent: true, child: true });
+  });
+
+  it.each(['data', 'columns'] as const)('resets the store when the input %s changes', (input) => {
+    let data: GroupNode[] = [{ id: 'parent' }];
+    let cascadeGroups = ['group1', 'group2'];
+    const { result, rerender } = renderHook(useStore, {
+      wrapper: ({ children }) => (
+        <DataCascadeProvider data={data} cascadeGroups={cascadeGroups}>
+          {children}
+        </DataCascadeProvider>
+      ),
+    });
+
+    act(() => result.current.actions.setExpandedRows({ parent: true }));
+    act(() => result.current.actions.setSelectedRows({ parent: true }));
+    act(() =>
+      result.current.actions.setRowGroupNodeData({ id: 'parent', data: [{ id: 'child' }] })
+    );
+    act(() =>
+      result.current.actions.setRowGroupLeafData({ cacheKey: 'child', data: [{ id: 'leaf' }] })
+    );
+
+    if (input === 'data') {
+      data = [{ id: 'replacement' }];
+    } else {
+      cascadeGroups = ['group3'];
+    }
+    rerender();
+
+    expect(result.current.state.groupNodes).toEqual(data);
+    expect(result.current.state.groupByColumns).toEqual(cascadeGroups);
+    expect(result.current.state.currentGroupByColumns).toEqual([cascadeGroups[0]]);
+    expect(result.current.state.table).toEqual({});
+    expect(result.current.state.leafNodes.size).toBe(0);
   });
 });
