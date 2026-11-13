@@ -9,7 +9,8 @@
  * Migrated from: x-pack/platform/test/functional/apps/canvas/embeddables/visualization.ts
  *
  * Focuses on the Canvas-specific integration points for visualize embeddables:
- *   1. By-reference: adding an existing visualization from the library renders it on the workpad.
+ *   1. By-reference: adding an existing visualization or Vega library item from the library
+ *      renders it on the workpad.
  *   2. By-value: creating a new Vega panel via the Canvas editor menu adds a panel with the
  *      default spec to the workpad (Canvas skips the inline Vega editor).
  *
@@ -21,14 +22,24 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../../fixtures';
 
-const { VISUALIZATION } = testData.EMBEDDABLES;
+const { VISUALIZATION, VEGA } = testData.EMBEDDABLES;
 const EXTENDED_TIMEOUT = 20_000;
+const VEGA_API_VERSION = '2023-10-31';
 
 test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classic'] }, () => {
+  let vegaItemId: string;
+
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     // Canvas is only accessible when at least one workpad exists.
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DEFAULT);
+    const { data } = await kbnClient.request<{ id: string }>({
+      method: 'POST',
+      path: '/api/vega',
+      headers: { 'elastic-api-version': VEGA_API_VERSION },
+      body: testData.VEGA_LIBRARY_ITEM,
+    });
+    vegaItemId = data.id;
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects: { canvas } }) => {
@@ -39,6 +50,11 @@ test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classi
   });
 
   test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.request({
+      method: 'DELETE',
+      path: `/api/vega/${vegaItemId}`,
+      headers: { 'elastic-api-version': VEGA_API_VERSION },
+    });
     await kbnClient.savedObjects.cleanStandardList();
   });
 
@@ -49,6 +65,19 @@ test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classi
     await expect(canvas.embeddablePanelHeading(VISUALIZATION.headingId)).toBeVisible({
       timeout: EXTENDED_TIMEOUT,
     });
+  });
+
+  test('adds a by-reference Vega panel from the library and edits it in the library editor', async ({
+    page,
+    pageObjects: { canvas },
+  }) => {
+    await canvas.addEmbeddableFromLibrary(VEGA.libraryName, 'Vega');
+    await expect(canvas.embeddablePanelHeading(VEGA.headingId)).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
+
+    await canvas.editPanel(VEGA.libraryName);
+    await expect(page.testSubj.locator('vegaLibraryEditorBody')).toBeVisible();
   });
 
   test('creates a by-value Vega panel via the editor menu', async ({ pageObjects: { canvas } }) => {

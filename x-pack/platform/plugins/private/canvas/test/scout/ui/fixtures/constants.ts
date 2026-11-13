@@ -60,6 +60,27 @@ export const EMBEDDABLES = {
     libraryName: 'Artistpreviouslyknownaslens',
     headingId: 'Artistpreviouslyknownaslens',
   },
+  VEGA: {
+    libraryName: 'CanvasVegaLibraryItem',
+    headingId: 'CanvasVegaLibraryItem',
+  },
+} as const;
+
+/** A Vega library item with inline data, so it renders without index privileges. */
+export const VEGA_LIBRARY_ITEM = {
+  title: EMBEDDABLES.VEGA.libraryName,
+  spec: {
+    format: 'json',
+    value: {
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      data: { values: [{ category: 'A', count: 1 }] },
+      mark: 'bar',
+      encoding: {
+        x: { field: 'category', type: 'nominal' },
+        y: { field: 'count', type: 'quantitative' },
+      },
+    },
+  },
 } as const;
 
 /** Expected legacy-metric label/value rendered by the saved Lens visualization. */

@@ -16,6 +16,8 @@ import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
+import type { MSearchIn, MSearchResult } from '@kbn/content-management-plugin/common';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -25,8 +27,13 @@ import { SavedSearchType } from '@kbn/saved-search-plugin/public';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/public';
+import { VEGA_SAVED_OBJECT_TYPE } from '@kbn/vis-type-vega-plugin/common';
 import { getCanvasNotifyService } from '../../services/canvas_notify_service';
-import { contentManagementService, coreServices } from '../../services/kibana_services';
+import {
+  contentManagementService,
+  coreServices,
+  embeddableService,
+} from '../../services/kibana_services';
 
 const strings = {
   getNoItemsText: () =>
@@ -44,7 +51,24 @@ const CANVAS_LIBRARY_TYPES = [
   VISUALIZE_SAVED_OBJECT_TYPE,
   LENS_CONTENT_TYPE,
   MAP_SAVED_OBJECT_TYPE,
+  VEGA_SAVED_OBJECT_TYPE,
 ];
+
+// Searches through the embeddable plugin like Dashboard's flyout, because some library types,
+// such as `vega`, are not Content Management content types.
+const getLibraryClient = (): ContentClient =>
+  ({
+    ...contentManagementService.client,
+    mSearch: async ({ contentTypes, query }: MSearchIn): Promise<MSearchResult> => {
+      const { hits, total } = await embeddableService.getSavedObjects({
+        type: contentTypes.map(({ contentTypeId }) => contentTypeId),
+        search: query.text,
+        limit: query.limit,
+        tags: query.tags,
+      });
+      return { hits, pagination: { total } };
+    },
+  } as ContentClient);
 
 export interface Props {
   onClose: () => void;
@@ -55,6 +79,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const libraryTypes = useAddFromLibraryTypes();
+  const libraryClient = useMemo(getLibraryClient, []);
 
   const canvasLibraryTypes = useMemo(() => {
     return libraryTypes.filter(({ type }) => CANVAS_LIBRARY_TYPES.includes(type));
@@ -103,7 +128,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
           services={{
-            contentClient: contentManagementService.client,
+            contentClient: libraryClient,
             uiSettings: coreServices.uiSettings,
           }}
         />
