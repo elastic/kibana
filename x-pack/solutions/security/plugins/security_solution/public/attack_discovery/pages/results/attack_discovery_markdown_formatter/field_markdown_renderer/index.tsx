@@ -8,14 +8,11 @@
 import { EuiButtonEmpty, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DraggableBadge } from '../../../../../common/components/draggables';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/events/flyout_v2/types';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
-import { ENTITY_TYPE_BY_FIELD, getFlyoutPanelProps } from './helpers';
+import { ENTITY_TYPE_BY_FIELD } from './helpers';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useMarkdownFormatterContext } from '../context';
 import { DisabledFieldMarkdownRenderer } from './disabled_field_markdown_renderer';
@@ -29,14 +26,10 @@ export const ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*` as const;
 /** Alert-document `_id` fields whose chips open the alert-details flyout when clicked. */
 const ALERT_ID_FIELDS: ReadonlySet<string> = new Set(['_id', 'kibana.alert.uuid']);
 
-const contextId = 'FieldMarkdownRenderer';
-
 const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
   const { scopeId, alertIds } = useMarkdownFormatterContext();
-  const { openFlyout, openRightPanel } = useExpandableFlyoutApi();
   const { openDocumentFlyoutFromPattern, openHostFlyout, openUserFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
 
   const { chipLabelRef, isValueTruncated } = useIsChipLabelTruncated(value);
 
@@ -52,23 +45,14 @@ const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) =>
 
   const onAlertIdClick = useCallback(() => {
     if (stringValue == null) return;
-    if (enableNewFlyout) {
-      openDocumentFlyoutFromPattern({
-        documentId: stringValue,
-        indexName: ALERTS_INDEX_PATTERN,
-        origin: FLYOUT_ORIGIN.ATTACK_SUMMARY_ALERT,
-      });
-    } else {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: { id: stringValue, indexName: ALERTS_INDEX_PATTERN, scopeId },
-        },
-      });
-    }
-  }, [enableNewFlyout, openDocumentFlyoutFromPattern, openFlyout, scopeId, stringValue]);
+    openDocumentFlyoutFromPattern({
+      documentId: stringValue,
+      indexName: ALERTS_INDEX_PATTERN,
+      origin: FLYOUT_ORIGIN.ATTACK_SUMMARY_ALERT,
+    });
+  }, [openDocumentFlyoutFromPattern, stringValue]);
 
-  const isEntityField = name in ENTITY_TYPE_BY_FIELD && typeof value === 'string';
+  const isEntityField = Object.hasOwn(ENTITY_TYPE_BY_FIELD, name) && typeof value === 'string';
 
   const { euid, isLoading } = useEntityEuidFromAlerts({
     alertIds: alertIds ?? [],
@@ -77,46 +61,27 @@ const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) =>
     enabled: isEntityField,
   });
 
-  const flyoutPanelProps = useMemo(
-    () => getFlyoutPanelProps({ contextId, fieldName: name, value, entityId: euid, scopeId }),
-    [euid, name, value, scopeId]
-  );
-
   const onEntityClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       // Prevent the click from bubbling up to parent interactive elements (e.g. accordion buttons).
       event.stopPropagation();
 
-      if (flyoutPanelProps == null) {
+      if (!isEntityField) {
         return;
       }
 
-      if (enableNewFlyout) {
-        if (ENTITY_TYPE_BY_FIELD[name] === 'host') {
-          openHostFlyout({ hostName: value as string, entityId: euid, scopeId });
-        } else {
-          openUserFlyout({ userName: value as string, entityId: euid, scopeId });
-        }
+      if (ENTITY_TYPE_BY_FIELD[name] === 'host') {
+        openHostFlyout({ hostName: value as string, entityId: euid, scopeId });
       } else {
-        openRightPanel(flyoutPanelProps);
+        openUserFlyout({ userName: value as string, entityId: euid, scopeId });
       }
     },
-    [
-      flyoutPanelProps,
-      openRightPanel,
-      openHostFlyout,
-      openUserFlyout,
-      enableNewFlyout,
-      name,
-      value,
-      euid,
-      scopeId,
-    ]
+    [isEntityField, openHostFlyout, openUserFlyout, name, value, euid, scopeId]
   );
 
   const entityButton: React.ReactElement | null = useMemo(
     () =>
-      flyoutPanelProps != null ? (
+      isEntityField ? (
         <EuiButtonEmpty
           css={css`
             font-size: ${euiTheme.font.scale.s}rem;
@@ -138,7 +103,7 @@ const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) =>
           )}
         </EuiButtonEmpty>
       ) : null,
-    [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
+    [euiTheme.font.scale.s, euiTheme.size.xs, isEntityField, isLoading, onEntityClick, value]
   );
 
   if (isClickableAlertId && stringValue != null) {

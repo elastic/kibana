@@ -7,6 +7,9 @@
 
 import type {
   ChatCompleteAPI,
+  ChatCompleteCompositeResponse,
+  ChatCompleteOptions,
+  FeatureChatCompleteOptions,
   OutputAPI,
   OutputCompositeResponse,
   OutputOptions,
@@ -22,14 +25,25 @@ import {
 import { isObservable, map } from 'rxjs';
 import { ensureMultiTurn } from '../utils/ensure_multi_turn';
 
-type DefaultOutputOptions = OutputOptions<string, ToolSchema | undefined, boolean>;
+// A server client bound to a feature calls with a `featureId` in place of the `connectorId`.
+type DefaultOutputOptions = OutputOptions<string, ToolSchema | undefined, boolean> & {
+  featureId?: string;
+};
+
+// The server `chatComplete` also accepts a `featureId`; the shared `ChatCompleteAPI` type does not.
+type OutputChatCompleteApi = (
+  options: ChatCompleteOptions | FeatureChatCompleteOptions
+) => ChatCompleteCompositeResponse;
 
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI;
 
-export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
+export function createOutputApi(api: ChatCompleteAPI) {
+  const chatCompleteApi = api as OutputChatCompleteApi;
+
   return function callOutputApi({
     id,
     connectorId,
+    featureId,
     input,
     schema,
     system,
@@ -55,8 +69,10 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
       },
     ]);
 
+    const target = featureId !== undefined ? { featureId } : { connectorId };
+
     const response = chatCompleteApi({
-      connectorId,
+      ...target,
       stream,
       modelName,
       functionCalling,
@@ -122,6 +138,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
             return callOutputApi({
               id,
               connectorId,
+              featureId,
               input,
               schema,
               system,

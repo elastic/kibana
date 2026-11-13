@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useQueryClient } from '@kbn/react-query';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import {
   OverviewTab,
   conversationToInvestigation,
   type OverviewSections,
-  type ImpactEntityTarget,
   type OverviewSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
+import type { ImpactEntityTarget } from '@kbn/agentic-investigations-impact';
 import type { Investigation } from '../../../../../common';
 import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
@@ -68,6 +70,41 @@ export const toOverviewSections = (
   };
 };
 
+const toProposalsKey = (proposals: Investigation['proposals'] | undefined): string | undefined =>
+  proposals
+    ?.map(({ id, status }) => `${id}:${status}`)
+    .sort()
+    .join(',');
+
+/**
+ * Refetches the "Proposed actions" list when the polled investigation shows a proposal added or
+ * changing status. The list only polls while one of its own rows settles, so without this a
+ * proposal an agent creates while the flyout is open never shows up there.
+ */
+const useRefetchProposalsOnChange = (
+  conversationId: string,
+  proposals: Investigation['proposals'] | undefined
+): void => {
+  const queryClient = useQueryClient();
+  const proposalsKey = toProposalsKey(proposals);
+  const prevProposalsKeyRef = useRef<string | undefined>();
+
+  useEffect(() => {
+    const prev = prevProposalsKeyRef.current;
+    prevProposalsKeyRef.current = proposalsKey;
+    // The list fetches on its own when it mounts, so only a change after the first read counts.
+    if (prev === undefined || proposalsKey === undefined || prev === proposalsKey) {
+      return;
+    }
+    // Join a refetch that is already running rather than cancel it: a decision waits for its own
+    // refetch to land (see `useProposalDecisionSignal`).
+    void queryClient.invalidateQueries(
+      { queryKey: platformQueryKeys.proposals.forConversation(conversationId) },
+      { cancelRefetch: false }
+    );
+  }, [conversationId, proposalsKey, queryClient]);
+};
+
 /**
  * The investigation template's overview tab: the conversation joined with what the query API
  * knows about it (subjects, impact, hypotheses), read again while an agent works on it. When the
@@ -86,6 +123,7 @@ export const InvestigationOverview: React.FC<
   onOpenEntity,
 }) => {
   const { data } = useInvestigation(conversation.id);
+  useRefetchProposalsOnChange(conversation.id, data?.proposals);
   const investigation = useMemo(() => {
     const fromConversation = conversationToInvestigation(conversation);
     const summary = readMetadataString(data?.metadata.summary);

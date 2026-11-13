@@ -26,10 +26,8 @@ import {
 } from '../rule_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
-import type { EventBus, Subscription } from '../event_bus';
+import type { EventBus } from '../event_bus';
 import { RuleChangesHistorySubscriber } from './rule_changes_history_subscriber';
-import { RuleChangesHistoryEventLogger } from './rule_changes_history_event_logger';
-import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
 
 type CapturedHandler = (
   event: AlertingDomainEvent,
@@ -69,32 +67,8 @@ describe('RuleChangesHistorySubscriber', () => {
     userProfile = userProfileServiceMock.createStart();
     userProfile.getCurrent.mockResolvedValue(profile);
     ({ loggerService, mockLogger } = createLoggerService());
-    subscriber = new RuleChangesHistorySubscriber(
-      bus,
-      new RuleChangesHistoryEventLogger(changeHistory, userProfile, loggerService),
-      loggerService
-    );
+    subscriber = new RuleChangesHistorySubscriber(bus, changeHistory, userProfile, loggerService);
     request = httpServerMock.createKibanaRequest();
-  });
-
-  describe('start()', () => {
-    it('subscribes one handler per mapping, using each mapping event type', () => {
-      subscriber.start();
-
-      const mappingEventTypes = Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP);
-      expect(bus.subscribe).toHaveBeenCalledTimes(mappingEventTypes.length);
-
-      const subscribedEventTypes = bus.subscribe.mock.calls.map(([eventType]) => eventType);
-      expect(subscribedEventTypes.sort()).toEqual(mappingEventTypes.sort());
-    });
-
-    it('is idempotent: a second call does not double-subscribe', () => {
-      subscriber.start();
-      const firstCallCount = bus.subscribe.mock.calls.length;
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(firstCallCount);
-    });
   });
 
   describe('event dispatch', () => {
@@ -165,17 +139,6 @@ describe('RuleChangesHistorySubscriber', () => {
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
     });
 
-    it('skips events whose publisher already logged them to change history', async () => {
-      subscriber.start();
-
-      await handlerFor(RULE_UPDATED_EVENT_TYPE)(
-        eventOf(RULE_UPDATED_EVENT_TYPE, { ...payload, changeHistoryLogged: true }),
-        { request, origin: { actor: 'user', channel: 'api' } }
-      );
-
-      expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
-    });
-
     it('omits timestamp so logRuleChanges defaults to now', async () => {
       subscriber.start();
 
@@ -211,63 +174,5 @@ describe('RuleChangesHistorySubscriber', () => {
         error: expect.objectContaining({ message: 'es unreachable' }),
       });
     });
-  });
-
-  describe('stop()', () => {
-    it('unsubscribes every active subscription and clears internal state', () => {
-      const unsubscribers: jest.Mock[] = [];
-      bus.subscribe.mockImplementation(() => {
-        const unsubscribe = jest.fn();
-        unsubscribers.push(unsubscribe);
-        return { unsubscribe } satisfies Subscription;
-      });
-
-      subscriber.start();
-      expect(unsubscribers.length).toBe(Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP).length);
-
-      subscriber.stop();
-
-      for (const unsubscribe of unsubscribers) {
-        expect(unsubscribe).toHaveBeenCalledTimes(1);
-      }
-    });
-
-    it('makes a subsequent start() re-subscribe (state cleared)', () => {
-      subscriber.start();
-      const firstCount = bus.subscribe.mock.calls.length;
-
-      subscriber.stop();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(firstCount * 2);
-    });
-
-    it('is safe to call when no subscriptions are active', () => {
-      expect(() => subscriber.stop()).not.toThrow();
-    });
-  });
-});
-
-describe('RuleChangesHistoryEventLogger', () => {
-  it('passes refresh through so callers can wait for the entry to be searchable', async () => {
-    const changeHistory = createRuleChangesHistoryServiceMock();
-    const userProfile = userProfileServiceMock.createStart();
-    userProfile.getCurrent.mockResolvedValue(profile);
-    const { loggerService } = createLoggerService();
-    const eventLogger = new RuleChangesHistoryEventLogger(
-      changeHistory,
-      userProfile,
-      loggerService
-    );
-
-    await eventLogger.log(
-      eventOf(RULE_UPDATED_EVENT_TYPE),
-      { request: httpServerMock.createKibanaRequest(), origin: { actor: 'user', channel: 'api' } },
-      { refresh: 'wait_for' }
-    );
-
-    expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
-      expect.objectContaining({ action: RuleChangesHistoryAction.ruleUpdate, refresh: 'wait_for' })
-    );
   });
 });

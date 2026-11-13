@@ -158,10 +158,35 @@ export default function (providerContext: FtrProviderContext) {
           outcome: 'no_key',
           integrations: TEST_PACKAGE_INTEGRATION_SET,
         });
-        // The static template is known to be deployed, so there is nothing to compare.
-        expect(mockIacProvisioner.getRequests()).to.have.length(0);
+        // The provisioner is asked once, without a key to compare: only to learn that it can render
+        // the update the callout offers.
+        const requests = mockIacProvisioner.getRequests();
+        expect(requests).to.have.length(1);
+        expect(requests[0].body).to.not.have.property('templateSha');
         expect((await getCloudConnector(supertest, cloudConnectorId)).iac_upgrade_status).to.be(
           'upgrade_available'
+        );
+      });
+
+      it('fails open as key_unavailable and stores nothing for a keyless connector when the provisioner errors', async () => {
+        const cloudConnectorId = await createConnectorWithPolicy();
+        mockIacProvisioner.setRenderResponse({
+          status: 500,
+          body: { code: 'internal_error', message: 'render backend unavailable' },
+        });
+
+        const { body } = await verify(cloudConnectorId).expect(200);
+
+        // No `reason`: nothing blocks the onboarding and no upgrade callout is raised where the
+        // provisioner cannot render an update.
+        expect(body).to.eql({
+          matches: true,
+          outcome: 'key_unavailable',
+          integrations: TEST_PACKAGE_INTEGRATION_SET,
+        });
+        expect(mockIacProvisioner.getRequests()).to.have.length(1);
+        expect(await getCloudConnector(supertest, cloudConnectorId)).to.not.have.property(
+          'iac_upgrade_status'
         );
       });
     });

@@ -80,7 +80,7 @@ export function ConnectPopover({
       <div
         css={css`
           min-width: 320px;
-          padding: ${euiTheme.size.xs} 0;
+          padding: ${euiTheme.size.s};
         `}
       >
         <ConnectorList

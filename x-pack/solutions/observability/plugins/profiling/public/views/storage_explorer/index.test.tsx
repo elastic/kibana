@@ -18,7 +18,7 @@ import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { StorageExplorerView } from '.';
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({ onPageReady: jest.fn() }),
 }));
 jest.mock('../../components/contexts/profiling_dependencies/use_profiling_dependencies', () => ({

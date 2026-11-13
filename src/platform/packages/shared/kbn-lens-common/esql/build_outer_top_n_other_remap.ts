@@ -55,3 +55,32 @@ export const buildOtherBucketLabelFragment = ({
   groupExpr: string;
   keyAlias: string;
 }): string => `${groupExpr} = COALESCE(TO_STRING(${keyAlias}), ${OTHER_BUCKET_ESQL_LITERAL})`;
+
+/**
+ * Commands after the leaf `STATS` that every Other shape shares: sort Other last, restore the
+ * field labels, then drop the helper columns.
+ */
+export const buildOtherBucketOutputParts = ({
+  groupExpr,
+  keyAlias,
+  flagAlias,
+  sortClause,
+  limit,
+  dropAliases = [],
+}: {
+  groupExpr: string;
+  keyAlias: string;
+  flagAlias: string;
+  /** Ranking applied after the named flag, already formatted for `SORT`. */
+  sortClause: string;
+  /** Only the single Top values shape caps rows; the time-series shape keeps every group. */
+  limit?: number;
+  /** Helper columns dropped along with the flag and the key, such as rank columns. */
+  dropAliases?: readonly string[];
+}): string[] => [
+  `EVAL ${buildOtherBucketNamedFlagFragment({ flagAlias, keyAlias })}`,
+  `SORT ${flagAlias} DESC, ${sortClause}`,
+  ...(limit === undefined ? [] : [`LIMIT ${limit}`]),
+  `EVAL ${buildOtherBucketLabelFragment({ groupExpr, keyAlias })}`,
+  `DROP ${[flagAlias, keyAlias, ...dropAliases].join(', ')}`,
+];

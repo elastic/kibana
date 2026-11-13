@@ -47,13 +47,13 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
         name: i18n.translate('xpack.digitalExperience.featureRegistry.sessionsSubFeatureName', {
           defaultMessage: 'Sessions',
         }),
-        // The sessions transforms and index serve every space, so only grant this in all spaces.
+        // The sessions index serves every space, so only grant this in all spaces.
         requireAllSpaces: true,
         privilegesTooltip: i18n.translate(
           'xpack.digitalExperience.featureRegistry.sessionsSubFeatureTooltip',
           {
             defaultMessage:
-              'Requires "*" (All spaces). Users also need the Elasticsearch privileges to manage transforms, ingest pipelines and index templates.',
+              'Requires "*" (All spaces). Users also need the Elasticsearch privilege to manage index templates.',
           }
         ),
         privilegeGroups: [
@@ -66,8 +66,8 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
                   'xpack.digitalExperience.featureRegistry.manageSessionsPrivilegeName',
                   { defaultMessage: 'Set up and update session summaries' }
                 ),
-                // Never granted with `all`: setting sessions up runs the transforms with this
-                // user's data access, for everyone who reads sessions.
+                // Never granted with `all`: sessions are set up with this user's data access, for
+                // everyone who reads sessions.
                 includeIn: 'none',
                 api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
                 ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions],

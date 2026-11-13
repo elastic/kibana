@@ -63,7 +63,8 @@ const installAssistantAgentMock = installAssistantAgent as jest.MockedFunction<
   typeof installAssistantAgent
 >;
 
-const SPACE_ID = 'test-space';
+// Nightshift only starts investigations in the default space, which is what the client asserts.
+const SPACE_ID = 'default';
 
 const startFromApi = (client: NightshiftInvestigationsClient, request: StartInvestigationRequest) =>
   client.start(request, { entryPoint: 'start_api' });
@@ -308,6 +309,27 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(investigationQuotaCallback).toHaveBeenCalledWith('manual');
   });
 
+  it.each([undefined, 'a1'])(
+    'records the owning automation on its investigation execution and rejects a caller-supplied association: %s',
+    async (automationId) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-123');
+      const result = await makeClient().start(
+        {
+          subject: { type: 'manual', id: 'manual' },
+          trigger_type: 'manual',
+          message: 'Review service health.',
+          context: { nightshift_automation_id: 'forged' },
+        },
+        { automationId, entryPoint: 'automation' }
+      );
+      expect(mockManagement.runWorkflow.mock.calls[0][2].context.nightshift_automation_id).toBe(
+        automationId
+      );
+      expect(result.execution_id).toBe(automationId ? 'exec-123' : undefined);
+    }
+  );
+
   it('keeps operator instructions outside the alert evidence and leaves default briefs unchanged', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
@@ -427,6 +449,23 @@ describe('NightshiftInvestigationsClient.start()', () => {
     ).rejects.toEqual(new NightshiftModelNotFoundError(NIGHTSHIFT_DEFAULT_MODELS.investigation));
   });
 
+  // Asserted before anything is installed: the failure sweep is ensured early in `start`, so a
+  // refusal further down would leave a sweep workflow behind in a space Nightshift cannot run in.
+  it('refuses to start outside the default space before installing anything', async () => {
+    const ensureFailureSweep = jest.fn().mockResolvedValue(undefined);
+
+    await expect(
+      startFromApi(makeClient({ spaceIdOverride: 'marketing', ensureFailureSweep }), {
+        title: 'Latency is too high',
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'manual',
+      })
+    ).rejects.toThrow(/only available in the "default" space/);
+    expect(ensureFailureSweep).not.toHaveBeenCalled();
+    expect(mockManagement.getWorkflow).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+
   it('refuses to start while service accounts are turned off', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
@@ -465,7 +504,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         subject: { type: 'significant_event', id: 'event-1' },
         trigger_type: 'manual',
       })
-    ).rejects.toThrow(/enable the Nightshift service account/);
+    ).rejects.toThrow(/enable the nightshift service account/);
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
@@ -864,7 +903,10 @@ describe('NightshiftInvestigationsClient.start()', () => {
   it('reports nothing for a manual start, which skips the quota', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
-    const telemetry = { reportInvestigationSkipped: jest.fn() };
+    const telemetry = {
+      reportInvestigationSkipped: jest.fn(),
+      reportInvestigationStarted: jest.fn(),
+    };
 
     await startFromApi(makeClient({ telemetry: telemetry as never }), {
       subject: { type: 'manual', id: 'question' },
@@ -872,6 +914,106 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     expect(telemetry.reportInvestigationSkipped).not.toHaveBeenCalled();
+  });
+
+  it('reports the started run with the discovery run that triggered it', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await makeClient({ telemetry: telemetry as never }).start(
+      {
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'automatic',
+        context: { event_id: 'event-1', source_workflow_execution_id: 'discovery-exec' },
+      },
+      { entryPoint: 'automation', automationId: 'a1' }
+    );
+
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflow_execution_id: 'exec-1',
+        automation_id: 'a1',
+        event_id: 'event-1',
+        source_workflow_execution_id: 'discovery-exec',
+      })
+    );
+  });
+
+  it('reports the significant event of the subject when the context names none', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await makeClient({ telemetry: telemetry as never }).start(
+      {
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'manual',
+        context: { event_id: '' },
+      },
+      { entryPoint: 'start_api' }
+    );
+
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({ event_id: 'event-1' })
+    );
+  });
+
+  it('reports the significant event behind an alert-triggered investigation', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await makeClient({ telemetry: telemetry as never }).start(
+      {
+        subject: { type: 'alert', id: 'episode-1' },
+        trigger_type: 'automatic',
+        context: {
+          alerts: [
+            {
+              alert_version: 'v2',
+              id: 'episode-1',
+              rule_id: 'v2-rule-1',
+              group_hash: 'hash-1',
+              status: 'active',
+              start: '2026-08-24T12:00:00.000Z',
+              source: 'elastic.significant_events',
+              data: { event_id: 'event-1' },
+            },
+          ],
+        },
+      },
+      { entryPoint: 'automation', automationId: 'a1' }
+    );
+
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({ event_id: 'event-1' })
+    );
+  });
+
+  it('reports the producer workflow of an alert-triggered investigation', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('investigation-exec');
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await makeClient({ telemetry: telemetry as never }).start(
+      {
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'automatic',
+        context: {
+          ...alertContext,
+          source_workflow_execution_id: 'alert-producer-exec',
+        },
+      },
+      { entryPoint: 'automation', automationId: 'a1' }
+    );
+
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflow_execution_id: 'investigation-exec',
+        source_workflow_execution_id: 'alert-producer-exec',
+      })
+    );
   });
 
   it('persists the subject summary into the workflow context', async () => {
@@ -1878,7 +2020,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
+      /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
@@ -1979,7 +2121,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     mockManagement.getWorkflow.mockResolvedValueOnce(null);
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
+      /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
   });
@@ -2795,6 +2937,43 @@ describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
   });
 });
 
+describe('NightshiftInvestigationsClient.getLifecycleCorrelation()', () => {
+  it('reads significant-event join keys from the bound investigation execution', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      spaceId: SPACE_ID,
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      status: ExecutionStatus.RUNNING,
+      effectiveIdentity: INVESTIGATOR_IDENTITY,
+      context: {
+        inputs: {
+          investigation_id: 'inv-1',
+          context: {
+            event_id: 'significant-event-1',
+            source_workflow_execution_id: 'discovery-execution-1',
+          },
+        },
+      },
+    });
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: BOUND_WORKFLOW_ID,
+      definition: BOUND_DEFINITION,
+    });
+
+    await expect(makeClient().getLifecycleCorrelation('inv-1', 'exec-1')).resolves.toEqual({
+      event_id: 'significant-event-1',
+      source_workflow_execution_id: 'discovery-execution-1',
+    });
+  });
+
+  it('returns no keys and warns when the execution cannot be read', async () => {
+    mockManagement.getWorkflowExecution.mockRejectedValue(new Error('store unavailable'));
+
+    await expect(makeClient().getLifecycleCorrelation('inv-1', 'exec-1')).resolves.toEqual({});
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('store unavailable'));
+  });
+});
+
 describe('NightshiftInvestigationsClient notification destinations', () => {
   const destination = {
     type: 'slack',
@@ -3047,10 +3226,21 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
     subjectsClient.listByConversationIds.mockResolvedValue([
       { ...makeStoredSubject(), snapshot: { id: 'alert-1', reason: 'Latency spike' } },
     ]);
+    const telemetry = { reportInvestigationStarted: jest.fn() };
 
-    await expect(makeClient().followUpRecoveredAlert(RECOVERY)).resolves.toEqual({
+    await expect(
+      makeClient({ telemetry: telemetry as never }).followUpRecoveredAlert(RECOVERY)
+    ).resolves.toEqual({
       investigation_id: 'inv-1',
       execution_id: 'exec-rec-1',
+    });
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith({
+      investigation_id: 'inv-1',
+      workflow_execution_id: 'exec-rec-1',
+      trigger_type: 'automatic',
+      entry_point: 'alert_recovery',
+      subject_type: 'alert',
+      is_follow_up: true,
     });
     expect(mockLogger.info).toHaveBeenCalledWith(
       'Requested a recovery round on investigation "inv-1" for alert/alert-1, execution_id=exec-rec-1'

@@ -40,10 +40,10 @@ export interface RuleEventPayload {
    */
   readonly correlationId?: string;
   /**
-   * Set when the publisher already wrote this change to change history and
-   * waited for it, so the change-history subscriber does not log it again.
+   * Rule as it was stored before the operation. Present only for `rule.updated`,
+   * and only when the pre-update state is available.
    */
-  readonly changeHistoryLogged?: boolean;
+  readonly prevRule?: RuleResponse;
 }
 
 /**

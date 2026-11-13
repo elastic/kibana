@@ -60,7 +60,7 @@ export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps)
             iconType="warning"
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
-              <MaxGroupsMessage />
+              <MaxGroupsMessage type="services" />
             </EuiText>
           </PopoverTooltip>
         </EuiFlexItem>

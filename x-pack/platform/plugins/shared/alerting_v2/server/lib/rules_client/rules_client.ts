@@ -877,6 +877,11 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const prevRule = this.toRuleApiResponse({
+      id,
+      attrs: existingAttrs,
+      references: existingReferences,
+    });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       {
@@ -884,6 +889,7 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
+        prevRule,
       },
     ]);
 
@@ -1683,11 +1689,17 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
+      const prevRule = this.toRuleApiResponse({
+        id: item.id,
+        attrs: rotatedCandidates[i].attrs,
+        references: item.references,
+      });
       updatedRules.push({
         ruleId: rule.id,
         spaceId,
         rule,
         templateId: item.attrs.metadata.template?.id,
+        prevRule,
       });
     }
 
@@ -2038,24 +2050,18 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
-    if (awaitChangeHistory) {
-      await this.changeHistoryEventLogger.log(
-        {
-          type: RULE_UPDATED_EVENT_TYPE,
-          payload: { ruleId: rule.id, spaceId: this.spaceId, rule },
-        },
-        this.eventContext,
-        { refresh: 'wait_for' }
-      );
-    }
-
+    const prevRule = this.toRuleApiResponse({
+      id,
+      attrs: existingAttrs,
+      references: existingReferences,
+    });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       {
         ruleId: rule.id,
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
-        ...(awaitChangeHistory ? { changeHistoryLogged: true } : {}),
+        prevRule,
       },
     ]);
     return rule;

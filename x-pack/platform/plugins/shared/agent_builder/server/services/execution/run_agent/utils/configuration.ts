@@ -29,6 +29,10 @@ export const resolveConfiguration = async (
   const base: ResolvedConfiguration = {
     instructions: configuration.instructions ?? '',
     aiIndices: configuration.ai_indices ?? [],
+    capabilities: {
+      attachmentTools: configuration.capabilities?.attachment_tools?.enabled !== false,
+      apiTools: configuration.capabilities?.api_tools?.enabled !== false,
+    },
   };
 
   if (!aiIndicesEnabled) return base;

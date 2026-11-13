@@ -39,7 +39,7 @@ export interface EventRule {
   spaceId: string;
   rule?: RuleResponse;
   templateId?: string;
-  changeHistoryLogged?: boolean;
+  prevRule?: RuleResponse;
 }
 
 /**
@@ -106,14 +106,14 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
   }
 
   private toEventPayload(eventRule: EventRule, correlationId?: string): RuleEventPayload {
-    const { ruleId, spaceId, rule, templateId, changeHistoryLogged } = eventRule;
+    const { ruleId, spaceId, rule, templateId, prevRule } = eventRule;
     return {
       ruleId,
       spaceId,
       ...(correlationId ? { correlationId } : {}),
       ...(rule ? { rule } : {}),
       ...(templateId ? { templateId } : {}),
-      ...(changeHistoryLogged ? { changeHistoryLogged } : {}),
+      ...(prevRule ? { prevRule } : {}),
     };
   }
 
