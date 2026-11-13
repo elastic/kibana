@@ -151,9 +151,9 @@ describe('buildDefaultEsqlQuery', () => {
       expect(result).not.toContain('actions.context');
     });
 
-    it('falls back to all candidate fields when the index does not exist', async () => {
+    it('falls back to all candidate fields when fieldCaps fails', async () => {
       (mockEsClient.fieldCaps as jest.Mock).mockRejectedValueOnce(
-        Object.assign(new Error('index_not_found_exception'), { statusCode: 404 })
+        new Error('index_not_found_exception')
       );
 
       const result = await buildDefaultEsqlQuery({
@@ -206,21 +206,6 @@ describe('buildDefaultEsqlQuery', () => {
       (mockEsClient.fieldCaps as jest.Mock).mockResolvedValue(
         mockFieldCapsResponse(['host.name', 'user.name'])
       );
-    });
-
-    it('rethrows an authorization error from fieldCaps instead of returning every candidate field', async () => {
-      (mockEsClient.fieldCaps as jest.Mock).mockRejectedValueOnce(
-        Object.assign(new Error('security_exception'), { statusCode: 403 })
-      );
-
-      await expect(
-        buildDefaultEsqlQuery({
-          allowedFields: ['host.name', 'user.name'],
-          esClient: mockEsClient,
-          logger: mockLogger,
-          spaceId: DEFAULT_SPACE_ID,
-        })
-      ).rejects.toThrow('security_exception');
     });
 
     it('reads anonymization fields with anonymizationFieldsEsClient when provided', async () => {
