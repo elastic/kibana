@@ -35,6 +35,7 @@ export const WorkflowManagementAuditActions = {
   RESUME_EXECUTION: 'workflow_execution_resume',
   HITL_WAITING: 'workflow_hitl_waiting',
   HITL_TIMED_OUT: 'workflow_hitl_timed_out',
+  HITL_RESUMED_AS_RESPONDER: 'workflow_hitl_resumed_as_responder',
 } as const;
 
 type WorkflowAuditEventType = 'access' | 'change' | 'creation' | 'deletion';
@@ -540,6 +541,32 @@ export class WorkflowManagementAuditLog {
         WorkflowManagementAuditActions.HITL_TIMED_OUT,
         'change',
         `${actor} timed out HITL wait [executionId=${executionId}]${stepPart}${typePart}`
+      )
+    );
+  }
+
+  logHitlResumedAsResponder(
+    request: KibanaRequest | undefined,
+    params: {
+      executionId: string;
+      stepExecutionId?: string;
+      stepType?: string;
+      responder: string;
+      serviceAccountId?: string;
+    }
+  ): void {
+    const { executionId, stepExecutionId, stepType, responder, serviceAccountId } = params;
+    const actor = this.getActor(request);
+    const stepPart = stepExecutionId !== undefined ? ` [stepExecutionId=${stepExecutionId}]` : '';
+    const typePart = stepType !== undefined ? ` [stepType=${stepType}]` : '';
+    const accountPart =
+      serviceAccountId !== undefined ? ` [serviceAccountId=${serviceAccountId}]` : '';
+    this.log(
+      request,
+      createEvent(
+        WorkflowManagementAuditActions.HITL_RESUMED_AS_RESPONDER,
+        'change',
+        `${actor} continued workflow execution as the responder [executionId=${executionId}]${stepPart}${typePart} [responder=${responder}]${accountPart}`
       )
     );
   }

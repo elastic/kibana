@@ -471,6 +471,23 @@ describe('WorkflowManagementAuditLog', () => {
       expect(l2.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.HITL_TIMED_OUT);
       expect(l2.mock.calls[0][0].message).toContain('System timed out HITL wait');
     });
+
+    it('logHitlResumedAsResponder names the responder and the service account it replaces', async () => {
+      const { audit, systemLog } = await createAuditHarness();
+      audit.logHitlResumedAsResponder(undefined, {
+        executionId: 'e-1',
+        stepExecutionId: 's-1',
+        stepType: 'waitForApproval',
+        responder: 'u_analyst',
+        serviceAccountId: 'account-a',
+      });
+      expect(systemLog.mock.calls[0][0].event.action).toBe(
+        WorkflowManagementAuditActions.HITL_RESUMED_AS_RESPONDER
+      );
+      expect(systemLog.mock.calls[0][0].message).toBe(
+        'System continued workflow execution as the responder [executionId=e-1] [stepExecutionId=s-1] [stepType=waitForApproval] [responder=u_analyst] [serviceAccountId=account-a]'
+      );
+    });
   });
 
   describe('bulk audit action naming for operators (workflow_bulk_* prefix)', () => {

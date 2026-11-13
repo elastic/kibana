@@ -579,6 +579,17 @@ export const WaitForApprovalChannelsSchema = z
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
+export const HitlResumeAsSchema = lazySchema(() => z.enum(['responder']));
+export type HitlResumeAs = z.infer<typeof HitlResumeAsSchema>;
+
+export const HitlResumeAsPropSchema = lazySchema(() =>
+  z.object({
+    'resume-as': HitlResumeAsSchema.optional().describe(
+      'Identity the steps after the answer run as. Unset, an execution with a service account keeps it, and one without continues as whoever answered in Kibana. `responder` runs them as the person who answered in both cases, until the next wait; an answer that cannot be tied to that person, such as one given through an external link, fails the step.'
+    ),
+  })
+);
+
 export const WaitForInputStepInputSchema = z
   .object({
     message: z
@@ -592,12 +603,15 @@ export const WaitForInputStepInputSchema = z
     channels: WaitForInputChannelsSchema,
   })
   .optional();
-export const WaitForInputStepSchema = BaseStepSchema.extend({
-  type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
-  with: WaitForInputStepInputSchema,
-})
-  .merge(DynamicTimeoutPropSchema)
-  .merge(StepWithOnFailureSchema);
+export const WaitForInputStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
+    with: WaitForInputStepInputSchema,
+  })
+    .merge(DynamicTimeoutPropSchema)
+    .merge(HitlResumeAsPropSchema)
+    .merge(StepWithOnFailureSchema)
+);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -621,14 +635,17 @@ export const WaitForApprovalStepInputSchema = z
   })
   .optional();
 
-export const WaitForApprovalStepSchema = BaseStepSchema.extend({
-  type: z
-    .literal('waitForApproval')
-    .describe('Pause execution until approval or rejection is received'),
-  with: WaitForApprovalStepInputSchema,
-})
-  .merge(DynamicTimeoutPropSchema)
-  .merge(StepWithOnFailureSchema);
+export const WaitForApprovalStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z
+      .literal('waitForApproval')
+      .describe('Pause execution until approval or rejection is received'),
+    with: WaitForApprovalStepInputSchema,
+  })
+    .merge(DynamicTimeoutPropSchema)
+    .merge(HitlResumeAsPropSchema)
+    .merge(StepWithOnFailureSchema)
+);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z

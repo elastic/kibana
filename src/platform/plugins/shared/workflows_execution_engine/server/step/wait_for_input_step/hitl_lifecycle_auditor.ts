@@ -30,6 +30,14 @@ export type HitlLifecycleEvent =
       type: 'canceled';
       executionId: string;
       stepExecutionId?: string;
+    }
+  | {
+      type: 'resumed_as_responder';
+      executionId: string;
+      stepExecutionId?: string;
+      stepType?: string;
+      responder: string;
+      serviceAccountId?: string;
     };
 
 export type HitlLifecycleAuditor = (event: HitlLifecycleEvent) => void;

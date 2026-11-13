@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HitlResumeAs } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/server';
 import { emitHitlLifecycle } from './hitl_lifecycle_auditor';
 import { RESUME_INPUT_TAKEN_FOR_KEY } from '../../repositories/resume_context_revert';
+import {
+  getResumeAsRecord,
+  getWorkflowResponder,
+  RESUME_AS_CONTEXT_KEY,
+  RESUME_AS_RESPONDER_ERROR,
+} from '../../resume_as_responder';
+import { getExecutionServiceAccountId } from '../../service_account_execution';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -19,12 +28,16 @@ export function resumeHitlWaitStep({
   workflowRuntime,
   workflowLogger,
   stepId,
+  stepType,
+  resumeAs,
   transformResumeInput,
 }: {
   stepExecutionRuntime: StepExecutionRuntime;
   workflowRuntime: WorkflowExecutionRuntimeManager;
   workflowLogger: IWorkflowEventLogger;
   stepId: string;
+  stepType: string;
+  resumeAs?: HitlResumeAs;
   transformResumeInput?: (
     resumeInput: Record<string, unknown> | undefined,
     resumedBy: string
@@ -43,6 +56,15 @@ export function resumeHitlWaitStep({
   const resumedBy = claimedBy ?? (typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown');
   const executionId = execution.id;
 
+  const responder =
+    resumeAs === 'responder'
+      ? getWorkflowResponder(stepExecutionRuntime.contextManager.getFakeRequest())
+      : undefined;
+  if (resumeAs === 'responder' && (responder === undefined || responder !== ctx?.resumedBy)) {
+    failHitlWaitAsUnconfirmedResponder({ stepExecutionRuntime, context, resumedBy, hitl });
+    return;
+  }
+
   const stepOutput = transformResumeInput
     ? transformResumeInput(resumeInput, resumedBy)
     : resumeInput;
@@ -51,15 +73,26 @@ export function resumeHitlWaitStep({
 
   stepExecutionRuntime.finishStep(enrichedOutput);
 
-  if (context != null && typeof context === 'object' && 'resumeInput' in context) {
-    // ES merges partial context updates; omitting the key would retain the consumed approval.
-    stepExecutionRuntime.updateWorkflowExecution({
-      context: {
-        ...context,
-        resumeInput: null,
-        pendingInteractiveResume: false,
-        [RESUME_INPUT_TAKEN_FOR_KEY]: null,
-      },
+  consumeResumeInput(
+    stepExecutionRuntime,
+    context,
+    responder !== undefined
+      ? {
+          [RESUME_AS_CONTEXT_KEY]: {
+            stepExecutionId: stepExecutionRuntime.stepExecutionId,
+            responder,
+          },
+        }
+      : {}
+  );
+  if (responder !== undefined) {
+    emitHitlLifecycle({
+      type: 'resumed_as_responder',
+      executionId,
+      stepExecutionId: stepExecutionRuntime.stepExecutionId,
+      stepType,
+      responder,
+      serviceAccountId: getExecutionServiceAccountId(execution),
     });
   }
 
@@ -77,6 +110,72 @@ export function resumeHitlWaitStep({
   });
 
   workflowRuntime.navigateToNextNode();
+}
+
+/** Records whether this wait's answer continues the execution as its responder, ending any earlier scope. */
+export function recordHitlResumeAs({
+  stepExecutionRuntime,
+  workflowRuntime,
+  resumeAs,
+}: {
+  stepExecutionRuntime: StepExecutionRuntime;
+  workflowRuntime: WorkflowExecutionRuntimeManager;
+  resumeAs?: HitlResumeAs;
+}): void {
+  const { context } = workflowRuntime.getWorkflowExecution();
+  const record =
+    resumeAs === 'responder'
+      ? { stepExecutionId: stepExecutionRuntime.stepExecutionId, responder: null }
+      : null;
+  if (record === null && getResumeAsRecord(context) === undefined) {
+    return;
+  }
+  stepExecutionRuntime.updateWorkflowExecution({
+    context: { ...context, [RESUME_AS_CONTEXT_KEY]: record },
+  });
+}
+
+function failHitlWaitAsUnconfirmedResponder({
+  stepExecutionRuntime,
+  context,
+  resumedBy,
+  hitl,
+}: {
+  stepExecutionRuntime: StepExecutionRuntime;
+  context: Record<string, unknown> | null | undefined;
+  resumedBy: string;
+  hitl: { channel?: string; respondedAt?: string } | null | undefined;
+}): void {
+  consumeResumeInput(stepExecutionRuntime, context);
+  stepExecutionRuntime.failStep(
+    new ExecutionError({
+      type: RESUME_AS_RESPONDER_ERROR,
+      message:
+        context?.pendingInteractiveResume === true
+          ? `The steps after this answer must run as ${resumedBy} (resume-as: responder), but this resume does not hold their credentials.`
+          : 'This answer does not identify who gave it, as with an external link, so the steps after it cannot run as the responder (resume-as: responder).',
+    }),
+    enrichHitlStepOutput({ respondedBy: resumedBy }, hitl)
+  );
+}
+
+function consumeResumeInput(
+  stepExecutionRuntime: StepExecutionRuntime,
+  context: Record<string, unknown> | null | undefined,
+  update: Record<string, unknown> = {}
+): void {
+  if (context != null && typeof context === 'object' && 'resumeInput' in context) {
+    // ES merges partial context updates; omitting the key would retain the consumed approval.
+    stepExecutionRuntime.updateWorkflowExecution({
+      context: {
+        ...context,
+        resumeInput: null,
+        pendingInteractiveResume: false,
+        [RESUME_INPUT_TAKEN_FOR_KEY]: null,
+        ...update,
+      },
+    });
+  }
 }
 
 /** Skip wait-entry when the step runtime was already aborted (timeout/cancel race) to avoid re-entering WAITING_FOR_INPUT. */

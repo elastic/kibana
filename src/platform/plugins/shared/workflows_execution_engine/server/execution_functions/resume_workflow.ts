@@ -22,6 +22,12 @@ import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import {
+  resolveWorkflowResponder,
+  RESUME_AS_RESPONDER_ERROR,
+  ResumeAsResponderError,
+  withWorkflowResponder,
+} from '../resume_as_responder';
+import {
   getExecutionServiceAccountId,
   withWorkflowExecutionIdentity,
 } from '../service_account_execution';
@@ -232,20 +238,32 @@ export const resumeWorkflow = async (
     return {};
   }
   let enteredExecution = false;
+  const resumeWithRequest = (fakeRequest: KibanaRequest) => {
+    enteredExecution = true;
+    return resumeWorkflowWithRequest({ ...params, fakeRequest });
+  };
   try {
+    const responder = await resolveWorkflowResponder(
+      params.dependencies.coreStart,
+      execution,
+      params.fakeRequest
+    );
+    if (responder) {
+      return await withWorkflowResponder(params.fakeRequest, responder, () =>
+        resumeWithRequest(params.fakeRequest)
+      );
+    }
     return await withWorkflowExecutionIdentity(
       params.dependencies.coreStart,
       execution,
       params.fakeRequest,
-      (fakeRequest) => {
-        enteredExecution = true;
-        return resumeWorkflowWithRequest({ ...params, fakeRequest });
-      }
+      resumeWithRequest
     );
   } catch (error) {
-    if (!enteredExecution && getExecutionServiceAccountId(execution)) {
+    const isResponderError = error instanceof ResumeAsResponderError;
+    if (!enteredExecution && (isResponderError || getExecutionServiceAccountId(execution))) {
       const executionError = {
-        type: 'ServiceAccountExecutionError',
+        type: isResponderError ? RESUME_AS_RESPONDER_ERROR : 'ServiceAccountExecutionError',
         message: error instanceof Error ? error.message : String(error),
       };
       const failedExecution = await finalizeWorkflowIdentityFailure({
