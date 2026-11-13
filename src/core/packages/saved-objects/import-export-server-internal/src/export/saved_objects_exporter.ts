@@ -123,6 +123,7 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
       logger: this.#log,
     });
 
+    // sort with the provided sort iteratees then with the default export sorting
     const exportedObjects = sortObjects(sortBy(collectedObjects, sortIteratees));
 
     // redact attributes that should not be exported
@@ -179,8 +180,9 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
       }
     }
 
-    // Elasticsearch can't sort on `_id`, so sort in memory
+    // sorts server-side by _id, since it's only available in fielddata
     return sortBy(
+      // exclude the find-specific `score` property from the exported objects
       hits.map(({ score, ...obj }) => obj),
       'id'
     );

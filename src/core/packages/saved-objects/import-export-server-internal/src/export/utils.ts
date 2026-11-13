@@ -9,4 +9,6 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
+export type SavedObjectComparator = (a: SavedObject, b: SavedObject) => number;
+
 export const getObjKey = (obj: SavedObject) => `${obj.type}|${obj.id}`;
