@@ -13,13 +13,7 @@ import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-
-/**
- * Pricing feature that gates significant events. Copied from `SIGNIFICANT_EVENTS_TIERED_FEATURE`
- * in `significant_events/common/constants.ts`; the engine runs on the same tiers, so keep the two
- * ids equal.
- */
-const DETECTION_ENGINE_TIERED_FEATURE_ID = 'streams:significant-events';
+import { NIGHTSHIFT_DETECTION_TIERED_FEATURE } from '../../../common/constants';
 
 /** Requirements in evaluation order; the first unmet one is the reason reported. */
 export type TAvailabilityUnavailableReason =
@@ -61,7 +55,7 @@ export class AvailabilityService {
       return 'project_type';
     }
 
-    if (!this.pricing.isFeatureAvailable(DETECTION_ENGINE_TIERED_FEATURE_ID)) {
+    if (!this.pricing.isFeatureAvailable(NIGHTSHIFT_DETECTION_TIERED_FEATURE.id)) {
       return 'pricing_tier';
     }
 

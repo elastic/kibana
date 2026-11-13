@@ -17,7 +17,7 @@ import { createToken } from '@kbn/core-di';
  * {@link EngineDataClient}.
  */
 export const DetectionEngineSystemClient = createToken<ElasticsearchClient>(
-  'nightshiftDetection.DetectionEngineSystemClient'
+  'nightshiftDetection.EngineSystemClient'
 );
 
 /**

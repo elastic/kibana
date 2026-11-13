@@ -83,7 +83,7 @@ describe('AvailabilityService', () => {
       await expect(service.getUnavailableReason()).resolves.toBe('project_type');
     });
 
-    it('reports the pricing tier when significant events is not part of it', async () => {
+    it('reports the pricing tier when the engine is not part of it', async () => {
       const { service } = createService({ tierAvailable: false });
 
       await expect(service.getUnavailableReason()).resolves.toBe('pricing_tier');

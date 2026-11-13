@@ -11,6 +11,7 @@
     "@kbn/core",
     "@kbn/core-di",
     "@kbn/core-di-server",
+    "@kbn/core-pricing-common",
     "@kbn/core-plugins-server",
     "@kbn/licensing-plugin",
     "@kbn/nightshift-shared"
