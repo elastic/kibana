@@ -575,7 +575,8 @@ export const triageMatchFpDecisionsStepCommonDefinition: CommonStepDefinition<
   outputSchema: matchFpDecisionsOutputSchema,
 };
 
-export const REVOKE_FP_DECISION_STATUSES = ['ok', 'not_found'] as const;
+export const REVOKE_FP_DECISION_STATUSES = ['ok', 'not_found', 'denied'] as const;
+export type RevokeFpDecisionStatus = (typeof REVOKE_FP_DECISION_STATUSES)[number];
 
 const revokeFpDecisionInputSchema = lazySchema(() =>
   z.object({
@@ -592,7 +593,7 @@ const revokeFpDecisionOutputSchema = lazySchema(() =>
     status: z
       .enum(REVOKE_FP_DECISION_STATUSES)
       .describe(
-        '`not_found` when no such decision exists in this space. Alerts that carry its tag are still put back.'
+        '`not_found` when no such decision exists in this space. Alerts that carry its tag are still put back. `denied` when the caller cannot write the decisions index: nothing was changed.'
       ),
     alerts_reopened: z.number().describe('Alerts the decision closed that were reopened.'),
     alerts_released: z
