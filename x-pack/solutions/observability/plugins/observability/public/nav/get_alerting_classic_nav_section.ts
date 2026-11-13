@@ -22,7 +22,11 @@ import {
 import type { NavigationEntry, NavigationSection } from '@kbn/observability-shared-plugin/public';
 import { observabilityAppId } from '../../common';
 import { ALERTS_PATH } from '../../common/locators/paths';
-import { canReadV1Alerts, getObservabilityAlertsLinkTitle } from './get_alerts_nav_panel';
+import {
+  canListClassicAlertsTable,
+  canReadV1Alerts,
+  getObservabilityAlertsLinkTitle,
+} from './get_alerts_nav_panel';
 
 // Directly below the Overview section (100), before the remaining top entries (102) and Streams (103).
 const ALERTING_SECTION_SORT_KEY = 101;
@@ -38,7 +42,7 @@ const getAlertingEntries = (core: CoreStart): NavigationEntry[] => {
     });
   }
 
-  if (canReadV1Alerts(core) && shouldShowV1ObservabilityAlertsTable(core)) {
+  if (canListClassicAlertsTable(core) && shouldShowV1ObservabilityAlertsTable(core)) {
     entries.push({
       label: getObservabilityAlertsLinkTitle(true),
       app: observabilityAppId,

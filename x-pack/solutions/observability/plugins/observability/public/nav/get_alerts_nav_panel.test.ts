@@ -20,10 +20,10 @@ const FULL_V2_CAPABILITIES = {
   alerting_v2_action_policies: { read: true },
   alerting_v2_execution_history: { read: true },
   observabilityAlerts: { show: true },
+  stackAlerts: { show: true },
   management: {
     insightsAndAlerting: {
       triggersActionsAlerts: true,
-      triggersActionsRules: true,
       maintenanceWindows: true,
     },
   },
@@ -351,10 +351,16 @@ describe('getAlertsNavPanel', () => {
       });
     });
 
-    it('shows a visible v1 Rules link when the user only has v1 rules read', () => {
-      setCapabilities(core, {
-        management: { insightsAndAlerting: { triggersActionsRules: true } },
-      });
+    it.each([
+      ['stack rules read', { stackAlerts: { show: true } }],
+      ['data set quality', { dataQuality: { show: true } }],
+      ['the machine learning app privilege', { navLinks: { ml: true } }],
+    ])('shows Alerts and a visible v1 Rules link for %s', (_label, features) => {
+      setCapabilities(core, features);
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
+      ]);
 
       const children = getSectionByTitle(core, 'Rule Management')?.children;
 
@@ -363,10 +369,43 @@ describe('getAlertsNavPanel', () => {
       expect(children?.[0]).not.toHaveProperty('getIsActive');
     });
 
+    it('hides Alerts and Rules from a security rules user', () => {
+      setCapabilities(core, {
+        securitySolutionRulesV4: { read_rules: true },
+        siem: { show: true },
+      });
+
+      expect(getAlertsNavPanel(core)).toEqual([]);
+    });
+
+    it('hides Rule Management when the user can open Stack Management Rules but cannot read rules', () => {
+      setCapabilities(core, {
+        actions: { show: true },
+        rulesSettings: { show: true },
+        agentBuilder: { show: true },
+        management: {
+          insightsAndAlerting: {
+            triggersActionsRules: true,
+            triggersActionsAlerts: true,
+            triggersActionsConnectors: true,
+          },
+        },
+      });
+
+      expect(getSectionByTitle(core, 'Rule Management')).toBeUndefined();
+      expect(getAlertsNavPanel(core)).toEqual([]);
+    });
+
+    it('hides Rule Management from a v2 action policies user', () => {
+      setCapabilities(core, { alerting_v2_action_policies: { read: true } });
+
+      expect(getSectionByTitle(core, 'Rule Management')).toBeUndefined();
+    });
+
     it('prefers the v2 Rules link when the user has both v1 and v2 rules read', () => {
       setCapabilities(core, {
         alerting_v2_rules: { read: true },
-        management: { insightsAndAlerting: { triggersActionsRules: true } },
+        stackAlerts: { show: true },
       });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
