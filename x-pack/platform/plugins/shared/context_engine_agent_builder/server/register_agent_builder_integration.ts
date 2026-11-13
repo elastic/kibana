@@ -10,6 +10,8 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
 import { registerAgentBuilderTools } from './agent_builder/tools';
+import { getMemoryBackend } from './agent_builder/tools/memory_store';
+import type { MemoryStoreConfig } from './config';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerContextEngineAgent } from './agent/context_engine_agent';
 import type {
@@ -23,6 +25,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
   coreSetup,
   agentBuilder,
   workflowsManagement,
+  memoryStoreConfig,
 }: {
   coreSetup: CoreSetup<
     ContextEngineAgentBuilderStartDependencies,
@@ -30,6 +33,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
   >;
   agentBuilder: AgentBuilderPluginSetup;
   workflowsManagement: WorkflowsManagementApi;
+  memoryStoreConfig: MemoryStoreConfig;
 }): void => {
   registerAttachmentTypes(agentBuilder);
   registerContextEngineAgent(agentBuilder);
@@ -68,6 +72,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
       return startDeps.security;
     },
     getWorkflowsManagement: () => workflowsManagement,
+    memoryBackend: getMemoryBackend(memoryStoreConfig),
     getContextEngineStart: async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.contextEngine;

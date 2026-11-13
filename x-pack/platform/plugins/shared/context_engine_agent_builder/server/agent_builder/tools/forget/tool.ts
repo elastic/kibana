@@ -14,8 +14,6 @@ import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index
 import { MAX_KI_ID_LENGTH } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
-  getKiRevision,
-  writeKiRevision,
   isKiDeleted,
   type KiWriter,
 } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
@@ -27,6 +25,7 @@ import { assertContextEngineWriteAccess } from '../../assert_context_engine_writ
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
 import { createMemoryWriter, isMemoryDocument } from '../memory_document';
+import { createElasticsearchMemoryStore, type CreateMemoryStore } from '../memory_store';
 
 const forgetSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -43,10 +42,12 @@ export const createForgetTool = ({
   getAiIndexService,
   getCoreStart,
   getSecurityStart,
+  createMemoryStore = createElasticsearchMemoryStore,
 }: {
   getAiIndexService: () => Promise<AiIndexService>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  createMemoryStore?: CreateMemoryStore;
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
   id: contextEngineMemoryTools.forget,
   type: ToolType.builtin,
@@ -84,17 +85,13 @@ export const createForgetTool = ({
         getCoreStart,
       });
 
-      const currentUserClient = esClient.asCurrentUser;
-      const abortSignal = new AbortController().signal;
-
-      const revision = await getKiRevision({
-        esClient: currentUserClient,
+      const store = createMemoryStore({
         aiIndexId: params.aiIndexId,
         dest: aiIndex.dest,
-        kiId: params.id,
-        abortSignal,
-        includeSource: true,
+        spaceId,
+        esClient: esClient.asCurrentUser,
       });
+      const revision = await store.get(params.id);
 
       if (!isMemoryDocument(revision.source)) {
         throw new Error(
@@ -127,16 +124,7 @@ export const createForgetTool = ({
         },
       };
 
-      await writeKiRevision({
-        esClient: currentUserClient,
-        aiIndexId: params.aiIndexId,
-        dest: aiIndex.dest,
-        kiId: params.id,
-        revision,
-        changes,
-        refresh: true,
-        abortSignal,
-      });
+      await store.markDeleted({ kiId: params.id, existing: revision, changes });
 
       return {
         results: [

@@ -14,6 +14,7 @@ import type {
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 import { registerContextEngineInferenceFeatures } from './register_inference_features';
+import type { ContextEngineAgentBuilderConfig } from './config';
 
 export class ContextEngineAgentBuilderPlugin
   implements
@@ -24,7 +25,11 @@ export class ContextEngineAgentBuilderPlugin
       ContextEngineAgentBuilderStartDependencies
     >
 {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private readonly config: ContextEngineAgentBuilderConfig;
+
+  constructor(initializerContext: PluginInitializerContext<ContextEngineAgentBuilderConfig>) {
+    this.config = initializerContext.config.get();
+  }
 
   setup(
     coreSetup: CoreSetup<
@@ -37,6 +42,7 @@ export class ContextEngineAgentBuilderPlugin
       coreSetup,
       agentBuilder: setupDeps.agentBuilder,
       workflowsManagement: setupDeps.workflowsManagement.management,
+      memoryStoreConfig: this.config.memory.store,
     });
 
     if (setupDeps.searchInferenceEndpoints) {
