@@ -637,6 +637,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
+    it('judges the recorded parent, not the process command line', () => {
+      const message = String(analyze?.with?.message);
+      expect(message).toContain('Judge the recorded process.parent only;');
+      expect(message).toContain("a process's own command line is not its parent.");
+    });
+
     it('weighs the process parent with the cited alert severity', () => {
       expect(String(analyze?.with?.message)).toContain(
         'A risk score or severity on a cited alert weighs how strong that parent is.'

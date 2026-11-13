@@ -459,9 +459,11 @@ steps:
            A management server, MDM, jump box, or service account is neutral, not contradicts:
            the role is context for the other checks, and those machines are also
            high-value targets. A thin or uncurated record is neutral.
-        3. process_parent — raw events only. A management agent, scheduler, Nessus
-           scan, software-distribution parent, or other config-management parent
-           that explains the child contradicts. An office program or browser supports.
+        3. process_parent — raw events only. Judge the recorded process.parent only;
+           a process's own command line is not its parent. A management agent,
+           scheduler, Nessus scan, software-distribution parent, or other
+           config-management parent that explains the child contradicts. An office
+           program or browser supports.
            A risk score or severity on a cited alert weighs how strong that parent is.
            It is not a separate verdict.
         4. network_destination — raw events only. Judge every destination shown.
