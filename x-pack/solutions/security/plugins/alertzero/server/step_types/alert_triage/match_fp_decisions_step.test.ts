@@ -725,6 +725,69 @@ describe('triage match decisions step in on mode', () => {
     expect(closes()).toEqual([]);
   });
 
+  describe('a cloud key in `on`', () => {
+    // A cloud key is the action plus the account, so it covers every actor of that action.
+    const cloud = (action: string) => ({
+      'kibana.alert.rule.uuid': 'rule-cloud',
+      'kibana.alert.rule.revision': 1,
+      'kibana.alert.severity': 'low',
+      event: { action },
+      cloud: { account: { id: '123456789012' } },
+    });
+    const cloudId = (kind: 'false_positive' | 'do_not_propose', action: string) =>
+      decisionId(
+        kind,
+        groupByStrictKey({ alerts: [{ id: 'x', doc: cloud(action) }], spaceId: 'default' })
+          .groups[0].hash
+      );
+
+    it('only tags an approved cloud match, as shadow does, while another kind still closes', async () => {
+      const cloudDecision = cloudId('false_positive', 'AssumeRole');
+      const fileDecision = decisionId('false_positive', hashOf('C:\\x.exe'));
+      const { run, tags, closes } = setup({
+        mode: 'on',
+        alerts: [
+          ['c', cloud('AssumeRole')],
+          ['f', source('C:\\x.exe')],
+        ],
+        decisions: {
+          [cloudDecision]: stored('false_positive'),
+          [fileDecision]: stored('false_positive'),
+        },
+      });
+
+      const { output } = await run();
+
+      expect(closes().map(({ signal_ids }) => signal_ids)).toEqual([['f']]);
+      expect(tags()).toContainEqual({
+        ids: ['c'],
+        tags: { tags_to_add: [`az:would_close:${cloudDecision}`], tags_to_remove: [] },
+      });
+      expect(tags().filter(({ ids }) => ids.includes('c'))).toHaveLength(1);
+      expect(output).toEqual(
+        expect.objectContaining({ would_close: 2, closed: 1, held_in_shadow: 1 })
+      );
+    });
+
+    it('only tags a dismissed cloud match as would-skip, so it still goes to analysis', async () => {
+      const id = cloudId('do_not_propose', 'AssumeRole');
+      const { run, tags } = setup({
+        mode: 'on',
+        alerts: [['c', cloud('AssumeRole')]],
+        decisions: { [id]: stored('do_not_propose') },
+      });
+
+      const { output } = await run();
+
+      expect(tags()).toEqual([
+        { ids: ['c'], tags: { tags_to_add: [`az:would_skip:${id}`], tags_to_remove: [] } },
+      ]);
+      expect(output).toEqual(
+        expect.objectContaining({ would_skip: 1, skipped: 0, held_in_shadow: 1 })
+      );
+    });
+  });
+
   it('sends a high alert of a dismissed pattern to analysis, because a dismissal is not a verdict that it is fine', async () => {
     const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
     const { run, tags } = setup({

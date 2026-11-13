@@ -543,6 +543,11 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     excluded_by_severity: z
       .number()
       .describe('Matches the severity guard keeps with a human, not tagged.'),
+    held_in_shadow: z
+      .number()
+      .describe(
+        'Matches on a cloud key that `on` only tagged, as shadow does: the alert goes to analysis.'
+      ),
     tag_failures: z
       .number()
       .describe('Tag updates that failed. Those alerts match again next sweep.'),
