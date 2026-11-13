@@ -13,7 +13,11 @@ import { basename } from 'path';
 import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { endpointActionResponseCodes } from '../../../public/management/components/endpoint_responder/lib/endpoint_action_response_codes';
-import { isCancelAction } from '../../../common/endpoint/service/response_actions/type_guards';
+import {
+  isCancelAction,
+  isGetFileAction,
+  isMemoryDumpAction,
+} from '../../../common/endpoint/service/response_actions/type_guards';
 import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -175,6 +179,24 @@ export const sendEndpointActionResponse = async (
       }
     }
 
+    // With `export`, Endpoint uploads the file to the export provider instead of to Fleet and, only
+    // on success, reports where it went (memory-dump also reports the dump's file name)
+    const exportProviderId =
+      isGetFileAction(action) || isMemoryDumpAction(action) ? action.parameters?.export : undefined;
+    const outputContent = endpointResponse.EndpointActions.data.output?.content;
+
+    if (exportProviderId && outputContent && !endpointResponse.error) {
+      Object.assign(outputContent, {
+        exported: endpointActionGenerator.generateExportedOutput({
+          export: exportProviderId,
+          path: `${action.id}/upload.zip`,
+        }),
+        ...(action.command === 'memory-dump' && 'path' in outputContent
+          ? { file_name: basename(outputContent.path) }
+          : {}),
+      });
+    }
+
     await esClient
       .index({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
@@ -209,12 +231,13 @@ export const sendEndpointActionResponse = async (
       ]);
     }
 
-    // For `get-file`, upload a file to ES
+    // For `get-file` (unless it was exported), upload a file to ES
     if (
       (action.command === 'execute' ||
         action.command === 'get-file' ||
         action.command === 'runscript') &&
-      !endpointResponse.error
+      !endpointResponse.error &&
+      !exportProviderId
     ) {
       const filePath =
         action.command === 'execute'

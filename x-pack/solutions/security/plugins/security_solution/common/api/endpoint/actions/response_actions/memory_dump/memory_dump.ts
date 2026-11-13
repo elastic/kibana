@@ -7,7 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { DeepMutable } from '../../../../../endpoint/types';
-import { BaseActionRequestSchema } from '../../..';
+import { BaseActionRequestSchema, ExportParameterSchema } from '../../..';
 
 export const MemoryDumpActionRequestSchema = {
   body: schema.object({
@@ -31,6 +31,7 @@ export const MemoryDumpActionRequestSchema = {
             },
           })
         ),
+        export: ExportParameterSchema,
       },
       {
         validate: (parameters) => {

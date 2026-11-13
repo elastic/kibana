@@ -37,8 +37,10 @@ import type {
   LogsEndpointActionResponse,
   ProcessesEntry,
   ResponseActionExecuteOutputContent,
+  ResponseActionExportedOutput,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionMemoryDumpParameters,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
@@ -375,6 +377,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
 
       if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        const exportProviderId = (overrides.parameters as ResponseActionGetFileParameters)?.export;
+
         (
           details as unknown as ActionDetails<
             ResponseActionGetFileOutputContent,
@@ -391,10 +395,19 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             content: {
               code: 'ra_get-file_success',
               zip_size: 123,
-              downloadUri: ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
-                `{action_id}`,
-                details.id
-              ).replace(`{file_id}`, agentId),
+              ...(typeof exportProviderId === 'string'
+                ? {
+                    exported: this.generateExportedOutput({
+                      export: exportProviderId,
+                      path: `${overrides.id ?? details.id}/upload.zip`,
+                    }),
+                  }
+                : {
+                    downloadUri: ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
+                      `{action_id}`,
+                      details.id
+                    ).replace(`{file_id}`, agentId),
+                  }),
               contents: [
                 {
                   path: '/some/file/txt',
@@ -529,14 +542,27 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         details.outputs = {};
       }
 
+      const exportProviderId = (overrides.parameters as ResponseActionMemoryDumpParameters)?.export;
+
       for (const agentId of details.agents) {
+        const dumpFileName = 'memory-dump.2025-11-03T16:22:05.365Z.zip';
+
         details.outputs[agentId] = {
           type: 'json',
           content: {
             code: 'ra_memory-dump-success',
-            path: `/home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip`,
+            path: `/home/user/${agentId}/tmp/${dumpFileName}`,
             file_size: 23895729,
             disk_free_space: 1234567000,
+            ...(typeof exportProviderId === 'string'
+              ? {
+                  file_name: dumpFileName,
+                  exported: this.generateExportedOutput({
+                    export: exportProviderId,
+                    path: `${overrides.id ?? details.id}/upload.zip`,
+                  }),
+                }
+              : {}),
             ...(details.parameters?.type === 'raw'
               ? {
                   total_memory_size: 53_000_000,
@@ -584,6 +610,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       TOutputContent,
       TParameters
     >;
+  }
+
+  /** Generates the output Endpoint reports when a file was uploaded to an export provider instead of Fleet */
+  generateExportedOutput(
+    overrides: Partial<ResponseActionExportedOutput> = {}
+  ): ResponseActionExportedOutput {
+    return {
+      export: 'azure-1',
+      service: 'azure_blob',
+      account: 'acct',
+      container: 'response-actions',
+      path: `${this.seededUUIDv4()}/upload.zip`,
+      ...overrides,
+    };
   }
 
   randomGetFileFailureCode(): string {

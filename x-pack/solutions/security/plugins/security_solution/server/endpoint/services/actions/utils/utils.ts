@@ -228,12 +228,23 @@ export const getActionCompletionInfo = <
         agentResponse.endpointResponse &&
         agentResponse.endpointResponse.EndpointActions.data.output
       ) {
-        completedInfo.outputs[agentId] = agentResponse.endpointResponse.EndpointActions.data.output;
+        const output = agentResponse.endpointResponse.EndpointActions.data.output;
+        const { content } = output;
+        completedInfo.outputs[agentId] = output;
+
+        // An output that was exported to external storage was never uploaded to Fleet, so it
+        // must never get a download link. (`content` is a string for `text` outputs)
+        const wasExported =
+          typeof content === 'object' &&
+          content !== null &&
+          'exported' in content &&
+          Boolean(content.exported);
 
         if (
           doesActionHaveFileAccess(action.agentType, action.command) &&
           completedInfo.agentState[agentId].isCompleted &&
-          completedInfo.agentState[agentId].wasSuccessful
+          completedInfo.agentState[agentId].wasSuccessful &&
+          !wasExported
         ) {
           set(
             completedInfo.outputs[agentId],

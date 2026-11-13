@@ -339,6 +339,47 @@ describe('When using Actions service utilities', () => {
       );
     });
 
+    it('should NOT return file download URI for a response that was exported to external storage', () => {
+      const exported = endpointActionGenerator.generateExportedOutput();
+
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            endpointActionGenerator.generate({
+              agent: { id: ['123'] },
+              EndpointActions: { data: { command: 'get-file' } },
+            })
+          ),
+          {
+            fleetResponses: [],
+            endpointResponses: [
+              endpointActionGenerator.generateResponse({
+                agent: { id: '123' },
+                EndpointActions: {
+                  data: {
+                    command: 'get-file',
+                    output: { type: 'json', content: { code: 'success', exported } },
+                  },
+                },
+              }),
+            ],
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          outputs: {
+            '123': {
+              content: {
+                code: 'success',
+                exported,
+              },
+              type: 'json',
+            },
+          },
+        })
+      );
+    });
+
     it('should NOT return file download URI for actions with no file support', () => {
       expect(
         getActionCompletionInfo(
