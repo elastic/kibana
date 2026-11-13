@@ -23,6 +23,8 @@ export type {
   TailSamplingConfig,
   TailSamplingProcessor,
   TailSamplingDiagnostic,
+  TailSamplingWarning,
+  TailSamplingWarningCode,
   TailSamplingResponse,
   ValidateTailSamplingResponse,
 } from './types';
@@ -30,4 +32,6 @@ export {
   MAX_TAIL_SAMPLING_POLICIES,
   MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH,
   TAIL_SAMPLING_PROCESSOR,
+  TAIL_SAMPLING_POLICY_TYPES_WITH_WARNING,
+  TAIL_SAMPLING_WARNING_CODES,
 } from './types';

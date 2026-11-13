@@ -54,6 +54,8 @@ export {
   MAX_TAIL_SAMPLING_POLICIES,
   MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH,
   TAIL_SAMPLING_PROCESSOR,
+  TAIL_SAMPLING_POLICY_TYPES_WITH_WARNING,
+  TAIL_SAMPLING_WARNING_CODES,
 } from './src/routes/tail_sampling';
 export { sourceMapSchema } from './src/routes/source_maps';
 export { filterOptionsSchema, payloadSchema } from './src/routes/custom_links';

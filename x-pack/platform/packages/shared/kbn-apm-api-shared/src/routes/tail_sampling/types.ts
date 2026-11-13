@@ -57,6 +57,24 @@ export const tailSamplingSettingsSchema = z.object({
   config: z.object({ policies: tailSamplingPoliciesSchema }),
 });
 
+// Policy types that are accepted but produce a warning.
+export const TAIL_SAMPLING_POLICY_TYPES_WITH_WARNING: ReadonlySet<string> = new Set([
+  'rate_limiting',
+  'bytes_limiting',
+  'composite',
+]);
+
+export const TAIL_SAMPLING_WARNING_CODES = {
+  // A policy of a type in TAIL_SAMPLING_POLICY_TYPES_WITH_WARNING, at any depth.
+  RATE_LIMIT_PER_REPLICA: 'rate_limit_per_replica',
+  // The policy set drops client or producer spans, so the service map loses connections.
+  EXIT_SPANS_DROPPED: 'exit_spans_dropped',
+} as const;
+
+export type TailSamplingWarningCode =
+  (typeof TAIL_SAMPLING_WARNING_CODES)[keyof typeof TAIL_SAMPLING_WARNING_CODES];
+
+/** An error. Errors make the config invalid. */
 export interface TailSamplingDiagnostic {
   code: string;
   message: string;
@@ -65,6 +83,11 @@ export interface TailSamplingDiagnostic {
   policyName?: string;
   // Path inside the policy, for example ['latency', 'threshold_ms'].
   path?: Array<string | number>;
+}
+
+/** A warning. Warnings never make the config invalid, and it can still be saved. */
+export interface TailSamplingWarning extends TailSamplingDiagnostic {
+  code: TailSamplingWarningCode;
 }
 
 export interface TailSamplingResponse {
@@ -81,8 +104,11 @@ export interface TailSamplingResponse {
 }
 
 export interface ValidateTailSamplingResponse {
+  // False only when there are errors. Warnings do not affect it.
   valid: boolean;
   diagnostics: TailSamplingDiagnostic[];
+  // Non-blocking. A warning about one policy sets `policyIndex`, a set-level one does not.
+  warnings: TailSamplingWarning[];
   // Hash of the config as validated. Send it back as `validatedHash` on save.
   hash: string;
 }
