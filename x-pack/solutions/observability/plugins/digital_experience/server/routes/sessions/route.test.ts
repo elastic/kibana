@@ -22,9 +22,11 @@ import { getSessionsStatus } from '../../services/sessions/sessions_status';
 import type { SessionsServices } from '../create_digital_experience_server_route';
 import { getSession } from './get_session';
 import { listSessions } from './list_sessions';
+import { getSessionLocations } from './session_locations';
 import {
   SESSIONS_ENABLE_ENDPOINT,
   SESSIONS_LIST_ENDPOINT,
+  SESSION_LOCATIONS_ENDPOINT,
   SESSIONS_STATUS_ENDPOINT,
   SESSION_DETAIL_ENDPOINT,
   sessionsRouteRepository,
@@ -32,6 +34,7 @@ import {
 
 jest.mock('./get_session');
 jest.mock('./list_sessions');
+jest.mock('./session_locations');
 jest.mock('../../services/sessions/sessions_status');
 jest.mock('../../services/sessions/enable_sessions', () => ({
   ...jest.requireActual('../../services/sessions/enable_sessions'),
@@ -141,6 +144,7 @@ describe('sessions routes', () => {
   it.each<[Endpoint, string]>([
     [SESSIONS_ENABLE_ENDPOINT, 'manage_digital_experience_sessions'],
     [SESSIONS_LIST_ENDPOINT, 'read_digital_experience'],
+    [SESSION_LOCATIONS_ENDPOINT, 'read_digital_experience'],
     [SESSION_DETAIL_ENDPOINT, 'read_digital_experience'],
   ])('%s requires %s', (endpoint, privilege) => {
     expect(sessionsRouteRepository[endpoint].security).toEqual({
@@ -382,8 +386,40 @@ describe('sessions routes', () => {
         withFailedRequests: false,
         minDurationMs: 10_000,
         maxDurationMs: undefined,
+        bounds: undefined,
       },
     });
+  });
+
+  it('clusters the located sessions as the current user, with the filters and the map view', async () => {
+    jest.mocked(getSessionLocations).mockResolvedValue({ clusters: [] } as never);
+    const viewport = { west: -10, south: 35, east: 30, north: 60 };
+    const { result, coreContext } = runHandler(SESSION_LOCATIONS_ENDPOINT, {
+      params: {
+        path: { serviceName: 'web' },
+        query: { start: START, end: END, country: 'NL', withJsErrors: true, zoom: 3, viewport },
+      },
+    });
+
+    expect(await result).toEqual({ clusters: [] });
+    expect(getSessionLocations).toHaveBeenCalledWith(
+      coreContext.elasticsearch.client.asCurrentUser,
+      {
+        serviceName: 'web',
+        start: START,
+        end: END,
+        zoom: 3,
+        viewport,
+        facets: { browsers: undefined, os: undefined, countries: 'NL', entryPages: undefined },
+        filters: {
+          withJsErrors: true,
+          withFailedRequests: undefined,
+          minDurationMs: undefined,
+          maxDurationMs: undefined,
+          bounds: undefined,
+        },
+      }
+    );
   });
 
   it('answers 404 for an unknown session', async () => {
@@ -456,6 +492,17 @@ describe('sessions routes', () => {
       ).toBe(false);
     });
 
+    it('parses the map area, and rejects one that is not', () => {
+      expect(querySchemaOf().parse({ ...range, bounds: '-10,35,30,60' }).bounds).toEqual({
+        west: -10,
+        south: 35,
+        east: 30,
+        north: 60,
+      });
+      expect(querySchemaOf().safeParse({ ...range, bounds: '-10,60,30,35' }).success).toBe(false);
+      expect(querySchemaOf().safeParse({ ...range, bounds: 'here' }).success).toBe(false);
+    });
+
     it('accepts an environment up to 1024 characters', () => {
       const withEnvironment = (length: number) =>
         querySchemaOf().safeParse({ ...range, environment: 'x'.repeat(length) }).success;
@@ -481,6 +528,7 @@ describe('sessions routes', () => {
 
   it.each([
     ['list', SESSIONS_LIST_ENDPOINT, listSessions],
+    ['locations', SESSION_LOCATIONS_ENDPOINT, getSessionLocations],
     ['detail', SESSION_DETAIL_ENDPOINT, getSession],
   ] as const)(
     'answers 403 naming the index privileges when Elasticsearch denies the %s read',

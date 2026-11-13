@@ -14,6 +14,7 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -35,6 +36,20 @@ const ANY_VALUE = '';
 
 const ANY_LABEL = i18n.translate('xpack.digitalExperience.sessions.filters.anyLabel', {
   defaultMessage: 'Any',
+});
+
+const MAP_AREA_LABEL = i18n.translate('xpack.digitalExperience.sessions.filters.mapAreaLabel', {
+  defaultMessage: 'Map area',
+});
+
+const CLEAR_MAP_AREA_LABEL = i18n.translate(
+  'xpack.digitalExperience.sessions.filters.clearMapAreaLabel',
+  { defaultMessage: 'Clear the map area filter' }
+);
+
+const MAP_AREA_TOOLTIP = i18n.translate('xpack.digitalExperience.sessions.filters.mapAreaTooltip', {
+  defaultMessage:
+    'Only sessions from the area picked on the sessions map, beside a session. Sessions without a location are left out.',
 });
 
 type FacetParam = 'browser' | 'os' | 'country' | 'entryPage';
@@ -149,6 +164,26 @@ export function SessionsFilters({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
+          {/* Set from the sessions map beside a session; only cleared here. */}
+          {state.bounds && (
+            <EuiToolTip content={MAP_AREA_TOOLTIP} disableScreenReaderOutput>
+              <EuiFilterButton
+                data-test-subj="digitalExperienceSessionsMapAreaFilter"
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+                  element: SESSIONS_EBT_ELEMENTS.MAP_AREA_FILTER,
+                })}
+                withNext
+                hasActiveFilters
+                iconType="cross"
+                iconSide="right"
+                aria-label={CLEAR_MAP_AREA_LABEL}
+                onClick={() => onChange({ bounds: undefined })}
+              >
+                {MAP_AREA_LABEL}
+              </EuiFilterButton>
+            </EuiToolTip>
+          )}
           <EuiFilterButton
             data-test-subj="digitalExperienceSessionsJsErrorsFilter"
             {...getEbtProps({

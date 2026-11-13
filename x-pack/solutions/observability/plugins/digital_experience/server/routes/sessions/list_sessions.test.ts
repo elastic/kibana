@@ -56,7 +56,12 @@ const sessionDoc: StoredSessionDocument = {
   environment: 'production',
   user: { key: 'jane@example.com' },
   user_agent: { browser: 'Chrome', browser_version: '130', os: 'macOS', device: null },
-  geo: { country_iso: 'NL', region: 'North Holland', city: 'Amsterdam' },
+  geo: {
+    country_iso: 'NL',
+    region: 'North Holland',
+    city: 'Amsterdam',
+    location: { lat: 52.3676, lon: 4.9041 },
+  },
   web_vitals: { lcp: 1800, inp: null, cls: 0.05, fcp: null, ttfb: null },
   search: ['abc', 'jane@example.com', 'chrome', 'macos', 'nl', '/', '/products', '/cart'],
 };
@@ -213,6 +218,26 @@ describe('buildListSessionsRequest', () => {
     ).toEqual({ bool: { filter: [{ range: { http_failed_request_count: { gte: 1 } } }] } });
   });
 
+  it('narrows the list, KPIs and facets to sessions located in the map area', () => {
+    const request = buildListSessionsRequest({
+      ...baseParams,
+      filters: { bounds: { west: 170, south: -10, east: -170, north: 10 } },
+    });
+    const filters = [
+      {
+        geo_bounding_box: {
+          'geo.location': {
+            top_left: { lat: 10, lon: 170 },
+            bottom_right: { lat: -10, lon: -170 },
+          },
+        },
+      },
+    ];
+    expect(request.post_filter).toEqual({ bool: { filter: filters } });
+    expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
+    expect(request.aggs?.countries.filter).toEqual({ bool: { filter: filters } });
+  });
+
   it('applies an open-ended duration range', () => {
     const request = buildListSessionsRequest({ ...baseParams, filters: { minDurationMs: 0 } });
     expect(request.post_filter).toEqual({
@@ -261,7 +286,12 @@ describe('toSessionSummary', () => {
       environment: 'production',
       user: 'jane@example.com',
       userAgent: { browser: 'Chrome', browserVersion: '130', os: 'macOS', device: null },
-      geo: { countryIso: 'NL', region: 'North Holland', city: 'Amsterdam' },
+      geo: {
+        countryIso: 'NL',
+        region: 'North Holland',
+        city: 'Amsterdam',
+        location: { lat: 52.3676, lon: 4.9041 },
+      },
       webVitals: { lcp: 1800, inp: null, cls: 0.05, fcp: null, ttfb: null },
     });
   });
@@ -287,7 +317,7 @@ describe('toSessionSummary', () => {
       environment: null,
       user: null,
       userAgent: { browser: null, browserVersion: null, os: null, device: null },
-      geo: { countryIso: null, region: null, city: null },
+      geo: { countryIso: null, region: null, city: null, location: null },
       webVitals: { lcp: null, inp: null, cls: null, fcp: null, ttfb: null },
     });
   });

@@ -12,6 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import {
+  GEO_BOUNDS_PARAM_MAX_LENGTH,
+  parseGeoBounds,
+  type GeoBounds,
+} from '../../../common/geo_bounds';
+import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_LIST_DEFAULT_PER_PAGE,
   SESSIONS_LIST_MAX_DURATION_MS,
@@ -22,7 +27,9 @@ import {
   SESSIONS_SOURCE_INDICES,
   SESSION_SORT_FIELDS,
   type SessionDetailResponse,
+  SESSION_MAP_MAX_ZOOM,
   type SessionListResponse,
+  type SessionLocationsResponse,
   type SessionsStatus,
 } from '../../../common/sessions';
 import {
@@ -37,13 +44,18 @@ import { getSessionsStatus } from '../../services/sessions/sessions_status';
 import { MAX_ENVIRONMENT_LENGTH } from '../../lib/constants';
 import { describeError } from '../../lib/helpers/errors';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
+import { START_AFTER_END_ISSUE, isStartBeforeEnd } from '../params';
 import { getSession } from './get_session';
 import { listSessions } from './list_sessions';
+import { getSessionLocations } from './session_locations';
 
 export const SESSIONS_STATUS_ENDPOINT = 'GET /internal/digital_experience/sessions/status';
 export const SESSIONS_ENABLE_ENDPOINT = 'POST /internal/digital_experience/sessions/enable';
 export const SESSIONS_LIST_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions';
+// Not under `sessions/`, where the path segment is a session ID.
+export const SESSION_LOCATIONS_ENDPOINT =
+  'GET /internal/digital_experience/applications/{serviceName}/session_locations';
 export const SESSION_DETAIL_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}';
 
@@ -231,6 +243,68 @@ const facetValue = (maxLength: number) => z.string().min(1).max(maxLength).optio
 const durationMs = () =>
   z.coerce.number().int().min(0).max(SESSIONS_LIST_MAX_DURATION_MS).optional();
 
+/** A map area param, `west,south,east,north`; rejected unless it is a valid one. */
+const geoBounds = () =>
+  z
+    .string()
+    .max(GEO_BOUNDS_PARAM_MAX_LENGTH)
+    .refine((raw) => parseGeoBounds(raw) !== null, {
+      message: 'Expected `west,south,east,north` in degrees, with `south` below `north`',
+    })
+    .transform((raw) => parseGeoBounds(raw) as GeoBounds)
+    .optional();
+
+/** The params that pick which sessions the list, and the map, show. */
+const sessionsFilterShape = () => ({
+  start: isoDateTime(),
+  end: isoDateTime(),
+  query: z.string().max(SESSIONS_LIST_MAX_SEARCH_LENGTH).optional(),
+  browser: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.browser),
+  os: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
+  country: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
+  entryPage: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
+  // All environments when left out, as in the applications list.
+  environment: z.string().min(1).max(MAX_ENVIRONMENT_LENGTH).optional(),
+  withJsErrors: z.stringbool().optional(),
+  withFailedRequests: z.stringbool().optional(),
+  minDurationMs: durationMs(),
+  maxDurationMs: durationMs(),
+  bounds: geoBounds(),
+});
+
+type SessionsFilterQuery = z.infer<z.ZodObject<ReturnType<typeof sessionsFilterShape>>>;
+
+const isDurationRange = ({
+  minDurationMs,
+  maxDurationMs,
+}: {
+  minDurationMs?: number;
+  maxDurationMs?: number;
+}) => minDurationMs === undefined || maxDurationMs === undefined || minDurationMs < maxDurationMs;
+
+const DURATION_RANGE_ISSUE = {
+  message: '`minDurationMs` must be below `maxDurationMs`',
+  path: ['maxDurationMs'],
+};
+
+/** The facets and filters of the sessions list's query params, as the sessions queries take them. */
+const toSessionsFilters = ({
+  browser,
+  os,
+  country,
+  entryPage,
+  withJsErrors,
+  withFailedRequests,
+  minDurationMs,
+  maxDurationMs,
+  bounds,
+  ...rest
+}: SessionsFilterQuery) => ({
+  ...rest,
+  facets: { browsers: browser, os, countries: country, entryPages: entryPage },
+  filters: { withJsErrors, withFailedRequests, minDurationMs, maxDurationMs, bounds },
+});
+
 const listRoute = createDigitalExperienceServerRoute({
   endpoint: SESSIONS_LIST_ENDPOINT,
   options: { access: 'internal' },
@@ -240,19 +314,7 @@ const listRoute = createDigitalExperienceServerRoute({
       path: z.object({ serviceName: serviceName() }),
       query: z
         .object({
-          start: isoDateTime(),
-          end: isoDateTime(),
-          query: z.string().max(SESSIONS_LIST_MAX_SEARCH_LENGTH).optional(),
-          browser: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.browser),
-          os: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
-          country: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
-          entryPage: facetValue(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
-          // All environments when left out, as in the applications list.
-          environment: z.string().min(1).max(MAX_ENVIRONMENT_LENGTH).optional(),
-          withJsErrors: z.stringbool().optional(),
-          withFailedRequests: z.stringbool().optional(),
-          minDurationMs: durationMs(),
-          maxDurationMs: durationMs(),
+          ...sessionsFilterShape(),
           sortField: z.enum(SESSION_SORT_FIELDS).default('start_time'),
           sortDirection: z.enum(['asc', 'desc']).default('desc'),
           page: z.coerce.number().int().min(0).max(SESSIONS_LIST_MAX_PAGE).default(0),
@@ -263,41 +325,57 @@ const listRoute = createDigitalExperienceServerRoute({
             .max(SESSIONS_LIST_MAX_PER_PAGE)
             .default(SESSIONS_LIST_DEFAULT_PER_PAGE),
         })
-        .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
-          message: '`start` must be before `end`',
-          path: ['end'],
-        })
-        .refine(
-          ({ minDurationMs, maxDurationMs }) =>
-            minDurationMs === undefined ||
-            maxDurationMs === undefined ||
-            minDurationMs < maxDurationMs,
-          { message: '`minDurationMs` must be below `maxDurationMs`', path: ['maxDurationMs'] }
-        ),
+        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE)
+        .refine(isDurationRange, DURATION_RANGE_ISSUE),
     })
   ),
   handler: async ({ context, params, logger }): Promise<SessionListResponse> => {
     const { elasticsearch } = await context.core;
-    const {
-      browser,
-      os,
-      country,
-      entryPage,
-      withJsErrors,
-      withFailedRequests,
-      minDurationMs,
-      maxDurationMs,
-      ...query
-    } = params.query;
+    const { sortField, sortDirection, page, perPage, ...filterQuery } = params.query;
     try {
       return await listSessions(elasticsearch.client.asCurrentUser, {
-        ...query,
+        ...toSessionsFilters(filterQuery),
+        sortField,
+        sortDirection,
+        page,
+        perPage,
         serviceName: params.path.serviceName,
-        facets: { browsers: browser, os, countries: country, entryPages: entryPage },
-        filters: { withJsErrors, withFailedRequests, minDurationMs, maxDurationMs },
       });
     } catch (error) {
       throw toReadError(error, logger, 'the sessions list');
+    }
+  },
+});
+
+const locationsRoute = createDigitalExperienceServerRoute({
+  endpoint: SESSION_LOCATIONS_ENDPOINT,
+  options: { access: 'internal' },
+  security: { authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] } },
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: serviceName() }),
+      query: z
+        .object({
+          ...sessionsFilterShape(),
+          zoom: z.coerce.number().min(0).max(SESSION_MAP_MAX_ZOOM).default(0),
+          viewport: geoBounds(),
+        })
+        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE)
+        .refine(isDurationRange, DURATION_RANGE_ISSUE),
+    })
+  ),
+  handler: async ({ context, params, logger }): Promise<SessionLocationsResponse> => {
+    const { elasticsearch } = await context.core;
+    const { zoom, viewport, ...filterQuery } = params.query;
+    try {
+      return await getSessionLocations(elasticsearch.client.asCurrentUser, {
+        ...toSessionsFilters(filterQuery),
+        zoom,
+        viewport,
+        serviceName: params.path.serviceName,
+      });
+    } catch (error) {
+      throw toReadError(error, logger, 'the session locations');
     }
   },
 });
@@ -331,5 +409,6 @@ export const sessionsRouteRepository = {
   ...statusRoute,
   ...enableRoute,
   ...listRoute,
+  ...locationsRoute,
   ...detailRoute,
 };

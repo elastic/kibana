@@ -10,6 +10,7 @@ import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { NonEmptyString } from '@kbn/io-ts-utils';
 import { inRangeFromStringRt, nonEmptyStringRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import { parseGeoBounds } from '../../common/geo_bounds';
 import {
   SESSION_SORT_FIELDS,
   SESSIONS_LIST_MAX_FACET_LENGTHS,
@@ -117,6 +118,17 @@ export const SESSIONS_PAGE_SIZES = pageSizeRt.types.map(({ value }) => value);
  * The sessions list's state in the URL. The router removes an invalid value (see `routes.tsx`),
  * e.g. an empty filter, a page past the API's last one or a page size the table doesn't offer.
  */
+/** A map area, `west,south,east,north`, as `formatGeoBounds` writes it. */
+const geoBoundsParamRt = t.brand(
+  t.string,
+  (value): value is t.Branded<string, GeoBoundsParamBrand> => parseGeoBounds(value) !== null,
+  'GeoBoundsParam'
+);
+
+export interface GeoBoundsParamBrand {
+  readonly GeoBoundsParam: unique symbol;
+}
+
 export const sessionsListQueryRt = t.partial({
   search: filterValueRt(SESSIONS_LIST_MAX_SEARCH_LENGTH),
   browser: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.browser),
@@ -126,6 +138,8 @@ export const sessionsListQueryRt = t.partial({
   withJsErrors: booleanParamRt,
   withFailedRequests: booleanParamRt,
   duration: durationBucketRt,
+  /** The map area the sessions are from, set from the sessions map. */
+  bounds: geoBoundsParamRt,
   sortField: sortFieldRt,
   sortDirection: t.keyof({ asc: null, desc: null }),
   page: inRangeFromStringRt(0, SESSIONS_LIST_MAX_PAGE).pipe(t.Int),
@@ -143,6 +157,7 @@ const SESSIONS_LIST_QUERY_KEYS = [
   'withJsErrors',
   'withFailedRequests',
   'duration',
+  'bounds',
   'sortField',
   'sortDirection',
   'page',

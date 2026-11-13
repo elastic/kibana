@@ -83,7 +83,7 @@ const summaryOf = (sessionsStartMs: number, index: number) => {
     journey,
     user: { key: user },
     user_agent: userAgent,
-    geo: { country_iso: 'NL', city: 'Amsterdam' },
+    geo: { country_iso: 'NL', city: 'Amsterdam', location: { lat: 52.3676, lon: 4.9041 } },
     search: [
       ...new Set(
         [sessionId(index), user, userAgent.browser, userAgent.os, 'NL', 'Amsterdam', ...journey]

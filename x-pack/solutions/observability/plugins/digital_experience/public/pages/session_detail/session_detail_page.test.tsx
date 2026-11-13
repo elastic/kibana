@@ -9,6 +9,7 @@ import React from 'react';
 import type { ComponentProps } from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
+import { BehaviorSubject } from 'rxjs';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -34,10 +35,18 @@ jest.mock('../../breadcrumbs/use_route_breadcrumb');
 jest.mock('../../hooks/use_kibana_services');
 jest.mock('../../hooks/use_time_range');
 jest.mock('../../hooks/use_digital_experience_router');
+// jsdom lays nothing out: the sessions map gets a size to fit its view to.
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: () => ({ width: 400, height: 800 }),
+}));
 
 const mockFetch = jest.fn();
 const mockDetail = jest.fn();
 const mockList = jest.fn();
+const mockLocations = jest.fn();
+const LOCATIONS_ENDPOINT =
+  'GET /internal/digital_experience/applications/{serviceName}/session_locations';
 const DETAIL_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}';
 jest.mock('@kbn/server-route-repository-client', () => ({
@@ -114,7 +123,12 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     environment: 'production',
     user: 'jane@example.com',
     userAgent: { browser: 'Firefox', browserVersion: '131', os: 'Linux', device: null },
-    geo: { countryIso: 'NL', region: 'North Holland', city: 'Amsterdam' },
+    geo: {
+      countryIso: 'NL',
+      region: 'North Holland',
+      city: 'Amsterdam',
+      location: { lat: 52.3676, lon: 4.9041 },
+    },
     webVitals: { ...emptyWebVitals(), lcp: 1800, cls: 0.3 },
   },
   timeline: [
@@ -216,8 +230,9 @@ function SessionRoute() {
   return <SessionDetailPage serviceName="shop" sessionId={sessionId} />;
 }
 
-const renderPage = () => {
+const renderPage = ({ maps }: { maps?: unknown } = {}) => {
   jest.mocked(useKibanaServices).mockReturnValue({
+    maps,
     notifications: { toasts: { addSuccess: mockAddSuccess } },
     chrome: mockChrome,
     share: {
@@ -274,7 +289,11 @@ beforeEach(() => {
   window.localStorage.clear();
   // The session, and the sessions list beside it.
   mockFetch.mockImplementation((endpoint: string, options: unknown) =>
-    endpoint === DETAIL_ENDPOINT ? mockDetail(endpoint, options) : mockList(endpoint, options)
+    endpoint === DETAIL_ENDPOINT
+      ? mockDetail(endpoint, options)
+      : endpoint === LOCATIONS_ENDPOINT
+      ? mockLocations(endpoint, options)
+      : mockList(endpoint, options)
   );
   mockList.mockResolvedValue({
     sessions: [
@@ -785,5 +804,198 @@ describe('SessionDetailPage', () => {
     fireEvent.click(screen.getByTestId('digitalExperienceSessionRetry'));
 
     expect(await screen.findByTestId('digitalExperienceSessionSummary')).toBeInTheDocument();
+  });
+
+  describe('sessions map', () => {
+    const AMSTERDAM_TILE = { west: 0, south: 48.9225, east: 11.25, north: 55.7765 };
+    const cluster = {
+      key: '5/16/10',
+      location: { lat: 52.3676, lon: 4.9041 },
+      count: 12,
+      bounds: AMSTERDAM_TILE,
+      city: 'Amsterdam',
+      countryIso: 'NL',
+      cityCount: 1,
+    };
+    let mapProps: Record<string, unknown> = {};
+    const mapCenter$ = new BehaviorSubject<{
+      mapCenter?: { lat: number; lon: number; zoom: number };
+    }>({});
+    const maps = {
+      Map: (props: Record<string, unknown>) => {
+        mapProps = props;
+        return <div data-test-subj="mockMap" />;
+      },
+      createLayerDescriptors: {
+        createBasemapLayerDescriptor: jest.fn(async () => ({
+          id: 'basemap',
+          type: 'EMS_VECTOR_TILE',
+        })),
+      },
+    };
+    const layerIdsOf = (props: Record<string, unknown>) =>
+      (props.layerList as Array<{ id: string }>).map(({ id }) => id);
+
+    const showMap = async (history = renderPage({ maps })) => {
+      fireEvent.click(await screen.findByTestId('digitalExperienceSessionsRailView-map'));
+      await screen.findByTestId('mockMap');
+      return history;
+    };
+
+    beforeEach(() => {
+      mapProps = {};
+      mapCenter$.next({});
+      mockDetail.mockResolvedValue(detail());
+      mockLocations.mockResolvedValue({
+        clusters: [cluster],
+        total: 14,
+        located: 12,
+        bounds: { west: 4.9, south: 52.37, east: 4.9, north: 52.37 },
+        center: { lat: 52.37, lon: 4.9 },
+      });
+    });
+
+    it('only shows the list without the Maps plugin', async () => {
+      renderPage();
+      await screen.findByTestId('digitalExperienceSessionsRailItem-abcdef123456');
+      expect(screen.queryByTestId('digitalExperienceSessionsRailView')).not.toBeInTheDocument();
+    });
+
+    it("clusters the list's sessions on a map, fit to them, with the open session ringed", async () => {
+      await showMap();
+
+      expect(mockLocations).toHaveBeenCalledWith(LOCATIONS_ENDPOINT, {
+        signal: expect.any(AbortSignal),
+        params: {
+          path: { serviceName: 'shop' },
+          // The list's filters, without its sort and page.
+          query: {
+            start: expect.any(String),
+            end: expect.any(String),
+            withJsErrors: 'true',
+            zoom: 0,
+          },
+        },
+      });
+      expect(layerIdsOf(mapProps)).toEqual([
+        'basemap',
+        'digitalExperienceSessionClusters',
+        'digitalExperienceSelectedSession',
+      ]);
+      expect(mapProps.mapCenter).toEqual({
+        lat: expect.closeTo(52.37, 2),
+        lon: expect.closeTo(4.9, 2),
+        zoom: 9,
+      });
+      expect(screen.getByTestId('digitalExperienceSessionsMapCounts')).toHaveTextContent(
+        '12 of 14 sessions have a location'
+      );
+      // The map loads its own clusters, not the list.
+      expect(screen.queryByTestId('digitalExperienceSessionsRailTotal')).not.toBeInTheDocument();
+    });
+
+    it('lists the latest sessions of a clicked cluster, and shows all of them in the list', async () => {
+      const history = await showMap();
+      const renderTooltip = (
+        mapProps.getTooltipRenderer as () => (params: unknown) => JSX.Element
+      )();
+      const closeTooltip = jest.fn();
+      const tooltip = render(
+        <I18nProvider>
+          <EuiProvider>
+            {renderTooltip({
+              features: [
+                {
+                  layerId: 'digitalExperienceSessionClusters',
+                  mbProperties: { cluster_key: cluster.key },
+                  actions: [],
+                },
+              ],
+              isLocked: true,
+              closeTooltip,
+            })}
+          </EuiProvider>
+        </I18nProvider>
+      );
+
+      expect(tooltip.getByTestId('digitalExperienceSessionsMapClusterTitle')).toHaveTextContent(
+        'Amsterdam, NL'
+      );
+      expect(
+        await tooltip.findByTestId('digitalExperienceSessionsMapSession-first111')
+      ).toHaveAttribute(
+        'href',
+        `/app/digital_experience/shop/sessions/first111?page=2&${TIME_QUERY}&source=otel&withJsErrors=true`
+      );
+      expect(mockList).toHaveBeenLastCalledWith(
+        'GET /internal/digital_experience/applications/{serviceName}/sessions',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            query: expect.objectContaining({
+              withJsErrors: 'true',
+              bounds: '0,48.9225,11.25,55.7765',
+              perPage: 5,
+            }),
+          }),
+        })
+      );
+
+      fireEvent.click(tooltip.getByTestId('digitalExperienceSessionsMapClusterShowAll'));
+      expect(closeTooltip).toHaveBeenCalled();
+      expect(new URLSearchParams(history.location.search).get('bounds')).toBe(
+        '0,48.9225,11.25,55.7765'
+      );
+      expect(new URLSearchParams(history.location.search).get('page')).toBeNull();
+      expect(await screen.findByTestId('digitalExperienceSessionsRailMapArea')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailClearMapArea'));
+      expect(new URLSearchParams(history.location.search).get('bounds')).toBeNull();
+    });
+
+    it('narrows the list to the map view as the map moves, once asked to', async () => {
+      jest.useFakeTimers({ doNotFake: ['queueMicrotask'] });
+      try {
+        const history = await showMap();
+        act(() => {
+          (mapProps.onApiAvailable as (api: unknown) => void)({ latestState$: mapCenter$ });
+          mapCenter$.next({ mapCenter: { lat: 52.37, lon: 4.9, zoom: 4 } });
+        });
+        act(() => {
+          jest.advanceTimersByTime(500);
+        });
+        // Moving the map alone doesn't filter the list.
+        expect(new URLSearchParams(history.location.search).get('bounds')).toBeNull();
+        await waitFor(() =>
+          expect(mockLocations).toHaveBeenLastCalledWith(
+            LOCATIONS_ENDPOINT,
+            expect.objectContaining({
+              params: expect.objectContaining({
+                query: expect.objectContaining({ zoom: 4, viewport: expect.any(String) }),
+              }),
+            })
+          )
+        );
+
+        fireEvent.click(screen.getByTestId('digitalExperienceSessionsMapSearchAsMoved'));
+        act(() => {
+          jest.advanceTimersByTime(500);
+        });
+        const bounds = new URLSearchParams(history.location.search).get('bounds');
+        expect(bounds).toMatch(/^-?[0-9.]+,-?[0-9.]+,-?[0-9.]+,-?[0-9.]+$/);
+
+        act(() => {
+          mapCenter$.next({ mapCenter: { lat: 48.85, lon: 2.35, zoom: 4 } });
+        });
+        act(() => {
+          jest.advanceTimersByTime(500);
+        });
+        expect(new URLSearchParams(history.location.search).get('bounds')).not.toBe(bounds);
+
+        fireEvent.click(screen.getByTestId('digitalExperienceSessionsMapSearchAsMoved'));
+        expect(new URLSearchParams(history.location.search).get('bounds')).toBeNull();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import {
+  toGeoLocation,
   sessionDocumentId,
   toEsqlRows,
   toSessionDocuments,
@@ -33,6 +34,7 @@ const summaryRow = (overrides: EsqlRow = {}): EsqlRow => ({
   attribute_country_iso: 'ES',
   attribute_region: null,
   attribute_city: 'Madrid',
+  attribute_location: 'POINT (-3.7037999 40.4168001)',
   lcp_p75: 2100.5,
   lcp_samples: 4,
   lcp_good: 2,
@@ -93,7 +95,12 @@ describe('toSessionDocuments', () => {
       environment: 'production',
       user: { key: 'Ana@Example.com' },
       user_agent: { browser: 'Chrome', browser_version: '130', os: 'macOS', device: null },
-      geo: { country_iso: 'ES', region: null, city: 'Madrid' },
+      geo: {
+        country_iso: 'ES',
+        region: null,
+        city: 'Madrid',
+        location: { lat: 40.4168, lon: -3.7038 },
+      },
       web_vitals: { lcp: 2100.5, inp: null, cls: null, fcp: null, ttfb: null },
       web_vital_samples: {
         lcp: { count: 4, good: 2, needs_improvement: 1, poor: 1 },
@@ -162,4 +169,21 @@ describe('sessionDocumentId', () => {
     expect(sessionDocumentId('a', 'session')).not.toBe(sessionDocumentId('b', 'session'));
     expect(sessionDocumentId('a', 'session')).toBe(sessionDocumentId('a', 'session'));
   });
+});
+
+describe('toGeoLocation', () => {
+  it('reads the WKT point that ES|QL turns a geo_point into, rounded to 6 decimals', () => {
+    expect(toGeoLocation('POINT (4.899999992921948 52.3699999647215)')).toEqual({
+      lat: 52.37,
+      lon: 4.9,
+    });
+    expect(toGeoLocation('point(-122.4194 37.7749)')).toEqual({ lat: 37.7749, lon: -122.4194 });
+  });
+
+  it.each([null, '', 'POINT EMPTY', 'LINESTRING (0 0, 1 1)', 'POINT (200 10)', 'POINT (10 95)'])(
+    'has no location for %p',
+    (wkt) => {
+      expect(toGeoLocation(wkt)).toBeNull();
+    }
+  );
 });

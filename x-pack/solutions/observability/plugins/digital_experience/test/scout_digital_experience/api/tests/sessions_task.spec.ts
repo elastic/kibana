@@ -108,6 +108,8 @@ const buildEvents = (sessionId: string, startMs: number) => {
         'user.email': 'jane@example.com',
         'client.geo.country_iso_code': 'NL',
         'client.geo.city_name': 'Amsterdam',
+        // A geo_point, which the summary reads back from ES|QL's WKT.
+        'client.geo.location': { lat: 52.3676, lon: 4.9041 },
       }),
       log(30 * SECOND_MS, 'browser.navigation', { 'url.full': url('/home') }),
     ],
@@ -256,7 +258,12 @@ apiTest.describe(
             environment: ENVIRONMENT,
             user: { key: 'jane@example.com' },
             user_agent: { browser: 'Chrome', browser_version: '130', os: 'macOS', device: null },
-            geo: { country_iso: 'NL', region: null, city: 'Amsterdam' },
+            geo: {
+              country_iso: 'NL',
+              region: null,
+              city: 'Amsterdam',
+              location: { lat: 52.3676, lon: 4.9041 },
+            },
             // A float field stores 0.1 as its nearest float.
             web_vitals: { lcp: 2000, inp: null, cls: Math.fround(0.1), fcp: null, ttfb: null },
             web_vital_samples: {

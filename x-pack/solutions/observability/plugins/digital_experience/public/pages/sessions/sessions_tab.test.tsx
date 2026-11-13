@@ -90,7 +90,7 @@ const session = (overrides: Partial<SessionSummary> = {}): SessionSummary => ({
   environment: 'production',
   user: 'jane@example.com',
   userAgent: { browser: 'Chrome', browserVersion: '130', os: 'macOS', device: null },
-  geo: { countryIso: 'NL', region: null, city: 'Amsterdam' },
+  geo: { countryIso: 'NL', region: null, city: 'Amsterdam', location: null },
   webVitals: emptyWebVitals(),
   ...overrides,
 });

@@ -60,15 +60,23 @@ const fullDocument: SessionDocument = {
   environment: 'production',
   user: { key: 'ana@example.com' },
   user_agent: { browser: 'Chrome', browser_version: '130', os: 'macOS', device: 'desktop' },
-  geo: { country_iso: 'ES', region: 'Madrid', city: 'Madrid' },
+  geo: {
+    country_iso: 'ES',
+    region: 'Madrid',
+    city: 'Madrid',
+    location: { lat: 40.4168, lon: -3.7038 },
+  },
   web_vitals: { lcp: 2100, inp: 120, cls: 0.05, fcp: 900, ttfb: 300 },
   web_vital_samples: { lcp: samples, inp: samples, cls: samples, fcp: samples, ttfb: samples },
   search: ['session-a', 'ana@example.com'],
 };
 
+// A `{ lat, lon }` object is one `geo_point` value, not two fields.
+const isGeoPoint = (value: object) => Object.keys(value).sort().join() === 'lat,lon';
+
 const documentPaths = (value: object, prefix = ''): string[] =>
   Object.entries(value).flatMap(([name, field]) =>
-    field !== null && typeof field === 'object' && !Array.isArray(field)
+    field !== null && typeof field === 'object' && !Array.isArray(field) && !isGeoPoint(field)
       ? documentPaths(field, `${prefix}${name}.`)
       : [`${prefix}${name}`]
   );

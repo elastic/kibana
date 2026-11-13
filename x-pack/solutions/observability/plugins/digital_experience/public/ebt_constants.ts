@@ -46,6 +46,10 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   TOGGLE_SESSIONS_LIST: 'toggleSessionsList',
   /** The user moves to another page of a list. */
   CHANGE_PAGE: 'changePage',
+  /** The user closes details they opened, e.g. a cluster of the sessions map. */
+  CLOSE_DETAILS: 'closeDetails',
+  /** The user switches the sessions beside a session between the list and the map. */
+  SWITCH_SESSIONS_VIEW: 'switchSessionsView',
 } as const;
 
 /*
@@ -127,5 +131,12 @@ export const SESSIONS_EBT_ELEMENTS = {
   RAIL_HIDE: 'sessionsRailHide',
   RAIL_EDIT_FILTERS: 'sessionsRailEditFilters',
   RAIL_PAGE: 'sessionsRailPage',
+  RAIL_VIEW: 'sessionsRailView',
+  MAP_AREA_FILTER: 'sessionsMapAreaFilter',
+  MAP_SEARCH_AS_MOVED: 'sessionsMapSearchAsMoved',
+  MAP_CLUSTER_SESSION: 'sessionsMapClusterSession',
+  MAP_CLUSTER_SHOW_ALL: 'sessionsMapClusterShowAll',
+  MAP_CLUSTER_CLOSE: 'sessionsMapClusterClose',
+  MAP_CLEAR_AREA: 'sessionsMapClearArea',
   TRACE_LINK: 'sessionTraceLink',
 } as const;

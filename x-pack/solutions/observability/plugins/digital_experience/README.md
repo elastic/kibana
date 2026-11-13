@@ -183,7 +183,9 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
   views per session and bounce rate, over the listed sessions, so they follow the search and filters.
 - **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **JS errors**,
   **Failed requests**, duration ranges, and browser, OS, country and entry page facets with their
-  counts. The environment picked in the app filters the sessions too.
+  counts. The environment picked in the app filters the sessions too. A **Map area** filter, set
+  from the sessions map beside a session (`bounds=west,south,east,north`), shows with a button to
+  clear it.
 - **Table:** start time, user with browser and OS, journey (entry → number of pages in between →
   exit), duration, page views, clicks, JS errors and failed requests; sortable and paged on the
   server. A column selector, kept in local storage, adds environment, location, entry and exit page,
@@ -202,6 +204,16 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
   the page and a marker per error. Selecting a segment scrolls to that visit.
 - **Page journey:** a card per page visit with its time, share of the session, clicks, errors and web
   vitals, and its page views, clicks, errors and web vitals in order. Spans and logs are left out.
+- **Sessions beside it:** the list's sessions, with its search, filters, sort and page, on the left
+  or the right, or hidden. A **List** / **Map** switch (kept in local storage, and only there when
+  the Maps plugin is enabled) shows them on a map instead: the Maps plugin's `Map` component with
+  its basemap, and the sessions clustered by the server into bubbles that grow with their count.
+  Sessions from one city share its coordinates, as GeoIP resolves an address to a city, so a bubble
+  holds a city's sessions, or those of nearby cities until the user zooms in. The map opens on the
+  sessions, and the open session's location is ringed. Clicking a bubble lists its 5 latest
+  sessions to open, and **Show all in the list** narrows the list to the bubble's area. **Search as
+  I move the map** narrows the list to the area the map shows, as it moves (`bounds` in the URL);
+  sessions without a location are then left out, and the map says how many have none.
 - **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
 
 ## Sessions
@@ -210,7 +222,12 @@ A Task Manager task (`digital_experience:sessions-summaries`, every minute) summ
 sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-<version>` with
 ES|QL, one document per `service.name` + `session.id`: start/end time and duration, page views with
 entry/exit page and journey, page loads, clicks, JS errors, HTTP requests and failed requests, p75
-Core Web Vitals with their samples by rating, and environment, user, browser, OS and geo attributes.
+Core Web Vitals with their samples by rating, and environment, user, browser, OS and geo attributes,
+with the location as a `geo_point` for the sessions map. Geo comes from GeoIP: `client.geo.*`, as
+an Elasticsearch GeoIP ingest processor writes it, else `geo.*`, as the Collector's GeoIP processor
+writes it on the resource from `client.address`; the Elasticsearch exporter merges its
+`geo.location.lat` and `geo.location.lon` into `geo.location`, which the OTel index templates map
+as a `geo_point`. ES|QL reads it as WKT, `POINT (lon lat)`.
 Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and it
 skips events with an empty `service.name` or `session.id`.
 
@@ -367,7 +384,13 @@ logged and answer 500 without Elasticsearch details:
   OS, country, entry page), the `environment`, `withJsErrors`, `withFailedRequests` and
   `minDurationMs` / `maxDurationMs` filters, sorting, pagination, KPIs, and how many days sessions
   are kept (`retentionDays`). Facets count their values without their own selection; the other
-  filters narrow every count.
+  filters narrow every count, and so does `bounds`, the map area (`west,south,east,north`).
+- `GET /internal/digital_experience/applications/{serviceName}/session_locations`: the sessions the
+  list's filters match, clustered with a `geotile_grid` 3 zoom levels finer than the map's `zoom`
+  (8 × 8 bubbles a map tile), in the map's `viewport`, with each cluster's centroid, count, tile and
+  city or country when its sessions share one, how many sessions match and how many have a
+  location, and the area they span. It is not under `sessions/`, where a path segment is a session
+  ID.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}`: summary,
   event timeline, per-page journey, and web vitals. The raw events are read from just before the
   session's start up to the longest a session lasts, with only the fields the timeline shows.

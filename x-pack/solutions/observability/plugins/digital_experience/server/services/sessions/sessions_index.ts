@@ -9,6 +9,7 @@ import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vitals';
+import type { GeoLocation } from '../../../common/sessions';
 import {
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
@@ -64,7 +65,13 @@ export interface SessionDocument {
     os: string | null;
     device: string | null;
   };
-  geo: { country_iso: string | null; region: string | null; city: string | null };
+  geo: {
+    country_iso: string | null;
+    region: string | null;
+    city: string | null;
+    /** Where the session's latest event with a location came from: a city, as GeoIP resolves it. */
+    location: GeoLocation | null;
+  };
   /** The p75 of each vital's samples in the session. */
   web_vitals: Record<CoreWebVital, number | null>;
   /** The samples of each vital by rating, which add up across sessions, unlike the p75. */
@@ -101,7 +108,14 @@ export const sessionsIndexMappings = {
     user_agent: {
       properties: { browser: keyword, browser_version: keyword, os: keyword, device: keyword },
     },
-    geo: { properties: { country_iso: keyword, region: keyword, city: keyword } },
+    geo: {
+      properties: {
+        country_iso: keyword,
+        region: keyword,
+        city: keyword,
+        location: { type: 'geo_point' },
+      },
+    },
     web_vitals: {
       properties: Object.fromEntries(
         CORE_WEB_VITALS.map((name) => [name, { type: 'double' as const }])

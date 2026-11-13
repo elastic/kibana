@@ -12,10 +12,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vitals';
+import type { GeoBounds } from '../../../common/geo_bounds';
 import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_LOOKBACK_DAYS,
   emptyWebVitals,
+  type GeoLocation,
   type SessionListFacets,
   type SessionListResponse,
   type SessionSortField,
@@ -55,6 +57,8 @@ export interface SessionListFilters {
   minDurationMs?: number;
   /** Exclusive upper bound of the session duration. */
   maxDurationMs?: number;
+  /** The map area the sessions are from: sessions without a location don't match. */
+  bounds?: GeoBounds;
 }
 
 export interface ListSessionsParams {
@@ -102,7 +106,7 @@ export const sessionScopeFilters = ({
 ];
 
 /** Sessions with the search term anywhere in their id, user, user agent, geo or pages. */
-const searchFilter = (query: string | undefined): QueryDslQueryContainer[] => {
+export const searchFilter = (query: string | undefined): QueryDslQueryContainer[] => {
   const term = query?.trim().toLowerCase();
   return term ? [{ wildcard: { search: { value: `*${escapeWildcard(term)}*` } } }] : [];
 };
@@ -119,12 +123,26 @@ const atLeastOne = (field: string): QueryDslQueryContainer => ({ range: { [field
 const WITH_JS_ERRORS = atLeastOne('js_error_count');
 const WITH_FAILED_REQUESTS = atLeastOne('http_failed_request_count');
 
+export const SESSION_LOCATION_FIELD = 'geo.location';
+
+/** Sessions located in `bounds`; `west` past `east` crosses the antimeridian. */
+export const boundsFilter = ({ west, south, east, north }: GeoBounds): QueryDslQueryContainer => ({
+  geo_bounding_box: {
+    [SESSION_LOCATION_FIELD]: {
+      top_left: { lat: north, lon: west },
+      bottom_right: { lat: south, lon: east },
+    },
+  },
+});
+
 const sessionFilters = ({
   withJsErrors,
   withFailedRequests,
   minDurationMs,
   maxDurationMs,
+  bounds,
 }: SessionListFilters = {}): QueryDslQueryContainer[] => [
+  ...(bounds ? [boundsFilter(bounds)] : []),
   ...(withJsErrors ? [WITH_JS_ERRORS] : []),
   ...(withFailedRequests ? [WITH_FAILED_REQUESTS] : []),
   ...(minDurationMs !== undefined || maxDurationMs !== undefined
@@ -142,7 +160,7 @@ const sessionFilters = ({
 ];
 
 /** The listed sessions: selected filters and facets. */
-const listedFilter = (
+export const listedFilter = (
   { facets, filters }: Pick<ListSessionsParams, 'facets' | 'filters'>,
   exclude?: FacetName
 ): QueryDslQueryContainer => ({
@@ -200,6 +218,15 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
   };
 };
 
+/** A location as the summaries task writes it, `{ lat, lon }`. */
+const geoLocationOrNull = (value: unknown): GeoLocation | null => {
+  if (typeof value !== 'object' || value === null) {
+    return null;
+  }
+  const { lat, lon } = value as Partial<Record<'lat' | 'lon', unknown>>;
+  return typeof lat === 'number' && typeof lon === 'number' ? { lat, lon } : null;
+};
+
 export const toSessionSummary = (doc: StoredSessionDocument): SessionSummary => {
   const webVitals = emptyWebVitals();
   for (const vital of CORE_WEB_VITALS) {
@@ -235,6 +262,7 @@ export const toSessionSummary = (doc: StoredSessionDocument): SessionSummary => 
       countryIso: stringOrNull(doc.geo?.country_iso),
       region: stringOrNull(doc.geo?.region),
       city: stringOrNull(doc.geo?.city),
+      location: geoLocationOrNull(doc.geo?.location),
     },
     webVitals,
   };

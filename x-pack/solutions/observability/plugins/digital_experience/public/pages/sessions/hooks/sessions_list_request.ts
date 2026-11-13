@@ -43,6 +43,7 @@ export const sessionsListRequestQuery = ({
       withFailedRequests: state.withFailedRequests ? 'true' : undefined,
       minDurationMs: duration?.minDurationMs,
       maxDurationMs: duration?.maxDurationMs,
+      bounds: state.bounds,
       sortField: state.sortField,
       sortDirection: state.sortDirection,
       page: state.page,

@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import type { estypes } from '@elastic/elasticsearch';
 import { CORE_WEB_VITAL, type CoreWebVital } from '../../../common/core_web_vitals';
-import { SESSIONS_JOURNEY_SIZE, toPagePath } from '../../../common/sessions';
+import { SESSIONS_JOURNEY_SIZE, toPagePath, type GeoLocation } from '../../../common/sessions';
 import type { SessionAttribute } from '../../../common/session_attribute_fields';
 import type { SessionDocument, WebVitalSamples } from './sessions_index';
 import { attributeColumn } from './summary_queries';
@@ -35,6 +35,25 @@ const asStrings = (value: EsqlRow[string] | undefined): string[] =>
 
 const attributeOf = (row: EsqlRow, attribute: SessionAttribute): string | null =>
   asString(row[attributeColumn(attribute)]);
+
+const WKT_POINT = /^POINT\s*\(\s*(-?[0-9.eE+-]+)\s+(-?[0-9.eE+-]+)\s*\)$/i;
+
+/**
+ * A location from the WKT that ES|QL turns a `geo_point` into, `POINT (lon lat)`; null when it isn't
+ * one or is out of range.
+ */
+export const toGeoLocation = (wkt: string | null): GeoLocation | null => {
+  const match = wkt ? WKT_POINT.exec(wkt.trim()) : null;
+  if (!match) {
+    return null;
+  }
+  const lon = Number(match[1]);
+  const lat = Number(match[2]);
+  // A `geo_point` is stored with about 1 cm of precision, which reads back as e.g. 4.899999992921948.
+  return Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180
+    ? { lat: Number(lat.toFixed(6)), lon: Number(lon.toFixed(6)) }
+    : null;
+};
 
 /** Pages without repeats, from page URLs the summary query returns in first-view order. */
 const toJourney = (urls: string[]): string[] =>
@@ -126,7 +145,12 @@ export const toSessionDocuments = (rows: EsqlRow[]): SessionDocument[] =>
           os,
           device: attributeOf(row, 'device'),
         },
-        geo: { country_iso: countryIso, region: attributeOf(row, 'region'), city },
+        geo: {
+          country_iso: countryIso,
+          region: attributeOf(row, 'region'),
+          city,
+          location: toGeoLocation(attributeOf(row, 'location')),
+        },
         web_vitals: byVital((vital) => asNumberOrNull(row[`${vital}_p75`])),
         web_vital_samples: byVital((vital) => toWebVitalSamples(row, vital)),
         search: searchValues([

@@ -515,6 +515,7 @@ export function SessionDetailPage({
           side={railSide}
           onHide={() => setRailPlacement('hidden')}
           headerHeight={headerHeight || undefined}
+          selectedLocation={detail?.session.geo.location ?? null}
         />
       }
     >

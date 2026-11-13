@@ -6,6 +6,7 @@
  */
 
 import type { CoreWebVital } from './core_web_vitals';
+import type { GeoBounds } from './geo_bounds';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
 
 /**
@@ -63,6 +64,8 @@ export const SESSIONS_LIST_MAX_PAGE = 1000;
 /** A week; longer sessions only match a lower bound. */
 export const SESSIONS_LIST_MAX_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 export const SESSIONS_LIST_MAX_SEARCH_LENGTH = 256;
+/** The deepest zoom level of the sessions map. */
+export const SESSION_MAP_MAX_ZOOM = 24;
 /** The longest value of each facet filter. */
 export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
   browser: 256,
@@ -139,10 +142,16 @@ export interface SessionUserAgent {
   device: string | null;
 }
 
+export interface GeoLocation {
+  lat: number;
+  lon: number;
+}
+
 export interface SessionGeo {
   countryIso: string | null;
   region: string | null;
   city: string | null;
+  location: GeoLocation | null;
 }
 
 export interface SessionSummary {
@@ -190,6 +199,34 @@ export interface SessionListKpis {
   sessionsWithJsErrors: number;
   sessionsWithFailedRequests: number;
   webVitals: SessionWebVitals;
+}
+
+/** Sessions of one map tile, which the map draws as one bubble. */
+export interface SessionLocationCluster {
+  /** The `geotile_grid` key of the tile, `zoom/x/y`. */
+  key: string;
+  /** Where its sessions are on average. */
+  location: GeoLocation;
+  count: number;
+  /** The area of the tile, which the list narrows to in order to show the cluster's sessions. */
+  bounds: GeoBounds;
+  /** The city and country of all its sessions, when they share one. */
+  city: string | null;
+  countryIso: string | null;
+  /** How many cities its sessions are from, approximately. */
+  cityCount: number;
+}
+
+export interface SessionLocationsResponse {
+  clusters: SessionLocationCluster[];
+  /** The sessions that match, with a location or not. */
+  total: number;
+  /** The sessions that match and have a location. */
+  located: number;
+  /** The area all the located sessions span, wherever the map is. */
+  bounds: GeoBounds | null;
+  /** Where the located sessions are on average, wherever the map is. */
+  center: GeoLocation | null;
 }
 
 export interface SessionListResponse {

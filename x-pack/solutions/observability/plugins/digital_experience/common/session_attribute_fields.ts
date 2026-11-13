@@ -51,12 +51,34 @@ export const SESSION_ATTRIBUTE_FIELDS = {
     'attributes.device.model.name',
     'resource.attributes.device.type',
   ],
+  // `client.geo.*` is what an Elasticsearch GeoIP ingest processor writes; `geo.*` is what the
+  // Collector's GeoIP processor writes, on the resource by default, from `client.address`.
   countryIso: [
     'attributes.client.geo.country_iso_code',
     'resource.attributes.client.geo.country_iso_code',
+    'resource.attributes.geo.country.iso_code',
+    'attributes.geo.country.iso_code',
   ],
-  region: ['attributes.client.geo.region_name', 'resource.attributes.client.geo.region_name'],
-  city: ['attributes.client.geo.city_name', 'resource.attributes.client.geo.city_name'],
+  region: [
+    'attributes.client.geo.region_name',
+    'resource.attributes.client.geo.region_name',
+    'resource.attributes.geo.region_name',
+    'attributes.geo.region_name',
+  ],
+  city: [
+    'attributes.client.geo.city_name',
+    'resource.attributes.client.geo.city_name',
+    'resource.attributes.geo.city_name',
+    'attributes.geo.city_name',
+  ],
+  // A `geo_point`: the OTel index templates map any `*.geo.location` as one, and the Elasticsearch
+  // exporter merges the Collector's `geo.location.lat` and `geo.location.lon` into it.
+  location: [
+    'attributes.client.geo.location',
+    'resource.attributes.client.geo.location',
+    'resource.attributes.geo.location',
+    'attributes.geo.location',
+  ],
 } as const;
 
 export type SessionAttribute = keyof typeof SESSION_ATTRIBUTE_FIELDS;

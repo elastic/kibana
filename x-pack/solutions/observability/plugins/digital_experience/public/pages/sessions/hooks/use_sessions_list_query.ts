@@ -21,6 +21,7 @@ const FILTER_KEYS = [
   'withJsErrors',
   'withFailedRequests',
   'duration',
+  'bounds',
 ] as const satisfies ReadonlyArray<keyof SessionsListUrlQuery>;
 
 export interface SessionsListState {
@@ -32,6 +33,8 @@ export interface SessionsListState {
   withJsErrors: boolean;
   withFailedRequests: boolean;
   duration?: DurationBucket;
+  /** The map area the sessions are from, as the `bounds` param. */
+  bounds?: string;
   sortField: SessionSortField;
   sortDirection: 'asc' | 'desc';
   page: number;
@@ -48,6 +51,7 @@ export const sessionsListStateOf = (query: SessionsListUrlQuery): SessionsListSt
   withJsErrors: query.withJsErrors ?? false,
   withFailedRequests: query.withFailedRequests ?? false,
   duration: query.duration,
+  bounds: query.bounds,
   sortField: query.sortField ?? 'start_time',
   sortDirection: query.sortDirection ?? 'desc',
   page: query.page ?? 0,

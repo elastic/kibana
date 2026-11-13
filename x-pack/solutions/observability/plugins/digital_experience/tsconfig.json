@@ -32,6 +32,7 @@
     "@kbn/i18n-react",
     "@kbn/io-ts-utils",
     "@kbn/kibana-react-plugin",
+    "@kbn/maps-plugin",
     "@kbn/observability-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/react-hooks",

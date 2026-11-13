@@ -74,7 +74,7 @@ export const SESSION_ATTRIBUTE_GROUPS = {
   environment: ['environment'],
   user: ['user'],
   user_agent: ['browser', 'browserVersion', 'os', 'device'],
-  geo: ['countryIso', 'region', 'city'],
+  geo: ['countryIso', 'region', 'city', 'location'],
 } as const satisfies Record<string, readonly SessionAttribute[]>;
 
 /** The browser SDK events with a session and an application, from `?from` up to `?to`. */
