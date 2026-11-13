@@ -11,24 +11,15 @@ import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
-  HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { TestProviders } from '../../../../common/mock';
 import { useGetAgentStatus } from '../../../../management/hooks/agents/use_get_agent_status';
-import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPreviewPanelKey } from '../../../../flyout/entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from './host_entity_overview';
-import { UserPreviewPanelKey } from '../../../../flyout/entity_details/user_right';
-import { USER_PREVIEW_BANNER } from './user_entity_overview';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');
-
-jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockOpenSystemFlyout = jest.fn();
@@ -53,92 +44,22 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 
-const SCOPE_ID = 'scopeId';
-
-const renderHighlightedFieldsCell = (values: string[], field: string, showPreview = false) =>
+const renderHighlightedFieldsCell = (values: string[], field: string) =>
   render(
     <TestProviders>
-      <HighlightedFieldsCell
-        values={values}
-        field={field}
-        scopeId={SCOPE_ID}
-        showPreview={showPreview}
-      />
+      <HighlightedFieldsCell values={values} field={field} />
     </TestProviders>
   );
 
 describe('<HighlightedFieldsCell />', () => {
-  beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render a basic cell', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['value'], 'field', true);
+    const { getByTestId } = renderHighlightedFieldsCell(['value'], 'field');
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should open host preview when click on host', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['test host'], 'host.name', true);
-    expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
-
-    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: HostPreviewPanelKey,
-      params: {
-        contextID: SCOPE_ID,
-        hostName: 'test host',
-        scopeId: SCOPE_ID,
-        banner: HOST_PREVIEW_BANNER,
-        entityId: undefined,
-      },
-    });
-  });
-
-  it('should pass entityId to host preview when provided (document identity / entity resolution)', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <HighlightedFieldsCell
-          values={['test host']}
-          field="host.name"
-          scopeId={SCOPE_ID}
-          showPreview
-          entityId="euid-from-highlighted-fields"
-        />
-      </TestProviders>
-    );
-    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: HostPreviewPanelKey,
-      params: {
-        contextID: SCOPE_ID,
-        hostName: 'test host',
-        scopeId: SCOPE_ID,
-        banner: HOST_PREVIEW_BANNER,
-        entityId: 'euid-from-highlighted-fields',
-      },
-    });
-  });
-
-  it('should open user preview when click on user', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['test user'], 'user.name', true);
-    expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
-
-    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: UserPreviewPanelKey,
-      params: {
-        contextID: SCOPE_ID,
-        userName: 'test user',
-        scopeId: SCOPE_ID,
-        banner: USER_PREVIEW_BANNER,
-        entityId: undefined,
-      },
-    });
   });
 
   it('should open network details flyout when click on ip with renderFlyoutLink', () => {
@@ -147,7 +68,6 @@ describe('<HighlightedFieldsCell />', () => {
         <HighlightedFieldsCell
           values={['100:XXX:XXX']}
           field="source.ip"
-          scopeId={SCOPE_ID}
           renderFlyoutLink={OpenFlyoutLink}
         />
       </TestProviders>
@@ -164,7 +84,7 @@ describe('<HighlightedFieldsCell />', () => {
     });
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={['value']} field={'agent.status'} scopeId={SCOPE_ID} />
+        <HighlightedFieldsCell values={['value']} field={'agent.status'} />
       </TestProviders>
     );
 
@@ -183,7 +103,6 @@ describe('<HighlightedFieldsCell />', () => {
           values={['value']}
           field={'agent.status'}
           originalField="observer.serial_number"
-          scopeId={SCOPE_ID}
         />
       </TestProviders>
     );
@@ -203,7 +122,6 @@ describe('<HighlightedFieldsCell />', () => {
           values={['value']}
           field={'agent.status'}
           originalField="crowdstrike.event.DeviceId"
-          scopeId={SCOPE_ID}
         />
       </TestProviders>
     );
@@ -214,7 +132,7 @@ describe('<HighlightedFieldsCell />', () => {
   it('should not render if values is null', () => {
     const { container } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={null} field={'field'} scopeId={SCOPE_ID} />
+        <HighlightedFieldsCell values={null} field={'field'} />
       </TestProviders>
     );
 
@@ -225,7 +143,7 @@ describe('<HighlightedFieldsCell />', () => {
     const values = new Array(5).fill(null).map((_, i) => i.toString());
     const { container } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={values} field={'field'} scopeId={SCOPE_ID} />
+        <HighlightedFieldsCell values={values} field={'field'} />
       </TestProviders>
     );
 
