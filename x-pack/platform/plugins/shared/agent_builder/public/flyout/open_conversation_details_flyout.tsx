@@ -8,7 +8,7 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator } from '@elastic/eui';
+import { getFlyoutManagerStore, htmlIdGenerator } from '@elastic/eui';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
@@ -28,6 +28,27 @@ const notFoundMessage = (conversationId: string) =>
   });
 
 const generateTitleId = htmlIdGenerator('agentBuilderConversationDetailsFlyoutTitle');
+const generateFlyoutId = htmlIdGenerator('agentBuilderConversationDetailsFlyout');
+
+/**
+ * Drops the flyouts stacked on this one in its history group, bringing it back to the front (same
+ * as picking it in the flyout Back history). EUI closes only a flyout's own session when it is not
+ * the current one, which would leave the stacked flyouts open with nothing to go back to.
+ */
+const surfaceOwnSession = (flyoutId: string): void => {
+  const store = getFlyoutManagerStore();
+  const { sessions } = store.getState();
+  const ownIndex = sessions.findIndex(({ mainFlyoutId }) => mainFlyoutId === flyoutId);
+  if (ownIndex === -1) {
+    return;
+  }
+  const hasNewerSessionInGroup = sessions
+    .slice(ownIndex + 1)
+    .some(({ historyKey }) => historyKey === CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY);
+  if (hasNewerSessionInGroup) {
+    store.goToFlyout(flyoutId, 'main');
+  }
+};
 
 export interface OpenConversationDetailsFlyoutOptions {
   core: CoreStart;
@@ -49,6 +70,7 @@ export const openConversationDetailsFlyout = async ({
   trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
+  const flyoutId = generateFlyoutId();
   const queryClient = new QueryClient();
 
   const onNotFound = () => {
@@ -68,6 +90,7 @@ export const openConversationDetailsFlyout = async ({
       />
     </QueryClientProvider>,
     {
+      id: flyoutId,
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       title: FLYOUT_TITLE,
@@ -88,5 +111,8 @@ export const openConversationDetailsFlyout = async ({
     onClose?.();
   });
 
-  return () => flyoutRef.close();
+  return () => {
+    surfaceOwnSession(flyoutId);
+    flyoutRef.close();
+  };
 };
