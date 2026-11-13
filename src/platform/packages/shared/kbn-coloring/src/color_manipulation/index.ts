@@ -9,22 +9,6 @@
 
 import chroma from 'chroma-js';
 
-// Mirrors EUI's `isColorDark` (WCAG relative luminance <= 0.179), inlined to avoid
-// loading `@elastic/eui` from server-side code paths.
-const isColorDark = (red: number, green: number, blue: number): boolean => {
-  const [r, g, b] = [red, green, blue]
-    .map((c) => c / 255.0)
-    .map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return luminance <= 0.179;
-};
-
-export const enforceColorContrast = (color: string, backgroundColor: string) => {
-  const finalColor =
-    chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
-  return isColorDark(...finalColor.rgb());
-};
-
 export function isValidColor(colorString?: string) {
   // chroma can handle also hex values with alpha channel/transparency
   // chroma accepts also hex without #, so test for it
