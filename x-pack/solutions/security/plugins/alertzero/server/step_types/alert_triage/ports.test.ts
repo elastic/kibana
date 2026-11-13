@@ -689,22 +689,15 @@ describe('fetchDecisionCandidates', () => {
     expect(JSON.stringify(filter)).not.toContain('acknowledged');
   });
 
-  it('leaves out an alert a decision closed even in on mode, so a reopened alert stays open', async () => {
-    const callKibanaApi = jest
-      .fn()
-      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+  it('leaves out an alert a decision closed, so a reopened alert stays open', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
 
-    await fetchDecisionCandidates(
-      { callKibanaApi },
-      'alert_analysis:',
-      Date.parse('2026-10-12'),
-      NO_FILTERS,
-      { includeTaggedByShadow: true }
-    );
+    await fetch();
 
-    const mustNot = JSON.stringify(callKibanaApi.mock.calls[0][0].body.query.bool.must_not);
-    expect(mustNot).toContain('az:closed_by_decision:');
-    expect(mustNot).not.toContain('az:would_close:');
+    const { must_not: mustNot } = callKibanaApi.mock.calls[0][0].body.query.bool;
+    expect(mustNot).toContainEqual({
+      prefix: { 'kibana.alert.workflow_tags': 'az:closed_by_decision:' },
+    });
   });
 });
 

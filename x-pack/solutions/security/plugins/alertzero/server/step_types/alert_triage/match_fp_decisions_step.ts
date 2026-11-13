@@ -379,7 +379,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
               input.analysis_tag_prefix,
               now - input.lookback_hours * HOUR_MS,
               filters,
-              { after, includeTaggedByShadow: mode === 'on' }
+              { after }
             );
             const hashes = hashCandidates(found.candidates, input.space_id);
             const decisionsByHash = await readDecisions({
