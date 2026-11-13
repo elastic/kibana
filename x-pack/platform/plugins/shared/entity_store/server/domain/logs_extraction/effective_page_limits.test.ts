@@ -9,6 +9,7 @@ import {
   capAtMaxLogsPerWindow,
   LOG_EXTRACTION_SAMPLE_MIN_RETAINED,
   pickSampleProbability,
+  scaleMaxLogsPerPageForRate,
 } from './effective_page_limits';
 
 describe('capAtMaxLogsPerWindow', () => {
@@ -22,6 +23,50 @@ describe('capAtMaxLogsPerWindow', () => {
 
   it('leaves value unchanged when maxLogsPerWindow is 0 (disabled)', () => {
     expect(capAtMaxLogsPerWindow(50000, 0)).toBe(50000);
+  });
+});
+
+describe('scaleMaxLogsPerPageForRate', () => {
+  // Defaults: maxLogsPerPage 50_000, maxLogsPerWindow 100_000.
+  it('scales the raw target by 1/rate so the slice retains about maxLogsPerPage rows', () => {
+    expect(scaleMaxLogsPerPageForRate(50000, 100000, 0.1)).toBe(500000);
+    expect(scaleMaxLogsPerPageForRate(50000, 100000, 0.4)).toBe(125000);
+    expect(scaleMaxLogsPerPageForRate(50000, 100000, 0.8)).toBe(62500);
+  });
+
+  it('converts the window cap to the same raw denomination instead of clamping the scaled target', () => {
+    // The second assertion is what the first one avoids: clamping against the unconverted
+    // retained-row budget would scale the target up and then straight back down.
+    expect(scaleMaxLogsPerPageForRate(50000, 100000, 0.1)).toBe(500000);
+    expect(capAtMaxLogsPerWindow(500000, 100000)).toBe(100000);
+  });
+
+  it('still clamps when the scaled target exceeds the converted budget', () => {
+    // Budget 10_000 retained = 100_000 raw at rate 0.1, below the 500_000 scaled target.
+    expect(scaleMaxLogsPerPageForRate(50000, 10000, 0.1)).toBe(100000);
+  });
+
+  it('leaves the limit unscaled when the window cap is disabled', () => {
+    expect(scaleMaxLogsPerPageForRate(50000, 0, 0.1)).toBe(500000);
+  });
+
+  it('is a no-op at rate 1, where no SAMPLE stage is emitted', () => {
+    expect(scaleMaxLogsPerPageForRate(50000, 100000, 1)).toBe(capAtMaxLogsPerWindow(50000, 100000));
+  });
+
+  it('falls back to the unscaled limit for rates that are not a real fraction', () => {
+    // A caller passing one of these has a bug, but the safe response is today's behaviour
+    // rather than an Infinity or NaN page size reaching the probe.
+    for (const rate of [0, -0.5, 1.5, NaN]) {
+      expect(scaleMaxLogsPerPageForRate(50000, 100000, rate)).toBe(
+        capAtMaxLogsPerWindow(50000, 100000)
+      );
+    }
+  });
+
+  it('rounds to whole documents, since the result becomes an ES|QL LIMIT', () => {
+    expect(Number.isInteger(scaleMaxLogsPerPageForRate(50000, 0, 0.3))).toBe(true);
+    expect(scaleMaxLogsPerPageForRate(50000, 0, 0.3)).toBe(166667);
   });
 });
 

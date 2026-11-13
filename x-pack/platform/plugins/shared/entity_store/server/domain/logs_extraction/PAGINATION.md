@@ -4,7 +4,7 @@ Three nested loops process raw log documents into aggregated entity rows.
 
 **Window cap outer loop**: When the gap between `fromDateISO` and the effective window end (`now - delay`) exceeds `maxTimeWindowSize + GRACE_PERIOD` (default `15m + 30s`), the run processes the time range as a sequence of capped `[fromSub, toSub]` sub-windows of width `maxTimeWindowSize`, advancing within a single execution until the effective end is reached. Sub-windows are an in-memory iteration concept — the saved-object schema is unaware of them. Crash recovery uses the per-slice persistence emitted by the inner outer-loop (last `checkpointTimestamp` written).  Manual `specificWindow` / `windowOverride` runs bypass capping and run as a single pass.
 
-**Outer loop — log slices**: Each iteration runs a **boundary probe** (`buildLogPaginationCursorProbeEsql`) to locate the inclusive end of the next raw-log slice. The probe samples the logs (`SAMPLE p`), sorts by `@timestamp ASC`, limits to the scaled page size `round(maxLogsPerPage × p)`, then aggregates `MAX(@timestamp)` and `COUNT(*)`. `p` comes from `pickSampleProbability`: `0.1` by default, raised up to `1` (no `SAMPLE` stage) when `maxLogsPerPage` is too small to keep 2500 sampled rows. A page below the scaled limit signals the last slice; a saturated page means more slices may follow. The last slice always ends at `toDateISO`, not at the probe's `MAX(@timestamp)`, so logs the sampled probe missed at the tail are still extracted.
+**Outer loop — log slices**: Each iteration runs a **boundary probe** (`buildLogPaginationCursorProbeEsql`) to locate the inclusive end of the next raw-log slice. The probe samples the logs (`SAMPLE p`), sorts by `@timestamp ASC`, limits to the scaled page size `round(maxLogsPerPage × p)`, then aggregates `MAX(@timestamp)` and `COUNT(*)`. `p` comes from `pickSampleProbability`: `0.1` by default, raised up to `1` (no `SAMPLE` stage) when `maxLogsPerPage` is too small to keep 2500 sampled rows. A page below the scaled limit signals the last slice; a saturated page means more slices may follow. When extraction sampling is active the page size is scaled by the rate and the first slice is probed twice, see [Slice scaling](#slice-scaling). The last slice always ends at `toDateISO`, not at the probe's `MAX(@timestamp)`, so logs the sampled probe missed at the tail are still extracted.
 
 **Inner loop — entity pages**: Each log slice is processed via `buildLogsExtractionEsqlQuery`. Results are paginated by entity id only (`SORT entity.EngineMetadata.UntypedId ASC`, then `WHERE id > paginationId` on later pages), up to `docsLimit` entities per query. The id is derived only from identity fields, so the order does not change when the query samples.
 
@@ -212,6 +212,8 @@ A crash *between* sub-windows is indistinguishable from a crash at a slice bound
 
 When a manual window is supplied (admin-triggered API call), the sub-window cap is bypassed and the supplied bounds are processed in a single pass via the existing slice/entity loops. State is not advanced — the user explicitly picked the bounds, and we do not silently shorten or shift them.
 
+Mid-slice recovery state is also ignored. It describes a slice of whichever window the scheduled run was working through, so resuming into it would extract those bounds instead of the ones the caller asked for. A manual run starts from its own `fromDateISO` and resolves its own sampling rate.
+
 ### Timestamp collision at a slice boundary
 
 The log-slice cursor is timestamp-only (`@timestamp >= T`). Documents sharing the same millisecond are processed in undefined order, and the slice boundary is inclusive so the slice-end document is re-processed on the next iteration. Re-processing is safe because all aggregations (`TOP`, `LAST`, `MIN`, `MV_UNION`) are idempotent.
@@ -244,7 +246,7 @@ Two independent knobs bound how much work a single run does:
 
 | Knob | Purpose |
 |------|---------|
-| `maxLogsPerPage` | Upper bound on raw log docs in **one slice** (probe `LIMIT` is `round(maxLogsPerPage × p)` sampled rows). Capped at `maxLogsPerWindow` when the cap is enabled. |
+| `maxLogsPerPage` | Upper bound on raw log docs in **one slice** (probe `LIMIT` is `round(maxLogsPerPage × p)` sampled rows). Capped at `maxLogsPerWindow` when the cap is enabled. Scaled by `1 / rate` when extraction sampling is active, so the slice retains about this many rows rather than this many raw logs, see [Slice scaling](#slice-scaling). |
 | `maxLogsPerWindow` | Upper bound on raw log docs across **the entire run**. 0 = disabled. |
 
 ### Why logs, not entities
@@ -326,16 +328,34 @@ For non-priority, `maxLogsPerWindowCapBehavior` is not read from the store-wide 
 
 With the dual-process flag on, the non-priority process of an entity type that supports sampling (today only `user`) adds `| SAMPLE rate` to the extraction query, right after the source filter. Single and priority never sample the extraction query. At `rate = 1` no `SAMPLE` stage is emitted, so the query is the same as without sampling.
 
-The rate is computed per slice in `sampling.ts`, from the probe values the loop already has (no extra queries):
+The rate is resolved once per run in `sampling.ts`, from the probe values the loop already has (no extra queries):
 
 ```
 estimatedRemaining = sliceLogCount + sliceDensity × (windowEnd - sliceEnd)
-remainingBudget    = LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT - scannedLogs
+remainingBudget    = maxLogsPerWindow - scannedLogs
 rate               = clamp(remainingBudget / estimatedRemaining, MIN_SAMPLING_RATE, 1)
 ```
 
-- The budget is the built-in default `maxLogsPerWindow` (`100000`), never the configured one. Changing `maxLogsPerWindow` only moves the hard stop.
+- The budget is the process's **effective configured** `maxLogsPerWindow`, resolved through the same merge stack the hard cap uses. Raising or lowering it moves both the trigger and the rate together.
 - `MIN_SAMPLING_RATE` is `0.1`. At very high volume the budget still runs out and the cap fires as usual.
-- A `samplingRate` in `nonPriorityLogExtractionConfig` replaces the computed rate for every slice, whatever the volume.
+- A `samplingRate` in `nonPriorityLogExtractionConfig` replaces the computed rate, whatever the volume. Because it needs no probe to be known, it also skips the base probe described below.
 - The budget counts processed volume (`ceil(sliceLogCount × rate)`), so a fixed budget covers the whole window instead of only its start.
 - The rate of an in-flight slice is pinned in `sliceSamplingRate`, see [Recovery](#recovery).
+
+### Slice scaling
+
+`maxLogsPerPage` sizes a slice in **raw** logs, but the budget it feeds counts **retained** rows. A slice sampled at `rate` therefore spends only that fraction of the budget, and the window is covered in `1 / rate` times more slices than it needs - each paying for its own probe, extraction query, ingest and refresh.
+
+When a rate below `1` is in effect, the raw target is scaled so the slice retains about `maxLogsPerPage` rows whatever the rate is, and slice count stops depending on the rate:
+
+```
+sliceRawTarget = clamp(maxLogsPerPage / rate, maxLogsPerWindow / rate)
+```
+
+The cap is converted into the same raw denomination before clamping. Comparing a scaled raw target against a retained-row budget would clamp it straight back down.
+
+Because the rate comes from the probe but is needed to size the slice, the **first slice of a run is probed twice**: once at the base page size to resolve the rate, then again at the scaled size to redraw the boundary that rate implies. Only the second boundary becomes a slice. Every later slice is probed once and reuses the rate.
+
+The rate is **pinned for the run** rather than recomputed per slice: it both sizes the slice and samples it, so a slice sized for one rate and sampled at another would not retain what the budget expects. One consequence is that sampling density is uniform across the window instead of climbing toward its end, and a run whose first slice underestimates density has no later slice to lower the rate - the cap fires sooner instead.
+
+Scaling applies only where a rate below `1` is in effect, so single and priority probe once per slice at the base page size, exactly as they did before.
