@@ -417,7 +417,7 @@ export function useSingleAgentMenuItems({
         toolTipContent: pendingUnenroll ? (
           <FormattedMessage
             id="xpack.fleet.agentList.pendingUnenrollTooltip"
-            defaultMessage="An unenroll was requested {requestedAt} and the agent has not acknowledged it. Use Force unenroll to remove it immediately."
+            defaultMessage="An unenroll request was sent {requestedAt} and the agent has not acknowledged it. Use Force unenroll to mark it Unenrolled without waiting."
             values={{
               requestedAt: <FormattedRelative value={agent.unenrollment_started_at} />,
             }}

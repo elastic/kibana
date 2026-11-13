@@ -131,7 +131,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.unenrollAgents.unenrollFleetServerMultipleDescription"
-                  defaultMessage="Unenrolling them will disconnect those Fleet Servers and prevent agents from sending data if no other Fleet Servers exist."
+                  defaultMessage="Unenrolling these agents will disconnect the Fleet Servers they run and prevent agents from sending data if no other Fleet Servers exist."
                 />
               )
             }
@@ -169,7 +169,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
             {' '}
             <FormattedMessage
               id="xpack.fleet.unenrollAgents.pendingUnenrollCountDescription"
-              defaultMessage="{count} of these agents {count, plural, one {already has} other {already have}} an unenroll pending and will not be affected."
+              defaultMessage="{count} of these agents {count, plural, one {already has} other {already have}} a pending unenroll request and will not be affected."
               values={{ count: pendingUnenrollCount }}
             />
           </>

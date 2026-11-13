@@ -117,7 +117,9 @@ describe('AgentUnenrollAgentModal', () => {
       />
     );
 
-    expect(getByText(/1 of these agents already has an unenroll pending/)).toBeInTheDocument();
+    expect(
+      getByText(/1 of these agents already has a pending unenroll request/)
+    ).toBeInTheDocument();
   });
 
   it('should not report a pending unenroll for a single agent, which gets a fresh request', async () => {
@@ -130,7 +132,7 @@ describe('AgentUnenrollAgentModal', () => {
       />
     );
 
-    expect(queryByText(/unenroll pending/)).toBeNull();
+    expect(queryByText(/pending unenroll request/)).toBeNull();
   });
 
   it('should keep the generic signpost for an online agent', async () => {
@@ -279,7 +281,9 @@ describe('AgentForceUnenrollModal', () => {
 
     expect(getByText('This action does not notify the agent of unenrollment')).toBeInTheDocument();
     expect(getByText(/stuck offline or in a compromised state/)).toBeInTheDocument();
-    expect(getByText(/Revokes the agent's local API keys and marks it/)).toBeInTheDocument();
+    expect(
+      getByText(/This action revokes the agent's local API keys and marks it/)
+    ).toBeInTheDocument();
   });
 
   it('should link to the unenroll documentation', async () => {
@@ -305,7 +309,9 @@ describe('AgentForceUnenrollModal', () => {
     );
 
     expect(getByText('This action does not notify the agents of unenrollment')).toBeInTheDocument();
-    expect(getByText(/Revokes the agents' local API keys and marks them/)).toBeInTheDocument();
+    expect(
+      getByText(/This action revokes the agents' local API keys and marks them/)
+    ).toBeInTheDocument();
   });
 
   it('should warn when a bulk selection includes a Fleet Server agent', async () => {

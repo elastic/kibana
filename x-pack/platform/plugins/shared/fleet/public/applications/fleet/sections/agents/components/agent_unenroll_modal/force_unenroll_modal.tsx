@@ -114,7 +114,7 @@ export const AgentForceUnenrollModal: React.FunctionComponent<Props> = ({
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.forceUnenrollAgents.fleetServerMultipleDescription"
-                  defaultMessage="Force unenrolling them will disconnect those Fleet Servers and prevent agents from sending data if no other Fleet Servers exist."
+                  defaultMessage="Force unenrolling these agents will disconnect the Fleet Servers they run and prevent agents from sending data if no other Fleet Servers exist."
                 />
               )
             }
@@ -136,12 +136,12 @@ export const AgentForceUnenrollModal: React.FunctionComponent<Props> = ({
           isSingleAgent ? (
             <FormattedMessage
               id="xpack.fleet.forceUnenrollAgents.whenToUseSingleDescription"
-              defaultMessage="Use this if the agent is stuck offline or in a compromised state. Otherwise, use Unenroll agent or Uninstall agent."
+              defaultMessage="Use this if the agent is stuck offline or in a compromised state. Otherwise, unenroll or uninstall the agent."
             />
           ) : (
             <FormattedMessage
               id="xpack.fleet.forceUnenrollAgents.whenToUseMultipleDescription"
-              defaultMessage="Use this if the agents are stuck offline or in a compromised state. Otherwise, use Unenroll agents or Uninstall agent."
+              defaultMessage="Use this if the agents are stuck offline or in a compromised state. Otherwise, unenroll or uninstall the agents."
             />
           )
         }
@@ -150,9 +150,8 @@ export const AgentForceUnenrollModal: React.FunctionComponent<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.fleet.forceUnenrollAgents.consequencesDescription"
-          defaultMessage="Revokes {count, plural, one {the agent's} other {the agents''}} local API keys and marks {count, plural, one {it} other {them}} Unenrolled in Fleet.
-            {count, plural, one {The agent} other {The agents}} will keep running on {count, plural, one {the host} other {their hosts}} and can keep sending data to any
-            output that does not use the revoked keys until {count, plural, one {it is} other {they are}} uninstalled there. {count, plural, one {It} other {They}} cannot be
+          defaultMessage="This action revokes {count, plural, one {the agent's} other {the agents''}} local API keys and marks {count, plural, one {it} other {them}} Unenrolled in Fleet.
+            {count, plural, one {The agent} other {The agents}} will keep running on {count, plural, one {the host} other {their hosts}} and can keep trying to send data using the revoked output keys until {count, plural, one {it is} other {they are}} uninstalled from {count, plural, one {the host} other {their hosts}}. {count, plural, one {It} other {They}} cannot be
             uninstalled remotely afterwards, and Fleet will not register a later manual uninstall. {learnMore}"
           values={{ count: agentCount, learnMore }}
         />
