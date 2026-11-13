@@ -45,14 +45,31 @@ import {
 } from '../../fixtures/built_in_role_access';
 import { deleteSignificantEvent, seedSignificantEvent } from '../../fixtures/rule_events';
 
-// No Kibana privilege besides Nightshift `all` and Agent Builder `read` (for the tools), and no
-// index privilege besides reading the data the source queries. Anything else Significant Events
-// needs, Alerting v2 included, has to come from the Nightshift feature privilege.
+// No Kibana privilege besides Nightshift `all`, Agent Builder `read` (for the tools) and Alerts
+// `all`, and no index privilege besides reading the data the source queries. Closing or reopening
+// an event is an Alerting v2 alert action that needs Alerts `all`, which Nightshift `all` lacks.
 const NIGHTSHIFT_ALL_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
     indices: [{ names: ['logs*'], privileges: ['read', 'view_index_metadata'] }],
   },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        [NIGHTSHIFT_FEATURE_ID]: ['all'],
+        agentBuilder: ['read'],
+        // Close and reopen go through the Alerting v2 alert actions client, which authorizes the
+        // caller against Alerts `all`. The Nightshift feature privilege does not grant it.
+        alerting_v2_alerts: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+const NIGHTSHIFT_ALL_NO_ALERTS_ROLE: KibanaRole = {
+  ...NIGHTSHIFT_ALL_ROLE,
   kibana: [
     {
       base: [],
@@ -69,20 +86,41 @@ const ROLES: ReadonlyArray<{
   label: string;
   role: string | KibanaRole;
   canChangeSources: boolean;
+  canCloseEvents: boolean;
 }> = [
-  { name: 'editor', label: 'the built-in editor role', role: 'editor', canChangeSources: false },
-  { name: 'admin', label: 'the built-in admin role', role: 'admin', canChangeSources: true },
+  {
+    name: 'editor',
+    label: 'the built-in editor role',
+    role: 'editor',
+    canChangeSources: false,
+    canCloseEvents: true,
+  },
+  {
+    name: 'admin',
+    label: 'the built-in admin role',
+    role: 'admin',
+    canChangeSources: true,
+    canCloseEvents: true,
+  },
   {
     name: 'nightshift-all',
-    label: 'a role with only Nightshift all and Agent Builder read',
+    label: 'a role with only Nightshift all, Agent Builder read and Alerts all',
     role: NIGHTSHIFT_ALL_ROLE,
     canChangeSources: false,
+    canCloseEvents: true,
+  },
+  {
+    name: 'nightshift-all-no-alerts',
+    label: 'a role with only Nightshift all and Agent Builder read',
+    role: NIGHTSHIFT_ALL_NO_ALERTS_ROLE,
+    canChangeSources: false,
+    canCloseEvents: false,
   },
 ];
 
 // These roles can do everything except changing Significant Events settings
 // (covered in settings_role_access.spec.ts) and, unless `canChangeSources`, changing sources.
-for (const { name, label, role, canChangeSources } of ROLES) {
+for (const { name, label, role, canChangeSources, canCloseEvents } of ROLES) {
   apiTest.describe(
     `Significant Events actions for ${label}`,
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -175,29 +213,67 @@ for (const { name, label, role, canChangeSources } of ROLES) {
         });
       }
 
-      apiTest('closes a significant event', async ({ apiClient }) => {
-        await expect
-          .poll(async () => {
+      if (canCloseEvents) {
+        apiTest('closes and reopens a significant event', async ({ apiClient }) => {
+          // An operator's change is an Alerting v2 alert action. The route privilege is the only
+          // gate: Alerting v2 writes `.alert-actions` and `.rule-events` as the internal user.
+          const readEventStatuses = async () => {
             const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
               headers,
               responseType: 'json',
             });
             return {
               statusCode: response.statusCode,
-              eventIds: (response.body.hits ?? []).map(
-                ({ event_id: id }: { event_id: string }) => id
+              statuses: (response.body.hits ?? []).map(
+                ({ event_id: id, status }: { event_id: string; status: string }) => ({ id, status })
               ),
             };
-          }, POLL_OPTIONS)
-          .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
+          };
 
-        const response = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
-          headers,
-          body: { status: 'inactive', assessment_note: `Closed by ${name}` },
-          responseType: 'json',
+          await expect
+            .poll(readEventStatuses, POLL_OPTIONS)
+            .toStrictEqual({ statusCode: 200, statuses: [{ id: eventId, status: 'active' }] });
+
+          const closeResponse = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
+            headers,
+            body: { status: 'inactive', assessment_note: `Closed by ${name}` },
+            responseType: 'json',
+          });
+          expect(closeResponse).toHaveStatusCode(200);
+          expect(closeResponse.body).toStrictEqual({ updated: 1, ignored: 0, status: 'inactive' });
+          await expect
+            .poll(readEventStatuses, POLL_OPTIONS)
+            .toStrictEqual({ statusCode: 200, statuses: [{ id: eventId, status: 'inactive' }] });
+
+          const reopenResponse = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
+            headers,
+            body: { status: 'active', assessment_note: `Reopened by ${name}` },
+            responseType: 'json',
+          });
+          expect(reopenResponse).toHaveStatusCode(200);
+          expect(reopenResponse.body).toStrictEqual({ updated: 1, ignored: 0, status: 'active' });
+          await expect
+            .poll(readEventStatuses, POLL_OPTIONS)
+            .toStrictEqual({ statusCode: 200, statuses: [{ id: eventId, status: 'active' }] });
         });
-        expect(response).toHaveStatusCode(200);
-      });
+      } else {
+        apiTest('refuses to close an event without Alerts all', async ({ apiClient }) => {
+          const closeResponse = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
+            headers,
+            body: { status: 'inactive', assessment_note: `Closed by ${name}` },
+            responseType: 'json',
+          });
+          expect(closeResponse).toHaveStatusCode(403);
+
+          const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
+            headers,
+            responseType: 'json',
+          });
+          expect(response.body.hits.map(({ status }: { status: string }) => status)).toStrictEqual([
+            'active',
+          ]);
+        });
+      }
 
       apiTest('writes and reads detections', async ({ apiClient }) => {
         const createResponse = await apiClient.post(DETECTIONS_ENDPOINT, {

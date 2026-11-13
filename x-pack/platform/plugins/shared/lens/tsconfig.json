@@ -163,7 +163,9 @@
     "@kbn/zod",
     "@kbn/app-header",
     "@kbn/managed-content-badge",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/coloring-components",
+    "@kbn/palettes-components"
   ],
   "exclude": ["target/**/*"]
 }
