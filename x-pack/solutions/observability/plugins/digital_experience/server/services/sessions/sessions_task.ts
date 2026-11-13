@@ -20,11 +20,18 @@ import {
   type SessionsSettings,
 } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
-import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
+import {
+  createSessionsIndex,
+  deleteExpiredSessions,
+  deleteOlderSessionsIndices,
+  putSessionsIndexTemplate,
+} from './sessions_index';
 import { INITIAL_WINDOW_MS, summarizeSessions } from './summarize_sessions';
 
 /** No window starts after this much of a run, so it ends well before its timeout. */
 const RUN_BUDGET_MS = 45 * 1000;
+/** The expired summaries are deleted at most this often, not on every run. */
+const RETENTION_INTERVAL_MS = 60 * 60 * 1000;
 
 export const NO_API_KEY_MESSAGE =
   'The task has no API key, so it cannot read events. Enable sessions again to grant one.';
@@ -50,6 +57,8 @@ const stateSchemaV1 = schema.object({
    * by enabling sessions again isn't taken for invalid while a run of the old one finishes.
    */
   failedApiKeyId: schema.maybe(schema.nullable(schema.string())),
+  /** When the expired summaries were last deleted, whether or not that worked. */
+  lastRetentionAt: schema.maybe(schema.nullable(schema.string())),
 });
 
 export type SessionsTaskState = TypeOf<typeof stateSchemaV1>;
@@ -90,6 +99,12 @@ export const apiKeyIdOf = (request: KibanaRequest): string | null => {
   return API_KEY_ID.test(id) ? id : null;
 };
 
+/** Whether the expired summaries are due to be deleted; an unreadable time counts as never. */
+const isRetentionDue = (lastRetentionAt: string | null | undefined, now: number): boolean => {
+  const last = lastRetentionAt ? Date.parse(lastRetentionAt) : NaN;
+  return Number.isNaN(last) || now - last >= RETENTION_INTERVAL_MS;
+};
+
 const logErrorChange = (logger: Logger, previous: SessionsTaskState, message: string) => {
   if (previous.lastError?.message !== message) {
     logger.warn(`Summarizing Digital Experience sessions failed: ${message}`);
@@ -121,13 +136,17 @@ export const runSessionsTask = async ({
 
   // A deleted index, or a new version, is rebuilt from the lookback, also after a failed run.
   let rebuild = state.version !== SESSIONS_VERSION;
+  let result: { state: SessionsTaskState; runAt?: Date };
   try {
     if (rebuild) {
       await putSessionsIndexTemplate(internalClient, signal);
     }
     const created = await createSessionsIndex(esClient, signal);
+    if (rebuild) {
+      await deleteOlderSessionsIndices(esClient, signal);
+    }
     rebuild = rebuild || created;
-    const result = await summarizeSessions({
+    const summarized = await summarizeSessions({
       esClient,
       signal,
       now,
@@ -137,33 +156,34 @@ export const runSessionsTask = async ({
       concurrency,
     });
 
-    const caughtUp = (!rebuild && state.caughtUp === true) || result.caughtUp;
+    const caughtUp = (!rebuild && state.caughtUp === true) || summarized.caughtUp;
     if (caughtUp && state.caughtUp !== true) {
       logger.info('Digital Experience session summaries caught up with the events.');
     }
     if (state.lastError) {
       logger.info('Summarizing Digital Experience sessions works again.');
     }
-    return {
+    result = {
       state: {
         version: SESSIONS_VERSION,
-        checkpoint: result.checkpoint,
-        windowMs: result.windowMs,
+        checkpoint: summarized.checkpoint,
+        windowMs: summarized.windowMs,
         caughtUp,
         lastRunAt: at,
         lastSuccessAt: at,
         lastError: null,
         apiKeyInvalid: false,
         failedApiKeyId: null,
+        lastRetentionAt: state.lastRetentionAt ?? null,
       },
       // Behind: run again right away instead of waiting for the interval.
-      ...(result.caughtUp ? {} : { runAt: new Date() }),
+      ...(summarized.caughtUp ? {} : { runAt: new Date() }),
     };
   } catch (error) {
     const message = describeError(error);
     const unauthorized = isResponseError(error) && error.statusCode === 401;
     logErrorChange(logger, state, message);
-    return {
+    result = {
       state: {
         ...state,
         // A rebuild that failed starts over: the next run finds the index it created.
@@ -175,6 +195,25 @@ export const runSessionsTask = async ({
       },
     };
   }
+
+  // Retention runs on the state the summaries already reached, in its own try: a failure here
+  // must never reset the checkpoint, or every later run would restart the 30-day backfill. It
+  // only logs, as the summaries the run wrote are correct either way.
+  if (result.state.lastError || !isRetentionDue(state.lastRetentionAt, now)) {
+    return result;
+  }
+  try {
+    const deleted = await deleteExpiredSessions(esClient, now, signal);
+    if (deleted > 0) {
+      logger.debug(`Deleted ${deleted} expired Digital Experience session summaries.`);
+    }
+  } catch (error) {
+    logger.warn(
+      `Deleting the expired Digital Experience session summaries failed: ${describeError(error)}`
+    );
+  }
+  // Whether or not it worked: a failure waits for the interval instead of retrying every run.
+  return { ...result, state: { ...result.state, lastRetentionAt: at } };
 };
 
 /**

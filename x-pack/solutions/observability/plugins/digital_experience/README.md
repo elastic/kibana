@@ -246,8 +246,14 @@ finishes the windows it starts. Failures are kept in the task's state, not throw
 retries from the same checkpoint, and status shows the error. Events that arrive later than the sync
 delay after their `@timestamp` are only summarized when another event of their session arrives.
 
+Once an hour, after the summaries are written, a run deletes the summaries of sessions that ended
+more than 31 days ago. It waits for that deletion, so a failure is logged, and it only logs it: a
+run's checkpoint survives, and the next attempt waits for the hour.
+
 Readers don't depend on how summaries are built. A new `SESSIONS_VERSION` makes the task rebuild
-every summary into the new index.
+every summary into the new index and delete the indices of *older* versions. A newer version's index
+is left alone, as during a rolling upgrade, or a rollback, a node of this version runs beside one
+that writes it.
 
 The journey lists distinct pages in first-view order (revisits are not repeated), from the first 30
 page-view URLs, and the exit page is the one viewed last. Each attribute group (environment, user,
@@ -270,7 +276,8 @@ spaces, as the task and index serve every space. The user also needs these Elast
 when any is missing the request fails with a 403 listing them, before anything is written:
 
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
-- `digital-experience-sessions-*`: `read`, `view_index_metadata`, `index`, `create_index`
+- `digital-experience-sessions-*`: `read`, `view_index_metadata`, `index`, `create_index`, `delete`,
+  `delete_index`
 - On serverless, the cluster privilege `read_security` (the predefined `admin` role has it; custom
   roles may not)
 

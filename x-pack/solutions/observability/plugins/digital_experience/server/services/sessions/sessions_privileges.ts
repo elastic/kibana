@@ -19,7 +19,7 @@ import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 
 /**
  * What the summaries task does with the API key granted on the user's behalf: read the events with
- * ES|QL, and write the summaries. Kibana's internal user puts the index template.
+ * ES|QL, and write, expire and rebuild the summaries. Kibana's internal user puts the index template.
  */
 export const REQUIRED_SOURCE_INDEX_PRIVILEGES = ['read', 'view_index_metadata'] as const;
 export const REQUIRED_DEST_INDEX_PRIVILEGES = [
@@ -27,6 +27,8 @@ export const REQUIRED_DEST_INDEX_PRIVILEGES = [
   'view_index_metadata',
   'index',
   'create_index',
+  'delete',
+  'delete_index',
 ] as const;
 
 export const getMissingSessionsPrivileges = async (

@@ -20,6 +20,8 @@ import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fiel
 import { ENVIRONMENT_FIELDS } from '../../lib/otel/queries';
 import {
   createSessionsIndex,
+  deleteExpiredSessions,
+  deleteOlderSessionsIndices,
   putSessionsIndexTemplate,
   sessionsIndexMappings,
   sessionsIndexTemplate,
@@ -27,6 +29,8 @@ import {
 } from './sessions_index';
 
 type Client = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+const NOW = Date.parse('2026-10-27T12:00:00.000Z');
 
 interface MappingNode {
   type?: string;
@@ -185,6 +189,96 @@ describe('sessions index', () => {
       client.indices.create.mockRejectedValue(error);
 
       await expect(createSessionsIndex(client)).rejects.toBe(error);
+    });
+  });
+
+  describe('deleteOlderSessionsIndices', () => {
+    it('deletes the indices of older versions by name, open or closed', async () => {
+      const older = 'digital-experience-sessions-0';
+      client.indices.get.mockResolvedValue({ [older]: {}, [SESSIONS_INDEX]: {} });
+      const { signal } = new AbortController();
+
+      expect(await deleteOlderSessionsIndices(client, signal)).toEqual([older]);
+      expect(client.indices.get).toHaveBeenCalledWith(
+        {
+          index: SESSIONS_INDEX_PATTERN,
+          allow_no_indices: true,
+          expand_wildcards: ['open', 'closed'],
+        },
+        { signal }
+      );
+      expect(client.indices.delete).toHaveBeenCalledWith(
+        { index: [older], ignore_unavailable: true },
+        { signal }
+      );
+    });
+
+    // A node of this version runs beside one of the next during a rolling upgrade or a rollback.
+    it('leaves a newer version alone', async () => {
+      const newer = `digital-experience-sessions-${SESSIONS_VERSION + 1}`;
+      client.indices.get.mockResolvedValue({ [SESSIONS_INDEX]: {}, [newer]: {} });
+
+      expect(await deleteOlderSessionsIndices(client)).toEqual([]);
+      expect(client.indices.delete).not.toHaveBeenCalled();
+    });
+
+    it('leaves an index of the pattern that no version names', async () => {
+      client.indices.get.mockResolvedValue({
+        'digital-experience-sessions-backup': {},
+        'digital-experience-sessions-0-snapshot': {},
+      });
+
+      expect(await deleteOlderSessionsIndices(client)).toEqual([]);
+      expect(client.indices.delete).not.toHaveBeenCalled();
+    });
+
+    it('deletes nothing when only this version exists', async () => {
+      client.indices.get.mockResolvedValue({ [SESSIONS_INDEX]: {} });
+
+      expect(await deleteOlderSessionsIndices(client)).toEqual([]);
+      expect(client.indices.delete).not.toHaveBeenCalled();
+    });
+
+    it('deletes nothing when no sessions index exists', async () => {
+      client.indices.get.mockResolvedValue({});
+
+      expect(await deleteOlderSessionsIndices(client)).toEqual([]);
+      expect(client.indices.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteExpiredSessions', () => {
+    it('deletes the sessions of this index that ended before the lookback and a day', async () => {
+      client.deleteByQuery.mockResolvedValue({ deleted: 7 });
+      const { signal } = new AbortController();
+
+      expect(await deleteExpiredSessions(client, NOW, signal)).toBe(7);
+      expect(client.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: SESSIONS_INDEX,
+          ignore_unavailable: true,
+          conflicts: 'proceed',
+          // 30 days of lookback plus one of margin.
+          query: { range: { end_time: { lt: '2026-09-26T12:00:00.000Z' } } },
+        },
+        { signal, requestTimeout: 120_000 }
+      );
+    });
+
+    it('throws what Elasticsearch could not delete, so the run logs it', async () => {
+      client.deleteByQuery.mockResolvedValue({
+        deleted: 1,
+        failures: [
+          {
+            id: 'session-a',
+            index: SESSIONS_INDEX,
+            status: 409,
+            cause: { type: 'version_conflict_engine_exception', reason: 'conflict' },
+          },
+        ],
+      });
+
+      await expect(deleteExpiredSessions(client, NOW)).rejects.toThrow('conflict (1 failed)');
     });
   });
 });

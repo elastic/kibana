@@ -1,5 +1,5 @@
 {
-  "sha1": "a4050675b081e07856c8dd5083c26d79a81d0736",
+  "sha1": "ce3b3b6904f5d0f17bbcc2c96cafee324b06347c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -335,8 +335,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_enable.spec.ts",
-        "line": 52,
-        "column": 21
+        "line": 62,
+        "column": 12
       }
     },
     {
@@ -349,8 +349,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/sessions_enable.spec.ts",
-        "line": 66,
-        "column": 30
+        "line": 74,
+        "column": 37
       }
     },
     {
