@@ -116,8 +116,10 @@ const evaluateCondition = (
       return (condition.operation === 'equals' ? order === 0 : order < 0) ? 'true' : 'false';
     }
     case 'kernel_release_matches': {
-      if (host.kernelRelease === undefined) return 'unknown';
-      return compile(condition.pattern, stats)?.test(host.kernelRelease) ? 'true' : 'false';
+      const re = compile(condition.pattern, stats);
+      // A feed pattern that does not compile cannot rule the host out.
+      if (host.kernelRelease === undefined || re === null) return 'unknown';
+      return re.test(host.kernelRelease) ? 'true' : 'false';
     }
   }
 };
@@ -235,12 +237,12 @@ const matchKernels = (os: OsIndex, host: HostInventory, hits: Hit[], stats?: Mat
   for (const record of os.kernels) {
     const capture = record.package.release_version;
     if (!capture) continue;
-    const alternative = satisfiedAlternative(record, host, stats);
-    if (!Array.isArray(alternative)) continue;
     const running = ubuntuKernelVersion(capture, kernelRelease, stats);
     if (running === undefined || compareFor(record)(running, record.fixed_version.raw) >= 0) {
       continue;
     }
+    const alternative = satisfiedAlternative(record, host, stats);
+    if (!Array.isArray(alternative)) continue;
     hits.push({
       record,
       pkg: { name: record.package.name, version: running },
@@ -295,6 +297,7 @@ export const matchHost = (
       const listed = os.namesByDefinition.get(record.advisory.definition_id);
       for (const sibling of siblingsBySource.get(source) ?? []) {
         if (sibling === pkg || listed?.has(sibling.name)) continue;
+        if (!archMatches(record.package.arch, sibling.arch, stats)) continue;
         if (compare(sibling.version, record.fixed_version.raw) >= 0) continue;
         hits.push({
           record,

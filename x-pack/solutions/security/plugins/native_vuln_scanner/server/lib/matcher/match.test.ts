@@ -126,6 +126,29 @@ describe('matchHost: Ubuntu', () => {
       expect(run(host({ os: UBUNTU, kernelRelease: '6.8.0-1024-raspi' }), [raspi])).toEqual([]);
     });
 
+    it('does not count unknown facts for an already patched kernel', () => {
+      const gated = {
+        ...raspi,
+        conditions: [
+          [...raspi.conditions[0], { type: 'module_enabled' as const, module: 'nodejs:18' }],
+        ],
+      };
+      const stats: MatchStats = {};
+      expect(run(host({ os: UBUNTU, kernelRelease: '6.8.0-1024-raspi' }), [gated], stats)).toEqual(
+        []
+      );
+      expect(stats).toEqual({});
+    });
+
+    it('treats a flavour pattern that does not compile as unknown, not as a clean host', () => {
+      const broken = { ...raspi, conditions: [[{ ...raspi.conditions[0][0], pattern: '6\\.8(' }]] };
+      const stats: MatchStats = {};
+      expect(run(host({ os: UBUNTU, kernelRelease: '6.8.0-1020-raspi' }), [broken], stats)).toEqual(
+        []
+      );
+      expect(stats).toEqual({ invalid_pattern: 1, unknown_kernel_release_matches: 1 });
+    });
+
     it('counts hosts without a kernel release instead of guessing', () => {
       const stats: MatchStats = {};
       expect(run(host({ os: UBUNTU }), [raspi], stats)).toEqual([]);
@@ -237,6 +260,19 @@ describe('matchHost: RHEL', () => {
         glibcFix,
         i686Only,
       ]);
+      expect(findings.map((f) => f.package.name)).toEqual(['glibc']);
+    });
+
+    it('does not expand to a sibling the arch constraint excludes', () => {
+      const x86Only = rhsa({
+        package: { name: 'glibc', arch: { operation: 'pattern match', value: 'aarch64|x86_64' } },
+        fixed_version: { raw: '0:2.34-100.el9', scheme: 'rpm' },
+        cves: [{ id: 'CVE-2026-2000' }],
+      });
+      const findings = run(
+        host({ os: RHEL9, packages: [glibc('glibc'), { ...glibc('glibc-common'), arch: 'i686' }] }),
+        [x86Only]
+      );
       expect(findings.map((f) => f.package.name)).toEqual(['glibc']);
     });
 

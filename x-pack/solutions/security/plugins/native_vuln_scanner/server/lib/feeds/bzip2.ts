@@ -12,16 +12,16 @@ const CHUNK_SIZE = 64 * 1024;
 // seek-bzip keeps CRCs as signed 32-bit ints; compare them as unsigned.
 const toUint32 = (n: number): number => (n < 0 ? n + 2 ** 32 : n);
 
-/**
- * Decompresses a (possibly multi-stream) bzip2 buffer one block at a time, so callers can yield
- * to the event loop between blocks instead of blocking it for the whole feed. Block and stream
- * CRCs are verified; corrupt input throws.
- */
 const MAGIC = [0x42, 0x5a, 0x68]; // 'BZh'
 
 const startsStream = (input: Uint8Array, at: number): boolean =>
   MAGIC.every((byte, i) => input[at + i] === byte);
 
+/**
+ * Decompresses a (possibly multi-stream) bzip2 buffer one block at a time, so callers can yield
+ * to the event loop between blocks instead of blocking it for the whole feed. Block and stream
+ * CRCs are verified; corrupt input throws.
+ */
 export function* bunzip2Blocks(input: Uint8Array): Generator<Buffer> {
   let pos = 0;
   const inputStream = {
