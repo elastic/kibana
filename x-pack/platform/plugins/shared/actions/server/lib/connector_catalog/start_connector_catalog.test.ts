@@ -182,8 +182,8 @@ describe('startConnectorCatalog', () => {
       jest.useFakeTimers();
       const onResolved = jest.fn();
 
-      const promise = startWithHandle(1000).ready.then(onResolved);
-      await jest.advanceTimersByTimeAsync(999);
+      const promise = startWithHandle(CATALOG_FIRST_LOAD_TIMEOUT_MS).ready.then(onResolved);
+      await jest.advanceTimersByTimeAsync(CATALOG_FIRST_LOAD_TIMEOUT_MS - 1);
       expect(onResolved).not.toHaveBeenCalled();
 
       await jest.advanceTimersByTimeAsync(1);
@@ -193,6 +193,31 @@ describe('startConnectorCatalog', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('flag'));
       expect(storage.getManifest).not.toHaveBeenCalled();
       expect(storage.getDefinitions).not.toHaveBeenCalled();
+    });
+
+    it('gives the load only the rest of the budget when the flag arrives late', async () => {
+      jest.useFakeTimers();
+      storage.getManifest.mockReturnValue(new Promise(() => {}));
+      const onResolved = jest.fn();
+      const { ready, onFlagValue } = startWithHandle(CATALOG_FIRST_LOAD_TIMEOUT_MS);
+      void ready.then(onResolved);
+
+      await jest.advanceTimersByTimeAsync(20_000);
+      onFlagValue(true);
+      await jest.advanceTimersByTimeAsync(0);
+      expect(storage.getManifest).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(9_999);
+      expect(onResolved).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(1);
+      await ready;
+
+      expect(onResolved).toHaveBeenCalledTimes(1);
+      const [{ signal }] = storage.getManifest.mock.calls[0] as [{ signal: AbortSignal }];
+      expect(signal.aborted).toBe(true);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('timed out'));
+      expect(jest.getTimerCount()).toBe(0);
     });
 
     it('ignores a flag value that arrives after the flag timeout', async () => {
