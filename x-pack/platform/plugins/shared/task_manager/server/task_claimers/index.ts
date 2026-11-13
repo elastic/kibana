@@ -62,6 +62,8 @@ export interface ClaimOwnershipResult {
     tasksLeftUnclaimed?: number;
     tasksErrors?: number;
     staleTasks?: number;
+    /** Cost of the claimable tasks in this node's partitions it could not start this cycle: capacity, heap budget, concurrency limits, or beyond the fetch size. */
+    backlogCost?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;

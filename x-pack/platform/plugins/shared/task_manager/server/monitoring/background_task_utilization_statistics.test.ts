@@ -17,7 +17,9 @@ import {
   TaskPersistence,
   asTaskManagerStatEvent,
   asTaskManagerBackpressureEvent,
+  asTaskManagerAutoscalingEvent,
 } from '../task_events';
+import type { AutoscalingSignalSample } from '../lib/autoscaling_signal';
 import { asOk } from '../lib/result_type';
 import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
@@ -586,6 +588,65 @@ describe('Task Run Statistics', () => {
         events$.next(asTaskManagerBackpressureEvent(asOk({ active: false, reason: null })));
       });
     });
+
+    test('smooths each autoscaling term over the window and reports the largest as load', async () => {
+      const events$ = new Subject<TaskLifecycleEvent>();
+      const taskPollingLifecycle = taskPollingLifecycleMock.create({
+        events$: events$ as Observable<TaskLifecycleEvent>,
+      });
+      const samples: AutoscalingSignalSample[] = [
+        { slot_load: 20, heap_load: 10, cpu_load: 30, backlog_load: 20, reference_capacity: 10 },
+        { slot_load: 40, heap_load: 10, cpu_load: 30, backlog_load: 140, reference_capacity: 10 },
+        { slot_load: 60, heap_load: 70, cpu_load: 30, backlog_load: 200, reference_capacity: 10 },
+      ];
+
+      const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
+        taskPollingLifecycle,
+        new AdHocTaskCounter(),
+        pollInterval,
+        2
+      );
+
+      return new Promise<void>((resolve) => {
+        BackgroundTaskUtilizationAggregator.pipe(
+          map(({ value }: AggregatedStat<BackgroundTaskUtilizationStat>) => value.autoscaling),
+          take(4),
+          bufferCount(4)
+        ).subscribe(([initial, first, second, third]) => {
+          expect(initial).toEqual({
+            load: 0,
+            slot_load: 0,
+            heap_load: 0,
+            cpu_load: 0,
+            backlog_load: 0,
+            reference_capacity: 0,
+          });
+          expect(first).toEqual({ ...samples[0], load: 30 });
+          // window of 2: averages of the last two samples
+          expect(second).toEqual({
+            load: 80,
+            slot_load: 30,
+            heap_load: 10,
+            cpu_load: 30,
+            backlog_load: 80,
+            reference_capacity: 10,
+          });
+          expect(third).toEqual({
+            load: 170,
+            slot_load: 50,
+            heap_load: 40,
+            cpu_load: 30,
+            backlog_load: 170,
+            reference_capacity: 10,
+          });
+          resolve();
+        });
+
+        for (const sample of samples) {
+          events$.next(asTaskManagerAutoscalingEvent(asOk(sample)));
+        }
+      });
+    });
   });
 
   describe('summarizeUtilizationStats', () => {
@@ -616,6 +677,14 @@ describe('Task Run Statistics', () => {
         },
         load: 63,
         es_backpressure_active: 1,
+        autoscaling: {
+          load: 90,
+          slot_load: 63,
+          heap_load: 40,
+          cpu_load: 55,
+          backlog_load: 90,
+          reference_capacity: 10,
+        },
       },
     };
 
@@ -677,6 +746,7 @@ describe('Task Run Statistics', () => {
           value: {
             load: 63,
             es_backpressure_active: 1,
+            autoscaling: monitoredStats.value.autoscaling,
           },
         },
       });

@@ -124,6 +124,8 @@ export interface FetchResult {
 export interface ClaimCandidateFetchResult {
   docs: TaskClaimCandidate[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
+  /** Candidates matching the searches, fetched or not; what the claim could see with no `size` cut. */
+  total: number;
 }
 
 // The claim phase only needs metadata to version-check, cost and select candidates, and the
@@ -1684,6 +1686,7 @@ export class TaskStore {
 
     const versionMap = this.createVersionMap([]);
     let allTasks = new Array<TaskClaimCandidate>();
+    let total = 0;
 
     for (const response of responses) {
       if (response.status !== 200) {
@@ -1696,9 +1699,10 @@ export class TaskStore {
       const { hits: tasks } = hits;
       this.addTasksToVersionMap(versionMap, tasks);
       allTasks = allTasks.concat(this.filterClaimCandidates(tasks));
+      total += getTotalHits(hits) ?? tasks.length;
     }
 
-    return { docs: claimSort(this.definitions, allTasks), versionMap };
+    return { docs: claimSort(this.definitions, allTasks), versionMap, total };
   }
 
   public async search(opts: SearchOpts = {}, limitResponse: boolean = false): Promise<FetchResult> {
@@ -2011,4 +2015,13 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
 
 function isMGetSuccess(doc: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return (doc as estypes.GetGetResult).found !== undefined;
+}
+
+/** Reads `hits.total` in either of its shapes; undefined when the search did not track it. */
+function getTotalHits(hits: estypes.SearchHitsMetadata<unknown>): number | undefined {
+  const { total } = hits;
+  if (typeof total === 'number') {
+    return total;
+  }
+  return total?.value;
 }

@@ -16,18 +16,29 @@ import type { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecy
 import type { ConcreteTaskInstance } from '../task';
 import type { TaskRun, TaskTiming } from '../task_events';
 import {
+  isTaskManagerAutoscalingEvent,
   isTaskManagerBackpressureEvent,
   isTaskManagerWorkerUtilizationStatEvent,
   isTaskRunEvent,
 } from '../task_events';
+import type { AutoscalingSignalSample } from '../lib/autoscaling_signal';
 import type { MonitoredStat } from './monitoring_stats_stream';
 import type { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calculators';
 import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from '../config';
 
+/**
+ * The signal the background-task autoscaler scales on: running averages of
+ * each term of the per-cycle sample, and `load` as the largest of them.
+ */
+export interface AutoscalingStat extends AutoscalingSignalSample {
+  load: number;
+}
+
 export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
   load: number;
   es_backpressure_active: number;
+  autoscaling: AutoscalingStat;
 }
 
 export interface BackgroundTaskUtilizationStat extends PublicBackgroundTaskUtilizationStat {
@@ -108,6 +119,14 @@ export function createBackgroundTaskUtilizationAggregator(
     map((taskEvent) => ({ es_backpressure_active: unwrap(taskEvent.event).active ? 1 : 0 }))
   );
 
+  const autoscalingSampleToStat = createAutoscalingSampleToStat(workerUtilizationWindowSize);
+  const taskManagerAutoscalingEvent$: Observable<
+    Pick<BackgroundTaskUtilizationStat, 'autoscaling'>
+  > = taskPollingLifecycle.events.pipe(
+    filter(isTaskManagerAutoscalingEvent),
+    map((taskEvent) => autoscalingSampleToStat(unwrap(taskEvent.event)))
+  );
+
   return combineLatest([
     taskRunAdhocEvents$.pipe(
       startWith({
@@ -148,13 +167,15 @@ export function createBackgroundTaskUtilizationAggregator(
         es_backpressure_active: 0,
       })
     ),
+    taskManagerAutoscalingEvent$.pipe(startWith({ autoscaling: EMPTY_AUTOSCALING_STAT })),
   ]).pipe(
     map(
-      ([adhoc, recurring, load, backpressure]: [
+      ([adhoc, recurring, load, backpressure, autoscaling]: [
         Pick<BackgroundTaskUtilizationStat, 'adhoc'>,
         Pick<BackgroundTaskUtilizationStat, 'recurring'>,
         Pick<BackgroundTaskUtilizationStat, 'load'>,
-        Pick<BackgroundTaskUtilizationStat, 'es_backpressure_active'>
+        Pick<BackgroundTaskUtilizationStat, 'es_backpressure_active'>,
+        Pick<BackgroundTaskUtilizationStat, 'autoscaling'>
       ]) => {
         return {
           key: 'utilization',
@@ -163,6 +184,7 @@ export function createBackgroundTaskUtilizationAggregator(
             ...recurring,
             ...load,
             ...backpressure,
+            ...autoscaling,
           },
         } as AggregatedStat<BackgroundTaskUtilizationStat>;
       }
@@ -205,7 +227,7 @@ export function summarizeUtilizationStats({
       timestamp: monitoredStats.timestamp,
       value: isInternal
         ? utilizationStats
-        : pick(utilizationStats, 'load', 'es_backpressure_active'),
+        : pick(utilizationStats, 'load', 'es_backpressure_active', 'autoscaling'),
     },
   };
 }
@@ -270,6 +292,42 @@ function createTaskRunEventToLoadStat(workerUtilizationRunningAverageWindowSize:
     const historicalLoad = loadQueue(load);
     return {
       load: stats.mean(historicalLoad),
+    };
+  };
+}
+
+const EMPTY_AUTOSCALING_STAT: AutoscalingStat = {
+  load: 0,
+  slot_load: 0,
+  heap_load: 0,
+  cpu_load: 0,
+  backlog_load: 0,
+  reference_capacity: 0,
+};
+
+/**
+ * Smooths each term of the autoscaling sample over the worker-utilization
+ * window, like `load`, and reports the largest smoothed term as `load`.
+ */
+function createAutoscalingSampleToStat(workerUtilizationRunningAverageWindowSize: number) {
+  const slotQueue = createRunningAveragedStat<number>(workerUtilizationRunningAverageWindowSize);
+  const heapQueue = createRunningAveragedStat<number>(workerUtilizationRunningAverageWindowSize);
+  const cpuQueue = createRunningAveragedStat<number>(workerUtilizationRunningAverageWindowSize);
+  const backlogQueue = createRunningAveragedStat<number>(workerUtilizationRunningAverageWindowSize);
+  return (sample: AutoscalingSignalSample): Pick<BackgroundTaskUtilizationStat, 'autoscaling'> => {
+    const slotLoad = stats.mean(slotQueue(sample.slot_load));
+    const heapLoad = stats.mean(heapQueue(sample.heap_load));
+    const cpuLoad = stats.mean(cpuQueue(sample.cpu_load));
+    const backlogLoad = stats.mean(backlogQueue(sample.backlog_load));
+    return {
+      autoscaling: {
+        load: Math.max(slotLoad, heapLoad, cpuLoad, backlogLoad),
+        slot_load: slotLoad,
+        heap_load: heapLoad,
+        cpu_load: cpuLoad,
+        backlog_load: backlogLoad,
+        reference_capacity: sample.reference_capacity,
+      },
     };
   };
 }

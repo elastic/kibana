@@ -91,6 +91,26 @@ export default function ({ getService }: FtrProviderContext) {
       expect(esBackpressureActive).to.eql(0);
     });
 
+    it('should include the autoscaling signal', async () => {
+      const {
+        value: { autoscaling },
+      } = await getUtilizationRequest(true);
+      expect(typeof autoscaling.load).to.eql('number');
+      expect(typeof autoscaling.slot_load).to.eql('number');
+      expect(typeof autoscaling.heap_load).to.eql('number');
+      expect(typeof autoscaling.cpu_load).to.eql('number');
+      expect(typeof autoscaling.backlog_load).to.eql('number');
+      expect(autoscaling.reference_capacity).to.be.greaterThan(0);
+      expect(autoscaling.load).to.eql(
+        Math.max(
+          autoscaling.slot_load,
+          autoscaling.heap_load,
+          autoscaling.cpu_load,
+          autoscaling.backlog_load
+        )
+      );
+    });
+
     it('should return expected fields for internal route', async () => {
       const monitoredStat = (await getBackgroundTaskUtilization(true)).stats;
       expect(monitoredStat?.timestamp).not.to.be(undefined);
@@ -99,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(monitoredStat?.value?.recurring).not.to.be(undefined);
       expect(monitoredStat?.value?.load).not.to.be(undefined);
       expect(monitoredStat?.value?.es_backpressure_active).not.to.be(undefined);
+      expect(monitoredStat?.value?.autoscaling).not.to.be(undefined);
     });
 
     it('should return expected fields for public route', async () => {
@@ -109,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(monitoredStat?.value?.recurring).to.be(undefined);
       expect(monitoredStat?.value?.load).not.to.be(undefined);
       expect(monitoredStat?.value?.es_backpressure_active).not.to.be(undefined);
+      expect(monitoredStat?.value?.autoscaling).not.to.be(undefined);
     });
   });
 }

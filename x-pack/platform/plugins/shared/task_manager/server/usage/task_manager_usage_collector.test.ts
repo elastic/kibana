@@ -397,6 +397,14 @@ function getMockMonitoredUtilization(overrides = {}): MonitoredUtilization {
       value: {
         load: 6,
         es_backpressure_active: 0,
+        autoscaling: {
+          load: 6,
+          slot_load: 6,
+          heap_load: 2,
+          cpu_load: 4,
+          backlog_load: 6,
+          reference_capacity: 10,
+        },
         adhoc: {
           created: {
             counter: 5,

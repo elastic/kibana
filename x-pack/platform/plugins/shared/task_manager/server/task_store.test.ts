@@ -1073,6 +1073,25 @@ describe('TaskStore', () => {
       expect(result.docs[0]).not.toHaveProperty('apiKey');
     });
 
+    test('reports the total number of candidates across the searches', async () => {
+      const hit = {
+        _index: '.kibana_task_manager_8.16.0_001',
+        _source: { task: mockTask },
+      };
+      const { result } = await testMsearch(
+        [{}, {}, {}],
+        [
+          { hits: [hit], total: { value: 7, relation: 'eq' } },
+          { hits: [], total: 3 },
+          // no total tracked: the page itself is all that is known
+          { hits: [hit] },
+        ]
+      );
+
+      expect(result.docs).toHaveLength(2);
+      expect(result.total).toEqual(11);
+    });
+
     test('does not decrypt API keys, even when candidates carry one', async () => {
       await testMsearch(
         [{}],

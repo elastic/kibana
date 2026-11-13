@@ -109,7 +109,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const stopTaskTimer = startTaskTimer();
 
   // get a list of candidate tasks to claim, with their version info
-  const { docs, versionMap } = await searchAvailableTasks({
+  const { docs, versionMap, total } = await searchAvailableTasks({
     definitions,
     taskTypes: new Set(definitions.getAllTypes()),
     excludedTaskTypePatterns: excludedTaskTypes,
@@ -126,11 +126,14 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     logger,
   });
 
-  if (docs.length === 0)
+  if (docs.length === 0) {
+    const emptyResult = getEmptyClaimOwnershipResult();
     return {
-      ...getEmptyClaimOwnershipResult(),
+      ...emptyResult,
+      stats: { ...emptyResult.stats, backlogCost: 0 },
       timing: stopTaskTimer(),
     };
+  }
 
   // use mget to get the latest version of each task
   const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
@@ -162,6 +165,8 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   // apply limited concurrency limits (TODO: can currently starve other tasks)
   const candidateTasks = selectTasksByCapacity({ definitions, tasks: currentTasks, batches });
+  const candidateIds = new Set(candidateTasks.map((task) => task.id));
+  const concurrencyLimitedTasks = currentTasks.filter((task) => !candidateIds.has(task.id));
 
   // apply capacity and, with adaptive capacity, heap budget constraints to candidate tasks
   const tasksToRun: TaskClaimCandidate[] = [];
@@ -292,6 +297,16 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   await markUnreadableTasksAsFailed({ taskStore, tasks: unreadableTasks, logger });
 
+  // What this node could see but not start: the autoscaling signal reads it as
+  // demand for more nodes. Candidates beyond the fetched page are priced as
+  // normal-cost tasks, since only their count is known.
+  const backlogCost =
+    [...leftOverTasks, ...concurrencyLimitedTasks].reduce(
+      (cost, task) => cost + getTaskCost(task, definitions),
+      0
+    ) +
+    Math.max(0, total - docs.length) * TaskCost.Normal;
+
   // TODO: need a better way to generate stats
   const memoryMessage = memoryGate
     ? `; heap budget: ${Math.round(
@@ -312,6 +327,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksLeftUnclaimed: leftOverTasks.length,
       tasksErrors: bulkUpdateErrors + bulkGetErrors + tasksWithMalformedData.length,
       staleTasks: staleTasks.length,
+      backlogCost,
     },
     docs: fullTasksToRun,
     timing: stopTaskTimer(),
@@ -369,6 +385,8 @@ async function markUnreadableTasksAsFailed({
 interface SearchAvailableTasksResponse {
   docs: TaskClaimCandidate[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
+  /** Candidates behind the searches, fetched or not. */
+  total: number;
 }
 
 let lastPartitionWarningLog: number | undefined;

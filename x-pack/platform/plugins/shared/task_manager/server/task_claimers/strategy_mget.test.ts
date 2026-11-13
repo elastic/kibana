@@ -205,7 +205,11 @@ describe('TaskClaiming', () => {
       }
 
       for (let i = 0; i < hits.length; i++) {
-        store.msearch.mockResolvedValueOnce({ docs: hits[i], versionMap: versionMaps[i] });
+        store.msearch.mockResolvedValueOnce({
+          docs: hits[i],
+          versionMap: versionMaps[i],
+          total: hits[i].length,
+        });
         store.getDocVersions.mockResolvedValueOnce(versionMaps[i]);
         const oneBulkResult = hits[i].map((hit) => getPartialUpdateResult(hit));
         store.bulkPartialUpdate.mockResolvedValueOnce(oneBulkResult);
@@ -418,7 +422,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[0], fetchedTasks[1]].map(asOk));
       store.bulkPartialUpdate.mockResolvedValueOnce(
@@ -457,7 +465,71 @@ describe('TaskClaiming', () => {
         'id-1',
         'id-2',
       ]);
-      expect(result.stats).toMatchObject({ tasksClaimed: 2, tasksLeftUnclaimed: 2 });
+      expect(result.stats).toMatchObject({
+        tasksClaimed: 2,
+        tasksLeftUnclaimed: 2,
+        backlogCost: 4,
+      });
+    });
+
+    test('should price the candidates beyond the fetched page into the backlog as normal-cost tasks', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }), // 60 MB, always admitted
+        mockInstance({ id: `id-2`, taskType: 'report' }), // 120 MB total, within the 150 MB budget
+        mockInstance({ id: `id-3`, taskType: 'report' }), // would exceed the budget, skipped
+        mockInstance({ id: `id-4`, taskType: 'report' }), // also skipped, capacity is still open
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      // three more candidates matched the search than the page could hold
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length + 3,
+      });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      store.bulkGet.mockResolvedValueOnce([fetchedTasks[0], fetchedTasks[1]].map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1]].map(getPartialUpdateResult)
+      );
+
+      const MB = 1024 * 1024;
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        getMemoryGate: () => ({
+          budgetBytes: 150 * MB,
+          lightTaskBytes: 0,
+          reservedBytes: 0,
+          seed: () => false,
+          estimateBytes: () => 60 * MB,
+        }),
+        taskPartitioner,
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(store.bulkPartialUpdate.mock.calls[0][0].map((task) => task.id)).toEqual([
+        'id-1',
+        'id-2',
+      ]);
+      // two skipped normal-cost tasks (4) plus three unfetched ones priced as normal (6)
+      expect(result.stats).toMatchObject({
+        tasksClaimed: 2,
+        tasksLeftUnclaimed: 2,
+        backlogCost: 10,
+      });
     });
 
     test('should admit light tasks against capacity only and skip heavy ones over budget', async () => {
@@ -472,7 +544,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       const admitted = [fetchedTasks[2], fetchedTasks[3]];
       store.bulkGet.mockResolvedValueOnce(admitted.map(asOk));
@@ -531,7 +607,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       const admitted = [fetchedTasks[1]];
       store.bulkGet.mockResolvedValueOnce(admitted.map(asOk));
@@ -581,7 +661,11 @@ describe('TaskClaiming', () => {
 
       const fetchedTasks = [mockInstance({ id: `id-1`, taskType: 'report' })];
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkGet.mockResolvedValueOnce([]);
       store.bulkPartialUpdate.mockResolvedValueOnce([]);
@@ -618,7 +702,11 @@ describe('TaskClaiming', () => {
 
       const fetchedTasks = [mockInstance({ id: `id-1`, taskType: 'report' })];
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkGet.mockResolvedValueOnce([]);
       store.bulkPartialUpdate.mockResolvedValueOnce([]);
@@ -663,7 +751,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce(
@@ -753,6 +845,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3']);
 
       expect(result.stats).toEqual({
+        backlogCost: 14,
         tasksClaimed: 3,
         tasksConflicted: 0,
         tasksErrors: 0,
@@ -783,7 +876,11 @@ describe('TaskClaiming', () => {
       );
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fullTasks);
-      store.msearch.mockResolvedValueOnce({ docs: candidates, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: candidates,
+        versionMap,
+        total: candidates.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkPartialUpdate.mockResolvedValueOnce(candidates.map(getPartialUpdateResult));
       store.bulkGet.mockResolvedValueOnce(fullTasks.map(asOk));
@@ -821,6 +918,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2']);
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 2,
         tasksConflicted: 0,
         tasksErrors: 0,
@@ -846,7 +944,11 @@ describe('TaskClaiming', () => {
       const fetchedTasks: ConcreteTaskInstance[] = [];
 
       const { versionMap } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
 
       const taskClaiming = new TaskClaiming({
         logger: taskManagerLogger,
@@ -886,6 +988,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkPartialUpdate).not.toHaveBeenCalled();
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 0,
         tasksConflicted: 0,
         tasksUpdated: 0,
@@ -906,7 +1009,11 @@ describe('TaskClaiming', () => {
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       versionMap.delete('id-1');
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
@@ -977,6 +1084,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 2,
         tasksConflicted: 0,
         tasksErrors: 0,
@@ -999,7 +1107,11 @@ describe('TaskClaiming', () => {
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       docLatestVersions.delete('task:id-1');
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
@@ -1070,6 +1182,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 2,
         tasksConflicted: 0,
         tasksErrors: 0,
@@ -1092,7 +1205,11 @@ describe('TaskClaiming', () => {
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
       docLatestVersions.set('task:id-1', { esId: 'task:id-1', seqNo: 33, primaryTerm: 33 });
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce([fetchedTasks[1], fetchedTasks[2]].map(asOk));
@@ -1163,6 +1280,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-2', 'id-3']);
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 2,
         tasksConflicted: 0,
         tasksErrors: 0,
@@ -1187,7 +1305,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce(
@@ -1289,6 +1411,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-5']);
 
       expect(result.stats).toEqual({
+        backlogCost: 2,
         tasksClaimed: 4,
         tasksConflicted: 0,
         tasksErrors: 0,
@@ -1313,7 +1436,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
 
       store.bulkGet.mockResolvedValueOnce(
@@ -1469,7 +1596,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkPartialUpdate.mockResolvedValueOnce(
         [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(
@@ -1580,6 +1711,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 3,
         tasksConflicted: 0,
         tasksErrors: 1,
@@ -1602,7 +1734,11 @@ describe('TaskClaiming', () => {
         ];
 
         const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-        store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+        store.msearch.mockResolvedValueOnce({
+          docs: fetchedTasks,
+          versionMap,
+          total: fetchedTasks.length,
+        });
         store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
         store.bulkPartialUpdate.mockResolvedValueOnce(
           fetchedTasks.map(({ id }) =>
@@ -1719,7 +1855,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkPartialUpdate.mockResolvedValueOnce(
         [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(
@@ -1825,6 +1965,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 3,
         tasksConflicted: 1,
         tasksErrors: 0,
@@ -1850,7 +1991,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkPartialUpdate.mockResolvedValueOnce(
         [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(
@@ -1948,7 +2093,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkPartialUpdate.mockResolvedValueOnce([
         getPartialUpdateResult(fetchedTasks[0]),
@@ -2065,6 +2214,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 3,
         tasksConflicted: 0,
         tasksErrors: 1,
@@ -2087,7 +2237,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkPartialUpdate.mockResolvedValueOnce([
         getPartialUpdateResult(fetchedTasks[0]),
@@ -2195,6 +2349,7 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
+        backlogCost: 0,
         tasksClaimed: 3,
         tasksConflicted: 1,
         tasksErrors: 0,
@@ -2217,7 +2372,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkPartialUpdate.mockRejectedValueOnce(new Error('oh no'));
       store.bulkGet.mockResolvedValueOnce([]);
@@ -2317,7 +2476,11 @@ describe('TaskClaiming', () => {
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.msearch.mockResolvedValueOnce({
+        docs: fetchedTasks,
+        versionMap,
+        total: fetchedTasks.length,
+      });
       store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
       store.bulkPartialUpdate.mockResolvedValueOnce(
         [fetchedTasks[0], fetchedTasks[1], fetchedTasks[3]].map(getPartialUpdateResult)
@@ -2988,7 +3151,7 @@ describe('TaskClaiming', () => {
           versionMap.set(doc.id, { esId, seqNo: 42, primaryTerm: 666 });
           docVersions.set(esId, { esId, seqNo: 42, primaryTerm: 666 });
         }
-        taskStore.msearch.mockResolvedValueOnce({ docs, versionMap });
+        taskStore.msearch.mockResolvedValueOnce({ docs, versionMap, total: docs.length });
         taskStore.getDocVersions.mockResolvedValueOnce(docVersions);
         const updatedDocs = docs.map((doc) => {
           doc = { ...doc, retryAt: null };
@@ -2998,7 +3161,7 @@ describe('TaskClaiming', () => {
         taskStore.bulkGet.mockResolvedValueOnce(updatedDocs);
       }
 
-      taskStore.msearch.mockResolvedValue({ docs: [], versionMap: new Map() });
+      taskStore.msearch.mockResolvedValue({ docs: [], versionMap: new Map(), total: 0 });
       taskStore.getDocVersions.mockResolvedValue(new Map());
       taskStore.bulkPartialUpdate.mockResolvedValue([]);
       taskStore.bulkGet.mockResolvedValue([]);

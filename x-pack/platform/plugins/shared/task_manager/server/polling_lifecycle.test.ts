@@ -568,6 +568,53 @@ describe('TaskPollingLifecycle', () => {
       });
     });
 
+    test('should emit the autoscaling signal with the backlog the claim reported', async () => {
+      clock.restore();
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        Promise.resolve(
+          asOk({
+            docs: [],
+            stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0, backlogCost: 10 },
+          })
+        )
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const taskPollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const emittedEvents: TaskLifecycleEvent[] = [];
+
+      taskPollingLifecycle.events.subscribe((event: TaskLifecycleEvent) =>
+        emittedEvents.push(event)
+      );
+
+      elasticsearchAndSOAvailability$.next(true);
+      await new Promise((resolve) => setImmediate(resolve));
+      await retryUntil('autoscaling event emitted', () => {
+        return !!emittedEvents.find((event) => event.type === 'TASK_MANAGER_AUTOSCALING');
+      });
+
+      const autoscalingEvent = emittedEvents.find(
+        (event) => event.type === 'TASK_MANAGER_AUTOSCALING'
+      );
+      // starting capacity 20 is 40 in cost; nothing runs, a backlog of 10 is a quarter of it
+      expect(autoscalingEvent).toEqual({
+        type: 'TASK_MANAGER_AUTOSCALING',
+        event: {
+          tag: 'ok',
+          value: {
+            slot_load: 0,
+            heap_load: expect.any(Number),
+            cpu_load: expect.any(Number),
+            backlog_load: 25,
+            reference_capacity: 20,
+          },
+        },
+      });
+    });
+
     test('should emit event when polling error occurs', async () => {
       clock.restore();
       mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() => {

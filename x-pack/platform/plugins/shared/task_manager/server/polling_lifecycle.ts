@@ -28,6 +28,7 @@ import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { TaskManagerConfig } from './config';
 import {
   CLAIM_STRATEGY_MGET,
+  DEFAULT_CAPACITY,
   LOW_UTILIZATION_POLL_INTERVAL,
   WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
 } from './config';
@@ -41,12 +42,14 @@ import type {
   TaskManagerStat,
   TaskManagerMetric,
   TaskManagerBackpressure,
+  TaskManagerAutoscaling,
 } from './task_events';
 import {
   asTaskRunRequestEvent,
   asTaskPollingCycleEvent,
   asTaskManagerStatEvent,
   asTaskManagerBackpressureEvent,
+  asTaskManagerAutoscalingEvent,
 } from './task_events';
 import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
@@ -67,6 +70,7 @@ import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
 import type { TaskPoller } from './polling/task_poller';
 import { ADAPTIVE_CAPACITY, AdaptiveCapacityController } from './lib/adaptive_capacity';
+import { AutoscalingSignal } from './lib/autoscaling_signal';
 import { registerAdaptiveCapacityTelemetry } from './otel/adaptive_capacity_telemetry';
 import type { AdaptiveCapacityState } from './lib/adaptive_capacity';
 import {
@@ -118,7 +122,8 @@ export type TaskLifecycleEvent =
   | TaskPollingCycle
   | TaskManagerStat
   | TaskManagerMetric
-  | TaskManagerBackpressure;
+  | TaskManagerBackpressure
+  | TaskManagerAutoscaling;
 
 /**
  * The public interface into the task manager system.
@@ -147,6 +152,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   public adaptiveCapacityState$?: Observable<AdaptiveCapacityState>;
   private adaptiveCapacity?: AdaptiveCapacityController;
   private adaptiveCapacitySubscription?: Subscription;
+  private readonly autoscalingSignal: AutoscalingSignal;
 
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
@@ -251,6 +257,13 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     } else {
       this.capacityConfiguration$ = pressureCapacity$;
     }
+    // The autoscaler reads load against a capacity that does not move: under
+    // `capacity: auto` the pool's own capacity follows the heap, so a node
+    // running what a default node would run must still read as full.
+    this.autoscalingSignal = new AutoscalingSignal({
+      referenceCapacity: isAdaptiveCapacity(config) ? DEFAULT_CAPACITY : startingCapacity,
+      getAdaptiveState: () => this.adaptiveCapacity?.state,
+    });
     this.pollIntervalConfiguration$ = errorCheck$.pipe(
       withLatestFrom(this.currentTmUtilization$),
       createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationQueue),
@@ -390,6 +403,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
           // Emit event indicating task manager utilization
           this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(usedCapacityPercentage)));
+          // No claim ran, so the backlog is as last seen.
+          this.emitAutoscalingSignal();
         }
         return capacity;
       },
@@ -579,6 +594,15 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     );
   };
 
+  /** Samples the autoscaling signal at the end of a polling cycle; an undefined backlog keeps the last one measured. */
+  private emitAutoscalingSignal(backlogCost?: number) {
+    this.emitEvent(
+      asTaskManagerAutoscalingEvent(
+        asOk(this.autoscalingSignal.sample({ runningCost: this.pool.usedCapacity, backlogCost }))
+      )
+    );
+  }
+
   private subscribeToPoller(
     poller$: Observable<Result<TimedFillPoolResult, PollingError<string>>>
   ) {
@@ -599,6 +623,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
             this.emitEvent(
               asTaskManagerStatEvent('workerUtilization', asOk(this.pool.usedCapacityPercentage))
             );
+            this.emitAutoscalingSignal();
           })
         )
       )
@@ -620,6 +645,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
             this.currentTmUtilization$.next(tmUtilization);
             this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(tmUtilization)));
+            this.emitAutoscalingSignal(results.stats?.backlogCost);
           })
         )
       )

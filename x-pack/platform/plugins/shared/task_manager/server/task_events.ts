@@ -16,6 +16,7 @@ import type { DecoratedError, TaskRunResult } from './task_running';
 import type { EventLoopDelayConfig } from './config';
 import type { TaskManagerMetrics } from './metrics/task_metrics_collector';
 import type { BackpressureReason } from './lib/backpressure_reason';
+import type { AutoscalingSignalSample } from './lib/autoscaling_signal';
 
 export enum TaskPersistence {
   Recurring = 'recurring',
@@ -31,6 +32,7 @@ export enum TaskEventType {
   TASK_MANAGER_METRIC = 'TASK_MANAGER_METRIC',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
   TASK_MANAGER_BACKPRESSURE = 'TASK_MANAGER_BACKPRESSURE',
+  TASK_MANAGER_AUTOSCALING = 'TASK_MANAGER_AUTOSCALING',
 }
 
 export interface TaskTiming {
@@ -98,6 +100,9 @@ export interface TaskManagerBackpressureStats {
   reason: BackpressureReason | null;
 }
 export type TaskManagerBackpressure = TaskEvent<TaskManagerBackpressureStats, never>;
+
+/** One sample of the autoscaling signal, taken at the end of a polling cycle. */
+export type TaskManagerAutoscaling = TaskEvent<AutoscalingSignalSample, never>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
   ? OkResult
@@ -199,6 +204,15 @@ export function asTaskManagerBackpressureEvent(
   };
 }
 
+export function asTaskManagerAutoscalingEvent(
+  event: Result<AutoscalingSignalSample, never>
+): TaskManagerAutoscaling {
+  return {
+    type: TaskEventType.TASK_MANAGER_AUTOSCALING,
+    event,
+  };
+}
+
 export function isTaskMarkRunningEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskMarkRunning {
@@ -239,4 +253,9 @@ export function isTaskManagerBackpressureEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerBackpressure {
   return taskEvent.type === TaskEventType.TASK_MANAGER_BACKPRESSURE;
+}
+export function isTaskManagerAutoscalingEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskManagerAutoscaling {
+  return taskEvent.type === TaskEventType.TASK_MANAGER_AUTOSCALING;
 }
