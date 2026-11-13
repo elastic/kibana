@@ -25,12 +25,16 @@ import {
 import { listAllSources } from '../../utils/list_all_sources';
 import type { SourceKnowledgeStateClient } from '../../../lib/knowledge_indicators/source_knowledge_state';
 import { StatusError } from '../../../lib/errors/status_error';
+import { latestExecutionBySource } from './extraction/classify_sources';
+
+const ONBOARDING_RESERVATION_MS = 5 * 60_000;
 
 interface OnboardingClient {
   cancelBySource: (args: ISourceRunIdentity & { request: KibanaRequest }) => Promise<unknown>;
   getNonTerminalExecutions?: (args: {
     request: KibanaRequest;
   }) => Promise<WorkflowExecutionListItemDto[]>;
+  getRecentExecutions?: (request: KibanaRequest) => Promise<WorkflowExecutionListItemDto[]>;
 }
 
 type CatalogKiClient = Pick<
@@ -189,6 +193,7 @@ export async function reconcileSourceRevision({
   scheduleSourceOnboarding?: (source: NightshiftSource) => Promise<boolean>;
   request: KibanaRequest;
 }): Promise<(() => Promise<void>) | undefined> {
+  const latestExecution = await loadLatestExecution(source, onboardingClient, request);
   const sourceToSchedule = await sourceKnowledgeState.runExclusive({
     sourceId: source.id,
     run: async (state, checkpoint) => {
@@ -201,9 +206,14 @@ export async function reconcileSourceRevision({
         if (state.revision !== undefined) {
           await resetSourceKnowledge({ source: current, kiClient, onboardingClient, request });
         }
-        await checkpoint({ revision: current.esql_updated_at, onboardingScheduled: false });
+        await checkpoint({
+          revision: current.esql_updated_at,
+          onboardingScheduled: false,
+          onboardingReservedAt: undefined,
+        });
       }
-      return current.enabled && (isRevisionChanged || !state.onboardingScheduled)
+      return current.enabled &&
+        (isRevisionChanged || !isOnboardingScheduled(state, latestExecution))
         ? current
         : undefined;
     },
@@ -217,16 +227,22 @@ export async function reconcileSourceRevision({
     if (runningSources.has(sourceToSchedule.id)) {
       throw new StatusError('Waiting for the previous onboarding execution to finish', 409);
     }
+    const latestExecutionBeforeReservation = await loadLatestExecution(
+      sourceToSchedule,
+      onboardingClient,
+      request
+    );
+    const reservedAt = Date.now();
     const reserved = await sourceKnowledgeState.runExclusive({
       sourceId: sourceToSchedule.id,
       run: async (state, checkpoint) => {
         if (
           state.revision !== sourceToSchedule.esql_updated_at ||
-          state.onboardingScheduled === true
+          isOnboardingScheduled(state, latestExecutionBeforeReservation)
         ) {
           return false;
         }
-        await checkpoint({ onboardingScheduled: true });
+        await checkpoint({ onboardingReservedAt: reservedAt });
         return true;
       },
     });
@@ -242,28 +258,69 @@ export async function reconcileSourceRevision({
       await clearOnboardingReservation({
         source: sourceToSchedule,
         sourceKnowledgeState,
+        reservedAt,
       });
       throw error;
     }
-    await clearOnboardingReservation({ source: sourceToSchedule, sourceKnowledgeState });
+    await clearOnboardingReservation({
+      source: sourceToSchedule,
+      sourceKnowledgeState,
+      reservedAt,
+    });
   };
 }
 
 const clearOnboardingReservation = async ({
   source,
   sourceKnowledgeState,
+  reservedAt,
 }: {
   source: NightshiftSource;
   sourceKnowledgeState: SourceKnowledgeStateClient;
+  reservedAt: number;
 }): Promise<void> => {
   await sourceKnowledgeState.runExclusive({
     sourceId: source.id,
     run: async (state, checkpoint) => {
-      if (state.revision === source.esql_updated_at && state.onboardingScheduled === true) {
-        await checkpoint({ onboardingScheduled: false });
+      if (state.revision === source.esql_updated_at && state.onboardingReservedAt === reservedAt) {
+        await checkpoint({ onboardingReservedAt: undefined });
       }
     },
   });
+};
+
+const loadLatestExecution = async (
+  source: NightshiftSource,
+  onboardingClient: OnboardingClient | undefined,
+  request: KibanaRequest
+): Promise<WorkflowExecutionListItemDto | undefined> => {
+  const executions = await onboardingClient?.getRecentExecutions?.(request);
+  return executions === undefined
+    ? undefined
+    : latestExecutionBySource([source], executions).get(source);
+};
+
+const isOnboardingScheduled = (
+  state: {
+    onboardingScheduled?: boolean;
+    onboardingReservedAt?: number;
+  },
+  latestExecution: WorkflowExecutionListItemDto | undefined
+): boolean => {
+  if (state.onboardingScheduled) {
+    return true;
+  }
+  const { onboardingReservedAt } = state;
+  if (onboardingReservedAt === undefined) {
+    return false;
+  }
+  if (Date.now() - onboardingReservedAt < ONBOARDING_RESERVATION_MS) {
+    return true;
+  }
+  const latestStartedAt = latestExecution?.startedAt
+    ? Date.parse(latestExecution.startedAt)
+    : Number.NaN;
+  return latestStartedAt >= onboardingReservedAt;
 };
 
 /**

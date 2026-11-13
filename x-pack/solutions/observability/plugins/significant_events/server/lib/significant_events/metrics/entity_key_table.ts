@@ -20,12 +20,9 @@ export type EsqlRow = Readonly<Record<string, EsqlCell>>;
 export const ENTITY_QUERY_LIMIT = 501;
 
 export interface DroppedMetricsEntityRows {
-  ownerless: number;
-  nullNamespace: number;
   nullNodeName: number;
   nullCluster: number;
   idTooLong: number;
-  shortLived: number;
 }
 
 export interface EntityFoldResult {
@@ -33,12 +30,6 @@ export interface EntityFoldResult {
   droppedIncompleteRowsCount: number;
   droppedRows: DroppedMetricsEntityRows;
   unknownClusterRows: number;
-  multiNamespaceWorkloadsCount: number;
-  namespacesSkippedCount: number;
-}
-
-export interface EntityQueryContext {
-  multiNamespaceWorkloadKeys: readonly string[];
 }
 
 export interface EntityFoldContext {
@@ -50,19 +41,24 @@ export interface EntityKeyRow {
   families: readonly string[];
   datasets: readonly string[];
   datasetPrefixes?: readonly string[];
-  subtype: 'k8s_workload' | 'k8s_nodes' | 'k8s_namespaces' | 'k8s_cluster' | 'host' | 'service';
-  buildQuery: (sourceQuery: string, context?: EntityQueryContext) => string;
+  subtype:
+    | 'k8s.deployment'
+    | 'k8s.statefulset'
+    | 'k8s.daemonset'
+    | 'k8s.cronjob'
+    | 'k8s.cluster'
+    | 'k8s_nodes'
+    | 'k8s_namespaces'
+    | 'host'
+    | 'service';
+  buildQuery: (sourceQuery: string) => string;
   foldRows: (rows: EsqlRow[], context: EntityFoldContext) => EntityFoldResult;
 }
 
 export const getDatasetFamily = (dataset: string | null): string | undefined =>
   dataset?.split('.')[0];
 
-/** Names in fewer namespaces stay separate (e.g. redis in 4 team namespaces); multi-tenant copies run in hundreds. */
-export const MULTI_NAMESPACE_WORKLOAD_THRESHOLD = 10;
-
 type WorkloadKind = 'deployment' | 'statefulset' | 'daemonset' | 'cronjob';
-type ShortLivedWorkloadKind = 'job' | 'replicaset';
 type KubernetesEntityKind = WorkloadKind | 'cluster';
 
 /** Kubernetes entity types aligned with Entity Inventory and its proposed extensions. */
@@ -78,7 +74,9 @@ type KubernetesEntityIdentity =
   | { kind: WorkloadKind; namespace: string; name: string }
   | { kind: 'cluster'; name: string };
 
-const getKubernetesEntityStoreType = (kind: KubernetesEntityKind): string =>
+const getKubernetesEntityStoreType = <TKind extends KubernetesEntityKind>(
+  kind: TKind
+): (typeof KUBERNETES_ENTITY_STORE_TYPES)[TKind] =>
   KUBERNETES_ENTITY_STORE_TYPES[kind];
 
 export const buildKubernetesEntityId = (identity: KubernetesEntityIdentity): string => {
@@ -98,24 +96,11 @@ const workloadOwnerFields: Record<WorkloadKind, string> = {
 const isWorkloadKind = (value: EsqlCell): value is WorkloadKind =>
   typeof value === 'string' && value in workloadOwnerFields;
 
-const isShortLivedWorkloadKind = (value: EsqlCell): value is ShortLivedWorkloadKind =>
-  value === 'job' || value === 'replicaset';
-
 interface WorkloadEntity {
   kind: WorkloadKind;
   namespace: string;
   name: string;
   ownerDerived: boolean;
-  clusters: string[];
-  replicas: number;
-  lastSeen: string;
-}
-
-interface MultiNamespaceWorkloadEntity {
-  kind: WorkloadKind;
-  name: string;
-  ownerDerived: boolean;
-  namespaceCount: number;
   clusters: string[];
   replicas: number;
   lastSeen: string;
@@ -153,21 +138,13 @@ const formatDatasetList = (datasets: readonly string[]): string =>
   datasets.map((dataset) => `"${dataset}"`).join(', ');
 
 const createDroppedRows = (): DroppedMetricsEntityRows => ({
-  ownerless: 0,
-  nullNamespace: 0,
   nullNodeName: 0,
   nullCluster: 0,
   idTooLong: 0,
-  shortLived: 0,
 });
 
 const droppedRowsCount = (droppedRows: DroppedMetricsEntityRows): number =>
-  droppedRows.ownerless +
-  droppedRows.nullNamespace +
-  droppedRows.nullNodeName +
-  droppedRows.nullCluster +
-  droppedRows.idTooLong +
-  droppedRows.shortLived;
+  droppedRows.nullNodeName + droppedRows.nullCluster + droppedRows.idTooLong;
 
 const derivedOwnerSources: Partial<
   Record<WorkloadKind, { stampedField: string; sourceField: string }>
@@ -184,12 +161,12 @@ const derivedOwnerSources: Partial<
 
 const buildWorkloadOwnerFilter = (
   target: Pick<WorkloadEntity, 'kind' | 'name' | 'ownerDerived'>,
-  hasPrefixCollision: boolean
+  collidingNames: readonly string[]
 ): Condition => {
   const ownerField = workloadOwnerFields[target.kind];
   const stampedOwner: Condition = { field: ownerField, eq: target.name };
   const derivedOwner = derivedOwnerSources[target.kind];
-  return target.ownerDerived && derivedOwner && !hasPrefixCollision
+  return target.ownerDerived && derivedOwner
     ? {
         or: [
           stampedOwner,
@@ -197,6 +174,11 @@ const buildWorkloadOwnerFilter = (
             and: [
               { not: { field: derivedOwner.stampedField, exists: true } },
               { field: derivedOwner.sourceField, startsWith: `${target.name}-` },
+              ...collidingNames.map(
+                (name): Condition => ({
+                  not: { field: derivedOwner.sourceField, startsWith: `${name}-` },
+                })
+              ),
             ],
           },
         ],
@@ -209,34 +191,22 @@ export const buildWorkloadFilter = (
   workloads: ReadonlyArray<Pick<WorkloadEntity, 'kind' | 'namespace' | 'name'>>
 ): Condition => {
   // The prefix-collision guard sees only rows returned by the ranked query.
-  const hasPrefixCollision = workloads.some(
-    (workload) =>
-      workload.kind === target.kind &&
-      workload.namespace === target.namespace &&
-      workload.name !== target.name &&
-      workload.name.startsWith(`${target.name}-`)
-  );
-  return {
-    and: [
-      { field: 'kubernetes.namespace', eq: target.namespace },
-      buildWorkloadOwnerFilter(target, hasPrefixCollision),
-    ],
-  };
-};
-
-const buildMultiNamespaceWorkloadFilter = (
-  target: Pick<MultiNamespaceWorkloadEntity, 'kind' | 'name' | 'ownerDerived'>,
-  workloads: ReadonlyArray<Pick<MultiNamespaceWorkloadEntity, 'kind' | 'name'>>
-): Condition =>
-  buildWorkloadOwnerFilter(
-    target,
-    workloads.some(
+  const collidingNames = workloads
+    .filter(
       (workload) =>
         workload.kind === target.kind &&
+        workload.namespace === target.namespace &&
         workload.name !== target.name &&
         workload.name.startsWith(`${target.name}-`)
     )
-  );
+    .map(({ name }) => name);
+  return {
+    and: [
+      { field: 'kubernetes.namespace', eq: target.namespace },
+      buildWorkloadOwnerFilter(target, collidingNames),
+    ],
+  };
+};
 
 const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-hash\`,
        rs = kubernetes.replicaset.name,
@@ -264,9 +234,6 @@ const WORKLOAD_OWNER_DERIVATION = `| EVAL h = \`kubernetes.labels.pod-template-h
 const quoteEsqlString = (value: string): string =>
   `"${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`;
 
-const formatWorkloadKeys = (keys: readonly string[]): string =>
-  keys.map(quoteEsqlString).join(', ');
-
 const roundToTwoSignificantDigits = (value: number): number =>
   value === 0 ? 0 : Number(value.toPrecision(2));
 
@@ -279,14 +246,12 @@ export const buildInfrastructureConceptDescription = ({
   scale,
   breakdownField,
   members,
-  tenantNamespaces = 0,
 }: {
   concept: 'nodes' | 'namespaces';
   cluster: string;
   scale: number;
   breakdownField: 'kubernetes.node.name' | 'kubernetes.namespace';
   members: readonly string[];
-  tenantNamespaces?: number;
 }): string => {
   const label = concept === 'nodes' ? 'nodes' : 'namespaces';
   const meaning =
@@ -297,15 +262,6 @@ export const buildInfrastructureConceptDescription = ({
     `${meaning}; this source has ${formatScale(scale, label)}.`,
     `Break them down by ${breakdownField}; properties.list_query lists them live.`,
   ];
-  if (concept === 'namespaces' && tenantNamespaces > 0) {
-    sentences.push(
-      `${formatScale(
-        tenantNamespaces,
-        tenantNamespaces === 1 ? 'namespace' : 'namespaces'
-      )} hold only copies of multi-namespace workloads.`
-    );
-  }
-
   const descriptionPrefix = `${sentences.join(' ')} Members: `;
   const descriptionLimit = MAX_TEXT_LENGTH - 200;
   const includedMembers: string[] = [];
@@ -346,47 +302,14 @@ const buildConceptListQuery = ({
 | STATS last_seen = MAX(@timestamp) BY ${breakdownField}
 | SORT ${breakdownField}`;
 
-export const getMultiNamespaceWorkloadKeys = (rows: EsqlRow[]): string[] => [
-  ...new Set(
-    rows.flatMap((row): string[] => {
-      const kind = row.kind;
-      const workload = row.workload;
-      return isWorkloadKind(kind) && typeof workload === 'string' ? [`${kind}/${workload}`] : [];
-    })
-  ),
-];
-
-const buildMultiNamespaceWorkloadQuery = (sourceQuery: string): string => `${sourceQuery}
+const buildWorkloadQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
     AND kubernetes.pod.uid IS NOT NULL
 ${WORKLOAD_OWNER_DERIVATION}
 | WHERE kind IN ("deployment", "statefulset", "daemonset", "cronjob")
     AND workload IS NOT NULL
-| STATS namespaces = COUNT_DISTINCT(kubernetes.namespace),
-        replicas = COUNT_DISTINCT(kubernetes.pod.uid),
-        last_seen = MAX(@timestamp),
-        clusters = VALUES(orchestrator.cluster.name),
-        owner_derived = MAX(CASE(owner_derived, 1, 0))
-  BY kind, workload
-| WHERE namespaces >= ${MULTI_NAMESPACE_WORKLOAD_THRESHOLD}
-| SORT replicas DESC, workload
-| LIMIT ${ENTITY_QUERY_LIMIT}`;
-
-const buildWorkloadQuery = (
-  sourceQuery: string,
-  context?: EntityQueryContext
-): string => `${sourceQuery}
-| WHERE @timestamp > NOW() - 1 hour
-    AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
-    AND kubernetes.pod.uid IS NOT NULL
-${WORKLOAD_OWNER_DERIVATION}
-| EVAL workload_key = CONCAT(kind, "/", workload)${
-  context && context.multiNamespaceWorkloadKeys.length > 0
-    ? `
-| WHERE workload_key NOT IN (${formatWorkloadKeys(context.multiNamespaceWorkloadKeys)})`
-    : ''
-}
+    AND kubernetes.namespace IS NOT NULL
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived
 | STATS replicas = SUM(replicas), last_seen = MAX(last_seen),
@@ -396,80 +319,6 @@ ${WORKLOAD_OWNER_DERIVATION}
 | SORT replicas DESC, kubernetes.namespace, workload
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
-export const foldMultiNamespaceWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
-  const droppedRows = createDroppedRows();
-  let unknownClusterRows = 0;
-  const workloads = rows.flatMap((row): MultiNamespaceWorkloadEntity[] => {
-    const kind = row.kind;
-    const name = row.workload;
-    if (isShortLivedWorkloadKind(kind)) {
-      droppedRows.shortLived += 1;
-      return [];
-    }
-    if (!isWorkloadKind(kind) || typeof name !== 'string') {
-      droppedRows.ownerless += 1;
-      return [];
-    }
-    const clusters = clustersOf(row.clusters);
-    if (clusters.includes(UNKNOWN_CLUSTER)) {
-      unknownClusterRows += 1;
-    }
-    return [
-      {
-        kind,
-        name,
-        ownerDerived: row.owner_derived === true || row.owner_derived === 1,
-        namespaceCount: typeof row.namespaces === 'number' ? row.namespaces : 0,
-        clusters,
-        replicas: replicasOf(row),
-        lastSeen: lastSeenOf(row),
-      },
-    ];
-  });
-  const features = workloads.flatMap((workload): FeatureUpsert[] => {
-    const id = buildKubernetesEntityId({
-      kind: workload.kind,
-      namespace: '*',
-      name: workload.name,
-    });
-    if (id.length > MAX_ID_LENGTH || workload.name.length > MAX_TITLE_LENGTH) {
-      droppedRows.idTooLong += 1;
-      return [];
-    }
-    return [
-      {
-        type: 'entity',
-        subtype: 'k8s_workload',
-        id,
-        title: workload.name,
-        description: `Kubernetes ${workload.kind} ${workload.name} in ${workload.namespaceCount} namespaces.`,
-        filter: buildMultiNamespaceWorkloadFilter(workload, workloads),
-        properties: {
-          name: workload.name,
-          identity: { [workloadOwnerFields[workload.kind]]: workload.name },
-          grain: 'multi_namespace',
-          namespace_count: workload.namespaceCount,
-          breakdown: ['kubernetes.namespace', 'orchestrator.cluster.name'],
-          clusters: workload.clusters,
-          replicas: workload.replicas,
-          last_seen: workload.lastSeen,
-          origin: 'metrics',
-          key_row: 'ecs.k8s_multi_namespace_workload',
-        },
-        confidence: 100,
-      },
-    ];
-  });
-  return {
-    features,
-    droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
-    droppedRows,
-    unknownClusterRows,
-    multiNamespaceWorkloadsCount: features.length,
-    namespacesSkippedCount: 0,
-  };
-};
-
 export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
   const droppedRows = createDroppedRows();
   let unknownClusterRows = 0;
@@ -478,16 +327,10 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
     const namespace = row['kubernetes.namespace'];
     const kind = row.kind;
     const name = row.workload;
-    if (isShortLivedWorkloadKind(kind)) {
-      droppedRows.shortLived += 1;
-      return [];
-    }
     if (!isWorkloadKind(kind) || typeof name !== 'string') {
-      droppedRows.ownerless += 1;
       return [];
     }
     if (typeof namespace !== 'string') {
-      droppedRows.nullNamespace += 1;
       return [];
     }
 
@@ -519,7 +362,7 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
     return [
       {
         type: 'entity',
-        subtype: 'k8s_workload',
+        subtype: getKubernetesEntityStoreType(workload.kind),
         id,
         title: workload.name,
         description: `Kubernetes ${workload.kind} ${workload.name} in namespace ${workload.namespace}.`,
@@ -549,8 +392,6 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
     unknownClusterRows,
-    multiNamespaceWorkloadsCount: 0,
-    namespacesSkippedCount: 0,
   };
 };
 
@@ -562,8 +403,11 @@ const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp),
         os = VALUES(host.os.name), cloud_provider = VALUES(cloud.provider)
   BY orchestrator.cluster.name, kubernetes.node.name
-| INLINE STATS scale = COUNT(*) BY orchestrator.cluster.name
-| SORT activity DESC, kubernetes.node.name
+| STATS scale = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
+        members = TOP(kubernetes.node.name, 50, "asc"),
+        os = VALUES(os), cloud_provider = VALUES(cloud_provider)
+  BY orchestrator.cluster.name
+| SORT activity DESC
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
 export const foldNodeRows = (
@@ -586,11 +430,6 @@ export const foldNodeRows = (
       droppedRows.nullCluster += 1;
       continue;
     }
-    const name = row['kubernetes.node.name'];
-    if (typeof name !== 'string') {
-      droppedRows.nullNodeName += 1;
-      continue;
-    }
     const concept = conceptsByCluster.get(cluster) ?? {
       scale: 0,
       members: [],
@@ -599,9 +438,7 @@ export const foldNodeRows = (
     };
     concept.scale =
       typeof row.scale === 'number' ? Math.max(concept.scale, row.scale) : concept.scale;
-    if (concept.members.length < 50) {
-      concept.members.push(name);
-    }
+    concept.members = stringsOf(row.members).slice(0, 50);
     stringsOf(row.os).forEach((value) => concept.os.add(value));
     stringsOf(row.cloud_provider).forEach((value) => concept.cloudProviders.add(value));
     conceptsByCluster.set(cluster, concept);
@@ -658,36 +495,21 @@ export const foldNodeRows = (
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
     unknownClusterRows: 0,
-    multiNamespaceWorkloadsCount: 0,
-    namespacesSkippedCount: 0,
   };
 };
 
-const buildNamespaceQuery = (
-  sourceQuery: string,
-  context?: EntityQueryContext
-): string => `${sourceQuery}
+const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
     AND data_stream.dataset IN (${formatDatasetList(KUBERNETES_POD_DATASETS)})
     AND kubernetes.pod.uid IS NOT NULL
     AND orchestrator.cluster.name IS NOT NULL
-${WORKLOAD_OWNER_DERIVATION}
-| EVAL workload_key = CONCAT(kind, "/", workload)
-| STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid),
-        local_pods = COUNT_DISTINCT(${
-          context && context.multiNamespaceWorkloadKeys.length > 0
-            ? `CASE(workload_key IS NULL OR workload_key NOT IN (${formatWorkloadKeys(
-                context.multiNamespaceWorkloadKeys
-              )}), kubernetes.pod.uid, NULL)`
-            : 'kubernetes.pod.uid'
-        }),
-        last_seen = MAX(@timestamp),
-        clusters = VALUES(orchestrator.cluster.name)
+    AND kubernetes.namespace IS NOT NULL
+| STATS activity = COUNT(*), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace
-| INLINE STATS scale = COUNT(*),
-               tenant_namespaces = SUM(CASE(local_pods == 0, 1, 0))
+| STATS scale = COUNT(*), activity = SUM(activity), last_seen = MAX(last_seen),
+        members = TOP(kubernetes.namespace, 50, "asc")
   BY orchestrator.cluster.name
-| SORT replicas DESC, kubernetes.namespace
+| SORT activity DESC
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
 
 export const foldNamespaceRows = (
@@ -697,7 +519,7 @@ export const foldNamespaceRows = (
   const droppedRows = createDroppedRows();
   const conceptsByCluster = new Map<
     string,
-    { scale: number; members: string[]; tenantNamespaces: number }
+    { scale: number; members: string[] }
   >();
   for (const row of rows) {
     const cluster = row['orchestrator.cluster.name'];
@@ -705,25 +527,13 @@ export const foldNamespaceRows = (
       droppedRows.nullCluster += 1;
       continue;
     }
-    const namespace = row['kubernetes.namespace'];
-    if (typeof namespace !== 'string') {
-      droppedRows.nullNamespace += 1;
-      continue;
-    }
     const concept = conceptsByCluster.get(cluster) ?? {
       scale: 0,
       members: [],
-      tenantNamespaces: 0,
     };
     concept.scale =
       typeof row.scale === 'number' ? Math.max(concept.scale, row.scale) : concept.scale;
-    concept.tenantNamespaces =
-      typeof row.tenant_namespaces === 'number'
-        ? Math.max(concept.tenantNamespaces, row.tenant_namespaces)
-        : concept.tenantNamespaces;
-    if (concept.members.length < 50) {
-      concept.members.push(namespace);
-    }
+    concept.members = stringsOf(row.members).slice(0, 50);
     conceptsByCluster.set(cluster, concept);
   }
 
@@ -747,14 +557,12 @@ export const foldNamespaceRows = (
           scale: concept.scale,
           breakdownField: 'kubernetes.namespace',
           members,
-          tenantNamespaces: concept.tenantNamespaces,
         }),
         filter: { field: 'orchestrator.cluster.name', eq: cluster },
         properties: {
           breakdown: ['kubernetes.namespace'],
           scale: concept.scale,
           members,
-          tenant_namespaces: concept.tenantNamespaces,
           list_query: buildConceptListQuery({
             sourceQuery,
             cluster,
@@ -775,11 +583,6 @@ export const foldNamespaceRows = (
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
     unknownClusterRows: 0,
-    multiNamespaceWorkloadsCount: 0,
-    namespacesSkippedCount: [...conceptsByCluster.values()].reduce(
-      (count, concept) => count + concept.tenantNamespaces,
-      0
-    ),
   };
 };
 
@@ -809,7 +612,7 @@ export const foldClusterRows = (rows: EsqlRow[]): EntityFoldResult => {
     return [
       {
         type: 'entity',
-        subtype: 'k8s_cluster',
+        subtype: KUBERNETES_ENTITY_STORE_TYPES.cluster,
         id,
         title: cluster,
         description: `Kubernetes cluster ${cluster}.`,
@@ -833,8 +636,6 @@ export const foldClusterRows = (rows: EsqlRow[]): EntityFoldResult => {
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
     unknownClusterRows: 0,
-    multiNamespaceWorkloadsCount: 0,
-    namespacesSkippedCount: 0,
   };
 };
 
@@ -883,7 +684,6 @@ const foldHostRows = ({
   const features = rows.flatMap((row): FeatureUpsert[] => {
     const hostName = row['host.name'];
     if (typeof hostName !== 'string') {
-      droppedRows.ownerless += 1;
       return [];
     }
     const nodeName = row[nodeField];
@@ -951,7 +751,7 @@ const foldHostRows = ({
         droppedRows.idTooLong += 1;
         return [];
       }
-      const allMembers = [...concept.members];
+      const allMembers = [...concept.members].sort();
       const members = allMembers.slice(0, 50);
       return [
         {
@@ -994,8 +794,6 @@ const foldHostRows = ({
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
     unknownClusterRows,
-    multiNamespaceWorkloadsCount: 0,
-    namespacesSkippedCount: 0,
   };
 };
 
@@ -1098,7 +896,6 @@ export const foldServiceRows = (rows: EsqlRow[]): EntityFoldResult => {
   const features = rows.flatMap((row): FeatureUpsert[] => {
     const name = row['service.name'];
     if (typeof name !== 'string') {
-      droppedRows.ownerless += 1;
       return [];
     }
     const id = `service:${name}`;
@@ -1132,25 +929,15 @@ export const foldServiceRows = (rows: EsqlRow[]): EntityFoldResult => {
     droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
     droppedRows,
     unknownClusterRows: 0,
-    multiNamespaceWorkloadsCount: 0,
-    namespacesSkippedCount: 0,
   };
 };
 
 export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
   {
-    id: 'ecs.k8s_multi_namespace_workload',
-    families: KUBERNETES_DATASET_FAMILIES,
-    datasets: KUBERNETES_POD_DATASETS,
-    subtype: 'k8s_workload',
-    buildQuery: buildMultiNamespaceWorkloadQuery,
-    foldRows: foldMultiNamespaceWorkloadRows,
-  },
-  {
     id: 'ecs.k8s_workload',
     families: KUBERNETES_DATASET_FAMILIES,
     datasets: KUBERNETES_POD_DATASETS,
-    subtype: 'k8s_workload',
+    subtype: KUBERNETES_ENTITY_STORE_TYPES.deployment,
     buildQuery: buildWorkloadQuery,
     foldRows: foldWorkloadRows,
   },
@@ -1174,7 +961,7 @@ export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
     id: 'ecs.k8s_cluster',
     families: KUBERNETES_DATASET_FAMILIES,
     datasets: KUBERNETES_CLUSTER_DATASETS,
-    subtype: 'k8s_cluster',
+    subtype: KUBERNETES_ENTITY_STORE_TYPES.cluster,
     buildQuery: buildClusterQuery,
     foldRows: foldClusterRows,
   },

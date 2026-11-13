@@ -161,7 +161,10 @@ describe('reconcileSourceCatalog', () => {
 
   it('stops scheduling onboarding once the sweep budget is spent', async () => {
     const sources = ['a', 'b', 'c'].map((id) => makeSource({ id }));
-    const states = new Map<string, { revision?: string; onboardingScheduled: boolean }>();
+    const states = new Map<
+      string,
+      { revision?: string; onboardingScheduled: boolean; onboardingReservedAt?: number }
+    >();
     const sourceKnowledgeState: SourceKnowledgeStateClient = {
       runExclusive: jest.fn(async ({ sourceId, run }) => {
         const state = states.get(sourceId) ?? { revision: undefined, onboardingScheduled: false };
@@ -192,7 +195,7 @@ describe('reconcileSourceCatalog', () => {
 
     // One slot is taken by the run already going, so only one new source starts.
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
-    expect(states.get('a')?.onboardingScheduled).toBe(true);
+    expect(states.get('a')?.onboardingReservedAt).toEqual(expect.any(Number));
     expect(states.get('b')?.onboardingScheduled).toBe(false);
     expect(states.get('c')?.onboardingScheduled).toBe(false);
   });
@@ -757,6 +760,7 @@ describe('durable source revision reconciliation', () => {
     const onboardingClient = {
       cancelBySource: jest.fn(async () => null),
       getNonTerminalExecutions: jest.fn().mockResolvedValue([]),
+      getRecentExecutions: jest.fn().mockResolvedValue([]),
     };
     const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
     const reconcile = async () => {
@@ -802,7 +806,12 @@ describe('durable source revision reconciliation', () => {
     await reconcile();
     expect(kiClient.deleteIndicators).toHaveBeenCalledTimes(2);
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
-    expect(state).toEqual({ revision: 'revision-2', onboardingScheduled: true, lease: null });
+    expect(state).toMatchObject({
+      revision: 'revision-2',
+      onboardingScheduled: false,
+      lease: null,
+    });
+    expect(state.onboardingReservedAt).toEqual(expect.any(Number));
   });
 
   it('waits for cancellation to complete before queuing the replacement', async () => {
@@ -848,9 +857,50 @@ describe('durable source revision reconciliation', () => {
     source.enabled = true;
     await reconcile();
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
-    expect(state.onboardingScheduled).toBe(true);
+    expect(state.onboardingReservedAt).toEqual(expect.any(Number));
 
     await reconcile();
     expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not schedule a fresh reservation', async () => {
+    const { reconcile, state, scheduleSourceOnboarding } = setup();
+    state.revision = 'revision-2';
+    state.onboardingScheduled = false;
+    state.onboardingReservedAt = Date.now();
+
+    await reconcile();
+
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+  });
+
+  it('does not schedule a stale reservation with a later execution', async () => {
+    const { reconcile, state, scheduleSourceOnboarding, onboardingClient } = setup();
+    state.revision = 'revision-2';
+    state.onboardingScheduled = false;
+    state.onboardingReservedAt = Date.now() - 6 * 60_000;
+    onboardingClient.getRecentExecutions.mockResolvedValue([
+      {
+        ...runningExecution('source-slug'),
+        startedAt: new Date().toISOString(),
+      },
+    ]);
+
+    await reconcile();
+
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+  });
+
+  it('reschedules a stale reservation without a later execution', async () => {
+    const { reconcile, state, scheduleSourceOnboarding } = setup();
+    const staleReservation = Date.now() - 6 * 60_000;
+    state.revision = 'revision-2';
+    state.onboardingScheduled = false;
+    state.onboardingReservedAt = staleReservation;
+
+    await reconcile();
+
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(state.onboardingReservedAt).toBeGreaterThan(staleReservation);
   });
 });

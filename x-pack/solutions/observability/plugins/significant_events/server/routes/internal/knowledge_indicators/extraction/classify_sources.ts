@@ -110,15 +110,12 @@ export const classifySources = ({
  * Executions arrive newest-first. The first row whose concurrency key carries
  * the id of a known source is that source's latest run.
  */
-const latestExecutionBySource = (
-  sources: ClassifySourcesArgs['sources'],
+export const latestExecutionBySource = <TSource extends { id: string }>(
+  sources: readonly TSource[],
   executions: WorkflowExecutionListItemDto[]
-): Map<ClassifySourcesArgs['sources'][number], WorkflowExecutionListItemDto> => {
+): Map<TSource, WorkflowExecutionListItemDto> => {
   const sourcesById = new Map(sources.map((source) => [source.id, source]));
-  const latestBySource = new Map<
-    ClassifySourcesArgs['sources'][number],
-    WorkflowExecutionListItemDto
-  >();
+  const latestBySource = new Map<TSource, WorkflowExecutionListItemDto>();
 
   for (const execution of executions) {
     if (!execution.concurrencyGroupKey) {

@@ -17,13 +17,15 @@ interface WorkflowStep {
   condition?: string;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
+  status?: string;
   'on-failure'?: { continue?: boolean };
   with?: {
     path?: string;
     'workflow-id'?: string;
     metricsEntitiesExcludedSkipped?: string;
-    metricsEntitiesMultiNamespaceWorkloads?: string;
     metricsEntitiesDroppedOverflow?: string;
+    metricsEntitiesHandled?: boolean;
+    metricsEntitiesSkipReason?: string;
   };
 }
 
@@ -100,15 +102,11 @@ describe('KI onboarding workflow metrics branch', () => {
     ).toMatchObject({
       metricsEntitiesExcludedSkipped:
         '${{ steps.run_metrics_entities.output.excludedSkippedCount | default: 0 }}',
-      metricsEntitiesMultiNamespaceWorkloads:
-        '${{ steps.run_metrics_entities.output.multiNamespaceWorkloadsCount | default: 0 }}',
       metricsEntitiesDroppedOverflow:
         '${{ steps.run_metrics_entities.output.droppedOverflowRowsCount | default: 0 }}',
     });
     expect(workflow.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
       metricsEntitiesExcludedSkipped: '${{ variables.metricsEntitiesExcludedSkipped }}',
-      metricsEntitiesMultiNamespaceWorkloads:
-        '${{ variables.metricsEntitiesMultiNamespaceWorkloads }}',
       metricsEntitiesDroppedOverflow: '${{ variables.metricsEntitiesDroppedOverflow }}',
     });
     expect(workflow.steps.find(({ name }) => name === 'keep_alive_persistent')).toMatchObject({
@@ -120,5 +118,26 @@ describe('KI onboarding workflow metrics branch', () => {
         metricsEntitiesHandled: true,
       })
     ).toBe(true);
+  });
+
+  it('fails after keep-alive when the metrics request fails', () => {
+    const keepAliveIndex = workflow.steps.findIndex(({ name }) => name === 'keep_alive_persistent');
+    const failureIndex = workflow.steps.findIndex(
+      ({ name }) => name === 'exit_if_metrics_request_failed'
+    );
+    const failureOutput = workflow.steps[failureIndex]?.steps?.[0];
+
+    expect(failureIndex).toBeGreaterThan(keepAliveIndex);
+    expect(workflow.steps[failureIndex]?.condition).toBe(
+      '${{ steps.run_metrics_entities.error != null }}'
+    );
+    expect(failureOutput).toMatchObject({
+      type: 'workflow.output',
+      status: 'failed',
+      with: {
+        metricsEntitiesHandled: true,
+        metricsEntitiesSkipReason: 'request_failed',
+      },
+    });
   });
 });

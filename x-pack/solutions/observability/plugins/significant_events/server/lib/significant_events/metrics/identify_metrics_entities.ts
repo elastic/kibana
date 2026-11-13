@@ -8,7 +8,10 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Logger } from '@kbn/logging';
-import type { FeatureUpsert } from '@kbn/significant-events-schema';
+import {
+  normalizeFeatureSlug,
+  type FeatureUpsert,
+} from '@kbn/significant-events-schema';
 import { toFromSourceQuery } from '@kbn/nightshift-shared';
 import { timeoutSignal } from '@kbn/std';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
@@ -16,7 +19,6 @@ import {
   ENTITY_QUERY_LIMIT,
   ENTITY_KEY_TABLE,
   getDatasetFamily,
-  getMultiNamespaceWorkloadKeys,
   mergeHostFeatures,
   type DroppedMetricsEntityRows,
   type EsqlCell,
@@ -51,26 +53,18 @@ export interface IdentifyMetricsEntitiesResult {
   droppedOverflowRowsCount: number;
   droppedRows: DroppedMetricsEntityRows;
   unknownClusterRows: number;
-  multiNamespaceWorkloadsCount: number;
-  namespacesSkippedCount: number;
   excludedSkippedCount: number;
   timings: {
     catalogueMs: number;
     inventoryMs: number;
     totalMs: number;
   };
-  errors: Array<{ stage: 'catalogue'; message: string }>;
 }
 
-const errorMessage = (error: Error): string => error.message;
-
 const createDroppedRows = (): DroppedMetricsEntityRows => ({
-  ownerless: 0,
-  nullNamespace: 0,
   nullNodeName: 0,
   nullCluster: 0,
   idTooLong: 0,
-  shortLived: 0,
 });
 
 const isEsqlScalar = (value: ESQLSearchResponse['values'][number][number]): value is EsqlScalar =>
@@ -138,7 +132,7 @@ const compareEntityIds = (left: FeatureUpsert, right: FeatureUpsert): number =>
 
 const entityPriority = (feature: FeatureUpsert): number => {
   switch (feature.subtype) {
-    case 'k8s_cluster':
+    case 'k8s.cluster':
       return 0;
     case 'k8s_nodes':
     case 'k8s_namespaces':
@@ -147,7 +141,10 @@ const entityPriority = (feature: FeatureUpsert): number => {
       return 2;
     case 'service':
       return 3;
-    case 'k8s_workload':
+    case 'k8s.deployment':
+    case 'k8s.statefulset':
+    case 'k8s.daemonset':
+    case 'k8s.cronjob':
       return 4;
     default:
       return 5;
@@ -164,33 +161,8 @@ export const identifyMetricsEntities = async ({
   signal,
 }: IdentifyMetricsEntitiesOptions): Promise<IdentifyMetricsEntitiesResult> => {
   const startedAt = Date.now();
-  let sourceQuery = '';
-  let datasets: Array<string | null> = [];
-
-  try {
-    sourceQuery = buildSourceQuery(esql);
-    datasets = await getMetricsDatasets({ esClient, sourceQuery, signal });
-  } catch (error) {
-    const catalogueMs = Date.now() - startedAt;
-    const message = errorMessage(error instanceof Error ? error : new Error(String(error)));
-    return {
-      handled: true,
-      metricsEntitiesCount: 0,
-      metricsCatalogueRowsCount: 0,
-      matchedEntityKeyRowsCount: 0,
-      uncoveredDatasetsCount: 0,
-      metricsEntityRowsCount: 0,
-      droppedIncompleteRowsCount: 0,
-      droppedOverflowRowsCount: 0,
-      droppedRows: createDroppedRows(),
-      unknownClusterRows: 0,
-      multiNamespaceWorkloadsCount: 0,
-      namespacesSkippedCount: 0,
-      excludedSkippedCount: 0,
-      timings: { catalogueMs, inventoryMs: 0, totalMs: catalogueMs },
-      errors: [{ stage: 'catalogue', message }],
-    };
-  }
+  const sourceQuery = buildSourceQuery(esql);
+  const datasets = await getMetricsDatasets({ esClient, sourceQuery, signal });
 
   const catalogueMs = Date.now() - startedAt;
   const metricsCatalogueRowsCount = datasets.length;
@@ -208,11 +180,8 @@ export const identifyMetricsEntities = async ({
       droppedOverflowRowsCount: 0,
       droppedRows: createDroppedRows(),
       unknownClusterRows: 0,
-      multiNamespaceWorkloadsCount: 0,
-      namespacesSkippedCount: 0,
       excludedSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
-      errors: [],
     };
   }
 
@@ -250,11 +219,8 @@ export const identifyMetricsEntities = async ({
       droppedOverflowRowsCount: 0,
       droppedRows: createDroppedRows(),
       unknownClusterRows: 0,
-      multiNamespaceWorkloadsCount: 0,
-      namespacesSkippedCount: 0,
       excludedSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
-      errors: [],
     };
   }
   if (uncoveredDatasetsCount > 0) {
@@ -270,18 +236,10 @@ export const identifyMetricsEntities = async ({
   let droppedIncompleteRowsCount = 0;
   const droppedRows = createDroppedRows();
   let unknownClusterRows = 0;
-  let multiNamespaceWorkloadKeys: string[] = [];
-  let multiNamespaceWorkloadsCount = 0;
-  let largestNamespaceCount = 0;
-  let namespacesSkippedCount = 0;
 
   for (const keyRow of matchedKeyRows) {
     const response = (await esClient.esql.query(
-      {
-        query: keyRow.buildQuery(sourceQuery, {
-          multiNamespaceWorkloadKeys,
-        }),
-      },
+      { query: keyRow.buildQuery(sourceQuery) },
       { signal }
     )) as ESQLSearchResponse;
     const rows = rowsFromResponse(response);
@@ -290,40 +248,29 @@ export const identifyMetricsEntities = async ({
         `Metrics entity query for source [${sourceId}] row [${keyRow.id}] reached the ${ENTITY_QUERY_LIMIT} row limit.`
       );
     }
-    if (keyRow.id === 'ecs.k8s_multi_namespace_workload') {
-      multiNamespaceWorkloadKeys = getMultiNamespaceWorkloadKeys(rows);
-      largestNamespaceCount = rows.reduce(
-        (largest, row) =>
-          typeof row.namespaces === 'number' ? Math.max(largest, row.namespaces) : largest,
-        0
-      );
-    }
     metricsEntityRowsCount += rows.length;
     const folded = keyRow.foldRows(rows, { sourceQuery });
     features.push(...folded.features);
     droppedIncompleteRowsCount += folded.droppedIncompleteRowsCount;
-    droppedRows.ownerless += folded.droppedRows.ownerless;
-    droppedRows.nullNamespace += folded.droppedRows.nullNamespace;
     droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
     droppedRows.nullCluster += folded.droppedRows.nullCluster;
     droppedRows.idTooLong += folded.droppedRows.idTooLong;
-    droppedRows.shortLived += folded.droppedRows.shortLived;
     unknownClusterRows += folded.unknownClusterRows;
-    multiNamespaceWorkloadsCount += folded.multiNamespaceWorkloadsCount;
-    namespacesSkippedCount += folded.namespacesSkippedCount;
   }
 
-  if (multiNamespaceWorkloadsCount > 0) {
-    logger.info(
-      `Metrics source [${sourceId}] merged [${multiNamespaceWorkloadsCount}] workload names across namespaces; the largest spans [${largestNamespaceCount}] namespaces.`
-    );
-  }
-
-  const { hits: excludedFeatures } = await kiClient.getExcludedFeatures(sourceId);
-  const excludedFeatureIds = new Set(excludedFeatures.map(({ id }) => id));
+  const [{ hits: excludedFeatures }, { hits: priorFeatures }] = await Promise.all([
+    kiClient.getExcludedFeatures(sourceId),
+    kiClient.getFeatures(sourceId),
+  ]);
+  const excludedFeatureIds = new Set(
+    excludedFeatures.map(({ id }) => normalizeFeatureSlug(id))
+  );
+  const priorBySlug = new Map(
+    priorFeatures.map((feature) => [normalizeFeatureSlug(feature.id), feature])
+  );
   const mergedFeatures = mergeHostFeatures(features);
   const selectedFeatures = mergedFeatures
-    .filter(({ id }) => !excludedFeatureIds.has(id))
+    .filter(({ id }) => !excludedFeatureIds.has(normalizeFeatureSlug(id)))
     .sort((left, right) => {
       const priority = entityPriority(left) - entityPriority(right);
       if (priority !== 0) {
@@ -344,9 +291,17 @@ export const identifyMetricsEntities = async ({
     const expiresAt = kiClient.getDefaultExpiresAt();
     await kiClient.bulk(
       sourceId,
-      selectedFeatures.map((feature) => ({
-        index: { feature: { ...feature, expires_at: expiresAt } },
-      }))
+      selectedFeatures.map((feature) => {
+        const prior = priorBySlug.get(normalizeFeatureSlug(feature.id));
+        return {
+          index: {
+            feature: {
+              ...feature,
+              expires_at: !prior || prior.expires_at ? expiresAt : undefined,
+            },
+          },
+        };
+      })
     );
   }
 
@@ -362,10 +317,7 @@ export const identifyMetricsEntities = async ({
     droppedOverflowRowsCount,
     droppedRows,
     unknownClusterRows,
-    multiNamespaceWorkloadsCount,
-    namespacesSkippedCount,
     excludedSkippedCount,
     timings: { catalogueMs, inventoryMs, totalMs: Date.now() - startedAt },
-    errors: [],
   };
 };

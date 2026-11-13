@@ -148,9 +148,7 @@ steps:
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
           metricsEntitiesCount: 0
           metricsEntitiesUncoveredDatasetsCount: 0
-          metricsEntitiesDroppedOwnerlessRows: 0
           metricsEntitiesExcludedSkipped: 0
-          metricsEntitiesMultiNamespaceWorkloads: 0
           metricsEntitiesDroppedOverflow: 0
           metricsEntitiesHandled: false
           metricsEntitiesSkipReason: ''
@@ -173,9 +171,7 @@ steps:
       queriesConnectorUsed: ""
       metricsEntitiesCount: 0
       metricsEntitiesUncoveredDatasetsCount: 0
-      metricsEntitiesDroppedOwnerlessRows: 0
       metricsEntitiesExcludedSkipped: 0
-      metricsEntitiesMultiNamespaceWorkloads: 0
       metricsEntitiesDroppedOverflow: 0
       metricsEntitiesHandled: false
       metricsEntitiesSkipReason: ""
@@ -204,9 +200,7 @@ steps:
         with:
           metricsEntitiesCount: "${{ steps.run_metrics_entities.output.metricsEntitiesCount | default: 0 }}"
           metricsEntitiesUncoveredDatasetsCount: "${{ steps.run_metrics_entities.output.uncoveredDatasetsCount | default: 0 }}"
-          metricsEntitiesDroppedOwnerlessRows: "${{ steps.run_metrics_entities.output.droppedRows.ownerless | default: 0 }}"
           metricsEntitiesExcludedSkipped: "${{ steps.run_metrics_entities.output.excludedSkippedCount | default: 0 }}"
-          metricsEntitiesMultiNamespaceWorkloads: "${{ steps.run_metrics_entities.output.multiNamespaceWorkloadsCount | default: 0 }}"
           metricsEntitiesDroppedOverflow: "${{ steps.run_metrics_entities.output.droppedOverflowRowsCount | default: 0 }}"
           metricsEntitiesHandled: >-
             ${{ steps.run_metrics_entities.error != null
@@ -350,6 +344,31 @@ steps:
     on-failure:
       continue: true
 
+  - name: exit_if_metrics_request_failed
+    type: if
+    condition: '${{ steps.run_metrics_entities.error != null }}'
+    steps:
+      - name: output_metrics_request_failed
+        type: workflow.output
+        status: failed
+        with:
+          sourceId: '${{ inputs.sourceId }}'
+          featuresSkipped: true
+          featuresConnectorUsed: ''
+          discoveredFeatures: []
+          featuresTokensUsed: { prompt: 0, completion: 0, total: 0 }
+          queriesSkipped: true
+          queriesConnectorUsed: ''
+          persistedQueries: []
+          queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
+          metricsEntitiesCount: 0
+          metricsEntitiesUncoveredDatasetsCount: 0
+          metricsEntitiesExcludedSkipped: 0
+          metricsEntitiesDroppedOverflow: 0
+          metricsEntitiesHandled: true
+          metricsEntitiesSkipReason: 'request_failed'
+          keepAliveRefreshed: "${{ steps.keep_alive_persistent.output.refreshed }}"
+
   # -----------------------------------------------------------------------
   # Step 6: Output summary
   # -----------------------------------------------------------------------
@@ -367,9 +386,7 @@ steps:
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
       metricsEntitiesCount: "${{ variables.metricsEntitiesCount }}"
       metricsEntitiesUncoveredDatasetsCount: "${{ variables.metricsEntitiesUncoveredDatasetsCount }}"
-      metricsEntitiesDroppedOwnerlessRows: "${{ variables.metricsEntitiesDroppedOwnerlessRows }}"
       metricsEntitiesExcludedSkipped: "${{ variables.metricsEntitiesExcludedSkipped }}"
-      metricsEntitiesMultiNamespaceWorkloads: "${{ variables.metricsEntitiesMultiNamespaceWorkloads }}"
       metricsEntitiesDroppedOverflow: "${{ variables.metricsEntitiesDroppedOverflow }}"
       metricsEntitiesHandled: "${{ variables.metricsEntitiesHandled }}"
       metricsEntitiesSkipReason: "${{ variables.metricsEntitiesSkipReason }}"
