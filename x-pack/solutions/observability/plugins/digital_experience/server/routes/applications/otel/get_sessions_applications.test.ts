@@ -49,7 +49,7 @@ const setup = (aggregations: unknown) => {
   return { tracedEsClient: { search } as unknown as TracedElasticsearchClient, search };
 };
 
-const PARAMS = { start: 1, end: 2, timeZone: 'UTC' };
+const PARAMS = { start: 1, end: 2, interval: { value: 1, unit: 's' as const }, timeZone: 'UTC' };
 
 describe('getSessionsApplications', () => {
   it('maps the sessions buckets to application summaries, with the samples and ratings summed', async () => {

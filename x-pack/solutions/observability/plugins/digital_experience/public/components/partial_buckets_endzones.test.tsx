@@ -82,6 +82,26 @@ describe('PartialBucketsEndzones', () => {
     expect(lastShadedZones()).toEqual([{ coordinates: { x0: 3 * HOUR } }]);
   });
 
+  it('measures the last calendar bucket by its own length, not the shortest one', () => {
+    // Monthly buckets: February is 28 days, March 31, so a range ending on March 30 cuts March.
+    const months = ['2026-01-01', '2026-02-01', '2026-03-01'].map((day) => ({
+      timestamp: Date.parse(`${day}T00:00:00.000Z`),
+    }));
+    const end = Date.parse('2026-03-30T00:00:00.000Z');
+
+    render(
+      <PartialBucketsEndzones
+        points={months}
+        interval={{ value: 1, unit: 'M' }}
+        range={{ start: months[0].timestamp, end }}
+        timeZone="UTC"
+      />,
+      { wrapper: EuiProvider }
+    );
+
+    expect(lastShadedZones()).toEqual([{ coordinates: { x0: end } }]);
+  });
+
   it('renders nothing without buckets', () => {
     render(
       <PartialBucketsEndzones

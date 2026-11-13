@@ -110,7 +110,13 @@ describe('getOtelApplications', () => {
     });
 
     await expect(
-      getOtelApplications({ esClient, start: 1, end: 2, timeZone: 'UTC' })
+      getOtelApplications({
+        esClient,
+        start: 1,
+        end: 2,
+        interval: { value: 1, unit: 's' },
+        timeZone: 'UTC',
+      })
     ).resolves.toEqual({
       applications: [
         {
@@ -163,7 +169,13 @@ describe('getOtelApplications', () => {
   it('matches web vital names in any case and orders the applications by page loads', async () => {
     const esClient = setup({ logs: [], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20, timeZone: 'UTC' });
+    await getOtelApplications({
+      esClient,
+      start: 10,
+      end: 20,
+      interval: { value: 1, unit: 's' },
+      timeZone: 'UTC',
+    });
 
     const [[logsRequest]] = esClient.search.mock.calls;
     const { applications } = (
@@ -185,7 +197,13 @@ describe('getOtelApplications', () => {
   it('queries the OTel logs and traces for browser SDKs only', async () => {
     const esClient = setup({ logs: [pageLoadsOnly('web')], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20, timeZone: 'UTC' });
+    await getOtelApplications({
+      esClient,
+      start: 10,
+      end: 20,
+      interval: { value: 1, unit: 's' },
+      timeZone: 'UTC',
+    });
 
     const indices = esClient.search.mock.calls.map(([request]) => request?.index);
     expect(indices).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
@@ -207,6 +225,7 @@ describe('getOtelApplications', () => {
       esClient,
       start: 1,
       end: 2,
+      interval: { value: 1, unit: 's' },
       timeZone: 'UTC',
     });
 
@@ -225,6 +244,7 @@ describe('getOtelApplications', () => {
       esClient,
       start: 1,
       end: 2,
+      interval: { value: 1, unit: 's' },
       timeZone: 'UTC',
     });
 
@@ -234,7 +254,13 @@ describe('getOtelApplications', () => {
   it('searches the HTTP requests of the applications found in the logs only', async () => {
     const esClient = setup({ logs: [pageLoadsOnly('web'), pageLoadsOnly('shop')], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20, timeZone: 'UTC' });
+    await getOtelApplications({
+      esClient,
+      start: 10,
+      end: 20,
+      interval: { value: 1, unit: 's' },
+      timeZone: 'UTC',
+    });
 
     const [, [spansRequest]] = esClient.search.mock.calls;
     const { applications } = (
@@ -250,7 +276,13 @@ describe('getOtelApplications', () => {
   it('skips the spans search without applications in the logs', async () => {
     const esClient = setup({ logs: [], spans: [] });
 
-    await getOtelApplications({ esClient, start: 10, end: 20, timeZone: 'UTC' });
+    await getOtelApplications({
+      esClient,
+      start: 10,
+      end: 20,
+      interval: { value: 1, unit: 's' },
+      timeZone: 'UTC',
+    });
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
   });
@@ -263,6 +295,7 @@ describe('getOtelApplications', () => {
       start: 10,
       end: 20,
       environment: 'ENVIRONMENT_NOT_DEFINED',
+      interval: { value: 1, unit: 's' },
       timeZone: 'UTC',
     });
 
@@ -294,6 +327,7 @@ describe('getOtelApplications', () => {
       start: 10,
       end: 20,
       environment: 'production',
+      interval: { value: 1, unit: 's' },
       timeZone: 'UTC',
     });
 

@@ -25,6 +25,7 @@ import type {
 } from '../../../../common/types/overview';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
+import { NO_BUCKETS_INTERVAL } from '../../../components/partial_buckets_endzones';
 import type { QueriedRange } from '../../../utils/time_range_query';
 import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { ApplicationData, ApplicationRequest } from '../../../hooks/use_application_data';
@@ -114,7 +115,7 @@ const emptyOverview = (
   httpRequests: { count: 0, failedCount: 0, failedRatio: null },
   webVitals: NO_WEB_VITALS,
   trend: [],
-  trendInterval: { value: 1, unit: 's' },
+  trendInterval: NO_BUCKETS_INTERVAL,
 });
 
 /** The KPIs, Core Web Vitals and trends of one Overview, empty while it loads. */

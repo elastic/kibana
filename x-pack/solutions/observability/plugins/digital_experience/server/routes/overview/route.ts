@@ -13,6 +13,7 @@ import type { ApplicationOverviewResponse } from '../../../common/types/overview
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { MAX_SERVICE_NAME_LENGTH } from '../../lib/constants';
 import { kueryToQuery } from '../../lib/helpers/kuery';
+import { getHistogramInterval } from '../../lib/helpers/time_series';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import {
   START_AFTER_END_ISSUE,
@@ -69,6 +70,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       filters: readOverviewFilters(filters),
       percentile,
       kuery: kueryToQuery(kuery),
+      interval: getHistogramInterval(start, end),
       timeZone,
       signal,
     });

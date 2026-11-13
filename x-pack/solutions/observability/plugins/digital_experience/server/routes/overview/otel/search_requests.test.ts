@@ -7,7 +7,13 @@
 
 import { logsSearch, spansSearch } from './search_requests';
 
-const PARAMS = { serviceName: 'shop', start: 0, end: 60 * 60 * 1000, timeZone: 'America/New_York' };
+const PARAMS = {
+  serviceName: 'shop',
+  start: 0,
+  end: 60 * 60 * 1000,
+  interval: { value: 60, unit: 's' as const },
+  timeZone: 'America/New_York',
+};
 
 const inEnvironmentOf = (request: ReturnType<typeof logsSearch>) =>
   request.aggs?.inEnvironment as { filter: unknown; aggs: Record<string, never> };

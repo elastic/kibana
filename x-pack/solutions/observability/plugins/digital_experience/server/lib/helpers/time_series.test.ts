@@ -29,8 +29,15 @@ describe('getHistogramInterval', () => {
 });
 
 describe('dateHistogram', () => {
-  it('returns every bucket of the range, empty ones included', () => {
-    expect(dateHistogram(0, HOUR, TIME_ZONE)).toEqual({
+  it('returns every bucket of the range in the time zone, empty ones included', () => {
+    expect(
+      dateHistogram({
+        start: 0,
+        end: HOUR,
+        interval: { value: 60, unit: 's' },
+        timeZone: TIME_ZONE,
+      })
+    ).toEqual({
       date_histogram: {
         field: '@timestamp',
         fixed_interval: '60s',
@@ -41,28 +48,28 @@ describe('dateHistogram', () => {
     });
   });
 
-  it('passes the time zone with a fixed interval', () => {
-    expect(dateHistogram(0, 24 * HOUR, TIME_ZONE).date_histogram).toMatchObject({
-      fixed_interval: '1800s',
-      time_zone: TIME_ZONE,
+  it('uses a calendar interval for the calendar units', () => {
+    const { date_histogram: daily } = dateHistogram({
+      start: 0,
+      end: 90 * DAY,
+      interval: { value: 1, unit: 'd' },
+      timeZone: TIME_ZONE,
     });
-    expect(dateHistogram(0, 30 * DAY, TIME_ZONE).date_histogram).toMatchObject({
-      fixed_interval: '43200s',
-      time_zone: TIME_ZONE,
-    });
-  });
-
-  it('passes the time zone with a calendar interval', () => {
-    const daily = dateHistogram(0, 90 * DAY, TIME_ZONE).date_histogram;
-    const weekly = dateHistogram(0, 365 * DAY, TIME_ZONE).date_histogram;
 
     expect(daily).toMatchObject({ calendar_interval: '1d', time_zone: TIME_ZONE });
     expect(daily).not.toHaveProperty('fixed_interval');
-    expect(weekly).toMatchObject({ calendar_interval: '1w', time_zone: TIME_ZONE });
   });
 
   it('buckets by the given field', () => {
-    expect(dateHistogram(0, HOUR, TIME_ZONE, 'start_time').date_histogram.field).toBe('start_time');
+    const { date_histogram: histogram } = dateHistogram({
+      start: 0,
+      end: HOUR,
+      interval: { value: 60, unit: 's' },
+      timeZone: TIME_ZONE,
+      field: 'start_time',
+    });
+
+    expect(histogram.field).toBe('start_time');
   });
 });
 
