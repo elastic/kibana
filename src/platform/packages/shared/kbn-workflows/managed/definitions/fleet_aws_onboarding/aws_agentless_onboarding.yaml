@@ -1,0 +1,268 @@
+# =============================================================================
+# AWS Agentless Onboarding
+# =============================================================================
+#
+# Purpose:
+#   Lets an AI agent onboard AWS services with agentless integrations on behalf of
+#   a user: check credentials, discover the services in use, resolve the integration
+#   settings, create the Federated Identity CloudFormation stack, register the cloud
+#   connector, create one agentless policy per service and wait for data.
+#
+# Human-in-the-loop:
+#   Every step that reads from or writes to the user's AWS account is preceded by an
+#   approval. Rejecting an approval fails the run.
+#
+# Modes:
+#   Only the fully managed mode is encoded. The partially managed mode (the user runs
+#   the CloudFormation stack themselves) is intentionally not part of this workflow,
+#   so there is no `mode` input.
+# =============================================================================
+
+name: "AWS Agentless Onboarding"
+enabled: true
+description: "Onboard AWS services with agentless integrations, with human approval at each step that touches the AWS account."
+version: "1"
+tags:
+  - fleet
+  - aws
+  - onboarding
+
+triggers:
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        region:
+          type: string
+          description: AWS region used to discover services and resolve integration settings.
+        namespace:
+          type: string
+          description: Data stream namespace for the created policies. Defaults to the integration default.
+        stack_parameter_overrides:
+          type: object
+          description: Overrides for the CloudFormation stack parameters, as string values by parameter name.
+          additionalProperties:
+            type: string
+      required:
+        - region
+
+steps:
+  # Credentials are checked once. Only when they are missing do we enter the loop, which is
+  # do-while: it asks the user, re-checks, and repeats until they are configured. Nothing after
+  # this block reads credential state, so a single branch suffices.
+  - name: credentials
+    type: fleet.awsOnboardingCredentials
+
+  - name: credentials_missing
+    type: if
+    condition: "${{ steps.credentials.output.configured != true }}"
+    steps:
+      - name: ensure_credentials
+        type: while
+        condition: "${{ steps.credentials_recheck.output.configured != true }}"
+        max-iterations:
+          limit: 10
+          on-limit: fail
+        steps:
+          - name: ask_credentials
+            type: waitForInput
+            with:
+              message: "Set up onboarding access for Elastic in your AWS account (run the bootstrap stack, then enter the access key and role ARNs in Kibana's AWS onboarding credentials form). Reply when done."
+              schema:
+                properties:
+                  done:
+                    type: boolean
+          - name: credentials_recheck
+            type: fleet.awsOnboardingCredentials
+
+  - name: ask_discover
+    type: waitForApproval
+    with:
+      message: "May I match Elastic integrations to the services in your AWS account? This reads billing and service metadata only."
+
+  - name: fail_no_discover
+    type: if
+    condition: "${{ steps.ask_discover.output.response.approved != true }}"
+    steps:
+      - name: stop_no_discover
+        type: workflow.fail
+        with:
+          message: "Service discovery was not approved."
+          reason: "discover_rejected"
+
+  - name: discover
+    type: fleet.awsOnboardingDiscover
+    with:
+      region: "{{ inputs.region }}"
+
+  - name: select_services
+    type: waitForInput
+    with:
+      message: "Which services do you want to onboard?"
+      schema:
+        properties:
+          services:
+            type: array
+            items:
+              type: string
+            minItems: 1
+            uniqueItems: true
+          region:
+            type: string
+        required:
+          - services
+
+  - name: ask_resolve
+    type: waitForApproval
+    with:
+      message: "May I look up the values those integrations need (regions, detector ids) in your account?"
+
+  - name: fail_no_resolve
+    type: if
+    condition: "${{ steps.ask_resolve.output.response.approved != true }}"
+    steps:
+      - name: stop_no_resolve
+        type: workflow.fail
+        with:
+          message: "Looking up the integration values was not approved."
+          reason: "resolve_rejected"
+
+  - name: resolve
+    type: fleet.awsOnboardingResolve
+    with:
+      services: "${{ steps.select_services.output.response.services }}"
+      region: "{{ steps.select_services.output.response.region | default: inputs.region }}"
+      account_id: "{{ steps.discover.output.account_id }}"
+      namespace: "{{ inputs.namespace }}"
+
+  - name: approve_values
+    type: waitForApproval
+    with:
+      message: "Approve the integration settings shown by the assistant?"
+
+  - name: fail_values_rejected
+    type: if
+    condition: "${{ steps.approve_values.output.response.approved != true }}"
+    steps:
+      - name: stop_values_rejected
+        type: workflow.fail
+        with:
+          message: "The integration settings were not approved."
+          reason: "values_rejected"
+
+  - name: ask_stack
+    type: waitForApproval
+    with:
+      message: "May I create the Federated Identity CloudFormation stack in your account? It creates an OIDC provider and one IAM role with the permissions listed."
+
+  - name: fail_no_stack
+    type: if
+    condition: "${{ steps.ask_stack.output.response.approved != true }}"
+    steps:
+      - name: stop_no_stack
+        type: workflow.fail
+        with:
+          message: "Creating the CloudFormation stack was not approved."
+          reason: "stack_rejected"
+
+  - name: cloud_context
+    type: fleet.awsOnboardingCloudContext
+    with:
+      overrides: "${{ inputs.stack_parameter_overrides }}"
+
+  - name: create_stack
+    type: fleet.awsOnboardingCreateStack
+    with:
+      integrations: "${{ steps.resolve.output.integrations }}"
+      parameters: "${{ steps.cloud_context.output.parameters }}"
+
+  # Do-while: the first status check always runs, then the loop repeats while the stack is
+  # still being created. 15s interval, at most 60 attempts, 15 minutes.
+  - name: poll_stack
+    type: while
+    condition: "${{ steps.stack_status.output.status == 'in_progress' }}"
+    max-iterations:
+      limit: 60
+      on-limit: fail
+    timeout: 15m
+    steps:
+      - name: stack_status
+        type: fleet.awsOnboardingStackStatus
+        with:
+          stack_id: "{{ steps.create_stack.output.stack_id }}"
+      - name: stack_delay
+        type: if
+        condition: "${{ steps.stack_status.output.status == 'in_progress' }}"
+        steps:
+          - name: stack_wait
+            type: wait
+            with:
+              duration: 15s
+
+  - name: fail_stack
+    type: if
+    condition: "${{ steps.stack_status.output.status != 'complete' }}"
+    steps:
+      - name: stop_stack
+        type: workflow.fail
+        with:
+          message: "The CloudFormation stack did not complete: {{ steps.stack_status.output.reason }}"
+          reason: "stack_failed"
+
+  - name: name_identity
+    type: waitForInput
+    with:
+      message: "Name for this Federated Identity (the assistant suggests one):"
+      schema:
+        properties:
+          name:
+            type: string
+        required:
+          - name
+
+  - name: create_connector
+    type: fleet.awsOnboardingCreateConnector
+    with:
+      name: "{{ steps.name_identity.output.response.name }}"
+      role_arn: "{{ steps.stack_status.output.role_arn }}"
+      stack_id: "{{ steps.create_stack.output.stack_id }}"
+      template_sha: "{{ steps.create_stack.output.template_sha }}"
+      blueprint_id: "{{ steps.create_stack.output.blueprint_id }}"
+      blueprint_version: "{{ steps.create_stack.output.blueprint_version }}"
+
+  - name: create_policies
+    type: fleet.awsOnboardingCreatePolicies
+    with:
+      policies: "${{ steps.resolve.output.policies }}"
+      cloud_connector_id: "{{ steps.create_connector.output.cloud_connector_id }}"
+
+  # Do-while: the first check always runs. 20s interval, at most 60 attempts, 20 minutes.
+  - name: wait_for_data
+    type: while
+    condition: "${{ steps.has_data.output.has_data != true }}"
+    max-iterations:
+      limit: 60
+      on-limit: fail
+    timeout: 20m
+    steps:
+      - name: has_data
+        type: fleet.awsOnboardingHasData
+        with:
+          policy_ids: "${{ steps.create_policies.output.policy_ids }}"
+          package_name: "{{ steps.resolve.output.package_name }}"
+          package_version: "{{ steps.resolve.output.package_version }}"
+      - name: data_delay
+        type: if
+        condition: "${{ steps.has_data.output.has_data != true }}"
+        steps:
+          - name: data_wait
+            type: wait
+            with:
+              duration: 20s
+
+  - name: done
+    type: workflow.output
+    with:
+      policies: "${{ steps.create_policies.output.policies }}"
+      cloud_connector_id: "{{ steps.create_connector.output.cloud_connector_id }}"
+      dashboard_path: "/app/dashboards#/view/aws-fac28650-7349-11e9-816b-07687310a99a"

@@ -108,6 +108,10 @@ import {
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
+import {
+  installAwsOnboardingWorkflow,
+  registerAwsOnboardingWorkflowOwner,
+} from './workflows/managed_workflows';
 import { registerAwsOnboardingSteps } from './workflows/steps';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
@@ -724,6 +728,7 @@ export class FleetPlugin
     registerRoutes(fleetAuthzRouter, config, isServerless, router);
     if (deps.workflowsExtensions) {
       registerAwsOnboardingSteps(deps.workflowsExtensions);
+      registerAwsOnboardingWorkflowOwner(deps.workflowsExtensions);
     }
 
     this.telemetryEventsSender.setup(deps.telemetry);
@@ -925,6 +930,11 @@ export class FleetPlugin
     this.versionSpecificPolicyAssignmentTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
+
+    if (plugins.workflowsExtensions) {
+      // Not awaited: the install handles its own failures and must never block Fleet start.
+      installAwsOnboardingWorkflow(plugins.workflowsExtensions).catch(() => {});
+    }
 
     const logger = appContextService.getLogger();
 
