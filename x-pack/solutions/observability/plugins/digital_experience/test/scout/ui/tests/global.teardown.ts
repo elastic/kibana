@@ -7,14 +7,26 @@
 
 import { globalTeardownHook } from '@kbn/scout-oblt';
 import { deleteOtelRumData } from '../../common/fixtures/otel_rum_data';
-import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+import { deleteSessionsData } from '../../common/fixtures/sessions_data';
+import { FLAG_RESET_OVERRIDE } from '../../feature_flag';
+import { DIGITAL_EXPERIENCE_DISABLED_TAGS, DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
 // The mock OTel documents live in shared data streams; the Classic RUM archive is left loaded, as
 // Scout's `esArchiver` has no unload.
 globalTeardownHook(
-  'Delete the mock OTel RUM data',
+  'Delete the mock OTel RUM data and sessions',
   { tag: DIGITAL_EXPERIENCE_TAGS },
   async ({ esClient }) => {
     await deleteOtelRumData(esClient);
+    await deleteSessionsData(esClient);
+  }
+);
+
+// Each spec resets the flag it set; this covers a spec that stopped before its `afterAll`.
+globalTeardownHook(
+  'Restore the Digital Experience feature flag',
+  { tag: DIGITAL_EXPERIENCE_DISABLED_TAGS },
+  async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_RESET_OVERRIDE);
   }
 );

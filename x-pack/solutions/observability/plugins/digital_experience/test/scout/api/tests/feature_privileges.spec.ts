@@ -9,6 +9,7 @@ import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const { COMMON_HEADERS, createRole } = testData;
 
@@ -41,6 +42,14 @@ const CAPABILITY_CASES = [
 ] as const;
 
 apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
+  apiTest.beforeAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_ON_OVERRIDE);
+  });
+
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_RESET_OVERRIDE);
+  });
+
   apiTest('registers the feature with its privileges', async ({ apiClient, requestAuth }) => {
     const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
 
