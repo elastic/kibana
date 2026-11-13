@@ -150,6 +150,21 @@ describe('selectDecisionKeys', () => {
 
     expect(selected).toHaveLength(2);
   });
+
+  it('stops a dismissal at the same cap, so one mixed proposal cannot flood the index', () => {
+    const groups = Array.from({ length: FP_DECISIONS_MAX_PER_APPROVAL + 3 }, (_, index) =>
+      group(`tool${index}.exe`, 1)
+    );
+
+    const { selected, keysOverCap } = selectDecisionKeys({
+      kind: 'do_not_propose',
+      groups,
+      blocked: new Set(),
+    });
+
+    expect(selected).toEqual(groups.slice(0, FP_DECISIONS_MAX_PER_APPROVAL));
+    expect(keysOverCap).toBe(3);
+  });
 });
 
 describe('buildDecisionDocument', () => {
