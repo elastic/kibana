@@ -13,9 +13,9 @@ describe('takesMemories', () => {
     expect(takesMemories({ managed: false, memory_enabled: false })).toBe(true);
   });
 
-  it('takes memories for a managed AI index unless its registration opts out', () => {
-    expect(takesMemories({ managed: true })).toBe(true);
+  it('takes memories for a managed AI index only when its registration opts in', () => {
     expect(takesMemories({ managed: true, memory_enabled: true })).toBe(true);
+    expect(takesMemories({ managed: true })).toBe(false);
     expect(takesMemories({ managed: true, memory_enabled: false })).toBe(false);
   });
 });

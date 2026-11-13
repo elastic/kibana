@@ -56,11 +56,17 @@ describe('getWritableMemoryAiIndex', () => {
     await expect(run()).rejects.toThrow('Context Engine memory is not enabled.');
   });
 
-  it('accepts writes to a managed AI index whose registration does not opt out', async () => {
-    const managed = { ...aiIndex, managed: true };
+  it('accepts writes to a managed AI index registered with memory_enabled true', async () => {
+    const managed = { ...aiIndex, managed: true, memory_enabled: true };
     get.mockResolvedValue(managed);
 
     await expect(run()).resolves.toEqual(managed);
+  });
+
+  it('rejects writes to a managed AI index registered without memory_enabled', async () => {
+    get.mockResolvedValue({ ...aiIndex, managed: true });
+
+    await expect(run()).rejects.toThrow("AI index 'support' does not have memory enabled.");
   });
 
   it('rejects writes to a managed AI index registered with memory_enabled false', async () => {

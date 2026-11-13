@@ -16,8 +16,8 @@ export const RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES: readonly string[] = [
 ];
 
 /**
- * Whether an AI index takes memories while the global memory setting is on: always, unless it is
- * managed and its registration sets `memory_enabled: false`.
+ * Whether an AI index takes memories while the global memory setting is on: always when it is not
+ * managed, and only when its registration sets `memory_enabled: true` when it is.
  */
 export const takesMemories = ({
   managed,
@@ -25,4 +25,4 @@ export const takesMemories = ({
 }: {
   managed: boolean;
   memory_enabled?: boolean;
-}): boolean => !managed || memoryEnabled !== false;
+}): boolean => !managed || memoryEnabled === true;

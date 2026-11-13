@@ -67,7 +67,7 @@ steps:
 
         Keep lists whole. When a page, dialog, menu or dropdown shows options, columns, checkboxes, buttons, links, tabs or stages, record every one, in the order shown, with which is selected, checked or the default, rather than a few examples ("such as", "including", "and others"). Counts are knowledge too: how many icons are beside a field, how many results a page shows, how many stages remain.
 
-        A batch of tool results can hold hundreds of such items: write each of them, rather than a summary of the page.
+        A batch of tool results can hold hundreds of such items: write each of them, rather than a summary of the page, up to 200 facts and 200 entities for the whole batch. When there are more, keep the ones a later question is most likely to need.
 
         A round too long for one batch comes in parts, each with the round's id and a header saying which part it is and how the round began. Read a part as the continuation of that round, and cite the round's id.
 

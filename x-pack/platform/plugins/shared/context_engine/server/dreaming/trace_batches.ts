@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_DREAMING_STEP_MEMORIES } from '../../common/dreaming';
 import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
 
 const CHARS_PER_TOKEN = 4;
@@ -84,7 +85,8 @@ const conversationOf = (round: TraceTranscriptMemory): string => {
 
 /**
  * Batches rounds that share permissions for the dreaming model, packing whole conversations in
- * order up to `batchTokens` and splitting larger ones between rounds or into parts.
+ * order up to `batchTokens` and `MAX_DREAMING_STEP_MEMORIES` rounds, and splitting larger ones
+ * between rounds or into parts.
  */
 export const batchByConversation = (
   rounds: TraceTranscriptMemory[],
@@ -107,7 +109,10 @@ export const batchByConversation = (
         (sum, round) => sum + estimateTokens(round),
         0
       );
-      if (tokens + conversationTokens <= batchTokens) {
+      if (
+        tokens + conversationTokens <= batchTokens &&
+        batch.length + conversation.length <= MAX_DREAMING_STEP_MEMORIES
+      ) {
         batch.push(...conversation);
         tokens += conversationTokens;
         continue;
@@ -115,7 +120,10 @@ export const batchByConversation = (
       flush();
       for (const round of conversation) {
         const roundTokens = estimateTokens(round);
-        if (batch.length > 0 && tokens + roundTokens > batchTokens) {
+        if (
+          batch.length > 0 &&
+          (tokens + roundTokens > batchTokens || batch.length >= MAX_DREAMING_STEP_MEMORIES)
+        ) {
           flush();
         }
         batch.push(round);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_DREAMING_STEP_MEMORIES } from '../../common/dreaming';
 import type { TraceTranscriptMemory } from '../../common/step_types/read_trace_transcripts';
 import { batchByConversation, estimateTokens, splitRound } from './trace_batches';
 
@@ -55,6 +56,23 @@ describe('batchByConversation', () => {
     expect(ids(batchByConversation(rounds, 100))).toEqual([
       ['a1', 'a2', 'b1'],
       ['c1', 'c2'],
+    ]);
+  });
+
+  it('caps a batch at the memories one dreaming step takes, however few tokens its rounds hold', () => {
+    const long = Array.from({ length: MAX_DREAMING_STEP_MEMORIES + 50 }, (_, index) =>
+      round(`a${index}`, 'a', 1)
+    );
+    const twoConversations = Array.from({ length: 300 }, (_, index) =>
+      round(`b${index}`, `b${index % 2}`, 1)
+    );
+
+    expect(batchByConversation(long, 1_000_000).map((batch) => batch.length)).toEqual([
+      MAX_DREAMING_STEP_MEMORIES,
+      50,
+    ]);
+    expect(batchByConversation(twoConversations, 1_000_000).map((batch) => batch.length)).toEqual([
+      150, 150,
     ]);
   });
 

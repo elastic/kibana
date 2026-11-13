@@ -434,12 +434,15 @@ describe('describeAiIndex', () => {
 
   describe('without dreaming set up', () => {
     it.each([
-      ['an AI index that is not managed', false],
-      ['a managed AI index', true],
-    ])('renders memory capability for %s, without dreamed types', async (_kind, managed) => {
+      ['an AI index that is not managed', { managed: false }],
+      [
+        'a managed AI index registered with memory_enabled true',
+        { managed: true, memory_enabled: true },
+      ],
+    ])('renders memory capability for %s, without dreamed types', async (_kind, fields) => {
       const response = await describeAiIndex({
         ...params,
-        aiIndex: { ...aiIndex, managed },
+        aiIndex: { ...aiIndex, ...fields },
         includeMemory: true,
       });
 
@@ -454,10 +457,13 @@ describe('describeAiIndex', () => {
       );
     });
 
-    it('omits memory capability for a managed AI index registered with memory_enabled false', async () => {
+    it.each([
+      ['without memory_enabled', {}],
+      ['with memory_enabled false', { memory_enabled: false }],
+    ])('omits memory capability for a managed AI index registered %s', async (_kind, fields) => {
       const response = await describeAiIndex({
         ...params,
-        aiIndex: { ...aiIndex, managed: true, memory_enabled: false },
+        aiIndex: { ...aiIndex, managed: true, ...fields },
         includeMemory: true,
       });
 

@@ -88,7 +88,7 @@ export interface AiIndexFeedbackAnalysis {
 export interface AiIndexProperties {
   description?: string;
   /**
-   * Set `false` on a managed registration to keep memories out of the AI index; see
+   * Set `true` on a managed registration for the AI index to take memories; see
    * `takesMemories`. Ignored from API callers, whose AI indices always take memories.
    */
   memory_enabled?: boolean;
