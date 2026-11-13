@@ -290,45 +290,35 @@ export function ServiceMap({
         css={isFullscreen ? fullScreenContainerStyles : undefined}
       >
         <EuiPanel hasBorder={true} paddingSize="none">
-          <EuiFlexGroup
+          <div
             data-test-subj="serviceMap"
-            direction="column"
-            gutterSize="none"
-            responsive={false}
-            ref={ref}
-            css={{
+            style={{
               height: isFullscreen ? '100%' : mapHeight,
               zIndex: Number(euiTheme.levels.content) + 1,
-              minHeight: 0,
               position: 'relative',
-              ...(isFullscreen ? { flex: 1 } : {}),
+              ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
             }}
+            ref={ref}
           >
             {isLoading && <LoadingSpinner />}
-            {!isLoading && (
-              <EuiFlexItem grow={false}>
-                <ServiceMapGroupingCountLine countLine={groupingCountLine} />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow css={{ minHeight: 0 }}>
-              <ServiceMapGraph
-                height="100%"
-                nodes={isLoading ? [] : nodesForGraph}
-                edges={isLoading ? [] : edgesForGraph}
-                serviceName={serviceName}
-                highlightedServiceNames={highlightedServiceNames}
-                environment={environment}
-                kuery={kuery}
-                start={start}
-                end={end}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                serviceGroupId={serviceGroupId}
-                isFullscreen={isFullscreen}
-                onToggleFullscreen={onToggleFullscreen}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            {!isLoading && <ServiceMapGroupingCountLine countLine={groupingCountLine} />}
+            <ServiceMapGraph
+              height={isFullscreen ? '100%' : mapHeight}
+              nodes={isLoading ? [] : nodesForGraph}
+              edges={isLoading ? [] : edgesForGraph}
+              serviceName={serviceName}
+              highlightedServiceNames={highlightedServiceNames}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceGroupId={serviceGroupId}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={onToggleFullscreen}
+            />
+          </div>
         </EuiPanel>
         {sloOverviewFlyout && (
           <SloOverviewFlyout

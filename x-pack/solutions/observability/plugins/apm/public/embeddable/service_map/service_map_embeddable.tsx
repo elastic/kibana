@@ -6,14 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -553,44 +546,33 @@ export function ServiceMapEmbeddable({
             flyoutOptions={flyoutOptions}
           />
         ) : (
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="none"
-            responsive={false}
-            css={{ height: '100%', minHeight: 0 }}
-          >
-            {!isLoading && (
-              <EuiFlexItem grow={false}>
-                <ServiceMapGroupingCountLine countLine={groupingCountLine} />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow css={{ minHeight: 0 }}>
-              <ServiceMapGraph
-                height="100%"
-                nodes={isLoading ? [] : nodesForGraph}
-                edges={isLoading ? [] : edgesForGraph}
-                serviceName={serviceName}
-                highlightedServiceNames={highlightedServiceNames}
-                environment={environment}
-                kuery={kuery}
-                start={start}
-                end={end}
-                isFullscreen={false}
-                fullMapHref={fullMapHref}
-                isEmbedded
-                isInteractive={viewMode !== 'non-interactive'}
-                showEmbeddedControls={showEmbeddedControls}
-                showFocusMap={showFocusMapInPopover}
-                alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
-                clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
-                mapOrientation={mapOrientation}
-                onMapOrientationChange={onMapOrientationChange}
-                viewFilters={viewFiltersForGraph}
-                onViewFiltersChange={onViewFiltersChange}
-                flyoutOptions={flyoutOptions}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <>
+            {!isLoading && <ServiceMapGroupingCountLine countLine={groupingCountLine} />}
+            <ServiceMapGraph
+              height="100%"
+              nodes={isLoading ? [] : nodesForGraph}
+              edges={isLoading ? [] : edgesForGraph}
+              serviceName={serviceName}
+              highlightedServiceNames={highlightedServiceNames}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+              isFullscreen={false}
+              fullMapHref={fullMapHref}
+              isEmbedded
+              isInteractive={viewMode !== 'non-interactive'}
+              showEmbeddedControls={showEmbeddedControls}
+              showFocusMap={showFocusMapInPopover}
+              alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+              clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+              mapOrientation={mapOrientation}
+              onMapOrientationChange={onMapOrientationChange}
+              viewFilters={viewFiltersForGraph}
+              onViewFiltersChange={onViewFiltersChange}
+              flyoutOptions={flyoutOptions}
+            />
+          </>
         )}
       </div>
       {sloOverviewFlyout && (
