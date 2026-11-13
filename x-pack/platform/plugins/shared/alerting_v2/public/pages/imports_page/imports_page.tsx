@@ -14,6 +14,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { ImportSetupFlyout } from '../../components/imports/import_setup_flyout';
 import { ImportsTable } from '../../components/imports/imports_table';
 import { useFetchImports } from '../../hooks/use_fetch_imports';
+import { useFetchImportAlertCounts } from '../../hooks/use_fetch_import_alert_counts';
 
 const IMPORTS_PAGE_TITLE = i18n.translate('xpack.alertingV2.imports.pageTitle', {
   defaultMessage: 'Import alerts',
@@ -24,6 +25,8 @@ export const ImportsPage = () => {
   useBreadcrumbs('imports_list');
   const [isSetupFlyoutOpen, setIsSetupFlyoutOpen] = useState(false);
   const { data: imports = [], isLoading, error } = useFetchImports();
+  const connectorIds = useMemo(() => imports.map(({ connectorId }) => connectorId), [imports]);
+  const { data: alertCounts } = useFetchImportAlertCounts(connectorIds);
 
   const openSetupFlyout = useCallback(() => setIsSetupFlyoutOpen(true), []);
   const closeSetupFlyout = useCallback(() => setIsSetupFlyoutOpen(false), []);
@@ -47,7 +50,7 @@ export const ImportsPage = () => {
     <div data-test-subj="alertingV2ImportsPage">
       <AppHeader sticky={false} title={IMPORTS_PAGE_TITLE} spacing="bleed" menu={headerMenu} />
       <EuiSpacer size="m" />
-      <ImportsTable items={imports} isLoading={isLoading} error={error} />
+      <ImportsTable items={imports} isLoading={isLoading} error={error} alertCounts={alertCounts} />
       {isSetupFlyoutOpen && <ImportSetupFlyout onClose={closeSetupFlyout} />}
     </div>
   );
