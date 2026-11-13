@@ -43,6 +43,9 @@ export const servers: ScoutServerConfig = {
       ...findTestPluginPaths(resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins')),
       ...findTestPluginPaths(resolve(REPO_ROOT, 'src/platform/test_plugins/plugin_functional')),
       `--plugin-path=${resolve(REPO_ROOT, 'src/platform/test_plugins/data_search')}`,
+      ...findTestPluginPaths(
+        resolve(REPO_ROOT, 'src/platform/test_plugins/plugin_functional/plugins')
+      ),
     ],
   },
 };

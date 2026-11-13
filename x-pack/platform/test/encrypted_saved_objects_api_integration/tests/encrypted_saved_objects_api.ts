@@ -747,7 +747,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // In these test cases, we simulate a scenario where some existing model version objects need to be migrated. This happens because
       // they have an outdated model version number. This also means that the encryptedSavedObjects.createModelVersion wrapper is used to
-      // facilitate the migration (see x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
+      // facilitate the migration (see x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
       describe('handles model version transforms correctly', () => {
         before(async () => {
           await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });

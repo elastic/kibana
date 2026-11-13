@@ -535,7 +535,7 @@ importers:
         version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad
       '@kbn/access-control-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin
       '@kbn/actions-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/actions
@@ -862,7 +862,7 @@ importers:
         version: link:x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common
       '@kbn/audit-log-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/audit_log
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/audit_log
       '@kbn/automatic-import-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/automatic_import
@@ -2134,7 +2134,7 @@ importers:
         version: link:examples/eso_model_version_example
       '@kbn/eso-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
+        version: link:x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
       '@kbn/esql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql
@@ -2266,13 +2266,13 @@ importers:
         version: link:examples/feature_flags_example
       '@kbn/feature-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test
       '@kbn/features-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/features
       '@kbn/features-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/features_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/features_provider
       '@kbn/fec-alerts-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test_plugins/functional_execution_context/alerts
@@ -2341,7 +2341,7 @@ importers:
         version: link:src/platform/packages/shared/shared-ux/flyout/template
       '@kbn/foo-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin
+        version: link:x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin
       '@kbn/fs':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-fs
@@ -2410,7 +2410,7 @@ importers:
         version: link:src/platform/packages/private/kbn-hapi-mocks
       '@kbn/hardening-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/hardening
+        version: link:src/platform/test_plugins/plugin_functional/plugins/hardening
       '@kbn/health-gateway-server':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-health-gateway-server
@@ -2530,7 +2530,7 @@ importers:
         version: link:src/platform/plugins/private/interactive_setup
       '@kbn/interactive-setup-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints
+        version: link:src/platform/test_plugins/interactive_setup_test_endpoints
       '@kbn/intercepts-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/intercepts
@@ -2584,7 +2584,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-kibana-api-cli
       '@kbn/kibana-cors-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_cors/plugins/kibana_cors_test
+        version: link:x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test
       '@kbn/kibana-overview-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/kibana_overview
@@ -2992,7 +2992,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-occ
       '@kbn/oidc-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/oidc_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider
       '@kbn/ols':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ols
@@ -3295,7 +3295,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-safer-lodash-set
       '@kbn/saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider
       '@kbn/sample-data-ingest':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/sample_data_ingest
@@ -3313,7 +3313,7 @@ importers:
         version: link:src/platform/test_plugins/plugin_functional/saved_object_import_warnings
       '@kbn/saved-object-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
+        version: link:x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin
       '@kbn/saved-objects-example-plugin':
         specifier: workspace:*
         version: link:examples/saved_objects
@@ -3511,7 +3511,7 @@ importers:
         version: link:x-pack/solutions/security/packages/upselling
       '@kbn/security-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_functional/plugins/test_endpoints
+        version: link:x-pack/platform/test_plugins/security_functional/plugins/test_endpoints
       '@kbn/security-ui-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/security/ui_components
@@ -3631,7 +3631,7 @@ importers:
         version: link:src/platform/packages/shared/serverless/settings/vectordb_project
       '@kbn/service-accounts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
         version: link:src/platform/test_plugins/plugin_functional/session_notifications
@@ -3808,7 +3808,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/spaces
       '@kbn/spaces-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin
       '@kbn/sse-example-plugin':
         specifier: workspace:*
         version: link:examples/sse_example
@@ -3907,7 +3907,7 @@ importers:
         version: link:src/platform/test_plugins/plugin_functional/telemetry
       '@kbn/test-feature-usage-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage
+        version: link:x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage
       '@kbn/testing-embedded-lens-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/testing_embedded_lens
@@ -4102,7 +4102,7 @@ importers:
         version: link:examples/user_profile_examples
       '@kbn/user-profiles-consumer-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer
       '@kbn/user-storage-test-plugin':
         specifier: workspace:*
         version: link:src/platform/test_plugins/user_storage
@@ -5906,7 +5906,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-scout-synthtrace
       '@kbn/security-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/packages/helpers
+        version: link:x-pack/platform/test_plugins/security_api_integration/packages/helpers
       '@kbn/security-evals-alerts-snapshot':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
@@ -8694,8 +8694,6 @@ importers:
 
   src/platform/plugins/private/interactive_setup: {}
 
-  src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints: {}
-
   src/platform/plugins/private/kibana_overview: {}
 
   src/platform/plugins/private/kibana_usage_collection: {}
@@ -8860,8 +8858,6 @@ importers:
 
   src/platform/test: {}
 
-  src/platform/test/plugin_functional/plugins/hardening: {}
-
   src/platform/test_plugins/analytics/analytics_ftr_helpers: {}
 
   src/platform/test_plugins/analytics/analytics_plugin_a: {}
@@ -8871,6 +8867,8 @@ importers:
   src/platform/test_plugins/data_search: {}
 
   src/platform/test_plugins/health_gateway/status: {}
+
+  src/platform/test_plugins/interactive_setup_test_endpoints: {}
 
   src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline: {}
 
@@ -8915,6 +8913,8 @@ importers:
   src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin: {}
 
   src/platform/test_plugins/plugin_functional/kbn_top_nav: {}
+
+  src/platform/test_plugins/plugin_functional/plugins/hardening: {}
 
   src/platform/test_plugins/plugin_functional/rendering_plugin: {}
 
@@ -9624,47 +9624,23 @@ importers:
 
   x-pack/platform/test: {}
 
-  x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
-
-  x-pack/platform/test/functional_cors/plugins/kibana_cors_test: {}
-
-  x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
-
-  x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test: {}
-
-  x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
-
-  x-pack/platform/test/security_api_integration/packages/helpers: {}
-
-  x-pack/platform/test/security_api_integration/plugins/audit_log: {}
-
-  x-pack/platform/test/security_api_integration/plugins/features_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/oidc_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/saml_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/service_accounts: {}
-
-  x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer: {}
-
-  x-pack/platform/test/security_functional/plugins/test_endpoints: {}
-
-  x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin: {}
-
-  x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
-
-  x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
-
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
 
   x-pack/platform/test_plugins/cloud_integration/saml_provider: {}
+
+  x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
+
+  x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test: {}
 
   x-pack/platform/test_plugins/functional_embedded/iframe_embedded: {}
 
   x-pack/platform/test_plugins/functional_execution_context/alerts: {}
 
+  x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage: {}
+
   x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client: {}
+
+  x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test: {}
 
   x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad: {}
 
@@ -9690,7 +9666,25 @@ importers:
 
   x-pack/platform/test_plugins/response_ops/task_manager/service_accounts: {}
 
+  x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
+
   x-pack/platform/test_plugins/search_inference_endpoints_fixtures: {}
+
+  x-pack/platform/test_plugins/security_api_integration/packages/helpers: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/audit_log: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/features_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer: {}
+
+  x-pack/platform/test_plugins/security_functional/plugins/test_endpoints: {}
 
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 
@@ -9699,6 +9693,12 @@ importers:
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
 
   x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
+
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin: {}
+
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin: {}
+
+  x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin: {}
 
   x-pack/platform/test_plugins/usage_collection/application_usage_test: {}
 

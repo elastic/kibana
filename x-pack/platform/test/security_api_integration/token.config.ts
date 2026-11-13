@@ -15,9 +15,15 @@ import { services } from './services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_functional/plugins/test_endpoints'
+  );
 
-  const auditLogPath = resolve(__dirname, './packages/helpers/audit/token.log');
+  const auditLogPath = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/packages/helpers/audit/token.log'
+  );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.API_TEST,

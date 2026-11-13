@@ -22,7 +22,7 @@ import { pkiConfig } from '../../pki/stateful/base.config';
 // so keeping it out means they exercise an unmodified auth provider.
 const pluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
-  'x-pack/platform/test/security_functional/plugins/test_endpoints'
+  'x-pack/platform/test_plugins/security_functional/plugins/test_endpoints'
 )}`;
 
 export const servers: ScoutServerConfig = {

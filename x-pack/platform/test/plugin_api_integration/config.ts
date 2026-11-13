@@ -59,6 +59,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           path.resolve(__dirname, '../../test_plugins/plugin_api_integration'),
           path.resolve(__dirname, '../../test_plugins/response_ops/plugin_api_integration'),
         ]),
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../test_plugins/plugin_api_integration/plugins')
+        ),
       ],
     },
   };
