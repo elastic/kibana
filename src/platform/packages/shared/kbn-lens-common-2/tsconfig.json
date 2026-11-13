@@ -20,5 +20,6 @@
     "@kbn/chart-expressions-common",
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/esql-types",
   ]
 }

@@ -18,4 +18,5 @@ export { getESQLControlFactory } from './controls/esql_control/get_esql_control_
 
 export { createDataControlPanelAction } from './actions/create_data_control_panel_action';
 export { createESQLControlAction } from './actions/create_esql_control_action';
+export { createESQLControlFromValueClickAction } from './actions/create_esql_control_from_value_click_action';
 export { createTimeSliderAction } from './actions/create_time_slider_action';

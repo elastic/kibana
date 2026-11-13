@@ -23,6 +23,8 @@ export {
   isQueryESQLControl,
 } from './src/variables_types';
 
+export { type CanUpdateESQLQuery, apiCanUpdateESQLQuery } from './src/can_update_esql_query';
+
 export {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,

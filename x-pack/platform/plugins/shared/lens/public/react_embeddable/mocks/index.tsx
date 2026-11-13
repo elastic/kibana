@@ -57,6 +57,8 @@ function getDefaultLensApiMock() {
     dataLoading$: new BehaviorSubject<boolean | undefined>(false),
     // Methods
     getSavedVis: jest.fn(),
+    getEditableESQLQuery: jest.fn(),
+    updateESQLQuery: jest.fn(),
     getFullAttributes: jest.fn(),
     canViewUnderlyingData$: new BehaviorSubject<boolean>(false),
     loadViewUnderlyingData: jest.fn(),

@@ -27,6 +27,7 @@ import {
   searchContextComparators,
 } from './initializers/initialize_search_context';
 import { initializeActionApi } from './initializers/initialize_actions';
+import { initializeESQLQueryApi } from './initializers/initialize_esql_query_api';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
@@ -205,6 +206,7 @@ export const createLensEmbeddableFactory = (
           ...searchContextConfig.api,
           ...actionsConfig.api,
           ...integrationsConfig.api,
+          ...initializeESQLQueryApi(getLatestState, internalApi.updateAttributes),
           ...stateConfig.api,
           ...dashboardConfig.api,
           supportsJsonExport: true,
