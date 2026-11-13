@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { UserInteractionEvent } from '../grid/use_grid_layout_events/types';
+import type { UserInteractionEvent } from './types';
 import type { LayoutClassPrefix } from './types';
 
 interface DefaultDragHandleProps {

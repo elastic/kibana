@@ -19,8 +19,8 @@ import {
   startKeyboardInteraction,
   startMouseInteraction,
   startTouchInteraction,
-} from '../../../grid/use_grid_layout_events/sensors';
-import type { UserInteractionEvent } from '../../../grid/use_grid_layout_events/types';
+} from '../../../common/sensors';
+import type { UserInteractionEvent } from '../../../common/types';
 import {
   cancelAction,
   commitAction,

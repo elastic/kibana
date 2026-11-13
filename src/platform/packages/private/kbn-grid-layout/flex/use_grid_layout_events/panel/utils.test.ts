@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KeyboardCode } from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
+import { KeyboardCode } from '../../../common/sensors/keyboard/types';
 import type { FlexLayoutStateManager } from '../../types';
 import type { ActivePanelEvent } from '../../panel/types';
 import { getKeyboardDragPosition, getNextKeyboardResizePosition } from './utils';

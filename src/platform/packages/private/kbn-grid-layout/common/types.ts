@@ -9,3 +9,10 @@
 
 /** Prefix of a layout's class names, e.g. `kbnGrid` -> `kbnGridPanel`, `kbnGrid--static` */
 export type LayoutClassPrefix = 'kbnGrid' | 'kbnFlex';
+
+export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;
+
+export interface PointerPosition {
+  clientX: number;
+  clientY: number;
+}

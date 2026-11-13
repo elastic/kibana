@@ -14,9 +14,5 @@ export { GridLayout } from './grid/grid_layout';
 export type { GridPanelData } from './grid/grid_panel';
 export type { GridSectionData } from './grid/grid_section';
 export type { GridAccessMode, GridLayoutData, GridSettings } from './grid/types';
-export {
-  handleAutoscroll,
-  startAutoScroll,
-  stopAutoScroll,
-} from './grid/use_grid_layout_events/sensors/autoscroll';
+export { handleAutoscroll, startAutoScroll, stopAutoScroll } from './common/sensors/autoscroll';
 export { isLayoutEqual } from './grid/utils/equality_checks';

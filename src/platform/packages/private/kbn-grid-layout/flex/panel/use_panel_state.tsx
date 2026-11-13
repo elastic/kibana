@@ -14,6 +14,7 @@ import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import type { FlexPanelData } from './types';
 import type { FlexLayoutData } from '../types';
+import { nonNullable } from '../../common/utils';
 
 export const usePanelState = ({
   panelId,
@@ -58,7 +59,3 @@ export const usePanelState = ({
 const getPanelState = (layout: FlexLayoutData, panelId: string): FlexPanelData | undefined => {
   return layout[panelId];
 };
-
-function nonNullable<T>(value: T): value is NonNullable<T> {
-  return value !== null && value !== undefined;
-}

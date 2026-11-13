@@ -9,20 +9,8 @@
 
 import type { ActivePanelEvent, FlexPanelData } from '../../panel';
 import type { FlexLayoutStateManager } from '../../types';
-import {
-  getSensorPosition,
-  isKeyboardEvent,
-  isMouseEvent,
-  isTouchEvent,
-} from '../../../grid/use_grid_layout_events/sensors';
-import {
-  KeyboardCode,
-  type UserKeyboardEvent,
-} from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
-import type {
-  PointerPosition,
-  UserInteractionEvent,
-} from '../../../grid/use_grid_layout_events/types';
+import { KeyboardCode, type UserKeyboardEvent } from '../../../common/sensors/keyboard/types';
+import type { PointerPosition } from '../../../common/types';
 
 // A panel can never be resized narrower than this, regardless of `resizeOptions.minWidth`
 export const MIN_RESIZE_WIDTH = 50;
@@ -89,37 +77,6 @@ export const getResizePreviewRect = ({
     ),
   };
 };
-
-// Calculates the preview rect coordinates for a dragged panel
-export const getDragPreviewRect = ({
-  pointerPixel,
-  activePanel,
-}: {
-  pointerPixel: PointerPosition;
-  activePanel: ActivePanelEvent;
-}) => {
-  return {
-    left: pointerPixel.clientX - activePanel.sensorOffsets.left,
-    top: pointerPixel.clientY - activePanel.sensorOffsets.top,
-    bottom: pointerPixel.clientY - activePanel.sensorOffsets.bottom,
-    right: pointerPixel.clientX - activePanel.sensorOffsets.right,
-  };
-};
-
-// Calculates the sensor's offset relative to the active panel's edges (top, left, right, bottom).
-// This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
-export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
-  if (!isTouchEvent(e) && !isMouseEvent(e) && !isKeyboardEvent(e)) {
-    throw new Error('Unsupported event type: only mouse, touch, or keyboard events are handled.');
-  }
-  const { clientX, clientY } = getSensorPosition(e);
-  return {
-    top: clientY - top,
-    left: clientX - left,
-    right: clientX - right,
-    bottom: clientY - bottom,
-  };
-}
 
 type PanelRect = Pick<DOMRect, 'top' | 'left' | 'right'>;
 

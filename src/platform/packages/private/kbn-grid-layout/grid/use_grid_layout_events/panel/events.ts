@@ -19,12 +19,12 @@ import {
   startKeyboardInteraction,
   startMouseInteraction,
   startTouchInteraction,
-} from '../sensors';
+} from '../../../common/sensors';
 import {
   hasPanelInteractionStartedWithKeyboard,
   isLayoutInteractive,
 } from '../state_manager_selectors';
-import type { UserInteractionEvent } from '../types';
+import type { UserInteractionEvent } from '../../../common/types';
 import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { getNextKeyboardPositionForPanel } from './utils';
 /*

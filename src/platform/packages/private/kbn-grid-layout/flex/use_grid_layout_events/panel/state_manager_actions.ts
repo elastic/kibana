@@ -9,24 +9,16 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
+import { getDragPreviewRect, getSensorOffsets } from '../../../common/utils';
 
 import type { ActivePanelEvent, FlexPanelData } from '../../panel';
 import type { FlexLayoutData, FlexLayoutStateManager } from '../../types';
 import type { GridLayoutContextType } from '../../use_grid_layout_context';
-import { getSensorType } from '../../../grid/use_grid_layout_events/sensors';
-import type {
-  PointerPosition,
-  UserInteractionEvent,
-} from '../../../grid/use_grid_layout_events/types';
+import { getSensorType } from '../../../common/sensors';
+import type { PointerPosition, UserInteractionEvent } from '../../../common/types';
 import { getPanelKeysInOrder } from '../../utils/panel_order';
-import type { UserKeyboardEvent } from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
-import {
-  getAllowedBreakpoints,
-  getDragPreviewRect,
-  getKeyboardDragPosition,
-  getResizePreviewRect,
-  getSensorOffsets,
-} from './utils';
+import type { UserKeyboardEvent } from '../../../common/sensors/keyboard/types';
+import { getAllowedBreakpoints, getKeyboardDragPosition, getResizePreviewRect } from './utils';
 
 let startingLayout: FlexLayoutData | undefined;
 

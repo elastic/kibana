@@ -9,8 +9,8 @@
 
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
-import type { UserInteractionEvent } from '../../../grid/use_grid_layout_events/types';
-import { useCustomDragHandles } from '../../../grid/grid_panel/drag_handle/use_custom_drag_handles';
+import type { UserInteractionEvent } from '../../../common/types';
+import { useCustomDragHandles } from '../../../common/use_custom_drag_handles';
 
 const DRAG_HANDLE_CLASS = 'kbnFlexPanel--dragHandle';
 

@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-import type { UserInteractionEvent } from '../../use_grid_layout_events/types';
+import type { UserInteractionEvent } from './types';
 
 /**
  * Attaches the drag listeners to custom drag handles (and keeps `dragHandleClass` on them),
