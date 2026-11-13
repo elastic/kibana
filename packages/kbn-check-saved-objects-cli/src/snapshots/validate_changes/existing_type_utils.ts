@@ -102,7 +102,6 @@ export function validateNoStructuralModelVersionChanges(
       typeName: name,
       message: `Some modelVersions have been structurally updated for SO type '${name}' after they were defined: ${structuralMutations}.`,
       fixHint: `Existing model versions are immutable. Revert the change and add a new model version to capture the update instead.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -205,7 +204,6 @@ function reportSchemaChanges(
         )} of SO type '${name}', ` +
         `but the baseline snapshot uses the legacy hash format — detailed diff is not possible.`,
       fixHint: `Re-generate the baseline snapshot to enable schema change validation.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -218,7 +216,6 @@ function reportSchemaChanges(
         '\n  - '
       )}`,
       fixHint: `Revert the breaking schema change and introduce it as a new model version instead.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -483,7 +480,6 @@ export function validateNewMappingsInModelVersion(
         newModelVersion.version
       }': ${undeclaredFields.join(', ')}.`,
       fixHint: `Add the missing fields to the 'mappings_addition' change in model version '${newModelVersion.version}'.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -525,7 +521,6 @@ export function validateIgnoreAboveExistingType(
         ', '
       )}.`,
       fixHint: `Add 'ignore_above: 1024' (or another appropriate limit) to each affected field to prevent Elasticsearch from silently dropping strings that exceed the limit.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -584,7 +579,6 @@ export function validateNameTitleFieldTypesExistingType(
         .map(({ description }) => description)
         .join(', ')}.`,
       fixHint: `Change the field mapping type to 'text'. If the field already exists in production, this requires a reindex.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }

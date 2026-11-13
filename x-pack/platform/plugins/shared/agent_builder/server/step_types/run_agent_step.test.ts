@@ -21,7 +21,12 @@ jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
 import { z } from '@kbn/zod/v4';
-import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  createConversationBusyError,
+  createRequestAbortedError,
+  isRequestAbortedError,
+} from '@kbn/agent-builder-common';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
@@ -33,7 +38,11 @@ import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
 } from '../../common/resolve_connector_or_inference_id';
-import { getRunAgentStepDefinition, parseMaxStepSize } from './run_agent_step';
+import {
+  CONVERSATION_BUSY_RETRY_OPTIONS,
+  getRunAgentStepDefinition,
+  parseMaxStepSize,
+} from './run_agent_step';
 import type { ServiceManager } from '../services';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
@@ -316,6 +325,84 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
     expect(execution.executeAgent).toHaveBeenCalledTimes(1);
     expect(res.error).toBe(execError);
+  });
+
+  describe('conversation busy', () => {
+    const busyError = createConversationBusyError({
+      conversationId: 'c-1',
+      activeExecutionId: 'active-1',
+    });
+    const roundComplete$ = of({
+      type: ChatEventType.roundComplete,
+      data: { round: { id: 'r-1', response: { message: 'ok' } } },
+    });
+
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('retries executeAgent until the conversation is free', async () => {
+      const execution = {
+        executeAgent: jest
+          .fn()
+          .mockRejectedValueOnce(busyError)
+          .mockResolvedValueOnce({ executionId: 'exec-1', events$: roundComplete$ }),
+      };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const resPromise = step.handler(createContext({ input: { message: 'hello' } }));
+      await jest.advanceTimersByTimeAsync(CONVERSATION_BUSY_RETRY_OPTIONS.maxTimeout);
+      const res = await resPromise;
+
+      expect(execution.executeAgent).toHaveBeenCalledTimes(2);
+      expect(res.error).toBeUndefined();
+      expect(res.output?.message).toBe('ok');
+    });
+
+    it('stops waiting once the step is aborted', async () => {
+      const controller = new AbortController();
+      const execution = { executeAgent: jest.fn().mockRejectedValue(busyError) };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const resPromise = step.handler(
+        createContext({ input: { message: 'hello' }, abortSignal: controller.signal })
+      );
+      await jest.advanceTimersByTimeAsync(0);
+      controller.abort();
+      const res = await resPromise;
+
+      expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+      expect(isRequestAbortedError(res.error)).toBe(true);
+    });
+
+    it('reports the abort when the step is aborted during a call that returns busy', async () => {
+      const controller = new AbortController();
+      const execution = {
+        executeAgent: jest.fn().mockImplementation(async () => {
+          controller.abort();
+          throw busyError;
+        }),
+      };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(
+        createContext({ input: { message: 'hello' }, abortSignal: controller.signal })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+      expect(isRequestAbortedError(res.error)).toBe(true);
+    });
+
+    it('fails with the busy error once the retry budget is spent', async () => {
+      const execution = { executeAgent: jest.fn().mockRejectedValue(busyError) };
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const resPromise = step.handler(createContext({ input: { message: 'hello' } }));
+      await jest.advanceTimersByTimeAsync(CONVERSATION_BUSY_RETRY_OPTIONS.maxRetryTime * 2);
+      const res = await resPromise;
+
+      expect(execution.executeAgent.mock.calls.length).toBeGreaterThan(1);
+      expect(res.error).toBe(busyError);
+    });
   });
 
   it('returns an error when no round_complete event is emitted', async () => {

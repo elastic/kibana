@@ -18,6 +18,7 @@ import {
   mockUiSettingsService,
   mockRenderingService,
   mockMetricsService,
+  mockEventLoopWatchdogService,
   mockStatusService,
   mockLoggingService,
   mockI18nService,
@@ -202,6 +203,49 @@ test('sets up services on "setup"', async () => {
   expect(mockSecurityService.setup).toHaveBeenCalledTimes(1);
   expect(mockUserProfileService.setup).toHaveBeenCalledTimes(1);
   expect(mockInjectionService.setup).toHaveBeenCalledTimes(1);
+  expect(mockEventLoopWatchdogService.setup).toHaveBeenCalledTimes(1);
+});
+
+test('sets up the event loop watchdog after the status service', async () => {
+  const server = new Server(rawConfigService, env, logger);
+
+  await server.preboot();
+  await server.setup();
+
+  expect(mockEventLoopWatchdogService.setup).toHaveBeenCalledWith({
+    status: mockStatusService.setup.mock.results[0].value,
+    nodeRoles: ['background_tasks', 'ui'],
+    serviceVersion: env.packageInfo.version,
+  });
+  expect(mockStatusService.setup.mock.invocationCallOrder[0]).toBeLessThan(
+    mockEventLoopWatchdogService.setup.mock.invocationCallOrder[0]
+  );
+});
+
+test('starts the event loop watchdog with the feature flags start contract', async () => {
+  const server = new Server(rawConfigService, env, logger);
+
+  await server.preboot();
+  await server.setup();
+  expect(mockEventLoopWatchdogService.start).not.toHaveBeenCalled();
+  await server.start();
+
+  expect(mockEventLoopWatchdogService.start).toHaveBeenCalledTimes(1);
+  expect(mockEventLoopWatchdogService.start).toHaveBeenCalledWith({
+    featureFlags: expect.objectContaining({ getBooleanValue$: expect.any(Function) }),
+  });
+  // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+  await server.stop();
+});
+
+test('fails setup when node roles are missing', async () => {
+  mockNodeService.preboot.mockResolvedValueOnce({
+    roles: { migrator: false, ui: true, backgroundTasks: true },
+  } as InternalNodeServicePreboot);
+  const server = new Server(rawConfigService, env, logger);
+
+  await server.preboot();
+  await expect(server.setup()).rejects.toThrow('Node roles are only known after preboot');
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -272,6 +316,8 @@ test('runs services on "start"', async () => {
   expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockInjectionService.start).toHaveBeenCalledTimes(1);
+  // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+  await server.stop();
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -301,8 +347,15 @@ test('stops services on "stop"', async () => {
   expect(mockCustomBrandingService.stop).not.toHaveBeenCalled();
   expect(mockSecurityService.stop).not.toHaveBeenCalled();
   expect(mockUserProfileService.stop).not.toHaveBeenCalled();
+  expect(mockEventLoopWatchdogService.stop).not.toHaveBeenCalled();
 
   await server.stop();
+
+  expect(mockEventLoopWatchdogService.stop).toHaveBeenCalledTimes(1);
+  // Stops before logging, so its last log line is still written.
+  expect(mockEventLoopWatchdogService.stop.mock.invocationCallOrder[0]).toBeLessThan(
+    mockLoggingService.stop.mock.invocationCallOrder[0]
+  );
 
   expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
@@ -416,6 +469,7 @@ test('migrator-only node throws exception during start', async () => {
   );
   const nodeServiceContract: InternalNodeServicePreboot = {
     roles: { migrator: true, ui: false, backgroundTasks: false },
+    roleNames: ['migrator'],
   };
   mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
   mockNodeService.start.mockReturnValue(nodeServiceContract);
@@ -472,19 +526,27 @@ describe('When preboot is disabled', () => {
 describe('self client UIAM attestation getter', () => {
   const ATTESTATION = 'attestation-for-outbound';
   const ATTESTATION_HEADERS = { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: ATTESTATION };
+  let server: Server | undefined;
 
   beforeEach(() => {
     // An earlier test leaves the node service mocked as a migrator-only node, which aborts `start`.
     const nodeServiceContract: InternalNodeServicePreboot = {
       roles: { migrator: false, ui: true, backgroundTasks: true },
+      roleNames: ['background_tasks', 'ui'],
     };
     mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
     mockNodeService.start.mockReturnValue(nodeServiceContract);
     rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
   });
 
+  afterEach(async () => {
+    // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+    await server?.stop();
+    server = undefined;
+  });
+
   const startServerAndGetAttestationGetter = async () => {
-    const server = new Server(rawConfigService, env, logger);
+    server = new Server(rawConfigService, env, logger);
     await server.preboot();
     await server.setup();
     await server.start();
@@ -657,6 +719,7 @@ describe('self client own client authentication check', () => {
   beforeEach(() => {
     const nodeServiceContract: InternalNodeServicePreboot = {
       roles: { migrator: false, ui: true, backgroundTasks: true },
+      roleNames: ['background_tasks', 'ui'],
     };
     mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
     mockNodeService.start.mockReturnValue(nodeServiceContract);
@@ -680,5 +743,7 @@ describe('self client own client authentication check', () => {
     expect(isOwn('kibana-shared-secret')).toBe(true);
     expect(isOwn('upstream-secret')).toBe(false);
     expect(uiam.isOwnClientAuthentication).toHaveBeenCalledWith('upstream-secret');
+    // start() polls runtime flag overrides on a timer. Stop so Jest can exit.
+    await server.stop();
   });
 });

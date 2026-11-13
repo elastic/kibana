@@ -23,10 +23,6 @@ export function UserProfilePageProvider({ getService }: FtrProviderContext) {
     return await testSubjects.find('saveProfileChangesButton');
   };
 
-  const getReloadWindowButton = async () => {
-    return await testSubjects.find('windowReloadButton');
-  };
-
   const getThemeKeypadButton = async (colorMode: ColorMode) => {
     return await testSubjects.find(`themeKeyPadItem${colorMode}`);
   };
@@ -46,13 +42,6 @@ export function UserProfilePageProvider({ getService }: FtrProviderContext) {
     await themeModeButton.click();
 
     await saveUserProfileChanges();
-
-    let reloadWindowButton;
-    await retry.try(async () => {
-      reloadWindowButton = await getReloadWindowButton();
-      expect(reloadWindowButton).not.to.be(null);
-      await reloadWindowButton.click();
-    });
   };
 
   return {

@@ -172,6 +172,35 @@ describe('WorkflowSearchService', () => {
       expect(call.query.bool.must.length).toBeGreaterThanOrEqual(4);
     });
 
+    it('sorts by relevance first when a query is set without a sort field', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflows({ size: 20, page: 1, query: 'orders' }, 'default');
+
+      expect(storageClient.search.mock.calls[0][0].sort).toEqual([
+        '_score',
+        { updated_at: { order: 'desc' } },
+      ]);
+    });
+
+    it('keeps the explicit sort field when a query is set', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflows(
+        { size: 20, page: 1, query: 'orders', sortField: 'name', sortOrder: 'asc' },
+        'default'
+      );
+
+      expect(storageClient.search.mock.calls[0][0].sort).toEqual([
+        { 'name.keyword': { order: 'asc' } },
+        { updated_at: { order: 'desc' } },
+      ]);
+    });
+
     it('keeps unmanaged workflows and filters managed workflows by selector availability', async () => {
       const { deps, storageClient } = makeDeps();
       storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });

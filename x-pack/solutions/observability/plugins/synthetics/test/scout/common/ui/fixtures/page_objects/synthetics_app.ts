@@ -265,22 +265,6 @@ export class SyntheticsAppPage {
     }
   }
 
-  async enableMonitorManagement(shouldEnable = true) {
-    const addMonitorBtn = this.page.getByRole('button', { name: 'Create monitor' });
-    const isDisabled = await addMonitorBtn.isDisabled();
-    const isEnabled = !isDisabled;
-    if (isEnabled === shouldEnable) {
-      return;
-    }
-    const toggle = this.page.testSubj.locator('syntheticsEnableSwitch');
-    const button = this.page.testSubj.locator('syntheticsEnableButton');
-    if (await toggle.isVisible({ timeout: 3000 })) {
-      await toggle.click();
-    } else if (await button.isVisible({ timeout: 3000 })) {
-      await button.click();
-    }
-  }
-
   async getMonitorRowLocator(monitorName: string) {
     const monitorRow = this.page.locator(
       `${euiSelectors.basicTable.ROW_SELECTOR}:has([data-test-subj="syntheticsMonitorDetailsLinkLink"]:has-text("${monitorName}"))`

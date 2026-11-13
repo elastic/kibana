@@ -6,7 +6,7 @@
  */
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { I18nServiceSetup, RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -36,9 +36,11 @@ describe('Update profile routes', () => {
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let userProfileService: jest.Mocked<UserProfileServiceStartInternal>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
+  let i18n: jest.Mocked<I18nServiceSetup>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
+    i18n = routeParamsMock.i18n as jest.Mocked<I18nServiceSetup>;
 
     session = sessionMock.create();
     routeParamsMock.getSession.mockReturnValue(session);
@@ -443,6 +445,133 @@ describe('Update profile routes', () => {
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
       expect(userProfileService.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('sanitizes an SVG avatar image before storing it.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      const maliciousSvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(2)</script><rect width="10" height="10"/></svg>';
+      const avatar = {
+        initials: 'ab',
+        color: '#000000',
+        imageUrl: `data:image/svg+xml;base64,${Buffer.from(maliciousSvg).toString('base64')}`,
+      };
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledTimes(1);
+      const [, updatedData] = userProfileService.update.mock.calls[0];
+      const { imageUrl, ...rest } = (updatedData as { avatar: typeof avatar }).avatar;
+      expect(rest).toEqual({ initials: 'ab', color: '#000000' });
+      expect(imageUrl).toMatch(/^data:image\/svg\+xml;base64,/);
+      expect(
+        Buffer.from(imageUrl.replace('data:image/svg+xml;base64,', ''), 'base64').toString('utf8')
+      ).toBe('<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"></rect></svg>');
+    });
+
+    it('stores raster avatar images unchanged.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      const avatar = {
+        initials: null,
+        color: null,
+        imageUrl: 'data:image/png;base64,iVBORw0KGgo=',
+      };
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', { avatar });
+    });
+
+    it('rejects unsupported avatar image media types.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: { avatar: { imageUrl: 'data:text/html;base64,PHNjcmlwdD4=' } },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 415 }));
+
+      expect(userProfileService.update).not.toHaveBeenCalled();
+    });
+
+    describe('locale', () => {
+      beforeEach(() => {
+        session.get.mockResolvedValue({
+          error: null,
+          value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+        });
+        authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      });
+
+      const updateLocale = (locale: string) =>
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { userSettings: { locale } } }),
+          kibanaResponseFactory
+        );
+
+      it('accepts a locale listed in `i18n.locales`.', async () => {
+        i18n.getLocales.mockReturnValue(['en', 'fr-FR']);
+
+        await expect(updateLocale('fr-FR')).resolves.toEqual(
+          expect.objectContaining({ status: 200 })
+        );
+      });
+
+      it('rejects a locale not listed in `i18n.locales`.', async () => {
+        i18n.getLocales.mockReturnValue(['en']);
+
+        await expect(updateLocale('de-DE')).resolves.toEqual(
+          expect.objectContaining({ status: 400 })
+        );
+        expect(userProfileService.update).not.toHaveBeenCalled();
+      });
+
+      it('accepts the default locale when `i18n.locales` is empty.', async () => {
+        i18n.getLocales.mockReturnValue([]);
+        i18n.getLocale.mockReturnValue('en');
+
+        await expect(updateLocale('en')).resolves.toEqual(expect.objectContaining({ status: 200 }));
+      });
+
+      it('rejects other locales when `i18n.locales` is empty.', async () => {
+        i18n.getLocales.mockReturnValue([]);
+        i18n.getLocale.mockReturnValue('en');
+
+        await expect(updateLocale('de-DE')).resolves.toEqual(
+          expect.objectContaining({ status: 400 })
+        );
+        expect(userProfileService.update).not.toHaveBeenCalled();
+      });
     });
   });
 });

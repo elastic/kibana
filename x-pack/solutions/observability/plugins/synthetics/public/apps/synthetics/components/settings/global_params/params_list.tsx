@@ -27,6 +27,7 @@ import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
 import { SecretConnectionPanel } from './secret_connection_panel';
+import { parseVaultReference } from '../../../../../../common/lib/vault_reference';
 import { kibanaService } from '../../../../../utils/kibana_service';
 
 export interface ListParamItem extends SyntheticsParams {
@@ -64,7 +65,23 @@ export const ParamsList = () => {
       name: i18n.translate('xpack.synthetics.settingsRoute.params.value', {
         defaultMessage: 'Value',
       }),
-      render: (item: ListParamItem) => <ParamsText text={item.value ?? ''} />,
+      render: (item: ListParamItem) => {
+        const reference = parseVaultReference(item.value);
+        return reference ? (
+          <EuiBadge color="hollow" iconType="lock" data-test-subj="syntheticsParamVaultBadge">
+            {i18n.translate('xpack.synthetics.settingsRoute.params.vaultReference', {
+              defaultMessage: 'vault: {connection}@{path}#{field}',
+              values: {
+                connection: reference.connection,
+                path: reference.path,
+                field: reference.field,
+              },
+            })}
+          </EuiBadge>
+        ) : (
+          <ParamsText text={item.value ?? ''} />
+        );
+      },
     },
     {
       name: i18n.translate('xpack.synthetics.settingsRoute.params.description', {

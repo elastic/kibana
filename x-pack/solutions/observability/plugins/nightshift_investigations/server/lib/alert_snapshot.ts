@@ -47,6 +47,7 @@ import {
 } from '@kbn/rule-data-utils';
 import {
   alertSnapshotSchema,
+  MAX_V2_ALERT_DATA_LENGTH,
   v2AlertSnapshotSchema,
   type InvestigationAlertSnapshot,
   type AlertSnapshot,
@@ -167,6 +168,57 @@ const buildEpisodesSummaryQuery = (spaceId: string, episodeIds: string[]) => {
   return asTypedEsqlQuery<EpisodeEventsEsqlRow>(query.keep(...EPISODE_EVENTS_FIELDS));
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const fieldJsonLength = (key: string, value: unknown): number =>
+  JSON.stringify(key).length + 1 + JSON.stringify(value).length;
+
+export const truncateV2AlertData = (data: Record<string, unknown>): Record<string, unknown> => {
+  const truncated = { ...data };
+  const sizes = new Map<string, number>(
+    Object.entries(data).map(([key, value]) => [key, fieldJsonLength(key, value)])
+  );
+  let fieldsTotal = [...sizes.values()].reduce((sum, size) => sum + size, 0);
+  const jsonLength = () => 2 + fieldsTotal + Math.max(sizes.size - 1, 0);
+  const setField = (key: string, value: unknown) => {
+    const size = fieldJsonLength(key, value);
+    fieldsTotal += size - (sizes.get(key) ?? 0);
+    sizes.set(key, size);
+    truncated[key] = value;
+  };
+  const largestOf = (keys: string[]): string | undefined =>
+    keys.reduce<string | undefined>(
+      (best, key) =>
+        best === undefined || (sizes.get(key) ?? 0) > (sizes.get(best) ?? 0) ? key : best,
+      undefined
+    );
+
+  const arrayKeys = Object.keys(data).filter((key) => Array.isArray(data[key]));
+  while (jsonLength() > MAX_V2_ALERT_DATA_LENGTH) {
+    const key = largestOf(
+      arrayKeys.filter((arrayKey) => {
+        const value = truncated[arrayKey];
+        return Array.isArray(value) && value.length > 0;
+      })
+    );
+    if (key === undefined) break;
+    const original = data[key];
+    const value = truncated[key];
+    if (!Array.isArray(original) || !Array.isArray(value)) break;
+    setField(key, value.slice(0, Math.floor(value.length / 2)));
+    setField(`${key}_truncated`, original.length);
+  }
+  while (jsonLength() > MAX_V2_ALERT_DATA_LENGTH) {
+    const key = largestOf([...sizes.keys()]);
+    if (key === undefined) break;
+    fieldsTotal -= sizes.get(key) ?? 0;
+    sizes.delete(key);
+    delete truncated[key];
+  }
+  return truncated;
+};
+
 const fetchV2Snapshots = async (
   { esClient, getRulesClient, spaceId }: EpisodeLookup,
   episodeIds: string[]
@@ -193,28 +245,34 @@ const fetchV2Snapshots = async (
     ])
   );
   const ruleNames = await fetchRuleNames(getRulesClient, [
-    ...new Set(episodes.map((episode) => episode['rule.id'])),
+    ...new Set(episodes.flatMap((episode) => episode['rule.id'] ?? [])),
   ]);
 
   return new Map(
-    episodes.map((episode) => {
+    episodes.flatMap((episode) => {
       const episodeData = dataByEpisode.get(episode['episode.id']);
-      const snapshot = v2AlertSnapshotSchema.parse({
+      const rawData: unknown = episodeData ? JSON.parse(episodeData) : undefined;
+      const data = v2AlertSnapshotSchema.shape.data
+        .catch(undefined)
+        .parse(isRecord(rawData) ? truncateV2AlertData(rawData) : rawData);
+      const ruleId = episode['rule.id'] ?? undefined;
+      const ruleName = ruleId
+        ? ruleNames.get(ruleId)
+        : v2AlertSnapshotSchema.shape.rule_name.catch(undefined).parse(data?.rule_name);
+      const parsed = v2AlertSnapshotSchema.safeParse({
         alert_version: 'v2',
         id: episode['episode.id'],
-        rule_id: episode['rule.id'],
-        rule_name: ruleNames.get(episode['rule.id']),
+        rule_id: ruleId,
+        rule_name: ruleName,
         group_hash: episode.group_hash,
         status: episode['episode.status'],
         start: episode.first_timestamp,
         last_event_timestamp: episode.last_timestamp,
         severity: episode.severity ?? undefined,
         source: episode.source ?? undefined,
-        data: v2AlertSnapshotSchema.shape.data
-          .catch(undefined)
-          .parse(episodeData ? JSON.parse(episodeData) : undefined),
+        data,
       });
-      return [snapshot.id, snapshot];
+      return parsed.success ? [[parsed.data.id, parsed.data] as const] : [];
     })
   );
 };

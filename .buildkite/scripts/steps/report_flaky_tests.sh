@@ -28,8 +28,6 @@ REPORT_DIR="target/flaky_tests"
 REPORT_PATH="$REPORT_DIR/flaky_tests.json"
 
 echo "--- Bootstrap Kibana"
-# The step only runs Node scripts; skip building the dev-mode shared webpack bundles
-export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
 # `+++` expands this group by default so the log opens on the summary table

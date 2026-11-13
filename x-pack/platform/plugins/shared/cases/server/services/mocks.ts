@@ -161,6 +161,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     ensureAlertsAuthorized: jest.fn(),
     ensureAttacksAuthorized: jest.fn(),
     ensureDocumentsExist: jest.fn(),
+    confirmAlertIndices: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
   });
@@ -205,7 +206,6 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     find: jest.fn(),
     countAlertsAttachedToCase: jest.fn(),
     countAlertsWithinCase: jest.fn(),
-    executeCaseAggregations: jest.fn(),
     countPersistableStateAndExternalReferenceAttachments: jest.fn(),
   });
 

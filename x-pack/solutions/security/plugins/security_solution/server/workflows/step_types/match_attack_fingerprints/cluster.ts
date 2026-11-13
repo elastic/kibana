@@ -58,6 +58,11 @@ export interface AttackSignals extends AttackMatchFields {
 export interface StoredFingerprint extends AttackMatchFields {
   id: string;
   investigationId: string;
+  /**
+   * Alerts the review judged. Frozen at creation. Absent on a fingerprint written
+   * before the field existed; those fall back to `alertIds`.
+   */
+  analyzedAlertIds?: readonly string[];
   /** Uncapped count. `alertIds` itself stops at `STORED_ALERT_ID_CAP`. */
   alertCount?: number;
   /** When the fingerprint document was written. Absent on a record read without `@timestamp`. */
@@ -71,12 +76,21 @@ export interface InvestigationMeta {
   status?: string;
   closeReason?: string;
   verdict?: string;
+  /** The conversation API failed. A 404 leaves this unset and the meta absent. */
+  unreadable?: boolean;
 }
 
 export type DispositionKind = 'review' | 'review_linked' | 'attach';
 
 /** Why a new review is journaled against an earlier Investigation. */
-export type RelatedLinkReason = '' | 'false_positive' | 'builtin_account';
+export type RelatedLinkReason =
+  | ''
+  | 'false_positive'
+  | 'closed'
+  | 'builtin_account'
+  | 'proposal_expired'
+  | 'analysis_failed'
+  | 'investigation_missing';
 
 export interface Disposition {
   kind: DispositionKind;
@@ -84,7 +98,15 @@ export interface Disposition {
   relatedInvestigationId: string;
   relatedLinkReason: RelatedLinkReason;
   tagCorrelatedAlerts: boolean;
+  /** Tag `az:ad_fp_chain` instead of `az:ad_correlated`. Closed false-positive attach only. */
+  tagFpChainAlerts: boolean;
   journalAlertsRetired: boolean;
+  /**
+   * Rewrite the matched fingerprint onto this attack, and only while it still
+   * points at the earlier Investigation. Set when that Investigation is missing
+   * and the fingerprint is already older than the pending window.
+   */
+  retargetFingerprint?: boolean;
 }
 
 const intersectionSize = (left: readonly string[], right: readonly string[]): number => {
@@ -102,6 +124,19 @@ const intersectionSize = (left: readonly string[], right: readonly string[]): nu
 };
 
 export const uniqueSorted = (values: readonly string[]): string[] => [...new Set(values)].sort();
+
+/**
+ * Alerts a false-positive continuation may retire. A missing field is a fingerprint
+ * from before the field existed, whose `alertIds` had not yet been extended.
+ */
+export const analyzedIdsOf = (stored: StoredFingerprint): readonly string[] =>
+  stored.analyzedAlertIds ?? stored.alertIds;
+
+/** Ids present in both lists, in sorted order. */
+export const sharedIds = (left: readonly string[], right: readonly string[]): string[] => {
+  const allowed = new Set(right);
+  return uniqueSorted(left).filter((id) => allowed.has(id));
+};
 
 /**
  * True when the sets share at least two alerts and at least half of the smaller set.
@@ -406,22 +441,30 @@ export const fingerprintId = (
   return createHash('sha256').update(keyed).digest('hex');
 };
 
-/**
- * A later run that joins an existing Investigation tags its alerts, including while
- * that Investigation is still open. A closed false positive stays untagged, and so
- * does an Investigation this run could not read.
- */
-export const tagCorrelatedAlerts = (investigation: InvestigationMeta | undefined): boolean => {
-  if (investigation === undefined) {
-    return false;
-  }
-  return !(investigation.status === 'closed' && investigation.closeReason === 'false_positive');
+const NO_CLASSIFICATION_VERDICT = 'NO CLASSIFICATION';
+const GATE_FAILED_VERDICT = 'GATE FAILED';
+const EXPIRED_PROPOSAL_VERDICT = 'expired with no decision';
+
+const analysisFailed = (investigation: InvestigationMeta): boolean => {
+  const verdict = investigation.verdict ?? '';
+  return verdict.includes(NO_CLASSIFICATION_VERDICT) || verdict.includes(GATE_FAILED_VERDICT);
 };
 
+const proposalExpired = (investigation: InvestigationMeta): boolean =>
+  (investigation.verdict ?? '').includes(EXPIRED_PROPOSAL_VERDICT);
+
 /**
- * The review journals alert retirement only for a true-positive or inconclusive
- * verdict. The record of that on the Investigation is the handed-off verdict,
- * written when that escalation is approved. A declined or other close still tags.
+ * An open Investigation that was already handed to forensics tags a continuation
+ * `az:ad_correlated`. A review still waiting, and a gate still open, do not:
+ * the decision has not been made. Closed, expired, and failed Investigations
+ * are not attached, so they never reach this.
+ */
+export const tagCorrelatedAlerts = (investigation: InvestigationMeta | undefined): boolean =>
+  (investigation?.verdict ?? '').includes(HANDED_OFF_VERDICT);
+
+/**
+ * The attach journals alert retirement only when the Investigation was already
+ * handed off. That verdict is the record that the escalation was approved.
  */
 export const journalAlertsRetired = (investigation: InvestigationMeta | undefined): boolean =>
   (investigation?.verdict ?? '').includes(HANDED_OFF_VERDICT);
@@ -463,6 +506,7 @@ export const disposition = (
     relatedInvestigationId: '',
     relatedLinkReason: '' as const,
     tagCorrelatedAlerts: false,
+    tagFpChainAlerts: false,
     journalAlertsRetired: false,
   };
   // A missing Investigation is not a match to attach to, unless this fingerprint
@@ -480,6 +524,8 @@ export const disposition = (
   const closedFalsePositive =
     investigation?.status === 'closed' && investigation.closeReason === 'false_positive';
   const linkable = investigation !== undefined || investigationStillPending(stored, now);
+  // A built-in account does not wait. A failed read must not attach it to the
+  // other chain, which would skip FP/TP and add its alerts to that fingerprint.
   if (onlyBuiltin && linkable) {
     return {
       kind: 'review_linked',
@@ -487,13 +533,46 @@ export const disposition = (
       relatedInvestigationId: stored.investigationId,
       relatedLinkReason: closedFalsePositive ? 'false_positive' : 'builtin_account',
       tagCorrelatedAlerts: false,
+      tagFpChainAlerts: false,
       journalAlertsRetired: false,
     };
   }
 
+  // A 5xx, a timeout, or a privilege error is not a missing Investigation.
+  // Inside 15 minutes the review may still be creating it, so this waits, the
+  // same as a 404. Older than that, retargeting would rewrite a fingerprint
+  // that may still be live.
+  if (investigation?.unreadable === true) {
+    if (investigationStillPending(stored, now)) {
+      return {
+        kind: 'attach',
+        investigationId: stored.investigationId,
+        relatedInvestigationId: '',
+        relatedLinkReason: '',
+        tagCorrelatedAlerts: false,
+        tagFpChainAlerts: false,
+        journalAlertsRetired: false,
+      };
+    }
+    return review;
+  }
+
   if (investigation === undefined) {
     if (!investigationStillPending(stored, now)) {
-      return review;
+      // A built-in account still does not join. Retargeting would hand it this chain.
+      if (onlyBuiltin) {
+        return review;
+      }
+      return {
+        kind: 'review_linked',
+        investigationId: freshInvestigationId,
+        relatedInvestigationId: stored.investigationId,
+        relatedLinkReason: 'investigation_missing',
+        tagCorrelatedAlerts: false,
+        tagFpChainAlerts: false,
+        journalAlertsRetired: false,
+        retargetFingerprint: true,
+      };
     }
     return {
       kind: 'attach',
@@ -501,17 +580,33 @@ export const disposition = (
       relatedInvestigationId: '',
       relatedLinkReason: '',
       tagCorrelatedAlerts: false,
+      tagFpChainAlerts: false,
       journalAlertsRetired: false,
     };
   }
 
-  if (closedFalsePositive && !sharesAlerts) {
+  // A closed Investigation takes no more attachments. The later attack is reviewed
+  // on its own, with a note naming this one. An expiry and a failed analysis stay
+  // open, and a later attack is reviewed the same way: nobody is waiting on them.
+  if (investigation.status === 'closed') {
     return {
       kind: 'review_linked',
       investigationId: freshInvestigationId,
       relatedInvestigationId: stored.investigationId,
-      relatedLinkReason: 'false_positive',
+      relatedLinkReason: closedFalsePositive ? 'false_positive' : 'closed',
       tagCorrelatedAlerts: false,
+      tagFpChainAlerts: false,
+      journalAlertsRetired: false,
+    };
+  }
+  if (analysisFailed(investigation) || proposalExpired(investigation)) {
+    return {
+      kind: 'review_linked',
+      investigationId: freshInvestigationId,
+      relatedInvestigationId: stored.investigationId,
+      relatedLinkReason: analysisFailed(investigation) ? 'analysis_failed' : 'proposal_expired',
+      tagCorrelatedAlerts: false,
+      tagFpChainAlerts: false,
       journalAlertsRetired: false,
     };
   }
@@ -522,36 +617,97 @@ export const disposition = (
     relatedInvestigationId: '',
     relatedLinkReason: '',
     tagCorrelatedAlerts: tagCorrelatedAlerts(investigation),
+    tagFpChainAlerts: false,
     journalAlertsRetired: journalAlertsRetired(investigation),
   };
 };
 
+/** Stored fingerprints this group matches. The caller ranks them. */
+export const matchedFingerprints = (
+  group: readonly AttackMatchFields[],
+  stored: readonly StoredFingerprint[]
+): StoredFingerprint[] =>
+  stored.filter((item) => group.some((member) => sameAttack(member, item, false)));
+
 export const bestStoredFingerprint = (
   canonical: AttackMatchFields,
-  stored: readonly StoredFingerprint[]
+  stored: readonly StoredFingerprint[],
+  investigations?: ReadonlyMap<string, InvestigationMeta | undefined>,
+  now: Date = new Date()
 ): StoredFingerprint | undefined => {
   const matches = stored.filter((item) => sameAttack(canonical, item, false));
-  return rankStoredFingerprints(canonical.alertIds, matches);
+  return rankStoredFingerprints(canonical.alertIds, matches, investigations, now);
 };
 
 /**
  * A stored fingerprint continues the group when any phase matches it. Phases of one
  * chain can sit further apart than the window between the first phase and the last.
+ * With Investigation state, a fingerprint you can still join ranks ahead of a
+ * closed, expired, or failed one, and ahead of one whose Investigation never appeared.
  */
 export const bestStoredForGroup = (
   group: readonly AttackMatchFields[],
-  stored: readonly StoredFingerprint[]
+  stored: readonly StoredFingerprint[],
+  investigations?: ReadonlyMap<string, InvestigationMeta | undefined>,
+  now: Date = new Date()
 ): StoredFingerprint | undefined => {
-  const matches = stored.filter((item) => group.some((member) => sameAttack(member, item, false)));
+  const matches = matchedFingerprints(group, stored);
   const alertIds = uniqueSorted(group.flatMap((member) => member.alertIds));
-  return rankStoredFingerprints(alertIds, matches);
+  return rankStoredFingerprints(alertIds, matches, investigations, now);
+};
+
+/**
+ * Lower ranks first. `joinable` is a missing Investigation still inside 15 minutes,
+ * or an open one that is not finished. `retarget` is missing and already older than
+ * that. `finished` is closed, expired, analysis failed, gate failed, or unreadable
+ * and already older than 15 minutes.
+ */
+const JOIN_TIER = {
+  joinable: 0,
+  retarget: 1,
+  finished: 2,
+} as const;
+
+const joinTier = (
+  stored: StoredFingerprint,
+  investigations: ReadonlyMap<string, InvestigationMeta | undefined> | undefined,
+  now: Date
+): number => {
+  // No Investigation state to compare, so every fingerprint shares one rank and
+  // alert overlap keeps the previous order.
+  if (investigations === undefined) {
+    return JOIN_TIER.joinable;
+  }
+  const investigation = investigations.get(stored.investigationId);
+  // A failed read inside 15 minutes is still the in-flight review. Older than
+  // that, it is not a candidate to join or to retarget.
+  if (investigation?.unreadable === true) {
+    return investigationStillPending(stored, now) ? JOIN_TIER.joinable : JOIN_TIER.finished;
+  }
+  if (investigation === undefined) {
+    return investigationStillPending(stored, now) ? JOIN_TIER.joinable : JOIN_TIER.retarget;
+  }
+  if (
+    investigation.status === 'closed' ||
+    analysisFailed(investigation) ||
+    proposalExpired(investigation)
+  ) {
+    return JOIN_TIER.finished;
+  }
+  return JOIN_TIER.joinable;
 };
 
 const rankStoredFingerprints = (
   alertIds: readonly string[],
-  matches: StoredFingerprint[]
+  matches: StoredFingerprint[],
+  investigations: ReadonlyMap<string, InvestigationMeta | undefined> | undefined,
+  now: Date
 ): StoredFingerprint | undefined => {
   matches.sort((left, right) => {
+    const tier = joinTier(left, investigations, now) - joinTier(right, investigations, now);
+    if (tier !== 0) {
+      return tier;
+    }
     const overlap =
       intersectionSize(right.alertIds, alertIds) - intersectionSize(left.alertIds, alertIds);
     if (overlap !== 0) {

@@ -14,12 +14,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { UseInvestigationResult } from '@kbn/investigation-output';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { EventFlyout } from './event_flyout';
-import type {
-  InvestigationRunStatus,
-  SignificantEventResponse,
-} from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../../../data/query_keys';
-import { clearPendingInvestigationCompletionsForTests } from '../../../hooks/use_fetch_significant_events';
+import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
@@ -31,6 +26,31 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 const mockUseInvestigation = jest.fn<UseInvestigationResult, [unknown]>();
+const mockSubjectInvestigation = jest.fn();
+const mockIsAwaitingStart = jest.fn(() => false);
+const mockIsListLoading = jest.fn(() => false);
+const mockAwaitingArg = jest.fn();
+const mockIsInvestigationAvailable = jest.fn(() => true);
+const mockIsAvailabilityLoading = jest.fn(() => false);
+jest.mock('../../../data/investigations/use_fetch_investigation_availability', () => ({
+  useFetchInvestigationAvailability: () => ({
+    isAvailable: mockIsInvestigationAvailable(),
+    isLoading: mockIsAvailabilityLoading(),
+  }),
+}));
+jest.mock('../../../data/significant_events/use_fetch_event_investigation', () => ({
+  useFetchEventInvestigation: (
+    episodeId: string | undefined,
+    options: { awaiting?: unknown } | undefined
+  ) => {
+    mockAwaitingArg(options?.awaiting);
+    return {
+      investigation: mockSubjectInvestigation(episodeId),
+      isAwaitingStart: mockIsAwaitingStart(),
+      isListLoading: mockIsListLoading(),
+    };
+  },
+}));
 
 jest.mock('@kbn/investigation-output', () => ({
   // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
@@ -53,13 +73,7 @@ const investigationDetails = {
 const mockOpenConversationDetails = jest.fn();
 const mockReportEvent = jest.fn();
 
-jest.mock('../../../hooks/use_fetch_investigation_statuses', () => ({
-  useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
-}));
-
-let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
-
-jest.mock('../../../hooks/use_fetch_source_features', () => ({
+jest.mock('../../../data/knowledge_indicators/use_fetch_source_features', () => ({
   useFetchSourceFeatures: () => ({
     features: [],
     failedSourceIds: [],
@@ -74,7 +88,7 @@ jest.mock('../detection/change_point_lens_chart', () => ({
   ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
 }));
 
-jest.mock('../../../hooks/use_fetch_detection_occurrences', () => ({
+jest.mock('../../../data/detections/use_fetch_detection_occurrences', () => ({
   useFetchDetectionOccurrences: () => ({
     data: new Map([
       [
@@ -91,7 +105,7 @@ jest.mock('../../../hooks/use_fetch_detection_occurrences', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_fetch_event_lifecycle', () => ({
+jest.mock('../../../data/significant_events/use_fetch_event_lifecycle', () => ({
   useFetchEventLifecycle: () => ({
     data: {
       detections: [
@@ -113,8 +127,13 @@ jest.mock('../../../hooks/use_fetch_event_lifecycle', () => ({
 }));
 
 const mockOpenChat = jest.fn();
+const mockFocusedSignificantEventService = {
+  setFocusedEvent: jest.fn(),
+  clearFocusedEvent: jest.fn(),
+};
 const mockAddSuccess = jest.fn();
 const mockSignificantEventsFetch = jest.fn();
+const mockInvestigationsFetch = jest.fn();
 let mockCanManage = false;
 
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
@@ -133,6 +152,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
         openChat: mockOpenChat,
         openConversationDetails: mockOpenConversationDetails,
       },
+      focusedSignificantEventService: mockFocusedSignificantEventService,
       notifications: {
         toasts: {
           addSuccess: mockAddSuccess,
@@ -165,6 +185,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
           fetch: mockSignificantEventsFetch,
         },
       },
+      nightshiftInvestigations: {
+        investigationsClient: { fetch: mockInvestigationsFetch },
+      },
     },
   }),
 }));
@@ -173,6 +196,7 @@ const mockEvent: SignificantEventResponse = {
   '@timestamp': '2026-07-10T12:00:00Z',
   created_at: '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
+  episode_id: 'episode-001',
   status: 'active',
   source_ids: ['logs.web-frontend', 'logs.api-gateway'],
   title: 'Web latency spike across frontend and API gateway',
@@ -185,18 +209,26 @@ const mockEvent: SignificantEventResponse = {
 describe('EventFlyout', () => {
   beforeEach(() => {
     queryClient.clear();
-    clearPendingInvestigationCompletionsForTests();
     mockOpenChat.mockClear();
+    mockFocusedSignificantEventService.setFocusedEvent.mockClear();
+    mockFocusedSignificantEventService.clearFocusedEvent.mockClear();
     mockAddSuccess.mockClear();
-    mockInvestigationRunStatuses = undefined;
+    mockSubjectInvestigation.mockReset();
+    mockIsAwaitingStart.mockReset();
+    mockIsAwaitingStart.mockReturnValue(false);
+    mockIsListLoading.mockReset();
+    mockIsListLoading.mockReturnValue(false);
+    mockAwaitingArg.mockClear();
+    mockInvestigationsFetch.mockClear();
+    mockIsInvestigationAvailable.mockReset();
+    mockIsInvestigationAvailable.mockReturnValue(true);
+    mockIsAvailabilityLoading.mockReset();
+    mockIsAvailabilityLoading.mockReturnValue(false);
     mockOpenConversationDetails.mockClear();
     mockReportEvent.mockClear();
     mockCanManage = false;
-    mockSignificantEventsFetch.mockImplementation((route: string) =>
-      route === 'POST /internal/significant_events/events/{id}/investigate'
-        ? Promise.resolve({ executionId: 'exec-new' })
-        : Promise.resolve({ updated: 1, ignored: 0, status: 'inactive' })
-    );
+    mockSignificantEventsFetch.mockResolvedValue({ updated: 1, ignored: 0, status: 'inactive' });
+    mockInvestigationsFetch.mockResolvedValue({ investigation_id: 'investigation-new' });
     mockUseInvestigation.mockReturnValue({
       status: 'complete',
       investigation: investigationDetails,
@@ -231,19 +263,17 @@ describe('EventFlyout', () => {
     expect(screen.getAllByText(/Jul 10, 2026 @ \d{2}:\d{2}:\d{2}/).length).toBeGreaterThan(0);
   });
 
+  it('publishes the focused event and clears it by id on unmount', () => {
+    const { unmount } = renderFlyout();
+
+    expect(mockFocusedSignificantEventService.setFocusedEvent).toHaveBeenCalledWith(mockEvent);
+    unmount();
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
+  });
+
   it('opens a new chat from the Actions menu', async () => {
-    renderFlyout({
-      event: {
-        ...mockEvent,
-        investigations: [
-          {
-            workflow_execution_id: 'exec-1',
-            started_at: '2026-07-10T12:00:00Z',
-            completed_at: '2026-07-10T12:05:00Z',
-          },
-        ],
-      },
-    });
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-1', in_progress: false });
+    renderFlyout();
 
     await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
     await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
@@ -253,23 +283,84 @@ describe('EventFlyout', () => {
         initialMessage: expect.stringContaining(mockEvent.title),
       })
     );
+    expect(mockOpenChat.mock.invocationCallOrder[0]).toBeLessThan(
+      Math.max(...mockFocusedSignificantEventService.setFocusedEvent.mock.invocationCallOrder)
+    );
   });
 
-  it('offers a new chat instead of the investigation chat while it is running', async () => {
+  it('clears the focused event after New chat closes an overlay flyout', async () => {
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-1', in_progress: false });
+    const { unmount } = renderFlyout({ type: 'overlay' });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    unmount();
+
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
+  });
+
+  it('keeps a staged overlay event when it refetches after New chat', async () => {
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-1', in_progress: false });
+    const { rerender, unmount } = renderFlyout({ type: 'overlay' });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    rerender(
+      <EventFlyout
+        event={{ ...mockEvent, summary: 'Updated after refetch' }}
+        onClose={jest.fn()}
+        type="overlay"
+      />
+    );
+
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).not.toHaveBeenCalled();
+    unmount();
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
+  });
+
+  it('shows the investigation found by the event alert subject, without investigations[]', async () => {
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-subject', in_progress: false });
+    renderFlyout();
+
+    expect(mockSubjectInvestigation).toHaveBeenCalledWith(mockEvent.episode_id);
+    expect(mockUseInvestigation).toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: 'conv-subject' })
+    );
+    expect(screen.getByText('Investigation')).toBeInTheDocument();
+  });
+
+  it('does not present an older run as the current one while a start is pending', async () => {
+    mockCanManage = true;
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-old', in_progress: false });
+    mockIsAwaitingStart.mockReturnValue(true);
+    renderFlyout();
+
+    expect(mockUseInvestigation).toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: undefined })
+    );
+    expect(screen.getByText('Investigation · In progress')).toBeInTheDocument();
+  });
+
+  it('disables the investigation action for an event without an alert to investigate', async () => {
+    mockCanManage = true;
+    renderFlyout({ event: { ...mockEvent, episode_id: undefined } });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    const item = screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton');
+    expect(item).toHaveAttribute('aria-disabled', 'true');
+    expect(mockInvestigationsFetch).not.toHaveBeenCalled();
+  });
+
+  it('offers a new chat instead of the investigation chat while the subject investigation runs', async () => {
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-subject', in_progress: true });
     mockUseInvestigation.mockReturnValue({ status: 'running' });
-    renderFlyout({
-      event: {
-        ...mockEvent,
-        investigations: [{ workflow_execution_id: 'exec-1', started_at: '2026-07-10T12:00:00Z' }],
-      },
-    });
+    renderFlyout();
 
     await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
     expect(
       screen.queryByTestId('nightshiftEventFlyoutOpenInvestigationChatItem')
     ).not.toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
-    expect(mockOpenChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
+    expect(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem')).toBeInTheDocument();
   });
 
   it('runs an investigation from the footer for users with manage access', async () => {
@@ -280,13 +371,116 @@ describe('EventFlyout', () => {
     await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
 
     await waitFor(() =>
-      expect(mockSignificantEventsFetch).toHaveBeenCalledWith(
-        'POST /internal/significant_events/events/{id}/investigate',
+      expect(mockInvestigationsFetch).toHaveBeenCalledWith(
+        'POST /internal/nightshift/investigations',
         {
-          params: { path: { id: mockEvent.event_id } },
+          params: { body: { subject: { type: 'alert', ids: [mockEvent.episode_id] } } },
           signal: null,
         }
       )
+    );
+  });
+
+  it('does not start an investigation until the list has been read', async () => {
+    mockCanManage = true;
+    mockIsListLoading.mockReturnValue(true);
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    expect(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
+  it('disables the investigation action for a user who cannot start investigations', async () => {
+    mockCanManage = true;
+    mockIsInvestigationAvailable.mockReturnValue(false);
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    const item = screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton');
+    expect(item).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(item);
+    expect(mockInvestigationsFetch).not.toHaveBeenCalled();
+  });
+
+  it('does not claim missing access while availability is still loading', async () => {
+    mockCanManage = true;
+    mockIsInvestigationAvailable.mockReturnValue(false);
+    mockIsAvailabilityLoading.mockReturnValue(true);
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.hover(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+
+    expect(screen.queryByText(/write access to Agent Builder/)).not.toBeInTheDocument();
+  });
+
+  it('keeps a start with the event it was made for when another event is shown before it returns', async () => {
+    mockCanManage = true;
+    let resolveStart: (response: { investigation_id: string }) => void = () => {};
+    mockInvestigationsFetch.mockReturnValue(
+      new Promise((resolve) => {
+        resolveStart = resolve;
+      })
+    );
+    const otherEvent = { ...mockEvent, event_id: 'evt-002', episode_id: 'episode-002' };
+    const { rerender } = renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+    rerender(<EventFlyout event={otherEvent} onClose={jest.fn()} />);
+    await act(async () => {
+      resolveStart({ investigation_id: 'conv-a' });
+    });
+
+    await waitFor(() => expect(mockAddSuccess).toHaveBeenCalled());
+    expect(mockAwaitingArg).toHaveBeenLastCalledWith(undefined);
+
+    rerender(<EventFlyout event={mockEvent} onClose={jest.fn()} />);
+    expect(mockAwaitingArg).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'conv-a' }));
+  });
+
+  it('carries the listed state into the wait when the start continues that investigation', async () => {
+    mockCanManage = true;
+    mockSubjectInvestigation.mockReturnValue({
+      id: 'conv-open',
+      in_progress: false,
+      updated_at: '2026-07-10T12:00:00Z',
+    });
+    mockInvestigationsFetch.mockResolvedValue({ investigation_id: 'conv-open' });
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+
+    await waitFor(() =>
+      expect(mockAwaitingArg).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'conv-open', listedUpdatedAt: '2026-07-10T12:00:00Z' })
+      )
+    );
+  });
+
+  it('waits without a baseline when the start opens a different investigation', async () => {
+    mockCanManage = true;
+    mockSubjectInvestigation.mockReturnValue({
+      id: 'conv-open',
+      in_progress: false,
+      updated_at: '2026-07-10T12:00:00Z',
+    });
+    mockInvestigationsFetch.mockResolvedValue({ investigation_id: 'conv-new' });
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+
+    await waitFor(() =>
+      expect(mockAwaitingArg).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'conv-new' }))
+    );
+    expect(mockAwaitingArg).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ listedUpdatedAt: expect.anything() })
     );
   });
 
@@ -298,6 +492,7 @@ describe('EventFlyout', () => {
     expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Mark inactive' }));
+    await userEvent.click(screen.getByRole('radio', { name: /^Dismissed/ }));
     fireEvent.change(screen.getByTestId('nightshiftMarkSignificantEventInactiveReason'), {
       target: { value: 'Known maintenance' },
     });
@@ -309,7 +504,11 @@ describe('EventFlyout', () => {
         {
           params: {
             path: { id: mockEvent.event_id },
-            body: { status: 'inactive', assessment_note: 'Known maintenance' },
+            body: {
+              status: 'inactive',
+              close_reason: 'dismissed',
+              assessment_note: 'Known maintenance',
+            },
           },
           signal: null,
         }
@@ -320,17 +519,8 @@ describe('EventFlyout', () => {
 
   it('only offers Mark inactive for live events with manage access', async () => {
     mockCanManage = true;
-    const event: SignificantEventResponse = {
-      ...mockEvent,
-      status: 'recovering',
-      investigations: [
-        {
-          workflow_execution_id: 'conv-1',
-          started_at: '2026-07-10T12:00:00Z',
-          completed_at: '2026-07-10T12:05:00Z',
-        },
-      ],
-    };
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-1', in_progress: false });
+    const event: SignificantEventResponse = { ...mockEvent, status: 'recovering' };
     const { rerender } = renderFlyout({ event });
     await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
     expect(await screen.findByRole('menuitem', { name: 'Mark inactive' })).toBeInTheDocument();
@@ -348,161 +538,14 @@ describe('EventFlyout', () => {
     expect(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem')).toBeInTheDocument();
   });
 
-  it('waits for the event outcome before completing each investigation round', () => {
-    const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'follow-up'];
-    const firstRound: SignificantEventResponse = {
-      ...mockEvent,
-      investigations: [
-        {
-          workflow_execution_id: 'conv-1',
-          started_at: new Date(Date.now() - 60_000).toISOString(),
-        },
-      ],
-    };
-    queryClient.setQueryData(key, { hits: [firstRound] });
-    mockUseInvestigation.mockReturnValue({
-      status: 'running',
-      investigation: investigationDetails,
-    });
-    const onClose = jest.fn();
-    const { rerender } = renderFlyout({ event: firstRound, onClose });
-
-    mockUseInvestigation.mockReturnValue({
-      status: 'complete',
-      investigation: investigationDetails,
-    });
-    rerender(<EventFlyout event={firstRound} onClose={onClose} />);
-    expect(queryClient.getQueryData(key)).toEqual({ hits: [firstRound] });
-
-    const followUp: SignificantEventResponse = {
-      ...firstRound,
-      investigations: [{ workflow_execution_id: 'conv-1', started_at: new Date().toISOString() }],
-    };
-    act(() => queryClient.setQueryData(key, { hits: [followUp] }));
-    rerender(<EventFlyout event={followUp} onClose={onClose} />);
-    expect(
-      queryClient.getQueryData<{ hits: SignificantEventResponse[] }>(key)?.hits[0]
-        .investigations?.[0].completed_at
-    ).toBeUndefined();
-
-    mockUseInvestigation.mockReturnValue({
-      status: 'running',
-      investigation: investigationDetails,
-    });
-    rerender(<EventFlyout event={followUp} onClose={onClose} />);
-    mockUseInvestigation.mockReturnValue({
-      status: 'complete',
-      investigation: investigationDetails,
-    });
-    rerender(<EventFlyout event={followUp} onClose={onClose} />);
-    expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
-
-    const finishedFollowUp: SignificantEventResponse = {
-      ...followUp,
-      investigations: followUp.investigations?.map((investigation) => ({
-        ...investigation,
-        completed_at: new Date().toISOString(),
-        outcome: 'failed',
-      })),
-    };
-    act(() => queryClient.setQueryData(key, { hits: [finishedFollowUp] }));
-    rerender(<EventFlyout event={finishedFollowUp} onClose={onClose} />);
-    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
-      'Investigation · Failed'
-    );
-  });
-
   it.each([
-    { phase: 'the initial read', minutesAgo: 1, wasRunning: false },
-    { phase: 'a running investigation', minutesAgo: 1, wasRunning: true },
-    { phase: 'the polling cutoff', minutesAgo: 66, wasRunning: false },
+    { inProgress: false, label: 'Completed' },
+    { inProgress: true, label: 'In progress' },
   ])(
-    'does not complete an investigation after a read error during $phase',
-    ({ minutesAgo, wasRunning }) => {
-      const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'read-error'];
-      const event: SignificantEventResponse = {
-        ...mockEvent,
-        investigations: [
-          {
-            workflow_execution_id: 'conv-1',
-            started_at: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
-          },
-        ],
-      };
-      const readError: UseInvestigationResult = {
-        status: 'unavailable',
-        error: 'Internal Server Error',
-      };
-      queryClient.setQueryData(key, { hits: [event] });
-      mockUseInvestigation.mockReturnValue(wasRunning ? { status: 'running' } : readError);
-      const onClose = jest.fn();
-      const { rerender } = renderFlyout({ event, onClose });
-
-      mockUseInvestigation.mockReturnValue(readError);
-      rerender(<EventFlyout event={event} onClose={onClose} />);
-
-      expect(queryClient.getQueryData(key)).toEqual({ hits: [event] });
-      expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
-        'Investigation · In progress'
-      );
-    }
-  );
-
-  it('shows a failed outcome and clears it when a follow-up starts', () => {
-    const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'failed-follow-up'];
-    const failedEvent: SignificantEventResponse = {
-      ...mockEvent,
-      investigations: [
-        {
-          workflow_execution_id: 'conv-1',
-          started_at: new Date(Date.now() - 60_000).toISOString(),
-          completed_at: new Date().toISOString(),
-          outcome: 'failed',
-        },
-      ],
-    };
-    const onClose = jest.fn();
-    const { rerender } = renderFlyout({ event: failedEvent, onClose });
-    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
-      'Investigation · Failed'
-    );
-
-    const followUp: SignificantEventResponse = {
-      ...failedEvent,
-      investigations: [{ workflow_execution_id: 'conv-1', started_at: new Date().toISOString() }],
-    };
-    act(() => queryClient.setQueryData(key, { hits: [followUp] }));
-    rerender(<EventFlyout event={followUp} onClose={onClose} />);
-
-    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
-      'Investigation · In progress'
-    );
-    expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
-  });
-
-  it.each([
-    { outcome: 'completed', label: 'Completed' },
-    { outcome: 'failed', label: 'Failed' },
-  ] as const)(
-    'shows the latest $outcome outcome despite an older unfinished investigation',
-    ({ outcome, label }) => {
-      renderFlyout({
-        event: {
-          ...mockEvent,
-          investigations: [
-            {
-              workflow_execution_id: 'older-investigation',
-              started_at: '2026-07-10T11:00:00Z',
-            },
-            {
-              workflow_execution_id: 'conv-1',
-              started_at: '2026-07-10T12:00:00Z',
-              completed_at: '2026-07-10T12:05:00Z',
-              outcome,
-            },
-          ],
-        },
-      });
+    'labels the investigation card $label when in_progress is $inProgress',
+    ({ inProgress, label }) => {
+      mockSubjectInvestigation.mockReturnValue({ id: 'conv-1', in_progress: inProgress });
+      renderFlyout();
 
       expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
         `Investigation · ${label}`
@@ -525,14 +568,6 @@ describe('EventFlyout', () => {
     expect(screen.getByText('Show less')).toBeInTheDocument();
   });
 
-  it('renders the detections section', () => {
-    renderFlyout();
-
-    expect(screen.getByText('Detections')).toBeInTheDocument();
-    expect(screen.getByText('latency-p95-spike')).toBeInTheDocument();
-    expect(screen.getByText('Spike')).toBeInTheDocument();
-  });
-
   it('hides the investigation section when the event has no investigation', () => {
     renderFlyout();
 
@@ -540,18 +575,8 @@ describe('EventFlyout', () => {
   });
 
   it('renders the investigation from the shared API and opens its conversation details', () => {
-    renderFlyout({
-      event: {
-        ...mockEvent,
-        investigations: [
-          {
-            workflow_execution_id: 'conv-1',
-            started_at: '2026-07-10T12:00:00Z',
-            completed_at: '2026-07-10T12:05:00Z',
-          },
-        ],
-      },
-    });
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-1', in_progress: false });
+    renderFlyout();
 
     expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
       'Web latency spike'
@@ -576,42 +601,13 @@ describe('EventFlyout', () => {
       error: "You don't have permission to view this investigation.",
     });
 
-    renderFlyout({
-      event: {
-        ...mockEvent,
-        investigations: [
-          {
-            workflow_execution_id: 'conv-1',
-            started_at: '2026-07-10T12:00:00Z',
-            completed_at: '2026-07-10T12:05:00Z',
-          },
-        ],
-      },
-    });
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-1', in_progress: false });
+    renderFlyout();
 
     const card = screen.getByTestId('nightshiftEventInvestigationCard');
     expect(card.tagName).toBe('DIV');
     fireEvent.click(card);
     expect(mockOpenConversationDetails).not.toHaveBeenCalled();
-  });
-
-  it('shows no investigation when the investigation does not exist', () => {
-    mockInvestigationRunStatuses = {};
-
-    renderFlyout({
-      event: {
-        ...mockEvent,
-        investigations: [
-          {
-            workflow_execution_id: 'legacy-execution',
-            started_at: '2026-07-10T12:00:00Z',
-            completed_at: '2026-07-10T12:05:00Z',
-          },
-        ],
-      },
-    });
-
-    expect(screen.queryByTestId('nightshiftEventInvestigationCard')).not.toBeInTheDocument();
   });
 
   it('calls onClose when flyout is closed', () => {

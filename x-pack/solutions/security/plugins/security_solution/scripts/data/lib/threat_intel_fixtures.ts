@@ -553,7 +553,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             '192[.]0[.]2[.]31 (192.0.2.31). ATT&CK: T1059.001, T1078.004.',
         },
         {
-          title: 'Telemetry refresh: process chain fields for Tier 2 execute on WIN-ANALYST01',
+          title:
+            'Telemetry refresh: process chain fields for Behavior Hunt execute on WIN-ANALYST01',
           body:
             'Telemetry refresh for WIN-ANALYST01 reminding hunters that powershell.exe spawning ' +
             'aws.exe (T1059.001) toward escalated-role in account 123456789012 precedes the ' +
@@ -722,7 +723,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             '(T1078.004) instead of those IPs.',
         },
         {
-          title: 'Telemetry refresh: AssumeRole event.provider fields for Tier 2 execute',
+          title: 'Telemetry refresh: AssumeRole event.provider fields for Behavior Hunt execute',
           body:
             'Telemetry refresh for account 123456789012 reminding hunters that sts.amazonaws.com ' +
             'AssumeRole events (aws.cloudtrail.event_name) toward escalated-role on WIN-ANALYST01 ' +

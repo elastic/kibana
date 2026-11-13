@@ -13,6 +13,7 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { installSecurityAlertAnalysisWorkflow } from './alert_analysis_workflow/install';
+import { syncEndpointConfigurationTroubleshootingWorkflows } from './endpoint_configuration_troubleshooting_workflows/install';
 import {
   initSecurityManagedWorkflowsClient,
   type SecurityManagedWorkflowsClient,
@@ -34,6 +35,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   workflowsExtensions,
   logger,
   threatIntelSupplyEnabled,
+  automaticTroubleshootingUniversalSkillEnabled,
   aesopPrototypeEnabled,
   bootstrapReady,
   core,
@@ -48,6 +50,12 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   threatIntelSupplyEnabled: boolean;
   /** When false, previously installed AESOP prototype workflows are uninstalled. */
   aesopPrototypeEnabled: boolean;
+  /**
+   * True when `automaticTroubleshootingUniversalSkill` is on. When true, the
+   * endpoint configuration troubleshooting managed workflows are installed; when
+   * false, they are uninstalled.
+   */
+  automaticTroubleshootingUniversalSkillEnabled: boolean;
   /**
    * Resolves after TI bootstrap (templates, migrations, seed). Only awaited when
    * supply is enabled; ignored otherwise.
@@ -116,6 +124,19 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     logger.warn('Failed to install or uninstall threat intelligence managed workflows', {
       error,
     });
+  }
+
+  try {
+    await syncEndpointConfigurationTroubleshootingWorkflows({
+      managedWorkflowsClient,
+      enabled: automaticTroubleshootingUniversalSkillEnabled,
+      logger,
+    });
+  } catch (error) {
+    logger.warn(
+      'Failed to install or uninstall the endpoint configuration troubleshooting managed workflows',
+      { error }
+    );
   }
 
   try {

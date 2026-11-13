@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/es-query'
   - '@kbn/features-plugin'
+  - '@kbn/content-sanitization'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'
@@ -133,6 +134,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

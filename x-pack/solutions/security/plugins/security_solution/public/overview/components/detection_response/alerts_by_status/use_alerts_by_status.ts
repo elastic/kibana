@@ -46,12 +46,15 @@ export const ENTITY_ID_FIELD = 'entity.id';
 /** Stable empty map so callers passing inline `{}` do not invalidate query memoization every render. */
 const EMPTY_IDENTITY_FIELDS: Record<string, string> = {};
 
-const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefined => {
+const toStoreEntityType = (type: string | undefined): 'host' | 'user' | 'service' | undefined => {
   if (type === EntityType.host || type === 'host') {
     return 'host';
   }
   if (type === EntityType.user || type === 'user') {
     return 'user';
+  }
+  if (type === EntityType.service || type === 'service') {
+    return 'service';
   }
   return undefined;
 };

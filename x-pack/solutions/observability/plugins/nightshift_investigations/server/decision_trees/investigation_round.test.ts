@@ -67,7 +67,7 @@ describe('buildInvestigationRound', () => {
     expect(step).toMatchObject({ tool_call_id: 'investigation-call-0' });
   });
 
-  it('omits the content of Cortex and decision-tree files Nightshift seeded', () => {
+  it('omits the content of Wiki and decision-tree files Nightshift seeded', () => {
     const [seeded, other] = build([
       {
         tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
@@ -96,7 +96,7 @@ describe('buildInvestigationRound', () => {
       {
         tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
         tool_call_id: 'toolu_env',
-        params: { file_path: '/workspace/elastic.md' },
+        params: { file_path: '/workspace/.connector-docs/elastic.md' },
         results: esqlResult('elastic body'),
       },
       {

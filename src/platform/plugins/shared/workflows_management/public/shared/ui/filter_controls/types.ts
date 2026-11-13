@@ -44,6 +44,10 @@ export interface FilterGroupProps {
    * Current Kibana space. Scopes option aggregations to this space and namespaces stored control state.
    */
   spaceId?: string;
+  /**
+   * Extra filters that scope the option aggregations without being reported through `onFiltersChange`.
+   */
+  parentFilters?: Filter[];
   dataViewId: string | null;
   /**
    * Filters changed callback
@@ -73,4 +77,9 @@ export interface FilterGroupProps {
   Storage: typeof Storage;
   storageKey?: string;
   disableLocalStorageSync?: boolean;
+  /**
+   * Rewrites the controls chosen from the URL, local storage, or defaults before they are created.
+   * Runs on every source, so a stored control can be migrated or removed without changing the storage key.
+   */
+  transformControls?: (controls: FilterControlConfig[]) => FilterControlConfig[];
 }

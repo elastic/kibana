@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Row } from '@tanstack/react-table';
 import { debounce } from 'lodash';
 import {
   useCallback,
@@ -24,6 +23,7 @@ import {
   type IStoreState,
 } from '../../../store_provider';
 import { calculateActiveStickyIndex, type UseVirtualizerReturnType } from '../virtualizer';
+import type { CascadeTableRow } from '../table';
 import type {
   ChildVirtualizerController,
   ConnectedChildState,
@@ -69,7 +69,7 @@ export interface DataCascadeUISnapshotStore<G extends GroupNode, L extends LeafN
  * Options for useExposePublicApi. Supplies table/UI state needed to build the snapshot.
  */
 export interface UseExposePublicApiOptions<G extends GroupNode> {
-  rows: Row<G>[];
+  rows: Array<CascadeTableRow<G>>;
   enableStickyGroupHeader: boolean;
   childController?: ChildVirtualizerController | null;
 }

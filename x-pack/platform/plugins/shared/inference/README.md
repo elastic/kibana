@@ -168,7 +168,7 @@ const { content, tokens } = chatResponse;
 #### Using a feature's configured model
 
 On the server, an unbound client from `getClient({ request })` also accepts a `featureId` instead of a `connectorId`.
-The inference plugin calls the feature's top endpoint, using the `temperature` and `reasoning` configured for that endpoint.
+The inference plugin calls the feature's top endpoint, using the `reasoning` configured for that endpoint.
 
 ```ts
 const chatResponse = await inferenceClient.chatComplete({
@@ -177,10 +177,10 @@ const chatResponse = await inferenceClient.chatComplete({
 });
 ```
 
-The top endpoint is the first one returned by `searchInferenceEndpoints.endpoints.getForFeature`, which applies the default AI connector settings, the admin's model settings for the feature, and the feature's `recommendedEndpoints`. When that endpoint has no configured parameters, it is called without `temperature` and `reasoning`.
+The top endpoint is the first one returned by `searchInferenceEndpoints.endpoints.getForFeature`, which applies the default AI connector settings, the admin's model settings for the feature, and the feature's `recommendedEndpoints`. When that endpoint has no configured parameters, it is called without `reasoning`.
 
 - The feature must be registered with `searchInferenceEndpoints` with the `chat_completion` task type.
-- `connectorId`, `temperature` and `reasoning` cannot be passed together with `featureId`.
+- `connectorId` and `reasoning` cannot be passed together with `featureId`.
 - `stream: true` and tools work the same way as with `connectorId`.
 - `featureId` is not supported by clients bound to a connector or by `getClientWithoutRequest`.
 - The call fails with a request error (400) when the feature is not registered, is not a chat completion feature, or has no endpoint, and with an internal error when the `searchInferenceEndpoints` plugin is disabled.

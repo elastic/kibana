@@ -77,11 +77,13 @@ export const cleanupStaleEvents = async ({
   eventSearchClient,
   rulesClient,
   candidateRuleIds,
+  workflowExecutionId,
   logger,
 }: {
   eventSearchClient: RuleEventsClient;
   rulesClient: IRulesManagementClient;
   candidateRuleIds?: string[];
+  workflowExecutionId?: string;
   logger?: Logger;
 }): Promise<CleanupStaleEventsResult> => {
   const uniqueCandidateRuleIds = candidateRuleIds
@@ -127,8 +129,10 @@ export const cleanupStaleEvents = async ({
           eventSearchClient.updateEventStatus({
             eventId: event.event_id,
             change: StatusChange.ruleDeleted(),
+            actor: 'stale_event_cleanup',
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
             expectedTimestamp: event['@timestamp'],
+            workflowExecutionId,
           })
         )
       )

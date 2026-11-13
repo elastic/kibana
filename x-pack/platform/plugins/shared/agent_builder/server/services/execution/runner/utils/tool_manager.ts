@@ -231,7 +231,7 @@ export class ToolManager implements IToolManager {
           logger: input.logger,
           sendEvent: this.eventEmitter,
           toolId: toolIdMapping.get(tool.id),
-          addReasoningParam: false,
+          addIntentParam: true,
           buildContent: ({ results, toolId, toolCallId, dynamicToolId }) =>
             buildGuardedToolContent({
               results,

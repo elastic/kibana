@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
 import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';

@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ConversationRoundStep, ToolCallStep, ToolResult } from '@kbn/agent-builder-common';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { toolCallsSchema, toolResultsSchema } from '../step_definitions/tool_calls_schema';
 
@@ -16,7 +17,7 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
 
 /**
  * Shared Zod input schema for post-execution optimizer steps that inspect a completed
- * Nightshift investigation round (`cortexOptimize`, `memoryOptimize`, `decisionTreePrepare`,
+ * Nightshift investigation round (`wikiOptimize`, `memoryOptimize`, `decisionTreePrepare`,
  * `decisionTreeReinforce`).
  */
 export const investigationRoundInputsSchema = {
@@ -66,12 +67,23 @@ export type InvestigationTranscriptStep =
     };
 
 export interface LoadedInvestigationRound {
-  source: 'persisted_round' | 'hook_tool_calls' | 'tool_call_params_only';
+  /**
+   * Where the transcript came from. `conversation_unreadable` carries no transcript: the caller
+   * cannot read the conversation, so the round cannot be learned from at all.
+   */
+  source:
+    | 'persisted_round'
+    | 'hook_tool_calls'
+    | 'tool_call_params_only'
+    | 'conversation_unreadable';
   roundId?: string;
   /** Zero-based position of the round in `conversation.rounds` when resolved from a conversation. */
   roundIndex?: number;
   /** Total number of rounds in `conversation.rounds` when resolved from a conversation. */
   roundCount?: number;
+  /** The request and final answer of the round before this one, which a follow-up message refers to. */
+  previousUserMessage?: string;
+  previousAssistantMessage?: string;
   traceId?: string;
   startedAt?: string;
   /** Interleaved reasoning and tool-call steps normalized from the round or hook fallback. */
@@ -304,7 +316,7 @@ export const stepsFromToolCalls = (
   );
 };
 
-const toolCallsFromRoundSteps = (steps: readonly RawRoundStep[]): InvestigationToolCall[] =>
+export const toolCallsFromRoundSteps = (steps: readonly RawRoundStep[]): InvestigationToolCall[] =>
   steps.flatMap((step) => {
     if (step.type !== 'tool_call' || typeof step.tool_id !== 'string') {
       return [];
@@ -321,6 +333,9 @@ const toolCallsFromRoundSteps = (steps: readonly RawRoundStep[]): InvestigationT
 
 /** Agent Builder fires the post-execution hook before saving the round, so wait briefly, then fall back. */
 export const ROUND_READ_RETRY_DELAYS_MS = [1_000, 2_000] as const;
+
+/** Why a round read gave up without retrying: the caller is not allowed to see the conversation. */
+export const UNREADABLE_CONVERSATION_REASON = 'conversation not readable by this caller';
 
 const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
   new Promise((resolve) => {
@@ -397,11 +412,19 @@ export const loadInvestigationRound = async ({
           const steps = stepsFromRound(rawRoundSteps);
           const roundToolCalls = toolCallsFromRoundSteps(rawRoundSteps);
           const traceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+          const previousUserMessage =
+            resolvedIndex > 0 ? conversation.rounds[resolvedIndex - 1]?.input?.message : undefined;
+          const previousAssistantMessage =
+            resolvedIndex > 0
+              ? conversation.rounds[resolvedIndex - 1]?.response?.message
+              : undefined;
           return {
             source: 'persisted_round',
             roundId: round.id,
             roundIndex: resolvedIndex,
             roundCount,
+            ...(previousUserMessage ? { previousUserMessage } : {}),
+            ...(previousAssistantMessage ? { previousAssistantMessage } : {}),
             traceId,
             startedAt: round.started_at,
             steps,
@@ -411,9 +434,19 @@ export const loadInvestigationRound = async ({
         }
         lastProblem = 'round not saved yet';
       } catch (error) {
+        // The conversation is written before the run starts and read by id, so it is never late:
+        // not-found means this caller cannot read it - a service-account-bound agent in a
+        // conversation its owner keeps private - and waiting cannot change that.
+        if (isConversationNotFoundError(error)) {
+          logger.warn(
+            `Investigation round loader cannot read conversation ${conversationId}; ${UNREADABLE_CONVERSATION_REASON}`
+          );
+          return { source: 'conversation_unreadable', roundId, steps: [], toolCalls: [] };
+        }
         lastProblem = (error as Error).message;
       }
     }
+    // An error's own message can carry conversation content, so it stays in the debug line below.
     logger.warn(
       'Investigation round loader could not read the persisted round; using hook tool calls'
     );

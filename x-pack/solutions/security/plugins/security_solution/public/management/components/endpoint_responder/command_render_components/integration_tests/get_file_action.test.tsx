@@ -153,6 +153,83 @@ describe('When using get-file action from response actions console', () => {
     });
   });
 
+  describe('and the `--force` argument is used', () => {
+    it('should include `force` in the request body', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two","force":true}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should not include `force` in the request body when `--force` is not used', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledTimes(1);
+      });
+
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.stringContaining('force') })
+      );
+    });
+
+    it('should display the `--force` argument in the command help', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent('--force');
+      });
+    });
+
+    it('should not display the `--force` argument in the command help if the Endpoint does not support the `get_file_force` capability', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toBeInTheDocument();
+      });
+
+      expect(renderResult.getByTestId('test-helpOutput')).not.toHaveTextContent('--force');
+    });
+
+    it('should error if `--force` is used and the Endpoint does not support the `get_file_force` capability', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --force'
+      );
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
+    });
+
+    it('should still allow `get-file` without `--force` when the capability is not supported', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('should error if `--force` is used with a non-endpoint agent type', async () => {
+      getConsoleCommandsOptions.agentType = 'sentinel_one';
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --force'
+      );
+    });
+  });
+
   it('should only accept one `--comment`', async () => {
     await render();
     await enterConsoleCommand(
@@ -238,6 +315,7 @@ describe('When using get-file action from response actions console', () => {
     'ra_get-file_error_upload-timeout',
     'ra_get-file_error_queue-timeout',
     'ra_get-file_error_not-enough-free-space',
+    'ra_get-file_error_file-locked',
   ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',

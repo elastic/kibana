@@ -10,12 +10,18 @@ import ReactDOM from 'react-dom';
 import { EuiBetaBadge, EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { Redirect, useLocation } from 'react-router-dom';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type { StartServices } from '../hooks/use_kibana';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
+import type { EntityInventoryAppStartDependencies } from '../types';
+import { entityInventoryRouter } from '../routes/config';
+import { EntityTablePreferencesProvider } from './context/entity_table_preferences_context';
+import { createFixtureEntityInventoryApiClient } from '../inventory_api/fixture_client';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
@@ -43,47 +49,44 @@ const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
   },
 ];
 
-function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps) {
+export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps) {
   const { pathname } = useLocation();
-  const title =
-    ENTITY_INVENTORY_PAGES.find((page) => page.path === pathname)?.title ?? ENTITY_INVENTORY_TITLE;
+  const currentPage = ENTITY_INVENTORY_PAGES.find((page) => page.path === pathname);
+  const title = currentPage?.title ?? ENTITY_INVENTORY_TITLE;
 
   return (
     <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
       <AppHeader title={title} badges={TECH_PREVIEW_BADGE} menu={{}} spacing="standard" />
       <EuiPageSection paddingSize="m" grow restrictWidth={false}>
-        <Routes>
-          <Route path="/all-resources" component={EntityInventoryContent} />
-          <Route path="/hosts" component={EntityInventoryContent} />
-          <Route path="/kubernetes" component={EntityInventoryContent} />
-          <Redirect from="/" to="/all-resources" />
-        </Routes>
+        <EntityTablePreferencesProvider>
+          <RouteRenderer />
+        </EntityTablePreferencesProvider>
       </EuiPageSection>
     </PageTemplate>
   );
 }
 
-function EntityInventoryContent() {
-  return (
-    <>
-      <br />
-      <h1>Entity Inventory content here.</h1>
-    </>
-  );
-}
-
 export function renderApp(
   core: CoreStart,
-  observabilityShared: ObservabilitySharedPluginStart,
+  plugins: EntityInventoryAppStartDependencies,
   { element, history }: AppMountParameters
 ) {
-  const { PageTemplate } = observabilityShared.navigation;
+  const { PageTemplate } = plugins.observabilityShared.navigation;
+
+  // Fixture data backs the inventory until the entity inventory routes exist (#6304).
+  const services: StartServices = {
+    ...core,
+    ...plugins,
+    inventoryApi: createFixtureEntityInventoryApiClient(),
+  };
 
   ReactDOM.render(
     core.rendering.addContext(
-      <Router history={history}>
-        <EntityInventoryShell PageTemplate={PageTemplate} />
-      </Router>
+      <KibanaContextProvider services={services}>
+        <RouterProvider history={history} router={entityInventoryRouter}>
+          <EntityInventoryShell PageTemplate={PageTemplate} />
+        </RouterProvider>
+      </KibanaContextProvider>
     ),
     element
   );

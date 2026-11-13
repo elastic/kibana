@@ -105,6 +105,10 @@ export const esqlCompileEvaluator: EvaluatorDefinition = {
       };
     }
 
+    if (!trace) {
+      return { scores: [], notApplicable: { reason: 'No Elasticsearch access without a trace' } };
+    }
+
     const results = await Promise.all(queries.map((q) => verifyQuery(trace.esClient, q)));
     const failed = results.filter((r) => !r.ok);
     const score = (results.length - failed.length) / results.length;

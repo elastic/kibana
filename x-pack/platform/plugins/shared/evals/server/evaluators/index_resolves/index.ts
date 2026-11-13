@@ -184,6 +184,10 @@ export const indexResolvesEvaluator: EvaluatorDefinition = {
       };
     }
 
+    if (!trace) {
+      return { scores: [], notApplicable: { reason: 'No Elasticsearch access without a trace' } };
+    }
+
     const results = await Promise.all(patterns.map((p) => resolvePattern(trace.esClient, p)));
     const unresolved = results.filter((r) => !r.resolved);
     const score = (results.length - unresolved.length) / results.length;

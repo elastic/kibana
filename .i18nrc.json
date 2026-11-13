@@ -48,6 +48,7 @@
       "src/platform/packages/private/default-nav"
     ],
     "devTools": "src/platform/plugins/shared/dev_tools",
+    "developerToolbar": "src/platform/plugins/shared/developer_toolbar",
     "discover": [
       "src/platform/plugins/shared/discover",
       "src/platform/packages/shared/kbn-discover-utils",
@@ -157,6 +158,7 @@
     "vectordbOnboarding": "x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding",
     "securitySolutionPackages": [
       "x-pack/solutions/security/packages/data-table",
+      "x-pack/solutions/security/packages/timeline-components",
       "x-pack/solutions/security/packages/ecs-data-quality-dashboard",
       "x-pack/solutions/security/packages/features",
       "x-pack/solutions/security/packages/kbn-cloud-security-posture",
@@ -186,6 +188,7 @@
     "timelion": [
       "src/platform/plugins/private/vis_types/timelion"
     ],
+    "traceLatencyMap": "src/platform/packages/shared/kbn-trace-latency-map",
     "tryInConsole": "src/platform/packages/shared/kbn-try-in-console/",
     "uiActions": [
       "src/platform/plugins/shared/ui_actions",
