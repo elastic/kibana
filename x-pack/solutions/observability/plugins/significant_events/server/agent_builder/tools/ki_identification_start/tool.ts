@@ -14,6 +14,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
@@ -81,6 +82,7 @@ export const createKiIdentificationStartTool = ({
   `,
   schema: onboardingStartSchema,
   handler: async ({ slug, steps, connectors }, { request }) => {
+    const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     let sourceId = '';
     try {
       await assertCanManageSignificantEvents({ request, server });
@@ -101,6 +103,7 @@ export const createKiIdentificationStartTool = ({
       });
 
       telemetry.trackAgentToolKiIdentificationStarted({
+        workflow_execution_id: workflowExecutionId,
         success: true,
         source_id: source.id,
       });
@@ -117,6 +120,7 @@ export const createKiIdentificationStartTool = ({
       const message = err instanceof Error ? err.message : String(err);
 
       telemetry.trackAgentToolKiIdentificationStarted({
+        workflow_execution_id: workflowExecutionId,
         success: false,
         source_id: sourceId,
         error_message: message,

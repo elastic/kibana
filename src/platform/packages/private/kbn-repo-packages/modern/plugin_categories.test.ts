@@ -8,22 +8,36 @@
  */
 
 import Path from 'path';
-import { Package, getPluginPackagesFilter } from '..';
+import { Package, getPackages, getPluginPackagesFilter } from '..';
 
 const repoRoot = Path.resolve(__dirname, '../../../../../..');
+
+it('loads a relocated test plugin only when its path is explicitly requested', () => {
+  const plugin = getPackages(repoRoot).find(
+    ({ id }) => id === '@kbn/kbn-tp-custom-visualizations-plugin'
+  );
+  if (!plugin) {
+    throw new Error('Custom visualizations test plugin was not discovered');
+  }
+
+  expect(plugin.getPluginCategories().testPlugin).toBe(true);
+  expect(getPluginPackagesFilter()(plugin)).toBe(false);
+  expect(getPluginPackagesFilter({ paths: [plugin.directory] })(plugin)).toBe(true);
+});
+
 const resolverTestPlugin = Package.fromManifest(
   repoRoot,
   Path.resolve(repoRoot, 'x-pack/solutions/security/test_plugins/resolver_test/kibana.jsonc')
 );
 const browserPlugin = Package.fromManifest(
   repoRoot,
-  Path.resolve(repoRoot, 'src/platform/test/user_storage/plugins/user_storage_test/kibana.jsonc')
+  Path.resolve(repoRoot, 'src/platform/test_plugins/user_storage/kibana.jsonc')
 );
 const serverPlugin = Package.fromManifest(
   repoRoot,
   Path.resolve(
     repoRoot,
-    'x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client/kibana.jsonc'
+    'x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client/kibana.jsonc'
   )
 );
 

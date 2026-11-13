@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 // App IDs in the usage schema that are not registered in the Kibana instance this test runs against.
 const SCHEMA_ONLY_APP_IDS: Readonly<Record<string, string>> = {
   profiling: 'Disabled by default',
-  digital_experience: 'Disabled by default (xpack.digital_experience.enabled: false)',
   searchPlayground: 'Retained only for historical usage',
   significantEvents: 'Retained only for historical usage',
 };

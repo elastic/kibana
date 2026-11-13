@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import {
+  getInstanceCostFromTaskCost,
   getTaskCostFromInstance,
   getDeleteTaskRunResult,
   isFailedRunResult,
@@ -31,10 +32,37 @@ describe('task', () => {
     it(`should return undefined for no parameter`, () => {
       expect(getTaskCostFromInstance()).toBeUndefined();
       expect(getTaskCostFromInstance(undefined)).toBeUndefined();
+      expect(getTaskCostFromInstance('')).toBeUndefined();
     });
 
     it(`should return undefined for unexpected parameter`, () => {
-      expect(getTaskCostFromInstance('NOPE' as InstanceTaskCost)).toBeUndefined();
+      expect(getTaskCostFromInstance('NOPE')).toBeUndefined();
+    });
+  });
+
+  describe('getInstanceCostFromTaskCost()', () => {
+    it(`should return the relevant value from existing constants`, () => {
+      expect(getInstanceCostFromTaskCost(TaskCost.Tiny)).toBe(InstanceTaskCost.Tiny);
+      expect(getInstanceCostFromTaskCost(TaskCost.Normal)).toBe(InstanceTaskCost.Normal);
+      expect(getInstanceCostFromTaskCost(TaskCost.Large)).toBe(InstanceTaskCost.Large);
+      expect(getInstanceCostFromTaskCost(TaskCost.ExtraLarge)).toBe(InstanceTaskCost.ExtraLarge);
+    });
+
+    it(`should return undefined for no parameter`, () => {
+      expect(getInstanceCostFromTaskCost()).toBeUndefined();
+      expect(getInstanceCostFromTaskCost(undefined)).toBeUndefined();
+    });
+
+    it(`should return undefined for unexpected parameter`, () => {
+      expect(getInstanceCostFromTaskCost(99 as TaskCost)).toBeUndefined();
+    });
+
+    it(`should round-trip every TaskCost`, () => {
+      Object.values(TaskCost)
+        .filter((value): value is TaskCost => typeof value === 'number')
+        .forEach((cost) => {
+          expect(getTaskCostFromInstance(getInstanceCostFromTaskCost(cost))).toBe(cost);
+        });
     });
   });
 
