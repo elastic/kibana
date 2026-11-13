@@ -453,6 +453,92 @@ describe('useDiscoverHistogram', () => {
       expect(hook.result.current.isChartLoading).toBe(false);
     });
 
+    describe('ES|QL chart results', () => {
+      const setupEsql = async () => {
+        const { toolkit } = await setup();
+        const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { query: { esql: 'from *' } },
+          })
+        );
+        const { hook } = await renderUseDiscoverHistogram({ toolkit });
+        const state = {
+          chartHidden: false,
+          totalHitsStatus: UnifiedHistogramFetchStatus.loading,
+          totalHitsResult: undefined,
+        } as unknown as UnifiedHistogramState;
+        const api = createMockUnifiedHistogramApi();
+        const state$ = new BehaviorSubject<UnifiedHistogramState>(state);
+        api.state$ = state$;
+        const {
+          data$: { main$, documents$, totalHits$ },
+        } = dataStateContainer;
+        act(() => {
+          main$.next({ fetchStatus: FetchStatus.LOADING });
+          documents$.next({ fetchStatus: FetchStatus.LOADING });
+          totalHits$.next({ fetchStatus: FetchStatus.LOADING });
+          hook.result.current.setUnifiedHistogramApi(api);
+        });
+        const setTotalHits = (
+          totalHitsStatus: UnifiedHistogramFetchStatus,
+          totalHitsResult?: number | Error
+        ) => {
+          act(() => {
+            state$.next({ ...state, totalHitsStatus, totalHitsResult });
+          });
+        };
+
+        return { hook, main$, totalHits$, setTotalHits };
+      };
+
+      it('should set main$ to partial when the chart completes with results', async () => {
+        const { hook, main$, totalHits$, setTotalHits } = await setupEsql();
+        expect(hook.result.current.isChartLoading).toBe(true);
+        setTotalHits(UnifiedHistogramFetchStatus.complete, 5);
+        expect(main$.getValue().fetchStatus).toBe(FetchStatus.PARTIAL);
+        expect(totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.LOADING });
+        expect(hook.result.current.isChartLoading).toBe(false);
+      });
+
+      it('should set main$ to partial again for a following fetch with the same result', async () => {
+        const { main$, setTotalHits } = await setupEsql();
+        setTotalHits(UnifiedHistogramFetchStatus.complete, 5);
+        expect(main$.getValue().fetchStatus).toBe(FetchStatus.PARTIAL);
+        act(() => {
+          main$.next({ fetchStatus: FetchStatus.LOADING });
+        });
+        setTotalHits(UnifiedHistogramFetchStatus.loading, 5);
+        expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+        setTotalHits(UnifiedHistogramFetchStatus.complete, 5);
+        expect(main$.getValue().fetchStatus).toBe(FetchStatus.PARTIAL);
+      });
+
+      it('should keep main$ loading when the chart completes without results', async () => {
+        const { hook, main$, setTotalHits } = await setupEsql();
+        setTotalHits(UnifiedHistogramFetchStatus.complete, 0);
+        expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+        expect(hook.result.current.isChartLoading).toBe(true);
+      });
+
+      it('should keep main$ loading when the chart fails', async () => {
+        const { main$, totalHits$, setTotalHits } = await setupEsql();
+        setTotalHits(UnifiedHistogramFetchStatus.error, new Error('test'));
+        expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+        expect(totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.LOADING });
+      });
+
+      it('should not change main$ when it is already complete', async () => {
+        const { main$, setTotalHits } = await setupEsql();
+        const completeMsg = { fetchStatus: FetchStatus.COMPLETE, foundDocuments: true };
+        act(() => {
+          main$.next(completeMsg);
+        });
+        setTotalHits(UnifiedHistogramFetchStatus.complete, 5);
+        expect(main$.getValue()).toBe(completeMsg);
+      });
+    });
+
     it('should use timerange + timeRangeRelative + query given by the internalState', async () => {
       const fetch$ = new Subject<DiscoverLatestFetchDetails>();
       const { toolkit } = await setup();

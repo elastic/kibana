@@ -31,7 +31,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
+import { checkHitCount, sendErrorTo, sendPartialMsg } from '../../hooks/use_saved_search_messages';
 import {
   type DiscoverAppState,
   selectTabCombinedFilters,
@@ -103,9 +103,16 @@ export const useDiscoverHistogram = (
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documentsState = useDataState(documents$);
+  const mainState = useDataState(main$);
+  // In ES|QL mode main$ is only PARTIAL while documents$ is LOADING if a chart completed first:
+  // fetchAll moves documents$ off LOADING before it calls checkHitCount
   const isChartLoading = useMemo(() => {
-    return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
-  }, [isEsqlMode, documentsState?.fetchStatus]);
+    return (
+      isEsqlMode &&
+      documentsState?.fetchStatus === FetchStatus.LOADING &&
+      mainState.fetchStatus !== FetchStatus.PARTIAL
+    );
+  }, [isEsqlMode, documentsState?.fetchStatus, mainState.fetchStatus]);
 
   /**
    * API initialization
@@ -165,7 +172,15 @@ export const useDiscoverHistogram = (
     const subscription = createTotalHitsObservable(unifiedHistogramApi?.state$)?.subscribe(
       ({ status, result }) => {
         if (isEsqlMode) {
-          // ignore histogram's total hits updates for ES|QL as Discover manages them during docs fetching
+          // ES|QL total hits come from the documents request; a completed chart with results
+          // only dismisses the loading overlay
+          if (
+            status === UnifiedHistogramFetchStatus.complete &&
+            typeof result === 'number' &&
+            result > 0
+          ) {
+            sendPartialMsg(main$);
+          }
           return;
         }
 

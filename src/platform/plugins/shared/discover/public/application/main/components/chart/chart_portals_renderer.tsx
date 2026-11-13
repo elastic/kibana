@@ -37,12 +37,14 @@ import {
   useCurrentTabSelector,
   useCurrentTabAction,
   useRuntimeStateManager,
+  useCurrentTabDataStateContainer,
 } from '../../state_management/redux';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
 import type { ChartSectionConfiguration } from '../../../../context_awareness/types';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { sendPartialMsg } from '../../hooks/use_saved_search_messages';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -241,6 +243,12 @@ const CustomChartSectionWrapper = ({
     [setMetricsGridState, dispatch]
   );
 
+  const {
+    data$: { main$ },
+  } = useCurrentTabDataStateContainer();
+  // A custom chart with results dismisses the loading overlay while documents are still loading
+  const onChartLoaded = useCallback(() => sendPartialMsg(main$), [main$]);
+
   useEffect(() => {
     setUnifiedHistogramApi(api);
   }, [setUnifiedHistogramApi, api]);
@@ -296,6 +304,7 @@ const CustomChartSectionWrapper = ({
         setLensRequestAdapter: api.setLensRequestAdapter,
         initialState: metricsGridState,
         onInitialStateChange,
+        onChartLoaded,
       })}
     </KibanaSectionErrorBoundary>
   );
