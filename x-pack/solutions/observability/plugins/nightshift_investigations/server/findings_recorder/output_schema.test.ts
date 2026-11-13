@@ -61,6 +61,48 @@ describe('findings output', () => {
   });
 });
 
+describe('missing data and settled_by', () => {
+  const base = { summary: 's', hypotheses: [] };
+
+  it('keeps at most three gaps, trims their text and drops a reason the store does not know', () => {
+    const parsed = findingsOutputSchema.safeParse({
+      ...base,
+      missing_data: [
+        { what: ` ${'w'.repeat(500)} `, why: 'no_access', source: 'SLO API' },
+        { what: 'Deploy history', why: 'because' },
+        { what: '   ' },
+        { what: 'Third', why: 'not_retained' },
+        { what: 'Fourth' },
+      ],
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+
+    const { missing_data: gaps } = limitFindings(parsed.data);
+    expect(gaps).toHaveLength(3);
+    expect(gaps?.[0]).toEqual({ what: 'w'.repeat(200), why: 'no_access', source: 'SLO API' });
+    expect(gaps?.[1]).toEqual({ what: 'Deploy history' });
+  });
+
+  it('leaves the gaps out when the model sent none, and asks for them in the final schema only', () => {
+    expect(limitFindings({ ...base }).missing_data).toBeUndefined();
+    expect(Object.keys(FINDINGS_JSON_SCHEMA.properties)).toContain('missing_data');
+    expect(Object.keys(LIVE_FINDINGS_JSON_SCHEMA.properties)).not.toContain('missing_data');
+  });
+
+  it('carries settled_by through the record and leaves it out when empty', () => {
+    const limited = limitFindings({
+      ...base,
+      hypotheses: [
+        { candidate: 'a', confidence: 0.5, status: 'investigating', settled_by: 'Refuted if x' },
+        { candidate: 'b', confidence: 0.5, status: 'investigating', settled_by: '' },
+      ],
+    });
+    expect(limited.hypotheses[0].settled_by).toBe('Refuted if x');
+    expect(limited.hypotheses[1]).not.toHaveProperty('settled_by');
+  });
+});
+
 describe('evidence', () => {
   const chart = (points: Array<{ x: string; y: number }>) => ({
     type: 'line' as const,

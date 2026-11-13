@@ -175,6 +175,7 @@ export {
 } from './src/service_accounts/ensure_service_accounts';
 export {
   ensureNightshiftServiceAccountRoles,
+  NIGHTSHIFT_BLIND_SPOTS_INDEX,
   NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
 } from './src/service_accounts/service_account_roles';
 export {

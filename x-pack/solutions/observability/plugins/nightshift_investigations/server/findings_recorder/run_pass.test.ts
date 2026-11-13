@@ -56,6 +56,8 @@ describe('runFindingsPass', () => {
       getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
     };
     const patchMetadata = jest.fn().mockResolvedValue(undefined);
+    const reportMissingDataRecorded = jest.fn();
+    const saveBlindSpots = jest.fn().mockResolvedValue(undefined);
     const chatComplete = jest.fn();
     answers.forEach((answer) => chatComplete.mockResolvedValueOnce(answer));
     chatComplete.mockResolvedValue({ content: '' });
@@ -79,9 +81,19 @@ describe('runFindingsPass', () => {
       getAgenticInvestigations: () => ({ getFindingsWriter: () => writer } as never),
       ...(workspace ? { getWorkspace: jest.fn().mockResolvedValue(workspace) } : {}),
       ...(proposals ? { getProposals: () => proposals as never } : {}),
+      getTelemetry: () => ({ reportMissingDataRecorded } as never),
+      getBlindSpots: () => ({ save: saveBlindSpots }),
       logger: loggerMock.create(),
     };
-    return { deps, writer, patchMetadata, chatComplete, memory };
+    return {
+      deps,
+      writer,
+      patchMetadata,
+      chatComplete,
+      memory,
+      reportMissingDataRecorded,
+      saveBlindSpots,
+    };
   };
 
   const run = (deps: FindingsPassDeps, memory: RecorderMemory, extra = {}) =>
@@ -328,6 +340,90 @@ describe('runFindingsPass', () => {
     });
   });
 
+  it('keeps the gaps and open tests in the blind spots index, never in the conversation, and a live pass keeps none', async () => {
+    const unconfirmed = {
+      ...output,
+      verdict: 'Cause not confirmed: a bad deploy.',
+      self_assessed_result: 'cause_not_identified',
+      missing_data: [
+        { what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' },
+        { what: 'client app versions' },
+      ],
+      hypotheses: [
+        {
+          candidate: 'bad deploy',
+          confidence: 0.4,
+          status: 'investigating',
+          settled_by: 'Refuted if x',
+        },
+      ],
+    };
+    const final = setup({ answers: [answerWith(unconfirmed)] });
+    await run(final.deps, final.memory, { answer: 'Cause not confirmed' });
+    const live = setup({ answers: [answerWith(unconfirmed)] });
+    await run(live.deps, live.memory);
+
+    expect(final.saveBlindSpots).toHaveBeenCalledWith({
+      conversation_id: 'c1',
+      '@timestamp': expect.any(String),
+      self_assessed_result: 'cause_not_identified',
+      missing_data: [
+        { what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' },
+        { what: 'client app versions' },
+      ],
+      hypotheses: [
+        { candidate: 'bad deploy', status: 'investigating', settled_by: 'Refuted if x' },
+      ],
+    });
+    // Neither the metadata nor the stored hypotheses carry the new fields.
+    expect(final.patchMetadata.mock.calls[0][1]).not.toHaveProperty('missing_data');
+    expect(JSON.stringify(final.writer.setHypotheses.mock.calls)).not.toContain('settled_by');
+    // Telemetry counts gaps by reason only, never their text.
+    expect(final.reportMissingDataRecorded.mock.calls).toEqual([
+      [{ reason: 'no_access' }],
+      [{ reason: 'unspecified' }],
+    ]);
+    expect(live.saveBlindSpots).not.toHaveBeenCalled();
+    expect(live.reportMissingDataRecorded).not.toHaveBeenCalled();
+  });
+
+  it('records an empty gap list when the cause is found, and survives a failed index write', async () => {
+    const found = setup({
+      answers: [answerWith({ ...output, self_assessed_result: 'cause_identified' })],
+    });
+    found.saveBlindSpots.mockRejectedValue(new Error('index unavailable'));
+    await run(found.deps, found.memory, { answer: 'done' });
+
+    expect(found.saveBlindSpots).toHaveBeenCalledWith(
+      expect.objectContaining({ self_assessed_result: 'cause_identified', missing_data: [] })
+    );
+    expect(found.patchMetadata).toHaveBeenCalled();
+    expect(found.writer.setHypotheses).toHaveBeenCalled();
+  });
+
+  it('stores the result the recorder chose, not one read from the verdict text', async () => {
+    const calm = setup({
+      answers: [
+        answerWith({
+          ...output,
+          verdict: 'No incident in 03:00-06:00Z: all services were healthy.',
+          self_assessed_result: 'nothing_abnormal',
+        }),
+      ],
+    });
+    await run(calm.deps, calm.memory, { answer: 'No incident' });
+    const silent = setup({
+      answers: [answerWith({ ...output, verdict: 'Cause not confirmed: a bad deploy.' })],
+    });
+    await run(silent.deps, silent.memory, { answer: 'Cause not confirmed' });
+
+    expect(calm.saveBlindSpots).toHaveBeenCalledWith(
+      expect.objectContaining({ self_assessed_result: 'nothing_abnormal', missing_data: [] })
+    );
+    // No result from the recorder means none is stored: it is not guessed from the text.
+    expect(silent.saveBlindSpots.mock.calls[0][0]).not.toHaveProperty('self_assessed_result');
+  });
+
   it('asks a live pass for the live schema and a final pass for the full one', async () => {
     const live = setup();
     await run(live.deps, live.memory);
@@ -338,7 +434,14 @@ describe('runFindingsPass', () => {
       chatComplete.mock.calls[0][0].tools.structuredOutput.schema.properties;
     expect(Object.keys(schemaOf(live.chatComplete))).toEqual(['summary', 'hypotheses']);
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
-      expect.arrayContaining(['verdict', 'severity', 'impact_summary', 'impact_entities'])
+      expect.arrayContaining([
+        'verdict',
+        'self_assessed_result',
+        'severity',
+        'impact_summary',
+        'impact_entities',
+        'missing_data',
+      ])
     );
   });
 
