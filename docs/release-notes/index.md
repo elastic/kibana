@@ -29,16 +29,16 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Fixes [kibana-9.5.7-fixes]
 
 **Elastic Agent Builder**:
-* Fix Agent Builder running tools with empty arguments when an Amazon Bedrock model requests several tools in one response [#301775]({{kib-pull}}301775).
-* Fix the Agent Builder anomaly detection jobs tool failing with an "Insufficient privileges to access feature" error when it runs in workflows or in Agent Builder chat, even for superusers [#301983]({{kib-pull}}301983).
+* Fix Agent Builder running tools with empty arguments when a model provider, such as Amazon Bedrock, returns several tool calls in one response [#301775]({{kib-pull}}301775).
+* Fix the Agent Builder anomaly detection jobs tool failing with `Insufficient privileges to access feature` for every user, including superusers, when an agent runs it in an `ai.agent` workflow step or in Agent Builder chat [#301983]({{kib-pull}}301983).
 
 **Alerting and cases**:
 * Fix bulk untracking of alerts also untracking alerts for rule types you aren't authorized for [#304048]({{kib-pull}}304048).
 * Fix repeated connection failures to an unreachable MCP server exhausting {{kib}} memory. The MCP connector now stops retrying for a cooling period [#303996]({{kib-pull}}303996).
 * Fix the MCP connector keeping connections to an unreachable MCP server open after each request [#303987]({{kib-pull}}303987).
 % !!DEFERRED!! Not on the 9.5 branch (backport failed with merge conflicts, as of 2026-11-13). Re-verify against the next BC.
-% * Fix the MCP connector keeping a timed-out session in its connection pool and retrying after repeated failures. The `.mcp` connector now stops retrying an action after 3 consecutive connection failures within 5 minutes [#303531]({{kib-pull}}303531).
-* Fix rules edited through workflows ending up with a short-lived API key that is later revoked, which caused them to fail with "api key has been invalidated" [#300667]({{kib-pull}}300667).
+% * Fix the MCP connector reusing a pooled connection after a timeout or a `5xx` error, and retrying after repeated failures. The `.mcp` connector now stops retrying an action after 3 consecutive connection failures within 5 minutes [#303531]({{kib-pull}}303531).
+* Fix rules that you created with your own API key failing with an `api key has been invalidated` error after a workflow edits them [#300667]({{kib-pull}}300667).
 * Fix the rules list failing to load when one or more rules can't be loaded correctly. The list now leaves those rules out and shows a warning [#300110]({{kib-pull}}300110).
 * Fix IBM Resilient additional fields on case templates showing the connector's default value instead of the value you saved [#303132]({{kib-pull}}303132).
 * Fix searching cases by comment text, alert ID, or event ID returning no cases [#304470]({{kib-pull}}304470).
@@ -49,43 +49,43 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Dashboards and Visualizations**:
 * Fix {{esql}} metric visualization background trendlines failing when `EVAL` copies or overwrites the time-bucket column [#299104]({{kib-pull}}299104).
 % !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
-% * Fix the **Try ES|QL** button on the dashboard empty state doing nothing when you select it before Lens finishes loading. The button is now disabled until Lens is ready [#297237]({{kib-pull}}297237).
+% * Fix the **Try {{esql}}** button on the dashboard empty state doing nothing when you select it before the visualization editor finishes loading. The button is now disabled until it's ready [#297237]({{kib-pull}}297237).
 % !!DEFERRED!! Not on the 9.5 branch (backport PR #303659 still open as of 2026-11-13). Re-verify against the next BC.
-% * Fix saving a dashboard with a tag that doesn't exist, such as through `PUT /api/dashboards/{id}`, causing an unhandled error that can crash {{kib}} [#303299]({{kib-pull}}303299).
+% * Fix saving a dashboard through the API with a tag that doesn't exist, which could crash {{kib}} [#303299]({{kib-pull}}303299).
 
 **Data ingestion and {{fleet}}**:
 * Fix unenrolled agentless agents appearing in the {{fleet}} agents list after you delete the agentless integration [#304146]({{kib-pull}}304146).
-* Fix the **Add Elastic Agent to your hosts** button not opening the **Add agent** flyout in the modal that appears after you add an integration [#303762]({{kib-pull}}303762).
-* Fix the agent policy update API accepting a request body `id` that differs from the policy being updated. The API now returns a `400` error [#303513]({{kib-pull}}303513).
+* Fix the **Add Elastic Agent to your hosts** button in the dialog that opens after you add an integration not opening the **Add agent** flyout [#303762]({{kib-pull}}303762).
+* Return a `400` error when the `id` in the body of `PUT /api/fleet/agent_policies/{agentPolicyId}` differs from the ID in the path [#303513]({{kib-pull}}303513).
 * Fix agent policies failing to apply when an integration policy ID contains characters that {{es}} rejects in role descriptor names, such as IDs generated for Synthetics project monitors [#303384]({{kib-pull}}303384).
-* Fix editing an integration policy from **Installed integrations** showing the add heading and instructions instead of the edit title, description, and agent policy context [#303069]({{kib-pull}}303069).
-* Fix copying an integration policy dropping the condition of the source integration [#303053]({{kib-pull}}303053).
-* Fix an invalid dataset name disabling the save button without showing its validation error [#303036]({{kib-pull}}303036).
-* Fix the agent activity flyout not labeling automatic unenrollments of inactive agents [#302879]({{kib-pull}}302879).
-* Fix {{fleet}} accepting package policy input and stream IDs that contain path-traversal sequences (`..`). {{fleet}} now rejects them [#302459]({{kib-pull}}302459).
-* Fix package and policy upgrade APIs applying upgrades that include unacknowledged breaking changes. To proceed, set `acknowledge_breaking_changes: true` in the request body [#301973]({{kib-pull}}301973).
-* Require the **Integrations** read privilege for the full agent policy API and the agent policy download API. Without it, the **View policy** and **View agent policy** actions and the **Run standalone** option are disabled [#301951]({{kib-pull}}301951).
-* Fix updating an output or a {{fleet-server}} host through the API erasing its secret values [#299235]({{kib-pull}}299235).
-* Fix a {{fleet-server}} policy ignoring the {{es}} output configured on the policy when its {{fleet-server}} host has SSL settings [#301068]({{kib-pull}}301068).
+* Fix editing an integration from the **Installed integrations** page showing the add title and instructions. It now shows the edit title, description, and agent policy [#303069]({{kib-pull}}303069).
+* Fix copying an integration policy dropping the integration's condition [#303053]({{kib-pull}}303053).
+* Fix an invalid dataset name disabling the save button of an integration policy without showing its validation error [#303036]({{kib-pull}}303036).
+* Fix automatic unenrollments of inactive agents showing as **Unenrolling** and **unenrolled** in the agent activity. They now show as **Automatic unenrolling** and **automatically unenrolled** [#302879]({{kib-pull}}302879).
+* Reject integration policy input and stream IDs that contain path-traversal sequences, such as `../`, with a `400` error [#302459]({{kib-pull}}302459).
+* Reject {{fleet}} API requests that upgrade an integration or an integration policy across breaking changes with a `400` error, unless the request sets `acknowledge_breaking_changes: true` [#301973]({{kib-pull}}301973).
+* Require the **Integrations** read privilege for the full agent policy APIs, and disable **View policy**, **View agent policy**, and the **Run standalone** option when you can't read integration policies [#301951]({{kib-pull}}301951).
+* Fix updating an output or a {{fleet-server}} host through the API deleting stored secrets, such as an output's `ssl.key` or a Kafka password, when the request omits them or sends them as plain text. {{fleet}} now keeps the secrets that a request omits and stores plain-text values as secrets [#299235]({{kib-pull}}299235).
+* Fix the {{es}} output on a {{fleet-server}} agent policy being replaced when the {{fleet-server}} host has SSL settings [#301068]({{kib-pull}}301068).
 * Fix integration upgrades failing with a `400` error from a proxy in front of {{es}} when the data stream namespace contains non-ASCII characters [#301496]({{kib-pull}}301496).
-* Fix the Certificate Authority set in the Advanced YAML of an output with a proxy not being used for the {{fleet}} Server connection to {{es}} when the {{fleet}} Server host has {{es}} SSL settings [#301626]({{kib-pull}}301626).
+* Fix {{fleet-server}} ignoring the certificate authorities that you set with the `ssl.certificate_authorities` key in an output's **Advanced YAML configuration** when the output uses a proxy that has a certificate authority and the {{fleet-server}} host has {{es}} SSL settings. {{fleet}} now combines them with the proxy's certificate authority [#301626]({{kib-pull}}301626).
 * Fix the **Error patterns** panel on the OpenTelemetry collector details page loading indefinitely when its request fails [#301922]({{kib-pull}}301922).
 % !!DEFERRED!! Not in the latest BC (9.5.7-f2560f72, built from ec86614e); the backport merged after the BC was cut. Re-verify against the next BC.
 % * Fix {{fleet}} not reporting agents assigned to a version-specific agent policy as inactive once they stop checking in. This broke inactivity-based unenrollment and the inactive agent filter and counts for those agents [#303898]({{kib-pull}}303898).
 
 **Data management**:
 * Fix the component template wizard adding a data lifecycle when no lifecycle phase is configured, which made {{es}} reject index templates without a data stream that use the component template [#304426]({{kib-pull}}304426).
-* Fix creating and fetching {{data-sources}} with `allowNoIndex: true` that target a nonexistent remote cluster failing with a `400` error [#299790]({{kib-pull}}299790).
+* Fix creating and fetching {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving it [#299790]({{kib-pull}}299790).
 % !!DEFERRED!! Not in the latest BC (9.5.7-f2560f72, built from ec86614e); the backport merged after the BC was cut. Re-verify against the next BC.
 % * Fix the **Auto-follow patterns** page failing with "Error loading auto-follow patterns" when a pattern created through the {{es}} API has no `follow_index_pattern` [#303787]({{kib-pull}}303787).
 
 **Discover**:
 * Fix the **Surrounding documents** and **Single document** views failing with "No matching data view" for default ad hoc data views such as **All logs**, for example after you change the theme and reload the page [#304432]({{kib-pull}}304432).
 * Fix SQL and EQL async searches sending too many requests to check for results when {{kib}} is accessed over HTTP/2 [#302641]({{kib-pull}}302641).
-* Fix {{esql}} controls that you add while editing a Discover session panel from the library not appearing on the dashboard after **Save and return** [#301047]({{kib-pull}}301047).
+* Fix {{esql}} controls that you add while editing a Discover session panel from the library not appearing on the dashboard after you select **Save and return** [#301047]({{kib-pull}}301047).
 * Fix the Metrics charts in Discover failing with an `Unknown column` error when an {{esql}} `TS` query filters on a metadata field such as `_ignored` [#302705]({{kib-pull}}302705).
 % !!DEFERRED!! Not on the 9.5 branch (backport PR #304968 still open as of 2026-11-13). Re-verify against the next BC.
-% * Fix an error when you switch an {{esql}} metric chart to a line background in Discover while a maximum value is configured [#301106]({{kib-pull}}301106).
+% * Fix an error in Discover when you switch the background chart of an {{esql}} metric from bar to line while a maximum value is configured [#301106]({{kib-pull}}301106).
 
 **{{product.observability}} solution**:
 For the {{product.observability}} 9.5.7 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -94,27 +94,27 @@ For the {{product.observability}} 9.5.7 release information, refer to [{{product
 For the {{elastic-sec}} 9.5.7 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **{{kib}} platform**:
-* Fix saving profile settings failing when your display language isn't enabled for the deployment [#302172]({{kib-pull}}302172).
+* Fix saving your user profile settings failing with a `400` error when your display language isn't enabled for the deployment [#302172]({{kib-pull}}302172).
 * Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
 
 **Machine learning and {{infer}}**:
-* Fix AI features failing with a `tool_choice` error on Claude models that don't support forced tool calls, such as Claude Sonnet 5.5 and Opus 5.5 [#301398]({{kib-pull}}301398).
+* Fix AI features failing with Claude models that reject forced tool use, such as Claude Sonnet 5.5 and Opus 5.5. {{kib}} now sends `tool_choice: auto` to these models, so the model decides whether to call a tool [#301398]({{kib-pull}}301398).
 * Fix {{kib}} logging an unhandled error when it can't read the anonymization settings for an AI request [#304251]({{kib-pull}}304251).
 % !!DEFERRED!! Not in the latest BC (9.5.7-f2560f72, built from ec86614e); the backport merged after the BC was cut. Re-verify against the next BC.
 % * Fix the data drift setup page hiding the **Analyze data drift without saving** button and the **Data view name** field while you type a comparison index pattern [#304648]({{kib-pull}}304648).
 
 **Workflows**:
-* Fix generated workflows writing timestamps in a format that {{es}} maps as `text` instead of `date` [#291211]({{kib-pull}}291211).
-* Fix the email connector icon appearing as a broken image, including on email steps in Workflows [#287419]({{kib-pull}}287419).
-* Fix `generate_workflow` timing out when you edit large workflows [#299949]({{kib-pull}}299949).
+* Fix workflows that the AI agent generates writing `{{ now }}` as unformatted text in {{es}} documents, which {{es}} mapped as `text` instead of `date`. The generator now uses `{{ now | date_to_xmlschema }}` [#291211]({{kib-pull}}291211).
+* Fix the email step showing a broken-image placeholder instead of its icon in the actions menu and the workflow list [#287419]({{kib-pull}}287419).
+* Fix the `generate_workflow` tool timing out when it edits large workflows, and fix edits to steps nested in `if` or `foreach` steps failing [#299949]({{kib-pull}}299949).
 % !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
-% * Fix workflow execution resume requests being able to claim a waiting step that belongs to a different execution [#299264]({{kib-pull}}299264).
+% * Fix the resume API accepting a step that belongs to a different execution than the one in the request. The API now returns a `409` error [#299264]({{kib-pull}}299264).
 % !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
-% * Fix workflow APIs revealing whether a workflow ID exists when you don't have access to it. They now return a generic `404` error [#299475]({{kib-pull}}299475).
+% * Return a generic `404` error from all workflow operations when you request a workflow ID that you can't access, so the response doesn't reveal whether the ID exists [#299475]({{kib-pull}}299475).
 % !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
-% * Fix repeated error toasts when workflow execution requests fail. Polling now stops after a `404` response and backs off exponentially after `500` or network errors [#299548]({{kib-pull}}299548).
+% * Fix the workflow execution view repeatedly checking for an execution that doesn't exist and showing repeated error messages. The view now stops after a `404` response and waits longer between checks after `500` and network errors [#299548]({{kib-pull}}299548).
 % !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
-% * Fix values inserted into workflow conditions with `{{ }}` being parsed as KQL. Inserted values are now compared as literal text [#299558]({{kib-pull}}299558).
+% * Fix values that you insert with `{{ }}` into `if`, `while`, `retry`, `continue`, `data.filter`, and `data.find` conditions being read as KQL syntax. {{kib}} now compares inserted values as literal text, so `*` no longer acts as a wildcard and leading and trailing spaces are no longer trimmed [#299558]({{kib-pull}}299558).
 % !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
 % * Fix unsaved workflow test runs appearing in the execution history of a saved workflow with the same ID [#293652]({{kib-pull}}293652).
 
