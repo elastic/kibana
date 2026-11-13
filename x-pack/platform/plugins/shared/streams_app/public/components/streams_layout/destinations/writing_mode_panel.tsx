@@ -20,6 +20,7 @@ import {
   EuiRadio,
   EuiSpacer,
   EuiText,
+  mathWithUnits,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -232,8 +233,11 @@ export const ReadOnlyPrepend = ({
         ${slot === 'delimiter' ? `border-inline: ${border};` : ''}
       `}
     >
-      {/* Centred 12px text sits 2px above the 14px input text, so drop it onto the input's line. */}
-      <EuiFormPrepend label={label} css={css({ insetBlockStart: euiTheme.size.xxs })} />
+      {/* EUI centres the 12px text 1px high, so it reads as floating above the 14px input text. */}
+      <EuiFormPrepend
+        label={label}
+        css={css({ insetBlockStart: mathWithUnits(euiTheme.size.xxs, (xxs) => xxs / 2) })}
+      />
     </span>
   );
 };
