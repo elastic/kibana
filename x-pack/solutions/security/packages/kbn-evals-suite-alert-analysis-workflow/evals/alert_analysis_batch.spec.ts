@@ -19,7 +19,8 @@
  * minutes per model. On a PR, add the `evals:security-alert-analysis-workflow-batch` label.
  *
  * Evaluators: BatchCoverage, BatchAccuracy, HardShapeAccuracy, MaliciousNotClosed,
- * BenignNotEscalated, VerdictConsistency (see `batch_evaluators.ts`).
+ * BenignNotEscalated, VerdictConsistency (see `batch_evaluators.ts`), plus WorkflowLatencySeconds and
+ * ClassificationStepLatencySeconds (engine timestamps, `latency_evaluators.ts`).
  */
 
 import { randomUUID } from 'crypto';
@@ -33,6 +34,7 @@ import { configureAlertAnalysisWorkflow, ensureAlertsIndex } from '../src/space_
 import { buildBatchDocs, planBatch } from '../src/batch_dataset';
 import { BATCH_RULES } from '../src/batch_rules';
 import { batchEvaluators, type BatchExpected, type BatchOutput } from '../src/batch_evaluators';
+import { latencyEvaluators } from '../src/latency_evaluators';
 import { ALERTS_INDEX } from '../src/constants';
 
 /** A typical sweep, one full model call (50), and two model calls (100), over both rules. */
@@ -150,7 +152,7 @@ evaluate.describe(
               }
 
               try {
-                const { verdicts, executionStatus } = await runAlertAnalysisBatch({
+                const { verdicts, executionStatus, traceId, timing } = await runAlertAnalysisBatch({
                   fetch,
                   log,
                   alertIds: docs.map(({ id }) => id),
@@ -161,6 +163,8 @@ evaluate.describe(
                     classification: verdicts[id]?.classification,
                   })),
                   executionStatus,
+                  traceId,
+                  timing,
                 };
               } finally {
                 await esClient
@@ -177,7 +181,7 @@ evaluate.describe(
               }
             },
           },
-          selectEvaluators(batchEvaluators)
+          selectEvaluators([...batchEvaluators, ...latencyEvaluators])
         );
       }
     );
