@@ -20,6 +20,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   type ChatCompleteAPI,
   type ChatCompletionChunkEvent,
+  type InferenceClient,
   MessageRole,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
@@ -39,6 +40,7 @@ import type { AnonymizationRule, NamedEntityRecognitionRule } from '@kbn/ai-anon
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import { bindClient } from '../../common/inference_client/bind_client';
 
 describe('createChatCompleteApi', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -674,6 +676,32 @@ describe('createChatCompleteApi', () => {
 
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
         expect.objectContaining({ temperature: 0.3, reasoning: { effort: 'low' } })
+      );
+    });
+
+    it('feature reasoning overrides caller reasoning on a feature-bound chatComplete', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
+        connectorId: 'feature-connector',
+        reasoning: { effort: 'low' },
+      });
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+      const boundClient = bindClient(
+        { chatComplete: chatCompleteForFeature } as unknown as InferenceClient,
+        { featureId: 'my_feature' }
+      );
+
+      await boundClient.chatComplete({
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        reasoning: { effort: 'high' },
+        maxRetries: 0,
+      });
+
+      expect(resolveFeatureEndpoint).toHaveBeenCalledWith('my_feature');
+      expect(getInferenceExecutorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'feature-connector' })
+      );
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: { effort: 'low' } })
       );
     });
 

@@ -8,5 +8,7 @@
 export {
   InferenceChatModel,
   type InferenceChatModelParams,
+  type InferenceChatModelBaseParams,
+  type InferenceChatModelTarget,
   type InferenceChatModelCallOptions,
 } from './inference_chat_model';

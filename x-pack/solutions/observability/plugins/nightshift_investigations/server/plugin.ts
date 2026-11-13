@@ -143,7 +143,6 @@ import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
 import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
   InvestigationQuotaCallback,
-  NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
   NightshiftInvestigationsSetupDeps,
   NightshiftInvestigationsStartDeps,
@@ -156,7 +155,7 @@ type ManagedWorkflowsClient = Awaited<
 export class NightshiftInvestigationsPlugin
   implements
     Plugin<
-      NightshiftInvestigationsServerSetup,
+      void,
       NightshiftInvestigationsServerStart,
       NightshiftInvestigationsSetupDeps,
       NightshiftInvestigationsStartDeps
@@ -206,7 +205,7 @@ export class NightshiftInvestigationsPlugin
   setup(
     core: CoreSetup<NightshiftInvestigationsStartDeps, NightshiftInvestigationsServerStart>,
     plugins: NightshiftInvestigationsSetupDeps
-  ): NightshiftInvestigationsServerSetup {
+  ): void {
     this.workflowsManagement = plugins.workflowsManagement;
     this.lockManager = new LockManagerService(core, this.logger);
     const investigationLocator = plugins.share.url.locators.create(
@@ -287,6 +286,7 @@ export class NightshiftInvestigationsPlugin
       getDeps: () => ({ savedObjects: this.savedObjects, security: this.securityStart }),
       logger: this.logger.get('investigation_quotas'),
     });
+    this.investigationQuotaCallback = (trigger) => investigationQuotaClient.consume(trigger);
 
     const customContextClient = createCustomContextClient({
       getDeps: () => ({
@@ -831,15 +831,6 @@ export class NightshiftInvestigationsPlugin
         'workflowsManagement is not available — nightshift investigations routes will not be registered'
       );
     }
-
-    return {
-      registerInvestigationQuota: (callback) => {
-        if (this.investigationQuotaCallback) {
-          throw new Error('Investigation quota callback is already registered');
-        }
-        this.investigationQuotaCallback = callback;
-      },
-    };
   }
 
   start(

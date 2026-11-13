@@ -6,10 +6,7 @@
  */
 
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type {
-  NightshiftInvestigationsServerSetup,
-  NightshiftInvestigationsServerStart,
-} from '@kbn/nightshift-investigations-plugin/server';
+import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type {
@@ -64,7 +61,6 @@ export interface SignificantEventsPluginSetupDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   nightshiftSources: NightshiftSourcesServerSetup;
-  nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
 }
 
 export interface SignificantEventsPluginStartDependencies {

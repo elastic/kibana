@@ -256,21 +256,25 @@ export class Server {
     const uiSettingsPreboot = await this.uiSettings.preboot();
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
+    const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
+
+    const contextServicePreboot = this.context.preboot({
+      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
+    });
+    const docLinksPreboot = this.docLinks.setup();
+
+    // The preboot HTTP server always starts, so probes can reach Kibana while it boots (e.g. waiting for ES or running migrations).
+    // When preboot is disabled, it only serves 503 responses (including `/api/status`) and the ELU history API.
+    const httpPreboot = await this.http.preboot({
+      context: contextServicePreboot,
+      docLinks: docLinksPreboot,
+    });
+    await this.status.preboot({ http: httpPreboot });
+    await this.metrics.preboot({ http: httpPreboot });
+
     let corePreboot: InternalCorePreboot | undefined;
 
     if (!disablePreboot) {
-      const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
-
-      const contextServicePreboot = this.context.preboot({
-        pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
-      });
-      const docLinksPreboot = this.docLinks.setup();
-
-      const httpPreboot = await this.http.preboot({
-        context: contextServicePreboot,
-        docLinks: docLinksPreboot,
-      });
-
       // setup i18n prior to any other service, to have translations ready
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
@@ -279,8 +283,6 @@ export class Server {
       this.capabilities.preboot({ http: httpPreboot });
 
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();
-
-      await this.status.preboot({ http: httpPreboot });
 
       const renderingPreboot = await this.rendering.preboot({
         http: httpPreboot,
