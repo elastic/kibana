@@ -26,9 +26,7 @@ import type { WatchlistObject } from '../../../../../common/api/entity_analytics
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { validateWatchlistUpdate } from './validation';
 import { getIndexForWatchlist } from '../entities/utils';
-import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
-import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
 import { invalidateEntitySourceApiKey } from '../entity_sources/entity_source_api_key';
 import { MANUAL_SOURCE_ID } from '../entity_sources/manual/constants';
@@ -38,12 +36,6 @@ export const MAX_PER_PAGE = 10_000;
 interface WatchlistConfigClientDeps {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
-  /**
-   * Used for system index operations (e.g. creating the watchlist backing index).
-   * Hidden indices require the `x-elastic-product-origin: kibana` header which is
-   * only attached when using the internal client.
-   */
-  internalEsClient?: ElasticsearchClient;
   securityServiceStart?: SecurityServiceStart;
   namespace: string;
   logger: Logger;
@@ -118,31 +110,6 @@ export class WatchlistConfigClient {
       { ...attrs, managed: attrs.managed ?? false },
       { id: options?.id, refresh: 'wait_for' }
     );
-
-    if (!this.deps.internalEsClient) {
-      throw new Error('internalEsClient is required to create a watchlist index');
-    }
-
-    try {
-      await createOrUpdateIndex({
-        esClient: this.deps.internalEsClient,
-        logger: this.deps.logger,
-        options: {
-          index: getIndexForWatchlist(this.deps.namespace),
-          mappings: generateWatchlistEntityIndexMappings(),
-          settings: { hidden: true, auto_expand_replicas: '0-1' },
-        },
-      });
-    } catch (err) {
-      await this.deps.soClient
-        .delete(watchlistConfigTypeName, so.id, { refresh: 'wait_for' })
-        .catch((deleteErr) =>
-          this.deps.logger.error(
-            `Failed to roll back watchlist saved object '${so.id}' after index creation failed: ${deleteErr.message}`
-          )
-        );
-      throw err;
-    }
 
     return toWatchlistObject(so);
   }

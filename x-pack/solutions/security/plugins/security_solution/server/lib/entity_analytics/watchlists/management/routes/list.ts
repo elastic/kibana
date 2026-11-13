@@ -55,7 +55,6 @@ export const listWatchlistsRoute = (
               namespace,
               soClient,
               esClient,
-              internalEsClient,
               logger,
             });
 
@@ -73,7 +72,6 @@ export const listWatchlistsRoute = (
               namespace,
               soClient: internalSoClient,
               esClient: internalEsClient,
-              internalEsClient,
               logger,
             });
             try {

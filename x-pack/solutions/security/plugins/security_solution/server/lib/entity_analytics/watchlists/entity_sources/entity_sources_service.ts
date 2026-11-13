@@ -12,6 +12,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { isNotFoundError } from '@kbn/es-errors';
 import { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
@@ -279,14 +280,27 @@ export const createEntitySourcesService = ({
     ignoredSourceIds: string[] = [MANUAL_SOURCE_ID],
     abortSignal?: AbortSignal
   ) => {
-    const aggResponse = await esClient.search({
-      index: meta.index,
-      size: 0,
-      query: { term: { 'watchlist.id': meta.id } },
-      aggs: {
-        source_ids: { terms: { field: 'labels.source_ids', size: 100 } },
-      },
-    });
+    let aggResponse;
+    try {
+      aggResponse = await esClient.search({
+        index: meta.index,
+        size: 0,
+        query: { term: { 'watchlist.id': meta.id } },
+        aggs: {
+          source_ids: { terms: { field: 'labels.source_ids', size: 100 } },
+        },
+      });
+    } catch (error) {
+      // The index does not exist in a space where the Entity Store was never installed, so there
+      // is nothing to clean up. Other failures (e.g. a closed index) must still surface.
+      if (isNotFoundError(error)) {
+        logger.debug(
+          `[WatchlistSync] Watchlist index ${meta.index} does not exist, skipping cleanup`
+        );
+        return;
+      }
+      throw error;
+    }
 
     const excludedIds = new Set([...ignoredSourceIds, ...activeSourceIds]);
     const orphanedSourceIds: string[] = (

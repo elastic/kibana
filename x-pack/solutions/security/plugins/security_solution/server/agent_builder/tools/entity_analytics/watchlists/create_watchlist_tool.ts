@@ -148,7 +148,6 @@ Do NOT use this tool to add entities to an existing watchlist — that is a sepa
         const client = new WatchlistConfigClient({
           soClient: savedObjectsClient,
           esClient: esClient.asCurrentUser,
-          internalEsClient: esClient.asInternalUser,
           namespace: spaceId,
           logger,
         });
