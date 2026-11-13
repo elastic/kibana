@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { isEqual } from 'lodash';
-import { readAclParts, type AclWarning, type StoredAcl, type Principal } from '@kbn/ols';
+import { readEditableAcl, type AclWarning, type StoredAcl, type Principal } from '@kbn/ols';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { AccessDraftEditor } from './access_draft_editor';
@@ -142,7 +142,9 @@ export const ObjectAccessPanel = ({
   const canManage = state.permissions.includes('manage_access');
   const canTransfer = state.permissions.includes('transfer');
   const isDirty = !!draft && !isEqual(draft, savedDraft);
-  const owner = state.acl ? readAclParts(toModelPolicy(policy.data), state.acl).owner : undefined;
+  const owner = state.acl
+    ? readEditableAcl(toModelPolicy(policy.data), state.acl).owner
+    : undefined;
 
   return (
     <div data-test-subj="accessPanel">
@@ -386,7 +388,7 @@ const toModelPolicy = (policy: AccessPolicyResponse) => ({
  * Returns the editable part of a stored ACL: general access and named entries, without the owner.
  */
 export const toAccessDraft = (policy: AccessPolicyResponse, acl: StoredAcl): AccessDraft => {
-  const { general_access: generalAccess, entries } = readAclParts(toModelPolicy(policy), acl);
+  const { general_access: generalAccess, entries } = readEditableAcl(toModelPolicy(policy), acl);
   return {
     general_access: generalAccess,
     entries: entries.map(({ type, id, access }) => ({ type, id, access })),

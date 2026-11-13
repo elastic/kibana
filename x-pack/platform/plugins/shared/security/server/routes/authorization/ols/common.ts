@@ -116,4 +116,4 @@ export const createOlsHandler = <P extends { type: string }, B>(
     }
   );
 
-const STATUS_CODES = { bad_request: 400, forbidden: 403, conflict: 409 } as const;
+const STATUS_CODES = { bad_request: 400, forbidden: 403, not_found: 404, conflict: 409 } as const;

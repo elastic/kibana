@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AclInput } from '@kbn/ols';
+import type { InitialAccess } from '@kbn/ols';
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import type { ActionsClientContext } from '../../../../../actions_client';
 
@@ -16,7 +16,7 @@ export interface ConnectorCreate {
   secrets: SavedObjectAttributes;
   isInboundEventsEnabled?: boolean;
   /** Initial ACL of the connector. The creator becomes the owner. */
-  acl?: AclInput;
+  acl?: InitialAccess;
 }
 
 export interface ConnectorCreateParams {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AclInput } from '@kbn/ols';
+import type { InitialAccess } from '@kbn/ols';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { SavedObjectAccessControl, SavedObjectReference } from '../..';
 
@@ -79,5 +79,5 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * caller becomes the owner. Creation fails rather than storing the object with broader access.
    * Not allowed when overwriting an existing object, whose access is always preserved.
    */
-  initialAcl?: AclInput;
+  initialAcl?: InitialAccess;
 }

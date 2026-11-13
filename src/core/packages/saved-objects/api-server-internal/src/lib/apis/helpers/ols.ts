@@ -12,7 +12,7 @@ import {
   ACL_FIELD,
   normalizeAclSource,
   type AclChange,
-  type AclInput,
+  type InitialAccess,
   type AclObjectDecision,
 } from '@kbn/ols';
 import {
@@ -154,7 +154,11 @@ export class OlsHelper {
   /**
    * Returns the ACL to store with a new object. Only enforced types accept requested access.
    */
-  public async getInitialAcl(type: string, namespace: string | undefined, requested?: AclInput) {
+  public async getInitialAcl(
+    type: string,
+    namespace: string | undefined,
+    requested?: InitialAccess
+  ) {
     if (!this.olsExtension || !this.registry.getAccessPolicy(type)) {
       if (requested) {
         throw SavedObjectsErrorHelpers.createBadRequestError(

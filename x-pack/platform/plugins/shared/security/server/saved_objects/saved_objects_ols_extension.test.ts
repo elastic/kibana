@@ -178,6 +178,7 @@ describe('SavedObjectsOlsExtension', () => {
     it.each([
       ['bad_request', 400],
       ['forbidden', 403],
+      ['not_found', 404],
       ['conflict', 409],
     ] as const)('maps a %s error to a %s Saved Objects error', async (code, statusCode) => {
       olsService.authorizeChange.mockRejectedValue(new AclChangeError(code, 'No.'));

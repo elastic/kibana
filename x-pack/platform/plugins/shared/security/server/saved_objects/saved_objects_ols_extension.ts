@@ -105,6 +105,8 @@ const toSavedObjectsError = (error: Error, type: string, id?: string) => {
   switch (error.code) {
     case 'forbidden':
       return SavedObjectsErrorHelpers.decorateForbiddenError(error);
+    case 'not_found':
+      return SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     case 'conflict':
       return id
         ? SavedObjectsErrorHelpers.createConflictError(type, id, error.message)

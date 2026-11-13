@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { AclDecision, AclInput, AclObjectDecision, StoredAcl, Principal } from '@kbn/ols';
+import type { AclDecision, InitialAccess, AclObjectDecision, StoredAcl, Principal } from '@kbn/ols';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
@@ -81,6 +81,6 @@ export interface CoreScopedOlsService {
   validateInitialAcl(params: {
     type: string;
     spaceId: string;
-    requested?: AclInput;
+    requested?: InitialAccess;
   }): Promise<void>;
 }

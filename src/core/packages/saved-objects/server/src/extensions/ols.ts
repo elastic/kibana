@@ -8,7 +8,14 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { AclChange, Acl, AclInput, AclObjectDecision, AclWarning, StoredAcl } from '@kbn/ols';
+import type {
+  AclChange,
+  Acl,
+  InitialAccess,
+  AclObjectDecision,
+  AclWarning,
+  StoredAcl,
+} from '@kbn/ols';
 
 /**
  * Repository operations that check object-level access. Consumer operations such as connector
@@ -57,7 +64,7 @@ export interface ISavedObjectsOlsExtension {
   getInitialAcl(params: {
     type: string;
     namespace?: string;
-    requested?: AclInput;
+    requested?: InitialAccess;
   }): Promise<Acl | undefined>;
 
   /**

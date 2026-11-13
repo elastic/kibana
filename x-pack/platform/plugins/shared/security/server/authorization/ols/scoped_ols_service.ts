@@ -15,7 +15,6 @@ import {
   type AclChange,
   AclChangeError,
   type AclDecision,
-  type AclInput,
   type AclObjectDecision,
   type AclWarning,
   buildAclReadFilter,
@@ -23,6 +22,7 @@ import {
   type EntryLevel,
   evaluateAcl,
   generalAccessPermits,
+  type InitialAccess,
   prepareAclChange,
   prepareInitialAcl,
   type Principal,
@@ -303,7 +303,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
   public async validateInitialAcl(params: {
     type: string;
     spaceId: string;
-    requested?: AclInput;
+    requested?: InitialAccess;
   }): Promise<void> {
     try {
       await this.getInitialAcl(params);
@@ -325,7 +325,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
   }: {
     type: string;
     spaceId: string;
-    requested?: AclInput;
+    requested?: InitialAccess;
   }): Promise<Acl | undefined> {
     const prepared = prepareInitialAcl({
       policy: this.requirePolicy(type),
@@ -335,7 +335,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
       now: new Date().toISOString(),
     });
     if (prepared) {
-      await this.validateRecipients(prepared.grantsToCheck);
+      await this.validateRecipients(prepared.principalsToCheck);
     }
     return prepared?.next;
   }
@@ -364,7 +364,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
 
     const decision = await this.evaluate({ type, spaceId, acl });
     const principal = await this.getPrincipal();
-    const { next, grantsToCheck } = prepareAclChange({
+    const { next, principalsToCheck } = prepareAclChange({
       policy,
       current: acl,
       decision,
@@ -373,7 +373,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
       enabled: true,
       now: new Date().toISOString(),
     });
-    await this.validateRecipients(grantsToCheck);
+    await this.validateRecipients(principalsToCheck);
 
     const operation = change.kind === 'replace' ? 'manage_access' : change.kind;
     const operationsViaRecovery = decision.operationsViaRecovery.has(
