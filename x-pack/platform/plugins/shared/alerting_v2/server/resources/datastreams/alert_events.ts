@@ -12,8 +12,9 @@ import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 8;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 9;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
+export const ALERT_EVENTS_DATA_IGNORE_ABOVE = 8191;
 export const ALERT_EVENTS_RESOURCE_KEY = `data_stream:${ALERT_EVENTS_DATA_STREAM}`;
 
 const mappings: MappingsDefinition = {
@@ -30,7 +31,10 @@ const mappings: MappingsDefinition = {
       },
     },
     group_hash: { type: 'keyword' },
-    data: { type: 'flattened' },
+    // Leaf values longer than the Lucene term limit (32766 bytes) would reject the whole document.
+    // `ignore_above` counts characters, so 8191 covers 4-byte UTF-8 characters too. Longer values
+    // stay in `_source` but are not indexed.
+    data: { type: 'flattened', ignore_above: ALERT_EVENTS_DATA_IGNORE_ABOVE },
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert
