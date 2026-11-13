@@ -79,7 +79,6 @@ export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const libraryTypes = useAddFromLibraryTypes();
-  const libraryClient = useMemo(getLibraryClient, []);
 
   const canvasLibraryTypes = useMemo(() => {
     return libraryTypes.filter(({ type }) => CANVAS_LIBRARY_TYPES.includes(type));
@@ -128,7 +127,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
           services={{
-            contentClient: libraryClient,
+            contentClient: getLibraryClient(),
             uiSettings: coreServices.uiSettings,
           }}
         />
