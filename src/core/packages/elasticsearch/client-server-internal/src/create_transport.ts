@@ -203,7 +203,7 @@ export const createTransport = ({
           ? getUnauthorizedErrorHandler()
           : undefined;
         if (unauthorizedErrorHandler) {
-          const result = await unauthorizedErrorHandler(error);
+          const result = await unauthorizedErrorHandler(error, opts.headers);
           if (isRetryResult(result)) {
             this.headers = {
               ...this.headers,

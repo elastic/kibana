@@ -22,6 +22,7 @@ import { UiamAPIKeys } from './uiam_api_keys';
 import type { SecurityLicense } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import type { UiamServicePublic } from '../../../uiam';
+import { authenticatorMock } from '../../authenticator.mock';
 
 describe('UiamAPIKeys', () => {
   let uiamApiKeys: UiamAPIKeys;
@@ -33,6 +34,7 @@ describe('UiamAPIKeys', () => {
   let mockUiam: jest.Mocked<UiamServicePublic>;
   let mockGetCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
   let logger: Logger;
+  let authenticator: ReturnType<typeof authenticatorMock.create>;
 
   /** Mimics what Elasticsearch reports for a request authenticated with a UIAM API key. */
   const authenticatedWithApiKey = (internal: boolean) =>
@@ -84,12 +86,14 @@ describe('UiamAPIKeys', () => {
     // Defaults to a session-authenticated user, which is not an API key and therefore still needs
     // Kibana's client authentication.
     mockGetCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser() as AuthenticatedUser);
+    authenticator = authenticatorMock.create();
+    authenticator.getCurrentUser = mockGetCurrentUser;
 
     uiamApiKeys = new UiamAPIKeys({
       logger,
       license: mockLicense,
       uiam: mockUiam,
-      getCurrentUser: mockGetCurrentUser,
+      authenticator,
     });
   });
 
@@ -99,6 +103,78 @@ describe('UiamAPIKeys', () => {
         headers: authHeader ? { authorization: authHeader } : {},
       });
     };
+
+    const expiredTokenError = () => {
+      const error = Boom.unauthorized('UIAM token expired');
+      Object.assign(error.output, { payload: { error: { code: '0x7E0116' } } });
+      return error;
+    };
+
+    it('retries once with reauthenticated credentials and reads published credentials for a later grant', async () => {
+      const request = createMockRequest('Bearer essu_old');
+      const renewed = authenticatorMock
+        .create()
+        .getRequestCredentials(createMockRequest('Bearer essu_new'));
+      authenticator.reauthenticate.mockImplementation(async () => {
+        authenticator.getRequestCredentials.mockReturnValue(renewed);
+        return renewed;
+      });
+      mockUiam.grantApiKey
+        .mockRejectedValueOnce(expiredTokenError())
+        .mockResolvedValue({ id: 'key', key: 'secret', description: 'test' });
+
+      await uiamApiKeys.grant(request, { name: 'first' });
+      await uiamApiKeys.grant(request, { name: 'second' });
+
+      expect(
+        mockUiam.grantApiKey.mock.calls.map(([authorization]) => authorization.credentials)
+      ).toEqual(['essu_old', 'essu_new', 'essu_new']);
+      expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+      expect(authenticator.reauthenticate).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({ authorization: 'Bearer essu_old' })
+      );
+      expect(request.headers.authorization).toBe('Bearer essu_old');
+    });
+
+    it('preserves the original operation error when Authenticator cannot reauthenticate', async () => {
+      const expired = expiredTokenError();
+      mockUiam.grantApiKey.mockRejectedValue(expired);
+      await expect(
+        uiamApiKeys.grant(createMockRequest('Bearer essu_old'), { name: 'test' })
+      ).rejects.toBe(expired);
+      expect(mockUiam.grantApiKey).toHaveBeenCalledTimes(1);
+      expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['expired', 'denied'])(
+      'does not retry a second %s failure and logs the terminal error',
+      async (reason) => {
+        const retryError = reason === 'expired' ? expiredTokenError() : new Error('retry denied');
+        authenticator.reauthenticate.mockResolvedValue(
+          authenticatorMock.create().getRequestCredentials(createMockRequest('Bearer essu_new'))
+        );
+        mockUiam.grantApiKey
+          .mockRejectedValueOnce(expiredTokenError())
+          .mockRejectedValue(retryError);
+
+        await expect(
+          uiamApiKeys.grant(createMockRequest('Bearer essu_old'), { name: 'test' })
+        ).rejects.toBe(retryError);
+        expect(mockUiam.grantApiKey).toHaveBeenCalledTimes(2);
+        expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('never reauthenticates for an unrelated grant error', async () => {
+      const denied = new Error('permission denied');
+      mockUiam.grantApiKey.mockRejectedValue(denied);
+      await expect(
+        uiamApiKeys.grant(createMockRequest('Bearer essu_old'), { name: 'test' })
+      ).rejects.toBe(denied);
+      expect(authenticator.reauthenticate).not.toHaveBeenCalled();
+    });
 
     it('returns null when license is not enabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);

@@ -50,6 +50,17 @@ export interface AuthenticationProviderOptions {
  */
 export type AuthenticationProviderSpecificOptions = Record<string, unknown>;
 
+/** Options for a full authentication check of an existing session. */
+export interface AuthenticationOptions {
+  /**
+   * Authenticator sets this after it confirms that the request uses the supplied session.
+   * Core already copied the session token into the request's Authorization header.
+   * The owning provider must contact Elasticsearch, even on minimal-authentication routes.
+   * Request headers stay unchanged. Without these options, normal HTTP rules apply.
+   */
+  reauthenticate: boolean;
+}
+
 /**
  * Name of the Elastic Cloud built-in SSO realm.
  */
@@ -124,12 +135,16 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
   /**
    * Performs request authentication based on the session created during login or other information
    * associated with the request (e.g. `Authorization` HTTP header).
+   * Normal authentication honors incoming HTTP credentials. During session renewal, the owning
+   * provider checks the supplied session with Elasticsearch without changing the request headers.
    * @param request Request instance.
    * @param [session] Optional session object associated with the provider.
+   * @param [options] Set `reauthenticate` only for the session that authenticated this request.
    */
   abstract authenticate(
     request: KibanaRequest,
-    session: SessionValue<TState> | null
+    session: SessionValue<TState> | null,
+    options?: AuthenticationOptions
   ): Promise<AuthenticationResult>;
 
   /**
@@ -158,20 +173,22 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
    * @param request Request instance.
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    * @param [session] Optional session object associated with the provider.
+   * @param [options] Session renewal must contact ES, even on minimal-authentication routes.
    */
   protected async getUser(
     request: KibanaRequest,
     authHeaders?: Headers,
-    session?: SessionValue<TState>
+    session?: SessionValue<TState>,
+    options?: AuthenticationOptions
   ) {
     // For "minimal" authentication, we don't need to call the `_authenticate` endpoint and can just
     // return a static user proxy. The caveat here is that we don't validate credentials, but it
     // will be done by the Elasticsearch itself.
-    // We also want to skip minimal authentication for requests that explicitly ask for the full authentication
-    // information by setting `kbn-auth-full` header to `true` (e.g., during re-authentication).
+    // Session renewal and explicit kbn-auth-full requests must contact Elasticsearch.
     if (
       session &&
       session.username &&
+      !options?.reauthenticate &&
       request.route.options.security?.authc?.enabled === 'minimal' &&
       request.headers[KIBANA_AUTH_FULL_HEADER] !== 'true'
     ) {

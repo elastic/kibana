@@ -190,6 +190,80 @@ describe('HTTPAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe(header);
     });
 
+    it.each([false, true])(
+      'leaves native JWT client authentication on the request (tagged routes: %s)',
+      async (taggedRoutesOnly) => {
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: 'Bearer header.body.signature',
+            'es-client-authentication': 'SharedSecret jwt-secret',
+            'x-client-authentication': 'unrelated-uiam-secret',
+          },
+          routeTags: taggedRoutesOnly ? [ROUTE_TAG_ACCEPT_JWT] : [],
+        });
+        const headers = request.headers;
+        const user = mockAuthenticatedUser({ authentication_realm: { name: 'jwt1', type: 'jwt' } });
+        const client = elasticsearchServiceMock.createScopedClusterClient();
+        client.asCurrentUser.security.authenticate.mockResponse(user);
+        mockOptions.client.asScoped.mockReturnValue(client);
+        const provider = new HTTPAuthenticationProvider(mockOptions, {
+          supportedSchemes: new Set(['bearer']),
+          jwt: { taggedRoutesOnly },
+        });
+
+        const result = await provider.authenticate(request);
+
+        expect(result.succeeded()).toBe(true);
+        expect(result.authHeaders).toEqual({
+          authorization: 'Bearer header.body.signature',
+        });
+        expect(request.headers).toBe(headers);
+        expect(request.headers['es-client-authentication']).toBe('SharedSecret jwt-secret');
+      }
+    );
+
+    it.each([
+      { label: 'native bearer', authorization: 'Bearer native-token', realm: 'native' },
+      { label: 'basic', authorization: 'Basic dXNlcjpwYXNz', realm: 'native' },
+      {
+        label: 'UIAM service-account bearer',
+        authorization: 'Bearer essu_token',
+        realm: '_cloud_service_account',
+      },
+      { label: 'UIAM API key', authorization: 'ApiKey essu_key', realm: '_cloud_api_key' },
+    ])(
+      'does not publish native JWT client authentication for $label credentials',
+      async ({ authorization, realm }) => {
+        const options = mockAuthenticationProviderOptions({ name: 'http', uiam: true });
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization,
+            'es-client-authentication': 'SharedSecret unrelated-native-secret',
+            'x-client-authentication': 'uiam-secret',
+          },
+        });
+        const client = elasticsearchServiceMock.createScopedClusterClient();
+        client.asCurrentUser.security.authenticate.mockResponse(
+          mockAuthenticatedUser({ authentication_realm: { name: realm, type: realm } })
+        );
+        options.client.asScoped.mockReturnValue(client);
+        const provider = new HTTPAuthenticationProvider(options, {
+          supportedSchemes: new Set(['bearer', 'basic', 'apikey']),
+        });
+
+        const result = await provider.authenticate(request);
+
+        expect(result.succeeded()).toBe(true);
+        expect(result.authHeaders).not.toHaveProperty('es-client-authentication');
+        expect(result.authHeaders).toEqual({
+          authorization,
+          ...(authorization === 'Bearer essu_token'
+            ? { 'x-client-authentication': 'uiam-secret' }
+            : {}),
+        });
+      }
+    );
+
     it('succeeds for non-JWT authentication if JWT restricted to tagged routes.', async () => {
       const header = 'Basic xxx';
       const user = mockAuthenticatedUser();

@@ -159,6 +159,31 @@ describe('BaseAuthenticationProvider', () => {
         expect(mockOptions.client.asScoped).toHaveBeenCalled();
         expect(user.username).toBe(esUser.username);
       });
+
+      it('validates reauthentication explicitly without changing request headers or adding a full-auth header', async () => {
+        const session = sessionMock.createValue({ username: 'testuser' });
+        const request = createMinimalAuthcRequest({ authorization: 'Bearer stale' });
+        const headers = request.headers;
+        const esUser = mockAuthenticatedUser();
+        const client = elasticsearchServiceMock.createScopedClusterClient();
+        client.asCurrentUser.security.authenticate.mockResponse(esUser);
+        mockOptions.client.asScoped.mockReturnValue(client);
+
+        const user = await provider.getUserPublic(
+          request,
+          { authorization: 'Bearer session' },
+          session,
+          { reauthenticate: true }
+        );
+
+        expect(client.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+          headers: { authorization: 'Bearer session' },
+        });
+        expect(user.username).toBe(esUser.username);
+        expect(request.headers).toBe(headers);
+        expect(request.headers).toEqual({ authorization: 'Bearer stale' });
+      });
     });
 
     describe('standard authentication mode', () => {

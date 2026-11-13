@@ -27,7 +27,8 @@ export interface PluginStartDependencies {
 export const plugin: PluginInitializer<void, void> = async (
   initializerContext
 ): Promise<Plugin<void, void, PluginSetupDependencies, PluginStartDependencies>> => ({
-  setup: (core: CoreSetup<PluginStartDependencies>) => initRoutes(initializerContext, core),
+  setup: (core: CoreSetup<PluginStartDependencies>, { taskManager }) =>
+    initRoutes(initializerContext, core, taskManager),
   start: () => {},
   stop: () => {},
 });

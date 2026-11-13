@@ -11,6 +11,7 @@ import type { DetailedPeerCertificate } from 'tls';
 import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
+import type { AuthenticationOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
@@ -109,22 +110,30 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
 
   /**
    * Performs PKI request authentication.
+   * During session renewal, ignore the expired token that Core put in the Authorization header.
+   * Use the supplied session and contact Elasticsearch, even on minimal-authentication routes.
+   * The request headers stay unchanged.
    * @param request Request instance.
    * @param [session] Optional session object associated with the provider.
+   * @param [options] Explicit session reauthentication controls.
    */
-  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    session?: SessionValue<ProviderState> | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
 
-    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+    if (!options?.reauthenticate && HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
     if (session?.state) {
-      authenticationResult = await this.authenticateViaState(request, session);
+      authenticationResult = await this.authenticateViaState(request, session, options);
 
       // If access token expired or doesn't match to the certificate fingerprint we should try to get
       // a new one in exchange to peer certificate chain. Since we know that we had a valid session
@@ -195,8 +204,13 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
    * @param session Session value previously stored by the provider.
+   * @param [options] Reauthentication options forwarded to full backend credential validation.
    */
-  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
+  private async authenticateViaState(
+    request: KibanaRequest,
+    session: SessionValue<ProviderState>,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug('Trying to authenticate via state.');
 
     // If peer is authorized, but its certificate isn't available, that likely means the connection
@@ -243,7 +257,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
       authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
     };
     try {
-      const user = await this.getUser(request, authHeaders, session);
+      const user = await this.getUser(request, authHeaders, session, options);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });

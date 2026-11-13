@@ -389,25 +389,34 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
   cmdParams: [],
 };
 
-const EPHEMERAL_TOKEN_EXPIRATION_PATTERN = /^PT(?:(\d+)M)?(?:(\d+)S)?$/;
-const EPHEMERAL_TOKEN_EXPIRATION_MIN_SECONDS = 60;
-const EPHEMERAL_TOKEN_EXPIRATION_MAX_SECONDS = 300;
+const TOKEN_EXPIRATION_PATTERN = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/;
+const TOKEN_EXPIRATION_MIN_SECONDS = 60;
 
 // UIAM exits on startup when the lifetime is out of range, which kbn-es would otherwise only
 // report as a container that never became healthy, minutes later.
-const assertEphemeralTokenExpiration = (expiration: string) => {
-  const match = EPHEMERAL_TOKEN_EXPIRATION_PATTERN.exec(expiration);
-  const seconds = match ? Number(match[1] ?? 0) * 60 + Number(match[2] ?? 0) : undefined;
-  if (
-    seconds === undefined ||
-    seconds < EPHEMERAL_TOKEN_EXPIRATION_MIN_SECONDS ||
-    seconds > EPHEMERAL_TOKEN_EXPIRATION_MAX_SECONDS
-  ) {
+const assertTokenExpiration = (
+  expiration: string,
+  tokenType: 'ephemeral' | 'access',
+  maxSeconds = Infinity
+) => {
+  const match = TOKEN_EXPIRATION_PATTERN.exec(expiration);
+  const seconds = match
+    ? Number(match[1] ?? 0) * 3600 + Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0)
+    : 0;
+  if (!Number.isFinite(seconds) || seconds < TOKEN_EXPIRATION_MIN_SECONDS || seconds > maxSeconds) {
+    const expected =
+      tokenType === 'ephemeral' ? 'from PT1M to PT5M, such as PT1M or PT90S' : 'of at least PT1M';
     throw new Error(
-      `Invalid UIAM ephemeral token expiration [${expiration}]: expected an ISO-8601 duration from PT1M to PT5M, such as PT1M or PT90S.`
+      `Invalid UIAM ${tokenType} token expiration [${expiration}]: expected an ISO-8601 duration ${expected}.`
     );
   }
 };
+
+const assertEphemeralTokenExpiration = (expiration: string) =>
+  assertTokenExpiration(expiration, 'ephemeral', 300);
+
+const assertAccessTokenExpiration = (expiration: string) =>
+  assertTokenExpiration(expiration, 'access');
 
 export interface GetUiamContainersOptions {
   /** Include the UIAM OAuth container. */
@@ -417,6 +426,8 @@ export interface GetUiamContainersOptions {
    * tokens. UIAM accepts PT1M to PT5M and defaults to PT5M.
    */
   ephemeralTokenExpiration?: string;
+  /** ISO-8601 session access-token lifetime, at least PT1M. UIAM defaults to PT1H. */
+  accessTokenExpiration?: string;
 }
 
 /**
@@ -425,23 +436,35 @@ export interface GetUiamContainersOptions {
 export function getUiamContainers({
   includeOAuth = false,
   ephemeralTokenExpiration,
+  accessTokenExpiration,
 }: GetUiamContainersOptions = {}): UiamContainer[] {
   const containers = includeOAuth
     ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER]
     : [...UIAM_BASE_CONTAINERS];
-  if (!ephemeralTokenExpiration) {
+  if (ephemeralTokenExpiration === undefined && accessTokenExpiration === undefined) {
     return containers;
   }
 
-  assertEphemeralTokenExpiration(ephemeralTokenExpiration);
+  if (ephemeralTokenExpiration !== undefined) {
+    assertEphemeralTokenExpiration(ephemeralTokenExpiration);
+  }
+
+  if (accessTokenExpiration !== undefined) {
+    assertAccessTokenExpiration(accessTokenExpiration);
+  }
+
   return containers.map((container) =>
     container.name === UIAM_CONTAINER_NAME
       ? {
           ...container,
           params: [
             ...container.params,
-            '--env',
-            `uiam.tokens.ephemeral.expiration=${ephemeralTokenExpiration}`,
+            ...(ephemeralTokenExpiration
+              ? ['--env', `uiam.tokens.ephemeral.expiration=${ephemeralTokenExpiration}`]
+              : []),
+            ...(accessTokenExpiration
+              ? ['--env', `uiam.tokens.access.expiration=${accessTokenExpiration}`]
+              : []),
           ],
         }
       : container
