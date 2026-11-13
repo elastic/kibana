@@ -707,8 +707,10 @@ const UNKNOWN_TARGET = 'unknown';
  * Per-target build counts for the given tests of one execution model, any branch in scope. The
  * target is the Scout deployment the test ran against (`stateful-classic`, `serverless-search`,
  * ...) and where it ran (`local` or `cloud`); frameworks without a Scout target record the mode
- * `unknown`, and a document missing the fields is grouped with them. Over the same executions as
- * the per-branch counts, plus the last failed build.
+ * `unknown`, and a document missing the fields is grouped with them. A pipeline judged on its own
+ * has its own rows, as one running locally in another environment (FIPS mode) shares the targets
+ * of the pooled ones. Over the same executions as the per-branch counts, plus the last failed
+ * build.
  */
 export const buildTargetStatsQuery = (
   scope: FlakyTestQueryScope,
@@ -716,6 +718,7 @@ export const buildTargetStatsQuery = (
   testIds: readonly string[]
 ): string => {
   const [model] = buildExecutionModels(frameworks);
+  const judged = judgedBy(scope);
 
   return [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
@@ -724,15 +727,18 @@ export const buildTargetStatsQuery = (
       model.executionFilter,
       `test.id IN (${inList(testIds)})`,
     ].join(' AND ')}`,
-    `EVAL failed = ${model.failedExpression},` +
-      ` target_mode = COALESCE(test_run.target.mode, "${UNKNOWN_TARGET}"),` +
-      ` target_type = COALESCE(test_run.target.type, "${UNKNOWN_TARGET}")`,
+    `EVAL ${[
+      `failed = ${model.failedExpression}`,
+      `target_mode = COALESCE(test_run.target.mode, "${UNKNOWN_TARGET}")`,
+      `target_type = COALESCE(test_run.target.type, "${UNKNOWN_TARGET}")`,
+      ...judged.eval,
+    ].join(', ')}`,
     'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
       ' last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1,' +
       ' last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1' +
-      ' BY test.id, target_mode, target_type',
+      ` BY test.id, target_mode, target_type${judged.eval.length > 0 ? ', judged_pipeline' : ''}`,
     'RENAME test.id AS test_id',
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
@@ -754,6 +760,7 @@ export const fetchTargetStats = async (
         test_id: string;
         target_mode: string;
         target_type: string;
+        judged_pipeline?: string | null;
         builds: number;
         failed_builds: number;
         last_failed_at: string | null;
@@ -766,9 +773,11 @@ export const fetchTargetStats = async (
   const byTest = new Map<string, FlakyTestTargetStats[]>();
   for (const record of results.flat()) {
     const stats = byTest.get(record.test_id) ?? [];
+    const pipeline = judgedPipeline(record.judged_pipeline);
     stats.push({
       mode: record.target_mode,
       type: record.target_type,
+      ...(pipeline ? { pipeline } : {}),
       builds: record.builds,
       failedBuilds: record.failed_builds,
       buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,

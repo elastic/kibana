@@ -34,9 +34,9 @@ import {
   isFlakyBranch,
   isPullRequestRef,
   KIBANA_BLOB_URL,
+  pipelineTargetEnvironment,
   plural,
   table,
-  targetEnvironment,
   testsTable,
   type BranchThresholds,
 } from './markdown';
@@ -531,14 +531,15 @@ const failuresByTarget = (suite: FlakySuite): string | undefined => {
   const targets = worstPerKey(
     suite,
     (test) => test.byTarget.filter((stats) => stats.mode !== UNKNOWN_TARGET_MODE),
-    (stats) => `${stats.mode} · ${stats.type}`
+    // a pipeline judged on its own, such as FIPS, has rows of its own for the same targets
+    (stats) => [stats.mode, stats.type, stats.pipeline ?? ''].join(' · ')
   );
   if (targets.length === 0) {
     return undefined;
   }
   const rows = targets.map((row) => [
     `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${inlineCode(row.worst.mode)}`,
-    targetEnvironment(row.worst),
+    pipelineTargetEnvironment(row.worst),
     ...failuresCells(row),
   ]);
   return [

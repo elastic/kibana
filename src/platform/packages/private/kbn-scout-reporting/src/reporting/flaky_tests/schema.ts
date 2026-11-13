@@ -131,21 +131,28 @@ export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
  * record a target; Jest and Cypress runs, and FTR runs whose target can't be resolved, report
  * the mode `unknown`.
  */
-export const FlakyTestTargetStatsSchema = z.object({
-  /** `<arch>-<domain>`, e.g. `stateful-classic` or `serverless-security_complete`. */
-  mode: z.string(),
-  /** Where the target ran: `local` or `cloud`. */
-  type: z.string(),
-  builds: z.int(),
-  failedBuilds: z.int(),
-  /** `failedBuilds / builds` on this target. */
-  buildFailRate: z.number(),
-  /** Absent when the test never failed on this target. */
-  lastFailedAt: z.optional(z.coerce.date()),
-  /** The build of that failure and its Buildkite job; `<url>#<jobId>` opens the job's log. */
-  lastFailedBuildUrl: z.optional(z.string()),
-  lastFailedJobId: z.optional(z.string()),
-});
+export const FlakyTestTargetStatsSchema = lazySchema(() =>
+  z.object({
+    /** `<arch>-<domain>`, e.g. `stateful-classic` or `serverless-security_complete`. */
+    mode: z.string(),
+    /** Where the target ran: `local` or `cloud`. */
+    type: z.string(),
+    /**
+     * The pipeline these counts are of, when it is judged on its own (not in `pooledPipelines`);
+     * absent for the counts over the pooled pipelines.
+     */
+    pipeline: z.optional(z.string()),
+    builds: z.int(),
+    failedBuilds: z.int(),
+    /** `failedBuilds / builds` on this target. */
+    buildFailRate: z.number(),
+    /** Absent when the test never failed on this target. */
+    lastFailedAt: z.optional(z.coerce.date()),
+    /** The build of that failure and its Buildkite job; `<url>#<jobId>` opens the job's log. */
+    lastFailedBuildUrl: z.optional(z.string()),
+    lastFailedJobId: z.optional(z.string()),
+  })
+);
 export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
 
 /**

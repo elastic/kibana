@@ -87,6 +87,32 @@ export const targetEnvironment = ({ mode, type }: { mode: string; type: string }
   return type;
 };
 
+/** How a pipeline judged on its own runs the tests differently, for its targets' environment. */
+const PIPELINE_ENVIRONMENTS: Readonly<Record<string, string>> = {
+  'kibana-fips': 'FIPS enabled',
+};
+
+/**
+ * `Local deployment (FIPS enabled)`: the environment of a target of a pipeline judged on its own,
+ * whose local targets would otherwise read like those of the pooled pipelines. A Cloud target
+ * already says where it ran.
+ */
+export const pipelineTargetEnvironment = (target: {
+  mode: string;
+  type: string;
+  pipeline?: string;
+}): string => {
+  const environment = targetEnvironment(target);
+  if (target.pipeline === undefined) {
+    return environment;
+  }
+  const note = PIPELINE_ENVIRONMENTS[target.pipeline];
+  if (note) {
+    return `${environment} (${note})`;
+  }
+  return target.type === 'local' ? `${environment} (${inlineCode(target.pipeline)})` : environment;
+};
+
 /** `98 / 505 (**19%**)`, the rate in bold so it stands out in a table. */
 export const formatFailedBuilds = ({
   builds,

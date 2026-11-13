@@ -905,6 +905,24 @@ describe('buildTargetStatsQuery', () => {
         'BY test.id, target_mode, target_type'
     );
     expect(query).toContain('RENAME test.id AS test_id');
+    expect(query).not.toContain('judged_pipeline');
+  });
+
+  it('gives a pipeline judged on its own rows of its own, as it may share the pooled targets', () => {
+    const query = buildTargetStatsQuery(
+      {
+        ...scope,
+        pipelines: ['kibana-on-merge', 'kibana-fips'],
+        pooledPipelines: ['kibana-on-merge'],
+      },
+      ['ftr'],
+      ['t1']
+    );
+
+    expect(query).toContain(
+      'judged_pipeline = CASE(buildkite.pipeline.slug IN ("kibana-on-merge"), "", buildkite.pipeline.slug)'
+    );
+    expect(query).toContain('BY test.id, target_mode, target_type, judged_pipeline |');
   });
 });
 
