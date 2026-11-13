@@ -16,6 +16,37 @@ import { configureMigrations } from './migrations';
  * Remove these comments when https://github.com/elastic/kibana/issues/152756 is resolved.
  */
 
+// Unknown keys are allowed at every level, so a build of an earlier model version keeps the keys of a later version.
+const observableTypeSettingsAttributesSchema = schema.object(
+  {
+    extractObservables: schema.maybe(schema.boolean()),
+    observableTypeSettings: schema.maybe(
+      schema.arrayOf(
+        schema.object(
+          {
+            key: schema.string(),
+            paths: schema.maybe(
+              schema.arrayOf(
+                schema.object(
+                  {
+                    path: schema.string(),
+                    enabled: schema.boolean(),
+                    excludedValues: schema.maybe(schema.arrayOf(schema.string())),
+                  },
+                  { unknowns: 'allow' }
+                )
+              )
+            ),
+            valuePattern: schema.maybe(schema.string()),
+          },
+          { unknowns: 'allow' }
+        )
+      )
+    ),
+  },
+  { unknowns: 'allow' }
+);
+
 export const caseConfigureSavedObjectType: SavedObjectsType = {
   name: CASE_CONFIGURE_SAVED_OBJECT,
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -160,67 +191,12 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       },
     },
     '4': {
-      // observableTypes entries gain paths (with optional excluded values) and a valuePattern, and the label becomes optional
-      // (an entry without a label overrides a built-in type). Not indexed, so no mapping change.
+      // observableTypeSettings holds the extraction settings of built-in and custom observable types, by type key.
+      // observableTypes keeps its shape, so a build of an earlier model version reads every document. Not indexed, so no mapping change.
       changes: [],
       schemas: {
-        forwardCompatibility: schema.object(
-          {
-            extractObservables: schema.maybe(schema.boolean()),
-            observableTypes: schema.maybe(
-              schema.arrayOf(
-                schema.object(
-                  {
-                    key: schema.string(),
-                    label: schema.maybe(schema.string()),
-                    paths: schema.maybe(
-                      schema.arrayOf(
-                        schema.object(
-                          {
-                            path: schema.string(),
-                            enabled: schema.boolean(),
-                            excludedValues: schema.maybe(schema.arrayOf(schema.string())),
-                          },
-                          { unknowns: 'allow' }
-                        )
-                      )
-                    ),
-                    valuePattern: schema.maybe(schema.string()),
-                  },
-                  { unknowns: 'allow' }
-                )
-              )
-            ),
-          },
-          { unknowns: 'allow' }
-        ),
-        create: schema.object(
-          {
-            extractObservables: schema.maybe(schema.boolean()),
-            observableTypes: schema.maybe(
-              schema.arrayOf(
-                schema.object(
-                  {
-                    key: schema.string(),
-                    label: schema.maybe(schema.string()),
-                    paths: schema.maybe(
-                      schema.arrayOf(
-                        schema.object({
-                          path: schema.string(),
-                          enabled: schema.boolean(),
-                          excludedValues: schema.maybe(schema.arrayOf(schema.string())),
-                        })
-                      )
-                    ),
-                    valuePattern: schema.maybe(schema.string()),
-                  },
-                  { unknowns: 'allow' }
-                )
-              )
-            ),
-          },
-          { unknowns: 'allow' }
-        ),
+        forwardCompatibility: observableTypeSettingsAttributesSchema,
+        create: observableTypeSettingsAttributesSchema,
       },
     },
   },
