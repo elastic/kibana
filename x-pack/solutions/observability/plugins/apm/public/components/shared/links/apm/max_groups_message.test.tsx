@@ -16,7 +16,7 @@ import { MaxGroupsMessage } from './max_groups_message';
 function renderMessage(serviceOverflowCount?: number) {
   return render(
     <MockApmPluginContextWrapper>
-      <MaxGroupsMessage serviceOverflowCount={serviceOverflowCount} />
+      <MaxGroupsMessage type="services" serviceOverflowCount={serviceOverflowCount} />
     </MockApmPluginContextWrapper>
   );
 }
@@ -27,7 +27,7 @@ describe('MaxGroupsMessage', () => {
 
     expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
       'href',
-      mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyTransactions
+      mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyServices
     );
   });
 
@@ -60,4 +60,17 @@ describe('MaxGroupsMessage', () => {
       expect(screen.queryByText(/additional service/i)).not.toBeInTheDocument();
     }
   );
+
+  it('preserves transaction messaging and its documentation link', () => {
+    render(
+      <MockApmPluginContextWrapper>
+        <MaxGroupsMessage type="transactions" serviceOverflowCount={47} />
+      </MockApmPluginContextWrapper>
+    );
+    expect(screen.getByText(/The cardinality of APM data being collected is too high/i)).toBeInTheDocument();
+    expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
+      'href',
+      mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyTransactions
+    );
+  });
 });
