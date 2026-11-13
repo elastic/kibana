@@ -70,11 +70,16 @@ export const createIncomingMessages = ({
 
       const events = conversation.events ?? [];
       const deliveries = analyzeDeliveries(events);
-      const candidates = pendingSteers(events, deliveries)
-        .filter((event) => !deliveredThisExecution.has(event.id))
-        .slice(0, STEERS_PER_CHECK_MAX);
+      const undelivered = pendingSteers(events, deliveries).filter(
+        (event) => !deliveredThisExecution.has(event.id)
+      );
+      const candidates = undelivered.slice(0, STEERS_PER_CHECK_MAX);
       if (candidates.length === 0) {
         return [];
+      }
+      // A backlog beyond one batch is read again on the next check whatever the version says.
+      if (undelivered.length > STEERS_PER_CHECK_MAX) {
+        lastSeenSeq = undefined;
       }
 
       const deliveredAt = new Date().toISOString();

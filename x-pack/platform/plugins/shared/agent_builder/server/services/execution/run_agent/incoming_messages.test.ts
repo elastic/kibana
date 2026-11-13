@@ -186,6 +186,30 @@ describe('createIncomingMessages', () => {
     expect(delivered[0]).toMatchObject({ event_id: 's0', redelivered: 1 });
   });
 
+  it('keeps reading while a backlog remains, whatever the version says', async () => {
+    const { client, incoming } = setup();
+    const many = Array.from({ length: STEERS_PER_CHECK_MAX + 2 }, (_, index) =>
+      steer(`s${index}`, owner, `2026-01-01T00:00:0${index}.000Z`)
+    );
+    client.getWithVersion.mockResolvedValue({
+      conversation: document(many),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+    client.peekVersion.mockResolvedValue({ seqNo: 10, primaryTerm: 1 });
+
+    const first = await incoming.drain({ cycle: 0 });
+    const second = await incoming.drain({ cycle: 1 });
+    const third = await incoming.drain({ cycle: 2 });
+
+    expect(first).toHaveLength(STEERS_PER_CHECK_MAX);
+    expect(second.map((step) => step.event_id)).toEqual(['s5', 's6']);
+    expect(third).toEqual([]);
+    // the second check skipped the probe; the third, with nothing left behind, used it
+    expect(client.getWithVersion).toHaveBeenCalledTimes(2);
+    expect(client.peekVersion).toHaveBeenCalledTimes(1);
+  });
+
   it('returns nothing and keeps going when the probe or the read fails', async () => {
     const { client, incoming } = setup();
     client.getWithVersion.mockRejectedValueOnce(new Error('boom'));

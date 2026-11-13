@@ -23,6 +23,7 @@ import {
   ChatEventType,
   AgentExecutionMode,
   EventActorType,
+  analyzeDeliveries,
   timelineExecutionId,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -233,6 +234,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
     resumeAnchors,
+    // Folding hides which execution made each delivery, so settlement comes from the stored events.
+    settledSteers: conversation?.events
+      ? analyzeDeliveries(conversation.events).settled
+      : undefined,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;

@@ -274,6 +274,35 @@ describe('renderHistorySteps', () => {
     expect(String(messages[1].content)).toContain('while you were writing the answer above');
   });
 
+  it('renders a delivery as a reference only when no finished execution settled its steer', async () => {
+    const delivered = (eventId: string): ConversationRoundStep =>
+      ({
+        type: ConversationRoundStepType.deliveredMessage,
+        event_id: eventId,
+        author: { type: 'user', id: 'u1' },
+        is_run_owner: true,
+        message: `text of ${eventId}`,
+        delivered_at: '2026-01-01T00:00:00.000Z',
+        cycle: 1,
+        redelivered: 0,
+      } as ConversationRoundStep);
+    const steps = [delivered('settled'), delivered('unsettled')];
+
+    const [settled, unsettled] = await renderHistorySteps({
+      steps,
+      settledSteers: new Set(['settled']),
+    });
+    expect(String(settled.content)).toContain('text of settled');
+    expect(String(unsettled.content)).not.toContain('text of unsettled');
+    expect(String(unsettled.content)).toContain('delivered again by a later run');
+
+    const withoutEvents = await renderHistorySteps({ steps });
+    expect(withoutEvents.map((message) => String(message.content))).toEqual([
+      expect.stringContaining('text of settled'),
+      expect.stringContaining('text of unsettled'),
+    ]);
+  });
+
   it('renders workflow model context before relevant skills and never renders workflow state', async () => {
     const messages = await renderHistorySteps({
       steps: [

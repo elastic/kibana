@@ -95,8 +95,12 @@ interface HistoryRenderContext {
   type: 'history';
   resultTransformer?: ToolCallResultTransformer;
   stepAttachments?: StepAttachments;
-  /** True when the round's execution failed or was aborted: its steers are rendered as references. */
-  interrupted?: boolean;
+  /**
+   * Steers a finished execution read. A delivery outside the set was made by a run that did not
+   * finish, so it is rendered as a reference and a later delivery supplies the text. Absent on
+   * conversations without events: every delivery keeps its text.
+   */
+  settledSteers?: ReadonlySet<string>;
 }
 
 interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'range' | 'attachments'> {
@@ -451,11 +455,11 @@ const renderSteps = async (
     if (isBackgroundAgentCompleteStep(step)) {
       messages.push(createUserMessage(formatSystemNotice(step)));
     } else if (isDeliveredMessageStep(step)) {
-      // Interrupted history uses references; the redelivery supplies the text.
-      const interrupted = context.type === 'history' && context.interrupted === true;
+      const unsettled =
+        context.type === 'history' && context.settledSteers?.has(step.event_id) === false;
       messages.push(
         createUserMessage(
-          interrupted ? formatDeliveredMessageReference(step) : formatDeliveredMessageNotice(step)
+          unsettled ? formatDeliveredMessageReference(step) : formatDeliveredMessageNotice(step)
         )
       );
     } else if (isInterimAnswerStep(step)) {
@@ -512,19 +516,19 @@ export const renderHistorySteps = async ({
   steps,
   resultTransformer,
   attachments,
-  interrupted,
+  settledSteers,
 }: {
   steps: ConversationRoundStep[];
   resultTransformer?: ToolCallResultTransformer;
   attachments?: StepAttachments;
-  /** True when the round's execution failed or was aborted. */
-  interrupted?: boolean;
+  /** Steers a finished execution read; see `HistoryRenderContext`. */
+  settledSteers?: ReadonlySet<string>;
 }): Promise<BaseMessage[]> =>
   renderSteps(steps, {
     type: 'history',
     resultTransformer,
     stepAttachments: attachments,
-    interrupted,
+    settledSteers,
   });
 
 /** Renders the current run (or the `range` of its steps) to LangChain messages. */

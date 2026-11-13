@@ -27,6 +27,7 @@ import {
   EventActorType,
   ExecutionStatus,
   TimelineEventType,
+  analyzeDeliveries,
   isTimelineEvent,
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
@@ -51,6 +52,10 @@ import {
   pausedRoundTimeline,
   pausedThenInterruptedResumeTimeline,
   processedCustomEventFixture,
+  promptResponseEvent,
+  interruptedExecutionEvents,
+  terminatedExecutionEvents,
+  userMessageEvent,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
@@ -1970,6 +1975,46 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(types.at(-2)).toBe('human');
       expect(String(messages.at(-2)?.content)).toContain('<system_notice>');
       expect(String(messages.at(-1)?.content)).toContain('bye');
+    });
+
+    it('keeps the text of a steer the paused execution settled when its resume fails', async () => {
+      const delivered = (eventId: string): ConversationRoundStep =>
+        ({
+          type: ConversationRoundStepType.deliveredMessage,
+          event_id: eventId,
+          author: { type: 'user', id: 'u1' },
+          is_run_owner: true,
+          message: `text of ${eventId}`,
+          delivered_at: T0,
+          cycle: 1,
+          redelivered: 0,
+        } as ConversationRoundStep);
+      const events: TimelineEvent[] = [
+        userMessageEvent('r1'),
+        ...terminatedExecutionEvents({
+          roundId: 'r1',
+          steps: [delivered('before-pause')],
+          outcome: { type: 'prompt_requested', prompts: [] },
+        }),
+        promptResponseEvent('r1', 1, 'r1::execution_terminated'),
+        ...interruptedExecutionEvents({
+          roundId: 'r1',
+          index: 1,
+          steps: [delivered('in-resume')],
+          interruption: { type: 'failed' },
+        }),
+      ];
+      const conversation = {
+        ...conversationOf(processedTimeline(events)),
+        settledSteers: analyzeDeliveries(events).settled,
+      };
+
+      const messages = await prepareMessages({ conversation });
+
+      const contents = messages.map((message) => String(message.content));
+      expect(contents.some((content) => content.includes('text of before-pause'))).toBe(true);
+      expect(contents.some((content) => content.includes('text of in-resume'))).toBe(false);
+      expect(contents.some((content) => content.includes('id in-resume'))).toBe(true);
     });
 
     it('end to end: a confirmation-blocked call + prompt_response + failed setup-window resume renders the call as interrupted', async () => {

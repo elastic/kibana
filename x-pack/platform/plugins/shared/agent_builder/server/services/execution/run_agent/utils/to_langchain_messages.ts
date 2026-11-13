@@ -33,7 +33,6 @@ import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
   isAwaitingPrompt,
-  isInterruptedRound,
   isTimelineStandaloneEvent,
   isTimelineRound,
   roundInterruption,
@@ -154,6 +153,7 @@ export const prepareMessages = async ({
           notices,
           resumeAnchors: conversation.resumeAnchors,
           fromStepIndex: index === 0 ? visibility.entryFromStep : 0,
+          settledSteers: conversation.settledSteers,
         }))
       );
       continue;
@@ -213,6 +213,7 @@ export interface RoundToLangchainOptions {
    * message is kept so the visible steps stay anchored to the request they answer.
    */
   fromStepIndex?: number;
+  settledSteers?: ReadonlySet<string>;
 }
 
 export const roundToLangchain = async (
@@ -223,6 +224,7 @@ export const roundToLangchain = async (
     notices,
     resumeAnchors,
     fromStepIndex = 0,
+    settledSteers,
   }: RoundToLangchainOptions
 ): Promise<BaseMessage[]> => {
   const placement = roundAttachmentPlacement(round, resumeAnchors);
@@ -239,7 +241,7 @@ export const roundToLangchain = async (
         steps: round.steps.slice(fromStepIndex),
         resultTransformer,
         attachments: { placement, notices },
-        interrupted: isInterruptedRound(round),
+        settledSteers,
       }))
     );
   }

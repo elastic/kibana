@@ -288,7 +288,7 @@ export const formatDeliveredMessageReference = (step: DeliveredMessageStep): str
       {
         tagName: 'message',
         children: [
-          `A message from the user (id ${step.event_id}) was read here by a run that did not finish; it is delivered again in the current run.`,
+          `A message from the user (id ${step.event_id}) was read here by a run that did not finish; it is delivered again by a later run.`,
         ],
       },
     ],
