@@ -51,7 +51,7 @@ const EXTERNAL_RESUME_INVALID_LINK_MESSAGE = i18n.translate(
   }
 );
 
-const EXTERNAL_RESUME_HTML_HEADERS = {
+export const EXTERNAL_RESUME_HTML_HEADERS = {
   'content-type': 'text/html; charset=utf-8',
   'cache-control': 'no-store',
   'referrer-policy': 'no-referrer',

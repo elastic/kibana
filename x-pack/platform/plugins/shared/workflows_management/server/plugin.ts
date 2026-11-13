@@ -74,7 +74,7 @@ export class WorkflowsPlugin
   ) {
     this.logger.debug('Workflows Management: Setup');
 
-    registerUISettings(core, plugins);
+    registerUISettings(core, plugins, { pagesEnabled: this.config.pages.enabled });
 
     plugins.features?.registerKibanaFeature(
       getWorkflowsManagementFeatureConfig({ pagesEnabled: this.config.pages.enabled })
