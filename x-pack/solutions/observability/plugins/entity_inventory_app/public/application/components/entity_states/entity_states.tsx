@@ -23,7 +23,7 @@ import {
   getTypeNotAvailableTitle,
 } from './translations';
 
-/** Shown while the first load of a type is running. */
+/** Shown while the app's `types` request is running. */
 export const EntityTableLoading = () => (
   <EuiEmptyPrompt
     icon={<EuiLoadingSpinner size="xl" />}
@@ -42,14 +42,15 @@ export const EntityTableTypeNotAvailable = ({ entityType }: { entityType: string
 );
 
 export interface EntityTableLoadErrorProps {
-  entityType: string;
+  /** Reported as the click detail of the retry button: the entity type, or `types` for the type list. */
+  ebtDetail: string;
   message: string;
   onRetry: () => void;
 }
 
 /** Shown when a request failed, with a way to try again. */
 export const EntityTableLoadError = ({
-  entityType,
+  ebtDetail,
   message,
   onRetry,
 }: EntityTableLoadErrorProps) => (
@@ -66,7 +67,7 @@ export const EntityTableLoadError = ({
         {...getEbtProps({
           action: ENTITY_INVENTORY_EBT_ACTIONS.RETRY_LOAD,
           element: ENTITY_INVENTORY_EBT_ELEMENTS.ENTITY_TABLE,
-          detail: entityType,
+          detail: ebtDetail,
         })}
       >
         {RETRY_LABEL}

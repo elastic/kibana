@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import type { InventoryListRequest, InventoryListResponse, InventoryTypesResponse } from './types';
-
-/**
- * The default and maximum number of entities a `_list` request returns. It mirrors the ES|QL
- * result limit (`esql.query.result_truncation_max_size`, 10,000 by default), so it must not
- * exceed the limit of the server route, and can follow it if that setting changes.
- */
-export const ENTITY_INVENTORY_LIST_LIMIT = 10_000;
+import type { GetTypesResponse, ListResponse } from '@kbn/entity-inventory-plugin/common';
+import type { EntityInventoryRouteRepository } from '@kbn/entity-inventory-plugin/server';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-client';
 
 export interface EntityInventoryRequestOptions {
   signal?: AbortSignal;
@@ -20,10 +15,13 @@ export interface EntityInventoryRequestOptions {
 
 /** Data access for the entity inventory routes. */
 export interface EntityInventoryApiClient {
-  getTypes(options: EntityInventoryRequestOptions): Promise<InventoryTypesResponse>;
+  getTypes(options: EntityInventoryRequestOptions): Promise<GetTypesResponse>;
   getEntities(
     type: string,
-    request: InventoryListRequest,
+    request: ClientRequestParamsOf<
+      EntityInventoryRouteRepository,
+      'POST /internal/entity_inventory/entities/{type}/_list'
+    >['params']['body'],
     options: EntityInventoryRequestOptions
-  ): Promise<InventoryListResponse>;
+  ): Promise<ListResponse>;
 }

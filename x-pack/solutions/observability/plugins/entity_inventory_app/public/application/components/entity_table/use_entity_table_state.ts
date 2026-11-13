@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import type { EuiDataGridSorting } from '@elastic/eui';
-import type { InventoryRow } from '../../../inventory_api/types';
+import type { InventoryRow } from '@kbn/entity-inventory-plugin/common';
 
 export const DEFAULT_PAGE_SIZE = 10;
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];

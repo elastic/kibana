@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLColumn } from '@kbn/es-types';
 import type { GeneratedQuery } from '../generator';
 import { esqlResultsToRows } from './esql_results_to_rows';
-import type { InventoryRow } from './types';
+import type { InventoryRow } from '../../../common';
 
 export interface EsqlStats {
   /** Cluster time in milliseconds, not wall time. */

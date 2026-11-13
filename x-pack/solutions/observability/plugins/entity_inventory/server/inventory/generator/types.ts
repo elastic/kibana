@@ -6,9 +6,7 @@
  */
 
 import type { DynamicAttribute } from '@kbn/entity-store/common';
-
-/** The ES|QL source command a plan runs under. */
-export type QueryEngine = 'TS' | 'FROM';
+import type { NamedParams, QueryEngine } from '../../../common';
 
 /** What the probe found behind one source's pattern. */
 export interface SourceProbe {
@@ -39,9 +37,6 @@ export interface TimeWindow {
   from: string;
   to: string;
 }
-
-/** Named ES|QL parameters in the request-body shape. */
-export type NamedParams = Array<Record<string, string | number | boolean>>;
 
 /** ES|QL text with the named parameters it references. */
 export interface GeneratedQuery {
