@@ -329,6 +329,65 @@ describe('handleCoverageOverviewRequest', () => {
     expect(result.invalid_mitre_ids).toEqual({});
   });
 
+  it('skips invalid-ID detection when MITRE data turns degraded during the read (failed before, degraded after)', async () => {
+    const ruleWithMitre: Rule = {
+      id: 'rule-with-mitre',
+      name: 'Some Rule',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: VALID_TACTIC_ID,
+              name: 'Defense Evasion',
+              reference: 'https://attack.mitre.org/tactics/TA0005/',
+            },
+            technique: [
+              {
+                id: 'T1059',
+                name: 'Command and Scripting Interpreter',
+                reference: 'https://attack.mitre.org/techniques/T1059/',
+              },
+            ],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      total: 1,
+      page: 1,
+      perPage: 10000,
+      data: [ruleWithMitre],
+    });
+
+    // Partial data: T1059 is missing, which would be flagged as invalid if validated.
+    const partialBuckets = makeManagedBuckets(
+      buildValidMitreIdsFromBuckets({
+        tactics: [{ id: VALID_TACTIC_ID }],
+        techniques: [{ id: 'T1566' }],
+        subtechniques: [],
+      })
+    );
+    const mitreDataClient: MitreAttackDataClient = {
+      list: jest.fn().mockResolvedValue(partialBuckets),
+      getById: jest.fn(),
+      getStatus: jest
+        .fn()
+        .mockReturnValueOnce({ status: 'failed' })
+        .mockReturnValueOnce({ status: 'degraded' }),
+    };
+
+    const result = await handleCoverageOverviewRequest({
+      params: {},
+      deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
+    });
+
+    expect(result.rules_data['rule-with-mitre']).toBeDefined();
+    expect(result.invalid_mitre_ids).toEqual({});
+  });
+
   it('sources MITRE data from the managed client when mitreDataClient is provided', async () => {
     const validIdSets: ValidMitreIdSets = buildValidMitreIdsFromBuckets({
       tactics: [{ id: VALID_TACTIC_ID }],

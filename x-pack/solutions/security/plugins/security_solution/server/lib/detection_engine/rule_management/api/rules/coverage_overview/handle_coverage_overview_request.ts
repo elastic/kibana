@@ -79,14 +79,15 @@ export async function handleCoverageOverviewRequest({
       referencedFrameworks.add(framework);
     }
   }
-  // Snapshot status before the async read so a repair finishing mid-read
-  // does not promote partial data to ready.
-  const isDegraded = mitreDataClient?.getStatus().status === 'degraded';
+  // Both reads are needed: the snapshot before guards a repair finishing mid-read, and the read
+  // after catches a population that list() itself started and that ended degraded (partial data).
+  const wasDegradedBefore = mitreDataClient?.getStatus().status === 'degraded';
   const bucketsByFramework = await resolveMitreBucketsByFramework(
     mitreDataClient,
     Array.from(referencedFrameworks),
     logger
   );
+  const isDegraded = wasDegradedBefore || mitreDataClient?.getStatus().status === 'degraded';
   const validIdsByFramework: ValidMitreIdSetsByFramework = {};
   for (const framework of referencedFrameworks) {
     const buckets = bucketsByFramework[framework];

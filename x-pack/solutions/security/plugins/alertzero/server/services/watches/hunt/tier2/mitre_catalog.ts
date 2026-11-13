@@ -132,17 +132,19 @@ export const getMitreCatalog = async ({
 
   if (cachedCatalog) return cachedCatalog;
 
-  // Snapshot status before the async read so a repair that finishes mid-read
-  // does not promote partial data to ready.
+  // Both reads are needed: the snapshot before guards a repair finishing mid-read, and the read
+  // after catches a population that list() itself started and that ended degraded (partial data).
   const statusBefore = mitreDataClient.getStatus().status;
 
   let techniques: MitreTechnique[];
   let subtechniques: MitreSubtechnique[];
+  let statusAfter: string;
   try {
     ({ techniques, subtechniques } = await mitreDataClient.list({
       framework: 'enterprise',
       status: 'all',
     }));
+    statusAfter = mitreDataClient.getStatus().status;
   } catch (error) {
     if (error instanceof MitreDataUnavailableError) {
       if (error.reason === 'disabled') {
@@ -168,11 +170,12 @@ export const getMitreCatalog = async ({
     return EMPTY_CATALOG_FAILED;
   }
 
+  const isDegraded = statusBefore === 'degraded' || statusAfter === 'degraded';
   const catalog: MitreCatalog = {
     ...buildMitreCatalog([...techniques, ...subtechniques]),
-    ...(statusBefore === 'degraded' && { degraded: true }),
+    ...(isDegraded && { degraded: true }),
   };
-  if (statusBefore === 'ready') {
+  if (statusBefore === 'ready' && statusAfter === 'ready') {
     cachedCatalog = catalog;
   }
   return catalog;

@@ -1774,6 +1774,42 @@ describe('huntCoordinator', () => {
       // Extraction never ran, so the recorded pending list must be left alone, not replaced by [].
       expect(result.pending_technique_ids).toBeUndefined();
     });
+
+    it('counts per-technique catalog_unavailable gaps as extraction having run', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [{ technique_id: 'T1059' }],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'catalog_unavailable', technique_id: 'T1059', detail: 'catalog degraded' },
+          budgetGap('T1003'),
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-per-technique-catalog');
+
+      // Extraction ran: T1003 was not named and is given up on, T1059 keeps its retry.
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
+    it('treats a report-level catalog_disabled gap as extraction not having run', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_validated',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [{ reason: 'catalog_disabled', detail: 'MITRE plugin is off' }],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-catalog-disabled');
+
+      expect(result.pending_technique_ids).toBeUndefined();
+    });
   });
 
   describe('merging caller inputs with the report', () => {

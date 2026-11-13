@@ -190,6 +190,16 @@ describe('getMitreCatalog', () => {
     expect(catalog.techniqueById.size).toBeGreaterThan(0);
   });
 
+  it('sets degraded flag when status flips to degraded during list()', async () => {
+    const client = makeClient();
+    (client.getStatus as jest.Mock)
+      .mockReturnValueOnce({ status: 'failed' })
+      .mockReturnValueOnce({ status: 'degraded' });
+    const catalog = await getMitreCatalog({ mitreDataClient: client });
+    expect(catalog.degraded).toBe(true);
+    expect(catalog.techniqueById.size).toBeGreaterThan(0);
+  });
+
   it('does not set degraded flag when data client status is ready', async () => {
     const catalog = await getMitreCatalog({ mitreDataClient: makeClient() });
     expect(catalog.degraded).toBeUndefined();
