@@ -17,6 +17,7 @@ import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-
 import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
+  ExportTypeUnavailableError,
   KibanaShuttingDownError,
   MissingAuthenticationError,
   numberToDuration,
@@ -213,6 +214,20 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     );
     this.eventTracker = eventTracker;
     return this.eventTracker;
+  }
+
+  private async throwIfExportTypeUnavailable(jobType: string) {
+    const exportType = this.exportTypesRegistry
+      .getAll()
+      .find((registered) => registered.jobType === jobType);
+    if (!exportType) {
+      throw new ExportTypeUnavailableError(
+        `No export type from ${jobType} found to execute report`
+      );
+    }
+    if (!(await this.opts.reporting.isExportTypeEnabled(exportType.id, this.scheduleType))) {
+      throw new ExportTypeUnavailableError(`Export type ${exportType.id} is disabled`);
+    }
   }
 
   protected getJobContentEncoding(jobType: string) {
@@ -438,12 +453,6 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     stream,
   }: PerformJobOpts): Promise<PerformJobResults> {
     const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
-    if (!exportType) {
-      throw new Error(`No export type from ${task.jobtype} found to execute report`);
-    }
-    if (!(await this.opts.reporting.isExportTypeEnabled(exportType.id, this.scheduleType))) {
-      throw new Error(`Export type ${exportType.id} is disabled`);
-    }
     // notify usage
     exportType.notifyUsage(this.exportType);
 
@@ -641,6 +650,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           );
 
           try {
+            await this.throwIfExportTypeUnavailable(jobType);
+
             const retries = maxAttempts.maxRetries;
             let atmpts: number | undefined = retries > 0 ? 0 : undefined;
             await retryOnError({
@@ -793,8 +804,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               return { runAt: renderRetry.runAt, state: renderRetry.state };
             }
 
+            const isExportTypeUnavailable =
+              failedToExecuteErr instanceof ExportTypeUnavailableError;
             const attemptCount = attemptsMade(renderRetryState, taskAttempts ?? 0, attempts);
-            const isLastAttempt = renderRetry
+            const isLastAttempt = isExportTypeUnavailable
+              ? true
+              : renderRetry
               ? renderRetry.action === RenderRetryAction.FAIL
               : attemptCount
               ? attemptCount >= maxAttempts.maxTaskAttempts
@@ -832,6 +847,15 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`,
                 { tags: [jobId] }
               );
+            }
+
+            if (isExportTypeUnavailable) {
+              const userError = createTaskRunError(failedToExecuteErr, TaskErrorSource.USER);
+              // Unrecoverable errors delete recurring tasks, so scheduled reports keep their schedule.
+              if (this.scheduleType === ScheduleType.SINGLE) {
+                throwUnrecoverableError(userError);
+              }
+              throw userError;
             }
 
             if (renderRetry?.action === RenderRetryAction.RESCHEDULE) {
