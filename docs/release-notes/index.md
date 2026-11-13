@@ -28,9 +28,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ### Fixes [kibana-9.5.7-fixes]
 
-**Elastic Agent Builder**:
-* Fix Agent Builder running tools with empty arguments when an Amazon Bedrock model requests several tools in one response [#301775]({{kib-pull}}301775).
-
 **Alerting and cases**:
 * Fix bulk untracking of alerts also untracking alerts for rule types you aren't authorized for [#304048]({{kib-pull}}304048).
 * Fix repeated connection failures to an unreachable MCP server exhausting {{kib}} memory. The MCP connector now stops retrying for a cooling period [#303996]({{kib-pull}}303996).
@@ -82,6 +79,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fix the **Surrounding documents** and **Single document** views failing with "No matching data view" for default ad hoc data views such as **All logs**, for example after you change the theme and reload the page [#304432]({{kib-pull}}304432).
 * Fix SQL and EQL async searches sending too many requests to check for results when {{kib}} is accessed over HTTP/2 [#302641]({{kib-pull}}302641).
 * Fix {{esql}} controls that you add while editing a Discover session panel from the library not appearing on the dashboard after **Save and return** [#301047]({{kib-pull}}301047).
+* Fix the Metrics charts in Discover failing with an `Unknown column` error when an {{esql}} `TS` query filters on a metadata field such as `_ignored` [#302705]({{kib-pull}}302705).
 % !!DEFERRED!! Not on the 9.5 branch (backport PR #304968 still open as of 2026-11-13). Re-verify against the next BC.
 % * Fix an error when you switch an {{esql}} metric chart to a line background in Discover while a maximum value is configured [#301106]({{kib-pull}}301106).
 
@@ -96,6 +94,7 @@ For the {{elastic-sec}} 9.5.7 release information, refer to [{{elastic-sec}} Sol
 * Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
 
 **Machine learning and {{infer}}**:
+* Fix Agent Builder running tools with empty arguments when an Amazon Bedrock model requests several tools in one response [#301775]({{kib-pull}}301775).
 * Fix AI features failing with a `tool_choice` error on Claude models that don't support forced tool calls, such as Claude Sonnet 5.5 and Opus 5.5 [#301398]({{kib-pull}}301398).
 * Fix {{kib}} logging an unhandled error when it can't read the anonymization settings for an AI request [#304251]({{kib-pull}}304251).
 * Fix the Agent Builder anomaly detection jobs tool failing with an "Insufficient privileges to access feature" error when it runs in workflows or in Agent Builder chat, even for superusers [#301983]({{kib-pull}}301983).
