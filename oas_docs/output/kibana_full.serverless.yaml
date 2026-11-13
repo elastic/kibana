@@ -58132,7 +58132,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: The proof of the sending AWS account did not verify, or was made for another callback or other values.
+          description: Unauthorized
         '404':
           content:
             application/json:
