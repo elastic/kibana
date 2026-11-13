@@ -5,47 +5,50 @@
  * 2.0.
  */
 
-import { GET_UNREAD_STATUS_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
-import { queryUnreadStatus } from '../lib/query_unread_status';
-import { getReadState } from '../lib/read_state';
-import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from './route_deps';
+import { inject, injectable } from 'inversify';
+import { Response } from '@kbn/core-di-server';
+import type { KibanaResponseFactory, RouteSecurity } from '@kbn/core/server';
+import { GET_UNREAD_STATUS_PATH } from '../../common/routes';
+import { UnreadStatusService } from '../lib/query_unread_status';
+import { ReadStateService } from '../lib/read_state';
+import { NC_AUTHZ_OPT_OUT_REASON } from '../constants';
 
-/** Register the unread-status endpoint for callers with profile-scoped read state. */
-export const registerGetUnreadStatusRoute = ({
-  router,
-  core,
-  logger,
-}: NotificationRouteDeps): void => {
-  router.versioned
-    .get({
-      access: 'internal',
-      path: GET_UNREAD_STATUS_PATH,
-      security: { authz: { enabled: false, reason: NC_AUTHZ_OPT_OUT_REASON } },
-    })
-    .addVersion(
-      { version: NOTIFICATION_CENTER_API_VERSION, validate: false },
-      async (_context, request, response) => {
-        const [{ elasticsearch, userStorage }] = await core.getStartServices();
-        const client = userStorage.asScoped(request);
-        if (!client) {
-          return response.forbidden({
-            body: { message: 'A user profile is required to check unread status.' },
-          });
-        }
+/**
+ * `GET /internal/notification_center/notifications/_unread_status`
+ * Answers the bell badge for callers with profile-scoped read state.
+ */
+@injectable()
+export class GetUnreadStatusRoute {
+  static method = 'get' as const;
+  static path = GET_UNREAD_STATUS_PATH;
+  static options = { access: 'internal' } as const;
+  static security: RouteSecurity = {
+    authz: { enabled: false, reason: NC_AUTHZ_OPT_OUT_REASON },
+  };
+  static validate = false as const;
 
-        const readState = await getReadState(client, logger);
-        if (!readState) {
-          return response.customError({
-            statusCode: 500,
-            body: { message: 'Failed to load unread status.' },
-          });
-        }
+  constructor(
+    @inject(UnreadStatusService) private readonly unreadStatus: UnreadStatusService,
+    @inject(ReadStateService) private readonly readState: ReadStateService,
+    @inject(Response) private readonly response: KibanaResponseFactory
+  ) {}
 
-        const result = await queryUnreadStatus(
-          { esClient: elasticsearch.client.asInternalUser, logger },
-          readState
-        );
-        return response.ok({ body: result });
-      }
-    );
-};
+  async handle() {
+    if (!this.readState.hasUserProfile) {
+      return this.response.forbidden({
+        body: { message: 'A user profile is required to check unread status.' },
+      });
+    }
+
+    const readState = await this.readState.get();
+    if (!readState) {
+      return this.response.customError({
+        statusCode: 500,
+        body: { message: 'Failed to load unread status.' },
+      });
+    }
+
+    const result = await this.unreadStatus.query(readState);
+    return this.response.ok({ body: result });
+  }
+}

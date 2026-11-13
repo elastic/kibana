@@ -11,10 +11,10 @@ import { createEsClientForTesting, createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { NotificationDocument } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
-import { queryNotifications } from '../lib/query_notifications';
-import { queryUnreadStatus } from '../lib/query_unread_status';
+import { NotificationQueryService } from '../lib/query_notifications';
+import { UnreadStatusService } from '../lib/query_unread_status';
 import type { NotificationReadState } from '../lib/read_state';
-import { cleanupExpiredNotifications } from '../cleanup_task/cleanup_expired_notifications';
+import { NotificationCleanupService } from '../cleanup_task/cleanup_expired_notifications';
 
 const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
@@ -33,16 +33,19 @@ const doc = (
   ...overrides,
 });
 
-describe('queryNotifications [integration]', () => {
+describe('notification read paths [integration]', () => {
   let esServer: EsTestCluster;
   let esClient: ReturnType<typeof createEsClientForTesting>;
   let seedNotifications: (documents: NotificationDocument[]) => Promise<void>;
   const logger = loggingSystemMock.createLogger();
+  let notifications: NotificationQueryService;
+  let unreadStatus: UnreadStatusService;
+  let cleanup: NotificationCleanupService;
 
   const query = (
-    params: Parameters<typeof queryNotifications>[1] = {},
+    params: Parameters<NotificationQueryService['query']>[0] = {},
     readState?: NotificationReadState
-  ) => queryNotifications({ esClient, logger }, params, readState);
+  ) => notifications.query(params, readState);
 
   beforeAll(async () => {
     jest.setTimeout(120_000);
@@ -56,6 +59,9 @@ describe('queryNotifications [integration]', () => {
       // Core's client always sends it, which is why the plugin itself never has to.
       headers: { 'x-elastic-product-origin': 'kibana' },
     });
+    notifications = new NotificationQueryService(esClient, logger);
+    unreadStatus = new UnreadStatusService(esClient, logger);
+    cleanup = new NotificationCleanupService(esClient, logger);
 
     seedNotifications = async (documents: NotificationDocument[]) => {
       const response = await esClient.bulk({
@@ -80,7 +86,7 @@ describe('queryNotifications [integration]', () => {
   it('reads an empty result before any producer has created the stream', async () => {
     await expect(query()).resolves.toEqual({ items: [], truncated: false });
     await expect(
-      queryUnreadStatus({ esClient, logger }, { overrides: {}, readAllBefore: daysAgo(365) })
+      unreadStatus.query({ overrides: {}, readAllBefore: daysAgo(365) })
     ).resolves.toEqual({ hasUnread: false });
   });
 
@@ -166,15 +172,12 @@ describe('queryNotifications [integration]', () => {
     });
 
     it('reports unread status from the same read state as the list', async () => {
-      const result = await queryUnreadStatus(
-        { esClient, logger },
-        {
-          overrides: {
-            'recent-warning': { read: true, markedAt: new Date().toISOString() },
-          },
-          readAllBefore: daysAgo(3),
-        }
-      );
+      const result = await unreadStatus.query({
+        overrides: {
+          'recent-warning': { read: true, markedAt: new Date().toISOString() },
+        },
+        readAllBefore: daysAgo(3),
+      });
 
       // `recent-warning` is the newest group but is overridden as read, so the scan looks past it.
       expect(result).toEqual({ hasUnread: true });
@@ -200,7 +203,7 @@ describe('queryNotifications [integration]', () => {
       ]);
       await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
 
-      await cleanupExpiredNotifications(esClient, new AbortController().signal);
+      await cleanup.cleanupExpiredNotifications(new AbortController().signal);
       await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
 
       const response = await esClient.search<NotificationDocument>({

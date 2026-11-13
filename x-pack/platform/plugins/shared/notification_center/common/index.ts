@@ -30,7 +30,6 @@ export {
   GET_UNREAD_STATUS_PATH,
   MARK_READ_PATH,
   MARK_ALL_READ_PATH,
-  NOTIFICATION_CENTER_API_VERSION,
 } from './routes';
 
 export { NOTIFICATION_REGISTRY } from './notification_registry';
