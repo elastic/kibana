@@ -23,10 +23,11 @@ import {
   ChatEventType,
   AgentExecutionMode,
   EventActorType,
+  platformCoreTools,
   timelineExecutionId,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
-import { HookLifecycle } from '@kbn/agent-builder-server';
+import { HookLifecycle, resolveAllowedConnectorIds } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
@@ -426,6 +427,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       imageResolver,
       conversationTemplates: context.conversationTemplates,
       conversationMetadataWritable: updateConversationMetadata !== undefined,
+      connectorsAssigned: (resolveAllowedConnectorIds(agentConfiguration) ?? []).length > 0,
+      // Static tools only: dynamic tools can change mid-conversation, which would change the system prompt and lose its cache.
+      smlSearchSelected: staticTools.some(({ id }) => id === platformCoreTools.smlSearch),
     });
 
     const agentGraph = createAgentGraph({
