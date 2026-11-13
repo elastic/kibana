@@ -97,9 +97,11 @@ export const sendInvestigationNotificationsForExecution = async (
   }
 ): Promise<DeliverInvestigationNotificationsResult> => {
   const { request, spaceId, executionId, kibanaUrl } = context;
-  // The message carries the summary and verdict, which the final findings pass records after the
-  // execution returns.
-  await waitForFindings?.(investigationId, context.abortSignal);
+  // A terminal message carries the summary and verdict, which the final findings pass records after
+  // the execution returns. The started message does not depend on them.
+  if (phase !== 'started') {
+    await waitForFindings?.(investigationId, context.abortSignal);
+  }
   const client = getInvestigationsClient(request, spaceId);
   const { investigation, conversationId, workflowId, notificationDestinations } =
     await client.getInvestigationExecutionContext(investigationId, executionId);

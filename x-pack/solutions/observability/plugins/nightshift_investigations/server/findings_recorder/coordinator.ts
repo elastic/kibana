@@ -207,7 +207,7 @@ export class FindingsCoordinator {
     timeoutMs: number;
     signal?: AbortSignal;
   }): Promise<void> {
-    if (!this.states.get(conversationId)?.final) return;
+    if (signal?.aborted || !this.states.get(conversationId)?.final) return;
     let timer: NodeJS.Timeout | undefined;
     let onAbort: (() => void) | undefined;
     const cutoff = new Promise<void>((resolve) => {
@@ -234,10 +234,15 @@ export class FindingsCoordinator {
     }
   }
 
-  /** Drops what is tracked for an investigation whose execution ended without a final pass. */
+  /**
+   * Drops what is tracked for an investigation whose execution ended without a final pass. A final
+   * pass of an earlier round that is still running keeps the state, so a resumed round cannot start
+   * from fresh tickets and be overwritten by it; the last final pass releases it.
+   */
   release(conversationId: string): void {
     const state = this.states.get(conversationId);
     state?.live?.abort.abort();
+    if (state && state.pendingFinals > 0) return;
     this.states.delete(conversationId);
   }
 }

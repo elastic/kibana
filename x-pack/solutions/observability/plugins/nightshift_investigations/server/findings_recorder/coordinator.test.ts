@@ -146,6 +146,34 @@ describe('FindingsCoordinator', () => {
     await expect(final).resolves.toBe(false);
   });
 
+  it('keeps the state while a final pass runs, so a release cannot reset its tickets', async () => {
+    const coordinator = new FindingsCoordinator();
+    const gate = deferred();
+    const writes: boolean[] = [];
+    const final = coordinator.runFinal({
+      conversationId: 'c1',
+      timeoutMs: 1000,
+      run: async (guard) => {
+        await gate.promise;
+        writes.push(guard.claimWrite());
+      },
+    });
+
+    coordinator.release('c1');
+    expect(
+      coordinator.startLive({
+        conversationId: 'c1',
+        executionSignal: execution().signal,
+        timeoutMs: 1000,
+        run: async () => undefined,
+      })
+    ).toBe(false);
+
+    gate.resolve();
+    await final;
+    expect(writes).toEqual([true]);
+  });
+
   it('lets the final pass record its fallback after its own timeout, but not a stale live pass', async () => {
     jest.useFakeTimers();
     try {
@@ -315,6 +343,27 @@ describe('FindingsCoordinator', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+
+    it('resolves at once for a signal that already aborted', async () => {
+      const coordinator = new FindingsCoordinator();
+      const gate = deferred();
+      const final = coordinator.runFinal({
+        conversationId: 'a',
+        timeoutMs: 1000,
+        run: () => gate.promise,
+      });
+
+      await expect(
+        coordinator.waitForFinal({
+          conversationId: 'a',
+          timeoutMs: 100_000,
+          signal: AbortSignal.abort(),
+        })
+      ).resolves.toBeUndefined();
+
+      gate.resolve();
+      await final;
     });
 
     it("waits for a later round's final pass that replaces the one in flight", async () => {
