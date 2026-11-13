@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { describeScenarios, runScenario, SUGGEST_FLOWS } from './run';
+export { describeScenarios, passesOn, runScenario, SUGGEST_FLOWS } from './run';
 export { createCallbacks, DEFAULT_WORLD } from './world';
 export { counterRateTestFunction } from './test_functions';
 export {
