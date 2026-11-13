@@ -68,7 +68,7 @@ interface DatasetExample extends Example {
     toolCalls?: ToolCallAssertion[];
     attachments?: AttachmentAssertion[];
   };
-  metadata?: { query_intent?: string };
+  metadata?: { query_intent?: string; ui_only_intent?: string };
 }
 
 interface ChatTaskOutput {

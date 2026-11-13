@@ -27,6 +27,16 @@ import {
  *      `path` (+ a `flyout` object for the deep-link destinations) and renders the
  *      returned `url` as a markdown link.
  *   3. Explains in one short sentence why the operation lives in the UI.
+ *
+ * Every example declares `metadata.ui_only_intent`: the id of the intent it exercises.
+ * Those ids are the intents the product skill declares UI-only (`UI_ONLY_NAVIGATION_INTENTS`
+ * in the security_solution plugin's `server/agent_builder/skills/ui_navigation.ts`), and an
+ * example may only assert a redirect here while the skill still redirects for it.
+ * `src/ui_navigation_intents.test.ts` fails when a fixture and the skill disagree, so a
+ * fixture cannot outlive a product decision that moved an intent into chat — configuring a
+ * watchlist's entity source is such an intent (the manage-watchlists skill handles it with
+ * the rule-based data-source tools, see `manage_watchlists.spec.ts`), and it is deliberately
+ * not covered here.
  */
 
 const MANAGEMENT_BASE_PATH = '/app/security/entity_analytics_management';
@@ -106,7 +116,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav EA Enablement' },
+                metadata: {
+                  query_intent: 'Nav EA Enablement',
+                  ui_only_intent: 'entity_analytics.settings',
+                },
               },
               {
                 input: { question: 'Clear all entity data.' },
@@ -123,7 +136,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav EA Clear Data' },
+                metadata: {
+                  query_intent: 'Nav EA Clear Data',
+                  ui_only_intent: 'entity_analytics.clear_data',
+                },
               },
             ],
           },
@@ -155,7 +171,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav Risk Engine Config' },
+                metadata: {
+                  query_intent: 'Nav Risk Engine Config',
+                  ui_only_intent: 'risk_engine.scoring_config',
+                },
               },
               {
                 input: {
@@ -200,7 +219,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav Asset Criticality Bulk CSV' },
+                metadata: {
+                  query_intent: 'Nav Asset Criticality Bulk CSV',
+                  ui_only_intent: 'asset_criticality.bulk_edit',
+                },
               },
               {
                 input: {
@@ -219,7 +241,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav Asset Criticality Bulk Import' },
+                metadata: {
+                  query_intent: 'Nav Asset Criticality Bulk Import',
+                  ui_only_intent: 'asset_criticality.bulk_edit',
+                },
               },
             ],
           },
@@ -253,7 +278,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav Entity Resolution Bulk CSV' },
+                metadata: {
+                  query_intent: 'Nav Entity Resolution Bulk CSV',
+                  ui_only_intent: 'entity_resolution.bulk_csv',
+                },
               },
             ],
           },
@@ -288,7 +316,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav Resolution Flyout Explicit' },
+                metadata: {
+                  query_intent: 'Nav Resolution Flyout Explicit',
+                  ui_only_intent: 'entity_resolution.flyout',
+                },
               },
             ],
           },
@@ -319,7 +350,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav Engine Status' },
+                metadata: {
+                  query_intent: 'Nav Engine Status',
+                  ui_only_intent: 'entity_store.status',
+                },
               },
             ],
           },
@@ -334,7 +368,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — watchlist edit flyout',
             description:
-              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path carrying an `editWatchlistId=<id>` query parameter (no flyout). It must NOT call any mutating watchlist tool.',
+              'Watchlist CSV upload lives in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path carrying an `editWatchlistId=<id>` query parameter (no flyout). It must NOT call any mutating watchlist tool. Configuring a watchlist entity source is deliberately NOT here: the manage-watchlists skill hands that to security.set_watchlist_rule_based_data_source / security.remove_watchlist_rule_based_data_source in chat (see manage_watchlists.spec.ts), so asserting a redirect for it contradicts the product.',
             examples: [
               {
                 input: {
@@ -355,28 +389,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav Watchlist CSV Upload' },
-              },
-              {
-                input: {
-                  question: 'Configure the entity source for the High Risk Hosts watchlist.',
+                metadata: {
+                  query_intent: 'Nav Watchlist CSV Upload',
+                  ui_only_intent: 'watchlist.csv_upload',
                 },
-                output: {
-                  criteria: [
-                    'The agent declines to configure the entity source in chat and calls NO mutating watchlist tool.',
-                    `The reply contains a clickable markdown link to the High Risk Hosts watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries an \`editWatchlistId=\` query parameter with that watchlist's id.`,
-                    'The reply explains that the persistent entity source is configured in the editor, not by the chat tools (which only do one-time add/remove).',
-                  ],
-                  toolCalls: [
-                    {
-                      id: LINK_TOOL_ID,
-                      criteria: [
-                        `The tool is called with path '${WATCHLISTS_TAB_PATH}?editWatchlistId=<the resolved id for 'High Risk Hosts'>' and no flyout.`,
-                      ],
-                    },
-                  ],
-                },
-                metadata: { query_intent: 'Nav Watchlist Entity Source' },
               },
               {
                 input: {
@@ -397,7 +413,10 @@ evaluate.describe(
                     },
                   ],
                 },
-                metadata: { query_intent: 'Nav Watchlist Bare Tab' },
+                metadata: {
+                  query_intent: 'Nav Watchlist Bare Tab',
+                  ui_only_intent: 'watchlist.bare_tab',
+                },
               },
             ],
           },
