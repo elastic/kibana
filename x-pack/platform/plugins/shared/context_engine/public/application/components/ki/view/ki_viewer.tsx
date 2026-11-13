@@ -26,6 +26,7 @@ import React, { useState } from 'react';
 import { readKiDocumentLifecycleStatus } from '../../../../../common/ki_lifecycle_status';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import type { KiDocument } from '../../../../../common/http_api/knowledge_indicators';
+import { useCanWriteContextEngine } from '../../../hooks/use_can_write_context_engine';
 import { useKi } from '../../../hooks/use_ki';
 import type { SelectedKi } from '../../../hooks/use_selected_ki';
 import { resolveKiStatus } from '../../../utils/ki_expiry';
@@ -36,7 +37,9 @@ import { KiTypeDisplay } from '../shared/ki_type_display';
 import { KiContentPanel } from './content/ki_content_panel';
 import { ViewKiRawJsonPanel } from './content/view_ki_raw_json_panel';
 import { ViewKiMetadataPanel } from './metadata/view_ki_metadata_panel';
+import { KiViewerActions } from './ki_viewer_actions';
 import { useKiViewerStyles } from './ki_viewer_styles';
+import { useKiViewerActions } from './use_ki_viewer_actions';
 
 export type KiViewerMode = 'content' | 'document';
 
@@ -102,6 +105,18 @@ export const KiViewer = ({ aiIndexId, selectedKi: { kiId, index } }: KiViewerPro
     index,
     enabled: index.length > 0,
   });
+  const canWrite = useCanWriteContextEngine();
+  const {
+    isEditing,
+    startEditing,
+    stopEditing,
+    saveContent,
+    isSaving,
+    deleteKi,
+    isDeleting,
+    restoreKi,
+    isRestoring,
+  } = useKiViewerActions({ aiIndexId, kiId: ki?.id ?? kiId, index });
 
   const modeOptions = [
     {
@@ -180,6 +195,11 @@ export const KiViewer = ({ aiIndexId, selectedKi: { kiId, index } }: KiViewerPro
   }
 
   const document = ki?.document;
+  const isDeleted = document ? readKiDocumentLifecycleStatus(document) === 'deleted' : false;
+  // Today's rule: a deleted document can't be edited.
+  const canEdit = canWrite && !isDeleted;
+  const showActions = canWrite && document !== undefined && !isEditing;
+  const shownMode: KiViewerMode = isEditing ? 'content' : mode;
 
   return (
     <EuiPanel hasBorder paddingSize="l" css={styles.panel} data-test-subj="contextKiViewer">
@@ -207,8 +227,9 @@ export const KiViewer = ({ aiIndexId, selectedKi: { kiId, index } }: KiViewerPro
               defaultMessage: 'Show the document as',
             })}
             options={modeOptions}
-            idSelected={mode}
+            idSelected={shownMode}
             onChange={(id) => setMode(id === 'document' ? 'document' : 'content')}
+            isDisabled={isEditing}
             buttonSize="s"
             data-test-subj="contextKiViewerMode"
           />
@@ -221,10 +242,17 @@ export const KiViewer = ({ aiIndexId, selectedKi: { kiId, index } }: KiViewerPro
         </div>
       ) : null}
 
-      {mode === 'document' ? (
+      {shownMode === 'document' ? (
         <ViewKiRawJsonPanel document={document} isLoading={isLoading} />
       ) : (
-        <KiContentPanel document={document} isLoading={isLoading} />
+        <KiContentPanel
+          document={document}
+          isLoading={isLoading}
+          isEditing={canEdit && isEditing}
+          onCancel={stopEditing}
+          isSaving={isSaving}
+          onSave={saveContent}
+        />
       )}
 
       <EuiAccordion
@@ -244,6 +272,20 @@ export const KiViewer = ({ aiIndexId, selectedKi: { kiId, index } }: KiViewerPro
         <EuiSpacer size="m" />
         <ViewKiMetadataPanel kiId={ki?.id ?? kiId} document={document} isLoading={isLoading} />
       </EuiAccordion>
+
+      {showActions ? (
+        <div css={styles.actions}>
+          <KiViewerActions
+            isDeleted={isDeleted}
+            canEdit={canEdit}
+            onEdit={startEditing}
+            onDelete={deleteKi}
+            onRestore={restoreKi}
+            isDeleting={isDeleting}
+            isRestoring={isRestoring}
+          />
+        </div>
+      ) : null}
     </EuiPanel>
   );
 };

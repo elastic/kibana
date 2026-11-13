@@ -18,6 +18,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import type { GetAiIndexResponse } from '../../../../../../common/http_api/ai_indices';
+import { uiPrivileges } from '../../../../../../common/features';
 
 export const listKiTestAiIndex: GetAiIndexResponse = {
   id: 'sample-ki',
@@ -40,6 +41,7 @@ export interface ListKiRenderOptions {
   discoverShow?: boolean;
   indexManagementMonitor?: boolean;
   initialPath?: string;
+  canWrite?: boolean;
 }
 
 export const renderListKiWithProviders = (
@@ -50,6 +52,7 @@ export const renderListKiWithProviders = (
     discoverShow = true,
     indexManagementMonitor = true,
     initialPath = '/ai_index/sample-ki/knowledge_indicators',
+    canWrite = false,
   } = options;
   const history = createMemoryHistory({ initialEntries: [initialPath] });
   const services = {
@@ -58,6 +61,7 @@ export const renderListKiWithProviders = (
   };
   services.application.capabilities = {
     ...services.application.capabilities,
+    contextEngine: { show: true, [uiPrivileges.write]: canWrite },
     discover_v2: { show: discoverShow },
     index_management: {
       ...services.application.capabilities.index_management,
@@ -84,7 +88,7 @@ export const renderListKiWithProviders = (
   const result = render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={services}>
+        <KibanaContextProvider services={{ ...services, history }}>
           <QueryClientProvider client={queryClient}>
             <Router history={history}>{ui}</Router>
           </QueryClientProvider>
