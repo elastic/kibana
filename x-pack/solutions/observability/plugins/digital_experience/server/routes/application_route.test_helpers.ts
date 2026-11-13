@@ -60,7 +60,15 @@ export const applicationRouteTestCases = ({
     return (route().handler as (resources: unknown) => Promise<unknown>)({
       params: { path: { serviceName: 'shop' }, query },
       context: {
-        core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: esClient } } }),
+        core: Promise.resolve({
+          elasticsearch: { client: { asCurrentUser: esClient } },
+          // The route guard reads the `digitalExperience.enabled` flag before the handler runs.
+          featureFlags: {
+            getBooleanValue: async () => {
+              return true;
+            },
+          },
+        }),
       },
       request: { events: { aborted$: NEVER } },
       plugins: {},

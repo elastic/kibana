@@ -16,7 +16,8 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-components';
-import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {

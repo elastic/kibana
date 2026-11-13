@@ -210,13 +210,14 @@ export class AlertsClient<
     const {
       hits: { hits, total },
       aggregations,
+      _shards,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
       ...queryBody,
       ignore_unavailable: true,
     });
 
-    return { hits, total, aggregations };
+    return { hits, total, aggregations, _shards };
   }
 
   public async msearch<Aggregation = unknown>(

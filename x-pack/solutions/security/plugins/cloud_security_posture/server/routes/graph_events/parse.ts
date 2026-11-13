@@ -11,7 +11,7 @@ import type {
   EventsResponse,
 } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import type { EventRecord } from './types';
-import { transformEntityTypeToIconAndShape, normalizeToArray } from '../graph/utils';
+import { getEntityTypeIcon, normalizeToArray } from '../graph/utils';
 
 /**
  * Parses event records into EventOrAlertItem response.
@@ -46,8 +46,8 @@ export const parseEventRecords = (
     const targetId = record.targetEntityId;
     const targetParentField = record.targetEcsParentField;
 
-    const { icon: actorIcon } = transformEntityTypeToIconAndShape(actorParentField ?? '');
-    const { icon: targetIcon } = transformEntityTypeToIconAndShape(targetParentField ?? '');
+    const actorIcon = getEntityTypeIcon(actorParentField ?? '');
+    const targetIcon = getEntityTypeIcon(targetParentField ?? '');
 
     const actorName = record.actorEntityName ?? actorId ?? undefined;
     const targetName = record.targetEntityName ?? targetId ?? undefined;

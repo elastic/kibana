@@ -128,6 +128,7 @@ const externals = {
     '__kbnSharedDeps__.ElasticEuiLibComponentsUseIsNestedEuiProvider',
   '@elastic/eui/lib/services/theme/warning': '__kbnSharedDeps__.ElasticEuiLibServicesThemeWarning',
   '@elastic/eui-theme-borealis': '__kbnSharedDeps__.ElasticEuiThemeBorealis',
+  '@elastic/eui-theme-common': '__kbnSharedDeps__.ElasticEuiThemeCommon',
 
   // transient dep of eui
   '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
