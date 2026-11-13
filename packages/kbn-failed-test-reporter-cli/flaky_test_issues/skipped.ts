@@ -7,17 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FlakyTestBranchStats, FlakyTestEntry } from '@kbn/scout-reporting';
+import {
+  describeScope,
+  type FlakyTestBranchStats,
+  type FlakyTestEntry,
+} from '@kbn/scout-reporting';
 import { isPullRequestRef } from './markdown';
 
 const failedBranches = (test: FlakyTestEntry): FlakyTestBranchStats[] =>
   test.byBranch.filter(({ branch, failedBuilds }) => failedBuilds > 0 && !isPullRequestRef(branch));
 
-/** Skipped by every setup on every branch it failed on, pull requests left out. */
+/**
+ * Skipped by every setup on every branch it failed on, pull requests left out; a pipeline judged
+ * on its own has its own entry for the branch.
+ */
 export const isSkippedTest = (test: FlakyTestEntry): boolean => {
   const failed = failedBranches(test);
   return failed.length > 0 && failed.every(({ skipped }) => skipped === true);
 };
 
 export const skippedBranches = (test: FlakyTestEntry): string[] =>
-  failedBranches(test).map(({ branch }) => branch);
+  failedBranches(test).map(describeScope);

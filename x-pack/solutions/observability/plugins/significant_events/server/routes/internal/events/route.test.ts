@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -15,6 +13,7 @@ import {
   type FakeInvestigation,
 } from '../../../lib/significant_events/events/investigations_reader.mock';
 import { internalEventsRoutes } from './route';
+import { MAX_DEACTIVATION_REASON_LENGTH } from '@kbn/significant-events-schema';
 
 const mockCleanupStaleEvents = jest.fn();
 
@@ -837,12 +836,14 @@ describe('events investigation state', () => {
 describe('POST /internal/significant_events/events/{id}/update', () => {
   const run = ({
     findLatestByEventId,
+    createEpisodeAction = jest.fn().mockResolvedValue(undefined),
     createAlertEvent = jest.fn().mockResolvedValue(undefined),
     emitTrigger,
     body = { status: 'inactive' as const },
     request = { spaceId: 'default' },
   }: {
     findLatestByEventId: jest.Mock;
+    createEpisodeAction?: jest.Mock;
     createAlertEvent?: jest.Mock;
     emitTrigger?: jest.Mock;
     body?: { status: 'active' | 'inactive'; assessment_note?: string };
@@ -856,7 +857,11 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
         getEventSearchClient: () =>
           asRuleEventsClient(
             { findLatestByEventId },
-            { getAlertEventsClient: async () => ({ createAlertEvent } as never), emitTrigger }
+            {
+              getAlertEventsClient: async () => ({ createAlertEvent } as never),
+              getAlertActionsClient: async () => ({ createEpisodeAction } as never),
+              emitTrigger,
+            }
           ),
       }),
       server: {},
@@ -866,50 +871,30 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
   const stored = {
     event_id: 'event-1',
     status: 'active',
+    episode_id: 'episode-1',
     '@timestamp': '2026-01-01T00:00:00.000Z',
   };
 
-  it('appends the next version, notifies, and returns the new status', async () => {
+  it('creates the alert action for the stored episode, notifies, and returns the new status', async () => {
+    const createEpisodeAction = jest.fn().mockResolvedValue(undefined);
     const createAlertEvent = jest.fn().mockResolvedValue(undefined);
     const emitTrigger = jest.fn();
 
     const result = await run({
       findLatestByEventId: jest.fn().mockResolvedValue(stored),
+      createEpisodeAction,
       createAlertEvent,
       emitTrigger,
       body: { status: 'inactive', assessment_note: ' not an incident ' },
     });
 
     expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
-    expect(createAlertEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fingerprint: 'event-1',
-        alert_status: 'inactive',
-        data: expect.objectContaining({ assessment_note: 'not an incident' }),
-      })
-    );
+    expect(createEpisodeAction).toHaveBeenCalledWith({
+      episodeId: 'episode-1',
+      action: { action_type: 'deactivate', reason: 'not an incident' },
+    });
+    expect(createAlertEvent).not.toHaveBeenCalled();
     expect(emitTrigger).toHaveBeenCalledTimes(1);
-  });
-
-  it('stamps the calling workflow run on the version it writes', async () => {
-    const createAlertEvent = jest.fn().mockResolvedValue(undefined);
-    const request = { spaceId: 'default' };
-    setWorkflowEventChainContext(request as unknown as KibanaRequest, {
-      depth: 0,
-      sourceExecutionId: 'workflow-run-1',
-    });
-
-    await run({
-      findLatestByEventId: jest.fn().mockResolvedValue(stored),
-      createAlertEvent,
-      request,
-    });
-
-    expect(createAlertEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
-      })
-    );
   });
 });
 
@@ -932,6 +917,21 @@ describe('POST /internal/significant_events/events/{id}/update — body schema',
   it('accepts active status without assessment_note', () => {
     const result = bodySchema.safeParse({ status: 'active' });
     expect(result.success).toBe(true);
+  });
+
+  it('bounds assessment_note at the length an alert action reason allows, on the raw string', () => {
+    expect(
+      bodySchema.safeParse({
+        status: 'inactive',
+        assessment_note: 'x'.repeat(MAX_DEACTIVATION_REASON_LENGTH),
+      }).success
+    ).toBe(true);
+    expect(
+      bodySchema.safeParse({
+        status: 'inactive',
+        assessment_note: 'x'.repeat(MAX_DEACTIVATION_REASON_LENGTH + 1),
+      }).success
+    ).toBe(false);
   });
 
   it('rejects recovering, which only the lifecycle state machine writes', () => {

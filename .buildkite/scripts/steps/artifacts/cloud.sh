@@ -12,6 +12,8 @@ if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
   exit 0
 fi
 
+load_cloud_deploy_credentials
+
 echo "--- Clean up cached images"
 clean_cached_images
 

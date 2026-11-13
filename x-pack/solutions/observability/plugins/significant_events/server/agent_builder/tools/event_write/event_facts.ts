@@ -7,7 +7,6 @@
 
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
-  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   type Severity,
   type SignalEntry,
   type SignalVerdict,
@@ -206,7 +205,6 @@ export const computeEventFacts = ({
           sourceIds: rest.source_ids,
           causalFeatures: rest.causal_features ?? [],
           blastRadius: rest.blast_radius ?? [],
-          confidence: rest.confidence ?? 0,
         };
 
   const { status } = candidate;
@@ -227,6 +225,14 @@ export const computeEventFacts = ({
         )
       : undefined;
 
+  // A continuation that brings no new confirming evidence keeps its score: nothing new supports a
+  // different one. A new event, a reopen or a write with a confirming signal is rated afresh.
+  const keepsStoredConfidence =
+    isContinuation &&
+    !reopens &&
+    latest?.confidence !== undefined &&
+    !(candidate.input.signals ?? []).some(({ verdict }) => verdict === 'confirms');
+
   return {
     candidate,
     rest,
@@ -235,11 +241,7 @@ export const computeEventFacts = ({
     status,
     severity,
     frozenNarrative,
-    // Nothing confirmed, so nothing to be confident about; a signal-less write keeps its own.
-    confidence:
-      signals.length === 0 || hasEventWorthySignal(signals)
-        ? episodeContext.confidence
-        : Math.min(episodeContext.confidence, UNCONFIRMED_EVENT_MAX_CONFIDENCE),
+    confidence: keepsStoredConfidence && latest ? latest.confidence : rest.confidence,
   };
 };
 
