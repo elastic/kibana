@@ -455,7 +455,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'active-cascade',
-          text: 'Sets status=active with severity=high for the cascade event: the frontend’s balance, transaction-history, payment and deposit calls are stated timing out or refused across hours, which meets high without a share. Critical would need a stated block of those operations or of a mandatory component, which the descriptions do not state.',
+          text: 'Sets status=active with severity=high for the cascade event: the frontend’s balance, transaction-history, payment and deposit calls are stated timing out or refused, not confined to a single burst, which meets high without a share. Critical would need a stated block of those operations or of a mandatory component, which the descriptions do not state.',
           score: 3,
         },
         {
@@ -508,7 +508,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=high because the frontend’s balance calls to balancereader are stated timing out or refused across hours: a sustained failing call to a named dependency is enough for high without a share. Weak p_value and stationary change_point_type must not cap severity at medium or low, and the assessment note names the evidence the tier rests on.',
+          text: 'Sets severity=high because the frontend’s balance calls to balancereader are stated timing out or refused, not confined to a single burst: a failing call to a named dependency is enough for high without a share. Weak p_value and stationary change_point_type must not cap severity at medium or low, and the assessment note names the evidence the tier rests on.',
           score: 3,
         },
         {
