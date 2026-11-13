@@ -5,18 +5,29 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { createAlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher.mock';
 import type { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
+import type { AlertStatusChangedEventPublisherContract } from '../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import { createMockAlertStatusChangedEventPublisher } from '../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher.mock';
+import type { RulesClient } from '../rules_client';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
 import { AlertActionsClient } from './alert_actions_client';
+
+/** The only `RulesClient` method the alert actions client reads rules with. */
+export type AlertActionsRulesClientMock = jest.Mocked<Pick<RulesClient, 'getRules'>>;
+
+export const createAlertActionsRulesClientMock = (): AlertActionsRulesClientMock => ({
+  getRules: jest.fn().mockResolvedValue({ items: [], errors: [] }),
+});
 
 export function createAlertActionsClient(): {
   alertActionsClient: AlertActionsClient;
@@ -25,6 +36,9 @@ export function createAlertActionsClient(): {
   userProfileService: jest.Mocked<UserProfileServiceStart>;
   alertActionEventPublisher: AlertActionEventPublisher;
   resourceManager: ReturnType<typeof createMockResourceManager>;
+  alertStatusChangedPublisher: jest.Mocked<AlertStatusChangedEventPublisherContract>;
+  rulesClient: AlertActionsRulesClientMock;
+  mockLogger: jest.Mocked<Logger>;
 } {
   const { queryService, mockEsClient: queryServiceEsClient } = createQueryService();
   const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
@@ -32,6 +46,9 @@ export function createAlertActionsClient(): {
   const { publisher: alertActionEventPublisher } = createAlertActionEventPublisher();
   const request = httpServerMock.createKibanaRequest();
   const resourceManager = createMockResourceManager();
+  const alertStatusChangedPublisher = createMockAlertStatusChangedEventPublisher();
+  const rulesClient = createAlertActionsRulesClientMock();
+  const { loggerService, mockLogger } = createLoggerService();
 
   userProfileService.getCurrentProfileId.mockResolvedValue('test-uid');
 
@@ -42,7 +59,10 @@ export function createAlertActionsClient(): {
     request,
     'default',
     alertActionEventPublisher,
-    resourceManager
+    resourceManager,
+    alertStatusChangedPublisher,
+    rulesClient,
+    loggerService
   );
 
   return {
@@ -52,6 +72,9 @@ export function createAlertActionsClient(): {
     userProfileService,
     alertActionEventPublisher,
     resourceManager,
+    alertStatusChangedPublisher,
+    rulesClient,
+    mockLogger,
   };
 }
 

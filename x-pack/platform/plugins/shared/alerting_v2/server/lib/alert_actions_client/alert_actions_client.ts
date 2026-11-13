@@ -22,7 +22,8 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { encodeSeriesId, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
-import { ALERTING_ERROR_CODES } from '../errors/error_codes';
+import type { AlertStatusChangedTriggerPayload } from '../../../common/workflows/triggers';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getAlertEpisodeNotFoundMessage,
   getAlertSeriesNotFoundMessage,
@@ -33,12 +34,26 @@ import {
   alertActionActorType,
   type AlertActionDocument,
 } from '../../resources/datastreams/alert_actions';
-import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_events';
+import {
+  ALERT_EVENTS_RESOURCE_KEY,
+  alertEpisodeStatus,
+  type AlertEpisodeStatus,
+  type AlertEventDocument,
+} from '../../resources/datastreams/alert_events';
 import {
   ResourceManager,
   type ResourceManagerContract,
 } from '../services/resource_service/resource_manager';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
+import {
+  AlertStatusChangedEventPublisher,
+  type AlertStatusChangedEventPublisherContract,
+} from '../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
+import { RulesClient, type RuleResponse } from '../rules_client';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
@@ -79,6 +94,19 @@ type BulkAlertActionError = BulkResponse['errors'][number];
 interface AlertActionBoomData {
   code?: string;
   details?: Record<string, unknown>;
+}
+
+/** A lifecycle action's synthetic `.rule-events` doc and the stored event it was prepared from. */
+interface LifecycleWrite {
+  readonly ruleEvent: AlertEventDocument;
+  readonly alertEvent: AlertEventRecord;
+}
+
+/** A persisted status change, with `previousStatus` resolved across the batch. */
+interface UserStatusChange {
+  readonly alertEvent: AlertEventRecord;
+  readonly status: AlertEpisodeStatus;
+  readonly previousStatus: AlertEpisodeStatus | null;
 }
 
 /**
@@ -154,8 +182,66 @@ const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
   actionType === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ||
   actionType === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
 
+/**
+ * Keeps the lifecycle writes Elasticsearch accepted and resolves their status
+ * changes in batch order. `previousStatus` chains per episode, so a batch that
+ * names one episode twice reports each write against the one before it, and a
+ * write that leaves the status unchanged is dropped, like the other publishers
+ * only report genuine changes.
+ */
+const toUserStatusChanges = (
+  writes: readonly LifecycleWrite[],
+  persistedDocs: ReadonlySet<Record<string, unknown>>
+): UserStatusChange[] => {
+  const statusByEpisode = new Map<string, AlertEpisodeStatus>();
+  const changes: UserStatusChange[] = [];
+
+  for (const { ruleEvent, alertEvent } of writes) {
+    const status = ruleEvent.alert?.status;
+    if (status === undefined || !persistedDocs.has(ruleEvent)) {
+      continue;
+    }
+
+    const { episode_id: episodeId, episode_status: storedStatus } = alertEvent;
+    const previousStatus = statusByEpisode.get(episodeId) ?? storedStatus ?? null;
+    statusByEpisode.set(episodeId, status);
+
+    if (status !== previousStatus) {
+      changes.push({ alertEvent, status, previousStatus });
+    }
+  }
+
+  return changes;
+};
+
+/**
+ * Builds the `alerting.alertStatusChanged` payload of a user status change.
+ * There is no rule run, so `execution` is null; an inactive alert reports no
+ * severity, as for the other publishers.
+ */
+const toAlertStatusChangedPayload = (
+  { alertEvent, status, previousStatus }: UserStatusChange,
+  rule: RuleResponse | null
+): AlertStatusChangedTriggerPayload => ({
+  spaceId: alertEvent.space_id,
+  source: alertEvent.source,
+  alert: {
+    id: alertEvent.episode_id,
+    groupHash: alertEvent.group_hash,
+    status,
+    previousStatus,
+    severity: status === alertEpisodeStatus.inactive ? null : alertEvent.severity ?? null,
+  },
+  rule: rule
+    ? { id: rule.id, name: rule.metadata.name, tags: [...(rule.metadata.tags ?? [])] }
+    : null,
+  execution: null,
+});
+
 @injectable()
 export class AlertActionsClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
@@ -164,8 +250,14 @@ export class AlertActionsClient {
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
     @inject(AlertActionEventPublisher)
     private readonly eventPublisher: AlertActionEventPublisher,
-    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
-  ) {}
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract,
+    @inject(AlertStatusChangedEventPublisher)
+    private readonly alertStatusChangedPublisher: AlertStatusChangedEventPublisherContract,
+    @inject(RulesClient) private readonly rulesClient: Pick<RulesClient, 'getRules'>,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   /**
    * Creates a series-level action (`snooze` / `unsnooze`) for the
@@ -218,7 +310,8 @@ export class AlertActionsClient {
    *
    * Lifecycle actions additionally require the episode to be the latest of
    * its series (see {@link isLifecycleActionType}); a superseded episode is
-   * rejected with a 409 `ALERT_EPISODE_NOT_LATEST`.
+   * rejected with a 409 `ALERT_EPISODE_NOT_LATEST`. Once their write lands
+   * they also publish `alerting.alertStatusChanged`.
    */
   public async createEpisodeAction(params: {
     episodeId: string;
@@ -254,9 +347,12 @@ export class AlertActionsClient {
       docAlertId: alertEvent.episode_id,
       alertActionState: actionStates.get(episodeId) ?? EMPTY_ALERT_ACTION_STATE,
     });
+    const { ruleEvent } = prepared;
+    const lifecycleWrites: LifecycleWrite[] = ruleEvent ? [{ ruleEvent, alertEvent }] : [];
 
-    await this.persistPreparedActions([prepared]);
+    const persistedDocs = await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
+    await this.publishAlertStatusChanges(toUserStatusChanges(lifecycleWrites, persistedDocs));
   }
 
   /**
@@ -389,14 +485,103 @@ export class AlertActionsClient {
   }
 
   /**
+   * Publishes `alerting.alertStatusChanged` for persisted user status changes.
+   * The publisher owns the opt-in check and only then calls the builder, so
+   * the rule lookup never runs when nobody listens. The writes already
+   * succeeded, so a failure here is logged rather than thrown.
+   */
+  private async publishAlertStatusChanges(changes: readonly UserStatusChange[]): Promise<void> {
+    if (changes.length === 0) {
+      return;
+    }
+
+    try {
+      await this.alertStatusChangedPublisher.publishAlertStatusChanges(() =>
+        this.buildAlertStatusChangedPayloads(changes)
+      );
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to publish alert status changes for user actions',
+        error,
+        code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED,
+        labels: { space_id: this.spaceId },
+      });
+    }
+  }
+
+  /**
+   * Resolves the rule of every rule-produced alert with one `getRules` call,
+   * the client the rule executor reads its rule with. A change whose rule
+   * cannot be read is skipped, as the executor publishes nothing for a rule it
+   * cannot load; `rule: null` stays reserved for alerts without a rule.
+   */
+  private async buildAlertStatusChangedPayloads(
+    changes: readonly UserStatusChange[]
+  ): Promise<AlertStatusChangedTriggerPayload[]> {
+    const ruleIds = [
+      ...new Set(
+        changes.flatMap(({ alertEvent: { rule_id: ruleId } }) => (ruleId == null ? [] : [ruleId]))
+      ),
+    ];
+    const rulesById = await this.loadReadableRules(ruleIds);
+
+    return changes.flatMap((change) => {
+      const { rule_id: ruleId } = change.alertEvent;
+      if (ruleId == null) {
+        return [toAlertStatusChangedPayload(change, null)];
+      }
+
+      const rule = rulesById.get(ruleId);
+      return rule ? [toAlertStatusChangedPayload(change, rule)] : [];
+    });
+  }
+
+  /**
+   * Reads the given rules for the acting user. A rule that cannot be read is
+   * missing from the result, and so is every rule when the lookup itself
+   * fails, so only the changes of those rules are skipped while changes of
+   * alerts without a rule are still published.
+   */
+  private async loadReadableRules(ruleIds: readonly string[]): Promise<Map<string, RuleResponse>> {
+    if (ruleIds.length === 0) {
+      return new Map();
+    }
+
+    try {
+      const { items, errors } = await this.rulesClient.getRules([...ruleIds]);
+      errors.forEach(({ id, error }) => {
+        this.logger.warn({
+          message: `Did not publish alert status changes for user actions: rule could not be read (${error.message})`,
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED,
+          labels: { space_id: this.spaceId, rule_id: id },
+        });
+      });
+      return new Map(items.map((rule) => [rule.id, rule]));
+    } catch (error) {
+      this.logger.warn({
+        message: 'Did not publish alert status changes for user actions: rules could not be read',
+        error,
+        code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED,
+        labels: { space_id: this.spaceId },
+      });
+      return new Map();
+    }
+  }
+
+  /**
    * Persists a batch of prepared actions in a single ES `_bulk` round-trip.
    * `bulkIndexDocsAcrossIndices` is used uniformly so audit-only batches and
    * mixed audit + synthetic `.rule-events` batches share one code path. The
    * `wait_for` refresh ensures the next API/UI read sees the new state.
+   *
+   * Returns the docs Elasticsearch accepted (the same objects passed in), so
+   * callers can tell which synthetic `.rule-events` docs landed.
    */
-  private async persistPreparedActions(prepared: readonly PreparedAction[]): Promise<void> {
+  private async persistPreparedActions(
+    prepared: readonly PreparedAction[]
+  ): Promise<ReadonlySet<Record<string, unknown>>> {
     if (prepared.length === 0) {
-      return;
+      return new Set();
     }
 
     const docs = prepared.flatMap(({ alertActionDoc, ruleEvent }) =>
@@ -414,10 +599,12 @@ export class AlertActionsClient {
       this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY),
     ]);
 
-    await this.storageService.bulkIndexDocsAcrossIndices({
+    const { docs: persistedDocs } = await this.storageService.bulkIndexDocsAcrossIndices({
       docs,
       refresh: 'wait_for',
     });
+
+    return new Set(persistedDocs);
   }
 
   /**
@@ -536,6 +723,7 @@ export class AlertActionsClient {
 
     const errors: BulkAlertActionError[] = [];
     const prepared: PreparedAction[] = [];
+    const lifecycleWrites: LifecycleWrite[] = [];
 
     for (const item of items) {
       const alertEvent = eventByEpisodeId.get(item.alert_id);
@@ -565,15 +753,17 @@ export class AlertActionsClient {
       }
 
       try {
-        prepared.push(
-          this.prepareAction({
-            action: item,
-            alertEvent,
-            userProfileUid,
-            docAlertId: alertEvent.episode_id,
-            alertActionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
-          })
-        );
+        const preparedAction = this.prepareAction({
+          action: item,
+          alertEvent,
+          userProfileUid,
+          docAlertId: alertEvent.episode_id,
+          alertActionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
+        });
+        prepared.push(preparedAction);
+        if (preparedAction.ruleEvent) {
+          lifecycleWrites.push({ ruleEvent: preparedAction.ruleEvent, alertEvent });
+        }
       } catch (error) {
         if (Boom.isBoom(error) && EXPECTED_BULK_ITEM_STATUS_CODES.has(error.output.statusCode)) {
           errors.push(boomToBulkActionError(item.alert_id, error));
@@ -584,11 +774,12 @@ export class AlertActionsClient {
     }
 
     if (prepared.length > 0) {
-      await this.persistPreparedActions(prepared);
+      const persistedDocs = await this.persistPreparedActions(prepared);
       this.eventPublisher.emitEpisodeActions(
         this.request,
         prepared.map((p) => p.alertActionDoc)
       );
+      await this.publishAlertStatusChanges(toUserStatusChanges(lifecycleWrites, persistedDocs));
     }
 
     return { affected_count: prepared.length, errors };

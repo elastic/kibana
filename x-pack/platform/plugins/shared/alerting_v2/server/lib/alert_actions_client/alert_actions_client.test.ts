@@ -14,9 +14,16 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { encodeSeriesId } from '@kbn/alerting-v2-utils';
+import type { Logger } from '@kbn/core/server';
+import type { AlertStatusChangedTriggerPayload } from '../../../common/workflows/triggers';
 import type { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
+import type { AlertStatusChangedEventPublisherContract } from '../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import { createRuleResponse } from '../test_utils';
 import type { AlertActionsClient } from './alert_actions_client';
-import { createAlertActionsClient } from './alert_actions_client.mock';
+import {
+  createAlertActionsClient,
+  type AlertActionsRulesClientMock,
+} from './alert_actions_client.mock';
 import {
   getAlertActionStateESQLResponse,
   getAlertEventESQLResponse,
@@ -65,6 +72,9 @@ describe('AlertActionsClient', () => {
   let alertActionEventPublisher: AlertActionEventPublisher;
   let emitEpisodeActionsSpy: jest.SpyInstance;
   let resourceManager: ReturnType<typeof createAlertActionsClient>['resourceManager'];
+  let alertStatusChangedPublisher: jest.Mocked<AlertStatusChangedEventPublisherContract>;
+  let rulesClient: AlertActionsRulesClientMock;
+  let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     ({
@@ -74,6 +84,9 @@ describe('AlertActionsClient', () => {
       userProfileService,
       alertActionEventPublisher,
       resourceManager,
+      alertStatusChangedPublisher,
+      rulesClient,
+      mockLogger,
     } = createAlertActionsClient());
     emitEpisodeActionsSpy = jest.spyOn(alertActionEventPublisher, 'emitEpisodeActions');
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
@@ -1272,6 +1285,551 @@ describe('AlertActionsClient', () => {
       expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({ alert_id: 'episode-2' });
       expect(emitEpisodeActionsSpy.mock.calls[0][1]).toHaveLength(1);
+    });
+  });
+
+  describe('alerting.alertStatusChanged publishing', () => {
+    const PUBLISH_FAILED = 'EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED';
+    const rule = createRuleResponse({
+      id: 'test-rule-id',
+      metadata: { name: 'CPU above 90%', tags: ['k8s'] },
+    });
+    let published: AlertStatusChangedTriggerPayload[];
+
+    /** Payload of a status change of the default fixture's rule-produced alert. */
+    const payload = (
+      alert: Partial<AlertStatusChangedTriggerPayload['alert']> &
+        Pick<AlertStatusChangedTriggerPayload['alert'], 'id' | 'status' | 'previousStatus'>,
+      overrides: Partial<AlertStatusChangedTriggerPayload> = {}
+    ): AlertStatusChangedTriggerPayload => ({
+      spaceId: 'default',
+      source: 'internal',
+      alert: { groupHash: 'group-1', severity: null, ...alert },
+      rule: { id: 'test-rule-id', name: 'CPU above 90%', tags: ['k8s'] },
+      execution: null,
+      ...overrides,
+    });
+
+    const expectPublishFailedWarning = () =>
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ labels: expect.objectContaining({ code: PUBLISH_FAILED }) })
+      );
+
+    beforeEach(() => {
+      published = [];
+      // Behaves like an opted-in publisher: it runs the builder and records what it returns.
+      alertStatusChangedPublisher.publishAlertStatusChanges.mockImplementation(async (payloads) => {
+        published.push(...(typeof payloads === 'function' ? await payloads() : payloads));
+      });
+      rulesClient.getRules.mockResolvedValue({ items: [rule], errors: [] });
+    });
+
+    it.each(['active', 'pending', 'recovering', null] as const)(
+      'publishes a deactivate of a %s episode after the write, with the stored status as previous',
+      async (storedStatus) => {
+        queryServiceEsClient.esql.query
+          .mockResolvedValueOnce(
+            getAlertEventESQLResponse([
+              {
+                episode_id: 'episode-3',
+                group_hash: 'group-1',
+                episode_status: storedStatus,
+                severity: 'high',
+              },
+            ])
+          )
+          .mockResolvedValueOnce(
+            getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+          );
+
+        await client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+        });
+
+        expect(published).toEqual([
+          payload({ id: 'episode-3', status: 'inactive', previousStatus: storedStatus }),
+        ]);
+        expect(rulesClient.getRules).toHaveBeenCalledWith(['test-rule-id']);
+        expect(
+          alertStatusChangedPublisher.publishAlertStatusChanges.mock.invocationCallOrder[0]
+        ).toBeGreaterThan(storageServiceEsClient.bulk.mock.invocationCallOrder[0]);
+      }
+    );
+
+    it.each([
+      ['inactive', 'high', 'high'],
+      ['recovering', null, null],
+      ['pending', 'low', 'low'],
+      [null, null, null],
+    ] as const)(
+      'publishes an activate of a %s episode with the stored severity',
+      async (storedStatus, storedSeverity, expectedSeverity) => {
+        queryServiceEsClient.esql.query
+          .mockResolvedValueOnce(
+            getAlertEventESQLResponse([
+              {
+                episode_id: 'episode-3',
+                group_hash: 'group-1',
+                episode_status: storedStatus,
+                severity: storedSeverity,
+              },
+            ])
+          )
+          .mockResolvedValueOnce(
+            getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+          );
+
+        await client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE, reason: 'reopen' },
+        });
+
+        expect(published).toEqual([
+          payload({
+            id: 'episode-3',
+            status: 'active',
+            previousStatus: storedStatus,
+            severity: expectedSeverity,
+          }),
+        ]);
+      }
+    );
+
+    it('publishes rule: null for an alert without a rule, without reading rules', async () => {
+      const source = 'elastic.significant_events';
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            {
+              episode_id: 'episode-3',
+              group_hash: 'group-1',
+              rule_id: null,
+              source,
+              episode_status: 'active',
+            },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([
+            { episode_id: 'episode-3', group_hash: 'group-1', rule_id: null, source },
+          ])
+        );
+
+      await client.createEpisodeAction({
+        episodeId: 'episode-3',
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+      });
+
+      expect(published).toEqual([
+        payload(
+          { id: 'episode-3', status: 'inactive', previousStatus: 'active' },
+          { source, rule: null }
+        ),
+      ]);
+      expect(rulesClient.getRules).not.toHaveBeenCalled();
+    });
+
+    it('does not publish audit-only actions', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(getAlertEventESQLResponse([{ episode_id: 'episode-3' }]))
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse());
+
+      await client.createEpisodeAction({
+        episodeId: 'episode-3',
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+      });
+
+      expect(alertStatusChangedPublisher.publishAlertStatusChanges).not.toHaveBeenCalled();
+    });
+
+    it('publishes nothing when a precondition rejects the action', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-3', group_hash: 'group-1', episode_status: 'inactive' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+        );
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 409 } });
+
+      expect(alertStatusChangedPublisher.publishAlertStatusChanges).not.toHaveBeenCalled();
+    });
+
+    it('publishes nothing when the bulk write throws', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-3', group_hash: 'group-1', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+        );
+      storageServiceEsClient.bulk.mockReset();
+      storageServiceEsClient.bulk.mockRejectedValueOnce(new Error('bulk write failed'));
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+        })
+      ).rejects.toThrow('bulk write failed');
+
+      expect(alertStatusChangedPublisher.publishAlertStatusChanges).not.toHaveBeenCalled();
+    });
+
+    it('publishes nothing when a data stream fails to initialize', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-3', group_hash: 'group-1', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+        );
+      resourceManager.ensureResourceReady.mockRejectedValueOnce(new Error('init failed'));
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+        })
+      ).rejects.toThrow('init failed');
+
+      expect(alertStatusChangedPublisher.publishAlertStatusChanges).not.toHaveBeenCalled();
+    });
+
+    it('still resolves and logs a warning when the publisher throws', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-3', group_hash: 'group-1', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+        );
+      alertStatusChangedPublisher.publishAlertStatusChanges.mockRejectedValueOnce(
+        new Error('bus down')
+      );
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+        })
+      ).resolves.toBeUndefined();
+
+      expectPublishFailedWarning();
+    });
+
+    it('still resolves and logs a warning when the rule lookup throws', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-3', group_hash: 'group-1', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+        );
+      rulesClient.getRules.mockRejectedValueOnce(new Error('rules index unavailable'));
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+        })
+      ).resolves.toBeUndefined();
+
+      expect(published).toEqual([]);
+      expectPublishFailedWarning();
+    });
+
+    it('still publishes changes of alerts without a rule when the rule lookup throws', async () => {
+      const source = 'elastic.significant_events';
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            {
+              episode_id: 'episode-1',
+              group_hash: 'group-1',
+              rule_id: null,
+              source,
+              episode_status: 'active',
+            },
+            { episode_id: 'episode-2', group_hash: 'group-2', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1', rule_id: null, source },
+            { episode_id: 'episode-2', group_hash: 'group-2' },
+          ])
+        );
+      rulesClient.getRules.mockRejectedValueOnce(new Error('rules index unavailable'));
+
+      await client.createBulkEpisodeActions([
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+        {
+          alert_id: 'episode-2',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+      ]);
+
+      expect(published).toEqual([
+        payload(
+          { id: 'episode-1', status: 'inactive', previousStatus: 'active' },
+          { source, rule: null }
+        ),
+      ]);
+      expectPublishFailedWarning();
+    });
+
+    it('publishes one payload per persisted lifecycle item of a bulk request, reading rules once', async () => {
+      const items: BulkCreateEpisodeAlertActionItemBody[] = [
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+        { alert_id: 'episode-2', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        {
+          alert_id: 'episode-3',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+          reason: 'reopen',
+        },
+        {
+          alert_id: 'episode-4',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+      ];
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1', episode_status: 'active' },
+            { episode_id: 'episode-2', group_hash: 'group-2' },
+            { episode_id: 'episode-3', group_hash: 'group-3', episode_status: 'inactive' },
+            { episode_id: 'episode-4', group_hash: 'group-4', episode_status: 'inactive' },
+          ])
+        )
+        .mockResolvedValueOnce(getAlertActionStateESQLResponse())
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1' },
+            { episode_id: 'episode-3', group_hash: 'group-3' },
+            { episode_id: 'episode-4', group_hash: 'group-4' },
+          ])
+        );
+
+      const result = await client.createBulkEpisodeActions(items);
+
+      // episode-4 is already inactive, so its deactivate is a per-item error.
+      expect(result.errors).toEqual([
+        {
+          id: 'episode-4',
+          error: expect.objectContaining({ code: 'INVALID_ALERT_STATE_TRANSITION' }),
+        },
+      ]);
+      expect(published).toEqual([
+        payload({ id: 'episode-1', status: 'inactive', previousStatus: 'active' }),
+        payload({
+          id: 'episode-3',
+          groupHash: 'group-3',
+          status: 'active',
+          previousStatus: 'inactive',
+        }),
+      ]);
+      expect(rulesClient.getRules).toHaveBeenCalledTimes(1);
+      expect(rulesClient.getRules).toHaveBeenCalledWith(['test-rule-id']);
+    });
+
+    it('publishes one change for two deactivates of the same episode in one bulk request', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+        );
+
+      await client.createBulkEpisodeActions([
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+      ]);
+
+      expect(published).toEqual([
+        payload({ id: 'episode-1', status: 'inactive', previousStatus: 'active' }),
+      ]);
+    });
+
+    it('chains previousStatus across items of one bulk request that name the same episode', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1', episode_status: 'recovering' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+        );
+
+      await client.createBulkEpisodeActions([
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+          reason: 'reopen',
+        },
+      ]);
+
+      expect(published).toEqual([
+        payload({ id: 'episode-1', status: 'inactive', previousStatus: 'recovering' }),
+        payload({ id: 'episode-1', status: 'active', previousStatus: 'inactive' }),
+      ]);
+    });
+
+    it('does not publish an item whose synthetic rule-event Elasticsearch rejected', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1', episode_status: 'active' },
+            { episode_id: 'episode-2', group_hash: 'group-2', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1' },
+            { episode_id: 'episode-2', group_hash: 'group-2' },
+          ])
+        );
+      storageServiceEsClient.bulk.mockReset();
+      // Operations: episode-1 rule-event, its audit doc, episode-2 rule-event, its audit doc.
+      storageServiceEsClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        took: 1,
+        items: [
+          {
+            create: {
+              _index: '.rule-events',
+              status: 400,
+              error: { type: 'mapper_parsing_exception', reason: 'rejected' },
+            },
+          },
+          { create: { _index: '.alert-actions', status: 201 } },
+          { create: { _index: '.rule-events', status: 201 } },
+          { create: { _index: '.alert-actions', status: 201 } },
+        ],
+      });
+
+      const result = await client.createBulkEpisodeActions([
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+        {
+          alert_id: 'episode-2',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+      ]);
+
+      // The response is unchanged by the rejection; only the publishing reflects it.
+      expect(result).toEqual({ affected_count: 2, errors: [] });
+      expect(published).toEqual([
+        payload({
+          id: 'episode-2',
+          groupHash: 'group-2',
+          status: 'inactive',
+          previousStatus: 'active',
+        }),
+      ]);
+    });
+
+    it('skips changes whose rule cannot be read and publishes the rest', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            {
+              episode_id: 'episode-1',
+              group_hash: 'group-1',
+              rule_id: 'deleted-rule',
+              episode_status: 'active',
+            },
+            { episode_id: 'episode-2', group_hash: 'group-2', episode_status: 'active' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([
+            { episode_id: 'episode-1', group_hash: 'group-1', rule_id: 'deleted-rule' },
+            { episode_id: 'episode-2', group_hash: 'group-2' },
+          ])
+        );
+      rulesClient.getRules.mockResolvedValueOnce({
+        items: [rule],
+        errors: [{ id: 'deleted-rule', error: { code: 'RULE_NOT_FOUND', message: 'not found' } }],
+      });
+
+      await client.createBulkEpisodeActions([
+        {
+          alert_id: 'episode-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+        {
+          alert_id: 'episode-2',
+          action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          reason: 'resolved',
+        },
+      ]);
+
+      expect(rulesClient.getRules).toHaveBeenCalledWith(['deleted-rule', 'test-rule-id']);
+      expect(published).toEqual([
+        payload({
+          id: 'episode-2',
+          groupHash: 'group-2',
+          status: 'inactive',
+          previousStatus: 'active',
+        }),
+      ]);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: PUBLISH_FAILED, rule_id: 'deleted-rule' }),
+        })
+      );
     });
   });
 });

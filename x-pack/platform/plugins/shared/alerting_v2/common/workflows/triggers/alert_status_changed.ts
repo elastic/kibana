@@ -193,10 +193,11 @@ export const alertStatusChangedTriggerCommonDefinition: CommonTriggerDefinition<
           'Fires once per alert per genuine status change between pending, active, recovering and inactive. Alerts whose status did not change produce no events. ' +
           'It fires for alerts produced by rule runs and for alerts written through the alert events client, such as imported external alerts and significant events. ' +
           'For the latter, event.rule and event.execution are null, and event.source always says where the alert came from. ' +
-          'For rule-produced alerts, severity is the highest among the stored events for the alert and status in the first batch that publishes the change. Later batches do not revise it. ' +
-          'Alerts a user has manually activated produce no events while they are held active. ' +
+          'It also fires when a user deactivates or activates an alert. Then event.execution is null, event.rule is the rule of a rule-produced alert (null for an alert without a rule), severity is the last stored severity of the alert, previousStatus is null when the alert has no stored status, and the change is skipped when the rule no longer exists or that user cannot read it. ' +
+          'For alerts produced by rule runs, severity is the highest among the stored events for the alert and status in the first batch that publishes the change. Later batches do not revise it. ' +
+          "A user's activation produces an event, but rule runs produce no events for the alert while it is held active. " +
           'Events are only published after an integration, for example Nightshift, has opted in, and only for the spaces it enables. Until then no events are sent. ' +
-          'Workflows started from a rule run use the API key of the rule, and workflows started from an alert events client write use the request of the writer, not the workflow author. Anyone who can create workflows in the space can subscribe to this trigger. ' +
+          'Workflows started from a rule run use the API key of the rule, workflows started from an alert events client write use the request of the writer, and workflows started from a user deactivating or activating an alert use the request of that user, not the workflow author. Anyone who can create workflows in the space can subscribe to this trigger. ' +
           'Rule names, tags, and ids from each event are also written to the workflow trigger log, which users with workflow execution read access in the space can view.',
       }
     ),
