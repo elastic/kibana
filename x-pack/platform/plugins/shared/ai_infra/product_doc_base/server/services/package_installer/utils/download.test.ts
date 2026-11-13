@@ -9,6 +9,8 @@ import { createReadStream } from 'fs';
 import Fs from 'fs/promises';
 import Os from 'os';
 import Path from 'path';
+import { pipeline } from 'stream/promises';
+import { createWriteStream } from '@kbn/fs';
 import { ProxyAgent } from 'undici';
 import { ArtifactNotFoundError, checkArtifactAvailable, downloadToDisk } from './download';
 
@@ -92,12 +94,16 @@ describe('downloadToDisk', () => {
     expect(fetchMock).toHaveBeenCalledWith(mockFileUrl, {});
   });
 
-  it('should copy a file from a local file URL', async () => {
+  it('returns the path of a local file URL in place instead of copying it', async () => {
     const mockLocalFileUrl = 'file:///local/path/to/file.txt';
 
-    await downloadToDisk(mockLocalFileUrl, mockFilePathAtVolume);
+    await expect(downloadToDisk(mockLocalFileUrl, mockFilePathAtVolume)).resolves.toBe(
+      mockLocalPath
+    );
 
-    expect(createReadStream).toHaveBeenCalledWith(mockLocalPath);
+    expect(createReadStream).not.toHaveBeenCalled();
+    expect(createWriteStream).not.toHaveBeenCalled();
+    expect(pipeline).not.toHaveBeenCalled();
   });
 
   it('should handle errors during the download process', async () => {

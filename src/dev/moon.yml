@@ -54,6 +54,8 @@ dependsOn:
   - '@kbn/swc-register'
   - '@kbn/dev-validation-runner'
   - '@kbn/test'
+  - '@kbn/product-doc-common'
+  - '@kbn/inference-common'
 tags:
   - tooling
   - package

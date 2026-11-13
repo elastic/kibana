@@ -78,6 +78,7 @@ const ALL_SPACE_RESULTS: Space[] = [
       // Disabled features are automatically added to the space when a solution is set
       'alertzero',
       'apm',
+      'digital_experience',
       'infrastructure',
       'logs',
       'observabilityAlerts',
