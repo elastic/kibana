@@ -9,6 +9,7 @@ import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
@@ -39,6 +40,7 @@ const createPlugin = (memoryEnabled = false) =>
 const createSetupDeps = () =>
   ({
     share: { url: new MockUrlService() },
+    taskManager: taskManagerMock.createSetup(),
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {

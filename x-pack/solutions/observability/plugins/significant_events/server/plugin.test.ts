@@ -54,7 +54,12 @@ const createSetupDeps = ({
   ({
     nightshiftSources: { onSourceChange },
     ...(registerInvestigationQuota
-      ? { nightshiftInvestigations: { registerInvestigationQuota } }
+      ? {
+          nightshiftInvestigations: {
+            registerInvestigationQuota,
+            registerDetectionSnapshotContributor: jest.fn(),
+          },
+        }
       : {}),
     ...(workflowsExtensions ? { workflowsExtensions } : {}),
   } as unknown as SignificantEventsPluginSetupDependencies);

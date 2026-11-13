@@ -72,6 +72,8 @@ interface Deps {
   listInstalledWorkflowStates: PluginScopedManagedWorkflows['listInstalledWorkflowStates'];
   scheduleSourceVolumeTask: (request: KibanaRequest) => Promise<void>;
   removeSourceVolumeTask: () => Promise<void>;
+  scheduleDetectionSnapshotTask: (request: KibanaRequest) => Promise<void>;
+  removeDetectionSnapshotTask: () => Promise<void>;
   isUniversalAlertingAvailable: () => boolean;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
@@ -80,6 +82,7 @@ interface Deps {
 
 /** Matches the wait `nightshift.ensureInvestigationAgent` uses for a just-installed agent. */
 const AGENT_VISIBILITY_RETRY_OPTIONS = { retries: 9, factor: 1, minTimeout: 300 } as const;
+// Guards every telemetry task; renaming it would break exclusion with nodes still on the old id.
 const TASK_LIFECYCLE_LOCK_ID = 'nightshift-source-volume-task-lifecycle';
 const TASK_LIFECYCLE_LOCK_RETRY_OPTIONS = {
   retries: 120,
@@ -128,6 +131,8 @@ export const createInvestigatorServiceAccountService = ({
   listInstalledWorkflowStates,
   scheduleSourceVolumeTask,
   removeSourceVolumeTask,
+  scheduleDetectionSnapshotTask,
+  removeDetectionSnapshotTask,
   isUniversalAlertingAvailable,
   isServerless,
   logger,
@@ -540,12 +545,22 @@ export const createInvestigatorServiceAccountService = ({
     );
   };
 
-  const removeSourceVolumeTaskIfUnused = async (): Promise<void> => {
+  // Waits for every change before failing, so none outlives the lifecycle lock.
+  const settleAll = async (changes: Array<Promise<void>>): Promise<void> => {
+    const results = await Promise.allSettled(changes);
+    const failure = results.find((result) => result.status === 'rejected');
+    if (failure?.status === 'rejected') throw failure.reason;
+  };
+
+  const scheduleTelemetryTasks = (request: KibanaRequest): Promise<void> =>
+    settleAll([scheduleSourceVolumeTask(request), scheduleDetectionSnapshotTask(request)]);
+
+  const removeTelemetryTasksIfUnused = async (): Promise<void> => {
     if (await hasInstalledNightshiftSpace()) {
       return;
     }
-    await removeSourceVolumeTask();
-    logger.info('No space has nightshift set up; removed the source volume telemetry task');
+    await settleAll([removeSourceVolumeTask(), removeDetectionSnapshotTask()]);
+    logger.info('No space has nightshift set up; removed the telemetry tasks');
   };
 
   const runEnable = async (
@@ -582,8 +597,8 @@ export const createInvestigatorServiceAccountService = ({
       status = await getStatus(request, spaceId);
     }
     assertAllBound(status, spaceId, serviceAccountIds.agent);
-    await withTaskLifecycleLock(() => scheduleSourceVolumeTask(request)).catch((error) => {
-      logger.error(`Failed to schedule the source volume telemetry task: ${error.message}`);
+    await withTaskLifecycleLock(() => scheduleTelemetryTasks(request)).catch((error) => {
+      logger.error(`Failed to schedule the telemetry tasks: ${error.message}`);
     });
     logger.info(
       `Nightshift in space [${spaceId}] is set up with service accounts [${serviceAccountIds.agent}] and [${serviceAccountIds.automations}]`
@@ -655,8 +670,8 @@ export const createInvestigatorServiceAccountService = ({
         }
       );
     }
-    await withTaskLifecycleLock(removeSourceVolumeTaskIfUnused).catch((error) => {
-      logger.error(`Failed to reconcile the source volume telemetry task: ${error.message}`);
+    await withTaskLifecycleLock(removeTelemetryTasksIfUnused).catch((error) => {
+      logger.error(`Failed to reconcile the telemetry tasks: ${error.message}`);
     });
     return getStatus(request, spaceId);
   };
