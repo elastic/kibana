@@ -131,6 +131,26 @@ export const createAgentGraph = ({
     return {};
   };
 
+  // Notices a check appends are placed after the last tool batch.
+  const lastToolCallGroupIdOf = (state: StateType): string | undefined =>
+    [...state.steps].reverse().find(isToolCallStep)?.tool_call_group_id;
+
+  // Steers are drained at every check: a message sent mid-run is read at the next one.
+  const drainIncomingSteps = async (
+    state: StateType,
+    afterAnswer?: boolean
+  ): Promise<RunStepUpdate[]> => {
+    if (!incomingMessages) {
+      return [];
+    }
+    const delivered = await incomingMessages.drain({
+      cycle: state.currentCycle,
+      lastToolCallGroupId: lastToolCallGroupIdOf(state),
+      ...(afterAnswer ? { afterAnswer } : {}),
+    });
+    return delivered.map((data) => stepUpdates.append(createDeliveredMessageStep(data)));
+  };
+
   // The first pass of a run checks whatever its cycle, then every BACKGROUND_CHECK_CYCLE_INTERVAL
   // cycles: a resume starts at the paused cycle, and a sub-agent that finished while the round
   // waited on a prompt is reported by the run that answers it.
@@ -139,25 +159,12 @@ export const createAgentGraph = ({
     const due = firstPass || state.currentCycle % BACKGROUND_CHECK_CYCLE_INTERVAL === 0;
     firstPass = false;
 
-    // Find the last tool call group ID for positioning the notices
-    const lastToolCallGroupId = [...state.steps].reverse().find(isToolCallStep)?.tool_call_group_id;
-    const updates: RunStepUpdate[] = [];
-
-    // Steers are drained on every traversal: a message sent mid-run is read at the next check.
-    if (incomingMessages) {
-      const delivered = await incomingMessages.drain({
-        cycle: state.currentCycle,
-        lastToolCallGroupId,
-      });
-      updates.push(
-        ...delivered.map((data) => stepUpdates.append(createDeliveredMessageStep(data)))
-      );
-    }
+    const updates: RunStepUpdate[] = await drainIncomingSteps(state);
 
     if (backgroundExecutionService?.hasPending() && due) {
       const completions = await backgroundExecutionService.checkForCompletions({
         roundId,
-        toolCallGroupId: lastToolCallGroupId,
+        toolCallGroupId: lastToolCallGroupIdOf(state),
       });
       updates.push(
         ...completions.map((execution) =>
@@ -307,12 +314,7 @@ export const createAgentGraph = ({
     ) {
       return { continueAfterAnswer: false };
     }
-    const lastToolCallGroupId = [...state.steps].reverse().find(isToolCallStep)?.tool_call_group_id;
-    const delivered = await incomingMessages.drain({
-      cycle: state.currentCycle,
-      lastToolCallGroupId,
-      afterAnswer: true,
-    });
+    const delivered = await drainIncomingSteps(state, true);
     if (delivered.length === 0) {
       return { continueAfterAnswer: false };
     }
@@ -320,17 +322,15 @@ export const createAgentGraph = ({
       continueAfterAnswer: true,
       steps: [
         stepUpdates.append(createInterimAnswerStep({ message: outcome.message })),
-        ...delivered.map((data) => stepUpdates.append(createDeliveredMessageStep(data))),
+        ...delivered,
       ],
     };
   };
 
-  const checkIncomingAfterAnswerEdge = async (state: StateType) => {
-    if (state.continueAfterAnswer) {
-      return steps.contextManagement;
-    }
-    return structuredOutput ? steps.prepareToAnswer : steps.finalize;
-  };
+  // Where a run that read nothing after its answer ends: the structured graph still has to answer.
+  const afterAnswerEnd = structuredOutput ? steps.prepareToAnswer : steps.finalize;
+  const checkIncomingAfterAnswerEdge = async (state: StateType) =>
+    state.continueAfterAnswer ? steps.contextManagement : afterAnswerEnd;
 
   const executeTool = async (state: StateType): Promise<StateUpdate> => {
     const outcome = state.researchOutcome;
@@ -530,10 +530,6 @@ export const createAgentGraph = ({
         [steps.prepareToAnswer]: steps.prepareToAnswer,
         [steps.checkIncomingAfterAnswer]: steps.checkIncomingAfterAnswer,
       })
-      .addConditionalEdges(steps.checkIncomingAfterAnswer, checkIncomingAfterAnswerEdge, {
-        [steps.contextManagement]: steps.contextManagement,
-        [steps.prepareToAnswer]: steps.prepareToAnswer,
-      })
       .addEdge(steps.prepareToAnswer, steps.answerAgent)
       .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
         [steps.answerAgent]: steps.answerAgent,
@@ -549,12 +545,12 @@ export const createAgentGraph = ({
         [steps.forcedAnswer]: steps.forcedAnswer,
         [steps.checkIncomingAfterAnswer]: steps.checkIncomingAfterAnswer,
       })
-      .addConditionalEdges(steps.checkIncomingAfterAnswer, checkIncomingAfterAnswerEdge, {
-        [steps.contextManagement]: steps.contextManagement,
-        [steps.finalize]: steps.finalize,
-      })
       .addEdge(steps.forcedAnswer, steps.finalize);
   }
+  graphBuilder.addConditionalEdges(steps.checkIncomingAfterAnswer, checkIncomingAfterAnswerEdge, {
+    [steps.contextManagement]: steps.contextManagement,
+    [afterAnswerEnd]: afterAnswerEnd,
+  });
 
   return graphBuilder.compile();
 };

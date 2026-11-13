@@ -11,13 +11,13 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
   UserMessageEvent as UserMessageEventData,
-  ConversationRoundAuthor,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
 import { isSteerMessageEvent } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { UserMessage } from '../user_message/user_message';
 import { useTurnContentInset } from '../turn_content_inset';
+import { eventActorToRoundAuthor } from '../round_author';
 import type { SteerState } from '../types';
 
 interface UserMessageEventProps {
@@ -40,12 +40,6 @@ const steerLabels: Record<SteerState, string> = {
   }),
 };
 
-const toRoundAuthor = (actor: UserMessageEventData['actor']): ConversationRoundAuthor => ({
-  id: actor.id,
-  username: actor.username,
-  full_name: actor.full_name,
-});
-
 const UserMessageEventComponent: React.FC<UserMessageEventProps> = ({
   event,
   isPending = false,
@@ -66,7 +60,7 @@ const UserMessageEventComponent: React.FC<UserMessageEventProps> = ({
       <UserMessage
         input={event.data.message}
         startedAt={event.created_at}
-        author={isPending ? undefined : toRoundAuthor(event.actor)}
+        author={isPending ? undefined : eventActorToRoundAuthor(event.actor)}
         origin={event.actor.origin}
         isPendingCurrentRound={isPending}
         attachmentRefs={attachmentRefs}

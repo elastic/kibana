@@ -403,7 +403,7 @@ export const createBackgroundExecutionAlreadyReportedError = ({
   );
 };
 
-// Steer refusals: the steer endpoint returns each as a typed 409/429 the client branches on.
+// Steer refusals: the steer endpoint returns each as a 409/429 whose code the client branches on.
 
 export type AgentBuilderConversationNotSteerableError =
   AgentBuilderError<AgentBuilderErrorCode.conversationNotSteerable>;
@@ -462,20 +462,18 @@ export const isNoActiveExecutionError = (
   return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.noActiveExecution;
 };
 
-/** No live run holds the conversation; `alreadyStored` says whether the steer was stored before. */
+/** No live run holds the conversation and nothing is stored: the message can start a run instead. */
 export const createNoActiveExecutionError = ({
   conversationId,
-  alreadyStored,
   meta = {},
 }: {
   conversationId: string;
-  alreadyStored: boolean;
   meta?: Record<string, unknown>;
 }): AgentBuilderNoActiveExecutionError => {
   return new AgentBuilderError(
     AgentBuilderErrorCode.noActiveExecution,
     `Conversation ${conversationId} has no active execution`,
-    { ...meta, conversationId, alreadyStored, statusCode: 409 }
+    { ...meta, conversationId, statusCode: 409 }
   );
 };
 

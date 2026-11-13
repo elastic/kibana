@@ -9,9 +9,9 @@ import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments
 import type { ConversationEvent } from '@kbn/agent-builder-common';
 import {
   TimelineEventType,
+  analyzeDeliveries,
   isActivityEvent,
   isCurrentFormatAttachmentEvent,
-  isDeliveredMessageStep,
   isExecutionTerminalEvent,
   isSteerMessageEvent,
   isTimelineEvent,
@@ -41,33 +41,24 @@ import {
 } from './attachment_event_refs';
 
 /**
- * Where each steer stands: picked up by a run that is live or finished (the step carries it, the
- * message item is dropped), read only by runs that did not finish, or still waiting. One no run
- * read before the conversation went idle is a plain message: nothing to say about it.
+ * Where each steer stands, from the shared delivery analysis: picked up by a run that is live or
+ * finished (the step carries it, the message item is dropped), read only by runs that did not
+ * finish, or still waiting. One no run read before the conversation went idle is a plain message:
+ * nothing to say about it.
  */
 const steerPlacement = (events: TimelineDisplayEvent[]) => {
-  const terminals = new Map<string, TimelineEventType>();
+  const { settled, readByLive, unfinishedReads } = analyzeDeliveries(events);
   const started = new Set<string>();
-  const stepsByEvent = new Map<string, string[]>();
+  const ended = new Set<string>();
   for (const event of events) {
     if (!event.execution_id) continue;
     if (event.type === TimelineEventType.executionStarted) started.add(event.execution_id);
-    if (isExecutionTerminalEvent(event)) terminals.set(event.execution_id, event.type);
-    if (event.type === TimelineEventType.executionStep && isDeliveredMessageStep(event.data.step)) {
-      const list = stepsByEvent.get(event.data.step.event_id) ?? [];
-      list.push(event.execution_id);
-      stepsByEvent.set(event.data.step.event_id, list);
-    }
+    if (isExecutionTerminalEvent(event)) ended.add(event.execution_id);
   }
-  const finishedOrLive = (executionId: string) => {
-    const terminal = terminals.get(executionId);
-    return terminal === undefined || terminal === TimelineEventType.executionTerminated;
-  };
-  const hasLiveExecution = [...started].some((executionId) => !terminals.has(executionId));
   return {
-    hasLiveExecution,
-    carriedByStep: (eventId: string) => (stepsByEvent.get(eventId) ?? []).some(finishedOrLive),
-    readByUnfinished: (eventId: string) => (stepsByEvent.get(eventId) ?? []).length > 0,
+    hasLiveExecution: [...started].some((executionId) => !ended.has(executionId)),
+    carriedByStep: (eventId: string) => settled.has(eventId) || readByLive.has(eventId),
+    readByUnfinished: (eventId: string) => (unfinishedReads.get(eventId) ?? 0) > 0,
   };
 };
 

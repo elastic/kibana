@@ -36,6 +36,7 @@ import type {
   EventActor,
   TimelineEvent,
   UserIdAndName,
+  UserMessageEvent,
 } from '@kbn/agent-builder-common';
 import type { ExecutionPeek } from '../../execution/persistence';
 import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
@@ -143,10 +144,8 @@ export interface AppendSteerRequest {
 }
 
 export interface AppendSteerResult {
-  eventId: string;
-  /** The lock holder the message was stamped with. */
-  executionId: string;
-  createdAt: string;
+  /** The stored message, stamped with the lock holder that will read it. */
+  event: UserMessageEvent;
   /** True when an earlier request already stored this `eventId`. */
   alreadyStored: boolean;
 }

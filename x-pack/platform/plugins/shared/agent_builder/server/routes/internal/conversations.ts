@@ -12,10 +12,6 @@ import {
   CONVERSATION_TITLE_MAX_LENGTH,
   STEER_MESSAGE_MAX_LENGTH,
   agentIdMaxLength,
-  isConversationAwaitingPromptError,
-  isConversationNotSteerableError,
-  isNoActiveExecutionError,
-  isTooManyPendingSteersError,
 } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -24,7 +20,6 @@ import type {
   MarkReadConversationResponse,
   RenameConversationResponse,
   SearchConversationsResponse,
-  SteerConversationErrorBody,
   SteerConversationResponse,
 } from '../../../common/http_api/conversations';
 import { currentUserActor } from '../../services/conversation/client/rounds_to_events';
@@ -358,39 +353,14 @@ export function registerInternalConversationRoutes({
       const { message, event_id: eventId } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const refuse = (statusCode: number, body: SteerConversationErrorBody) =>
-        response.customError({ statusCode, body: { message: body.error, attributes: body } });
-      try {
-        const result = await client.appendSteer(
-          { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
-          { source: 'http_api' }
-        );
-        return response.ok<SteerConversationResponse>({
-          body: {
-            event_id: result.eventId,
-            execution_id: result.executionId,
-            created_at: result.createdAt,
-            ...(result.alreadyStored ? { already_stored: true } : {}),
-          },
-        });
-      } catch (error) {
-        if (isConversationNotSteerableError(error)) {
-          return refuse(409, { error: 'not_steerable' });
-        }
-        if (isConversationAwaitingPromptError(error)) {
-          return refuse(409, { error: 'awaiting_prompt' });
-        }
-        if (isNoActiveExecutionError(error)) {
-          return refuse(409, {
-            error: 'no_active_execution',
-            already_stored: Boolean(error.meta?.alreadyStored),
-          });
-        }
-        if (isTooManyPendingSteersError(error)) {
-          return refuse(429, { error: 'too_many_pending' });
-        }
-        throw error;
-      }
+      // Refusals are typed errors with their own status; the handler wrapper answers them.
+      const { event, alreadyStored } = await client.appendSteer(
+        { id: conversationId, message, eventId, actor: currentUserActor(client.getUser()) },
+        { source: 'http_api' }
+      );
+      return response.ok<SteerConversationResponse>({
+        body: { event, ...(alreadyStored ? { already_stored: true } : {}) },
+      });
     })
   );
 }

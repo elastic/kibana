@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-/**
- * Thrown from `appendSteer`'s OCC `fields` callback, on the `ConversationBusySignal` pattern: each
- * refusal becomes a 409/429 that `OccWriter` would otherwise retry as a version conflict.
- * `already_stored` is a short-circuit success, not a refusal: the write is skipped.
- */
-export type SteerSignalKind =
+import type { UserMessageEvent } from '@kbn/agent-builder-common';
+
+export type SteerRefusalKind =
   | 'not_steerable'
   | 'awaiting_prompt'
   | 'no_active_execution'
-  | 'too_many_pending'
-  | 'already_stored';
+  | 'too_many_pending';
+
+/**
+ * What ends `appendSteer`'s OCC `fields` callback early: a refusal, each of which becomes a
+ * 409/429, or a retry of a stored steer, a short-circuit success that skips the write. Thrown on
+ * the `ConversationBusySignal` pattern, since `OccWriter` would otherwise retry a thrown error as
+ * a version conflict.
+ */
+export type SteerSignalOutcome =
+  | { kind: 'already_stored'; event: UserMessageEvent }
+  | { kind: SteerRefusalKind };
 
 export class SteerSignal {
-  constructor(
-    public readonly kind: SteerSignalKind,
-    public readonly meta: { alreadyStored?: boolean; createdAt?: string; executionId?: string } = {}
-  ) {}
+  constructor(public readonly outcome: SteerSignalOutcome) {}
 }

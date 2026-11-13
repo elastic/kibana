@@ -7,7 +7,6 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { AgentBuilderErrorCode, TimelineEventType } from '@kbn/agent-builder-common';
-import type { SteerConversationErrorBody } from '../../../common/http_api/conversations';
 import { useSendSteer } from './use_send_steer';
 
 jest.mock('./use_agent_builder_service');
@@ -17,9 +16,6 @@ jest.mock('../context/streaming/streaming_context', () => ({
 }));
 jest.mock('./use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
-}));
-jest.mock('./use_current_user', () => ({
-  useCurrentUser: jest.fn(),
 }));
 jest.mock('./use_toasts', () => ({
   useToasts: jest.fn(),
@@ -32,7 +28,6 @@ const { useAgentBuilderServices } = jest.requireMock('./use_agent_builder_servic
 const { useConversationId } = jest.requireMock('../context/conversation/use_conversation_id');
 const { useConversationStreamService } = jest.requireMock('../context/streaming/streaming_context');
 const { useConversationStream } = jest.requireMock('./use_conversation_stream');
-const { useCurrentUser } = jest.requireMock('./use_current_user');
 const { useToasts } = jest.requireMock('./use_toasts');
 
 const conversationId = 'conv-1';
@@ -53,8 +48,8 @@ const httpError = ({
     body: { statusCode: status, message, ...(attributes ? { attributes } : {}) },
   });
 
-const steerRefusal = (attributes: SteerConversationErrorBody, status = 409) =>
-  httpError({ status, attributes: { ...attributes } });
+const steerRefusal = (code: AgentBuilderErrorCode, status = 409) =>
+  httpError({ status, attributes: { code } });
 
 const networkError = () => new Error('Failed to fetch');
 
@@ -65,10 +60,15 @@ const busyRejection = () =>
     attributes: { code: AgentBuilderErrorCode.conversationBusy },
   });
 
-const storedResponse = (eventId: string) => ({
-  event_id: eventId,
-  execution_id: 'exec-1',
+const storedEvent = (eventId: string, message = 'hello') => ({
+  id: eventId,
+  type: TimelineEventType.userMessage,
   created_at: '2026-11-12T10:00:00.000Z',
+  actor: { type: 'user', id: 'user-1', username: 'sid' },
+  data: { message, steer: { execution_id: 'exec-1' } },
+});
+const storedResponse = (eventId: string, message?: string) => ({
+  event: storedEvent(eventId, message),
 });
 
 describe('useSendSteer', () => {
@@ -88,12 +88,13 @@ describe('useSendSteer', () => {
     useConversationId.mockReturnValue(conversationId);
     useConversationStreamService.mockReturnValue({ recordSteer });
     useConversationStream.mockReturnValue({ sendMessage });
-    useCurrentUser.mockReturnValue({ currentUser: { uid: 'user-1', user: { username: 'sid' } } });
     useToasts.mockReturnValue({ addErrorToast });
   });
 
   it('stores the message and shows it waiting in the live stream', async () => {
-    steer.mockImplementation(({ eventId }) => Promise.resolve(storedResponse(eventId)));
+    steer.mockImplementation(({ eventId, message }) =>
+      Promise.resolve(storedResponse(eventId, message))
+    );
     const { result } = renderHook(() => useSendSteer());
 
     let sent: boolean | undefined;
@@ -107,13 +108,11 @@ describe('useSendSteer', () => {
       message: 'use a table',
       eventId: expect.any(String),
     });
-    expect(recordSteer).toHaveBeenCalledWith(conversationId, {
-      id: steerIdOfCall(0),
-      type: TimelineEventType.userMessage,
-      created_at: '2026-11-12T10:00:00.000Z',
-      actor: { type: 'user', id: 'user-1', username: 'sid' },
-      data: { message: 'use a table', steer: { execution_id: 'exec-1' } },
-    });
+    // The event goes into the live stream as the server returned it.
+    expect(recordSteer).toHaveBeenCalledWith(
+      conversationId,
+      storedEvent(steerIdOfCall(0), 'use a table')
+    );
     expect(sendMessage).not.toHaveBeenCalled();
     expect(addErrorToast).not.toHaveBeenCalled();
   });
@@ -132,7 +131,7 @@ describe('useSendSteer', () => {
   });
 
   it('starts a run through the ordinary send when no run holds the conversation', async () => {
-    steer.mockRejectedValue(steerRefusal({ error: 'no_active_execution', already_stored: false }));
+    steer.mockRejectedValue(steerRefusal(AgentBuilderErrorCode.noActiveExecution));
     const { result } = renderHook(() => useSendSteer());
 
     let sent: boolean | undefined;
@@ -150,7 +149,9 @@ describe('useSendSteer', () => {
   });
 
   it('sends nothing more when an earlier request already stored the message', async () => {
-    steer.mockRejectedValue(steerRefusal({ error: 'no_active_execution', already_stored: true }));
+    steer.mockImplementation(({ eventId }) =>
+      Promise.resolve({ ...storedResponse(eventId), already_stored: true })
+    );
     const { result } = renderHook(() => useSendSteer());
 
     let sent: boolean | undefined;
@@ -159,16 +160,17 @@ describe('useSendSteer', () => {
     });
 
     expect(sent).toBe(true);
+    expect(recordSteer).toHaveBeenCalledTimes(1);
     expect(sendMessage).not.toHaveBeenCalled();
     expect(addErrorToast).not.toHaveBeenCalled();
   });
 
   it.each([
-    ['awaiting_prompt', /waiting for your answer/],
-    ['not_steerable', /public conversation/],
-    ['too_many_pending', /unread messages/],
-  ] as const)('keeps the text and explains a %s refusal', async (error, title) => {
-    steer.mockRejectedValue(steerRefusal({ error }));
+    [AgentBuilderErrorCode.conversationAwaitingPrompt, /waiting for your answer/],
+    [AgentBuilderErrorCode.conversationNotSteerable, /public conversation/],
+    [AgentBuilderErrorCode.tooManyPendingSteers, /unread messages/],
+  ] as const)('keeps the text and explains a %s refusal', async (code, title) => {
+    steer.mockRejectedValue(steerRefusal(code));
     const { result } = renderHook(() => useSendSteer());
 
     let sent: boolean | undefined;
@@ -225,8 +227,8 @@ describe('useSendSteer', () => {
 
     it('treats the message as stored when the retry finds it there', async () => {
       steer.mockRejectedValueOnce(networkError());
-      steer.mockRejectedValueOnce(
-        steerRefusal({ error: 'no_active_execution', already_stored: true })
+      steer.mockImplementationOnce(({ eventId }) =>
+        Promise.resolve({ ...storedResponse(eventId), already_stored: true })
       );
       const { result } = renderHook(() => useSendSteer());
 
@@ -260,7 +262,7 @@ describe('useSendSteer', () => {
 
     it('forgets the id once a request was answered', async () => {
       steer.mockRejectedValueOnce(networkError());
-      steer.mockRejectedValueOnce(steerRefusal({ error: 'too_many_pending' }, 429));
+      steer.mockRejectedValueOnce(steerRefusal(AgentBuilderErrorCode.tooManyPendingSteers, 429));
       steer.mockImplementationOnce(({ eventId }) => Promise.resolve(storedResponse(eventId)));
       const { result } = renderHook(() => useSendSteer());
 
@@ -294,9 +296,7 @@ describe('useSendSteer', () => {
 
     it('retries through the steer path once the run has ended and starts the next run when nothing was stored', async () => {
       steer.mockRejectedValueOnce(networkError());
-      steer.mockRejectedValueOnce(
-        steerRefusal({ error: 'no_active_execution', already_stored: false })
-      );
+      steer.mockRejectedValueOnce(steerRefusal(AgentBuilderErrorCode.noActiveExecution));
       const { result } = renderHook(() => useSendSteer());
 
       await act(async () => {
@@ -318,9 +318,7 @@ describe('useSendSteer', () => {
 
   describe('when the ordinary send is refused because a run took the conversation', () => {
     const fallBackToConverse = async () => {
-      steer.mockRejectedValueOnce(
-        steerRefusal({ error: 'no_active_execution', already_stored: false })
-      );
+      steer.mockRejectedValueOnce(steerRefusal(AgentBuilderErrorCode.noActiveExecution));
       const onUnsent = jest.fn();
       const { result } = renderHook(() => useSendSteer());
       await act(async () => {
@@ -349,7 +347,7 @@ describe('useSendSteer', () => {
 
     it('gives the text back with the reason when the second steer is refused too', async () => {
       const { onRejected, onUnsent } = await fallBackToConverse();
-      steer.mockRejectedValueOnce(steerRefusal({ error: 'too_many_pending' }, 429));
+      steer.mockRejectedValueOnce(steerRefusal(AgentBuilderErrorCode.tooManyPendingSteers, 429));
 
       act(() => {
         onRejected(busyRejection());
@@ -366,9 +364,7 @@ describe('useSendSteer', () => {
 
     it('gives the text back when the new run is gone again rather than racing a third time', async () => {
       const { onRejected, onUnsent } = await fallBackToConverse();
-      steer.mockRejectedValueOnce(
-        steerRefusal({ error: 'no_active_execution', already_stored: false })
-      );
+      steer.mockRejectedValueOnce(steerRefusal(AgentBuilderErrorCode.noActiveExecution));
 
       act(() => {
         onRejected(busyRejection());
@@ -445,7 +441,7 @@ describe('useSendSteer', () => {
     });
 
     it('gives the text back with the reason when the run refuses the steer', async () => {
-      steer.mockRejectedValueOnce(steerRefusal({ error: 'awaiting_prompt' }));
+      steer.mockRejectedValueOnce(steerRefusal(AgentBuilderErrorCode.conversationAwaitingPrompt));
       const { onRejected, onUnsent } = steerIfBusyHandler();
 
       act(() => {

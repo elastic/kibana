@@ -131,10 +131,11 @@ export {
   isInterimAnswerStep,
 } from './conversation';
 export {
-  settledMessageIds,
+  STEERS_PER_RUN_MAX,
+  analyzeDeliveries,
   pendingSteers,
   pendingSteersFor,
-  unfinishedReadCount,
+  type SteerDeliveries,
 } from './steering';
 export {
   ChatEventType,

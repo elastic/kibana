@@ -10,7 +10,11 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { BackgroundAgentCompleteStep, ChatAgentEvent } from '@kbn/agent-builder-common/chat';
+import type {
+  BackgroundAgentCompleteStep,
+  ChatAgentEvent,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common/chat';
 import {
   ChatEventType,
   createMessageDeliveredEvent,
@@ -115,6 +119,21 @@ const stepUpdatesToEvents = (
 };
 
 const stripStepType = ({ type, ...execution }: BackgroundAgentCompleteStep) => execution;
+
+/** The event a step a check node appended is streamed as: a completion, an interim answer, a pickup. */
+const notificationEvent = (step: ConversationRoundStep): ChatAgentEvent | undefined => {
+  if (isBackgroundAgentCompleteStep(step)) {
+    return createBackgroundAgentCompleteEvent(stripStepType(step));
+  }
+  if (isInterimAnswerStep(step)) {
+    return createInterimAnswerEvent({ message: step.message });
+  }
+  if (isDeliveredMessageStep(step)) {
+    const { type, ...data } = step;
+    return createMessageDeliveredEvent(data);
+  }
+  return undefined;
+};
 
 const NODE_NAMES: ReadonlySet<string> = new Set(Object.values(steps));
 
@@ -312,44 +331,18 @@ export const convertGraphEvents = ({
           return completed.length > 0 ? of(...completed) : EMPTY;
         }
 
-        // emit background execution complete events
-        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.checkBackgroundWork)) {
-          const output = event.data.output as { steps?: RunStepUpdate[] };
-          const bgEvents: ChatAgentEvent[] = [];
-
-          for (const update of output.steps ?? []) {
-            if (update.type === 'append' && isBackgroundAgentCompleteStep(update.step)) {
-              bgEvents.push(createBackgroundAgentCompleteEvent(stripStepType(update.step)));
-            } else if (update.type === 'append' && isDeliveredMessageStep(update.step)) {
-              const { type, ...data } = update.step;
-              bgEvents.push(createMessageDeliveredEvent(data));
-            }
-          }
-
-          if (bgEvents.length > 0) {
-            return of(...bgEvents);
-          }
-        }
-
-        // A message read after the answer: the answer becomes an interim step, then the pickup.
+        // The check nodes append notifications in order: background completions and pickups, or
+        // the interim answer then the pickups read after it.
         if (
           isRootGraphNodeEnd(event, graphName) &&
-          matchName(event, steps.checkIncomingAfterAnswer)
+          (matchName(event, steps.checkBackgroundWork) ||
+            matchName(event, steps.checkIncomingAfterAnswer))
         ) {
           const output = event.data.output as { steps?: RunStepUpdate[] };
-          const continued: ChatAgentEvent[] = [];
-          for (const update of output.steps ?? []) {
-            if (update.type !== 'append') {
-              continue;
-            }
-            if (isInterimAnswerStep(update.step)) {
-              continued.push(createInterimAnswerEvent({ message: update.step.message }));
-            } else if (isDeliveredMessageStep(update.step)) {
-              const { type, ...data } = update.step;
-              continued.push(createMessageDeliveredEvent(data));
-            }
-          }
-          return continued.length > 0 ? of(...continued) : EMPTY;
+          const notifications = (output.steps ?? []).flatMap((update) =>
+            update.type === 'append' ? notificationEvent(update.step) ?? [] : []
+          );
+          return notifications.length > 0 ? of(...notifications) : EMPTY;
         }
 
         return EMPTY;

@@ -6459,17 +6459,17 @@ describe('ConversationClient', () => {
         const result = await appendSteer();
 
         expect(result).toEqual({
-          eventId: steerId,
-          executionId: 'e1',
-          createdAt: expect.any(String),
+          event: {
+            id: steerId,
+            type: TimelineEventType.userMessage,
+            created_at: expect.any(String),
+            actor,
+            data: { message: 'use a table', steer: { execution_id: 'e1' } },
+          },
           alreadyStored: false,
         });
         const events = indexedSource().events as ConversationEvent[];
-        expect(events[events.length - 1]).toMatchObject({
-          id: steerId,
-          type: TimelineEventType.userMessage,
-          data: { message: 'use a table', steer: { execution_id: 'e1' } },
-        });
+        expect(events[events.length - 1]).toEqual(result.event);
       });
 
       it('answers a retry with the run the message was stamped with, also once that run has ended', async () => {
@@ -6479,12 +6479,7 @@ describe('ConversationClient', () => {
 
         const result = await appendSteer();
 
-        expect(result).toEqual({
-          eventId: steerId,
-          executionId: 'e1',
-          createdAt: '2026-10-26T10:00:05.000Z',
-          alreadyStored: true,
-        });
+        expect(result).toEqual({ event: storedSteer, alreadyStored: true });
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
 
@@ -6503,23 +6498,17 @@ describe('ConversationClient', () => {
 
         const result = await appendSteer();
 
-        expect(result).toEqual({
-          eventId: steerId,
-          executionId: 'e1',
-          createdAt: '2026-10-26T10:00:05.000Z',
-          alreadyStored: true,
-        });
+        expect(result).toEqual({ event: storedSteer, alreadyStored: true });
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
 
-      it('refuses without a live holder and says nothing is stored', async () => {
+      it('refuses without a live holder', async () => {
         mockGetDocumentResponse(documentWithHolder('e1'));
         staleHolder();
 
         const error = await appendSteer().catch((caught: unknown) => caught);
 
         expect(isNoActiveExecutionError(error)).toBe(true);
-        expect((error as { meta: { alreadyStored: boolean } }).meta.alreadyStored).toBe(false);
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
     });

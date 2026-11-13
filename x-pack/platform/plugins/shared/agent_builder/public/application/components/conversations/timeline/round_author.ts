@@ -1,0 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ConversationRoundAuthor, EventActor } from '@kbn/agent-builder-common';
+
+/** The author a message bubble shows, from the actor an event or a step records. */
+export const eventActorToRoundAuthor = ({
+  id,
+  username,
+  full_name: fullName,
+}: EventActor): ConversationRoundAuthor => ({
+  id,
+  username,
+  full_name: fullName,
+});

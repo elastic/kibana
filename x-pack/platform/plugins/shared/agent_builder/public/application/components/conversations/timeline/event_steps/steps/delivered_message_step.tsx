@@ -6,21 +6,13 @@
  */
 
 import React from 'react';
-import type {
-  ConversationRoundAuthor,
-  DeliveredMessageStep as DeliveredMessageStepData,
-} from '@kbn/agent-builder-common';
+import type { DeliveredMessageStep as DeliveredMessageStepData } from '@kbn/agent-builder-common';
 import { UserMessage } from '../../user_message/user_message';
+import { eventActorToRoundAuthor } from '../../round_author';
 
 interface DeliveredMessageStepProps {
   step: DeliveredMessageStepData;
 }
-
-const toRoundAuthor = (actor: DeliveredMessageStepData['author']): ConversationRoundAuthor => ({
-  id: actor.id,
-  username: actor.username,
-  full_name: actor.full_name,
-});
 
 /**
  * A message sent while the agent ran, shown where the run picked it up: the same bubble as any
@@ -31,7 +23,7 @@ export const DeliveredMessageStep: React.FC<DeliveredMessageStepProps> = ({ step
     <UserMessage
       input={step.message}
       startedAt={step.delivered_at}
-      author={toRoundAuthor(step.author)}
+      author={eventActorToRoundAuthor(step.author)}
       origin={step.author.origin}
       isPendingCurrentRound={false}
     />

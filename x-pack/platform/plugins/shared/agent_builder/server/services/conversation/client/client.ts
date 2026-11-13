@@ -57,6 +57,7 @@ import {
   isConversationNotFoundError,
   isExecutionTerminalEvent,
   pendingSteersFor,
+  STEERS_PER_RUN_MAX,
   TimelineEventType,
   type UserMessageEvent,
 } from '@kbn/agent-builder-common';
@@ -110,7 +111,6 @@ import {
   toActiveExecution,
 } from './active_execution';
 import { getPendingResumeRound } from '../../execution/utils/pending_round';
-import { STEERS_PER_RUN_MAX } from '../../execution/run_agent/constants';
 import type { AgentExecutionClient } from '../../execution/persistence';
 import {
   MAX_CONVERSATIONS_PER_PAGE,
@@ -882,9 +882,7 @@ class ConversationClientImpl implements ConversationClient {
     { id: conversationId, message, eventId, actor }: AppendSteerRequest,
     { source }: ConversationWriteOptions
   ): Promise<AppendSteerResult> {
-    const createdAt = new Date().toISOString();
     let written: UserMessageEvent | undefined;
-    let holderId: string | undefined;
 
     try {
       await this.writeConversation({
@@ -894,37 +892,29 @@ class ConversationClientImpl implements ConversationClient {
         peekHeld: true,
         fields: (current) => {
           if (isPublicConversation(current.access_control)) {
-            throw new SteerSignal('not_steerable');
+            throw new SteerSignal({ kind: 'not_steerable' });
           }
           // A retry is answered first, whatever the run has done since: paused on a prompt or ended.
           const currentEvents = current.events ?? [];
           const stored = currentEvents.find((event) => event.id === eventId);
           if (stored) {
-            const stampedId =
-              stored.type === TimelineEventType.userMessage
-                ? (stored as UserMessageEvent).data.steer?.execution_id
-                : undefined;
-            throw new SteerSignal('already_stored', {
-              createdAt: stored.created_at,
-              executionId: stampedId,
-            });
+            throw new SteerSignal({ kind: 'already_stored', event: stored as UserMessageEvent });
           }
           // Checked before the holder: the lock is free while a round waits on a prompt.
           if (getPendingResumeRound(current) !== undefined) {
-            throw new SteerSignal('awaiting_prompt');
+            throw new SteerSignal({ kind: 'awaiting_prompt' });
           }
           const held = current.active_execution?.execution_id;
           if (!held || isExecutionStale(current.execution)) {
-            throw new SteerSignal('no_active_execution', { alreadyStored: false });
+            throw new SteerSignal({ kind: 'no_active_execution' });
           }
           if (pendingSteersFor(currentEvents, held).length >= STEERS_PER_RUN_MAX) {
-            throw new SteerSignal('too_many_pending');
+            throw new SteerSignal({ kind: 'too_many_pending' });
           }
-          holderId = held;
           written = {
             id: eventId,
             type: TimelineEventType.userMessage,
-            created_at: createdAt,
+            created_at: new Date().toISOString(),
             actor,
             data: { message, steer: { execution_id: held } },
           };
@@ -943,34 +933,27 @@ class ConversationClientImpl implements ConversationClient {
       if (!(error instanceof SteerSignal)) {
         throw error;
       }
-      switch (error.kind) {
+      const { outcome } = error;
+      switch (outcome.kind) {
         case 'already_stored':
-          return {
-            eventId,
-            executionId: error.meta.executionId ?? '',
-            createdAt: error.meta.createdAt ?? createdAt,
-            alreadyStored: true,
-          };
+          return { event: outcome.event, alreadyStored: true };
         case 'not_steerable':
           throw createConversationNotSteerableError({ conversationId });
         case 'awaiting_prompt':
           throw createConversationAwaitingPromptError({ conversationId });
         case 'no_active_execution':
-          throw createNoActiveExecutionError({
-            conversationId,
-            alreadyStored: error.meta.alreadyStored ?? false,
-          });
+          throw createNoActiveExecutionError({ conversationId });
         case 'too_many_pending':
           throw createTooManyPendingSteersError({ conversationId });
       }
     }
 
-    if (!written || !holderId) {
+    if (!written) {
       throw createInternalError(
         `Steer ${eventId} on conversation ${conversationId} was not written`
       );
     }
-    return { eventId, executionId: holderId, createdAt, alreadyStored: false };
+    return { event: written, alreadyStored: false };
   }
 
   async updateRoundFeedback(

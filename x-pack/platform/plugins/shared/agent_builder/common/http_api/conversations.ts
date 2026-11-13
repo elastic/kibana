@@ -6,6 +6,7 @@
  */
 
 import type {
+  UserMessageEvent,
   ConversationAccessControl,
   ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
@@ -64,25 +65,13 @@ export interface SteerConversationRequestBody {
   event_id: string;
 }
 
+/**
+ * The stored message, stamped with the run that will read it. A refusal is an error whose code
+ * says why: no active execution, awaiting a prompt, not steerable, too many pending.
+ */
 export interface SteerConversationResponse {
-  event_id: string;
-  /** The execution the message was stamped with. */
-  execution_id: string;
-  created_at: string;
+  event: UserMessageEvent;
   /** Present and true when an earlier request already stored this `event_id`. */
-  already_stored?: boolean;
-}
-
-export type SteerConversationErrorCode =
-  | 'not_steerable'
-  | 'awaiting_prompt'
-  | 'no_active_execution'
-  | 'too_many_pending';
-
-/** The body of a `409` / `429` refusal from the `_steer` route. */
-export interface SteerConversationErrorBody {
-  error: SteerConversationErrorCode;
-  /** On `no_active_execution`: whether the steer was stored by an earlier request. */
   already_stored?: boolean;
 }
 

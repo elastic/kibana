@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { DeliveredMessageStepData } from '@kbn/agent-builder-common';
-import { pendingSteers, unfinishedReadCount } from '@kbn/agent-builder-common';
+import { analyzeDeliveries, pendingSteers } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '@kbn/agent-builder-server/agents';
 import { STEERS_PER_CHECK_MAX } from './constants';
 
@@ -75,7 +75,8 @@ export const createIncomingMessages = ({
       }
 
       const events = conversation.events ?? [];
-      const candidates = pendingSteers(events)
+      const deliveries = analyzeDeliveries(events);
+      const candidates = pendingSteers(events, deliveries)
         .filter((event) => !deliveredThisExecution.has(event.id))
         .slice(0, STEERS_PER_CHECK_MAX);
       if (candidates.length === 0) {
@@ -94,7 +95,7 @@ export const createIncomingMessages = ({
           cycle,
           ...(lastToolCallGroupId ? { tool_call_group_id: lastToolCallGroupId } : {}),
           ...(afterAnswer ? { after_answer: true } : {}),
-          redelivered: unfinishedReadCount(events, event.id),
+          redelivered: deliveries.unfinishedReads.get(event.id) ?? 0,
         };
       });
       logger.debug(

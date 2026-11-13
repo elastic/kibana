@@ -7,60 +7,19 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
-import {
-  AgentBuilderErrorCode,
-  EventActorType,
-  TimelineEventType,
-} from '@kbn/agent-builder-common';
-import type { UserMessageEvent } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
-import type {
-  SteerConversationErrorBody,
-  SteerConversationResponse,
-} from '../../../common/http_api/conversations';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useConversationStreamService } from '../context/streaming/streaming_context';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useConversationStream } from './use_conversation_stream';
-import { useCurrentUser } from './use_current_user';
 import { useToasts } from './use_toasts';
+import { isConversationBusyRejection, requestSteer } from './steer_outcome';
+import type { SteerOutcome } from './steer_outcome';
 
 const labels = {
-  awaitingPrompt: i18n.translate('xpack.agentBuilder.conversationInput.steer.awaitingPrompt', {
-    defaultMessage: 'The agent is waiting for your answer to its question. Answer it first.',
-  }),
-  notSteerable: i18n.translate('xpack.agentBuilder.conversationInput.steer.notSteerable', {
-    defaultMessage: 'Messages cannot be sent to a running agent in a public conversation.',
-  }),
-  tooManyPending: i18n.translate('xpack.agentBuilder.conversationInput.steer.tooManyPending', {
-    defaultMessage: 'The agent already has several unread messages. Wait for it to catch up.',
-  }),
   failed: i18n.translate('xpack.agentBuilder.conversationInput.steer.failed', {
     defaultMessage: 'The message could not be sent to the running agent.',
   }),
-};
-
-/** The typed refusal the `_steer` route puts in the error body's `attributes`. */
-const steerErrorBody = (error: unknown): SteerConversationErrorBody | undefined => {
-  const body = (error as IHttpFetchError<{ attributes?: SteerConversationErrorBody }>)?.body;
-  const attributes = body && typeof body === 'object' ? body.attributes : undefined;
-  return attributes && typeof attributes === 'object' && 'error' in attributes
-    ? attributes
-    : undefined;
-};
-
-/** A 4xx without a steer code (not found, forbidden, invalid): refused before anything was written. */
-const isAnsweredRefusal = (error: unknown): boolean => {
-  const status = (error as IHttpFetchError)?.response?.status;
-  return typeof status === 'number' && status >= 400 && status < 500;
-};
-
-/** Whether the ordinary send was refused because a run holds the conversation. */
-const isConversationBusyRejection = (error: unknown): boolean => {
-  const body = (error as IHttpFetchError<{ attributes?: { code?: string } }>)?.body;
-  return body?.attributes?.code === AgentBuilderErrorCode.conversationBusy;
 };
 
 /** A steer request that got no answer; its id is reused so the retry stores nothing twice. */
@@ -69,16 +28,6 @@ interface UnansweredSteer {
   message: string;
   eventId: string;
 }
-
-type SteerOutcome =
-  /** Stored by this request or an earlier one. */
-  | { kind: 'stored' }
-  /** No run holds the conversation and nothing is stored: the message starts a run instead. */
-  | { kind: 'converse' }
-  /** Refused by the server, with the reason to show. */
-  | { kind: 'refused'; title: string }
-  /** No answer: the request may or may not have landed. */
-  | { kind: 'unanswered' };
 
 export interface SendSteerOptions {
   /** Called with the message when a failure settles after the submit already resolved as sent. */
@@ -96,11 +45,12 @@ export const useSendSteer = () => {
   const { conversationsService } = useAgentBuilderServices();
   const conversationStreamService = useConversationStreamService();
   const { sendMessage } = useConversationStream();
-  const { currentUser } = useCurrentUser();
   const { addErrorToast } = useToasts();
   const [isSending, setIsSending] = useState(false);
   const unansweredRef = useRef<UnansweredSteer | undefined>(undefined);
 
+  // The stored event goes into the live stream as the server holds it, so the message shows as
+  // waiting before the run picks it up and matches the saved form once it is reloaded.
   const attemptSteer = useCallback(
     async ({
       targetConversationId,
@@ -111,47 +61,17 @@ export const useSendSteer = () => {
       message: string;
       eventId: string;
     }): Promise<SteerOutcome> => {
-      let result: SteerConversationResponse;
-      try {
-        result = await conversationsService.steer({
-          conversationId: targetConversationId,
-          message,
-          eventId,
-        });
-      } catch (error) {
-        const body = steerErrorBody(error);
-        if (body?.error === 'no_active_execution') {
-          return body.already_stored ? { kind: 'stored' } : { kind: 'converse' };
-        }
-        if (body?.error === 'awaiting_prompt') {
-          return { kind: 'refused', title: labels.awaitingPrompt };
-        }
-        if (body?.error === 'not_steerable') {
-          return { kind: 'refused', title: labels.notSteerable };
-        }
-        if (body?.error === 'too_many_pending') {
-          return { kind: 'refused', title: labels.tooManyPending };
-        }
-        if (isAnsweredRefusal(error)) {
-          return { kind: 'refused', title: formatAgentBuilderErrorMessage(error) };
-        }
-        return { kind: 'unanswered' };
+      const outcome = await requestSteer(conversationsService, {
+        conversationId: targetConversationId,
+        message,
+        eventId,
+      });
+      if (outcome.kind === 'stored') {
+        conversationStreamService.recordSteer(targetConversationId, outcome.event);
       }
-      const stored: UserMessageEvent = {
-        id: result.event_id,
-        type: TimelineEventType.userMessage,
-        created_at: result.created_at,
-        actor: {
-          type: EventActorType.user,
-          id: currentUser?.uid ?? '',
-          ...(currentUser?.user.username ? { username: currentUser.user.username } : {}),
-        },
-        data: { message, steer: { execution_id: result.execution_id } },
-      };
-      conversationStreamService.recordSteer(targetConversationId, stored);
-      return { kind: 'stored' };
+      return outcome;
     },
-    [conversationsService, conversationStreamService, currentUser]
+    [conversationsService, conversationStreamService]
   );
 
   /**

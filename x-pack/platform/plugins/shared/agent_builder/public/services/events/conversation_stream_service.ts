@@ -108,9 +108,7 @@ export class ConversationStreamService {
    * immediately reflects the human's answer before the server persists it.
    */
   recordPromptResponse(conversationId: string, event: PromptResponseEvent): void {
-    const stream = this.ensure(conversationId);
-    const current = stream.state$.getValue();
-    stream.state$.next({ ...current, events: upsertEvent(current.events, event) });
+    this.upsertLiveEvent(conversationId, event);
   }
 
   /**
@@ -118,6 +116,10 @@ export class ConversationStreamService {
    * server stored it, so the timeline shows it waiting before the run picks it up.
    */
   recordSteer(conversationId: string, event: UserMessageEvent): void {
+    this.upsertLiveEvent(conversationId, event);
+  }
+
+  private upsertLiveEvent(conversationId: string, event: PromptResponseEvent | UserMessageEvent) {
     const stream = this.ensure(conversationId);
     const current = stream.state$.getValue();
     stream.state$.next({ ...current, events: upsertEvent(current.events, event) });
