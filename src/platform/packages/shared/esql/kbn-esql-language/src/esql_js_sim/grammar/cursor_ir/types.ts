@@ -93,6 +93,52 @@ export interface Follower {
   startsCommand: boolean;
 }
 
+/** A place above a written argument: the call site, and which of its repetitions this one is. */
+export interface WrittenAncestor {
+  id: CallSiteId;
+  /** The position among the siblings with the same call site, as the items of a list. */
+  index: number;
+  start: number;
+  end: number;
+  /** Set by `locate`: the cursor is inside it, so what is typed next belongs to it. */
+  open?: boolean;
+}
+
+/** An argument or a token that is written in a command. */
+export interface WrittenArgument {
+  /** The call site that takes it, as in `ExpectedArgument.id` and `Follower.id`. */
+  id: CallSiteId;
+  kind: 'rule' | 'token';
+  /** For a rule: the rule, e.g. `qualifiedName`. */
+  rule?: string;
+  /** For a token: its grammar name and its class. */
+  token?: string;
+  class?: TokenClass;
+  text: string;
+  start: number;
+  end: number;
+  /** The position among the siblings with the same call site, as the items of a list. */
+  index: number;
+  /** The call sites from the command down to it, outermost first. */
+  ancestors: WrittenAncestor[];
+  /** The parser read it without an error. */
+  complete: boolean;
+  /** Set by `locate`: it is the argument the cursor is in, written only in part. */
+  open?: boolean;
+}
+
+/** A command of a query with what is written in it. */
+export interface WrittenCommand {
+  /** The rule of the command, e.g. `whereCommand`. */
+  rule: string;
+  start: number;
+  end: number;
+  /** The rules of the commands around it, outermost first. */
+  enclosingCommands: string[];
+  /** In the order written. The arguments of a nested command belong to that command. */
+  arguments: WrittenArgument[];
+}
+
 /** The last token before the cursor, or before the word being typed. */
 export interface PreviousToken {
   token: string;
@@ -102,12 +148,30 @@ export interface PreviousToken {
   glued: boolean;
 }
 
+/** What the text of a word looks like, whatever the grammar expects there. */
+export type WordKind = 'name' | 'quoted_name' | 'pattern' | 'number' | 'string';
+
 /** The word being typed. The position and the expectations describe the place before it. */
 export interface TypedWord {
   text: string;
   start: number;
+  kind: WordKind;
+  /** The lexer reads the word as one whole token, as a closed string or a name. */
+  complete: boolean;
   /** The expected token the word spells in full, e.g. `BY` for `by`. */
   keyword?: string;
+  /**
+   * The whole argument typed so far when the word continues one, e.g. `a.b` for the word `b`
+   * or `cluster:index` for `index`.
+   */
+  argument?: { text: string; start: number };
+}
+
+/** The first token after the cursor, or after the word being typed. */
+export interface NextToken {
+  token: string;
+  /** Read from the token's text alone, as for the previous token. */
+  class: TokenClass;
 }
 
 /** What the grammar says about the cursor, in terms that hold for every command. */
@@ -124,5 +188,13 @@ export interface CursorIR {
   followers: Follower[];
   /** The command is complete at the cursor. */
   canEnd: boolean;
+  /** The only token that can come next, when nothing else can. */
+  onlyFollower?: string;
   word?: TypedWord;
+  next?: NextToken;
+  /**
+   * What is written in the innermost command before the cursor or the word being typed. The
+   * argument the cursor is in, if it has text before the cursor, comes last and is `open`.
+   */
+  written: WrittenArgument[];
 }
