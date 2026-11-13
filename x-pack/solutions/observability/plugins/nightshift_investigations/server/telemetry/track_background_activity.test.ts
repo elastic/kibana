@@ -62,15 +62,31 @@ describe('trackBackgroundActivity', () => {
     });
   });
 
-  it('reports a failure and rethrows it', async () => {
+  it('reports a failure without usage and rethrows it', async () => {
     await expect(
       trackBackgroundActivity(ids, async () => {
         throw new Error('model unavailable');
       })
     ).rejects.toThrow('model unavailable');
 
+    // No call returned, so the usage is unknown rather than zero.
+    expect(telemetry.reportBackgroundActivity).toHaveBeenCalledWith({
+      activity: 'decision_tree_reinforcement',
+      outcome: 'failure',
+      workflow_execution_id: 'optimize-exec-1',
+      conversation_id: 'inv-1',
+      duration_ms: expect.any(Number),
+    });
+  });
+
+  it('reports a failure for a returned result the job marks as failed', async () => {
+    await trackBackgroundActivity(
+      { ...ids, isFailure: (result) => result === undefined },
+      async () => undefined
+    );
+
     expect(telemetry.reportBackgroundActivity).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: 'failure', llm_calls: 0 })
+      expect.objectContaining({ outcome: 'failure' })
     );
   });
 

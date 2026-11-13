@@ -362,6 +362,9 @@ describe('memoryOptimizeStepDefinition', () => {
       workflow_execution_id: 'workflow-exec-1',
       outcome: 'failure',
     });
+    expect(telemetry.reportBackgroundActivity).toHaveBeenCalledWith(
+      expect.objectContaining({ activity: 'memory_optimize', outcome: 'failure' })
+    );
   });
 
   it('reports no telemetry for a round it skipped because the conversation is unreadable', async () => {
@@ -433,6 +436,10 @@ describe('memoryOptimizeStepDefinition', () => {
       outcome: 'failure',
       write_failure_count: 2,
     });
+    // Both events agree on the outcome of the same execution.
+    expect(telemetry.reportBackgroundActivity).toHaveBeenCalledWith(
+      expect.objectContaining({ activity: 'memory_optimize', outcome: 'failure' })
+    );
   });
 
   it('propagates a scoped client failure', async () => {

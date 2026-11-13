@@ -45,9 +45,11 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       : undefined;
     // Failed runs report from `nightshift.handleInvestigationFailure`, which the workflow runs
     // instead of this route, so only a completed run reports here. Telemetry does not depend on
-    // workflow triggers or a recorded subject, so it reports before either check.
+    // workflow triggers or a recorded subject, so it starts before either check. It is not
+    // awaited: its reads must not delay the completed trigger or the notifications after it, and
+    // it never throws.
     if (executionId && params.body.status === 'completed') {
-      await client.reportRunEnded(params.path.id, executionId, 'completed');
+      void client.reportRunEnded(params.path.id, executionId, 'completed');
     }
 
     const emitter = getTriggerEmitter(request);

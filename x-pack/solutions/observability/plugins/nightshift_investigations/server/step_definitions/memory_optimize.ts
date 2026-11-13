@@ -146,13 +146,19 @@ export const memoryOptimizeStepDefinition = ({
             },
           },
           async (span) => {
-            const res = await trackBackgroundActivity(
+            const res = await trackBackgroundActivity<
+              Awaited<ReturnType<typeof runMemoryOptimize>>
+            >(
               {
                 telemetry,
                 activity: 'memory_optimize',
                 workflowExecutionId,
                 conversationId: context.input.conversation_id,
                 roundId: context.input.round_id,
+                // The same results `nightshift-semantic-memory-optimized` reports as a failure.
+                isFailure: (result) =>
+                  result === undefined ||
+                  (!isMemoryOptimizeSkipped(result) && result.writeFailureCount > 0),
               },
               (modelUsage) =>
                 withTimeout(

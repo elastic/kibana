@@ -14,12 +14,13 @@ export const NIGHTSHIFT_BACKGROUND_ACTIVITY_EVENT = 'nightshift-background-activ
 export type BackgroundActivityType =
   | 'memory_optimize'
   | 'wiki_optimize'
-  | 'decision_tree_reinforcement';
+  | 'decision_tree_reinforcement'
+  | 'findings_recorder';
 
 export interface BackgroundActivityEvent extends ModelUsageFields {
   activity: BackgroundActivityType;
   outcome: 'success' | 'failure';
-  workflow_execution_id: string;
+  workflow_execution_id?: string;
   conversation_id?: string;
   round_id?: string;
   duration_ms: number;
@@ -30,22 +31,28 @@ const backgroundActivitySchema: RootSchema<BackgroundActivityEvent> = {
     type: 'keyword',
     _meta: {
       description:
-        'The background job: memory_optimize, wiki_optimize or decision_tree_reinforcement.',
+        'The background job: memory_optimize, wiki_optimize, decision_tree_reinforcement or findings_recorder.',
     },
   },
   outcome: {
     type: 'keyword',
-    _meta: { description: 'Whether the job finished or threw.' },
+    _meta: {
+      description: 'failure when the job threw or returned a failed result, success otherwise.',
+    },
   },
   workflow_execution_id: {
     type: 'keyword',
-    _meta: { description: 'Execution ID of the background workflow the job ran in.' },
+    _meta: {
+      description:
+        'Execution ID of the background workflow the job ran in. Absent for findings_recorder, which runs inside the agent run.',
+      optional: true,
+    },
   },
   conversation_id: {
     type: 'keyword',
     _meta: {
       description:
-        'Conversation whose round the job learned from. For an investigation this is the investigation id.',
+        'Conversation whose round the job worked on. For an investigation this is the investigation id.',
       optional: true,
     },
   },
@@ -60,7 +67,10 @@ const backgroundActivitySchema: RootSchema<BackgroundActivityEvent> = {
   ...modelUsageSchema,
 };
 
-/** Sent once per background LLM job that runs on behalf of a conversation round. */
+/**
+ * Sent once per background LLM job that runs on behalf of a conversation round. The findings
+ * recorder sends one per pass: its calls are not part of the round's usage on the ended event.
+ */
 export const backgroundActivityEvent: EventTypeOpts<BackgroundActivityEvent> = {
   eventType: NIGHTSHIFT_BACKGROUND_ACTIVITY_EVENT,
   schema: backgroundActivitySchema,

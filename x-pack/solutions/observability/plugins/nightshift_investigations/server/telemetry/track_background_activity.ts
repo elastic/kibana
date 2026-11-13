@@ -20,12 +20,15 @@ export const trackBackgroundActivity = async <T>(
     workflowExecutionId,
     conversationId,
     roundId,
+    isFailure,
   }: {
     telemetry: NightshiftTelemetryClient | undefined;
     activity: BackgroundActivityType;
-    workflowExecutionId: string;
+    workflowExecutionId?: string;
     conversationId?: string;
     roundId?: string;
+    /** Marks a result the job returned, rather than threw, as a failure. */
+    isFailure?: (result: T) => boolean;
   },
   run: (usage: ModelUsageCollector) => Promise<T>
 ): Promise<T> => {
@@ -34,7 +37,7 @@ export const trackBackgroundActivity = async <T>(
   let outcome: 'success' | 'failure' = 'failure';
   try {
     const result = await run(usage);
-    outcome = 'success';
+    outcome = isFailure?.(result) ? 'failure' : 'success';
     return result;
   } finally {
     const summary = usage.summarize();
@@ -42,12 +45,14 @@ export const trackBackgroundActivity = async <T>(
       telemetry?.reportBackgroundActivity({
         activity,
         outcome,
-        workflow_execution_id: workflowExecutionId,
+        ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
         // Liquid renders an absent workflow input as '', which must not become a grouping key.
         ...(conversationId ? { conversation_id: conversationId } : {}),
         ...(roundId ? { round_id: roundId } : {}),
         duration_ms: Date.now() - startedAt,
-        ...summary,
+        // A job that failed before any call returned has unknown usage, which zeros would
+        // report as free.
+        ...(summary.llm_calls > 0 ? summary : {}),
       });
     }
   }

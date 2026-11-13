@@ -22,7 +22,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import { isConversationNotFoundError } from '@kbn/agent-builder-common';
+import { isConversationNotFoundError, isZeroModelUsage } from '@kbn/agent-builder-common';
 import type {
   Investigation as SharedInvestigation,
   InvestigationSubject as StoredInvestigationSubject,
@@ -1292,14 +1292,25 @@ export class NightshiftInvestigationsClient {
       );
       const context = isPlainObject(inputs?.context) ? inputs?.context : {};
       const entryPoint = asString(context?.entry_point);
+      const parentExecutionId = isPlainObject(execution.context)
+        ? asString(execution.context.parentWorkflowExecutionId)
+        : undefined;
+      // Only `start()` records the trigger type; a recovery round is always automatic.
+      const triggerType =
+        asString(context?.trigger_type) ??
+        (entryPoint === 'alert_recovery' ? 'automatic' : undefined);
+      // A Slack reply records only its entry point, and its subject is the thread.
+      const subjectType =
+        asString(context?.source) ?? (entryPoint === 'slack' ? 'slack_thread' : undefined);
       runStartedAt = Date.parse(execution.startedAt);
       Object.assign(event, {
+        ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
         ...(Number.isNaN(runStartedAt) ? {} : { duration_ms: Date.now() - runStartedAt }),
-        ...(asString(context?.trigger_type)
-          ? { trigger_type: asString(context?.trigger_type) }
-          : {}),
+        ...(triggerType ? { trigger_type: triggerType } : {}),
         ...(entryPoint ? { entry_point: entryPoint } : {}),
-        // Alert recovery rounds always continue an investigation but predate the flag.
+        ...(subjectType ? { subject_type: subjectType } : {}),
+        // Replaced below by what the conversation shows, when it can be read. Alert recovery
+        // rounds always continue an investigation but predate the flag.
         ...(typeof context?.is_follow_up === 'boolean'
           ? { is_follow_up: context.is_follow_up }
           : entryPoint === 'alert_recovery'
@@ -1325,12 +1336,18 @@ export class NightshiftInvestigationsClient {
           request: this.request,
         });
         const { rounds } = await conversations.get(investigationId);
+        // Runs that do not go through `start()` carry no follow-up flag, and every one of them
+        // leaves its rounds on the conversation.
+        event.is_follow_up = rounds.some(
+          ({ started_at: startedAt }) => Date.parse(startedAt) < startedAtMs
+        );
         // The run's agent round is the first one started after the run did. Taking the first
         // keeps a chat message sent right after the run out of its cost.
         const round = rounds.find(
           ({ started_at: startedAt }) => Date.parse(startedAt) >= startedAtMs
         );
-        if (round) {
+        // An interrupted round has unknown usage, which zeros would report as free.
+        if (round && !isZeroModelUsage(round.model_usage)) {
           const usage = new ModelUsageCollector();
           usage.addRound(round.model_usage);
           Object.assign(event, usage.summarize());

@@ -15,9 +15,11 @@ export type InvestigationRunOutcome = 'completed' | 'failed';
 export interface InvestigationEndedEvent extends ModelUsageFields {
   investigation_id: string;
   workflow_execution_id: string;
+  parent_workflow_execution_id?: string;
   outcome: InvestigationRunOutcome;
   trigger_type?: string;
   entry_point?: string;
+  subject_type?: string;
   is_follow_up?: boolean;
   automation_id?: string;
   duration_ms?: number;
@@ -32,7 +34,15 @@ const investigationEndedSchema: RootSchema<InvestigationEndedEvent> = {
     type: 'keyword',
     _meta: {
       description:
-        'Workflow Engine execution ID of this investigation run; the same id the started event carries.',
+        'Workflow Engine execution ID of the investigation workflow run. The started event carries the id of the run that started it; join on parent_workflow_execution_id.',
+    },
+  },
+  parent_workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        "Execution ID of the run that started this one: the space's entry point, whose id the started event carries as workflow_execution_id, or the Slack thread workflow for a Slack reply.",
+      optional: true,
     },
   },
   outcome: {
@@ -50,10 +60,14 @@ const investigationEndedSchema: RootSchema<InvestigationEndedEvent> = {
       optional: true,
     },
   },
+  subject_type: {
+    type: 'keyword',
+    _meta: { description: 'The subject type the run was started for.', optional: true },
+  },
   is_follow_up: {
     type: 'boolean',
     _meta: {
-      description: 'Whether the run added a round to an existing investigation.',
+      description: 'Whether the run added a round to an investigation that already had one.',
       optional: true,
     },
   },
@@ -69,8 +83,10 @@ const investigationEndedSchema: RootSchema<InvestigationEndedEvent> = {
 };
 
 /**
- * Sent once per investigation run when it completes or fails. Carries the token usage of the
- * run's agent rounds so the cost of a run is readable from this one event.
+ * Sent once per investigation run when it completes or fails, with the token usage of the run's
+ * agent round. A timed-out or cancelled run sends none, so a started event with no ended event
+ * whose `parent_workflow_execution_id` matches is such a run. The findings recorder's calls are
+ * reported per pass on `nightshift-background-activity`.
  */
 export const investigationEndedEvent: EventTypeOpts<InvestigationEndedEvent> = {
   eventType: NIGHTSHIFT_INVESTIGATION_ENDED_EVENT,
