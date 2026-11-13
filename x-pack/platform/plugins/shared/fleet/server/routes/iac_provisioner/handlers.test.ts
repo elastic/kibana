@@ -470,6 +470,11 @@ const mockedAppContext = jest.mocked(appContextService);
 const PAYLOAD = {
   role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc',
   stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
+  caller_identity: {
+    region: 'us-east-1',
+    headers: { Authorization: 'AWS4-HMAC-SHA256 ...', 'x-elastic-callback-id': 'cb-1' },
+    body: 'Action=GetCallerIdentity&Version=2011-06-15',
+  },
 };
 
 const ITEM: CloudConnectorCallback = {
@@ -851,6 +856,25 @@ describe('Provisioning callback handlers', () => {
       mockedService.receive.mockResolvedValue({ outcome: 'invalid', message: 'mismatch' });
       await receive(withToken);
       expect(response.badRequest).toHaveBeenCalledWith({ body: { message: 'mismatch' } });
+    });
+
+    it('answers 401 without the reason when the proof of the sending account does not verify, and logs the reason', async () => {
+      const logger = loggingSystemMock.createLogger();
+      mockedAppContext.getLogger.mockReturnValue(logger);
+      mockedService.receive.mockResolvedValue({
+        outcome: 'unverified',
+        reason: 'account_mismatch',
+      });
+
+      await receive(withToken);
+
+      expect(response.unauthorized).toHaveBeenCalledWith({
+        body: { message: 'The report was not signed from the AWS account of the reported role' },
+      });
+      expect(loggingSystemMock.collect(logger).info).toEqual([
+        ['Provisioning callback report [id=cb-1] outcome=unverified reason=account_mismatch'],
+      ]);
+      expect(JSON.stringify(loggingSystemMock.collect(logger))).not.toContain('AWS4-HMAC-SHA256');
     });
   });
 });

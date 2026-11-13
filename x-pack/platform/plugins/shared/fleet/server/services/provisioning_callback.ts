@@ -17,6 +17,7 @@ import type {
   CloudConnectorCallback,
   CloudConnectorCallbackIdentity,
   CloudConnectorCallbackReceivedValues,
+  CloudConnectorCallbackReport,
 } from '../../common/types/models/provisioning_callback';
 import type { CloudConnectorIacState } from '../../common/types/models/cloud_connector';
 import type {
@@ -32,6 +33,8 @@ import {
   isProvisioningCallbackTokenValid,
   mintProvisioningCallbackToken,
 } from './provisioning_callback_token';
+import type { CallerIdentityRejection } from './provisioning_callback_caller_identity';
+import { verifyCallerIdentity } from './provisioning_callback_caller_identity';
 
 /** How long the stack has to call back. Also the lifetime of the token bound to the record. */
 export const PROVISIONING_CALLBACK_TTL_MS = 2 * 60 * 60 * 1000;
@@ -74,7 +77,7 @@ const isDuplicateName = (error: unknown): boolean =>
 export interface ProvisioningCallbackReceiveInput {
   /** The token the caller presented; undefined when it sent none. */
   token: string | undefined;
-  payload: CloudConnectorCallbackReceivedValues;
+  payload: CloudConnectorCallbackReport;
 }
 
 export type ProvisioningCallbackReceiveResult =
@@ -89,11 +92,20 @@ export type ProvisioningCallbackReceiveResult =
   /** Past its expiry, or cancelled by the browser. */
   | { outcome: 'gone' }
   /** Fields are individually well-formed but disagree with each other. */
-  | { outcome: 'invalid'; message: string };
+  | { outcome: 'invalid'; message: string }
+  /**
+   * The proof of the sending AWS account did not verify: STS did not vouch for the account of the
+   * reported role and stack, or the proof was made for another record or other values. The
+   * record is left as it was, for a report that does verify.
+   */
+  | { outcome: 'unverified'; reason: CallerIdentityRejection; detail?: string };
 
-/** Audit log entry for each outcome of a report. The `invalid` message comes from the check that failed. */
+/**
+ * Audit log entry for each outcome of a report. The `invalid` and `unverified` messages come from
+ * the check that failed.
+ */
 const REPORT_AUDIT: Record<
-  Exclude<ProvisioningCallbackReceiveResult['outcome'], 'invalid'>,
+  Exclude<ProvisioningCallbackReceiveResult['outcome'], 'invalid' | 'unverified'>,
   { message: string; type: string; outcome: string }
 > = {
   received: {
@@ -349,6 +361,12 @@ class ProvisioningCallbackService {
         type: 'denied',
         outcome: 'failure',
       });
+    } else if (result.outcome === 'unverified') {
+      this.auditReport(id, input.payload, {
+        message: `Provisioning callback report rejected: caller identity not verified (${result.reason})`,
+        type: 'denied',
+        outcome: 'failure',
+      });
     } else {
       this.auditReport(id, input.payload, REPORT_AUDIT[result.outcome]);
     }
@@ -409,6 +427,31 @@ class ProvisioningCallbackService {
       };
     }
 
+    // The token proves the caller was given the launch; STS proves which account the report
+    // was signed from. Checked before anything is written, so a report from elsewhere leaves
+    // the record waiting for the real one.
+    const { caller_identity: proof, ...report } = payload;
+    const verification = await verifyCallerIdentity(
+      proof,
+      { callbackId: so.id, report },
+      { stsUrl: appContextService.getConfig()?.developer?.provisioningCallbackStsUrl }
+    );
+    if (!verification.verified) {
+      this.logger.warn(
+        `Provisioning callback report [id=${so.id}] caller identity not verified [reason=${
+          verification.reason
+        }]${verification.detail ? ` [detail=${verification.detail}]` : ''}`
+      );
+      return {
+        outcome: 'unverified',
+        reason: verification.reason,
+        ...(verification.detail ? { detail: verification.detail } : {}),
+      };
+    }
+    this.logger.info(
+      `Provisioning callback report [id=${so.id}] caller identity verified [account=${verification.account}] [arn=${verification.arn}]`
+    );
+
     let { attributes, version } = so;
     let updatedAt = so.updated_at;
     let claimedHere = false;
@@ -416,7 +459,7 @@ class ProvisioningCallbackService {
       if (new Date(attributes.expires_at).getTime() <= Date.now()) {
         return { outcome: 'gone' };
       }
-      const claimed = await this.claim(soClient, so, payload);
+      const claimed = await this.claim(soClient, so, report);
       if (!claimed) {
         return { outcome: 'not_found' };
       }
@@ -427,7 +470,7 @@ class ProvisioningCallbackService {
       return { outcome: 'gone' };
     }
 
-    if (!isSamePayload(attributes, payload)) {
+    if (!isSamePayload(attributes, report)) {
       // A different report is a conflict, whether the first one has finished or not.
       return { outcome: 'conflict', item: toItem(so.id, attributes) };
     }
@@ -444,7 +487,7 @@ class ProvisioningCallbackService {
       if (!isClaimStale(updatedAt)) {
         return { outcome: 'receiving', item: toItem(so.id, attributes) };
       }
-      const taken = await this.claim(soClient, { ...so, attributes, version }, payload);
+      const taken = await this.claim(soClient, { ...so, attributes, version }, report);
       if (!taken) {
         return { outcome: 'not_found' };
       }
@@ -454,7 +497,7 @@ class ProvisioningCallbackService {
       ({ attributes, version } = taken);
     }
 
-    const item = await this.apply(soClient, so.id, attributes, payload, version);
+    const item = await this.apply(soClient, so.id, attributes, report, version);
     return { outcome: 'received', item };
   }
 

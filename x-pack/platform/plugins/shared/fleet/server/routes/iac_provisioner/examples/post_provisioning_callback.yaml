@@ -8,6 +8,16 @@ requestBody:
           value:
             role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123'
             stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555'
+            caller_identity:
+              region: 'us-east-1'
+              headers:
+                Authorization: 'AWS4-HMAC-SHA256 Credential=ASIAEXAMPLE/20261113/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-security-token;x-elastic-callback-id;x-elastic-report-sha256, Signature=5d41402abc4b2a76b9719d911017c592e5c0c8d3b0d4c3d6b0b1e0d8f9a1b2c3'
+                Content-Type: 'application/x-www-form-urlencoded'
+                X-Amz-Date: '20261113T100000Z'
+                X-Amz-Security-Token: 'IQoJb3JpZ2luX2VjEXAMPLE'
+                x-elastic-callback-id: '0f5d7a5e-2b1c-4a3d-9e8f-123456789abc'
+                x-elastic-report-sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'
+              body: 'Action=GetCallerIdentity&Version=2011-06-15'
 responses:
   200:
     description: 'The values were stored, or were already stored'
@@ -31,6 +41,18 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'role_arn and stack_arn must be in the same AWS account'
+  401:
+    description: 'Unauthorized'
+    content:
+      application/json:
+        examples:
+          unverifiedExample:
+            summary: Proof of the sending account did not verify
+            description: 'STS did not vouch that the report was signed from the account of the reported role by the stack callback function, or the proof was made for another callback or other values'
+            value:
+              statusCode: 401
+              error: 'Unauthorized'
+              message: 'The report was not signed from the AWS account of the reported role'
   404:
     description: 'Not Found'
     content:
