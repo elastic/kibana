@@ -183,27 +183,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
   // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
-  const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds] = await Promise.all([
-    modelProvider.getDefaultModel(),
-    resolveConfiguration(agentConfiguration, {
-      aiIndicesEnabled: experimentalFeatures.aiIndices,
-      request,
-      resolver: context.aiIndexResolver,
-      logger,
-    }),
-    experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
-    context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []),
-  ]);
+  const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds, connectorSkillIds] =
+    await Promise.all([
+      modelProvider.getDefaultModel(),
+      resolveConfiguration(agentConfiguration, {
+        aiIndicesEnabled: experimentalFeatures.aiIndices,
+        request,
+        resolver: context.aiIndexResolver,
+        logger,
+      }),
+      experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
+      context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []),
+      context.connectorSkills.resolveSkillIds(agentConfiguration.connector_ids ?? []),
+    ]);
   const skillIdsOverride = configurationOverrides?.skill_ids;
-  const filteredPluginSkillIds =
-    skillIdsOverride !== undefined
-      ? pluginSkillIds.filter((id) => skillIdsOverride.includes(id))
-      : pluginSkillIds;
+  const filterBySkillIdsOverride = (ids: string[]) =>
+    skillIdsOverride !== undefined ? ids.filter((id) => skillIdsOverride.includes(id)) : ids;
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
     agentConfiguration,
-    additionalSkillIds: filteredPluginSkillIds,
+    additionalSkillIds: [
+      ...filterBySkillIdsOverride(pluginSkillIds),
+      ...filterBySkillIdsOverride(connectorSkillIds),
+    ],
   });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);

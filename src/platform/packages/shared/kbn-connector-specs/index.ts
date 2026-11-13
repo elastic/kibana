@@ -25,6 +25,13 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export {
+  CONNECTOR_SKILL_ID_PREFIX,
+  getAllConnectorSkills,
+  getConnectorSkillRegistryId,
+  getConnectorSkillRegistryIds,
+  type ConnectorTypeSkill,
+} from './src/connector_skills';
 export { getSandboxSupportedAuthTypeIds } from './src/get_sandbox_supported_auth_type_ids';
 export { getSandboxHosts } from './src/get_sandbox_hosts';
 export {
@@ -42,7 +49,7 @@ export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
   MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './src/specs/inbound_webhook/constants';
-export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
+export { isToolAction, TEST_CONNECTOR_SUB_ACTION, buildSkill } from './src/connector_spec';
 export type {
   ConnectorIngressContext,
   EventDefinition,
