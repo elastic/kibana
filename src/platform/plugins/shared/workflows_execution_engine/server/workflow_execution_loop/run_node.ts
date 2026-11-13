@@ -81,6 +81,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
   let nodeImplementation: NodeImplementation | undefined;
+  let contextStarted = false;
 
   if (!node) {
     return;
@@ -140,9 +141,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       return;
     }
 
-    // Pre-warm: rehydrate any evicted step outputs that the upcoming step will need.
+    // Load this node's context once. Drop the snapshot on every exit, including failure.
     // This must happen before getContext() is called (which is synchronous).
-    await stepExecutionRuntime.contextManager.ensureContextReady();
+    contextStarted = true;
+    await stepExecutionRuntime.contextManager.beforeNodeStart();
 
     monitorAbortController = new AbortController();
 
@@ -193,6 +195,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       const catchErrorSpan = apm.startSpan('catch error handling', 'workflow', 'error_handling');
       await catchError(params, stepExecutionRuntime);
       catchErrorSpan?.end();
+    }
+
+    if (contextStarted && stepExecutionRuntime) {
+      stepExecutionRuntime.contextManager.afterNodeEnd();
     }
 
     nodeSpan?.end();

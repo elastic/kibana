@@ -22,8 +22,8 @@ import { WorkflowRunFixture } from '../workflow_run_fixture';
  *    eviction being active. On a pause/resume cycle, rehydration targets only the large completed
  *    predecessor, not the failed step.
  *
- * 2. if/then/else + eviction + resume — before the if-condition evaluates, ensureContextReady()
- *    must rehydrate the evicted predecessor. On resume, final_step rehydrates only the taken-branch
+ * 2. if/then/else + eviction + resume — before the if-condition evaluates, beforeNodeStart()
+ *    must load the evicted predecessor. On resume, final_step loads only the taken-branch
  *    steps; the never-executed else branch is correctly absent from the eviction state.
  *
  * 3. on-failure:retry + eviction boundary — failed retry attempts must never appear in
@@ -183,7 +183,7 @@ describe('output eviction: if/then/else branch + eviction + resume', () => {
   //
   // On resume:
   //   - load() marks all non-data.set steps as evicted
-  //   - ensureContextReady() for final_step must rehydrate setup_step and then_step
+  //   - beforeNodeStart() for final_step must load setup_step and then_step
   //   - else_step never executed → not in eviction state → no crash
   const yaml = `
 name: if-branch-eviction-resume

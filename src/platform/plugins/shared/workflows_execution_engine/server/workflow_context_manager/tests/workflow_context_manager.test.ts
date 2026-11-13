@@ -153,9 +153,26 @@ describe('WorkflowContextManager', () => {
       () => workflowExecutionState.getDataSetStepExecutions().length
     );
     workflowExecutionState.getStepIoVersion = jest.fn(() => ioVersion);
+    workflowExecutionState.getStepIo = jest.fn((id: string, type: 'input' | 'output') => {
+      const value = readIo(id, type);
+      return value === undefined ? undefined : (value as never);
+    });
     const stepIoService = {
       hasEvictedOutputs: jest.fn().mockReturnValue(false),
       rehydrate: jest.fn().mockResolvedValue(undefined),
+      readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
+        const values = new Map<string, unknown>();
+        for (const id of ids) {
+          if (type === 'error') {
+            const error = workflowExecutionState.getStepExecution(id)?.error;
+            if (error !== undefined) values.set(id, error);
+          } else {
+            const value = readIo(id, type);
+            if (value !== undefined) values.set(id, value);
+          }
+        }
+        return values;
+      }),
       rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
       releaseReadPins: jest.fn(),
       releaseTransientlyRehydratedOutputs: jest.fn(),
@@ -2120,7 +2137,7 @@ describe('WorkflowContextManager', () => {
     });
   });
 
-  describe('ensureContextReady', () => {
+  describe('beforeNodeStart', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
       version: '1',
@@ -2146,15 +2163,82 @@ describe('WorkflowContextManager', () => {
       testContainer = createTestContainer(workflow);
     });
 
-    // ensureContextReady resolves rehydration targets (via resolveRehydrationTargets)
-    // and then delegates the actual cache-miss fetch to stepIoService.rehydrate.
-    // Full coverage of the static-analysis branches lives in the
-    // resolveRehydrationTargets unit tests.
-    it('delegates to stepIoService.rehydrate with resolved IDs', async () => {
-      await testContainer.underTest.ensureContextReady();
+    // beforeNodeStart resolves rehydration targets (via resolveRehydrationTargets)
+    // and then fetches them with readBatch. Full coverage of the static-analysis
+    // branches lives in the resolveRehydrationTargets unit tests.
+    it('fetches the resolved output and input ids with readBatch', async () => {
+      await testContainer.underTest.beforeNodeStart();
 
       // step_a has no predecessors and no scope-stack frames → empty output and input ID sets.
-      expect(testContainer.stepIoService.rehydrate).toHaveBeenCalledWith([], []);
+      expect(testContainer.stepIoService.readBatch).toHaveBeenCalledWith([], 'output');
+      expect(testContainer.stepIoService.readBatch).toHaveBeenCalledWith([], 'input');
+    });
+
+    it('serves the same context until the node ends', async () => {
+      await testContainer.underTest.beforeNodeStart();
+
+      const first = testContainer.underTest.getContext();
+      const second = testContainer.underTest.getContext();
+
+      expect(second).toBe(first);
+
+      testContainer.underTest.afterNodeEnd();
+
+      expect(testContainer.underTest.getContext()).not.toBe(first);
+    });
+
+    it('renders a predecessor output that readBatch returned and the LRU did not keep', async () => {
+      const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const node = workflowExecutionGraph
+        .getAllNodes()
+        .find((candidate) => candidate.stepId === 'step_b');
+      expect(node).toBeDefined();
+
+      const output = 'oversized-token';
+      const stepIoService = {
+        readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
+          const values = new Map<string, unknown>();
+          if (type === 'output' && ids.includes('exec-step-a')) {
+            values.set('exec-step-a', output);
+          }
+          return values;
+        }),
+      } as unknown as StepIoService;
+      const workflowExecutionState = {
+        getWorkflowExecution: jest.fn().mockReturnValue({
+          id: 'exec-1',
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          createdAt: '2023-01-01T00:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          workflowDefinition: workflow,
+          scopeStack: [],
+        }),
+        getDataSetStepExecutions: jest.fn().mockReturnValue([]),
+        getDataSetStepExecutionCount: jest.fn().mockReturnValue(0),
+        getStepIoVersion: jest.fn().mockReturnValue(0),
+        getLatestStepExecution: jest.fn((stepId: string) =>
+          stepId === 'step_a' ? { id: 'exec-step-a', stepId: 'step_a' } : undefined
+        ),
+      } as unknown as WorkflowExecutionState;
+
+      const underTest = new WorkflowContextManager({
+        templateEngine: new WorkflowTemplatingEngine(),
+        node: node as AtomicGraphNode,
+        stackFrames: [],
+        workflowExecutionGraph,
+        workflowExecutionState,
+        stepIoService,
+        esClient: {} as any,
+        dependencies,
+        fakeRequest: {} as KibanaRequest,
+        coreStart: {} as CoreStart,
+      });
+
+      await underTest.beforeNodeStart();
+
+      expect(stepIoService.readBatch).toHaveBeenCalledWith(['exec-step-a'], 'output');
+      expect(underTest.renderValueAccordingToContext('{{ steps.step_a.output }}')).toBe(output);
     });
   });
 

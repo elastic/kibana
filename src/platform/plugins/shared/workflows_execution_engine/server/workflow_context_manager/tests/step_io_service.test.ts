@@ -54,16 +54,18 @@ function buildHarness(opts: { maxBytes?: number } = {}) {
 
 describe('StepIoService', () => {
   describe('IO reads/writes', () => {
-    it('returns a written output', () => {
+    it('returns a written output', async () => {
       const { service } = buildHarness();
       service.write('step-1', 'output', { hello: 'world' });
-      expect(service.read('step-1', 'output')).toEqual({ hello: 'world' });
+      expect((await service.readBatch(['step-1'], 'output')).get('step-1')).toEqual({
+        hello: 'world',
+      });
     });
 
-    it('returns a written input', () => {
+    it('returns a written input', async () => {
       const { service } = buildHarness();
       service.write('step-1', 'input', { foo: 'bar' });
-      expect(service.read('step-1', 'input')).toEqual({ foo: 'bar' });
+      expect((await service.readBatch(['step-1'], 'input')).get('step-1')).toEqual({ foo: 'bar' });
     });
 
     it('routes outputs to both the cache and state, and inputs to state only', () => {
@@ -75,27 +77,30 @@ describe('StepIoService', () => {
       expect(state.getStepIo('step-1', 'output')).toEqual({ result: 'ok' });
     });
 
-    it('returns undefined for IO that was never written', () => {
+    it('omits IO that was never written', async () => {
       const { service } = buildHarness();
-      expect(service.read('missing', 'output')).toBeUndefined();
-      expect(service.read('missing', 'input')).toBeUndefined();
+      expect((await service.readBatch(['missing'], 'output')).has('missing')).toBe(false);
+      expect((await service.readBatch(['missing'], 'input')).has('missing')).toBe(false);
     });
 
-    it('distinguishes a null output from a missing output', () => {
+    it('distinguishes a null output from a missing output', async () => {
       const { service } = buildHarness();
       service.write('step-1', 'output', null);
-      expect(service.read('step-1', 'output')).toBeNull();
+      expect((await service.readBatch(['step-1'], 'output')).get('step-1')).toBeNull();
     });
 
-    it('falls back to state when the cache cannot retain the output', () => {
-      const { service } = buildHarness({ maxBytes: 0 });
+    it('returns a state output the LRU refused without fetching', async () => {
+      const { service, stepExecutionRepository } = buildHarness({ maxBytes: 0 });
       service.write('step-1', 'output', { big: 'x'.repeat(100) });
       // Not flushed yet, so state still holds the output.
-      expect(service.read('step-1', 'output')).toEqual({ big: 'x'.repeat(100) });
+      expect((await service.readBatch(['step-1'], 'output')).get('step-1')).toEqual({
+        big: 'x'.repeat(100),
+      });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
-    it('returns step error via service when state holds the error', () => {
-      const { state, service } = buildHarness();
+    it('returns a step error from the loaded execution without fetching', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness();
       state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
@@ -103,43 +108,34 @@ describe('StepIoService', () => {
         status: ExecutionStatus.FAILED,
         error: { type: 'BadThing', message: 'boom' },
       } as Partial<EsWorkflowStepExecution>);
-      expect(service.getStepError('step-1')).toEqual({ type: 'BadThing', message: 'boom' });
+      expect((await service.readBatch(['step-1'], 'error')).get('step-1')).toEqual({
+        type: 'BadThing',
+        message: 'boom',
+      });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
-    it('returns undefined for unknown step error', () => {
+    it('fetches an error for a step execution that is not loaded', async () => {
+      const { service, stepExecutionRepository } = buildHarness();
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'step-1', error: { type: 'BadThing', message: 'boom' } } as EsWorkflowStepExecution,
+      ]);
+
+      expect((await service.readBatch(['step-1'], 'error')).get('step-1')).toEqual({
+        type: 'BadThing',
+        message: 'boom',
+      });
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['step-1'],
+        ['id', 'error']
+      );
+    });
+
+    it('omits an error when the step execution does not exist', async () => {
       const { service } = buildHarness();
-      expect(service.getStepError('does-not-exist')).toBeUndefined();
-    });
-
-    it('getLatestStepIO returns input/output/error for the latest execution by stepId', () => {
-      const { state, service } = buildHarness();
-      state.upsertStep({
-        id: 'exec-1',
-        stepId: 'loopStep',
-        stepType: 'connector',
-        status: ExecutionStatus.COMPLETED,
-      });
-      service.write('exec-1', 'input', { i: 1 });
-      service.write('exec-1', 'output', { o: 'first' });
-      state.upsertStep({
-        id: 'exec-2',
-        stepId: 'loopStep',
-        stepType: 'connector',
-        status: ExecutionStatus.COMPLETED,
-      });
-      service.write('exec-2', 'input', { i: 2 });
-      service.write('exec-2', 'output', { o: 'second' });
-
-      expect(service.getLatestStepIO('loopStep')).toEqual({
-        input: { i: 2 },
-        output: { o: 'second' },
-        error: undefined,
-      });
-    });
-
-    it('getLatestStepIO returns undefined when no execution exists', () => {
-      const { service } = buildHarness();
-      expect(service.getLatestStepIO('never-ran')).toBeUndefined();
+      expect((await service.readBatch(['does-not-exist'], 'error')).has('does-not-exist')).toBe(
+        false
+      );
     });
   });
 
@@ -183,68 +179,67 @@ describe('StepIoService', () => {
     });
   });
 
-  describe('rehydrate', () => {
-    it('fetches uncached outputs from the repository and makes them readable', async () => {
+  describe('readBatch', () => {
+    it('fetches uncached outputs and keeps a fitting output in the LRU', async () => {
       const { service, stepExecutionRepository } = buildHarness();
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
         { id: 'a', output: { v: 1 } } as unknown as EsWorkflowStepExecution,
       ]);
 
-      await service.rehydrate(['a']);
-
+      expect((await service.readBatch(['a'], 'output')).get('a')).toEqual({ v: 1 });
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['a'],
         ['id', 'output']
       );
-      expect(service.read('a', 'output')).toEqual({ v: 1 });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      expect((await service.readBatch(['a'], 'output')).get('a')).toEqual({ v: 1 });
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
-    it('is a no-op when every requested output is already cached', async () => {
+    it('does not fetch an output that is already cached', async () => {
       const { service, state, stepExecutionRepository } = buildHarness();
       service.write('a', 'output', { v: 1 });
       // Simulate a flush: the output lives only in the cache now.
       state.clearFlushedOutputs(['a']);
 
-      await service.rehydrate(['a']);
-
+      expect((await service.readBatch(['a'], 'output')).get('a')).toEqual({ v: 1 });
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
-      expect(service.read('a', 'output')).toEqual({ v: 1 });
     });
 
-    it('skips outputs that are still held in state because they were not flushed yet', async () => {
+    it('does not fetch an output that is still held in state', async () => {
       const { service, state, stepExecutionRepository } = buildHarness();
       state.setStepIo('a', { output: { v: 1 } });
 
-      await service.rehydrate(['a']);
-
+      expect((await service.readBatch(['a'], 'output')).get('a')).toEqual({ v: 1 });
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
-      expect(service.read('a', 'output')).toEqual({ v: 1 });
     });
 
     it('does not call the repository for an empty id list', async () => {
       const { service, stepExecutionRepository } = buildHarness();
 
-      await service.rehydrate([]);
+      await service.readBatch([], 'output');
 
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
-    it('restores a document without output as null', async () => {
+    it('returns a document without output as null and keeps that null cached', async () => {
       const { service, stepExecutionRepository } = buildHarness();
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
         { id: 'a' } as unknown as EsWorkflowStepExecution,
       ]);
 
-      await service.rehydrate(['a']);
+      expect((await service.readBatch(['a'], 'output')).get('a')).toBeNull();
 
-      expect(service.read('a', 'output')).toBeNull();
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      expect((await service.readBatch(['a'], 'output')).get('a')).toBeNull();
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
-    it('handles missing documents gracefully', async () => {
+    it('omits documents the repository does not return', async () => {
       const { service } = buildHarness();
 
-      await expect(service.rehydrate(['ghost'])).resolves.toBeUndefined();
-      expect(service.read('ghost', 'output')).toBeUndefined();
+      expect((await service.readBatch(['ghost'], 'output')).has('ghost')).toBe(false);
     });
 
     it('does not overwrite an output that was written while the fetch was in flight', async () => {
@@ -254,68 +249,67 @@ describe('StepIoService', () => {
         return [{ id: 'a', output: { stale: true } } as unknown as EsWorkflowStepExecution];
       });
 
-      await service.rehydrate(['a']);
-
-      expect(service.read('a', 'output')).toEqual({ fresh: true });
+      expect((await service.readBatch(['a'], 'output')).get('a')).toEqual({ fresh: true });
     });
 
-    it('keeps outputs readable when the budget cannot hold them', async () => {
+    it('returns an oversized output in the map and leaves it out of the LRU', async () => {
       const { service, stepExecutionRepository } = buildHarness({ maxBytes: 0 });
       stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
         { id: 'a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
       ]);
 
-      await service.rehydrate(['a']);
+      expect((await service.readBatch(['a'], 'output')).get('a')).toEqual({ v: 'a' });
 
-      expect(service.read('a', 'output')).toEqual({ v: 'a' });
-    });
-
-    it('drops read-scoped overflow once a later rehydrate no longer requests it', async () => {
-      const { service, stepExecutionRepository } = buildHarness({ maxBytes: 0 });
-      stepExecutionRepository.getStepExecutionsByIds
-        .mockResolvedValueOnce([
-          { id: 'a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
-        ])
-        .mockResolvedValueOnce([
-          { id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
-        ]);
-
-      await service.rehydrate(['a']);
-      await service.rehydrate(['b']);
-
-      expect(service.read('b', 'output')).toEqual({ v: 'b' });
-      expect(service.read('a', 'output')).toBeUndefined();
-    });
-
-    it('re-fetches requested outputs that were evicted by the inserts of the same call', async () => {
-      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 100 });
-      // `a` is resident and already flushed, so only the cache holds it.
-      service.write('a', 'output', { v: 'a' }, 95);
-      state.clearFlushedOutputs(['a']);
-      stepExecutionRepository.getStepExecutionsByIds
-        // First fetch: `b` is the only cache miss. Inserting it pushes `a` out of the budget.
-        .mockResolvedValueOnce([
-          { id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
-        ])
-        // Second fetch: the evicted resident `a`.
-        .mockResolvedValueOnce([
-          { id: 'a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
-        ]);
-
-      await service.rehydrate(['a', 'b']);
-
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenNthCalledWith(
-        1,
-        ['b'],
-        ['id', 'output']
-      );
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenNthCalledWith(
-        2,
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      await service.readBatch(['a'], 'output');
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['a'],
         ['id', 'output']
       );
-      expect(service.read('a', 'output')).toEqual({ v: 'a' });
-      expect(service.read('b', 'output')).toEqual({ v: 'b' });
+    });
+
+    it('keeps a resident output in the returned map when the same batch evicts it', async () => {
+      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 100 });
+      service.write('a', 'output', { v: 'a' }, 95);
+      state.clearFlushedOutputs(['a']);
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      const batch = await service.readBatch(['a', 'b'], 'output');
+
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+      expect(batch.get('a')).toEqual({ v: 'a' });
+      expect(batch.get('b')).toEqual({ v: 'b' });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+      const again = await service.readBatch(['a', 'b'], 'output');
+      expect(again.get('b')).toEqual({ v: 'b' });
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['a'],
+        ['id', 'output']
+      );
+    });
+
+    it('fetches an input that state dropped after the step finished', async () => {
+      const { service, state, stepExecutionRepository } = buildHarness();
+      state.upsertStep({
+        id: 'a',
+        stepId: 'foreach',
+        stepType: 'foreach',
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      service.write('a', 'input', { items: [1] });
+      state.clearFlushedOutputs(['a']);
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'a', input: { items: [1] } } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      expect((await service.readBatch(['a'], 'input')).get('a')).toEqual({ items: [1] });
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['a'],
+        ['id', 'input']
+      );
     });
   });
 });

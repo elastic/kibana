@@ -94,8 +94,8 @@ describe('runNode', () => {
       scopeStack,
       abortController: new AbortController(),
       contextManager: {
-        ensureContextReady: jest.fn().mockResolvedValue(undefined),
-        releaseReadPins: jest.fn(),
+        beforeNodeStart: jest.fn().mockResolvedValue(undefined),
+        afterNodeEnd: jest.fn(),
       },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
@@ -520,11 +520,21 @@ describe('runNode', () => {
     });
   });
 
-  describe('ensureContextReady pre-warm', () => {
-    it('prepares the context once on every successful run', async () => {
+  describe('node context snapshot', () => {
+    it('prepares the context once on every successful run and drops it afterwards', async () => {
       await runNode(mockParams);
 
-      expect(mockStepExecutionRuntime.contextManager.ensureContextReady).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.beforeNodeStart).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.afterNodeEnd).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops the snapshot when the node throws', async () => {
+      mockNodeImplementation.run = jest.fn().mockRejectedValue(new Error('step failed'));
+
+      await runNode(mockParams);
+
+      expect(mockStepExecutionRuntime.contextManager.beforeNodeStart).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.afterNodeEnd).toHaveBeenCalledTimes(1);
     });
 
     it('does not prepare the context when the execution is no longer RUNNING', async () => {
@@ -533,7 +543,8 @@ describe('runNode', () => {
       await runNode(mockParams);
 
       expect(mockNodeImplementation.run).not.toHaveBeenCalled();
-      expect(mockStepExecutionRuntime.contextManager.ensureContextReady).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.contextManager.beforeNodeStart).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.contextManager.afterNodeEnd).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,7 +8,7 @@
  */
 
 import { withTimeout } from '@kbn/std';
-import type { ParallelConcurrencyObject, StackFrame } from '@kbn/workflows';
+import type { ParallelConcurrencyObject, SerializedError, StackFrame } from '@kbn/workflows';
 import {
   DEFAULT_PARALLEL_CONCURRENCY,
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
@@ -16,6 +16,7 @@ import {
   ExecutionStatus,
 } from '@kbn/workflows';
 import type { EnterParallelNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import type {
   ParallelBranchResult,
   ParallelBranchState,
@@ -26,6 +27,7 @@ import type {
 import { isTemplateExpression, parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
+import type { StepIoBatchValue } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
@@ -515,17 +517,19 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
     const timedOut = await this.runWithDeadline(
       async () => {
-        // Pre-warm (rehydrate evicted outputs) — scope-independent, safe to run
-        // concurrently with sibling branches.
-        await branchRuntime.contextManager.ensureContextReady();
-        // Start the node with the branch's scope installed. The scope only needs
-        // to be correct for this synchronous prefix; we restore it immediately so
-        // concurrent siblings are unaffected. Template rendering (getInput) reads
-        // the branch runtime's own stack frames, so it may run after an await.
-        const runPromise = this.withBranchScope(branchStackFrames, () =>
-          Promise.resolve(branchImpl.run())
-        );
-        await runPromise;
+        try {
+          await branchRuntime.contextManager.beforeNodeStart();
+          // Start the node with the branch's scope installed. The scope only needs
+          // to be correct for this synchronous prefix; we restore it immediately so
+          // concurrent siblings are unaffected. Template rendering (getInput) reads
+          // the branch runtime's own stack frames, so it may run after an await.
+          const runPromise = this.withBranchScope(branchStackFrames, () =>
+            Promise.resolve(branchImpl.run())
+          );
+          await runPromise;
+        } finally {
+          branchRuntime.contextManager.afterNodeEnd();
+        }
       },
       deadline,
       branchRuntime.abortController
@@ -850,20 +854,20 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     );
   }
 
+  private async finish(branches: ParallelBranchState[]): Promise<void> {
+    await this.aggregateBranchResults(branches);
+  }
+
   /**
    * Builds the aggregate from the branches' terminal step results.
    *
-   * Rehydrates those results first. A branch's output is read directly (not via
-   * a template), so `StepIoService.prepareForRead` — which targets outputs by
-   * static template analysis — never pre-warms it. Resume-time `load()` marks
-   * every non-pinned step deferred, and a parallel step advances at most
-   * `concurrency` branches per tick, so without this every wave but the last
-   * aggregates as `output: {}` once the fan-out is wider than the concurrency
-   * window. One ES round trip for all branches; a no-op when they are resident
-   * (single-tick fan-out, or eviction disabled).
+   * A branch's output is read directly (not via a template), so context
+   * preparation — which targets outputs by static template analysis — never
+   * pre-warms it. One `readBatch` for every branch output and one for every
+   * branch error; neither hits Elasticsearch when the values are resident.
    */
-  private async finish(branches: ParallelBranchState[]): Promise<void> {
-    // Only branches that actually ran carry a step result to rehydrate.
+  private async aggregateBranchResults(branches: ParallelBranchState[]): Promise<void> {
+    // Only branches that actually ran carry a step result to read.
     const branchRuntimes = new Map<number, StepExecutionRuntime>(
       branches
         .filter((branch) => branch.status !== 'skipped' && branch.status !== 'timed_out')
@@ -876,9 +880,14 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
           }),
         ])
     );
-    await this.stepExecutionRuntime.rehydrateStepOutputs(
-      Array.from(branchRuntimes.values(), (runtime) => runtime.stepExecutionId)
+    const branchExecutionIds = Array.from(
+      branchRuntimes.values(),
+      (runtime) => runtime.stepExecutionId
     );
+    const [outputs, errors] = await Promise.all([
+      this.stepExecutionRuntime.readBatch(branchExecutionIds, 'output'),
+      this.stepExecutionRuntime.readBatch(branchExecutionIds, 'error'),
+    ]);
 
     const results: ParallelBranchResult[] = branches.map((branch) => {
       const timing = {
@@ -911,13 +920,13 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
           },
         };
       }
-      const branchResult = branchRuntimes.get(branch.index)?.getCurrentStepResult();
+      const branchRuntime = branchRuntimes.get(branch.index);
       return {
         ...correlation,
         ...timing,
         status: branch.status === 'failed' ? 'failed' : 'completed',
-        output: branchResult?.output,
-        error: branchResult?.error,
+        output: branchRuntime ? outputs.get(branchRuntime.stepExecutionId) : undefined,
+        error: branchRuntime ? toBranchError(errors.get(branchRuntime.stepExecutionId)) : undefined,
       };
     });
 
@@ -1095,4 +1104,11 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
     return resolved;
   }
+}
+
+function toBranchError(value: StepIoBatchValue | undefined): ExecutionError | undefined {
+  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+  return new ExecutionError(value as SerializedError);
 }

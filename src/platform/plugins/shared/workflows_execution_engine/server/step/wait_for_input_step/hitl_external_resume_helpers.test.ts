@@ -113,7 +113,7 @@ describe('removeHitlExternalResumeTokenFields', () => {
 });
 
 describe('invalidateHitlExternalResumeTokenIfPresent', () => {
-  it('clears token metadata from the current step input', () => {
+  it('clears token metadata from the current step input', async () => {
     const setInput = jest.fn();
     const stepExecutionRuntime = {
       stepExecution: {
@@ -126,19 +126,36 @@ describe('invalidateHitlExternalResumeTokenIfPresent', () => {
       setInput,
     } as unknown as StepExecutionRuntime;
 
-    invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
+    await invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
 
     expect(setInput).toHaveBeenCalledWith({ message: 'Please respond' });
   });
 
-  it('does nothing when token metadata is absent', () => {
+  it('reads the input through readBatch when the execution has none stored', async () => {
+    const setInput = jest.fn();
+    const stepExecutionRuntime = {
+      stepExecution: {},
+      getCurrentStepInput: jest.fn().mockResolvedValue({
+        message: 'Please respond',
+        [HITL_TOKEN_HASH_INPUT_FIELD]: 'hash',
+        [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: '2999-01-01T00:00:00.000Z',
+      }),
+      setInput,
+    } as unknown as StepExecutionRuntime;
+
+    await invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
+
+    expect(setInput).toHaveBeenCalledWith({ message: 'Please respond' });
+  });
+
+  it('does nothing when token metadata is absent', async () => {
     const setInput = jest.fn();
     const stepExecutionRuntime = {
       stepExecution: { input: { message: 'Please respond' } },
       setInput,
     } as unknown as StepExecutionRuntime;
 
-    invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
+    await invalidateHitlExternalResumeTokenIfPresent(stepExecutionRuntime);
 
     expect(setInput).not.toHaveBeenCalled();
   });

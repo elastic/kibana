@@ -27,11 +27,11 @@ export class EnterForeachIterationNodeImpl implements NodeImplementation {
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
   ) {}
 
-  public run(): void {
+  public async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
 
     const foreachStepRuntime = this.getEnclosingForeachStepRuntime();
-    const input = foreachStepRuntime.getCurrentStepResult()?.input;
+    const input = await foreachStepRuntime.getCurrentStepInput();
     const items =
       extractForeachItemsFromInput(input) ?? this.evaluateForeachItems(foreachStepRuntime, input);
     const index = indexFromIterationStepId(this.node.stepId);

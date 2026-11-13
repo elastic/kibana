@@ -60,14 +60,11 @@ export function removeHitlExternalResumeTokenFields(
   return nextInput;
 }
 
-export function invalidateHitlExternalResumeTokenIfPresent(
+export async function invalidateHitlExternalResumeTokenIfPresent(
   stepExecutionRuntime: StepExecutionRuntime
-): void {
+): Promise<void> {
   const stepInput =
-    stepExecutionRuntime.stepExecution?.input ??
-    (typeof stepExecutionRuntime.getCurrentStepResult === 'function'
-      ? stepExecutionRuntime.getCurrentStepResult()?.input
-      : undefined);
+    stepExecutionRuntime.stepExecution?.input ?? (await stepExecutionRuntime.getCurrentStepInput());
 
   if (stepInput == null || typeof stepInput !== 'object') {
     return;

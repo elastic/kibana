@@ -180,6 +180,12 @@ const createBroaderSurfaceContainer = () => {
       return undefined;
     });
   workflowExecutionState.getStepExecution = jest.fn().mockReturnValue(undefined);
+  workflowExecutionState.getStepIo = jest.fn((id: string, type: 'input' | 'output') => {
+    if (type === 'output' && id in largeStepOutputs) {
+      return largeStepOutputs[id as keyof typeof largeStepOutputs];
+    }
+    return undefined;
+  });
   workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
   workflowExecutionState.getDataSetStepExecutions = jest.fn().mockReturnValue([]);
 

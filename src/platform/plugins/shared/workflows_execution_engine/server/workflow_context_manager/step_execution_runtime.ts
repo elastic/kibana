@@ -11,19 +11,19 @@ import type { JsonValue } from '@kbn/utility-types';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  SerializedError,
   StackFrame,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import type { StepIoService } from './step_io_service';
+import type { StepIoBatchValue, StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { STEP_SIZE_LIMIT_EXCEEDED, toExecutionError } from '../step/errors';
-import type { RunStepResult } from '../step/node_implementation';
 import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } from '../utils';
 
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -143,25 +143,47 @@ export class StepExecutionRuntime {
     return !!this.workflowExecutionState.getStepExecution(this.stepExecutionId);
   }
 
-  public getCurrentStepResult(): RunStepResult | undefined {
-    if (!this.stepExecutionExists()) {
+  /** Reads this step's input. A missing step execution returns `undefined`. */
+  public async getCurrentStepInput(): Promise<unknown> {
+    return this.readCurrent('input');
+  }
+
+  /** Reads this step's output. A missing step execution returns `undefined`. */
+  public async getCurrentStepOutput(): Promise<unknown> {
+    return this.readCurrent('output');
+  }
+
+  /** Reads this step's error. A missing step execution returns `undefined`. */
+  public async getCurrentStepError(): Promise<ExecutionError | undefined> {
+    const error = await this.readCurrent('error');
+    if (error == null || typeof error !== 'object') {
       return undefined;
     }
-    const error = this.stepIoService.getStepError(this.stepExecutionId);
-    return {
-      input: this.stepIoService.read(this.stepExecutionId, 'input') || {},
-      output: this.stepIoService.read(this.stepExecutionId, 'output') || {},
-      error: error ? new ExecutionError(error) : undefined,
-    };
+    return new ExecutionError(error as SerializedError);
   }
 
   /**
-   * Brings the given step executions' outputs back into the LRU cache so a
-   * subsequent {@link getCurrentStepResult} can read them. One Elasticsearch
-   * round trip for the ids that are not already cached.
+   * Fetches many step values in one round trip. Parallel finish uses this for
+   * every branch output and every branch error instead of the single-id methods.
    */
-  public async rehydrateStepOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
-    await this.stepIoService.rehydrate(stepExecutionIds, stepExecutionIds);
+  public readBatch(
+    ids: readonly string[],
+    type: 'input' | 'output' | 'error'
+  ): Promise<ReadonlyMap<string, StepIoBatchValue>> {
+    return this.stepIoService.readBatch(ids, type);
+  }
+
+  private async readCurrent(
+    type: 'input' | 'output' | 'error'
+  ): Promise<StepIoBatchValue | undefined> {
+    if (!this.stepExecutionExists()) {
+      return undefined;
+    }
+    const values = await this.stepIoService.readBatch([this.stepExecutionId], type);
+    if (!values.has(this.stepExecutionId)) {
+      return undefined;
+    }
+    return values.get(this.stepExecutionId);
   }
 
   public getCurrentStepState(): Record<string, unknown> | undefined {

@@ -48,9 +48,18 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
     }
   };
   return {
-    read: jest.fn((id: string, type: 'input' | 'output') =>
-      type === 'input' ? inputs.get(id) : outputs.get(id)
-    ),
+    readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
+      const values = new Map<string, unknown>();
+      for (const id of ids) {
+        if (type === 'input' && inputs.has(id)) values.set(id, inputs.get(id));
+        if (type === 'output' && outputs.has(id)) values.set(id, outputs.get(id));
+        if (type === 'error') {
+          const error = state.getStepExecution(id)?.error;
+          if (error !== undefined) values.set(id, error);
+        }
+      }
+      return values;
+    }),
     write: jest.fn(write),
     setStepInput: (id: string, input: JsonValue) => {
       inputs.set(id, input);
@@ -80,6 +89,8 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
     pinOutputsForRead: jest.fn(),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
     rehydrate: jest.fn().mockResolvedValue(undefined),
+    load: jest.fn().mockResolvedValue(undefined),
+    releaseLoaded: jest.fn(),
     releaseReadPins: jest.fn(),
     releaseTransientlyRehydratedOutputs: jest.fn(),
   } as unknown as StepIoService;
@@ -207,7 +218,7 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should be able to retrieve the step result', () => {
+    it('should be able to retrieve the step input, output, and error', async () => {
       (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
         error: { type: 'Error', message: 'Fake error' },
@@ -216,15 +227,23 @@ describe('StepExecutionRuntime', () => {
       stepIoService.write(fakeStepExecutionId, 'input', {});
       stepIoService.write(fakeStepExecutionId, 'output', { success: true, data: {} });
 
-      const stepResult = underTest.getCurrentStepResult();
-      expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
-        `fake_step_execution_id`
+      await expect(underTest.getCurrentStepInput()).resolves.toEqual({});
+      await expect(underTest.getCurrentStepOutput()).resolves.toEqual({ success: true, data: {} });
+      await expect(underTest.getCurrentStepError()).resolves.toEqual(
+        new ExecutionError({ type: 'Error', message: 'Fake error' })
       );
-      expect(stepResult).toEqual({
-        input: {},
-        output: { success: true, data: {} },
-        error: new ExecutionError({ type: 'Error', message: 'Fake error' }),
-      });
+      expect(stepIoService.readBatch).toHaveBeenCalledWith([fakeStepExecutionId], 'input');
+      expect(stepIoService.readBatch).toHaveBeenCalledWith([fakeStepExecutionId], 'output');
+      expect(stepIoService.readBatch).toHaveBeenCalledWith([fakeStepExecutionId], 'error');
+    });
+
+    it('returns undefined for a missing step execution', async () => {
+      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+      await expect(underTest.getCurrentStepInput()).resolves.toBeUndefined();
+      await expect(underTest.getCurrentStepOutput()).resolves.toBeUndefined();
+      await expect(underTest.getCurrentStepError()).resolves.toBeUndefined();
+      expect(stepIoService.readBatch).not.toHaveBeenCalled();
     });
   });
 
@@ -912,19 +931,13 @@ describe('StepExecutionRuntime', () => {
     });
   });
 
-  // The ordering here is the whole point: `StepIoService.rehydrateOutputs`
-  // snapshots only the ids that are evicted at entry, so an id that is resident
-  // at that moment is not in its fetch set. If the pin were taken after the
-  // await -- or not at all -- the concurrent eviction cycle could drop that
-  // output during the ES round trip, and it would be neither fetched nor
-  // resident when the caller reads it.
-  describe('rehydrateStepOutputs', () => {
-    it('rehydrates the requested step execution ids', async () => {
-      const rehydrate = jest.spyOn(stepIoService, 'rehydrate').mockImplementation(async () => {});
+  describe('readBatch', () => {
+    it('forwards the ids and type to the IO service', async () => {
+      const readBatch = jest.spyOn(stepIoService, 'readBatch').mockResolvedValue(new Map());
 
-      await underTest.rehydrateStepOutputs(['a', 'b']);
+      await underTest.readBatch(['a', 'b'], 'output');
 
-      expect(rehydrate).toHaveBeenCalledWith(['a', 'b'], ['a', 'b']);
+      expect(readBatch).toHaveBeenCalledWith(['a', 'b'], 'output');
     });
   });
 });

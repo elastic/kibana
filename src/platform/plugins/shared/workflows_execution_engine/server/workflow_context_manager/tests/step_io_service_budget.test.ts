@@ -23,34 +23,45 @@ const buildService = (maxBytes: number, docs: Array<{ id: string; output: unknow
 };
 
 describe('StepIoService cache budget', () => {
-  it('keeps every rehydrated output readable when the set exceeds the budget', async () => {
+  it('returns every output and keeps only what fits in the LRU', async () => {
     const docs = [
       { id: 'a', output: { v: 'a'.repeat(50) } },
       { id: 'b', output: { v: 'b'.repeat(50) } },
       { id: 'c', output: { v: 'c'.repeat(50) } },
     ];
-    const { service } = buildService(80, docs);
+    const { service, stepRepository } = buildService(80, docs);
 
-    await service.rehydrate(['a', 'b', 'c']);
+    const batch = await service.readBatch(['a', 'b', 'c'], 'output');
 
-    expect(service.read('a', 'output')).toEqual(docs[0].output);
-    expect(service.read('b', 'output')).toEqual(docs[1].output);
-    expect(service.read('c', 'output')).toEqual(docs[2].output);
+    expect(batch.get('a')).toEqual(docs[0].output);
+    expect(batch.get('b')).toEqual(docs[1].output);
+    expect(batch.get('c')).toEqual(docs[2].output);
+
+    stepRepository.getStepExecutionsByIds.mockClear();
+    await service.readBatch(['a', 'b', 'c'], 'output');
+    const refetched = stepRepository.getStepExecutionsByIds.mock.calls[0]?.[0] ?? [];
+    expect(refetched.length).toBeLessThan(3);
   });
 
-  it('keeps outputs readable with a zero budget', async () => {
-    const { service } = buildService(0, [{ id: 'a', output: { v: 1 } }]);
+  it('returns an output that cannot fit and fetches it again afterwards', async () => {
+    const { service, stepRepository } = buildService(0, [{ id: 'a', output: { v: 1 } }]);
 
-    await service.rehydrate(['a']);
+    expect((await service.readBatch(['a'], 'output')).get('a')).toEqual({ v: 1 });
 
-    expect(service.read('a', 'output')).toEqual({ v: 1 });
+    stepRepository.getStepExecutionsByIds.mockClear();
+    await service.readBatch(['a'], 'output');
+
+    expect(stepRepository.getStepExecutionsByIds).toHaveBeenCalledWith(['a'], ['id', 'output']);
   });
 
-  it('does not throw for empty outputs', async () => {
-    const { service } = buildService(100, [{ id: 'a', output: null }]);
+  it('keeps an empty output that fits the budget', async () => {
+    const { service, stepRepository } = buildService(100, [{ id: 'a', output: null }]);
 
-    await expect(service.rehydrate(['a'])).resolves.toBeUndefined();
-    expect(service.read('a', 'output')).toBeNull();
+    expect((await service.readBatch(['a'], 'output')).get('a')).toBeNull();
+
+    stepRepository.getStepExecutionsByIds.mockClear();
+    expect((await service.readBatch(['a'], 'output')).get('a')).toBeNull();
+    expect(stepRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
   });
 
   it('reports execution-wide output sizes regardless of eviction', () => {

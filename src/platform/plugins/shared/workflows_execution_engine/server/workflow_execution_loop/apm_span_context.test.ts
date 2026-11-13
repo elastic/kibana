@@ -91,7 +91,8 @@ const createStepExecutionRuntime = () =>
     scopeStack: WorkflowScopeStack.fromStackFrames([]),
     contextManager: {
       getDependencies: jest.fn(() => ({ config: {} })),
-      ensureContextReady: jest.fn().mockResolvedValue(undefined),
+      beforeNodeStart: jest.fn().mockResolvedValue(undefined),
+      afterNodeEnd: jest.fn(),
       releaseReadPins: jest.fn(),
     },
   } as unknown as StepExecutionRuntime);

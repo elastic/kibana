@@ -34,8 +34,8 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     this.advanceRetryAttempt();
   }
 
-  public catchError(failedContext: StepExecutionRuntime): void {
-    const error = failedContext.getCurrentStepResult()?.error;
+  public async catchError(failedContext: StepExecutionRuntime): Promise<void> {
+    const error = await failedContext.getCurrentStepError();
     const { condition } = this.node.configuration;
 
     if (!condition && error?.retryable === false) {
@@ -73,9 +73,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     }
 
     // fail retry with last error after exceeding max attempts
-    this.stepExecutionRuntime.failStep(
-      new ExecutionError(failedContext.getCurrentStepResult()?.error as SerializedError)
-    );
+    this.stepExecutionRuntime.failStep(new ExecutionError(error as SerializedError));
   }
 
   private initializeRetry(): void {

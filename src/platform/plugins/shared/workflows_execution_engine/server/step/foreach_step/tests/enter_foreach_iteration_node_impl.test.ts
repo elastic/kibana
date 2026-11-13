@@ -47,11 +47,9 @@ describe('EnterForeachIterationNodeImpl', () => {
 
     foreachStepRuntime = {
       node: { stepId: 'loop' },
-      getCurrentStepResult: jest.fn().mockReturnValue({
-        input: {
-          foreach: '{{ consts.items }}',
-          items: ['item0', 'item1', 'item2'],
-        },
+      getCurrentStepInput: jest.fn().mockResolvedValue({
+        foreach: '{{ consts.items }}',
+        items: ['item0', 'item1', 'item2'],
       }),
       contextManager: {
         evaluateExpressionInContext: jest.fn(),
@@ -71,14 +69,14 @@ describe('EnterForeachIterationNodeImpl', () => {
     );
   });
 
-  it('should start the iteration step', () => {
-    underTest.run();
+  it('should start the iteration step', async () => {
+    await underTest.run();
 
     expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith();
   });
 
-  it('should create a runtime for the enclosing foreach step', () => {
-    underTest.run();
+  it('should create a runtime for the enclosing foreach step', async () => {
+    await underTest.run();
 
     expect(stepExecutionRuntimeFactory.createStepExecutionRuntime).toHaveBeenCalledWith({
       nodeId: 'enterForeach_loop',
@@ -86,24 +84,24 @@ describe('EnterForeachIterationNodeImpl', () => {
     });
   });
 
-  it('should set the current foreach item as the iteration step input', () => {
-    underTest.run();
+  it('should set the current foreach item as the iteration step input', async () => {
+    await underTest.run();
 
-    expect(foreachStepRuntime.getCurrentStepResult).toHaveBeenCalled();
+    expect(foreachStepRuntime.getCurrentStepInput).toHaveBeenCalled();
     expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({ item: 'item1' });
     expect(foreachStepRuntime.contextManager.evaluateExpressionInContext).not.toHaveBeenCalled();
     expect(foreachStepRuntime.contextManager.renderValueAccordingToContext).not.toHaveBeenCalled();
   });
 
-  it('should go to the next node', () => {
-    underTest.run();
+  it('should go to the next node', async () => {
+    await underTest.run();
 
     expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
   });
 
-  it('should re-evaluate the foreach expression when input has no items', () => {
-    (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
-      input: { foreach: '{{ consts.items }}' },
+  it('should re-evaluate the foreach expression when input has no items', async () => {
+    (foreachStepRuntime.getCurrentStepInput as jest.Mock).mockResolvedValue({
+      foreach: '{{ consts.items }}',
     });
     (foreachStepRuntime.contextManager.evaluateExpressionInContext as jest.Mock).mockReturnValue([
       'legacy0',
@@ -111,7 +109,7 @@ describe('EnterForeachIterationNodeImpl', () => {
       'legacy2',
     ]);
 
-    underTest.run();
+    await underTest.run();
 
     expect(foreachStepRuntime.contextManager.evaluateExpressionInContext).toHaveBeenCalledWith(
       '{{ consts.items }}'
@@ -120,15 +118,15 @@ describe('EnterForeachIterationNodeImpl', () => {
     expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
   });
 
-  it('should parse a rendered JSON list when input has no items', () => {
-    (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
-      input: { foreach: '["a", "b", "c"]' },
+  it('should parse a rendered JSON list when input has no items', async () => {
+    (foreachStepRuntime.getCurrentStepInput as jest.Mock).mockResolvedValue({
+      foreach: '["a", "b", "c"]',
     });
     (foreachStepRuntime.contextManager.renderValueAccordingToContext as jest.Mock).mockReturnValue(
       '["a", "b", "c"]'
     );
 
-    underTest.run();
+    await underTest.run();
 
     expect(foreachStepRuntime.contextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
       '["a", "b", "c"]'
@@ -136,19 +134,19 @@ describe('EnterForeachIterationNodeImpl', () => {
     expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({ item: 'b' });
   });
 
-  it('should throw if the foreach step has no items and no expression to re-evaluate', () => {
-    (foreachStepRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
-      input: {},
-    });
+  it('should throw if the foreach step has no items and no expression to re-evaluate', async () => {
+    (foreachStepRuntime.getCurrentStepInput as jest.Mock).mockResolvedValue({});
 
-    expect(() => underTest.run()).toThrow('Foreach step "loop" has no items in its input.');
+    await expect(underTest.run()).rejects.toThrow('Foreach step "loop" has no items in its input.');
     expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
   });
 
-  it('should throw if the iteration index is out of range', () => {
+  it('should throw if the iteration index is out of range', async () => {
     node.stepId = iterationStepIdFromIndex(5);
 
-    expect(() => underTest.run()).toThrow('Foreach iteration index 5 is out of range for 3 items.');
+    await expect(underTest.run()).rejects.toThrow(
+      'Foreach iteration index 5 is out of range for 3 items.'
+    );
     expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
   });
 });
