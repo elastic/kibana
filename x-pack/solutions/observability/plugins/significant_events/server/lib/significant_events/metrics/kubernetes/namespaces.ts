@@ -17,6 +17,7 @@ import {
   formatDatasetList,
   KUBERNETES_POD_DATASETS,
   stringsOf,
+  type ClusterScope,
 } from '../entity_rows/helpers';
 import {
   createDroppedRows,
@@ -70,6 +71,8 @@ export const foldNamespaceRows = (
 
   const features = [...conceptsByCluster.values()].flatMap((concept): FeatureUpsert[] => {
     const { cluster } = concept;
+    const clusterScope: Exclude<ClusterScope, undefined> =
+      cluster === undefined ? { missing: true } : { name: cluster };
     const id = `k8s.namespaces:${cluster ?? sourceId}`;
     const title = cluster
       ? `Kubernetes namespaces of ${cluster}`
@@ -87,12 +90,13 @@ export const foldNamespaceRows = (
         title,
         description: buildInfrastructureConceptDescription({
           concept: 'namespaces',
-          scope: cluster ?? 'not reported',
+          scope: cluster ?? sourceId,
           scale: concept.scale,
           breakdownFields: ['kubernetes.namespace'],
           members,
+          clusterMissing: cluster === undefined,
         }),
-        filter: buildScopedFilter(cluster, buildDatasetFilter(KUBERNETES_POD_DATASETS), {
+        filter: buildScopedFilter(clusterScope, buildDatasetFilter(KUBERNETES_POD_DATASETS), {
           field: 'kubernetes.namespace',
           exists: true,
         }),
@@ -103,7 +107,7 @@ export const foldNamespaceRows = (
           members,
           list_query: buildConceptListQuery({
             sourceQuery,
-            cluster,
+            clusterScope,
             datasetCondition: `data_stream.dataset IN (${formatDatasetList(
               KUBERNETES_POD_DATASETS
             )})`,

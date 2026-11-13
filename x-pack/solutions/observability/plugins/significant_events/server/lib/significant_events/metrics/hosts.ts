@@ -12,7 +12,7 @@ import {
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
 import type { Condition } from '@kbn/streamlang';
-import { buildScopedFilter, stringsOf } from './entity_rows/helpers';
+import { buildScopedFilter, stringsOf, type ClusterScope } from './entity_rows/helpers';
 import {
   createDroppedRows,
   droppedRowsCount,
@@ -126,6 +126,8 @@ export const foldHostRows = (
     const clusterValue = row.concept_cluster;
     const cluster =
       typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const clusterScope: Exclude<ClusterScope, undefined> =
+      cluster === undefined ? { missing: true } : { name: cluster };
     const id = `k8s.nodes:${cluster ?? sourceId}`;
     const title = cluster
       ? `Kubernetes nodes of ${cluster}`
@@ -141,12 +143,13 @@ export const foldHostRows = (
       title,
       description: buildInfrastructureConceptDescription({
         concept: 'nodes',
-        scope: cluster ?? 'not reported',
+        scope: cluster ?? sourceId,
         scale,
         breakdownFields: ['kubernetes.node.name'],
         members,
+        clusterMissing: cluster === undefined,
       }),
-      filter: buildScopedFilter(cluster, HOST_DATASET_FILTER, NODE_NAME_FILTER),
+      filter: buildScopedFilter(clusterScope, HOST_DATASET_FILTER, NODE_NAME_FILTER),
       properties: {
         breakdown: ['kubernetes.node.name'],
         entity_store_type: KUBERNETES_ENTITY_STORE_TYPES.node,
@@ -154,7 +157,7 @@ export const foldHostRows = (
         members,
         list_query: buildConceptListQuery({
           sourceQuery,
-          cluster,
+          clusterScope,
           datasetCondition: HOST_DATASET_CONDITION,
           additionalPipeline: `${HOST_NODE_NAME_EVAL}
 | WHERE node_name IS NOT NULL

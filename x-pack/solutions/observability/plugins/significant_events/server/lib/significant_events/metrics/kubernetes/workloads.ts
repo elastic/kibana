@@ -18,6 +18,7 @@ import {
   formatDatasetList,
   KUBERNETES_POD_DATASETS,
   stringsOf,
+  type ClusterScope,
 } from '../entity_rows/helpers';
 import {
   createDroppedRows,
@@ -131,16 +132,16 @@ ${WORKLOAD_OWNER_DERIVATION}
 
 const buildWorkloadListQuery = ({
   sourceQuery,
-  cluster,
+  clusterScope,
   kind,
 }: {
   sourceQuery: string;
-  cluster?: string;
+  clusterScope: ClusterScope;
   kind: WorkloadKind;
 }): string =>
   buildConceptListQuery({
     sourceQuery,
-    cluster,
+    clusterScope,
     datasetCondition: `data_stream.dataset IN (${formatDatasetList(
       KUBERNETES_POD_DATASETS
     )}) AND kubernetes.pod.uid IS NOT NULL`,
@@ -163,6 +164,8 @@ export const foldWorkloadRows = (
     const clusterValue = row['orchestrator.cluster.name'];
     const cluster =
       typeof clusterValue === 'string' && clusterValue.length > 0 ? clusterValue : undefined;
+    const clusterScope: Exclude<ClusterScope, undefined> =
+      cluster === undefined ? { missing: true } : { name: cluster };
     const scope = cluster ?? sourceId;
     const { plural, ownerField } = WORKLOAD_TYPES[kind];
     const id = `k8s.${plural}:${scope}`;
@@ -184,13 +187,14 @@ export const foldWorkloadRows = (
         title,
         description: buildInfrastructureConceptDescription({
           concept: plural,
-          scope: cluster ?? 'not reported',
+          scope,
           scale,
           breakdownFields: ['kubernetes.namespace', ownerField],
           members,
+          clusterMissing: cluster === undefined,
         }),
         filter: buildScopedFilter(
-          cluster,
+          clusterScope,
           buildDatasetFilter(KUBERNETES_POD_DATASETS),
           WORKLOAD_TYPE_FILTERS[kind]
         ),
@@ -199,7 +203,7 @@ export const foldWorkloadRows = (
           entity_store_type: entityStoreType,
           scale,
           members,
-          list_query: buildWorkloadListQuery({ sourceQuery, cluster, kind }),
+          list_query: buildWorkloadListQuery({ sourceQuery, clusterScope, kind }),
           origin: 'metrics',
           key_row: 'ecs.k8s_workload',
         },

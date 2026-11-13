@@ -35,14 +35,21 @@ export const buildDatasetFilter = (datasets: readonly string[]): Condition => ({
   or: datasets.map((dataset) => ({ field: 'data_stream.dataset', eq: dataset })),
 });
 
+export type ClusterScope = { name: string } | { missing: true } | undefined;
+
+const getClusterConditions = (clusterScope: ClusterScope): Condition[] => {
+  if (clusterScope === undefined) {
+    return [];
+  }
+  if ('name' in clusterScope) {
+    return [{ field: 'orchestrator.cluster.name', eq: clusterScope.name }];
+  }
+  return [{ not: { field: 'orchestrator.cluster.name', exists: true } }];
+};
+
 export const buildScopedFilter = (
-  cluster: string | undefined,
+  clusterScope: ClusterScope,
   ...conditions: Condition[]
 ): Condition => ({
-  and: [
-    ...(cluster !== undefined
-      ? [{ field: 'orchestrator.cluster.name', eq: cluster } as const]
-      : []),
-    ...conditions,
-  ],
+  and: [...getClusterConditions(clusterScope), ...conditions],
 });

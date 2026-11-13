@@ -17,6 +17,7 @@ import {
   formatDatasetList,
   KUBERNETES_NODE_DATASETS,
   stringsOf,
+  type ClusterScope,
 } from '../entity_rows/helpers';
 import {
   createDroppedRows,
@@ -81,6 +82,8 @@ export const foldNodeRows = (
 
   const features = [...conceptsByCluster.values()].flatMap((concept): FeatureUpsert[] => {
     const { cluster } = concept;
+    const clusterScope: Exclude<ClusterScope, undefined> =
+      cluster === undefined ? { missing: true } : { name: cluster };
     const id = `k8s.nodes:${cluster ?? sourceId}`;
     const title = cluster
       ? `Kubernetes nodes of ${cluster}`
@@ -98,12 +101,13 @@ export const foldNodeRows = (
         title,
         description: buildInfrastructureConceptDescription({
           concept: 'nodes',
-          scope: cluster ?? 'not reported',
+          scope: cluster ?? sourceId,
           scale: concept.scale,
           breakdownFields: ['kubernetes.node.name'],
           members,
+          clusterMissing: cluster === undefined,
         }),
-        filter: buildScopedFilter(cluster, buildDatasetFilter(KUBERNETES_NODE_DATASETS), {
+        filter: buildScopedFilter(clusterScope, buildDatasetFilter(KUBERNETES_NODE_DATASETS), {
           field: 'kubernetes.node.name',
           exists: true,
         }),
@@ -114,7 +118,7 @@ export const foldNodeRows = (
           members,
           list_query: buildConceptListQuery({
             sourceQuery,
-            cluster,
+            clusterScope,
             datasetCondition: `data_stream.dataset IN (${formatDatasetList(
               KUBERNETES_NODE_DATASETS
             )})`,

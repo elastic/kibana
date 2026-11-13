@@ -374,26 +374,47 @@ describe('Kubernetes type KIs', () => {
     );
   });
 
-  it('groups workloads without a cluster name under the source', () => {
-    const feature = foldWorkloadRows(
+  it('separates named-cluster and missing-cluster workloads', () => {
+    const features = foldWorkloadRows(
       [
+        {
+          'orchestrator.cluster.name': 'cluster-a',
+          kind: 'deployment',
+          scale: 1,
+          members: ['apps/named'],
+        },
         {
           'orchestrator.cluster.name': null,
           kind: 'deployment',
           scale: 1,
-          members: ['apps/api'],
+          members: ['apps/missing'],
         },
       ],
       foldContext
-    ).features[0];
+    ).features;
+    const byId = new Map(features.map((feature) => [feature.id, feature]));
+    const namedCluster = byId.get('k8s.deployments:cluster-a');
+    const missingCluster = byId.get('k8s.deployments:source-id');
 
-    expect(feature).toEqual(
+    expect([...byId.keys()]).toEqual(['k8s.deployments:cluster-a', 'k8s.deployments:source-id']);
+    expect(namedCluster?.filter).toEqual(
+      expect.objectContaining({
+        and: expect.arrayContaining([{ field: 'orchestrator.cluster.name', eq: 'cluster-a' }]),
+      })
+    );
+    expect(namedCluster?.properties.list_query).toEqual(
+      expect.stringContaining('orchestrator.cluster.name == "cluster-a"')
+    );
+    expect(missingCluster).toEqual(
       expect.objectContaining({
         id: 'k8s.deployments:source-id',
         title: 'Kubernetes deployments (cluster not reported)',
-        description: expect.stringContaining('cluster not reported'),
+        description: expect.stringContaining(
+          'Kubernetes deployments with no cluster name reported'
+        ),
         filter: {
           and: [
+            { not: { field: 'orchestrator.cluster.name', exists: true } },
             {
               or: [
                 { field: 'data_stream.dataset', eq: 'kubernetes.pod' },
@@ -405,7 +426,12 @@ describe('Kubernetes type KIs', () => {
         },
       })
     );
-    expect(JSON.stringify(feature?.filter)).not.toContain('orchestrator.cluster.name');
+    expect(missingCluster?.properties.list_query).toEqual(
+      expect.stringContaining('orchestrator.cluster.name IS NULL')
+    );
+    expect(missingCluster?.properties.list_query).not.toEqual(
+      expect.stringContaining('orchestrator.cluster.name ==')
+    );
   });
 
   it('drops an overlong workload type identity while keeping valid rows', () => {

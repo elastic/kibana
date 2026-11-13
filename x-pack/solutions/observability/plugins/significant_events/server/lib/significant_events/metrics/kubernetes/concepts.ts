@@ -7,7 +7,7 @@
 
 // Describes metrics type KIs; it reads no datasets.
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import { quoteEsqlString } from '../entity_rows/helpers';
+import { quoteEsqlString, type ClusterScope } from '../entity_rows/helpers';
 
 export type InfrastructureConcept =
   | 'deployments'
@@ -19,20 +19,35 @@ export type InfrastructureConcept =
   | 'hosts'
   | 'services';
 
+const getClusterCondition = (clusterScope: ClusterScope): string => {
+  if (clusterScope === undefined) {
+    return '';
+  }
+  if ('name' in clusterScope) {
+    return `AND orchestrator.cluster.name == ${quoteEsqlString(clusterScope.name)}\n    `;
+  }
+  return 'AND orchestrator.cluster.name IS NULL\n    ';
+};
+
 export const buildInfrastructureConceptDescription = ({
   concept,
   scope,
   scale,
   breakdownFields,
   members,
+  clusterMissing = false,
 }: {
   concept: InfrastructureConcept;
   scope: string;
   scale: number;
   breakdownFields: readonly string[];
   members: readonly string[];
+  clusterMissing?: boolean;
 }): string => {
   const meaning = (() => {
+    if (clusterMissing) {
+      return `Kubernetes ${concept} with no cluster name reported`;
+    }
     switch (concept) {
       case 'nodes':
         return `Kubernetes nodes are the machines that run workloads in cluster ${scope}`;
@@ -75,23 +90,22 @@ export const buildInfrastructureConceptDescription = ({
 
 export const buildConceptListQuery = ({
   sourceQuery,
-  cluster,
+  clusterScope,
   datasetCondition,
   additionalPipeline,
   breakdownFields,
 }: {
   sourceQuery: string;
-  cluster?: string;
+  clusterScope?: ClusterScope;
   datasetCondition: string;
   additionalPipeline?: string;
   breakdownFields: readonly string[];
 }): string => {
   const extraPipeline = additionalPipeline ? `\n${additionalPipeline}` : '';
+  const clusterCondition = getClusterCondition(clusterScope);
   return `${sourceQuery}
 | WHERE @timestamp > NOW() - 1 hour
-    ${
-      cluster ? `AND orchestrator.cluster.name == ${quoteEsqlString(cluster)}\n    ` : ''
-    }AND ${datasetCondition}${extraPipeline}
+    ${clusterCondition}AND ${datasetCondition}${extraPipeline}
 | STATS last_seen = MAX(@timestamp) BY ${breakdownFields.join(', ')}
 | SORT ${breakdownFields.join(', ')}`;
 };
