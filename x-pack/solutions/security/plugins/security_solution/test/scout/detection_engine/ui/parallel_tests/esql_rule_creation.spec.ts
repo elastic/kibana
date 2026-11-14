@@ -265,7 +265,10 @@ spaceTest.describe(
           .setQuery(`from ${sourceIndexName(scoutSpace.id)} | limit 5`);
         await continueDefineStep(ruleCreateWizard);
 
-        await expect(queryBar).not.toContainText('metadata _id');
+        // Cypress asserted `not.contain 'metadata _id'` on the hidden query bar, which cannot
+        // fail. The behavior under test is that the query is accepted without a metadata error.
+        await expect(ruleCreateWizard.aboutRuleName).toBeVisible();
+        await expect(queryBar).toBeHidden();
       }
     );
 
