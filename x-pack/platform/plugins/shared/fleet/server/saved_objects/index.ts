@@ -55,6 +55,7 @@ import {
   SettingsSchemaV7,
   SettingsSchemaV8,
   SettingsSchemaV9,
+  SettingsSchemaV10,
   PackagePolicySchemaV22,
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
@@ -228,6 +229,7 @@ export const getSavedObjectTypes = (
           ssl_secret_storage_requirements_met: { type: 'boolean' },
           download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
           otlp_output_requirements_met: { type: 'boolean' },
+          response_actions_export_secret_storage_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -344,6 +346,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: SettingsSchemaV9.extends({}, { unknowns: 'ignore' }),
             create: SettingsSchemaV9,
+          },
+        },
+        10: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                response_actions_export_secret_storage_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV10.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV10,
           },
         },
       },

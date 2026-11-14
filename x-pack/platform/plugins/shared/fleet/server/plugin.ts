@@ -141,6 +141,10 @@ import {
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
 import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
+import {
+  createSecretsService,
+  type SecretsServiceInterface,
+} from './services/secrets/secrets_service';
 import type { FilesClientFactory } from './services/files/types';
 import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
@@ -320,6 +324,16 @@ export interface FleetStartContract {
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
   createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
+  /**
+   * Fleet secrets (`.fleet-secrets`) and the Fleet Server version check for secret references.
+   * Fleet supplies its internal clients; audit entries record `consumer` and, when given, the user of `request`.
+   */
+  getSecretsService(opts: {
+    /** The user's request, for audit attribution. Omit only for background work (e.g. tasks). */
+    request?: KibanaRequest;
+    /** Calling feature, recorded in audit entries, e.g. 'security_solution'. */
+    consumer: string;
+  }): SecretsServiceInterface;
   /*
   Function exported to allow creating unique ids for saved object tags
    */
@@ -1044,6 +1058,13 @@ export class FleetPlugin
       createFleetActionsClient(packageName: string) {
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      getSecretsService: ({ request, consumer }) =>
+        createSecretsService({
+          esClient: core.elasticsearch.client.asInternalUser,
+          soClient: internalSoClient,
+          request,
+          consumer,
+        }),
       getPackageSpecTagId,
       async createOutputClient(request: KibanaRequest) {
         const authz = await getAuthzFromRequest(request);

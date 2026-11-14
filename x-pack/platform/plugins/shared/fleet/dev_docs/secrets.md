@@ -102,3 +102,27 @@ For integration secrets, when performing CRUD on a package policy, we first chec
 If secret storage is not enabled, we check all fleet server versions, if they meet the minimum spec, then we enable secret storage on the global settings saved object and the check is never performed again. 
 
 For output secrets, we do not perform this check as outputs offer a plain text alternative for all secret fields. Instead we warn the user about the version requirements and let them decide. 
+
+### Using Fleet secrets from other plugins
+
+Other plugins call `FleetStartContract.getSecretsService({ request, consumer })`. Fleet supplies its internal Elasticsearch and saved objects clients. Every audit entry the service writes records `consumer` (`labels.consumer`) and, when `request` is given, the user. Omit `request` only for background work such as tasks.
+
+- `createSecrets(values)` creates one secret per value and returns `{ id }` in input order.
+  - Requests are not retried: retrying a lost response would create a duplicate secret.
+  - All or nothing: on any failure, it deletes the secrets this call created and throws.
+  - A failed request Elasticsearch did not reject with a 4xx is audited as `secret possibly created` with the `unknown` outcome.
+- `deleteSecrets(ids)` returns `{ id, deleted }` per id.
+  - Callers may only pass ids returned by their own `createSecrets`. `.fleet-secrets` is shared, and secrets have no owner.
+  - The whole call throws before any request is sent when an id is malformed (anything but the 20-character ids Elasticsearch generates) or still referenced by the current revision of a package policy in any space.
+  - Nothing else is checked: outputs, Fleet Server hosts, download sources, SSL settings, cloud connectors, previous package policy revisions, compiled agent policies (`.fleet-policies`) and agent actions. Deleting a secret an agent policy still references crashes Fleet Server for the whole deployment (elastic/fleet-server#7536). Delete a secret an action references only once the action can no longer be delivered (it expired or every target agent acknowledged it).
+  - An unknown id is reported as `deleted: false`.
+  - A 404 after a retried request (retried by Fleet or by the Elasticsearch client) counts as `deleted: true`, because an earlier attempt may have deleted the secret. It is audited as `secret possibly deleted` with the `unknown` outcome, as is any other failure unless Elasticsearch rejected the only attempt with a 4xx response.
+- `isSecretStorageEnabledForFeature(feature)` runs the Fleet Server version check described above for a `SecretStorageFeature`. Fleet owns each feature's settings key and minimum version.
+
+To add a feature:
+
+1. Add its id to `SecretStorageFeature` and an entry to `SECRET_STORAGE_FEATURES` (`server/services/secrets/secrets_service.ts`).
+2. Add a minimum version constant to `common/constants/secrets.ts`.
+3. Add a new settings key to `FleetServerRequirementSettingsKey`, `BaseSettings`, `mapSettingsSO` and the settings saved object (mappings plus a new model version).
+
+The settings latch is sticky, so raising a feature's minimum version needs a new settings key.
