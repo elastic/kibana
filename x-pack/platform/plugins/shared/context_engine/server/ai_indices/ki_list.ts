@@ -8,8 +8,12 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { toOptionalKiLifecycleStatus } from '../../common/ki_lifecycle_status';
-import type { KiLifecycleStatus } from '../../common/step_types/ki';
+import {
+  toOptionalKiLifecycleStatus,
+  toOptionalKiStatus,
+  type KiStatus,
+} from '../../common/ki_lifecycle_status';
+import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../common/ki_list_sort';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
@@ -17,6 +21,7 @@ import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledg
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
 /** Normalized lifecycle column: unset stored values become `active`. */
 const KI_LIFECYCLE_STATUS_ALIAS = 'lifecycle_status';
+export const KI_STATUS_ALIAS = 'ki_status';
 
 /** Columns the list reads. Each is guarded by a schema probe since AI indices vary in shape. */
 const KI_LIST_FIELDS = [
@@ -38,7 +43,8 @@ export interface GetKisOptions {
   /** Fuzzy full-text search over indexed title and description columns. */
   query?: string;
   /** When omitted, non-deleted KIs only (unset status counts as active). */
-  lifecycleStatuses?: KiLifecycleStatus[];
+  statuses?: KiStatus[];
+  sort?: KiListSort;
 }
 
 const EMPTY: ListKisResponse = { kis: [], total: 0, summary: { total: 0, counts_by_type: [] } };
@@ -56,6 +62,7 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
   const updatedAtValue = toOptionalString(updatedAt);
   const expiresAtValue = toOptionalString(expiresAt);
   const lifecycleStatus = toOptionalKiLifecycleStatus(row[KI_LIFECYCLE_STATUS_ALIAS]) ?? 'active';
+  const status = toOptionalKiStatus(row[KI_STATUS_ALIAS]) ?? lifecycleStatus;
   return {
     id: String(id),
     index: String(index),
@@ -64,23 +71,29 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
     ...(updatedAtValue !== undefined ? { updated_at: updatedAtValue } : {}),
     ...(expiresAtValue !== undefined ? { expires_at: expiresAtValue } : {}),
     lifecycle_status: lifecycleStatus,
+    status,
   };
 };
 
-const lifecycleStatusEvalClause = (has: (field: KiListField) => boolean): string =>
+export const lifecycleStatusEvalClause = (has: (field: KiListField) => boolean): string =>
   has(KI_LIFECYCLE_STATUS_FIELD)
     ? `EVAL ${KI_LIFECYCLE_STATUS_ALIAS} = COALESCE(${KI_LIFECYCLE_STATUS_FIELD}, "active")`
     : `EVAL ${KI_LIFECYCLE_STATUS_ALIAS} = "active"`;
 
-const lifecycleFilterClause = (lifecycleStatuses?: KiLifecycleStatus[]): string[] => {
-  if (lifecycleStatuses === undefined) {
+export const kiStatusEvalClause = (has: (field: KiListField) => boolean): string => {
+  const expired = has('expires_at') ? 'expires_at <= NOW()' : 'false';
+  return `EVAL ${KI_STATUS_ALIAS} = CASE(${KI_LIFECYCLE_STATUS_ALIAS} == "active" AND COALESCE(${expired}, false), "expired", ${KI_LIFECYCLE_STATUS_ALIAS})`;
+};
+
+const statusFilterClause = (statuses?: KiStatus[]): string[] => {
+  if (statuses === undefined) {
     return [`WHERE ${KI_LIFECYCLE_STATUS_ALIAS} != "deleted"`];
   }
-  if (lifecycleStatuses.length === 0) {
+  if (statuses.length === 0) {
     return ['WHERE FALSE'];
   }
-  const values = lifecycleStatuses.map((status) => `"${status}"`).join(', ');
-  return [`WHERE ${KI_LIFECYCLE_STATUS_ALIAS} IN (${values})`];
+  const values = statuses.map((status) => `"${status}"`).join(', ');
+  return [`WHERE ${KI_STATUS_ALIAS} IN (${values})`];
 };
 
 const searchFilterClause = (has: (field: KiListField) => boolean, query?: string): string[] => {
@@ -89,7 +102,7 @@ const searchFilterClause = (has: (field: KiListField) => boolean, query?: string
   }
   const matches: string[] = [];
   if (has('title')) {
-    matches.push('MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2})');
+    matches.push('MATCH(title, ?searchQuery, {"fuzziness":"AUTO"})');
   }
   if (has('description')) {
     matches.push('MATCH(description, ?searchQuery, {"fuzziness":"AUTO"})');
@@ -141,13 +154,15 @@ export const probeColumns = async (
   }
 };
 
-const getRowsSort = (query: string | undefined, hasTimestampColumn: boolean): string => {
-  if (query !== undefined) {
-    return hasTimestampColumn
-      ? 'SORT _score DESC, revision_time DESC, id ASC'
-      : 'SORT _score DESC, id ASC';
+/** ES|QL sorts `text` case-sensitively, and an empty title sorts first unless nulled. */
+const getRowsSort = (sort: KiListSort, hasTimestampColumn: boolean): string[] => {
+  if (sort === 'title') {
+    return [
+      'EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))',
+      'SORT title_sort ASC NULLS LAST, id ASC',
+    ];
   }
-  return hasTimestampColumn ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC';
+  return [hasTimestampColumn ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC'];
 };
 
 /**
@@ -174,21 +189,20 @@ export const latestRevisionPipeline = (
   ];
 };
 
-/** One row per KI, filtered by lifecycle status. */
+/** One row per KI, filtered by status. */
 const currentKisQuery = (
   dest: AiIndexDest,
   sources: string[],
   has: (field: KiListField) => boolean,
-  lifecycleStatuses?: KiLifecycleStatus[],
+  statuses?: KiStatus[],
   query?: string
 ): string =>
   [
-    `FROM ${fromSources(sources)} ${
-      query !== undefined ? 'METADATA _id, _index, _score' : 'METADATA _id, _index'
-    }`,
+    `FROM ${fromSources(sources)} METADATA _id, _index`,
     ...latestRevisionPipeline(dest, has),
     lifecycleStatusEvalClause(has),
-    ...lifecycleFilterClause(lifecycleStatuses),
+    kiStatusEvalClause(has),
+    ...statusFilterClause(statuses),
     ...searchFilterClause(has, query),
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
@@ -198,7 +212,7 @@ const currentKisQuery = (
 
 export const getKis = async (
   esClient: ElasticsearchClient,
-  { dest, size, type, query, lifecycleStatuses }: GetKisOptions
+  { dest, size, type, query, statuses, sort = DEFAULT_KI_LIST_SORT }: GetKisOptions
 ): Promise<ListKisResponse> => {
   // Zero-row probes resolve the mapped columns under the caller's own read privilege; an
   // expression that resolves to nothing is left out so the rest of the dest still lists.
@@ -219,7 +233,7 @@ export const getKis = async (
     dest,
     sources.map(({ expression }) => expression),
     has,
-    lifecycleStatuses,
+    statuses,
     query
   );
   const filterParams = listQueryParams(type, query);
@@ -231,14 +245,15 @@ export const getKis = async (
     'updated_at',
     'expires_at',
     KI_LIFECYCLE_STATUS_ALIAS,
+    KI_STATUS_ALIAS,
   ].join(', ');
 
-  const rowsSort = getRowsSort(query, has('@timestamp'));
+  const rowsSort = getRowsSort(sort, has('@timestamp'));
 
   const rowsQuery = [
     base,
     ...(type !== undefined ? ['WHERE type == ?type'] : []),
-    rowsSort,
+    ...rowsSort,
     `KEEP ${keepFields}`,
     `LIMIT ${size}`,
   ].join('\n| ');

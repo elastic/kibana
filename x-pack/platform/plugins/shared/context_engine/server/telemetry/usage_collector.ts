@@ -11,7 +11,13 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { latestRevisionPipeline, probeColumns } from '../ai_indices/ki_list';
+import {
+  KI_STATUS_ALIAS,
+  kiStatusEvalClause,
+  latestRevisionPipeline,
+  lifecycleStatusEvalClause,
+  probeColumns,
+} from '../ai_indices/ki_list';
 import { aiIndicesIndexName, type StoredAiIndexDocument } from '../ai_indices/storage';
 import { formatErrorMessage } from '../utils/format_es_error';
 
@@ -64,15 +70,13 @@ const isKiLifecycleBucket = (value: unknown): value is KiLifecycleBucket =>
  * KIs that failed verification are left out.
  */
 const kiLifecycleCountsQuery = (dest: AiIndexDest, columns: Set<string>): string => {
-  const hasStatus = columns.has('governance.lifecycle.status');
-  const deleted = hasStatus ? 'governance.lifecycle.status == "deleted"' : 'false';
-  const failed = hasStatus ? 'governance.lifecycle.status == "verification_failed"' : 'false';
-  const expired = columns.has('expires_at') ? 'expires_at <= NOW()' : 'false';
+  const has = (field: string) => columns.has(field);
   return [
     `FROM ${JSON.stringify(dest.value)} METADATA _id, _index`,
-    ...latestRevisionPipeline(dest, (field) => columns.has(field)),
-    `EVAL lifecycle = CASE(COALESCE(${deleted}, false), "deleted", COALESCE(${failed}, false), "verification_failed", COALESCE(${expired}, false), "expired", "active")`,
-    'STATS count = COUNT(*) BY lifecycle',
+    ...latestRevisionPipeline(dest, has),
+    lifecycleStatusEvalClause(has),
+    kiStatusEvalClause(has),
+    `STATS count = COUNT(*) BY ${KI_STATUS_ALIAS}`,
   ].join('\n| ');
 };
 
@@ -92,7 +96,7 @@ const countKisByLifecycle = async (
     { requestTimeout: ESQL_REQUEST_TIMEOUT_MS }
   )) as unknown as ESQLSearchResponse;
   const countIndex = response.columns.findIndex(({ name }) => name === 'count');
-  const lifecycleIndex = response.columns.findIndex(({ name }) => name === 'lifecycle');
+  const lifecycleIndex = response.columns.findIndex(({ name }) => name === KI_STATUS_ALIAS);
   for (const row of response.values) {
     const lifecycle = row[lifecycleIndex];
     if (isKiLifecycleBucket(lifecycle)) {

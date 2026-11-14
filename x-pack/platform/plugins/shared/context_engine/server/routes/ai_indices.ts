@@ -729,9 +729,8 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
-        const { size, type, lifecycle_status: lifecycleStatus, query } = request.query;
-        const lifecycleStatuses =
-          lifecycleStatus !== undefined ? [lifecycleStatus].flat() : undefined;
+        const { size, type, status, query, sort } = request.query;
+        const statuses = status !== undefined ? [status].flat() : undefined;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -740,8 +739,9 @@ export const registerAiIndexRoutes = ({
             dest: aiIndex.dest,
             size,
             ...(type !== undefined ? { type } : {}),
-            ...(lifecycleStatuses !== undefined ? { lifecycleStatuses } : {}),
+            ...(statuses !== undefined ? { statuses } : {}),
             ...(query !== undefined ? { query } : {}),
+            sort,
           });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
           return response.ok({ body });

@@ -40,6 +40,8 @@ import {
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
+import { KI_STATUSES, type KiStatus } from '../../../common/ki_lifecycle_status';
+import { DEFAULT_KI_LIST_SORT, KI_LIST_SORTS, type KiListSort } from '../../../common/ki_list_sort';
 import {
   KI_LIFECYCLE_STATUSES,
   MAX_KI_ID_LENGTH,
@@ -329,6 +331,31 @@ const kiLifecycleStatusesQuerySchema = schema.oneOf(
   }
 );
 
+const kiListStatusQuerySchema = schema.oneOf(
+  KI_STATUSES.map((status) => schema.literal(status)) as [Type<KiStatus>],
+  {
+    meta: {
+      description:
+        'Knowledge Indicator status: a stored governance.lifecycle.status value, or `expired` for active KIs past expires_at.',
+    },
+  }
+);
+
+const kiListStatusesQuerySchema = schema.oneOf(
+  [
+    kiListStatusQuerySchema,
+    schema.arrayOf(kiListStatusQuerySchema, {
+      maxSize: KI_STATUSES.length,
+    }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, filter by KI status. `expired` matches KIs past expires_at that are not deleted or failed, and `active` excludes them. When omitted, deleted KIs are excluded.',
+    },
+  }
+);
+
 export const listKisQuerySchema = schema.object({
   size: schema.number({
     min: 0,
@@ -342,7 +369,14 @@ export const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
-  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
+  status: schema.maybe(kiListStatusesQuerySchema),
+  sort: schema.oneOf(KI_LIST_SORTS.map((value) => schema.literal(value)) as [Type<KiListSort>], {
+    defaultValue: DEFAULT_KI_LIST_SORT,
+    meta: {
+      description:
+        'Sort order. `updated` is newest first, `title` is A to Z (case-insensitive, KIs without a title last). Always applies, also when `query` is set.',
+    },
+  }),
   query: schema.maybe(
     schema.string({
       minLength: 1,
