@@ -61,6 +61,11 @@ describe('config schema', () => {
           },
           "selector": Object {},
         },
+        "authz": Object {
+          "ols": Object {
+            "enabled": false,
+          },
+        },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "fipsMode": Object {
@@ -123,6 +128,11 @@ describe('config schema', () => {
           },
           "selector": Object {},
         },
+        "authz": Object {
+          "ols": Object {
+            "enabled": false,
+          },
+        },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "fipsMode": Object {
@@ -184,6 +194,11 @@ describe('config schema', () => {
             "token": undefined,
           },
           "selector": Object {},
+        },
+        "authz": Object {
+          "ols": Object {
+            "enabled": false,
+          },
         },
         "cookieName": "sid",
         "fipsMode": Object {
@@ -248,6 +263,11 @@ describe('config schema', () => {
             "token": undefined,
           },
           "selector": Object {},
+        },
+        "authz": Object {
+          "ols": Object {
+            "enabled": false,
+          },
         },
         "cookieName": "sid",
         "fipsMode": Object {

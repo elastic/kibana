@@ -16,6 +16,8 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/saved-objects/common
+dependsOn:
+  - '@kbn/ols'
 tags:
   - shared-common
   - package

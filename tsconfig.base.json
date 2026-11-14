@@ -2063,6 +2063,8 @@
       "@kbn/oidc-provider-plugin/*": ["./x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider/*"],
       "@kbn/ols": ["./src/platform/packages/shared/kbn-ols"],
       "@kbn/ols/*": ["./src/platform/packages/shared/kbn-ols/*"],
+      "@kbn/ols-ui": ["./src/platform/packages/shared/kbn-ols-ui"],
+      "@kbn/ols-ui/*": ["./src/platform/packages/shared/kbn-ols-ui/*"],
       "@kbn/open-telemetry-instrumented-plugin": ["./src/platform/test_plugins/otel_metrics"],
       "@kbn/open-telemetry-instrumented-plugin/*": ["./src/platform/test_plugins/otel_metrics/*"],
       "@kbn/openapi-bundler": ["./src/platform/packages/shared/kbn-openapi-bundler"],

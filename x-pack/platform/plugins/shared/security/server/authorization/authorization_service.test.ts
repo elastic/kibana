@@ -75,6 +75,7 @@ it(`#setup returns exposed services`, () => {
 
   const authorizationService = new AuthorizationService();
   const getClusterClient = () => Promise.resolve(mockClusterClient);
+  const privilegeCheckRecovery = { getRecoveryActions: jest.fn(), primeRecovery: jest.fn() };
   const authz = authorizationService.setup({
     http: mockCoreSetup.http,
     capabilities: mockCoreSetup.capabilities,
@@ -87,6 +88,7 @@ it(`#setup returns exposed services`, () => {
     getSpacesService: mockGetSpacesService,
     getCurrentUser: jest.fn(),
     customBranding: mockCoreSetup.customBranding,
+    privilegeCheckRecovery,
   });
 
   expect(authz.applicationName).toBe(application);
@@ -95,7 +97,8 @@ it(`#setup returns exposed services`, () => {
   expect(checkPrivilegesFactory).toHaveBeenCalledWith(
     authz.actions,
     getClusterClient,
-    authz.applicationName
+    authz.applicationName,
+    privilegeCheckRecovery
   );
 
   expect(authz.checkPrivilegesDynamicallyWithRequest).toBe(

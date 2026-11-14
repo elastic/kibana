@@ -16,6 +16,11 @@ export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
   getAll = jest
     .fn()
     .mockResolvedValue(Object.values(FakeConnectors) as ConnectorWithExtraFindData[]);
+  getAllWithAcl = jest.fn().mockResolvedValue(
+    (Object.values(FakeConnectors) as ConnectorWithExtraFindData[]).map((connector) => ({
+      connector,
+    }))
+  );
   execute = jest.fn().mockImplementation((options) => this.returnMockedConnectorResult(options));
   bulkEnqueueExecution = jest.fn().mockResolvedValue(undefined);
 

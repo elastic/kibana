@@ -142,6 +142,8 @@ export type {
   SecurityServiceStart,
   CoreAuthenticationService,
   CoreAuditService,
+  CoreOlsService,
+  CoreScopedOlsService,
   CoreServiceAccountsService,
   ServiceAccount,
   CreateServiceAccountParams,
@@ -429,6 +431,7 @@ export type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
+  SavedObjectsOlsExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
   SavedObjectsExtensionFactory,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
@@ -473,12 +476,16 @@ export type {
   CheckAuthorizationResult,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
+  ISavedObjectsOlsExtension,
+  AclObject,
+  AclOperation,
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
+  OLS_EXTENSION_ID,
   SPACES_EXTENSION_ID,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';

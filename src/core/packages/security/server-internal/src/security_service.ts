@@ -21,11 +21,22 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
+import type { AccessPolicyRegistry, SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 import { createCoreUiamService } from './uiam';
 import { WorkloadTypeRegistry } from './workload_type_registry';
 import { createBoundWorkloadResolver } from './resolve_bound_workloads';
+
+/**
+ * @internal
+ */
+export interface SecurityServiceStartDeps {
+  /**
+   * The Saved Objects type registry with every type registered. The default object-level security (OLS)
+   * reads access policies from it, so Core starts security after Saved Objects.
+   */
+  typeRegistry: AccessPolicyRegistry;
+}
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -116,11 +127,11 @@ export class SecurityService
     };
   }
 
-  public start(): InternalSecurityServiceStart {
+  public start({ typeRegistry }: SecurityServiceStartDeps): InternalSecurityServiceStart {
     if (!this.securityApi) {
       this.log.warn('Security API was not registered, using default implementation');
     }
-    const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
+    const apiContract = this.securityApi ?? getDefaultSecurityImplementation(typeRegistry);
     return convertSecurityApi(apiContract, this.workloadTypes);
   }
 

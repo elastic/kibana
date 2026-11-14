@@ -8,6 +8,7 @@
  */
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { createFailClosedOls, type AccessPolicyRegistry } from './fail_closed_ols';
 
 const API_KEYS_DISABLED_ERROR = new Error('API keys are disabled');
 const REJECT_WHEN_API_KEYS_DISABLED = () => Promise.reject(API_KEYS_DISABLED_ERROR);
@@ -15,7 +16,9 @@ const REJECT_WHEN_API_KEYS_DISABLED = () => Promise.reject(API_KEYS_DISABLED_ERR
 const SERVICE_ACCOUNTS_DISABLED_ERROR = new Error('Service accounts are disabled');
 const REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED = () => Promise.reject(SERVICE_ACCOUNTS_DISABLED_ERROR);
 
-export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract => {
+export const getDefaultSecurityImplementation = (
+  typeRegistry: AccessPolicyRegistry
+): CoreSecurityDelegateContract => {
   return {
     authc: {
       getCurrentUser: () => null,
@@ -54,6 +57,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
       getWorkloadServiceAccountSummary: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       withScopedRequestForWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
     },
+    authz: { ols: createFailClosedOls(typeRegistry) },
     // No security delegate registered, so there are no user profiles to bind.
     fakeRequestEnricher: () => undefined,
   };

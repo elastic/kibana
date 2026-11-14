@@ -1,0 +1,179 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { lazy } from 'react';
+import userEvent from '@testing-library/user-event';
+import { screen, waitFor, within } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { AccessPolicyResponse } from '@kbn/ols-ui';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
+import CreateConnectorFlyout from '.';
+import type { AppMockRenderer } from '../../test_utils';
+import { createAppMockRenderer } from '../../test_utils';
+
+jest.mock('../../../lib/action_connector_api', () => ({
+  ...jest.requireActual('../../../lib/action_connector_api'),
+  loadActionTypes: jest.fn(),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
+
+jest.setTimeout(15_000);
+
+const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
+
+const POLICY_PATH = '/internal/security/ols/action/_policy';
+
+const POLICY: AccessPolicyResponse = {
+  enabled: true,
+  general_access_levels: ['none', 'use', 'edit'],
+  default_general_access_level: 'use',
+  entry_levels: ['use'],
+  operations: { view: { level: 'view' }, execute: { level: 'use' }, edit: { level: 'edit' } },
+};
+
+const ALICE = {
+  uid: 'u_alice',
+  enabled: true,
+  user: { username: 'alice', email: 'alice@example.com', full_name: 'Alice Archer' },
+  data: {},
+  eligible_levels: ['use'],
+};
+
+const createConnectorResponse = {
+  connector_type_id: 'test',
+  is_preconfigured: false,
+  is_deprecated: false,
+  name: 'My test',
+  config: { testTextField: 'My text field' },
+  secrets: {},
+  id: '123',
+};
+
+describe('CreateConnectorFlyout with object-level security (OLS)', () => {
+  let appMockRenderer: AppMockRenderer;
+  let policy: AccessPolicyResponse;
+  const actionTypeRegistry = actionTypeRegistryMock.create();
+  const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+    actionConnectorFields: lazy(() => import('../connector_mock')),
+    validateParams: jest.fn().mockResolvedValue({ errors: {} }),
+  });
+
+  const renderAndFillForm = async () => {
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={jest.fn()}
+        onConnectorCreated={jest.fn()}
+        onTestConnector={jest.fn()}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+    await userEvent.click(await screen.findByTestId('nameInput'));
+    await userEvent.paste('My test');
+    await userEvent.click(await screen.findByTestId('test-connector-text-field'));
+    await userEvent.paste('My text field');
+  };
+
+  const getCreateBody = () => {
+    const calls = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+      ([path]: [string]) => path.startsWith('/api/actions/connector')
+    );
+    expect(calls).toHaveLength(1);
+    return JSON.parse(calls[0][1].body);
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    policy = POLICY;
+    loadActionTypes.mockResolvedValue([
+      {
+        id: actionTypeModel.id,
+        enabled: true,
+        name: 'Test',
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting'],
+      },
+    ]);
+    actionTypeRegistry.has.mockReturnValue(true);
+    actionTypeRegistry.get.mockReturnValue(actionTypeModel);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.coreStart.application.capabilities = {
+      ...appMockRenderer.coreStart.application.capabilities,
+      actions: { save: true, show: true },
+    };
+    appMockRenderer.coreStart.http.get = jest.fn(async (path: string) =>
+      path === POLICY_PATH ? policy : {}
+    ) as unknown as typeof appMockRenderer.coreStart.http.get;
+    appMockRenderer.coreStart.http.post = jest.fn(async (path: string) =>
+      path.endsWith('/_suggest_principals') ? { users: [ALICE] } : createConnectorResponse
+    ) as unknown as typeof appMockRenderer.coreStart.http.post;
+    appMockRenderer.coreStart.http.head = jest.fn().mockResolvedValue({});
+  });
+
+  it('keeps configuration and access when switching tabs and saves both together', async () => {
+    await renderAndFillForm();
+
+    const flyout = within(screen.getByTestId('create-connector-flyout'));
+    expect(flyout.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'Configuration',
+      'Access',
+    ]);
+    await userEvent.click(flyout.getByRole('tab', { name: 'Access' }));
+    expect(screen.getByTestId('nameInput')).not.toBeVisible();
+    await userEvent.click(screen.getByTestId('accessPanelGeneralAccess'));
+    await waitForEuiPopoverOpen();
+    await userEvent.click(screen.getByTestId('accessPanelGeneralAccessOption-none'));
+    await userEvent.type(
+      within(screen.getByTestId('accessPanelPrincipalPicker')).getByRole('combobox'),
+      'alice'
+    );
+    await userEvent.click(await screen.findByTestId('accessPanelPrincipalPickerOption-u_alice'));
+    expect(screen.getByTestId('accessPanelEntryLevel-u_alice')).toBeInTheDocument();
+
+    await userEvent.click(flyout.getByRole('tab', { name: 'Configuration' }));
+    expect(screen.getByTestId('nameInput')).toHaveValue('My test');
+    expect(screen.getByTestId('test-connector-text-field')).toHaveValue('My text field');
+    await userEvent.click(flyout.getByRole('tab', { name: 'Access' }));
+    expect(screen.getByTestId('accessPanelGeneralAccess')).toHaveTextContent(
+      'Only people with access'
+    );
+    expect(screen.getByTestId('accessPanelEntryLevel-u_alice')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+    await waitFor(() =>
+      expect(getCreateBody()).toEqual({
+        name: 'My test',
+        config: { testTextField: 'My text field' },
+        secrets: {},
+        connector_type_id: actionTypeModel.id,
+        acl: {
+          general_access: 'none',
+          entries: [{ type: 'user', id: 'u_alice', access: 'use' }],
+        },
+      })
+    );
+  });
+
+  it('shows no Access section and sends no access while OLS is disabled', async () => {
+    policy = { ...POLICY, enabled: false };
+    await renderAndFillForm();
+
+    await waitFor(() =>
+      expect(appMockRenderer.coreStart.http.get).toHaveBeenCalledWith(POLICY_PATH)
+    );
+    expect(screen.queryByTestId('connectorAccessSection')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Access' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+    await waitFor(() => expect(getCreateBody()).not.toHaveProperty('acl'));
+  });
+});

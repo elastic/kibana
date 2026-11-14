@@ -64,6 +64,7 @@ export {
   readEditableAcl,
   type AclChange,
   type AclChangeErrorCode,
+  type AclWarning,
   type EditableAcl,
   type EditableAclEntry,
   type InitialAccess,

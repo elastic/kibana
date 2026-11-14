@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ACL_FIELD } from '@kbn/ols';
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
@@ -58,6 +59,7 @@ export const performFind = async <T = unknown, A = unknown>(
     serializer: serializerHelper,
     migration: migrationHelper,
     encryption: encryptionHelper,
+    acl: olsHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
   let namespaces!: string[];
@@ -117,6 +119,20 @@ export const performFind = async <T = unknown, A = unknown>(
 
   if (fields && !Array.isArray(fields)) {
     throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
+  }
+
+  // Searching or sorting by access control lists would reveal grants to callers who cannot manage
+  // access. Filters and aggregations reject them during validation.
+  const isAclField = (field?: string) =>
+    field === ACL_FIELD || !!field?.startsWith(`${ACL_FIELD}.`);
+  if (
+    [
+      ...(rootSearchFields ?? []),
+      sortField,
+      ...(requestedSort ?? []).map(({ field }) => field),
+    ].some(isAclField)
+  ) {
+    throw SavedObjectsErrorHelpers.createBadRequestError('ACL fields cannot be searched or sorted');
   }
 
   let kueryNode;
@@ -187,6 +203,18 @@ export const performFind = async <T = unknown, A = unknown>(
     }
   }
 
+  // Object-level security applies before search, so pages, totals, and aggregations never count
+  // objects the caller cannot view. System callers that disable extensions skip it.
+  const aclFiltersByType = disableExtensions
+    ? undefined
+    : await olsHelper.getReadFilters(
+        new Map(
+          typeToNamespacesMap
+            ? [...typeToNamespacesMap]
+            : allowedTypes.map((allowedType) => [allowedType, namespaces])
+        )
+      );
+
   const esOptions = {
     // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
     index: pit ? undefined : commonHelper.getIndicesForTypes(allowedTypes),
@@ -211,6 +239,7 @@ export const performFind = async <T = unknown, A = unknown>(
       sort: requestedSort,
       namespaces,
       typeToNamespacesMap, // If defined, this takes precedence over the `type` and `namespaces` fields
+      aclFiltersByType: aclFiltersByType?.size ? aclFiltersByType : undefined,
       hasReference,
       hasReferenceOperator,
       hasNoReference,

@@ -36,6 +36,7 @@ interface GetSearchDslOptions {
   namespaces?: string[];
   pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;
+  aclFiltersByType?: Map<string, estypes.QueryDslQueryContainer>;
   hasReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
   hasReferenceOperator?: SearchOperator;
   hasNoReference?: SavedObjectTypeIdTuple | SavedObjectTypeIdTuple[];
@@ -61,6 +62,7 @@ export function getSearchDsl(
     namespaces,
     pit,
     typeToNamespacesMap,
+    aclFiltersByType,
     hasReference,
     hasReferenceOperator,
     hasNoReference,
@@ -86,6 +88,7 @@ export function getSearchDsl(
       namespaces,
       type,
       typeToNamespacesMap,
+      aclFiltersByType,
       search,
       searchFields,
       rootSearchFields,

@@ -3018,3 +3018,91 @@ describe('execute() - EARS structured logging', () => {
     expect(earsLines()).toEqual([]);
   });
 });
+
+describe('object-level security', () => {
+  const privateConnector = {
+    ...connectorSavedObject,
+    acl: {
+      version: [1],
+      owner: { type: ['user'], id: ['u_owner'] },
+      general_access: ['none'],
+      entries: [],
+    },
+  };
+  const ols = securityServiceMock.createOls();
+  const scopedOls = securityServiceMock.createScopedOls();
+
+  afterEach(() => {
+    securityMockStart.authz.ols = null;
+  });
+
+  beforeEach(() => {
+    ols.asScoped.mockReturnValue(scopedOls);
+    securityMockStart.authz.ols = ols;
+    connectorTypeRegistry.get.mockReturnValue(connectorType);
+    connectorTypeRegistry.isActionExecutable.mockReturnValue(true);
+  });
+
+  test('runs an unrestricted connector without any object-level check', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+
+    await actionExecutor.execute(executeParams);
+
+    expect(scopedOls.authorize).not.toHaveBeenCalled();
+    expect(connectorType.executor).toHaveBeenCalled();
+  });
+
+  test('runs a restricted connector the execution credential can use', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(privateConnector);
+    scopedOls.authorize.mockResolvedValue(new Map([[CONNECTOR_ID, { status: 'allowed' }]]));
+
+    await actionExecutor.execute(executeParams);
+
+    // The credential's own feature privileges cap the grant, so they are checked first.
+    expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
+      operation: 'execute',
+      actionTypeId: 'test',
+    });
+    expect(ols.asScoped).toHaveBeenCalledWith(executeParams.request);
+    expect(scopedOls.authorize).toHaveBeenCalledWith({
+      type: 'action',
+      spaceId: 'some-namespace',
+      operation: 'execute',
+      objects: [{ id: CONNECTOR_ID, acl: privateConnector.acl }],
+    });
+    expect(connectorType.executor).toHaveBeenCalled();
+  });
+
+  test('refuses a restricted connector the execution credential cannot use', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(privateConnector);
+    scopedOls.authorize.mockResolvedValue(new Map([[CONNECTOR_ID, { status: 'not_found' }]]));
+
+    const result = await actionExecutor.execute(executeParams);
+
+    expect(result).toMatchObject({ status: 'error', retry: false });
+    expect(result.message).toContain('Unauthorized to execute connector');
+    expect(connectorType.executor).not.toHaveBeenCalled();
+  });
+
+  test('refuses a restricted connector without a request', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(privateConnector);
+
+    const result = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+
+    expect(result).toMatchObject({ status: 'error' });
+    expect(result.message).toContain('restricted connector');
+    expect(connectorType.executor).not.toHaveBeenCalled();
+  });
+
+  test('keeps restricted connectors usable while object-level security is disabled', async () => {
+    securityMockStart.authz.ols = null;
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(privateConnector);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(scopedOls.authorize).not.toHaveBeenCalled();
+    expect(connectorType.executor).toHaveBeenCalled();
+  });
+});

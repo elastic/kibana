@@ -8,6 +8,7 @@
  */
 
 export { AclChangeError, type AclChangeErrorCode } from './acl_change_error';
+export type { AclWarning } from './acl_warning';
 export {
   MAX_ACL_ENTRIES,
   prepareAclChange,

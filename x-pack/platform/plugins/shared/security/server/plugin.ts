@@ -48,6 +48,8 @@ import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
+import { OlsService } from './authorization/ols/ols_service';
+import { createPrivilegeCheckRecovery } from './authorization/ols/recovery';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
@@ -224,6 +226,14 @@ export class SecurityPlugin
     return this.userProfileStart;
   };
 
+  private olsService?: OlsService;
+  private readonly getOlsService = () => {
+    if (!this.olsService) {
+      throw new Error(`olsService is not registered!`);
+    }
+    return this.olsService;
+  };
+
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
@@ -376,6 +386,8 @@ export class SecurityPlugin
       features,
       getCurrentUser,
       customBranding: core.customBranding,
+      // The OLS service exists only after start. Checks made before it skip recovery.
+      privilegeCheckRecovery: createPrivilegeCheckRecovery(() => this.olsService),
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
@@ -411,6 +423,8 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getCurrentUser,
+      olsEnabled: config.authz.ols.enabled,
+      getOlsService: this.getOlsService,
     });
 
     this.registerDeprecations(core, license);
@@ -423,6 +437,7 @@ export class SecurityPlugin
         audit: this.auditSetup,
         config,
         logger: this.logger,
+        getOlsService: this.getOlsService,
       })
     ));
     core.userProfile.registerUserProfileDelegate(
@@ -449,6 +464,8 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       getServiceAccountsService: this.getServiceAccountsService,
+      getOlsService: this.getOlsService,
+      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       serverlessProjectId: cloud?.serverless?.projectId,
       serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
@@ -583,6 +600,19 @@ export class SecurityPlugin
       features,
       clusterClient,
       online$: watchOnlineStatus$(),
+    });
+
+    this.olsService = new OlsService({
+      enabled: config.authz.ols.enabled,
+      clusterClient,
+      authz: this.authorizationSetup!,
+      audit: this.auditSetup!,
+      typeRegistry: core.savedObjects.getTypeRegistry(),
+      userProfiles: this.userProfileStart,
+      getAuthenticatedPrincipal: core.security.authc.getPrincipal,
+      serviceAccountExists: async (id) =>
+        (await this.serviceAccountsStart?.backend.exists(id)) ?? false,
+      logger: this.logger.get('ols'),
     });
 
     this.anonymousAccessStart = this.anonymousAccessService.start({

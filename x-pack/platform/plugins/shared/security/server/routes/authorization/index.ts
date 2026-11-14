@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { defineOlsRoutes } from './ols';
 import { definePrivilegesRoutes } from './privileges';
 import { defineRolesRoutes } from './roles';
 import { defineShareSavedObjectPermissionRoutes } from './spaces';
@@ -18,6 +19,9 @@ export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
     definePrivilegesRoutes(params);
     defineRolesRoutes(params);
   }
+
+  // Object-level security (OLS) routes work for every type with an access policy, in every offering.
+  defineOlsRoutes(params);
 
   // Shared object permission routes are not currently available in serverless.
   if (params.buildFlavor !== 'serverless') {

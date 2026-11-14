@@ -133,6 +133,8 @@ interface QueryParams {
   namespaces?: string[];
   type?: string | string[];
   typeToNamespacesMap?: Map<string, string[] | undefined>;
+  /** Object-level security clause per type. Types without one are not restricted. */
+  aclFiltersByType?: Map<string, estypes.QueryDslQueryContainer>;
   search?: string;
   defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
@@ -161,7 +163,8 @@ export function getNamespacesBoolFilter({
   registry,
   types,
   typeToNamespacesMap,
-}: Pick<QueryParams, 'namespaces' | 'registry' | 'typeToNamespacesMap'> & {
+  aclFiltersByType,
+}: Pick<QueryParams, 'namespaces' | 'registry' | 'typeToNamespacesMap' | 'aclFiltersByType'> & {
   types: string[];
 }): NamespacesBoolFilter {
   return {
@@ -170,7 +173,9 @@ export function getNamespacesBoolFilter({
         const deduplicatedNamespaces = uniqNamespaces(
           typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
         );
-        return getClauseForType(registry, deduplicatedNamespaces, shouldType);
+        const clause = getClauseForType(registry, deduplicatedNamespaces, shouldType);
+        const aclFilter = aclFiltersByType?.get(shouldType);
+        return aclFilter ? { bool: { filter: [clause, aclFilter] } } : clause;
       }),
       minimum_should_match: 1,
     },
@@ -189,6 +194,7 @@ export function getQueryParams({
   namespaces,
   type,
   typeToNamespacesMap,
+  aclFiltersByType,
   search,
   searchFields: searchFieldsParam = [],
   rootSearchFields,
@@ -228,7 +234,13 @@ export function getQueryParams({
             }),
           ]
         : []),
-      getNamespacesBoolFilter({ namespaces, registry, types, typeToNamespacesMap }),
+      getNamespacesBoolFilter({
+        namespaces,
+        registry,
+        types,
+        typeToNamespacesMap,
+        aclFiltersByType,
+      }),
     ],
   };
 

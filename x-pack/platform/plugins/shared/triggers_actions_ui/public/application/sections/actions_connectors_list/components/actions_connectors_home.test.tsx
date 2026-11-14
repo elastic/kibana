@@ -117,6 +117,8 @@ describe('ActionsConnectorsHome', () => {
     lastActionsConnectorsListProps = undefined;
     loadAllActions.mockResolvedValue([]);
     loadConnectorAuthStatus.mockResolvedValue({});
+    // The create flyout loads the connector access policy; an empty response leaves it off.
+    (useKibana().services.http.get as jest.Mock).mockResolvedValue({});
   });
 
   it('renders Actions connectors list component', async () => {

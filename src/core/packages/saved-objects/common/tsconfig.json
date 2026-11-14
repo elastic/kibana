@@ -10,6 +10,9 @@
   "include": [
     "**/*.ts"
   ],
+  "kbn_references": [
+    "@kbn/ols",
+  ],
   "exclude": [
     "target/**/*",
   ]
