@@ -123,7 +123,7 @@ export interface AesopExplorerWorkflowTemplateValues extends ManagedWorkflowTemp
   intervalMinutes: number;
   /** Model connector the explorer agent and every A/B arm run through. */
   connectorId: string;
-  /** Evals dataset the A/B arms run against. */
+  /** Evals dataset an A/B arm runs against when the candidate names no fitting dataset. */
   datasetId: string;
   /** Agent the A/B arms converse with. */
   abAgentId: string;
@@ -137,13 +137,15 @@ export const AESOP_EXPLORER_WORKFLOW = {
   pluginId: 'securitySolution',
   // Bump on every YAML edit: yamlTemplate hashing does not see the imported
   // YAML, so installed instances only re-render on a version bump.
-  version: 3,
+  version: 4,
   billable: false,
   yamlTemplate: ({ mode, intervalMinutes, connectorId, datasetId, abAgentId, investigationId }) =>
     renderTemplate(AESOP_EXPLORER_YAML, {
       __MODE__: mode === 'telemetry' ? 'telemetry' : 'discovery',
       __INTERVAL_MINUTES__: intervalMinutes,
       __CONNECTOR_ID__: toTemplateId('connectorId', connectorId),
+      // The default when a candidate names no dataset that fits its task;
+      // the explorer reads the full dataset list at runtime.
       __DATASET_ID__: toTemplateId('datasetId', datasetId),
       __AB_AGENT_ID__: toTemplateId('abAgentId', abAgentId),
       __INVESTIGATION_ID__: toTemplateId('investigationId', investigationId),

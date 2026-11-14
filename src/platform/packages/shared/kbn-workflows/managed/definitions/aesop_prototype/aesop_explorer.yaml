@@ -24,6 +24,7 @@ settings:
 consts:
   AI_INDEX_ID: aesop
   MODE: '__MODE__'
+  DEFAULT_DATASET_ID: '__DATASET_ID__'
   # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
   EMPTY_ARRAY: []
 outputs:
@@ -46,6 +47,25 @@ steps:
     with:
       method: GET
       path: '/s/{{ workflow.spaceId }}/internal/context_engine/ai_index/{{ consts.AI_INDEX_ID }}/kis?size=100'
+      headers:
+        elastic-api-version: '1'
+        x-elastic-internal-origin: 'Kibana'
+    on-failure:
+      continue: true
+
+  # ----------------------------------------------------------------------
+  # The eval datasets each candidate can be scored on, so the explorer can
+  # pick the one that fits the task it is proposing. Read at runtime, not
+  # rendered into the YAML: a dataset created after this instance was
+  # enabled is still discovered. A failed read leaves the agent without
+  # the list; candidates then fall back to the default dataset.
+  # ----------------------------------------------------------------------
+  - name: read_datasets
+    type: kibana.request
+    timeout: '30s'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/evals/datasets'
       headers:
         elastic-api-version: '1'
         x-elastic-internal-origin: 'Kibana'
@@ -88,9 +108,12 @@ steps:
             What AESOP already recorded (do not propose these again; a rejection or dismissal stands unless you have new evidence):
             {{ steps.read_prior_knowledge.output.kis | json | truncate: 6000 }}
 
-            Read the `aesop` AI index for the details of any entry before you rely on it.
+            Read the `aesop` AI index for the details of any entry before you rely on it. One re-proposal rule: a rejection earned on a dataset that does not fit the task does not bind once a fitting dataset exists in the list below — re-propose that candidate with the fitting dataset_id.
 
-            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id; a candidate for a new skill leaves skill_id empty and names the skill. Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. Set continue_exploring to true only when another pass would look somewhere new.
+            Eval datasets the A/B can score a candidate on (id, name, description, examples):
+            {{ steps.read_datasets.output.datasets | default: consts.EMPTY_ARRAY | json | truncate: 4000 }}
+
+            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id; a candidate for a new skill leaves skill_id empty and names the skill. Each candidate also sets dataset_id to the id of the dataset whose examples fit the task it improves — a candidate scored on a dataset that does not fit its task is scored out of domain and will likely be rejected, so prefer tasks one of the datasets covers and leave dataset_id empty only when none fits (the default dataset then applies). Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. Set continue_exploring to true only when another pass would look somewhere new.
           schema:
             type: object
             properties:
@@ -106,6 +129,9 @@ steps:
                     skill_name:
                       type: string
                       maxLength: 64
+                    dataset_id:
+                      type: string
+                      maxLength: 128
                     title:
                       type: string
                       maxLength: 400
@@ -149,6 +175,7 @@ steps:
                 attributes:
                   skill_id: '{{ foreach.item.skill_id }}'
                   skill_name: '{{ foreach.item.skill_name }}'
+                  dataset_id: '{{ foreach.item.dataset_id }}'
                   mode: '{{ consts.MODE }}'
                   workflow_execution_id: '{{ execution.id }}'
             on-failure:
@@ -174,7 +201,9 @@ steps:
               inputs:
                 skill_id: '{{ foreach.item.skill_id }}'
                 new_skill_name: '{{ foreach.item.skill_name }}'
-                dataset_id: '__DATASET_ID__'
+                # Empty dataset_id means the candidate named no fitting
+                # dataset; the explorer's default dataset applies.
+                dataset_id: '{{ foreach.item.dataset_id | default: consts.DEFAULT_DATASET_ID }}'
                 connector_id: '__CONNECTOR_ID__'
                 agent_id: '__AB_AGENT_ID__'
                 variants: '${{ foreach.item.variants }}'
