@@ -9,12 +9,15 @@ import {
   apiIsOfType,
   apiPublishesTitle,
   apiPublishesUnifiedSearch,
+  type PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
+import { isObservable } from 'rxjs';
 import {
   type LensApiCallbacks,
   type LensPublicCallbacks,
   type LensComponentForwardedProps,
+  type LensXYOverlayProvidersConfig,
   type UserMessage,
   LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
@@ -44,6 +47,12 @@ export const isLensApi = (api: unknown): api is LensApi => {
       apiPublishesUnifiedSearch(api)
   );
 };
+
+export function apiPublishesXYOverlayProvidersConfig(
+  api: unknown
+): api is { xyOverlayProviders$: PublishingSubject<LensXYOverlayProvidersConfig | undefined> } {
+  return isObject(api) && 'xyOverlayProviders$' in api && isObservable(api.xyOverlayProviders$);
+}
 
 export function apiHasLensComponentCallbacks(api: unknown): api is LensPublicCallbacks {
   return (

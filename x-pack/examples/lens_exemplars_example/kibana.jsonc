@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/lens-exemplars-example-plugin",
+  "owner": "@elastic/kibana-dashboards",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "lensExemplarsExample",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "lens_exemplars_example"
+    ],
+    "requiredPlugins": [
+      "lens",
+      "data",
+      "developerExamples"
+    ]
+  }
+}

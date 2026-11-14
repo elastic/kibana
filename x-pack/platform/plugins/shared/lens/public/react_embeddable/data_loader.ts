@@ -7,10 +7,12 @@
 
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import type { XYOverlay } from '@kbn/expression-xy-plugin/common';
 import type {
   GetStateType,
   LensInternalApi,
   LensPublicCallbacks,
+  LensRuntimeState,
   SharingSavedObjectProps,
   TextBasedPersistedState,
   UserMessagesDisplayLocationId,
@@ -41,7 +43,11 @@ import { apm } from '@elastic/apm-rum';
 import { getEditPath } from '../../common/constants';
 import { prepareCallbacks } from './expressions/callbacks';
 import { getExpressionRendererParams } from './expressions/expression_params';
-import { getMergedSearchContext } from './expressions/merged_search_context';
+import {
+  getMergedSearchContext,
+  type MergedSearchContext,
+} from './expressions/merged_search_context';
+import { getXYOverlayProviderFailureMessage, loadXYOverlays } from '../xy_overlay_providers';
 import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
 import {
@@ -53,6 +59,7 @@ import {
 import { addLog } from './logger';
 import {
   apiHasLensComponentCallbacks,
+  apiPublishesXYOverlayProvidersConfig,
   apiHasUserMessages,
   hasTablesAdapter,
   isPartialInspectorAdapters,
@@ -200,6 +207,42 @@ export function loadEmbeddableData(
     getLogError(getExecutionContext)('runtime');
   };
 
+  // Stable for the same reason: the chart subscribes once and receives overlays after it renders.
+  const overlays$ = new BehaviorSubject<readonly XYOverlay[]>([]);
+  const xyOverlayProviders$ = apiPublishesXYOverlayProvidersConfig(parentApi)
+    ? parentApi.xyOverlayProviders$
+    : undefined;
+  let overlaysAbortController: AbortController | undefined;
+  let lastOverlaysInput:
+    | { state: LensRuntimeState; searchContext: MergedSearchContext }
+    | undefined;
+
+  const loadOverlays = async (state: LensRuntimeState, searchContext: MergedSearchContext) => {
+    overlaysAbortController?.abort();
+    lastOverlaysInput = { state, searchContext };
+    const abortController = new AbortController();
+    overlaysAbortController = abortController;
+    const { overlays, failures } = await loadXYOverlays({
+      registry: services.xyOverlayProviderRegistry,
+      attributes: state.attributes,
+      executionContext: getExecutionContext(),
+      runtimeConfig: xyOverlayProviders$?.getValue(),
+      searchContext,
+      searchSessionId: api.searchSessionId$.getValue(),
+      requestsAdapter: api.getInspectorAdapters().requests,
+      abortSignal: abortController.signal,
+      data: services.data,
+    });
+    if (abortController.signal.aborted) {
+      return;
+    }
+    overlays$.next(overlays.map(({ providerId, ...overlay }) => ({ ...overlay, id: providerId })));
+    if (failures.length) {
+      addUserMessages(failures.map(getXYOverlayProviderFailureMessage));
+      updateMessages(getUserMessages('embeddableBadge'));
+    }
+  };
+
   async function reload(
     // make reload easier to debug
     sourceId: ReloadReason,
@@ -219,6 +262,10 @@ export function loadEmbeddableData(
 
     // reset the render on reload
     internalApi.dispatchRenderStart();
+
+    // overlays belong to the previous data: drop them until the new ones are fetched
+    overlaysAbortController?.abort();
+    overlays$.next([]);
 
     // Hide badges while reloading. `onRenderComplete` republishes them.
     updateMessages([]);
@@ -258,6 +305,11 @@ export function loadEmbeddableData(
       updateWarnings();
       // Render can still go wrong, so perfor a new check
       dispatchBlockingErrorIfAny();
+
+      // fetched after the base data so overlay providers never delay the chart
+      loadOverlays(currentState, searchContext).catch((error) =>
+        addLog(`Failed to load XY overlays: ${error}`)
+      );
     };
 
     const { onRender, onData, handleEvent, disableTriggers } = prepareCallbacks(
@@ -302,6 +354,7 @@ export function loadEmbeddableData(
         disableTriggers,
         forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
         getDisplayOptions: internalApi.getDisplayOptions,
+        overlays$,
       }),
       getUsedDataViews(
         currentState.attributes.references,
@@ -413,6 +466,20 @@ export function loadEmbeddableData(
           }
         }
       }),
+    // toggling overlay providers only refreshes the overlays, the base chart is untouched
+    ...(xyOverlayProviders$
+      ? [
+          xyOverlayProviders$.pipe(waitUntilChanged()).subscribe(() => {
+            if (!lastOverlaysInput) {
+              return;
+            }
+            overlays$.next([]);
+            loadOverlays(lastOverlaysInput.state, lastOverlaysInput.searchContext).catch((error) =>
+              addLog(`Failed to load XY overlays: ${error}`)
+            );
+          }),
+        ]
+      : []),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
@@ -451,6 +518,8 @@ export function loadEmbeddableData(
       for (const subscription of subscriptions) {
         subscription.unsubscribe();
       }
+      overlaysAbortController?.abort();
+      overlays$.complete();
     },
   };
 }

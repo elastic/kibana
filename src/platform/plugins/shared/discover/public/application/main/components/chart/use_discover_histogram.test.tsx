@@ -158,6 +158,7 @@ describe('useDiscoverHistogram', () => {
       const { hook } = await renderUseDiscoverHistogram();
       const params = hook.result.current;
       expect(params?.localStorageKeyPrefix).toBe('discover');
+      expect(params?.executionContext).toEqual({ type: 'discover', name: 'unified_histogram' });
       expect(params?.initialState).toMatchInlineSnapshot(`
         Object {
           "chartHidden": false,

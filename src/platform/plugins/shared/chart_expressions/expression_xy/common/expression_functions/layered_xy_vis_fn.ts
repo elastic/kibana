@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XY_VIS_RENDERER } from '../constants';
-import type { LayeredXyVisFn } from '../types';
+import { isObservable, type Observable } from 'rxjs';
+import { XY_OVERLAYS_VARIABLE, XY_VIS_RENDERER } from '../constants';
+import type { LayeredXyVisFn, XYOverlay } from '../types';
 import { type XYRender } from '../types';
 import { logDatatables, logDatatable } from '../utils';
 import {
@@ -25,6 +26,9 @@ import {
   applyYAxisExtentPolicies,
   resolveAxisFormatPolicies,
 } from '../axis_format_policy';
+
+const getOverlays$ = (value: unknown): Observable<readonly XYOverlay[]> | undefined =>
+  isObservable(value) ? (value as Observable<readonly XYOverlay[]>) : undefined;
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
@@ -79,6 +83,7 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
       overrides: handlers.variables?.overrides as XYRender['value']['overrides'],
+      overlays$: getOverlays$(handlers.variables?.[XY_OVERLAYS_VARIABLE]),
     },
   };
 };

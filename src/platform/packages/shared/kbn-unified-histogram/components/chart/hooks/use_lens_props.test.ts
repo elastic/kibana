@@ -89,6 +89,36 @@ describe('useLensProps', () => {
     expect(lensProps.result.current?.lensProps).toMatchSnapshot();
   });
 
+  it('should forward the host execution context to Lens', async () => {
+    const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
+    const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock();
+    const lensVisMock = await getLensVisMock({
+      filters: fetchParams.filters,
+      query: fetchParams.query,
+      columns: [],
+      dataView: dataViewWithTimefieldMock,
+      timeInterval: 'auto',
+      breakdownField: undefined,
+    });
+
+    const lensProps = renderHook(() =>
+      useLensProps({
+        fetch$,
+        onLoad: jest.fn(),
+        executionContext: { type: 'discover', name: 'unified_histogram' },
+      })
+    );
+    act(() => {
+      fetch$.next({ fetchParams, lensVisServiceState: lensVisMock.lensService.state$.getValue() });
+    });
+
+    expect(lensProps.result.current?.lensProps.executionContext).toEqual({
+      type: 'discover',
+      name: 'unified_histogram',
+      description: 'fetch chart data and total hits',
+    });
+  });
+
   it('should only return lens props after fetch$ is triggered', async () => {
     const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
     const onLoad = jest.fn();

@@ -57,6 +57,11 @@ export interface AnnotationClickEvent {
   data: AnnotationClickTriggerEvent['data'];
 }
 
+export interface OverlayPointClickEvent {
+  name: 'overlayPointClick';
+  data: { overlayId: string; layerId: string; pointId: string };
+}
+
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export interface OperationDescriptor extends Operation {

@@ -23,4 +23,8 @@ export {
   AreaFillOptions,
 } from '../common';
 
-export type { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
+export type {
+  ExpressionXyPluginSetup,
+  ExpressionXyPluginStart,
+  OverlayPointClickEvent,
+} from './types';

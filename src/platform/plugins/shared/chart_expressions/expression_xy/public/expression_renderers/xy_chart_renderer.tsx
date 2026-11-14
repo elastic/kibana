@@ -49,6 +49,7 @@ import type {
   GetCompatibleCellValueActions,
   MultiFilterEvent,
   AnnotationClickEvent,
+  OverlayPointClickEvent,
   StartServices,
 } from '../types';
 
@@ -236,6 +237,10 @@ export const getXyChartRenderer = ({
     const onAnnotationClick = (data: AnnotationClickEvent['data']) => {
       handlers.event({ name: 'annotationClick', data });
     };
+    const onOverlayPointClick = (data: OverlayPointClickEvent['data']) => {
+      const event: OverlayPointClickEvent = { name: 'overlayPointClick', data };
+      handlers.event(event);
+    };
     const onClickMultiValue = (data: MultiFilterEvent['data']) => {
       handlers.event({ name: 'multiFilter', data });
     };
@@ -306,6 +311,7 @@ export const getXyChartRenderer = ({
             layerCellValueActions={layerCellValueActions}
             onSelectRange={onSelectRange}
             onAnnotationClick={onAnnotationClick}
+            onOverlayPointClick={onOverlayPointClick}
             renderMode={handlers.getRenderMode()}
             syncColors={config.syncColors}
             syncTooltips={config.syncTooltips}
