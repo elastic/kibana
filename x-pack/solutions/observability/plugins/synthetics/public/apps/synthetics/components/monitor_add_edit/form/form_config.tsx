@@ -188,6 +188,7 @@ export const BROWSER_ADVANCED = (readOnly: boolean) => [
     ),
     components: [
       FIELD(readOnly)[ConfigKey.THROTTLING_CONFIG],
+      FIELD(readOnly)[ConfigKey.FILMSTRIPS],
       FIELD(readOnly)[ConfigKey.IGNORE_HTTPS_ERRORS],
       FIELD(readOnly)[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST],
       FIELD(readOnly)[ConfigKey.SYNTHETICS_ARGS],
