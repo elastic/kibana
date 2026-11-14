@@ -140,6 +140,54 @@ const securitySchemeNames = (requirements: unknown): string[] =>
 const toKeptTokens = (tokens: string[]): string[] =>
   tokens[0] === 'components' ? tokens.slice(0, 3) : tokens;
 
+// Where a discriminator mapping value points: a schema name, or a ref. Undefined for a ref
+// outside the document, which can't be checked.
+const mappingTargetTokens = (target: string): string[] | undefined => {
+  const pointer = localRefToPointer(target);
+  if (pointer !== undefined) {
+    return toTokens(pointer);
+  }
+  return target.includes('/') ? undefined : ['components', 'schemas', target];
+};
+
+/**
+ * Drops the `discriminator.mapping` entries that name a schema the projection left out. Mapping
+ * values are plain strings, so keeping what they name isn't part of following `$ref`s, and
+ * keeping it would pull in every subtype (most of Microsoft Graph). Left in, they dangle, and
+ * `oasdiff` refuses a document whose mapping names a missing schema.
+ */
+const pruneDiscriminatorMappings = (projected: JsonObject): void => {
+  const visit = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (!isJsonObject(value)) {
+      return;
+    }
+    const { discriminator } = value;
+    if (isJsonObject(discriminator) && isJsonObject(discriminator.mapping)) {
+      const { mapping } = discriminator;
+      for (const [name, target] of Object.entries(mapping)) {
+        const tokens = typeof target === 'string' ? mappingTargetTokens(target) : undefined;
+        if (tokens !== undefined && getAtTokens(projected, tokens) === undefined) {
+          delete mapping[name];
+        }
+      }
+      if (Object.keys(mapping).length === 0) {
+        delete discriminator.mapping;
+      }
+    }
+    for (const [key, child] of Object.entries(value)) {
+      // Literal values are data, not spec objects.
+      if (!LITERAL_KEYWORDS.has(key)) {
+        visit(child);
+      }
+    }
+  };
+  visit(projected);
+};
+
 /**
  * Trims an OpenAPI 3.x document (Swagger 2.0 is converted first) to the given operations, with
  * their path-level parameters and servers, the security schemes they use and every component
@@ -212,5 +260,6 @@ export const projectSpec = (
   while (queue.length > 0) {
     forEachRef(queue.shift(), keepRef);
   }
+  pruneDiscriminatorMappings(projected);
   return projected;
 };

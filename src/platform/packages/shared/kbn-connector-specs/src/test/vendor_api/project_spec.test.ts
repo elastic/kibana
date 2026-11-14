@@ -169,6 +169,103 @@ describe('projectSpec', () => {
     expect(loadContractOperations(projectSpec(document, operations))).toHaveLength(2);
   });
 
+  describe('discriminator mappings', () => {
+    const polymorphic = {
+      openapi: '3.0.3',
+      info: { title: 'Animals' },
+      paths: {
+        '/animals': {
+          get: {
+            responses: { '200': ok({ $ref: '#/components/schemas/Animal' }) },
+          },
+        },
+        '/cats': {
+          get: {
+            responses: { '200': ok({ $ref: '#/components/schemas/Cat' }) },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Animal: {
+            type: 'object',
+            required: ['kind'],
+            properties: { kind: { type: 'string' } },
+            discriminator: {
+              propertyName: 'kind',
+              mapping: {
+                cat: '#/components/schemas/Cat',
+                dog: '#/components/schemas/Dog',
+                bird: 'Bird',
+                fish: 'Fish',
+                lizard: 'https://example.com/reptiles.yaml#/Lizard',
+              },
+            },
+          },
+          Cat: { allOf: [{ $ref: '#/components/schemas/Animal' }] },
+          Dog: { allOf: [{ $ref: '#/components/schemas/Animal' }] },
+          Bird: { type: 'object' },
+          Fish: { type: 'object' },
+          Plant: {
+            type: 'object',
+            discriminator: {
+              propertyName: 'kind',
+              mapping: { tree: '#/components/schemas/Tree' },
+            },
+          },
+          Tree: { type: 'object' },
+        },
+      },
+    };
+    const animals = [{ method: 'get', path: '/animals' }];
+    const schemasOf = (projected: unknown) =>
+      (projected as { components: { schemas: Record<string, { discriminator?: unknown }> } })
+        .components.schemas;
+
+    it('drops the entries naming schemas the projection left out, and keeps the rest', () => {
+      // `Cat` is only kept through the operation that returns it; `Dog`, `Bird` and `Fish` aren't.
+      const { Animal } = schemasOf(
+        projectSpec(polymorphic, [...animals, { method: 'get', path: '/cats' }])
+      );
+
+      expect(Animal.discriminator).toEqual({
+        propertyName: 'kind',
+        mapping: {
+          cat: '#/components/schemas/Cat',
+          // Not a schema of this document, so it can't be judged.
+          lizard: 'https://example.com/reptiles.yaml#/Lizard',
+        },
+      });
+    });
+
+    it('keeps the entries that name a schema by its name when it is kept', () => {
+      const projected = projectSpec(polymorphic, animals, ['#/components/schemas/Bird']);
+
+      expect(
+        (schemasOf(projected).Animal.discriminator as { mapping: Record<string, string> }).mapping
+      ).toEqual({
+        bird: 'Bird',
+        lizard: 'https://example.com/reptiles.yaml#/Lizard',
+      });
+    });
+
+    it('removes a mapping that ends up empty, keeping the property name', () => {
+      const projected = projectSpec(polymorphic, animals, ['#/components/schemas/Plant']);
+
+      expect(schemasOf(projected).Plant.discriminator).toEqual({ propertyName: 'kind' });
+    });
+
+    it('leaves nothing for a strict loader to resolve, and is idempotent', () => {
+      const projected = projectSpec(polymorphic, animals);
+      const mapped = Object.values(
+        (schemasOf(projected).Animal.discriminator as { mapping: Record<string, string> }).mapping
+      );
+
+      expect(mapped).toEqual(['https://example.com/reptiles.yaml#/Lizard']);
+      expect(projectSpec(projected, animals)).toEqual(projected);
+    });
+  });
+
   it('keeps overlays applicable, reporting corrections of operations left out as no-match', () => {
     const { document: corrected, findings } = applyOverlay(projectSpec(document, operations), {
       overlay: '1.1.0',

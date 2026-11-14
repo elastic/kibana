@@ -261,12 +261,6 @@
     "schemas": {
       "Constraint": {
         "discriminator": {
-          "mapping": {
-            "CHECK": "CheckConstraint",
-            "FOREIGN KEY": "ForeignKey",
-            "PRIMARY KEY": "PrimaryKey",
-            "UNIQUE": "UniqueKey"
-          },
           "propertyName": "constraint_type"
         },
         "properties": {
@@ -315,11 +309,6 @@
       },
       "DataMetricSchedule": {
         "discriminator": {
-          "mapping": {
-            "CRON": "DataMetricCronSchedule",
-            "MINUTES": "DataMetricMinutesSchedule",
-            "TRIGGER_ON_CHANGES": "DataMetricTriggerOnChangesSchedule"
-          },
           "propertyName": "schedule_type"
         },
         "properties": {
