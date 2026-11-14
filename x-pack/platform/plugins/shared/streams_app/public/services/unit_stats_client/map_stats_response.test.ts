@@ -138,6 +138,41 @@ describe('mapStatsResponse', () => {
     expect(result.processors['uppercase-message'].status).toBe('ready');
   });
 
+  describe('a component with an error and values', () => {
+    const error = { code: 'error', reason: 'The stats query failed.' };
+    const { components } = STATS_FIXTURE_RESPONSES.data;
+    const withError = (id: 'es-prod' | 'es-dev') =>
+      mapStatsResponse(
+        {
+          ...STATS_FIXTURE_RESPONSES.data,
+          components: {
+            ...components,
+            destinations: {
+              ...components.destinations,
+              [id]: { ...components.destinations[id], error },
+            },
+          },
+        },
+        STANDARD_REQUEST
+      );
+
+    it('is ready, and keeps its error and its stats, when only a part of its stats failed', () => {
+      expect(withError('es-prod').destinations['es-prod']).toMatchObject({
+        status: 'ready',
+        error,
+        stats: { eventsRate: 3700, eventsTotal: 3330000, latencyAverage: 0.012 },
+      });
+    });
+
+    it('counts a rate of 0 as values', () => {
+      expect(withError('es-dev').destinations['es-dev']).toMatchObject({ status: 'ready', error });
+    });
+
+    it('does not touch a component with no error', () => {
+      expect(withError('es-prod').destinations['es-dev'].error).toBeUndefined();
+    });
+  });
+
   it('sets the error on every component of a kind that failed, and keeps the other kind', () => {
     const result = map('kindError', STANDARD_REQUEST);
 

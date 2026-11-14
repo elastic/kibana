@@ -250,6 +250,11 @@ export const streamsUnitStatsRequestSchema = lazySchema(() =>
   })
 );
 
+/**
+ * Why the stats of a component could not be read. The other fields of the component can still hold
+ * real values, because an error can cover only a part of them, for example the failure rates of a
+ * destination. A value that could not be read is no data: `null`.
+ */
 export const streamsUnitStatsErrorSchema = z.object({
   code: z.string(),
   reason: z.string(),
@@ -260,27 +265,80 @@ const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string
 /** A rate is always per unit of time. `time_unit` is always set: the UCUM time unit, for example `s`. */
 const statsRateSchema = statsValueSchema.extend({ time_unit: z.string() });
 
+/**
+ * What share of the destination's attempts failed, in percent (`unit` is `%`, 100 is all of them).
+ * `value` is null when there is no data, or no attempt to take a share of. The attempts are counted
+ * in the unit of the rate beside it, so an S3 percentage is of upload attempts, not of items.
+ */
+const statsPercentageSchema = statsValueSchema;
+
+/**
+ * One cause of failures: the reason the destination gave (its own error type) on the collection
+ * that it wrote to (an Elasticsearch data stream or index). Either can be null, when the
+ * destination did not report it: a failure of a whole request has no collection. `percentage` is
+ * the share of all the destination's attempts that failed for this cause, not the share of its
+ * class.
+ */
+const statsFailureBreakdownEntrySchema = lazySchema(() =>
+  z.object({
+    collection: z.string().nullable(),
+    reason: z.string().nullable(),
+    rate: statsRateSchema,
+    percentage: statsPercentageSchema,
+  })
+);
+
+/**
+ * What failed for one class of reason, per second, counted in the unit of its `rate` (items for
+ * Elasticsearch, upload attempts for S3). `rate` is the whole class, and
+ * `percentage` is the share of all the destination's attempts that it is. `breakdown` splits it by
+ * cause, highest rate first and limited to the highest ones. It leaves out a cause with neither a
+ * collection nor a reason, so it can cover less than `rate`, and it is missing when it has no
+ * entries.
+ */
+const statsFailureRateSchema = lazySchema(() =>
+  z.object({
+    rate: statsRateSchema,
+    percentage: statsPercentageSchema,
+    breakdown: z.array(statsFailureBreakdownEntrySchema).optional(),
+  })
+);
+
 export const streamsUnitStatsSeriesSchema = z.object({
   bucket_ms: z.number(),
   points: z.array(z.object({ start: z.string(), value: z.number() })),
 });
 
-export const streamsUnitStatsDestinationResultSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
-  latency: z.object({ average: statsValueSchema }),
-  events: z.object({
-    incoming: z.object({
-      total: statsValueSchema,
-      rate: statsRateSchema,
-      series: streamsUnitStatsSeriesSchema,
+export const streamsUnitStatsDestinationResultSchema = lazySchema(() =>
+  z.object({
+    error: streamsUnitStatsErrorSchema.optional(),
+    latency: z.object({ average: statsValueSchema }),
+    events: z.object({
+      incoming: z.object({
+        total: statsValueSchema,
+        rate: statsRateSchema,
+        series: streamsUnitStatsSeriesSchema,
+      }),
+      /**
+       * What failed in this destination. For Elasticsearch it is items, per second: every outcome
+       * other than "success". The destination is the last hop, so each of them is its own failure.
+       * `authentication` (HTTP 401) and `authorization` (HTTP 403) are parts of it, picked by
+       * status code, not by outcome. `percentage` is the share of the incoming items that failed.
+       *
+       * A destination type that reports its failures another way says so in the `unit` of the rates,
+       * and the percentages are of the same thing. S3 reports upload attempts (`{request}`), because
+       * it counts a failed item only after its retries, so the items would show the failure late or
+       * never. Do not add or compare a rate of requests to a rate of items.
+       */
+      failed: z.object({
+        rate: statsRateSchema,
+        percentage: statsPercentageSchema,
+        authentication: statsFailureRateSchema,
+        authorization: statsFailureRateSchema,
+      }),
     }),
-    /**
-     * Items that failed in this destination, per second: every outcome other than "success".
-     * The destination is the last hop, so each of them is its own failure.
-     */
-    failed: z.object({ rate: statsRateSchema }),
-  }),
-});
+  })
+);
 
 export const streamsUnitStatsProcessorInstanceSchema = z.object({
   pipeline_id: z.string(),
