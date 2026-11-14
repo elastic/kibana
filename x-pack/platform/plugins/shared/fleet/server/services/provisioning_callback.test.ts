@@ -25,19 +25,33 @@ import {
   isProvisioningCallbackTokenValid,
   mintProvisioningCallbackToken,
 } from './provisioning_callback_token';
+import { verifyCallerIdentity } from './provisioning_callback_caller_identity';
 
 jest.mock('./app_context');
 jest.mock('./audit_logging');
+jest.mock('./provisioning_callback_caller_identity');
 jest.mock('uuid', () => ({ v4: () => 'cb-1' }));
 
 const mockedAudit = jest.mocked(auditLoggingService);
+const mockedVerify = jest.mocked(verifyCallerIdentity);
 
 const ROLE_ARN = 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc';
 const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1';
+/** The values the stack reports, as the record stores them. */
 const PAYLOAD = {
   role_arn: ROLE_ARN,
   stack_arn: STACK_ARN,
 };
+/** The proof of the sending account, as the Lambda attaches it. Judged by the mocked verifier. */
+const PROOF = {
+  region: 'us-east-1',
+  headers: { Authorization: 'AWS4-HMAC-SHA256 ...', 'x-elastic-callback-id': 'cb-1' },
+  body: 'Action=GetCallerIdentity&Version=2011-06-15',
+};
+/** The report as received: the values plus the proof. */
+const REPORT = { ...PAYLOAD, caller_identity: PROOF };
+const CALLER_ARN =
+  'arn:aws:sts::123456789012:assumed-role/elastic-ElasticCallbackFunctionRole-1A2B3C/elastic-ElasticCallbackFunction-A1B2C3';
 
 const NOW = new Date('2026-10-13T10:00:00.000Z');
 const FUTURE = '2026-10-13T12:00:00.000Z';
@@ -101,6 +115,7 @@ describe('provisioningCallbackService', () => {
     soClient.find.mockResolvedValue(EMPTY_FIND);
     logger = loggerMock.create();
     jest.mocked(appContextService.getLogger).mockReturnValue(logger);
+    mockedVerify.mockResolvedValue({ verified: true, account: '123456789012', arn: CALLER_ARN });
     jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(soClient);
     jest.spyOn(cloudConnectorService, 'create').mockResolvedValue({
       id: 'cc-1',
@@ -481,7 +496,7 @@ describe('provisioningCallbackService', () => {
       );
       const result = await provisioningCallbackService.receive(soClient, 'nope', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -491,10 +506,12 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: OTHER_TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
+      // A caller without the token is not worth an STS round trip.
+      expect(mockedVerify).not.toHaveBeenCalled();
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledTimes(1);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
         message: 'Provisioning callback report rejected: unknown record or token',
@@ -516,7 +533,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: undefined,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -527,7 +544,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs({ expires_at: '2026-10-13T13:00:00.000Z' }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'not_found' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -539,7 +556,7 @@ describe('provisioningCallbackService', () => {
       mockRecord({ ...expired, token_hash: tokenHash });
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'gone' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -549,7 +566,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs({ status: 'cancelled' }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toEqual({ outcome: 'gone' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -571,13 +588,92 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs());
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::999999999999:role/other' },
+        payload: { ...REPORT, role_arn: 'arn:aws:iam::999999999999:role/other' },
       });
       expect(result).toEqual({
         outcome: 'invalid',
         message: 'role_arn and stack_arn must be in the same AWS account',
       });
       expect(soClient.update).not.toHaveBeenCalled();
+      expect(mockedVerify).not.toHaveBeenCalled();
+    });
+
+    it('has the proof verified against the record id and the values, at the configured STS', async () => {
+      mockRecord(pendingAttrs());
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        developer: { provisioningCallbackStsUrl: 'http://localhost:8091/' },
+      } as any);
+
+      await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(mockedVerify).toHaveBeenCalledWith(
+        PROOF,
+        { callbackId: 'cb-1', report: PAYLOAD },
+        { stsUrl: 'http://localhost:8091/' }
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        `Provisioning callback report [id=cb-1] caller identity verified [account=123456789012] [arn=${CALLER_ARN}]`
+      );
+    });
+
+    it('is unverified, writes nothing and audit-logs when the proof does not verify', async () => {
+      mockRecord(pendingAttrs());
+      mockedVerify.mockResolvedValue({ verified: false, reason: 'account_mismatch' });
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(result).toEqual({ outcome: 'unverified', reason: 'account_mismatch' });
+      // The record stays pending for a report that does verify.
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(cloudConnectorService.create).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Provisioning callback report [id=cb-1] caller identity not verified [reason=account_mismatch]'
+      );
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
+        message:
+          'Provisioning callback report rejected: caller identity not verified (account_mismatch)',
+        event: {
+          action: 'provisioning_callback_report',
+          category: ['web'],
+          type: ['denied'],
+          outcome: 'failure',
+        },
+        kibana: { saved_object: { type: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE, id: 'cb-1' } },
+        labels: { role_arn: ROLE_ARN, stack_arn: STACK_ARN },
+      });
+      // The proof is never written anywhere.
+      expect(JSON.stringify(mockedAudit.writeCustomAuditLog.mock.calls)).not.toContain(
+        'AWS4-HMAC-SHA256'
+      );
+    });
+
+    it('carries the detail of a rejection to the caller result, for the log line', async () => {
+      mockRecord(pendingAttrs());
+      mockedVerify.mockResolvedValue({
+        verified: false,
+        reason: 'sts_unreachable',
+        detail: 'TimeoutError',
+      });
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: REPORT,
+      });
+
+      expect(result).toEqual({
+        outcome: 'unverified',
+        reason: 'sts_unreachable',
+        detail: 'TimeoutError',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Provisioning callback report [id=cb-1] caller identity not verified [reason=sts_unreachable] [detail=TimeoutError]'
+      );
     });
 
     it('claims the record, creates the connector under its id and audit-logs', async () => {
@@ -585,7 +681,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       // The claim is guarded by the version read, so two reports cannot both take it.
@@ -680,7 +776,7 @@ describe('provisioningCallbackService', () => {
 
       await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(cloudConnectorService.create).toHaveBeenCalledWith(
@@ -717,7 +813,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(cloudConnectorService.create).toHaveBeenNthCalledWith(
@@ -746,7 +842,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({
@@ -763,7 +859,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(cloudConnectorService.create).not.toHaveBeenCalled();
@@ -799,7 +895,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({ outcome: 'receiving', item: { status: 'receiving' } });
@@ -820,7 +916,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({ outcome: 'receiving', item: { status: 'receiving' } });
@@ -841,7 +937,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({ outcome: 'receiving', item: { status: 'receiving' } });
@@ -872,7 +968,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({
@@ -901,7 +997,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(soClient.update).toHaveBeenCalledTimes(3);
@@ -948,7 +1044,7 @@ describe('provisioningCallbackService', () => {
 
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
 
       expect(result).toMatchObject({
@@ -966,7 +1062,7 @@ describe('provisioningCallbackService', () => {
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
           token: TOKEN,
-          payload: PAYLOAD,
+          payload: REPORT,
         })
       ).rejects.toThrow('boom');
       // Back to pending, so a retry of the report or a cancel from the browser can proceed. The
@@ -1008,7 +1104,7 @@ describe('provisioningCallbackService', () => {
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
           token: TOKEN,
-          payload: PAYLOAD,
+          payload: REPORT,
         })
       ).rejects.toThrow('boom');
       expect(jest.mocked(appContextService.getLogger)().warn).not.toHaveBeenCalled();
@@ -1024,7 +1120,7 @@ describe('provisioningCallbackService', () => {
       await expect(
         provisioningCallbackService.receive(soClient, 'cb-1', {
           token: TOKEN,
-          payload: PAYLOAD,
+          payload: REPORT,
         })
       ).rejects.toThrow('boom');
     });
@@ -1033,7 +1129,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(CLAIMED);
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::123456789012:role/another' },
+        payload: { ...REPORT, role_arn: 'arn:aws:iam::123456789012:role/another' },
       });
       expect(result).toMatchObject({ outcome: 'conflict' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -1043,7 +1139,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: PAYLOAD,
+        payload: REPORT,
       });
       expect(result).toMatchObject({ outcome: 'received' });
       expect(soClient.update).not.toHaveBeenCalled();
@@ -1053,7 +1149,7 @@ describe('provisioningCallbackService', () => {
       mockRecord(pendingAttrs({ status: 'received', received_at: PAST, ...PAYLOAD }));
       const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
         token: TOKEN,
-        payload: { ...PAYLOAD, role_arn: 'arn:aws:iam::123456789012:role/another' },
+        payload: { ...REPORT, role_arn: 'arn:aws:iam::123456789012:role/another' },
       });
       expect(result).toMatchObject({ outcome: 'conflict' });
       expect(soClient.update).not.toHaveBeenCalled();

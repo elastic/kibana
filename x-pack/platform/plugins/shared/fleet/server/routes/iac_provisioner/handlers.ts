@@ -304,7 +304,8 @@ export const deleteProvisioningCallbackHandler: FleetRequestHandler<
 
 /**
  * Called by the stack's Lambda. The route is not authenticated: the only thing that admits the
- * report is the record's own token, presented in a header and checked by the service.
+ * report is the record's own token, presented in a header and checked by the service. The report
+ * then has to prove, through STS, that it was signed from the account of the role it names.
  *
  * The flag is a runtime one, read per request, so the route cannot be left unregistered while
  * it is off; it answers as a missing route does instead, before any record is looked up.
@@ -328,9 +329,11 @@ export const receiveProvisioningCallbackHandler: FleetRequestHandler<
     request.params.callbackId,
     { token, payload: request.body }
   );
-  // Never log the token.
+  // Never log the token or the proof.
   logger.info(
-    `Provisioning callback report [id=${request.params.callbackId}] outcome=${result.outcome}`
+    `Provisioning callback report [id=${request.params.callbackId}] outcome=${result.outcome}${
+      result.outcome === 'unverified' ? ` reason=${result.reason}` : ''
+    }`
   );
 
   switch (result.outcome) {
@@ -351,5 +354,10 @@ export const receiveProvisioningCallbackHandler: FleetRequestHandler<
       });
     case 'invalid':
       return response.badRequest({ body: { message: result.message } });
+    case 'unverified':
+      // The reason stays in the log: the caller learns only that its proof was not accepted.
+      return response.unauthorized({
+        body: { message: 'The report was not signed from the AWS account of the reported role' },
+      });
   }
 };
