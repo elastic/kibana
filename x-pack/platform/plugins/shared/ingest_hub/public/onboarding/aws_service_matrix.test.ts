@@ -555,6 +555,24 @@ describe('AWS service matrix', () => {
       expect(makeDsView(entry, dsId).varGroupsByInput).toEqual({ 'aws-s3': [LOG_GROUP_SOURCE] });
     });
 
+    it('drops the groups in the ECF view, which collects only the trigger ARN', () => {
+      const ecfEntry = {
+        ...entry,
+        ecfSettings: {
+          requiredConfig: ['log_group_arn'],
+          dataStreams: [dsId],
+          inputs: ['aws-s3'],
+          defaultEnabledInputs: ['aws-s3'],
+        },
+      };
+      const ecfView = applyDeploymentMethodView(ecfEntry, 'managed_integration');
+      expect(ecfView.varGroupsByInput).toBeUndefined();
+      expect(makeDsView(ecfView, dsId).varGroupsByInput).toBeUndefined();
+      expect(applyDeploymentMethodView(ecfEntry, 'agent_based').varGroupsByInput).toEqual({
+        'aws-s3': [LOG_GROUP_SOURCE],
+      });
+    });
+
     it('leaves varGroupsByInput undefined when no stream declares groups', () => {
       const plain = BUILT_MATRIX.find((e) => e.id === dsId)!;
       expect(plain.varGroupsByInput).toBeUndefined();
