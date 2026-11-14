@@ -14,6 +14,7 @@ const createLegacyAlertsClientMock = () => {
       processAlerts: jest.fn(),
       logAlerts: jest.fn(),
       getRawAlertInstancesForState: jest.fn(),
+      getRawTrackedActiveAlert: jest.fn(),
       hasReachedAlertLimit: jest.fn(),
       getMaxAlertLimit: jest.fn().mockReturnValue(1000),
       checkLimitUsage: jest.fn(),

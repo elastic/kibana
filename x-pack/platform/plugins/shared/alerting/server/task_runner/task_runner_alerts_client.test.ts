@@ -17,7 +17,11 @@ import type {
   RuleAlertData,
   RawRule,
 } from '../types';
-import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../types';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  DEFAULT_QUERY_DELAY_SETTINGS,
+  RuleExecutionStatusWarningReasons,
+} from '../types';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { TaskRunnerContext } from './types';
 import { ApiKeyType } from './types';
@@ -302,6 +306,8 @@ describe('Task Runner', () => {
         });
         logger.get.mockImplementation(() => logger);
         ruleType.executor.mockResolvedValue({ state: {} });
+        mockAlertsClient.getProcessedAlerts.mockReturnValue({});
+        mockLegacyAlertsClient.getProcessedAlerts.mockReturnValue({});
         clusterClient.search.mockResolvedValue({
           took: 10,
           timed_out: false,
@@ -1464,6 +1470,261 @@ describe('Task Runner', () => {
           spy.mockRestore();
         }
       );
+
+      describe('when a step after persisting the alerts fails', () => {
+        afterEach(() => {
+          taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReset();
+          taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReset();
+        });
+
+        const previousRunState = {
+          alertTypeState: { evaluated: 'previous run' },
+          previousStartedAt: DATE_1970_5_MIN,
+        };
+
+        const mockAlertDocument = (status: 'active' | 'recovered') => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'uuid-1',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: {
+                    [ALERT_UUID]: 'uuid-1',
+                    [ALERT_INSTANCE_ID]: '1',
+                    [ALERT_RULE_UUID]: '1',
+                    [ALERT_STATUS]: status,
+                    [ALERT_START]: DATE_1970_5_MIN,
+                    [ALERT_TRACKED]: status === 'active',
+                    [ALERT_WORKFLOW_STATUS]: 'acknowledged',
+                    [SPACE_IDS]: ['default'],
+                  },
+                },
+              ],
+            },
+          });
+        };
+
+        const runRule = async ({
+          previousState = previousRunState,
+          reportAlert = true,
+        }: { previousState?: ConcreteTaskInstance['state']; reportAlert?: boolean } = {}) => {
+          const alertsService = new AlertsService({
+            logger,
+            pluginStop$: new ReplaySubject(1),
+            kibanaVersion: '8.8.0',
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+          elasticsearchAndSOAvailability$.next(true);
+          const spy = jest
+            .spyOn(alertsService, 'getContextInitializationPromise')
+            .mockResolvedValue({ result: true });
+
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
+            maintenanceWindows: [],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+          taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+            true
+          );
+          taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+          ruleTypeWithAlerts.executor.mockImplementation(
+            async ({
+              services: executorServices,
+            }: RuleExecutorOptions<
+              RuleTypeParams,
+              RuleTypeState,
+              AlertInstanceState,
+              AlertInstanceContext,
+              string,
+              RuleAlertData
+            >) => {
+              if (reportAlert) {
+                executorServices.alertsClient?.report({ id: '1', actionGroup: 'default' });
+              }
+              return { state: { evaluated: 'this run' } };
+            }
+          );
+
+          const taskRunner = createTaskRunner({
+            taskInstance: { ...mockedTaskInstance, state: previousState },
+            context: { ...taskRunnerFactoryInitializerParams, alertsService },
+          });
+          mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+          encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+          const result = await taskRunner.run();
+          spy.mockRestore();
+          return result;
+        };
+
+        test('should save the persisted alerts with the previous rule type state when enqueueing actions fails', async () => {
+          actionsClient.bulkEnqueueExecution.mockRejectedValueOnce(new Error('enqueue failed'));
+
+          const { state, taskRunError } = await runRule();
+
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
+          expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+          expect(taskRunError?.message).toBe('enqueue failed');
+          expect(state).toEqual({
+            ...previousRunState,
+            alertInstances: {
+              '1': {
+                state: expect.any(Object),
+                meta: expect.objectContaining({ uuid: RULE_EXECUTION_UUID }),
+              },
+            },
+            alertRecoveredInstances: {},
+          });
+          expect(state.alertInstances?.['1'].meta?.lastScheduledActions).toBeUndefined();
+        });
+
+        test('should evaluate the same data again and retry the actions on the run after enqueueing actions failed', async () => {
+          actionsClient.bulkEnqueueExecution.mockRejectedValueOnce(new Error('enqueue failed'));
+          const { state: failedRunState } = await runRule();
+
+          actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({ errors: false, items: [] });
+          const { state, taskRunError } = await runRule({ previousState: failedRunState });
+
+          expect(ruleTypeWithAlerts.executor).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              state: { evaluated: 'previous run' },
+              previousStartedAt: new Date(DATE_1970_5_MIN),
+            })
+          );
+          expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(2);
+          expect(actionsClient.bulkEnqueueExecution).toHaveBeenLastCalledWith([
+            expect.objectContaining({ id: '1' }),
+          ]);
+          expect(taskRunError).toBeUndefined();
+          expect(state.alertTypeState).toEqual({ evaluated: 'this run' });
+          expect(state.alertInstances?.['1'].meta?.lastScheduledActions).toEqual(
+            expect.objectContaining({ group: 'default' })
+          );
+        });
+
+        test('should keep the previous entry of an alert that recovered when enqueueing actions fails', async () => {
+          const getPreviousAlert = () => ({
+            meta: {
+              uuid: 'uuid-1',
+              flappingHistory: [true],
+              flapping: false,
+              maintenanceWindowIds: [],
+              maintenanceWindowNames: [],
+              lastScheduledActions: { group: 'default', date: DATE_1970_5_MIN },
+              activeCount: 1,
+              pendingRecoveredCount: 0,
+            },
+            state: { start: DATE_1970_5_MIN, duration: '0' },
+          });
+          mockAlertDocument('active');
+          actionsClient.bulkEnqueueExecution.mockRejectedValueOnce(new Error('enqueue failed'));
+
+          const { state, taskRunError } = await runRule({
+            previousState: { ...previousRunState, alertInstances: { '1': getPreviousAlert() } },
+            reportAlert: false,
+          });
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: [
+                expect.objectContaining({ index: expect.objectContaining({ _id: 'uuid-1' }) }),
+                expect.objectContaining({ [ALERT_STATUS]: 'recovered' }),
+              ],
+            })
+          );
+          expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+          expect(taskRunError?.message).toBe('enqueue failed');
+          expect(state).toEqual({
+            ...previousRunState,
+            alertInstances: { '1': getPreviousAlert() },
+            alertRecoveredInstances: {},
+          });
+        });
+
+        test('should keep an alert restored from its document when it recovers and enqueueing actions fails', async () => {
+          mockAlertDocument('active');
+          actionsClient.bulkEnqueueExecution.mockRejectedValueOnce(new Error('enqueue failed'));
+
+          const { state: failedRunState, taskRunError } = await runRule({ reportAlert: false });
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: [
+                expect.objectContaining({ index: expect.objectContaining({ _id: 'uuid-1' }) }),
+                expect.objectContaining({ [ALERT_STATUS]: 'recovered' }),
+              ],
+            })
+          );
+          expect(taskRunError?.message).toBe('enqueue failed');
+          expect(failedRunState).toEqual({
+            ...previousRunState,
+            alertInstances: {
+              '1': {
+                state: { start: DATE_1970_5_MIN, duration: '0' },
+                meta: {
+                  uuid: 'uuid-1',
+                  flappingHistory: [],
+                  maintenanceWindowIds: [],
+                  maintenanceWindowNames: [],
+                },
+              },
+            },
+            alertRecoveredInstances: {},
+          });
+
+          mockAlertDocument('recovered');
+          actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({ errors: false, items: [] });
+          const { state } = await runRule({ previousState: failedRunState, reportAlert: false });
+
+          expect(actionsClient.bulkEnqueueExecution).toHaveBeenLastCalledWith([
+            expect.objectContaining({ id: '2' }),
+          ]);
+          expect(state.alertInstances).toEqual({});
+        });
+
+        test('should finish the run with a warning when updating the persisted alerts fails', async () => {
+          actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({ errors: false, items: [] });
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('update failed'));
+
+          const { state, taskRunError } = await runRule();
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+          expect(taskRunError).toBeUndefined();
+          expect(state.alertTypeState).toEqual({ evaluated: 'this run' });
+          expect(state.alertInstances?.['1'].meta?.lastScheduledActions).toEqual(
+            expect.objectContaining({ group: 'default' })
+          );
+          expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+              doc: {
+                alert: expect.objectContaining({
+                  executionStatus: expect.objectContaining({
+                    status: 'warning',
+                    warning: {
+                      reason: RuleExecutionStatusWarningReasons.EXECUTION,
+                      message:
+                        'Failed to update alerts with their last scheduled actions and maintenance windows: update failed',
+                    },
+                  }),
+                  lastRun: expect.objectContaining({ outcome: 'warning' }),
+                }),
+              },
+            }),
+            { ignore: [404] }
+          );
+        });
+      });
     });
 
     function testCorrectAlertsClientUsed<
