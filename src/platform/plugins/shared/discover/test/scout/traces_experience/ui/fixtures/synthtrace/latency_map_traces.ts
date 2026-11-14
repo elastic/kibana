@@ -28,9 +28,14 @@ export function latencyMapTraces({
     .service({ name: LATENCY_TRACE.SERVICE_NAME, environment: 'production', agentName: 'java' })
     .instance('latency-1');
 
-  const transactionWith = (timestamp: number, durationMs: number, failed = false) => {
+  const transactionWith = (
+    timestamp: number,
+    durationMs: number,
+    failed = false,
+    transactionName = LATENCY_TRACE.TRANSACTION_NAME
+  ) => {
     const transaction = instance
-      .transaction({ transactionName: LATENCY_TRACE.TRANSACTION_NAME })
+      .transaction({ transactionName })
       .timestamp(timestamp)
       .duration(durationMs);
     return failed ? transaction.failure() : transaction.success();
@@ -68,7 +73,24 @@ export function latencyMapTraces({
       .generator((timestamp) => transactionWith(timestamp, 400, true))
   );
 
-  const allEvents = [...denseBand, ...spread, ...failures];
+  // A second operation whose durations fall into two clear groups, decades apart: enough
+  // spans for the duration-groups dropdown to offer it, without dominating the map.
+  const MIXED_MS = [15, 20, 25, 400, 500, 600];
+  const mixed = Array.from(
+    timerange(from, to)
+      .interval('1s')
+      .rate(MIXED_MS.length)
+      .generator((timestamp, index) =>
+        transactionWith(
+          timestamp,
+          MIXED_MS[index % MIXED_MS.length],
+          false,
+          LATENCY_TRACE.TRANSACTION_NAME_MIXED
+        )
+      )
+  );
+
+  const allEvents = [...denseBand, ...spread, ...failures, ...mixed];
 
   function* generator(): SynthtraceGenerator<ApmFields> {
     yield* allEvents;

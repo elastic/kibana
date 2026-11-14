@@ -13,6 +13,7 @@ import { getESQLResults } from '@kbn/esql-utils';
 import {
   FAILED_SPAN_CONDITION,
   LatencyMap,
+  operationToEsqlCondition,
   selectionToEsqlCondition,
 } from '@kbn/trace-latency-map';
 import type { LatencyMapProps } from '@kbn/trace-latency-map';
@@ -106,6 +107,33 @@ describe('TracesLatencyMapView', () => {
     mapProps.onSelectionCommit(undefined, undefined);
     const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
     expect(updater(`FROM traces-apm*\n| WHERE ${selectionClause}`)).toBe('FROM traces-apm*');
+  });
+
+  it('writes the focused operation into the query, replacing the previous one', () => {
+    const { actions, mapProps } = renderView();
+    const operation = { service: 'cart', name: 'GET /cart' };
+    const condition = operationToEsqlCondition(operation);
+    mapProps.onFocusOperation!(operation, condition);
+    const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    const previous = operationToEsqlCondition({ service: 'checkout', name: 'POST /checkout' });
+    expect(updater(`FROM traces-apm*\n| WHERE ${previous}`)).toBe(
+      `${SET_NULLIFY}FROM traces-apm*\n| WHERE ${condition}`
+    );
+  });
+
+  it('restores the query when the operation is cleared, and reads it back as the badge', () => {
+    const operation = { service: 'cart', name: 'GET /cart' };
+    const condition = operationToEsqlCondition(operation);
+    const { actions, mapProps } = renderView({
+      filters: ['service.name == "cart"', condition],
+    });
+    // A reload or a shared link restores the focused operation from the clause.
+    expect(mapProps.focusedOperation).toEqual(operation);
+    // The clause narrows the map too: it stays in the source, unlike the selection's.
+    expect(mapProps.source.filters).toEqual(['service.name == "cart"', condition]);
+    mapProps.onClearOperation!();
+    const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    expect(updater(`FROM traces-apm*\n| WHERE ${condition}`)).toBe('FROM traces-apm*');
   });
 
   it('clears a selection the picked time range no longer overlaps, instead of showing nothing', () => {

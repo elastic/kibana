@@ -24,6 +24,14 @@ export interface TracesCharts {
   readonly latencyMapLegend: Locator;
   readonly latencyMapSelectionBar: Locator;
   readonly latencyMapClearSelection: Locator;
+  readonly latencyMapDurationGroups: Locator;
+  readonly latencyMapOperationBadge: Locator;
+  /** The nth entry of the duration-groups dropdown. */
+  latencyMapDurationGroup(n: number): Locator;
+  /** The nth duration band marker right of the plot. */
+  latencyMapBand(n: number): Locator;
+  /** Moves the pointer over the map, which calibrates its geometry as any real use does. */
+  hoverLatencyMap(at?: { x: number; y: number }): Promise<void>;
   /** Waits until the map has drawn its cells and takes pointer input. */
   waitForLatencyMapReady(): Promise<void>;
   /** Draws a selection by dragging between two fractions of the map's plot area. */
@@ -64,6 +72,15 @@ export function createTracesCharts(page: ScoutPage): TracesCharts {
     latencyMapLegend: page.testSubj.locator('traceLatencyMapLegend'),
     latencyMapSelectionBar: page.testSubj.locator('traceLatencyMapSelectionBar'),
     latencyMapClearSelection: page.testSubj.locator('traceLatencyMapClearSelection'),
+    latencyMapDurationGroups: page.testSubj.locator('traceLatencyMapDurationGroups'),
+    latencyMapOperationBadge: page.testSubj.locator('traceLatencyMapOperationBadge'),
+    latencyMapDurationGroup: (n: number) =>
+      page.testSubj.locator(`traceLatencyMapDurationGroup-${n}`),
+    latencyMapBand: (n: number) => page.testSubj.locator(`traceLatencyMapBand-${n}`),
+    hoverLatencyMap: async (at = { x: 0.5, y: 0.5 }) => {
+      const point = await layerPoint(at);
+      await page.mouse.move(point.x, point.y);
+    },
     waitForLatencyMapReady: async () => {
       await latencyMapLayer.waitFor({ state: 'visible' });
       await page.testSubj.locator('traceLatencyMapLoading').waitFor({ state: 'hidden' });

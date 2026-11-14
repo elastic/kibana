@@ -18,10 +18,17 @@ import {
   FAILED_SPAN_CONDITION,
   LatencyMap,
   isFailedOnlyCondition,
+  isOperationCondition,
   isSelectionCondition,
+  parseOperationCondition,
   parseSelectionCondition,
 } from '@kbn/trace-latency-map';
-import type { LatencyMapCell, LatencyMapSelection, RunEsql } from '@kbn/trace-latency-map';
+import type {
+  LatencyMapCell,
+  LatencyMapOperation,
+  LatencyMapSelection,
+  RunEsql,
+} from '@kbn/trace-latency-map';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractFilters } from '../../../utils';
 import { appendMapClause, removeWhere } from './latency_map_query_clauses';
@@ -59,6 +66,9 @@ export function TracesLatencyMapView({
   const selectionClause = filters.find(isSelectionCondition);
   const selection = selectionClause ? parseSelectionCondition(selectionClause) : undefined;
   const failedOnly = filters.some(isFailedOnlyCondition);
+  // The focused operation lives in the query too, so a reload or a shared link restores it.
+  const operationClause = filters.find(isOperationCondition);
+  const focusedOperation = operationClause ? parseOperationCondition(operationClause) : undefined;
 
   // The map reads the query without its own clauses: the whole range, failed and not, so it
   // can paint "failed only" from the counts it has and show what a selection would catch.
@@ -101,6 +111,27 @@ export function TracesLatencyMapView({
     },
     [updateESQLQuery]
   );
+
+  // Focusing an operation narrows the query itself, like the selection and "Failed only":
+  // the documents table follows, and the map's source keeps the clause - unlike the other
+  // two, it narrows what the map shows, which is the point.
+  const focusOperation = useCallback(
+    (_operation: LatencyMapOperation, esqlCondition: string) => {
+      updateESQLQuery?.((query) => {
+        // Found in the query being updated, not in the rendered props, as in commitSelection.
+        const withoutOperation = extractFilters(query)
+          .filter(isOperationCondition)
+          .reduce(removeWhere, query);
+        return appendMapClause(withoutOperation, esqlCondition);
+      });
+    },
+    [updateESQLQuery]
+  );
+  const clearOperation = useCallback(() => {
+    updateESQLQuery?.((query) =>
+      extractFilters(query).filter(isOperationCondition).reduce(removeWhere, query)
+    );
+  }, [updateESQLQuery]);
 
   // A selection left outside the picked time range matches nothing: the query would strand
   // the user on the no-results screen, with the map gone. A range that no longer overlaps
@@ -211,6 +242,9 @@ export function TracesLatencyMapView({
         onFailedOnlyChange={changeFailedOnly}
         onSelectionCommit={commitSelection}
         onCellClick={setExpandedDoc ? openExampleSpan : undefined}
+        onFocusOperation={updateESQLQuery ? focusOperation : undefined}
+        focusedOperation={focusedOperation}
+        onClearOperation={updateESQLQuery ? clearOperation : undefined}
         timeZone={timeZone}
       />
     </EuiPanel>

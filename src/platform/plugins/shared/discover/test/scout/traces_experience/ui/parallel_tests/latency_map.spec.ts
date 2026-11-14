@@ -131,6 +131,46 @@ spaceTest.describe(
       }
     );
 
+    spaceTest(
+      'focusing an operation from the duration groups dropdown narrows the query',
+      async ({ pageObjects }) => {
+        const { charts } = pageObjects.tracesExperience;
+        const { discover } = pageObjects;
+
+        // The map is the default view.
+        await charts.waitForLatencyMapReady();
+
+        await spaceTest.step('picking the mixed operation writes its WHERE clause', async () => {
+          await charts.latencyMapDurationGroups.click();
+          await charts.latencyMapDurationGroup(1).click();
+          await expect
+            .poll(async () => discover.getEsqlQueryValue())
+            .toContain(`transaction.name == "${LATENCY_TRACE.TRANSACTION_NAME_MIXED}"`);
+          await expect(charts.latencyMapOperationBadge).toBeVisible();
+        });
+
+        await spaceTest.step('the focused operation draws its duration groups', async () => {
+          await charts.waitForLatencyMapReady();
+          await charts.hoverLatencyMap();
+          await expect(charts.latencyMapBand(1)).toBeVisible();
+        });
+
+        await spaceTest.step('clicking a band selects the group', async () => {
+          await charts.latencyMapBand(1).click();
+          await expect(charts.latencyMapSelectionBar).toBeVisible();
+          await charts.latencyMapClearSelection.click();
+          await expect(charts.latencyMapSelectionBar).toBeHidden();
+        });
+
+        await spaceTest.step('clearing the badge restores the query', async () => {
+          await charts.latencyMapOperationBadge.getByRole('button').click();
+          await expect
+            .poll(async () => (await discover.getEsqlQueryValue()).trim())
+            .toBe(LATENCY_TRACE.ESQL_QUERY);
+        });
+      }
+    );
+
     spaceTest('a click on a cell opens the document flyout', async ({ pageObjects }) => {
       const { charts } = pageObjects.tracesExperience;
 
