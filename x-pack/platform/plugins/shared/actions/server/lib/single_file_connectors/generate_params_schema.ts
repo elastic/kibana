@@ -10,6 +10,14 @@ import { z as z4 } from '@kbn/zod/v4';
 
 import type { ActionTypeParams, ValidatorType } from '../../types';
 
+/** Loose params schema used by legacy sub-action connectors. Per-action checks run in the executor. */
+export const generateCompatParamsSchema = (): ValidatorType<ActionTypeParams> => ({
+  schema: z4.object({
+    subAction: z4.string(),
+    subActionParams: z4.object({}).passthrough().default({}),
+  }),
+});
+
 const fetchOptionsSchema = z4
   .object({
     max_content_length: z4.number().positive().optional(),

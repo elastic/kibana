@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpec, ConnectorSpecStackCompat } from '@kbn/connector-specs';
 import {
   authTypeUsesRelay,
   getAuthModeForAuthTypeId,
@@ -23,6 +23,7 @@ import type {
   PlatformServices,
   RelayActionClient,
 } from '@kbn/connector-specs';
+import { z } from '@kbn/zod/v4';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import type { ExecutorParams } from '../../sub_action_framework/types';
@@ -162,6 +163,8 @@ export const generateExecutorFunction = ({
   platform,
   clientTypes = defaultClientTypes,
   getJwtSigner,
+  stackCompat,
+  connectorName,
 }: {
   connectorTypeId?: string;
   actions: ConnectorSpec['actions'];
@@ -173,6 +176,8 @@ export const generateExecutorFunction = ({
   networkSettings: ConnectorNetworkSettings;
   platform: PlatformServices;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
+  stackCompat?: Pick<ConnectorSpecStackCompat, 'getAuthHeaders' | 'isUserError'>;
+  connectorName?: string;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -189,6 +194,7 @@ export const generateExecutorFunction = ({
       authMode,
       profileUid,
       connectorVersion,
+      connectorUsageCollector,
     } = execOptions;
     const { subAction, subActionParams, fetchOptions } = params as ExecutorParams & {
       fetchOptions?: FetchOptions;
@@ -199,7 +205,7 @@ export const generateExecutorFunction = ({
       connectorTypeId,
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
-      secrets,
+      secrets: stackCompat ? {} : secrets,
       signal,
       authMode,
       profileUid,
@@ -209,16 +215,44 @@ export const generateExecutorFunction = ({
     });
 
     if (!actions[subAction]) {
+      if (stackCompat) {
+        throw new Error(
+          `Sub action "${subAction}" is not registered. Connector id: ${connectorId}. Connector name: ${
+            connectorName ?? ''
+          }. Connector type: ${connectorTypeId ?? ''}`
+        );
+      }
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
+    // Legacy stack connectors do not persist selectedActions. Skip the gate so a stored
+    // value cannot reject an action the previous executor would run.
     const selectedActions = config.selectedActions as SelectedActions;
-    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+    if (!stackCompat && !isSelectedActionEnabled(subAction, selectedActions)) {
       const errorMessage = `[Action][ExternalService] Action '${subAction}' is not enabled for this connector.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
+    }
+
+    let handlerInput: unknown = subActionParams;
+    if (stackCompat) {
+      try {
+        handlerInput = actions[subAction].input.parse(subActionParams);
+      } catch (reqValidationError) {
+        let errMessage =
+          reqValidationError instanceof Error
+            ? reqValidationError.message
+            : String(reqValidationError);
+        if (reqValidationError instanceof z.ZodError) {
+          errMessage = z.prettifyError(reqValidationError);
+        }
+        throw createTaskRunError(
+          new Error(`Request validation failed (${errMessage})`),
+          TaskErrorSource.USER
+        );
+      }
     }
 
     const pool = getClientLeasePool();
@@ -251,7 +285,9 @@ export const generateExecutorFunction = ({
     // `authMode`, which is inferred once when the connector is created and so can be absent (no
     // `authType` field, an auth type unknown at creation time, or an in-memory connector) and
     // would then fall back to `shared`.
-    const authTypeId = (secrets as { authType?: string }).authType ?? 'none';
+    // Compat never reads secrets.authType. A legacy secrets key of that name must not
+    // select an auth strategy, a relay, or a per-user lease.
+    const authTypeId = stackCompat ? 'none' : (secrets as { authType?: string }).authType ?? 'none';
     const getClient = async (id: string): Promise<unknown> => {
       const clientType = clientTypes[id];
       if (!clientType) {
@@ -298,14 +334,19 @@ export const generateExecutorFunction = ({
               config,
               networkSettings,
               platform,
-              credential: getCredential({
-                connectorId,
-                connectorTypeId,
-                secrets,
-                connectorTokenClient,
-                authMode,
-                profileUid,
-              }),
+              credential: stackCompat
+                ? {
+                    getAuthHeaders: async () =>
+                      (await stackCompat.getAuthHeaders?.(config, secrets)) ?? {},
+                  }
+                : getCredential({
+                    connectorId,
+                    connectorTypeId,
+                    secrets,
+                    connectorTokenClient,
+                    authMode,
+                    profileUid,
+                  }),
             }),
           (client) => clientType.terminate(client)
         );
@@ -323,6 +364,8 @@ export const generateExecutorFunction = ({
       client: axiosInstance,
       secrets,
       config,
+      connectorId,
+      connectorUsageCollector,
       getClient: getClient as ActionContext['getClient'],
       relay: authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined,
       signJwt: getJwtSigner?.(connectorId),
@@ -330,7 +373,7 @@ export const generateExecutorFunction = ({
 
     try {
       let data = {};
-      const res = await actions[subAction].handler(actionContext, subActionParams);
+      const res = await actions[subAction].handler(actionContext, handlerInput);
 
       if (res != null) {
         data = res as Record<string, unknown>;
@@ -340,6 +383,13 @@ export const generateExecutorFunction = ({
     } catch (error) {
       releaseAcquiredClients();
       await invalidateAcquiredClientsForError(error);
+      if (stackCompat) {
+        if (stackCompat.isUserError?.(error)) {
+          const tagged = error instanceof Error ? error : new Error(String(error));
+          throw createTaskRunError(tagged, TaskErrorSource.USER);
+        }
+        throw error;
+      }
       const errorSource = error instanceof Error ? getErrorSource(error) : undefined;
       if (errorSource === TaskErrorSource.FRAMEWORK) throw error;
       const errorMessage = error instanceof Error ? error.message : String(error);

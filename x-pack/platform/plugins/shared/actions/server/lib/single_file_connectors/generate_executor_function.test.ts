@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { z } from '@kbn/zod/v4';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
@@ -1855,6 +1856,262 @@ describe('generateExecutorFunction', () => {
       expect(result2).toEqual({ status: 'ok', data: { from: 'action2' }, actionId: connectorId });
       expect(handler1).toHaveBeenCalledTimes(1);
       expect(handler2).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('stackCompat', () => {
+    const getAuthHeaders = jest.fn().mockResolvedValue({ Authorization: 'Bearer legacy' });
+
+    const makeCompatExecutor = (
+      handler: jest.Mock,
+      extras: {
+        clientTypes?: Record<string, { id: string; build: jest.Mock; terminate: jest.Mock }>;
+        stackCompat?: { getAuthHeaders?: jest.Mock; isUserError?: (err: unknown) => boolean };
+        getRelayClient?: () => unknown;
+        connectorName?: string;
+        connectorTypeId?: string;
+        input?: z.ZodType;
+      } = {}
+    ) =>
+      generateExecutorFunction({
+        connectorTypeId: extras.connectorTypeId ?? '.compat',
+        connectorName: extras.connectorName ?? 'Compat Connector',
+        actions: {
+          doThing: {
+            scope: 'write',
+            isTool: true,
+            input: extras.input ?? z.object({ name: z.string().default('fallback') }),
+            handler,
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        ...(extras.clientTypes ? { clientTypes: extras.clientTypes } : {}),
+        ...(extras.getRelayClient
+          ? { getRelayClient: extras.getRelayClient as () => undefined }
+          : {}),
+        stackCompat: extras.stackCompat ?? { getAuthHeaders },
+      });
+
+    beforeEach(() => {
+      getAuthHeaders.mockClear();
+      getAuthHeaders.mockResolvedValue({ Authorization: 'Bearer legacy' });
+    });
+
+    it('throws the legacy unknown sub-action text and does not log', async () => {
+      const executor = makeCompatExecutor(jest.fn());
+
+      await expect(
+        executor(makeExecOptions({ subAction: 'missing', subActionParams: {} }))
+      ).rejects.toThrow(
+        'Sub action "missing" is not registered. Connector id: test-connector-id. Connector name: Compat Connector. Connector type: .compat'
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('ignores a stored selectedActions allowlist', async () => {
+      const handler = jest.fn().mockResolvedValue({ ok: true });
+      const executor = makeCompatExecutor(handler);
+      const opts = makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } });
+
+      const result = await executor({
+        ...opts,
+        config: { url: 'https://example.com', selectedActions: ['other'] },
+      });
+
+      expect(result).toEqual({ status: 'ok', data: { ok: true }, actionId: connectorId });
+      expect(handler).toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid input with a user validation error and does not call the handler', async () => {
+      const handler = jest.fn();
+      const executor = makeCompatExecutor(handler, { input: z.object({ name: z.string() }) });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'doThing', subActionParams: {} })
+      ).catch((err) => err);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(thrown.message).toContain('Request validation failed (');
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.USER);
+    });
+
+    it('passes parsed, defaulted input to the handler', async () => {
+      const handler = jest.fn().mockResolvedValue({});
+      const executor = makeCompatExecutor(handler);
+
+      await executor(makeExecOptions({ subAction: 'doThing', subActionParams: {} }));
+
+      expect(handler).toHaveBeenCalledWith(expect.anything(), { name: 'fallback' });
+    });
+
+    it('returns the legacy success shape and an empty object when the handler returns null', async () => {
+      const handler = jest.fn().mockResolvedValue(null);
+      const executor = makeCompatExecutor(handler);
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } })
+      );
+
+      expect(result).toEqual({ status: 'ok', data: {}, actionId: connectorId });
+    });
+
+    it('rethrows a handler error as the same instance', async () => {
+      const raw = new Error('downstream failed');
+      const handler = jest.fn().mockRejectedValue(raw);
+      const executor = makeCompatExecutor(handler);
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } })
+      ).catch((err) => err);
+
+      expect(thrown).toBe(raw);
+      expect(getErrorSource(thrown)).toBeUndefined();
+    });
+
+    it('tags a handler error as USER when isUserError returns true', async () => {
+      const raw = new Error('bad token');
+      const handler = jest.fn().mockRejectedValue(raw);
+      const executor = makeCompatExecutor(handler, {
+        stackCompat: { isUserError: (err) => err === raw },
+      });
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } })
+      ).catch((err) => err);
+
+      expect(thrown.message).toBe('bad token');
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.USER);
+    });
+
+    it('builds axios with empty secrets even when legacy secrets include authType', async () => {
+      const handler = jest.fn().mockResolvedValue({});
+      const executor = makeCompatExecutor(handler);
+
+      await executor({
+        ...makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } }),
+        secrets: { token: 'legacy', authType: 'oauth_authorization_code' },
+      });
+
+      expect(mockGetAxiosInstanceWithAuth).toHaveBeenCalledWith(
+        expect.objectContaining({ secrets: {} })
+      );
+    });
+
+    it('does not call getCredential and uses getAuthHeaders for the pooled client', async () => {
+      let headers: Record<string, string> | undefined;
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn(async (ctx: BuildContext) => {
+          headers = await ctx.credential.getAuthHeaders();
+          return { id: 'client' };
+        }),
+        terminate: jest.fn(),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('fake');
+        return {};
+      });
+      const executor = makeCompatExecutor(handler, { clientTypes: { fake: fakeClientType } });
+
+      await executor({
+        ...makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } }),
+        config: { url: 'https://example.com' },
+        secrets: { token: 'legacy-token', authType: 'oauth_authorization_code' },
+      });
+
+      expect(mockGetCredential).not.toHaveBeenCalled();
+      expect(getAuthHeaders).toHaveBeenCalledWith(
+        { url: 'https://example.com' },
+        { token: 'legacy-token', authType: 'oauth_authorization_code' }
+      );
+      expect(headers).toEqual({ Authorization: 'Bearer legacy' });
+    });
+
+    it('uses an empty credential when getAuthHeaders is absent', async () => {
+      let headers: Record<string, string> | undefined;
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn(async (ctx: BuildContext) => {
+          headers = await ctx.credential.getAuthHeaders();
+          return {};
+        }),
+        terminate: jest.fn(),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('fake');
+        return {};
+      });
+      const executor = makeCompatExecutor(handler, {
+        clientTypes: { fake: fakeClientType },
+        stackCompat: {},
+      });
+
+      await executor(makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } }));
+
+      expect(headers).toEqual({});
+      expect(mockGetCredential).not.toHaveBeenCalled();
+    });
+
+    it('leases a shared client even when secrets.authType looks per-user', async () => {
+      const fakeClientType = {
+        id: 'fake',
+        build: jest.fn().mockResolvedValue({}),
+        terminate: jest.fn(),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('fake');
+        return {};
+      });
+      const acquire = jest.spyOn(fakeLeasePool, 'acquire');
+      const executor = makeCompatExecutor(handler, { clientTypes: { fake: fakeClientType } });
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } }),
+        secrets: { authType: 'oauth_authorization_code' },
+        authMode: 'shared',
+        profileUid: 'user-1',
+      });
+
+      expect(result.status).toBe('ok');
+      expect(acquire).toHaveBeenCalled();
+      expect(String(acquire.mock.calls[0][0])).toContain(':shared:');
+      expect(String(acquire.mock.calls[0][0])).not.toContain('user-1');
+    });
+
+    it('leaves relay undefined', async () => {
+      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const handler = jest.fn().mockResolvedValue({});
+      const executor = makeCompatExecutor(handler, { getRelayClient: () => relay });
+
+      await executor({
+        ...makeExecOptions({ subAction: 'doThing', subActionParams: { name: 'x' } }),
+        secrets: { authType: 'relay' },
+      });
+
+      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ relay: undefined }), {
+        name: 'x',
+      });
+    });
+
+    it('passes connectorId and connectorUsageCollector on the non-compat path', async () => {
+      const usage = { addRequestBodyBytes: jest.fn() };
+      const executor = makeExecutor();
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: { foo: 'bar' } });
+
+      await executor({ ...opts, connectorUsageCollector: usage as never });
+
+      expect(mockHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId,
+          connectorUsageCollector: usage,
+        }),
+        { foo: 'bar' }
+      );
     });
   });
 });
