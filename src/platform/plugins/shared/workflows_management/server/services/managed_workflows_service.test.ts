@@ -2676,6 +2676,59 @@ describe('ManagedWorkflowsService', () => {
       );
     });
 
+    it('logs and skips a dynamic auto upgrade whose stored template values no longer render, upgrading the rest', async () => {
+      const baseDefinition = createTemplateDefinition({
+        management: { lifecycle: 'dynamic', versionStrategy: 'auto' },
+      });
+      const definition: TemplateManagedWorkflowDefinition = {
+        ...baseDefinition,
+        version: 2,
+        yamlTemplate: (values) => {
+          if (values.recipient === 'bad id') {
+            throw new Error('invalid id');
+          }
+          return baseDefinition.yamlTemplate(values);
+        },
+      };
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, logger, service } = createService();
+
+      const badId = `${definition.id}-bad`;
+      const goodId = `${definition.id}-good`;
+      const sourceFor = (recipient: string) =>
+        createWorkflowSource({
+          lifecycle: 'dynamic',
+          managedVersion: 1,
+          originManagedWorkflowId: definition.id,
+          managedTemplateValues: { recipient, enabled: true },
+        });
+      const sources = new Map([
+        [badId, sourceFor('bad id')],
+        [goodId, sourceFor('World')],
+      ]);
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue(
+        [...sources].map(([id, source]) => ({ id, source }))
+      );
+      crudService.getWorkflowDocumentWithVersion.mockImplementation(async (id: string) => {
+        const source = sources.get(id);
+        return source ? createVersionedDocument(source) : null;
+      });
+
+      await expect(service.pluginReady(PLUGIN_ID)).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`dynamic auto upgrade of '${badId}'`),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledTimes(1);
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
+        goodId,
+        SPACE_ID,
+        expect.objectContaining({ document: expect.any(Object) })
+      );
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(true);
+    });
+
     it('preserves tracked static docs and would-be orphans when install pass is incomplete', async () => {
       const trackedDefinition = createDefinition({ id: 'system-tracked' });
       const orphanDefinition = createDefinition({ id: 'system-orphan' });

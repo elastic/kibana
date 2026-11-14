@@ -1138,11 +1138,20 @@ export class ManagedWorkflowsService {
     }
 
     for (const update of dynamicUpdates) {
-      await this.installManagedWorkflow(
-        update.definitionId,
-        { workflowId: update.workflowId, spaceId: update.spaceId },
-        pluginId
-      );
+      try {
+        await this.installManagedWorkflow(
+          update.definitionId,
+          { workflowId: update.workflowId, spaceId: update.spaceId },
+          pluginId
+        );
+      } catch (error) {
+        // One instance whose stored values no longer render must not block upgrades of the rest.
+        this.logger.warn(
+          `Managed workflows: dynamic auto upgrade of '${update.workflowId}' ` +
+            `(definition '${update.definitionId}', space '${update.spaceId}') failed and was skipped`,
+          { error }
+        );
+      }
     }
   }
 
