@@ -56,12 +56,13 @@ export const OsqueryExportLiveQueryResultsRequestParams = lazySchema(() =>
     /**
      * The ID of the live query (parent action ID).
      */
-    id: z.string().describe('The ID of the live query (parent action ID).'),
+    id: z.string().max(1024).describe('The ID of the live query (parent action ID).'),
     /**
      * The query action ID whose results are exported. Filters the export to rows for this specific per-agent action.
      */
     actionId: z
       .string()
+      .max(1024)
       .describe(
         'The query action ID whose results are exported. Filters the export to rows for this specific per-agent action.'
       ),

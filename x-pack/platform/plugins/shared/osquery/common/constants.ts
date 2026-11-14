@@ -76,6 +76,13 @@ export const MAX_TAGS_PER_ACTION = 20;
 export const MAX_TAG_LENGTH = 256;
 
 /**
+ * Largest filter string (KQL, serialized filters, user and tag lists) a request can carry:
+ * HTTP/2's default 65,535-octet header list caps every URL, so this rejects nothing a client can
+ * send in a query string.
+ */
+export const MAX_FILTER_PARAM_LENGTH = 65_536;
+
+/**
  * `precision_threshold` for `cardinality(agent_id)` on the scheduled execution
  * DETAILS endpoint (single-bucket agg — sketch memory negligible). Exact up to
  * 40k agents, close approximation beyond, never a rejected request. NOT used on

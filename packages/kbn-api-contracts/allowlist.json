@@ -633,6 +633,78 @@
       "prUrl": "https://github.com/elastic/kibana/pull/295450"
     },
     {
+      "path": "/api/osquery/history",
+      "method": "get",
+      "reason": "Intentional: query parameters gain maximum lengths. kuery and userIds accept 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected. nextPage (4,096) is a server-generated cursor of a few hundred characters, sourceFilters (64) fits every combination of its three allowed values, and startDate/endDate (64) fit ISO timestamps and date math.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}",
+      "method": "get",
+      "reason": "Intentional: parameters gain maximum lengths. scheduleId (1,024) holds UUID schedule IDs and sort (256) holds a field name. kuery accepts 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results",
+      "method": "get",
+      "reason": "Intentional: parameters gain maximum lengths. scheduleId (1,024) holds UUID schedule IDs, sort (256) holds a field name and startDate (64) holds a timestamp. kuery accepts 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "method": "post",
+      "reason": "Intentional: the scheduleId path parameter is capped at 1,024 characters. Schedule IDs are UUIDs, so no working value is affected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "method": "post",
+      "reason": "Intentional: body kuery is capped at 65,536 characters, the same limit as the KQL the results view sends in its URL, so any filter the results view accepts can still be exported. Each agentIds entry is capped at 1,024 characters; agent IDs are UUIDs.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export",
+      "method": "post",
+      "reason": "Intentional: agentIds is capped at 100,000 entries, matching osquery's other agent ID lists and above the roughly 26,900 UUIDs a default 1 MiB request body can hold.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-max-items-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "method": "post",
+      "reason": "Intentional: the id and actionId path parameters are capped at 1,024 characters. Both are UUID action IDs, so no working value is affected.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-parameter-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "method": "post",
+      "reason": "Intentional: body kuery is capped at 65,536 characters, the same limit as the KQL the results view sends in its URL, so any filter the results view accepts can still be exported. Each agentIds entry is capped at 1,024 characters; agent IDs are UUIDs.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-max-length-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
+      "path": "/api/osquery/live_queries/{id}/results/{actionId}/_export",
+      "method": "post",
+      "reason": "Intentional: agentIds is capped at 100,000 entries, matching osquery's other agent ID lists and above the roughly 26,900 UUIDs a default 1 MiB request body can hold.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-max-items-set",
+      "prUrl": "https://github.com/elastic/kibana/pull/301372"
+    },
+    {
       "path": "/api/fleet/agents/bulk_migrate",
       "method": "post",
       "reason": "oasdiff misreports this as removed anyOf subschemas because both agents branches gained maxLength (512 per agent ID, 500000 for the KQL string). The real change is a new length limit. Agent IDs are UUIDs, and 500000 covers the largest query the Fleet UI generates (a select-all selection excluding up to 10000 agent IDs), so no known valid request is affected.",

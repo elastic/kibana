@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { MAX_FILTER_PARAM_LENGTH } from '../../../common/constants';
 import {
+  exportLiveQueryParamsSchema,
   exportQuerySchema,
   exportRequestBodySchema,
   exportScheduledQueryParamsSchema,
@@ -82,6 +84,40 @@ describe('exportRequestBodySchema', () => {
       /array size is \[101\]/
     );
   });
+
+  it('accepts a kuery at the maximum filter length', () => {
+    expect(() =>
+      exportRequestBodySchema.validate({ kuery: 'a'.repeat(MAX_FILTER_PARAM_LENGTH) })
+    ).not.toThrow();
+  });
+
+  it('rejects a kuery longer than the maximum filter length', () => {
+    expect(() =>
+      exportRequestBodySchema.validate({ kuery: 'a'.repeat(MAX_FILTER_PARAM_LENGTH + 1) })
+    ).toThrow(new RegExp(`maximum length of \\[${MAX_FILTER_PARAM_LENGTH}\\]`));
+  });
+
+  it('accepts an agent ID of exactly 1,024 characters', () => {
+    expect(() => exportRequestBodySchema.validate({ agentIds: ['a'.repeat(1024)] })).not.toThrow();
+  });
+
+  it('rejects an agent ID longer than 1,024 characters', () => {
+    expect(() => exportRequestBodySchema.validate({ agentIds: ['a'.repeat(1025)] })).toThrow(
+      /maximum length of \[1024\]/
+    );
+  });
+
+  it('accepts agentIds with exactly 100,000 entries', () => {
+    const agentIds = Array.from({ length: 100_000 }, (_, i) => `agent-${i}`);
+    expect(() => exportRequestBodySchema.validate({ agentIds })).not.toThrow();
+  });
+
+  it('rejects agentIds with 100,001 entries', () => {
+    const agentIds = Array.from({ length: 100_001 }, (_, i) => `agent-${i}`);
+    expect(() => exportRequestBodySchema.validate({ agentIds })).toThrow(
+      /array size is \[100001\]/
+    );
+  });
 });
 
 describe('exportQuerySchema', () => {
@@ -116,5 +152,39 @@ describe('exportScheduledQueryParamsSchema', () => {
 
   it('rejects a missing scheduleId', () => {
     expect(() => exportScheduledQueryParamsSchema.validate({ executionCount: 1 })).toThrow();
+  });
+
+  it('accepts a scheduleId of exactly 1,024 characters', () => {
+    expect(() =>
+      exportScheduledQueryParamsSchema.validate({ scheduleId: 'a'.repeat(1024), executionCount: 1 })
+    ).not.toThrow();
+  });
+
+  it('rejects a scheduleId longer than 1,024 characters', () => {
+    expect(() =>
+      exportScheduledQueryParamsSchema.validate({ scheduleId: 'a'.repeat(1025), executionCount: 1 })
+    ).toThrow(/maximum length of \[1024\]/);
+  });
+});
+
+describe('exportLiveQueryParamsSchema', () => {
+  it.each(['id', 'actionId'] as const)('accepts %s of exactly 1,024 characters', (field) => {
+    expect(() =>
+      exportLiveQueryParamsSchema.validate({
+        id: 'live-1',
+        actionId: 'action-1',
+        [field]: 'a'.repeat(1024),
+      })
+    ).not.toThrow();
+  });
+
+  it.each(['id', 'actionId'] as const)('rejects %s longer than 1,024 characters', (field) => {
+    expect(() =>
+      exportLiveQueryParamsSchema.validate({
+        id: 'live-1',
+        actionId: 'action-1',
+        [field]: 'a'.repeat(1025),
+      })
+    ).toThrow(new RegExp(`\\[${field}\\].*maximum length of \\[1024\\]`));
   });
 });
