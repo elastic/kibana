@@ -5,172 +5,138 @@
  * 2.0.
  */
 
-import Path from 'path';
 import Fs from 'fs/promises';
-import { spawn } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { TaskConfig } from '../types';
+import type { IndexedSecurityLabsDocument, TaskConfig } from '../types';
+import { parseMarkdownFiles } from './parse_markdown';
+import type { ContentstackEntry } from './contentstack_entry';
+import { CONTENTSTACK_REFERENCE_FIELDS, contentstackEntryToDocument } from './contentstack_entry';
 
-/** Only this GitHub repo may be fetched as Security Labs KB content. */
-export const ALLOWED_SECURITY_LABS_REPO_OWNER = 'elastic';
-export const ALLOWED_SECURITY_LABS_REPO_NAME = 'security-labs-elastic-co';
+/** Maximum page size supported by the Contentstack Content Delivery API. */
+export const CONTENTSTACK_PAGE_SIZE = 100;
 
-/**
- * Derives the `owner/repo` slug from a GitHub repository URL (e.g.
- * `https://github.com/elastic/security-labs-elastic-co`) or an already-slug-shaped
- * value (e.g. `elastic/security-labs-elastic-co`).
- */
-export const parseRepoSlug = (githubRepoUrl: string): { owner: string; repo: string } => {
-  const trimmed = githubRepoUrl.trim();
-  const pathname = trimmed.includes('://') ? new URL(trimmed).pathname : trimmed;
-  const [owner, repoSegment] = pathname.split('/').filter(Boolean);
-  const repo = repoSegment?.replace(/\.git$/i, '');
-
-  if (!owner || !repo) {
-    throw new Error(
-      `Unable to derive owner/repo from githubRepoUrl [${githubRepoUrl}]. Expected ` +
-        `"https://github.com/elastic/security-labs-elastic-co" or "elastic/security-labs-elastic-co".`
-    );
-  }
-
-  return { owner, repo };
-};
+/** Content Delivery API hosts for every Contentstack region (e.g. `cdn.contentstack.io`, `eu-cdn.contentstack.com`). */
+const ALLOWED_CONTENTSTACK_HOST = /^(?:[a-z0-9-]+-)?cdn\.contentstack\.(?:io|com)$/;
 
 /**
- * Ensures GitHub fetches only pull from the Elastic Security Labs content repo.
- * Local/fork experimentation should use `--localContentPath` instead.
+ * Ensures the stack credentials are only ever sent to a Contentstack Content Delivery API host,
+ * so a misconfigured CI env cannot leak it or publish another source as Security Labs KB.
  */
-export const assertAllowedSecurityLabsRepo = ({
-  owner,
-  repo,
-}: {
-  owner: string;
-  repo: string;
-}): void => {
-  if (
-    owner.toLowerCase() !== ALLOWED_SECURITY_LABS_REPO_OWNER ||
-    repo.toLowerCase() !== ALLOWED_SECURITY_LABS_REPO_NAME
-  ) {
+export const assertAllowedContentstackHost = (host: string): void => {
+  if (!ALLOWED_CONTENTSTACK_HOST.test(host)) {
     throw new Error(
-      `Refusing to fetch Security Labs content from [${owner}/${repo}]. ` +
-        `Only [${ALLOWED_SECURITY_LABS_REPO_OWNER}/${ALLOWED_SECURITY_LABS_REPO_NAME}] is allowed ` +
-        `for GitHub fetches. Use --localContentPath for local or fork checkouts.`
+      `Refusing to fetch Security Labs content from [${host}]. Expected a Contentstack ` +
+        `Content Delivery API host such as [cdn.contentstack.io] or [eu-cdn.contentstack.com]. ` +
+        `Use --localContentPath for local content.`
     );
   }
 };
 
-/**
- * Builds child-process env that authenticates git against github.com via GitHub's
- * `x-access-token:<token>` Basic credential.
- *
- * Injecting the credential through git's `GIT_CONFIG_*` env vars (rather than argv or
- * persisted `.git/config`) keeps the token out of logs entirely and still applies it to
- * the lazy blob fetch that `git checkout` performs against the promisor remote, since that
- * subprocess inherits this env. The header is host-scoped so it is only ever sent to github.com.
- */
-const buildGitAuthEnv = (token: string): NodeJS.ProcessEnv => {
-  const basic = Buffer.from(`x-access-token:${token}`).toString('base64');
-  return {
-    GIT_CONFIG_COUNT: '1',
-    GIT_CONFIG_KEY_0: 'http.https://github.com/.extraheader',
-    GIT_CONFIG_VALUE_0: `AUTHORIZATION: basic ${basic}`,
-  };
-};
+interface ContentstackCredentials {
+  apiKey: string;
+  deliveryToken: string;
+}
 
-const runGit = async ({
-  args,
-  cwd,
-  env,
-  log,
+interface ContentstackEntriesResponse {
+  entries?: ContentstackEntry[];
+  count?: number;
+  error_message?: string;
+}
+
+const fetchEntriesPage = async ({
+  config,
+  credentials,
+  contentType,
+  skip,
 }: {
-  args: string[];
-  cwd: string;
-  env?: NodeJS.ProcessEnv;
-  log: ToolingLog;
-}): Promise<void> => {
-  log.debug(`Running: git ${args.join(' ')}`);
-
-  await new Promise<void>((resolvePromise, rejectPromise) => {
-    const child = spawn('git', args, {
-      cwd,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      env: env ? { ...process.env, ...env } : process.env,
-    });
-    let stderr = '';
-
-    child.stderr.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString();
-    });
-
-    child.on('error', rejectPromise);
-
-    child.on('exit', (code: number | null) => {
-      if (code === 0) {
-        resolvePromise();
-        return;
-      }
-      rejectPromise(
-        new Error(`git ${args.join(' ')} failed with exit code ${code}: ${stderr.trim()}`)
-      );
-    });
-  });
-};
-
-/**
- * Performs a sparse, blobless partial checkout of just `contentSubPath` at `ref`.
- *
- * Only the article markdown (plus a handful of tiny ancestor-directory files implied
- * by cone-mode sparse checkout) is ever downloaded — the rest of the large website
- * repository (e.g. `public/` images, `src/`) is never transferred. Blobs for the sparse
- * paths are fetched lazily during `checkout` via the promisor remote; auth is supplied
- * through `gitEnv` so that lazy fetch stays authenticated.
- */
-const sparseCheckoutContent = async ({
-  owner,
-  repo,
-  ref,
-  contentSubPath,
-  token,
-  destFolder,
-  log,
-}: {
-  owner: string;
-  repo: string;
-  ref: string;
-  contentSubPath: string;
-  token?: string;
-  destFolder: string;
-  log: ToolingLog;
-}): Promise<void> => {
-  const cloneUrl = `https://github.com/${owner}/${repo}.git`;
-  const env = token ? buildGitAuthEnv(token) : undefined;
-
-  await Fs.mkdir(destFolder, { recursive: true });
-
-  await runGit({ args: ['init', '--quiet'], cwd: destFolder, env, log });
-  await runGit({ args: ['remote', 'add', 'origin', cloneUrl], cwd: destFolder, env, log });
-
-  if (contentSubPath) {
-    await runGit({ args: ['sparse-checkout', 'set', contentSubPath], cwd: destFolder, env, log });
+  config: TaskConfig;
+  credentials: ContentstackCredentials;
+  contentType: string;
+  skip: number;
+}): Promise<{ entries: ContentstackEntry[]; count: number }> => {
+  const url = new URL(
+    `https://${config.contentstackHost}/v3/content_types/${encodeURIComponent(contentType)}/entries`
+  );
+  url.searchParams.set('environment', config.contentstackEnvironment);
+  url.searchParams.set('locale', config.contentstackLocale);
+  url.searchParams.set('limit', String(CONTENTSTACK_PAGE_SIZE));
+  url.searchParams.set('skip', String(skip));
+  url.searchParams.set('include_count', 'true');
+  for (const field of CONTENTSTACK_REFERENCE_FIELDS) {
+    url.searchParams.append('include[]', field);
   }
 
-  // `--filter=blob:none` turns origin into a promisor remote, so only the tree metadata is
-  // fetched up front and blobs for the sparse paths are pulled lazily during `checkout`.
-  await runGit({
-    args: ['fetch', '--filter=blob:none', '--depth', '1', '--no-tags', 'origin', ref],
-    cwd: destFolder,
-    env,
-    log,
+  const response = await fetch(url, {
+    headers: {
+      api_key: credentials.apiKey,
+      access_token: credentials.deliveryToken,
+    },
   });
-  await runGit({ args: ['checkout', '--quiet', 'FETCH_HEAD'], cwd: destFolder, env, log });
+  const body = (await response
+    .json()
+    .catch((): ContentstackEntriesResponse => ({}))) as ContentstackEntriesResponse;
 
-  // Drop the git metadata now that the working tree is materialized.
-  await Fs.rm(Path.join(destFolder, '.git'), { recursive: true, force: true });
+  if (!response.ok) {
+    throw new Error(
+      `Contentstack request for content type [${contentType}] failed with HTTP ` +
+        `${response.status}: ${body.error_message ?? response.statusText}`
+    );
+  }
+
+  return { entries: body.entries ?? [], count: body.count ?? 0 };
+};
+
+const fetchContentTypeEntries = async ({
+  config,
+  credentials,
+  contentType,
+}: {
+  config: TaskConfig;
+  credentials: ContentstackCredentials;
+  contentType: string;
+}): Promise<ContentstackEntry[]> => {
+  const entries: ContentstackEntry[] = [];
+  let total = Infinity;
+
+  while (entries.length < total) {
+    const page = await fetchEntriesPage({
+      config,
+      credentials,
+      contentType,
+      skip: entries.length,
+    });
+    entries.push(...page.entries);
+    total = page.count;
+
+    if (page.entries.length < CONTENTSTACK_PAGE_SIZE) {
+      break;
+    }
+  }
+
+  return entries;
+};
+
+const loadLocalContent = async ({
+  contentPath,
+  log,
+}: {
+  contentPath: string;
+  log: ToolingLog;
+}): Promise<IndexedSecurityLabsDocument[]> => {
+  log.info(`Using local content path: ${contentPath}`);
+
+  try {
+    await Fs.access(contentPath);
+  } catch {
+    throw new Error(`Local content path does not exist: ${contentPath}`);
+  }
+
+  return parseMarkdownFiles({ contentPath, log });
 };
 
 /**
- * Fetches Security Labs content from a GitHub repository or uses a local path.
- * Returns the path to the directory that holds the article markdown files.
+ * Loads Security Labs documents from a local markdown checkout when `localContentPath` is set,
+ * otherwise from the published entries of the configured Contentstack content types.
  */
 export const fetchContent = async ({
   config,
@@ -178,64 +144,74 @@ export const fetchContent = async ({
 }: {
   config: TaskConfig;
   log: ToolingLog;
-}): Promise<string> => {
-  // If a local content path is provided, use it directly.
+}): Promise<IndexedSecurityLabsDocument[]> => {
   if (config.localContentPath) {
-    log.info(`Using local content path: ${config.localContentPath}`);
-
-    try {
-      await Fs.access(config.localContentPath);
-    } catch {
-      throw new Error(`Local content path does not exist: ${config.localContentPath}`);
-    }
-
-    return config.localContentPath;
+    return loadLocalContent({ contentPath: config.localContentPath, log });
   }
 
-  const { owner, repo } = parseRepoSlug(config.githubRepoUrl);
-  assertAllowedSecurityLabsRepo({ owner, repo });
-  const ref = config.githubRef;
-  const contentSubPath = config.contentSubPath.replace(/^\/+/, '').replace(/\/+$/, '');
+  const {
+    contentstackHost,
+    contentstackApiKey: apiKey,
+    contentstackDeliveryToken: deliveryToken,
+    contentstackContentTypes: contentTypes,
+    contentstackEnvironment,
+    contentstackLocale,
+  } = config;
 
-  log.info(
-    `Fetching content from GitHub: ${owner}/${repo}@${ref} (subpath: ${contentSubPath || '<root>'})`
-  );
+  assertAllowedContentstackHost(contentstackHost);
 
-  const destFolder = Path.join(config.buildFolder, 'content-repo');
-  // Start from a clean slate so `git init` never runs against a stale checkout.
-  await Fs.rm(destFolder, { recursive: true, force: true });
-
-  try {
-    await sparseCheckoutContent({
-      owner,
-      repo,
-      ref,
-      contentSubPath,
-      token: config.githubToken,
-      destFolder,
-      log,
-    });
-  } catch (err) {
-    if (!config.githubToken) {
-      throw new Error(
-        `${
-          err instanceof Error ? err.message : String(err)
-        }\nThe repository is internal-only; pass --githubToken (or set GITHUB_TOKEN).`
-      );
-    }
-    throw err;
-  }
-
-  const articlesPath = contentSubPath ? Path.join(destFolder, contentSubPath) : destFolder;
-
-  try {
-    await Fs.access(articlesPath);
-  } catch {
+  if (!apiKey) {
     throw new Error(
-      `Extracted content path does not exist: ${articlesPath}. ` +
-        `Check that [${contentSubPath}] exists in ${owner}/${repo}@${ref}.`
+      'No Contentstack stack API key configured; pass --contentstackApiKey ' +
+        '(or set SECURITY_LABS_CONTENTSTACK_API_KEY), or use --localContentPath.'
     );
   }
 
-  return articlesPath;
+  if (!deliveryToken) {
+    throw new Error(
+      'No Contentstack delivery token configured; pass --contentstackDeliveryToken ' +
+        '(or set SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN), or use --localContentPath.'
+    );
+  }
+
+  if (contentTypes.length === 0) {
+    throw new Error(
+      'No Contentstack content types configured; pass --contentstackContentTypes ' +
+        '(or set SECURITY_LABS_CONTENTSTACK_CONTENT_TYPES).'
+    );
+  }
+
+  const documents: IndexedSecurityLabsDocument[] = [];
+
+  for (const contentType of contentTypes) {
+    log.info(
+      `Fetching Contentstack entries for content type [${contentType}] ` +
+        `(host: ${contentstackHost}, environment: ${contentstackEnvironment}, locale: ${contentstackLocale})`
+    );
+
+    const entries = await fetchContentTypeEntries({
+      config,
+      credentials: { apiKey, deliveryToken },
+      contentType,
+    });
+    let skipped = 0;
+
+    for (const entry of entries) {
+      const document = contentstackEntryToDocument(entry);
+      if (document) {
+        documents.push(document);
+      } else {
+        skipped++;
+        log.warning(
+          `Skipping Contentstack entry [${entry.uid}] of type [${contentType}] without a title, slug, or body`
+        );
+      }
+    }
+
+    log.info(
+      `Fetched ${entries.length} entries for content type [${contentType}] (${skipped} skipped)`
+    );
+  }
+
+  return documents;
 };

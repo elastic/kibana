@@ -131,6 +131,21 @@ EOF
   fi
 }
 
+# Set up Security Labs Contentstack credentials
+{
+  if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-gen-ai-security-labs" ]]; then
+    SECURITY_LABS_CONTENTSTACK_API_KEY="$(vault_get security-labs-contentstack api_key || true)"
+    SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN="$(vault_get security-labs-contentstack delivery_token || true)"
+    if [[ -n "$SECURITY_LABS_CONTENTSTACK_API_KEY" && -n "$SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN" ]]; then
+      buildkite-agent redactor add <<<"$SECURITY_LABS_CONTENTSTACK_API_KEY" 2>/dev/null || true
+      export SECURITY_LABS_CONTENTSTACK_API_KEY
+      export SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN
+    else
+      echo "Could not read the Security Labs Contentstack credentials from Vault; the Security Labs artifact build will fail" >&2
+    fi
+  fi
+}
+
 # Set up Kibana Evals secrets
 {
   if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
