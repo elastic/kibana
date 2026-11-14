@@ -27,6 +27,7 @@ import {
   removeProvider,
   setActiveTabTimeline,
   setChanged,
+  setSavePromptDismissed,
   setDataProviderVisibility,
   setEventsDeleted,
   setEventsLoading,
@@ -512,6 +513,18 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         changed,
+        // any change or save re-arms the unsaved changes prompt
+        savePromptDismissed: false,
+      },
+    },
+  }))
+  .case(setSavePromptDismissed, (state, { id, dismissed }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        savePromptDismissed: dismissed,
       },
     },
   }))

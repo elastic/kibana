@@ -267,6 +267,10 @@ export const setDataProviderVisibility = actionCreator<{
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');
 
+export const setSavePromptDismissed = actionCreator<{ id: string; dismissed: boolean }>(
+  'SET_SAVE_PROMPT_DISMISSED'
+);
+
 export const updateColumnWidth = actionCreator<{
   columnId: string;
   id: string;

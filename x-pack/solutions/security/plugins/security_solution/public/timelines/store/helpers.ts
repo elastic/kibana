@@ -188,6 +188,7 @@ export const addNewTimeline = ({
     savedObjectId: null,
     version: null,
     isSaving: false,
+    changed: false,
     timelineType,
     ...templateTimelineInfo,
   };

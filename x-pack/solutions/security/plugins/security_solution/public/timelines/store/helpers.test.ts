@@ -242,6 +242,16 @@ describe('Timeline', () => {
         },
       });
     });
+
+    test('should keep `changed: true` for a duplicated timeline', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: { ...basicTimeline, changed: true },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.changed).toBe(true);
+    });
   });
 
   describe('#addNewTimeline', () => {
@@ -270,12 +280,12 @@ describe('Timeline', () => {
       });
       expect(update).toEqual({
         foo: basicTimeline,
-        bar: { ...timelineDefaults, id: 'bar' },
+        bar: { ...timelineDefaults, id: 'bar', changed: false },
       });
     });
 
     test('should add the specified columns to the timeline', () => {
-      const barWithEmptyColumns = { ...timelineDefaults, id: 'bar' };
+      const barWithEmptyColumns = { ...timelineDefaults, id: 'bar', changed: false };
       const barWithPopulatedColumns = { ...barWithEmptyColumns, columns: defaultHeaders };
 
       const update = addNewTimeline({
@@ -318,6 +328,20 @@ describe('Timeline', () => {
 
       expect(update.foo.isSuperTimeline).toBe(false);
       expect(update.foo.superTimelineSourceIds).toEqual([]);
+    });
+
+    test('should not inherit `changed` from the timeline it replaces', () => {
+      const update = addNewTimeline({
+        id: 'foo',
+        columns: timelineDefaults.columns,
+        dataViewId: null,
+        indexNames: [],
+        timelineById: { foo: { ...basicTimeline, changed: true } },
+        timelineType: TimelineTypeEnum.default,
+        savedSearchId: null,
+      });
+
+      expect(update.foo.changed).toBe(false);
     });
   });
 

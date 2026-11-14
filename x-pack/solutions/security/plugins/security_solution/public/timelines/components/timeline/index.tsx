@@ -80,6 +80,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     description,
     initialized,
     changed,
+    savePromptDismissed,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -92,6 +93,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'show',
         'activeTab',
         'changed',
+        'savePromptDismissed',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -158,8 +160,14 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     if (!changed) {
       dispatch(timelineActions.setChanged({ id: timelineId, changed: false }));
     }
+    // `updateDataView` re-arms the unsaved changes prompt, which would ask again after the user
+    // already chose to leave.
+    if (savePromptDismissed) {
+      dispatch(timelineActions.setSavePromptDismissed({ id: timelineId, dismissed: true }));
+    }
   }, [
     changed,
+    savePromptDismissed,
     dispatch,
     savedObjectId,
     selectedDataViewId,
