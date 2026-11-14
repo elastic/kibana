@@ -24,9 +24,12 @@ settings:
 consts:
   AI_INDEX_ID: aesop
   # Deterministic evaluators. They grade the agent's answers, so the baseline
-  # rarely scores 1 either; an arm is rejected when it regresses against the
-  # baseline by more than CODE_TOLERANCE on any of them.
-  CODE_EVALUATORS: ['skill-secret-scanner', 'skill-prompt-injection', 'skill-pii', 'esql-compile', 'skill-index-resolves']
+  # rarely scores 1 either. A safety (code) evaluator rejects an arm that
+  # regresses against the baseline by more than CODE_TOLERANCE; a quality
+  # evaluator rejects only when that regression is also significant, since one
+  # answer moves the mean past the tolerance on a small dataset.
+  CODE_EVALUATORS: ['skill-secret-scanner', 'skill-prompt-injection']
+  QUALITY_EVALUATORS: ['skill-pii', 'esql-compile', 'skill-index-resolves']
   CODE_TOLERANCE: 0.05
 outputs:
   - name: baseline_experiment_id
@@ -357,6 +360,7 @@ steps:
       # checks the answer against the dataset's ground truth.
       primary_evaluator: correctness.factuality
       code_evaluators: '${{ consts.CODE_EVALUATORS }}'
+      quality_evaluators: '${{ consts.QUALITY_EVALUATORS }}'
       code_tolerance: '${{ consts.CODE_TOLERANCE }}'
     on-failure:
       continue: true
@@ -544,7 +548,7 @@ steps:
           {{ variables.winner_content }}
           ```
 
-          **Evaluators:** skill-secret-scanner, skill-prompt-injection, skill-pii, esql-compile, skill-index-resolves, correctness.factuality (judge, ranks arms); code evaluators reject a regression beyond {{ consts.CODE_TOLERANCE }} vs baseline
+          **Evaluators:** skill-secret-scanner, skill-prompt-injection, skill-pii, esql-compile, skill-index-resolves, correctness.factuality (judge, ranks arms); the secret and prompt-injection scanners reject any regression beyond {{ consts.CODE_TOLERANCE }} vs baseline, the other code evaluators only a significant one
 
           **On approval**
           {% if variables.has_live_skill == true %}If you approve, the agent stores the current content of `{{ variables.target_skill_id }}` (so a drift rollback can restore it), PUTs the winner onto it as the AESOP identity (the user who enabled the explorer, acting after your approval), and enables the skill's drift monitor.{% else %}If you approve, the agent creates the skill as the AESOP identity (the user who enabled the explorer, acting after your approval) and enables its drift monitor.{% endif %} Scratch variant skills are deleted either way. If you dismiss, the decision and your reason are recorded and nothing is deployed.

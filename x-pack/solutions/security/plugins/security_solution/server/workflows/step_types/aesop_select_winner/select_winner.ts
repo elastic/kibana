@@ -37,27 +37,44 @@ const weightedMean = (rows: ArmResult[], pick: (row: ArmResult) => number): numb
 
 const format = (value: number): string => Number(value.toFixed(4)).toString();
 
+const regressionOf = ({ meanTarget, meanBaseline, direction }: ArmResult): number =>
+  direction === 'minimize' ? meanTarget - meanBaseline : meanBaseline - meanTarget;
+
 /**
  * Code evaluators grade the agent's answers, not the skill document, so the baseline does not
  * score 1 on them either (a triage answer that cites an IP trips the PII scanner). An arm is
- * rejected only when it is worse than the baseline by more than the tolerance.
+ * rejected when it is worse than the baseline by more than the tolerance. Quality evaluators
+ * additionally need the drop to be significant: on a small dataset one answer moves the mean
+ * past the tolerance, and that noise must not veto an arm the primary evaluator prefers.
  */
-const rejectionReasons = (arm: Arm, codeEvaluators: string[], tolerance: number): string[] =>
-  arm.results
-    .filter(({ evaluatorName, meanTarget, meanBaseline, direction }) => {
-      if (!codeEvaluators.includes(evaluatorName)) return false;
-      const regression =
-        direction === 'minimize' ? meanTarget - meanBaseline : meanBaseline - meanTarget;
-      return regression > tolerance + EPSILON;
-    })
-    .map(
-      ({ evaluatorName, meanTarget, meanBaseline }) =>
-        `code evaluator ${evaluatorName} scored ${format(
-          meanTarget
-        )} against a baseline of ${format(
-          meanBaseline
-        )}, a regression beyond the tolerance of ${format(tolerance)}`
-    );
+const rejectionReasons = (
+  arm: Arm,
+  codeEvaluators: string[],
+  qualityEvaluators: string[],
+  tolerance: number,
+  alpha: number
+): string[] =>
+  arm.results.flatMap((result) => {
+    const { evaluatorName, meanTarget, meanBaseline, pValue } = result;
+    const isCode = codeEvaluators.includes(evaluatorName);
+    const isQuality = !isCode && qualityEvaluators.includes(evaluatorName);
+    if (!isCode && !isQuality) return [];
+    if (regressionOf(result) <= tolerance + EPSILON) return [];
+    const scored = `scored ${format(meanTarget)} against a baseline of ${format(meanBaseline)}`;
+    if (isCode) {
+      return [
+        `code evaluator ${evaluatorName} ${scored}, a regression beyond the tolerance of ${format(
+          tolerance
+        )}`,
+      ];
+    }
+    if (pValue !== null && pValue > alpha) return [];
+    return [
+      `quality evaluator ${evaluatorName} ${scored}, a regression beyond the tolerance of ${format(
+        tolerance
+      )}${pValue === null ? ' with no p-value available' : ` at p=${format(pValue)}`}`,
+    ];
+  });
 
 /**
  * Collapses an arm's rows for the primary evaluator (one per dataset) into one score. The
@@ -123,6 +140,7 @@ export const selectWinner = (input: Input): Output => {
   const {
     primary_evaluator: primary,
     code_evaluators: codeEvaluators,
+    quality_evaluators: qualityEvaluators,
     code_tolerance: codeTolerance,
     alpha,
   } = input;
@@ -130,7 +148,7 @@ export const selectWinner = (input: Input): Output => {
   const scored: PrimaryScore[] = [];
 
   comparisons.forEach((arm, index) => {
-    const reasons = rejectionReasons(arm, codeEvaluators, codeTolerance);
+    const reasons = rejectionReasons(arm, codeEvaluators, qualityEvaluators, codeTolerance, alpha);
     if (reasons.length > 0) {
       rejected.push({ target_id: arm.target_id, reasons });
       return;

@@ -28,6 +28,7 @@ const build = (comparisons: Arm[], overrides: Partial<Input> = {}): Input => ({
   comparison: { baseline_id: 'baseline', comparisons },
   primary_evaluator: 'correctness',
   code_evaluators: ['esql-compile', 'skill-secret-scanner'],
+  quality_evaluators: [],
   code_tolerance: 0,
   alpha: 0.05,
   min_delta: 0,
@@ -198,6 +199,122 @@ describe('selectWinner', () => {
     );
 
     expect(result.winner_target_id).toBe('a');
+  });
+
+  describe('quality_evaluators', () => {
+    const quality = (overrides: Partial<Row>) =>
+      row({ evaluatorName: 'skill-pii', meanBaseline: 0.4, meanTarget: 0.33, ...overrides });
+    const withQuality = (qualityRow: Row) =>
+      selectWinner(
+        build(
+          [
+            arm('a', [
+              row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+              qualityRow,
+            ]),
+          ],
+          { code_evaluators: [], quality_evaluators: ['skill-pii'], code_tolerance: 0.05 }
+        )
+      );
+
+    it('keeps an arm whose drop beyond the tolerance is not significant', () => {
+      expect(withQuality(quality({ pValue: 0.5 }))).toMatchObject({
+        winner_target_id: 'a',
+        rejected: [],
+      });
+    });
+
+    it('rejects an arm whose drop beyond the tolerance is significant', () => {
+      const result = withQuality(quality({ pValue: 0.03 }));
+
+      expect(result.winner_index).toBe(-1);
+      expect(result.rejected).toEqual([
+        {
+          target_id: 'a',
+          reasons: [
+            'quality evaluator skill-pii scored 0.33 against a baseline of 0.4, a regression beyond the tolerance of 0.05 at p=0.03',
+          ],
+        },
+      ]);
+    });
+
+    it('rejects a drop beyond the tolerance when no p-value is available', () => {
+      const result = withQuality(quality({ pValue: null }));
+
+      expect(result.rejected[0].reasons[0]).toContain('with no p-value available');
+    });
+
+    it('keeps a significant drop that stays within the tolerance', () => {
+      expect(withQuality(quality({ meanTarget: 0.36, pValue: 0.001 })).rejected).toEqual([]);
+    });
+
+    it('keeps the strict code rule for an evaluator listed in both', () => {
+      const result = selectWinner(
+        build(
+          [
+            arm('a', [
+              row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+              row({ evaluatorName: 'esql-compile', meanBaseline: 1, meanTarget: 0.9, pValue: 0.9 }),
+            ]),
+          ],
+          { quality_evaluators: ['esql-compile'], code_tolerance: 0.05 }
+        )
+      );
+
+      expect(result.rejected[0].reasons[0]).toContain('code evaluator esql-compile');
+    });
+
+    it('rejects only the significant quality drop when replaying a live lab run', () => {
+      // Means and p-values from a three-arm lab run in which every arm lost to the strict gate.
+      const pii = row({ evaluatorName: 'skill-pii', meanBaseline: 0.4, meanTarget: 1 / 3 });
+      const safety = [
+        row({ evaluatorName: 'skill-secret-scanner', meanBaseline: 1, meanTarget: 1, pValue: 1 }),
+        row({ evaluatorName: 'skill-prompt-injection', meanBaseline: 1, meanTarget: 1, pValue: 1 }),
+      ];
+      const liveArm = (id: string, factuality: number, p: number, esql: number, esqlP: number) =>
+        arm(id, [
+          row({
+            evaluatorName: 'correctness',
+            sampleSize: 15,
+            meanBaseline: 0.34,
+            meanTarget: factuality,
+            pValue: p,
+          }),
+          row({
+            evaluatorName: 'esql-compile',
+            sampleSize: 15,
+            meanBaseline: 0.934,
+            meanTarget: esql,
+            pValue: esqlP,
+          }),
+          { ...pii, sampleSize: 15 },
+          ...safety,
+        ]);
+      const result = selectWinner(
+        build(
+          [
+            liveArm('v1', 0.299, 0.866, 0.822, 0.066),
+            liveArm('v2', 0.493, 0.169, 0.825, 0.029),
+            liveArm('v3', 0.417, 0.441, 0.892, 0.265),
+          ],
+          {
+            code_evaluators: ['skill-secret-scanner', 'skill-prompt-injection'],
+            quality_evaluators: ['skill-pii', 'esql-compile'],
+            code_tolerance: 0.05,
+          }
+        )
+      );
+
+      expect(result.rejected).toEqual([
+        {
+          target_id: 'v2',
+          reasons: [
+            'quality evaluator esql-compile scored 0.825 against a baseline of 0.934, a regression beyond the tolerance of 0.05 at p=0.029',
+          ],
+        },
+      ]);
+      expect(result).toMatchObject({ winner_target_id: 'v3', beats_baseline: false });
+    });
   });
 
   it('returns no winner when every arm is rejected by a code evaluator', () => {
