@@ -339,6 +339,7 @@ export {
   reconcileInstances,
   buildStreamVars,
   buildPackageInputs,
+  disableUnlistedPackageInputs,
   buildIacIntegrations,
   buildPackageVars,
   getPackageVarNames,

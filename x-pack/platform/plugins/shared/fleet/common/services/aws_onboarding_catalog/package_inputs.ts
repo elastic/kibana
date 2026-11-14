@@ -188,6 +188,38 @@ function resolveServiceVars(
 
 const EMPTY_DS_VARS: Readonly<ServiceDataStreamVars> = { enabledInputs: [], varsByInput: {} };
 
+/** Policy template shape of package info that matters for input keys. */
+export interface PackagePolicyTemplateInputs {
+  name?: string;
+  type?: string;
+  input?: string;
+  inputs?: Array<{ type: string }>;
+}
+
+/**
+ * Adds a disabled entry for every package input that is not in `inputs`. Fleet otherwise keeps
+ * each default-enabled input of the package enabled, and the ones that are not agentless-capable
+ * fail agentless validation ("not allowed for agentless"). Returns a new object.
+ */
+export function disableUnlistedPackageInputs(
+  inputs: Record<string, PackageInputEntry>,
+  policyTemplates: PackagePolicyTemplateInputs[] | undefined
+): Record<string, PackageInputEntry> {
+  const result = { ...inputs };
+  for (const template of policyTemplates ?? []) {
+    // Input-only templates have `input` (singular, the collector type e.g. 'otelcol') and
+    // `type` (signal type e.g. 'metrics'). Use `input` for the key — `type` is wrong here.
+    const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
+    for (const input of templateInputs) {
+      const key = template.name ? `${template.name}-${input.type}` : input.type;
+      if (!result[key]) {
+        result[key] = { enabled: false, streams: {} };
+      }
+    }
+  }
+  return result;
+}
+
 export function buildPackageInputs(
   services: AwsServiceMatrixEntry[],
   storedServiceVars: Record<string, ServiceVars>,

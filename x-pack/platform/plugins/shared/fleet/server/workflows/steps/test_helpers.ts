@@ -36,26 +36,39 @@ const logDataStream = (path: string, dataset: string, type: 'logs' | 'metrics' =
 export const awsPackageInfoFixture = {
   name: 'aws',
   version: '8.1.2',
+  vars: [{ name: 'default_region', type: 'text', show_user: true, default: 'us-east-1' }],
   policy_templates: [
     {
       name: 'guardduty',
       title: 'AWS GuardDuty',
       data_streams: ['guardduty'],
       deployment_modes: { agentless: { enabled: true } },
-      inputs: [{ type: 'aws-s3', title: 'Collect logs from S3' }],
+      inputs: [
+        {
+          type: 'aws-s3',
+          title: 'Collect logs from S3',
+          deployment_modes: ['default', 'agentless'],
+        },
+      ],
     },
     {
       name: 'ec2',
       title: 'AWS EC2',
       data_streams: ['ec2_logs'],
       deployment_modes: { agentless: { enabled: true } },
-      inputs: [{ type: 'aws-s3', title: 'Collect logs from S3' }],
+      inputs: [
+        {
+          type: 'aws-s3',
+          title: 'Collect logs from S3',
+          deployment_modes: ['default', 'agentless'],
+        },
+      ],
     },
     {
       name: 'cloudtrail',
       title: 'AWS CloudTrail',
       data_streams: ['cloudtrail'],
-      inputs: [{ type: 'aws-s3', title: 'Collect logs from S3' }],
+      inputs: [{ type: 'aws-s3', title: 'Collect logs from S3', deployment_modes: ['default'] }],
     },
   ],
   data_streams: [

@@ -114,6 +114,21 @@ export const awsOnboardingHasDataStepDefinition = createServerStepDefinition({
       }
     }
 
-    return { output: { has_data: agents.some(({ data }) => data), agents } };
+    // Every requested policy must have at least one agent that reported data.
+    const policiesWithData = policyIds.filter((policyId) =>
+      agents.some((agent) => agent.policy_id === policyId && agent.data)
+    );
+    const policiesWithoutData = policyIds.filter(
+      (policyId) => !policiesWithData.includes(policyId)
+    );
+
+    return {
+      output: {
+        has_data: policiesWithoutData.length === 0,
+        policies_with_data: policiesWithData,
+        policies_without_data: policiesWithoutData,
+        agents,
+      },
+    };
   },
 });

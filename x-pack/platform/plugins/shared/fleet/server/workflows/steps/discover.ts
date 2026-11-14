@@ -97,6 +97,7 @@ export const awsOnboardingDiscoverStepDefinition = createServerStepDefinition({
     return {
       output: {
         account_id: discovery.accountId,
+        region: discovery.region,
         services,
         errors: discovery.errors,
       },

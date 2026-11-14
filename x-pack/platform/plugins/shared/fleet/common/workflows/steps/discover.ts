@@ -12,15 +12,13 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const AwsOnboardingDiscoverStepTypeId = 'fleet.awsOnboardingDiscover';
 
-export const awsOnboardingDiscoverInputSchema = lazySchema(() =>
-  z.object({
-    region: z.string(),
-  })
-);
+export const awsOnboardingDiscoverInputSchema = lazySchema(() => z.object({}));
 
 export const awsOnboardingDiscoverOutputSchema = lazySchema(() =>
   z.object({
     account_id: z.string().optional(),
+    /** Region of the stored onboarding credentials, the default for the services picked next. */
+    region: z.string(),
     services: z.array(
       z.object({
         id: z.string(),

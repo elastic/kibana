@@ -44,8 +44,7 @@ describe('awsOnboardingDiscoverStepDefinition', () => {
     (getPackageInfo as jest.Mock).mockResolvedValue(awsPackageInfoFixture);
   });
 
-  const run = () =>
-    awsOnboardingDiscoverStepDefinition.handler(createStepContext({ region: 'us-east-1' }));
+  const run = () => awsOnboardingDiscoverStepDefinition.handler(createStepContext({}));
 
   it('maps a billing name to a catalog service and marks it agentless when the policy template allows it', async () => {
     discover.mockResolvedValue(
@@ -61,6 +60,7 @@ describe('awsOnboardingDiscoverStepDefinition', () => {
     expect(result).toEqual({
       output: {
         account_id: '123456789012',
+        region: 'us-east-1',
         services: [
           expect.objectContaining({
             id: 'guardduty',
@@ -106,6 +106,7 @@ describe('awsOnboardingDiscoverStepDefinition', () => {
 
     expect(result).toEqual({
       output: {
+        region: 'us-east-1',
         services: [],
         errors: [{ source: 'costExplorer', message: 'Cost Explorer not enabled' }],
       },

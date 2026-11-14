@@ -9,7 +9,12 @@ import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-p
 
 import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/common';
 import { getDefaultEnabledDataStreams } from '@kbn/fleet-plugin/common';
-import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '@kbn/fleet-plugin/common';
+import {
+  buildPackageInputs,
+  buildPackageVars,
+  disableUnlistedPackageInputs,
+  getPackageVarNames,
+} from '@kbn/fleet-plugin/common';
 import type {
   AuthenticateAndDeployStepState,
   ServiceChipState,
@@ -187,7 +192,7 @@ export async function deployGroup(
   }
 
   const services = group.members.map(({ service }) => service);
-  const inputs = buildPackageInputs(
+  const selectedInputs = buildPackageInputs(
     services,
     serviceVarsMap,
     globalRegion,
@@ -196,23 +201,7 @@ export async function deployGroup(
 
   // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
   // enabled inputs that would cause "not allowed for agentless" errors.
-  const pkgTemplates: Array<{
-    name?: string;
-    type?: string;
-    input?: string;
-    inputs?: Array<{ type: string }>;
-  }> = (pkgInfo as any).policy_templates ?? [];
-  for (const template of pkgTemplates) {
-    // Input-only templates have `input` (singular, the collector type e.g. 'otelcol') and
-    // `type` (signal type e.g. 'metrics'). Use `input` for the key — `type` is wrong here.
-    const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
-    for (const input of templateInputs) {
-      const key = template.name ? `${template.name}-${input.type}` : input.type;
-      if (!inputs[key]) {
-        inputs[key] = { enabled: false, streams: {} };
-      }
-    }
-  }
+  const inputs = disableUnlistedPackageInputs(selectedInputs, (pkgInfo as any).policy_templates);
 
   const pkgVarNames = getPackageVarNames(pkgInfo);
   // Refs of a sibling policy let a new group reuse credentials the user kept; Fleet tracks them

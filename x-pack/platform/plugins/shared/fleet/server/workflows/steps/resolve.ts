@@ -11,6 +11,9 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   buildIacIntegrations,
   buildPackageInputs,
+  buildPackageVars,
+  disableUnlistedPackageInputs,
+  getPackageVarNames,
   getServiceIndexPatterns,
 } from '../../../common/services/aws_onboarding_catalog';
 import type { AwsServiceMatrixEntry } from '../../../common/services/aws_onboarding_catalog';
@@ -38,8 +41,9 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
       region,
       namespace = DEFAULT_NAMESPACE,
       account_id,
+      run_suffix: runSuffix,
     } = context.input;
-    const { packageVersion, matrix } = await loadAwsServiceMatrix(context);
+    const { packageVersion, packageInfo, matrix } = await loadAwsServiceMatrix(context);
 
     const selected: AwsServiceMatrixEntry[] = [];
     const rejected: string[] = [];
@@ -78,8 +82,12 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
       {}
     );
 
+    // Fleet enforces unique policy and connector names, so a re-run needs its own suffix.
+    const suffix = runSuffix?.trim() || Date.now().toString(36);
+    const packageVars = buildPackageVars(region, undefined, getPackageVarNames(packageInfo));
+
     const policies = selected.map((service) => {
-      const name = `aws-${service.id}-agentless`;
+      const name = `aws-${service.id}-agentless-${suffix}`;
       return {
         service: service.id,
         name,
@@ -87,10 +95,21 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
           name,
           namespace,
           package: { name: 'aws' as const, version: packageVersion },
-          inputs: buildPackageInputs([service], {}, region),
+          // The agentless API skips the pass that disables default-enabled inputs, and it needs
+          // the template to validate against, so both are explicit.
+          policy_template: service.policyTemplate ?? service.id,
+          ...(packageVars ? { vars: packageVars } : {}),
+          inputs: disableUnlistedPackageInputs(
+            buildPackageInputs([service], {}, region),
+            packageInfo.policy_templates
+          ),
         },
       };
     });
+
+    const permissionsSummary = integrations.flatMap(({ policyTemplates }) =>
+      policyTemplates.map(({ name, enabledInputs }) => `${name} (${enabledInputs.join(', ')})`)
+    );
 
     const indexPatterns = [
       ...new Set(selected.flatMap((service) => getServiceIndexPatterns(service, namespace))),
@@ -103,7 +122,8 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
         integrations,
         policies,
         index_patterns: indexPatterns,
-        suggested_identity_name: `aws-${account_id ?? 'account'}-federated-identity`,
+        permissions_summary: permissionsSummary,
+        suggested_identity_name: `aws-${account_id ?? 'account'}-federated-identity-${suffix}`,
       },
     };
   },

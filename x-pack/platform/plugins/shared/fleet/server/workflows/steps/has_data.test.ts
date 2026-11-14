@@ -52,6 +52,8 @@ describe('awsOnboardingHasDataStepDefinition', () => {
     expect(result).toEqual({
       output: {
         has_data: false,
+        policies_with_data: [],
+        policies_without_data: ['policy-a', 'policy-b'],
         agents: [
           { policy_id: 'policy-a', data: false },
           { policy_id: 'policy-b', data: false },
@@ -60,7 +62,7 @@ describe('awsOnboardingHasDataStepDefinition', () => {
     });
   });
 
-  it('returns has_data=true only when an enrolled agent reports data for the package', async () => {
+  it('returns has_data=true only when every policy has an agent reporting data for the package', async () => {
     const callKibanaApi = jest
       .fn()
       .mockResolvedValueOnce({
@@ -89,7 +91,9 @@ describe('awsOnboardingHasDataStepDefinition', () => {
     });
     expect(result).toEqual({
       output: {
-        has_data: true,
+        has_data: false,
+        policies_with_data: ['policy-a'],
+        policies_without_data: ['policy-b'],
         agents: [
           {
             policy_id: 'policy-a',
@@ -110,9 +114,24 @@ describe('awsOnboardingHasDataStepDefinition', () => {
     });
 
     callKibanaApi
-      .mockResolvedValueOnce({ body: { items: [{ id: 'agent-1', policy_id: 'policy-a' }] } })
-      .mockResolvedValueOnce({ body: { items: [{ 'agent-1': { data: false } }] } });
-    const none = await awsOnboardingHasDataStepDefinition.handler(contextWithApi(callKibanaApi));
-    expect((none as any).output.has_data).toBe(false);
+      .mockResolvedValueOnce({
+        body: {
+          items: [
+            { id: 'agent-1', policy_id: 'policy-a' },
+            { id: 'agent-2', policy_id: 'policy-b' },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        body: { items: [{ 'agent-1': { data: true } }, { 'agent-2': { data: true } }] },
+      });
+    const all = await awsOnboardingHasDataStepDefinition.handler(contextWithApi(callKibanaApi));
+    expect((all as any).output).toEqual(
+      expect.objectContaining({
+        has_data: true,
+        policies_with_data: ['policy-a', 'policy-b'],
+        policies_without_data: [],
+      })
+    );
   });
 });

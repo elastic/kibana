@@ -18,6 +18,8 @@ export const awsOnboardingResolveInputSchema = lazySchema(() =>
     region: z.string(),
     namespace: z.string().optional(),
     account_id: z.string().optional(),
+    /** Short per-run suffix that keeps policy and connector names unique across runs. */
+    run_suffix: z.string().optional(),
   })
 );
 
@@ -26,6 +28,7 @@ const policyBodySchema = lazySchema(() =>
     name: z.string(),
     namespace: z.string(),
     package: z.object({ name: z.literal('aws'), version: z.string() }),
+    policy_template: z.string(),
     inputs: z.record(z.string(), z.unknown()),
     vars: z.record(z.string(), z.unknown()).optional(),
   })
@@ -51,6 +54,8 @@ export const awsOnboardingResolveOutputSchema = lazySchema(() =>
       })
     ),
     index_patterns: z.array(z.string()),
+    /** Policy templates and input types the identity will be granted, one entry per template. */
+    permissions_summary: z.array(z.string()),
     suggested_identity_name: z.string(),
   })
 );

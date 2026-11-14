@@ -12,13 +12,18 @@ import {
   buildAwsServiceMatrix,
 } from '../../../common/services/aws_onboarding_catalog';
 import type { AwsServiceMatrixEntry } from '../../../common/services/aws_onboarding_catalog';
+import type { PackageInfo } from '../../../common/types';
 import { appContextService } from '../../services/app_context';
 import { getPackageInfo } from '../../services/epm/packages/get';
 
 /** Builds the catalog from the live `aws` package metadata, scoped to the workflow's fake request. */
 export const loadAwsServiceMatrix = async (
   context: StepHandlerContext
-): Promise<{ packageVersion: string; matrix: AwsServiceMatrixEntry[] }> => {
+): Promise<{
+  packageVersion: string;
+  packageInfo: PackageInfo;
+  matrix: AwsServiceMatrixEntry[];
+}> => {
   const savedObjectsClient = appContextService.getInternalUserSOClient(
     context.contextManager.getFakeRequest()
   );
@@ -30,6 +35,7 @@ export const loadAwsServiceMatrix = async (
   });
   return {
     packageVersion: packageInfo.version,
+    packageInfo,
     matrix: buildAwsServiceMatrix({ aws: packageInfo }, AWS_SERVICES_STATIC),
   };
 };

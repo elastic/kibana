@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { validateDeploymentModesForInputs } from '../../../common/services/agentless_policy_helper';
+import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { getPackageInfo } from '../../services/epm/packages/get';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
 
@@ -48,13 +50,14 @@ describe('awsOnboardingResolveStepDefinition', () => {
         region: 'us-west-2',
         namespace: 'prod',
         account_id: '123456789012',
+        run_suffix: 'ab12cd34',
       })
     );
 
     const { output } = result as { output: Record<string, any> };
     expect(output.package_name).toBe('aws');
     expect(output.package_version).toBe('8.1.2');
-    expect(output.suggested_identity_name).toBe('aws-123456789012-federated-identity');
+    expect(output.suggested_identity_name).toBe('aws-123456789012-federated-identity-ab12cd34');
     expect(output.integrations).toEqual([
       {
         name: 'aws',
@@ -64,23 +67,53 @@ describe('awsOnboardingResolveStepDefinition', () => {
         ],
       },
     ]);
+    expect(output.permissions_summary).toEqual(['ec2 (aws-s3)', 'guardduty (aws-s3)']);
     expect(output.policies.map((p: any) => [p.service, p.name])).toEqual([
-      ['guardduty', 'aws-guardduty-agentless'],
-      ['ec2', 'aws-ec2-agentless'],
+      ['guardduty', 'aws-guardduty-agentless-ab12cd34'],
+      ['ec2', 'aws-ec2-agentless-ab12cd34'],
     ]);
     const [guardduty] = output.policies;
     expect(guardduty.body).toEqual(
       expect.objectContaining({
-        name: 'aws-guardduty-agentless',
+        name: 'aws-guardduty-agentless-ab12cd34',
         namespace: 'prod',
         package: { name: 'aws', version: '8.1.2' },
+        policy_template: 'guardduty',
+        vars: { default_region: 'us-west-2' },
       })
     );
     expect(guardduty.body.cloud_connector).toBeUndefined();
-    expect(Object.keys(guardduty.body.inputs)).toEqual(['guardduty-aws-s3']);
+    // the selected input is on; every other input of the package, including the ones of the
+    // sibling templates, is explicitly off
+    expect(guardduty.body.inputs['guardduty-aws-s3'].enabled).toBe(true);
+    expect(guardduty.body.inputs['ec2-aws-s3']).toEqual({ enabled: false, streams: {} });
+    expect(guardduty.body.inputs['cloudtrail-aws-s3']).toEqual({ enabled: false, streams: {} });
     expect(output.index_patterns).toEqual(
       expect.arrayContaining(['logs-aws.guardduty-prod', 'logs-aws.ec2_logs-prod'])
     );
+  });
+
+  it('produces policy bodies that pass the agentless conversion and deployment mode validation', async () => {
+    const result = await awsOnboardingResolveStepDefinition.handler(
+      createStepContext({ services: ['guardduty', 'ec2'], region: 'us-west-2' })
+    );
+    const { output } = result as { output: Record<string, any> };
+
+    for (const { body } of output.policies) {
+      const { policy_template: policyTemplate, ...simplified } = body;
+      const packagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
+        { ...simplified, supports_agentless: true },
+        awsPackageInfoFixture,
+        { policyTemplate }
+      );
+
+      expect(() =>
+        validateDeploymentModesForInputs(packagePolicy.inputs, 'agentless', awsPackageInfoFixture)
+      ).not.toThrow();
+      expect(
+        packagePolicy.inputs.filter((input) => input.enabled).map((input) => input.policy_template)
+      ).toEqual([policyTemplate]);
+    }
   });
 
   it('refuses to run while the feature flag is off', async () => {
