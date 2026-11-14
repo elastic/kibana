@@ -16,6 +16,11 @@ import type { DefaultModelValidationResult } from '../../hooks/use_default_model
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 
 jest.mock('../../hooks/use_connectors');
+jest.mock('./test_model_button', () => ({
+  TestModelButton: ({ connectorId, label }: { connectorId: string; label: string }) => (
+    <button data-test-subj="test-model-button" type="button">{`${connectorId}|${label}`}</button>
+  ),
+}));
 
 const mockUseConnectors = useConnectors as jest.Mock;
 
@@ -85,6 +90,41 @@ describe('DefaultModelSection', () => {
     expect(screen.getByTestId('featureSpecificModelsRow')).toBeInTheDocument();
     expect(screen.getByTestId('globalModelComboBox')).toBeInTheDocument();
     expect(screen.getByTestId('featureSpecificModelsSwitch')).toBeInTheDocument();
+  });
+
+  describe('test button for the global model', () => {
+    const renderSection = (settings = createMockSettings(), props: { disabled?: boolean } = {}) =>
+      render(
+        <Wrapper>
+          <DefaultModelSection
+            defaultModelSettings={settings}
+            validation={validResult}
+            {...props}
+          />
+        </Wrapper>
+      );
+
+    it('tests the selected global model', () => {
+      renderSection();
+
+      expect(screen.getByTestId('test-model-button')).toHaveTextContent('pre-1|Elastic Model');
+    });
+
+    it('is not shown when no global model is selected', () => {
+      renderSection(
+        createMockSettings({
+          state: { enableAi: true, defaultModelId: NO_DEFAULT_MODEL, featureSpecificModels: true },
+        })
+      );
+
+      expect(screen.queryByTestId('test-model-button')).not.toBeInTheDocument();
+    });
+
+    it('is not shown when the section is read only', () => {
+      renderSection(createMockSettings(), { disabled: true });
+
+      expect(screen.queryByTestId('test-model-button')).not.toBeInTheDocument();
+    });
   });
 
   it('marks rows with pending changes as unsaved', () => {

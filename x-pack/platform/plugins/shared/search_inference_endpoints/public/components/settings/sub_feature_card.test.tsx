@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -23,6 +23,14 @@ import { EisModelStatus, type EndpointDeprecationInfo, type EndpointEfforts } fr
 jest.mock('../../hooks/use_connectors');
 jest.mock('../../hooks/use_registered_features');
 jest.mock('../../hooks/use_supported_effort_levels');
+jest.mock(
+  '../all_inference_endpoints/render_table_columns/render_actions/actions/test_endpoint/test_endpoint_modal',
+  () => ({
+    TestEndpointModal: ({ target }: { target: { featureId?: string; connectorId?: string } }) => (
+      <div data-test-subj="test-modal">{target.featureId ?? target.connectorId}</div>
+    ),
+  })
+);
 jest.mock('./add_model_popover', () => ({
   AddModelPopover: ({
     existingEndpointIds,
@@ -201,6 +209,177 @@ describe('SubFeatureCard', () => {
         />
       </Wrapper>
     );
+
+  describe('test model buttons', () => {
+    const renderRows = (props: {
+      canManage?: boolean;
+      effectiveRecommendedEndpoints?: string[];
+      invalidEndpointIds?: Set<string>;
+      hasSavedObject?: boolean;
+      globalDefaultId?: string;
+    }) =>
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={['ep-1', 'ep-2']}
+            effectiveRecommendedEndpoints={['__different__']}
+            onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
+            invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
+            {...defaultGlobalRowProps}
+            {...props}
+          />
+        </Wrapper>
+      );
+
+    it('shows a test button on every assigned model', () => {
+      renderRows({});
+
+      expect(screen.getByTestId('test-endpoint-ep-1')).toBeInTheDocument();
+      expect(screen.getByTestId('test-endpoint-ep-2')).toBeInTheDocument();
+    });
+
+    it('shows a test button on every recommended model', () => {
+      renderRows({ effectiveRecommendedEndpoints: ['ep-1', 'ep-2'] });
+
+      expect(screen.getByTestId('test-endpoint-ep-1')).toBeInTheDocument();
+      expect(screen.getByTestId('test-endpoint-ep-2')).toBeInTheDocument();
+    });
+
+    it('tests the model of the row that was clicked', () => {
+      renderRows({});
+
+      fireEvent.click(screen.getByTestId('test-endpoint-ep-2'));
+
+      expect(screen.getByTestId('test-modal')).toHaveTextContent('ep-2');
+    });
+
+    it('hides the test button for models that are no longer available', () => {
+      renderRows({ invalidEndpointIds: new Set(['ep-2']) });
+
+      expect(screen.getByTestId('test-endpoint-ep-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('test-endpoint-ep-2')).not.toBeInTheDocument();
+    });
+
+    it('shows a test button on the global default row', () => {
+      renderRows({ hasSavedObject: false, globalDefaultId: 'ep-3' });
+
+      fireEvent.click(
+        within(screen.getByTestId('global-default-row-test_feature')).getByTestId(
+          'test-endpoint-ep-3'
+        )
+      );
+
+      expect(screen.getByTestId('test-modal')).toHaveTextContent('ep-3');
+    });
+
+    it('shows a test button on the global default row of the recommended list', () => {
+      renderRows({
+        hasSavedObject: false,
+        globalDefaultId: 'ep-3',
+        effectiveRecommendedEndpoints: ['ep-1', 'ep-2'],
+      });
+
+      expect(
+        within(screen.getByTestId('global-default-row-test_feature')).getByTestId(
+          'test-endpoint-ep-3'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('hides the global default test button when the user cannot manage settings', () => {
+      renderRows({ canManage: false, hasSavedObject: false, globalDefaultId: 'ep-3' });
+
+      expect(screen.queryByTestId('test-endpoint-ep-3')).not.toBeInTheDocument();
+    });
+
+    it('hides the test buttons when the user cannot manage settings', () => {
+      renderRows({ canManage: false });
+
+      expect(screen.queryByTestId('test-endpoint-ep-1')).not.toBeInTheDocument();
+    });
+
+    it('hides the recommended model test buttons when the user cannot manage settings', () => {
+      renderRows({ canManage: false, effectiveRecommendedEndpoints: ['ep-1', 'ep-2'] });
+
+      expect(screen.queryByTestId('test-endpoint-ep-1')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('test feature button', () => {
+    const renderCardWith = (props: {
+      canManage?: boolean;
+      isFeatureDirty?: boolean;
+      endpointIds?: string[];
+      hasSavedObject?: boolean;
+      globalDefaultId?: string;
+    }) =>
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={['ep-1']}
+            effectiveRecommendedEndpoints={['ep-1']}
+            onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
+            invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
+            {...defaultGlobalRowProps}
+            {...props}
+          />
+        </Wrapper>
+      );
+
+    it('opens the test modal for the feature', () => {
+      renderCardWith({});
+
+      fireEvent.click(screen.getByTestId('test-feature-test_feature'));
+
+      expect(screen.getByTestId('test-modal')).toHaveTextContent('test_feature');
+    });
+
+    it('tests the first model in the list while the feature has unsaved changes', () => {
+      renderCardWith({ isFeatureDirty: true });
+
+      fireEvent.click(screen.getByTestId('test-feature-test_feature'));
+
+      expect(screen.getByTestId('test-modal')).toHaveTextContent('ep-1');
+    });
+
+    it('tests the global default first while the feature has unsaved changes and uses the default', () => {
+      renderCardWith({ isFeatureDirty: true, hasSavedObject: false, globalDefaultId: 'ep-3' });
+
+      fireEvent.click(screen.getByTestId('test-feature-test_feature'));
+
+      expect(screen.getByTestId('test-modal')).toHaveTextContent('ep-3');
+    });
+
+    it('is disabled while the feature has unsaved changes and no model to test', () => {
+      renderCardWith({ isFeatureDirty: true, endpointIds: [] });
+
+      expect(screen.getByTestId('test-feature-test_feature')).toBeDisabled();
+    });
+
+    it('is hidden when the user cannot manage settings', () => {
+      renderCardWith({ canManage: false });
+
+      expect(screen.queryByTestId('test-feature-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('is hidden for features that are not chat completion features', () => {
+      renderCard(['ep-1'], { taskType: 'text_embedding' });
+
+      expect(screen.queryByTestId('test-feature-test_feature')).not.toBeInTheDocument();
+    });
+  });
 
   it('renders feature name, description, and Use recommended defaults toggle', () => {
     renderCard(['ep-1']);

@@ -10,11 +10,15 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceServerClient } from '@kbn/inference-plugin/server';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { defineInferenceSettingsRoutes } from './routes/inference_settings';
 import { defineInferenceFeaturesRoutes } from './routes/inference_features';
 import { defineInferenceConnectorsRoute } from './routes/inference_connectors';
 import { defineRegionPolicyRoutes } from './routes/region_policy';
+import { defineTestInferenceEndpointRoute } from './routes/test_inference_endpoint';
+import { defineTestFeatureRoute } from './routes/test_feature';
+import { defineTestConnectorRoute } from './routes/test_connector';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
 import type { ResolvedInferenceEndpoints } from './types';
 import { APIRoutes } from './types';
@@ -28,6 +32,7 @@ export function defineRoutes({
   getForFeature,
   getConnectorList,
   getConnectorById,
+  getInferenceClient,
 }: {
   logger: Logger;
   router: IRouter;
@@ -35,10 +40,16 @@ export function defineRoutes({
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
   getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+  getInferenceClient: (
+    request: KibanaRequest
+  ) => Promise<Pick<InferenceServerClient, 'chatComplete'>>;
 }) {
   defineInferenceSettingsRoutes({ logger, router, featureRegistry, getConnectorById });
   defineInferenceFeaturesRoutes({ logger, router, featureRegistry });
   defineRegionPolicyRoutes({ logger, router });
+  defineTestInferenceEndpointRoute({ logger, router, getInferenceClient });
+  defineTestFeatureRoute({ logger, router, getInferenceClient });
+  defineTestConnectorRoute({ logger, router, getInferenceClient });
   defineInferenceConnectorsRoute({
     logger,
     router,

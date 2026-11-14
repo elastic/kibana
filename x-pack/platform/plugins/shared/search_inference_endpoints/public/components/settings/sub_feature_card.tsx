@@ -50,6 +50,9 @@ import { ReasoningEffortPopover } from './reasoning_effort_popover';
 import { RecommendedDefaultsSwitch } from './recommended_defaults_switch';
 import { ResetDefaultsModal } from './reset_defaults_modal';
 import { SettingTitle } from './setting_title';
+import { TestModelButton } from './test_model_button';
+import { TEST_BUTTON_CLASS_NAME, revealTestButtonOnHoverStyles } from './reveal_test_button_styles';
+import { TestEndpointModal } from '../all_inference_endpoints/render_table_columns/render_actions/actions/test_endpoint/test_endpoint_modal';
 
 const COLLAPSED_COUNT = 5;
 const NO_EFFORT_LEVELS: ReasoningEffortLevel[] = [];
@@ -106,6 +109,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
   // Sticky session flag: the editable list is seeded with the recommended endpoints, so without this
   // the toggle would snap back to ON immediately after the user confirms "Turn off recommended defaults".
@@ -116,6 +120,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   }, [discardVersion]);
   const listRef = useRef<HTMLDivElement>(null);
   const { isTechPreview, isBeta } = feature;
+  const showTestButton = canManage && feature.taskType === 'chat_completion';
 
   const { regionDeniedEndpointIds, availableEndpointIds } =
     useRegionAvailableEndpoints(endpointIds);
@@ -186,6 +191,16 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL
       ? deprecatedEndpointsMap.get(globalDefaultId)
       : undefined;
+
+  const topEndpointId = showGlobalDefaultRow ? globalDefaultId : availableEndpointIds[0];
+  const testTarget =
+    isFeatureDirty && topEndpointId
+      ? {
+          connectorId: topEndpointId,
+          connectorName: endpointDisplayMap.get(topEndpointId)?.label ?? topEndpointId,
+        }
+      : { featureId, featureName: feature.featureName };
+  const isTestDisabled = isFeatureDirty && !topEndpointId;
 
   const handleRemove = useCallback(
     (index: number) => {
@@ -286,9 +301,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         wrap
       >
         <EuiFlexItem
-          css={css`
-            min-inline-size: min(20rem, 50%);
-          `}
+          css={[
+            css`
+              min-inline-size: min(20rem, 50%);
+            `,
+            revealTestButtonOnHoverStyles,
+          ]}
         >
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
@@ -317,6 +335,35 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                     </EuiBadge>
                   )}
                 </EuiBadgeGroup>
+              </EuiFlexItem>
+            )}
+            {showTestButton && (
+              <EuiFlexItem grow={false} className={TEST_BUTTON_CLASS_NAME}>
+                <EuiToolTip
+                  content={
+                    isFeatureDirty
+                      ? i18n.translate(
+                          'xpack.searchInferenceEndpoints.settings.testFeatureUnsaved',
+                          {
+                            defaultMessage:
+                              'You have unsaved changes, so this tests the first model in the list.',
+                          }
+                        )
+                      : undefined
+                  }
+                >
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="play"
+                    isDisabled={isTestDisabled}
+                    onClick={() => setIsTestModalOpen(true)}
+                    data-test-subj={`test-feature-${featureId}`}
+                  >
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.testFeature', {
+                      defaultMessage: 'Test',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -353,6 +400,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
               <RecommendedEndpointsList
                 featureId={featureId}
                 endpointIds={availableEndpointIds}
+                canManage={canManage}
                 efforts={efforts}
                 endpointDisplayMap={endpointDisplayMap}
                 invalidEndpointIds={invalidEndpointIds}
@@ -381,6 +429,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                         showBadge={!isFeatureDirty}
                         globalDefaultId={globalDefaultId}
                         deprecationInfo={globalDefaultDeprecationInfo}
+                        canManage={canManage}
                       />
                     )}
                     <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
@@ -405,7 +454,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                               <div>
                                 <EuiSplitPanel.Inner
                                   paddingSize="s"
-                                  css={endpointRowStyles}
+                                  css={[revealTestButtonOnHoverStyles, endpointRowStyles]}
                                   data-test-subj={`endpoint-row-${endpointId}`}
                                 >
                                   <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -499,6 +548,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                             <EffortBadge endpointId={endpointId} effort={effort} />
                                           )
                                         )}
+                                      </EuiFlexItem>
+                                    )}
+                                    {canManage && !isInvalid && (
+                                      <EuiFlexItem grow={false} className={TEST_BUTTON_CLASS_NAME}>
+                                        <TestModelButton connectorId={endpointId} label={label} />
                                       </EuiFlexItem>
                                     )}
                                     {canManage && (
@@ -635,6 +689,13 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
           onCancel={() => setIsResetModalOpen(false)}
         />
       )}
+      {isTestModalOpen && (
+        <TestEndpointModal
+          target={testTarget}
+          taskType={feature.taskType}
+          onClose={() => setIsTestModalOpen(false)}
+        />
+      )}
     </>
   );
 };
@@ -646,6 +707,7 @@ interface GlobalDefaultLockedRowProps {
   showBadge: boolean;
   globalDefaultId: string;
   deprecationInfo?: EndpointDeprecationInfo;
+  canManage: boolean;
 }
 
 const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
@@ -655,9 +717,14 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
   showBadge,
   globalDefaultId,
   deprecationInfo,
+  canManage,
 }) => (
   <>
-    <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`global-default-row-${featureId}`}>
+    <EuiSplitPanel.Inner
+      paddingSize="s"
+      css={revealTestButtonOnHoverStyles}
+      data-test-subj={`global-default-row-${featureId}`}
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiPanel color="transparent" paddingSize="none">
@@ -706,6 +773,11 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
             />
           </EuiFlexItem>
         )}
+        {canManage && (
+          <EuiFlexItem grow={false} className={TEST_BUTTON_CLASS_NAME}>
+            <TestModelButton connectorId={globalDefaultId} label={label} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiSplitPanel.Inner>
     <EuiHorizontalRule margin="none" />
@@ -715,6 +787,7 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
 interface RecommendedEndpointsListProps {
   featureId: string;
   endpointIds: string[];
+  canManage: boolean;
   efforts: EndpointEfforts;
   endpointDisplayMap: Map<string, { icon: string; label: string }>;
   invalidEndpointIds: Set<string>;
@@ -731,6 +804,7 @@ interface RecommendedEndpointsListProps {
 const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
   featureId,
   endpointIds,
+  canManage,
   efforts,
   endpointDisplayMap,
   invalidEndpointIds,
@@ -747,6 +821,7 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
           showBadge={globalDefaultRow.showBadge}
           globalDefaultId={globalDefaultRow.globalDefaultId}
           deprecationInfo={globalDefaultRow.deprecationInfo}
+          canManage={canManage}
         />
       )}
       {endpointIds.map((endpointId, index) => {
@@ -756,7 +831,11 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
         const effort = efforts[endpointId];
         return (
           <div key={endpointId}>
-            <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
+            <EuiSplitPanel.Inner
+              paddingSize="s"
+              css={revealTestButtonOnHoverStyles}
+              data-test-subj={`endpoint-row-${endpointId}`}
+            >
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   {isInvalid ? (
@@ -793,6 +872,11 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
                 {effort !== undefined && (
                   <EuiFlexItem grow={false}>
                     <EffortBadge endpointId={endpointId} effort={effort} />
+                  </EuiFlexItem>
+                )}
+                {canManage && !isInvalid && (
+                  <EuiFlexItem grow={false} className={TEST_BUTTON_CLASS_NAME}>
+                    <TestModelButton connectorId={endpointId} label={label} />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
