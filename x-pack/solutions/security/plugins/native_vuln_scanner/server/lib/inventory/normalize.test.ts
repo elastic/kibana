@@ -105,10 +105,17 @@ describe('normalizeOs', () => {
       family: 'rhel',
       version: '9',
     });
-    expect(normalizeOs({ platform: 'almalinux', platform_like: 'rhel fedora', major: 8 })).toEqual({
-      family: 'rhel',
-      version: '8',
-    });
+  });
+
+  it('does not match platform_like to rhel', () => {
+    // Real rebuilds report platform rhel (os-release ID_LIKE never decides the feed).
+    // Amazon Linux 2 lists rhel in ID_LIKE but is not a RHEL rebuild.
+    expect(normalizeOs({ platform: 'amzn', platform_like: 'centos rhel fedora', major: '2' })).toBe(
+      'unsupported_os'
+    );
+    expect(normalizeOs({ platform: 'fedora', platform_like: 'rhel', major: '41' })).toBe(
+      'unsupported_os'
+    );
   });
 
   it('rejects unknown platforms and hosts without a usable release', () => {

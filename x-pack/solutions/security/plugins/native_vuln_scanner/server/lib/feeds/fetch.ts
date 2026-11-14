@@ -93,9 +93,7 @@ const guardBlocks = function* (
     signal?.throwIfAborted();
     total += block.byteLength;
     if (total > maxDecompressedBytes) {
-      throw new Error(
-        `Advisory feed ${url} decompresses past ${maxDecompressedBytes} bytes`
-      );
+      throw new Error(`Advisory feed ${url} decompresses past ${maxDecompressedBytes} bytes`);
     }
     yield block;
   }

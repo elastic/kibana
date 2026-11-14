@@ -148,8 +148,6 @@ describe('loadFeed', () => {
       controller.abort();
       return fakeResponse(rhelBz2);
     }) as unknown as typeof fetch;
-    await expect(
-      loadFeed(rhel9, { signal: controller.signal, fetchImpl })
-    ).rejects.toThrow();
+    await expect(loadFeed(rhel9, { signal: controller.signal, fetchImpl })).rejects.toThrow();
   });
 });
