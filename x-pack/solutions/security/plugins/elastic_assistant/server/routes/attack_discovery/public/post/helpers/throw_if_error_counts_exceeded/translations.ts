@@ -26,3 +26,13 @@ export const MAX_GENERATION_ATTEMPTS = (generationAttempts: number) =>
       values: { generationAttempts },
     }
   );
+
+export const MAX_GENERATION_ATTEMPTS_WITH_EMPTY_MODEL_RESPONSE = (generationAttempts: number) =>
+  i18n.translate(
+    'xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsWithEmptyModelResponseErrorMessage',
+    {
+      defaultMessage:
+        'Maximum generation attempts ({generationAttempts}) reached. The model returned an empty response (no content) for these attempts, so sending fewer alerts to this model will not help: this is a model or connector problem, not a prompt-size problem. Check the connector and model used for Attack Discovery; when available, the connector, model and token counts are in the errors below.',
+      values: { generationAttempts },
+    }
+  );

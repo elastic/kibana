@@ -12,3 +12,18 @@ export const getCombined = ({
   combinedGenerations: string;
   partialResponse: string;
 }): string => `${combinedGenerations}${partialResponse}`;
+
+/**
+ * The combined text to carry into the next attempt after a failed one.
+ *
+ * `combinedResponse` is only assigned once a response was combined, so it is still '' when the
+ * attempt failed before producing content (for example an empty completion). Resetting the
+ * accumulated text then would discard every partial result from earlier attempts.
+ */
+export const getCombinedAfterFailedAttempt = ({
+  combinedGenerations,
+  combinedResponse,
+}: {
+  combinedGenerations: string;
+  combinedResponse: string;
+}): string => (combinedResponse === '' ? combinedGenerations : combinedResponse);

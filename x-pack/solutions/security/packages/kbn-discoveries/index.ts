@@ -11,10 +11,14 @@ export { AttackDiscoveryError, InvalidDefendInsightTypeError } from './impl/lib/
 export { getLlmType } from './impl/lib/helpers/get_llm_type';
 export {
   extractJson,
+  getEmptyModelResponseError,
   getFormatInstructionsFromZodV4Schema,
   getModelRefusalErrorMessage,
+  getParseErrorSummary,
   getStructuredGenerationPrompt,
   handleModelRefusal,
+  isEmptyModelResponseError,
+  isEmptyModelResponseErrorEntry,
 } from './impl/lib/langchain';
 export {
   getGenerateNode,
