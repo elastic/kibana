@@ -53,6 +53,7 @@
     "@kbn/cloud-plugin",
     "@kbn/core-http-server-utils",
     "@kbn/es-errors",
+    "@kbn/storage-adapter",
     "@kbn/kibana-utils-plugin",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
