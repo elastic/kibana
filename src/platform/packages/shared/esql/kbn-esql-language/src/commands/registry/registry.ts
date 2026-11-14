@@ -15,6 +15,7 @@ import type {
   ICommandContext,
   ESQLColumnData,
   ESQLCommandSummary,
+  ESQLCommandSummaryContext,
   UnmappedFieldsStrategy,
 } from './types';
 import type { ESQLMessage } from '../definitions/types';
@@ -83,9 +84,14 @@ export interface ICommandMethods<TContext = ICommandContext> {
    * Returns useful information about the command.
    * @param command The parsed Abstract Syntax Tree.
    * @param query The ESQL query string.
+   * @param context The LETs that the command's sources can point to.
    * @returns A summary object containing details about the command.
    */
-  summary?: (command: ESQLCommand, query: string) => ESQLCommandSummary;
+  summary?: (
+    command: ESQLCommand,
+    query: string,
+    context: ESQLCommandSummaryContext
+  ) => ESQLCommandSummary;
 }
 
 export interface ICommandMetadata {

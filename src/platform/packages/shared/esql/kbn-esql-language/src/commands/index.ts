@@ -9,7 +9,7 @@
 
 // Command registry - the main command registry instance and related utilities
 export * from './registry';
-export type { ESQLCommandSummary } from './registry/types';
+export type { ESQLCommandSummary, ESQLCommandSummaryContext, FieldSummary } from './registry/types';
 
 // Command definitions - constants, types, and utilities for defining commands
 export * from './definitions/constants';

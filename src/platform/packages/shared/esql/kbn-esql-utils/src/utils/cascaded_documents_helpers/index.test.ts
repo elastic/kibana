@@ -847,6 +847,74 @@ describe('cascaded documents helpers utils', () => {
           });
         });
       });
+
+      describe('query header', () => {
+        it('keeps a SET instruction in the cascade query of a column group', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              SET unmapped_fields = "NULLIFY";
+              FROM kibana_sample_data_logs | STATS count() BY clientip
+            `,
+          };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['clientip'],
+            nodePathMap: { clientip: '192.168.1.1' },
+          });
+
+          expect(cascadeQuery!.esql).toBe(
+            'SET unmapped_fields = "NULLIFY"; FROM kibana_sample_data_logs | INLINE STATS COUNT() BY clientip | WHERE clientip == "192.168.1.1"'
+          );
+        });
+
+        it('keeps a LET binding in the cascade query of a column group', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              LET errors = (FROM kibana_sample_data_logs | WHERE response == "503");
+              FROM errors | STATS count() BY clientip
+            `,
+          };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['clientip'],
+            nodePathMap: { clientip: '192.168.1.1' },
+          });
+
+          expect(cascadeQuery!.esql).toBe(
+            'LET errors = (FROM kibana_sample_data_logs | WHERE response == "503"); FROM errors | INLINE STATS COUNT() BY clientip | WHERE clientip == "192.168.1.1"'
+          );
+        });
+
+        it('keeps the header in the cascade query of a categorize group', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              SET unmapped_fields = "NULLIFY";
+              FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message)
+            `,
+          };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath: ['CATEGORIZE(message)'],
+            nodePathMap: { 'CATEGORIZE(message)': 'some random pattern' },
+          });
+
+          expect(cascadeQuery!.esql).toBe(
+            'SET unmapped_fields = "NULLIFY"; FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+          );
+        });
+      });
     });
   });
 

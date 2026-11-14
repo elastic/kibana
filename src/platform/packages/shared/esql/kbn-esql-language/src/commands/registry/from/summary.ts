@@ -8,9 +8,10 @@
  */
 
 import type { ESQLCommandOption, ESQLCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
-import { isColumn, isOptionNode, isSubQuery } from '@elastic/esql';
+import { isColumn, isOptionNode, isSource, isSubQuery } from '@elastic/esql';
 import { esqlCommandRegistry } from '../../../..';
-import type { ESQLCommandSummary, FieldSummary } from '../types';
+import { findNamedSubqueryForSource } from '../../definitions/utils/named_subqueries';
+import type { ESQLCommandSummary, ESQLCommandSummaryContext, FieldSummary } from '../types';
 
 function aggregateSummary(source: ESQLCommandSummary, target: ESQLCommandSummary) {
   source.newColumns?.forEach((col) => target.newColumns?.add(col));
@@ -20,7 +21,11 @@ function aggregateSummary(source: ESQLCommandSummary, target: ESQLCommandSummary
   source.grouping?.forEach((group) => target.grouping?.add(group));
 }
 
-export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
+export const summary = (
+  command: ESQLCommand,
+  query: string,
+  context: ESQLCommandSummaryContext
+): ESQLCommandSummary => {
   const metadataOption = command.args.find(
     (arg) => isOptionNode(arg) && arg.name === 'metadata'
   ) as ESQLCommandOption | undefined;
@@ -37,26 +42,35 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
   const allMetadataColumns = new Set(metadataColumns);
   const allAggregates = new Set<FieldSummary>();
   const allGroupings = new Set<FieldSummary>();
-
-  for (const subquery of subqueries) {
-    const subquerySummary = processSubquery(subquery.child, query);
-    aggregateSummary(subquerySummary, {
-      newColumns: allNewColumns,
-      renamedColumnsPairs: allRenamedColumnsPairs,
-      metadataColumns: allMetadataColumns,
-      aggregates: allAggregates,
-      grouping: allGroupings,
-    });
-  }
-
-  return {
+  const target: ESQLCommandSummary = {
     newColumns: allNewColumns,
     renamedColumnsPairs: allRenamedColumnsPairs,
     metadataColumns: allMetadataColumns,
+    aggregates: allAggregates,
+    grouping: allGroupings,
   };
+
+  for (const subquery of subqueries) {
+    const subquerySummary = processSubquery(subquery.child, query, context);
+    aggregateSummary(subquerySummary, target);
+  }
+
+  for (const source of command.args.filter(isSource)) {
+    const namedSubquery = findNamedSubqueryForSource(source, context.namedSubqueries);
+
+    if (namedSubquery) {
+      aggregateSummary(context.getNamedSubquerySummary(namedSubquery), target);
+    }
+  }
+
+  return target;
 };
 
-function processSubquery(subquery: ESQLAstQueryExpression, query: string): ESQLCommandSummary {
+function processSubquery(
+  subquery: ESQLAstQueryExpression,
+  query: string,
+  context: ESQLCommandSummaryContext
+): ESQLCommandSummary {
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
   const allMetadataColumns = new Set<string>();
@@ -67,7 +81,7 @@ function processSubquery(subquery: ESQLAstQueryExpression, query: string): ESQLC
     const commandDef = esqlCommandRegistry.getCommandByName(subCommand.name);
 
     if (commandDef?.methods.summary) {
-      const commandSummary = commandDef.methods.summary(subCommand, query);
+      const commandSummary = commandDef.methods.summary(subCommand, query, context);
       aggregateSummary(commandSummary, {
         newColumns: allNewColumns,
         renamedColumnsPairs: allRenamedColumnsPairs,

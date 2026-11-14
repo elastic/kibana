@@ -178,6 +178,22 @@ describe('getQuerySummary', () => {
 
     expect(result.newColumns).toEqual(new Set());
   });
+
+  it('includes only the LET bindings referenced by the sources', () => {
+    const query =
+      'LET a = (FROM logs | EVAL total = bytes * 2); LET b = (FROM a); LET unused = (FROM logs | EVAL ignored = 1); FROM b';
+    const result = getQuerySummary(query);
+
+    expect(result.newColumns).toEqual(new Set(['total']));
+  });
+
+  it('includes the aggregates and grouping of a referenced LET binding', () => {
+    const query = 'LET a = (FROM logs | STATS n = COUNT() BY host); FROM a';
+    const result = getQuerySummary(query);
+
+    expect([...(result.aggregates ?? [])].map(({ field }) => field)).toEqual(['n']);
+    expect([...(result.grouping ?? [])].map(({ field }) => field)).toEqual(['host']);
+  });
 });
 
 describe('isComputedColumn', () => {
