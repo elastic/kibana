@@ -185,6 +185,8 @@ describe('global header', () => {
     '/rules/monitoring',
     '/rules/updates',
     '/rules/add_rules',
+    '/rules/create',
+    '/rules/id/123/edit',
     '/rules_coverage_overview',
     '/exceptions',
     '/exceptions/details/list-1',
@@ -228,23 +230,6 @@ describe('global header', () => {
 
     expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
     expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
-  });
-
-  it('keeps the legacy header action menu on the rule editing page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123/edit' });
-    const setHeaderActionMenu = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
-      ...mockUseKibana(),
-      services: { ...mockUseKibana().services, setHeaderActionMenu },
-    });
-
-    render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-
-    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('shows AI Assistant header link', () => {
