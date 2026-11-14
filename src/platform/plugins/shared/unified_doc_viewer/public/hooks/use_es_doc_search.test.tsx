@@ -14,7 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { setUnifiedDocViewerServices } from '../plugin';
+import { getUnifiedDocViewerServices, setUnifiedDocViewerServices } from '../plugin';
 import type { UnifiedDocViewerServices } from '../types';
 
 const index = 'test-index';
@@ -226,5 +226,86 @@ describe('Test of <Doc /> helper / hook', () => {
         flattened: { field1: 1, field2: 2 },
       },
     ]);
+  });
+  describe('text based languages with _id and _index in the row', () => {
+    const dataView = {
+      getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
+      getIndexPattern: () => index,
+      fields: { getByName: () => undefined },
+    };
+    const esqlHit = {
+      id: '1',
+      raw: { _id: '1', _index: 'index1', field1: 1 },
+      flattened: { _id: '1', _index: 'index1', field1: 1 },
+    } as unknown as DataTableRecord;
+    const props: EsDocSearchProps = {
+      id: '1',
+      index: 'index1',
+      dataView: dataView as unknown as EsDocSearchProps['dataView'],
+      esqlHit,
+    };
+
+    beforeEach(() => {
+      (getUnifiedDocViewerServices().data.search.search as jest.Mock).mockClear();
+    });
+
+    test('refetches the document to recover values missing from the row', async () => {
+      const fetchedHit = {
+        _id: '1',
+        _index: 'index1',
+        _source: { long_keyword: 'x'.repeat(2000) },
+      };
+      const searchSubject = new Subject();
+      (getUnifiedDocViewerServices().data.search.search as jest.Mock).mockReturnValueOnce(
+        searchSubject
+      );
+
+      const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
+        initialProps: props,
+      });
+
+      expect(hook.result.current[0]).toBe(ElasticRequestState.Loading);
+
+      await act(async () => {
+        searchSubject.next({ rawResponse: { hits: { hits: [fetchedHit] } } });
+        searchSubject.complete();
+      });
+
+      await waitFor(() => expect(hook.result.current[0]).toBe(ElasticRequestState.Found));
+      expect(hook.result.current[1]?.raw._source).toEqual(fetchedHit._source);
+    });
+
+    test('falls back to the row when the refetch fails', async () => {
+      const searchSubject = new Subject();
+      (getUnifiedDocViewerServices().data.search.search as jest.Mock).mockReturnValueOnce(
+        searchSubject
+      );
+
+      const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
+        initialProps: props,
+      });
+
+      await act(async () => {
+        searchSubject.error(new Error('failed'));
+      });
+
+      await waitFor(() => expect(hook.result.current[0]).toBe(ElasticRequestState.Found));
+      expect(hook.result.current[1]).toBe(esqlHit);
+    });
+
+    test('does not refetch when the row has no _index', () => {
+      const rowWithoutIndex = {
+        id: '1',
+        raw: { _id: '1', field1: 1 },
+        flattened: { _id: '1', field1: 1 },
+      } as unknown as DataTableRecord;
+
+      const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
+        initialProps: { ...props, esqlHit: rowWithoutIndex },
+      });
+
+      expect(getUnifiedDocViewerServices().data.search.search).not.toHaveBeenCalled();
+      expect(hook.result.current[1]).toBe(rowWithoutIndex);
+    });
   });
 });

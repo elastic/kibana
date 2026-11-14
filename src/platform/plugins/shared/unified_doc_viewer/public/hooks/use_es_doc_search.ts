@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -68,6 +68,9 @@ export function useEsDocSearch({
   );
   const [hit, setHit] = useState<DataTableRecord | null>(null);
   const { data, analytics } = getUnifiedDocViewerServices();
+  // Read through a ref so a new row object for the same document doesn't trigger a refetch
+  const esqlHitRef = useRef(esqlHit);
+  esqlHitRef.current = esqlHit;
 
   const requestData = useCallback(async () => {
     if (!index) {
@@ -95,11 +98,18 @@ export function useEsDocSearch({
         setStatus(ElasticRequestState.Found);
         const record = buildDataTableRecord(hits?.hits?.[0], dataView);
         setHit(onProcessRecord ? onProcessRecord(record) : record);
+      } else if (esqlHitRef.current) {
+        // The ES|QL row is still a valid document to show when the refetch finds nothing
+        setStatus(ElasticRequestState.Found);
+        setHit(esqlHitRef.current);
       } else {
         setStatus(ElasticRequestState.NotFound);
       }
     } catch (err) {
-      if (err.savedObjectId) {
+      if (esqlHitRef.current) {
+        setStatus(ElasticRequestState.Found);
+        setHit(esqlHitRef.current);
+      } else if (err.savedObjectId) {
         setStatus(ElasticRequestState.NotFoundDataView);
       } else if (err.status === 404) {
         setStatus(ElasticRequestState.NotFound);
@@ -117,17 +127,24 @@ export function useEsDocSearch({
     }
   }, [analytics, data.search, dataView, id, index, onBeforeFetch, onProcessRecord]);
 
+  // ES|QL rows only carry doc values, so values dropped by `ignore_above` are missing from them.
+  // The document can be refetched (with its `_source`) only when the row has `_id` and `_index`,
+  // which requires `METADATA _id, _index` in the query.
+  const canRefetchEsqlDoc = Boolean(esqlHit?.raw._id && esqlHit?.raw._index);
+  // Only used as the final value when there is nothing to refetch
+  const esqlHitToShow = canRefetchEsqlDoc ? undefined : esqlHit;
+
   useEffect(() => {
     if (skip) {
       return;
     }
-    if (esqlHit) {
+    if (esqlHitToShow) {
       setStatus(ElasticRequestState.Found);
-      setHit(esqlHit);
+      setHit(esqlHitToShow);
     } else {
       requestData();
     }
-  }, [id, requestData, esqlHit, skip]);
+  }, [id, requestData, skip, esqlHitToShow]);
 
   return [status, hit, requestData];
 }
