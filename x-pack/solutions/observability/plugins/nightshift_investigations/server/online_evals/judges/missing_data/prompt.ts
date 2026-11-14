@@ -12,13 +12,8 @@ import systemPromptText from './system_prompt.text';
 
 export const MISSING_DATA_TOOL_NAME = 'report_missing_data';
 
-/** Why a piece of data is missing: what someone must fix, versus what the agent can still check. */
-export const MISSING_DATA_REASONS = [
-  'no_access',
-  'not_retained',
-  'not_collected',
-  'not_queried',
-] as const;
+/** Why a piece of data is missing: each is something someone must fix. */
+export const MISSING_DATA_REASONS = ['no_access', 'not_retained', 'not_collected'] as const;
 
 export type MissingDataReason = (typeof MISSING_DATA_REASONS)[number];
 
@@ -54,7 +49,7 @@ export const missingDataTool: { name: string; description: string; schema: ToolS
     properties: {
       gaps: {
         type: 'array',
-        description: `At most ${MAX_MISSING_DATA} gaps, the most decisive first. Empty when the answer states a verified cause or there was nothing to explain.`,
+        description: `At most ${MAX_MISSING_DATA} gaps, the most decisive first. Empty when the answer states a verified cause, there was nothing to explain, or no data was out of reach.`,
         items: {
           type: 'object',
           properties: {
@@ -64,7 +59,7 @@ export const missingDataTool: { name: string; description: string; schema: ToolS
               type: 'string',
               enum: [...MISSING_DATA_REASONS],
               description:
-                'no_access: permission, authentication or connector error. not_retained: gone, expired or empty for the window. not_collected: the source does not record it. not_queried: the agent did not get to it.',
+                'no_access: permission, authentication or connector error. not_retained: gone, expired or empty for the window. not_collected: the source does not record it.',
             },
             would_decide: {
               type: 'string',

@@ -80,18 +80,19 @@ describe('nightshift_missing_data', () => {
 
   it('keeps at most three gaps', async () => {
     const { scores } = await judgeReturning(
-      ['a', 'b', 'c', 'd'].map((what) => ({ what, why: 'not_queried' }))
+      ['a', 'b', 'c', 'd'].map((what) => ({ what, why: 'not_collected' }))
     ).evaluate();
 
     expect(scores.filter(({ name }) => name === 'missing_data_gap')).toHaveLength(3);
     expect(scores[0]).toEqual(expect.objectContaining({ score: 3, label: '3 gaps' }));
   });
 
-  it('only accepts the four reasons', () => {
+  it('only accepts the three reasons', () => {
     const schema = missingDataOutputSchema;
 
     expect(schema.safeParse({ gaps: [{ what: 'x', why: 'no_access' }] }).success).toBe(true);
     expect(schema.safeParse({ gaps: [{ what: 'x', why: 'because' }] }).success).toBe(false);
+    expect(schema.safeParse({ gaps: [{ what: 'x', why: 'not_queried' }] }).success).toBe(false);
   });
 
   it('requires an input and a final answer', () => {

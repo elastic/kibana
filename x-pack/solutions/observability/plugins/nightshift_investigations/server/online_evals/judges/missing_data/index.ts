@@ -37,7 +37,7 @@ export const missingDataJudge: RegisteredEvaluatorDefinition = {
   kind: 'llm',
   direction: 'minimize',
   description:
-    'Reference-free: the data an investigation was missing to confirm its cause, and why: no access, not retained, not collected or not queried.',
+    'Reference-free: the data an investigation was missing to confirm its cause, and why: no access, not retained or not collected.',
   evidenceSchema: roundEvidenceSchema,
   async evaluate({ round, inferenceClient }) {
     if (!inferenceClient) {

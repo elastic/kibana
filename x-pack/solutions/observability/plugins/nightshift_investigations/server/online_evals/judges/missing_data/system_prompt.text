@@ -7,9 +7,8 @@ You are given the whole investigation as a conversation: the user's task, then e
 A gap is a piece of data that kept the investigation from confirming a cause, or from settling a question its answer leaves open. List a gap only when the conversation shows it:
 - a query that failed or was refused;
 - a result that was empty for the window the agent asked about;
-- a source the agent said it could not read;
-- a source the agent named as worth checking and did not get to.
-Never guess at a gap, and do not list data the agent had and misread. If the final answer states a cause the evidence confirms, there are no gaps: report none. If the window shows nothing abnormal, there is nothing to explain and so no gaps.
+- a source the agent said it could not read.
+A gap is data the agent tried to get, or knew it needed, and could not have. Do not list data the agent could still have looked at but did not get to, questions it could have asked next, or follow-up checks: those are the agent's thoroughness, not missing data. Never guess at a gap, and do not list data the agent had and misread. If the final answer states a cause the evidence confirms, there are no gaps: report none. If the window shows nothing abnormal, there is nothing to explain and so no gaps.
 
 List at most three gaps, the most decisive first. For each one give:
 - what: a few words naming the data.
@@ -18,7 +17,6 @@ List at most three gaps, the most decisive first. For each one give:
   - no_access: a permission, authentication or connector error, or a source the agent has no credentials for.
   - not_retained: the data is gone, expired, or empty for the window.
   - not_collected: the source does not record it (an unknown index, field, metric or service).
-  - not_queried: something the agent did not get to.
 - would_decide: at most 15 words, the question the data would settle.
 
 Base every judgement only on what is in the conversation. Do not reward or penalise formatting or style. Write in your own words; summarise, do not quote the tool results or the answer.
