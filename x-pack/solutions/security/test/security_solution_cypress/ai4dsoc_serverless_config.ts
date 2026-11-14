@@ -6,6 +6,7 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { withUiamCertOfProject } from '@kbn/test-suites-xpack-platform/serverless/shared/uiam_cert';
 import { SecuritySolutionConfigurableCypressTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -26,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...svlSharedConfig.get('kbnTestServer'),
       serverArgs: [
-        ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+        ...withUiamCertOfProject(svlSharedConfig.get('kbnTestServer.serverArgs'), 'security'),
         '--serverless=security',
         '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
         `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([

@@ -8,6 +8,7 @@
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { Config } from '@kbn/test';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { withUiamCertOfProject } from '@kbn/test-suites-xpack-platform/serverless/shared/uiam_cert';
 import { SecuritySolutionEndpointRegistryHelpers } from '../services/endpoint_registry_helpers';
 import type { TargetTags } from '../target_tags';
 import type { PageObjects } from '../page_objects';
@@ -81,7 +82,9 @@ export const generateConfig = async ({
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
-        ...baseConfig.get('kbnTestServer.serverArgs'),
+        ...(target === 'serverless'
+          ? withUiamCertOfProject(baseConfig.get('kbnTestServer.serverArgs'), 'security')
+          : baseConfig.get('kbnTestServer.serverArgs')),
         // if you return an empty string here the kibana server will not start properly but an empty array works
         ...getRegistryUrlAsArray(),
         // always install Endpoint package by default when Fleet sets up

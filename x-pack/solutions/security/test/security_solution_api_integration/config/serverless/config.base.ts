@@ -8,6 +8,7 @@ import path from 'path';
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import { withUiamCertOfProject } from '@kbn/test-suites-xpack-platform/serverless/shared/uiam_cert';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
@@ -49,7 +50,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+          ...withUiamCertOfProject(svlSharedConfig.get('kbnTestServer.serverArgs'), 'security'),
           '--serverless=security',
           `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
             { product_line: 'security', product_tier: 'complete' },

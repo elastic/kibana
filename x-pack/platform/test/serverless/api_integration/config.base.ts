@@ -9,6 +9,7 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
+import { withUiamCertOfProject } from '../shared/uiam_cert';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -43,7 +44,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+          ...withUiamCertOfProject(
+            svlSharedConfig.get('kbnTestServer.serverArgs'),
+            options.serverlessProject
+          ),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs || []),
           ...(enableFleetDockerRegistry && dockerRegistryPort

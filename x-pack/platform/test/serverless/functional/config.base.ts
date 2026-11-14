@@ -11,6 +11,7 @@ import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
+import { withUiamCertOfProject } from '../shared/uiam_cert';
 
 export function createTestConfig<
   TServices extends {} = typeof services,
@@ -42,7 +43,10 @@ export function createTestConfig<
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+          ...withUiamCertOfProject(
+            svlSharedConfig.get('kbnTestServer.serverArgs'),
+            options.serverlessProject
+          ),
           `--serverless=${options.serverlessProject}`,
           // Fail fast if CI can't reach Fleet's product versions API (default 60s, retried once).
           '--xpack.fleet.productVersionsApiTimeoutMs=5000',
