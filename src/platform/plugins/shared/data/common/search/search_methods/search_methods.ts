@@ -61,6 +61,10 @@ export interface SearchMethodsServiceDependencies {
    * Resolves the query config from advanced settings, used to apply a search context
    */
   getEsQueryConfig: () => Promise<EsQueryConfig>;
+  /**
+   * Resolves the locale sent with ES|QL requests when the caller does not provide one
+   */
+  getLocale?: () => string;
 }
 
 /**
@@ -461,6 +465,7 @@ export class SearchMethodsService implements ISearchMethods {
       timeZone:
         params.timeZone ??
         (esQueryConfig.dateFormatTZ ? getTimeZoneFromSettings(esQueryConfig.dateFormatTZ) : 'UTC'),
+      locale: params.locale ?? this.deps.getLocale?.(),
     };
   }
 
