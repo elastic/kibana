@@ -1,0 +1,71 @@
+name: docs-issue-pr-link
+
+# Posts the PR link and docs notes on the docs issue a developer linked in the PR.
+# Runs in the base repo's context so it can handle PRs from forks. It never checks
+# out or runs code from the PR: PR text is only parsed inside the script.
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - labeled
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-issue-pr-link-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  link:
+    # The labeled event also fires for labels this workflow adds, so only react to Team:Cases.
+    if: >-
+      github.repository == 'elastic/kibana'
+      && github.event.pull_request.draft == false
+      && (github.event.action != 'labeled' || github.event.label.name == 'Team:Cases')
+      && contains(github.event.pull_request.labels.*.name, 'Team:Cases')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+
+      - name: Validate the docs request
+        id: validate
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { validate } = require('./.github/scripts/docs_issue_pr_link');
+            await validate({ github, context, core });
+
+      # Only requested after validation passed, so a blocked PR never gets a docs-repo token.
+      - name: Fetch ephemeral GitHub token
+        if: steps.validate.outputs.proceed == 'true'
+        id: fetch-ephemeral-token
+        uses: elastic/ci-gh-actions/fetch-github-token@f1837d5894f688eb909c1d777aaaf2f1df705cef # v1.5.4
+        with:
+          vault-instance: ci-prod
+
+      - name: Comment on the docs issue
+        if: steps.validate.outputs.proceed == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          DOCS_TOKEN: ${{ steps.fetch-ephemeral-token.outputs.token }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { postToDocsIssue } = require('./.github/scripts/docs_issue_pr_link');
+            const docsGithub = getOctokit(process.env.DOCS_TOKEN);
+            await postToDocsIssue({ github, docsGithub, context });

@@ -18,6 +18,16 @@ Reviewers should verify this PR satisfies this list as well.
 - [ ] The correct `release_note:*` type label (or `release_note:skip`) is applied, the PR title reads as a release note, and the description has a `## Release note` section if a custom summary is needed, per the [guidelines](https://www.elastic.co/docs/extend/kibana/contributing/workflow/how-we-use-github#release-notes).
 - [ ] Review the [backport guidelines](https://docs.google.com/document/d/1VyN5k91e5OVumlc0Gb9RPa3h1ewuPE705nRtioPiTvY/edit?usp=sharing) and apply applicable `backport:*` labels.
 
+### Documentation
+
+Team:Cases PRs only. If this PR changes what users see or do, tick the box, link the docs issue from the feature issue, and describe the change.
+
+- [ ] Update docs issue
+
+Docs issue: <!-- https://github.com/elastic/docs-content/issues/NNN -->
+
+What changed for docs: <!-- Describe the change for users in one or two sentences. -->
+
 ### Identify risks
 
 Does this PR introduce any risks? For example, consider risks like hard to test bugs, performance regression, potential of data loss.
