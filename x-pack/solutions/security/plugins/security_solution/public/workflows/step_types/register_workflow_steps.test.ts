@@ -34,6 +34,18 @@ import { aesopCaptureDatasetStepDefinition } from './aesop_capture_dataset/aesop
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
+const isStepLoader = (arg: unknown): arg is StepLoader => typeof arg === 'function';
+
+const getStepLoaders = (
+  workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createSetup>
+): StepLoader[] =>
+  workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => {
+    if (!isStepLoader(arg)) {
+      throw new Error('Expected registerStepDefinition to receive an async loader');
+    }
+    return arg;
+  });
+
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 const enabled = { experimentalFeatures: { aesopPrototypeEnabled: true } };
 
@@ -76,7 +88,7 @@ describe('registerWorkflowSteps (public)', () => {
       loader21,
       loader22,
       loader23,
-    ] = workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
+    ] = getStepLoaders(workflowsExtensions);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
     await expect(loader2()).resolves.toBe(buildAlertEntityGraphStepDefinition);
@@ -111,9 +123,7 @@ describe('registerWorkflowSteps (public)', () => {
     });
 
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(21);
-    const loaded = await Promise.all(
-      workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => (arg as StepLoader)())
-    );
+    const loaded = await Promise.all(getStepLoaders(workflowsExtensions).map((load) => load()));
     expect(loaded).not.toContain(aesopSelectWinnerStepDefinition);
     expect(loaded).not.toContain(aesopCaptureDatasetStepDefinition);
   });
