@@ -232,7 +232,7 @@ describe('selectWinner', () => {
         {
           target_id: 'a',
           reasons: [
-            'quality evaluator skill-pii scored 0.33 against a baseline of 0.4, a regression beyond the tolerance of 0.05 at p=0.03',
+            'quality evaluator skill-pii scored 0.33 against a baseline of 0.4, a regression beyond the tolerance of 0.05 at p=0.03 (alpha 0.05)',
           ],
         },
       ]);
@@ -353,7 +353,7 @@ describe('selectWinner', () => {
         {
           target_id: 'v2',
           reasons: [
-            'quality evaluator esql-compile scored 0.825 against a baseline of 0.934, a regression beyond the tolerance of 0.05 at p=0.029',
+            'quality evaluator esql-compile scored 0.825 against a baseline of 0.934, a regression beyond the tolerance of 0.05 at p=0.029 (alpha 0.05)',
           ],
         },
       ]);

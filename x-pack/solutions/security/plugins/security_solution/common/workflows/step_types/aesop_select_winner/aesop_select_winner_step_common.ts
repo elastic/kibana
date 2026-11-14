@@ -54,7 +54,7 @@ export const aesopSelectWinnerInputSchema = lazySchema(() =>
       .max(50)
       .default([])
       .describe(
-        'Deterministic evaluators that score answer quality; an arm is rejected only when it falls below the baseline by more than code_tolerance and the drop is significant at alpha'
+        'Deterministic evaluators that score answer quality; an arm is rejected only when it falls below the baseline by more than code_tolerance and the drop is significant at alpha (or has no p-value)'
       ),
     code_tolerance: z
       .number()
@@ -64,7 +64,14 @@ export const aesopSelectWinnerInputSchema = lazySchema(() =>
       .describe(
         'How far an arm may fall below the baseline on a code or quality evaluator before rejection'
       ),
-    alpha: z.number().min(0).max(1).default(0.05).describe('Significance level for the p-value'),
+    alpha: z
+      .number()
+      .min(0)
+      .max(1)
+      .default(0.05)
+      .describe(
+        'Significance level for the primary p-value and for quality evaluator regressions; lowering it raises the bar for a winner and lowers it for rejecting a quality regression'
+      ),
     min_delta: z
       .number()
       .min(0)
@@ -141,7 +148,7 @@ export const aesopSelectWinnerStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.aesopSelectWinner.documentation.details',
       {
         defaultMessage:
-          'Rejects every arm that scores worse than the baseline by more than code_tolerance on a code evaluator (code evaluators grade the answers, so the baseline rarely scores 1 either), or by more than code_tolerance with a p-value at or below alpha on a quality evaluator, then ranks the rest by the primary evaluator. The best arm wins when its mean beats the baseline and the p-value is at or below alpha. When no p-value is available the best mean above the baseline is accepted and the reasons say so. Only arms that beat the baseline can win or tie. Arms within min_delta of the best are a tie: no winner is chosen and the tied arms are listed in tied_indexes and tied_target_ids so an analyst can pick one. tiebreak_index names the tied arm with the best primary mean (the lowest index on equal means), the arm a tie approval deploys. tiebreak_beats_baseline applies the winner significance rule to that arm (p-value at or below alpha, or no p-value) and is false when there is no tie, so a tie whose tiebreak gain is not significant is not deployed.',
+          'Rejects every arm that scores worse than the baseline by more than code_tolerance on a code evaluator (code evaluators grade the answers, so the baseline rarely scores 1 either), or by more than code_tolerance with a p-value at or below alpha (or no p-value) on a quality evaluator, then ranks the rest by the primary evaluator. The best arm wins when its mean beats the baseline and the p-value is at or below alpha. When no p-value is available the best mean above the baseline is accepted and the reasons say so. Only arms that beat the baseline can win or tie. Arms within min_delta of the best are a tie: no winner is chosen and the tied arms are listed in tied_indexes and tied_target_ids so an analyst can pick one. tiebreak_index names the tied arm with the best primary mean (the lowest index on equal means), the arm a tie approval deploys. tiebreak_beats_baseline applies the winner significance rule to that arm (p-value at or below alpha, or no p-value) and is false when there is no tie, so a tie whose tiebreak gain is not significant is not deployed.',
       }
     ),
     examples: [

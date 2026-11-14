@@ -37,6 +37,7 @@ const weightedMean = (rows: ArmResult[], pick: (row: ArmResult) => number): numb
 
 const format = (value: number): string => Number(value.toFixed(4)).toString();
 
+/** A neutral evaluator is gated as if higher were better; list only directional evaluators. */
 const regressionOf = ({ meanTarget, meanBaseline, direction }: ArmResult): number =>
   direction === 'minimize' ? meanTarget - meanBaseline : meanBaseline - meanTarget;
 
@@ -46,6 +47,7 @@ const regressionOf = ({ meanTarget, meanBaseline, direction }: ArmResult): numbe
  * rejected when it is worse than the baseline by more than the tolerance. Quality evaluators
  * additionally need the drop to be significant: on a small dataset one answer moves the mean
  * past the tolerance, and that noise must not veto an arm the primary evaluator prefers.
+ * Each quality row is tested at alpha on its own, with no correction for the number of rows.
  */
 const rejectionReasons = (
   arm: Arm,
@@ -72,7 +74,11 @@ const rejectionReasons = (
     return [
       `quality evaluator ${evaluatorName} ${scored}, a regression beyond the tolerance of ${format(
         tolerance
-      )}${pValue === null ? ' with no p-value available' : ` at p=${format(pValue)}`}`,
+      )}${
+        pValue === null
+          ? ' with no p-value available'
+          : ` at p=${format(pValue)} (alpha ${format(alpha)})`
+      }`,
     ];
   });
 
