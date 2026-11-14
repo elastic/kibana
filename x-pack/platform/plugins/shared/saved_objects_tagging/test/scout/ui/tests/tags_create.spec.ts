@@ -43,11 +43,32 @@ test.describe('Tags management create', { tag: tags.stateful.classic }, () => {
     expect(newTag?.description).toBe('I just added this tag');
   });
 
-  test('shows errors when validation fails', async ({ pageObjects }) => {
+  test('keeps the hex field editable and opens the palette from the arrow', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { tagModal } = pageObjects.tagManagement;
+
+    await tagModal.openCreate();
+
+    await expect(tagModal.colorInput).toHaveCSS('cursor', 'text');
+    await expect(tagModal.colorPaletteButton).toHaveCSS('cursor', 'pointer');
+
+    await tagModal.fillForm({ color: '#FF00CC' });
+    await expect(tagModal.colorInput).toHaveValue('#FF00CC');
+
+    await tagModal.openColorPalette();
+    await expect(page.testSubj.locator('euiSaturation')).toBeVisible();
+  });
+
+  test('shows errors without resizing the modal', async ({ page, pageObjects }) => {
     const { tagManagement } = pageObjects;
     const { tagModal } = tagManagement;
 
     await tagModal.openCreate();
+    const modal = page.getByRole('dialog', { name: 'Create tag' });
+    const initialHeight = await modal.evaluate((element) => element.clientHeight);
+
     await tagModal.fillForm({
       name: 'a',
       description: 'The name will fail validation',
@@ -61,6 +82,7 @@ test.describe('Tags management create', { tag: tags.stateful.classic }, () => {
     const errors = await tagModal.getValidationErrors();
     expect(errors.name).toBeDefined();
     expect(errors.color).toBeUndefined();
+    expect(await modal.evaluate((element) => element.clientHeight)).toBe(initialHeight);
   });
 
   test('creates a tag after fixing validation errors', async ({ pageObjects }) => {
