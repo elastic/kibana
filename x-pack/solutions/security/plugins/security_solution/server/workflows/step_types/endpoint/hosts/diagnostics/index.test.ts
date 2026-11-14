@@ -324,6 +324,68 @@ describe('getEndpointHostDiagnosticsStepDefinition', () => {
     });
   });
 
+  it.each([0, 1, 33])(
+    'projects %s applied user artifacts with explicit cut markers',
+    async (count) => {
+      const identifiers = Array.from({ length: count }, (_, index) => ({
+        name: index === 0 ? 'x'.repeat(257) : `endpoint-yararules-linux-v${index}`,
+        sha256: 'a'.repeat(64),
+      }));
+      const response = policyResponseBody();
+      const applied = response.body.policy_response.Endpoint.policy.applied;
+      const output = await run(
+        { hosts: [{ agent_id: 'agent-1', endpoint_id: 'endpoint-1' }] },
+        jest.fn().mockResolvedValue({
+          ...response,
+          body: {
+            policy_response: {
+              ...response.body.policy_response,
+              Endpoint: {
+                policy: { applied: { ...applied, artifacts: { user: { identifiers } } } },
+              },
+            },
+          },
+        })
+      );
+
+      const user = output.results[0].policy_response?.Endpoint.policy.applied.artifacts?.user;
+      expect(user).toEqual({
+        identifiers: identifiers
+          .slice(0, 32)
+          .map((identifier, index) =>
+            index === 0
+              ? { name: `${'x'.repeat(255)}…`, name_truncated: true, sha256: identifier.sha256 }
+              : identifier
+          ),
+        ...(count > 32 ? { identifiers_total: count } : {}),
+      });
+    }
+  );
+
+  it.each([undefined, {}, { user: {} }])(
+    'does not synthesize identifiers when artifacts is %j',
+    async (artifacts) => {
+      const response = policyResponseBody();
+      const applied = response.body.policy_response.Endpoint.policy.applied;
+      const output = await run(
+        { hosts: [{ agent_id: 'agent-1', endpoint_id: 'endpoint-1' }] },
+        jest.fn().mockResolvedValue({
+          ...response,
+          body: {
+            policy_response: {
+              ...response.body.policy_response,
+              Endpoint: { policy: { applied: { ...applied, artifacts } } },
+            },
+          },
+        })
+      );
+
+      expect(output.results[0].policy_response?.Endpoint.policy.applied).not.toHaveProperty(
+        'artifacts'
+      );
+    }
+  );
+
   it('fails before any read when more than MAX_HOST_TARGETS entries are given', async () => {
     const callKibanaApi = jest.fn();
     const hosts = Array.from({ length: 11 }, (_, index) => ({ agent_id: `agent-${index}` }));

@@ -29,6 +29,7 @@ import {
   MAX_HOST_IPS,
   MAX_HOST_RECORDS,
   MAX_POLICY_ACTIONS,
+  MAX_USER_ARTIFACT_IDENTIFIERS,
 } from '../../../../../../common/workflows/step_types/endpoint/hosts';
 import {
   MAX_PACKAGE_INDICES,
@@ -149,6 +150,16 @@ const maxDiagnosticsResult = () => ({
             message: long(EXCERPT_MAX_CHARS),
           })),
           actions_total: MAX_POLICY_ACTIONS,
+          artifacts: {
+            user: {
+              identifiers: Array.from({ length: MAX_USER_ARTIFACT_IDENTIFIERS }, () => ({
+                name: long(MAX_INPUT_STRING_CHARS),
+                name_truncated: true,
+                sha256: long(64),
+              })),
+              identifiers_total: MAX_USER_ARTIFACT_IDENTIFIERS + 1,
+            },
+          },
         },
       },
     },
