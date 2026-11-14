@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { ExperimentalIndexingFeature } from '../../../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { Installation, UpdatePackageRequestSchema } from '../../../types';
-import { PackageNotFoundError } from '../../../errors';
+import { FleetError, PackageNotFoundError } from '../../../errors';
 
 import { auditLoggingService } from '../../audit_logging';
 
 import { getInstallationObject, getPackageInfo } from './get';
+import { setLogsdbColumnarChoice } from './update_logsdb_columnar';
 
 export interface NamespaceCustomizationDiff {
   addedNamespaces: string[];
@@ -33,6 +34,9 @@ export async function updatePackage(
     savedObjectsClient: SavedObjectsClientContract;
     pkgName: string;
     keepPoliciesUpToDate?: boolean;
+    /** Required when `logsdb_columnar` is set: the change is applied to the index templates. */
+    esClient?: ElasticsearchClient;
+    logger?: Logger;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>
 ): Promise<{
   packageInfo: Awaited<ReturnType<typeof getPackageInfo>>;
@@ -41,10 +45,13 @@ export async function updatePackage(
 }> {
   const {
     savedObjectsClient,
+    esClient,
+    logger,
     pkgName,
     keepPoliciesUpToDate,
     namespace_customization_enabled_for: newNamespaceCustomization,
     namespace_customization_settings: newNamespaceCustomizationSettings,
+    logsdb_columnar: newLogsdbColumnar,
   } = options;
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
@@ -65,6 +72,30 @@ export async function updatePackage(
     removedNamespaces: [],
   };
   const ilmPolicyChanges: IlmPolicyChange[] = [];
+
+  // The user's columnar choice is stored once per installation and goes through the same path
+  // as the package policy editor. It runs before anything else is written so an unsupported
+  // package is rejected without leaving the saved object and the Elasticsearch templates out of
+  // sync.
+  if (newLogsdbColumnar !== undefined) {
+    if (!esClient || !logger) {
+      throw new FleetError(
+        `An Elasticsearch client and a logger are required to change logsdb_columnar for ${pkgName}`
+      );
+    }
+    const { changed } = await setLogsdbColumnarChoice({
+      savedObjectsClient,
+      esClient,
+      logger,
+      pkgName,
+      enabled: newLogsdbColumnar,
+      installation: installedPackage,
+    });
+    if (changed) {
+      // The full-document replacement below spreads these attributes: keep them current.
+      installedPackage.attributes.logsdb_columnar_enabled = newLogsdbColumnar;
+    }
+  }
 
   if (keepPoliciesUpToDate !== undefined) {
     updateAttrs.keep_policies_up_to_date = keepPoliciesUpToDate;

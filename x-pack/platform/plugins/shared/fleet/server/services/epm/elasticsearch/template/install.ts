@@ -68,7 +68,10 @@ export const prepareToInstallTemplates = async (
   packageInstallContext: PackageInstallContext,
   esReferences: EsAssetReference[],
   experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
-  onlyForDataStreams?: RegistryDataStream[]
+  onlyForDataStreams?: RegistryDataStream[],
+  // `settings.index.mode` per data stream asset base name: `logsdb_columnar` for the data streams
+  // of an installation that is on it. Data streams absent from the map keep the manifest's mode.
+  columnarIndexModes?: Map<string, string | undefined>
 ): Promise<{
   assetsToAdd: EsAssetReference[];
   assetsToRemove: EsAssetReference[];
@@ -103,7 +106,8 @@ export const prepareToInstallTemplates = async (
     dataStreams,
     packageInstallContext,
     fieldAssetsMap,
-    experimentalDataStreamFeatures
+    experimentalDataStreamFeatures,
+    columnarIndexModes
   );
 
   const assetsToAdd = getAllTemplateRefs(templates.map((template) => template.indexTemplate));
@@ -141,7 +145,8 @@ export async function prepareDataStreamTemplates(
   dataStreams: RegistryDataStream[],
   packageInstallContext: PackageInstallContext,
   fieldAssetsMap: AssetsMap,
-  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = []
+  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
+  columnarIndexModes?: Map<string, string | undefined>
 ): Promise<
   {
     componentTemplates: TemplateMap;
@@ -162,6 +167,7 @@ export async function prepareDataStreamTemplates(
       dataStream,
       experimentalDataStreamFeature,
       ilmMigrationStatusMap,
+      indexMode: columnarIndexModes?.get(getRegistryDataStreamAssetBaseName(dataStream)),
     });
     return { componentTemplates, indexTemplate };
   });
@@ -625,12 +631,15 @@ export function prepareTemplate({
   dataStream,
   experimentalDataStreamFeature,
   ilmMigrationStatusMap,
+  indexMode,
 }: {
   packageInstallContext: PackageInstallContext;
   fieldAssetsMap: AssetsMap;
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
   ilmMigrationStatusMap: Map<string, 'success' | undefined | null>;
+  /** `logsdb_columnar` when the installation is on it. Ignored for a `time_series` data stream. */
+  indexMode?: string;
 }): {
   componentTemplates: TemplateMap;
   indexTemplate: IndexTemplateEntry;
@@ -652,6 +661,7 @@ export function prepareTemplate({
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     !!experimentalDataStreamFeature?.features.tsdb ||
     (isOtelInputType && dataStream.type === 'metrics');
+  const resolvedIndexMode = isIndexModeTimeSeries ? undefined : indexMode;
 
   const validFields = processFields(fields);
 
@@ -694,6 +704,7 @@ export function prepareTemplate({
     hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
     isIndexModeTimeSeries,
+    indexMode: resolvedIndexMode,
     type: dataStream.type,
     isOtelInputType,
   });
