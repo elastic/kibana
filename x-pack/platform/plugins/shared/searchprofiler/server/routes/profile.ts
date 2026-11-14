@@ -98,10 +98,24 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
       try {
         const client = (await ctx.core).elasticsearch.client.asCurrentUser;
         const indicesExist = await hasIndices(client, log);
+        let indices: string[] = [];
+        try {
+          const resolved = await client.indices.resolveIndex({ name: '*' });
+          indices = Array.from(
+            new Set(
+              [...resolved.indices, ...resolved.aliases, ...resolved.data_streams].map(
+                ({ name }) => name
+              )
+            )
+          ).sort();
+        } catch (error) {
+          log.debug(`Search Profiler index suggestions unavailable: ${error.message}`);
+        }
 
         return response.ok({
           body: {
             hasIndices: indicesExist,
+            indices,
           },
         });
       } catch (err) {

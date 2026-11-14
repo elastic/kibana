@@ -11,7 +11,7 @@ import { compressToEncodedURIComponent } from 'lz-string';
 export class SearchProfilerPage {
   readonly container: Locator;
   readonly editor: Locator;
-  readonly indexInput: Locator;
+  readonly indexComboBox: ReturnType<ScoutPage['components']['comboBox']>;
   readonly profileButton: Locator;
   readonly profileTree: Locator;
   readonly jsonParseErrorToast: Locator;
@@ -25,7 +25,7 @@ export class SearchProfilerPage {
   constructor(private readonly page: ScoutPage) {
     this.container = this.page.testSubj.locator('searchprofiler');
     this.editor = this.page.testSubj.locator('searchProfilerEditor');
-    this.indexInput = this.page.testSubj.locator('indexName');
+    this.indexComboBox = this.page.components.comboBox('indexName');
     this.profileButton = this.page.testSubj.locator('profileButton');
     this.profileTree = this.page.testSubj.locator('profileTree');
     this.jsonParseErrorToast = this.page.testSubj.locator('jsonParseErrorToast');
@@ -60,9 +60,13 @@ export class SearchProfilerPage {
     await this.editor.waitFor();
   }
 
-  async setIndex(index: string) {
+  async setIndex(index: string, { custom = false }: { custom?: boolean } = {}) {
     await this.waitForEditorToLoad();
-    await this.indexInput.fill(index);
+    if (custom) {
+      await this.indexComboBox.setCustomSelectedOptions([index]);
+      return;
+    }
+    await this.indexComboBox.setSelectedOptions([index]);
   }
 
   async setQuery(query: string) {

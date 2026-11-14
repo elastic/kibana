@@ -63,7 +63,7 @@ test.describe('Search Profiler JSON parsing', { tag: testData.SEARCH_PROFILER_TA
     pageObjects,
   }) => {
     await mockNoShardsProfileResponse(page);
-    await pageObjects.searchProfiler.setIndex('search-profiler-missing-index-*');
+    await pageObjects.searchProfiler.setIndex('search-profiler-missing-index-*', { custom: true });
     await pageObjects.searchProfiler.setQuery(testData.SIMPLE_QUERY);
 
     await pageObjects.searchProfiler.profile();
