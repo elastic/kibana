@@ -15,6 +15,9 @@ import {
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
   inferVarGroupSelections,
+  isVarGroupOptionHiddenInDeploymentMode,
+  getFirstVisibleVarGroupOption,
+  sanitizeVarGroupSelections,
   type VarGroupSelection,
 } from './var_group_helpers';
 
@@ -406,6 +409,209 @@ describe('var_group_helpers', () => {
       expect(inferred).toEqual({
         credential_type: 'direct_access_key',
         data_collection: 'streaming',
+      });
+    });
+
+    it('should never infer an option hidden in the given deployment mode', () => {
+      // Validation and the form must agree on the default, and an option
+      // the form hides in this mode cannot be the one validation checks —
+      // even when its vars are the only populated ones.
+      const group: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          {
+            name: 'log_group_name',
+            title: 'Log Group Name',
+            vars: ['log_group_name', 'region_name'],
+            hide_in_deployment_modes: ['default'],
+          },
+        ],
+      };
+
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'default'
+        )
+      ).toBeUndefined();
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'agentless'
+        )
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+
+    it('should infer the visible option when both a hidden and a visible option have populated vars', () => {
+      // Without the mode filter, the hidden Name option would win outright
+      // (2/2 vs the ARN option's 1/1). With it, the hidden option is skipped
+      // and the ARN option — the best visible one — is inferred.
+      const group: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          {
+            name: 'log_group_name',
+            title: 'Log Group Name',
+            vars: ['log_group_name', 'region_name'],
+            hide_in_deployment_modes: ['default'],
+          },
+        ],
+      };
+
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_arn: { type: 'text', value: 'arn:aws:logs:us-east-1:123:log-group:g' },
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'default'
+        )
+      ).toEqual({ log_group_source: 'log_group_arn' });
+      expect(
+        inferVarGroupSelections([group], {
+          log_group_arn: { type: 'text', value: 'arn:aws:logs:us-east-1:123:log-group:g' },
+          log_group_name: { type: 'text', value: 'my-group' },
+          region_name: { type: 'text', value: 'us-east-1' },
+        })
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+  });
+
+  describe('isVarGroupOptionHiddenInDeploymentMode', () => {
+    const hiddenInDefault = {
+      name: 'log_group_arn',
+      title: 'Log Group ARN',
+      vars: ['log_group_arn'],
+      hide_in_deployment_modes: ['default' as const],
+    };
+
+    it('should return false when no deployment mode is given', () => {
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, undefined)).toBe(false);
+    });
+
+    it('should return true when the option hides the given mode', () => {
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, 'default')).toBe(true);
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, 'agentless')).toBe(false);
+    });
+
+    it('should return false when the option has no hide_in_deployment_modes', () => {
+      expect(
+        isVarGroupOptionHiddenInDeploymentMode({ name: 'x', title: 'X', vars: ['x'] }, 'default')
+      ).toBe(false);
+    });
+  });
+
+  describe('getFirstVisibleVarGroupOption', () => {
+    const groupWithHiddenFirstOption: RegistryVarGroup = {
+      name: 'log_group_source',
+      title: 'Log group',
+      selector_title: 'Identify the log group by',
+      options: [
+        {
+          name: 'log_group_arn',
+          title: 'Log Group ARN',
+          vars: ['log_group_arn'],
+          hide_in_deployment_modes: ['default'],
+        },
+        {
+          name: 'log_group_name',
+          title: 'Log Group Name',
+          vars: ['log_group_name', 'region_name'],
+        },
+      ],
+    };
+
+    it('should return the first option when nothing is hidden', () => {
+      expect(getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'agentless')?.name).toBe(
+        'log_group_arn'
+      );
+    });
+
+    it('should skip options hidden in the given deployment mode', () => {
+      expect(getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'default')?.name).toBe(
+        'log_group_name'
+      );
+    });
+
+    it('should skip options listed in hiddenOptionNames', () => {
+      expect(
+        getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'agentless', ['log_group_arn'])
+          ?.name
+      ).toBe('log_group_name');
+    });
+
+    it('should return undefined when every option is hidden', () => {
+      expect(
+        getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'default', ['log_group_name'])
+      ).toBeUndefined();
+    });
+  });
+
+  describe('sanitizeVarGroupSelections', () => {
+    const groups: RegistryVarGroup[] = [
+      {
+        name: 'auth_method',
+        title: 'Authentication',
+        selector_title: 'Select method',
+        options: [
+          { name: 'api_key', title: 'API Key', vars: ['api_key_var'] },
+          { name: 'oauth', title: 'OAuth', vars: ['client_id', 'client_secret'] },
+        ],
+      },
+      {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+        ],
+      },
+    ];
+
+    it('should drop a stored selection naming a removed option and keep the valid ones', () => {
+      expect(
+        sanitizeVarGroupSelections(groups, {
+          auth_method: 'saml',
+          log_group_source: 'log_group_name',
+        })
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+
+    it('should return the input unchanged when every stored selection names an existing option', () => {
+      const saved = { auth_method: 'oauth', log_group_source: 'log_group_arn' };
+      expect(sanitizeVarGroupSelections(groups, saved)).toBe(saved);
+    });
+
+    it('should keep entries for groups the package no longer declares', () => {
+      expect(
+        sanitizeVarGroupSelections(groups, {
+          auth_method: 'oauth',
+          removed_group: 'whatever',
+        })
+      ).toEqual({ auth_method: 'oauth', removed_group: 'whatever' });
+    });
+
+    it('should return undefined unchanged and not fail without var_groups', () => {
+      expect(sanitizeVarGroupSelections(groups, undefined)).toBeUndefined();
+      expect(sanitizeVarGroupSelections(undefined, { auth_method: 'oauth' })).toEqual({
+        auth_method: 'oauth',
       });
     });
   });

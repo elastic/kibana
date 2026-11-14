@@ -9,17 +9,27 @@ import { useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
-import type { AgentPolicy, NewPackagePolicy } from '../../../../../../../../../common/types';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackagePolicyConfigRecord,
+} from '../../../../../../../../../common/types';
 import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
-import { inferVarGroupSelections } from '../../../../../../../../../common/services';
+import {
+  inferVarGroupSelections,
+  sanitizeVarGroupSelections,
+} from '../../../../../../../../../common/services';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
 
 import {
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../../../services/var_group_helpers';
-import { buildVarGroupPolicyUpdates } from '../../../services/var_group_policy_effects';
+import {
+  buildVarGroupPolicyUpdates,
+  buildStreamVarGroupVarsUpdate,
+} from '../../../services/var_group_policy_effects';
 
 export function useDataStreamId() {
   const history = useHistory();
@@ -110,17 +120,24 @@ interface UseVarGroupSelectionsParams {
    */
   packagePolicy?: NewPackagePolicy;
   /**
+   * Optional: current stream vars, for stream-level var_groups only. When
+   * provided, a selection change also clears the populated vars of the
+   * deselected options, so stale values don't stay in the policy and leak
+   * into the agent template. Only the stream-level call site passes this.
+   */
+  streamVars?: PackagePolicyConfigRecord;
+  /**
    * Optional: options to hide per var group (e.g. options unsupported by the
    * policy template the form is scoped to). Hidden options are excluded when
    * computing default selections.
    */
   hideInVarGroupOptions?: Record<string, string[]>;
+  /** Vars to infer selections from when the groups' vars aren't the package policy's own (stream/input-level groups). Defaults to `packagePolicy?.vars`. */
+  varsForInference?: PackagePolicyConfigRecord;
   /**
-   * Optional: whether the form is editing an existing policy. When true and the
-   * policy has no stored var_group_selections (it predates the package's
-   * var_groups), selections are inferred from the policy's populated vars instead
-   * of blindly falling back to the first visible option, so an existing
-   * configuration is not presented as a different one.
+   * Optional: whether the form is editing an existing policy. When true, a policy with no
+   * stored selections (it predates the package's var_groups) is inferred from its populated
+   * vars instead of falling back to the first visible option.
    */
   isEditPage?: boolean;
 }
@@ -136,13 +153,14 @@ export function useVarGroupSelections({
   isAgentlessEnabled,
   onSelectionsChange,
   packagePolicy,
+  streamVars,
   hideInVarGroupOptions,
+  varsForInference,
   isEditPage = false,
 }: UseVarGroupSelectionsParams) {
-  // Derive selections when none are saved: defaults for new policies; on the edit
-  // page, prefer inference from the policy's populated vars (policies created before
-  // the package introduced var_groups have no stored selections, and the first
-  // visible option may not match their actual configuration).
+  // Derive selections when none are saved: defaults for new policies; on the edit page,
+  // inference from the policy's populated vars (a policy predating var_groups has no stored
+  // selections). Inference never picks an option hidden in the current deployment mode.
   const deriveSelections = useCallback((): VarGroupSelection => {
     const defaults = computeDefaultVarGroupSelections(
       varGroups,
@@ -152,15 +170,33 @@ export function useVarGroupSelections({
     if (!isEditPage) {
       return defaults;
     }
-    const inferred = inferVarGroupSelections(varGroups, packagePolicy?.vars);
+    const inferred = inferVarGroupSelections(
+      varGroups,
+      varsForInference ?? packagePolicy?.vars,
+      isAgentlessEnabled ? 'agentless' : 'default'
+    );
     return inferred ? { ...defaults, ...inferred } : defaults;
-  }, [varGroups, isAgentlessEnabled, hideInVarGroupOptions, isEditPage, packagePolicy?.vars]);
+  }, [
+    varGroups,
+    isAgentlessEnabled,
+    hideInVarGroupOptions,
+    isEditPage,
+    varsForInference,
+    packagePolicy?.vars,
+  ]);
 
-  // Derive current selections from saved or compute them
+  // Drop selections naming options the package no longer declares, so derive/inference runs for them (matches validation; otherwise all group-controlled fields are hidden).
+  const sanitizedSavedSelections = useMemo(
+    () => sanitizeVarGroupSelections(varGroups, savedSelections),
+    [varGroups, savedSelections]
+  );
+
+  // Current selections: valid saved selections win; the rest get the derived value,
+  // the same value validation derives, so the form and validation agree.
   const selections = useMemo((): VarGroupSelection => {
-    if (savedSelections) return savedSelections;
-    return deriveSelections();
-  }, [savedSelections, deriveSelections]);
+    const derived = deriveSelections();
+    return sanitizedSavedSelections ? { ...derived, ...sanitizedSavedSelections } : derived;
+  }, [sanitizedSavedSelections, deriveSelections]);
 
   // Initialize on mount if not already set. The default selection must apply the
   // same policy effects as a user selection: a required var_group makes the selected
@@ -179,11 +215,13 @@ export function useVarGroupSelections({
     }
   }, [varGroups, savedSelections, onSelectionsChange, deriveSelections, packagePolicy]);
 
-  // Handle selection change with policy effects computation
+  // Handle selection change with policy effects computation. The new selections build
+  // on `selections` — what the form actually shows — so a group displayed only through
+  // derivation is not dropped from the persisted update.
   const handleSelectionChange = useCallback(
     (groupName: string, optionName: string) => {
       const newSelections: VarGroupSelection = {
-        ...savedSelections,
+        ...selections,
         [groupName]: optionName,
       };
 
@@ -193,14 +231,68 @@ export function useVarGroupSelections({
           ? buildVarGroupPolicyUpdates(packagePolicy, newSelections, varGroups)
           : null;
 
+      // Stream-level var_groups only: clear the deselected options' populated vars
+      // so stale values don't leak into the agent template.
+      let clearedStreamVars: PackagePolicyConfigRecord | undefined;
+      if (streamVars && varGroups) {
+        const varGroup = varGroups.find((group) => group.name === groupName);
+        if (varGroup) {
+          clearedStreamVars = buildStreamVarGroupVarsUpdate(
+            streamVars,
+            varGroup,
+            selections[groupName],
+            optionName
+          );
+        }
+      }
+
       // Apply selections and any policy effects together
       onSelectionsChange({
         var_group_selections: newSelections,
         ...(policyEffects || {}),
+        ...(clearedStreamVars ? { vars: clearedStreamVars } : {}),
       });
     },
-    [savedSelections, onSelectionsChange, packagePolicy, varGroups]
+    [selections, onSelectionsChange, packagePolicy, varGroups, streamVars]
   );
+
+  // Persist the normalized selections when what the form shows differs from what is
+  // stored: a stale saved selection was dropped, or derivation filled in a group the
+  // stored map does not cover (an empty or partial map). Only the selections persist
+  // here, plus activation effects: effects that would turn something off are skipped,
+  // so opening the page cannot silently remove e.g. cloud_connector_id. An explicit
+  // user choice (handleSelectionChange above) still carries the full effects. This
+  // lives after handleSelectionChange because the mount effect above is also touched
+  // by upstream; keeping this write in its own block avoids an adjacent-change merge
+  // conflict. (Reference equality cannot detect the missing-group case — sanitize
+  // returns the input unchanged when nothing was dropped — so compare the merged
+  // selections against the sanitized stored map instead.)
+  useEffect(() => {
+    if (!varGroups || varGroups.length === 0) return;
+    if (!savedSelections) return;
+    const needsPersist = Object.entries(selections).some(
+      ([groupName, optionName]) => sanitizedSavedSelections?.[groupName] !== optionName
+    );
+    if (!needsPersist) return;
+    if (Object.keys(selections).length === 0) return;
+    const policyEffects =
+      packagePolicy && varGroups
+        ? buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups, {
+            skipDeactivation: true,
+          })
+        : null;
+    onSelectionsChange({
+      var_group_selections: selections,
+      ...(policyEffects || {}),
+    });
+  }, [
+    varGroups,
+    savedSelections,
+    sanitizedSavedSelections,
+    selections,
+    onSelectionsChange,
+    packagePolicy,
+  ]);
 
   return { selections, handleSelectionChange };
 }

@@ -11,6 +11,7 @@ import type { RegistryVarGroup } from '../../../../types';
 import {
   updateCloudConnectorPolicy,
   buildVarGroupPolicyUpdates,
+  buildStreamVarGroupVarsUpdate,
   registerPolicyUpdateHandler,
 } from './var_group_policy_effects';
 import type { VarGroupSelection } from './var_group_helpers';
@@ -471,6 +472,328 @@ describe('var_group_policy_effects', () => {
         cloud_connector_id: undefined,
       });
     });
+
+    it('should deactivate the cloud connector when the selection does not pick it', () => {
+      const packagePolicy = createMockPackagePolicy({
+        supports_cloud_connector: true,
+        cloud_connector_id: 'conn-123',
+        vars: {
+          supports_cloud_connectors: { value: true, type: 'bool' },
+        },
+      });
+      const varGroups = createMockVarGroups();
+      const selections: VarGroupSelection = { auth_method: 'manual' };
+
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups);
+
+      expect(result).toEqual({
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+        vars: {
+          supports_cloud_connectors: { value: false, type: 'bool' },
+        },
+      });
+    });
+
+    it('should skip deactivation with skipDeactivation, leaving the connector state untouched', () => {
+      const packagePolicy = createMockPackagePolicy({
+        supports_cloud_connector: true,
+        cloud_connector_id: 'conn-123',
+        vars: {
+          supports_cloud_connectors: { value: true, type: 'bool' },
+        },
+      });
+      const varGroups = createMockVarGroups();
+      const selections: VarGroupSelection = { auth_method: 'manual' };
+
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups, {
+        skipDeactivation: true,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should still apply activation effects with skipDeactivation', () => {
+      const packagePolicy = createMockPackagePolicy();
+      const varGroups = createMockVarGroups();
+      const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups, {
+        skipDeactivation: true,
+      });
+
+      expect(result).toEqual({
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+      });
+    });
+  });
+
+  describe('buildStreamVarGroupVarsUpdate', () => {
+    const createMockStreamVarGroups = (): RegistryVarGroup[] => [
+      {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+          {
+            name: 'log_group_name_prefix',
+            title: 'Log Group Name Prefix',
+            vars: ['log_group_name_prefix'],
+          },
+        ],
+      },
+    ];
+
+    it('should clear the plain-text var of the deselected option and keep the rest', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: 'my-group' },
+        other_var: { value: 'keep' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined },
+        log_group_name: { value: 'my-group' },
+        other_var: { value: 'keep' },
+      });
+    });
+
+    it('should unset deselected vars so a later switch-back still requires them', () => {
+      // Clearing to '' made validation treat the var as filled, so switching
+      // back to Log Group ARN showed the form as valid with an empty ARN.
+      // Unsetting the value keeps the entry (type and other metadata) while
+      // validation treats it as missing.
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: {
+          value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group',
+          type: 'text',
+        },
+        log_group_name: { value: '' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined, type: 'text' },
+        log_group_name: { value: '' },
+      });
+      expect(result?.log_group_arn.value).toBeUndefined();
+    });
+
+    it('should keep vars shared by the deselected and selected options', () => {
+      const varGroup: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn', 'region'] },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name', 'region'] },
+        ],
+      };
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: '' },
+        region: { value: 'us-east-1' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined },
+        log_group_name: { value: '' },
+        region: { value: 'us-east-1' },
+      });
+    });
+
+    it('should return undefined when the selection does not change', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_arn'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when deselected vars are already empty or absent', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: { value: '' },
+        log_group_name: { value: 'my-group' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should clear secret-ref values of deselected options', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: {
+          value: { isSecretRef: true, id: 'secret-1' },
+          type: 'password',
+        },
+        log_group_name: { value: '' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined, type: 'password' },
+        log_group_name: { value: '' },
+      });
+    });
+
+    it('should clear populated non-string values of deselected options', () => {
+      // The leak this PR fixes is value-type-agnostic — a multi:true array
+      // (a list of log group names), a number, or a true boolean belonging
+      // to a deselected option still reaches the compiled agent template.
+      // Any populated value is cleared.
+      const varGroup: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          {
+            name: 'log_group_arn',
+            title: 'Log Group ARN',
+            vars: ['log_group_arn', 'ports', 'use_tls', 'log_group_names'],
+          },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+        ],
+      };
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: '' },
+        ports: { value: [443, 8443], type: 'integer' },
+        use_tls: { value: true, type: 'bool' },
+        log_group_names: { value: ['group-a', 'group-b'], type: 'text' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined },
+        log_group_name: { value: '' },
+        ports: { value: undefined, type: 'integer' },
+        use_tls: { value: undefined, type: 'bool' },
+        log_group_names: { value: undefined, type: 'text' },
+      });
+    });
+
+    it('should leave unpopulated values of deselected options untouched', () => {
+      // '' / [] / false / undefined are indistinguishable from an unset var
+      // (false is a migration default, not evidence of configuration), so
+      // there is nothing to leak and nothing to clear.
+      const varGroup: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          {
+            name: 'log_group_arn',
+            title: 'Log Group ARN',
+            vars: ['log_group_arn', 'ports', 'use_tls', 'log_group_names'],
+          },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+        ],
+      };
+      const streamVars = {
+        log_group_arn: { value: '' },
+        log_group_name: { value: '' },
+        ports: { value: [], type: 'integer' },
+        use_tls: { value: false, type: 'bool' },
+        log_group_names: { value: undefined, type: 'text' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when streamVars is undefined', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+
+      const result = buildStreamVarGroupVarsUpdate(
+        undefined,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should clear vars of all deselected options, not just the previously selected one', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: 'my-group' },
+        log_group_name_prefix: { value: '' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name_prefix'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: undefined },
+        log_group_name: { value: undefined },
+        log_group_name_prefix: { value: '' },
+      });
+    });
   });
 
   describe('registerPolicyUpdateHandler', () => {
@@ -485,7 +808,7 @@ describe('var_group_policy_effects', () => {
 
       const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups);
 
-      expect(customHandler).toHaveBeenCalledWith(packagePolicy, selections, varGroups);
+      expect(customHandler).toHaveBeenCalledWith(packagePolicy, selections, varGroups, undefined);
       expect(result).toMatchObject({ custom_field: 'test' });
     });
   });
