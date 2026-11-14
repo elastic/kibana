@@ -7,14 +7,17 @@
 
 import expect from '@kbn/expect';
 
-import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { OBSERVABLE_TYPE_AGENT_ID, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
 import { buildUnifiedAlertReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
+  createConfiguration,
   deleteAllCaseItems,
+  deleteConfiguration,
   bulkCreateAttachments,
   createComment,
   getCase,
+  getConfigurationRequest,
 } from '../../../../common/lib/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -56,6 +59,23 @@ export default ({ getService }: FtrProviderContext): void => {
         refresh: 'true',
         document: { message: 'no ECS fields here', severity: 'high' },
       });
+      await es.index({
+        index: alertIndex,
+        id: 'ext-alert-fields',
+        refresh: 'true',
+        document: {
+          'agent.id': 'integration-agent',
+          'source.ip': '9.9.9.9',
+          'destination.ip': '127.0.0.1',
+          'user.employee_id': 'E123456',
+        },
+      });
+      await es.index({
+        index: alertIndex,
+        id: 'ext-alert-bad-employee-id',
+        refresh: 'true',
+        document: { 'user.employee_id': 'not-an-id' },
+      });
     });
 
     after(async () => {
@@ -64,6 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteAllCaseItems(es);
+      await deleteConfiguration(es);
     });
 
     describe('with extractObservables: true', () => {
@@ -247,6 +268,85 @@ export default ({ getService }: FtrProviderContext): void => {
         // ext-alert-1 contributes source.ip 1.2.3.4 + destination.ip 10.0.0.1,
         // ext-alert-2 contributes source.ip 5.6.7.8 → 3 distinct observables total
         expect(refreshedCase.observables.length).to.be(3);
+      });
+    });
+
+    describe('with observable type settings in the configuration', () => {
+      const observableTypes = [{ key: 'employee-id', label: 'Employee ID' }];
+      const observableTypeSettings = [
+        // Turn off the default agent.id field.
+        { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [{ path: 'agent.id', enabled: false }] },
+        // Skip one value on one default field of the IPv4 type.
+        {
+          key: OBSERVABLE_TYPE_IPV4.key,
+          paths: [{ path: 'destination.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+        },
+        // A custom type with its own field and value pattern.
+        {
+          key: 'employee-id',
+          valuePattern: '^E\\d{6}$',
+          paths: [{ path: 'user.employee_id', enabled: true }],
+        },
+      ];
+
+      const attachAlert = async (alertId: string) => {
+        const theCase = await createCase(
+          supertest,
+          getPostCaseRequest({ settings: { syncAlerts: false, extractObservables: true } })
+        );
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: theCase.id,
+          params: [
+            buildUnifiedAlertReq('securitySolutionFixture', {
+              alertId,
+              index: alertIndex,
+              rule: { id: 'rule-1', name: 'Rule 1' },
+            }),
+          ],
+          expectedHttpCode: 200,
+        });
+
+        return getCase({ supertest, caseId: theCase.id });
+      };
+
+      it('follows the toggles, the excluded values, and the value patterns', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({ overrides: { observableTypes, observableTypeSettings } })
+        );
+
+        const refreshedCase = await attachAlert('ext-alert-fields');
+
+        expect(
+          refreshedCase.observables.map(({ typeKey, value }) => `${typeKey}:${value}`).sort()
+        ).to.eql(['employee-id:E123456', `${OBSERVABLE_TYPE_IPV4.key}:9.9.9.9`]);
+      });
+
+      it('does not extract a value that does not match the pattern of a custom type', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({ overrides: { observableTypes, observableTypeSettings } })
+        );
+
+        const refreshedCase = await attachAlert('ext-alert-bad-employee-id');
+
+        expect(refreshedCase.observables).to.eql([]);
+      });
+
+      it('extracts the default fields when the configuration has no observable type settings', async () => {
+        await createConfiguration(supertest, getConfigurationRequest());
+
+        const refreshedCase = await attachAlert('ext-alert-fields');
+
+        expect(
+          refreshedCase.observables.map(({ typeKey, value }) => `${typeKey}:${value}`).sort()
+        ).to.eql([
+          `${OBSERVABLE_TYPE_AGENT_ID.key}:integration-agent`,
+          `${OBSERVABLE_TYPE_IPV4.key}:127.0.0.1`,
+          `${OBSERVABLE_TYPE_IPV4.key}:9.9.9.9`,
+        ]);
       });
     });
 

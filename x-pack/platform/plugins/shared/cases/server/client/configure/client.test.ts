@@ -16,6 +16,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
   MAX_TEMPLATES_LENGTH,
+  OBSERVABLE_TYPE_AGENT_ID,
   OBSERVABLE_TYPE_IPV4,
 } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common';
@@ -1310,6 +1311,130 @@ describe('client', () => {
             'Failed to get patch configure in route: Error: Invalid duplicated observable types in request: ipv4'
           );
         });
+
+        describe('observableTypeSettings', () => {
+          const storedSettings = [
+            { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [{ path: 'agent.id', enabled: false }] },
+            { key: 'employee-id', paths: [{ path: 'user.employee_id', enabled: true }] },
+          ];
+
+          beforeEach(() => {
+            clientArgs.services.caseConfigureService.get.mockResolvedValue({
+              attributes: {
+                connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+                customFields: [],
+                templates: [],
+                closure_type: 'close-by-user',
+                owner: 'cases',
+                extractObservables: true,
+                observableTypes: [{ key: 'employee-id', label: 'Employee ID' }],
+                observableTypeSettings: storedSettings,
+              },
+              id: 'test-id',
+              version: 'test-version',
+            } as never);
+          });
+
+          it('throws when a settings entry has no built-in or custom type', async () => {
+            await expect(
+              update(
+                'test-id',
+                { version: 'test-version', observableTypeSettings: [{ key: 'unknown-type' }] },
+                clientArgs,
+                casesClientInternal
+              )
+            ).rejects.toThrow(
+              'Failed to get patch configure in route: Error: Invalid observable type settings in request: observable type unknown-type does not exist'
+            );
+          });
+
+          it('throws when a built-in observable type has a value pattern', async () => {
+            await expect(
+              update(
+                'test-id',
+                {
+                  version: 'test-version',
+                  observableTypeSettings: [{ key: OBSERVABLE_TYPE_IPV4.key, valuePattern: '^a$' }],
+                },
+                clientArgs,
+                casesClientInternal
+              )
+            ).rejects.toThrow(
+              `Failed to get patch configure in route: Error: Invalid observable type settings in request: built-in observable type ${OBSERVABLE_TYPE_IPV4.key} cannot have a value pattern`
+            );
+          });
+
+          it('validates the settings against the stored custom types when the request omits them', async () => {
+            const observableTypeSettings = [
+              {
+                key: 'employee-id',
+                valuePattern: '^E\\d{6}$',
+                paths: [{ path: 'user.employee_id', enabled: true, excludedValues: ['E000000'] }],
+              },
+            ];
+
+            await update(
+              'test-id',
+              { version: 'test-version', observableTypeSettings },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+              expect.objectContaining({
+                updatedAttributes: expect.objectContaining({ observableTypeSettings }),
+              })
+            );
+          });
+
+          it('validates the settings against the custom types in the request', async () => {
+            await expect(
+              update(
+                'test-id',
+                {
+                  version: 'test-version',
+                  observableTypes: [],
+                  observableTypeSettings: [{ key: 'employee-id' }],
+                },
+                clientArgs,
+                casesClientInternal
+              )
+            ).rejects.toThrow(
+              'Failed to get patch configure in route: Error: Invalid observable type settings in request: observable type employee-id does not exist'
+            );
+          });
+
+          it('removes the settings of a custom type that the request deletes', async () => {
+            await update(
+              'test-id',
+              { version: 'test-version', observableTypes: [] },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+              expect.objectContaining({
+                updatedAttributes: expect.objectContaining({
+                  observableTypes: [],
+                  observableTypeSettings: [storedSettings[0]],
+                }),
+              })
+            );
+          });
+
+          it('does not change the settings when the request omits the observable types', async () => {
+            await update(
+              'test-id',
+              { version: 'test-version', extractObservables: false },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(
+              clientArgs.services.caseConfigureService.patch.mock.calls[0][0].updatedAttributes
+            ).not.toHaveProperty('observableTypeSettings');
+          });
+        });
       });
 
       describe('global field definitions', () => {
@@ -2196,6 +2321,64 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             'Failed to create case configuration: Error: Invalid duplicated observable types in request: ipv4'
+          );
+        });
+
+        it('throws when a settings entry has no built-in or custom type', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                observableTypes: [{ key: 'employee-id', label: 'Employee ID' }],
+                observableTypeSettings: [{ key: 'unknown-type' }],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: Invalid observable type settings in request: observable type unknown-type does not exist'
+          );
+        });
+
+        it('stores the observable type settings', async () => {
+          clientArgs.services.caseConfigureService.find.mockResolvedValue({
+            saved_objects: [],
+          } as never);
+          clientArgs.services.caseConfigureService.post.mockResolvedValue({
+            id: 'test-id',
+            type: 'cases-configure',
+            version: 'test-version',
+            attributes: {
+              connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+              closure_type: 'close-by-user',
+              owner: 'securitySolutionFixture',
+              customFields: [],
+              templates: [],
+              observableTypes: [],
+              extractObservables: true,
+              workflowTags: [],
+              created_at: '2019-11-25T21:54:48.952Z',
+              created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
+              updated_at: null,
+              updated_by: null,
+            },
+          } as never);
+          const observableTypes = [{ key: 'employee-id', label: 'Employee ID' }];
+          const observableTypeSettings = [
+            { key: OBSERVABLE_TYPE_AGENT_ID.key, paths: [{ path: 'agent.id', enabled: false }] },
+            { key: 'employee-id', paths: [{ path: 'user.employee_id', enabled: true }] },
+          ];
+
+          await create(
+            { ...baseRequest, observableTypes, observableTypeSettings },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalledWith(
+            expect.objectContaining({
+              attributes: expect.objectContaining({ observableTypes, observableTypeSettings }),
+            })
           );
         });
       });

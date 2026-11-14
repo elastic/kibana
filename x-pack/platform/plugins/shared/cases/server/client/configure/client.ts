@@ -52,6 +52,8 @@ import { ConfigurationSchema, ConfigurationsSchema } from '../../../common/types
 import {
   validateDuplicatedKeysInRequest,
   validateDuplicatedObservableTypesInRequest,
+  validateObservableTypeSettingsInRequest,
+  pruneObservableTypeSettings,
 } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
@@ -358,6 +360,22 @@ export async function update(
       configurationId,
     });
 
+    const observableTypes = request.observableTypes ?? configuration.attributes.observableTypes;
+
+    validateObservableTypeSettingsInRequest({
+      observableTypes,
+      observableTypeSettings: request.observableTypeSettings,
+    });
+
+    // A custom type that the request deletes takes its settings with it.
+    const prunedObservableTypeSettings =
+      request.observableTypes !== undefined && request.observableTypeSettings === undefined
+        ? pruneObservableTypeSettings({
+            observableTypes,
+            observableTypeSettings: configuration.attributes.observableTypeSettings ?? [],
+          })
+        : undefined;
+
     validateCustomFieldTypesInRequest({
       requestCustomFields: request.customFields,
       originalCustomFields: configuration.attributes.customFields,
@@ -458,6 +476,9 @@ export async function update(
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
+        ...(prunedObservableTypeSettings && {
+          observableTypeSettings: prunedObservableTypeSettings,
+        }),
         ...(updatedTemplates && { templates: updatedTemplates }),
         ...(connector != null && { connector }),
         updated_at: updateDate,
@@ -522,6 +543,11 @@ export async function create(
 
     validateDuplicatedObservableTypesInRequest({
       requestFields: validatedConfigurationRequest.observableTypes,
+    });
+
+    validateObservableTypeSettingsInRequest({
+      observableTypes: validatedConfigurationRequest.observableTypes,
+      observableTypeSettings: validatedConfigurationRequest.observableTypeSettings,
     });
 
     let error = null;

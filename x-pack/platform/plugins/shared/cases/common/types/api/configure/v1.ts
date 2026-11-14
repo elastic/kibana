@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_OBSERVABLE_TYPES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
+  MAX_OBSERVABLE_TYPE_PATHS,
+  MAX_OBSERVABLE_TYPE_PATH_LENGTH,
+  MAX_OBSERVABLE_TYPE_SETTINGS,
+  MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
@@ -90,26 +96,75 @@ export const CustomFieldsConfigurationSchema = limitedArraySchema({
   fieldName: 'customFields',
 });
 
+const ObservableTypeKeySchema = regexStringSchema({
+  codec: limitedStringSchema({
+    fieldName: 'key',
+    min: 1,
+    max: MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+  }),
+  pattern: '^[a-z0-9_-]+$',
+  message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+});
+
 export const ObservableTypesConfigurationSchema = limitedArraySchema({
   min: 0,
   max: MAX_CUSTOM_OBSERVABLE_TYPES,
   fieldName: 'observableTypes',
-  codec: z.object({
-    key: regexStringSchema({
-      codec: limitedStringSchema({
-        fieldName: 'key',
+  codec: lazySchema(() =>
+    z.object({
+      key: ObservableTypeKeySchema,
+      label: limitedStringSchema({
+        fieldName: 'label',
         min: 1,
-        max: MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+        max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
       }),
-      pattern: '^[a-z0-9_-]+$',
-      message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
-    }),
-    label: limitedStringSchema({
-      fieldName: 'label',
-      min: 1,
-      max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
-    }),
-  }),
+    })
+  ),
+});
+
+// limitedStringSchema checks the trimmed length and keeps the string unchanged.
+// The raw bound stops whitespace padding, and the value is not trimmed because extraction compares it exactly.
+const exactStringSchema = ({ fieldName, max }: { fieldName: string; max: number }) =>
+  limitedStringSchema({ fieldName, min: 1, max }).max(max);
+
+export const ObservableTypePathConfigurationSchema = lazySchema(() =>
+  z.object({
+    path: exactStringSchema({ fieldName: 'path', max: MAX_OBSERVABLE_TYPE_PATH_LENGTH }),
+    enabled: z.boolean(),
+    excludedValues: limitedArraySchema({
+      min: 0,
+      max: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+      fieldName: 'excludedValues',
+      codec: exactStringSchema({
+        fieldName: 'excluded value',
+        max: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
+      }),
+    }).optional(),
+  })
+);
+
+/**
+ * The extraction settings of the built-in and custom observable types, one entry for each type key.
+ */
+export const ObservableTypeSettingsConfigurationSchema = limitedArraySchema({
+  min: 0,
+  max: MAX_OBSERVABLE_TYPE_SETTINGS,
+  fieldName: 'observableTypeSettings',
+  codec: lazySchema(() =>
+    z.object({
+      key: ObservableTypeKeySchema,
+      paths: limitedArraySchema({
+        min: 0,
+        max: MAX_OBSERVABLE_TYPE_PATHS,
+        fieldName: 'paths',
+        codec: ObservableTypePathConfigurationSchema,
+      }).optional(),
+      valuePattern: exactStringSchema({
+        fieldName: 'valuePattern',
+        max: MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH,
+      }).optional(),
+    })
+  ),
 });
 
 export const WorkflowTagsConfigurationSchema = limitedArraySchema({
@@ -174,25 +229,28 @@ export const TemplatesConfigurationSchema = limitedArraySchema({
   fieldName: 'templates',
 });
 
-export const ConfigurationRequestSchema = z.object({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeSchema,
-  /**
-   * The plugin owner that manages this configuration
-   */
-  owner: z.string().max(MAX_TITLE_LENGTH),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
-});
+export const ConfigurationRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeSchema,
+    /**
+     * The plugin owner that manages this configuration
+     */
+    owner: z.string().max(MAX_TITLE_LENGTH),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    observableTypeSettings: ObservableTypeSettingsConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+  })
+);
 
 export const GetConfigurationFindRequestSchema = z.object({
   /**
@@ -208,16 +266,19 @@ export const CaseConfigureRequestParamsSchema = z.object({
   configuration_id: z.string().max(512),
 });
 
-export const ConfigurationPatchRequestSchema = z.object({
-  closure_type: ClosureTypeSchema.optional(),
-  connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
-  version: z.string().max(512),
-});
+export const ConfigurationPatchRequestSchema = lazySchema(() =>
+  z.object({
+    closure_type: ClosureTypeSchema.optional(),
+    connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    observableTypeSettings: ObservableTypeSettingsConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+    version: z.string().max(512),
+  })
+);
 
 export type ConfigurationRequest = z.infer<typeof ConfigurationRequestSchema>;
 export type ConfigurationPatchRequest = z.infer<typeof ConfigurationPatchRequestSchema>;
