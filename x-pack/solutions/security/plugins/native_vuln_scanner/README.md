@@ -10,6 +10,31 @@ Disabled by default. Enable with:
 xpack.nativeVulnScanner.enabled: true
 ```
 
+## Agent runtime requirement
+
+Elastic Agents 9.7+ route agent inputs through the OTel collector runtime by default, and that
+runtime only accepts filestream inputs (`OTel manager failed: failed to generate otel config:
+the only supported type is 'filestream', got: "osquery"`). Agents that enroll with a policy
+containing the osquery integration therefore fail to start osquery until the policy pins that
+integration to the process runtime.
+
+Set it in Fleet under **Agent policies → *your policy* → Settings → Advanced settings → Agent internal**
+(the `advanced_settings.agent_internal` field, which takes a YAML string):
+
+```yaml
+agent:
+  internal:
+    runtime:
+      default: process
+      osquerybeat:
+        default: process
+        osquery: process
+```
+
+A policy that has this set shows `runtime: {default: process, osquerybeat: {default: process,
+osquery: process}}` under its `advanced_settings` (verify via
+`GET /api/fleet/agent_policies/<id>`).
+
 ## Version ordering
 
 Distro package versions do not order like semver. `server/lib/version_compare` ports dpkg's
