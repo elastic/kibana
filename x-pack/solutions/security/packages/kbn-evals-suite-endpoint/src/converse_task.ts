@@ -38,6 +38,76 @@ const toPendingConfirmations = (prompts: unknown[]): PendingConfirmation[] =>
       : [];
   });
 
+/**
+ * A turn after the first, sent in the same conversation:
+ * - `{ confirm }` answers every confirmation the previous turn paused on with
+ *   `allow: confirm`, the way the UI's Approve / Decline buttons do.
+ * - `{ message }` sends another user message.
+ */
+export type FollowUpTurn = { confirm: boolean } | { message: string };
+
+export interface ConfirmationDecision extends PendingConfirmation {
+  allow: boolean;
+}
+
+const confirmationPromptIds = (prompts: unknown[]): string[] =>
+  prompts.flatMap((prompt) => {
+    const id = isRecord(prompt) && typeof prompt.id === 'string' ? prompt.id : '';
+    return CONFIRMATION_ID_PATTERN.test(id) ? [id] : [];
+  });
+
+const toDecision = (promptId: string, allow: boolean): ConfirmationDecision => {
+  const [confirmation] = toPendingConfirmations([{ id: promptId }]);
+  return { ...confirmation, allow };
+};
+
+type Step = Awaited<ReturnType<AgentBuilderClient['converse']>>['steps'][number];
+
+/**
+ * Folds a resumed round's steps into what is already recorded. Resuming a confirmation returns
+ * the whole logical round, so the paused call comes back with its results filled in next to steps
+ * already recorded.
+ *
+ * Only the round being resumed is rewritten: tool-call ids can repeat across rounds, so a call
+ * from an earlier round must never be matched. Matching is one-to-one — each recorded step is
+ * matched at most once, so a step that genuinely occurs twice in the round is kept, while the
+ * same replay still collapses onto one copy.
+ */
+const mergeResumedSteps = (recorded: Step[], incoming: Step[], from: number): Step[] => {
+  const merged = [...recorded];
+  const matched = new Set<number>();
+  const matchInRound = (predicate: (step: Step) => boolean): number => {
+    for (let i = from; i < merged.length; i++) {
+      if (!matched.has(i) && predicate(merged[i])) {
+        return i;
+      }
+    }
+    return -1;
+  };
+  for (const step of incoming) {
+    const serialized = JSON.stringify(step);
+    const callIndex =
+      typeof step.tool_call_id === 'string'
+        ? matchInRound((existing) => existing.tool_call_id === step.tool_call_id)
+        : -1;
+    if (callIndex !== -1) {
+      matched.add(callIndex);
+      merged[callIndex] = step;
+    } else {
+      const copyIndex = matchInRound((existing) => JSON.stringify(existing) === serialized);
+      if (copyIndex !== -1) {
+        matched.add(copyIndex);
+      } else {
+        merged.push(step);
+        // a freshly appended step is marked matched, so a later identical replay is
+        // appended as its own occurrence rather than collapsed onto it
+        matched.add(merged.length - 1);
+      }
+    }
+  }
+  return merged;
+};
+
 export const converseQuestionToTaskOutput = async (
   agentBuilderClient: AgentBuilderClient,
   question: string,
@@ -51,20 +121,94 @@ export const converseQuestionToTaskOutput = async (
      * judged output unchanged.
      */
     includePendingConfirmations?: boolean;
+    /**
+     * Turns sent after the first, in the same conversation. Steps, messages and
+     * pending confirmations from every turn accumulate in the output, so a
+     * criterion can check what happened after an approval or a decline, not just
+     * the first request. A `{ confirm }` turn with nothing pending ends the
+     * conversation and records an error instead of sending an unanswerable turn.
+     */
+    followUps?: readonly FollowUpTurn[];
   } = {}
 ) => {
-  const response = await agentBuilderClient.converse({
+  const { followUps = [], includePendingConfirmations } = options;
+
+  let response = await agentBuilderClient.converse({
     agentId: agentBuilderDefaultAgentId,
     input: question,
   });
 
+  const messages: Array<{ message: string }> = [
+    { message: question },
+    { message: response.message },
+  ];
+  let steps: Step[] = [...response.steps];
+  // Index in `steps` where the current (latest) round begins; a resume replays this round only.
+  let currentRoundFrom = 0;
+  const errors: unknown[] = [];
+  const pendingConfirmations = toPendingConfirmations(response.prompts ?? []);
+  const confirmationDecisions: ConfirmationDecision[] = [];
+
+  for (const followUp of followUps) {
+    const { conversationId } = response;
+    if (!conversationId) {
+      errors.push({ message: 'Cannot continue: the first turn returned no conversation id.' });
+      break;
+    }
+
+    let next: Awaited<ReturnType<AgentBuilderClient['converse']>>;
+    const resumesConfirmation = 'confirm' in followUp;
+    if ('confirm' in followUp) {
+      const promptIds = confirmationPromptIds(response.prompts ?? []);
+      if (promptIds.length === 0) {
+        errors.push({
+          message: `Cannot ${
+            followUp.confirm ? 'approve' : 'decline'
+          }: the previous turn left no pending confirmation.`,
+        });
+        break;
+      }
+
+      const { confirm: allow } = followUp;
+      confirmationDecisions.push(...promptIds.map((id) => toDecision(id, allow)));
+      messages.push({ message: allow ? '[approved]' : '[declined]' });
+      next = await agentBuilderClient.converse({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId,
+        promptResponses: Object.fromEntries(promptIds.map((id) => [id, { allow }])),
+      });
+    } else {
+      messages.push({ message: followUp.message });
+      next = await agentBuilderClient.converse({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId,
+        input: followUp.message,
+      });
+    }
+
+    response = next;
+    messages.push({ message: response.message });
+    if (resumesConfirmation) {
+      steps = mergeResumedSteps(steps, response.steps, currentRoundFrom);
+    } else {
+      steps = [...steps, ...response.steps];
+      currentRoundFrom = steps.length - response.steps.length;
+    }
+    pendingConfirmations.push(...toPendingConfirmations(response.prompts ?? []));
+  }
+
   return {
-    messages: [{ message: question }, { message: response.message }],
-    steps: response.steps,
-    errors: [] as unknown[],
+    messages,
+    steps,
+    errors,
     traceId: response.traceId,
-    ...(options.includePendingConfirmations
-      ? { pending_confirmations: toPendingConfirmations(response.prompts ?? []) }
+    ...(includePendingConfirmations
+      ? {
+          pending_confirmations: pendingConfirmations,
+          ...(confirmationDecisions.length > 0
+            ? { confirmation_decisions: confirmationDecisions }
+            : {}),
+        }
       : {}),
   };
 };
