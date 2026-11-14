@@ -295,6 +295,7 @@ overrides:
   nwsapi: 2.2.2
   react-focus-lock: 2.9.5
   react-focus-on: 3.9.1
+  refractor>prismjs: 1.30.0
   vega-crossfilter: 5.1.0
   vega-dataflow: 6.1.0
   vega-expression: 6.1.0
@@ -412,6 +413,9 @@ importers:
       '@elastic/eui-theme-borealis':
         specifier: 8.2.0
         version: 8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common':
+        specifier: 10.2.0
+        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
@@ -515,14 +519,14 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
       '@hapi/hapi':
-        specifier: 21.4.10
-        version: 21.4.10
+        specifier: 21.4.12
+        version: 21.4.12
       '@hapi/inert':
-        specifier: 7.1.2
-        version: 7.1.2
+        specifier: 7.1.3
+        version: 7.1.3
       '@hapi/wreck':
-        specifier: 18.1.2
-        version: 18.1.2
+        specifier: 18.1.3
+        version: 18.1.3
       '@hello-pangea/dnd':
         specifier: 18.0.1
         version: 18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -531,7 +535,7 @@ importers:
         version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad
       '@kbn/access-control-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin
       '@kbn/actions-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/actions
@@ -607,6 +611,9 @@ importers:
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
+      '@kbn/agentic-investigations-impact':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-impact
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
@@ -855,7 +862,7 @@ importers:
         version: link:x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common
       '@kbn/audit-log-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/audit_log
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/audit_log
       '@kbn/automatic-import-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/automatic_import
@@ -976,6 +983,9 @@ importers:
       '@kbn/coloring':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-coloring
+      '@kbn/coloring-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-coloring-components
       '@kbn/config':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-config
@@ -2124,7 +2134,7 @@ importers:
         version: link:examples/eso_model_version_example
       '@kbn/eso-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
+        version: link:x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
       '@kbn/esql':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/esql
@@ -2256,13 +2266,13 @@ importers:
         version: link:examples/feature_flags_example
       '@kbn/feature-usage-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
+        version: link:x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test
       '@kbn/features-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/features
       '@kbn/features-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/features_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/features_provider
       '@kbn/fec-alerts-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test_plugins/functional_execution_context/alerts
@@ -2331,7 +2341,7 @@ importers:
         version: link:src/platform/packages/shared/shared-ux/flyout/template
       '@kbn/foo-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin
+        version: link:x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin
       '@kbn/fs':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-fs
@@ -2400,7 +2410,7 @@ importers:
         version: link:src/platform/packages/private/kbn-hapi-mocks
       '@kbn/hardening-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/hardening
+        version: link:src/platform/test_plugins/plugin_functional/plugins/hardening
       '@kbn/health-gateway-server':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-health-gateway-server
@@ -2520,7 +2530,7 @@ importers:
         version: link:src/platform/plugins/private/interactive_setup
       '@kbn/interactive-setup-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints
+        version: link:src/platform/test_plugins/interactive_setup_test_endpoints
       '@kbn/intercepts-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/intercepts
@@ -2574,7 +2584,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-kibana-api-cli
       '@kbn/kibana-cors-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_cors/plugins/kibana_cors_test
+        version: link:x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test
       '@kbn/kibana-overview-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/kibana_overview
@@ -2887,6 +2897,9 @@ importers:
       '@kbn/nightshift-decision-trees':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
+      '@kbn/nightshift-detection-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/nightshift_detection
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_investigations
@@ -2979,7 +2992,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-occ
       '@kbn/oidc-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/oidc_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider
       '@kbn/ols':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ols
@@ -3019,6 +3032,9 @@ importers:
       '@kbn/palettes':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-palettes
+      '@kbn/palettes-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-palettes-components
       '@kbn/panel-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-panel-loader
@@ -3279,7 +3295,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-safer-lodash-set
       '@kbn/saml-provider-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/saml_provider
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider
       '@kbn/sample-data-ingest':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/sample_data_ingest
@@ -3297,7 +3313,7 @@ importers:
         version: link:src/platform/test_plugins/plugin_functional/saved_object_import_warnings
       '@kbn/saved-object-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
+        version: link:x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin
       '@kbn/saved-objects-example-plugin':
         specifier: workspace:*
         version: link:examples/saved_objects
@@ -3495,7 +3511,7 @@ importers:
         version: link:x-pack/solutions/security/packages/upselling
       '@kbn/security-test-endpoints-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_functional/plugins/test_endpoints
+        version: link:x-pack/platform/test_plugins/security_functional/plugins/test_endpoints
       '@kbn/security-ui-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/security/ui_components
@@ -3615,7 +3631,7 @@ importers:
         version: link:src/platform/packages/shared/serverless/settings/vectordb_project
       '@kbn/service-accounts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts
       '@kbn/session-notifications-plugin':
         specifier: workspace:*
         version: link:src/platform/test_plugins/plugin_functional/session_notifications
@@ -3792,7 +3808,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/spaces
       '@kbn/spaces-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin
+        version: link:x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin
       '@kbn/sse-example-plugin':
         specifier: workspace:*
         version: link:examples/sse_example
@@ -3891,7 +3907,7 @@ importers:
         version: link:src/platform/test_plugins/plugin_functional/telemetry
       '@kbn/test-feature-usage-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage
+        version: link:x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage
       '@kbn/testing-embedded-lens-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/testing_embedded_lens
@@ -4086,7 +4102,7 @@ importers:
         version: link:examples/user_profile_examples
       '@kbn/user-profiles-consumer-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
+        version: link:x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer
       '@kbn/user-storage-test-plugin':
         specifier: workspace:*
         version: link:src/platform/test_plugins/user_storage
@@ -4165,6 +4181,9 @@ importers:
       '@kbn/visualizations-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-visualizations-common
+      '@kbn/visualizations-components':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-visualizations-components
       '@kbn/visualizations-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/visualizations
@@ -4215,7 +4234,7 @@ importers:
         version: 1.5.0(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))
       '@langchain/classic':
         specifier: 1.0.55
-        version: 1.0.55(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@smithy/signature-v4@5.7.4)(cheerio@1.0.0-rc.12)(google-auth-library@10.9.1(supports-color@10.2.2))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(peggy@5.1.0)(undici@7.30.1)(ws@8.22.0)
+        version: 1.0.55(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@smithy/signature-v4@5.7.4)(cheerio@1.0.0-rc.12)(google-auth-library@10.9.1(supports-color@10.2.2))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(peggy@5.1.0)(undici@7.30.2)(ws@8.22.0)
       '@langchain/core':
         specifier: 1.3.0
         version: 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
@@ -4233,7 +4252,7 @@ importers:
         version: 1.2.1(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))
       '@langchain/openai':
         specifier: 1.7.0
-        version: 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)
+        version: 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)
       '@launchdarkly/node-server-sdk':
         specifier: 9.16.0
         version: 9.16.0(supports-color@10.2.2)
@@ -4379,8 +4398,8 @@ importers:
         specifier: 9.3.1
         version: 9.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@tanstack/react-virtual':
-        specifier: 3.13.12
-        version: 3.13.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 3.14.23
+        version: 3.14.23(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@turf/along':
         specifier: 6.0.1
         version: 6.0.1
@@ -4455,7 +4474,7 @@ importers:
         version: 2.0.5
       brok:
         specifier: 6.0.0
-        version: 6.0.0(@hapi/hapi@21.4.10)
+        version: 6.0.0(@hapi/hapi@21.4.12)
       byte-size:
         specifier: 9.0.1
         version: 9.0.1
@@ -4469,8 +4488,8 @@ importers:
         specifier: 4.0.3
         version: 4.0.3
       cbor2:
-        specifier: 2.4.0
-        version: 2.4.0
+        specifier: 2.4.1
+        version: 2.4.1
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -4997,8 +5016,8 @@ importers:
         specifier: 1.2.2
         version: 1.2.2(typescript-fsa@3.0.0)
       undici:
-        specifier: 7.30.1
-        version: 7.30.1
+        specifier: 7.30.2
+        version: 7.30.2
       unidiff:
         specifier: 1.0.4
         version: 1.0.4
@@ -5150,9 +5169,6 @@ importers:
       '@elastic/eui-test-helpers':
         specifier: 2.3.0
         version: 2.3.0(@playwright/test@1.64.1)
-      '@elastic/eui-theme-common':
-        specifier: 10.2.0
-        version: 10.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -5890,7 +5906,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-scout-synthtrace
       '@kbn/security-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/security_api_integration/packages/helpers
+        version: link:x-pack/platform/test_plugins/security_api_integration/packages/helpers
       '@kbn/security-evals-alerts-snapshot':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
@@ -8054,6 +8070,8 @@ importers:
 
   src/platform/packages/shared/kbn-coloring: {}
 
+  src/platform/packages/shared/kbn-coloring-components: {}
+
   src/platform/packages/shared/kbn-config: {}
 
   src/platform/packages/shared/kbn-config-schema: {}
@@ -8302,6 +8320,8 @@ importers:
 
   src/platform/packages/shared/kbn-palettes: {}
 
+  src/platform/packages/shared/kbn-palettes-components: {}
+
   src/platform/packages/shared/kbn-profiler: {}
 
   src/platform/packages/shared/kbn-profiling-utils: {}
@@ -8475,6 +8495,8 @@ importers:
   src/platform/packages/shared/kbn-visualization-utils: {}
 
   src/platform/packages/shared/kbn-visualizations-common: {}
+
+  src/platform/packages/shared/kbn-visualizations-components: {}
 
   src/platform/packages/shared/kbn-workflows: {}
 
@@ -8672,8 +8694,6 @@ importers:
 
   src/platform/plugins/private/interactive_setup: {}
 
-  src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints: {}
-
   src/platform/plugins/private/kibana_overview: {}
 
   src/platform/plugins/private/kibana_usage_collection: {}
@@ -8838,8 +8858,6 @@ importers:
 
   src/platform/test: {}
 
-  src/platform/test/plugin_functional/plugins/hardening: {}
-
   src/platform/test_plugins/analytics/analytics_ftr_helpers: {}
 
   src/platform/test_plugins/analytics/analytics_plugin_a: {}
@@ -8849,6 +8867,8 @@ importers:
   src/platform/test_plugins/data_search: {}
 
   src/platform/test_plugins/health_gateway/status: {}
+
+  src/platform/test_plugins/interactive_setup_test_endpoints: {}
 
   src/platform/test_plugins/interpreter_functional/kbn_tp_run_pipeline: {}
 
@@ -8893,6 +8913,8 @@ importers:
   src/platform/test_plugins/plugin_functional/elasticsearch_client_plugin: {}
 
   src/platform/test_plugins/plugin_functional/kbn_top_nav: {}
+
+  src/platform/test_plugins/plugin_functional/plugins/hardening: {}
 
   src/platform/test_plugins/plugin_functional/rendering_plugin: {}
 
@@ -9119,6 +9141,8 @@ importers:
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
+
+  x-pack/platform/packages/shared/kbn-agentic-investigations-impact: {}
 
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
 
@@ -9600,47 +9624,23 @@ importers:
 
   x-pack/platform/test: {}
 
-  x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
-
-  x-pack/platform/test/functional_cors/plugins/kibana_cors_test: {}
-
-  x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
-
-  x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test: {}
-
-  x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
-
-  x-pack/platform/test/security_api_integration/packages/helpers: {}
-
-  x-pack/platform/test/security_api_integration/plugins/audit_log: {}
-
-  x-pack/platform/test/security_api_integration/plugins/features_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/oidc_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/saml_provider: {}
-
-  x-pack/platform/test/security_api_integration/plugins/service_accounts: {}
-
-  x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer: {}
-
-  x-pack/platform/test/security_functional/plugins/test_endpoints: {}
-
-  x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin: {}
-
-  x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
-
-  x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
-
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
 
   x-pack/platform/test_plugins/cloud_integration/saml_provider: {}
+
+  x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
+
+  x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test: {}
 
   x-pack/platform/test_plugins/functional_embedded/iframe_embedded: {}
 
   x-pack/platform/test_plugins/functional_execution_context/alerts: {}
 
+  x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage: {}
+
   x-pack/platform/test_plugins/plugin_api_integration/elasticsearch_client: {}
+
+  x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test: {}
 
   x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad: {}
 
@@ -9666,7 +9666,25 @@ importers:
 
   x-pack/platform/test_plugins/response_ops/task_manager/service_accounts: {}
 
+  x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
+
   x-pack/platform/test_plugins/search_inference_endpoints_fixtures: {}
+
+  x-pack/platform/test_plugins/security_api_integration/packages/helpers: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/audit_log: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/features_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts: {}
+
+  x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer: {}
+
+  x-pack/platform/test_plugins/security_functional/plugins/test_endpoints: {}
 
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 
@@ -9675,6 +9693,12 @@ importers:
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
 
   x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
+
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin: {}
+
+  x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin: {}
+
+  x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin: {}
 
   x-pack/platform/test_plugins/usage_collection/application_usage_test: {}
 
@@ -9741,6 +9765,8 @@ importers:
   x-pack/solutions/observability/plugins/metrics_data_access: {}
 
   x-pack/solutions/observability/plugins/nightshift: {}
+
+  x-pack/solutions/observability/plugins/nightshift_detection: {}
 
   x-pack/solutions/observability/plugins/nightshift_investigations: {}
 
@@ -11060,9 +11086,9 @@ packages:
     peerDependencies:
       postcss-selector-parser: ^7.1.1
 
-  '@cto.af/wtf8@0.0.6':
-    resolution: {integrity: sha512-xp/zbWLXuh2WBxi9tIc+Jep7BAwLu8ETTI8xN68ks10bxOBMISs/jcu9DBEkOeGXLaTKUbA0Y2Ficx/jmmPABg==}
-    engines: {node: '>=20'}
+  '@cto.af/wtf8@1.0.0':
+    resolution: {integrity: sha512-qI0XnZxcj/FmASB8XXWqG49bSIzu0I/02deAjhnTni9IZ7KMRVlh8EFLE+mmJlMA169lET6rTCFhEsZSjOwlhA==}
+    engines: {node: '>=22'}
 
   '@cypress/grep@5.1.0':
     resolution: {integrity: sha512-n/8m5g2AuZf4thHhuo+rp7Fgkfm06k0uM9NlP0GrfWE5vaIJJ+8U10SOtjVj9bapjYI7l9RZiT87XSBU3wBFOA==}
@@ -11807,8 +11833,8 @@ packages:
     resolution: {integrity: sha512-A+po2d/dVoY7cYajycYI43ZbYMXukuopIsqCjh5QzsBCipDtdofHntljDlpccMjIfTy6UOkg+5KPriwYch2bXA==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/ammo@6.0.1':
-    resolution: {integrity: sha512-pmL+nPod4g58kXrMcsGLp05O2jF4P2Q3GiL8qYV7nKYEh3cGf+rV4P5Jyi2Uq0agGhVU63GtaSAfBEZOlrJn9w==}
+  '@hapi/ammo@6.0.2':
+    resolution: {integrity: sha512-YeVEkur58mIJ2wxIuIDGKDgpiNEmLOGswggGarZu/VORUPLBjOUPiaZSl2oFZGECqt3yPSNFBiHTwOQH51U+vA==}
 
   '@hapi/b64@6.0.1':
     resolution: {integrity: sha512-ZvjX4JQReUmBheeCq+S9YavcnMMHWqx3S0jHNXWIM1kQDxB9cyfSycpVvjfrKcIS8Mh5N3hmu/YKo4Iag9g2Kw==}
@@ -11851,8 +11877,8 @@ packages:
     resolution: {integrity: sha512-dvD8+Y/Okc0fh0blqaYCLIrcy0+1LqIhMr7hjk8elLQZ9mkw2hKFB9dFKuRfWf+1nvHpGlW+PwccqkdebynQbg==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/hapi@21.4.10':
-    resolution: {integrity: sha512-G0l7tch1/85Gkyasmmjvjam2IWbx/9zCp4AQx4nZ/nn/rrrmVmRvFejj2ZGe5j3wFZVCLt2+Zeg95ImFFom+7w==}
+  '@hapi/hapi@21.4.12':
+    resolution: {integrity: sha512-TT6ERrp5qv/pN3ubNILjI1/MZfXQMUum2IVWH2hHR23LHj1We5gsI8WFavfaNRax+T8W2qSUkri9l7FA72/Xdw==}
     engines: {node: '>=14.15.0'}
 
   '@hapi/heavy@8.0.1':
@@ -11864,8 +11890,8 @@ packages:
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
 
-  '@hapi/inert@7.1.2':
-    resolution: {integrity: sha512-fr0XmsYTUhahIbioBemFlc+o4ro4bj1HPMKN3dG9m6XC+UkF9fdVYfb7uNoDj0vO+HdXendbKk6YEfZG9ToeTQ==}
+  '@hapi/inert@7.1.3':
+    resolution: {integrity: sha512-ohdCQ7CKoC+Tr9KzeU7o1AoDf0TnfIKPrEs6MYnvzbmDRhkZo4HPvIQGEibvSNFqSDuOQZ6quIB4Y3CGD3VE+g==}
 
   '@hapi/iron@7.0.1':
     resolution: {integrity: sha512-tEZnrOujKpS6jLKliyWBl3A9PaE+ppuL/+gkbyPPDb/l2KSKQyH4lhMkVb+sBhwN+qaxxlig01JRqB8dk/mPxQ==}
@@ -11877,8 +11903,8 @@ packages:
     resolution: {integrity: sha512-uv3dtYuB4IsNaha+tigWmN8mQw/O9Qzl5U26Gm4ZcJVtDdB1AVJOwX3X5wOX+A07qzpEZnOMBAm8jjSqGsU6Nw==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/pez@6.1.1':
-    resolution: {integrity: sha512-yg2OS1tC0S1sHXvhUtWsfRn6lrKl9jKtRhZ+EI0woOW/gqX5vM2PZ1459ypCvCYDRLJ9nIyueeEH5MJV1ZDqIg==}
+  '@hapi/pez@6.1.3':
+    resolution: {integrity: sha512-hit/Yb7jYv/rAKDMTJJIhPslxHgt9WxmFfUvZ97rHLsq+HpI6eQE6HbGhFE/fhOHT8llkRETcjJX4+7ut7GF3w==}
 
   '@hapi/pinpoint@2.0.1':
     resolution: {integrity: sha512-EKQmr16tM8s16vTT3cA5L0kZZcTMU5DUOZTuvpnY738m+jyP3JIUj+Mm1xc1rsLkGBQ/gVnfKYPwOmPg1tUR4Q==}
@@ -11895,8 +11921,8 @@ packages:
   '@hapi/statehood@8.2.1':
     resolution: {integrity: sha512-xf72TG/QINW26jUu+uL5H+crE1o8GplIgfPWwPZhnAGJzetIVAQEQYvzq+C0aEVHg5/lMMtQ+L9UryuSa5Yjkg==}
 
-  '@hapi/subtext@8.1.3':
-    resolution: {integrity: sha512-WTpEZQjBP3UJ3gGunNl3w5Ao1EOJsuu2vttZ2KEcG+csSLxc0dI6VIkl2md2jDlHiQ2ARAoqdSUScy05A/NHtA==}
+  '@hapi/subtext@8.1.5':
+    resolution: {integrity: sha512-VSoL75dYqMfs2URprWPu9RXdL/+c5pZ5L0siSa3ZKg0VQKGQn2Yncd05Jl/154VvVYO/ymrOW3TR/a9psp1+kA==}
 
   '@hapi/teamwork@6.0.1':
     resolution: {integrity: sha512-52OXRslUfYwXAOG8k58f2h2ngXYQGP0x5RPOo+eWA/FtyLgHjGMrE3+e9LSXP/0q2YfHAK5wj9aA9DTy1K+kyQ==}
@@ -11918,8 +11944,8 @@ packages:
   '@hapi/vise@5.0.1':
     resolution: {integrity: sha512-XZYWzzRtINQLedPYlIkSkUr7m5Ddwlu99V9elh8CSygXstfv3UnWIXT0QD+wmR0VAG34d2Vx3olqcEhRRoTu9A==}
 
-  '@hapi/wreck@18.1.2':
-    resolution: {integrity: sha512-3dMnV2pfhQiyEqu8DL3VBmxkdLiRDiiUDuG79Dp+UK1gL9ZxAfDOUhB6k3D5MLqcgJJ1IARyGFhwoc1NITr/pg==}
+  '@hapi/wreck@18.1.3':
+    resolution: {integrity: sha512-PZ1FQpk5DWbEFFYiHu/kCkWeSHwUhAxDSUdv6Zsp1qi2coUP22cnYQlp647KCSsCc4uFB4LOTsHo9f5k7vgtHg==}
 
   '@hello-pangea/dnd@18.0.1':
     resolution: {integrity: sha512-xojVWG8s/TGrKT1fC8K2tIWeejJYTAeJuj36zM//yEm/ZrnZUSFGS15BpO+jGZT1ybWvyXmeDJwPYb4dhWlbZQ==}
@@ -14635,8 +14661,8 @@ packages:
     peerDependencies:
       react: '>=18'
 
-  '@tanstack/react-virtual@3.13.12':
-    resolution: {integrity: sha512-Gd13QdxPSukP8ZrkbgS2RwoZseTTbQPLnQEn7HY/rqtM+8Zt95f7xKC7N0EsKs7aoz0WzZ+fditZux+F8EzYxA==}
+  '@tanstack/react-virtual@3.14.23':
+    resolution: {integrity: sha512-Oyy58qQwdaQieA+A4WUDtnh9D1rv5FZvGdw8og9Xeyh88V6HH94vMSyV5i9ATIbYNe9t5Ix0WXRo9NOTpHDkYw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -14648,8 +14674,8 @@ packages:
     resolution: {integrity: sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ==}
     engines: {node: '>=20'}
 
-  '@tanstack/virtual-core@3.13.12':
-    resolution: {integrity: sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA==}
+  '@tanstack/virtual-core@3.19.8':
+    resolution: {integrity: sha512-Oz/SYBo/aVPyQkwtOw7Q23myITUgFIof2glQqydYJAPL6mH2SkJDkvDKZTklB+7gv5jGLZQhyTcd7SO1A1EODQ==}
 
   '@tediousjs/connection-string@1.1.0':
     resolution: {integrity: sha512-z9ZBWEG+8pIB5V1zYzlRPXx0oRJ5H7coPnMQK8EZOw03UTPI9Umn6viL36f5w+CuqkKsnCM50RVStpjZmR0Bng==}
@@ -16595,8 +16621,8 @@ packages:
   caseless@0.12.0:
     resolution: {integrity: sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==}
 
-  cbor2@2.4.0:
-    resolution: {integrity: sha512-s6+CPoEI6tgwasK2cWMTXt5sy8Yxo4vgRmKgkJSCdKDL/0bHU3aYJoYeHRX7/oywKYA3bxcpqEYkXkrdHe0+0Q==}
+  cbor2@2.4.1:
+    resolution: {integrity: sha512-h4OqPnSvIEUNCxTNb9pwMZPKjhNKO9bkPwQJOR7d5oBIrZR/CO098atrLl4AkQmB1p3opCvo2UFt4fhRSWC/vQ==}
     engines: {node: '>=22'}
 
   ccount@1.1.0:
@@ -22241,8 +22267,8 @@ packages:
     resolution: {integrity: sha512-X5i1y9/8VuBMb9WU8zubTiLKnJG4lcKvL7eaCEVc/jpTe3aS74gCcBM6Yd1vvUDoTCXm4Y15obNS/16yB0FTaQ==}
     engines: {node: '>=10'}
 
-  prismjs@1.27.0:
-    resolution: {integrity: sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==}
+  prismjs@1.30.0:
+    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
     engines: {node: '>=6'}
 
   process-nextick-args@1.0.7:
@@ -24573,8 +24599,8 @@ packages:
     resolution: {integrity: sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA==}
     engines: {node: '>=18.17'}
 
-  undici@7.30.1:
-    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
+  undici@7.30.2:
+    resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
     engines: {node: '>=20.18.1'}
 
   undici@8.11.2:
@@ -26945,7 +26971,7 @@ snapshots:
     dependencies:
       postcss-selector-parser: 7.1.6
 
-  '@cto.af/wtf8@0.0.6': {}
+  '@cto.af/wtf8@1.0.0': {}
 
   '@cypress/grep@5.1.0(@babel/core@7.29.7(supports-color@10.2.2))(cypress@15.12.0)(supports-color@10.2.2)':
     dependencies:
@@ -27521,7 +27547,7 @@ snapshots:
       ms: 2.1.3
       secure-json-parse: 4.1.0
       tslib: 2.8.1
-      undici: 7.30.1
+      undici: 7.30.2
     transitivePeerDependencies:
       - supports-color
 
@@ -27991,7 +28017,7 @@ snapshots:
     dependencies:
       '@hapi/hoek': 11.0.7
 
-  '@hapi/ammo@6.0.1':
+  '@hapi/ammo@6.0.2':
     dependencies:
       '@hapi/hoek': 11.0.7
 
@@ -28051,12 +28077,12 @@ snapshots:
       '@hapi/boom': 10.0.1
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
-      '@hapi/wreck': 18.1.2
+      '@hapi/wreck': 18.1.3
 
-  '@hapi/hapi@21.4.10':
+  '@hapi/hapi@21.4.12':
     dependencies:
       '@hapi/accept': 6.0.3
-      '@hapi/ammo': 6.0.1
+      '@hapi/ammo': 6.0.2
       '@hapi/boom': 10.0.1
       '@hapi/bounce': 3.0.2
       '@hapi/call': 9.0.1
@@ -28069,7 +28095,7 @@ snapshots:
       '@hapi/shot': 6.0.3
       '@hapi/somever': 4.1.1
       '@hapi/statehood': 8.2.1
-      '@hapi/subtext': 8.1.3
+      '@hapi/subtext': 8.1.5
       '@hapi/teamwork': 6.0.1
       '@hapi/topo': 6.0.2
       '@hapi/validate': 2.0.1
@@ -28084,9 +28110,9 @@ snapshots:
 
   '@hapi/hoek@9.3.0': {}
 
-  '@hapi/inert@7.1.2':
+  '@hapi/inert@7.1.3':
     dependencies:
-      '@hapi/ammo': 6.0.1
+      '@hapi/ammo': 6.0.2
       '@hapi/boom': 10.0.1
       '@hapi/bounce': 3.0.2
       '@hapi/hoek': 11.0.7
@@ -28111,7 +28137,7 @@ snapshots:
       '@hapi/hoek': 11.0.7
       '@hapi/vise': 5.0.1
 
-  '@hapi/pez@6.1.1':
+  '@hapi/pez@6.1.3':
     dependencies:
       '@hapi/b64': 6.0.1
       '@hapi/boom': 10.0.1
@@ -28147,15 +28173,15 @@ snapshots:
       '@hapi/iron': 7.0.1
       '@hapi/validate': 2.0.1
 
-  '@hapi/subtext@8.1.3':
+  '@hapi/subtext@8.1.5':
     dependencies:
       '@hapi/boom': 10.0.1
       '@hapi/bourne': 3.0.0
       '@hapi/content': 6.0.3
       '@hapi/file': 3.0.0
       '@hapi/hoek': 11.0.7
-      '@hapi/pez': 6.1.1
-      '@hapi/wreck': 18.1.2
+      '@hapi/pez': 6.1.3
+      '@hapi/wreck': 18.1.3
 
   '@hapi/teamwork@6.0.1': {}
 
@@ -28178,7 +28204,7 @@ snapshots:
     dependencies:
       '@hapi/hoek': 11.0.7
 
-  '@hapi/wreck@18.1.2':
+  '@hapi/wreck@18.1.3':
     dependencies:
       '@hapi/boom': 10.0.1
       '@hapi/bourne': 3.0.0
@@ -28665,10 +28691,10 @@ snapshots:
       '@aws-sdk/credential-provider-node': 3.972.88
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
 
-  '@langchain/classic@1.0.55(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@smithy/signature-v4@5.7.4)(cheerio@1.0.0-rc.12)(google-auth-library@10.9.1(supports-color@10.2.2))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(peggy@5.1.0)(undici@7.30.1)(ws@8.22.0)':
+  '@langchain/classic@1.0.55(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@smithy/signature-v4@5.7.4)(cheerio@1.0.0-rc.12)(google-auth-library@10.9.1(supports-color@10.2.2))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(peggy@5.1.0)(undici@7.30.2)(ws@8.22.0)':
     dependencies:
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
-      '@langchain/openai': 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)
+      '@langchain/openai': 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)
       '@langchain/textsplitters': 1.0.2(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))
       handlebars: 4.7.10
       js-yaml: 5.4.2
@@ -28756,11 +28782,11 @@ snapshots:
       - react
       - react-dom
 
-  '@langchain/openai@1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)':
+  '@langchain/openai@1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)':
     dependencies:
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
       js-tiktoken: 1.0.21
-      openai: 7.42.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)(zod@4.6.5)
+      openai: 7.42.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)(zod@4.6.5)
       zod: 4.6.5
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -31162,9 +31188,9 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@tanstack/react-virtual@3.13.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@tanstack/react-virtual@3.14.23(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@tanstack/virtual-core': 3.13.12
+      '@tanstack/virtual-core': 3.19.8
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -31174,7 +31200,7 @@ snapshots:
     dependencies:
       '@tanstack/store': 0.11.2
 
-  '@tanstack/virtual-core@3.13.12': {}
+  '@tanstack/virtual-core@3.19.8': {}
 
   '@tediousjs/connection-string@1.1.0': {}
 
@@ -31547,7 +31573,7 @@ snapshots:
 
   '@types/hapi__cookie@12.0.5':
     dependencies:
-      '@hapi/hapi': 21.4.10
+      '@hapi/hapi': 21.4.12
       '@types/node': 24.10.13
       joi: 17.13.9
 
@@ -33152,9 +33178,9 @@ snapshots:
     dependencies:
       object.entries: 1.1.9
 
-  brok@6.0.0(@hapi/hapi@21.4.10):
+  brok@6.0.0(@hapi/hapi@21.4.12):
     dependencies:
-      '@hapi/hapi': 21.4.10
+      '@hapi/hapi': 21.4.12
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
 
@@ -33394,9 +33420,9 @@ snapshots:
 
   caseless@0.12.0: {}
 
-  cbor2@2.4.0:
+  cbor2@2.4.1:
     dependencies:
-      '@cto.af/wtf8': 0.0.6
+      '@cto.af/wtf8': 1.0.0
 
   ccount@1.1.0: {}
 
@@ -36394,7 +36420,7 @@ snapshots:
   guarded-fetch@0.1.3:
     dependencies:
       ipaddr.js: 2.2.0
-      undici: 7.30.1
+      undici: 7.30.2
 
   handlebars@4.7.10:
     dependencies:
@@ -39583,12 +39609,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  openai@7.42.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)(zod@4.6.5):
+  openai@7.42.0(@aws-sdk/credential-provider-node@3.972.88)(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.2)(ws@8.22.0)(zod@4.6.5):
     optionalDependencies:
       '@aws-sdk/credential-provider-node': 3.972.88
       '@smithy/signature-v4': 5.7.4
       google-auth-library: 10.9.1(supports-color@10.2.2)
-      undici: 7.30.1
+      undici: 7.30.2
       ws: 8.22.0
       zod: 4.6.5
 
@@ -40262,7 +40288,7 @@ snapshots:
     dependencies:
       parse-ms: 2.1.0
 
-  prismjs@1.27.0: {}
+  prismjs@1.30.0: {}
 
   process-nextick-args@1.0.7: {}
 
@@ -41063,7 +41089,7 @@ snapshots:
     dependencies:
       hastscript: 6.0.0
       parse-entities: 2.0.0
-      prismjs: 1.27.0
+      prismjs: 1.30.0
 
   regenerate-unicode-properties@10.3.0:
     dependencies:
@@ -42986,7 +43012,7 @@ snapshots:
 
   undici@6.29.1: {}
 
-  undici@7.30.1: {}
+  undici@7.30.2: {}
 
   undici@8.11.2: {}
 

@@ -6,68 +6,52 @@
  */
 
 import React from 'react';
-import type { IconType } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiScreenReaderOnly,
-  EuiText,
-} from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiText } from '@elastic/eui';
 import moment from 'moment';
-import type { InventoryCellValue, InventoryOutputColumnKind } from '../../../inventory_api/types';
+import type { ESQLValue, OutputColumnKind } from '@kbn/entity-inventory-plugin/common';
 import { formatCellValue } from '../../utils/format_cell_value';
 import { NO_VALUE_LABEL } from './translations';
 
 /** Placeholder for a cell without a value; screen readers hear "No value". */
 export const EmptyCellValue = () => (
   <EuiText color="subdued" size="s">
-    <span aria-hidden={true}>—</span>
+    <span aria-hidden={true}>-</span>
     <EuiScreenReaderOnly>
       <span>{NO_VALUE_LABEL}</span>
     </EuiScreenReaderOnly>
   </EuiText>
 );
 
-export interface EntityNameCellProps {
-  name: string | null;
-  iconType: IconType;
-}
-
-/** The entity name with the icon of its type. */
-export const EntityNameCell = ({ name, iconType }: EntityNameCellProps) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiIcon type={iconType} aria-hidden={true} />
-    </EuiFlexItem>
-    <EuiFlexItem>{name ?? <EmptyCellValue />}</EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-export interface EntityCellProps {
-  value: InventoryCellValue | undefined;
-  kind: InventoryOutputColumnKind | undefined;
-  isBadge: boolean;
+interface CellRendererProps {
+  value: ESQLValue | undefined;
   dateFormat: string;
 }
 
-/** A value cell: a formatted date, a badge, plain text, or the placeholder when empty. */
-export const EntityCell = ({ value, kind, isBadge, dateFormat }: EntityCellProps) => {
-  if (kind === 'last_seen' && typeof value === 'string') {
-    return <>{moment(value).format(dateFormat)}</>;
-  }
-
+const TextCell = ({ value }: CellRendererProps) => {
   const text = formatCellValue(value);
-  if (text === null) {
-    return <EmptyCellValue />;
-  }
+  return text === null ? <EmptyCellValue /> : <>{text}</>;
+};
 
-  return isBadge ? (
-    <EuiBadge color="hollow" data-test-subj="entityInventoryCellBadge">
-      {text}
-    </EuiBadge>
+const DateCell = ({ value, dateFormat }: CellRendererProps) =>
+  typeof value === 'string' ? (
+    <>{moment(value).format(dateFormat)}</>
   ) : (
-    <>{text}</>
+    <TextCell value={value} dateFormat={dateFormat} />
   );
+
+/** The renderer of each column kind; a kind without an entry renders as text. */
+const CELL_RENDERER_BY_KIND: Readonly<
+  Partial<Record<OutputColumnKind, React.FC<CellRendererProps>>>
+> = {
+  last_seen: DateCell,
+};
+
+export interface EntityCellProps extends CellRendererProps {
+  kind: OutputColumnKind | undefined;
+}
+
+/** A cell rendered by its column's kind, or the placeholder when empty. */
+export const EntityCell = ({ value, kind, dateFormat }: EntityCellProps): React.ReactElement => {
+  const Renderer = (kind && CELL_RENDERER_BY_KIND[kind]) ?? TextCell;
+  return <Renderer value={value} dateFormat={dateFormat} />;
 };

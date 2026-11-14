@@ -56,7 +56,6 @@ const renderRelatedAlertsBySession = () =>
           scopeId={scopeId}
           eventId={eventId}
           onShowAlert={mockOnShowAlert}
-          useLegacyExpandableFlyout={false}
         />
       </DocumentDetailsContext.Provider>
     </TestProviders>

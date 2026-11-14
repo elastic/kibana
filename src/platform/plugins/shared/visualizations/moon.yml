@@ -93,6 +93,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/cps-utils'
   - '@kbn/std'
+  - '@kbn/visualizations-components'
 tags:
   - plugin
   - prod

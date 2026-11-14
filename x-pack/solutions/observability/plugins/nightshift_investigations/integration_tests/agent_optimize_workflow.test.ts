@@ -133,7 +133,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(agentParams.nextInput).toEqual({ message: 'reinforcement turn prompt' });
     expect(agentParams.conversation?.id).not.toBe(ELIGIBLE_ROUND_INPUTS.conversation_id);
     expect(telemetryMetadata).toMatchObject({
-      pluginId: 'nightshift_investigation_memory',
+      pluginId: 'nightshift_investigation_decision_tree',
       aggregateBy: 'nightshift',
       productSolution: 'observability',
       productFeature: 'nightshift',
@@ -185,7 +185,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(resolveNightshiftModelForRequest).toHaveBeenCalledWith(
       expect.objectContaining({ step: 'investigation', roundConnectorId: 'round-connector' })
     );
-    expect(roundFixture.agentRuns[0].defaultConnectorId).toBe('round-connector');
+    expect(roundFixture.agentRuns[0].defaultModel).toEqual({ connectorId: 'round-connector' });
   });
 
   // `${{ }}` keeps an array; Liquid `{{ }}` would stringify it to "[object Object]" and the
@@ -207,6 +207,10 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(jest.mocked(runMemoryOptimize).mock.calls[0][0]).toMatchObject({
       recalledIds: ['mem-1', 'mem-2'],
     });
+  });
+
+  it('does not report a causal-check telemetry event on an initial round', () => {
+    expect(fixture.telemetry.reportDecisionTreeCausalCheck).not.toHaveBeenCalled();
   });
 
   it('forwards optimizer opened_ids and applied_writes into score_memory_online_evals', async () => {
@@ -302,6 +306,12 @@ describe('agent optimize workflow, a follow-up round', () => {
       treeCount: 1,
       turnKind: 'feedback_reinforcement',
       openedTreeIds: [],
+      verdict: {
+        isFeedback: true,
+        causalConfirmed: true,
+        causalSummary: 'Confirmed root cause.',
+        learning: 'Check connection pool metrics.',
+      },
     });
 
     await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
@@ -318,6 +328,22 @@ describe('agent optimize workflow, a follow-up round', () => {
   it('offers the learning tools', () => {
     expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
     expect(fixture.agentRuns[0].agentParams.configurationOverrides).toBeDefined();
+  });
+
+  it('reports the follow-up causal-check telemetry event', () => {
+    expect(fixture.telemetry.reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+        conversation_id: ELIGIBLE_ROUND_INPUTS.conversation_id,
+        round_id: ELIGIBLE_ROUND_INPUTS.round_id,
+        outcome: 'confirmed',
+        is_feedback: true,
+        causal_confirmed: true,
+        has_learning: true,
+        tree_count: 1,
+        opened_tree_count: 0,
+      })
+    );
   });
 });
 

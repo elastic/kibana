@@ -7,28 +7,12 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import {
-  consumeInvestigationRunQuota,
-  createRunQuotaInternalRepository,
-  dayKey,
-} from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
-jest.mock('./lib/run_quotas', () => ({
-  consumeInvestigationRunQuota: jest.fn(),
-  createRunQuotaInternalRepository: jest.fn(),
-  dayKey: jest.fn(),
-  resolveDailyWindow: jest.fn(),
-}));
-
 jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
-
-const consumeInvestigationRunQuotaMock = jest.mocked(consumeInvestigationRunQuota);
-const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
-const dayKeyMock = jest.mocked(dayKey);
 
 const createPlugin = () => new SignificantEventsPlugin(coreMock.createPluginInitializerContext());
 
@@ -39,11 +23,9 @@ const createCoreSetup = () => {
 };
 
 const createSetupDeps = ({
-  registerInvestigationQuota,
   onSourceChange = jest.fn(),
   workflowsExtensions,
 }: {
-  registerInvestigationQuota?: jest.Mock;
   onSourceChange?: jest.Mock;
   workflowsExtensions?: {
     registerStepDefinition: jest.Mock;
@@ -53,19 +35,15 @@ const createSetupDeps = ({
 } = {}) =>
   ({
     nightshiftSources: { onSourceChange },
-    ...(registerInvestigationQuota
-      ? { nightshiftInvestigations: { registerInvestigationQuota } }
-      : {}),
     ...(workflowsExtensions ? { workflowsExtensions } : {}),
   } as unknown as SignificantEventsPluginSetupDependencies);
 
 describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    consumeInvestigationRunQuotaMock.mockResolvedValue({ allowed: true, release: jest.fn() });
   });
 
-  it('supports the investigations plugin being absent', () => {
+  it('sets up without the investigations plugin', () => {
     const plugin = createPlugin();
 
     expect(() => plugin.setup(createCoreSetup(), createSetupDeps())).not.toThrow();
@@ -101,77 +79,6 @@ describe('SignificantEventsPlugin setup', () => {
     expect(
       core.dataStreams.registerDataStream.mock.calls.map(([definition]) => definition)
     ).toEqual([detectionsDataStream, knowledgeIndicatorsDataStream]);
-  });
-
-  it('registers a callback without accessing start services', () => {
-    const registerInvestigationQuota = jest.fn();
-    const plugin = createPlugin();
-
-    plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
-
-    expect(registerInvestigationQuota).toHaveBeenCalledWith(expect.any(Function));
-    expect(createRunQuotaInternalRepositoryMock).not.toHaveBeenCalled();
-  });
-
-  it('reports unavailable start services when the callback is invoked too early', async () => {
-    const registerInvestigationQuota = jest.fn();
-    const plugin = createPlugin();
-    plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
-    const [callback] = registerInvestigationQuota.mock.calls[0];
-
-    await expect(callback('manual')).rejects.toThrow(
-      'Significant Events start services are unavailable'
-    );
-    expect(createRunQuotaInternalRepositoryMock).not.toHaveBeenCalled();
-  });
-
-  describe('when invoked', () => {
-    const internalRepository = {} as ReturnType<typeof createRunQuotaInternalRepository>;
-    const setupCallback = () => {
-      const registerInvestigationQuota = jest.fn();
-      createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
-      dayKeyMock.mockReturnValue('2026-10-29');
-      const plugin = createPlugin();
-      plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
-      const server = plugin.server;
-      if (!server) {
-        throw new Error('Expected Significant Events server');
-      }
-      server.core = coreMock.createStart();
-      return registerInvestigationQuota.mock.calls[0][0];
-    };
-
-    it.each([
-      ['automatic', 'investigation'],
-      ['manual', 'manual_investigation'],
-    ])('charges a %s start to the %s limit', async (trigger, group) => {
-      const release = jest.fn();
-      consumeInvestigationRunQuotaMock.mockResolvedValue({ allowed: true, release });
-
-      await expect(setupCallback()(trigger)).resolves.toEqual({ allowed: true, release });
-      expect(consumeInvestigationRunQuotaMock).toHaveBeenCalledWith({
-        internalRepository,
-        group,
-        date: '2026-10-29',
-      });
-    });
-
-    it.each([
-      ['manual_investigation', 'manual'],
-      ['total_investigation', 'all'],
-    ] as const)('reports a denial by %s as %s', async (deniedGroup, deniedBy) => {
-      consumeInvestigationRunQuotaMock.mockResolvedValue({
-        allowed: false,
-        deniedBy: deniedGroup,
-        limit: 4,
-      });
-
-      await expect(setupCallback()('manual')).resolves.toEqual({
-        allowed: false,
-        deniedBy,
-        limit: 4,
-      });
-    });
   });
 });
 

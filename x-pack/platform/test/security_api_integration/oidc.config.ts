@@ -14,13 +14,22 @@ import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
-  const plugin = resolve(__dirname, './plugins/oidc_provider');
+  const plugin = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/plugins/oidc_provider'
+  );
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
-  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_functional/plugins/test_endpoints'
+  );
 
-  const auditLogPath = resolve(__dirname, './packages/helpers/audit/oidc.log');
+  const auditLogPath = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/packages/helpers/audit/oidc.log'
+  );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.API_TEST,

@@ -19,6 +19,8 @@ import type { Hypothesis, ImpactEntity } from '@kbn/agentic-investigations-plugi
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
+import type { ModelUsageCollector } from '../lib/model_usage_collector';
+import { trackBackgroundActivity, type NightshiftTelemetryClient } from '../telemetry';
 import type { PassGuard, RecorderMemory } from './coordinator';
 import {
   buildRecorderMessages,
@@ -70,6 +72,8 @@ export interface FindingsPassDeps {
     conversationId: string;
     allowedConnectorIds: readonly string[];
   }) => Promise<RecorderWorkspace | undefined>;
+  /** Reports each pass's LLM usage, which the round's own usage does not include. */
+  telemetry?: NightshiftTelemetryClient;
   logger: Logger;
 }
 
@@ -246,7 +250,20 @@ const storedRecord = async (
  * throws for a model or write failure; it logs and returns false, because the investigation must
  * not depend on it.
  */
-export const runFindingsPass = async (
+export const runFindingsPass = (
+  deps: FindingsPassDeps,
+  params: FindingsPassParams
+): Promise<boolean> =>
+  trackBackgroundActivity(
+    {
+      telemetry: deps.telemetry,
+      activity: 'findings_recorder',
+      conversationId: params.conversationId,
+    },
+    (modelUsage) => runTrackedFindingsPass(deps, params, modelUsage)
+  );
+
+const runTrackedFindingsPass = async (
   deps: FindingsPassDeps,
   {
     request,
@@ -258,7 +275,8 @@ export const runFindingsPass = async (
     answer,
     connectorId,
     allowedConnectorIds = [],
-  }: FindingsPassParams
+  }: FindingsPassParams,
+  modelUsage: ModelUsageCollector
 ): Promise<boolean> => {
   const { logger } = deps;
   const final = answer !== undefined;
@@ -285,6 +303,7 @@ export const runFindingsPass = async (
       savedObjects: deps.getSavedObjects(),
       uiSettings: deps.getUiSettings(),
       telemetryMetadata: createInvestigationUsageTelemetry(conversationId),
+      modelUsage,
       logger,
     });
     if (!model) return false;

@@ -1,5 +1,5 @@
 {
-  "sha1": "f8d9b1c6c0397a265e814467f5ac599a941e7278",
+  "sha1": "1e3b5ffb98a996ea673eb414f5c0671c753de512",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -121,7 +121,7 @@
     {
       "id": "de1e365b467dbf7-56c73ac2d78fb44",
       "title": "FilterMonitors filters monitors by tags with AND/OR logic",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -130,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/filter_monitors.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 25,
+        "column": 28
       }
     },
     {

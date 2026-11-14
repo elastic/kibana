@@ -645,6 +645,86 @@ describe('Alerts Client', () => {
           spy.mockRestore();
         });
 
+        test('should log an error and throw if fetching missing alerts by id fails', async () => {
+          clusterClient.search
+            .mockResolvedValueOnce({
+              took: 10,
+              timed_out: false,
+              _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+              hits: {
+                total: { relation: 'eq', value: 0 },
+                hits: [],
+              },
+            })
+            .mockRejectedValueOnce(new Error('search failed!'));
+
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await expect(
+            alertsClient.initializeExecution({
+              ...defaultExecutionOpts,
+              activeAlertsFromState: {
+                'alert-1': { meta: { uuid: 'missing-uuid' } },
+              },
+            })
+          ).rejects.toThrow('search failed!');
+
+          expect(clusterClient.search).toHaveBeenCalledTimes(2);
+          expect(mockLegacyAlertsClient.initializeExecution).not.toHaveBeenCalled();
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error searching for tracked alerts by UUID ${ruleInfo} - search failed!`,
+            logTags
+          );
+
+          spy.mockRestore();
+        });
+
+        test('should log an error and throw if the tracked alerts query fails on some shards', async () => {
+          clusterClient.search.mockResolvedValueOnce({
+            took: 10,
+            timed_out: false,
+            _shards: {
+              failed: 1,
+              successful: 1,
+              total: 2,
+              skipped: 0,
+              failures: [
+                {
+                  shard: 0,
+                  index: '.internal.alerts-test.alerts-default-000001',
+                  reason: { type: 'circuit_breaking_exception', reason: '[parent] Data too large' },
+                },
+              ],
+            },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [],
+            },
+          });
+
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await expect(alertsClient.initializeExecution(defaultExecutionOpts)).rejects.toThrow(
+            'Failed to load tracked alerts from 1 of 2 shards: circuit_breaking_exception'
+          );
+
+          expect(mockLegacyAlertsClient.initializeExecution).not.toHaveBeenCalled();
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error searching for tracked alerts by UUID ${ruleInfo} - Failed to load tracked alerts from 1 of 2 shards: circuit_breaking_exception`,
+            logTags
+          );
+
+          spy.mockRestore();
+        });
+
         test('should call retryTransientEsErrors when querying for tracked alerts', async () => {
           const retrySpy = jest
             .spyOn(RetryTransientEsErrorsModule, 'retryTransientEsErrors')

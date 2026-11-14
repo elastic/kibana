@@ -241,10 +241,118 @@ describe('createSubagentTool', () => {
     expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'high' });
     expect(executeSubAgent).toHaveBeenCalledWith({
       agentId: 'test-agent',
-      connectorId: 'selected-connector',
+      modelSource: { connectorId: 'selected-connector' },
       parentExecutionId: 'parent-exec-id',
       prompt: 'Summarize data\n\nSummarize the following data...',
       abortSignal,
+    });
+  });
+
+  describe('when the parent runs on an inference feature', () => {
+    const completedEvents$ = () => {
+      const events$ = new ReplaySubject<ChatEvent>();
+      events$.next({ type: ChatEventType.roundComplete, data: { round: mockRound } } as ChatEvent);
+      events$.complete();
+      return events$.asObservable();
+    };
+
+    it("forwards the parent's featureId to the sub-agent executor as inferenceFeatureId", async () => {
+      const executeSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
+      const tool = createSubagentTool({
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+        executionId: 'parent-exec-id',
+        parentModel: { featureId: 'parent_feature' },
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+
+      const { context, modelProvider } = createMockContext();
+      await callHandler(
+        tool,
+        { description: 'test', prompt: 'Do something', effort: EffortLevels.high },
+        context
+      );
+
+      expect(modelProvider.selectModel).not.toHaveBeenCalled();
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ modelSource: { featureId: 'parent_feature' } })
+      );
+    });
+
+    it("forwards the parent's featureId when creating a persistent sub-agent", async () => {
+      const createSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'child-exec', events$: completedEvents$() });
+      const tool = createSubagentTool({
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+        executionId: 'parent-exec-id',
+        parentModel: { featureId: 'parent_feature' },
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          getExecution: jest.fn(),
+          createSubAgent,
+          sendToSubAgent: jest.fn(),
+        },
+        parentConversationId: 'parent-convo',
+        subagentTracker: new SubagentTracker(),
+        conversationExists: jest.fn().mockResolvedValue(false),
+      });
+
+      const { context, modelProvider } = createMockContext();
+      await callHandler(
+        tool,
+        {
+          description: 'test',
+          prompt: 'Do something',
+          mode: SubagentMode.persistent,
+          name: 'solver',
+        },
+        context
+      );
+
+      expect(modelProvider.selectModel).not.toHaveBeenCalled();
+      expect(createSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ modelSource: { featureId: 'parent_feature' } })
+      );
+    });
+
+    it('runs a low-effort sub-agent on the fast connector instead of the parent feature', async () => {
+      const executeSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
+      const tool = createSubagentTool({
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+        executionId: 'parent-exec-id',
+        parentModel: { featureId: 'parent_feature' },
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+
+      const { context, modelProvider } = createMockContext('fast-connector');
+      modelProvider.hasFastModel.mockResolvedValue(true);
+      await callHandler(
+        tool,
+        { description: 'test', prompt: 'Do something', effort: EffortLevels.low },
+        context
+      );
+
+      expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'low' });
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ modelSource: { connectorId: 'fast-connector' } })
+      );
     });
   });
 
@@ -320,7 +428,7 @@ describe('createSubagentTool', () => {
 
       expect(modelProvider.selectModel).not.toHaveBeenCalled();
       expect(executeSubAgent).toHaveBeenCalledWith(
-        expect.objectContaining({ agentId: 'solution-agent', connectorId: undefined })
+        expect.objectContaining({ agentId: 'solution-agent', modelSource: undefined })
       );
     });
 
@@ -358,7 +466,7 @@ describe('createSubagentTool', () => {
 
       expect(modelProvider.selectModel).not.toHaveBeenCalled();
       expect(createSubAgent).toHaveBeenCalledWith(
-        expect.objectContaining({ agentId: 'solution-agent', connectorId: undefined })
+        expect.objectContaining({ agentId: 'solution-agent', modelSource: undefined })
       );
     });
   });
@@ -552,7 +660,7 @@ describe('createSubagentTool', () => {
           parentExecutionId: 'parent-exec',
           subagentName: 'researcher',
           subagentPurpose: 'find flaky tests',
-          connectorId: 'conn-x',
+          modelSource: { connectorId: 'conn-x' },
         })
       );
       // Fresh tracker → conversationExists probe not invoked (nothing to check).

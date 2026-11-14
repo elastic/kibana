@@ -1,5 +1,5 @@
 {
-  "sha1": "59afce4bbf3edb78496bc6d38f0ed7c18b4a8546",
+  "sha1": "330eb258d5e7c9d6b2903f09a6619518f616edd1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -157,6 +157,22 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/prevalence.spec.ts",
         "line": 33,
         "column": 36
+      }
+    },
+    {
+      "id": "f0304b4b9a64817-3ea4a4b2b408d9a",
+      "title": "Document flyout v2 — Threat intelligence tool shows each matching indicator once and the insights count matches the tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/threat_intelligence.spec.ts",
+        "line": 102,
+        "column": 25
       }
     },
     {

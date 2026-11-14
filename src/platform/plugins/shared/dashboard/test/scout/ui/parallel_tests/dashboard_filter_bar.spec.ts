@@ -9,6 +9,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { createMetricPanel, readMetricValue } from '../metric_panel';
 
 // Document counts in the animals archive: all animals, and cats only
 const ANIMALS_COUNT = 23;
@@ -32,21 +33,7 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
       {
         title: 'Filter bar: animals',
         time_range: { from: '2018-01-01T00:00:00.000Z', to: '2018-04-13T00:00:00.000Z' },
-        panels: [
-          {
-            type: 'vis',
-            grid: { x: 0, y: 0, w: 24, h: 15 },
-            config: {
-              type: 'metric',
-              data_source: {
-                type: 'data_view_spec',
-                index_pattern: 'animals-*',
-                time_field: '@timestamp',
-              },
-              metrics: [{ type: 'primary', operation: 'count' }],
-            },
-          },
-        ],
+        panels: [createMetricPanel('animals-*')],
       },
       scoutSpace.id
     );
@@ -74,9 +61,7 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
 
     // The dashboard has a single metric panel with a single tile
     const expectMetricValue = (value: number) =>
-      expect(page.testSubj.locator('mtrVis').locator('.echMetricText__valueBlock')).toHaveText(
-        String(value)
-      );
+      expect.poll(() => readMetricValue(page)).toBe(value);
 
     const saveCopyAs = async (title: string) => {
       await dashboard.ensureEditMode();

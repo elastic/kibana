@@ -171,10 +171,9 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     );
     return () => {
       dispatch(inputsActions.deleteOneQuery({ id: tableId, inputId: InputsModelId.global }));
-      if (editorActionsRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        editorActionsRef.current.closeEditor();
-      }
+      // The editor may have been opened after mount, so the latest ref value is read on unmount
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      editorActionsRef.current?.closeEditor();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

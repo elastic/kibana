@@ -10,13 +10,16 @@
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-const SECURITY_TEST_PATH = resolve(REPO_ROOT, 'x-pack/platform/test/security_api_integration');
+const SECURITY_TEST_FIXTURE_PATH = resolve(
+  REPO_ROOT,
+  'x-pack/platform/test_plugins/security_api_integration'
+);
 
-export const SAML_IDP_PLUGIN_PATH = resolve(SECURITY_TEST_PATH, 'plugins/saml_provider');
+export const SAML_IDP_PLUGIN_PATH = resolve(SECURITY_TEST_FIXTURE_PATH, 'plugins/saml_provider');
 
 export const STATEFUL_IDP_METADATA_PATH = resolve(
-  SECURITY_TEST_PATH,
+  SECURITY_TEST_FIXTURE_PATH,
   'packages/helpers/saml/idp_metadata_mock_idp.xml'
 );
 export const SERVERLESS_IDP_METADATA_PATH = resolve(SAML_IDP_PLUGIN_PATH, 'metadata.xml');
-export const JWKS_PATH = resolve(SECURITY_TEST_PATH, 'packages/helpers/oidc/jwks.json');
+export const JWKS_PATH = resolve(SECURITY_TEST_FIXTURE_PATH, 'packages/helpers/oidc/jwks.json');

@@ -170,7 +170,7 @@ src/platform/packages/**/package-map.json
 **/.synthetics/
 **/.journeys/
 **/.rca/
-x-pack/platform/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/platform/test_plugins/security_api_integration/plugins/audit_log/audit.log
 x-pack/test
 
 # ignore FTR temp directory

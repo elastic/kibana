@@ -599,6 +599,11 @@ export class DataGrid {
     });
   }
 
+  async removeColumn(field: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.getByRole('button', { name: 'Remove column' }).click();
+  }
+
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
     const expandButton = this.page.locator(
       `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`

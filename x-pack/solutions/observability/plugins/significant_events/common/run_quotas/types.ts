@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import { MIN_RUN_LIMIT, type RunQuotaWindow } from '@kbn/nightshift-shared';
+
+export {
+  DEFAULT_RUN_QUOTA_TIME_ZONE,
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  type RunQuotaWindow,
+} from '@kbn/nightshift-shared';
+
 /**
  * `investigation` counts automatic investigations, `manual_investigation` counts manual ones (the
  * start API, the homepage, the CLI and Slack mentions), and `total_investigation` counts both.
@@ -29,10 +38,6 @@ export const isInvestigationRunQuotaGroup = (
   group: RunQuotaGroup
 ): group is InvestigationRunQuotaGroup =>
   INVESTIGATION_RUN_QUOTA_GROUPS.some((candidate) => candidate === group);
-
-export const MIN_RUN_LIMIT = 0;
-export const MAX_RUN_LIMIT = 10_000;
-export const DEFAULT_RUN_QUOTA_TIME_ZONE = 'UTC';
 
 export const DEFAULT_RUN_LIMITS: Readonly<Record<RunQuotaGroup, number>> = {
   detection: 15,
@@ -75,12 +80,6 @@ export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
   investigationLimitsEnabled: true,
   limits: DEFAULT_RUN_LIMITS,
 };
-
-export interface RunQuotaWindow {
-  start: string;
-  resetsAt: string;
-  timezone: typeof DEFAULT_RUN_QUOTA_TIME_ZONE;
-}
 
 export interface RunQuotasResponse {
   enabled: boolean;

@@ -55,6 +55,24 @@
     "getFileContents": [],
     "getIssue": [],
     "getIssueComments": [],
+    "getIssueTimeline": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 30,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "per_page"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "link"
+        },
+        "path": "/repos/{owner}/{repo}/issues/{issue_number}/timeline",
+        "source": "rest_2022_11_28"
+      }
+    ],
     "getLatestRelease": [],
     "getMe": [],
     "listBranches": [],
@@ -109,7 +127,7 @@
   "sources": {
     "rest_2022_11_28": {
       "apiVersion": "1.1.4",
-      "fetchedAt": "2026-10-07T20:20:34.696Z",
+      "fetchedAt": "2026-11-10T06:37:06.930Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2022-11-28.json"
     }

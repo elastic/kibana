@@ -47,10 +47,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          `--plugin-path=${path.resolve(__dirname, 'plugins/foo_plugin')}`,
           `--plugin-path=${path.resolve(
             __dirname,
-            '../../security_api_integration/plugins/features_provider'
+            '../../../test_plugins/ui_capabilities/common/plugins/foo_plugin'
+          )}`,
+          `--plugin-path=${path.resolve(
+            __dirname,
+            '../../../test_plugins/security_api_integration/plugins/features_provider'
           )}`,
         ],
       },

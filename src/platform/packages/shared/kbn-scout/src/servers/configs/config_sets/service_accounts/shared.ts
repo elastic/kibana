@@ -20,7 +20,7 @@ export const serviceAccountsServerArgs = [
   '--xpack.security.serviceAccounts.enabled=true',
   `--plugin-path=${resolve(
     REPO_ROOT,
-    'x-pack/platform/test/security_api_integration/plugins/service_accounts'
+    'x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts'
   )}`,
 ];
 

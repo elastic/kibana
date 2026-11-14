@@ -1,5 +1,5 @@
 {
-  "sha1": "af4fc2ac94a74185ebe0a8a921fb95d00dceb1f3",
+  "sha1": "f86f206b82777d6503eadc736a4162d3290f0c7c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -65,6 +65,34 @@
       }
     },
     {
+      "id": "6e35fe7a54cc945-58cbb38a0556d11",
+      "title": "GET /api/data_views/v2/{id} - as code - scripted fields returns the scripted fields with their label, description, format and popularity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/get_data_view_scripted_fields.spec.ts",
+        "line": 57,
+        "column": 23
+      }
+    },
+    {
+      "id": "6e35fe7a54cc945-b3756790408af07",
+      "title": "GET /api/data_views/v2/{id} - as code - scripted fields keeps the stored field overrides in field_settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/get_data_view_scripted_fields.spec.ts",
+        "line": 84,
+        "column": 21
+      }
+    },
+    {
       "id": "e9d43db51b73ef9-4d26ee25dad8cf3",
       "title": "GET /api/data_views/v2/{id} - as code can retrieve a data view",
       "expectedStatus": "passed",
@@ -85,8 +113,8 @@
       }
     },
     {
-      "id": "e9d43db51b73ef9-b9da3f8a6539839",
-      "title": "GET /api/data_views/v2/{id} - as code returns 404 for a non-existing data view",
+      "id": "e9d43db51b73ef9-df88f2db29ad3e2",
+      "title": "GET /api/data_views/v2/{id} - as code does not return scripted_fields when the data view has none",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -105,8 +133,8 @@
       }
     },
     {
-      "id": "e9d43db51b73ef9-edc66382f3c469d",
-      "title": "GET /api/data_views/v2/{id} - as code returns 400 when ID is too long",
+      "id": "e9d43db51b73ef9-b9da3f8a6539839",
+      "title": "GET /api/data_views/v2/{id} - as code returns 404 for a non-existing data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -122,6 +150,26 @@
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/get_data_view.spec.ts",
         "line": 53,
         "column": 12
+      }
+    },
+    {
+      "id": "e9d43db51b73ef9-edc66382f3c469d",
+      "title": "GET /api/data_views/v2/{id} - as code returns 400 when ID is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/get_data_view.spec.ts",
+        "line": 63,
+        "column": 21
       }
     },
     {

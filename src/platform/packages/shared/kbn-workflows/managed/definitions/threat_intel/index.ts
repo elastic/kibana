@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ATTRIBUTE_ALERTS_TO_REPORTS_YAML from './attribute_alerts_to_reports.yaml';
-import ENRICH_THREAT_REPORT_YAML from './enrich_threat_report.yaml';
-import INGEST_THREAT_FEEDS_YAML from './ingest_threat_feeds.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID = 'system-security-threat-intel-ingest-feeds';
 export const THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID = 'system-security-threat-intel-enrich-report';
@@ -36,7 +34,9 @@ export const THREAT_INTEL_INGEST_FEEDS_WORKFLOW = {
   pluginId: PLUGIN_ID,
   version: 2,
   visibility: VISIBILITY,
-  yaml: INGEST_THREAT_FEEDS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'ingest_threat_feeds.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const THREAT_INTEL_ENRICH_REPORT_WORKFLOW = {
@@ -46,7 +46,9 @@ export const THREAT_INTEL_ENRICH_REPORT_WORKFLOW = {
   pluginId: PLUGIN_ID,
   version: 5,
   visibility: VISIBILITY,
-  yaml: ENRICH_THREAT_REPORT_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'enrich_threat_report.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW = {
@@ -56,7 +58,9 @@ export const THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW = {
   pluginId: PLUGIN_ID,
   version: 2,
   visibility: VISIBILITY,
-  yaml: ATTRIBUTE_ALERTS_TO_REPORTS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'attribute_alerts_to_reports.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 export const THREAT_INTEL_WORKFLOW_IDS = [

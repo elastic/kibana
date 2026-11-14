@@ -68,3 +68,45 @@ describe.each(['src/platform/test_plugins/', 'x-pack/platform/test_plugins/'])(
     });
   }
 );
+
+describe('test plugin discovery', () => {
+  it('keeps plugins in the sibling test fixture trees out of production bundles', () => {
+    const fixtures = getPackages(repoRoot).filter(
+      ({ normalizedRepoRelativeDir }) =>
+        normalizedRepoRelativeDir.startsWith('src/platform/test_plugins/') ||
+        normalizedRepoRelativeDir.startsWith('x-pack/platform/test_plugins/')
+    );
+    const productionPlugins = getPluginPackagesFilter({ browser: true });
+    const testPlugins = getPluginPackagesFilter({ browser: true, testPlugins: true });
+
+    expect(fixtures.map(({ name }) => name)).toEqual(
+      expect.arrayContaining([
+        '@kbn/foo-plugin',
+        '@kbn/hardening-plugin',
+        '@kbn/interactive-setup-test-endpoints-plugin',
+        '@kbn/security-test-endpoints-plugin',
+        '@kbn/test-feature-usage-plugin',
+      ])
+    );
+
+    for (const fixture of fixtures) {
+      expect(productionPlugins(fixture)).toBe(false);
+      if (fixture.isPlugin() && fixture.manifest.plugin.browser) {
+        expect(testPlugins(fixture)).toBe(true);
+      }
+    }
+  });
+
+  it('loads interactive setup verification endpoints only when explicitly requested', () => {
+    const plugin = getPackages(repoRoot).find(
+      ({ id }) => id === '@kbn/interactive-setup-test-endpoints-plugin'
+    );
+    if (!plugin) {
+      throw new Error('Interactive setup test endpoints plugin was not discovered');
+    }
+
+    expect(plugin.getPluginCategories().testPlugin).toBe(true);
+    expect(getPluginPackagesFilter()(plugin)).toBe(false);
+    expect(getPluginPackagesFilter({ paths: [plugin.directory] })(plugin)).toBe(true);
+  });
+});

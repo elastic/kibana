@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import FAILURE_SWEEP_YAML from './failure_sweep_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 
 export const NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW_ID =
   'system-nightshift-investigation-failure-sweep';
@@ -18,6 +18,8 @@ export const NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW = {
   pluginId: 'nightshiftInvestigations',
   version: 2,
   billable: false,
-  yaml: FAILURE_SWEEP_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'failure_sweep_workflow.yaml');
+  },
   management: { lifecycle: 'static', versionStrategy: 'auto', enablement: 'restorable' },
 } as const satisfies ManagedWorkflowDefinition;

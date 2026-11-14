@@ -12,6 +12,8 @@ import {
   NIGHTSHIFT_SEMANTIC_MEMORY_OPTIMIZED_EVENT,
 } from './events';
 import { NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT } from './online_eval_score_event';
+import { NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT } from './alert_entered_pipeline_event';
+import { NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT } from './decision_tree_causal_check_event';
 
 describe('NightshiftTelemetryClient', () => {
   const logger = loggerMock.create();
@@ -89,6 +91,44 @@ describe('NightshiftTelemetryClient', () => {
     client.reportOnlineEvalScore(event);
 
     expect(analytics.reportEvent).toHaveBeenCalledWith(NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT, event);
+  });
+
+  it('registers the alert entered pipeline event', () => {
+    setupNightshiftTelemetry({ analytics: analytics as never, logger });
+
+    expect(analytics.registerEventType).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT })
+    );
+  });
+
+  it('registers and reports the decision-tree causal check event', () => {
+    const client = setupNightshiftTelemetry({ analytics: analytics as never, logger });
+
+    expect(analytics.registerEventType).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT })
+    );
+
+    const event = {
+      agent_id: 'nightshift.investigation',
+      conversation_id: 'conv-1',
+      round_id: 'round-2',
+      workflow_execution_id: 'exec-1',
+      outcome: 'confirmed' as const,
+      is_feedback: true,
+      causal_confirmed: true,
+      has_learning: true,
+      tree_count: 1,
+      opened_tree_count: 1,
+      recorder_outcome: 'found' as const,
+      recorder_has_confirmed_cause: true,
+      duration_ms: 1450,
+    };
+    client.reportDecisionTreeCausalCheck(event);
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT,
+      event
+    );
   });
 
   it('never fails the product operation when analytics reporting throws', () => {
