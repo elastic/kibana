@@ -46,6 +46,7 @@ export const MetricsExperienceGrid = ({
   isComponentVisible,
   isTabSelected,
   breakdownField,
+  setBreakdownFieldNames,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
@@ -107,6 +108,12 @@ export const MetricsExperienceGrid = ({
     selectedDimensions,
     onDimensionsChange
   );
+
+  useEffect(() => {
+    setBreakdownFieldNames?.(allDimensions.map(({ name }) => name));
+  }, [allDimensions, setBreakdownFieldNames]);
+
+  useEffect(() => () => setBreakdownFieldNames?.(undefined), [setBreakdownFieldNames]);
 
   useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
 

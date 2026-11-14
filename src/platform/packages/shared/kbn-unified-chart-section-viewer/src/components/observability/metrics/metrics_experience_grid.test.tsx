@@ -342,6 +342,20 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
   });
 
+  it('reports the dimensions as the only breakdown fields and clears them on unmount', () => {
+    const setBreakdownFieldNames = jest.fn();
+    const { unmount } = render(
+      <MetricsExperienceGrid {...defaultProps} setBreakdownFieldNames={setBreakdownFieldNames} />,
+      { wrapper: TestWrapper }
+    );
+
+    expect(setBreakdownFieldNames).toHaveBeenLastCalledWith(['foo', 'qux']);
+
+    unmount();
+
+    expect(setBreakdownFieldNames).toHaveBeenLastCalledWith(undefined);
+  });
+
   it('renders Discover ErrorCallout when METRICS_INFO fetch fails with a network error', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],

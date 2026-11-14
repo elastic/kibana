@@ -516,6 +516,15 @@ export class DiscoverPage extends DiscoverApp {
   }
 
   /**
+   * Drags a sidebar field onto the chart to use it as the breakdown field.
+   */
+  async dragFieldToChart(fieldName: string) {
+    const chartLocator = this.page.testSubj.locator('unifiedHistogramChart');
+    // Fields can appear in both "Popular fields" and the full field list.
+    await resolveSelector(this.page, `field-${fieldName}`).dragTo(chartLocator);
+  }
+
+  /**
    * Drags a sidebar field onto the grid using the keyboard, mirroring the FTR
    * `dragFieldWithKeyboardToTable` implementation.
    */

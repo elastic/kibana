@@ -30,6 +30,7 @@ import {
   type RuntimeStateManager,
   RuntimeStateProvider,
   selectTabRuntimeState,
+  setTabChartBreakdownFieldNames,
   internalStateActions,
   useInternalStateSelector,
   useInternalStateDispatch,
@@ -245,6 +246,13 @@ const CustomChartSectionWrapper = ({
     setUnifiedHistogramApi(api);
   }, [setUnifiedHistogramApi, api]);
 
+  const runtimeStateManager = useRuntimeStateManager();
+  const setBreakdownFieldNames = useCallback(
+    (fieldNames: string[] | undefined) =>
+      setTabChartBreakdownFieldNames(runtimeStateManager, currentTabId, fieldNames),
+    [runtimeStateManager, currentTabId]
+  );
+
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
@@ -294,6 +302,7 @@ const CustomChartSectionWrapper = ({
         isTabSelected,
         ...unifiedHistogramProps,
         setLensRequestAdapter: api.setLensRequestAdapter,
+        setBreakdownFieldNames,
         initialState: metricsGridState,
         onInitialStateChange,
       })}
