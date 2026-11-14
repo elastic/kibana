@@ -251,6 +251,7 @@ export function useDynamicTypeIcons(
     .sort()
     .join(',');
   const injectionRunIdRef = useRef(0);
+  const inFlightInjectionsRef = useRef(0);
   const lastInjectedShadowCssRef = useRef<string | null>(null);
   const customTriggerIds = triggerSchemas.getRegisteredIds();
   // Detect custom trigger in content: known registered ids OR pattern "type: x.y" (custom triggers use dots; built-in are manual/alert/scheduled).
@@ -310,40 +311,54 @@ export function useDynamicTypeIcons(
       ];
     };
 
-    const runInjection = async () => {
-      const myRunId = ++injectionRunIdRef.current;
-      setStabilityBadgeThemeContext(euiThemeContext);
-      // Use ref at injection time so retries (150ms, 500ms, etc.) see the current DOM and find the iframe if it appeared.
-      const editorContainer = editorContainerRef?.current ?? undefined;
-      const allTypes = getAllTypes();
-      const { colorMode } = euiThemeContext;
-      await injectDynamicConnectorIcons(allTypes, editorContainer, colorMode);
-      injectSuggestTechPreviewBadges(editorContainer, euiThemeContext);
-      await injectDynamicShadowIcons(
-        allTypes,
-        editorContainer,
-        colorMode,
-        () => myRunId !== injectionRunIdRef.current,
-        (css) => onShadowIconsCssReadyRef.current?.(css),
-        lastInjectedShadowCssRef
-      );
+    const runInjection = async (isRetry = false) => {
+      // A retry starting on top of an unfinished pass marks that pass stale, so its icon CSS is
+      // dropped and delivery waits for a whole further pass; let the running one finish instead.
+      if (isRetry && inFlightInjectionsRef.current > 0) {
+        return;
+      }
+      inFlightInjectionsRef.current += 1;
+      try {
+        const myRunId = ++injectionRunIdRef.current;
+        setStabilityBadgeThemeContext(euiThemeContext);
+        // Use ref at injection time so retries (150ms, 500ms, etc.) see the current DOM and find the iframe if it appeared.
+        const editorContainer = editorContainerRef?.current ?? undefined;
+        const allTypes = getAllTypes();
+        const { colorMode } = euiThemeContext;
+        await injectDynamicConnectorIcons(allTypes, editorContainer, colorMode);
+        injectSuggestTechPreviewBadges(editorContainer, euiThemeContext);
+        await injectDynamicShadowIcons(
+          allTypes,
+          editorContainer,
+          colorMode,
+          () => myRunId !== injectionRunIdRef.current,
+          (css) => onShadowIconsCssReadyRef.current?.(css),
+          lastInjectedShadowCssRef
+        );
+      } finally {
+        inFlightInjectionsRef.current -= 1;
+      }
+    };
+
+    const retryInjection = () => {
+      void runInjection(true);
     };
 
     void runInjection();
     // Re-run to pick up custom triggers that register after first paint (e.g. example plugin).
     // Multiple retries avoid race where getTriggerDefinitions() is still empty on first run.
     const retryIds: ReturnType<typeof setTimeout>[] = [
-      setTimeout(runInjection, 800),
-      setTimeout(runInjection, 2500),
-      setTimeout(runInjection, 5000),
-      setTimeout(runInjection, 8000),
+      setTimeout(retryInjection, 800),
+      setTimeout(retryInjection, 2500),
+      setTimeout(retryInjection, 5000),
+      setTimeout(retryInjection, 8000),
     ];
     // When YAML contains a custom trigger (load or re-add after delete), re-inject so custom icon
     // shows and wins over base bolt rule; retries catch late editor/decoration DOM.
     if (contentHasCustomTrigger && hasEditorMounted) {
-      retryIds.push(setTimeout(runInjection, 150));
-      retryIds.push(setTimeout(runInjection, 200));
-      retryIds.push(setTimeout(runInjection, 500));
+      retryIds.push(setTimeout(retryInjection, 150));
+      retryIds.push(setTimeout(retryInjection, 200));
+      retryIds.push(setTimeout(retryInjection, 500));
     }
 
     return () => {
