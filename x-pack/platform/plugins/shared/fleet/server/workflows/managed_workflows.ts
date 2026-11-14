@@ -12,7 +12,6 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 
-import { isAgenticAwsOnboardingEnabled } from '../services/utils/agentic_aws_onboarding';
 import { appContextService } from '../services';
 
 export const FLEET_MANAGED_WORKFLOW_OWNER = 'fleet';
@@ -24,7 +23,9 @@ export const registerAwsOnboardingWorkflowOwner = (
 };
 
 /**
- * Installs the AWS onboarding workflow in the global space while the feature flag is on.
+ * Installs the AWS onboarding workflow in the global space. The install does not depend on the
+ * feature flag, which can be switched on at runtime after Fleet starts: every step and agent tool
+ * checks the flag when it runs, so the installed workflow stays inert while the flag is off.
  * `ready()` is always called, and failures are logged so they never fail Fleet start.
  */
 export const installAwsOnboardingWorkflow = async (
@@ -37,11 +38,9 @@ export const installAwsOnboardingWorkflow = async (
     );
 
     try {
-      if (await isAgenticAwsOnboardingEnabled()) {
-        await managedWorkflowsClient.installMany([
-          { id: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID, spaceId: GLOBAL_WORKFLOW_SPACE_ID },
-        ]);
-      }
+      await managedWorkflowsClient.installMany([
+        { id: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID, spaceId: GLOBAL_WORKFLOW_SPACE_ID },
+      ]);
     } finally {
       await managedWorkflowsClient.ready();
     }
