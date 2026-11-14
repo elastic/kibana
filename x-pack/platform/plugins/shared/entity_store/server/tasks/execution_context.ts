@@ -24,12 +24,19 @@ export const EA_EXECUTION_CONTEXT_NAMES = {
 export type EaExecutionContextName =
   (typeof EA_EXECUTION_CONTEXT_NAMES)[keyof typeof EA_EXECUTION_CONTEXT_NAMES];
 
-/** Builds a server-side Security Solution Entity Analytics execution context payload. */
+/**
+ * Builds a server-side Security Solution Entity Analytics execution context payload.
+ *
+ * A task type that runs a different workload per variant (one task per entity type, one per
+ * maintainer) passes that variant, which is appended to the name. Consumers that attribute queries
+ * by name alone can then tell the workloads apart without parsing the task instance id.
+ */
 export const buildEaExecutionContext = (
   name: EaExecutionContextName,
-  id: string
+  id: string,
+  variant?: string
 ): KibanaExecutionContext => ({
   type: EXECUTION_CONTEXT_TYPE,
-  name,
+  name: variant ? `${name}:${variant}` : name,
   id,
 });

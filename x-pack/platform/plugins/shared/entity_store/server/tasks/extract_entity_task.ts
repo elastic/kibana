@@ -71,6 +71,18 @@ export function getExtractEntityTaskId(
   return `${getTaskType(entityType, extractionMode)}:${namespace}`;
 }
 
+/** The non-priority task scans a different set of documents from the shared single/priority task
+ * for the same entity type, so it gets its own execution-context name. */
+function getExecutionContextVariant(
+  entityType: EntityType,
+  extractionMode: ExtractionMode
+): string {
+  if (extractionMode === EXTRACTION_MODE.nonPriority) {
+    return `${entityType}:non_priority`;
+  }
+  return entityType;
+}
+
 export const getNewSchedule = (
   frequency: string,
   taskInstance: ConcreteTaskInstance
@@ -411,7 +423,8 @@ function registerOne({
           return coreStart.executionContext.withContext(
             buildEaExecutionContext(
               EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_EXTRACT_TASK,
-              taskInstance.id
+              taskInstance.id,
+              getExecutionContextVariant(type, extractionMode)
             ),
             () =>
               wrapTaskRun({
