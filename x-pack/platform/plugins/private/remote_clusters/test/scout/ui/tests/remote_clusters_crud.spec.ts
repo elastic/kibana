@@ -53,6 +53,13 @@ test.describe('Remote Clusters - add cluster', { tag: ['@local-stateful-classic'
       await expectNoA11yViolations(page);
     });
 
+    await test.step('connection form validation errors', async () => {
+      await remoteClusters.formNextButton.click();
+      await expect(remoteClusters.formNameInput).toBeFocused();
+      await expect(remoteClusters.formGlobalError).toBeVisible();
+      await expectNoA11yViolations(page);
+    });
+
     await test.step('request flyout', async () => {
       await remoteClusters.openRequestFlyout();
       await expect(remoteClusters.requestFlyoutTitle).toHaveText('Request');
