@@ -51,10 +51,13 @@ export interface TailSamplingConfig {
 /**
  * The processor and its config, as sent to `_validate` and `PUT`. A second processor
  * would turn this into a union keyed on `processor`.
+ *
+ * `config` is strict: only `policies` can be set. Other processor settings, such as
+ * `decision_wait`, are controlled by Elastic and are rejected.
  */
 export const tailSamplingSettingsSchema = z.object({
   processor: z.literal(TAIL_SAMPLING_PROCESSOR),
-  config: z.object({ policies: tailSamplingPoliciesSchema }),
+  config: z.strictObject({ policies: tailSamplingPoliciesSchema }),
 });
 
 // Policy types that are accepted but produce a warning.

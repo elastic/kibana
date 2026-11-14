@@ -74,9 +74,32 @@ describe('validateTailSamplingRoute params', () => {
     }));
     expectParseError(validateTailSamplingRoute.params!.safeParse({ body: settings(policies) }));
   });
+
+  it('rejects a processor setting other than policies', () => {
+    expectParseError(
+      validateTailSamplingRoute.params!.safeParse({
+        body: {
+          processor: 'tail_sampling',
+          config: { policies: [keepErrors], decision_wait: '10s' },
+        },
+      })
+    );
+  });
 });
 
 describe('saveTailSamplingRoute params', () => {
+  it('rejects a processor setting other than policies', () => {
+    expectParseError(
+      saveTailSamplingRoute.params!.safeParse({
+        body: {
+          processor: 'tail_sampling',
+          config: { policies: [keepErrors], decision_wait: '10s' },
+          validatedHash: hash,
+        },
+      })
+    );
+  });
+
   it('accepts a config with a validated hash', () => {
     expectParseSuccess(
       saveTailSamplingRoute.params!.safeParse({
