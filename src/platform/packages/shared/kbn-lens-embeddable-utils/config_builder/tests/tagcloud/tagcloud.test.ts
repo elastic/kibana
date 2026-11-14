@@ -8,9 +8,11 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { LensTagCloudState } from '@kbn/lens-common';
 
 import { validator } from '../utils/validator';
 import type { TagcloudConfig } from '../../schema';
+import { tagcloudConfigSchema } from '../../schema/charts/tagcloud';
 import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -94,6 +96,40 @@ describe('Tagcloud', () => {
       const apiOutput = builder.toAPIFormat(lensState) as TagcloudConfig;
 
       expect(apiOutput.tag_by.color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
+    });
+
+    it('should store the default categorical color mapping when tag_by has no color', () => {
+      const config = {
+        type: 'tag_cloud',
+        title: 'Tagcloud color default in state',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+        },
+        tag_by: {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 5,
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies TagcloudConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(tagcloudConfigSchema.parse(config));
+      const vizState = lensState.state.visualization as LensTagCloudState;
+
+      expect(vizState.colorMapping).toEqual({
+        colorMode: { type: 'categorical' },
+        paletteId: 'default',
+        assignments: [],
+        specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+      });
     });
   });
 });

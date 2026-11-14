@@ -41,6 +41,7 @@ import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import { fromColorMappingAPIToLensState, isAutoColor } from '../../coloring';
 import { processMetricColumnsWithReferences } from '../utils';
+import { getDefaultBreakdownColorMapping } from './defaults';
 
 const X_ACCESSOR = 'x';
 const BREAKDOWN_ACCESSOR = 'breakdown';
@@ -86,11 +87,19 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
     layer.type.includes('percentage') ? `${layer.type}_stacked` : layer.type
   ) as SeriesType;
 
+  // The runtime ignores the static Y color while the breakdown is active (not collapsed), and the
+  // breakdown color mapping while it is collapsed, so each is stored only when it is used.
+  const hasActiveBreakdown =
+    layer.breakdown_by != null &&
+    !('collapse_by' in layer.breakdown_by && layer.breakdown_by.collapse_by);
+
   const yConfig = layer.y.map<YConfig>((yMetric, index) => {
     const onAxis = yMetric?.axis ?? 'y';
     const axisMode = onAxis === 'y2' ? 'right' : 'left';
     return {
-      ...(yMetric.color && !isAutoColor(yMetric.color) ? { color: yMetric.color?.color } : {}),
+      ...(!hasActiveBreakdown && yMetric.color && !isAutoColor(yMetric.color)
+        ? { color: yMetric.color.color }
+        : {}),
       axisMode,
       forAccessor: getAccessorNameForXY(layer, i, METRIC_ACCESSOR_PREFIX, index),
     };
@@ -110,8 +119,10 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
     ...(layer.breakdown_by && 'collapse_by' in layer.breakdown_by
       ? { collapseFn: layer.breakdown_by.collapse_by }
       : {}),
-    ...(layer.breakdown_by && 'color' in layer.breakdown_by
-      ? { ...fromColorMappingAPIToLensState(layer.breakdown_by.color) }
+    ...(layer.breakdown_by && hasActiveBreakdown
+      ? fromColorMappingAPIToLensState(
+          layer.breakdown_by.color ?? getDefaultBreakdownColorMapping(seriesTypeLabel)
+        )
       : {}),
   };
 }

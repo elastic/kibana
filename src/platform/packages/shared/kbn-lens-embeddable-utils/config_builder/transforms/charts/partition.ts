@@ -275,9 +275,13 @@ function convertLegendStatsToWaffleAPIValues(
   return undefined;
 }
 
-function convertAPIStaticColorToLensState(config: PartitionConfig) {
-  if (isAPIMosaicChartLayer(config)) {
-    return undefined;
+function convertAPIStaticColorToLensState(
+  config: PartitionConfig
+): Pick<LensPartitionLayerState, 'colorsByDimension'> {
+  // Mosaic metrics have no color. Other charts ignore the static metric color while a group is
+  // active (not collapsed), so it is not stored, mirroring `fromLensStateToAPIMetrics`.
+  if (isAPIMosaicChartLayer(config) || config.group_by?.some(groupIsNotCollapsed)) {
+    return {};
   }
 
   // Key colorsByDimension by the metric's position in `config.metrics`
@@ -311,7 +315,11 @@ function convertCollapseAPItoCollapseFns<P extends 'group_by' | 'group_breakdown
 }
 
 function computeSharedPartitionLayerState(config: PartitionConfig) {
-  const groupColouring = config.group_by?.find(({ color }) => color != null)?.color;
+  // Only the first non-collapsed group is colored, as in `fromLensStateToAPIGroups`.
+  const coloredGroup = config.group_by?.find(groupIsNotCollapsed);
+  const groupColouring = coloredGroup
+    ? coloredGroup.color ?? DEFAULT_CATEGORICAL_COLOR_MAPPING
+    : undefined;
   const hasColorMapping = groupColouring != null && !('type' in groupColouring);
   const collapseFns = Object.fromEntries(
     convertCollapseAPItoCollapseFns(config, 'group_by').concat(

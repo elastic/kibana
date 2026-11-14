@@ -793,7 +793,8 @@ function extraQueryFromAPIState(state: LensApiConfig): Query | undefined {
   // ES|QL queries live exclusively on the text-based datasource layers
   // (written by the layer transforms); the top-level slot only carries the
   // chart-scoped KQL/Lucene filter from the API `query` field.
-  if ('query' in state && state.query) {
+  // An empty KQL or Lucene expression filters nothing, so neither it nor its language is stored.
+  if ('query' in state && state.query?.expression.length) {
     return queryToLensState(state.query satisfies LensApiFilterType);
   }
   return undefined;

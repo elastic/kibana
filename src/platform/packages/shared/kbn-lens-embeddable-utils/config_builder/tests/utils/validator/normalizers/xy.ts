@@ -211,11 +211,13 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
         // without a breakdown there is nothing to collapse — transform drops it
         if (layer.collapseFn === '' || !layer.splitAccessors?.length) delete layer.collapseFn;
 
-        // colorMapping/palette: only preserved through the round-trip when there's a breakdown.
+        // colorMapping/palette: only preserved through the round-trip while the breakdown is active
+        // (not collapsed): the runtime ignores them otherwise and the transforms leave them out.
         // Legacy palette (palette field, no colorMapping) round-trips back as palette, not colorMapping.
         // If colorMapping is present it overrides palette; default colorMapping is only added when
-        // neither colorMapping nor palette is set and a breakdown is present.
-        if (!layer.splitAccessors?.length) {
+        // neither colorMapping nor palette is set and the breakdown is active.
+        const hasActiveBreakdown = (layer.splitAccessors?.length ?? 0) > 0 && !layer.collapseFn;
+        if (!hasActiveBreakdown) {
           delete layer.colorMapping;
           delete layer.palette;
         } else if (layer.colorMapping) {
@@ -230,19 +232,19 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
 
         // Rebuild yConfig: one entry per accessor with normalized axisMode.
         // axisMode 'auto' normalizes to 'left' (the transform treats auto as no-preference → left).
-        // Per-series color is dropped when a breakdown is present (color moves to breakdown_by.color).
+        // Per-series color is dropped while the breakdown is active (not collapsed): the runtime
+        // ignores it and the transforms leave it out (the color moves to breakdown_by.color).
         const configuredAccessors = new Map<string, any>(
           (layer.yConfig ?? []).map((yc: any) => [yc.forAccessor, yc])
         );
         const allAccessors: string[] = layer.accessors ?? [];
-        const hasBreakdown = (layer.splitAccessors?.length ?? 0) > 0;
         layer.yConfig = allAccessors
           .map((acc) => {
             const existing = configuredAccessors.get(acc);
             const rawMode = existing?.axisMode ?? 'left';
             const axisMode = rawMode === 'auto' ? 'left' : rawMode;
             const entry = existing ? { ...existing, axisMode } : { axisMode, forAccessor: acc };
-            if (hasBreakdown) delete entry.color;
+            if (hasActiveBreakdown) delete entry.color;
             // lineStyle/lineWidth are reference-line-only styling; dropped for data layers
             delete entry.lineStyle;
             delete entry.lineWidth;
