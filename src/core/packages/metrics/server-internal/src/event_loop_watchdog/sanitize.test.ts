@@ -16,10 +16,6 @@ import {
 } from './sanitize';
 
 describe('capName', () => {
-  it('replaces C0 and C1 control characters, including CR/LF and ESC, with ?', () => {
-    expect(capName('a\r\nb\x1bc\x7fd\x85e\x9ff')).toBe('a??b?c?d?e?f');
-  });
-
   it('keeps names up to MAX_NAME_LENGTH characters and cuts longer ones from the end', () => {
     expect(capName('handler')).toBe('handler');
     const long = 'a'.repeat(MAX_NAME_LENGTH) + 'dropped';
@@ -28,10 +24,6 @@ describe('capName', () => {
 });
 
 describe('capLocation', () => {
-  it('replaces control characters with ?', () => {
-    expect(capLocation('src/a\nb.ts:1')).toBe('src/a?b.ts:1');
-  });
-
   it('keeps the end of a long location with a leading ellipsis, at MAX_LOCATION_LENGTH characters', () => {
     const deep = `src/${'very_long_segment/'.repeat(10)}leaf_file.ts:42`;
     const location = capLocation(deep);

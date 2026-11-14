@@ -14,23 +14,14 @@ export const MAX_NAME_LENGTH = 48;
 export const MAX_LOCATION_LENGTH = 120;
 const ELLIPSIS = '...';
 
-/** C0/C1 control characters (incl. CR/LF and ESC) could forge log lines or terminal escapes. */
-const isControlCharacter = (code: number): boolean => code < 0x20 || (code >= 0x7f && code <= 0x9f);
-
-const replaceControlCharacters = (value: string): string =>
-  Array.from(value, (char) => (isControlCharacter(char.charCodeAt(0)) ? '?' : char)).join('');
-
 /** Keeps the start of a function name, capped at `MAX_NAME_LENGTH` characters. */
-export const capName = (name: string): string =>
-  replaceControlCharacters(name.slice(0, MAX_NAME_LENGTH));
+export const capName = (name: string): string => name.slice(0, MAX_NAME_LENGTH);
 
 /** Keeps the end of a location (file name and line), capped at `MAX_LOCATION_LENGTH` characters. */
 export const capLocation = (location: string): string =>
-  replaceControlCharacters(
-    location.length <= MAX_LOCATION_LENGTH
-      ? location
-      : `${ELLIPSIS}${location.slice(ELLIPSIS.length - MAX_LOCATION_LENGTH)}`
-  );
+  location.length <= MAX_LOCATION_LENGTH
+    ? location
+    : `${ELLIPSIS}${location.slice(ELLIPSIS.length - MAX_LOCATION_LENGTH)}`;
 
 /** Repo-relative path, `node:` specifier, or the file name for paths outside the repo. */
 export const relativeLocation = (url: string, root: string): string | undefined => {
