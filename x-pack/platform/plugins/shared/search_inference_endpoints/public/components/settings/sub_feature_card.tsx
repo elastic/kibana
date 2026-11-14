@@ -179,7 +179,8 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const isGlobalDefaultAvailable =
     globalDefaultId !== NO_DEFAULT_MODEL && !regionDeniedEndpointIds.has(globalDefaultId);
   const showGlobalDefaultRow = !hasSavedObject && isGlobalDefaultAvailable;
-  const hasAssignedRows = availableEndpointIds.length > 0 || showGlobalDefaultRow;
+  const showGlobalDefaultFallbackRow = showGlobalDefaultRow && availableEndpointIds.length === 0;
+  const hasAssignedRows = availableEndpointIds.length > 0 || showGlobalDefaultFallbackRow;
   const { icon: globalDefaultIcon = 'processor', label: globalDefaultLabel = globalDefaultId } =
     endpointDisplayMap.get(globalDefaultId) ?? {};
   const globalDefaultDeprecationInfo =
@@ -373,7 +374,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
               <EuiDragDropContext onDragEnd={handleDragEnd}>
                 <div ref={listRef}>
                   <EuiSplitPanel.Outer hasBorder={hasAssignedRows}>
-                    {showGlobalDefaultRow && globalDefaultId && (
+                    {showGlobalDefaultFallbackRow && globalDefaultId && (
                       <GlobalDefaultLockedRow
                         featureId={featureId}
                         icon={globalDefaultIcon}
