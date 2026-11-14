@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type RuleValidationContext = 'create' | 'update' | 'upsert';
+export type RuleValidationContext = 'create' | 'update' | 'upsert' | 'restore';
 
 export const getRuleNotFoundMessage = (id: string): string => `Rule with id "${id}" not found`;
 

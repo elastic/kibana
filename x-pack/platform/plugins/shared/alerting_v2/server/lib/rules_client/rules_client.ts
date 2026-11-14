@@ -50,7 +50,12 @@ import {
   getRuleAlreadyExistsMessage,
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
+  type RuleValidationContext,
 } from '../errors/rule_error_messages';
+import {
+  RuleChangesHistoryClientToken,
+  type RuleChangesHistoryClientContract,
+} from '../rule_changes_history';
 import {
   bulkScheduleRuleExecutorTasks,
   ensureRuleExecutorTaskScheduled,
@@ -112,6 +117,7 @@ import {
   bulkErrorCodeForStatus,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
+  toRestoreRuleData,
 } from './utils';
 
 const withApm = withApmDecorator('RulesClient');
@@ -236,7 +242,9 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin
+    @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin,
+    @inject(RuleChangesHistoryClientToken)
+    private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract
   ) {
     this.eventContext = {
       request,
@@ -349,11 +357,7 @@ export class RulesClient {
     }
   }
 
-  private parseRuleData<T>(
-    schema: z.ZodType<T>,
-    data: unknown,
-    context: 'create' | 'update' | 'upsert'
-  ): T {
+  private parseRuleData<T>(schema: z.ZodType<T>, data: unknown, context: RuleValidationContext): T {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(getInvalidRuleDataMessage(context, stringifyZodError(parsed.error)), {
@@ -1960,6 +1964,34 @@ export class RulesClient {
       return { rule, created: true };
     }
 
+    const rule = await this.replaceExistingRule({ id, parsed });
+    return { rule, created: false };
+  }
+
+  /**
+   * Replaces a rule's configuration with the snapshot recorded by a
+   * change-history event. The current `enabled` state is kept and the version
+   * is bumped.
+   */
+  @withApm
+  public async restoreRule({ changeId }: { changeId: string }): Promise<RuleResponse> {
+    const { ruleId, snapshot } = await this.ruleChangesHistoryClient.getRuleChangeSnapshot({
+      eventId: changeId,
+    });
+
+    const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
+
+    return this.replaceExistingRule({ id: ruleId, parsed });
+  }
+
+  private async replaceExistingRule({
+    id,
+    parsed,
+  }: {
+    id: string;
+    parsed: PutRuleData;
+  }): Promise<RuleResponse> {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -2026,6 +2058,6 @@ export class RulesClient {
         prevRule,
       },
     ]);
-    return { rule, created: false };
+    return rule;
   }
 }
