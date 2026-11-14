@@ -20,7 +20,9 @@ import {
   HISTOGRAM_BUCKET_COLUMN,
   HISTOGRAM_COUNT_COLUMN,
   createTimeBucketAggregation,
+  getLensMetricFormat,
 } from '../../common/utils';
+import type { MetricUnit } from '../../types';
 
 type HeatmapColorSteps = Extract<
   NonNullable<LensHeatmapConfig['color']>,
@@ -70,27 +72,36 @@ export const buildHistogramHeatmapConfig = ({
   description,
   seriesColor,
   backgroundColor,
+  unit,
 }: {
   query: string;
   title: string;
   description?: string;
   seriesColor: string;
   backgroundColor: string;
-}): LensHeatmapConfig => ({
-  chartType: 'heatmap',
-  title,
-  description,
-  dataset: { esql: query },
-  value: HISTOGRAM_COUNT_COLUMN,
-  xAxis: createTimeBucketAggregation({}),
-  breakdown: HISTOGRAM_BUCKET_COLUMN,
-  legend: { show: false },
-  axisLabel: { xAxis: true, yAxis: true },
-  color: {
-    type: 'dynamic',
-    range: 'percentage',
-    steps: toPercentageColorSteps(heatmapCellColors(seriesColor, backgroundColor)),
-  },
-  // Histogram ranges run high to low, matching the previous query sort.
-  ySort: 'desc',
-});
+  unit?: MetricUnit;
+}): LensHeatmapConfig => {
+  return {
+    chartType: 'heatmap',
+    title,
+    description,
+    dataset: { esql: query },
+    value: HISTOGRAM_COUNT_COLUMN,
+    xAxis: createTimeBucketAggregation({}),
+    breakdown: HISTOGRAM_BUCKET_COLUMN,
+    // Same compact column format the XY series writes onto its Y axis.
+    breakdownFormat: {
+      compactValues: true,
+      ...getLensMetricFormat(unit),
+    },
+    legend: { show: false },
+    axisLabel: { xAxis: true, yAxis: true },
+    color: {
+      type: 'dynamic',
+      range: 'percentage',
+      steps: toPercentageColorSteps(heatmapCellColors(seriesColor, backgroundColor)),
+    },
+    // Histogram ranges run high to low, matching the previous query sort.
+    ySort: 'desc',
+  };
+};

@@ -15,6 +15,7 @@ import {
   createHistogramDistributionQuery,
   firstNonNullable,
   getMetricUniqueKey,
+  resolveMetricUnit,
 } from '../../../../common/utils';
 import { isHistogramMetric } from '../../../../common/utils/histogram_metric';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
@@ -103,9 +104,17 @@ export const useHistogramHeatmap = ({
             description,
             seriesColor,
             backgroundColor,
+            unit: resolveMetricUnit(metricItem.metricName, [...metricItem.units]),
           })
         : undefined,
-    [distributionQuery, metricItem.metricName, description, seriesColor, backgroundColor]
+    [
+      distributionQuery,
+      metricItem.metricName,
+      metricItem.units,
+      description,
+      seriesColor,
+      backgroundColor,
+    ]
   );
 
   return { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig };

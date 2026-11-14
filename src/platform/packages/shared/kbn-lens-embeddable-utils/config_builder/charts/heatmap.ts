@@ -102,6 +102,17 @@ function buildFormulaLayer(
   return defaultLayer;
 }
 
+function hasFormatParams(columnFormat: NonNullable<LensHeatmapConfig['breakdownFormat']>) {
+  return (
+    columnFormat.format &&
+    (columnFormat.suffix ||
+      columnFormat.compactValues ||
+      columnFormat.decimals ||
+      columnFormat.fromUnit ||
+      columnFormat.toUnit)
+  );
+}
+
 function getValueColumns(layer: LensHeatmapConfig) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('breakdown must be a field name when not using index source');
@@ -109,8 +120,31 @@ function getValueColumns(layer: LensHeatmapConfig) {
   if (typeof layer.xAxis !== 'string') {
     throw new Error('xAxis must be a field name when not using index source');
   }
+  const { breakdownFormat } = layer;
+  const format =
+    breakdownFormat && hasFormatParams(breakdownFormat)
+      ? {
+          id: breakdownFormat.format as string,
+          params: {
+            compact: breakdownFormat.compactValues,
+            decimals: breakdownFormat.decimals ?? 0,
+            suffix: breakdownFormat.suffix,
+            fromUnit: breakdownFormat.fromUnit,
+            toUnit: breakdownFormat.toUnit,
+          },
+        }
+      : undefined;
   return [
-    ...(layer.breakdown ? [getValueColumn(getAccessorName('y'), layer.breakdown as string)] : []),
+    ...(layer.breakdown
+      ? [
+          getValueColumn(
+            getAccessorName('y'),
+            layer.breakdown,
+            format ? 'number' : undefined,
+            format
+          ),
+        ]
+      : []),
     getValueColumn(getAccessorName('x'), layer.xAxis as string),
     getValueColumn(ACCESSOR, layer.value),
   ];
