@@ -215,7 +215,7 @@ export function ErrorGroupList({
         render: (_, item) => {
           return (
             <MessageAndCulpritCell>
-              <EuiToolTip id="error-message-tooltip" content={item.name || NOT_AVAILABLE_LABEL}>
+              <EuiToolTip content={item.name || NOT_AVAILABLE_LABEL} disableScreenReaderOutput>
                 <MessageLink serviceName={serviceName} errorGroupId={item.groupId} query={query}>
                   {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
@@ -224,8 +224,8 @@ export function ErrorGroupList({
                 <>
                   <br />
                   <EuiToolTip
-                    id="error-culprit-tooltip"
                     content={item.culprit || NOT_AVAILABLE_LABEL}
+                    disableScreenReaderOutput
                   >
                     <Culprit>{item.culprit || NOT_AVAILABLE_LABEL}</Culprit>
                   </EuiToolTip>
