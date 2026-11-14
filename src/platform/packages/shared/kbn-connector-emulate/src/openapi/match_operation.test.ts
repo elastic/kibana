@@ -117,6 +117,55 @@ describe('createOperationMatcher', () => {
     });
   });
 
+  it('ranks a template with a multi-segment parameter below any template with literal segments', () => {
+    // Azure's resources spec has a catch-all `/{resourceId}`, which has fewer parameters than the
+    // concrete templates of another spec loaded with it, and must not take their requests.
+    const matcher = createOperationMatcher(
+      loadOperations({
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1' },
+        servers: [{ url: 'https://management.azure.com' }],
+        paths: {
+          '/{resourceId}': {
+            get: {
+              operationId: 'getResource',
+              parameters: [
+                {
+                  name: 'resourceId',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'string' },
+                  'x-ms-skip-url-encoding': true,
+                },
+              ],
+              responses: ok,
+            },
+          },
+          '/subscriptions/{subscriptionId}/resourceGroups/{rg}/providers/Microsoft.ContainerService/managedClusters/{name}':
+            { get: { operationId: 'getCluster', responses: ok } },
+        },
+      })
+    );
+
+    expect(
+      match(
+        matcher,
+        'GET',
+        'https://management.azure.com/subscriptions/s1/resourceGroups/r1/providers/Microsoft.ContainerService/managedClusters/c1'
+      )
+    ).toEqual({
+      operation: 'getCluster',
+      pathParameters: { subscriptionId: 's1', rg: 'r1', name: 'c1' },
+    });
+    // Anything the concrete template does not match still reaches the catch-all.
+    expect(
+      match(matcher, 'GET', 'https://management.azure.com/subscriptions/s1/resourceGroups/r1')
+    ).toEqual({
+      operation: 'getResource',
+      pathParameters: { resourceId: 'subscriptions/s1/resourceGroups/r1' },
+    });
+  });
+
   it('prefers the template with more literal text among as many parameters', () => {
     const matcher = createMatcher([{ url: 'https://api.example.com' }]);
 
