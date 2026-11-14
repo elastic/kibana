@@ -493,7 +493,8 @@ export function timeSeriesExplorerServiceFactory(
     nonBlankEntities: any[],
     searchBounds: any,
     selectedJob: Job,
-    functionDescription?: string | undefined
+    functionDescription?: string | undefined,
+    signal?: AbortSignal
   ): Observable<FocusData> {
     const esFunctionToPlotIfMetric =
       functionDescription !== undefined
@@ -539,6 +540,7 @@ export function timeSeriesExplorerServiceFactory(
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
           detectorIndex,
           entities: nonBlankEntities,
+          signal,
         })
         .pipe(
           catchError((resp) =>

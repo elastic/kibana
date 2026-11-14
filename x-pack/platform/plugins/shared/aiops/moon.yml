@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/logging'
   - '@kbn/ml-agg-utils'
+  - '@kbn/ml-cancellable-search'
   - '@kbn/ml-category-validator'
   - '@kbn/ml-date-picker'
   - '@kbn/ml-error-utils'
@@ -74,6 +75,7 @@ dependsOn:
   - '@kbn/presentation-util-plugin'
   - '@kbn/react-kibana-mount'
   - '@kbn/saved-search-plugin'
+  - '@kbn/scout'
   - '@kbn/search-types'
   - '@kbn/share-plugin'
   - '@kbn/shared-ux-utility'
@@ -107,6 +109,7 @@ fileGroups:
     - public/**/*
     - scripts/**/*
     - server/**/*
+    - test/scout/**/*
     - types/**/*
     - '!target/**/*'
 tasks: {}

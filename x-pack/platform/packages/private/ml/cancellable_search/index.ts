@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { RequestCancellationManager } from './src/request_cancellation_manager';
 export { useCancellableSearch, type UseCancellableSearch } from './src/use_cancellable_search';

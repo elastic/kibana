@@ -6,6 +6,7 @@ plugins:
     - agent_builder_dashboards
     - agentic_investigations
     - ai_anonymization_settings
+    - aiops
     - alerting
     - alerting_v2
     - apm
@@ -124,9 +125,9 @@ plugins:
     - vis_types/vega
     - visualizations
     - watcher
+    - workflowsExtensionsExample
     - workflows_extensions
     - workflows_management
-    - workflowsExtensionsExample
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
 

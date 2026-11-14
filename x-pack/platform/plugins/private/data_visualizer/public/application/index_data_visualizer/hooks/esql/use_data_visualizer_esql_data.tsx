@@ -337,7 +337,7 @@ export const useESQLDataVisualizerData = (
     timeFieldName,
     queryHistoryStatus,
     exampleDocs,
-  } = useESQLOverallStatsData(fieldStatsRequest);
+  } = useESQLOverallStatsData(fieldStatsRequest, input.requestCancellationManager);
 
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded] = useState(defaults.metricsLoaded);
@@ -421,6 +421,7 @@ export const useESQLDataVisualizerData = (
     filter: fieldStatsRequest?.filter,
     limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
     timeRange: fieldStatsRequest?.timeRange,
+    requestCancellationManager: input.requestCancellationManager,
   });
 
   useEffect(
@@ -709,6 +710,8 @@ export const useESQLDataVisualizerData = (
   return {
     totalCount,
     progress: combinedProgress,
+    // The table shouldn't keep showing a loading state for a cancelled fetch
+    cancelled: Boolean(overallStatsProgress.cancelled || fieldStatsProgress.cancelled),
     overallStatsProgress,
     configs,
     // Column with action to lens, data view editor, etc

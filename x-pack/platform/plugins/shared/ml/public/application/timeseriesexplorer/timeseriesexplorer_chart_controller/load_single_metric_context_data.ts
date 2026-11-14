@@ -19,6 +19,7 @@ import {
   isSourceDataChartableForDetector,
   mlFunctionToESAggregation,
 } from '../../../../common/util/job_utils';
+import { takeUntilAborted } from '../../util/take_until_aborted';
 import { isMetricDetector } from '../get_function_description';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer_constants';
 import type { TimeSeriesExplorerZoomState } from './resolve_context_finish_focus_range';
@@ -50,7 +51,7 @@ export function getForecastAggTypeForContextLoad(
 
 /**
  * If `signal` aborts before `task()` settles, resolves `null` immediately so hosts can ignore stale work.
- * In-flight Elasticsearch requests are not cancelled unless lower layers pass `signal` into HTTP clients.
+ * The task itself also receives `signal` so in-flight HTTP requests are cancelled.
  */
 async function runUnlessAborted<T>(
   signal: AbortSignal | undefined,
@@ -116,7 +117,8 @@ export interface LoadSingleMetricContextDataDeps {
       entityFields: LoadSingleMetricContextDataEntityControl[],
       earliestMs: number,
       latestMs: number,
-      metricFunctionDescription?: string
+      metricFunctionDescription?: string,
+      signal?: AbortSignal
     ) => Promise<{ success: boolean; results: SmvChartDetails }>;
   };
   mlResultsService: {
@@ -127,7 +129,8 @@ export interface LoadSingleMetricContextDataDeps {
       latestMs: number,
       intervalMs: number,
       /** `aggregationTypeTransform.toES(functionDescription)` for metric detectors. */
-      functionToPlotByIfMetric: string | undefined
+      functionToPlotByIfMetric: string | undefined,
+      signal?: AbortSignal
     ) => Promise<{ results: Record<string, unknown> }>;
   };
   mlForecastService: {
@@ -212,7 +215,7 @@ export interface LoadSingleMetricContextDataSuccess {
  *
  * Pass `signal` from a per-load `AbortController`: when aborted, this function resolves **`null`**
  * as soon as the abort wins the race (still combine with `loadCounter` checks in React). Underlying
- * HTTP may complete in the background until services accept `AbortSignal`.
+ * in-flight HTTP requests are aborted via the same signal.
  */
 export async function loadSingleMetricContextData(
   params: LoadSingleMetricContextDataParams
@@ -281,16 +284,20 @@ async function executeLoadSingleMetricContextData(
   const latestMs = searchBounds.max.valueOf();
 
   // Four parallel requests — order MUST match `errorLabels` after `allSettled` (rejection index → toast).
+  // Observable requests are cancelled by unsubscribing when the signal aborts; promise-based
+  // requests receive the signal directly.
   const metricPromise = lastValueFrom(
-    deps.mlTimeSeriesSearchService.getMetricData(
-      selectedJob,
-      detectorIndex,
-      nonBlankEntities,
-      earliestMs,
-      latestMs,
-      intervalMs,
-      functionToPlotByIfMetric
-    )
+    deps.mlTimeSeriesSearchService
+      .getMetricData(
+        selectedJob,
+        detectorIndex,
+        nonBlankEntities,
+        earliestMs,
+        latestMs,
+        intervalMs,
+        functionToPlotByIfMetric
+      )
+      .pipe(takeUntilAborted(signal))
   );
 
   const swimlanePromise = deps.mlResultsService.getRecordMaxScoreByTime(
@@ -299,7 +306,8 @@ async function executeLoadSingleMetricContextData(
     earliestMs,
     latestMs,
     intervalMs,
-    functionToPlotByIfMetric
+    functionToPlotByIfMetric,
+    signal
   );
 
   const chartDetailsPromise = deps.mlTimeSeriesSearchService.getChartDetails(
@@ -309,25 +317,28 @@ async function executeLoadSingleMetricContextData(
     entityControls,
     earliestMs,
     latestMs,
-    functionDescription
+    functionDescription,
+    signal
   );
 
   const forecastPromise =
     selectedForecastId !== undefined
       ? lastValueFrom(
-          deps.mlForecastService.getForecastData(
-            selectedJob,
-            detectorIndex,
-            selectedForecastId,
-            nonBlankEntities,
-            earliestMs,
-            latestMs,
-            intervalMs,
-            // If `detectorIndex` is out of range, `detectors[detectorIndex]` is undefined and this throws.
-            getForecastAggTypeForContextLoad(modelPlotEnabled, {
-              function: selectedJob.analysis_config.detectors[detectorIndex].function ?? '',
-            })
-          )
+          deps.mlForecastService
+            .getForecastData(
+              selectedJob,
+              detectorIndex,
+              selectedForecastId,
+              nonBlankEntities,
+              earliestMs,
+              latestMs,
+              intervalMs,
+              // If `detectorIndex` is out of range, `detectors[detectorIndex]` is undefined and this throws.
+              getForecastAggTypeForContextLoad(modelPlotEnabled, {
+                function: selectedJob.analysis_config.detectors[detectorIndex].function ?? '',
+              })
+            )
+            .pipe(takeUntilAborted(signal))
         )
       : Promise.resolve(null);
 

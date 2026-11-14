@@ -7,7 +7,9 @@
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { StateComparators } from '@kbn/presentation-publishing';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { FieldStatsInitialState } from '../../../../../common/embeddables/types';
 import { FieldStatsInitializerViewType } from '../../../../../common/embeddables/types';
@@ -48,8 +50,11 @@ export const initializeFieldStatsControls = (
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
+  const requestCancellationManager = new RequestCancellationManager();
+
   const updateUserInput = (update: FieldStatsInitialState, shouldResetData = false) => {
     if (shouldResetData) {
+      requestCancellationManager.resumeAfterCancellation();
       resetData$.next(Date.now());
     }
     const viewType = update.view_type ?? viewType$.value;
@@ -73,6 +78,7 @@ export const initializeFieldStatsControls = (
   };
 
   const reinitializeState = (nextState: FieldStatsInitialState) => {
+    requestCancellationManager.resumeAfterCancellation();
     const viewType = nextState.view_type ?? defaultViewType;
     viewType$.next(viewType);
     dataViewId$.next(
@@ -84,7 +90,17 @@ export const initializeFieldStatsControls = (
 
   const onRenderComplete = () => dataLoading$.next(false);
   const onLoading = (v: boolean) => dataLoading$.next(v);
-  const onError = (error?: Error) => blockingError$.next(error);
+  const onError = (error?: Error) => {
+    // A cancellation is not a panel error
+    if (error?.name === 'AbortError') return;
+    blockingError$.next(error);
+  };
+  const cancelRequests = (reason?: AbortReason) => {
+    requestCancellationManager.cancel(reason);
+    // Without this the dashboard keeps showing the panel as loading, which keeps the
+    // cancel button visible and blocks `waitForPanelsToLoad$`.
+    dataLoading$.next(false);
+  };
 
   return {
     fieldStatsControlsApi: {
@@ -100,6 +116,8 @@ export const initializeFieldStatsControls = (
       onRenderComplete,
       onLoading,
       onError,
+      cancelRequests,
+      requestCancellationManager,
     },
     fieldStatsStateManager: {
       anyStateChange$: merge(

@@ -20,6 +20,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { PublishesFilters } from '@kbn/presentation-publishing';
 import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
@@ -61,6 +62,8 @@ export interface LogRateAnalysisEmbeddableWrapperProps {
   onError: (error: Error) => void;
   windowParameters?: WindowParameters;
   filtersApi?: PublishesFilters;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
   parentApi: unknown;
 }
 
@@ -75,6 +78,9 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   lastReloadRequestTime,
   windowParameters,
   filtersApi,
+  onLoading,
+  onRenderComplete,
+  requestCancellationManager,
   parentApi,
 }) => {
   const deps = useMemo(() => {
@@ -179,7 +185,14 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
               >
                 <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                   <LogRateAnalysisReduxProvider initialAnalysisStart={windowParameters}>
-                    <LogRateAnalysisForEmbeddable timeRange={timeRange} parentApi={parentApi} />
+                    <LogRateAnalysisForEmbeddable
+                      timeRange={timeRange}
+                      onLoading={onLoading}
+                      onRenderComplete={onRenderComplete}
+                      requestCancellationManager={requestCancellationManager}
+                      lastReloadRequestTime={lastReloadRequestTime}
+                      parentApi={parentApi}
+                    />
                   </LogRateAnalysisReduxProvider>
                 </FilterQueryContextProvider>
               </DataSourceContextProvider>

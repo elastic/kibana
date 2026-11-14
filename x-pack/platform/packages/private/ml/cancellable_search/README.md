@@ -1,3 +1,3 @@
 # @kbn/ml-cancellable-search
 
-React hook for cancellable data searching
+`RequestCancellationManager` and a React hook for cancelling in-flight ML embeddable searches.

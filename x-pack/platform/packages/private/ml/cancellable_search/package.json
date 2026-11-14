@@ -1,6 +1,6 @@
 {
   "name": "@kbn/ml-cancellable-search",
-  "description": "React hook for cancellable data searching",
+  "description": "Request cancellation helpers for ML embeddable searches",
   "author": "Machine Learning UI",
   "private": true,
   "version": "1.0.0",

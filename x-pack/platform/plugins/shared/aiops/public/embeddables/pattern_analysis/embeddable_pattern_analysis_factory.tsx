@@ -10,6 +10,7 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import {
   apiHasExecutionContext,
   apiPublishesFilters,
@@ -20,10 +21,12 @@ import {
   timeRangeComparators,
   titleComparators,
 } from '@kbn/presentation-publishing';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
 import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import { getPatternAnalysisComponent } from '../../shared_components';
@@ -129,6 +132,8 @@ export const getPatternAnalysisEmbeddableFactory = (
         },
       });
 
+      const requestCancellationManager = new RequestCancellationManager();
+
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
@@ -165,7 +170,26 @@ export const getPatternAnalysisEmbeddableFactory = (
         dataLoading$,
         blockingError$,
         dataSources$,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          dataLoading$.next(false);
+        },
       });
+
+      // Starting a new load lifts a previous cancellation. Besides `fetch$`, the panel
+      // refetches whenever one of its configuration subjects changes.
+      const fetchSubscription = merge(
+        fetch$(api),
+        ...[
+          patternAnalysisControlsApi.dataViewId,
+          patternAnalysisControlsApi.fieldName,
+          patternAnalysisControlsApi.minimumTimeRangeOption,
+          patternAnalysisControlsApi.randomSamplerMode,
+          patternAnalysisControlsApi.randomSamplerProbability,
+        ].map((subject: Observable<unknown>) => subject.pipe(skip(1)))
+      ).subscribe(() => requestCancellationManager.startLoad());
 
       const PatternAnalysisComponent = getPatternAnalysisComponent(coreStart, pluginStart);
 
@@ -173,7 +197,11 @@ export const getPatternAnalysisEmbeddableFactory = (
       const onRenderComplete = () => {
         dataLoading$.next(false);
       };
-      const onError = (error: Error) => blockingError$.next(error);
+      const onError = (error: Error) => {
+        // A cancellation is not a panel error
+        if (error?.name === 'AbortError') return;
+        blockingError$.next(error);
+      };
 
       return {
         api,
@@ -181,6 +209,10 @@ export const getPatternAnalysisEmbeddableFactory = (
           if (!apiHasExecutionContext(parentApi)) {
             throw new Error('Parent API does not have execution context');
           }
+
+          useEffect(() => {
+            return () => fetchSubscription.unsubscribe();
+          }, []);
 
           const [
             dataViewId,
@@ -235,6 +267,7 @@ export const getPatternAnalysisEmbeddableFactory = (
               onError={onError}
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
+              requestCancellationManager={requestCancellationManager}
             />
           );
         },
