@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "integration_tests/**/*", "../../../../../typings/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/securitysolution-alerts-page-url",
