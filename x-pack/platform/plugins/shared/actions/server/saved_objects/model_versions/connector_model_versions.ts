@@ -14,7 +14,11 @@ import {
   rawConnectorSchemaV4,
   rawConnectorSchemaV5,
 } from '../schemas/raw_connector';
-import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
+import {
+  actionEncryptedRegistrationV2,
+  actionEncryptedRegistrationV3,
+  actionEncryptedRegistrationV4,
+} from '../action_encryption';
 
 /** Empty string and null are not credentials. v3 encrypts `""`, so this must see the decrypted value. */
 const storedIdentityPresent = (value: unknown): boolean =>
@@ -101,4 +105,22 @@ export const connectorModelVersions = (
       forwardCompatibility: rawConnectorSchemaV5.extends({}, { unknowns: 'ignore' }),
     },
   },
+  // Preview connectors stored the ingest HMAC on `config`. That attribute is in AAD,
+  // so removing the leftover key re-encrypts. The live hash is on connector_ingress_credential.
+  '6': encryptedSavedObjects.createModelVersion({
+    modelVersion: {
+      changes: [
+        {
+          type: 'data_removal',
+          removedAttributePaths: ['config.ingestTokenHash'],
+        },
+      ],
+      schemas: {
+        create: rawConnectorSchemaV5,
+        forwardCompatibility: rawConnectorSchemaV5.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    inputType: actionEncryptedRegistrationV4,
+    outputType: actionEncryptedRegistrationV4,
+  }),
 });

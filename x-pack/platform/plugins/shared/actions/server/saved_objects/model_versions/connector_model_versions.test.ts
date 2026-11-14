@@ -20,7 +20,22 @@ import {
   rawConnectorSchemaV5,
 } from '../schemas/raw_connector';
 import { connectorModelVersions } from './connector_model_versions';
-import { actionEncryptedRegistrationV2, actionEncryptedRegistrationV3 } from '../action_encryption';
+import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
+import { actionMappings } from '../mappings';
+import {
+  actionEncryptedRegistrationV2,
+  actionEncryptedRegistrationV3,
+  actionEncryptedRegistrationV4,
+} from '../action_encryption';
+
+interface PreviewActionAttributes {
+  actionTypeId: string;
+  name: string;
+  isMissingSecrets: boolean;
+  config: Record<string, unknown>;
+  secrets: string;
+}
 
 describe('Connector Model Versions', () => {
   const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -406,6 +421,54 @@ describe('Connector Model Versions', () => {
           fixture['10.5.0'][index]
         );
       });
+    });
+  });
+
+  describe('version 6', () => {
+    it('re-encrypts while removing the leftover config hash', () => {
+      expect(encryptedSavedObjects.createModelVersion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputType: actionEncryptedRegistrationV4,
+          outputType: actionEncryptedRegistrationV4,
+        })
+      );
+      const version6 = versions['6'] as SavedObjectsFullModelVersion;
+      expect(version6.changes).toEqual([
+        {
+          type: 'data_removal',
+          removedAttributePaths: ['config.ingestTokenHash'],
+        },
+      ]);
+    });
+
+    it('drops config.ingestTokenHash and keeps the rest of the connector', () => {
+      const migrator = createModelVersionTestMigrator({
+        type: {
+          name: ACTION_SAVED_OBJECT_TYPE,
+          hidden: true,
+          namespaceType: 'multiple-isolated',
+          mappings: actionMappings,
+          modelVersions: versions,
+        },
+      });
+      const migrated = migrator.migrate<PreviewActionAttributes, PreviewActionAttributes>({
+        document: {
+          id: 'preview-connector',
+          type: ACTION_SAVED_OBJECT_TYPE,
+          attributes: {
+            actionTypeId: '.inboundWebhook',
+            name: 'preview',
+            isMissingSecrets: false,
+            config: { ingestTokenHash: 'a'.repeat(64), url: 'https://example.com' },
+            secrets: '{}',
+          },
+          references: [],
+        },
+        fromVersion: 5,
+        toVersion: 6,
+      });
+
+      expect(migrated.attributes.config).toEqual({ url: 'https://example.com' });
     });
   });
 });

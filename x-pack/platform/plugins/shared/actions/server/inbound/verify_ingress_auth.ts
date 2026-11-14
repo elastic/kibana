@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { timingSafeEqual } from 'node:crypto';
+import { computeTokenHmac, timingSafeEqualHex } from '@kbn/crypto';
 
-import { computeIngestTokenHash } from './compute_ingest_token_hash';
 import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../common/routes/events/apis/ingest';
 
 const getAuthorizationHeaderValue = (
@@ -72,15 +71,6 @@ export const verifyIngestToken = ({
   providedToken: string;
   ingestTokenHash: string;
 }): boolean => {
-  const expectedHash = computeIngestTokenHash({
-    connectorId,
-    spaceId,
-    token: providedToken,
-  });
-  const expected = Buffer.from(expectedHash, 'hex');
-  const stored = Buffer.from(ingestTokenHash, 'hex');
-  if (expected.length === 0 || expected.length !== stored.length) {
-    return false;
-  }
-  return timingSafeEqual(expected, stored);
+  const expectedHash = computeTokenHmac(providedToken, connectorId, spaceId);
+  return timingSafeEqualHex(expectedHash, ingestTokenHash);
 };
