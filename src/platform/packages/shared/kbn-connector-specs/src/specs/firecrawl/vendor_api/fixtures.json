@@ -23,7 +23,10 @@
           "data": []
         }
       }
-    ]
+    ],
+    "responseChecks": {
+      "boundary": "The action starts a crawl and polls it, so it needs the responses above, a crawl id and then a completed status, to run at all; sampled responses give it neither, so boundary responses can't be tried for it"
+    }
   },
   "map": {
     "queries": [

@@ -11,6 +11,8 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import type { ConnectorSpec } from '../../connector_spec';
+import { checkRecordedConnector } from './check_recorded_connector';
+import { describeResponseFindings } from './check_response_handling';
 import { loadVendorSpec } from './load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from './load_vendor_specs';
 import type { VendorApiManifest } from './manifest';
@@ -45,6 +47,9 @@ export interface SourceDrift {
  * - `healthy`: the actions pass against the committed snapshots and the latest specs.
  * - `vendor-drift`: they pass against the snapshots but not against the latest specs.
  * - `kibana-regression`: they fail against the snapshots already.
+ *
+ * Passing means the recording finds no problem and the response handling checks find none either:
+ * how the handlers handle boundary, paginated and error responses.
  * - `unknown`: a latest spec couldn't be loaded.
  */
 export type DriftVerdict = 'healthy' | 'vendor-drift' | 'kibana-regression' | 'unknown';
@@ -57,9 +62,12 @@ export interface ConnectorDrift {
   readonly sources: Readonly<Record<string, SourceDrift>>;
   /** Whether the actions call other operations against the latest specs. */
   readonly operationsChanged: boolean;
-  /** Problems recording the actions against the committed snapshots. */
+  /** Problems recording the actions, and handling responses, against the committed snapshots. */
   readonly snapshotProblems: readonly string[];
-  /** Problems recording them against the latest specs; undefined when those didn't load. */
+  /**
+   * Problems recording them, and handling responses, against the latest specs, beyond those they
+   * have against the snapshots; undefined when those didn't load.
+   */
   readonly latestProblems?: readonly string[];
   readonly verdict: DriftVerdict;
   /** Overlay actions that no longer apply to the latest specs. */
@@ -112,6 +120,19 @@ const toSpecChange = (entry: OasdiffEntry): SpecChange => ({
 const message = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+// How the handlers handle boundary, paginated and error responses against the artifacts in a
+// folder. A check that can't run is a problem too.
+const responseProblemsOf = async (
+  connector: ConnectorSpec,
+  directory: string
+): Promise<string[]> => {
+  try {
+    return describeResponseFindings(await checkRecordedConnector({ connector, directory }));
+  } catch (error) {
+    return [`The response handling checks couldn't run: ${message(error)}`];
+  }
+};
+
 // What the actions call; `apiVersion` and `fetchedAt` change without the contract changing.
 const callsOf = ({ operations, unmatched }: VendorApiManifest): string =>
   toStableJson({ operations, unmatched: unmatched ?? {} });
@@ -163,15 +184,18 @@ const compareWithLatest = async ({
   fetchText,
   now,
   diff,
+  knownProblems,
 }: Pick<DetectDriftOptions, 'connector' | 'directory' | 'fetchText' | 'now'> & {
   readonly manifest: VendorApiManifest;
   readonly diff: DiffSpecs;
+  /** The problems against the snapshots, which aren't drift when the latest specs have them. */
+  readonly knownProblems: ReadonlySet<string>;
 }): Promise<LatestComparison> => {
   const copy = await fs.mkdtemp(path.join(os.tmpdir(), 'connector-drift-'));
   try {
     await fs.cp(directory, copy, { recursive: true });
     const overlayFindings: string[] = [];
-    const problems = await updateVendorApi({
+    const recorded = await updateVendorApi({
       connector,
       directory: copy,
       refresh: true,
@@ -186,9 +210,15 @@ const compareWithLatest = async ({
         },
       },
     }).then(
-      (result) => result.problems,
-      (error) => [message(error)]
+      (result) => ({ problems: result.problems, refreshed: true }),
+      (error) => ({ problems: [message(error)], refreshed: false })
     );
+    // The handlers against the refreshed artifacts, unless refreshing them failed, as they would
+    // then be the committed ones again.
+    const responseProblems = recorded.refreshed
+      ? (await responseProblemsOf(connector, copy)).filter((problem) => !knownProblems.has(problem))
+      : [];
+    const problems = [...recorded.problems, ...responseProblems];
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
     for (const name of Object.keys(manifest.sources)) {
@@ -242,7 +272,7 @@ export const detectDrift = async ({
   const manifest = parseManifest(manifestText);
   const quiet: VendorApiLog = { info: () => {}, warning: () => {} };
 
-  const snapshot = await updateVendorApi({
+  const recordedSnapshot = await updateVendorApi({
     connector,
     directory,
     check: true,
@@ -253,6 +283,7 @@ export const detectDrift = async ({
     ({ problems }) => problems,
     (error) => [message(error)]
   );
+  const snapshot = [...recordedSnapshot, ...(await responseProblemsOf(connector, directory))];
 
   // Each document is fetched once, for the reachability check and the recording alike.
   const fetched = new Map<string, Promise<string>>();
@@ -274,7 +305,15 @@ export const detectDrift = async ({
 
   const latest =
     Object.keys(sources).length === 0
-      ? await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff })
+      ? await compareWithLatest({
+          connector,
+          directory,
+          manifest,
+          fetchText: fetchOnce,
+          now,
+          diff,
+          knownProblems: new Set(snapshot),
+        })
       : undefined;
 
   const drift = {

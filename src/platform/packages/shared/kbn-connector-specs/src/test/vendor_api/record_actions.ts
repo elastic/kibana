@@ -119,7 +119,7 @@ const isQueryCall = (query: QueryOperation, call: ContractCall): boolean => {
 };
 
 // Required properties only, so optional settings such as custom base URLs keep their defaults.
-const sampleConfig = async ({ schema }: ConnectorSpec): Promise<Record<string, unknown>> => {
+export const sampleConfig = async ({ schema }: ConnectorSpec): Promise<Record<string, unknown>> => {
   if (!schema) {
     return {};
   }
@@ -129,18 +129,18 @@ const sampleConfig = async ({ schema }: ConnectorSpec): Promise<Record<string, u
   return (config as Record<string, unknown> | undefined) ?? {};
 };
 
-const authTypeIdsOf = ({ auth }: ConnectorSpec): string[] =>
+export const authTypeIdsOf = ({ auth }: ConnectorSpec): string[] =>
   auth?.types.length
     ? auth.types.map((definition) =>
         typeof definition === 'string' ? definition : definition.type
       )
     : ['none'];
 
-const errorMessage = (error: unknown): string =>
+export const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 // A list of overrides generates the inputs once per entry; inputs that come out the same run once.
-const generateFixtureInputs = async (
+export const generateFixtureInputs = async (
   definition: ActionDefinition,
   input: ActionFixture['input']
 ): Promise<GeneratedInputs> => {

@@ -783,6 +783,42 @@ Other handler errors, auth types that can't be used against the contract mock, a
 - a connector has both a `vendor_api/manifest.json` and an exemption, or an exemption names no connector;
 - coverage shrinks since the merge base (`GITHUB_PR_MERGE_BASE` in CI, otherwise the merge base with `upstream/main` or `origin/main`): a connector that had a `vendor_api/manifest.json` there no longer has one, or a new connector has neither a `vendor_api/manifest.json` nor an exemption. Without a merge base, this check is skipped;
 - re-recording a connector against its committed snapshots finds a problem from the list above, or would change `manifest.json` or a snapshot. This catches actions added or changed without rerunning the script.
+- an action mishandles a response its vendor can send (see "Response handling checks" below).
+
+### Response handling checks
+
+The recorder answers every request with one sampled success, so it can't see how handlers cope with other responses. The contract test also runs each action of every connector with a `vendor_api/` folder against three kinds of response (`checkResponseHandling` in `src/test/vendor_api/check_response_handling.ts`):
+
+- **Boundary responses**: values at the schema's bounds (longest strings, fullest arrays, last enum values). A handler that works with typical responses but throws on these fails. Requests the mock refuses are the recorder's concern, so they aren't reported here.
+- **Pagination**: for each operation with a `pagination` descriptor, against collections of no items, one, exactly one page and several pages. A handler that pages must stop within a bounded number of requests and return every item. One that sends a single request is taken to leave paging to the caller.
+- **Failures**: each operation an action calls is answered with 400, 401, 429 and 500 whether its spec declares them or not, and with every other error status it declares. The handler has to throw an explanatory error, so that Workflows fails the step (and can retry it) and Agent Builder gives the agent guidance for the status. It must not crash, as on a missing field in an error body, or return a result. A 404 is left out for `read` actions, where "no such resource" can be an answer, such as `{ found: false }`.
+
+Each action runs under the first of its auth types that it sends a request under, as an auth type may refuse the action before any request. Its operations are found with every generated input. The boundary and pagination runs don't serve the action's `responses` from `fixtures.json`, since those take precedence over the responses being tested. An action that can't run without them, such as one that polls until a fixture says a job is `completed`, is reported as skipped, so that lost coverage is visible: opt it out of the check with a reason. A collection is at most 2,500 items, so the multi-page check is skipped for a vendor whose pages hold more than 2,499 items.
+
+A failure names the action, the status or collection size and what the handler did. If an action behaves this way on purpose, opt it out of a check with a reason in its `fixtures.json` entry. Reviewers should read the reason:
+
+```json
+{
+  "cancelStatement": {
+    "responseChecks": { "errors": "A repeated cancel answers 422, which the action returns as a result." }
+  }
+}
+```
+
+`responseChecks` takes `boundary`, `pagination` and `errors`. `pagination` and `errors` also take `{ "reason": "…", "operations": [{ "source": "v1", "method": "post", "path": "/notes/batch/read" }] }`, which opts out only those operations, so the action's others are still checked:
+
+```json
+{
+  "getCrmObject": {
+    "responseChecks": {
+      "errors": {
+        "reason": "A ticket's notes are optional, so failing to look them up returns the ticket without them.",
+        "operations": [{ "source": "notes_v3", "method": "POST", "path": "/crm/v3/objects/notes/batch/read" }]
+      }
+    }
+  }
+}
+```
 
 ### `manifest.json`
 
@@ -843,6 +879,7 @@ Per action:
 - `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
 - `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec, and a `when` (`path`, `query` and `headers` by value, and the `body` fields it lists) to the requests with those values. Overrides that break the spec, or name an operation it lacks, are reported.
+- `responseChecks`: opts the action out of a response handling check (`boundary`, `pagination` or `errors`), with the reason it behaves differently on purpose. For `pagination` and `errors`, it can name the operations to opt out.
 
 `vendorApiFixturesSchema` is the schema.
 
@@ -862,7 +899,7 @@ For each connector it:
 - compares each regenerated snapshot with the committed one and classifies the changes with [`oasdiff`](https://github.com/oasdiff/oasdiff) `changelog`. The binary is `OASDIFF_BIN`, else `oasdiff` on the `PATH`, as for `@kbn/api-contracts`; Kibana's CI agents have it. A response that widens (a new enum value, a longer string) is breaking, since a connector reading the field may not handle it; deprecations are their own kind;
 - reports overlay actions that no longer match the latest specs.
 
-Each connector in the JSON report gets a `verdict`: `healthy`, `vendor-drift` (the actions pass against the snapshots but not the latest specs), `kibana-regression` (they fail against the snapshots already) or `unknown` (a spec didn't load). Its `outcome` says what to do: `none`, `refresh` (only non-breaking changes, or the actions now call other operations, and everything passes; a run with `--refresh` updates the artifacts) or `issue` (anything breaking, deprecated, unreachable, unclassified without `oasdiff`, failing, or a stale overlay action). A new `info.version` alone changes nothing, since some vendors bump it on every deploy.
+Each connector in the JSON report gets a `verdict`: `healthy`, `vendor-drift` (the actions pass against the snapshots but not the latest specs), `kibana-regression` (they fail against the snapshots already) or `unknown` (a spec didn't load). Passing includes the response handling checks (see "Response handling checks"): they run against the committed snapshots, and against the artifacts refreshed from the latest specs, where a problem the snapshots don't have is drift. A vendor documenting a new error status that a handler returns a result for, for example, is reported this way. Its `outcome` says what to do: `none`, `refresh` (only non-breaking changes, or the actions now call other operations, and everything passes; a run with `--refresh` updates the artifacts) or `issue` (anything breaking, deprecated, unreachable, unclassified without `oasdiff`, failing, or a stale overlay action). A new `info.version` alone changes nothing, since some vendors bump it on every deploy.
 
 A connector the check can't run on at all is reported with an `error` instead.
 
