@@ -215,7 +215,11 @@ export class EmbeddableEditorService {
     if (action === TransferAction.SaveByReference) {
       const { state } = options as ByReferenceTransferOptions;
       return {
-        serializedState: { ref_id: state.savedObjectId, overrides: {} },
+        serializedState: {
+          ref_id: state.savedObjectId,
+          selected_tab_id: state.selectedTabId,
+          overrides: {},
+        },
         controlGroupState: getControlsMissingFromDashboard({
           controlGroupState: state.controlGroupState ?? {},
           dashboardControlGroupState,

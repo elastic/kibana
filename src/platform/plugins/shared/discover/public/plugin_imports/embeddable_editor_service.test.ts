@@ -505,6 +505,7 @@ describe('EmbeddableEditorService', () => {
       path: '/app/dashboards#/create',
       state: {
         savedObjectId: 'saved-search-1',
+        selectedTabId: 'tab-1',
       },
     });
 
@@ -518,6 +519,7 @@ describe('EmbeddableEditorService', () => {
             type: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
               ref_id: 'saved-search-1',
+              selected_tab_id: 'tab-1',
               overrides: {},
             },
             embeddableId: undefined,
