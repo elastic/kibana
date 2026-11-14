@@ -10,12 +10,12 @@ import type { ApplicationRequestOptions } from '../hooks/use_application_data';
 
 /**
  * The options of an application's request with the Overview's filters and KQL in its query, and
- * `extra` params of the routes that take more, e.g. the percentile.
+ * `extra` params of the routes that take more, e.g. the percentile or the time zone.
  */
 export const withOverviewFilters = (
   { signal, params: { path, query } }: ApplicationRequestOptions,
   searchParams: OverviewSearchParams,
-  extra?: { percentile?: OverviewPercentileParam }
+  extra?: { percentile?: OverviewPercentileParam; timeZone?: string }
 ) => ({
   signal,
   params: { path, query: { ...query, ...searchParams, ...extra } },

@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { BrushEndListener, SettingsProps } from '@elastic/charts';
+import type { BrushEndListener, RectAnnotationProps, SettingsProps } from '@elastic/charts';
 import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
@@ -16,17 +16,25 @@ import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
 import { OverviewTrends } from './overview_trends';
 
 const mockBrushEndListeners: BrushEndListener[] = [];
+const mockShadedZones: RectAnnotationProps['dataValues'][] = [];
+const mockXDomains: SettingsProps['xDomain'][] = [];
 
-// jsdom draws no canvas to drag over, so the test calls the listener each chart registers.
+// jsdom draws no canvas to drag over, so the test calls the listener each chart registers, and
+// reads the zones `Endzones` hands to the annotation and the domain each chart is drawn over.
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
   const { createElement } = jest.requireActual('react');
   return {
     ...actual,
+    RectAnnotation: (props: RectAnnotationProps) => {
+      mockShadedZones.push(props.dataValues);
+      return null;
+    },
     Settings: (props: SettingsProps) => {
       if (props.onBrushEnd) {
         mockBrushEndListeners.push(props.onBrushEnd);
       }
+      mockXDomains.push(props.xDomain);
       return createElement(actual.Settings, props);
     },
   };
@@ -39,16 +47,22 @@ const POINTS: OverviewTrendPoint[] = [
   { timestamp: 2_000, pageLoads: 0, loadTimePercentileMs: null },
 ];
 
+// The buckets of `POINTS` are one second wide, so this range matches their edges.
+const MATCHING_RANGE = { start: 1_000, end: 3_000 };
+
 const renderTrends = (
   points: OverviewTrendPoint[] = POINTS,
   isLoading = false,
   onTimeRangeSelect = jest.fn(),
   percentile: OverviewPercentile = 75,
-  onPercentileChange = jest.fn()
+  onPercentileChange = jest.fn(),
+  range = MATCHING_RANGE
 ) =>
   render(
     <OverviewTrends
       points={points}
+      interval={{ value: 1, unit: 's' }}
+      range={range}
       pageLoads={points.reduce((sum, { pageLoads }) => sum + pageLoads, 0)}
       loadTimePercentileMs={1500.5}
       percentile={percentile}
@@ -70,6 +84,7 @@ const hasChart = (panel: HTMLElement) => within(panel).queryByRole('graphics-doc
 
 beforeEach(() => {
   mockBrushEndListeners.length = 0;
+  mockShadedZones.length = 0;
   window.localStorage.clear();
   jest.mocked(useKibanaServices).mockReturnValue({
     uiSettings: createUiSettingsMock(),
@@ -146,6 +161,34 @@ describe('OverviewTrends', () => {
 
     renderTrends();
     expect(screen.getByRole('button', { name: 'Bar' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  // The last bucket runs from 2_000 to 3_000, so the shading from 2_500 on is drawn only when the
+  // domain reaches past it: bars' histogram mode extends it, areas need it widened.
+  it.each([
+    ['area', { min: 1_000, max: 3_000 }],
+    ['bar', { min: 1_000, max: 2_000 }],
+  ])(
+    'shades the partial first and last buckets of both %s charts, inside their domain',
+    (chartType, xDomain) => {
+      window.localStorage.setItem(
+        'xpack.digitalExperience.overview.trendChartType',
+        JSON.stringify(chartType)
+      );
+      renderTrends(POINTS, false, jest.fn(), 75, jest.fn(), { start: 1_500, end: 2_500 });
+
+      expect(mockShadedZones.slice(-2)).toEqual([
+        [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
+        [{ coordinates: { x1: 1_500 } }, { coordinates: { x0: 2_500 } }],
+      ]);
+      expect(mockXDomains.slice(-2)).toEqual([xDomain, xDomain]);
+    }
+  );
+
+  it('shades nothing when the range matches the bucket edges', () => {
+    renderTrends();
+
+    expect(mockShadedZones.slice(-2)).toEqual([[], []]);
   });
 
   it('shows the loading state of both charts, not their values or empty message', () => {

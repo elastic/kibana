@@ -12,13 +12,32 @@ export interface TimeRangeQuery {
   start: string;
   end: string;
   environment?: string;
+  /** The IANA time zone of the histogram buckets, for the routes that chart over time. */
+  timeZone?: string;
 }
 
-/** The query the routes read the time range and environment from; no environment is all. */
+/** The query the routes read the time range, environment and time zone from; no environment is all. */
 export const toTimeRangeQuery = (
   { rangeFrom, rangeTo }: TimeRange,
-  environment: string | undefined
+  environment: string | undefined,
+  timeZone?: string
 ): TimeRangeQuery => {
   const { startDate, endDate } = getDateISORange({ from: rangeFrom, to: rangeTo });
-  return { start: startDate, end: endDate, ...(environment ? { environment } : {}) };
+  return {
+    start: startDate,
+    end: endDate,
+    ...(environment ? { environment } : {}),
+    ...(timeZone ? { timeZone } : {}),
+  };
+};
+
+/** Start and end of a queried time range, in epoch milliseconds. */
+export interface QueriedRange {
+  start: number;
+  end: number;
+}
+
+/** The range a query covers, which a relative one like "last 24 hours" resolves per request. */
+export const toQueriedRange = ({ start, end }: TimeRangeQuery): QueriedRange => {
+  return { start: Date.parse(start), end: Date.parse(end) };
 };

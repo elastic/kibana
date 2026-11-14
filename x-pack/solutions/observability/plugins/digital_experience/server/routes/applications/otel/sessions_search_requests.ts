@@ -44,6 +44,8 @@ export const sessionsSearch = ({
   start,
   end,
   environment,
+  interval,
+  timeZone,
 }: SearchParams): estypes.SearchRequest => ({
   index: SESSIONS_INDEX_PATTERN,
   size: 0,
@@ -92,9 +94,11 @@ export const sessionsSearch = ({
         },
         pageLoadsOverTime: {
           date_histogram: {
-            ...dateHistogram(start, end, 'start_time').date_histogram,
-            // The buckets of the range only, like the raw events', as sessions may start before it.
-            hard_bounds: { min: start, max: end },
+            ...dateHistogram({ start, end, interval, timeZone, field: 'start_time' })
+              .date_histogram,
+            // No buckets before the range's, as sessions may start before it. ES drops the bucket
+            // holding a max bound, and the query already ends the sessions' starts at `end`.
+            hard_bounds: { min: start },
           },
           aggs: { pageLoads: sum('page_load_count') },
         },

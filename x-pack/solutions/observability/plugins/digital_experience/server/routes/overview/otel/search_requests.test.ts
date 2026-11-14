@@ -7,7 +7,13 @@
 
 import { logsSearch, spansSearch } from './search_requests';
 
-const PARAMS = { serviceName: 'shop', start: 0, end: 60 * 60 * 1000 };
+const PARAMS = {
+  serviceName: 'shop',
+  start: 0,
+  end: 60 * 60 * 1000,
+  interval: { value: 60, unit: 's' as const },
+  timeZone: 'America/New_York',
+};
 
 const inEnvironmentOf = (request: ReturnType<typeof logsSearch>) =>
   request.aggs?.inEnvironment as { filter: unknown; aggs: Record<string, never> };
@@ -88,6 +94,7 @@ describe('logsSearch', () => {
       date_histogram: {
         field: '@timestamp',
         fixed_interval: '60s',
+        time_zone: 'America/New_York',
         min_doc_count: 0,
         extended_bounds: { min: 0, max: 60 * 60 * 1000 },
       },

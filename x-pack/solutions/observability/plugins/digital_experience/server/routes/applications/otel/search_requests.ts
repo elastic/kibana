@@ -10,6 +10,7 @@ import { termsQuery } from '@kbn/es-query';
 import { OTEL_EVENT_NAME, SERVICE_NAME } from '@kbn/apm-types';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
+import type { HistogramInterval } from '../../../../common/types/applications';
 import { dateHistogram } from '../../../lib/helpers/time_series';
 import { environmentFilter } from '../../../lib/helpers/environment';
 import {
@@ -38,6 +39,10 @@ export interface SearchParams {
   end: number;
   /** Only this environment's data when set. */
   environment?: string;
+  /** The width of the histogram buckets, from `getHistogramInterval`. */
+  interval: HistogramInterval;
+  /** IANA time zone the histogram buckets line up with. */
+  timeZone: string;
 }
 
 export interface SpansSearchParams extends SearchParams {
@@ -46,7 +51,13 @@ export interface SpansSearchParams extends SearchParams {
 }
 
 /** Page loads, JS errors and web vitals per application, from the logs. */
-export const logsSearch = ({ start, end, environment }: SearchParams): estypes.SearchRequest => ({
+export const logsSearch = ({
+  start,
+  end,
+  environment,
+  interval,
+  timeZone,
+}: SearchParams): estypes.SearchRequest => ({
   ...otelSearchDefaults(OTEL_LOGS_INDEX),
   query: {
     bool: {
@@ -81,7 +92,7 @@ export const logsSearch = ({ start, end, environment }: SearchParams): estypes.S
     },
     pageLoadsOverTime: {
       ...eventCount(EVENT_NAVIGATION_TIMING),
-      aggs: { histogram: dateHistogram(start, end) },
+      aggs: { histogram: dateHistogram({ start, end, interval, timeZone }) },
     },
   }),
 });

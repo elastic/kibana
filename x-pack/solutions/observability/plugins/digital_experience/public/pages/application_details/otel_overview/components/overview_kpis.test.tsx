@@ -33,6 +33,7 @@ const OVERVIEW: ApplicationOverview = {
     ttfb: NO_VITAL,
   },
   trend: [],
+  trendInterval: { value: 1, unit: 's' },
 };
 
 const renderKpis = (overview = OVERVIEW, isLoading = false, percentile: OverviewPercentile = 75) =>

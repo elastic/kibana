@@ -13,8 +13,14 @@ import type { ApplicationOverviewResponse } from '../../../common/types/overview
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { MAX_SERVICE_NAME_LENGTH } from '../../lib/constants';
 import { kueryToQuery } from '../../lib/helpers/kuery';
+import { getHistogramInterval } from '../../lib/helpers/time_series';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { START_AFTER_END_ISSUE, filteredTimeRangeShape, isStartBeforeEnd } from '../params';
+import {
+  START_AFTER_END_ISSUE,
+  filteredTimeRangeShape,
+  isStartBeforeEnd,
+  timeZoneShape,
+} from '../params';
 import { getOtelOverview } from './otel/get_otel_overview';
 
 export const APPLICATION_OVERVIEW_ENDPOINT =
@@ -35,6 +41,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       query: z
         .object({
           ...filteredTimeRangeShape(),
+          ...timeZoneShape(),
           // The percentile of the load time, as a string like the rest of the query; 75 when left out.
           percentile: z
             .enum(OVERVIEW_PERCENTILES.map(String))
@@ -46,7 +53,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
   ),
   handler: async ({ params, context, request }): Promise<ApplicationOverviewResponse> => {
     const { serviceName } = params.path;
-    const { environment, filters, percentile, kuery } = params.query;
+    const { environment, filters, percentile, kuery, timeZone } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
 
@@ -63,6 +70,8 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       filters: readOverviewFilters(filters),
       percentile,
       kuery: kueryToQuery(kuery),
+      interval: getHistogramInterval(start, end),
+      timeZone,
       signal,
     });
   },

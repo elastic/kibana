@@ -43,6 +43,7 @@ const searchOtelOverview = async ({
     overview: toOverview(
       searchParams.serviceName,
       searchParams.percentile ?? DEFAULT_OVERVIEW_PERCENTILE,
+      searchParams.interval,
       logs,
       spans
     ),

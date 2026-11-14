@@ -7,6 +7,8 @@
 
 import { classicSearch } from './search_requests';
 
+const PARAMS = { start: 10, end: 20, interval: { value: 1, unit: 's' as const }, timeZone: 'UTC' };
+
 const applicationAggsOf = (request: ReturnType<typeof classicSearch>) =>
   (
     request.aggs?.inEnvironment as {
@@ -16,11 +18,11 @@ const applicationAggsOf = (request: ReturnType<typeof classicSearch>) =>
 
 describe('classicSearch', () => {
   it('fails instead of returning partial results', () => {
-    expect(classicSearch({ start: 10, end: 20 }).allow_partial_search_results).toBe(false);
+    expect(classicSearch(PARAMS).allow_partial_search_results).toBe(false);
   });
 
   it('counts page loads from the page-load transactions only', () => {
-    expect(applicationAggsOf(classicSearch({ start: 10, end: 20 })).pageLoads).toEqual({
+    expect(applicationAggsOf(classicSearch(PARAMS)).pageLoads).toEqual({
       filter: {
         bool: {
           filter: [
@@ -33,13 +35,13 @@ describe('classicSearch', () => {
   });
 
   it('counts JS errors from the error documents', () => {
-    expect(applicationAggsOf(classicSearch({ start: 10, end: 20 })).jsErrors).toEqual({
+    expect(applicationAggsOf(classicSearch(PARAMS)).jsErrors).toEqual({
       filter: { bool: { filter: [{ term: { 'processor.event': 'error' } }] } },
     });
   });
 
   it('counts successful HTTP requests from the external spans', () => {
-    expect(applicationAggsOf(classicSearch({ start: 10, end: 20 })).httpSuccess).toEqual({
+    expect(applicationAggsOf(classicSearch(PARAMS)).httpSuccess).toEqual({
       filter: {
         bool: {
           filter: [
@@ -53,13 +55,18 @@ describe('classicSearch', () => {
   });
 
   it('lists up to 10 environments per application', () => {
-    expect(applicationAggsOf(classicSearch({ start: 10, end: 20 })).environments).toEqual({
+    expect(applicationAggsOf(classicSearch(PARAMS)).environments).toEqual({
       terms: { field: 'service.environment', size: 10 },
     });
   });
 
   it('counts the page loads over time in the selected environment', () => {
-    const { aggs } = classicSearch({ start: 0, end: 60 * 60 * 1000 }).aggs?.inEnvironment as {
+    const { aggs } = classicSearch({
+      start: 0,
+      end: 60 * 60 * 1000,
+      interval: { value: 60, unit: 's' },
+      timeZone: 'America/New_York',
+    }).aggs?.inEnvironment as {
       aggs: Record<string, unknown>;
     };
 
@@ -77,6 +84,7 @@ describe('classicSearch', () => {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: '60s',
+            time_zone: 'America/New_York',
             min_doc_count: 0,
             extended_bounds: { min: 0, max: 60 * 60 * 1000 },
           },
