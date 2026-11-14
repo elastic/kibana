@@ -611,6 +611,30 @@ describe('serializeScoutTestingScope', () => {
     });
   });
 
+  it('serialises the affected configs recorded on a dependency-tree scope', () => {
+    const scope: ScoutTestingScope = {
+      kind: 'dependency-tree',
+      affectedModuleIds: new Set(['@kbn/foo']),
+      affectedConfigPaths: new Set(['b/playwright.config.ts', 'a/playwright.config.ts']),
+    };
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo']))).toEqual({
+      kind: 'dependency-tree',
+      affectedModules: ['@kbn/foo'],
+      affectedConfigs: ['a/playwright.config.ts', 'b/playwright.config.ts'],
+    });
+  });
+
+  it('omits affectedConfigs when the dependency-tree config lookup failed', () => {
+    const scope: ScoutTestingScope = {
+      kind: 'dependency-tree',
+      affectedModuleIds: new Set(['@kbn/foo']),
+      affectedConfigPaths: undefined,
+    };
+    expect(serializeScoutTestingScope(scope, new Set(['@kbn/foo']))).not.toHaveProperty(
+      'affectedConfigs'
+    );
+  });
+
   it('produces an empty affectedModules array when no modules are affected', () => {
     const scope: ScoutTestingScope = { kind: 'full', reason: 'selective-disabled' };
     expect(serializeScoutTestingScope(scope, new Set())).toEqual({
