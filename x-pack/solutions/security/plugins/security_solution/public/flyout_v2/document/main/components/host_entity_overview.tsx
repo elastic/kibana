@@ -183,16 +183,17 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     [hostOSFamilyValue, renderCellActions, scopeId]
   );
 
+  const lastSeenValue =
+    entityRecord?.entity?.lifecycle?.last_seen ?? entityRecord?.entity?.lifecycle?.last_activity;
+
   const hostLastSeen: DescriptionList[] = useMemo(
     () => [
       {
         title: LAST_SEEN,
         description:
           hostName != null && hostName !== '' ? (
-            entityRecord?.entity?.lifecycle?.last_activity ? (
-              <PreferenceFormattedDateFromPrimitive
-                value={entityRecord.entity.lifecycle.last_activity}
-              />
+            lastSeenValue ? (
+              <PreferenceFormattedDateFromPrimitive value={lastSeenValue} />
             ) : (
               getEmptyTagValue()
             )
@@ -201,7 +202,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
           ),
       },
     ],
-    [hostName, entityRecord?.entity?.lifecycle?.last_activity]
+    [hostName, lastSeenValue]
   );
 
   const { euiTheme } = useEuiTheme();

@@ -47,6 +47,7 @@ const ENTITY_STORE_KEEP_FIELDS = [
   'asset.criticality',
   'entity.source',
   'entity.lifecycle.first_seen',
+  'entity.lifecycle.last_seen',
   'entity.lifecycle.last_activity',
   'entity.attributes.watchlists',
   'entity.attributes.managed',
@@ -57,6 +58,8 @@ const ENTITY_STORE_KEEP_FIELDS = [
 ] as const;
 
 const MINUTES_PER_DAY = 1440;
+
+const LAST_SEEN_ESQL = 'COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity)';
 
 const intervalToMinutes = (interval: string): number => {
   const match = interval.match(/^(\d+)([smhdwM])$/);
@@ -478,10 +481,10 @@ const buildLifecycleFilterClauses = ({
     clauses.push(`WHERE entity.lifecycle.first_seen <= "${escapeEsqlString(firstSeenBefore)}"`);
   }
   if (lastSeenAfter) {
-    clauses.push(`WHERE entity.lifecycle.last_activity >= "${escapeEsqlString(lastSeenAfter)}"`);
+    clauses.push(`WHERE ${LAST_SEEN_ESQL} >= "${escapeEsqlString(lastSeenAfter)}"`);
   }
   if (lastSeenBefore) {
-    clauses.push(`WHERE entity.lifecycle.last_activity <= "${escapeEsqlString(lastSeenBefore)}"`);
+    clauses.push(`WHERE ${LAST_SEEN_ESQL} <= "${escapeEsqlString(lastSeenBefore)}"`);
   }
   return clauses;
 };

@@ -130,6 +130,34 @@ describe('useEntityFromStore', () => {
       expect(result.current.aliasCount).toBe(0);
     });
 
+    it('reports last_seen as the last seen date, falling back to last_activity', async () => {
+      const withLifecycle = (lifecycle: Record<string, string>) =>
+        ({
+          ...hostRecord('host-1'),
+          entity: { id: 'host-1', name: 'host-1', type: 'host', lifecycle },
+        } as unknown as EntityStoreRecord);
+      const lastSeenFor = async (lifecycle: Record<string, string>) => {
+        mockFetchEntitiesListV2.mockResolvedValue({ records: [withLifecycle(lifecycle)] });
+        const { result } = renderHook(
+          () => useEntityFromStore({ entityId: 'host-1', entityType: 'host', skip: false }),
+          { wrapper: createWrapper() }
+        );
+        await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+        return result.current.lastSeen;
+      };
+
+      expect(
+        await lastSeenFor({
+          last_seen: '2024-01-01T00:00:00.000Z',
+          last_activity: '2024-02-01T00:00:00.000Z',
+        })
+      ).toBe('2024-01-01T00:00:00.000Z');
+      expect(await lastSeenFor({ last_activity: '2024-02-01T00:00:00.000Z' })).toBe(
+        '2024-02-01T00:00:00.000Z'
+      );
+      expect(await lastSeenFor({})).toBeNull();
+    });
+
     it('returns a null entityRecord when the returned record does not match entityId', async () => {
       mockFetchEntitiesListV2.mockResolvedValue({ records: [hostRecord('other-host')] });
 

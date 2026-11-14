@@ -225,7 +225,7 @@ const parseFirstValidTimestamp = (
 /**
  * Earliest first-seen and latest last-seen across the records (same lifecycle fields the single
  * entity view reads), so the group's activity window spans every member. A record's last seen is
- * its `last_activity`, falling back to `last_seen`. Malformed or empty timestamps are ignored;
+ * its `last_seen`, falling back to `last_activity`. Malformed or empty timestamps are ignored;
  * `null` when no record has a valid one.
  */
 export const getEntityGroupLifecycle = (
@@ -239,7 +239,7 @@ export const getEntityGroupLifecycle = (
     if (recordFirstSeen && (!firstSeen || recordFirstSeen.epoch < firstSeen.epoch)) {
       firstSeen = recordFirstSeen;
     }
-    const recordLastSeen = parseFirstValidTimestamp(last_activity, last_seen);
+    const recordLastSeen = parseFirstValidTimestamp(last_seen, last_activity);
     if (recordLastSeen && (!lastSeen || recordLastSeen.epoch > lastSeen.epoch)) {
       lastSeen = recordLastSeen;
     }
