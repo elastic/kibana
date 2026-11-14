@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -54,7 +55,7 @@ const setup = ({
     app,
     registerApp,
     license$,
-    start: () => plugin.start(coreStart, { licensing }),
+    start: () => plugin.start(coreStart, { data: dataPluginMock.createStartContract(), licensing }),
     stop: () => plugin.stop(),
   };
 };

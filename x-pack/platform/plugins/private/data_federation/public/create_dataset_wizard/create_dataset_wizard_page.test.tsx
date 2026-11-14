@@ -36,6 +36,10 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
+jest.mock('./preview_step/dataset_preview', () => ({
+  DatasetPreview: () => <div data-test-subj="mockDatasetPreview" />,
+}));
+
 describe('CreateDatasetWizardPage', () => {
   const clickNext = async (getByTestId: ReturnType<typeof render>['getByTestId']) => {
     await act(async () => {
@@ -225,7 +229,7 @@ describe('CreateDatasetWizardPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('creates a dataset through the dataset, mapping, and review steps then saves', async () => {
+  it('creates a dataset through the dataset, mapping, preview, and review steps then saves', async () => {
     const { getByTestId, getByText, findByTestId, history, add, loadDataSets, reportUiCounter } =
       renderWizard();
 
@@ -275,6 +279,14 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
       target: { value: 'event_time' },
     });
+    await clickNext(getByTestId);
+
+    expect(await waitFor(() => getByTestId('createDatasetWizardPreviewStep'))).toBeInTheDocument();
+    expect(getByTestId('mockDatasetPreview')).toBeInTheDocument();
+    expect(getByTestId('nextButton')).toHaveAttribute(
+      'data-telemetry-id',
+      'dataFederation-datasetWizard-preview-nextButton'
+    );
     await clickNext(getByTestId);
 
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
@@ -390,6 +402,8 @@ describe('CreateDatasetWizardPage', () => {
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
     await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardPreviewStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     expect(getByTestId('createDatasetWizardReview-partition_detection')).toHaveTextContent('Hive');
     await clickNext(getByTestId);
@@ -440,6 +454,8 @@ describe('CreateDatasetWizardPage', () => {
     ).toBeInTheDocument();
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardPreviewStep'))).toBeInTheDocument();
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     await clickNext(getByTestId);
@@ -519,6 +535,8 @@ describe('CreateDatasetWizardPage', () => {
       fireEvent.change(timestampPathInput, { target: { value: 'event_time' } });
     }
     await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardPreviewStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     await clickNext(getByTestId);
 
@@ -551,6 +569,8 @@ describe('CreateDatasetWizardPage', () => {
     ).toBeInTheDocument();
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardPreviewStep'))).toBeInTheDocument();
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     await clickNext(getByTestId);
@@ -603,6 +623,8 @@ describe('CreateDatasetWizardPage', () => {
 
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardPreviewStep'))).toBeInTheDocument();
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     await clickNext(getByTestId);
@@ -829,7 +851,9 @@ describe('CreateDatasetWizardPage', () => {
     await clickStep(getByTestId, 'review');
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
 
-    // Back twice: Review -> Mapping -> Additional settings
+    // Back three times: Review -> Preview results -> Mapping -> Additional settings
+    await clickBack(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardPreviewStep'))).toBeInTheDocument();
     await clickBack(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
     await clickBack(getByTestId);
