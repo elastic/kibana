@@ -127,7 +127,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
                 exampleConfigLink: (
                   <EuiLink
                     data-test-subj="enterpriseSearchDockerInstructionsStepExampleConfigFileLink"
-                    href="https://github.com/elastic/connectors/blob/main/config.yml.example"
+                    href="https://github.com/elastic/connectors/blob/main/app/connectors_service/config.yml.example"
                     target="_blank"
                     external
                   >
