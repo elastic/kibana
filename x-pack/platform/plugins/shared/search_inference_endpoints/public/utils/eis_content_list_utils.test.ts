@@ -19,8 +19,22 @@ import {
   getItemModelId,
   toGroupedModel,
 } from './eis_content_list_utils';
-import type { GroupedModel } from './eis_utils';
+import * as eisUtils from './eis_utils';
+import type { GroupedModel, TaskTypeCategory } from './eis_utils';
 import { EisModelStatus } from '../../common/types';
+
+const { getTaskTypeCategoryLabel } = jest.requireActual<typeof eisUtils>('./eis_utils');
+
+jest.mock('./eis_utils', () => ({
+  ...jest.requireActual('./eis_utils'),
+  getTaskTypeCategoryLabel: jest.fn(),
+}));
+
+const mockGetTaskTypeCategoryLabel = jest.mocked(eisUtils.getTaskTypeCategoryLabel);
+
+beforeEach(() => {
+  mockGetTaskTypeCategoryLabel.mockImplementation(getTaskTypeCategoryLabel);
+});
 
 const model = (
   modelName: string,
@@ -125,6 +139,26 @@ describe('createEisFindItems', () => {
   it('sorts type in descending order', async () => {
     const { items } = await findItems(
       findParams({ sort: { field: EIS_TYPE_SORT_FIELD, direction: 'desc' } })
+    );
+
+    expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
+      'Rerank',
+      'Generative',
+      'Embedding',
+    ]);
+  });
+
+  it('sorts type by the translated label instead of the category key', async () => {
+    const translatedLabels: Record<TaskTypeCategory, string> = {
+      Embedding: 'Zulu',
+      Generative: 'Mike',
+      Rerank: 'Alpha',
+      Decision: 'Bravo',
+    };
+    mockGetTaskTypeCategoryLabel.mockImplementation((category) => translatedLabels[category]);
+
+    const { items } = await findItems(
+      findParams({ sort: { field: EIS_TYPE_SORT_FIELD, direction: 'asc' } })
     );
 
     expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
