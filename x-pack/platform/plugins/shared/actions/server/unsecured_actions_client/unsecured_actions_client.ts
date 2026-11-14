@@ -42,6 +42,7 @@ export interface UnsecuredActionsClientOpts {
   kibanaIndices: string[];
   logger: Logger;
   connectorTypeRegistry: ActionTypeRegistry;
+  whenCatalogReady: () => Promise<void>;
 }
 
 type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
@@ -68,6 +69,8 @@ export class UnsecuredActionsClient {
     relatedSavedObjects,
     spaceId,
   }: UnsecuredExecuteOptions) {
+    await this.opts.whenCatalogReady();
+
     // Check that requesterId is allowed
     if (!ALLOWED_REQUESTER_IDS.includes(requesterId)) {
       throw new Error(
@@ -97,6 +100,8 @@ export class UnsecuredActionsClient {
     requesterId: string,
     actionsToExecute: ExecuteOptions[]
   ): Promise<ExecutionResponse> {
+    await this.opts.whenCatalogReady();
+
     // Check that requesterId is allowed
     if (!ALLOWED_REQUESTER_IDS.includes(requesterId)) {
       throw new Error(
