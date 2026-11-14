@@ -17,8 +17,15 @@ const ESQL_RULE_TYPE_TEST_SUBJ = 'esqlRuleType';
 const INVESTIGATION_FIELDS_TEST_SUBJ = 'detectionEngineStepAboutRuleInvestigationFields';
 const RULE_NAME_OVERRIDE_TEST_SUBJ = 'detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType';
 const INVESTIGATION_FIELD = '_custom_agent_name';
+// Full wizard flows chain several helper waits of up to 60 s each (Continue enabled after
+// ES|QL validation, step navigation retries), which can exceed the default per-test budget.
 const LONG_FLOW_EXTRA_TIMEOUT_MS = 120_000;
 const QUERY_ERROR_RETRY_TIMEOUT_MS = 30_000;
+// ES|QL validation and field-list loading are async; Continue stays disabled and combo-box
+// options stay empty until they settle, which can take tens of seconds on a cold worker.
+const ASYNC_VALIDATION_TIMEOUT_MS = 60_000;
+// One attempt inside a toPass retry loop: short, so a click that raced validation is retried.
+const RETRY_ATTEMPT_TIMEOUT_MS = 5_000;
 
 // Each space gets its own source index: global setup loads no auditbeat data and one shared index
 // name would race across parallel workers. Mappings alone are enough for ES|QL validation and
@@ -89,14 +96,14 @@ const openEsqlWizard = async (
  */
 const continueDefineStep = async (ruleCreateWizard: RuleCreateWizard) => {
   const { defineContinue, aboutRuleName } = ruleCreateWizard;
-  await expect(defineContinue).toBeEnabled({ timeout: 60_000 });
+  await expect(defineContinue).toBeEnabled({ timeout: ASYNC_VALIDATION_TIMEOUT_MS });
   await expect(async () => {
     if (!(await aboutRuleName.isVisible())) {
-      await defineContinue.click({ timeout: 5_000 });
+      await defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
     }
-    await expect(aboutRuleName).toBeVisible({ timeout: 5_000 });
-    await expect(aboutRuleName).toBeEditable({ timeout: 5_000 });
-  }).toPass({ timeout: 60_000 });
+    await expect(aboutRuleName).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+    await expect(aboutRuleName).toBeEditable({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+  }).toPass({ timeout: ASYNC_VALIDATION_TIMEOUT_MS });
 };
 
 /**
@@ -107,11 +114,11 @@ const continueAboutStep = async (ruleCreateWizard: RuleCreateWizard) => {
   const { aboutContinue, scheduleContinue } = ruleCreateWizard;
   await expect(async () => {
     if (!(await scheduleContinue.isVisible())) {
-      await aboutContinue.click({ timeout: 5_000 });
+      await aboutContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
     }
-    await expect(scheduleContinue).toBeVisible({ timeout: 5_000 });
-    await expect(scheduleContinue).toBeEnabled({ timeout: 5_000 });
-  }).toPass({ timeout: 60_000 });
+    await expect(scheduleContinue).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+    await expect(scheduleContinue).toBeEnabled({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+  }).toPass({ timeout: ASYNC_VALIDATION_TIMEOUT_MS });
 };
 
 /** Clicks "Continue" with a pending validation possibly swallowing the first click. */
@@ -120,10 +127,12 @@ const expectQueryBarErrorOnContinue = async (
   queryBar: Locator,
   expectedError: string
 ) => {
-  await expect(ruleCreateWizard.defineContinue).toBeEnabled({ timeout: 60_000 });
+  await expect(ruleCreateWizard.defineContinue).toBeEnabled({
+    timeout: ASYNC_VALIDATION_TIMEOUT_MS,
+  });
   await expect(async () => {
-    await ruleCreateWizard.defineContinue.click({ timeout: 5_000 });
-    await expect(queryBar).toContainText(expectedError, { timeout: 5_000 });
+    await ruleCreateWizard.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+    await expect(queryBar).toContainText(expectedError, { timeout: RETRY_ATTEMPT_TIMEOUT_MS });
   }).toPass({ timeout: QUERY_ERROR_RETRY_TIMEOUT_MS });
 };
 
@@ -212,7 +221,7 @@ spaceTest.describe(
         await ruleCreateWizard.expandAdvancedSettings();
         await formFieldComboBox(page, RULE_NAME_OVERRIDE_TEST_SUBJ).setSelectedOptions(
           [RULE_NAME_OVERRIDE],
-          { timeout: 60_000 }
+          { timeout: ASYNC_VALIDATION_TIMEOUT_MS }
         );
         await continueAboutStep(ruleCreateWizard);
         await ruleCreateWizard.scheduleContinue.click();
@@ -336,7 +345,7 @@ spaceTest.describe(
         await ruleCreateWizard.expandAdvancedSettings();
         await formFieldComboBox(page, INVESTIGATION_FIELDS_TEST_SUBJ).setSelectedOptions(
           [INVESTIGATION_FIELD],
-          { timeout: 60_000 }
+          { timeout: ASYNC_VALIDATION_TIMEOUT_MS }
         );
         await continueAboutStep(ruleCreateWizard);
         await ruleCreateWizard.scheduleContinue.click();
