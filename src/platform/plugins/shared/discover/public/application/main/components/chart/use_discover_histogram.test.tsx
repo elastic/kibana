@@ -523,6 +523,94 @@ describe('useDiscoverHistogram', () => {
     });
   });
 
+  describe('ES|QL chart loaded', () => {
+    const setupEsqlChart = async () => {
+      const { toolkit } = await setup();
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { esql: 'from *' } },
+        })
+      );
+      const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+      const { main$, documents$, totalHits$ } = dataStateContainer.data$;
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      dataStateContainer.fetchChart$ = fetch$;
+      const fetchAbortController = { current: new AbortController() };
+      dataStateContainer.getAbortController = () => fetchAbortController.current;
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
+      const api = createMockUnifiedHistogramApi();
+      const state$ = new BehaviorSubject<UnifiedHistogramState>({
+        chartHidden: false,
+        totalHitsStatus: UnifiedHistogramFetchStatus.loading,
+        totalHitsResult: undefined,
+      } as unknown as UnifiedHistogramState);
+      api.state$ = state$;
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      // start of a fetch, the chart receives the abort controller of it
+      act(() => {
+        main$.next({ fetchStatus: FetchStatus.LOADING });
+        documents$.next({ fetchStatus: FetchStatus.LOADING });
+        totalHits$.next({ fetchStatus: FetchStatus.LOADING });
+        fetch$.next({ abortController: fetchAbortController.current });
+      });
+      const setChartState = (
+        totalHitsStatus: UnifiedHistogramFetchStatus,
+        totalHitsResult?: number | Error
+      ) => {
+        act(() => {
+          state$.next({ ...state$.getValue(), totalHitsStatus, totalHitsResult });
+        });
+      };
+
+      return { hook, main$, totalHits$, fetchAbortController, setChartState };
+    };
+
+    it('should set main$ to PARTIAL and stop the chart loading when the chart completes with results', async () => {
+      const { hook, main$, totalHits$, setChartState } = await setupEsqlChart();
+      expect(hook.result.current.isChartLoading).toBe(true);
+      setChartState(UnifiedHistogramFetchStatus.complete, 5);
+      expect(main$.getValue().fetchStatus).toBe(FetchStatus.PARTIAL);
+      expect(totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.LOADING });
+      expect(hook.result.current.isChartLoading).toBe(false);
+    });
+
+    it('should ignore a chart of a previous fetch', async () => {
+      const { hook, main$, fetchAbortController, setChartState } = await setupEsqlChart();
+      // a new fetch started, but the chart didn't receive its params yet
+      fetchAbortController.current.abort();
+      fetchAbortController.current = new AbortController();
+      setChartState(UnifiedHistogramFetchStatus.complete, 5);
+      expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+      expect(hook.result.current.isChartLoading).toBe(true);
+    });
+
+    it('should ignore a chart without results', async () => {
+      const { hook, main$, setChartState } = await setupEsqlChart();
+      setChartState(UnifiedHistogramFetchStatus.complete, 0);
+      expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+      expect(hook.result.current.isChartLoading).toBe(true);
+    });
+
+    it('should ignore a failed chart', async () => {
+      const { main$, totalHits$, setChartState } = await setupEsqlChart();
+      setChartState(UnifiedHistogramFetchStatus.error, new Error('test'));
+      expect(main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+      expect(totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.LOADING });
+    });
+
+    it('should not change main$ if it is already in an ERROR state', async () => {
+      const { main$, setChartState } = await setupEsqlChart();
+      const error = new Error('test');
+      act(() => {
+        main$.next({ fetchStatus: FetchStatus.ERROR, error });
+      });
+      setChartState(UnifiedHistogramFetchStatus.complete, 5);
+      expect(main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+    });
+  });
+
   describe('fetching', () => {
     const setupFetching = async ({ toolkit }: { toolkit: InternalStateMockToolkit }) => {
       const fetch$ = new Subject<DiscoverLatestFetchDetails>();

@@ -218,7 +218,20 @@ export function fetchAll(
       // but their errors will be shown in-place (e.g. of the chart).
       .catch((e) => {
         sendErrorMsg(dataSubjects.documents$, e, { query });
-        sendErrorMsg(dataSubjects.main$, e);
+
+        if (isEsqlQuery) {
+          // ES|QL total hits are derived from the documents request, complete them to resolve the fetch
+          sendErrorMsg(dataSubjects.totalHits$, e);
+        }
+
+        // main$ can just be PARTIAL at this point if a chart of this fetch is already displayed,
+        // in this case it's kept and the error is displayed in place of the documents
+        const isChartDisplayed =
+          isEsqlQuery && dataSubjects.main$.getValue().fetchStatus === FetchStatus.PARTIAL;
+
+        if (!isChartDisplayed) {
+          sendErrorMsg(dataSubjects.main$, e);
+        }
       });
 
     // Return a promise that will resolve once all the requests have finished or failed, or no results are found

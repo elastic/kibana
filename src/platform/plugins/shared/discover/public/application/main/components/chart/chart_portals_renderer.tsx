@@ -222,7 +222,11 @@ const CustomChartSectionWrapper = ({
   const localStorageKeyPrefix =
     chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix;
 
-  const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
+  const {
+    setUnifiedHistogramApi,
+    onChartLoaded: onFetchChartLoaded,
+    ...restProps
+  } = unifiedHistogramProps;
   const { api, stateProps, fetch$, fetchParams, hasValidFetchParams } = useServicesBootstrap({
     ...restProps,
     initialState: unifiedHistogramProps.initialState,
@@ -244,6 +248,12 @@ const CustomChartSectionWrapper = ({
   useEffect(() => {
     setUnifiedHistogramApi(api);
   }, [setUnifiedHistogramApi, api]);
+
+  const fetchAbortController = fetchParams?.abortController;
+  const onChartLoaded = useCallback(
+    () => onFetchChartLoaded(fetchAbortController),
+    [onFetchChartLoaded, fetchAbortController]
+  );
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
@@ -292,7 +302,8 @@ const CustomChartSectionWrapper = ({
         fetchParams,
         isComponentVisible,
         isTabSelected,
-        ...unifiedHistogramProps,
+        ...restProps,
+        onChartLoaded,
         setLensRequestAdapter: api.setLensRequestAdapter,
         initialState: metricsGridState,
         onInitialStateChange,
