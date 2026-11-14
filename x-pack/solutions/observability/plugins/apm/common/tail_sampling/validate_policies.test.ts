@@ -50,7 +50,11 @@ describe('validateTailSamplingPolicies', () => {
   it('rejects a duplicate name', () => {
     const diagnostics = validateTailSamplingPolicies([keepErrors, keepErrors]);
     expect(diagnostics).toEqual([
-      expect.objectContaining({ code: 'duplicate_name', policyIndex: 1, policyName: 'keep-errors' }),
+      expect.objectContaining({
+        code: 'duplicate_name',
+        policyIndex: 1,
+        policyName: 'keep-errors',
+      }),
     ]);
   });
 

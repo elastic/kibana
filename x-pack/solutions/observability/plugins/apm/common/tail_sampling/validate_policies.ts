@@ -60,7 +60,8 @@ export function validateTailSamplingPolicies(policies: unknown[]): TailSamplingD
       {
         code: 'no_policies',
         message: i18n.translate('xpack.apm.tailSampling.diagnostics.noPolicies', {
-          defaultMessage: 'Add at least one policy. To stop tail-based sampling, disable it instead.',
+          defaultMessage:
+            'Add at least one policy. To stop tail-based sampling, disable it instead.',
         }),
       },
     ];

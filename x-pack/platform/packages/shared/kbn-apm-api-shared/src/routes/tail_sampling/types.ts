@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const MAX_TAIL_SAMPLING_POLICIES = 100;
 export const MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH = 256;
@@ -34,14 +34,16 @@ export interface TailSamplingPolicy {
   [block: string]: unknown;
 }
 
-export const tailSamplingPolicySchema = z.looseObject({
-  name: z.string().max(MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH),
-  type: z.string().max(MAX_TAIL_SAMPLING_POLICY_TYPE_LENGTH),
-});
+export const tailSamplingPolicySchema = lazySchema(() =>
+  z.looseObject({
+    name: z.string().max(MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH),
+    type: z.string().max(MAX_TAIL_SAMPLING_POLICY_TYPE_LENGTH),
+  })
+);
 
-export const tailSamplingPoliciesSchema = z
-  .array(tailSamplingPolicySchema)
-  .max(MAX_TAIL_SAMPLING_POLICIES);
+export const tailSamplingPoliciesSchema = lazySchema(() =>
+  z.array(tailSamplingPolicySchema).max(MAX_TAIL_SAMPLING_POLICIES)
+);
 
 /** The config of the `tail_sampling` processor. */
 export interface TailSamplingConfig {
@@ -55,10 +57,12 @@ export interface TailSamplingConfig {
  * `config` is strict: only `policies` can be set. Other processor settings, such as
  * `decision_wait`, are controlled by Elastic and are rejected.
  */
-export const tailSamplingSettingsSchema = z.object({
-  processor: z.literal(TAIL_SAMPLING_PROCESSOR),
-  config: z.strictObject({ policies: tailSamplingPoliciesSchema }),
-});
+export const tailSamplingSettingsSchema = lazySchema(() =>
+  z.object({
+    processor: z.literal(TAIL_SAMPLING_PROCESSOR),
+    config: z.strictObject({ policies: tailSamplingPoliciesSchema }),
+  })
+);
 
 // Policy types that are accepted but produce a warning.
 export const TAIL_SAMPLING_POLICY_TYPES_WITH_WARNING: ReadonlySet<string> = new Set([

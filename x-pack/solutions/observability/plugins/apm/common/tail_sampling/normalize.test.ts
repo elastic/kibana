@@ -9,7 +9,9 @@ import { normalizeTailSamplingConfig } from './normalize';
 describe('normalizeTailSamplingConfig', () => {
   it('sorts object keys at every level', () => {
     const normalized = normalizeTailSamplingConfig({
-      policies: [{ type: 'latency', name: 'slow', latency: { upper_threshold_ms: 2, threshold_ms: 1 } }],
+      policies: [
+        { type: 'latency', name: 'slow', latency: { upper_threshold_ms: 2, threshold_ms: 1 } },
+      ],
     });
     expect(JSON.stringify(normalized)).toBe(
       '{"policies":[{"latency":{"threshold_ms":1,"upper_threshold_ms":2},"name":"slow","type":"latency"}]}'
