@@ -31,9 +31,11 @@ import {
 
 /**
  * AESOP prototype: internal routes the A/B compare workflow calls after a
- * variant deploys, so the per-skill drift monitor is installed and enabled
- * from the same identity that approved the deploy. The A/B workflow reaches
- * these over `kibana.request`, which runs as the workflow execution's API key.
+ * variant deploys, so the per-skill drift monitor is installed and enabled.
+ * The A/B workflow reaches these over `kibana.request`, which runs as the
+ * workflow execution's API key: the AESOP identity (the user who enabled the
+ * explorer), acting after analyst approval. The approver is recorded as
+ * `approved_by` on the deploy record; the workflows engine is unchanged.
  */
 
 const REQUIRED_PRIVILEGES = [RULES_API_ALL];

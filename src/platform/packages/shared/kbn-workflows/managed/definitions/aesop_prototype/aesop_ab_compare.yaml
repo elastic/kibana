@@ -388,21 +388,23 @@ steps:
   # the tied arm with the highest mean (the lowest index on equal means),
   # chosen by the select-winner step. It goes through the same winner_variant
   # and winner_content variables as a normal winner, so the deploy steps below
-  # do not care which proposal asked for it.
+  # do not care which proposal asked for it. A tie is proposed only when the
+  # tiebreak arm's gain is significant, the same bar a single winner must clear;
+  # otherwise it is rejected below like a non-significant winner.
   - name: resolve_tiebreak
     type: data.set
-    if: '${{ steps.resolve_comparison.output.is_tie == true }}'
+    if: '${{ steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline == true }}'
     with:
       winner_variant: '${{ variables.arm_variant_indexes[steps.winner.output.tiebreak_index] }}'
       is_tie: true
 
   - name: resolve_tiebreak_content
     type: data.set
-    if: '${{ steps.resolve_comparison.output.is_tie == true and variables.winner_variant != "live" }}'
+    if: '${{ steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline == true and variables.winner_variant != "live" }}'
     with:
       winner_content: '{{ inputs.variants[variables.winner_variant] }}'
-      # Every tied arm already beat the baseline, so the tiebreak arm is
-      # deployable unless it is the live skill itself (nothing to write then).
+      # The tiebreak arm beat the baseline, so it is deployable unless it is the
+      # live skill itself (nothing to write then).
       tie_deploy: true
 
   # A variant is deployed only when it won, beat the no-skill baseline, and is
@@ -416,16 +418,17 @@ steps:
           and variables.winner_variant != 'live'
           and steps.winner.output.beats_baseline == true }}
       reject_reason: >-
-        {% if steps.resolve_comparison.output.has_winner != true %}No variant won. {% elsif variables.winner_variant == 'live' %}The live skill outperformed every variant. {% elsif steps.winner.output.beats_baseline != true %}The best variant did not beat the no-skill baseline. {% endif %}{{ steps.winner.output.reasons | join: ' ' }}
+        {% if steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline != true %}The tied variants did not beat the no-skill baseline significantly. {% elsif steps.resolve_comparison.output.has_winner != true %}No variant won. {% elsif variables.winner_variant == 'live' %}The live skill outperformed every variant. {% elsif steps.winner.output.beats_baseline != true %}The best variant did not beat the no-skill baseline. {% endif %}{{ steps.winner.output.reasons | join: ' ' }}
 
   # ----------------------------------------------------------------------
-  # Rejection: no deployable winner. Record why, so the explorer reads it
+  # Rejection: no deployable winner, including a tie whose tiebreak arm did not
+  # beat the baseline significantly. Record why, so the explorer reads it
   # before proposing the same thing again. The variants are stored in the KI
   # content for the same reason.
   # ----------------------------------------------------------------------
   - name: write_rejection_ki
     type: context-engine.createKi
-    if: '${{ steps.resolve_comparison.output.compared == true and variables.deploy_candidate != true and steps.resolve_comparison.output.is_tie != true }}'
+    if: '${{ steps.resolve_comparison.output.compared == true and variables.deploy_candidate != true and (steps.resolve_comparison.output.is_tie != true or steps.winner.output.tiebreak_beats_baseline != true) }}'
     with:
       ai_index_id: '{{ consts.AI_INDEX_ID }}'
       ki_id: 'rejection-{{ execution.id }}'
@@ -449,7 +452,8 @@ steps:
 
   # ----------------------------------------------------------------------
   # Tie: two or more arms beat the baseline and sit within min_delta of each
-  # other, so the evidence cannot pick one. Hand the choice to the analyst.
+  # other, so the evidence cannot pick one. Hand the choice to the analyst,
+  # but only when the tiebreak arm's gain is significant.
   # Approving deploys the tiebreak arm (highest mean, lowest variant index on
   # equal means) through the same deploy steps as propose_deploy; dismissing
   # rejects every tied arm. No rejection is recorded up front, because no arm
@@ -457,7 +461,7 @@ steps:
   # ----------------------------------------------------------------------
   - name: propose_tie_pick
     type: workflow.execute
-    if: '${{ steps.resolve_comparison.output.is_tie == true }}'
+    if: '${{ steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline == true }}'
     with:
       workflow-id: system-create-proposal
       inputs:
@@ -557,6 +561,7 @@ steps:
   # so it is not counted as an approval to write.
   - name: resolve_tie_decision
     type: data.set
+    if: '${{ steps.winner.output.tiebreak_beats_baseline == true }}'
     with:
       tie_approved: '${{ variables.tie_deploy == true and steps.propose_tie_pick.output.decision == "approved" }}'
 
@@ -597,6 +602,7 @@ steps:
         attributes:
           skill_id: '{{ variables.target_skill_id }}'
           source: ab_compare
+          tied_target_ids: '{{ steps.winner.output.tied_target_ids | json }}'
           dismissReason: "{{ steps.get_dismissal.output.dismissReason | default: '' }}"
           rationale: "{{ steps.get_dismissal.output.rationale | default: '' | truncate: 5000 }}"
           dataset_id: '{{ inputs.dataset_id }}'
@@ -604,11 +610,6 @@ steps:
     on-failure:
       continue: true
 
-  # ----------------------------------------------------------------------
-  # Approval, update of a live skill: read the current content, store it as a
-  # KI keyed by the skill id, and only then PUT the winner. The PUT is gated on
-  # the KI write: without the prior content a rollback has nothing to restore.
-  # ----------------------------------------------------------------------
   # Who approved. The create-proposal workflow does not return the decider, so
   # read it back from the proposal. A failed read leaves approved_by empty, it
   # does not stop the deploy.
@@ -626,6 +627,11 @@ steps:
     with:
       approved_by: "{{ steps.get_approval.output.decidedBy.username | default: steps.get_approval.output.decidedBy.fullName | default: '' }}"
 
+  # ----------------------------------------------------------------------
+  # Approval, update of a live skill: read the current content, store it as a
+  # KI keyed by the skill id, and only then PUT the winner. The PUT is gated on
+  # the KI write: without the prior content a rollback has nothing to restore.
+  # ----------------------------------------------------------------------
   - name: get_prior_skill
     type: kibana.request
     if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill == true }}'

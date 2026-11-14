@@ -101,7 +101,8 @@ const noWinner = (
   rejected: Output['rejected'],
   reasons: string[],
   tied: PrimaryScore[] = [],
-  tiebreak: PrimaryScore | null = null
+  tiebreak: PrimaryScore | null = null,
+  alpha = 0
 ): Output => ({
   winner_index: -1,
   winner_target_id: null,
@@ -111,6 +112,8 @@ const noWinner = (
   tied_target_ids: tied.map(({ target_id: id }) => id),
   tiebreak_index: tiebreak?.index ?? -1,
   tiebreak_target_id: tiebreak?.target_id ?? null,
+  tiebreak_beats_baseline:
+    tiebreak !== null && (tiebreak.pValue === null || tiebreak.pValue <= alpha),
   rejected,
   reasons,
 });
@@ -171,7 +174,8 @@ export const selectWinner = (input: Input): Output => {
           .join(', ')})`,
       ],
       tied,
-      pickTiebreak(tied)
+      pickTiebreak(tied),
+      alpha
     );
   }
 
@@ -201,6 +205,7 @@ export const selectWinner = (input: Input): Output => {
     tied_target_ids: [],
     tiebreak_index: -1,
     tiebreak_target_id: null,
+    tiebreak_beats_baseline: false,
     rejected,
     reasons,
   };

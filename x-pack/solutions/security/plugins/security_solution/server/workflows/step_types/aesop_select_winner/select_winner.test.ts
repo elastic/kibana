@@ -337,6 +337,53 @@ describe('selectWinner', () => {
     expect(result).toMatchObject({ tie: true, tiebreak_index: 1, tiebreak_target_id: 'b' });
   });
 
+  describe('tiebreak_beats_baseline', () => {
+    const tieOf = (tiebreakPValue: number | null) =>
+      selectWinner(
+        build(
+          [
+            arm('a', [
+              row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: tiebreakPValue }),
+              ...codePass,
+            ]),
+            arm('b', [
+              row({ evaluatorName: 'correctness', meanTarget: 0.7, pValue: 0.01 }),
+              ...codePass,
+            ]),
+          ],
+          { min_delta: 0.2 }
+        )
+      );
+
+    it('is false when the tiebreak arm gain is not significant', () => {
+      expect(tieOf(0.4)).toMatchObject({
+        tie: true,
+        tiebreak_target_id: 'a',
+        tiebreak_beats_baseline: false,
+      });
+    });
+
+    it('is true when the tiebreak arm gain is significant', () => {
+      expect(tieOf(0.01)).toMatchObject({ tie: true, tiebreak_beats_baseline: true });
+    });
+
+    it('is true when the tiebreak arm has no p-value', () => {
+      expect(tieOf(null)).toMatchObject({ tie: true, tiebreak_beats_baseline: true });
+    });
+
+    it('is false when there is no tie', () => {
+      const result = selectWinner(
+        build([
+          arm('a', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+            ...codePass,
+          ]),
+        ])
+      );
+      expect(result).toMatchObject({ tie: false, tiebreak_beats_baseline: false });
+    });
+  });
+
   it('returns no winner when nothing beats the baseline', () => {
     const result = selectWinner(
       build([

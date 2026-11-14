@@ -313,7 +313,7 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
-  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '6:0bbcbd0f'],
+  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '7:c9c9db84'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '10:9dc52fe8'],
   [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '2:84917074'],
 ] as const)(
@@ -563,6 +563,62 @@ describe('managedWorkflowDefinitions', () => {
       });
       expect(yaml).toContain("'eis-anthropic-claude-5-sonnet'");
       expect(yaml).toContain("'3f2b8c1e-9d4a-4f6b-8a1c-2d7e5f9b0a11'");
+    });
+
+    // The deploy path is plain data.set/liquid chaining, so a renamed variable or step
+    // output breaks it silently at run time (the write gets an empty body, or a tie
+    // approval never reaches resolve_decision). Pin each link of the tie-deploy chain.
+    describe('A/B compare tie-deploy wiring', () => {
+      interface WiringStep {
+        name: string;
+        if?: string;
+        with?: Record<string, any>;
+      }
+      const stepsByName = (): Map<string, WiringStep> => {
+        const parsed = parse(AESOP_AB_COMPARE_YAML);
+        const steps: WiringStep[] = parsed.steps;
+        return new Map(steps.map((step) => [step.name, step]));
+      };
+
+      it('gates every tie step on the tiebreak arm beating the baseline', () => {
+        const steps = stepsByName();
+        for (const name of [
+          'resolve_tiebreak',
+          'resolve_tiebreak_content',
+          'propose_tie_pick',
+          'resolve_tie_decision',
+        ]) {
+          expect(steps.get(name)?.if).toContain(
+            'steps.winner.output.tiebreak_beats_baseline == true'
+          );
+        }
+      });
+
+      it.each([
+        ['resolve_tiebreak', 'with.winner_variant', 'steps.winner.output.tiebreak_index'],
+        [
+          'resolve_tiebreak_content',
+          'with.winner_content',
+          'inputs.variants[variables.winner_variant]',
+        ],
+        ['resolve_tie_decision', 'with.tie_approved', 'variables.tie_deploy'],
+        ['resolve_tie_decision', 'with.tie_approved', 'steps.propose_tie_pick.output.decision'],
+        ['resolve_decision', 'with.approved', 'variables.tie_approved'],
+        ['resolve_prior_skill', 'if', 'steps.resolve_decision.output.approved'],
+        ['update_skill', 'if', 'steps.resolve_prior_skill.output'],
+        ['update_skill', 'with.body.content', 'variables.winner_content'],
+        ['create_skill', 'if', 'steps.resolve_decision.output.approved'],
+        ['create_skill', 'with.body.content', 'variables.winner_content'],
+      ])('%s %s references %s', (name, path, expected) => {
+        const value = path
+          .split('.')
+          .reduce((node: any, key) => node?.[key], stepsByName().get(name));
+        expect(value).toContain(expected);
+      });
+
+      it('marks a tiebreak deploy so an approval of the live arm writes nothing', () => {
+        expect(stepsByName().get('resolve_tiebreak_content')?.with?.tie_deploy).toBe(true);
+      });
     });
   });
 
