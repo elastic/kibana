@@ -237,10 +237,14 @@ steps:
   - name: wait_for_data
     type: while
     condition: "${{ steps.has_data.output.has_data != true }}"
+    # A service that never reports (for example EC2 metrics in an account with no
+    # instances) must not fail a run whose stack, identity and policies all exist:
+    # on the iteration cap the loop ends and `done` reports which services did and
+    # did not report. The timeout stays above the cap so the cap decides.
     max-iterations:
       limit: 60
-      on-limit: fail
-    timeout: 20m
+      on-limit: continue
+    timeout: 25m
     steps:
       - name: has_data
         type: fleet.awsOnboardingHasData
