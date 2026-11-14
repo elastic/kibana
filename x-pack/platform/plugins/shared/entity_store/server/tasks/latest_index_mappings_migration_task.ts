@@ -34,6 +34,9 @@ interface NamespaceFailure {
   error: unknown;
 }
 
+const throwAborted = (): void =>
+  throwRetryableError(new Error('Latest index mappings migration aborted'), true);
+
 const namespacesWithResult = (
   results: Record<string, MigrateLatestIndexMappingsResult>,
   result: MigrateLatestIndexMappingsResult
@@ -66,7 +69,7 @@ export const runLatestIndexMappingsMigration = async ({
 
   for (const namespace of namespaces) {
     if (signal.aborted) {
-      throwRetryableError(new Error('Latest index mappings migration aborted'), true);
+      throwAborted();
     }
 
     try {
@@ -74,8 +77,13 @@ export const runLatestIndexMappingsMigration = async ({
         esClient,
         logger: taskLogger,
         namespace,
+        signal,
       });
     } catch (error) {
+      // An aborted request rejects with a request-aborted error: not a failure of the space.
+      if (signal.aborted) {
+        throwAborted();
+      }
       failures.push({ namespace, error });
     }
   }

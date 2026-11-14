@@ -18,11 +18,10 @@ import {
   LATEST_INDEX_MAPPINGS_VERSION_META_KEY,
   MAPPING_VERSION,
 } from '../../../../../common/domain/entity_index';
-import {
-  clearEntityStoreIndices,
-  installAllEntityTypes,
-  uninstallAllEntityTypes,
-} from '../../../common/fixtures/helpers';
+import { getMetadataEntitiesDataStreamName } from '../../../../../server/domain/asset_manager/metadata_data_stream';
+import { installAllEntityTypes, uninstallAllEntityTypes } from '../../../common/fixtures/helpers';
+
+const METADATA_DATA_STREAM = getMetadataEntitiesDataStreamName('default');
 
 apiTest.describe(
   'latest index mappings are installed with the entity store',
@@ -43,8 +42,15 @@ apiTest.describe(
     });
 
     apiTest.afterEach(async ({ apiClient, esClient }) => {
-      await uninstallAllEntityTypes(apiClient, defaultHeaders);
-      await clearEntityStoreIndices(esClient);
+      try {
+        await uninstallAllEntityTypes(apiClient, defaultHeaders);
+      } finally {
+        // Only what installing the default namespace creates (the latest index and the metadata
+        // data stream). The shared clearEntityStoreIndices helper would also delete the source
+        // data streams that other suites own.
+        await esClient.indices.delete({ index: LATEST_INDEX }, { ignore: [404] });
+        await esClient.indices.deleteDataStream({ name: METADATA_DATA_STREAM }, { ignore: [404] });
+      }
     });
 
     apiTest.afterAll(async ({ kbnClient }) => {

@@ -71,28 +71,24 @@ describe('latest_index_mappings_migration_task', () => {
   });
 
   describe('runLatestIndexMappingsMigration', () => {
-    it('migrates every installed namespace as the internal user', async () => {
+    it('migrates every installed namespace as the internal user, passing the task signal', async () => {
       givenNamespaces('default', 'other');
       mockMigrateLatestIndexMappings.mockResolvedValueOnce('migrated');
+      const { signal } = new AbortController();
 
-      const result = await runLatestIndexMappingsMigration({
-        coreStart,
-        logger,
-        signal: new AbortController().signal,
-      });
+      const result = await runLatestIndexMappingsMigration({ coreStart, logger, signal });
 
       expect(result).toEqual({ default: 'migrated', other: 'up_to_date' });
       expect(mockMigrateLatestIndexMappings).toHaveBeenCalledTimes(2);
-      expect(mockMigrateLatestIndexMappings).toHaveBeenNthCalledWith(1, {
-        esClient: mockEsClient,
-        logger: expect.anything(),
-        namespace: 'default',
-      });
-      expect(mockMigrateLatestIndexMappings).toHaveBeenNthCalledWith(2, {
-        esClient: mockEsClient,
-        logger: expect.anything(),
-        namespace: 'other',
-      });
+      expect(mockMigrateLatestIndexMappings.mock.calls.map(([params]) => params.namespace)).toEqual(
+        ['default', 'other']
+      );
+      for (const [params] of mockMigrateLatestIndexMappings.mock.calls) {
+        expect(params.esClient).toBe(mockEsClient);
+        // Identity, as a boolean: jest treats any two un-aborted AbortSignals as equal and
+        // crashes when it tries to print a diff of one
+        expect(params.signal === signal).toBe(true);
+      }
     });
 
     it('does not skip the next space when one space fails, then throws naming the failed space', async () => {
@@ -225,6 +221,43 @@ describe('latest_index_mappings_migration_task', () => {
       expect(error.message).toMatch(/aborted/i);
       expect(isRetryableError(error)).toBe(true);
       expect(mockMigrateLatestIndexMappings).toHaveBeenCalledTimes(1);
+    });
+
+    it('turns an abort in the middle of the last space into a retryable error, not a space failure', async () => {
+      givenNamespaces('only');
+      const controller = new AbortController();
+      mockMigrateLatestIndexMappings.mockImplementationOnce(async () => {
+        controller.abort();
+        throw new Error('Request aborted');
+      });
+
+      const error = await getRejection(
+        runLatestIndexMappingsMigration({ coreStart, logger, signal: controller.signal })
+      );
+
+      expect(error.message).toMatch(/aborted/i);
+      expect(error.message).not.toContain('failed in');
+      expect(isRetryableError(error)).toBe(true);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('treats any error of a space as an abort once the signal is aborted, and does not run the next space', async () => {
+      givenNamespaces('first', 'second');
+      const controller = new AbortController();
+      mockMigrateLatestIndexMappings.mockImplementationOnce(async () => {
+        controller.abort();
+        // Nothing in this error says it was an abort
+        throw new Error('socket hang up');
+      });
+
+      const error = await getRejection(
+        runLatestIndexMappingsMigration({ coreStart, logger, signal: controller.signal })
+      );
+
+      expect(error.message).toMatch(/aborted/i);
+      expect(isRetryableError(error)).toBe(true);
+      expect(mockMigrateLatestIndexMappings).toHaveBeenCalledTimes(1);
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 

@@ -12,6 +12,7 @@ import {
   LATEST_INDEX_MAPPINGS_VERSION_META_KEY,
 } from '../../../common/domain/entity_index';
 import { isEsResponseErrorWithStatus } from '../../infra/elasticsearch/es_errors';
+import { signalRequestOptions } from '../../infra/elasticsearch/signal_request_options';
 import { installAllComponentTemplates, installIndexTemplates } from './install_assets';
 import { getLatestIndexMappingProperties } from './latest_index_mappings';
 import { resolveEntityStoreWriteTargets } from './resolve_entity_store_indices';
@@ -22,6 +23,8 @@ interface MigrateLatestIndexMappingsParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   namespace: string;
+  /** Cancels the in-flight Elasticsearch requests, e.g. on task timeout or Kibana shutdown. */
+  signal?: AbortSignal;
 }
 
 type IndexMeta = Record<string, unknown>;
@@ -34,10 +37,11 @@ type LatestIndexMapping =
 
 const getLatestIndexMapping = async (
   esClient: ElasticsearchClient,
-  index: string
+  index: string,
+  signal?: AbortSignal
 ): Promise<LatestIndexMapping> => {
   try {
-    const response = await esClient.indices.getMapping({ index });
+    const response = await esClient.indices.getMapping({ index }, ...signalRequestOptions(signal));
     // Keyed by the concrete index name, which is not necessarily the requested name.
     const [entry] = Object.values(response);
     return {
@@ -143,10 +147,11 @@ export const migrateLatestIndexMappings = async ({
   esClient,
   logger,
   namespace,
+  signal,
 }: MigrateLatestIndexMappingsParams): Promise<MigrateLatestIndexMappingsResult> => {
-  const { latestIndex } = await resolveEntityStoreWriteTargets(esClient, namespace);
+  const { latestIndex } = await resolveEntityStoreWriteTargets(esClient, namespace, signal);
 
-  const liveMapping = await getLatestIndexMapping(esClient, latestIndex);
+  const liveMapping = await getLatestIndexMapping(esClient, latestIndex, signal);
   if (!liveMapping.exists) {
     logger.debug(`Latest index ${latestIndex} does not exist in namespace ${namespace}`);
     return 'index_missing';
@@ -175,16 +180,19 @@ export const migrateLatestIndexMappings = async ({
   }
 
   try {
-    await installAllComponentTemplates(esClient, namespace, logger);
-    await installIndexTemplates(esClient, namespace, logger);
-    await esClient.indices.putMapping({
-      index: latestIndex,
-      ...(Object.keys(missing).length > 0 ? { properties: missing } : {}),
-      _meta: {
-        ...existingMeta,
-        [LATEST_INDEX_MAPPINGS_VERSION_META_KEY]: LATEST_INDEX_MAPPINGS_VERSION,
+    await installAllComponentTemplates(esClient, namespace, logger, signal);
+    await installIndexTemplates(esClient, namespace, logger, signal);
+    await esClient.indices.putMapping(
+      {
+        index: latestIndex,
+        ...(Object.keys(missing).length > 0 ? { properties: missing } : {}),
+        _meta: {
+          ...existingMeta,
+          [LATEST_INDEX_MAPPINGS_VERSION_META_KEY]: LATEST_INDEX_MAPPINGS_VERSION,
+        },
       },
-    });
+      ...signalRequestOptions(signal)
+    );
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     throw new Error(

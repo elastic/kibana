@@ -168,21 +168,22 @@ export async function installIndicesAndDataStreams(
 export async function installIndexTemplates(
   esClient: ElasticsearchClient,
   namespace: string,
-  logger: Logger
+  logger: Logger,
+  signal?: AbortSignal
 ) {
   await Promise.all([
     (async () => {
-      await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(namespace));
+      await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(namespace), signal);
       logger.debug(`installed latest index template in ${namespace}`);
     })(),
 
     (async () => {
-      await putIndexTemplate(esClient, getHistorySnapshotIndexTemplateConfig(namespace));
+      await putIndexTemplate(esClient, getHistorySnapshotIndexTemplateConfig(namespace), signal);
       logger.debug(`installed history snapshot index template in ${namespace}`);
     })(),
 
     (async () => {
-      await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace));
+      await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace), signal);
       logger.debug(`installed metadata index template in ${namespace}`);
     })(),
   ]);
@@ -191,7 +192,8 @@ export async function installIndexTemplates(
 export async function installAllComponentTemplates(
   esClient: ElasticsearchClient,
   namespace: string,
-  logger: Logger
+  logger: Logger,
+  signal?: AbortSignal
 ) {
   const definitions = ALL_ENTITY_TYPES.map((type) => getEntityDefinition(type, namespace));
   await Promise.all([
@@ -199,13 +201,14 @@ export async function installAllComponentTemplates(
       (async () => {
         await putComponentTemplate(
           esClient,
-          getEntityDefinitionComponentTemplate(definition, namespace)
+          getEntityDefinitionComponentTemplate(definition, namespace),
+          signal
         );
         logger.debug(`installed latest component template for: ${definition.type} in ${namespace}`);
       })()
     ),
     (async () => {
-      await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace));
+      await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace), signal);
       logger.debug(`installed metadata component template in ${namespace}`);
     })(),
   ]);

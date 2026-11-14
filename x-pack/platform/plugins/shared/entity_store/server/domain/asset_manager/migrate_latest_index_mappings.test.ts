@@ -94,8 +94,13 @@ describe('migrateLatestIndexMappings', () => {
   let esClient: EsClientMock;
   let logger: ReturnType<typeof loggerMock.create>;
 
-  const run = (ns: string = namespace) =>
-    migrateLatestIndexMappings({ esClient: asEsClient(esClient), logger, namespace: ns });
+  const run = (ns: string = namespace, signal?: AbortSignal) =>
+    migrateLatestIndexMappings({
+      esClient: asEsClient(esClient),
+      logger,
+      namespace: ns,
+      ...(signal ? { signal } : {}),
+    });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -436,7 +441,8 @@ describe('migrateLatestIndexMappings', () => {
 
       expect(mockResolveEntityStoreWriteTargets).toHaveBeenCalledWith(
         asEsClient(esClient),
-        namespace
+        namespace,
+        undefined
       );
       expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: legacyIndex });
       expect(esClient.indices.putMapping.mock.calls[0][0].index).toBe(legacyIndex);
@@ -468,6 +474,71 @@ describe('migrateLatestIndexMappings', () => {
 
       expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
       expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('abort signal', () => {
+    type RequestOptions = { signal?: AbortSignal } | undefined;
+
+    // Compared by identity, as a boolean: jest treats any two un-aborted AbortSignals as equal,
+    // and crashes when it tries to print a diff of one.
+    const expectEveryCallCarriesSignal = (mockFn: jest.Mock, signal: AbortSignal) => {
+      expect(mockFn.mock.calls.length).toBeGreaterThan(0);
+      const everyCallCarriesSignal = mockFn.mock.calls.every(
+        ([, options]: [unknown, RequestOptions]) => options?.signal === signal
+      );
+      expect(everyCallCarriesSignal).toBe(true);
+    };
+
+    it('passes the very same signal to every Elasticsearch request on the migrate path', async () => {
+      const { signal } = new AbortController();
+      mockLatestIndexMapping(esClient, latestIndex, { mappingsVersion: 1 });
+
+      await expect(run(namespace, signal)).resolves.toBe('migrated');
+
+      expect(mockResolveEntityStoreWriteTargets).toHaveBeenCalledTimes(1);
+      expect(mockResolveEntityStoreWriteTargets.mock.calls[0][2] === signal).toBe(true);
+      expectEveryCallCarriesSignal(esClient.indices.getMapping, signal);
+      expectEveryCallCarriesSignal(esClient.cluster.putComponentTemplate, signal);
+      expectEveryCallCarriesSignal(esClient.indices.putIndexTemplate, signal);
+      expectEveryCallCarriesSignal(esClient.indices.putMapping, signal);
+      expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes the very same signal to getMapping on the up-to-date path', async () => {
+      const { signal } = new AbortController();
+      mockLatestIndexMapping(esClient, latestIndex, {
+        [LATEST_INDEX_MAPPINGS_VERSION_META_KEY]: LATEST_INDEX_MAPPINGS_VERSION,
+      });
+
+      await expect(run(namespace, signal)).resolves.toBe('up_to_date');
+
+      expect(mockResolveEntityStoreWriteTargets.mock.calls[0][2] === signal).toBe(true);
+      expectEveryCallCarriesSignal(esClient.indices.getMapping, signal);
+    });
+
+    it('passes no request options at all to the client when no signal is given', async () => {
+      mockLatestIndexMapping(esClient, latestIndex, { mappingsVersion: 1 });
+
+      await expect(run()).resolves.toBe('migrated');
+
+      expect(mockResolveEntityStoreWriteTargets).toHaveBeenCalledWith(
+        asEsClient(esClient),
+        namespace,
+        undefined
+      );
+      expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: latestIndex });
+      for (const mockFn of [
+        esClient.indices.getMapping,
+        esClient.cluster.putComponentTemplate,
+        esClient.indices.putIndexTemplate,
+        esClient.indices.putMapping,
+      ]) {
+        expect(mockFn.mock.calls.length).toBeGreaterThan(0);
+        for (const args of mockFn.mock.calls) {
+          expect(args).toHaveLength(1);
+        }
+      }
     });
   });
 });
