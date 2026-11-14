@@ -1,0 +1,72 @@
+{
+  "sha1": "918c72ee1601614389d164b98d73505521047f40",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "baabcd329d899dc-93fd0fe4871e93a",
+      "title": "Turn on alert analysis for the Alert Triage worker",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "8e7b651129dfe98-247be790ba7076d",
+      "title": "AlertZero managed workflows system-security-coverage-review: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
+        "line": 430,
+        "column": 26
+      }
+    },
+    {
+      "id": "8e7b651129dfe98-7eb9a7581b53e8d",
+      "title": "AlertZero managed workflows system-security-coverage-worker: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
+        "line": 430,
+        "column": 26
+      }
+    },
+    {
+      "id": "8e7b651129dfe98-f29d7699313e391",
+      "title": "AlertZero managed workflows system-security-floor-alert-triage-default: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
+        "line": 430,
+        "column": 26
+      }
+    },
+    {
+      "id": "a015847069f002e-14be5fbafaaef00",
+      "title": "Restore alert analysis",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

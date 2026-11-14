@@ -11,7 +11,7 @@ import {
   CREATE_THREAT_REPORT_API_PATH,
   EXTRACT_IOCS_API_PATH,
 } from '../../../../common/threat_intel';
-import { apiTest, tags, TI_HEADERS, cleanupThreatReportsByIds } from '../fixtures';
+import { apiTest, tags, testData, TI_HEADERS, cleanupThreatReportsByIds } from '../fixtures';
 
 interface CreateReportResponse {
   status: 'ingested' | 'duplicate';
@@ -45,6 +45,10 @@ apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.cl
   });
 
   apiTest('ingests a pasted report, then dedups an identical repeat', async ({ apiClient }) => {
+    // The create route writes `semantic_text` fields, so on a cold stack this can be the first
+    // write that waits for the ELSER deployment. The Scout apiClient has no per-request timeout,
+    // so the test timeout is the only lever.
+    apiTest.setTimeout(testData.SEMANTIC_SEED_HOOK_TIMEOUT_MS);
     const unique = `scout-${Date.now()}`;
     const body = {
       title: `Scout ingest smoke ${unique}`,

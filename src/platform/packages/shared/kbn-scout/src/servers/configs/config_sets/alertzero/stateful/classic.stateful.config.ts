@@ -8,26 +8,90 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../default/stateful/base.config';
+import { buildEisServerConfig } from '../shared';
+
+const ENABLE_EXPERIMENTAL_ARG = '--xpack.securitySolution.enableExperimental=';
+const REQUIRED_EXPERIMENTAL_FEATURES = ['endpointForensicAnalysisSkill'];
 
 /**
- * Scout server config for tests that need `alertzero` and the plugins it depends on.
+ * Kibana reads a single `enableExperimental` value, so a value already set by a base config set
+ * is merged into, not repeated.
+ */
+const withExperimentalFeatures = (baseArgs: string[]): string[] => {
+  const features = new Set<string>(REQUIRED_EXPERIMENTAL_FEATURES);
+  baseArgs
+    .filter((arg) => arg.startsWith(ENABLE_EXPERIMENTAL_ARG))
+    .forEach((arg) => {
+      (JSON.parse(arg.slice(ENABLE_EXPERIMENTAL_ARG.length)) as string[]).forEach((feature) =>
+        features.add(feature)
+      );
+    });
+  return [
+    ...baseArgs.filter((arg) => !arg.startsWith(ENABLE_EXPERIMENTAL_ARG)),
+    `${ENABLE_EXPERIMENTAL_ARG}${JSON.stringify([...features])}`,
+  ];
+};
+
+// Opportunistic EIS base: plain `defaultConfig` when no connector source exists (see below).
+const eisConfig = buildEisServerConfig({ required: false });
+
+/**
+ * Scout server config for everything under `test/scout_alertzero`: the AlertZero API suites
+ * and the AlertZero end-to-end flows (the attack-discovery and worker-control specs).
  *
- * `alertzero` gates threat-intel supply. `alertzero`, `agenticInvestigations` and `proposals`
- * are all on by default in stateful, so no plugin flags are needed here. The API tests of all
- * three live under `test/scout_alertzero` (security_solution, agentic_investigations, proposals).
+ * This file carries only what has to be fixed when the server starts. Advanced settings that
+ * Kibana accepts at runtime are not set here: the suites' global setup writes them through
+ * `internal/kibana/settings` and the global teardown restores the values it found, so a stack
+ * started from this config set is not left with settings the tests changed (see
+ * `applyRuntimeSettings` in the security_solution suite's `api/tests/global.setup.ts` and
+ * `applyAlertAnalysisSetting` in the alertzero suite's).
+ *
+ * `alertzero`, `agenticInvestigations` and `proposals` are all on by default in stateful, so no
+ * plugin flags are needed here. What the managed workflows and the e2e flows need on top:
+ *
+ * - service accounts: alertzero installs no managed workflows without them, and a Worker
+ *   cannot be enabled without a service account to run as.
+ * - the `endpointForensicAnalysisSkill` securitySolution experimental feature, on by default and
+ *   pinned only so an external `enableExperimental` override cannot drop it: the managed
+ *   `system-security-forensics-endpoint-analysis` Worker stays hidden without the
+ *   `endpoint-forensic-analysis` skill. The Defend endpoint package is not preinstalled: the
+ *   isolation spec installs it while seeding hosts (`indexHostsAndAlerts`).
+ * - the Attack Discovery workflows feature flag the review and forensics workflows rely on.
+ *
+ * The per-space `securitySolution:enableAlertZero` setting is deliberately not overridden: an
+ * override makes it read-only, and `internal/kibana/settings` rejects writes to overridden
+ * settings, including the baseline writes the hunt suites make to restore a value they never
+ * changed. Suites enable it for their space and restore it themselves (`enableAlertZeroInSpace`).
+ *
+ * EIS inference is opportunistic (`buildEisServerConfig({ required: false })`): when a connector
+ * source exists (`KIBANA_TESTING_AI_CONNECTORS`, `config/kibana.dev.yml` or
+ * `target/eis_models.json`) the stack boots with preconfigured inference connectors and the e2e
+ * flows run against real models. When none exists (plain CI) the stack boots without connectors
+ * and the LLM-dependent e2e specs skip themselves with an explicit reason — they never fail and
+ * never silently pass. The simple API suites are model-free and run either way.
+ *
+ * Model selection: the e2e specs use the stack's default AI connector. Set
+ * `ALERTZERO_E2E_AI_CONNECTOR` to the id of a preconfigured connector (for EIS models,
+ * `eis-<modelId>`, e.g. `eis-gpt-5-6-sol`) to pin `genAiSettings:defaultAIConnector` to it; the
+ * suites' global setup applies the pin at runtime.
  *
  * Usage:
- *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alertzero
+ *   ALERTZERO_E2E_AI_CONNECTOR=eis-gpt-5-6-sol \
+ *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet alertzero
  */
 export const servers: ScoutServerConfig = {
-  ...defaultConfig,
+  ...eisConfig,
   kbnTestServer: {
-    ...defaultConfig.kbnTestServer,
+    ...eisConfig.kbnTestServer,
     serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
+      ...withExperimentalFeatures(eisConfig.kbnTestServer.serverArgs),
+      // Falls back to true already; pinned so a feature-flag provider cannot turn it off, since
+      // Discoveries installs its managed workflows only when the flag is on at plugin start.
+      // Mirrors the evals_attack_discovery_agent_builder set.
+      '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
       // Already the traditional default; pinned so a local override cannot refuse the service
-      // account the Hunt Watch specs create.
+      // account the Hunt Watch specs create. `serviceAccountsServerArgs` is not spread: it also
+      // loads the security API integration test plugin, whose routes no alertzero suite calls.
       '--xpack.security.serviceAccounts.enabled=true',
       // Stateful Scout defaults restrictInternalApis=false. Pin true so authz specs can assert
       // that hunt/TI internal routes reject requests that omit x-elastic-internal-origin.

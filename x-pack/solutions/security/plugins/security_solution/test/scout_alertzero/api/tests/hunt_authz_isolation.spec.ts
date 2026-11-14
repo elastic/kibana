@@ -30,6 +30,7 @@ import {
   seedSharedReportWithEvidence,
   spaceUrl,
   tags,
+  testData,
   withHuntHeaders,
 } from '../fixtures';
 
@@ -71,6 +72,8 @@ apiTest.describe(
     let adminHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient, esClient }) => {
+      // The report seed can wait on a cold ELSER deployment (see COLD_ELSER_REQUEST_TIMEOUT_MS).
+      apiTest.setTimeout(testData.SEMANTIC_SEED_HOOK_TIMEOUT_MS);
       await apiServices.spaces.create({ id: SPACE_A, name: SPACE_A });
       await apiServices.spaces.create({ id: SPACE_B, name: SPACE_B });
       await apiServices.spaces.setSolutionView({ id: SPACE_A, solution: 'security' });

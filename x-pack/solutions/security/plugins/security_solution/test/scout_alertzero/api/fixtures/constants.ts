@@ -28,6 +28,97 @@ export const TI_HEADERS = {
   'Content-Type': 'application/json;charset=UTF-8',
 };
 
+/**
+ * Ids are inlined instead of imported from `@kbn/alertzero-common` / `@kbn/workflows`:
+ * Playwright's esbuild transform cannot load the managed-workflow YAML those barrels pull in.
+ */
+export const ATTACK_DISCOVERY_WORKER_WORKFLOW_ID = 'system-security-attack-discovery-worker';
+export const FLOOR_ATTACK_DISCOVERY_WORKER_ID = 'system-security-floor-attack-discovery';
+export const FLOOR_ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
+export const FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID = 'system-security-forensics-endpoint-analysis';
+export const ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID = 'system-security-attack-discovery-review';
+export const ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID = 'system-security-attack-discovery-attach';
+/**
+ * The workflows an Attack Discovery Worker run executes besides its own, in drain order: the
+ * shared runner it calls, the attach the runner starts with `workflow.executeAsync` (async
+ * children are not cancelled with their parent), and the per-attack reviews that the runner
+ * and the attach both dispatch asynchronously. Upstream first, so a run spawned late by an
+ * earlier drain is still caught by a later one. Teardown has to drain all of them, or they can
+ * still be mid-model-call when the service account is deleted.
+ */
+export const ATTACK_DISCOVERY_RUN_WORKFLOW_IDS = [
+  ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
+  ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
+  ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
+] as const;
+export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
+  'system-security-forensics-run-endpoint-analysis';
+export const FORENSICS_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-forensics-proposal-gate';
+export const FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID =
+  'system-security-forensics-close-investigation-gate';
+export const HANDOFF_TO_FORENSICS_ACTION_ID = 'system-alertzero-action-handoff-to-forensics';
+export const ISOLATE_HOST_ACTION_ID = 'system-alertzero-action-isolate-host';
+
+export const ALERTS_INDEX = '.alerts-security.alerts-default';
+export const ATTACK_DISCOVERY_ADHOC_INDEX =
+  '.adhoc.alerts-security.attack.discovery.alerts-default';
+
+export const AZ_VERDICT_TAGS = [
+  'az:true_positive',
+  'az:false_positive',
+  'az:inconclusive',
+] as const;
+
+/** Scenario the positive flow seeds: Word -> encoded PowerShell -> C2 -> persistence -> SMB copy. */
+export const ATTACK_SCENARIO_KEY = 'encoded-powershell';
+
+export const PUBLIC_HEADERS = {
+  'kbn-xsrf': 'scout',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': '2023-10-31',
+} as const;
+
+export const INTERNAL_HEADERS = {
+  'kbn-xsrf': 'scout',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': '1',
+} as const;
+
+/** Attack Discovery generation, the per-attack review and forensics each call a real model. */
+export const GENERATION_TIMEOUT_MS = 15 * 60_000;
+export const PROPOSAL_TIMEOUT_MS = 10 * 60_000;
+export const ACTION_TIMEOUT_MS = 3 * 60_000;
+export const POLL_INTERVAL_MS = 5_000;
+
+/** Ceiling `cancelNewExecutions` polls for in-flight executions to stop. */
+export const DRAIN_TIMEOUT_MS = 60_000;
+/** One drain end to end: the poll ceiling plus the list/cancel round trips around it. */
+export const DRAIN_BUDGET_MS = DRAIN_TIMEOUT_MS + 30_000;
+/**
+ * What an `afterAll` needs besides its drains: worker resets, proposal dismissal, record, account
+ * and host deletion, and the settings restore. Playwright's default hook timeout (60s) covers
+ * neither a single slow drain nor this, so each hook sets its own budget.
+ */
+export const TEARDOWN_CLEANUP_BUDGET_MS = 3 * 60_000;
+
+/**
+ * Request timeout for the first direct write into a `semantic_text` index. On a cold stack that
+ * write triggers the ELSER model import and deployment (~40s observed), past the Scout ES
+ * client's 30s default.
+ */
+export const COLD_ELSER_REQUEST_TIMEOUT_MS = 3 * 60_000;
+/** A `beforeAll` that makes such a write: the request ceiling plus the rest of its setup. */
+export const SEMANTIC_SEED_HOOK_TIMEOUT_MS = COLD_ELSER_REQUEST_TIMEOUT_MS + 2 * 60_000;
+
+/** Managed AI index the AlertZero producers write knowledge indicators into. */
+export const SECURITY_INVESTIGATIONS_AI_INDEX_ID = 'security-investigations';
+export const AI_INDEX_KI_BACKING_INDEX = `ai-index-idx-${SECURITY_INVESTIGATIONS_AI_INDEX_ID}`;
+
+/** Backing index of the managed AI index the Attack Discovery review writes fingerprints into. */
+export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';
+
+export const CONVERSATIONS_URL = '/api/agent_builder/conversations';
+
 /** Hunt for_threat and hunt_behavior live beside the other hunt URLs; not yet in the common package. */
 export const HUNT_FOR_THREAT_URL = '/internal/alertzero/hunt/hunt_for_threat' as const;
 export const HUNT_BEHAVIOR_URL = '/internal/alertzero/hunt/hunt_behavior' as const;
