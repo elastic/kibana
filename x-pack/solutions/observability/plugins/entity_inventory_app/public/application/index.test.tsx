@@ -24,6 +24,9 @@ import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
 import { EntityInventoryShell, renderApp } from '.';
 
+// EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
+jest.setTimeout(30_000);
+
 const PageTemplate = (({ children }: { children: React.ReactNode }) => (
   <div>{children}</div>
 )) as unknown as ObservabilitySharedPluginStart['navigation']['PageTemplate'];
