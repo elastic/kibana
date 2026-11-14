@@ -8,7 +8,7 @@
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
 import type { AttackDiscoveryTemplateCompletion } from '@kbn/discoveries';
-import { handleModelRefusal } from '@kbn/discoveries';
+import { handleModelRefusal, partialResponseContainsJson } from '@kbn/discoveries';
 import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../graphs';
@@ -90,6 +90,23 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
+
+      // if the response stopped before any JSON was produced there is nothing to
+      // combine or continue from: combining reasoning prose both breaks parsing
+      // and, fed back on the next (continuation) call, trips input-side content
+      // filters on some models (claude-5.5-opus). Keep the accumulated partial
+      // for the next attempt instead of combining the prose:
+      if (
+        !partialResponseContainsJson({
+          partialResponse,
+          accumulatedJson: combinedGenerations,
+        })
+      ) {
+        combinedResponse = combinedGenerations;
+        throw new Error(
+          'response contains no JSON to continue from (the response may have stopped before the JSON section)'
+        );
+      }
 
       // if the response is hallucinated, discard previous generations and start over:
       if (responseIsHallucinated(partialResponse)) {
