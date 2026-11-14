@@ -6,6 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -22,7 +23,7 @@ import {
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
-import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
+import { prepareDispatch } from '../services/dispatch_action';
 
 const scanHostSchema = z
   .object({
@@ -49,8 +50,8 @@ const scanHostSchema = z
  * Malware scan action. `scan` only detects malware on the provided path using
  * the endpoint's existing Elastic Defend policy — it does not execute or modify
  * anything on the host. It is nonetheless classified as a write action and
- * therefore always requires an explicit human confirmation step before the
- * skill dispatches it (see the skill system instructions).
+ * therefore always requires an explicit human confirmation step: the handler
+ * asks the analyst before it dispatches.
  */
 export const scanHostTool = (
   endpointAppContextService: EndpointAppContextService
@@ -60,44 +61,6 @@ export const scanHostTool = (
     type: ToolType.builtin,
     description: `Scans a file or folder path on a host (identified by hostname, or by agent ID when several endpoints share the hostname) for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
     schema: scanHostSchema,
-    // HITL gate enforced by the framework, not skill prose: the runner prompts
-    // the analyst for confirmation before every dispatch.
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: async ({ toolParams, context }) =>
-        buildDispatchConfirmation(
-          {
-            action: 'scan',
-            params: {
-              hostName: toolParams.hostName as string | undefined,
-              agentId: toolParams.agentId as string | undefined,
-            },
-            args: {
-              path: toolParams.path as string | undefined,
-              comment: toolParams.comment as string | undefined,
-            },
-            context,
-            endpointAppContextService,
-            requiredPrivilege: 'canWriteScanOperations',
-          },
-          {
-            title: 'Run malware scan?',
-            color: 'warning',
-            confirmText: 'Run scan',
-            comment: toolParams.comment as string | undefined,
-            describe: (host) => {
-              // Quoted with invisible characters escaped so what the analyst
-              // approves is exactly what gets dispatched (see
-              // `formatForConfirmationCard`).
-              const shownPath =
-                typeof toolParams.path === 'string'
-                  ? formatForConfirmationCard(toolParams.path)
-                  : 'the specified path';
-              return `This will scan \`${shownPath}\` on ${host} for malware.`;
-            },
-          }
-        ),
-    },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
       // Set just before the client call: from there on a throw does not mean
@@ -116,6 +79,43 @@ export const scanHostTool = (
           context,
           endpointAppContextService,
           requiredPrivilege: 'canWriteScanOperations',
+          confirmation: {
+            title: i18n.translate(
+              'xpack.securitySolution.endpointResponseActionsSkill.confirmation.scan.title',
+              {
+                defaultMessage: 'Run malware scan?',
+              }
+            ),
+            color: 'warning',
+            confirmText: i18n.translate(
+              'xpack.securitySolution.endpointResponseActionsSkill.confirmation.scan.confirmText',
+              {
+                defaultMessage: 'Run scan',
+              }
+            ),
+            comment: params.comment as string | undefined,
+            describe: (host) => {
+              // Quoted with invisible characters escaped so what the analyst
+              // approves is exactly what gets dispatched (see
+              // `formatForConfirmationCard`).
+              const shownPath =
+                typeof params.path === 'string'
+                  ? formatForConfirmationCard(params.path)
+                  : i18n.translate(
+                      'xpack.securitySolution.endpointResponseActionsSkill.confirmation.scan.unspecifiedPath',
+                      {
+                        defaultMessage: 'the specified path',
+                      }
+                    );
+              return i18n.translate(
+                'xpack.securitySolution.endpointResponseActionsSkill.confirmation.scan.message',
+                {
+                  defaultMessage: 'This will scan `{path}` on {host} for malware.',
+                  values: { path: shownPath, host },
+                }
+              );
+            },
+          },
         });
         if (prepared.kind === 'result') {
           return prepared.result;

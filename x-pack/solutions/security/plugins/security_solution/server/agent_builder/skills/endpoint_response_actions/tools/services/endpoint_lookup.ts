@@ -241,6 +241,11 @@ export function createEndpointLookupService(
     status: string;
     packages?: string[];
     /**
+     * Set when the candidate was admitted on Defend's own metadata rather than
+     * Fleet `packages`; it then always resolves as Elastic Defend.
+     */
+    agentType?: ResponseActionAgentType;
+    /**
      * ISO timestamp for the newest-first tiebreak. The source differs by
      * candidate origin: `enrolled_at` for Fleet agents, `last_checkin` for
      * Defend metadata entries, so it is only an ordering key, not a
@@ -322,8 +327,16 @@ export function createEndpointLookupService(
     // merely share the hostname without a supported integration (e.g. an
     // auditing agent) must not surface as candidates — they would otherwise
     // inflate the ambiguity set or win the tiebreak over a real endpoint.
-    const isSupported = (candidate: RawFleetAgent) =>
+    // An agent Defend reports metadata for is a Defend endpoint whatever its
+    // Fleet `packages` say (see `listDefendMetadataAgentIds`), so it stays a
+    // candidate instead of being dropped as an auditing-only agent.
+    const hasSupportedPackage = (candidate: RawFleetAgent) =>
       (candidate.packages ?? []).some((p) => supportedPackages.has(p));
+    const vouchedByDefend = await listDefendMetadataAgentIds(
+      items.filter((candidate) => !hasSupportedPackage(candidate)).map((candidate) => candidate.id)
+    );
+    const isSupported = (candidate: RawFleetAgent) =>
+      hasSupportedPackage(candidate) || vouchedByDefend.has(candidate.id);
     const unsupportedAgentIds = new Set(
       items.filter((candidate) => !isSupported(candidate)).map((candidate) => candidate.id)
     );
@@ -341,6 +354,9 @@ export function createEndpointLookupService(
       // distinction is defined.
       status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
       packages: candidate.packages,
+      // Defend's metadata outranks Fleet `packages`, which may be stale or name
+      // another vendor; routing by it would leave the Defend-only dispatch path.
+      ...(hasSupportedPackage(candidate) ? {} : { agentType: 'endpoint' as const }),
       sortKey: candidate.enrolled_at,
     }));
 
@@ -398,6 +414,41 @@ export function createEndpointLookupService(
       return [...new Set(names.filter((name): name is string => Boolean(name)))];
     } catch {
       return [];
+    }
+  };
+
+  /**
+   * Ids, among `agentIds`, that Defend itself reports metadata for. The united
+   * metadata read is bounded to this space's Defend policies, so an id in the
+   * result is proof the agent runs Elastic Defend here even when the Fleet agent
+   * document carries no (or a stale) `packages` list — Fleet populates that
+   * field from the agent's own check-in, and `list_endpoints` / the status read
+   * never consult it. Best effort: on failure no id is vouched for, which
+   * keeps the stricter Fleet-only behaviour.
+   */
+  const listDefendMetadataAgentIds = async (agentIds: string[]): Promise<Set<string>> => {
+    if (!agentIds.length || (supportedAgentTypes && !supportedAgentTypes.includes('endpoint'))) {
+      return new Set();
+    }
+
+    try {
+      const idList = `(${agentIds.map((id) => `"${escapeQuotes(id)}"`).join(' OR ')})`;
+      const kuery = `united.agent.agent.id: ${idList} OR agent.id: ${idList}`;
+      const { data } = await endpointAppContextService
+        .getEndpointMetadataService(spaceId)
+        .getHostMetadataList(
+          { page: 0, pageSize: Math.max(agentIds.length, 1), kuery },
+          dispatchMode ? undefined : scoped
+        );
+
+      return new Set(
+        (data ?? []).flatMap((entry) => {
+          const id = getMetadataAgentId(entry);
+          return id && agentIds.includes(id) ? [id] : [];
+        })
+      );
+    } catch {
+      return new Set();
     }
   };
 
@@ -516,12 +567,15 @@ export function createEndpointLookupService(
 
       // An agent without a supported (or, when scoped, requested) integration
       // is not a response-action target — same filter as the hostname path.
-      if (!packages.some((p) => supportedPackages.has(p))) {
+      const hasSupportedPackage = packages.some((p) => supportedPackages.has(p));
+      if (!hasSupportedPackage && !(await listDefendMetadataAgentIds([agent.id])).has(agent.id)) {
         return { kind: 'not_found' };
       }
 
       const fleetHostName = agent.local_metadata?.host?.name;
-      const agentType = resolveAgentTypeFromPackages(packages);
+      // Admitted on Defend's metadata alone: Fleet `packages` are stale or name
+      // another vendor, and a vendor type would leave the Defend-only dispatch path.
+      const agentType = hasSupportedPackage ? resolveAgentTypeFromPackages(packages) : 'endpoint';
       // Fleet's name for the agent is not the only identity a correct caller
       // can supply — see `listDefendHostNames`. Only a Defend agent has
       // documents in the metadata index, so only it needs that read.
@@ -610,7 +664,7 @@ export function createEndpointLookupService(
         kind: 'found',
         endpoint: {
           agentId: chosen.agentId,
-          agentType: resolveAgentTypeFromPackages(chosen.packages ?? []),
+          agentType: chosen.agentType ?? resolveAgentTypeFromPackages(chosen.packages ?? []),
           packages: chosen.packages ?? [],
           status: chosen.status,
         },

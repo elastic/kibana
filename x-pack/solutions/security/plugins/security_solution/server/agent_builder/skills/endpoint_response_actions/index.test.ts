@@ -105,11 +105,13 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.content).toMatch(/no\s+\\?`?get_endpoint_status\\?`? pre-check/);
       expect(reference).not.toMatch(/Before isolate or release, call/);
       expect(reference).toMatch(/isolate_host.*directly/);
-      // running processes enqueues a real action, so it is platform-confirmed too
+      // only the tools that change the host pause for the analyst
       expect(skill.content).toContain(
-        'running processes → `get_running_processes` (write, platform-confirmed)'
+        'running processes → `get_running_processes` (no confirmation)'
       );
-      expect(skill.content).toMatch(/all four pause for\s+the analyst's confirmation/);
+      expect(skill.content).toMatch(
+        /isolate, release and scan pause for\s+the analyst's confirmation/i
+      );
     });
 
     it('includes system instructions in content', () => {
