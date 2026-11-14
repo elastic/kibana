@@ -8,6 +8,7 @@
  */
 
 import { readFileSync } from 'fs';
+import { connect } from 'http2';
 import type { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
 import moment from 'moment';
@@ -175,6 +176,91 @@ describe('Http2BasePathProxyServer', () => {
       .then((res) => {
         expect(res.body).toEqual({ bar: 'test', baz: 123 });
       });
+  });
+
+  test.each([false, true])(
+    'forwards DELETE requests with a JSON body (content length: %s)',
+    async (withContentLength) => {
+      server.route({
+        method: 'DELETE',
+        path: `${basePath}/foo/`,
+        handler: (request, h) => {
+          return h.response(request.payload);
+        },
+      });
+
+      await server.start();
+
+      const payload = { service: { name: 'bean-ops', environment: 'production' } };
+      const serializedPayload = JSON.stringify(payload);
+      const client = connect('https://127.0.0.1:10013', { rejectUnauthorized: false });
+      try {
+        const response = await new Promise<{ statusCode: number; body: string }>(
+          (resolve, reject) => {
+            client.once('error', reject);
+            const request = client.request(
+              {
+                ':method': 'DELETE',
+                ':path': `${basePath}/foo/`,
+                'content-type': 'application/json',
+                ...(withContentLength
+                  ? { 'content-length': Buffer.byteLength(serializedPayload) }
+                  : {}),
+              },
+              { endStream: false }
+            );
+            let statusCode = 0;
+            let body = '';
+            request.setEncoding('utf8');
+            request.once('response', (headers) => {
+              statusCode = Number(headers[':status']);
+            });
+            request.on('data', (chunk) => {
+              body += chunk;
+            });
+            request.once('error', reject);
+            request.once('end', () => resolve({ statusCode, body }));
+            request.end(serializedPayload);
+          }
+        );
+
+        expect(response.statusCode).toBe(200);
+        expect(JSON.parse(response.body)).toEqual(payload);
+      } finally {
+        client.close();
+      }
+    }
+  );
+
+  test('forwards HTTP/1.1 DELETE requests with a JSON body', async () => {
+    server.route({
+      method: 'DELETE',
+      path: `${basePath}/foo/`,
+      handler: (request, h) => h.response(request.payload),
+    });
+    await server.start();
+
+    const payload = { service: { name: 'bean-ops', environment: 'production' } };
+    const response = await proxySupertest
+      .delete(`${basePath}/foo/`)
+      .http2(false)
+      .send(payload)
+      .expect(200);
+
+    expect(response.body).toEqual(payload);
+  });
+
+  test.each([false, true])('forwards bodyless DELETE requests (HTTP/2: %s)', async (useHttp2) => {
+    server.route({
+      method: 'DELETE',
+      path: `${basePath}/foo/`,
+      handler: (request, h) => h.response({ deleted: true }),
+    });
+    await server.start();
+
+    const response = await proxySupertest.delete(`${basePath}/foo/`).http2(useHttp2).expect(200);
+
+    expect(response.body).toEqual({ deleted: true });
   });
 
   test('returns the correct status code', async () => {
