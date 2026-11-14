@@ -8,7 +8,6 @@
 import type { CoreSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
-import type { FeatureCatalogueSolution } from '@kbn/home-plugin/public';
 import type { ManagementApp } from '@kbn/management-plugin/public';
 
 import { SearchConnectorsPlugin } from './plugin';
@@ -19,33 +18,6 @@ import type {
   SearchConnectorsPluginSetupDependencies,
   SearchConnectorsPluginStartDependencies,
 } from './types';
-
-const securitySolution: FeatureCatalogueSolution = {
-  id: 'securitySolution',
-  title: 'Security',
-  description: '',
-  icon: 'logoSecurity',
-  path: '/app/security',
-  order: 300,
-};
-
-const observabilitySolution: FeatureCatalogueSolution = {
-  id: 'observability',
-  title: 'Observability',
-  description: '',
-  icon: 'logoObservability',
-  path: '/app/observability',
-  order: 200,
-};
-
-const otherSolution: FeatureCatalogueSolution = {
-  id: 'kibana',
-  title: 'Analytics',
-  description: '',
-  icon: 'logoKibana',
-  path: '/app/home',
-  order: 400,
-};
 
 const createPlugin = (config: ClientConfigType) => {
   const initializerContext = coreMock.createPluginInitializerContext(config);
@@ -63,16 +35,7 @@ const createSetupDependencies = () => {
   return { managementSetup, registeredApp };
 };
 
-const createStartDependencies = (
-  solutions: FeatureCatalogueSolution[]
-): SearchConnectorsPluginStartDependencies => {
-  const home = {
-    featureCatalogue: {
-      getSolutions: jest.fn(() => solutions),
-    },
-  };
-  return { home } as unknown as SearchConnectorsPluginStartDependencies;
-};
+const startDependencies = {} as unknown as SearchConnectorsPluginStartDependencies;
 
 type PluginCoreSetup = CoreSetup<
   SearchConnectorsPluginStartDependencies,
@@ -91,7 +54,7 @@ const setupPlugin = ({ uiEnabled }: { uiEnabled: boolean }) => {
 
 describe('SearchConnectorsPlugin (public)', () => {
   describe('setup()', () => {
-    it('registers the Content Connectors management app synchronously, before getStartServices resolves', () => {
+    it('registers the Content Crawlers management app synchronously, before getStartServices resolves', () => {
       const plugin = createPlugin({ ui: { enabled: true } });
       const coreSetup = coreMock.createSetup() as unknown as PluginCoreSetup;
       const { managementSetup } = createSetupDependencies();
@@ -115,42 +78,18 @@ describe('SearchConnectorsPlugin (public)', () => {
   });
 
   describe('start()', () => {
-    it('keeps the management app enabled when config is enabled and a supported solution is registered', () => {
+    it('keeps the management app enabled when config.ui.enabled is true', () => {
       const { plugin, registeredApp } = setupPlugin({ uiEnabled: true });
 
-      plugin.start(coreMock.createStart(), createStartDependencies([securitySolution]));
+      plugin.start(coreMock.createStart(), startDependencies);
 
       expect(registeredApp.disable).not.toHaveBeenCalled();
     });
 
-    it('keeps the management app enabled when observability solution is registered', () => {
-      const { plugin, registeredApp } = setupPlugin({ uiEnabled: true });
-
-      plugin.start(coreMock.createStart(), createStartDependencies([observabilitySolution]));
-
-      expect(registeredApp.disable).not.toHaveBeenCalled();
-    });
-
-    it('disables the management app when no security or observability solution is registered', () => {
-      const { plugin, registeredApp } = setupPlugin({ uiEnabled: true });
-
-      plugin.start(coreMock.createStart(), createStartDependencies([otherSolution]));
-
-      expect(registeredApp.disable).toHaveBeenCalledTimes(1);
-    });
-
-    it('disables the management app when no solutions are registered at all', () => {
-      const { plugin, registeredApp } = setupPlugin({ uiEnabled: true });
-
-      plugin.start(coreMock.createStart(), createStartDependencies([]));
-
-      expect(registeredApp.disable).toHaveBeenCalledTimes(1);
-    });
-
-    it('disables the management app when config.ui.enabled is false even if a supported solution is registered', () => {
+    it('disables the management app when config.ui.enabled is false', () => {
       const { plugin, registeredApp } = setupPlugin({ uiEnabled: false });
 
-      plugin.start(coreMock.createStart(), createStartDependencies([securitySolution]));
+      plugin.start(coreMock.createStart(), startDependencies);
 
       expect(registeredApp.disable).toHaveBeenCalledTimes(1);
     });
