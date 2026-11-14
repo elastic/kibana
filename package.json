@@ -1862,6 +1862,7 @@
     "@kbn/dev-comments": "workspace:*",
     "@kbn/dev-comments-plugin": "workspace:*",
     "@kbn/dev-proc-runner": "workspace:*",
+    "@kbn/dev-procs": "workspace:*",
     "@kbn/dev-utils": "workspace:*",
     "@kbn/dev-validation-runner": "workspace:*",
     "@kbn/developer-toolbar": "workspace:*",

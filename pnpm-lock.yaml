@@ -5508,6 +5508,9 @@ importers:
       '@kbn/dev-proc-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-proc-runner
+      '@kbn/dev-procs':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-dev-procs
       '@kbn/dev-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-utils
@@ -7735,6 +7738,8 @@ importers:
   src/platform/packages/private/kbn-data-streams: {}
 
   src/platform/packages/private/kbn-dev-comments: {}
+
+  src/platform/packages/private/kbn-dev-procs: {}
 
   src/platform/packages/private/kbn-discover-session-constants: {}
 

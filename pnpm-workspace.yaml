@@ -611,6 +611,7 @@ packages:
   - 'src/platform/packages/private/kbn-cps-common'
   - 'src/platform/packages/private/kbn-data-streams'
   - 'src/platform/packages/private/kbn-dev-comments'
+  - 'src/platform/packages/private/kbn-dev-procs'
   - 'src/platform/packages/private/kbn-discover-session-constants'
   - 'src/platform/packages/private/kbn-dot-text'
   - 'src/platform/packages/private/kbn-dot-text-loader'
