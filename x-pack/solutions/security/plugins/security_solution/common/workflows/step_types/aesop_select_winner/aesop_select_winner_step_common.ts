@@ -40,13 +40,21 @@ export const aesopSelectWinnerInputSchema = lazySchema(() =>
     primary_evaluator: z
       .string()
       .max(256)
-      .default('correctness')
-      .describe('Evaluator that ranks the arms'),
+      .default('correctness.factuality')
+      .describe('Evaluator that ranks the arms, matched exactly against the comparison rows'),
     code_evaluators: z
       .array(z.string().max(256))
       .max(50)
       .default([])
-      .describe('Deterministic evaluators; an arm with a mean below 1 on any of them is rejected'),
+      .describe(
+        'Deterministic evaluators; an arm that scores worse than the baseline by more than code_tolerance on any of them is rejected'
+      ),
+    code_tolerance: z
+      .number()
+      .min(0)
+      .max(1)
+      .default(0)
+      .describe('How far an arm may fall below the baseline on a code evaluator before rejection'),
     alpha: z.number().min(0).max(1).default(0.05).describe('Significance level for the p-value'),
     min_delta: z
       .number()
@@ -119,7 +127,7 @@ export const aesopSelectWinnerStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.aesopSelectWinner.documentation.details',
       {
         defaultMessage:
-          'Rejects every arm below 1 on a code evaluator, then ranks the rest by the primary evaluator. The best arm wins when its mean beats the baseline and the p-value is at or below alpha. When no p-value is available the best mean above the baseline is accepted and the reasons say so. Only arms that beat the baseline can win or tie. Arms within min_delta of the best are a tie: no winner is chosen and the tied arms are listed in tied_indexes and tied_target_ids so an analyst can pick one. tiebreak_index names the tied arm with the best primary mean (the lowest index on equal means), the arm a tie approval deploys.',
+          'Rejects every arm that scores worse than the baseline by more than code_tolerance on a code evaluator (code evaluators grade the answers, so the baseline rarely scores 1 either), then ranks the rest by the primary evaluator. The best arm wins when its mean beats the baseline and the p-value is at or below alpha. When no p-value is available the best mean above the baseline is accepted and the reasons say so. Only arms that beat the baseline can win or tie. Arms within min_delta of the best are a tie: no winner is chosen and the tied arms are listed in tied_indexes and tied_target_ids so an analyst can pick one. tiebreak_index names the tied arm with the best primary mean (the lowest index on equal means), the arm a tie approval deploys.',
       }
     ),
     examples: [
@@ -129,7 +137,7 @@ export const aesopSelectWinnerStepCommonDefinition: BaseStepDefinition<
   type: security.aesopSelectWinner
   with:
     comparison: "\${{ steps.compare.output.comparison }}"
-    primary_evaluator: correctness
+    primary_evaluator: correctness.factuality
     code_evaluators: ["skill-secret-scanner", "esql-compile"]
 \`\`\``,
     ],

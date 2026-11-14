@@ -28,6 +28,7 @@ const build = (comparisons: Arm[], overrides: Partial<Input> = {}): Input => ({
   comparison: { baseline_id: 'baseline', comparisons },
   primary_evaluator: 'correctness',
   code_evaluators: ['esql-compile', 'skill-secret-scanner'],
+  code_tolerance: 0,
   alpha: 0.05,
   min_delta: 0,
   ...overrides,
@@ -72,7 +73,7 @@ describe('selectWinner', () => {
       build([
         arm('leaky', [
           row({ evaluatorName: 'correctness', meanTarget: 1, pValue: 0.001 }),
-          row({ evaluatorName: 'skill-secret-scanner', meanTarget: 0.9 }),
+          row({ evaluatorName: 'skill-secret-scanner', meanBaseline: 1, meanTarget: 0.9 }),
           codePass[0],
         ]),
         arm('clean', [
@@ -86,9 +87,83 @@ describe('selectWinner', () => {
     expect(result.rejected).toEqual([
       {
         target_id: 'leaky',
-        reasons: ['code evaluator skill-secret-scanner scored 0.9, below 1'],
+        reasons: [
+          'code evaluator skill-secret-scanner scored 0.9 against a baseline of 1, a regression beyond the tolerance of 0',
+        ],
       },
     ]);
+  });
+
+  it('keeps an arm that matches a baseline scoring below 1 on a code evaluator', () => {
+    const result = selectWinner(
+      build([
+        arm('a', [
+          row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+          row({ evaluatorName: 'esql-compile', meanBaseline: 0.6, meanTarget: 0.6 }),
+          row({ evaluatorName: 'skill-secret-scanner', meanBaseline: 0.4, meanTarget: 0.7 }),
+        ]),
+      ])
+    );
+
+    expect(result).toMatchObject({ winner_target_id: 'a', beats_baseline: true, rejected: [] });
+  });
+
+  it('allows a code evaluator regression within code_tolerance and rejects one beyond it', () => {
+    const arms = [
+      arm('small-drop', [
+        row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+        row({ evaluatorName: 'esql-compile', meanBaseline: 0.9, meanTarget: 0.86 }),
+      ]),
+      arm('big-drop', [
+        row({ evaluatorName: 'correctness', meanTarget: 0.9, pValue: 0.01 }),
+        row({ evaluatorName: 'esql-compile', meanBaseline: 0.9, meanTarget: 0.8 }),
+      ]),
+    ];
+    const result = selectWinner(build(arms, { code_tolerance: 0.05 }));
+
+    expect(result.winner_target_id).toBe('small-drop');
+    expect(result.rejected).toEqual([
+      {
+        target_id: 'big-drop',
+        reasons: [
+          'code evaluator esql-compile scored 0.8 against a baseline of 0.9, a regression beyond the tolerance of 0.05',
+        ],
+      },
+    ]);
+  });
+
+  it('treats a higher mean as the regression for a code evaluator that minimizes', () => {
+    const result = selectWinner(
+      build([
+        arm('a', [
+          row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+          row({
+            evaluatorName: 'esql-compile',
+            meanBaseline: 2,
+            meanTarget: 3,
+            direction: 'minimize',
+          }),
+        ]),
+      ])
+    );
+
+    expect(result.winner_index).toBe(-1);
+    expect(result.rejected[0].reasons[0]).toContain(
+      'esql-compile scored 3 against a baseline of 2'
+    );
+  });
+
+  it('ignores a code evaluator that is not listed in code_evaluators', () => {
+    const result = selectWinner(
+      build([
+        arm('a', [
+          row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+          row({ evaluatorName: 'skill-pii', meanBaseline: 1, meanTarget: 0 }),
+        ]),
+      ])
+    );
+
+    expect(result.winner_target_id).toBe('a');
   });
 
   it('returns no winner when every arm is rejected by a code evaluator', () => {

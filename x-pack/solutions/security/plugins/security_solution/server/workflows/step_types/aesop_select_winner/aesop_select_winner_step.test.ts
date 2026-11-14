@@ -20,7 +20,7 @@ describe('aesopSelectWinnerStepDefinition', () => {
               target_id: 'arm',
               results: [
                 {
-                  evaluatorName: 'correctness',
+                  evaluatorName: 'correctness.factuality',
                   sampleSize: 10,
                   meanBaseline: 0.4,
                   meanTarget: 0.8,

@@ -23,8 +23,11 @@ settings:
     max: 1
 consts:
   AI_INDEX_ID: aesop
-  # Deterministic evaluators: an arm below 1 on any of these is rejected.
+  # Deterministic evaluators. They grade the agent's answers, so the baseline
+  # rarely scores 1 either; an arm is rejected when it regresses against the
+  # baseline by more than CODE_TOLERANCE on any of them.
   CODE_EVALUATORS: ['skill-secret-scanner', 'skill-prompt-injection', 'skill-pii', 'esql-compile', 'skill-index-resolves']
+  CODE_TOLERANCE: 0.05
 outputs:
   - name: baseline_experiment_id
     type: string
@@ -350,8 +353,11 @@ steps:
     if: '${{ variables.can_compare == true and steps.compare.error == null }}'
     with:
       comparison: '${{ steps.compare.output.comparison }}'
-      primary_evaluator: correctness
+      # The correctness evaluator reports sub-scores; factuality is the one that
+      # checks the answer against the dataset's ground truth.
+      primary_evaluator: correctness.factuality
       code_evaluators: '${{ consts.CODE_EVALUATORS }}'
+      code_tolerance: '${{ consts.CODE_TOLERANCE }}'
     on-failure:
       continue: true
 

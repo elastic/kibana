@@ -37,14 +37,26 @@ const weightedMean = (rows: ArmResult[], pick: (row: ArmResult) => number): numb
 
 const format = (value: number): string => Number(value.toFixed(4)).toString();
 
-const rejectionReasons = (arm: Arm, codeEvaluators: string[]): string[] =>
+/**
+ * Code evaluators grade the agent's answers, not the skill document, so the baseline does not
+ * score 1 on them either (a triage answer that cites an IP trips the PII scanner). An arm is
+ * rejected only when it is worse than the baseline by more than the tolerance.
+ */
+const rejectionReasons = (arm: Arm, codeEvaluators: string[], tolerance: number): string[] =>
   arm.results
-    .filter(({ evaluatorName, meanTarget }) => {
-      return codeEvaluators.includes(evaluatorName) && meanTarget < 1 - EPSILON;
+    .filter(({ evaluatorName, meanTarget, meanBaseline, direction }) => {
+      if (!codeEvaluators.includes(evaluatorName)) return false;
+      const regression =
+        direction === 'minimize' ? meanTarget - meanBaseline : meanBaseline - meanTarget;
+      return regression > tolerance + EPSILON;
     })
     .map(
-      ({ evaluatorName, meanTarget }) =>
-        `code evaluator ${evaluatorName} scored ${format(meanTarget)}, below 1`
+      ({ evaluatorName, meanTarget, meanBaseline }) =>
+        `code evaluator ${evaluatorName} scored ${format(
+          meanTarget
+        )} against a baseline of ${format(
+          meanBaseline
+        )}, a regression beyond the tolerance of ${format(tolerance)}`
     );
 
 /**
@@ -105,12 +117,17 @@ const noWinner = (
 
 export const selectWinner = (input: Input): Output => {
   const { comparisons } = input.comparison;
-  const { primary_evaluator: primary, code_evaluators: codeEvaluators, alpha } = input;
+  const {
+    primary_evaluator: primary,
+    code_evaluators: codeEvaluators,
+    code_tolerance: codeTolerance,
+    alpha,
+  } = input;
   const rejected: Output['rejected'] = [];
   const scored: PrimaryScore[] = [];
 
   comparisons.forEach((arm, index) => {
-    const reasons = rejectionReasons(arm, codeEvaluators);
+    const reasons = rejectionReasons(arm, codeEvaluators, codeTolerance);
     if (reasons.length > 0) {
       rejected.push({ target_id: arm.target_id, reasons });
       return;
