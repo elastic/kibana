@@ -253,6 +253,86 @@ describe('experimentStatsToDatasets', () => {
       },
     ]);
   });
+
+  const zeroStat = (
+    datasetId: string,
+    evaluatorName: string
+  ): ExperimentStats['stats'][number] => ({
+    datasetId,
+    datasetName: datasetId.toUpperCase(),
+    evaluatorName,
+    stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0 },
+  });
+
+  const statsOf = (entries: ExperimentStats['stats']): ExperimentStats => ({
+    taskModel: { id: 'm1' },
+    evaluatorModel: { id: 'judge' },
+    totalRepetitions: 1,
+    stats: entries,
+  });
+
+  it('lists a count-0 evaluator as errored out instead of an evaluator scoring 0', () => {
+    expect(
+      experimentStatsToDatasets(statsOf([zeroStat('d1', 'Trajectory'), zeroStat('d1', 'Skill')]))
+    ).toEqual([
+      {
+        datasetId: 'd1',
+        datasetName: 'D1',
+        evaluators: [],
+        erroredOutEvaluators: ['Trajectory', 'Skill'],
+      },
+    ]);
+  });
+
+  it('keeps scored evaluators and only flags the count-0 one in a mixed dataset', () => {
+    const [dataset] = experimentStatsToDatasets(
+      statsOf([
+        {
+          datasetId: 'd1',
+          datasetName: 'D1',
+          evaluatorName: 'correctness',
+          stats: { mean: 0.9, median: 0.9, stdDev: 0, min: 0.9, max: 0.9, count: 10 },
+        },
+        zeroStat('d1', 'Trajectory'),
+      ])
+    );
+
+    expect(dataset.evaluators).toEqual([
+      { evaluatorName: 'correctness', mean: 0.9, count: 10, min: 0.9, max: 0.9 },
+    ]);
+    expect(dataset.erroredOutEvaluators).toEqual(['Trajectory']);
+  });
+
+  it('treats a non-finite mean as errored out', () => {
+    const [dataset] = experimentStatsToDatasets(
+      statsOf([
+        {
+          datasetId: 'd1',
+          datasetName: 'D1',
+          evaluatorName: 'Trajectory',
+          stats: { mean: NaN, median: NaN, stdDev: 0, min: 0, max: 0, count: 3 },
+        },
+      ])
+    );
+
+    expect(dataset.evaluators).toEqual([]);
+    expect(dataset.erroredOutEvaluators).toEqual(['Trajectory']);
+  });
+
+  it('omits erroredOutEvaluators when every evaluator has a score', () => {
+    const [dataset] = experimentStatsToDatasets(
+      statsOf([
+        {
+          datasetId: 'd1',
+          datasetName: 'D1',
+          evaluatorName: 'correctness',
+          stats: { mean: 0.9, median: 0.9, stdDev: 0, min: 0.9, max: 0.9, count: 10 },
+        },
+      ])
+    );
+
+    expect(dataset).not.toHaveProperty('erroredOutEvaluators');
+  });
 });
 
 describe('queryMatrixScores', () => {

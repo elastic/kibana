@@ -401,7 +401,14 @@ export const pickLatestExperimentPerModel = (
   return new Map([...latestByModel].map(([modelId, { experiment }]) => [modelId, experiment]));
 };
 
-/** Groups per-experiment evaluator stats by dataset. */
+/**
+ * Groups per-experiment evaluator stats by dataset.
+ *
+ * An evaluator whose stats carry no graded sample (`count === 0`, or a non-finite mean) produced
+ * no numeric score — the stats route reports `{ mean: 0, count: 0 }` for it. Publishing that as an
+ * ordinary evaluator would read as a score of 0 and a `not-recommended` cell for a model that was
+ * never graded. It is listed in `erroredOutEvaluators` instead, matching the prefix path.
+ */
 export const experimentStatsToDatasets = (stats: ExperimentStats): AggregatedDatasetScores[] => {
   const byDataset = new Map<string, AggregatedDatasetScores>();
 
@@ -411,13 +418,17 @@ export const experimentStatsToDatasets = (stats: ExperimentStats): AggregatedDat
       dataset = { datasetId: stat.datasetId, datasetName: stat.datasetName, evaluators: [] };
       byDataset.set(stat.datasetId, dataset);
     }
-    dataset.evaluators.push({
-      evaluatorName: stat.evaluatorName,
-      mean: stat.stats.mean,
-      count: stat.stats.count,
-      min: stat.stats.min,
-      max: stat.stats.max,
-    });
+    if (stat.stats.count === 0 || !Number.isFinite(stat.stats.mean)) {
+      dataset.erroredOutEvaluators = [...(dataset.erroredOutEvaluators ?? []), stat.evaluatorName];
+    } else {
+      dataset.evaluators.push({
+        evaluatorName: stat.evaluatorName,
+        mean: stat.stats.mean,
+        count: stat.stats.count,
+        min: stat.stats.min,
+        max: stat.stats.max,
+      });
+    }
   }
 
   return [...byDataset.values()];
