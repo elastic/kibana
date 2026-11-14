@@ -12,12 +12,22 @@ type Context = Parameters<typeof aesopCaptureDatasetStepDefinition.handler>[0];
 interface ApiCall {
   method?: string;
   path: string;
+  query?: Record<string, unknown>;
   headers?: Record<string, string>;
   body?: { examples?: unknown[] };
 }
 
 const upsertCall = (callKibanaApi: jest.Mock<unknown, [ApiCall]>) =>
   callKibanaApi.mock.calls.map(([call]) => call).find((call) => call.method === 'POST');
+
+const LIST_PATH = '/api/agent_builder/conversations';
+const isList = (path: string) => path === LIST_PATH;
+const listed = (...ids: string[]) => ({
+  body: {
+    results: ids.map((id) => ({ id, title: `Alert ${id}` })),
+    pagination: { total: ids.length },
+  },
+});
 
 const conversation = (id: string, message: string) => ({
   id,
@@ -49,7 +59,7 @@ describe('aesopCaptureDatasetStepDefinition', () => {
 
   it('creates the dataset when none exists yet', async () => {
     const callKibanaApi = jest.fn(async ({ method, path }: ApiCall) => {
-      if (path.endsWith('/_search')) return { body: { results: [{ id: 'c1' }] } };
+      if (isList(path)) return listed('c1');
       if (path === '/api/agent_builder/conversations/c1')
         return { body: conversation('c1', 'why open') };
       if (path.endsWith('/_resolve')) throw notFound();
@@ -78,7 +88,7 @@ describe('aesopCaptureDatasetStepDefinition', () => {
 
   it('reads each conversation from the public route with its API version', async () => {
     const callKibanaApi = jest.fn(async ({ method, path }: ApiCall) => {
-      if (path.endsWith('/_search')) return { body: { results: [{ id: 'c1' }] } };
+      if (isList(path)) return listed('c1');
       if (path.endsWith('/_resolve')) throw notFound();
       if (method === 'POST') {
         return { body: { dataset_id: 'new', added: 1, removed: 0, unchanged: 0 } };
@@ -90,10 +100,67 @@ describe('aesopCaptureDatasetStepDefinition', () => {
 
     const reads = callKibanaApi.mock.calls
       .map(([call]) => call)
-      .filter((call) => call.path.includes('/conversations/') && !call.path.endsWith('/_search'));
+      .filter((call) => call.path.includes('/conversations/'));
     expect(reads).toHaveLength(1);
     expect(reads[0].path).toBe('/api/agent_builder/conversations/c1');
     expect(reads[0].headers).toEqual({ 'elastic-api-version': '2023-10-31' });
+  });
+
+  it('lists the agent conversations on the public route and filters titles locally', async () => {
+    const callKibanaApi = jest.fn(async ({ method, path }: ApiCall) => {
+      if (isList(path)) {
+        return {
+          body: {
+            results: [
+              { id: 'c1', title: 'Why is this ALERT open' },
+              { id: 'c2', title: 'Unrelated chat' },
+              { id: 'c3' },
+            ],
+            pagination: { total: 3 },
+          },
+        };
+      }
+      if (path.endsWith('/_resolve')) throw notFound();
+      if (method === 'POST') {
+        return { body: { dataset_id: 'new', added: 1, removed: 0, unchanged: 0 } };
+      }
+      return { body: conversation('c1', 'why open') };
+    });
+
+    const result = await run(callKibanaApi, { query: 'alert' });
+
+    const calls = callKibanaApi.mock.calls.map(([call]) => call);
+    const list = calls.find((call) => isList(call.path));
+    expect(list?.method).toBe('GET');
+    expect(list?.headers).toEqual({ 'elastic-api-version': '2023-10-31' });
+    expect(list?.query).toMatchObject({ agent_id: 'agent-1', page: 1, per_page: 100 });
+    expect(result.output).toMatchObject({ conversations_read: 1 });
+    expect(calls.filter((call) => call.path.includes('/conversations/'))).toHaveLength(1);
+    expect(calls.some((call) => call.path.includes('/_search'))).toBe(false);
+  });
+
+  it('pages the list, stops at max_conversations and caps the scan at five pages', async () => {
+    const page = (n: number) =>
+      Array.from({ length: 100 }, (_, i) => ({ id: `c${n}-${i}`, title: 'alert' }));
+    const callKibanaApi = jest.fn(async ({ method, path, query }: ApiCall) => {
+      if (isList(path)) {
+        return { body: { results: page(Number(query?.page)), pagination: { total: 10_000 } } };
+      }
+      if (path.endsWith('/_resolve')) throw notFound();
+      if (method === 'POST') {
+        return { body: { dataset_id: 'new', added: 1, removed: 0, unchanged: 0 } };
+      }
+      return { body: conversation('c', 'why open') };
+    });
+
+    await run(callKibanaApi, { max_conversations: 50 });
+    const listCalls = () =>
+      callKibanaApi.mock.calls.map(([call]) => call).filter((call) => isList(call.path));
+    expect(listCalls()).toHaveLength(1);
+
+    callKibanaApi.mockClear();
+    await run(callKibanaApi, { query: 'no-title-matches' });
+    expect(listCalls()).toHaveLength(5);
   });
 
   it('sends existing examples along with the new ones and drops duplicates', async () => {
@@ -105,7 +172,7 @@ describe('aesopCaptureDatasetStepDefinition', () => {
       updated_at: 'y',
     };
     const callKibanaApi = jest.fn(async ({ method, path }: ApiCall) => {
-      if (path.endsWith('/_search')) return { body: { results: [{ id: 'c1' }, { id: 'c2' }] } };
+      if (isList(path)) return listed('c1', 'c2');
       if (path === '/api/agent_builder/conversations/c1')
         return { body: conversation('c1', 'why open') };
       if (path === '/api/agent_builder/conversations/c2')
@@ -130,7 +197,7 @@ describe('aesopCaptureDatasetStepDefinition', () => {
 
   it('does not upsert when every captured example is a duplicate', async () => {
     const callKibanaApi = jest.fn(async ({ path }: ApiCall) => {
-      if (path.endsWith('/_search')) return { body: { results: [{ id: 'c1' }] } };
+      if (isList(path)) return listed('c1');
       if (path === '/api/agent_builder/conversations/c1')
         return { body: conversation('c1', 'why open') };
       if (path.endsWith('/_resolve')) return { body: { id: 'ds-1' } };

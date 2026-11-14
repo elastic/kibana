@@ -15,10 +15,57 @@ import type { CapturedConversation, CapturedExample } from './capture_dataset';
 import { conversationToExamples, dedupeExamples } from './capture_dataset';
 
 const INTERNAL_VERSION_HEADERS = { 'elastic-api-version': '1' };
-const CONVERSATIONS_SEARCH_PATH = '/internal/agent_builder/conversations/_search';
 const PUBLIC_VERSION_HEADERS = { 'elastic-api-version': '2023-10-31' };
 const CONVERSATION_PATH = '/api/agent_builder/conversations';
 const DATASETS_PATH = '/internal/evals/datasets';
+
+// The public list route has no free-text search, so the title filter runs here
+// over a bounded window: at most LIST_MAX_PAGES pages of LIST_PAGE_SIZE.
+const LIST_PAGE_SIZE = 100;
+const LIST_MAX_PAGES = 5;
+
+interface ListedConversation {
+  id: string;
+  title?: string;
+}
+
+const listMatchingConversations = async ({
+  context,
+  agentId,
+  query,
+  limit,
+}: {
+  context: StepHandlerContext;
+  agentId: string;
+  query: string;
+  limit: number;
+}): Promise<ListedConversation[]> => {
+  const { callKibanaApi } = context.contextManager;
+  const needle = query.toLowerCase();
+  const matches: ListedConversation[] = [];
+  for (let page = 1; page <= LIST_MAX_PAGES && matches.length < limit; page++) {
+    const listed = await callKibanaApi<{
+      results: ListedConversation[];
+      pagination?: { total: number };
+    }>({
+      method: 'GET',
+      path: CONVERSATION_PATH,
+      query: { agent_id: agentId, page, per_page: LIST_PAGE_SIZE },
+      headers: PUBLIC_VERSION_HEADERS,
+    });
+    const { results, pagination } = listed.body;
+    for (const conversation of results) {
+      if (conversation.title?.toLowerCase().includes(needle)) matches.push(conversation);
+    }
+    if (
+      results.length < LIST_PAGE_SIZE ||
+      (pagination && page * LIST_PAGE_SIZE >= pagination.total)
+    ) {
+      break;
+    }
+  }
+  return matches.slice(0, limit);
+};
 
 interface ExistingDataset {
   id: string;
@@ -66,21 +113,17 @@ export const aesopCaptureDatasetStepDefinition = createServerStepDefinition({
     const { callKibanaApi } = context.contextManager;
 
     try {
-      const search = await callKibanaApi<{ results: Array<{ id: string }> }>({
-        method: 'GET',
-        path: CONVERSATIONS_SEARCH_PATH,
-        query: {
-          query: input.query,
-          agent_id: input.agent_id,
-          per_page: input.max_conversations,
-        },
-        headers: INTERNAL_VERSION_HEADERS,
+      const matches = await listMatchingConversations({
+        context,
+        agentId: input.agent_id,
+        query: input.query,
+        limit: input.max_conversations,
       });
 
-      // The search hits carry no rounds, so each conversation is read in full.
+      // The list entries carry no rounds, so each conversation is read in full.
       const captured: CapturedExample[] = [];
       let conversationsRead = 0;
-      for (const hit of search.body.results.slice(0, input.max_conversations)) {
+      for (const hit of matches) {
         const conversation = await callKibanaApi<CapturedConversation>({
           method: 'GET',
           path: `${CONVERSATION_PATH}/${encodeURIComponent(hit.id)}`,

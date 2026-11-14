@@ -22,7 +22,9 @@ export const aesopCaptureDatasetInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(256)
-      .describe('Conversation title search; the conversations search route requires one'),
+      .describe(
+        'Case-insensitive text a conversation title must contain; matched over the newest 500 conversations of the agent'
+      ),
     dataset_name: z.string().min(1).max(256).describe('Evals dataset to upsert into'),
     dataset_description: z.string().max(2048).default('Captured by AESOP'),
     tags: z.array(z.string().max(128)).max(20).default([]),
