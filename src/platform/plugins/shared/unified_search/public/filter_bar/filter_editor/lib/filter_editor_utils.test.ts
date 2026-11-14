@@ -36,6 +36,30 @@ describe('Filter editor utils', () => {
       expect(field).not.toBeUndefined();
       expect(field && field.name).toBe(phraseFilter.meta.key);
     });
+
+    it('should build the field of an ES|QL filter, as its column is not a field of the data view', () => {
+      const esqlFilter = {
+        ...phraseFilter,
+        meta: {
+          ...phraseFilter.meta,
+          key: 'size_class',
+          esql: { type: 'string', esType: 'keyword' },
+        },
+      };
+
+      expect(getFieldFromFilter(esqlFilter, stubIndexPattern)).toEqual(
+        expect.objectContaining({ name: 'size_class', type: 'string', esTypes: ['keyword'] })
+      );
+      expect(getFieldFromFilter(esqlFilter)).toEqual(
+        expect.objectContaining({ name: 'size_class' })
+      );
+    });
+
+    it('should not build a field for a filter that is not an ES|QL one', () => {
+      const filter = { ...phraseFilter, meta: { ...phraseFilter.meta, key: 'unknown_field' } };
+
+      expect(getFieldFromFilter(filter, stubIndexPattern)).toBeUndefined();
+    });
   });
 
   describe('getOperatorFromFilter', () => {

@@ -14,7 +14,7 @@
  * in * as Code APIs.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   ASCODE_FILTER_OPERATOR,
   ASCODE_GROUPED_CONDITION_TYPE,
@@ -65,30 +65,43 @@ const negatePropertySchema = z.boolean().optional().meta({
 /**
  * Common top-level properties shared by all as code filters
  */
-const commonBasePropertiesSchema = z
-  .object({
-    disabled: z.boolean().optional().meta({
-      description:
-        'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
-    }),
-    negate: negatePropertySchema,
-    controlled_by: z.string().optional().meta({
-      description:
-        'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
-    }),
-    data_view_id: z.string().optional().meta({
-      description: 'Identifier of the data view used as context for this filter.',
-    }),
-    label: z
-      .string()
-      .optional()
-      .meta({ description: 'Human-readable label for the filter, used for display purposes.' }),
-    is_multi_index: z.boolean().optional().meta({
-      description:
-        'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
-    }),
-  })
-  .strict();
+const commonBasePropertiesSchema = lazySchema(() =>
+  z
+    .object({
+      disabled: z.boolean().optional().meta({
+        description:
+          'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
+      }),
+      negate: negatePropertySchema,
+      controlled_by: z.string().optional().meta({
+        description:
+          'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
+      }),
+      data_view_id: z.string().optional().meta({
+        description: 'Identifier of the data view used as context for this filter.',
+      }),
+      label: z
+        .string()
+        .optional()
+        .meta({ description: 'Human-readable label for the filter, used for display purposes.' }),
+      is_multi_index: z.boolean().optional().meta({
+        description:
+          'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
+      }),
+      esql: z
+        .object({
+          type: z.string().optional().meta({ description: 'Kibana type of the column.' }),
+          es_type: z.string().optional().meta({ description: 'Elasticsearch type of the column.' }),
+        })
+        .strict()
+        .optional()
+        .meta({
+          description:
+            'Set when the filter is on a column created by an ES|QL query, which cannot be expressed as a DSL query. It is applied as a `WHERE` clause to the ES|QL queries that have the column, and it is ignored by the other queries.',
+        }),
+    })
+    .strict()
+);
 
 // ====================================================================
 // FILTER CONDITION SCHEMAS

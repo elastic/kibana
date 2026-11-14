@@ -340,17 +340,24 @@ describe('createFiltersFromClickEvent', () => {
         expect(filter[0].meta.negate).toBeFalsy();
       });
 
-      test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
+      test('creates an ES|QL filter, not a DSL one, for a computed column named like an index field', async () => {
         table.columns[0].isComputedColumn = true;
 
         const filter = await createFilterESQL(table, 0, 0);
 
-        expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
-        expect(createSourceSpy).not.toHaveBeenCalled();
-        expect(filter).toEqual([]);
+        expect(filter).toHaveLength(1);
+        expect(filter[0].meta.esql).toBeDefined();
+        expect(filter[0].query).toEqual({ match_phrase: { message: expect.anything() } });
       });
 
-      test('returns no filters for that same computed column even after it is given a custom Lens label', async () => {
+      test('does not create a filter for a computed date column', async () => {
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].meta!.type = 'date';
+
+        expect(await createFilterESQL(table, 0, 0)).toEqual([]);
+      });
+
+      test('targets the query column, not the custom Lens label, for a computed column', async () => {
         // Renaming the dimension via the Appearance section only changes column.name/label; it
         // must not make an EVAL-computed column look like a genuine RENAME of the real field.
         table.columns[0].isComputedColumn = true;
@@ -358,9 +365,9 @@ describe('createFiltersFromClickEvent', () => {
 
         const filter = await createFilterESQL(table, 0, 0);
 
-        expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
-        expect(createSourceSpy).not.toHaveBeenCalled();
-        expect(filter).toEqual([]);
+        expect(filter).toHaveLength(1);
+        expect(filter[0].meta.esql).toBeDefined();
+        expect(filter[0].query).toEqual({ match_phrase: { message: expect.anything() } });
       });
 
       test('still creates a filter for a genuinely RENAMEd column, even with a custom Lens label', async () => {
@@ -453,14 +460,16 @@ describe('createFiltersFromClickEvent', () => {
           ]);
         });
 
-        test('does not create a filter for a column the query computes on top of a view', async () => {
+        test('creates an ES|QL filter for a column the query computes on top of a view', async () => {
           useColumnOf('meow', 'foo', 'USx');
           table.columns[0].isComputedColumn = true;
           mockFieldByName.mockReturnValue(undefined);
 
           const filter = await createFilterESQL(table, 0, 0);
 
-          expect(filter).toEqual([]);
+          expect(filter).toHaveLength(1);
+          expect(filter[0].meta.esql).toBeDefined();
+          expect(filter[0].query).toEqual({ match_phrase: { foo: 'USx' } });
         });
 
         test('does not create a filter for a field the dataset does not have', async () => {

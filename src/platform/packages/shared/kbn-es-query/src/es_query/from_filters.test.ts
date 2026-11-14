@@ -241,5 +241,18 @@ describe('build query', () => {
         ]
       `);
     });
+
+    test('should ignore filters on columns created by an ES|QL query', () => {
+      const filters = [
+        { query: { match_phrase: { size: 'big' } }, meta: { esql: {}, negate: false } },
+        { query: { match_phrase: { size: 'small' } }, meta: { esql: {}, negate: true } },
+        { query: { query_string: { query: 'foo' } }, meta: {} },
+      ] as Filter[];
+
+      const result = buildQueryFromFilters(filters, indexPattern);
+
+      expect(result.filter).toEqual([{ query_string: { query: 'foo' } }]);
+      expect(result.must_not).toEqual([]);
+    });
   });
 });

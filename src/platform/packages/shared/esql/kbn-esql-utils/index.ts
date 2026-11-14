@@ -100,6 +100,7 @@ export {
   formatEsqlEntityPredicate,
   isComputedColumn,
   getQuerySummary,
+  getComputedColumnsInOutput,
   resolveSourceField,
   getColumnsWithHighlights,
   buildRenameSourceFieldMap,

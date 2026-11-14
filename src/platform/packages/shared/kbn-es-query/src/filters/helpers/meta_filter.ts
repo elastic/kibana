@@ -31,6 +31,15 @@ export const isFilterPinned = (filter: Filter) => {
 export const isFilterDisabled = (filter: Filter): boolean => get(filter, 'meta.disabled', false);
 
 /**
+ * @param filter
+ * @returns `true` if the filter targets a column created by an ES|QL query,
+ * which is applied to the ES|QL query itself rather than as DSL
+ *
+ * @public
+ */
+export const isEsqlFilter = (filter: Filter): boolean => Boolean(get(filter, 'meta.esql'));
+
+/**
  *
  * @param filter
  * @returns A copy of the filter with a toggled disabled state

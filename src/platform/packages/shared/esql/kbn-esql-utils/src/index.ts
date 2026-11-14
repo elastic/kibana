@@ -120,6 +120,7 @@ export {
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';
+export { getComputedColumnsInOutput } from './utils/get_computed_columns_in_output';
 export {
   createEsqlViewsManagementClient,
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,

@@ -30,6 +30,7 @@ export {
   enableFilter,
   disableFilter,
   isFilterDisabled,
+  isEsqlFilter,
   toggleFilterNegated,
   toggleFilterDisabled,
   toggleFilterPinned,

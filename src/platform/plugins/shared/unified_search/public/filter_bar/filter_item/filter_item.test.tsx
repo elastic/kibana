@@ -124,4 +124,21 @@ describe('FilterItemComponent.closePopover', () => {
 
     expect(onCloseFilterPopover).toHaveBeenCalledTimes(1);
   });
+
+  it('does not allow editing an ES|QL filter, but keeps the other options', () => {
+    const props = makeProps(jest.fn());
+    render(
+      <FilterItemComponent
+        {...props}
+        filter={{ ...filter, meta: { ...filter.meta, esql: { type: 'string' } } }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('filter-badge'));
+
+    expect(screen.queryByTestId('editFilter')).not.toBeInTheDocument();
+    expect(screen.getByTestId('negateFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('disableFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('deleteFilter')).toBeInTheDocument();
+  });
 });

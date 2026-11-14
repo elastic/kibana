@@ -42,6 +42,7 @@ import type {
   KibanaQueryContext,
 } from '@kbn/search-types';
 import type { ESQLSearchParams } from '@kbn/es-types';
+import { applyEsqlFilters } from './apply_esql_filters';
 import type {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
@@ -436,7 +437,10 @@ export class SearchMethodsService implements ISearchMethods {
     // this is for backward compatibility, if the query is of fields or functions type
     // and the query is not set with ?? in the query, we should set it
     // https://github.com/elastic/elasticsearch/pull/122459
-    const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
+    const esqlQuery = applyEsqlFilters(
+      fixESQLQueryWithVariables(params.query, esqlVariables),
+      kibanaFilters
+    );
 
     const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
     const contextFilters = [...kibanaFilters, ...(timeFilter ? [timeFilter] : [])];
