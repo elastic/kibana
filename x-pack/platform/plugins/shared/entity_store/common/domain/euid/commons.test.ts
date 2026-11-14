@@ -7,9 +7,11 @@
 
 import {
   applyWhenConditionTrueSetFields,
+  compareCodePoints,
   evaluateStreamlangCondition,
   getDocument,
   getFieldValue,
+  getFieldValues,
   resolveFieldValueSchema,
 } from './commons';
 import type { Condition } from '@kbn/streamlang';
@@ -64,6 +66,56 @@ describe('getFieldValue', () => {
       expect(getFieldValue({ user: { id: [] } }, 'user.id')).toBeUndefined();
       expect(getFieldValue({ 'user.id': [] }, 'user.id')).toBeUndefined();
     });
+  });
+
+  describe('multi-valued fields', () => {
+    it.each([
+      [['zzz', 'aaa'], 'aaa'],
+      [['a', 'a'], 'a'],
+      [['', 'a'], 'a'],
+      [[null, 'a'], 'a'],
+      [[''], undefined],
+      [[], undefined],
+    ])('reduces %j to its lowest non-empty value %j', (value, expected) => {
+      expect(getFieldValue({ 'host.id': value }, 'host.id')).toBe(expected);
+      expect(getFieldValue({ host: { id: value } }, 'host.id')).toBe(expected);
+    });
+
+    it('compares by code point, not by UTF-16 code unit', () => {
+      // U+FF5E sorts before U+1F600 by code point, but after its high surrogate (U+D83D).
+      expect(getFieldValue({ 'host.id': ['\u{1F600}', '\uFF5E'] }, 'host.id')).toBe('\uFF5E');
+    });
+  });
+});
+
+describe('getFieldValues', () => {
+  it('returns every non-empty value, in order', () => {
+    expect(getFieldValues({ 'host.id': ['b', '', null, 'a'] }, 'host.id')).toEqual(['b', 'a']);
+    expect(getFieldValues({ host: { id: 'a' } }, 'host.id')).toEqual(['a']);
+    expect(getFieldValues({}, 'host.id')).toEqual([]);
+  });
+});
+
+describe('compareCodePoints', () => {
+  it('orders strings like Elasticsearch orders keywords', () => {
+    expect(compareCodePoints('a', 'b')).toBeLessThan(0);
+    expect(compareCodePoints('b', 'a')).toBeGreaterThan(0);
+    expect(compareCodePoints('a', 'a')).toBe(0);
+    expect(compareCodePoints('a', 'ab')).toBeLessThan(0);
+    expect(compareCodePoints('B', 'a')).toBeLessThan(0);
+    expect(compareCodePoints('\uFF5E', '\u{1F600}')).toBeLessThan(0);
+  });
+});
+
+describe('evaluateStreamlangCondition includes', () => {
+  it('reads the first value of a multi-valued field (#20578)', () => {
+    const condition = { field: 'event.type', includes: 'user' };
+    expect(evaluateStreamlangCondition({ event: { type: ['user', 'info'] } }, condition)).toBe(
+      true
+    );
+    expect(evaluateStreamlangCondition({ event: { type: ['info', 'user'] } }, condition)).toBe(
+      false
+    );
   });
 });
 

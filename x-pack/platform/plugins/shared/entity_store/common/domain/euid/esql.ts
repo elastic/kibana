@@ -23,6 +23,7 @@ import {
 } from '../definitions/entity_schema';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
+  esqlIdentityValue,
   esqlIsNotNullOrEmpty,
   esqlIsNullOrEmpty,
   esqlPresentColumnName,
@@ -87,7 +88,7 @@ export function getEuidEsqlFilterBasedOnDocument(
     if (value === undefined) {
       return undefined;
     }
-    return `(${identityField.singleField} == "${escapeEsqlString(value)}")`;
+    return `(${esqlIdentityValue(identityField.singleField)} == "${escapeEsqlString(value)}")`;
   }
 
   const fieldEvaluations = identityField.fieldEvaluations ?? [];
@@ -116,7 +117,7 @@ export function getEuidEsqlFilterBasedOnDocument(
 
   const onExpressions = Object.entries(fieldsToBeFilteredOn.values)
     .filter(([field]) => !evaluatedDestinations.has(field))
-    .map(([field, value]) => `(${field} == "${escapeEsqlString(value)}")`);
+    .map(([field, value]) => `(${esqlIdentityValue(field)} == "${escapeEsqlString(value)}")`);
 
   const toBeFilteredOut = getFieldsToBeFilteredOut(
     effectiveEuidRanking,
@@ -144,9 +145,9 @@ export function getEuidEsqlFilterBasedOnDocument(
 
 function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
   if ('field' in source) {
-    return `MV_FIRST(${castField(source.field)})`;
+    return esqlIdentityValue(source.field);
   }
-  return `MV_FIRST(SPLIT(MV_FIRST(${castField(source.firstChunkOfField)}), "${escapeEsqlString(
+  return `MV_FIRST(SPLIT(${esqlIdentityValue(source.firstChunkOfField)}, "${escapeEsqlString(
     source.splitBy
   )}"))`;
 }
@@ -174,7 +175,7 @@ export function buildRankingCaseEsql(
     }
     if (comp.length === 1 && isEuidField(firstAttr)) {
       // Single ranking, single field: bare _present_or_null ref (no COALESCE needed)
-      return presentOrNullAliases.get(firstAttr.field) ?? `TO_STRING(${firstAttr.field})`;
+      return presentOrNullAliases.get(firstAttr.field) ?? esqlIdentityValue(firstAttr.field);
     }
   }
 
@@ -188,14 +189,14 @@ export function buildRankingCaseEsql(
 
     if (composedField.length === 1) {
       const f = composedField[0] as { field: string };
-      return presentOrNullAliases.get(f.field) ?? `TO_STRING(${f.field})`;
+      return presentOrNullAliases.get(f.field) ?? esqlIdentityValue(f.field);
     }
 
     // Composed arm: CONCAT over _present_or_null refs — NULL when any component is absent.
     const parts = composedField
       .map((attr) =>
         isEuidField(attr)
-          ? presentOrNullAliases.get(attr.field) ?? `TO_STRING(${attr.field})`
+          ? presentOrNullAliases.get(attr.field) ?? esqlIdentityValue(attr.field)
           : `"${escapeEsqlString(attr.sep)}"`
       )
       .join(', ');
@@ -226,9 +227,7 @@ function buildFieldMappingEsql(then: FieldEvaluationWhenClauseFieldMappingThen):
   const arms = Object.entries(then.mapping)
     .map(
       ([from, to]) =>
-        `MV_FIRST(TO_STRING(${then.field})) == "${escapeEsqlString(from)}", "${escapeEsqlString(
-          to
-        )}"`
+        `${esqlIdentityValue(then.field)} == "${escapeEsqlString(from)}", "${escapeEsqlString(to)}"`
     )
     .join(', ');
   return `CASE(${arms})`;
@@ -264,7 +263,10 @@ export function buildDestinationFieldEsql(
       condition = `COALESCE(${effectiveSourceName} IN (${inList}), FALSE)`;
     } else {
       const colName = `${destBase}_arm${i}`;
-      conditionPrecomputes.push({ colName, esql: conditionToESQL(clause.condition) });
+      conditionPrecomputes.push({
+        colName,
+        esql: conditionToESQL(clause.condition, { reduceMultiValued: true }),
+      });
       condition = `COALESCE(${colName}, FALSE)`;
     }
     const thenExpr =
@@ -335,9 +337,11 @@ function escapeEsqlString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+// The source clause must match what the derivation reads. A plain comparison on a multi-valued field
+// is NULL, so a document that derives its namespace from `['bob', 'alice']` would be dropped.
 function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpec): string {
   if (spec.type === 'condition') {
-    return `(${conditionToESQL(spec.condition)})`;
+    return `(${conditionToESQL(spec.condition, { reduceMultiValued: true })})`;
   }
 
   const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
@@ -349,17 +353,22 @@ function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpe
 
   const disjuncts = spec.values.map((v) => {
     const escaped = escapeEsqlString(v);
-    const exactConds = exactMatchFields.map((f) => `(${f} == "${escaped}")`);
-    const prefixConds = prefixMatchFields.map((f) => `STARTS_WITH(${f}, "${escaped}")`);
+    const exactConds = exactMatchFields.map((f) => `(${esqlIdentityValue(f)} == "${escaped}")`);
+    const prefixConds = prefixMatchFields.map(
+      (f) => `STARTS_WITH(${esqlIdentityValue(f)}, "${escaped}")`
+    );
     const parts = [...exactConds, ...prefixConds];
     return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
   });
   return disjuncts.length === 1 ? disjuncts[0] : `(${disjuncts.join(' OR ')})`;
 }
 
-/** `field` is present and non-empty, referencing the raw field (no TO_STRING cast). */
+/** Raw field reference (no TO_STRING cast), so the presence gate can be pushed down to Lucene. */
+const rawFieldOptions: CastFieldOptions = { castFields: false };
+
+/** `field` has a non-empty value, referencing the raw field. */
 function esqlRawFieldNonEmpty(field: string): string {
-  return `(\`${field}\` IS NOT NULL AND \`${field}\` != "")`;
+  return `(${esqlIsNotNullOrEmpty(`\`${field}\``, rawFieldOptions)})`;
 }
 
 /** Fields composing the host-scoped user EUID, per the `entity.namespace == 'local'` ranking branch. */
@@ -382,7 +391,12 @@ export function getHostScopedUserEuidEsql(): {
   const [userField, hostField] = HOST_SCOPED_USER_FIELDS;
 
   return {
-    evalAssignment: `CONCAT("user:", TO_STRING(\`${userField}\`), "@", TO_STRING(\`${hostField}\`), "@${USER_ENTITY_NAMESPACE.Local}")`,
+    evalAssignment: `CONCAT("user:", ${esqlIdentityValue(
+      `\`${userField}\``,
+      rawFieldOptions
+    )}, "@", ${esqlIdentityValue(`\`${hostField}\``, rawFieldOptions)}, "@${
+      USER_ENTITY_NAMESPACE.Local
+    }")`,
     presenceGate: HOST_SCOPED_USER_FIELDS.map(esqlRawFieldNonEmpty).join(' AND '),
   };
 }
@@ -452,7 +466,17 @@ export function getEuidEsqlDocumentsContainsIdFilter(
 export function getEuidEsqlEvaluation(
   entityDefinition: EntityDefinitionWithoutId,
   outputColumn: string,
-  { withTypeId = true }: { withTypeId?: boolean } = {}
+  {
+    withTypeId = true,
+    reduceMultiValued = true,
+  }: {
+    withTypeId?: boolean;
+    /**
+     * `false` leaves a single-field identity (e.g. `entity.id`) as it is, multi-valued included,
+     * for callers that expand the values into one row each afterwards (the graph).
+     */
+    reduceMultiValued?: boolean;
+  } = {}
 ): string {
   const { identityField, type: entityType } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
@@ -460,7 +484,9 @@ export function getEuidEsqlEvaluation(
   if (isSingleFieldIdentity(identityField)) {
     const expression = appendTypeIdIfNeeded(
       entityType,
-      castField(identityField.singleField),
+      reduceMultiValued
+        ? esqlIdentityValue(identityField.singleField)
+        : castField(identityField.singleField),
       mustPrependTypeId
     );
     return `${outputColumn} = ${expression}`;
@@ -482,10 +508,12 @@ export function getEuidEsqlEvaluation(
   for (const f of presentFields) {
     assignments.push(`${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`);
   }
-  // Nullable aliases: field value when present, NULL otherwise.
+  // Nullable aliases: the field's identity value when present, NULL otherwise.
   for (const f of presentFields) {
     assignments.push(
-      `${esqlPresentOrNullColumnName(f)} = CASE(${esqlPresentColumnName(f)}, TO_STRING(${f}))`
+      `${esqlPresentOrNullColumnName(f)} = CASE(${esqlPresentColumnName(f)}, ${esqlIdentityValue(
+        f
+      )})`
     );
   }
 
@@ -505,7 +533,9 @@ export function getEuidEsqlEvaluation(
       );
       if (branch.when) {
         const condVar = `_euid_branch_${i}_cond`;
-        assignments.push(`${condVar} = (${conditionToESQL(branch.when)})`);
+        assignments.push(
+          `${condVar} = (${conditionToESQL(branch.when, { reduceMultiValued: true })})`
+        );
         caseParts.push(`${condVar}, ${formulaVar}`);
       } else {
         caseParts.push(`TRUE, ${formulaVar}`);

@@ -6,7 +6,7 @@ FROM logs-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2024-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2024-01-02T00:00:00.000Z\\")
-      AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+      AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (CASE(MV_MIN(TO_STRING(user.email)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(user.email))), 1, 1)), MV_MIN(TO_STRING(user.email))) IS NOT NULL OR CASE(MV_MIN(TO_STRING(user.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(user.id))), 1, 1)), MV_MIN(TO_STRING(user.id))) IS NOT NULL OR CASE(MV_MIN(TO_STRING(user.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(user.name))), 1, 1)), MV_MIN(TO_STRING(user.name))) IS NOT NULL))
   | SAMPLE 0.1
   | SORT @timestamp ASC
   | LIMIT 10

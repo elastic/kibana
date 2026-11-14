@@ -190,8 +190,10 @@ describe('CRUDClient', () => {
       );
     });
 
-    it('rejects on a multivalued identity field ranked differently than the caller expected', async () => {
-      // Re-derivation selects the first array value; reject a caller keyed to another value.
+    it('accepts a multivalued identity field when the caller expected its lowest value', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      // Re-derivation selects the lowest array value, whatever the order in the source.
       const result = await client.createEntitiesFromSource([
         {
           type: 'host',
@@ -202,10 +204,29 @@ describe('CRUDClient', () => {
       ]);
 
       expect(result).toEqual({
+        created: ['host:host-1'],
+        alreadyExists: [],
+        skipped: [],
+        failed: [],
+      });
+    });
+
+    it('rejects on a multivalued identity field ranked differently than the caller expected', async () => {
+      // Re-derivation selects the lowest array value; reject a caller keyed to another value.
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: ['host-2', 'host-1'] } },
+          expectedEntityId: 'host:host-2',
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
         created: [],
         alreadyExists: [],
         skipped: [],
-        failed: [{ euid: 'host:host-1', reason: 'euid_mismatch' }],
+        failed: [{ euid: 'host:host-2', reason: 'euid_mismatch' }],
       });
       expect(esClient.bulk).not.toHaveBeenCalled();
     });

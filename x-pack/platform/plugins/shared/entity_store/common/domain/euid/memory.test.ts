@@ -136,6 +136,14 @@ describe('getEuidFromObject', () => {
       ).toBe('host:host-id-1');
     });
 
+    it('uses the lowest non-empty host.id of a multi-valued field', () => {
+      const host = getBuiltInEntityDefinition('host');
+      expect(getEuidFromObject(host, { host: { id: ['zzz', 'aaa'], name: 'n' } })).toBe('host:aaa');
+      expect(getEuidFromObject(host, { host: { id: ['hid', 'hid'] } })).toBe('host:hid');
+      expect(getEuidFromObject(host, { host: { id: ['', 'b'] } })).toBe('host:b');
+      expect(getEuidFromObject(host, { host: { id: [''], name: 'n' } })).toBe('host:n');
+    });
+
     it('uses host.name when host.id is missing', () => {
       expect(
         getEuidFromObject(getBuiltInEntityDefinition('host'), { host: { name: 'server1' } })
@@ -201,6 +209,15 @@ describe('getEuidFromObject', () => {
           event: { module: 'azure' },
         })
       ).toBeUndefined();
+    });
+
+    it('uses the lowest host.id of a multi-valued field for a local user', () => {
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), {
+          user: { name: 'alice' },
+          host: { id: ['zzz', 'aaa'] },
+        })
+      ).toBe('user:alice@aaa@local');
     });
 
     it('uses non-IDP path when user.name and host.id are present', () => {

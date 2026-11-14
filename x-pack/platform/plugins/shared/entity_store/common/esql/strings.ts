@@ -5,17 +5,30 @@
  * 2.0.
  */
 
-import { castField, referenceField } from './cast';
+import { referenceField } from './cast';
 import type { CastFieldOptions } from './cast';
 
-export function esqlIsNotNullOrEmpty(field: string, options?: CastFieldOptions) {
+/**
+ * The value a field contributes to an entity id: its lowest non-empty value, or NULL when it has
+ * none. A plain comparison on a multi-valued field yields NULL in ES|QL, so the field is reduced to
+ * one value first. Mirrors `getFieldValue` (in-memory) and `__euid_min` (Painless).
+ */
+export function esqlIdentityValue(field: string, options?: CastFieldOptions): string {
   const ref = referenceField(field, options);
-  return `${ref} IS NOT NULL AND ${ref} != ""`;
+  return `CASE(MV_MIN(${ref}) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(${ref})), 1, 1)), MV_MIN(${ref}))`;
+}
+
+export function esqlIsNotNullOrEmpty(field: string, options?: CastFieldOptions) {
+  const identityValue = `${esqlIdentityValue(field, options)} IS NOT NULL`;
+  // A raw `IS NOT NULL` can be pushed down to Lucene, so it pre-filters before the reduced check.
+  return options?.castFields === false
+    ? `${field} IS NOT NULL AND ${identityValue}`
+    : identityValue;
 }
 
 /**
  * Returns the precomputed column name for a field's boolean presence alias.
- * Used by the optimized entity-id pipeline to hoist `IS NOT NULL AND != ""`
+ * Used by the optimized entity-id pipeline to hoist the identity presence
  * checks out of per-row CASE arms into a single upstream EVAL stage.
  *
  * Example: `entity.namespace` → `entity_namespace_present`
@@ -37,8 +50,7 @@ export function esqlPresentOrNullColumnName(field: string): string {
 }
 
 export function esqlIsNullOrEmpty(field: string) {
-  const ref = castField(field);
-  return `(${ref} IS NULL OR ${ref} == "")`;
+  return `(${esqlIdentityValue(field)} IS NULL)`;
 }
 
 /**

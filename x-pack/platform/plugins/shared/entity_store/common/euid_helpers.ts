@@ -30,6 +30,7 @@
  */
 
 import * as euidModule from './domain/euid';
+import { esqlIdentityValue } from './esql/strings';
 import { getBuiltInEntityDefinition } from './domain/definitions/registry';
 import type { EntityDefinitionWithoutId, EntityType } from './domain/definitions/entity_schema';
 
@@ -102,6 +103,12 @@ export const euid = {
     getEuidEvaluationForSearch: euidModule.getEuidPainlessEvaluationForSearch,
 
     /**
+     * Helper functions the evaluations above call. A hand-built script that embeds
+     * `getEuidEvaluation` or `getEuidEvaluationForSearch` must emit this once at its root.
+     */
+    preamble: euidModule.EUID_PAINLESS_PREAMBLE,
+
+    /**
      * Elasticsearch `runtime_mappings` entry that exposes the EUID as a `keyword` runtime field (`entity_id`).
      * Input: an entity definition. Output: mapping object suitable for the Search API `runtime_mappings` map.
      */
@@ -135,6 +142,14 @@ export const euid = {
      * Input: an entity definition. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
      */
     getFieldEvaluations: euidModule.getFieldEvaluationsEsql,
+
+    /**
+     * ESQL expression reducing one (possibly multi-valued) field to its identity value: the lowest
+     * non-empty value, or NULL when it has none. Use it to normalize a field before grouping by it,
+     * so a multi-valued identity field yields one group, as it does in the EUID.
+     * Input: a field name; output: ESQL expression string.
+     */
+    getIdentityValue: esqlIdentityValue,
   },
 
   /**

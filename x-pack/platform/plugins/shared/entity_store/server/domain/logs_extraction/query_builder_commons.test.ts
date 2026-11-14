@@ -16,6 +16,7 @@ import type {
   EntityField,
   SetFieldsByCondition,
 } from '../../../common/domain/definitions/entity_schema';
+import { esqlIdentityValue } from '../../../common/esql/strings';
 import { USER_ENTITY_NAMESPACE } from '../../../common/domain/definitions/user_entity_constants';
 import { getEuidEsqlDocumentsContainsIdFilter } from '../../../common/domain/euid/esql';
 import {
@@ -297,9 +298,9 @@ describe('buildFieldEvaluations', () => {
 
     expect(fragment.startsWith('| EVAL ')).toBe(true);
     expect(fragment).toContain('entity.source = CASE(');
-    expect(fragment).toContain('_src_entity_source0 = MV_FIRST(TO_STRING(event.module))');
-    expect(fragment).toContain('_src_entity_source1 = MV_FIRST(TO_STRING(event.dataset))');
-    expect(fragment).toContain('_src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset))');
+    expect(fragment).toContain(`_src_entity_source0 = ${esqlIdentityValue('event.module')}`);
+    expect(fragment).toContain(`_src_entity_source1 = ${esqlIdentityValue('event.dataset')}`);
+    expect(fragment).toContain(`_src_entity_source2 = ${esqlIdentityValue('data_stream.dataset')}`);
     expect(fragment).toContain('NULL');
   });
 
