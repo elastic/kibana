@@ -52,10 +52,53 @@ export interface GroupResourceNodesResponse extends Pick<ServiceMapTelemetry, 'n
 export type ConnectionType = Connection | ConnectionLegacy;
 export type DestinationType = ExitSpanDestination | ExitSpanDestinationLegacy;
 
+/**
+ * How the server groups a large service map. Absent when grouping is off, under 100 services,
+ * or grouping failed — render the map as today.
+ */
+export type ServiceGroupingSource =
+  | 'serviceGroups'
+  | 'service.namespace'
+  | 'kubernetes.namespace'
+  | 'namePrefix'
+  | 'calls';
+
+export type ServiceMapGroup =
+  | { id: string; kind: 'savedGroup'; name: string }
+  | {
+      id: string;
+      kind: 'attribute';
+      attribute: 'service.namespace' | 'kubernetes.namespace' | 'namePrefix';
+      value: string;
+    }
+  | { id: string; kind: 'calls'; busiestService: string }
+  | { id: string; kind: 'shared' }
+  | { id: string; kind: 'notConnected' };
+
+export interface ServiceGroupingStrategy {
+  source: ServiceGroupingSource;
+  /** Whether this grouping passed readability checks */
+  passes: boolean;
+  /** This strategy's own groups (not shared across strategies) */
+  groups: ServiceMapGroup[];
+  /** assignment[i] = index in `groups` of services[i] */
+  assignment: number[];
+}
+
+export interface ServiceMapGrouping {
+  /** Every service on the map, sorted */
+  services: string[];
+  /** Strategy "Automatic" renders; always one of `strategies` */
+  automatic: ServiceGroupingSource;
+  strategies: ServiceGroupingStrategy[];
+}
+
 export interface ServiceMapRawResponse {
   spans: ServiceMapSpan[];
   servicesData: ServicesResponse[];
   anomalies: ServiceAnomaliesResponse;
+  /** Present when service map grouping produced a grouping for this map */
+  serviceGrouping?: ServiceMapGrouping;
 }
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
@@ -239,7 +282,32 @@ export interface GroupedNodeData extends BaseNodeData {
   count: number;
 }
 
-export type ServiceMapNodeData = ServiceNodeData | DependencyNodeData | GroupedNodeData;
+/**
+ * A closed service group (2+ services drawn as one node). Distinct from resource
+ * `GroupedNodeData` (`isGrouped`).
+ */
+export interface ServiceGroupNodeData extends BaseNodeData {
+  isService: false;
+  isServiceGroup: true;
+  groupKind: ServiceMapGroup['kind'];
+  memberServiceIds: string[];
+  memberCount: number;
+  /** True when a selected / highlighted service is a member of this closed group */
+  contextHighlight?: boolean;
+  serviceAnomalyStats?: ServiceAnomalyStats;
+  alertsCount?: number;
+  alertsByStatus?: Partial<Record<AlertStatus, number>>;
+  sloStatus?: SloStatus | 'noSLOs';
+  sloCount?: number;
+  /** Rolled up from members when service map grouping / numbers-on-nodes are on */
+  stats?: ServiceMapServiceStats;
+}
+
+export type ServiceMapNodeData =
+  | ServiceNodeData
+  | DependencyNodeData
+  | GroupedNodeData
+  | ServiceGroupNodeData;
 
 export type ServiceMapNode = Node<ServiceMapNodeData>;
 
@@ -282,4 +350,6 @@ export interface ReactFlowServiceMapResponse {
   edges: ServiceMapEdge[];
   nodesCount: number;
   tracesCount: number;
+  /** Passthrough from the raw map response when grouping produced a result */
+  serviceGrouping?: ServiceMapGrouping;
 }

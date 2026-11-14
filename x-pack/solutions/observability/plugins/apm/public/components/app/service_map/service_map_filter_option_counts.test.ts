@@ -70,4 +70,31 @@ describe('computeServiceMapFilterOptionCounts', () => {
     expect(connection.connected).toBe(2);
     expect(connection.orphaned).toBe(0);
   });
+
+  it('counts closed service groups in alert and SLO option tallies', () => {
+    const nodes: ServiceMapNode[] = [
+      mkService('alone'),
+      {
+        id: 'namePrefix:opbeans',
+        type: 'serviceGroup',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'namePrefix:opbeans',
+          label: 'opbeans',
+          isService: false,
+          isServiceGroup: true,
+          groupKind: 'attribute',
+          memberServiceIds: ['opbeans-java', 'opbeans-node'],
+          memberCount: 2,
+          alertsByStatus: { active: 2 },
+          sloStatus: 'violated',
+        },
+      },
+    ];
+
+    const { alerts, slo, totalServiceNodes } = computeServiceMapFilterOptionCounts(nodes, []);
+    expect(alerts.active).toBe(1);
+    expect(slo.violated).toBe(1);
+    expect(totalServiceNodes).toBe(2);
+  });
 });

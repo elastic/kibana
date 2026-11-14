@@ -11,7 +11,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import type { Environment } from '../../../../../common/environment_rt';
-import { isGroupedNodeData, type ServiceMapNode } from '../../../../../common/service_map';
+import {
+  isGroupedNodeData,
+  isServiceGroupNodeData,
+  type ServiceMapNode,
+} from '../../../../../common/service_map';
 import { POPOVER_WIDTH } from './constants';
 import { DependencyContents } from './dependency_contents';
 import { ExternalsListContents } from './externals_list_contents';
@@ -46,6 +50,10 @@ export function getContentsComponent(
   isDiagnosticModeEnabled: boolean
 ): ComponentType<ContentsProps> | null {
   const data = node.data;
+  // Closed service groups select only; no popover until open-group (#300587).
+  if (isServiceGroupNodeData(data)) {
+    return null;
+  }
   if (isGroupedNodeData(data)) {
     return ExternalsListContents;
   }

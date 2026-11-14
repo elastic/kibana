@@ -30,11 +30,13 @@ export type {
   ServiceMapService,
   ServiceMapExitSpan,
   ServiceMapSpan,
+  ServiceMapServiceStats,
   ServiceNodeData,
   DependencyNodeData,
   GroupedConnectionInfo,
   GroupInfo,
   GroupedNodeData,
+  ServiceGroupNodeData,
   ServiceMapNodeData,
   ServiceMapNode,
   EdgeMarker,
@@ -42,12 +44,17 @@ export type {
   ServiceMapEdge,
   GroupResourceNodesResult,
   ReactFlowServiceMapResponse,
+  ServiceGroupingSource,
+  ServiceMapGroup,
+  ServiceGroupingStrategy,
+  ServiceMapGrouping,
 } from '@kbn/apm-types';
 import type {
   ServiceMapNode,
   ServiceNodeData,
   DependencyNodeData,
   GroupedNodeData,
+  ServiceGroupNodeData,
   ServiceMapNodeData,
 } from '@kbn/apm-types';
 import type { Node } from '@xyflow/react';
@@ -67,21 +74,35 @@ export function isServiceNode(node: ServiceMapNode): node is Node<ServiceNodeDat
 }
 
 /**
+ * Type guard for a closed service-group node (not a resource group).
+ */
+export function isServiceGroupNodeData(data: ServiceMapNodeData): data is ServiceGroupNodeData {
+  return 'isServiceGroup' in data && data.isServiceGroup === true;
+}
+
+/**
+ * Helper to check if a node is a closed service-group node.
+ */
+export function isServiceGroupNode(node: ServiceMapNode): node is Node<ServiceGroupNodeData> {
+  return isServiceGroupNodeData(node.data);
+}
+
+/**
  * Helper to check if a node is an external/dependency node.
  */
 export function isExternalNode(node: ServiceMapNode): node is Node<DependencyNodeData> {
-  return node.data.isService === false && !('isGrouped' in node.data);
+  return isDependencyNodeData(node.data);
 }
 
 /**
  * Helper to check if a node is a grouped resources node.
  */
 export function isGroupedNode(node: ServiceMapNode): node is Node<GroupedNodeData> {
-  return 'isGrouped' in node.data && node.data.isGrouped === true;
+  return isGroupedNodeData(node.data);
 }
 
 /**
- * Type guard to check if node data is grouped node data.
+ * Type guard to check if node data is grouped resource node data.
  */
 export function isGroupedNodeData(data: ServiceMapNodeData): data is GroupedNodeData {
   return 'isGrouped' in data && data.isGrouped === true;
@@ -91,5 +112,5 @@ export function isGroupedNodeData(data: ServiceMapNodeData): data is GroupedNode
  * Type guard to check if node data is dependency/external node data.
  */
 export function isDependencyNodeData(data: ServiceMapNodeData): data is DependencyNodeData {
-  return data.isService === false && !('isGrouped' in data);
+  return data.isService === false && !isGroupedNodeData(data) && !isServiceGroupNodeData(data);
 }

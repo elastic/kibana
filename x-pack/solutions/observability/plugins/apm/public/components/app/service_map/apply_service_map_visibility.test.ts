@@ -106,6 +106,40 @@ describe('applyServiceMapVisibility', () => {
     expect(outEdges.every((e) => !e.hidden)).toBe(true);
   });
 
+  it('shows closed service groups with default filters even when only linked to a dependency', () => {
+    const nodes: ServiceMapNode[] = [
+      {
+        id: 'namePrefix:opbeans',
+        type: 'serviceGroup',
+        position: { x: 0, y: 0 },
+        data: {
+          id: 'namePrefix:opbeans',
+          label: 'opbeans',
+          isService: false,
+          isServiceGroup: true,
+          groupKind: 'attribute',
+          memberServiceIds: ['opbeans-go', 'opbeans-node'],
+          memberCount: 2,
+        },
+      },
+      {
+        id: 'postgresql',
+        type: 'dependency',
+        position: { x: 0, y: 0 },
+        data: { id: 'postgresql', label: 'postgresql', isService: false },
+      },
+    ];
+    const edges: ServiceMapEdge[] = [mkEdge('e1', 'namePrefix:opbeans', 'postgresql')];
+    const { nodes: outNodes } = applyServiceMapVisibility(
+      nodes,
+      edges,
+      DEFAULT_SERVICE_MAP_VIEW_FILTERS
+    );
+    const byId = Object.fromEntries(outNodes.map((n) => [n.id, n.hidden]));
+    expect(byId['namePrefix:opbeans']).toBe(false);
+    expect(byId.postgresql).toBe(false);
+  });
+
   it('treats sloStatus noSLOs like noData for SLO filter', () => {
     const nodes: ServiceMapNode[] = [
       mkService('a', { sloStatus: 'noSLOs' }),

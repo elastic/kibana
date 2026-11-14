@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { ServiceGroupingSource, ServiceMapGrouping } from '../../../../common/service_map';
+
+/**
+ * Count line for the map, e.g. "20 services in 3 groups, by name prefix".
+ *
+ * - Uses `grouping.automatic` only (no Group-by picker yet). When a strategy can
+ *   be chosen, pass that source into `groupServiceNodes` and look it up here too.
+ * - `serviceCount` is `grouping.services.length` from the payload (every service
+ *   the server assigned), not how many service/group nodes are on the graph.
+ * - `closedGroupCount` is how many group squares were actually drawn (members that
+ *   resolved to nodes and collapsed). Groups of 1 stay service nodes.
+ */
+export function formatServiceGroupingCountLine(
+  grouping: ServiceMapGrouping,
+  closedGroupCount: number
+): string | undefined {
+  const strategy = grouping.strategies.find((s) => s.source === grouping.automatic);
+  if (!strategy) {
+    return undefined;
+  }
+
+  return i18n.translate('xpack.apm.serviceMap.groupingCountLine', {
+    defaultMessage:
+      '{serviceCount} {serviceCount, plural, one {service} other {services}} in {groupCount} {groupCount, plural, one {group} other {groups}}, by {groupingBy}',
+    values: {
+      serviceCount: grouping.services.length,
+      groupCount: closedGroupCount,
+      groupingBy: formatServiceGroupingSource(grouping.automatic),
+    },
+  });
+}
+
+function formatServiceGroupingSource(source: ServiceGroupingSource): string {
+  switch (source) {
+    case 'calls':
+      return i18n.translate('xpack.apm.serviceMap.groupingSource.calls', {
+        defaultMessage: 'calls between services',
+      });
+    case 'service.namespace':
+      return i18n.translate('xpack.apm.serviceMap.groupingSource.serviceNamespace', {
+        defaultMessage: 'service.namespace',
+      });
+    case 'kubernetes.namespace':
+      return i18n.translate('xpack.apm.serviceMap.groupingSource.kubernetesNamespace', {
+        defaultMessage: 'kubernetes.namespace',
+      });
+    case 'namePrefix':
+      return i18n.translate('xpack.apm.serviceMap.groupingSource.namePrefix', {
+        defaultMessage: 'name prefix',
+      });
+    case 'serviceGroups':
+      return i18n.translate('xpack.apm.serviceMap.groupingSource.serviceGroups', {
+        defaultMessage: 'service groups',
+      });
+  }
+}
