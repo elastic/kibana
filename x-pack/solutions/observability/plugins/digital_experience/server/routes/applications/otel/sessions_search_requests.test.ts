@@ -33,7 +33,7 @@ const inEnvironment = (environment?: string) => aggregationsOf(environment).inEn
 describe('sessionsSearch', () => {
   it('reads the sessions index without hits, failing rather than returning partial results', () => {
     expect(sessionsSearch({ start: START, end: END })).toMatchObject({
-      index: 'digital-experience-sessions-*',
+      index: 'digital-experience-sessions-browser-*',
       size: 0,
       track_total_hits: false,
       ignore_unavailable: true,

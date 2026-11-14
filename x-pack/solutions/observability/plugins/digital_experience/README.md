@@ -68,7 +68,8 @@ request with the index's metadata, read as the internal user:
 
 - sessions are set up;
 - the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
-- the user can read `digital-experience-sessions-*`, otherwise the raw events are read quietly;
+- the user can read `digital-experience-sessions-browser-*`, which a `digital-experience-sessions-*`
+  grant covers, otherwise the raw events are read quietly;
 - the sessions hold at least one application, so applications that send no `session.id`, which the
   sessions skip, still appear when no application sends one.
 
@@ -209,10 +210,13 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 ## Sessions
 
 Sessions are summarized from the EDOT Browser data in `traces-*.otel-*,logs-*.otel-*` into
-`digital-experience-sessions-<version>`, one document per `service.name` + `session.id`: start/end
-time and duration, page views with entry/exit page and journey, click and error counts, p75 Core Web
-Vitals, and user, browser, OS and geo attributes. The Sessions tab, the session detail and the
-applications list read that index.
+`digital-experience-sessions-browser-<version>`, one document per `service.name` + `session.id`:
+start/end time and duration, page views with entry/exit page and journey, click and error counts, p75
+Core Web Vitals, and user, browser, OS and geo attributes. The Sessions tab, the session detail and
+the applications list read `digital-experience-sessions-browser-*`, and the index template covers
+only that pattern, so session summaries of another platform under `digital-experience-sessions-*`
+never mix with the browser ones. The privileges below name `digital-experience-sessions-*`, which
+covers the browser index.
 
 **Nothing in this plugin builds the summaries at the moment.** The Elasticsearch transform that did,
 with its destination pipeline and the health task and stored API key that kept it current, is
@@ -220,6 +224,10 @@ removed, and a Task Manager task is to replace it. Enabling sessions only create
 template, so the index stays empty until then. Unreleased setups that enabled sessions with the
 transform keep their transforms and index: delete the `digital-experience-sessions-*` transforms by
 hand.
+
+Setups that enabled sessions before the index was named `digital-experience-sessions-browser-<version>`
+keep an unused `digital-experience-sessions-1` index, which can be deleted. Enabling again replaces
+their index template, which keeps its name, `digital-experience-sessions`.
 
 The document also holds what the applications list counts, so the list can read it instead of the
 raw events: the environment, `page_load_count` (`browser.navigation_timing` events),

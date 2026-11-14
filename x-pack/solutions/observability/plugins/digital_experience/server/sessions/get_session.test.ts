@@ -150,6 +150,10 @@ describe('getSession', () => {
     expect(detail?.timeline).toHaveLength(5);
     expect(detail?.timelineTruncated).toBe(false);
     expect(detail?.pageVisits.map(({ page }) => page)).toEqual(['/', '/cart']);
+    expect(client.search).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ index: 'digital-experience-sessions-browser-*' })
+    );
     expect(client.search.mock.calls[1][0]).toEqual(
       expect.objectContaining({
         query: {
