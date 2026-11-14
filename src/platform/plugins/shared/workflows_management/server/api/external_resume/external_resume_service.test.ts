@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { computeTokenHmac } from '@kbn/crypto';
 import {
   ExecutionStatus,
   HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
@@ -14,7 +15,6 @@ import {
 } from '@kbn/workflows';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { WorkflowExecutionInvalidStatusError } from '@kbn/workflows/common/errors';
-import { computeTokenHmac } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { ExternalResumeError } from './external_resume_error';
 import {
