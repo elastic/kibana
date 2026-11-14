@@ -1,0 +1,92 @@
+{
+  "sha1": "df5f992312c1eb5fea2da4c3bfa45c73ed986374",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "d79feb3b2b05635-662d3f4ec99a053",
+      "title": "Install sample data needed for Dashboard sample data tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/tests/global.setup.ts",
+        "line": 13,
+        "column": 28
+      }
+    },
+    {
+      "id": "e3ed23d82624d1d-e98162885cfe058",
+      "title": "Dashboard bwc urls should forward legacy dashboard urls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/tests/dashboard_bwc_urls.spec.ts",
+        "line": 20,
+        "column": 28
+      }
+    },
+    {
+      "id": "e3ed23d82624d1d-5768a6920102c11",
+      "title": "Dashboard bwc urls should load dashboard with 8.14 short url state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/tests/dashboard_bwc_urls.spec.ts",
+        "line": 36,
+        "column": 53
+      }
+    },
+    {
+      "id": "e3ed23d82624d1d-067a7cfaa1e3090",
+      "title": "Dashboard bwc urls should load dashboard with 8.18 short url state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/tests/dashboard_bwc_urls.spec.ts",
+        "line": 36,
+        "column": 53
+      }
+    },
+    {
+      "id": "e3ed23d82624d1d-62bb1d119668bf1",
+      "title": "Dashboard bwc urls should load dashboard with 8.19 short url state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/tests/dashboard_bwc_urls.spec.ts",
+        "line": 36,
+        "column": 53
+      }
+    },
+    {
+      "id": "017aff1bc8e0a96-4e06187fc62e639",
+      "title": "Remove sample data installed for Dashboard sample data tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "sha1": "72b84dc66901a8452326aa64094931b1bdd8d05b",
+  "sha1": "892f67f48dd7f9c698ee395fb6872d20016499a9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
-        "line": 81,
-        "column": 61
+        "line": 85,
+        "column": 20
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
-        "line": 92,
-        "column": 15
+        "line": 98,
+        "column": 56
       }
     },
     {
@@ -48,8 +48,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
-        "line": 99,
+        "line": 107,
         "column": 17
+      }
+    },
+    {
+      "id": "ecb9dffb5199516-e389cdaab502319",
+      "title": "Overview threat intelligence panel counts each transform indicator once alongside indicators without the transform label",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
+        "line": 123,
+        "column": 41
       }
     }
   ]
