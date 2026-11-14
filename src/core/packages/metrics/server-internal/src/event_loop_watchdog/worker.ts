@@ -25,7 +25,7 @@ import {
   type CpuProfile,
   type InspectorSession,
 } from './profile_capture';
-import { summarizeProfile, type CallerSummary, type KibanaFrameSummary } from './profile_summary';
+import { summarizeProfile, type CallerSummary, type ProfileSummary } from './profile_summary';
 import type {
   BlockLogMeta,
   CaptureStopReason,
@@ -87,12 +87,32 @@ const sampledMs = ({ startTime, endTime, timeDeltas }: CpuProfile, untilUs = end
 const formatFrame = ({ name, location }: CallerSummary): string =>
   location === undefined ? name : `${name} (${location})`;
 
-const formatTopKibanaSuffix = (frame: KibanaFrameSummary | undefined): string => {
-  if (!frame) {
-    return '';
+/**
+ * Longest frame list in the capture message. The full lists are in `profile.frames` and
+ * `profile.kibanaFrames`; the cap keeps the worst-case line within the logger's 4,094 bytes.
+ */
+export const MAX_MESSAGE_FRAMES_LENGTH = 600;
+const MESSAGE_ELLIPSIS = '...';
+
+/** `Top: <frames>. Kibana code: <frames with callers>`, cut with `...` past the cap. */
+const formatFrameLists = ({ frames, kibanaFrames }: ProfileSummary): string => {
+  const lists: string[] = [];
+  if (frames.length > 0) {
+    lists.push(
+      `Top: ${frames.map((frame) => `${frame.percent}% ${formatFrame(frame)}`).join('; ')}`
+    );
   }
-  const chain = [formatFrame(frame), ...frame.callers.map(formatFrame)].join(' <- ');
-  return `; top Kibana frame: ${frame.percent}% ${chain}`;
+  if (kibanaFrames.length > 0) {
+    const entries = kibanaFrames.map(
+      (frame) =>
+        `${frame.percent}% ${[formatFrame(frame), ...frame.callers.map(formatFrame)].join(' <- ')}`
+    );
+    lists.push(`Kibana code: ${entries.join('; ')}`);
+  }
+  const text = lists.join('. ');
+  return text.length <= MAX_MESSAGE_FRAMES_LENGTH
+    ? text
+    : `${text.slice(0, MAX_MESSAGE_FRAMES_LENGTH - MESSAGE_ELLIPSIS.length)}${MESSAGE_ELLIPSIS}`;
 };
 
 /** Starts detection; returns a function that stops it (for tests: the worker never stops itself). */
@@ -111,6 +131,8 @@ export const runWatchdogWorker = (
   const stats = new BlockStats(thresholdsMs, toMs(nowUs()));
   let reportedDroppedLogLines = logger.getDroppedLogLineCount();
   let counts = noCaptures();
+  /** Capture lines logged since the worker started, for the message's `#N`. */
+  let captureNumber = 0;
   let capture: Capture | undefined;
   let lastCaptureEndedAt: number | undefined;
   /** Start of the last block profiled: one capture per block, however long it lasts. */
@@ -289,12 +311,14 @@ export const runWatchdogWorker = (
       stopHeartbeatGapMs = Math.max(current.stopHeartbeatGapMs, heartbeatGapMs(nowMs));
       counts.maxStopHeartbeatGapMs = Math.max(counts.maxStopHeartbeatGapMs, stopHeartbeatGapMs);
     }
+    captureNumber++;
+    const frameLists = formatFrameLists(summary);
     logger.info<ProfileLogMeta>(
-      `Event loop block profiled: block ~${blockedMs}ms${
+      `Event loop block profile #${captureNumber}: block ~${blockedMs}ms${
         stopReason === 'block_ended' ? '' : ' so far'
       } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${
         summary.samples
-      } samples; stopped: ${stopReason}${formatTopKibanaSuffix(summary.kibanaFrames[0])}`,
+      } samples; stopped: ${stopReason}.${frameLists ? ` ${frameLists}` : ''}`,
       {
         tags: ['event-loop-watchdog'],
         kibana: {

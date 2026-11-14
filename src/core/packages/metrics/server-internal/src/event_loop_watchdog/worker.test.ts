@@ -13,7 +13,7 @@ import path from 'node:path';
 import type * as WorkerThreads from 'node:worker_threads';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createWorkerLogger, type WorkerLogger } from '@kbn/core-threads-server-internal';
-import { runWatchdogWorker, type WatchdogWorkerDeps } from './worker';
+import { MAX_MESSAGE_FRAMES_LENGTH, runWatchdogWorker, type WatchdogWorkerDeps } from './worker';
 import type { ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
 import type { CpuProfile, InspectorSession } from './profile_capture';
 import {
@@ -187,7 +187,7 @@ describe('runWatchdogWorker', () => {
   };
   const profileLines = () =>
     logger.info.mock.calls.filter(([message]) =>
-      String(message).startsWith('Event loop block profiled')
+      String(message).startsWith('Event loop block profile #')
     );
   const allStats = () =>
     logger.info.mock.calls
@@ -543,7 +543,7 @@ describe('runWatchdogWorker', () => {
       expect(sessions[0].disconnect).toHaveBeenCalled();
       expect(profileLines()).toHaveLength(1);
       expect(profileLines()[0][0]).toMatch(
-        /^Event loop block profiled: block ~2000ms \(profiled after ~1000ms, profiler start took ~\d+ms\), 2 samples; stopped: block_ended; top Kibana frame: 100% spin \(src\/core\/server\/spin\.ts:10\) <- runStep \(x-pack\/plugins\/workflows\/server\/step\.ts:20\) <- handleRequest \(src\/core\/server\/http\/router\.ts:42\)$/
+        /^Event loop block profile #1: block ~2000ms \(profiled after ~1000ms, profiler start took ~\d+ms\), 2 samples; stopped: block_ended\. Top: 100% spin \(src\/core\/server\/spin\.ts:10\)\. Kibana code: 100% spin \(src\/core\/server\/spin\.ts:10\) <- runStep \(x-pack\/plugins\/workflows\/server\/step\.ts:20\) <- handleRequest \(src\/core\/server\/http\/router\.ts:42\)$/
       );
       expect(profileMeta()).toEqual({
         phase: 'starting',
@@ -578,7 +578,7 @@ describe('runWatchdogWorker', () => {
       });
     });
 
-    it('omits the top Kibana frame message suffix when the profile has no Kibana call frames', async () => {
+    it('leaves the Kibana code list out of the message when the profile has no Kibana call frames', async () => {
       profile = {
         nodes: [
           node(1, '(root)', { children: [2] }),
@@ -592,7 +592,7 @@ describe('runWatchdogWorker', () => {
       startProfiling();
       await profiledBlock(1_500);
       expect(profileLines()[0][0]).toMatch(
-        /^Event loop block profiled: block ~1500ms \(profiled after ~1000ms, profiler start took ~\d+ms\), 1 samples; stopped: block_ended$/
+        /^Event loop block profile #1: block ~1500ms \(profiled after ~1000ms, profiler start took ~\d+ms\), 1 samples; stopped: block_ended\. Top: 100% zodParse \(node_modules\/zod\/index\.js:5\)$/
       );
       expect(profileMeta().topKibanaFrame).toBeUndefined();
     });
@@ -693,6 +693,18 @@ describe('runWatchdogWorker', () => {
       block(1_500);
       await settle();
       expect(sessions).toHaveLength(2);
+    });
+
+    it('numbers capture lines from #1, counting up across captures', async () => {
+      startProfiling();
+      await profiledBlock(1_500);
+      idle(STATS_INTERVAL_MS);
+      await profiledBlock(1_500);
+      expect(
+        profileLines().map(
+          ([message]) => /^Event loop block profile #(\d+):/.exec(String(message))?.[1]
+        )
+      ).toEqual(['1', '2']);
     });
 
     it('starts the cooldown when a capture ends, not when it was requested', async () => {
@@ -1137,14 +1149,18 @@ describe('runWatchdogWorker', () => {
           .readFileSync(logFile, 'utf8')
           .trim()
           .split('\n')
-          .filter((l) => l.includes('"Event loop block profiled:'));
+          .filter((l) => l.includes('"Event loop block profile #'));
         expect(lines).toHaveLength(1);
         const lineBytes = Buffer.byteLength(lines[0], 'utf8');
         expect(lineBytes).toBeLessThanOrEqual(4_094);
 
         const parsed = JSON.parse(lines[0]);
         expect(parsed.message).not.toMatch(/\[truncated\]$/);
-        expect(parsed.message).toContain('; top Kibana frame: 45.5% ');
+        expect(parsed.message).toContain('Kibana code: 45.5% ');
+        // The frame lists are cut at their cap; the full lists are in `profile`.
+        const frameLists = parsed.message.slice(parsed.message.indexOf('Top: '));
+        expect(frameLists).toHaveLength(MAX_MESSAGE_FRAMES_LENGTH);
+        expect(frameLists.endsWith('...')).toBe(true);
         expect(parsed.kibana.worker).toEqual({ name: WATCHDOG_WORKER_NAME, thread_id: 99 });
         const loggedProfile = parsed.kibana.event_loop_watchdog.profile;
         expect(loggedProfile.frames).toHaveLength(2);

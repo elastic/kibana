@@ -330,7 +330,9 @@ describe('event loop watchdog in a child process', () => {
       const lines = profileLogLines(result);
       expect(lines).toHaveLength(1);
       expect(lines[0]).toMatchObject({
-        message: expect.stringMatching(/^Event loop block profiled: block ~\d+ms \(profiled after/),
+        message: expect.stringMatching(
+          /^Event loop block profile #1: block ~\d+ms \(profiled after/
+        ),
         log: { level: 'INFO', logger: 'metrics.event_loop_watchdog' },
         kibana: { event_loop_watchdog: { profile: { stopReason: 'block_ended' } } },
       });
