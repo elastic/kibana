@@ -90,6 +90,9 @@ describe('CreateDatasetSettings', () => {
     await act(async () => {
       fireEvent.click(getByTestId(optionTestId));
     });
+    // The select returns focus to its control a frame after closing; until that lands it can still
+    // pull focus out of whichever control the next step opens.
+    await waitFor(() => expect(getByTestId('createDatasetSettingsFormat')).toHaveFocus());
   };
 
   it('shows the format select', () => {
