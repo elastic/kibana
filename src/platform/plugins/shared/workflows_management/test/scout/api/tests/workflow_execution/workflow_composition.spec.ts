@@ -187,7 +187,7 @@ spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () 
 
   // -- Sync strategy ---------------------------------------------------------
 
-  spaceTest('sync: waits for child workflow and completes with correct step count', async () => {
+  spaceTest('sync: waits for the child and returns its last step output', async () => {
     const { workflowExecutionId } = await workflowsApi.run(syncParentId, {
       service_name: 'auth-service',
     });
@@ -196,6 +196,15 @@ spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () 
 
     expect(parentExecution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(parentExecution?.stepExecutions).toHaveLength(3);
+
+    const executionWithOutputs = await workflowsApi.getExecution(workflowExecutionId, {
+      includeOutput: true,
+    });
+    const runStep = executionWithOutputs?.stepExecutions.find(
+      (step) => step.stepId === 'run_health_check'
+    );
+    // The child has no workflow.output, so the execute step returns the console step's message.
+    expect(runStep?.output).toBe('Health check passed for auth-service');
 
     const { results: childExecutions } = await workflowsApi.getExecutions(childWorkflowId);
     const completedChildren = childExecutions.filter((e) => e.status === ExecutionStatus.COMPLETED);

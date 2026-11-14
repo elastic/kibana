@@ -21,12 +21,15 @@ import type {
   WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
+import type { ExecutionsIoClient } from '@kbn/workflows-execution-engine/server/repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import { hydrateExecutionIo } from './hydrate_execution_io';
 import { WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT } from '../../../common';
 
 interface GetWorkflowExecutionParams {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
+  executionsIoDataClient: ExecutionsIoClient;
   logger: Logger;
   workflowExecutionId: string;
   spaceId: string;
@@ -38,6 +41,7 @@ interface GetWorkflowExecutionParams {
 export const getWorkflowExecution = async ({
   workflowExecutionsDataClient,
   stepExecutionsDataClient,
+  executionsIoDataClient,
   logger,
   workflowExecutionId,
   spaceId,
@@ -56,9 +60,7 @@ export const getWorkflowExecution = async ({
       return null;
     }
 
-    const sourceExcludes: string[] = [];
-    if (!includeInput) sourceExcludes.push('input');
-    if (!includeOutput) sourceExcludes.push('output');
+    const sourceExcludes = ['input', 'output'];
 
     let stepExecutions: EsWorkflowStepExecution[] = [];
     if (!omitStepExecutions) {
@@ -78,6 +80,22 @@ export const getWorkflowExecution = async ({
           `Failed to get workflow execution ${workflowExecutionId} with steps: Elasticsearch response exceeded the maximum size Kibana can process`
         );
       }
+    }
+
+    try {
+      await hydrateExecutionIo({
+        executionsIoDataClient,
+        stepExecutions,
+        includeInput,
+        includeOutput,
+      });
+    } catch (error) {
+      if (!isMaximumResponseSizeExceededError(error)) {
+        throw error;
+      }
+      logger.warn(
+        `Failed to load step IO for workflow execution ${workflowExecutionId}: Elasticsearch response exceeded the maximum size Kibana can process`
+      );
     }
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);

@@ -26,6 +26,7 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from './repositories/data_access_layer';
+import type { ExecutionsIoClient } from './repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type {
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
@@ -77,6 +78,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   __internalStorage: {
     workflowExecutionsDataClient: WorkflowExecutionsDataClient;
     stepExecutionsDataClient: StepExecutionsDataClient;
+    executionsIoDataClient: ExecutionsIoClient;
   };
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;

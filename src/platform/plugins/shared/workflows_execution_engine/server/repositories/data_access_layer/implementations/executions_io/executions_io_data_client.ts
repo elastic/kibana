@@ -9,10 +9,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { executionIoId, type ExecutionIoType, parseExecutionIoId } from '@kbn/workflows/server';
 
 import { EXECUTION_IO_FALLBACK_INDEXES, WORKFLOWS_EXECUTIONS_IO_DATA_STREAM } from './constants';
-import { executionIoId, parseExecutionIoId } from './execution_io_id';
-import type { ExecutionIoType } from './execution_io_id';
 import type { EsExecutionIo } from './types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../constants/execution_indexes';
 import type {
@@ -23,13 +22,20 @@ import type {
 } from '../../types';
 import type { DataStreamMetadataManager } from '../data_stream/data_stream_metadata_manager';
 
-/** IO value submitted for create. The document id is assigned by {@link ExecutionsIoDataClient.bulkCreate}. */
-export type ExecutionIoCreateDocument = Omit<EsExecutionIo, 'id'>;
+/**
+ * IO value submitted for create.
+ * {@link ExecutionsIoDataClient.bulkCreate} assigns the document id and stamps `@timestamp` when it is omitted.
+ */
+export type ExecutionIoCreateDocument = Omit<EsExecutionIo, 'id' | '@timestamp'> & {
+  '@timestamp'?: string;
+};
 
 export interface ExecutionsIoBulkCreateRequest {
   refresh?: boolean | 'wait_for';
   documents: ExecutionIoCreateDocument[];
 }
+
+type IdentifiedExecutionIoDocument = ExecutionIoCreateDocument & { id: string };
 
 export interface ExecutionsIoDataClientDeps {
   esClient: ElasticsearchClient;
@@ -37,9 +43,17 @@ export interface ExecutionsIoDataClientDeps {
   logger: Logger;
 }
 
+/** Optional `_source` filter for {@link ExecutionsIoClient.getByIds}. */
+export interface GetExecutionsIoByIdsOptions {
+  sourceIncludes?: string[];
+}
+
 /** Public IO client. Both storage bundles and the deferred wrapper implement this. */
 export interface ExecutionsIoClient {
-  getByIds(ids: string[]): Promise<GetExecutionsByIdsResponse<EsExecutionIo>>;
+  getByIds(
+    ids: string[],
+    options?: GetExecutionsIoByIdsOptions
+  ): Promise<GetExecutionsByIdsResponse<EsExecutionIo>>;
   bulkCreate(request: ExecutionsIoBulkCreateRequest): Promise<BulkResponse>;
 }
 
@@ -57,20 +71,25 @@ type IoHit = GetExecutionsByIdsResponse<EsExecutionIo>['items'][number];
 /**
  * Reads and writes workflow and step IO on the executions IO data stream.
  * `getByIds` checks the two newest backing indexes, searches the IO data stream
- * for anything older, then the legacy plain execution indexes. Each id is created once.
+ * for anything older, then the legacy plain execution indexes. A create the write
+ * index rejects because the id already exists updates `value` and `size` there.
  */
 export class ExecutionsIoDataClient implements ExecutionsIoClient {
   constructor(private readonly deps: ExecutionsIoDataClientDeps) {}
 
-  public async getByIds(ids: string[]): Promise<GetExecutionsByIdsResponse<EsExecutionIo>> {
+  public async getByIds(
+    ids: string[],
+    options?: GetExecutionsIoByIdsOptions
+  ): Promise<GetExecutionsByIdsResponse<EsExecutionIo>> {
     if (ids.length === 0) {
       return { items: [], missing: [] };
     }
 
-    const byId = await this.readRecentBackingIndexes(ids);
+    const sourceIncludes = options?.sourceIncludes?.filter((field) => field.length > 0);
+    const byId = await this.readRecentBackingIndexes(ids, sourceIncludes);
     const missingIds = ids.filter((id) => !byId.has(id));
     if (missingIds.length > 0) {
-      const fallback = await this.readPlainIndexes(missingIds);
+      const fallback = await this.readPlainIndexes(missingIds, sourceIncludes);
       for (const [id, item] of fallback) {
         byId.set(id, item);
       }
@@ -86,9 +105,9 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
   }
 
   /**
-   * Creates an IO document on the data stream.
-   * An id is written once. Conflicts, including ids in older backing indexes, are reported
-   * per item with `errors: true`; the other documents are still written.
+   * Creates IO documents on the data stream.
+   * A write-index conflict is updated in the backing index that holds the id.
+   * Other documents in the request are still created. Per-item errors stay on the response.
    */
   public async bulkCreate(request: ExecutionsIoBulkCreateRequest): Promise<BulkResponse> {
     if (request.documents.length === 0) {
@@ -101,57 +120,134 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       id: executionIoId(document.type, document.executionId),
       '@timestamp': document['@timestamp'] || timestamp,
     }));
-    // A data stream only enforces `_id` uniqueness in the write index, so ids that already
-    // exist in older backing indexes are detected here and reported as conflicts.
-    const existingIds = await this.findExistingIds(documents.map(({ id }) => id));
-    const writable = documents.filter(({ id }) => !existingIds.has(id));
+
+    const response = await this.deps.esClient.bulk<EsExecutionIo>({
+      refresh: request.refresh,
+      operations: documents.flatMap((document) => [
+        {
+          create: {
+            _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+            _id: document.id,
+          },
+        },
+        document,
+      ]),
+    });
 
     const writtenById = new Map<string, BulkItemResponse>();
-    if (writable.length > 0) {
-      const response = await this.deps.esClient.bulk<EsExecutionIo>({
-        refresh: request.refresh,
-        operations: writable.flatMap((document) => [
-          {
-            create: {
-              _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
-              _id: document.id,
-            },
-          },
-          document,
-        ]),
-      });
-      writable.forEach((document, index) => {
-        writtenById.set(document.id, toBulkItemResponse(document.id, response.items[index]));
-      });
-    }
+    documents.forEach((document, index) => {
+      writtenById.set(document.id, toBulkItemResponse(document.id, response.items[index]));
+    });
+
+    // Step inputs are still rewritten after the first write. Overwrite the
+    // existing IO document until those writes move to step state.
+    // https://github.com/elastic/security-team/issues/20687
+    await this.updateConflictingDocs(documents, writtenById, request.refresh);
 
     const items = documents.map(
       (document): BulkItemResponse =>
         writtenById.get(document.id) ?? {
           id: document.id,
           index: '',
-          error: {
-            type: 'version_conflict_engine_exception',
-            reason: 'document already exists',
-          },
+          error: { type: 'unknown_error', reason: 'Missing bulk response item' },
         }
     );
     return { items, errors: items.some((item) => item.error !== undefined) };
   }
 
-  private async findExistingIds(ids: string[]): Promise<Set<string>> {
-    const response = await this.deps.esClient.search({
-      index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
-      ignore_unavailable: true,
-      size: ids.length,
-      _source: false,
-      query: { ids: { values: ids } },
+  private async updateConflictingDocs(
+    documents: IdentifiedExecutionIoDocument[],
+    writtenById: Map<string, BulkItemResponse>,
+    refresh: ExecutionsIoBulkCreateRequest['refresh']
+  ): Promise<void> {
+    const conflicts = documents.filter(
+      (document) =>
+        writtenById.get(document.id)?.error?.type === 'version_conflict_engine_exception'
+    );
+    if (conflicts.length === 0) {
+      return;
+    }
+
+    // A data stream only rejects the create when the id is already in the write
+    // index, and that bulk item names the index. getByIds can miss it.
+    const located = new Map(
+      conflicts.flatMap((document) => {
+        const index = writtenById.get(document.id)?.index;
+        return index ? [[document.id, index] as const] : [];
+      })
+    );
+    const updated = await this.updateDocuments(conflicts, located, refresh);
+    conflicts.forEach((document, index) => {
+      const item = updated[index];
+      if (item) {
+        writtenById.set(document.id, item);
+      }
     });
-    return new Set(response.hits.hits.flatMap((hit) => (hit._id ? [hit._id] : [])));
+  }
+
+  private async updateDocuments(
+    documents: IdentifiedExecutionIoDocument[],
+    indexById: ReadonlyMap<string, string>,
+    refresh: ExecutionsIoBulkCreateRequest['refresh']
+  ): Promise<BulkItemResponse[]> {
+    const items = new Array<BulkItemResponse>(documents.length);
+    const targets: Array<{
+      position: number;
+      document: IdentifiedExecutionIoDocument;
+      index: string;
+    }> = [];
+    documents.forEach((document, position) => {
+      const index = indexById.get(document.id);
+      if (!index) {
+        items[position] = {
+          id: document.id,
+          index: '',
+          error: { type: 'document_missing_exception', reason: 'document not found' },
+        };
+        return;
+      }
+      targets.push({ position, document, index });
+    });
+
+    if (targets.length === 0) {
+      return items;
+    }
+
+    const response = await this.deps.esClient.bulk<
+      EsExecutionIo,
+      { value?: EsExecutionIo['value']; size?: number }
+    >({
+      refresh,
+      operations: targets.flatMap(({ document, index }) => [
+        {
+          update: {
+            _index: index,
+            _id: document.id,
+            retry_on_conflict: 3,
+          },
+        },
+        // Assignment replaces `value`. A partial `doc` update would merge it and
+        // leave removed fields, such as a HITL token hash, in the stored payload.
+        {
+          script: {
+            source: 'ctx._source.value = params.value; ctx._source.size = params.size;',
+            params: { value: document.value, size: document.size },
+          },
+        },
+      ]),
+    });
+
+    targets.forEach(({ position, document }, index) => {
+      items[position] = toBulkItemResponse(document.id, response.items[index]);
+    });
+    return items;
   }
 
   /** mget the two newest IO backing indexes, then search the data stream for the rest. */
-  private async readRecentBackingIndexes(ids: string[]): Promise<Map<string, IoHit>> {
+  private async readRecentBackingIndexes(
+    ids: string[],
+    sourceIncludes?: string[]
+  ): Promise<Map<string, IoHit>> {
     const recentIndexes = [...this.deps.metadataManager.getMeta().backingIndexes]
       .slice(-2)
       .reverse();
@@ -161,8 +257,13 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
     }
 
     const lookups = ids.flatMap((id) => recentIndexes.map((index) => ({ id, index })));
+    const sourceFilter = sourceFilterFor(sourceIncludes);
     const response = await this.deps.esClient.mget<EsExecutionIo>({
-      docs: lookups.map(({ id, index }) => ({ _index: index, _id: id })),
+      docs: lookups.map(({ id, index }) => ({
+        _index: index,
+        _id: id,
+        ...(sourceFilter ? { _source: sourceFilter } : {}),
+      })),
     });
 
     response.docs.forEach((doc, index) => {
@@ -200,6 +301,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       ignore_unavailable: true,
       size: missingIds.length,
       seq_no_primary_term: true,
+      ...(sourceFilter ? { _source: sourceFilter } : {}),
       query: { ids: { values: missingIds } },
     });
 
@@ -237,7 +339,10 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
    * Each execution is fetched with only the input and output fields that were requested.
    * A missing index or a failed request leaves those ids unresolved.
    */
-  private async readPlainIndexes(ioIds: string[]): Promise<Map<string, IoHit>> {
+  private async readPlainIndexes(
+    ioIds: string[],
+    sourceIncludes?: string[]
+  ): Promise<Map<string, IoHit>> {
     const byId = new Map<string, IoHit>();
     const parsed = ioIds.flatMap((id) => {
       const parts = parseExecutionIoId(id);
@@ -258,17 +363,17 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       EXECUTION_IO_FALLBACK_INDEXES.map((index) => ({
         executionId,
         index,
-        sourceIncludes: sourceIncludesFor(index, types),
+        sourceIncludes: sourceIncludesFor(index, types, sourceIncludes),
       }))
     );
 
     let response: estypes.MgetResponse<LegacyExecutionIoSource>;
     try {
       response = await this.deps.esClient.mget<LegacyExecutionIoSource>({
-        docs: lookups.map(({ executionId, index, sourceIncludes }) => ({
+        docs: lookups.map(({ executionId, index, sourceIncludes: legacyIncludes }) => ({
           _index: index,
           _id: executionId,
-          _source: { includes: sourceIncludes },
+          _source: { includes: legacyIncludes },
         })),
       });
     } catch (error) {
@@ -319,14 +424,39 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
 const isWorkflowIndex = (index: string): boolean => index.includes(WORKFLOWS_EXECUTIONS_INDEX);
 
 // Step docs keep IO at the top level; workflow docs keep it under `context` (`inputs` is plural).
-function sourceIncludesFor(index: string, types: Set<ExecutionIoType>): string[] {
+function sourceFilterFor(sourceIncludes?: string[]): { includes: string[] } | undefined {
+  if (!sourceIncludes?.length) {
+    return undefined;
+  }
+  return { includes: sourceIncludes };
+}
+
+/**
+ * `value.*` on the data stream is `input` / `output` on a legacy step doc and
+ * `context.inputs` / `context.output` on a legacy workflow doc.
+ */
+function sourceIncludesFor(
+  index: string,
+  types: Set<ExecutionIoType>,
+  sourceIncludes?: string[]
+): string[] {
   const workflow = isWorkflowIndex(index);
+  const valueFields = (sourceIncludes ?? [])
+    .filter((field) => field.startsWith('value.'))
+    .map((field) => field.slice('value.'.length))
+    .filter((field) => field.length > 0);
   const includes: string[] = [];
   if (types.has('input')) {
-    includes.push(workflow ? 'context.inputs' : 'input');
+    const base = workflow ? 'context.inputs' : 'input';
+    includes.push(
+      ...(valueFields.length > 0 ? valueFields.map((field) => `${base}.${field}`) : [base])
+    );
   }
   if (types.has('output')) {
-    includes.push(workflow ? 'context.output' : 'output');
+    const base = workflow ? 'context.output' : 'output';
+    includes.push(
+      ...(valueFields.length > 0 ? valueFields.map((field) => `${base}.${field}`) : [base])
+    );
   }
   return includes;
 }

@@ -38,12 +38,17 @@ describe('WorkflowExecuteSyncStrategy', () => {
   let mockStepRepo: jest.Mocked<StepExecutionRepository>;
   let mockStepRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockLogger: jest.Mocked<IWorkflowEventLogger>;
+  let mockIoClient: { getByIds: jest.Mock };
   let mockRequest: KibanaRequest;
 
   beforeEach(() => {
     mockEngine = {
       executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'child-exec-1' }),
     } as any;
+
+    mockIoClient = {
+      getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+    };
 
     mockExecRepo = {
       getWorkflowExecutionById: jest.fn(),
@@ -81,6 +86,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
       mockEngine,
       mockExecRepo,
       mockStepRepo,
+      mockIoClient as any,
       mockStepRuntime,
       mockLogger
     );
@@ -468,7 +474,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
       mockStepRuntime.getCurrentStepState.mockReturnValue(waitState);
     });
 
-    it('should return completed with workflow.output from child execution', async () => {
+    it('should return completed with the stored workflow output', async () => {
       mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
         id: 'child-exec-1',
         status: ExecutionStatus.COMPLETED,
@@ -503,9 +509,17 @@ describe('WorkflowExecuteSyncStrategy', () => {
           stepId: 'step1',
           spaceId: 'default',
           scopeStack: [],
-          output: { data: 'from last step' },
+          outputId: 'output:step-1',
         },
       ] as any);
+      mockIoClient.getByIds.mockResolvedValue({
+        items: [
+          {
+            document: { id: 'output:step-1', value: { data: 'from last step' } },
+          },
+        ],
+        missing: [],
+      });
 
       const result = await strategy.execute(
         createMockWorkflow(),
@@ -949,16 +963,23 @@ describe('WorkflowExecuteSyncStrategy', () => {
           stepId: 'step1',
           spaceId: 'default',
           scopeStack: [],
-          output: { first: true },
+          outputId: 'output:step-exec-1',
         },
         {
           id: 'step-exec-2',
           stepId: 'step2',
           spaceId: 'default',
           scopeStack: [],
-          output: { second: true },
+          outputId: 'output:step-exec-2',
         },
       ] as any);
+      mockIoClient.getByIds.mockResolvedValue({
+        items: [
+          { document: { id: 'output:step-exec-1', value: { first: true } } },
+          { document: { id: 'output:step-exec-2', value: { second: true } } },
+        ],
+        missing: [],
+      });
 
       const result = await strategy.execute(
         createMockWorkflow(),
@@ -988,23 +1009,29 @@ describe('WorkflowExecuteSyncStrategy', () => {
           stepId: 'step1',
           spaceId: 'default',
           scopeStack: [],
-          output: { top: true },
+          outputId: 'output:step-exec-1',
         },
         {
           id: 'step-exec-2',
           stepId: 'step2',
           spaceId: 'default',
           scopeStack: [],
-          output: undefined,
         },
         {
           id: 'step-exec-3',
           stepId: 'child-step',
           spaceId: 'default',
           scopeStack: [{ stepId: 'step2' }],
-          output: { nested: true },
+          outputId: 'output:step-exec-3',
         },
       ] as any);
+      mockIoClient.getByIds.mockResolvedValue({
+        items: [
+          { document: { id: 'output:step-exec-1', value: { top: true } } },
+          { document: { id: 'output:step-exec-3', value: { nested: true } } },
+        ],
+        missing: [],
+      });
 
       const result = await strategy.execute(
         createMockWorkflow(),

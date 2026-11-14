@@ -10,9 +10,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError, StackFrame } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { executionIoId, parseExecutionIoId } from '@kbn/workflows/server';
 import {
   extractReferencedStepIds,
   extractReferencedStepIdsFromVariables,
@@ -23,6 +24,7 @@ import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_ty
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
+import type { ExecutionsIoClient } from '../repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { formatBytes, safeOutputSize } from '../step/errors';
 import { buildStepExecutionId } from '../utils';
@@ -35,6 +37,7 @@ export type PredecessorsResolver = (node: GraphNodeUnion) => ReadonlyArray<Graph
 
 export interface StepIoServiceInit {
   stepRepository: StepExecutionRepository;
+  ioClient: ExecutionsIoClient;
   state: StepIoStateAccessor;
   pinnedStepTypes?: ReadonlySet<string>;
   /**
@@ -113,7 +116,9 @@ export interface StepIoWriter extends StepIoReader {
  * step impl should not be able to drive a flush or evict outputs.
  */
 export interface StepIoLifecycle {
-  flush(): Promise<void>;
+  /** Flushes queued IO. Returns true when a create failed and was put back. */
+  flush(): Promise<boolean>;
+  hasPendingIo(): boolean;
   flushStepChanges(): Promise<void>;
   load(): Promise<void>;
   prepareForRead(args: PrepareForReadArgs): Promise<void>;
@@ -131,10 +136,9 @@ export interface StepIoLifecycle {
  * Owns the IO lifecycle of a workflow run.
  *
  * Holds the canonical `inputs` / `outputs` maps in-house — `WorkflowExecutionState`
- * stores only step *metadata* (status, scopeStack, error, indices, etc.).
- * The two domains are merged at flush time: the service drains state's
- * pending lifecycle partials, joins them with its own IO partials by step
- * id, and runs a single `bulkUpsert` per cycle.
+ * stores only step *metadata* (status, scopeStack, error, indices, ids, sizes).
+ * Flush creates each input or output once through the executions IO client.
+ * Metadata is flushed separately by `WorkflowExecutionState`.
  *
  * Responsibilities:
  *   - in-memory `input`/`output` storage and reads
@@ -144,7 +148,7 @@ export interface StepIoLifecycle {
  *   - on-demand rehydration of evicted outputs from ES
  *   - resume-time output orchestration (`load()`)
  *   - stale-loop iteration cleanup
- *   - bulk-upsert of merged lifecycle + IO partials
+ *   - create-once persistence of step input and output
  *
  * Dependency direction: state → workflowExecutionRepository;
  * service → state (via narrow `StepIoStateAccessor`) and
@@ -152,6 +156,7 @@ export interface StepIoLifecycle {
  */
 export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly stepRepository: StepExecutionRepository;
+  private readonly ioClient: ExecutionsIoClient;
   private readonly state: StepIoStateAccessor;
   private readonly pinnedStepTypes: ReadonlySet<string>;
   private readonly evictionMinBytes: number;
@@ -289,6 +294,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   constructor(init: StepIoServiceInit) {
     this.stepRepository = init.stepRepository;
+    this.ioClient = init.ioClient;
     this.state = init.state;
     this.pinnedStepTypes = init.pinnedStepTypes ?? EVICTION_EXEMPT_STEP_TYPES;
     this.evictionMinBytes = init.evictionMinBytes ?? Infinity;
@@ -528,31 +534,28 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   // ----- Lifecycle (public entry points) -----------------------------------
 
   /**
-   * Flushes pending step-doc and workflow-doc changes to Elasticsearch and
-   * runs IO bookkeeping (deferred output eviction + immediate input eviction)
-   * on the freshly-flushed step IDs.
+   * Creates pending input and output documents and runs IO bookkeeping
+   * (deferred output eviction + immediate input eviction) on the stored step ids.
+   * Returns true when a create failed and was put back. Execution metadata is
+   * flushed by {@link WorkflowExecutionState.flush}.
    */
-  public async flush(): Promise<void> {
-    if (isTerminalStatus(this.state.getWorkflowExecutionStatus())) {
-      await this.flushStepChanges();
-      await this.state.flushWorkflowDoc();
-      return;
-    }
+  public async flush(): Promise<boolean> {
+    const { storedIds, failed } = await this.persistPendingIo();
+    this.runDeferredEvictionCycle(storedIds);
+    return failed;
+  }
 
-    await Promise.all([this.state.flushWorkflowDoc(), this.flushStepChanges()]);
+  /** True when an input or output is queued and not yet stored. */
+  public hasPendingIo(): boolean {
+    return this.pendingIoChanges.size > 0;
   }
 
   /**
-   * Step-doc-only flush. Drains state's pending lifecycle partials, merges
-   * with this service's IO partials, and runs the combined bulk-upsert. Then
-   * processes the deferred output-eviction cycle and immediate input
-   * eviction. Even when there are no doc changes this still drains the
-   * previous cycle's eviction queue — the deferral is one cycle, not one
-   * bulk-upsert.
+   * IO-only flush. Even when there are no new values this still drains the
+   * previous cycle's eviction queue — the deferral is one cycle, not one create.
    */
   public async flushStepChanges(): Promise<void> {
-    const flushedIds = await this.persistMergedStepChanges();
-    this.runDeferredEvictionCycle(flushedIds);
+    await this.flush();
   }
 
   /**
@@ -577,24 +580,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     const foundSteps = await this.stepRepository.getStepExecutionsByIds(
       stepExecutionIds,
       undefined,
-      ['output']
+      ['input', 'output']
     );
 
-    // Capture inputs and hand `output`-stripped metadata to state. The
-    // `output` sourceExclude above should already drop output from the
-    // wire, but stripping defensively guards against a future caller
-    // passing sourceIncludes that re-introduces it.
-    //
-    // We also pre-seed `dataSetOutputs` here so the map's insertion order
-    // matches `globalExecutionIndex` order — `foundSteps` is returned in
-    // workflow `stepExecutionIds` order, which is the same order. Values
-    // are set to `null` as a placeholder and overwritten below once the
-    // pinned-doc fetch returns each step's actual `output`.
     const metadata: StepExecutionMetadata[] = [];
     for (const step of foundSteps) {
-      if (step.input !== undefined) {
-        this.inputs.set(step.id, step.input);
-      }
       if (step.stepType === 'data.set') {
         this.dataSetOutputs.set(step.id, null);
       }
@@ -603,16 +593,20 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     this.state.ingestLoadedStepDocs(metadata);
 
     const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
-    if (pinnedIdsToFetch.length > 0) {
-      const pinnedDocs = await this.stepRepository.getStepExecutionsByIds(pinnedIdsToFetch, [
-        'id',
-        'output',
-      ]);
-      for (const doc of pinnedDocs) {
-        const output: JsonValue | null = doc.output ?? null;
-        this.outputs.set(doc.id, output);
-        if (this.dataSetOutputs.has(doc.id)) {
-          this.dataSetOutputs.set(doc.id, output);
+    const ioIds = [
+      ...foundSteps.map((step) => step.inputId ?? executionIoId('input', step.id)),
+      ...pinnedIdsToFetch.map((id) => this.outputIdFor(id)),
+    ];
+    const loaded = await this.fetchIo(ioIds);
+    for (const document of loaded) {
+      if (document.type === 'input' && document.value != null) {
+        this.inputs.set(document.executionId, document.value);
+      }
+      if (document.type === 'output') {
+        const output: JsonValue | null = document.value ?? null;
+        this.outputs.set(document.executionId, output);
+        if (this.dataSetOutputs.has(document.executionId)) {
+          this.dataSetOutputs.set(document.executionId, output);
         }
       }
     }
@@ -1136,49 +1130,39 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     );
 
     const startMs = performance.now();
-    const expectedRunId = this.state.getWorkflowExecutionId();
     // Snapshot BEFORE the fetch so a write that lands during it is detectable.
     const generationsAtRequest = new Map(
       idsToRehydrate.map((id) => [id, this.outputWriteGenerations.get(id) ?? 0])
     );
-    const fetched = await this.stepRepository.getStepExecutionsByIds(idsToRehydrate, [
-      'id',
-      'output',
-      'workflowRunId',
-    ]);
+    const fetched = await this.fetchIo(idsToRehydrate.map((id) => this.outputIdFor(id)));
     // Responses we deliberately drop. Must not be mistaken for ids Elasticsearch
     // never returned: the cleanup at the end clears the evicted flag for those,
     // which here would leave the id neither resident nor evicted.
     const supersededIds = new Set<string>();
 
-    // Defensive cross-execution filter: mget targets documents by `_id` only,
-    // and step execution IDs are constructed from the workflow execution ID,
-    // so a collision is improbable but not impossible (e.g. someone running
-    // a custom resume path with mis-typed IDs). Drop any doc whose
-    // workflowRunId disagrees with the current execution rather than
-    // restoring foreign output into memory.
     const docs = fetched.filter((doc) => {
-      if (doc.workflowRunId && doc.workflowRunId !== expectedRunId) {
+      const stepExecutionId = doc.executionId;
+      if (doc.type !== 'output' || !idsToRehydrate.includes(stepExecutionId)) {
         this.logger?.error(
-          `Cross-execution doc skipped during rehydration: id=${doc.id} expected runId=${expectedRunId} got=${doc.workflowRunId}`
+          `Cross-execution IO doc skipped during rehydration: executionId=${stepExecutionId}`
         );
         return false;
       }
-      // A write during the fetch supersedes this response, whatever the evicted
-      // flag now says. See `outputWriteGenerations`.
-      if ((this.outputWriteGenerations.get(doc.id) ?? 0) !== generationsAtRequest.get(doc.id)) {
+      if (
+        (this.outputWriteGenerations.get(stepExecutionId) ?? 0) !==
+        generationsAtRequest.get(stepExecutionId)
+      ) {
         this.logger?.debug(
-          `Stale rehydration response discarded for step '${doc.id}': its output was rewritten while the fetch was in flight`
+          `Stale rehydration response discarded for step '${stepExecutionId}': its output was rewritten while the fetch was in flight`
         );
-        supersededIds.add(doc.id);
+        supersededIds.add(stepExecutionId);
         return false;
       }
-      // Still being evicted is what makes this document authoritative.
-      if (!this.evictedOutputIds.has(doc.id)) {
+      if (!this.evictedOutputIds.has(stepExecutionId)) {
         this.logger?.debug(
-          `Stale rehydration response discarded for step '${doc.id}': its output was rewritten or restored while the fetch was in flight`
+          `Stale rehydration response discarded for step '${stepExecutionId}': its output was rewritten or restored while the fetch was in flight`
         );
-        supersededIds.add(doc.id);
+        supersededIds.add(stepExecutionId);
         return false;
       }
       return true;
@@ -1186,19 +1170,17 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     let restoredCount = 0;
     for (const doc of docs) {
-      const previousBytes = this.evictedOutputSizes.get(doc.id);
-      this.clearEvicted(doc.id);
-      // The repository normalises absent `output` to `null` at the boundary,
-      // so `doc.output` here is already `JsonValue | null`. FAILED steps are
-      // not eviction candidates, so any rehydrated value was a COMPLETED
-      // output, and `null` only occurs when ES legitimately stored null.
-      this.outputs.set(doc.id, doc.output ?? null);
+      const stepExecutionId = doc.executionId;
+      const output: JsonValue | null = doc.value ?? null;
+      const previousBytes = this.evictedOutputSizes.get(stepExecutionId);
+      this.clearEvicted(stepExecutionId);
+      this.outputs.set(stepExecutionId, output);
       // Track for transient release: predecessors brought back into memory
       // for one step's read should not stay there forever.
       // A set: the same id is legitimately rehydrated more than once per tick
       // (every branch names its enclosing scope), and a duplicate used to outlive
       // `forgetTransientRehydration`, releasing an already-rewritten output.
-      this.transientlyRehydratedIds.add(doc.id);
+      this.transientlyRehydratedIds.add(stepExecutionId);
       restoredCount++;
 
       // Restore size tracking so:
@@ -1212,11 +1194,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       // were serialisable when written; getting null here means a
       // JSON.stringify quirk, not a poison payload.
       if (previousBytes !== undefined) {
-        this.setOutputSize(doc.id, previousBytes);
+        this.setOutputSize(stepExecutionId, previousBytes);
       } else {
-        const sz = safeOutputSize(doc.output);
+        const sz = safeOutputSize(output);
         if (sz !== null) {
-          this.setOutputSize(doc.id, sz);
+          this.setOutputSize(stepExecutionId, sz);
         }
       }
     }
@@ -1255,35 +1237,209 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   // ----- Internals ----------------------------------------------------------
 
+  private outputIdFor(stepExecutionId: string): string {
+    return (
+      this.state.getStepExecution(stepExecutionId)?.outputId ??
+      executionIoId('output', stepExecutionId)
+    );
+  }
+
+  private async fetchIo(ids: string[]) {
+    if (ids.length === 0) {
+      return [];
+    }
+    const { items } = await this.ioClient.getByIds(ids);
+    return items.map((item) => item.document);
+  }
+
   /**
-   * Drains state's pending lifecycle partials, joins them with this service's
-   * IO partials by step id, and runs the bulk-upsert. Returns the set of ids
-   * actually persisted (used by the deferred-eviction cycle).
-   *
-   * IO is included in the upsert only when the step had a write since the
-   * last flush — eviction-only events do not re-upsert the output.
+   * Creates each pending input or output once. Returns the step ids whose IO
+   * was stored, so the eviction cycle can drop those copies from memory. A
+   * failed create stays queued and is not evicted. A successful create clears
+   * a previous persistence error.
    */
-  private async persistMergedStepChanges(): Promise<ReadonlyArray<string>> {
-    const lifecyclePartials = this.state.drainPendingStepChanges();
+  private async persistPendingIo(): Promise<{
+    storedIds: ReadonlyArray<string>;
+    failed: boolean;
+  }> {
     const ioPartials = this.pendingIoChanges;
     this.pendingIoChanges = new Map();
 
-    if (lifecyclePartials.size === 0 && ioPartials.size === 0) {
-      return [];
+    if (ioPartials.size === 0) {
+      return { storedIds: [], failed: false };
     }
 
-    const merged = new Map<string, Partial<EsWorkflowStepExecution>>();
-    for (const [id, partial] of lifecyclePartials) {
-      merged.set(id, { ...partial });
+    const documents: Array<{
+      executionId: string;
+      type: 'input' | 'output';
+      value: JsonValue | null;
+      size: number;
+    }> = [];
+    const flushedIds: string[] = [];
+
+    for (const [stepExecutionId, ioPart] of ioPartials) {
+      flushedIds.push(stepExecutionId);
+      if (ioPart.input !== undefined) {
+        const size = safeOutputSize(ioPart.input) ?? 0;
+        documents.push({ executionId: stepExecutionId, type: 'input', value: ioPart.input, size });
+        if (this.state.getStepExecution(stepExecutionId)) {
+          this.state.updateStep(stepExecutionId, { id: stepExecutionId, inputSize: size });
+        }
+      }
+      if ('output' in ioPart) {
+        const size = this.outputSizes.get(stepExecutionId) ?? safeOutputSize(ioPart.output) ?? 0;
+        documents.push({
+          executionId: stepExecutionId,
+          type: 'output',
+          value: ioPart.output ?? null,
+          size,
+        });
+        if (this.state.getStepExecution(stepExecutionId)) {
+          this.state.updateStep(stepExecutionId, { id: stepExecutionId, outputSize: size });
+        }
+      }
     }
+
+    if (documents.length === 0) {
+      return { storedIds: flushedIds, failed: false };
+    }
+
+    const restorePending = (onlyIds?: ReadonlyArray<string>) => {
+      const selected = new Map(ioPartials);
+      if (onlyIds) {
+        selected.clear();
+        for (const id of onlyIds) {
+          const parsed = parseExecutionIoId(id);
+          if (!parsed) {
+            for (const [stepExecutionId, part] of ioPartials) {
+              selected.set(stepExecutionId, part);
+            }
+            break;
+          }
+          const part = ioPartials.get(parsed.executionId);
+          if (part) {
+            const current = selected.get(parsed.executionId) ?? {};
+            selected.set(parsed.executionId, {
+              ...current,
+              ...(parsed.type === 'input' ? { input: part.input } : { output: part.output }),
+            });
+          }
+        }
+      }
+      for (const [stepExecutionId, part] of selected) {
+        const newer = this.pendingIoChanges.get(stepExecutionId);
+        this.pendingIoChanges.set(stepExecutionId, newer ? { ...part, ...newer } : part);
+      }
+    };
+
+    let failedSides = new Map<string, { input?: boolean; output?: boolean }>();
+    try {
+      const response = await this.ioClient.bulkCreate({ documents });
+      if (response.errors) {
+        const failed = response.items.filter((item) => item.error);
+        const failedIds = failed.map((item) => item.id);
+        restorePending(failedIds);
+        const parsed = this.failedSidesFromIoDocuments(failedIds);
+        // An id this service did not write cannot be mapped back to a step.
+        // Keep every payload from this batch in memory.
+        if (!parsed || failed.length === 0) {
+          restorePending();
+          this.recordIoFailure(
+            `Failed to create ${failed.length} execution IO document(s): ${JSON.stringify(failed)}`
+          );
+          return { storedIds: [], failed: true };
+        }
+        failedSides = parsed;
+        this.recordIoFailure(
+          `Failed to create ${failed.length} execution IO document(s): ${JSON.stringify(failed)}`
+        );
+      } else {
+        this.clearIoFailure();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      // A version conflict means this id was already created. Drop it.
+      // Any other failure keeps the latest value for the next flush.
+      if (!message.includes('document already exists')) {
+        restorePending();
+        this.recordIoFailure(message);
+        return { storedIds: [], failed: true };
+      }
+      this.recordIoFailure(message);
+    }
+
+    const storedIds = flushedIds.filter((id) => !failedSides.has(id));
+    await this.mirrorPayloadsForPreviousNodes(ioPartials, failedSides);
+    return { storedIds, failed: failedSides.size > 0 };
+  }
+
+  private failedSidesFromIoDocuments(
+    ids: ReadonlyArray<string>
+  ): Map<string, { input?: boolean; output?: boolean }> | undefined {
+    const failed = new Map<string, { input?: boolean; output?: boolean }>();
+    for (const id of ids) {
+      const parsed = parseExecutionIoId(id);
+      if (!parsed) {
+        return undefined;
+      }
+      const current = failed.get(parsed.executionId) ?? {};
+      failed.set(parsed.executionId, { ...current, [parsed.type]: true });
+    }
+    return failed;
+  }
+
+  /**
+   * Copies a stored payload onto the step document so a previous-version node
+   * can read it during a rolling upgrade. This is not the metadata write: a
+   * failure here leaves the IO document in place and does not fail the run.
+   */
+  private async mirrorPayloadsForPreviousNodes(
+    ioPartials: ReadonlyMap<string, { input?: JsonValue; output?: JsonValue | null }>,
+    failedSides: ReadonlyMap<string, { input?: boolean; output?: boolean }>
+  ): Promise<void> {
+    const documents: Array<Partial<EsWorkflowStepExecution>> = [];
     for (const [id, ioPart] of ioPartials) {
-      const existing = merged.get(id) ?? { id };
-      merged.set(id, { ...existing, ...ioPart });
+      if (this.state.getStepExecution(id)) {
+        const failed = failedSides.get(id);
+        const document: Partial<EsWorkflowStepExecution> = { id };
+        if (ioPart.input !== undefined && !failed?.input) {
+          document.input = ioPart.input;
+        }
+        if ('output' in ioPart && !failed?.output) {
+          document.output = ioPart.output ?? null;
+        }
+        if (document.input !== undefined || document.output !== undefined) {
+          documents.push(document);
+        }
+      }
     }
+    if (documents.length === 0) {
+      return;
+    }
+    try {
+      await this.stepRepository.bulkUpsert(documents);
+    } catch (error) {
+      this.logger?.warn(
+        `Could not copy step payloads onto the step document for a previous-version node: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
 
-    const flushedIds = Array.from(merged.keys());
-    await this.stepRepository.bulkUpsert(Array.from(merged.values()));
-    return flushedIds;
+  private recordIoFailure(message: string): void {
+    this.logger?.error(message);
+    if (!this.state.getWorkflowExecution().error) {
+      this.state.updateWorkflowExecution({
+        error: { type: 'ExecutionIoPersistError', message },
+      });
+    }
+  }
+
+  private clearIoFailure(): void {
+    if (this.state.getWorkflowExecution().error?.type === 'ExecutionIoPersistError') {
+      this.state.updateWorkflowExecution({ error: null });
+    }
   }
 
   /**

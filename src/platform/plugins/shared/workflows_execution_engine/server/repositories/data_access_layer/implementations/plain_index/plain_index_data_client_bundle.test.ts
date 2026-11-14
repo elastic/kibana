@@ -59,5 +59,7 @@ describe('PlainIndexDataClientBundle', () => {
       index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: { match_all: {} },
     });
+
+    await bundle.stop();
   });
 });

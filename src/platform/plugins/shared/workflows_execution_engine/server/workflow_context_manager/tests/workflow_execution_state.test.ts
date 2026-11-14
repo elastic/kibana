@@ -39,6 +39,7 @@ function seedStep(
 describe('WorkflowExecutionState', () => {
   let underTest: WorkflowExecutionState;
   let ioService: StepIoService;
+  let ioClient: { getByIds: jest.Mock; bulkCreate: jest.Mock };
 
   let workflowExecutionRepository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
@@ -48,8 +49,13 @@ describe('WorkflowExecutionState', () => {
     repo: StepExecutionRepository,
     evictionMinBytes = Infinity
   ): StepIoService {
+    ioClient = {
+      getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+      bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
+    };
     return new StepIoService({
       stepRepository: repo,
+      ioClient,
       state,
       evictionMinBytes,
     });
@@ -73,7 +79,11 @@ describe('WorkflowExecutionState', () => {
       startedAt: '2025-08-05T20:00:00.000Z',
       isTestRun: false,
     } as EsWorkflowExecution;
-    underTest = new WorkflowExecutionState(fakeWorkflowExecution, workflowExecutionRepository);
+    underTest = new WorkflowExecutionState(
+      fakeWorkflowExecution,
+      workflowExecutionRepository,
+      stepExecutionRepository
+    );
     ioService = buildService(underTest, stepExecutionRepository);
   });
 
@@ -149,6 +159,8 @@ describe('WorkflowExecutionState', () => {
       globalExecutionIndex: 0,
       isTestRun: false,
       managed: false,
+      inputId: 'input:fake-id',
+      outputId: 'output:fake-id',
     } as Partial<EsWorkflowStepExecution>);
     expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
   });
@@ -163,7 +175,8 @@ describe('WorkflowExecutionState', () => {
     } as EsWorkflowExecution;
     const stateWithTestRun = new WorkflowExecutionState(
       workflowExecutionWithTestRun,
-      workflowExecutionRepository
+      workflowExecutionRepository,
+      stepExecutionRepository
     );
     buildService(stateWithTestRun, stepExecutionRepository);
 
@@ -194,7 +207,8 @@ describe('WorkflowExecutionState', () => {
         isTestRun: false,
         managed: true,
       } as EsWorkflowExecution,
-      workflowExecutionRepository
+      workflowExecutionRepository,
+      stepExecutionRepository
     );
 
     state.upsertStep({
@@ -296,7 +310,7 @@ describe('WorkflowExecutionState', () => {
         cancelledBy: 'user',
       });
 
-      await ioService.flush();
+      await underTest.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
       expect(underTest.getWorkflowExecution()).toEqual(
@@ -314,7 +328,7 @@ describe('WorkflowExecutionState', () => {
         .fn()
         .mockResolvedValue({ cancelRequested: true });
 
-      await ioService.flush();
+      await underTest.flush();
 
       expect(underTest.getWorkflowExecution()).toEqual(
         expect.objectContaining({ cancelRequested: true, currentNodeId: 'node-in-memory' })
@@ -332,7 +346,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.updateWorkflowExecution(updatedWorkflowExecution);
 
-      await ioService.flush();
+      await underTest.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         updatedWorkflowExecution,
@@ -345,7 +359,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.updateWorkflowExecution(updatedWorkflowExecution);
 
-      await ioService.flush();
+      await underTest.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -365,7 +379,7 @@ describe('WorkflowExecutionState', () => {
 
       underTest.upsertStep(stepExecution);
 
-      await ioService.flush();
+      await underTest.flush();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         expect.objectContaining({
@@ -386,7 +400,7 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await ioService.flush(); // initial flush to create the step execution
+      await underTest.flush(); // initial flush to create the step execution
 
       // update step execution
       underTest.upsertStep({
@@ -397,7 +411,7 @@ describe('WorkflowExecutionState', () => {
         executionTimeMs: 60000,
       } as EsWorkflowStepExecution);
 
-      await ioService.flush();
+      await underTest.flush();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         {
@@ -429,7 +443,7 @@ describe('WorkflowExecutionState', () => {
         executionTimeMs: 2000,
       } as EsWorkflowStepExecution);
 
-      await ioService.flush();
+      await underTest.flush();
 
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith([
         expect.objectContaining({
@@ -444,8 +458,73 @@ describe('WorkflowExecutionState', () => {
       ]);
     });
 
+    it('writes step rows before the workflow document when the status is terminal', async () => {
+      let resolveSteps: () => void = () => {};
+      stepExecutionRepository.bulkUpsert = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSteps = resolve;
+          })
+      );
+
+      underTest.updateWorkflowExecution({ status: ExecutionStatus.COMPLETED });
+      underTest.upsertStep({
+        id: 'fake-uuid',
+        stepId: 'last-step',
+        status: ExecutionStatus.COMPLETED,
+      });
+
+      const flushed = underTest.flush();
+      await Promise.resolve();
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+
+      resolveSteps();
+      await flushed;
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ status: ExecutionStatus.COMPLETED }),
+        {}
+      );
+    });
+
+    it('writes the workflow document and step rows together while the run is still going', async () => {
+      let resolveSteps: () => void = () => {};
+      let resolveDoc: () => void = () => {};
+      stepExecutionRepository.bulkUpsert = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSteps = resolve;
+          })
+      );
+      workflowExecutionRepository.updateWorkflowExecution = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDoc = resolve;
+          })
+      );
+
+      underTest.updateWorkflowExecution({ currentNodeId: 'node-1' });
+      underTest.upsertStep({
+        id: 'fake-uuid',
+        stepId: 'running-step',
+        status: ExecutionStatus.RUNNING,
+      });
+
+      const flushed = underTest.flush();
+      await Promise.resolve();
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+
+      resolveSteps();
+      resolveDoc();
+      await flushed;
+    });
+
     it('should not flush if there are no changes', async () => {
-      await ioService.flush();
+      await underTest.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
       expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
@@ -463,7 +542,7 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await ioService.flush(); // initial flush to create the step execution
+      await underTest.flush(); // initial flush to create the step execution
 
       // update step execution
       underTest.upsertStep({
@@ -480,9 +559,9 @@ describe('WorkflowExecutionState', () => {
         status: ExecutionStatus.RUNNING,
         startedAt: '2025-08-05T20:00:00.000Z',
       } as EsWorkflowStepExecution);
-      await ioService.flush(); // first flush that flushes everything
-      await ioService.flush(); // second flush with no changes
-      await ioService.flush(); // third flush with no changes
+      await underTest.flush(); // first flush that flushes everything
+      await underTest.flush(); // second flush with no changes
+      await underTest.flush(); // third flush with no changes
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(2);
@@ -644,7 +723,7 @@ describe('WorkflowExecutionState', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['11', '22'],
         undefined,
-        ['output']
+        ['input', 'output']
       );
       expect(underTest.getLatestStepExecution('testStep')).toEqual(
         expect.objectContaining({
@@ -667,31 +746,39 @@ describe('WorkflowExecutionState', () => {
       // pinned. Deferred-output / eviction semantics live in step_io_service.test.ts.
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
       const dataSetOutput = { myVar: 'hello' };
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)
-        .mockResolvedValueOnce([
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValueOnce([
+        {
+          id: '11',
+          stepId: 'connectorStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+        } as EsWorkflowStepExecution,
+        {
+          id: '22',
+          stepId: 'dataSetStep',
+          stepType: 'data.set',
+          status: ExecutionStatus.COMPLETED,
+        } as EsWorkflowStepExecution,
+      ]);
+      ioClient.getByIds.mockResolvedValue({
+        items: [
           {
-            id: '11',
-            stepId: 'connectorStep',
-            stepType: 'connector',
-            status: ExecutionStatus.COMPLETED,
-          } as EsWorkflowStepExecution,
-          {
-            id: '22',
-            stepId: 'dataSetStep',
-            stepType: 'data.set',
-            status: ExecutionStatus.COMPLETED,
-          } as EsWorkflowStepExecution,
-        ])
-        .mockResolvedValueOnce([
-          { id: '22', output: dataSetOutput } as unknown as EsWorkflowStepExecution,
-        ]);
+            document: {
+              id: 'output:22',
+              executionId: '22',
+              type: 'output',
+              value: dataSetOutput,
+              size: 1,
+            },
+          },
+        ],
+        missing: [],
+      });
       await ioService.load();
 
       expect(ioService.getStepOutput('22')).toEqual(dataSetOutput);
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
-        ['22'],
-        ['id', 'output']
-      );
+      expect(ioClient.getByIds).toHaveBeenCalledWith(['input:11', 'input:22', 'output:22']);
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
     });
 
     it('should sort step executions by executionIndex when loaded from repository', async () => {
@@ -1195,12 +1282,12 @@ describe('WorkflowExecutionState', () => {
         });
 
         // Flush the creates to ES
-        await ioService.flush();
+        await underTest.flush();
         (stepExecutionRepository.bulkUpsert as jest.Mock).mockClear();
 
         // Now evict — this should NOT trigger another flush of the evicted data
         ioService.evictStaleLoopOutputs(['step']);
-        await ioService.flush();
+        await underTest.flush();
 
         // No additional bulk upsert should have been triggered
         expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
@@ -1225,22 +1312,22 @@ describe('WorkflowExecutionState', () => {
           input: { idx: 1 },
         });
 
-        // Evict BEFORE flushing — the pending entry for exec-1 must still carry its output
+        // Evict BEFORE flushing — the pending metadata entry must stay intact.
+        // Payloads are not part of the metadata write.
         ioService.evictStaleLoopOutputs(['innerStep']);
 
-        await ioService.flush();
+        await underTest.flush();
 
-        // exec-1 was pending. Its flush payload must still include the original output/input
-        // because eviction is in-memory-only and must not touch pending ES writes.
-        expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith(
-          expect.arrayContaining([
-            expect.objectContaining({
-              id: 'exec-1',
-              output: { result: 'iter-0' },
-              input: { idx: 0 },
-            }),
-          ])
-        );
+        const upserted = (stepExecutionRepository.bulkUpsert as jest.Mock).mock
+          .calls[0][0] as Array<{
+          id: string;
+          input?: unknown;
+          output?: unknown;
+        }>;
+        const exec1 = upserted.find((document) => document.id === 'exec-1');
+        expect(exec1).toEqual(expect.objectContaining({ id: 'exec-1' }));
+        expect(exec1?.input).toBeUndefined();
+        expect(exec1?.output).toBeUndefined();
       });
     });
 

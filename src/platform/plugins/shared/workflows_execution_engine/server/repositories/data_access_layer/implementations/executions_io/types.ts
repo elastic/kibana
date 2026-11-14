@@ -8,7 +8,7 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
-import type { ExecutionIoType } from './execution_io_id';
+import type { ExecutionIoType } from '@kbn/workflows/server';
 
 /** One input or output value for a step or workflow execution. */
 export interface EsExecutionIo {

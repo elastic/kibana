@@ -92,8 +92,9 @@ export const buildWorkflowExecutionDocument = (
   const dispatchEventId =
     typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
   const missingIdentity = authenticatedUser == null;
+  const id = generateUuid();
   const workflowExecution: WorkflowExecutionForInputRendering = {
-    id: generateUuid(),
+    id,
     spaceId,
     workflowId: workflow.id,
     ...pickManagedWorkflowFields(workflow),

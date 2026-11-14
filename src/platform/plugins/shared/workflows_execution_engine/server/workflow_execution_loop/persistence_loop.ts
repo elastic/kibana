@@ -8,6 +8,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, TimeoutAbortedError } from '../utils';
 
@@ -22,8 +23,23 @@ export async function flushState(
   options: FlushStateOptions = {}
 ) {
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
+  // IO before step metadata so a terminal status is not readable until this
+  // flush's payload write has finished. Execution keeps running during that
+  // write, so a later step can queue another payload and complete the run
+  // before the workflow document is written. Drain that payload first.
+  // Logs stay concurrent with the IO write.
   await Promise.all([
-    params.stepIoService.flush(),
+    (async () => {
+      let failed = await params.stepIoService.flush();
+      while (
+        !failed &&
+        isTerminalStatus(params.workflowExecutionState.getWorkflowExecutionStatus()) &&
+        params.stepIoService.hasPendingIo()
+      ) {
+        failed = await params.stepIoService.flush();
+      }
+      await params.workflowExecutionState.flush();
+    })(),
     params.eventQueue.flush({ signal: options.workflowLogFlushSignal }),
   ]);
   flushSpan?.end();

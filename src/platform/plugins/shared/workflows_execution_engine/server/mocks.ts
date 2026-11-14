@@ -36,6 +36,10 @@ export const workflowsExecutionEngineMock = {
     __internalStorage: {
       workflowExecutionsDataClient: createMockWorkflowDataClient(),
       stepExecutionsDataClient: createMockStepDataClient(),
+      executionsIoDataClient: {
+        getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+        bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
+      },
     },
     workflowEventLoggerService: createMockWorkflowEventLoggerService(),
     executeWorkflow: jest.fn(),

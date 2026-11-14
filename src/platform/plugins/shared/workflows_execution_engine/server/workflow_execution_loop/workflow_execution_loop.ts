@@ -113,9 +113,11 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   await workflowRuntime.saveState();
   finalSaveSpan?.end();
 
-  // Flush the final state (including terminal status) to Elasticsearch
+  // IO first so a failed create's ExecutionIoPersistError is on the execution
+  // before the workflow document is drained. Nothing flushes after this.
   const finalStateFlushSpan = apm.startSpan('final state flush', 'workflow', 'persistence');
   await params.stepIoService.flush();
+  await params.workflowExecutionState.flush();
   finalStateFlushSpan?.end();
 
   // Workflow-end cleanup for transiently-rehydrated outputs. The per-step

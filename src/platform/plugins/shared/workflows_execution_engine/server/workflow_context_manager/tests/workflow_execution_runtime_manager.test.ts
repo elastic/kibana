@@ -126,6 +126,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       getStepExecutionsByStepId: jest.fn(),
       getAllStepExecutions: jest.fn().mockReturnValue([]),
       upsertStep: jest.fn(),
+      flush: jest.fn().mockResolvedValue(undefined),
     } as unknown as WorkflowExecutionState;
 
     const topologicalOrder = ['node1', 'node2', 'node3'];
@@ -955,10 +956,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
   });
 
   describe('setWorkflowOutputs', () => {
-    it('should update context with output', () => {
+    it('should update workflow execution context with output', () => {
       underTest.setWorkflowOutputs({ result: 'done' });
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: expect.objectContaining({ output: { result: 'done' } }),
+        context: {
+          ...(workflowExecution.context || {}),
+          output: { result: 'done' },
+        },
       });
     });
   });

@@ -262,6 +262,14 @@ export interface EsWorkflowStepExecution {
   error?: SerializedError;
   output?: JsonValue;
   input?: JsonValue;
+  /** IO document id for this step's input. Derived from the step execution id. */
+  inputId?: string;
+  /** Byte size of the input stored on the IO data stream. */
+  inputSize?: number;
+  /** IO document id for this step's output. Derived from the step execution id. */
+  outputId?: string;
+  /** Byte size of the output stored on the IO data stream. */
+  outputSize?: number;
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;

@@ -14,6 +14,7 @@ import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StepExecutionRepositoryMock, WorkflowExecutionRepositoryMock } from './mocks';
 import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
+import { InMemoryExecutionsIoClient } from './mocks/executions_io_client.mock';
 import { TaskManagerMock } from './mocks/task_manager.mock';
 import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
@@ -60,6 +61,9 @@ export class WorkflowRunFixture {
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
+  public readonly executionsIoClient = new InMemoryExecutionsIoClient(
+    this.stepExecutionRepositoryMock
+  );
   private readonly workflowExecutionRepository = this
     .workflowExecutionRepositoryMock as unknown as WorkflowExecutionRepository;
   private readonly stepExecutionRepository = this
@@ -103,6 +107,12 @@ export class WorkflowRunFixture {
 
     this.dependencies.actions = this.actionsClientMock;
     this.dependencies.taskManager = this.taskManagerMock;
+    this.bindIoClient();
+  }
+
+  private bindIoClient(): void {
+    this.workflowsExecutionEngineMock.__internalStorage.executionsIoDataClient = this
+      .executionsIoClient as typeof this.workflowsExecutionEngineMock.__internalStorage.executionsIoDataClient;
   }
 
   public runWorkflow({
@@ -116,6 +126,7 @@ export class WorkflowRunFixture {
   }) {
     // clean up before running workflow
     this.cleanup();
+    this.bindIoClient();
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',
@@ -184,6 +195,7 @@ export class WorkflowRunFixture {
   }
 
   public resumeWorkflow() {
+    this.bindIoClient();
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: this.spaceId,
@@ -210,6 +222,7 @@ export class WorkflowRunFixture {
   }) {
     // clean up before running workflow
     this.cleanup();
+    this.bindIoClient();
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',
@@ -249,5 +262,6 @@ export class WorkflowRunFixture {
     jest.clearAllMocks();
     this.workflowExecutionRepositoryMock.workflowExecutions.clear();
     this.stepExecutionRepositoryMock.stepExecutions.clear();
+    this.executionsIoClient.clear();
   }
 }

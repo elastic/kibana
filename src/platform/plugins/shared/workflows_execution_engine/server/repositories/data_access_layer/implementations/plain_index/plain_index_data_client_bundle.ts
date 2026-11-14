@@ -25,25 +25,36 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '../../types';
+import { ExecutionIoDataClientBundle } from '../executions_io/execution_io_data_client_bundle';
 
 export class PlainIndexDataClientBundle implements DataClientBundle {
   private esClient!: ElasticsearchClient;
   private stopped = false;
+  private readonly executionIoDataClientBundle: ExecutionIoDataClientBundle;
 
-  constructor(private readonly deps: CreateDataClientDeps) {}
+  constructor(private readonly deps: CreateDataClientDeps) {
+    this.executionIoDataClientBundle = new ExecutionIoDataClientBundle(deps);
+  }
 
-  async initSetup(_coreSetup: CoreSetup): Promise<void> {}
+  async initSetup(coreSetup: CoreSetup): Promise<void> {
+    await this.executionIoDataClientBundle.initSetup(coreSetup);
+  }
 
   async initStart(coreStart: CoreStart): Promise<void> {
     const esClient = createRetryingEsClient(
       coreStart.elasticsearch.client.asInternalUser,
       this.deps.logger
     );
-    this.esClient = await this.init(esClient, this.deps.logger);
+    const [, readyClient] = await Promise.all([
+      this.executionIoDataClientBundle.initStart(coreStart),
+      this.init(esClient, this.deps.logger),
+    ]);
+    this.esClient = readyClient;
   }
 
   async stop(): Promise<void> {
     this.stopped = true;
+    await this.executionIoDataClientBundle.stop();
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
@@ -59,7 +70,12 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
       esClient: this.esClient,
       logger: this.deps.logger,
       indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      stampExecutionIoIds: true,
     });
+  }
+
+  createIoDataClient() {
+    return this.executionIoDataClientBundle.createIoDataClient();
   }
 
   private async init(esClient: ElasticsearchClient, logger: Logger): Promise<ElasticsearchClient> {

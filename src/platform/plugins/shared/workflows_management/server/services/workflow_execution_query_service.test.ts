@@ -46,6 +46,10 @@ describe('WorkflowExecutionQueryService', () => {
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEventLoggerService: jest.Mocked<IWorkflowLogsQueryService>;
   let service: WorkflowExecutionQueryService;
+  let mockExecutionsIoDataClient: {
+    getByIds: jest.Mock;
+    bulkCreate: jest.Mock;
+  };
 
   beforeEach(() => {
     mockEsClient = {
@@ -72,11 +76,16 @@ describe('WorkflowExecutionQueryService', () => {
       getStepLogs: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     } as any;
 
+    mockExecutionsIoDataClient = {
+      getByIds: jest.fn().mockResolvedValue({ items: [], missing: [] }),
+      bulkCreate: jest.fn().mockResolvedValue({ items: [], errors: false }),
+    };
     service = new WorkflowExecutionQueryService({
       logger: mockLogger,
       esClient: mockEsClient,
       workflowExecutionsDataClient: mockWorkflowDataClient,
       stepExecutionsDataClient: mockStepDataClient,
+      executionsIoDataClient: mockExecutionsIoDataClient,
       workflowEventLoggerService: mockEventLoggerService,
     });
   });
@@ -516,17 +525,71 @@ describe('WorkflowExecutionQueryService', () => {
       );
     });
 
-    it('does not exclude when includeInput and includeOutput are true', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+    it('loads step metadata only and fills output from the IO client when requested', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'step-1',
+              _source: {
+                id: 'step-1',
+                outputId: 'output:step-1',
+                inputId: 'input:step-1',
+              },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+      mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+        items: [
+          {
+            document: {
+              id: 'output:step-1',
+              executionId: 'step-1',
+              type: 'output',
+              value: { done: true },
+              size: 1,
+            },
+          },
+        ],
+        missing: [],
+      });
 
-      await service.searchStepExecutions(
+      const result = await service.searchStepExecutions(
         { workflowId: 'wf-1', includeInput: true, includeOutput: true },
         'default'
       );
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
-      // No source excludes should be passed
-      expect(call._source?.excludes).toBeUndefined();
+      expect(call._source?.excludes).toEqual(expect.arrayContaining(['input', 'output']));
+      expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith([
+        'input:step-1',
+        'output:step-1',
+      ]);
+      expect(result.results[0].output).toEqual({ done: true });
+    });
+
+    it('does not call the IO client for output when includeOutput is false', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'step-1',
+              _source: { id: 'step-1', outputId: 'output:step-1', inputId: 'input:step-1' },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      const result = await service.searchStepExecutions(
+        { workflowId: 'wf-1', includeInput: false, includeOutput: false },
+        'default'
+      );
+
+      expect(mockExecutionsIoDataClient.getByIds).not.toHaveBeenCalled();
+      expect(result.results[0].output).toBeUndefined();
     });
 
     it('adds startedAt range when startedAfter and startedBefore are provided', async () => {
@@ -603,7 +666,72 @@ describe('WorkflowExecutionQueryService', () => {
       );
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call._source).toEqual({ includes: ['workflowRunId', 'output.structured_output'] });
+      expect(call._source).toEqual({ includes: ['workflowRunId', 'outputId'] });
+    });
+
+    it('reads only the requested output field from the IO client', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'step-1',
+              _source: {
+                id: 'step-1',
+                workflowRunId: 'run-1',
+                outputId: 'output:step-1',
+                output: { structured_output: { stale: true } },
+              },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+      mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+        items: [
+          {
+            document: {
+              id: 'output:step-1',
+              executionId: 'step-1',
+              type: 'output',
+              value: { structured_output: { answer: 'fresh' } },
+              size: 1,
+            },
+          },
+        ],
+        missing: [],
+      });
+
+      const result = await service.searchStepExecutions(
+        { workflowId: 'wf-1', sourceIncludes: ['workflowRunId', 'output.structured_output'] },
+        'default'
+      );
+
+      expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith(['output:step-1'], {
+        sourceIncludes: ['value.structured_output'],
+      });
+      expect(result.results[0].output).toEqual({ structured_output: { answer: 'fresh' } });
+    });
+
+    it('loads the whole output when sourceIncludes asks for output', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'step-1',
+              _source: { id: 'step-1', outputId: 'output:step-1' },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+      mockExecutionsIoDataClient.getByIds.mockResolvedValue({ items: [], missing: [] });
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', sourceIncludes: ['output'] },
+        'default'
+      );
+
+      expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith(['output:step-1']);
     });
   });
 
@@ -619,7 +747,9 @@ describe('WorkflowExecutionQueryService', () => {
       );
 
       expect(result).toBeNull();
-      expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(['step-1']);
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledWith(['step-1'], {
+        sourceExcludes: ['input', 'output'],
+      });
     });
 
     it('returns the step execution when found', async () => {
@@ -639,6 +769,95 @@ describe('WorkflowExecutionQueryService', () => {
       );
 
       expect(result).toEqual(stepSource);
+    });
+
+    it('fills input and output from the IO client', async () => {
+      mockStepDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          {
+            id: 'step-1',
+            workflowRunId: 'exec-1',
+            status: 'completed',
+            spaceId: 'default',
+            inputId: 'input:step-1',
+            outputId: 'output:step-1',
+          } as EsWorkflowStepExecution,
+        ])
+      );
+      mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+        items: [
+          {
+            document: {
+              id: 'input:step-1',
+              executionId: 'step-1',
+              type: 'input',
+              value: { message: 'hello' },
+              size: 1,
+            },
+          },
+          {
+            document: {
+              id: 'output:step-1',
+              executionId: 'step-1',
+              type: 'output',
+              value: 'hello',
+              size: 1,
+            },
+          },
+        ],
+        missing: [],
+      });
+
+      const result = await service.getStepExecution(
+        { executionId: 'exec-1', id: 'step-1' },
+        'default'
+      );
+
+      expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith([
+        'input:step-1',
+        'output:step-1',
+      ]);
+      expect(result?.input).toEqual({ message: 'hello' });
+      expect(result?.output).toBe('hello');
+    });
+
+    it('drops payloads stored on the step document', async () => {
+      mockStepDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          {
+            id: 'step-1',
+            workflowRunId: 'exec-1',
+            status: 'completed',
+            spaceId: 'default',
+            input: { message: 'stale' },
+            output: 'stale',
+            inputId: 'input:step-1',
+            outputId: 'output:step-1',
+          } as unknown as EsWorkflowStepExecution,
+        ])
+      );
+      mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+        items: [
+          {
+            document: {
+              id: 'input:step-1',
+              executionId: 'step-1',
+              type: 'input',
+              value: { message: 'fresh' },
+              size: 1,
+            },
+          },
+        ],
+        missing: ['output:step-1'],
+      });
+
+      const result = await service.getStepExecution(
+        { executionId: 'exec-1', id: 'step-1' },
+        'default'
+      );
+
+      expect(result?.input).toEqual({ message: 'fresh' });
+      expect(result?.output).toBeUndefined();
     });
 
     it('returns null when the document belongs to another execution or space', async () => {
@@ -772,6 +991,44 @@ describe('WorkflowExecutionQueryService', () => {
       expect(result.total).toBe(1);
       expect(result.results).toHaveLength(1);
       expect(result.results[0].stepType).toBe('waitForInput');
+      expect((mockEsClient.search.mock.calls[0][0] as any)._source).toEqual({
+        excludes: ['input', 'output'],
+      });
+    });
+
+    it('loads the pending prompt from the IO client and drops a payload stored on the step', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            buildHit({
+              input: { message: 'stale' },
+              inputId: 'input:doc-1',
+            }),
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+      mockAliveWorkflowsLookup(['wf-1']);
+      mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+        items: [
+          {
+            document: {
+              id: 'input:doc-1',
+              executionId: 'doc-1',
+              type: 'input',
+              value: { message: 'approve this' },
+              size: 1,
+            },
+          },
+        ],
+        missing: [],
+      });
+
+      const result = await service.listWaitingForInputSteps('default');
+
+      expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith(['input:doc-1']);
+      expect(result.results[0].input).toEqual({ message: 'approve this' });
+      expect(result.results[0].output).toBeUndefined();
     });
 
     it('excludes step executions that already have finishedAt or hitl.respondedAt set', async () => {
@@ -1034,6 +1291,59 @@ describe('WorkflowExecutionQueryService', () => {
       ]);
       expect(result.total).toBe(1);
       expect(result.results).toHaveLength(1);
+      expect((mockEsClient.search.mock.calls[0][0] as any)._source).toEqual({
+        excludes: ['input', 'output'],
+      });
+      expect(result.results[0].output).toBeUndefined();
+    });
+
+    it('loads the response and the prompt from the IO client', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            buildProcessedHit({
+              input: { message: 'stale prompt' },
+              output: { approved: true },
+              inputId: 'input:doc-1',
+              outputId: 'output:doc-1',
+            }),
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+      mockAliveWorkflowsLookup(['wf-1']);
+      mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+        items: [
+          {
+            document: {
+              id: 'input:doc-1',
+              executionId: 'doc-1',
+              type: 'input',
+              value: { message: 'approve this' },
+              size: 1,
+            },
+          },
+          {
+            document: {
+              id: 'output:doc-1',
+              executionId: 'doc-1',
+              type: 'output',
+              value: { approved: false },
+              size: 1,
+            },
+          },
+        ],
+        missing: [],
+      });
+
+      const result = await service.listProcessedWaitForInputSteps('default');
+
+      expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith([
+        'input:doc-1',
+        'output:doc-1',
+      ]);
+      expect(result.results[0].input).toEqual({ message: 'approve this' });
+      expect(result.results[0].output).toEqual({ approved: false });
     });
 
     it('keeps settled waiting_for_input rows with finishedAt in processed history', async () => {
@@ -1234,22 +1544,45 @@ describe('WorkflowExecutionQueryService', () => {
           hits: {
             hits: [
               {
+                _id: 'pred-1',
                 _source: {
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T14:59:00.000Z',
-                  output: { reasoning: { summary: 'did the thing' } },
                 },
               },
               {
+                _id: 'pred-0',
                 _source: {
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T14:00:00.000Z',
-                  output: { reasoning: { summary: 'older, ignored' } },
                 },
               },
             ],
           },
         } as any);
+        mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+          items: [
+            {
+              document: {
+                id: 'output:pred-1',
+                executionId: 'pred-1',
+                type: 'output',
+                value: { reasoning: { summary: 'did the thing' } },
+                size: 1,
+              },
+            },
+            {
+              document: {
+                id: 'output:pred-0',
+                executionId: 'pred-0',
+                type: 'output',
+                value: { reasoning: { summary: 'older, ignored' } },
+                size: 1,
+              },
+            },
+          ],
+          missing: [],
+        });
 
         const result = await service.listProcessedWaitForInputSteps('default', {
           includeReasoning: true,
@@ -1258,9 +1591,12 @@ describe('WorkflowExecutionQueryService', () => {
         const reasoningArgs = mockEsClient.search.mock.calls[2][0] as any;
         expect(reasoningArgs).toMatchObject({
           index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-          _source: { includes: ['workflowRunId', 'finishedAt', 'output.reasoning'] },
+          _source: { includes: ['workflowRunId', 'finishedAt'] },
           size: 1000,
           track_total_hits: false,
+        });
+        expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith(['output:pred-1'], {
+          sourceIncludes: ['value.reasoning'],
         });
         expect(reasoningArgs.query.bool.must).toEqual(
           expect.arrayContaining([
@@ -1279,10 +1615,10 @@ describe('WorkflowExecutionQueryService', () => {
           hits: {
             hits: [
               {
+                _id: 'pred-1',
                 _source: {
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T15:30:00.000Z',
-                  output: { reasoning: { summary: 'after the pause' } },
                 },
               },
             ],
@@ -1302,15 +1638,29 @@ describe('WorkflowExecutionQueryService', () => {
           hits: {
             hits: [
               {
+                _id: 'pred-1',
                 _source: {
                   workflowRunId: 'run-1',
                   finishedAt: '2026-04-28T14:59:00.000Z',
-                  output: { approved: true },
                 },
               },
             ],
           },
         } as any);
+        mockExecutionsIoDataClient.getByIds.mockResolvedValue({
+          items: [
+            {
+              document: {
+                id: 'output:pred-1',
+                executionId: 'pred-1',
+                type: 'output',
+                value: { approved: true },
+                size: 1,
+              },
+            },
+          ],
+          missing: [],
+        });
 
         const result = await service.listProcessedWaitForInputSteps('default', {
           includeReasoning: true,
@@ -1322,6 +1672,34 @@ describe('WorkflowExecutionQueryService', () => {
       it('never fails the listing when the predecessor lookup errors', async () => {
         mockListingWithWaitStep();
         mockEsClient.search.mockRejectedValueOnce(new Error('predecessor boom'));
+
+        const result = await service.listProcessedWaitForInputSteps('default', {
+          includeReasoning: true,
+        });
+
+        expect(result.results.map((r) => r.id)).toEqual(['wait-1']);
+        expect(result.reasoningByStepId.size).toBe(0);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to resolve predecessor reasoning')
+        );
+      });
+
+      it('never fails the listing when the output document lookup errors', async () => {
+        mockListingWithWaitStep();
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'pred-1',
+                _source: {
+                  workflowRunId: 'run-1',
+                  finishedAt: '2026-04-28T14:59:00.000Z',
+                },
+              },
+            ],
+          },
+        } as any);
+        mockExecutionsIoDataClient.getByIds.mockRejectedValue(new Error('io boom'));
 
         const result = await service.listProcessedWaitForInputSteps('default', {
           includeReasoning: true,
