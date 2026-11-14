@@ -67,6 +67,18 @@ the window. Thresholds are checked per branch, so a clean branch cannot hide a f
 branch a test qualified on is recorded as `flakiestBranch`. Tests that never passed in the window
 are consistently failing, not flaky, and are not reported.
 
+With `--judgedTogether` (`FLAKY_TESTS_JUDGED_TOGETHER` in the pipeline: `kibana-on-merge`,
+`kibana-security-solution-on-merge` and `kibana-batch-testing`, which run the same tests in the
+same local environment), only those pipelines' builds are counted together, those the report
+doesn't read ignored. Every
+other pipeline is judged per branch on its own: those running the tests in another environment,
+FIPS mode (`kibana-fips`) and Elastic Cloud (ECH and MKI), with far fewer builds. A test failing 4
+of the 14 FIPS builds on `main` is flaky there, even with 500 clean on-merge builds of `main`.
+Their branch entries carry the pipeline (`byBranch[].pipeline`), and the issue names it: "`main`
+in `kibana-fips`". The issue's `suite.branches` only lists the branch, so `/skip` skips the suite
+on that branch in every pipeline. A pipeline added to the report is judged on its own unless it is
+added to those judged together too.
+
 Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
 pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
 for a test failing at random as often. A test in a breakage up to its latest build is broken right
@@ -74,6 +86,14 @@ now and is dropped from the report. A test whose breakages are over is checked a
 thresholds again without their builds: it's dropped if it no longer clears them, and otherwise
 kept, counted and ranked without those builds. Each test dropped this way is logged with the
 breakage that dropped it, or the longest one, and each test kept with how many builds it lost.
+
+Tests that were fixed since are dropped too. On every branch the test qualifies on, its last failure
+was at least 24 hours before the end of the window, and it has passed enough builds since then
+that, failing as often as before, it would have failed at least 1.5 times on average. The failure
+rate leaves out the breakage builds, but a breakage still counts as its last failure, as the test
+may have changed to end it. For a test failing 8% of its builds, that's 19 builds. Only
+the pipelines, configs and targets where the test failed are counted, so a test can only look less
+fixed for it.
 
 Tests that have been skipped since are left out (`--no-omit-skipped-tests` keeps them): on every
 branch the test failed on, its latest run in every pipeline, config and target was a skip. A suite
@@ -111,17 +131,25 @@ itself). That repository is only read, never written to, and its closed issues a
 
 ### Keeping suite issues up to date
 
-When the daily report finds a suite flaky again, its own issue (one this command filed for that
-`describe` block, not a per-test or whole-file one) is refreshed. `--no-update-issues` turns this
-off.
+When the daily report finds a suite flaky again, its own issue (one about that `describe` block,
+flaky or consistently failing, not a per-test one) is refreshed. Without one, an open issue about
+the suite's whole file is, such as a consistently failing issue for tests in several blocks: CI
+failures of the suite's tests are already counted on it. The suites of a file that share such an
+issue are refreshed together, their tests named after their block, and the issue stays about the
+whole file. A closed one isn't reopened for a block: the block gets an issue of its own.
+`--no-update-issues` turns this off.
 
 - The body text stays as filed. Only the hidden metadata is updated (report count, history, last
   report); the test ids and branches recorded before are kept, so `/skip` still covers a branch
   the suite stopped failing on this week.
-- A comment with the new numbers ("This test suite still appears to be flaky […]") is posted when
-  the suite failed since the last one, or since the issue was filed, and at least
-  `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. Every comment ends with how to skip the test.
+- A short comment on where the suite is still flaky is posted when the suite failed since the
+  last one, or since the issue was filed, and at least `--comment-cooldown-days` later (default
+  3). Failures in between are covered by the next comment. It has one line per test that failed
+  there, even a single one, with the test's own numbers on each branch it's flaky on ("`sorts by
+  status`: 4% of builds (18 / 441), last failed […]"), and marks the tests the issue has not shown yet, in its
+  body or an earlier comment, as "(newly flaky)". On an issue no report has found flaky before, a
+  consistently failing one, the first comment says "Now flaky" and lists every flaky test. How to
+  skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.
@@ -142,8 +170,9 @@ refreshes them any more.
 The body ends with `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's file,
 title, framework and test ids, the branches its tests failed on (`suite.branches`, pull requests
 left out), the pipelines its file failed on (`suite.pipelines`), and the reports that found it
-flaky (`report.count`, `report.generatedAt`, the last 30 in `report.history`, and
-`report.commentedAt` once a comment was posted). This command uses it to recognise its own issues;
+flaky (`report.count`, `report.generatedAt`, the last 30 in `report.history`,
+`report.commentedAt` once a comment was posted, and in `report.shownTestIds` the tests the body
+and the comments have shown). This command uses it to recognise its own issues;
 `elastic/kibana-operations` (`triage/`) reads it too: `/skip` for the `describe` block to skip and
 the branches to skip it on, the failed-test alerts for the pipelines and the report count.
 
