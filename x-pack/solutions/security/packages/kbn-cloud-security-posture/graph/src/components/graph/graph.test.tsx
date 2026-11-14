@@ -12,7 +12,12 @@ import { Graph, type GraphProps } from './graph';
 import { TestProviders } from '../mock/test_providers';
 import type { NodeViewModel, EdgeViewModel } from '../types';
 import type { Edge, Node, ReactFlowInstance, ReactFlowProps } from '@xyflow/react';
-import { GRAPH_CONTROLS_LAYERS_ID } from '../test_ids';
+import {
+  GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID,
+  GRAPH_CONTROLS_LAYERS_ID,
+  GRAPH_KEYBOARD_SHORTCUTS_PANEL_CLOSE_ID,
+  GRAPH_KEYBOARD_SHORTCUTS_PANEL_ID,
+} from '../test_ids';
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 jest.mock('../constants', () => ({
@@ -930,6 +935,158 @@ describe('<Graph />', () => {
           event: expect.objectContaining({ sourceIpAddress: false }),
         })
       );
+    });
+  });
+
+  describe('keyboard shortcuts panel', () => {
+    const keyboardShortcutsNodes: NodeViewModel[] = [
+      { id: 'entity1', label: 'Entity', color: 'primary', shape: 'hexagon' },
+    ];
+
+    it('should render the keyboard shortcuts button when interactive is true', async () => {
+      const { getByTestId } = renderGraphPreview({
+        nodes: keyboardShortcutsNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        expect(getByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument();
+      });
+    });
+
+    it('should not render the keyboard shortcuts button when interactive is false', async () => {
+      const { queryByTestId } = renderGraphPreview({
+        nodes: keyboardShortcutsNodes,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        expect(queryByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should list all shortcuts when search and centering are available', async () => {
+      const { getByTestId } = renderGraphPreview({
+        nodes: [{ ...keyboardShortcutsNodes[0], isOrigin: true }],
+        edges: [],
+        interactive: true,
+        onToggleSearch: jest.fn(),
+      });
+
+      await waitFor(() =>
+        expect(getByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument()
+      );
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID));
+
+      await waitFor(() => {
+        const panel = getByTestId(GRAPH_KEYBOARD_SHORTCUTS_PANEL_ID);
+        [
+          'Open search',
+          'Display options',
+          'Zoom in',
+          'Zoom out',
+          'Fit to screen',
+          'Center graph',
+        ].forEach((label) => expect(panel).toHaveTextContent(label));
+      });
+    });
+
+    it('should hide the search and center shortcuts when they are unavailable', async () => {
+      const { getByTestId } = renderGraphPreview({
+        nodes: keyboardShortcutsNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() =>
+        expect(getByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument()
+      );
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID));
+
+      await waitFor(() => {
+        const panel = getByTestId(GRAPH_KEYBOARD_SHORTCUTS_PANEL_ID);
+        expect(panel).toHaveTextContent('Zoom in');
+        expect(panel).not.toHaveTextContent('Open search');
+        expect(panel).not.toHaveTextContent('Center graph');
+      });
+    });
+
+    it('should invoke onToggleSearch when "s" is pressed', async () => {
+      const onToggleSearch = jest.fn();
+      const { getByTestId } = renderGraphPreview({
+        nodes: keyboardShortcutsNodes,
+        edges: [],
+        interactive: true,
+        onToggleSearch,
+      });
+
+      await waitFor(() =>
+        expect(getByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument()
+      );
+
+      fireEvent.keyDown(document.body, { key: 's' });
+
+      expect(onToggleSearch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not handle shortcuts when the graph is not interactive', async () => {
+      const onToggleSearch = jest.fn();
+      const { container } = renderGraphPreview({
+        nodes: keyboardShortcutsNodes,
+        edges: [],
+        interactive: false,
+        onToggleSearch,
+      });
+
+      await waitFor(() => expect(container.querySelector('[data-id="entity1"]')).not.toBeNull());
+
+      fireEvent.keyDown(document.body, { key: 's' });
+
+      expect(onToggleSearch).not.toHaveBeenCalled();
+    });
+
+    it('should open the layers panel when "d" is pressed', async () => {
+      const { getByTestId, getByRole } = renderGraphPreview({
+        nodes: keyboardShortcutsNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument());
+
+      fireEvent.keyDown(document.body, { key: 'd' });
+
+      await waitFor(() =>
+        expect(getByRole('checkbox', { name: 'Asset criticality' })).toBeInTheDocument()
+      );
+    });
+
+    it('should close the panel when the close button is clicked', async () => {
+      const { getByTestId, queryByTestId } = renderGraphPreview({
+        nodes: keyboardShortcutsNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() =>
+        expect(getByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID)).toBeInTheDocument()
+      );
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID));
+
+      await waitFor(() =>
+        expect(getByTestId(GRAPH_KEYBOARD_SHORTCUTS_PANEL_CLOSE_ID)).toBeInTheDocument()
+      );
+
+      fireEvent.click(getByTestId(GRAPH_KEYBOARD_SHORTCUTS_PANEL_CLOSE_ID));
+
+      await waitFor(() => {
+        expect(queryByTestId(GRAPH_KEYBOARD_SHORTCUTS_PANEL_ID)).not.toBeInTheDocument();
+      });
     });
   });
 });
