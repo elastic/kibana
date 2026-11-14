@@ -143,6 +143,12 @@ export interface NightshiftWorkflowFixture {
   sandboxStart: jest.Mocked<NightshiftSandboxStart>;
   agentBuilder: { ensure: jest.Mock };
   reportOnlineEvalScore: jest.Mock;
+  telemetry: {
+    reportSemanticMemoryMaterialized: jest.Mock;
+    reportSemanticMemoryOptimized: jest.Mock;
+    reportDecisionTreeCausalCheck: jest.Mock;
+    reportOnlineEvalScore: jest.Mock;
+  };
   /** The saved rounds `prepare_turn` reads; none by default, so a round is a first round. */
   setSavedRounds: (rounds: Array<{ id: string; steps: unknown[] }>) => void;
   agentRuns: AgentRun[];
@@ -278,11 +284,13 @@ export const createNightshiftWorkflowFixture = ({
     },
   };
   const reportOnlineEvalScore = jest.fn();
-  const telemetry = {
+  const telemetryMock = {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
+    reportDecisionTreeCausalCheck: jest.fn(),
     reportOnlineEvalScore,
-  } as unknown as NightshiftTelemetryClient;
+  };
+  const telemetry = telemetryMock as unknown as NightshiftTelemetryClient;
 
   // Mirrors the registration list in `plugin.ts`: every writer and both reinforcement steps are
   // registered whatever the feature flags say, which is what lets a trees-off install still run
@@ -330,6 +338,7 @@ export const createNightshiftWorkflowFixture = ({
       getAgentBuilder: () => conversationsAgentBuilder as unknown as AgentBuilderPluginStart,
       logger,
       isEnabled: () => decisionTreesEnabled,
+      telemetry,
     }),
     resolveModelStepDefinition({
       getInference: () => ({} as never),
@@ -419,6 +428,7 @@ export const createNightshiftWorkflowFixture = ({
     sandboxStart,
     agentBuilder: { ensure: ensureAgent },
     reportOnlineEvalScore,
+    telemetry: telemetryMock,
     setSavedRounds: (rounds) => {
       savedRounds = rounds;
     },
