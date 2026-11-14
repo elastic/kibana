@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
@@ -59,11 +59,30 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   const dashboardFileName = getDashboardFileNameFromProps(dashboardProps);
 
+  // Tracks which dashboard the currently published API belongs to, so a late cleanup from a
+  // canceled load for a previous dashboard cannot clear the reference to the current one.
+  const publishedForRef = useRef<string | undefined>();
+
+  const onApiAvailable = useCallback(
+    (api: DashboardApi) => {
+      publishedForRef.current = dashboardFileName;
+      setDashboard(api);
+    },
+    [dashboardFileName]
+  );
+
+  const onApiCleanup = useCallback(() => {
+    if (publishedForRef.current === dashboardFileName) {
+      setDashboard(undefined);
+    }
+  }, [dashboardFileName]);
+
   return (
     <DashboardRenderer
       key={dashboardFileName}
       getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
-      onApiAvailable={setDashboard}
+      onApiAvailable={onApiAvailable}
+      onApiCleanup={onApiCleanup}
     />
   );
 }
