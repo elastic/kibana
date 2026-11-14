@@ -14,7 +14,6 @@ import {
   TraceFlags,
   type Attributes,
   type AttributeValue,
-  type Link,
   type Span,
   type SpanContext,
 } from '@opentelemetry/api';
@@ -177,7 +176,10 @@ export interface NightshiftBackgroundSpanOptions {
   traceId?: string;
   /** Optional 16-hex parent span ID. Defaults to deterministic `nightshift.background` root span ID. */
   parentSpanId?: string;
-  /** Foreground investigator round `trace_id` (`T_foreground`) for cross-trace correlation. */
+  /**
+   * Foreground investigator round `trace_id` (`T_foreground`). When valid, the span joins this
+   * trace (so it appears in the conversation trace flyout) instead of `traceId`.
+   */
   foregroundTraceId?: string;
   roundId?: string;
   conversationId?: string;
@@ -224,7 +226,8 @@ const resolvePrivacySettings = async (
 
 /**
  * Wraps a Nightshift background workflow step (`materialize`, `optimize`, `decisionTreeReinforce`,
- * or scheduled judges) in an OpenTelemetry span on `T_background` (`background_trace_id`).
+ * or online judges) in an OpenTelemetry span on `T_foreground` when `foregroundTraceId` is given,
+ * else on `T_background` (`background_trace_id`).
  *
  * Sets both `withAgentBuilderContext` (so `AgentBuilderSpanProcessor` exports the span to
  * `traces-agent_builder.otel-<spaceId>`) and `BAGGAGE_TRACKING_BEACON_KEY` + a remote parent
@@ -235,7 +238,14 @@ export const withNightshiftBackgroundSpan = async <T>(
   options: NightshiftBackgroundSpanOptions,
   fn: (span?: Span) => Promise<T>
 ): Promise<T> => {
-  const resolvedTraceId = toDeterministicTraceId(options.traceId ?? options.workflowExecutionId);
+  const backgroundTraceId = toDeterministicTraceId(options.traceId ?? options.workflowExecutionId);
+  const foregroundTraceId = toDeterministicTraceId(options.foregroundTraceId);
+  // Joining the investigator round's trace makes the span show up in the conversation-pane trace
+  // flyout, which selects spans by `trace_id` only. Otherwise the span lives on `T_background`.
+  const resolvedTraceId =
+    foregroundTraceId && isValidOtelTraceId(foregroundTraceId)
+      ? foregroundTraceId
+      : backgroundTraceId;
   if (!resolvedTraceId) {
     return fn(undefined);
   }
@@ -250,35 +260,11 @@ export const withNightshiftBackgroundSpan = async <T>(
       ? options.parentSpanId
       : toDeterministicSpanId(`${resolvedTraceId}:nightshift.background`);
 
-  const foregroundTraceId = toDeterministicTraceId(options.foregroundTraceId);
-  const rawRoundAttr = sanitizeNightshiftAttributeValue(
-    'nightshift.round_id',
-    options.roundId,
-    privacySettings
-  );
-  const links: Link[] =
-    foregroundTraceId && isValidOtelTraceId(foregroundTraceId)
-      ? [
-          {
-            context: {
-              traceId: foregroundTraceId,
-              spanId: toDeterministicSpanId(`${foregroundTraceId}:foreground`),
-              traceFlags: TraceFlags.SAMPLED,
-              isRemote: true,
-            },
-            attributes: {
-              'nightshift.link_type': 'foreground_round',
-              ...(rawRoundAttr ? { 'nightshift.round_id': rawRoundAttr } : {}),
-            },
-          },
-        ]
-      : [];
-
   const initialAttributes = sanitizeAttributesObject(
     {
       [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
       [GenAISemanticConventions.GenAIOperationName]: 'invoke_workflow',
-      'nightshift.background_trace_id': resolvedTraceId,
+      ...(backgroundTraceId ? { 'nightshift.background_trace_id': backgroundTraceId } : {}),
       ...(foregroundTraceId ? { 'nightshift.foreground_trace_id': foregroundTraceId } : {}),
       ...(options.conversationId ? { 'nightshift.conversation_id': options.conversationId } : {}),
       ...(options.roundId ? { 'nightshift.round_id': options.roundId } : {}),
@@ -311,7 +297,6 @@ export const withNightshiftBackgroundSpan = async <T>(
           options.name,
           {
             kind: SpanKind.INTERNAL,
-            ...(links.length > 0 ? { links } : {}),
             attributes: initialAttributes,
           },
           (span) =>

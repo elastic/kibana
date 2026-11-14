@@ -121,6 +121,7 @@ export const runAfterExecutionWorkflows = async ({
 
     const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
     const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
+    const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
 
     const workflowParams: AfterExecutionWorkflowParams = {
       prompt: round.input.message ?? '',
@@ -132,10 +133,11 @@ export const runAfterExecutionWorkflows = async ({
     };
     const optionalWorkflowParams: Pick<
       AfterExecutionWorkflowParams,
-      'round_connector_id' | 'workflow_context' | 'tool_results'
+      'round_connector_id' | 'round_trace_id' | 'workflow_context' | 'tool_results'
     > = {
       round_connector_id:
         roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined,
+      round_trace_id: roundTraceId || undefined,
       workflow_context: workflowContext,
       tool_results: toolResults.length > 0 ? toolResults : undefined,
     };
