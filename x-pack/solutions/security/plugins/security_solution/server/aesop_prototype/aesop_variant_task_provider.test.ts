@@ -6,7 +6,7 @@
  */
 
 import type { EvalsTaskContext } from '@kbn/evals-plugin/server/task_providers';
-import { createAesopVariantTaskProvider } from './aesop_variant_task_provider';
+import { CONVERSE_TIMEOUT_MS, createAesopVariantTaskProvider } from './aesop_variant_task_provider';
 
 const createContext = (overrides: Partial<EvalsTaskContext> = {}) => {
   const callKibanaApi = jest.fn().mockResolvedValue({
@@ -42,6 +42,15 @@ describe('createAesopVariantTaskProvider', () => {
     expect(callKibanaApi.mock.calls[0][0].body.input).toBe('Triage alert 42');
     expect(result.traceId).toBe('abc123');
     expect(result.output).toEqual({ message: 'done', conversation_id: 'conv-1' });
+  });
+
+  it('gives the converse call a longer timeout than the self-client default', async () => {
+    const { context, callKibanaApi } = createContext({ params: { skill_id: 'triage-v2' } });
+
+    await provider.run(context);
+
+    expect(callKibanaApi.mock.calls[0][0].timeout).toBe(CONVERSE_TIMEOUT_MS);
+    expect(CONVERSE_TIMEOUT_MS).toBeGreaterThan(60_000);
   });
 
   it.each([true, 'true'])('runs the no-skill baseline for no_skill=%p', async (noSkill) => {

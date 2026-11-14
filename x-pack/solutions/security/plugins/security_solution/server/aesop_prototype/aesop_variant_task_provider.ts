@@ -20,6 +20,8 @@ import {
 
 const CONVERSE_PATH = '/api/agent_builder/converse';
 const AGENT_BUILDER_API_VERSION = '2023-10-31';
+// A tool-using agent run routinely outlasts the self-client's 60s default.
+export const CONVERSE_TIMEOUT_MS = 300_000;
 
 const PROMPT_KEYS = ['input', 'prompt', 'question', 'query', 'text', 'message'] as const;
 
@@ -67,6 +69,7 @@ export const createAesopVariantTaskProvider = (): EvalsTaskProvider => ({
         method: 'POST',
         path: CONVERSE_PATH,
         headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+        timeout: CONVERSE_TIMEOUT_MS,
         body: {
           agent_id: agentId,
           connector_id: connectorId,
