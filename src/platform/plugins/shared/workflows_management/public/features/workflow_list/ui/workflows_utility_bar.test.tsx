@@ -8,7 +8,6 @@
  */
 
 import { fireEvent, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { WorkflowListItemDto } from '@kbn/workflows';
@@ -83,13 +82,13 @@ describe('WorkflowsUtilityBar', () => {
     expect(screen.getByTestId('workflows-table-bulk-actions-button')).toBeInTheDocument();
   });
 
-  it('opens bulk actions popover when button is clicked', async () => {
+  it('opens bulk actions popover when button is clicked', () => {
     const selectedWorkflows = [{ id: '1', name: 'Test Workflow 1' }] as WorkflowListItemDto[];
 
     renderWithI18n(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
 
     const bulkActionsButton = screen.getByTestId('workflows-table-bulk-actions-button');
-    await userEvent.click(bulkActionsButton);
+    fireEvent.click(bulkActionsButton);
 
     expect(screen.getByTestId('workflows-table-bulk-actions-context-menu')).toBeInTheDocument();
   });
