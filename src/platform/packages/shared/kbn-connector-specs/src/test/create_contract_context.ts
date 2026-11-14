@@ -10,6 +10,8 @@
 import { generateKeyPairSync, webcrypto } from 'crypto';
 import { Readable } from 'stream';
 import axios from 'axios';
+import type { SSLSettings } from '@kbn/actions-utils';
+import { getNodeSSLOptions } from '@kbn/actions-utils';
 import type { Emulator, EmulatorOptions } from '@kbn/connector-emulate';
 import { createEmulatorFetch, issueAccessToken } from '@kbn/connector-emulate';
 import type { Logger } from '@kbn/logging';
@@ -22,6 +24,14 @@ import type {
   NormalizedAuthType,
 } from '../connector_spec';
 import { getSchemaForAuthType } from '../lib';
+import type {
+  BuildContext,
+  ClientRegistry,
+  ClientTypeId,
+  ClientTypeSpec,
+  ClientTypeSpecs,
+  ConnectorNetworkSettings,
+} from '../lib/clients';
 
 export interface ContractContextOptions extends EmulatorOptions {
   readonly connector: ConnectorSpec;
@@ -30,6 +40,17 @@ export interface ContractContextOptions extends EmulatorOptions {
   /** Secrets for the auth type; fields left out get placeholders the auth schema accepts. */
   readonly secrets?: Readonly<Record<string, unknown>>;
   readonly config?: Readonly<Record<string, unknown>>;
+  /**
+   * Client types that `ctx.getClient` builds clients with, such as a database client type
+   * whose config points at a test server. `getClient` throws for any other id, so a contract
+   * test opens no connection it didn't ask for.
+   */
+  readonly clientTypes?: Partial<ClientTypeSpecs>;
+  /**
+   * Overrides the network settings clients are built with, which allow every host, use no
+   * proxy and verify certificates; e.g. to trust a test server's certificate authority.
+   */
+  readonly networkSettings?: Partial<ConnectorNetworkSettings>;
 }
 
 export interface ContractContext {
@@ -38,6 +59,8 @@ export interface ContractContext {
   readonly mock: Emulator;
   /** Validates the input with the action's schema, as the actions plugin does, and runs it. */
   readonly runAction: (name: string, input: unknown) => Promise<unknown>;
+  /** Terminates the clients `ctx.getClient` built, as the actions plugin's pool does on eviction. */
+  readonly close: () => Promise<void>;
 }
 
 const findAuthType = (id: string): NormalizedAuthType => {
@@ -195,6 +218,100 @@ const withoutGlobalFetch = async <T>(run: () => Promise<T>): Promise<T> => {
   }
 };
 
+// Response limits like the actions plugin's defaults (`xpack.actions.responseTimeout` and
+// `maxResponseContentLength`).
+const DEFAULT_RESPONSE_SETTINGS = { timeout: 60_000, maxContentLength: 1_000_000_000 };
+
+const createNetworkSettings = (
+  overrides: Partial<ConnectorNetworkSettings> = {}
+): ConnectorNetworkSettings => ({
+  ensureUriAllowed: () => {},
+  ensureHostnameAllowed: () => {},
+  getSslSettings: () => ({}),
+  getProxySettings: () => undefined,
+  getCustomHostSettings: () => undefined,
+  getResponseSettings: () => DEFAULT_RESPONSE_SETTINGS,
+  ...overrides,
+});
+
+interface Lease<T> {
+  client?: Promise<T>;
+}
+
+/**
+ * Builds `ctx.getClient` from the given client types, once per id like a lease from the actions
+ * plugin's pool, with a build context that mirrors the plugin's: the connector config, the auth
+ * type's own `getAuthHeaders`, and network settings.
+ */
+const createGetClient = ({
+  clientTypes,
+  config,
+  networkSettings,
+  getAuthHeaders,
+}: {
+  readonly clientTypes: Partial<ClientTypeSpecs>;
+  readonly config: Record<string, unknown>;
+  readonly networkSettings: ConnectorNetworkSettings;
+  readonly getAuthHeaders: () => Promise<Record<string, string>>;
+}) => {
+  // One lease per id, so a client is stored through its generic id without a cast.
+  const leases: { [K in ClientTypeId]: Lease<ClientRegistry[K]> } = {
+    mcp: {},
+    mongodb: {},
+    mssql: {},
+    mysql: {},
+  };
+  const buildContext: BuildContext = {
+    logger: silentLogger,
+    config,
+    networkSettings,
+    platform: {
+      resolveSrvHosts: async (name) => {
+        throw new Error(
+          `${name} needs an SRV lookup, which contract tests don't make; give the hosts instead`
+        );
+      },
+      buildTlsOptions: (targets, logger) => {
+        const ssl: SSLSettings = networkSettings.getSslSettings();
+        return getNodeSSLOptions(logger, ssl.verificationMode ?? 'full', ssl);
+      },
+    },
+    credential: { getAuthHeaders },
+  };
+
+  const getClient = async <K extends ClientTypeId>(id: K): Promise<ClientRegistry[K]> => {
+    const clientType: ClientTypeSpec<ClientRegistry[K]> | undefined = clientTypes[id];
+    if (!clientType) {
+      throw new Error(`Client ${id} is not available in contract tests`);
+    }
+    const lease: Lease<ClientRegistry[K]> = leases[id];
+    lease.client ??= clientType.build(buildContext);
+    return lease.client;
+  };
+
+  const terminate = async <K extends ClientTypeId>(id: K): Promise<void> => {
+    const lease: Lease<ClientRegistry[K]> = leases[id];
+    const { client } = lease;
+    const clientType: ClientTypeSpec<ClientRegistry[K]> | undefined = clientTypes[id];
+    lease.client = undefined;
+    // A client whose build failed has nothing to terminate.
+    const settled = await client?.then(
+      (value) => ({ value }),
+      () => undefined
+    );
+    if (clientType && settled) {
+      await clientType.terminate(settled.value);
+    }
+  };
+
+  const close = async () => {
+    // Object.keys widens to string[]; these are exactly the lease ids.
+    await Promise.all((Object.keys(leases) as ClientTypeId[]).map(terminate));
+  };
+
+  return { getClient, close };
+};
+
 /**
  * Builds an action context whose client is answered in-process by the contract mock: a real
  * axios instance on the mock's `fetch`, authenticated by the connector's own auth type and
@@ -205,6 +322,8 @@ export const createContractContext = async ({
   authType,
   secrets = {},
   config = {},
+  clientTypes = {},
+  networkSettings,
   ...mockOptions
 }: ContractContextOptions): Promise<ContractContext> => {
   const mock = createEmulatorFetch(mockOptions);
@@ -246,18 +365,33 @@ export const createContractContext = async ({
     client.defaults.headers.common[name] = value;
   }
   ensureWebCrypto();
+  const auth = findAuthType(id);
   await withoutGlobalFetch(() =>
-    findAuthType(id).configure(createAuthContext(mock.fetch), client, authSecrets)
+    auth.configure(createAuthContext(mock.fetch), client, authSecrets)
   );
+
+  const parsedConfig: Record<string, unknown> = connector.schema
+    ? await connector.schema.parseAsync(config)
+    : { ...config };
+  const { getClient, close } = createGetClient({
+    clientTypes,
+    config: parsedConfig,
+    networkSettings: createNetworkSettings(networkSettings),
+    // As the actions plugin's credential accessor, which native clients authenticate with.
+    getAuthHeaders: async () => {
+      if (!auth.getAuthHeaders) {
+        throw new Error(`Auth type "${id}" does not support getAuthHeaders for native clients`);
+      }
+      return auth.getAuthHeaders(createAuthContext(mock.fetch), authSecrets);
+    },
+  });
 
   const ctx: ActionContext = {
     client,
-    config: connector.schema ? await connector.schema.parseAsync(config) : { ...config },
+    config: parsedConfig,
     secrets: authSecrets,
     log: silentLogger,
-    getClient: async (clientType) => {
-      throw new Error(`Client ${String(clientType)} is not available in contract tests`);
-    },
+    getClient,
     fetchTestOnly: mock.fetch,
   };
 
@@ -270,5 +404,5 @@ export const createContractContext = async ({
     return withoutGlobalFetch(() => action.handler(ctx, parsed));
   };
 
-  return { ctx, mock, runAction };
+  return { ctx, mock, runAction, close };
 };
