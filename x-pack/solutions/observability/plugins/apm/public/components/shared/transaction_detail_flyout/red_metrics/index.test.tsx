@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, renderHook, screen, within } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TransactionDetailFlyoutRedMetrics } from '.';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
@@ -19,8 +20,12 @@ jest.mock('../../../../context/chart_pointer_event/chart_pointer_event_context',
     <>{children}</>
   ),
 }));
+const mockTimeseriesChart = jest.fn();
 jest.mock('../../charts/timeseries_chart', () => ({
-  TimeseriesChart: ({ id }: { id: string }) => <div data-test-subj={id} />,
+  TimeseriesChart: (props: { id: string }) => {
+    mockTimeseriesChart(props);
+    return <div data-test-subj={props.id} />;
+  },
 }));
 jest.mock('../../service_flyout/hooks/use_project_routing', () => ({
   useProjectRouting: () => undefined,
@@ -97,6 +102,18 @@ const CHARTS_RESULT = {
 const LENS = { EmbeddableComponent: () => null };
 const DATA_VIEWS = {};
 
+// Emotion serializes the rule without the spaces after commas.
+const RED_METRICS_GRID_COLUMNS = 'repeat(auto-fit,minmax(160px,1fr))';
+
+const API_CHART_PANEL_IDS = [
+  'transactionDetailFlyoutRedMetricsChart-latency',
+  'transactionDetailFlyoutRedMetricsChart-throughput',
+  'transactionDetailFlyoutRedMetricsChart-failedTransactionRate',
+];
+
+const getChildTestSubjects = (element: HTMLElement) =>
+  Array.from(element.children).map((child) => child.getAttribute('data-test-subj'));
+
 describe('TransactionDetailFlyoutRedMetrics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -125,6 +142,53 @@ describe('TransactionDetailFlyoutRedMetrics', () => {
         expect.objectContaining(FILTERS)
       );
       expect(getEsqlKeyMetricCharts).not.toHaveBeenCalled();
+    });
+
+    it('lays out latency, throughput and failed transaction rate in a single grid row', () => {
+      render(<TransactionDetailFlyoutRedMetrics />);
+
+      const grid = screen.getByTestId('transactionDetailFlyoutRedMetricsCharts');
+      expect(grid).toHaveStyleRule('grid-template-columns', RED_METRICS_GRID_COLUMNS);
+      expect(getChildTestSubjects(grid)).toEqual(API_CHART_PANEL_IDS);
+    });
+
+    it('renders the compact latency select on the latency title row', () => {
+      render(<TransactionDetailFlyoutRedMetrics />);
+
+      const latencyHeader = screen.getByTestId(
+        'transactionDetailFlyoutRedMetricsChart-latency-header'
+      );
+      expect(within(latencyHeader).getByText('Latency')).toBeInTheDocument();
+      expect(within(latencyHeader).getByTestId('apmLatencyChartSelect')).toBeInTheDocument();
+      expect(within(latencyHeader).getByRole('option', { name: 'Avg' })).toBeInTheDocument();
+      expect(within(latencyHeader).queryByText('Metric')).not.toBeInTheDocument();
+    });
+
+    it('gives every chart header the same height so the plots stay aligned', () => {
+      const {
+        result: {
+          current: { euiTheme },
+        },
+      } = renderHook(() => useEuiTheme());
+
+      render(<TransactionDetailFlyoutRedMetrics />);
+
+      API_CHART_PANEL_IDS.forEach((id) => {
+        expect(screen.getByTestId(`${id}-header`)).toHaveStyleRule('min-height', euiTheme.size.xl);
+      });
+    });
+
+    it('does not mirror tooltips onto the sibling charts in the narrow row', () => {
+      render(<TransactionDetailFlyoutRedMetrics />);
+
+      expect(mockTimeseriesChart).toHaveBeenCalledTimes(3);
+      mockTimeseriesChart.mock.calls.forEach(([props]) => {
+        expect(props).toEqual(
+          expect.objectContaining({
+            settings: { externalPointerEvents: { tooltip: { visible: false } } },
+          })
+        );
+      });
     });
 
     it('shows a skeleton while charts are loading', () => {
@@ -208,6 +272,26 @@ describe('TransactionDetailFlyoutRedMetrics', () => {
           schema: 'ecs',
         })
       );
+    });
+
+    it('lays out the Lens charts in a single grid row in the same order as the API path', () => {
+      mockedUseTransactionDetailFlyoutContext.mockReturnValue({
+        deps: { core: { uiSettings: { get: () => 'UTC' } }, lens: LENS, dataViews: DATA_VIEWS },
+        filters: FILTERS,
+        preferDocumentBasedCharts: true,
+        schema: 'ecs',
+        indices: MOCK_INDICES,
+      });
+
+      render(<TransactionDetailFlyoutRedMetrics />);
+
+      const grid = screen.getByTestId('transactionDetailFlyoutEsqlRedMetrics');
+      expect(grid).toHaveStyleRule('grid-template-columns', RED_METRICS_GRID_COLUMNS);
+      expect(getChildTestSubjects(grid)).toEqual([
+        'transactionDetailFlyoutLensChart-latency',
+        'transactionDetailFlyoutLensChart-throughput',
+        'transactionDetailFlyoutLensChart-failedTransactionRate',
+      ]);
     });
 
     it('uses ES|QL Lens charts for otel schema even without preferDocumentBasedCharts', () => {
