@@ -24,6 +24,7 @@ export interface UseArtifactCardPropsProviderProps {
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
   disabled?: boolean;
+  dataUpdatedAt?: number;
 }
 
 type ArtifactCardPropsProvider = (artifactItem: ExceptionListItemSchema) => ArtifactEntryCardProps;
@@ -41,6 +42,7 @@ export const useArtifactCardPropsProvider = ({
   allowCardDeleteAction = true,
   allowCardEditAction = true,
   disabled = false,
+  dataUpdatedAt,
 }: UseArtifactCardPropsProviderProps): ArtifactCardPropsProvider => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -100,10 +102,12 @@ export const useArtifactCardPropsProvider = ({
     cardActionDeleteLabel,
   ]);
 
+  // Attached outside the memo above so a refresh does not change the identity of `actions`, which
+  // would re-mount the card's open actions menu
   return useCallback(
     (artifactItem: ExceptionListItemSchema) => {
-      return artifactCardPropsPerItem[artifactItem.id];
+      return { ...artifactCardPropsPerItem[artifactItem.id], dataUpdatedAt };
     },
-    [artifactCardPropsPerItem]
+    [artifactCardPropsPerItem, dataUpdatedAt]
   );
 };
