@@ -59,6 +59,9 @@ describe('selectWinner', () => {
       beats_baseline: true,
       tie: false,
       tied_indexes: [],
+      tied_target_ids: [],
+      tiebreak_index: -1,
+      tiebreak_target_id: null,
       rejected: [],
     });
     expect(result.reasons.join(' ')).toContain('p=0.01');
@@ -132,6 +135,8 @@ describe('selectWinner', () => {
       beats_baseline: false,
       tied_indexes: [0, 1],
       tied_target_ids: ['a', 'b'],
+      tiebreak_index: 0,
+      tiebreak_target_id: 'a',
     });
     expect(result.reasons[0]).toContain('a, b');
     expect(result.reasons[0]).not.toContain('c)');
@@ -154,7 +159,13 @@ describe('selectWinner', () => {
       )
     );
 
-    expect(result).toMatchObject({ winner_index: -1, tie: false, tied_indexes: [] });
+    expect(result).toMatchObject({
+      winner_index: -1,
+      tie: false,
+      tied_indexes: [],
+      tied_target_ids: [],
+      tiebreak_index: -1,
+    });
     expect(result.reasons[0]).toContain('no arm beats the baseline');
   });
 
@@ -175,7 +186,80 @@ describe('selectWinner', () => {
       )
     );
 
-    expect(result).toMatchObject({ winner_index: 0, winner_target_id: 'above', tie: false });
+    expect(result).toMatchObject({
+      winner_index: 0,
+      winner_target_id: 'above',
+      tie: false,
+      tied_indexes: [],
+      tied_target_ids: [],
+    });
+  });
+
+  it('breaks a tie toward the tied arm with the highest mean', () => {
+    const result = selectWinner(
+      build(
+        [
+          arm('a', [row({ evaluatorName: 'correctness', meanTarget: 0.78 }), ...codePass]),
+          arm('b', [row({ evaluatorName: 'correctness', meanTarget: 0.8 }), ...codePass]),
+          arm('c', [row({ evaluatorName: 'correctness', meanTarget: 0.6 }), ...codePass]),
+        ],
+        { min_delta: 0.05 }
+      )
+    );
+
+    expect(result).toMatchObject({
+      winner_index: -1,
+      tie: true,
+      tied_target_ids: ['a', 'b'],
+      tiebreak_index: 1,
+      tiebreak_target_id: 'b',
+    });
+  });
+
+  it('breaks an exact tie toward the lowest arm index', () => {
+    const result = selectWinner(
+      build([
+        arm('a', [row({ evaluatorName: 'correctness', meanTarget: 0.8 }), ...codePass]),
+        arm('b', [row({ evaluatorName: 'correctness', meanTarget: 0.8 }), ...codePass]),
+      ])
+    );
+
+    expect(result).toMatchObject({
+      tie: true,
+      tied_indexes: [0, 1],
+      tiebreak_index: 0,
+      tiebreak_target_id: 'a',
+    });
+  });
+
+  it('breaks a tie toward the lowest mean when the primary evaluator minimizes', () => {
+    const result = selectWinner(
+      build(
+        [
+          arm('a', [
+            row({
+              evaluatorName: 'correctness',
+              meanBaseline: 0.9,
+              meanTarget: 0.4,
+              direction: 'minimize',
+            }),
+            ...codePass,
+          ]),
+          arm('b', [
+            row({
+              evaluatorName: 'correctness',
+              meanBaseline: 0.9,
+              meanTarget: 0.38,
+              direction: 'minimize',
+            }),
+            ...codePass,
+          ]),
+        ],
+        { min_delta: 0.05 }
+      )
+    );
+
+    expect(result).toMatchObject({ tie: true, tiebreak_index: 1, tiebreak_target_id: 'b' });
   });
 
   it('returns no winner when nothing beats the baseline', () => {

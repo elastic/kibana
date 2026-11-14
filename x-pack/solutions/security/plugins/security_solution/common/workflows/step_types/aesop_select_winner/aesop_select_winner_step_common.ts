@@ -75,6 +75,16 @@ export const aesopSelectWinnerOutputSchema = lazySchema(() =>
       .array(z.number().int())
       .describe('Indexes into comparison.comparisons of the tied arms, empty when there is no tie'),
     tied_target_ids: z.array(z.string()).describe('Target ids of the tied arms'),
+    tiebreak_index: z
+      .number()
+      .int()
+      .describe(
+        'Index into comparison.comparisons of the tied arm with the best primary mean (lowest index on equal means), -1 when there is no tie'
+      ),
+    tiebreak_target_id: z
+      .string()
+      .nullable()
+      .describe('Target id of the tiebreak arm, null when there is no tie'),
     rejected: z.array(
       z.object({
         target_id: z.string(),
@@ -109,7 +119,7 @@ export const aesopSelectWinnerStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.aesopSelectWinner.documentation.details',
       {
         defaultMessage:
-          'Rejects every arm below 1 on a code evaluator, then ranks the rest by the primary evaluator. The best arm wins when its mean beats the baseline and the p-value is at or below alpha. When no p-value is available the best mean above the baseline is accepted and the reasons say so. Only arms that beat the baseline can win or tie. Arms within min_delta of the best are a tie: no winner is chosen and the tied arms are listed in tied_indexes and tied_target_ids so an analyst can pick one.',
+          'Rejects every arm below 1 on a code evaluator, then ranks the rest by the primary evaluator. The best arm wins when its mean beats the baseline and the p-value is at or below alpha. When no p-value is available the best mean above the baseline is accepted and the reasons say so. Only arms that beat the baseline can win or tie. Arms within min_delta of the best are a tie: no winner is chosen and the tied arms are listed in tied_indexes and tied_target_ids so an analyst can pick one. tiebreak_index names the tied arm with the best primary mean (the lowest index on equal means), the arm a tie approval deploys.',
       }
     ),
     examples: [

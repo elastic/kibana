@@ -23,6 +23,7 @@ interface PrimaryScore {
   index: number;
   meanBaseline: number;
   meanTarget: number;
+  minimize: boolean;
   improvement: number;
   pValue: number | null;
   sampleSize: number;
@@ -65,16 +66,30 @@ const scorePrimary = (arm: Arm, index: number, evaluator: string): PrimaryScore 
     index,
     meanBaseline,
     meanTarget,
+    minimize,
     improvement: minimize ? meanBaseline - meanTarget : meanTarget - meanBaseline,
     pValue: largest.pValue,
     sampleSize: rows.reduce((sum, row) => sum + row.sampleSize, 0),
   };
 };
 
+/**
+ * The tied arm with the best primary mean (lowest when the evaluator minimizes); equal means go to
+ * the lowest arm index, which keeps the pick deterministic.
+ */
+const pickTiebreak = (tied: PrimaryScore[]): PrimaryScore =>
+  tied.reduce((top, row) => {
+    const diff = row.minimize ? top.meanTarget - row.meanTarget : row.meanTarget - top.meanTarget;
+    if (diff > EPSILON) return row;
+    if (diff < -EPSILON) return top;
+    return row.index < top.index ? row : top;
+  });
+
 const noWinner = (
   rejected: Output['rejected'],
   reasons: string[],
-  tied: PrimaryScore[] = []
+  tied: PrimaryScore[] = [],
+  tiebreak: PrimaryScore | null = null
 ): Output => ({
   winner_index: -1,
   winner_target_id: null,
@@ -82,6 +97,8 @@ const noWinner = (
   tie: tied.length > 0,
   tied_indexes: tied.map(({ index }) => index),
   tied_target_ids: tied.map(({ target_id: id }) => id),
+  tiebreak_index: tiebreak?.index ?? -1,
+  tiebreak_target_id: tiebreak?.target_id ?? null,
   rejected,
   reasons,
 });
@@ -136,7 +153,8 @@ export const selectWinner = (input: Input): Output => {
           .map(({ target_id: id }) => id)
           .join(', ')})`,
       ],
-      tied
+      tied,
+      pickTiebreak(tied)
     );
   }
 
@@ -164,6 +182,8 @@ export const selectWinner = (input: Input): Output => {
     tie: false,
     tied_indexes: [],
     tied_target_ids: [],
+    tiebreak_index: -1,
+    tiebreak_target_id: null,
     rejected,
     reasons,
   };
