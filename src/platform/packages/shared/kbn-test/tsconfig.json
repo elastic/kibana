@@ -21,7 +21,7 @@
     "@kbn/jest-serializers",
     "@kbn/stdio-dev-helpers",
     "@kbn/test-docker-servers",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/test-saml-auth",
     "@kbn/code-owners",
     "@kbn/scout-reporting",

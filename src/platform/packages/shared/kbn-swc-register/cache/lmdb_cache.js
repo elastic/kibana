@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const Fs = require('fs');
 const Path = require('path');
 const Crypto = require('crypto');
 
@@ -19,6 +20,12 @@ const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
+const ATIME_REFRESH_INTERVAL = 7 * DAY;
+const ATIME_LIMIT = 30 * DAY;
+const DELETE_BATCH_SIZE = 10_000;
+const LAST_CLEAN_KEY = '@last clean';
+const CODE_KEY_PREFIX = 'code:';
+const MAP_KEY_PREFIX = 'map:';
 
 /** @typedef {import('./types').Cache} CacheInterface */
 /** @typedef {import('lmdb').Database<import('./types').CacheEntry, string>} Db */
@@ -32,11 +39,74 @@ const dbName = (db) =>
   db.name;
 
 /**
+ * @param {unknown} value
+ * @returns {value is import('./types').LegacyCacheEntry | import('./types').CodeCacheEntry}
+ */
+const isCacheCodeEntry = (value) => Array.isArray(value) && typeof value[0] === 'number';
+
+/**
+ * @param {string} key
+ */
+const getCodeKey = (key) => `${CODE_KEY_PREFIX}${key}`;
+
+/**
+ * @param {string} key
+ */
+const getMapKey = (key) => `${MAP_KEY_PREFIX}${key}`;
+
+/**
+ * @param {string} prefix
+ * @param {string} path
+ * @param {string} source
+ * @returns {string}
+ */
+const getHashCacheKey = (prefix, path, source) =>
+  `${prefix}:${Crypto.createHash('sha256').update(path).update(source).digest('hex')}`;
+
+/**
+ * @param {bigint | number} value
+ * @returns {string | undefined}
+ */
+const getStatValue = (value) => {
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+
+  return Number.isFinite(value) ? String(value) : undefined;
+};
+
+/**
+ * @param {string} prefix
+ * @param {string} path
+ * @returns {string | undefined}
+ */
+const getMetadataCacheKey = (prefix, path) => {
+  let stat;
+  try {
+    stat = Fs.statSync(path, { bigint: true });
+  } catch {
+    return undefined;
+  }
+
+  const keyParts = [stat.dev, stat.ino, stat.mode, stat.size, stat.mtimeNs, stat.ctimeNs].map(
+    getStatValue
+  );
+
+  if (keyParts.some((part) => part === undefined)) {
+    return undefined;
+  }
+
+  return `${prefix}:stat:${keyParts.join(':')}:${Path.resolve(path)}`;
+};
+
+/**
  * @implements {CacheInterface}
  */
 class LmdbCache {
   /** @type {import('lmdb').RootDatabase<import('./types').CacheEntry, string>} */
   #db;
+  /** @type {boolean} */
+  #closed = false;
   /** @type {import('stream').Writable | undefined} */
   #log;
   /** @type {string} */
@@ -59,22 +129,22 @@ class LmdbCache {
       encoding: 'json',
       keyEncoder: utf8StringKeyEncoder,
     };
-    this.#db = LmdbStore.open(Path.resolve(config.dir, 'v6'), databaseOptions);
+    this.#db = LmdbStore.open(Path.resolve(config.dir, 'v2'), databaseOptions);
 
-    const lastClean = this.#db.get('@last clean');
-    if (!lastClean || lastClean[0] < GLOBAL_ATIME - 7 * DAY) {
+    const lastClean = this.#db.get(LAST_CLEAN_KEY);
+    if (!isCacheCodeEntry(lastClean) || lastClean[0] < GLOBAL_ATIME - 7 * DAY) {
       try {
         this.#pruneOldKeys();
       } catch (error) {
         process.stderr.write(`
-Failed to cleanup @kbn/babel-register cache:
+Failed to cleanup @kbn/swc-register cache:
 
   ${error.stack.split('\n').join('\n  ')}
 
 To eliminate this problem you may want to delete the "${Path.relative(process.cwd(), config.dir)}"
 directory and report this error to the Operations team.\n`);
       } finally {
-        this.#db.putSync('@last clean', [GLOBAL_ATIME, '', {}]);
+        this.#db.putSync(LAST_CLEAN_KEY, [GLOBAL_ATIME, '']);
       }
     }
   }
@@ -86,7 +156,7 @@ directory and report this error to the Operations team.\n`);
    * @returns {string}
    */
   getKey(path, source) {
-    return `${this.#prefix}:${Crypto.createHash('sha1').update(path).update(source).digest('hex')}`;
+    return getMetadataCacheKey(this.#prefix, path) ?? getHashCacheKey(this.#prefix, path, source);
   }
 
   /**
@@ -94,16 +164,17 @@ directory and report this error to the Operations team.\n`);
    * @returns {string|undefined}
    */
   getCode(key) {
-    const entry = this.#safeGet(this.#db, key);
+    const entry = this.#safeGet(this.#db, getCodeKey(key));
 
-    if (entry !== undefined && entry[0] !== GLOBAL_ATIME) {
-      // when we use a file from the cache set the "atime" of that cache entry
-      // so that we know which cache items we use and which haven't been
-      // used in a long time (currently 30 days)
-      this.#safePut(this.#db, key, [GLOBAL_ATIME, entry[1], entry[2]]);
+    if (!isCacheCodeEntry(entry)) {
+      return undefined;
     }
 
-    return entry?.[1];
+    if (entry[0] < GLOBAL_ATIME - ATIME_REFRESH_INTERVAL) {
+      this.#safePutAsync(this.#db, getCodeKey(key), [GLOBAL_ATIME, entry[1]]);
+    }
+
+    return entry[1];
   }
 
   /**
@@ -111,18 +182,47 @@ directory and report this error to the Operations team.\n`);
    * @returns {object|undefined}
    */
   getSourceMap(key) {
-    const entry = this.#safeGet(this.#db, key);
-    if (entry) {
-      return entry[2];
-    }
+    const entry = this.#safeGet(this.#db, getMapKey(key));
+    return entry && !Array.isArray(entry) ? entry : undefined;
   }
 
   /**
    * @param {string} key
-   * @param {{ code: string, map: object }} entry
+   * @param {{ code: string, map?: object | null }} entry
+   * @returns {Promise<void>}
    */
-  async update(key, entry) {
-    this.#safePut(this.#db, key, [GLOBAL_ATIME, entry.code, entry.map]);
+  update(key, entry) {
+    const writes = [this.#safePutAsync(this.#db, getCodeKey(key), [GLOBAL_ATIME, entry.code])];
+
+    if (entry.map) {
+      writes.push(this.#safePutAsync(this.#db, getMapKey(key), entry.map));
+    }
+
+    return Promise.all(writes).then(() => undefined);
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  close() {
+    if (this.#closed) {
+      return Promise.resolve();
+    }
+
+    this.#closed = true;
+    const db = this.#db;
+
+    try {
+      return Promise.resolve(db.close()).then(
+        () => undefined,
+        (error) => {
+          this.#logError('CLOSE', db, '', error);
+        }
+      );
+    } catch (error) {
+      this.#logError('CLOSE', db, '', error);
+      return Promise.resolve();
+    }
   }
 
   /**
@@ -136,7 +236,6 @@ directory and report this error to the Operations team.\n`);
       return value;
     } catch (error) {
       if (error.message.includes('No transaction to renew')) {
-        // this happens on errors very early in the process
         return undefined;
       }
 
@@ -149,12 +248,19 @@ directory and report this error to the Operations team.\n`);
    * @param {string} key
    * @param {import('./types').CacheEntry} value
    */
-  #safePut(db, key, value) {
+  #safePutAsync(db, key, value) {
     try {
-      db.putSync(key, value);
-      this.#debug('PUT', db, key);
+      return Promise.resolve(db.put(key, value)).then(
+        () => {
+          this.#debug('PUT', db, key);
+        },
+        (error) => {
+          this.#logError('PUT', db, key, error);
+        }
+      );
     } catch (error) {
       this.#logError('PUT', db, key, error);
+      return Promise.resolve();
     }
   }
 
@@ -168,7 +274,7 @@ directory and report this error to the Operations team.\n`);
   }
 
   /**
-   * @param {'GET' | 'PUT'} type
+   * @param {'GET' | 'PUT' | 'CLOSE'} type
    * @param {Db} db
    * @param {string} key
    * @param {Error} error
@@ -177,13 +283,13 @@ directory and report this error to the Operations team.\n`);
     this.#debug(`ERROR/${type}`, db, `${String(key)}: ${error.stack}`);
     process.stderr.write(
       chalk.red(
-        `[@kbn/optimizer/node] ${type} error [${dbName(db)}/${String(key)}]: ${error.stack}\n`
+        `[@kbn/swc-register] ${type} error [${dbName(db)}/${String(key)}]: ${error.stack}\n`
       )
     );
   }
 
   #pruneOldKeys() {
-    const ATIME_LIMIT = Date.now() - 30 * DAY;
+    const atimeLimit = Date.now() - ATIME_LIMIT;
 
     /** @type {string[]} */
     const toDelete = [];
@@ -197,22 +303,31 @@ directory and report this error to the Operations team.\n`);
           this.#db.removeSync(key);
         }
       });
+      toDelete.length = 0;
     };
 
     for (const { key, value } of this.#db.getRange()) {
-      if (Number.isNaN(value[0]) || value[0] < ATIME_LIMIT) {
+      if (key === LAST_CLEAN_KEY || key.startsWith(MAP_KEY_PREFIX)) {
+        continue;
+      }
+
+      if (!isCacheCodeEntry(value) || Number.isNaN(value[0]) || value[0] < atimeLimit) {
         toDelete.push(key);
 
-        // flush deletes early if there are many deleted
-        if (toDelete.length > 10_000) {
+        if (key.startsWith(CODE_KEY_PREFIX)) {
+          toDelete.push(getMapKey(key.slice(CODE_KEY_PREFIX.length)));
+        }
+
+        if (toDelete.length > DELETE_BATCH_SIZE) {
           flushDeletes();
         }
       }
     }
 
-    // delete all the old keys
     flushDeletes();
   }
 }
 
-exports.LmdbCache = LmdbCache;
+module.exports = {
+  LmdbCache,
+};

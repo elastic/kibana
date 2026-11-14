@@ -25,7 +25,7 @@ import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
 import { getPlaywrightLimitOptions } from '../tags';
-import { execFilePromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
+import { execFilePromise, getPlaywrightGrepTag, withKibanaSwcRegister } from '../utils';
 import type { RunTestsOptions } from './flags';
 
 export const getPlaywrightProject = (
@@ -67,7 +67,7 @@ async function runPlaywrightTest(
     cmd,
     args,
     cwd: resolve(REPO_ROOT),
-    env: withKibanaBabelRegister({
+    env: withKibanaSwcRegister({
       ...process.env,
       ...env,
     }),
@@ -84,7 +84,7 @@ export async function hasTestsInPlaywrightConfig(
   log.info(`scout: Validate Playwright config has tests`);
   try {
     const result = await execFilePromise(cmd, [...cmdArgs, '--list'], {
-      env: withKibanaBabelRegister({
+      env: withKibanaSwcRegister({
         ...process.env,
         SCOUT_REPORTER_ENABLED: 'false',
       }) as NodeJS.ProcessEnv,
