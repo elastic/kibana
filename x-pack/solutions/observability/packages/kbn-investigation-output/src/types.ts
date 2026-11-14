@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
-
 /**
  * Where an investigation is, from the point of view of a consumer rendering it:
  * - `loading` — the first read has not returned yet.
@@ -15,11 +13,3 @@ import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
  * - `unavailable` — it could not be read (for example missing privileges, or it does not exist).
  */
 export type InvestigationStatus = 'loading' | 'running' | 'complete' | 'unavailable';
-
-export interface InvestigationOutputProps {
-  status: InvestigationStatus;
-  /** The investigation from the shared investigations API, once read. */
-  investigation?: Investigation;
-  /** Detail message for the `unavailable` status. */
-  error?: string;
-}

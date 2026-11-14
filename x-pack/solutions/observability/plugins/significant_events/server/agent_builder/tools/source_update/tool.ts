@@ -65,7 +65,7 @@ export const createSourceUpdateTool = ({
   id: NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Change a Nightshift source of the current space. Pass only the fields to change: omitted fields
+    Change a nightshift source of the current space. Pass only the fields to change: omitted fields
     keep their current value. At least one field to change is required.
 
     A new query is validated and run as the current user, so the user needs read access to the
@@ -143,12 +143,12 @@ export const createSourceUpdateTool = ({
   availability: createSignificantEventsAvailability({
     server,
     logger,
-    requireManagePrivilege: true,
+    requireSourceChangePrivilege: true,
   }),
   handler: async ({ source: slugOrId, enabled, ...changes }, { request }) =>
     runSourceTool({
       action: 'update source',
-      privilege: 'manage',
+      privilege: 'changeSources',
       request,
       getScopedClients,
       server,

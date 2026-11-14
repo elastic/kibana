@@ -6,6 +6,7 @@
  */
 
 import { filter, map, tap, defer } from 'rxjs';
+import type { ToolChoice } from '@aws-sdk/client-bedrock-runtime';
 import type { Message } from '@kbn/inference-common';
 import { MessageRole, createInferenceInternalError, ToolChoiceType } from '@kbn/inference-common';
 import { toUtf8 } from '@smithy/util-utf8';
@@ -27,6 +28,7 @@ import { processConverseResponse } from './process_converse_response';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { resolveToolChoice } from '../../utils/forced_tool_choice';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -37,6 +39,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     tools,
     temperature = 0,
     modelName,
+    logger,
     abortSignal,
     metadata,
     timeout,
@@ -59,18 +62,27 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     const bedRockTools =
       noToolUsage && !hasToolUseMessages ? [] : toolsToConverseBedrock(tools, messages);
     const connector = executor.getConnector();
+    let actionToolChoice: ToolChoice | undefined;
+    if (noToolUsage && bedRockTools?.length) {
+      // Bedrock/Claude does not support a true "none" tool choice. If we include tool config
+      // (e.g. because the conversation contains tool use/result messages), we must still send a
+      // valid Bedrock toolChoice. The system directive prevents new tool usage in that case.
+      actionToolChoice = toolChoiceToConverse(ToolChoiceType.auto);
+    } else {
+      actionToolChoice = toolChoiceToConverse(
+        resolveToolChoice({
+          toolChoice,
+          modelId: modelName ?? connector.config?.defaultModel,
+          logger,
+        })
+      );
+    }
 
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
       tools: bedRockTools?.length ? bedRockTools : undefined,
-      // Bedrock/Claude does not support a true "none" tool choice. If we include tool config
-      // (e.g. because the conversation contains tool use/result messages), we must still send a
-      // valid Bedrock toolChoice. The system directive prevents new tool usage in that case.
-      toolChoice:
-        noToolUsage && bedRockTools?.length
-          ? toolChoiceToConverse(ToolChoiceType.auto)
-          : toolChoiceToConverse(toolChoice),
+      toolChoice: actionToolChoice,
       ...getTemperatureIfValid(temperature, { connector, modelName }),
       model: modelName,
       stopSequences: ['\n\nHuman:'],

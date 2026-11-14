@@ -13,17 +13,20 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { resumeSyncParentIfNeeded } from '../execution_functions/resume_sync_parent_if_needed';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowTaskRunAs } from '../service_account_execution';
 import type { InternalResumeWorkflowExecution } from '../types';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
  * When concurrency defers an execution to `queued`, schedule a dormant `workflow:run` task
  * using the trigger user's request so promotion can `runSoon` without privilege escalation.
+ * A promotion that already moved it to `pending` still gets that task when none exists yet.
  */
 export async function maybeScheduleDormantQueuedRunIfNeeded({
   workflowExecutionId,
   spaceId,
   request,
+  runAs,
   workflowExecutionRepository,
   workflowTaskManager,
   logger,
@@ -31,6 +34,7 @@ export async function maybeScheduleDormantQueuedRunIfNeeded({
   workflowExecutionId: string;
   spaceId: string;
   request: KibanaRequest;
+  runAs?: WorkflowTaskRunAs;
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
@@ -40,20 +44,33 @@ export async function maybeScheduleDormantQueuedRunIfNeeded({
     spaceId
   );
 
-  if (!execution || execution.status !== ExecutionStatus.QUEUED) {
-    return;
-  }
-
-  const concurrency = execution.workflowDefinition?.settings?.concurrency;
-  if (concurrency?.strategy !== 'queue') {
+  if (
+    !execution ||
+    execution.workflowDefinition?.settings?.concurrency?.strategy !== 'queue' ||
+    (execution.status !== ExecutionStatus.QUEUED && execution.status !== ExecutionStatus.PENDING)
+  ) {
     return;
   }
 
   try {
+    if (execution.status === ExecutionStatus.PENDING) {
+      if (!execution.id || (await workflowTaskManager.hasActiveTaskForExecution(execution.id))) {
+        return;
+      }
+    }
+
     await workflowTaskManager.scheduleDormantQueuedRunTask({
       workflowExecution: execution,
       request,
+      runAs,
     });
+
+    if (execution.status === ExecutionStatus.PENDING && execution.id) {
+      await workflowTaskManager.promoteQueuedRunTask({
+        executionId: execution.id,
+        triggeredBy: execution.triggeredBy || 'manual',
+      });
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logger.warn(
@@ -75,6 +92,7 @@ export async function handleConcurrencyBlockedExecution({
   workflowExecutionId,
   spaceId,
   request,
+  runAs,
   workflowExecutionRepository,
   stepExecutionRepository,
   workflowTaskManager,
@@ -84,6 +102,7 @@ export async function handleConcurrencyBlockedExecution({
   workflowExecutionId: string;
   spaceId: string;
   request: KibanaRequest;
+  runAs?: WorkflowTaskRunAs;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository?: StepExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
@@ -99,11 +118,12 @@ export async function handleConcurrencyBlockedExecution({
     return;
   }
 
-  if (execution.status === ExecutionStatus.QUEUED) {
+  if (execution.status === ExecutionStatus.QUEUED || execution.status === ExecutionStatus.PENDING) {
     await maybeScheduleDormantQueuedRunIfNeeded({
       workflowExecutionId,
       spaceId,
       request,
+      runAs,
       workflowExecutionRepository,
       workflowTaskManager,
       logger,

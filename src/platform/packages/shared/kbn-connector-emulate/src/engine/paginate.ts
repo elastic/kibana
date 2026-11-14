@@ -8,12 +8,19 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { cloneDeep, get, unset } from 'lodash';
+import { cloneDeep, get, isEqual, maxBy, omit, toPath, unset } from 'lodash';
 import type { ContractRequest, ContractResponse, Responder } from '../contract/types';
 import { isRecord } from '../openapi/schema_walk';
-import { MOCK_PAGE_PARAM } from '../openapi/validate_request';
+import { MOCK_PAGE_PARAM } from '../openapi/read_parameters';
 import type { ContractOperation } from '../openapi/types';
-import type { OperationRef, RecordedExchange, StoredResponse } from './response_engine';
+import type { RequestMatcher } from './request_match';
+import { countConditions, matchesRequest } from './request_match';
+import type {
+  OperationRef,
+  RecordedExchange,
+  ResponseEngine,
+  StoredResponse,
+} from './response_engine';
 import { createOperationIndex } from './response_engine';
 
 /** How a cursor-paginated response says there are no more pages. */
@@ -121,6 +128,12 @@ interface RecordedCollection {
   readonly positions: ReadonlyMap<string, number>;
   /** The recorded cursor for each position, issued instead of the mock's own. */
   readonly cursors: ReadonlyMap<number, string>;
+}
+
+/** A recorded collection, and the requests it answers: its recordings' non-paging values. */
+interface ScopedCollection {
+  readonly scope: RequestMatcher;
+  readonly recorded: RecordedCollection;
 }
 
 type RequestParameters = Pick<ContractRequest, 'query' | 'headers' | 'body'>;
@@ -375,6 +388,87 @@ const readRecordedCollection = (
   };
 };
 
+const pagingParameters = (pagination: PaginationDescriptor): string[] => {
+  const request = requestOf(pagination);
+  const selector =
+    'cursorParam' in request
+      ? request.cursorParam
+      : 'offsetParam' in request
+      ? request.offsetParam
+      : request.pageParam;
+  return request.sizeParam === undefined ? [selector] : [selector, request.sizeParam];
+};
+
+// Removes a body parameter and the objects it leaves empty, so a body that only sends `page` for
+// its `page.cursor` compares equal to one that doesn't send `page` at all.
+const removeBodyParameter = (body: object, name: string) => {
+  unset(body, name);
+  const parents = toPath(name).slice(0, -1);
+  for (let depth = parents.length; depth > 0; depth--) {
+    const parent = parents.slice(0, depth);
+    const value = get(body, parent);
+    if (!isRecord(value) || Object.keys(value).length > 0) {
+      return;
+    }
+    unset(body, parent);
+  }
+};
+
+// What sets a recording's collection apart from the operation's others: its path parameters, and
+// its query and body without the parameters that select a page.
+const toRecordedScope = (
+  pagination: PaginationDescriptor,
+  { request: { pathParameters = {}, query = {}, body } = {} }: RecordedExchange
+): RequestMatcher => {
+  const names = pagingParameters(pagination);
+  const location = parameterLocation(pagination);
+  const scopedQuery = location === 'query' ? omit(query, names) : query;
+  const scopedBody = location === 'body' && isRecord(body) ? cloneDeep(body) : body;
+  if (location === 'body' && isRecord(scopedBody)) {
+    names.forEach((name) => removeBodyParameter(scopedBody, name));
+  }
+  const hasBody =
+    scopedBody !== undefined && !(isRecord(scopedBody) && Object.keys(scopedBody).length === 0);
+  return {
+    ...(Object.keys(pathParameters).length > 0 ? { path: pathParameters } : {}),
+    ...(Object.keys(scopedQuery).length > 0 ? { query: scopedQuery } : {}),
+    ...(hasBody ? { body: scopedBody } : {}),
+  };
+};
+
+const readRecordedCollections = (
+  pagination: PaginationDescriptor,
+  exchanges: readonly RecordedExchange[]
+): ScopedCollection[] => {
+  const groups: Array<{ scope: RequestMatcher; exchanges: RecordedExchange[] }> = [];
+  for (const exchange of exchanges) {
+    const scope = toRecordedScope(pagination, exchange);
+    const group = groups.find((candidate) => isEqual(candidate.scope, scope));
+    if (group) {
+      group.exchanges.push(exchange);
+    } else {
+      groups.push({ scope, exchanges: [exchange] });
+    }
+  }
+  return groups.flatMap(({ scope, exchanges: own }) => {
+    const recorded = readRecordedCollection(pagination, own);
+    return recorded ? [{ scope, recorded }] : [];
+  });
+};
+
+// The most specific collection whose scope the request meets, else the operation's first, as
+// with the recording a request gets.
+const selectCollection = (
+  collections: readonly ScopedCollection[],
+  request: ContractRequest
+): RecordedCollection | undefined =>
+  (
+    maxBy(
+      collections.filter(({ scope }) => matchesRequest(scope, request)),
+      ({ scope }) => countConditions(scope)
+    ) ?? collections[0]
+  )?.recorded;
+
 const BAD_CURSOR: ContractResponse = {
   statusCode: 400,
   headers: { 'content-type': 'application/json' },
@@ -471,12 +565,12 @@ const paginate = (
 };
 
 /**
- * Wraps a responder so paginated operations serve pages of a virtual collection: the recorded
- * pages joined, or copies of the first item of the response the responder would give. Pages are
- * selected by the request's cursor, offset or page number and page size, read from its query,
- * body or headers; the next page is signalled by a cursor, a `Link` header or a next-page URL in
- * the body. Cursors are opaque positions or recorded vendor cursors; others get 400, as a vendor
- * would answer.
+ * Wraps a responder so paginated operations serve pages of a virtual collection: the pages
+ * recorded for the request's non-paging values joined, or copies of the first item of the response
+ * the responder would give. Fixtures are served as written. Pages are selected by the request's
+ * cursor, offset or page number and page size, read from its query, body or headers; the next page
+ * is signalled by a cursor, a `Link` header or a next-page URL in the body. Cursors are opaque
+ * positions or recorded vendor cursors; others get 400, as a vendor would answer.
  */
 export const withPagination = (
   operations: readonly ContractOperation[],
@@ -484,23 +578,46 @@ export const withPagination = (
     pagination = [],
     collectionSize,
     recordedExchanges = () => [],
-  }: PaginationOptions & {
-    readonly recordedExchanges?: (operation: ContractOperation) => readonly RecordedExchange[];
-  },
+    servedFrom = () => undefined,
+  }: PaginationOptions & Partial<Pick<ResponseEngine, 'recordedExchanges' | 'servedFrom'>>,
   respond: Responder
 ): Responder => {
   const findOperations = createOperationIndex(operations);
   const paginated = new Map(
     pagination.flatMap((entry) =>
-      findOperations(entry.operation).map((operation) => {
-        const recorded = readRecordedCollection(entry.pagination, recordedExchanges(operation));
-        return [operation, { pagination: entry.pagination, collectionSize, recorded }] as const;
-      })
+      findOperations(entry.operation).map(
+        (operation) =>
+          [
+            operation,
+            {
+              pagination: entry.pagination,
+              collections: readRecordedCollections(entry.pagination, recordedExchanges(operation)),
+            },
+          ] as const
+      )
     )
   );
-  return (operation, request) => {
-    const response = respond(operation, request);
-    const options = paginated.get(operation);
-    return options && response.statusCode < 300 ? paginate(options, request, response) : response;
+  return async (operation, request, context) => {
+    const origin = servedFrom(operation, request);
+    const response = await respond(operation, request, context);
+    const entry = paginated.get(operation);
+    if (
+      !entry ||
+      response.statusCode >= 300 ||
+      origin === 'fixture' ||
+      origin === 'runtime-fixture'
+    ) {
+      return response;
+    }
+    const { pagination: descriptor, collections } = entry;
+    return paginate(
+      {
+        pagination: descriptor,
+        collectionSize,
+        recorded: selectCollection(collections, request),
+      },
+      request,
+      response
+    );
   };
 };

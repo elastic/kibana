@@ -63,7 +63,7 @@ pivot:
     #     security: ">security-breaking"
     #     other:
     # Simple string form: labels as comma-separated string
-    bug-fix: 'release_note:fix, release_note:bug'
+    bug-fix: 'release_note:fix'
     deprecation: 'release_note:deprecation'
     feature: 'release_note:feature'
     enhancement: 'release_note:enhancement'
@@ -250,7 +250,6 @@ pivot:
       - 'Feature:Streams'
       - 'Feature:Metrics in Discover'
       - 'Team:obs-presentation'
-      - 'Team:obs-onboarding'
       - 'Team:obs-ux-management'
       - 'Team:actionable-obs'
       - 'Team:obs-ai - DEPRECATED'

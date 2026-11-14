@@ -25,11 +25,8 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  ErrorCallout,
-  SHOW_FIELD_STATISTICS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { ErrorCallout } from '@kbn/discover-utils/components';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -59,6 +56,8 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { EsqlErrorHelp } from '../../../../components/common/esql_error_help';
+import { useHasEnterpriseLicense } from '../../../../components/common/use_has_enterprise_license';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
@@ -102,11 +101,13 @@ export function DiscoverLayout() {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
+    licensing,
   } = useDiscoverServices();
   const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
@@ -415,6 +416,37 @@ export function DiscoverLayout() {
     return `${TABS_BAR_HEIGHT + 1}px`;
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
+  const hasEnterpriseLicense = useHasEnterpriseLicense(licensing);
+  const connectorsUrl = core.application.capabilities.management?.insightsAndAlerting
+    ?.triggersActionsConnectors
+    ? core.application.getUrlForApp('management', {
+        deepLinkId: 'triggersActionsConnectors',
+        path: '/connectors',
+      })
+    : undefined;
+  const errorAiHelp =
+    dataState.error && isEsqlMode && isOfAggregateQueryType(query) && hasEnterpriseLicense ? (
+      <EsqlErrorHelp
+        http={core.http}
+        query={query.esql}
+        errorMessage={dataState.error.message}
+        connectorsUrl={connectorsUrl}
+        onApplyQuery={(esql) => dispatch(updateESQLQuery({ queryOrUpdater: esql }))}
+      />
+    ) : undefined;
+  const errorCallout = dataState.error ? (
+    <ErrorCallout
+      title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+        defaultMessage: 'Unable to retrieve search results',
+      })}
+      error={dataState.error}
+      isEsqlMode={isEsqlMode}
+      showErrorDialog={({ title, error }) => core.notifications.showErrorDialog({ title, error })}
+      esqlReferenceHref={docLinks.links.query.queryESQL}
+      aiHelp={errorAiHelp}
+    />
+  ) : undefined;
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -480,20 +512,11 @@ export function DiscoverLayout() {
                       <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
-                          }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                        showErrorDialog={({ title, error }) =>
-                          core.notifications.showErrorDialog({ title, error })
-                        }
-                        esqlReferenceHref={docLinks.links.query.queryESQL}
-                      />
+                      errorAiHelp ? (
+                        <div css={styles.errorContainer}>{errorCallout}</div>
+                      ) : (
+                        errorCallout
+                      )
                     ) : (
                       <DiscoverNoResults
                         isTimeBased={isTimeBased}
@@ -560,6 +583,11 @@ const componentStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+  }),
+  errorContainer: css({
+    overflowY: 'auto',
+    flex: '1 1 auto',
+    minHeight: 0,
   }),
   dscPageContent: css({
     position: 'relative',

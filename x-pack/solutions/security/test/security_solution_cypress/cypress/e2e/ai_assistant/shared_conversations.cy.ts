@@ -7,7 +7,7 @@
 
 import type { Message, MessageRole } from '@kbn/elastic-assistant-common';
 import { closeToast } from '../../tasks/common/toast';
-import { IS_SERVERLESS } from '../../env_var_names_constants';
+import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../../env_var_names_constants';
 import {
   assertCalloutState,
   assertConversationTitle,
@@ -44,7 +44,7 @@ import {
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
-import { getFullname, getUsername } from '../../tasks/common';
+import { getMessageAuthorName, getUsername } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
@@ -52,10 +52,14 @@ const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
 describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
-  // The secondary identity comes from the same authentication mechanism as the primary one: a
-  // mock IdP SAML session in serverless, basic auth in ESS. Both roles hold every Kibana
-  // application privilege, which the share modal requires of the users it suggests.
-  const secondaryRole = isServerless ? 'system_indices_superuser' : 'elastic';
+  const isCloudServerless = Cypress.env(CLOUD_SERVERLESS);
+  // Local serverless uses the mock IdP, where system_indices_superuser exists. MKI only has the
+  // vault org users, and platform_engineer holds the assistant privilege the share modal suggests.
+  const secondaryRole = isCloudServerless
+    ? 'platform_engineer'
+    : isServerless
+    ? 'system_indices_superuser'
+    : 'elastic';
   let primaryUser: string;
   let secondaryUser: string;
   let secondaryUserFullName: string;
@@ -350,9 +354,10 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
 
 // In ESS the secondary user logs in with basic auth, where the user name is the role name
 // itself. In serverless the mock IdP derives both the user name and the full name from the role,
-// and the user name is a hash rather than the role name.
+// and the user name is a hash rather than the role name. The message header shows the full name,
+// or the username when the profile has none. It does not show the email.
 const getSecondaryUsername = (isServerless: boolean, role: string) =>
   isServerless ? getUsername(role) : cy.wrap(role);
 
 const getSecondaryFullName = (isServerless: boolean, role: string) =>
-  isServerless ? getFullname(role) : cy.wrap(role);
+  isServerless ? getMessageAuthorName(role) : cy.wrap(role);

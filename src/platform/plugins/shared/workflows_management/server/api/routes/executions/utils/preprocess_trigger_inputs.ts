@@ -8,13 +8,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { TriggerSelectionKind } from './parse_trigger_selections';
 import { preprocessAlertInputs } from './preprocess_alert_inputs';
 import { preprocessDocumentInputs } from './preprocess_document_inputs';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
-
-/** The compact selections the server knows how to expand, named after their `event` key. */
-export type TriggerSelectionKind = 'alertIds' | 'documentIds';
 
 export const ALL_TRIGGER_SELECTION_KINDS: readonly TriggerSelectionKind[] = [
   'alertIds',

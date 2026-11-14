@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { emitPipeline, getPipeline } from '#pipeline-utils';
+import { BuildkiteClient, emitPipeline, getPipeline } from '#pipeline-utils';
 
 const BUMP_TYPE = process.env.WORKFLOW;
 
@@ -18,9 +18,43 @@ if (!BUMP_TYPE) {
   process.exit(1);
 }
 
+// The centralized release workflow is sometimes re-triggered while an earlier bump for the same
+// version is still running; two builds then race on the same branches and PRs. The oldest build
+// wins, so retrying a step in it is never blocked by a newer duplicate.
+const assertNoConcurrentBump = async () => {
+  const { BUILDKITE_PIPELINE_SLUG, BUILDKITE_BUILD_NUMBER, NEW_VERSION, DRY_RUN } = process.env;
+  if (DRY_RUN === 'true' || !BUILDKITE_PIPELINE_SLUG || !BUILDKITE_BUILD_NUMBER || !NEW_VERSION) {
+    return;
+  }
+
+  let builds;
+  try {
+    builds = await new BuildkiteClient().getInProgressBuilds(BUILDKITE_PIPELINE_SLUG);
+  } catch (ex) {
+    // The check is a guard, not a prerequisite: don't fail the bump when Buildkite's API is unavailable.
+    console.warn(`Skipping concurrent version bump check: ${ex.message}`);
+    return;
+  }
+
+  const currentBuildNumber = Number(BUILDKITE_BUILD_NUMBER);
+  const olderDuplicate = builds.find(
+    ({ number, env }) =>
+      number < currentBuildNumber && env.NEW_VERSION === NEW_VERSION && env.DRY_RUN !== 'true'
+  );
+
+  if (olderDuplicate) {
+    throw new Error(
+      `build #${olderDuplicate.number} is already bumping to ${NEW_VERSION}: ${olderDuplicate.web_url}. ` +
+        'Let it finish (or cancel it) before starting another bump for this version.'
+    );
+  }
+};
+
 (async () => {
   const pipeline: string[] = [];
   try {
+    await assertNoConcurrentBump();
+
     if (BUMP_TYPE === 'patch') {
       // Step 1: Trigger ES build and promote (synchronous)
       pipeline.push(
@@ -82,7 +116,7 @@ if (!BUMP_TYPE) {
 
       // Step 6: Wait, then bump main's package.json to the next dev version. This runs
       // after release-branch setup is complete so update_release_branch is not coupled to
-      // the PR-merge wait inside bump_package_json_versions_to_main (up to 60 minutes).
+      // the PR-merge wait inside bump_package_json_versions_to_main (up to 2 hours).
       pipeline.push('  - wait # before package.json bump on main');
       pipeline.push(
         getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions_to_main.yml')

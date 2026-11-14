@@ -17,6 +17,7 @@ import {
   ExecutionTypeValues,
   type LayoutDirection,
 } from '@kbn/workflows';
+import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import {
   getStoredEditorView,
   getStoredGraphDirection,
@@ -41,6 +42,7 @@ export interface WorkflowUrlState {
   executionStatuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   /** Row to highlight after the detail flyout closes. */
   lastViewedExecutionId?: string;
 }
@@ -146,10 +148,12 @@ export function useWorkflowUrlState() {
       statuses: ExecutionStatus[];
       executionTypes: ExecutionType[];
       executedBy: string[];
+      runName?: string;
     };
     lastViewedExecutionId: string | undefined;
   } => {
     const params = queryString.parse(location.search);
+    const runName = firstString(params.runName);
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       view:
@@ -178,6 +182,8 @@ export function useWorkflowUrlState() {
           ExecutionTypeValues
         ),
         executedBy: stringList(params.executedBy),
+        runName:
+          runName && runName.length <= WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH ? runName : undefined,
       },
       lastViewedExecutionId: boundedToken(firstString(params.lastViewedExecutionId)),
     };
@@ -313,6 +319,25 @@ export function useWorkflowUrlState() {
     [updateUrlState]
   );
 
+  /**
+   * Selects a run started from the editor. It opens on the workflow tab, so the draft stays
+   * editable for the next edit, even when the execution list was open.
+   */
+  const selectEditorRun = useCallback<WorkflowUrlSelectionSetter>(
+    (executionId, options = {}) => {
+      updateUrlState(
+        {
+          executionId: executionId || undefined,
+          stepExecutionId: undefined,
+          stepId: undefined,
+          tab: 'workflow',
+        },
+        { replace: false, ...options }
+      );
+    },
+    [updateUrlState]
+  );
+
   const setSelectedStepExecution = useCallback<WorkflowUrlSelectionSetter>(
     (stepExecutionId, options = {}) => {
       updateUrlState(
@@ -373,6 +398,9 @@ export function useWorkflowUrlState() {
   return {
     // Current state
     activeTab: urlState.tab,
+    // The Executions tab alone only opens the list. The editor shows a run snapshot only once a
+    // run is selected too.
+    isViewingExecution: urlState.tab === 'executions' && Boolean(urlState.executionId),
     editorView: urlState.view,
     graphDirection: urlState.direction,
     selectedExecutionId: urlState.executionId,
@@ -389,6 +417,7 @@ export function useWorkflowUrlState() {
     setEditorView,
     setGraphDirection,
     setSelectedExecution,
+    selectEditorRun,
     setSelectedStepExecution,
     setSelectedStep,
     updateUrlState,

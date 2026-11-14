@@ -113,7 +113,7 @@ export interface ConversationPublicClient {
   patchMetadata(
     conversationId: string,
     updates: Record<string, MetadataFieldValue>,
-    options?: { access?: 'owner' | 'converse' }
+    options?: { access?: 'owner' | 'converse'; refresh?: 'wait_for' }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   /**
    * Update the conversation's title. Requires the caller to be the conversation owner.

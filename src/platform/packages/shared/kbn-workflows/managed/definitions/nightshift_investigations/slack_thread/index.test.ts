@@ -151,8 +151,11 @@ describe('Nightshift Slack thread workflow', () => {
       type: 'workflow.execute',
       with: {
         'workflow-id': NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+        // The global investigation runs as the account this workflow is bound to.
+        'run-as-mode': 'inherit',
         inputs: {
           investigation_id: '{{ steps.find_investigation.output.investigation_id }}',
+          context: { entry_point: 'slack' },
         },
       },
     });
