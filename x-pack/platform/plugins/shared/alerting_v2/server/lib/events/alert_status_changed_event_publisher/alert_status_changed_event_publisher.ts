@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
+import { isFunction } from 'lodash';
 import type { AlertStatusChangedTriggerPayload } from '../../../../common/workflows/triggers';
 import { AlertStatusChangedOptIns, type AlertStatusChangedOptIn } from '../../alert_status_changed';
 import {
@@ -22,14 +23,28 @@ import type { EventBus } from '../event_bus';
 import { ALERT_STATUS_CHANGED_EVENT_TYPE, type AlertStatusChangedEvent } from './events';
 
 /**
+ * Status changes to publish, or a builder that only runs once an opt-in is
+ * enabled, like a `LogMessageSource` for a log message: callers whose payloads
+ * need a lookup pass a builder so nothing is read when nobody listens.
+ */
+export type AlertStatusChangedPayloadsSource =
+  | readonly AlertStatusChangedTriggerPayload[]
+  | (() => Promise<readonly AlertStatusChangedTriggerPayload[]>);
+
+const resolvePayloads = async (
+  source: AlertStatusChangedPayloadsSource
+): Promise<readonly AlertStatusChangedTriggerPayload[]> => (isFunction(source) ? source() : source);
+
+/**
  * Public contract for the alert status changed event publisher.
  *
- * Called with persisted status changes by the rule executor and by the alert
- * events client. The publisher owns the opt-in check, so callers never ask it
- * themselves.
+ * Called with persisted status changes by the rule executor, by the alert
+ * events client, and by the alert actions client for user activate and
+ * deactivate actions. The publisher owns the opt-in check, so callers never
+ * ask it themselves.
  */
 export interface AlertStatusChangedEventPublisherContract {
-  publishAlertStatusChanges(payloads: readonly AlertStatusChangedTriggerPayload[]): Promise<void>;
+  publishAlertStatusChanges(source: AlertStatusChangedPayloadsSource): Promise<void>;
 }
 
 /**
@@ -38,12 +53,13 @@ export interface AlertStatusChangedEventPublisherContract {
  *
  * Bound `inRequestScope` because the bus threads `KibanaRequest` on every
  * publish: the rule executor's container has Task Manager's `fakeRequest`
- * bound to `Request`, and the alert events client's scope has the request it
- * was created with.
+ * bound to `Request`, and the alert events and alert actions clients' scope
+ * has the request it was created with.
  *
  * Nothing is published unless an integration has opted in for that request.
  * The answer is asked once per instance, so once per rule run, and only when
- * there is something to publish.
+ * there is something to publish. A payload builder runs only after that answer
+ * is yes.
  */
 @injectable()
 export class AlertStatusChangedEventPublisher implements AlertStatusChangedEventPublisherContract {
@@ -57,10 +73,9 @@ export class AlertStatusChangedEventPublisher implements AlertStatusChangedEvent
     @inject(AlertStatusChangedOptIns) private readonly optIns: AlertStatusChangedOptIns
   ) {}
 
-  public async publishAlertStatusChanges(
-    payloads: readonly AlertStatusChangedTriggerPayload[]
-  ): Promise<void> {
-    if (payloads.length === 0) {
+  public async publishAlertStatusChanges(source: AlertStatusChangedPayloadsSource): Promise<void> {
+    // An empty list has nothing to publish, so the opt-ins are not even asked.
+    if (!isFunction(source) && source.length === 0) {
       return;
     }
 
@@ -68,6 +83,12 @@ export class AlertStatusChangedEventPublisher implements AlertStatusChangedEvent
     const enabledOptIns = await this.#enabledOptIns;
 
     if (enabledOptIns.length === 0) {
+      return;
+    }
+
+    const payloads = await resolvePayloads(source);
+
+    if (payloads.length === 0) {
       return;
     }
 

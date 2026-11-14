@@ -11,8 +11,17 @@ import { Request } from '@kbn/core-di-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { Container, ContainerModule } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import { createAlertActionsRulesClientMock } from '../lib/alert_actions_client/alert_actions_client.mock';
 import { AlertActionEventPublisher } from '../lib/events/alert_action_event_publisher/alert_action_event_publisher';
 import { createAlertActionEventPublisher } from '../lib/events/alert_action_event_publisher/alert_action_event_publisher.mock';
+import {
+  AlertStatusChangedEventPublisher,
+  type AlertStatusChangedEventPublisherContract,
+} from '../lib/events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import { createMockAlertStatusChangedEventPublisher } from '../lib/events/alert_status_changed_event_publisher/alert_status_changed_event_publisher.mock';
+import { RulesClient } from '../lib/rules_client';
+import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { createLoggerService } from '../lib/services/logger_service/logger_service.mock';
 import { AuthService, type AuthServiceContract } from '../lib/services/auth_service/auth_service';
 import { QueryServiceInternalToken } from '../lib/services/query_service/tokens';
 import { createQueryService } from '../lib/services/query_service/query_service.mock';
@@ -56,8 +65,16 @@ describe('bindClients - AlertActionsClient authorization', () => {
       .bind<ResourceManagerContract>(ResourceManager)
       .toConstantValue(createMockResourceManager());
     container.bind<AuthServiceContract>(AuthService).toConstantValue({ ensureAuthorized });
+    container
+      .bind<AlertStatusChangedEventPublisherContract>(AlertStatusChangedEventPublisher)
+      .toConstantValue(createMockAlertStatusChangedEventPublisher());
+    container.bind(LoggerServiceToken).toConstantValue(createLoggerService().loggerService);
 
     container.load(new ContainerModule((options) => bindClients(options)));
+    // The real RulesClient needs the whole rules stack; these tests only cover authorization.
+    container
+      .rebind<Pick<RulesClient, 'getRules'>>(RulesClient)
+      .toConstantValue(createAlertActionsRulesClientMock());
   });
 
   const invocations: Array<[string, (client: AlertActionsClient) => Promise<unknown>]> = [
