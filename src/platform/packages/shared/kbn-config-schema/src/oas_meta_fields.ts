@@ -14,6 +14,9 @@
 export const META_FIELD_X_OAS_OPTIONAL = 'x-oas-optional' as const;
 export const META_FIELD_X_OAS_MIN_LENGTH = 'x-oas-min-length' as const;
 export const META_FIELD_X_OAS_MAX_LENGTH = 'x-oas-max-length' as const;
+/** Advisory bounds of a reporting-mode string, rewritten to vendor extensions by the OAS generator. */
+export const META_FIELD_X_OAS_PLANNED_MIN_LENGTH = 'x-oas-planned-min-length' as const;
+export const META_FIELD_X_OAS_PLANNED_MAX_LENGTH = 'x-oas-planned-max-length' as const;
 export const META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES =
   'x-oas-get-additional-properties' as const;
 export const META_FIELD_X_OAS_DEPRECATED = 'x-oas-deprecated' as const;
@@ -24,3 +27,9 @@ export const META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE =
 export const META_FIELD_X_OAS_ANY = 'x-oas-any-type' as const;
 export const META_FIELD_X_OAS_DISCONTINUED = 'x-oas-discontinued' as const;
 export const META_FIELD_X_OAS_AVAILABILITY = 'x-oas-availability' as const;
+
+/** Names the planned-length meta fields take in the generated OpenAPI document. */
+export {
+  X_KIBANA_PLANNED_MIN_LENGTH,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+} from '@kbn/schema-string-helpers';

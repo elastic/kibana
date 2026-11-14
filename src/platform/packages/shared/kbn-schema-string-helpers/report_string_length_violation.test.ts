@@ -32,13 +32,15 @@ test('creates one shared integer histogram with the proposed name', () => {
   reportStringLengthViolation({
     helper: 'savedObjectId',
     library: 'zod',
-    maxLength: 512,
+    bound: 'max',
+    limit: 512,
     length: 600,
   });
   reportStringLengthViolation({
     helper: 'savedObjectId',
     library: 'zod',
-    maxLength: 512,
+    bound: 'max',
+    limit: 512,
     length: 600,
   });
   expect(provider.getMeter).toHaveBeenCalledTimes(1);
@@ -59,15 +61,35 @@ test('records the actual length with only static dimensions', () => {
   reportStringLengthViolation({
     helper: 'savedObjectId',
     library: 'zod',
-    maxLength: 512,
+    bound: 'max',
+    limit: 512,
     length: 600,
     label: 'dashboard.panelId',
   });
   expect(histogram.record).toHaveBeenCalledWith(600, {
     'schema.helper': 'savedObjectId',
     'schema.library': 'zod',
+    'schema.bound': 'max',
     'schema.max_length': 512,
     'schema.label': 'dashboard.panelId',
+  });
+});
+
+test('records a minimum length violation under its own bound and limit', () => {
+  reportStringLengthViolation({
+    helper: 'urlString',
+    library: 'config-schema',
+    bound: 'min',
+    limit: 1,
+    length: 0,
+    label: 'fleet.outputs.hosts',
+  });
+  expect(histogram.record).toHaveBeenCalledWith(0, {
+    'schema.helper': 'urlString',
+    'schema.library': 'config-schema',
+    'schema.bound': 'min',
+    'schema.min_length': 1,
+    'schema.label': 'fleet.outputs.hosts',
   });
 });
 
@@ -75,12 +97,14 @@ test('omits an absent label', () => {
   reportStringLengthViolation({
     helper: 'description',
     library: 'config-schema',
-    maxLength: 10000,
+    bound: 'max',
+    limit: 10000,
     length: 20000,
   });
   expect(histogram.record).toHaveBeenCalledWith(20000, {
     'schema.helper': 'description',
     'schema.library': 'config-schema',
+    'schema.bound': 'max',
     'schema.max_length': 10000,
   });
 });
@@ -93,7 +117,8 @@ test('does not fail validation if the metric provider throws', () => {
     reportStringLengthViolation({
       helper: 'savedObjectId',
       library: 'zod',
-      maxLength: 512,
+      bound: 'max',
+      limit: 512,
       length: 600,
     })
   ).not.toThrow();

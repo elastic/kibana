@@ -98,7 +98,8 @@ DataFlow::Node intentionalUnboundedString() {
       name =
         [
           "savedObjectId", "savedObjectType", "savedObjectVersion", "spaceId", "displayName",
-          "description", "searchFilter", "aggregation", "querySortField"
+          "description", "searchFilter", "aggregation", "querySortField", "urlString",
+          "pemCertificate", "version", "boundedString"
         ]
     |
       result = helpers.getMember(name).getMember("warn").getACall()
