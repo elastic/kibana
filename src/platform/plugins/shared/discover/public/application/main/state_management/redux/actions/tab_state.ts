@@ -54,6 +54,7 @@ import {
   type ProfileStateDefaultsHandling,
 } from '../../../../../../common/context_awareness';
 import type { ProfileStateMutationOptions } from '../../../../../context_awareness';
+import { recordHasContext } from '../../../../../context_awareness/profiles_manager/record_has_context';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
@@ -136,8 +137,21 @@ type ExpandedDocPayload = TabActionPayload<{
 
 /** Sets the expanded document and synchronizes its URL reference. */
 export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
-  function setExpandedDocThunkFn(dispatch, getState) {
+  function setExpandedDocThunkFn(dispatch, getState, { runtimeStateManager }) {
     const { shouldUpdateUrl = true, ...expandedDocPayload } = payload;
+
+    // A record handed in from outside the fetch paths (a chart section, for example) is
+    // not the proxy `resolveDocumentProfile` creates: without its lazy `context`, the
+    // flyout would fall back to the default document profile and show the generic viewer
+    // for a document a profile knows better. Fetched rows pass through untouched.
+    const record = expandedDocPayload.expandedDoc;
+    if (record && !recordHasContext(record)) {
+      const scopedProfilesManager = selectTabRuntimeState(
+        runtimeStateManager,
+        payload.tabId
+      ).scopedProfilesManager$.getValue();
+      expandedDocPayload.expandedDoc = scopedProfilesManager.resolveDocumentProfile({ record });
+    }
 
     dispatch(internalStateSlice.actions.setExpandedDoc(expandedDocPayload));
 
