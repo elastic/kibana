@@ -44,7 +44,22 @@ privileges like the app.
   applications, which only the sessions index counts, so it shows a dash while they are read from
   the raw events (sessions not set up, a range past their lookback, no access to them) and for Classic
   RUM, which has no sessions.
-- **Partial data:** when one source fails to load, a warning above the summary names it.
+- **Partial data:** when one source fails to load, a warning above the summary names it (the
+  response lists it in `unavailableSources`). A source the user can only partly read is listed in
+  `partiallyAvailableSources` and gets its own warning, as Elasticsearch skips the indices of a
+  wildcard the user can't read instead of failing, so rows may be missing. The check resolves the
+  index expression the source's search sends (exclusions included) as the internal user and as
+  the user, which Elasticsearch limits to what they can access, keeps the names the user holds
+  `read` on (`security.hasPrivileges`, as `view_index_metadata` also resolves names), and warns
+  when the user reaches less data: indices, data streams (a backing index counts as its data
+  stream) and alias targets.
+  Unused defaults such as `apm-*` don't count, and a role narrower than the wildcard passes when it
+  covers every existing index. Classic RUM leaves out the EDOT wildcards of the default APM
+  indices, both sources leave out the Agent Builder OTel indices, as in APM Diagnostics, and remote
+  (CCS or CPS) patterns aren't checked. EDOT Browser has no warning when the sessions index
+  answered, as it is summarized with the access of the user who enabled sessions. With security
+  disabled, or if the check fails, no warning is shown. It doesn't name the indices, and document-
+  or field-level security isn't reported.
 - **Chart:** page loads over time, or the sessions that started, picked with a toggle whose choice
   is kept in local storage; drag over it to zoom into that range. The sessions are counted only
   while the applications are read from the sessions index, so the toggle disables **Sessions**, and

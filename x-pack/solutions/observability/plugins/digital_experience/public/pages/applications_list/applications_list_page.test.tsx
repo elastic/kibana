@@ -113,9 +113,16 @@ const respondWith = (
   applications: ApplicationSummary[],
   environments: string[] = [],
   unavailableSources: Array<ApplicationSummary['source']> = [],
-  sessionsOverTime: Array<{ timestamp: number; count: number }> | null = null
+  sessionsOverTime: Array<{ timestamp: number; count: number }> | null = null,
+  partiallyAvailableSources: Array<ApplicationSummary['source']> = []
 ) =>
-  mockFetch.mockResolvedValue({ applications, environments, unavailableSources, sessionsOverTime });
+  mockFetch.mockResolvedValue({
+    applications,
+    environments,
+    unavailableSources,
+    sessionsOverTime,
+    partiallyAvailableSources,
+  });
 
 // `isServerless` leaves out the ux plugin, as serverless does.
 const renderPage = ({ isServerless = false } = {}) => {
@@ -454,6 +461,34 @@ describe('ApplicationsListPage', () => {
     expect(await screen.findByTestId('digitalExperienceUnavailableSources')).toHaveTextContent(
       'Classic RUM'
     );
+  });
+
+  it('warns when the user can read only some of the indices of a source', async () => {
+    respondWith([app({ source: 'otel' })], [], [], null, ['classic']);
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperiencePartiallyAvailableSources')
+    ).toHaveTextContent('Classic RUM');
+    expect(screen.queryByTestId('digitalExperienceUnavailableSources')).not.toBeInTheDocument();
+  });
+
+  it('does not warn about partial access when every source is fully readable', async () => {
+    respondWith([app({ source: 'otel' })]);
+    renderPage();
+    await screen.findByTestId('digitalExperienceApplicationLink');
+
+    expect(
+      screen.queryByTestId('digitalExperiencePartiallyAvailableSources')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the unavailable and the partially available warnings together', async () => {
+    respondWith([app({ source: 'otel' })], [], ['classic'], null, ['otel']);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceUnavailableSources')).toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperiencePartiallyAvailableSources')).toBeInTheDocument();
   });
 
   it('shows FCP, TTFB, the error rate and the last seen time', async () => {
