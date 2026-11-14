@@ -91,7 +91,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           state,
           parentApi,
           willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
-          getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
+          getInitialFilter: (dataSource) => buildFilter(dataSource, uuid, state),
           editorStateManager,
         });
 
@@ -235,11 +235,11 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       ])
         .pipe(debounceTime(0))
         .subscribe(
-          ([dataViews, fieldName, selectedOptions, existsSelected, exclude, sectionId]) => {
-            const dataView = dataViews?.[0];
-            if (!dataView) return;
+          ([dataSources, fieldName, selectedOptions, existsSelected, exclude, sectionId]) => {
+            const dataSource = dataSources?.[0];
+            if (!dataSource) return;
 
-            const newFilter = buildFilter(dataView, uuid, {
+            const newFilter = buildFilter(dataSource, uuid, {
               field_name: fieldName,
               selected_options: selectedOptions,
               exists_selected: existsSelected,

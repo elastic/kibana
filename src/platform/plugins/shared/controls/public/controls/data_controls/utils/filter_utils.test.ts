@@ -92,7 +92,7 @@ describe('buildESQLPreFilter', () => {
     const result = buildESQLPreFilter({
       fetchContext: { query: undefined, filters: undefined },
       useGlobalFilters: true,
-      dataView,
+      dataSource: dataView,
       timeRange: { from: 'now-15m', to: 'now' },
       esqlQuery: 'FROM logs | KEEP host',
     });
@@ -110,7 +110,7 @@ describe('buildESQLPreFilter', () => {
     const result = buildESQLPreFilter({
       fetchContext: { query: undefined, filters: undefined },
       useGlobalFilters: true,
-      dataView,
+      dataSource: dataView,
       timeRange: { from: 'now-15m', to: 'now' },
       esqlQuery: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | KEEP host',
     });

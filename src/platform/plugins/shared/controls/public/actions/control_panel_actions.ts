@@ -9,7 +9,7 @@
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public/actions';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
 
@@ -22,7 +22,7 @@ export type CreateControlTypeAction<State extends DataControlState = DataControl
   CreateControlTypeContext<State>,
   {
     CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
-    isFieldCompatible: (field: DataViewField) => boolean;
+    isFieldCompatible: (field: FilterableField) => boolean;
   }
 > & {
   getDisplayName: () => string; // remove context from `getDisplayName`

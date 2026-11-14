@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { buildEsQuery, isOfQueryType } from '@kbn/es-query';
@@ -33,13 +33,13 @@ export const getFetchContextFilters = (fetchContext: FetchContext, useGlobalFilt
 export const buildESQLPreFilter = ({
   fetchContext,
   useGlobalFilters,
-  dataView,
+  dataSource,
   timeRange,
   esqlQuery,
 }: {
   fetchContext: Pick<FetchContext, 'query' | 'filters'>;
   useGlobalFilters?: boolean;
-  dataView?: DataView;
+  dataSource?: FilterableSource;
   timeRange?: TimeRange;
   esqlQuery?: string;
 }): { bool: BoolQuery } | undefined => {
@@ -48,13 +48,13 @@ export const buildESQLPreFilter = ({
   // nothing to translate to a DSL pre-filter.
   const globalQuery = isOfQueryType(fetchContext.query) ? fetchContext.query : undefined;
   const timeFilter =
-    esqlQuery && !hasStartEndParams(esqlQuery) && timeRange && dataView
-      ? dataService.query.timefilter.timefilter.createFilter(dataView, timeRange)
+    esqlQuery && !hasStartEndParams(esqlQuery) && timeRange && dataSource
+      ? dataService.query.timefilter.timefilter.createFilter(dataSource, timeRange)
       : undefined;
   const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
   if (!filtersToUse.length && !globalQuery) return undefined;
   const config = getEsQueryConfig(coreServices.uiSettings);
-  return buildEsQuery(dataView, globalQuery ?? [], filtersToUse, config);
+  return buildEsQuery(dataSource, globalQuery ?? [], filtersToUse, config);
 };
 
 export const getFetchContextTimeRange = (
@@ -73,16 +73,16 @@ export const getFetchContextTimeRange = (
 
 /** Dashboard-scoped DSL filters used by field-sourced options list aggregations. */
 export const buildOptionsListDashboardFilters = (
-  dataView: DataView,
+  dataSource: FilterableSource,
   fetchContext: FetchContext,
   useGlobalFilters?: boolean
 ): Array<{ bool: BoolQuery }> => {
   const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
   const filters = getFetchContextFilters(fetchContext, useGlobalFilters);
   const timeFilter = timeRange
-    ? dataService.query.timefilter.timefilter.createFilter(dataView, timeRange)
+    ? dataService.query.timefilter.timefilter.createFilter(dataSource, timeRange)
     : undefined;
   const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
   const config = getEsQueryConfig(coreServices.uiSettings);
-  return [buildEsQuery(dataView, fetchContext.query ?? [], filtersToUse ?? [], config)];
+  return [buildEsQuery(dataSource, fetchContext.query ?? [], filtersToUse ?? [], config)];
 };

@@ -296,6 +296,7 @@ describe('Internal dashboard top nav', () => {
       id: 'esql-dataset-id',
       title: 'logs-*',
       fields: [],
+      getFieldByName: () => undefined,
       timeFieldName: '@timestamp',
       isTimeBased: () => true,
     };
