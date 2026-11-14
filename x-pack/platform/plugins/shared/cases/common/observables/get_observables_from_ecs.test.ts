@@ -5,7 +5,15 @@
  * 2.0.
  */
 import type { ObservablePost } from '../types/api';
-import { getIPType, getObservablesFromEcs, processObservable } from './get_observables_from_ecs';
+import { DEFAULT_OBSERVABLE_TYPES } from './default_observable_types';
+import { getObservableDedupeKey } from './get_observable_dedupe_key';
+import {
+  getIPType,
+  getObservablesFromEcs,
+  MAX_VALUE_LENGTH_FOR_PATTERN,
+  processObservable,
+} from './get_observables_from_ecs';
+import { resolveObservableTypes } from './resolve_observable_types';
 
 describe('getIPType', () => {
   it('should return IPV4 for a valid IPv4 address', () => {
@@ -23,7 +31,7 @@ describe('processObservable', () => {
   it('should add an observable to the map', () => {
     const observablesMap = new Map<string, ObservablePost>();
     processObservable(observablesMap, 'value', 'key', 'Description');
-    expect(observablesMap.get('key-value')).toEqual({
+    expect(observablesMap.get(getObservableDedupeKey('key', 'value'))).toEqual({
       typeKey: 'key',
       value: 'value',
       description: 'Description',
@@ -48,11 +56,21 @@ describe('processObservable', () => {
     ]);
   });
 
+  it('should keep both observables when a hyphen moves between the type key and the value', () => {
+    const observablesMap = new Map<string, ObservablePost>();
+    processObservable(observablesMap, 'bar-1', 'foo', 'Description');
+    processObservable(observablesMap, '1', 'foo-bar', 'Description');
+    expect(Array.from(observablesMap.values())).toEqual([
+      { typeKey: 'foo', value: 'bar-1', description: 'Description' },
+      { typeKey: 'foo-bar', value: '1', description: 'Description' },
+    ]);
+  });
+
   it('should preserve the initial value if a duplicate is added with a different description', () => {
     const observablesMap = new Map<string, ObservablePost>();
     processObservable(observablesMap, 'value', 'key', 'Description');
     processObservable(observablesMap, 'value', 'key', 'Another Description');
-    expect(observablesMap.get('key-value')).toEqual({
+    expect(observablesMap.get(getObservableDedupeKey('key', 'value'))).toEqual({
       typeKey: 'key',
       value: 'value',
       description: 'Description',
@@ -258,6 +276,119 @@ describe('getObservablesFromEcsDataArray', () => {
 
   it('should ignore fields that no default type reads', () => {
     expect(getObservablesFromEcs([[{ field: 'user.name', value: ['alice'] }]])).toEqual([]);
+  });
+
+  describe('with the stored observable types', () => {
+    const description = 'Auto extracted observable';
+
+    it('skips a field that is turned off, and reads a custom type with its pattern', () => {
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [{ key: 'employee-id', label: 'Employee ID' }],
+        [
+          { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+          {
+            key: 'employee-id',
+            paths: [{ path: 'user.employee_id', enabled: true }],
+            valuePattern: '^E\\d{6}$',
+          },
+        ]
+      );
+
+      expect(
+        getObservablesFromEcs(
+          [
+            [
+              { field: 'agent.id', value: ['agent1'] },
+              { field: 'user.employee_id', value: ['E123456', 'not-an-id'] },
+              { field: 'host.name', value: ['host1'] },
+            ],
+          ],
+          observableTypes
+        )
+      ).toEqual([
+        { typeKey: 'employee-id', value: 'E123456', description },
+        { typeKey: 'observable-type-hostname', value: 'host1', description },
+      ]);
+    });
+
+    it('skips an excluded value only on the field that excludes it', () => {
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [],
+        [
+          {
+            key: 'observable-type-ipv4',
+            paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+          },
+        ]
+      );
+
+      expect(
+        getObservablesFromEcs(
+          [
+            [
+              { field: 'source.ip', value: ['127.0.0.1', '10.0.0.1'] },
+              { field: 'destination.ip', value: ['127.0.0.1'] },
+            ],
+          ],
+          observableTypes
+        )
+      ).toEqual([
+        { typeKey: 'observable-type-ipv4', value: '10.0.0.1', description },
+        { typeKey: 'observable-type-ipv4', value: '127.0.0.1', description },
+      ]);
+    });
+
+    it('compares excluded values exactly and with case', () => {
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [],
+        [
+          {
+            key: 'observable-type-hostname',
+            paths: [{ path: 'host.name', enabled: true, excludedValues: ['localhost'] }],
+          },
+        ]
+      );
+
+      expect(
+        getObservablesFromEcs(
+          [[{ field: 'host.name', value: ['localhost', 'LocalHost', 'localhost.lan'] }]],
+          observableTypes
+        ).map(({ value }) => value)
+      ).toEqual(['LocalHost', 'localhost.lan']);
+    });
+
+    it('does not extract an IPv6 value on an IPv4 type', () => {
+      expect(
+        getObservablesFromEcs([[{ field: 'source.ip', value: ['2001:db8::1'] }]]).map(
+          ({ typeKey }) => typeKey
+        )
+      ).toEqual(['observable-type-ipv6']);
+    });
+
+    it('skips a value that is longer than the bound of the pattern', () => {
+      const observableTypes = resolveObservableTypes(
+        DEFAULT_OBSERVABLE_TYPES,
+        [{ key: 'any-id', label: 'Any id' }],
+        [{ key: 'any-id', paths: [{ path: 'user.id', enabled: true }], valuePattern: '^a+$' }]
+      );
+
+      expect(
+        getObservablesFromEcs(
+          [
+            [
+              {
+                field: 'user.id',
+                value: ['a'.repeat(MAX_VALUE_LENGTH_FOR_PATTERN + 1), 'a'.repeat(5)],
+              },
+            ],
+          ],
+          observableTypes
+        )
+      ).toEqual([{ typeKey: 'any-id', value: 'aaaaa', description }]);
+    });
   });
 
   describe('with a given map of observable types', () => {

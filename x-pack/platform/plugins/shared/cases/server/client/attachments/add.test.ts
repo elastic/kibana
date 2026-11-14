@@ -241,6 +241,12 @@ describe('addComment', () => {
       expect(res.version).toBe('patched-version');
       expect(res.observables).toEqual([observable]);
       expect(res.total_observables).toBe(1);
+      expect(extractAndAddObservablesMock).toHaveBeenCalledWith(
+        caseId,
+        expect.anything(),
+        expect.objectContaining({ owner: theCase.attributes.owner }),
+        clientArgs
+      );
     });
 
     it('returns the case when every alert id is already on the case', async () => {
