@@ -64,15 +64,15 @@ function getLatencyColumnLabel(latencyAggregationType?: LatencyAggregationType) 
   switch (latencyAggregationType) {
     case LatencyAggregationType.avg:
       return i18n.translate('apmUiShared.transactionsTable.latencyColumnAvgLabel', {
-        defaultMessage: 'Latency (avg.)',
+        defaultMessage: 'Latency (avg)',
       });
     case LatencyAggregationType.p95:
       return i18n.translate('apmUiShared.transactionsTable.latencyColumnP95Label', {
-        defaultMessage: 'Latency (95th)',
+        defaultMessage: 'Latency (p95th)',
       });
     case LatencyAggregationType.p99:
       return i18n.translate('apmUiShared.transactionsTable.latencyColumnP99Label', {
-        defaultMessage: 'Latency (99th)',
+        defaultMessage: 'Latency (p99th)',
       });
     default:
       return i18n.translate('apmUiShared.transactionsTable.latencyColumnDefaultLabel', {

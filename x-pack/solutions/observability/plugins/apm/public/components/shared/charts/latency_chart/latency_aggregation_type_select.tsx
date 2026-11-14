@@ -14,19 +14,22 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
 
 const options: Array<{ value: LatencyAggregationType; text: string }> = [
-  { value: LatencyAggregationType.avg, text: 'Average' },
-  { value: LatencyAggregationType.p95, text: '95th percentile' },
-  { value: LatencyAggregationType.p99, text: '99th percentile' },
+  { value: LatencyAggregationType.avg, text: 'Avg' },
+  { value: LatencyAggregationType.p95, text: 'p95th' },
+  { value: LatencyAggregationType.p99, text: 'p99th' },
 ];
 
 export function LatencyAggregationTypeSelect({
   latencyAggregationType,
   onChange,
   ebt,
+  compact,
 }: {
   latencyAggregationType?: LatencyAggregationType;
   onChange: (value: LatencyAggregationType) => void;
   ebt?: EbtClickAttrsWithoutAction;
+  /** When true, hides the "Metric" prepend to save space in narrow hosts (e.g. flyouts). */
+  compact?: boolean;
 }) {
   return (
     <EuiSelect
@@ -38,9 +41,13 @@ export function LatencyAggregationTypeSelect({
       aria-label={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.selector', {
         defaultMessage: 'Metric selector',
       })}
-      prepend={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.prepend', {
-        defaultMessage: 'Metric',
-      })}
+      prepend={
+        compact
+          ? undefined
+          : i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.prepend', {
+              defaultMessage: 'Metric',
+            })
+      }
       options={options}
       value={latencyAggregationType}
       onChange={(nextOption) => onChange(nextOption.target.value as LatencyAggregationType)}

@@ -204,44 +204,47 @@ export function LatencyChart({
   return (
     <EuiFlexItem>
       <AnomalyChartPanel anomalyScore={anomaly?.score} paddingSize={panelPaddingSize}>
-        {/* wrap moves the controls onto their own line in narrow hosts (e.g. the
-            service flyout) instead of shrinking the title below its own width */}
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.apm.dependencyLatencyChart.chartTitle', {
-                  defaultMessage: 'Latency',
-                })}
-              </h2>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>
+                    {i18n.translate('xpack.apm.dependencyLatencyChart.chartTitle', {
+                      defaultMessage: 'Latency',
+                    })}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              {anomaly && (
+                <EuiFlexItem grow={false}>
+                  <AnomalySeverityBadge severity={anomaly.severity} score={anomaly.score} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          {anomaly && (
-            <EuiFlexItem grow={false}>
-              <AnomalySeverityBadge severity={anomaly.severity} score={anomaly.score} />
-            </EuiFlexItem>
-          )}
-          {setLatencyAggregationType && (
-            <EuiFlexItem grow={false}>
-              <LatencyAggregationTypeSelect
-                latencyAggregationType={latencyAggregationType}
-                onChange={setLatencyAggregationType}
-                ebt={latencySelectEbt}
-              />
-            </EuiFlexItem>
-          )}
-          {showTransactionTypeSelect && (
-            <EuiFlexItem grow={false}>
-              <TransactionTypeSelect
-                transactionType={transactionType}
-                transactionTypes={transactionTypes}
-                onChange={setTransactionType}
-              />
-            </EuiFlexItem>
-          )}
-          {showChartActions && (
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {setLatencyAggregationType && (
+                <EuiFlexItem grow={false}>
+                  <LatencyAggregationTypeSelect
+                    latencyAggregationType={latencyAggregationType}
+                    onChange={setLatencyAggregationType}
+                    ebt={latencySelectEbt}
+                    compact={!!panelPaddingSize}
+                  />
+                </EuiFlexItem>
+              )}
+              {showTransactionTypeSelect && (
+                <EuiFlexItem grow={false}>
+                  <TransactionTypeSelect
+                    transactionType={transactionType}
+                    transactionTypes={transactionTypes}
+                    onChange={setTransactionType}
+                  />
+                </EuiFlexItem>
+              )}
+              {showChartActions && (
                 <EuiFlexItem grow={false}>
                   <RedMetricsChartActions
                     queryParams={{
@@ -257,9 +260,9 @@ export function LatencyChart({
                     anomaly={anomaly}
                   />
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           {!!threshold && !compact && (
