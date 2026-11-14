@@ -12,6 +12,7 @@ import { expect } from '@kbn/scout/api';
 
 import {
   authenticationStep,
+  commonHeaders,
   createServiceAccountSuite,
   waitStep,
   workflowYaml,
@@ -168,7 +169,7 @@ apiTest.describe(
           elasticsearch: { cluster: [], indices: [] },
           kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
         });
-        const executorHeaders = { ...headers, ...cookieHeader };
+        const executorHeaders = { ...commonHeaders, ...cookieHeader };
         const executor = await apiClient.get('internal/security/me', {
           headers: executorHeaders,
           responseType: 'json',
