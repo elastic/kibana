@@ -32,6 +32,7 @@ import { buildGraduatedAlert } from './build_graduated_alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import { buildDelayedAlert } from './build_delayed_alert';
+import { reactivateRecoveredAlert } from './reactivate_recovered_alert';
 import type { LegacyAlertsClient } from '../../legacy_alerts_client';
 import { getRecoveredAlertIdsToStopTracking } from '../../../lib/flapping/optimize_task_state_for_flapping';
 
@@ -188,7 +189,13 @@ export class AlertBuilder<
       }
       if (activeAlert) {
         const uuid = activeAlert.getUuid();
-        const trackedActive = this.trackedAlerts.active[uuid];
+        const trackedRecovered = this.trackedAlerts.recovered[uuid];
+        // A failed run can write an alert's recovery and then keep the previous task state, where
+        // the alert is still active. Reactivating the document keeps its workflow status, tags and
+        // case IDs, which writing it as a new alert would reset.
+        const trackedActive =
+          this.trackedAlerts.active[uuid] ??
+          (trackedRecovered ? reactivateRecoveredAlert(trackedRecovered) : undefined);
         const trackedDelayed = this.trackedAlerts.delayed[uuid];
 
         if (trackedActive) {
