@@ -11,7 +11,11 @@ import type { SpecDefinitionsService } from '../../../services';
 import { BOOLEAN } from './shared';
 
 const commonPipelineParams = {
-  on_failure: [],
+  on_failure: [
+    {
+      __scope_link: '_processor',
+    },
+  ],
   ignore_failure: {
     __one_of: [false, true],
   },
@@ -835,29 +839,12 @@ const processorDefinition = {
   ],
 };
 
-const pipelineDefinition = {
-  description: '',
-  processors: [processorDefinition],
-  version: 123,
-};
-
 export const ingest = (specService: SpecDefinitionsService) => {
-  // Note: this isn't an actual API endpoint. It exists so the forEach processor's "processor" field
-  // may recursively use the autocomplete rules for any processor.
+  // Note: this isn't an actual API endpoint. It exists so processors (e.g. the foreach processor's
+  // "processor" field, "on_failure" handlers) and the pipeline definitions in the JSON overrides
+  // (ingest.put_pipeline, ingest.simulate) can use the autocomplete rules for any processor via
+  // `__scope_link: '_processor'`. The actual ingest APIs are defined in the JSON files.
   specService.addEndpointDescription('_processor', {
     data_autocomplete_rules: processorDefinition,
-  });
-
-  specService.addEndpointDescription('ingest.put_pipeline', {
-    methods: ['PUT'],
-    patterns: ['_ingest/pipeline/{id}'],
-    data_autocomplete_rules: pipelineDefinition,
-  });
-
-  specService.addEndpointDescription('ingest.simulate', {
-    data_autocomplete_rules: {
-      pipeline: pipelineDefinition,
-      docs: [],
-    },
   });
 };
