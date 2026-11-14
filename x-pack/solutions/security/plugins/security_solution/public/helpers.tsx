@@ -32,6 +32,7 @@ import {
   RULES_CHANGES_HISTORY_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
+  SIEM_READINESS_PATH,
   THREAT_INTELLIGENCE_PATH,
   ONBOARDING_PATH,
 } from '../common/constants';
@@ -285,6 +286,15 @@ export const isConfigurationsPath = (pathname: string): boolean =>
   });
 
 /**
+ * Matches the SIEM readiness page, whose app header owns the page actions.
+ */
+export const isSiemReadinessPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: SIEM_READINESS_PATH,
+    strict: false,
+  });
+
+/**
  * Matches the Shared Exception Lists and Exception list details pages, whose app headers own the page actions.
  */
 export const isExceptionsPath = (pathname: string): boolean =>
@@ -337,6 +347,7 @@ export const isPageWithAppHeaderPath = (pathname: string): boolean =>
     isExceptionsPath,
     isCloudSecurityPosturePath,
     isConfigurationsPath,
+    isSiemReadinessPath,
     isEndpointManagementPath,
     isManageLandingPath,
   ].some((matchesPath) => matchesPath(pathname));
