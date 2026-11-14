@@ -17,7 +17,12 @@ import type { AwsOnboardingToolDeps } from './common';
 
 const startSchema = lazySchema(() =>
   z.object({
-    region: z.string().describe('AWS region used to discover services, for example us-east-1.'),
+    region: z
+      .string()
+      .optional()
+      .describe(
+        'AWS region for the integration settings, for example us-east-1. Omit to use the region of the stored onboarding credentials.'
+      ),
     namespace: z
       .string()
       .optional()
@@ -42,7 +47,7 @@ export const createStartAwsOnboardingTool = ({
 
     const result = await executeWorkflow({
       workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
-      workflowParams: { region, ...(namespace ? { namespace } : {}) },
+      workflowParams: { ...(region ? { region } : {}), ...(namespace ? { namespace } : {}) },
       request,
       spaceId,
       workflowApi,

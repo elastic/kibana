@@ -34,7 +34,7 @@ triggers:
       properties:
         region:
           type: string
-          description: AWS region used to discover services and resolve integration settings.
+          description: AWS region for the integration settings. Defaults to the region of the stored onboarding credentials.
         namespace:
           type: string
           description: Data stream namespace for the created policies. Defaults to the integration default.
@@ -43,8 +43,6 @@ triggers:
           description: Overrides for the CloudFormation stack parameters, as string values by parameter name.
           additionalProperties:
             type: string
-      required:
-        - region
 
 steps:
   # Credentials are checked once. Only when they are missing do we enter the loop, which is
@@ -92,8 +90,6 @@ steps:
 
   - name: discover
     type: fleet.awsOnboardingDiscover
-    with:
-      region: "{{ inputs.region }}"
 
   - name: select_services
     type: waitForInput
@@ -115,7 +111,7 @@ steps:
   - name: ask_resolve
     type: waitForApproval
     with:
-      message: "May I look up the values those integrations need (regions, detector ids) in your account?"
+      message: "May I prepare the integration settings for the services you picked? This uses the package metadata and what discovery found; no new calls to your account."
 
   - name: fail_no_resolve
     type: if
@@ -131,8 +127,9 @@ steps:
     type: fleet.awsOnboardingResolve
     with:
       services: "${{ steps.select_services.output.response.services }}"
-      region: "{{ steps.select_services.output.response.region | default: inputs.region }}"
+      region: "{{ steps.select_services.output.response.region | default: inputs.region | default: steps.discover.output.region }}"
       account_id: "${{ steps.discover.output.account_id }}"
+      run_suffix: "{{ execution.id | slice: 0, 8 }}"
       namespace: "${{ inputs.namespace }}"
 
   - name: approve_values
@@ -153,7 +150,7 @@ steps:
   - name: ask_stack
     type: waitForApproval
     with:
-      message: "May I create the Federated Identity CloudFormation stack in your account? It creates an OIDC provider and one IAM role with the permissions listed."
+      message: "May I create the Federated Identity CloudFormation stack in your account? It creates an OIDC provider and one IAM role with the permissions the assistant showed you."
 
   - name: fail_no_stack
     type: if
@@ -264,5 +261,8 @@ steps:
     type: workflow.output
     with:
       policies: "${{ steps.create_policies.output.policies }}"
+      has_data: "${{ steps.has_data.output.has_data }}"
+      policies_with_data: "${{ steps.has_data.output.policies_with_data }}"
+      policies_without_data: "${{ steps.has_data.output.policies_without_data }}"
       cloud_connector_id: "{{ steps.create_connector.output.cloud_connector_id }}"
       dashboard_path: "/app/dashboards#/view/aws-fac28650-7349-11e9-816b-07687310a99a"

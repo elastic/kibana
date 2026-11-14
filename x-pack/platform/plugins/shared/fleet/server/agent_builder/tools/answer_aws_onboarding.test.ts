@@ -33,11 +33,14 @@ describe('answer_aws_onboarding', () => {
       getWorkflowExecution: jest.fn().mockResolvedValue({
         status: 'running',
         workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+        stepExecutions: [
+          { id: 'step-exec-1', stepId: 'approve_values', status: 'waiting_for_input' },
+        ],
       }),
     } as any;
 
     const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
-      { execution_id: 'exec-1', answer: { approved: true } },
+      { execution_id: 'exec-1', step_name: 'approve_values', answer: { approved: true } },
       { request, spaceId: 'default' } as any
     );
     const { results } = returned as unknown as {
@@ -48,7 +51,8 @@ describe('answer_aws_onboarding', () => {
       'exec-1',
       'default',
       { approved: true },
-      request
+      request,
+      { stepExecutionId: 'step-exec-1' }
     );
     expect(results[0].data).toEqual({ status: 'running' });
   });
@@ -62,12 +66,36 @@ describe('answer_aws_onboarding', () => {
     } as any;
 
     const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
-      { execution_id: 'exec-2', answer: { approved: true } },
+      { execution_id: 'exec-2', step_name: 'approve_values', answer: { approved: true } },
       { request, spaceId: 'default' } as any
     );
     const { results } = returned as unknown as { results: Array<{ type: string }> };
 
     expect(results[0].type).toBe('error');
+    expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('returns an error result and does not resume when the waiting step is not the one answered', async () => {
+    const workflowApi = {
+      resumeWorkflowExecution: jest.fn(),
+      getWorkflowExecution: jest.fn().mockResolvedValue({
+        status: 'waiting_for_input',
+        workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+        stepExecutions: [
+          { id: 'step-exec-1', stepId: 'approve_values', status: 'completed' },
+          { id: 'step-exec-2', stepId: 'ask_stack', status: 'waiting_for_input' },
+        ],
+      }),
+    } as any;
+
+    const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
+      { execution_id: 'exec-3', step_name: 'approve_values', answer: { approved: true } },
+      { request, spaceId: 'default' } as any
+    );
+    const { results } = returned as unknown as { results: Array<{ type: string; data: any }> };
+
+    expect(results[0].type).toBe('error');
+    expect(JSON.stringify(results[0])).toContain('ask_stack');
     expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
   });
 });

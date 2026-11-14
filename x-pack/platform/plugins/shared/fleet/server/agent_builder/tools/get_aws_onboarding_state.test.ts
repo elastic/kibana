@@ -64,7 +64,11 @@ describe('get_aws_onboarding_state', () => {
         step('discover', 1, {
           status: 'completed',
           input: { region: 'us-east-1' },
-          output: { services: [{ id: 'guardduty', name: 'GuardDuty', matched: true }], errors: [] },
+          output: {
+            region: 'us-west-2',
+            services: [{ id: 'guardduty', name: 'GuardDuty', matched: true }],
+            errors: [],
+          },
         }),
         step('resolve', 2, {
           status: 'completed',
@@ -77,10 +81,20 @@ describe('get_aws_onboarding_state', () => {
                 body: { vars: { secret_access_key: 'must-not-leak' } },
               },
             ],
+            permissions_summary: ['guardduty (aws-s3)'],
             suggested_identity_name: 'aws-onboarding',
           },
         }),
-        step('approve_values', 3, { status: 'waiting_for_input' }),
+        step('has_data', 3, {
+          status: 'completed',
+          output: {
+            has_data: false,
+            policies_with_data: ['p1'],
+            policies_without_data: ['p2'],
+            agents: [],
+          },
+        }),
+        step('approve_values', 4, { status: 'waiting_for_input' }),
       ],
     });
 
@@ -88,8 +102,13 @@ describe('get_aws_onboarding_state', () => {
     expect(data).toMatchObject({
       status: 'waiting_for_input',
       waiting: { step_name: 'approve_values', message: 'Approve the integration settings?' },
+      region: 'us-west-2',
       discovered_services: [{ id: 'guardduty', name: 'GuardDuty', matched: true }],
+      has_data: false,
+      policies_with_data: ['p1'],
+      policies_without_data: ['p2'],
       resolved: {
+        permissions_summary: ['guardduty (aws-s3)'],
         policies: [{ service: 'guardduty', name: 'aws-guardduty' }],
         suggested_identity_name: 'aws-onboarding',
       },

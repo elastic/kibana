@@ -93,11 +93,12 @@ export const createGetAwsOnboardingStateTool = ({
                   schema: state.waiting_input.schema,
                 }
               : null,
-          ...(discover && { discovered_services: discover.services }),
+          ...(discover && { region: discover.region, discovered_services: discover.services }),
           ...(resolve && {
             resolved: {
               policies: resolve.policies.map(({ service, name }) => ({ service, name })),
               integrations: resolve.integrations,
+              permissions_summary: resolve.permissions_summary,
               suggested_identity_name: resolve.suggested_identity_name,
             },
           }),
@@ -109,7 +110,11 @@ export const createGetAwsOnboardingStateTool = ({
             },
           }),
           ...(policies && { policies: policies.policies }),
-          ...(hasData && { has_data: hasData.has_data }),
+          ...(hasData && {
+            has_data: hasData.has_data,
+            policies_with_data: hasData.policies_with_data,
+            policies_without_data: hasData.policies_without_data,
+          }),
           ...(state.error_message && { error: state.error_message }),
         }),
       ],
