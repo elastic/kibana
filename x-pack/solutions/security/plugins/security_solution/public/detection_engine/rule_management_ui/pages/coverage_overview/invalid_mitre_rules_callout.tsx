@@ -84,7 +84,7 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
         <InvalidMitreRulesModal
           enabledRules={enabledRules}
           disabledRules={disabledRules}
-          framework={frameworkLabel}
+          framework={framework}
           onClose={closeModal}
         />
       )}

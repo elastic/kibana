@@ -9,7 +9,11 @@ import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import { getMitreFrameworkByThreatName } from '@kbn/security-mitre-attack-common';
 
-export { MITRE_ATTACK_FRAMEWORK, MITRE_ATLAS_FRAMEWORK } from '@kbn/security-mitre-attack-common';
+export {
+  MITRE_ATTACK_FRAMEWORK,
+  MITRE_ATLAS_FRAMEWORK,
+  MITRE_ICS_FRAMEWORK,
+} from '@kbn/security-mitre-attack-common';
 
 export type MitreThreatEntityType = 'tactic' | 'technique' | 'subtechnique';
 
@@ -22,7 +26,7 @@ export interface MitreThreatEntity {
 /**
  * Walks a rule's `threat` array and yields one `MitreThreatEntity` per
  * tactic, technique, and subtechnique entry found under a managed MITRE
- * framework (ATT&CK Enterprise or ATLAS). Each entity carries the resolved
+ * framework (ATT&CK Enterprise, ATLAS or ATT&CK for ICS). Each entity carries the resolved
  * `framework` of its parent threat item. Threat entries whose `framework`
  * string is not recognized are skipped.
  *

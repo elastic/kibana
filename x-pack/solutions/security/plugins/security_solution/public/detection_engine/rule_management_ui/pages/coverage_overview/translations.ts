@@ -6,10 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  getMitreFrameworkById,
-  THREAT_FRAMEWORK_DISPLAY_NAME,
-} from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_DISPLAY_NAME } from '@kbn/security-mitre-attack-common';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 
 export const COVERAGE_OVERVIEW_DASHBOARD_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.pageTitle',
@@ -271,11 +269,11 @@ export const COVERAGE_OVERVIEW_MITRE_ERROR_BODY = (framework: string) =>
       'The coverage matrix could not be displayed because {framework} data failed to load. Refresh the page to try again.',
   });
 
-export const INVALID_MITRE_ID_BADGE_TOOLTIP = (id: string) =>
+export const INVALID_MITRE_ID_BADGE_TOOLTIP = (id: string, framework: MitreFramework) =>
   i18n.translate(
     'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.invalidMitreIdBadgeTooltip',
     {
-      values: { id, framework: THREAT_FRAMEWORK_DISPLAY_NAME[getMitreFrameworkById(id)] },
+      values: { id, framework: THREAT_FRAMEWORK_DISPLAY_NAME[framework] },
       defaultMessage: 'Open {framework} reference for {id}',
     }
   );

@@ -55,8 +55,12 @@ describe('GetMitreEntitiesRequestQuery', () => {
       expect(result.framework).toBe('enterprise');
     });
 
+    it('accepts the ics framework', () => {
+      expect(GetMitreEntitiesRequestQuery.parse({ framework: 'ics' }).framework).toBe('ics');
+    });
+
     it('rejects an unknown framework value', () => {
-      expect(() => GetMitreEntitiesRequestQuery.parse({ framework: 'ics' })).toThrow();
+      expect(() => GetMitreEntitiesRequestQuery.parse({ framework: 'mobile' })).toThrow();
     });
   });
 

@@ -38,34 +38,58 @@ export const buildValidMitreIdsFromBuckets = (buckets: {
 });
 
 /**
- * Returns the unique MITRE IDs (tactic, technique, or subtechnique) referenced by a
- * rule's threat mappings that are not present in the valid id sets of their framework.
- * Returns an empty array when all referenced IDs are known.
+ * Returns, per framework, the unique MITRE IDs (tactic, technique, or subtechnique)
+ * referenced by a rule's threat mappings that are not present in the valid id sets of
+ * their framework. Frameworks with no invalid ids are omitted.
  *
  * Each entity is checked against `validIdsByFramework[entity.framework]`. When no sets
  * are provided for a framework (e.g. its data could not be loaded), entities from that
  * framework are skipped rather than flagged, so unavailable data never produces false
- * positives.
+ * positives. The same id under two frameworks is validated and reported per framework.
+ *
+ * Threat entries whose framework is not recognized are skipped. A missing or empty
+ * `threats` value results in an empty object.
+ */
+export const findInvalidMitreIdsByFramework = (
+  threats: Threats | undefined,
+  validIdsByFramework: ValidMitreIdSetsByFramework
+): Partial<Record<MitreFramework, string[]>> => {
+  const invalidIdsByFramework = new Map<MitreFramework, Set<string>>();
+
+  for (const { type, id, framework } of iterateMitreThreatEntities(threats)) {
+    const validIds = validIdsByFramework[framework];
+    if (validIds !== undefined && !validIds[type].has(id)) {
+      const invalidIds = invalidIdsByFramework.get(framework) ?? new Set<string>();
+      invalidIds.add(id);
+      invalidIdsByFramework.set(framework, invalidIds);
+    }
+  }
+
+  const result: Partial<Record<MitreFramework, string[]>> = {};
+  for (const [framework, invalidIds] of invalidIdsByFramework) {
+    result[framework] = Array.from(invalidIds);
+  }
+  return result;
+};
+
+/**
+ * Returns the unique MITRE IDs (tactic, technique, or subtechnique) referenced by a
+ * rule's threat mappings that are not present in the valid id sets of their framework,
+ * flattened across frameworks. Returns an empty array when all referenced IDs are known.
+ * See `findInvalidMitreIdsByFramework` for the per-framework form and the handling of
+ * unavailable framework data.
  *
  * Each invalid ID is reported at most once even if it is referenced multiple
  * times across the `threats` array, so callers can safely use the result to
  * key React elements.
- *
- * Threat entries whose framework is not recognized are skipped. A missing or empty
- * `threats` value results in an empty array.
  */
 export const findInvalidMitreIds = (
   threats: Threats | undefined,
   validIdsByFramework: ValidMitreIdSetsByFramework
 ): string[] => {
   const invalidIds = new Set<string>();
-
-  for (const { type, id, framework } of iterateMitreThreatEntities(threats)) {
-    const validIds = validIdsByFramework[framework];
-    if (validIds !== undefined && !validIds[type].has(id)) {
-      invalidIds.add(id);
-    }
+  for (const ids of Object.values(findInvalidMitreIdsByFramework(threats, validIdsByFramework))) {
+    ids.forEach((id) => invalidIds.add(id));
   }
-
   return Array.from(invalidIds);
 };

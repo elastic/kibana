@@ -6,7 +6,7 @@
  */
 
 import type { MitreFramework, MitreSubtechnique } from '@kbn/security-mitre-attack-common';
-import type { StixBundle, StixSourceName } from '../types';
+import type { StixBundle, StixFrameworkSource } from '../types';
 import {
   buildRevokedByTargetRefs,
   buildTacticByShortname,
@@ -18,7 +18,7 @@ import {
 
 /**
  * Matches a subtechnique ID and captures its parent technique ID:
- * 'T1003.001' -> 'T1003', 'AML.T0024.002' -> 'AML.T0024'. The optional 'AML.' prefix is
+ * 'T1003.001' -> 'T1003', 'T1691.001' -> 'T1691' (ICS), 'AML.T0024.002' -> 'AML.T0024'. The optional 'AML.' prefix is
  * part of the parent, so only the trailing '.NNN' segment is dropped.
  */
 const SUBTECHNIQUE_ID_REGEX = /^((?:AML\.)?T\d{4})\.\d{3}$/;
@@ -44,7 +44,7 @@ export const mapSubtechniques = (
   bundle: StixBundle,
   framework: MitreFramework,
   frameworkVersion: string,
-  sourceName: StixSourceName
+  source: StixFrameworkSource
 ): MitreSubtechnique[] => {
   const { objects } = bundle;
 
@@ -65,7 +65,7 @@ export const mapSubtechniques = (
 
   return subtechniqueEntities
     .flatMap((stixEntity) => {
-      const mitreReference = getMitreReference(stixEntity, sourceName);
+      const mitreReference = getMitreReference(stixEntity, source);
       if (mitreReference == null) return [];
 
       const parentStixId = subtechniqueParentRef.get(stixEntity.id);
@@ -75,7 +75,7 @@ export const mapSubtechniques = (
       if (parentStixId != null) {
         const parentEntity = entityById.get(parentStixId);
         const parentMitreReference =
-          parentEntity != null ? getMitreReference(parentEntity, sourceName) : null;
+          parentEntity != null ? getMitreReference(parentEntity, source) : null;
         const relationshipId = parentMitreReference?.id ?? dotPrefixId;
         if (parentMitreReference != null && relationshipId !== dotPrefixId) {
           throw new Error(
@@ -104,9 +104,9 @@ export const mapSubtechniques = (
             stixEntity.id,
             entityById,
             revokedByTargetRefs,
-            sourceName
+            source
           ),
-          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname, sourceName),
+          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname, source),
           technique_id: techniqueId,
         },
       ];

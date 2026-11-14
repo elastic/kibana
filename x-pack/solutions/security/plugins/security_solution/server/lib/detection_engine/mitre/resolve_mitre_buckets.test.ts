@@ -81,6 +81,14 @@ describe('resolveMitreBuckets — managed path', () => {
     expect(mockList).toHaveBeenCalledWith({ framework: 'atlas' });
   });
 
+  it('forwards the ics framework to list()', async () => {
+    const { client, mockList } = makeClient();
+
+    await resolveMitreBuckets(client, 'ics');
+
+    expect(mockList).toHaveBeenCalledWith({ framework: 'ics' });
+  });
+
   it('includes the framework in the "not initialized" error', async () => {
     const { client } = makeClient(true);
 
@@ -150,6 +158,9 @@ describe('resolveMitreBuckets — legacy fallback path', () => {
     await expect(resolveMitreBuckets(undefined, 'atlas')).rejects.toThrow(
       'Legacy MITRE data source only provides the enterprise framework (requested: atlas)'
     );
+    await expect(resolveMitreBuckets(undefined, 'ics')).rejects.toThrow(
+      'Legacy MITRE data source only provides the enterprise framework (requested: ics)'
+    );
   });
 });
 
@@ -209,6 +220,17 @@ describe('resolveMitreBucketsByFramework', () => {
 
     expect(Object.keys(result)).toEqual(['enterprise']);
     expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('resolves ics independently and never attempts it when no client is given', async () => {
+    const { client, mockList } = makeFrameworkClient('ok');
+
+    const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'ics']);
+    expect(mockList).toHaveBeenCalledWith({ framework: 'ics' });
+    expect(Object.keys(result).sort()).toEqual(['enterprise', 'ics']);
+
+    const legacy = await resolveMitreBucketsByFramework(undefined, ['enterprise', 'ics']);
+    expect(Object.keys(legacy)).toEqual(['enterprise']);
   });
 
   it('returns an empty record when every framework rejects', async () => {

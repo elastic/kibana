@@ -11,7 +11,10 @@ import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { getMitreFrameworkByThreatName } from '@kbn/security-mitre-attack-common';
+import {
+  MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS,
+  getMitreFrameworkByThreatName,
+} from '@kbn/security-mitre-attack-common';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
@@ -158,10 +161,15 @@ const DEFAULT_FIELDS_TO_FETCH = [
   'related_integrations',
 ] as const;
 
+const isMitreFrameworkEnabledInConsumers = (frameworkName: string): boolean => {
+  const framework = getMitreFrameworkByThreatName(frameworkName);
+  return framework !== undefined && MITRE_FRAMEWORKS_ENABLED_IN_CONSUMERS.includes(framework);
+};
+
 export const reduceMitreToTacticsOnly = (rule: RuleResponse) => ({
   ...rule,
   threat: (rule.threat ?? [])
-    .filter((entry) => getMitreFrameworkByThreatName(entry.framework) !== undefined)
+    .filter((entry) => isMitreFrameworkEnabledInConsumers(entry.framework))
     .map((entry) => ({
       framework: entry.framework,
       tactic: { id: entry.tactic?.id, name: entry.tactic?.name },

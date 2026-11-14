@@ -29,7 +29,8 @@ interface GetByIdArgs {
  * The framework defaults to enterprise ATT&CK and the version to the latest indexed one for
  * that framework. Because the saved object id is `{framework}:{framework_version}:{id}`,
  * looking up an ATLAS entity (`AML.*` ids) requires passing `framework: 'atlas'`; with the
- * default framework such ids resolve to `undefined`.
+ * default framework such ids resolve to `undefined`. ICS ids share their format with Enterprise
+ * ids, so ICS lookups must pass `framework: 'ics'` too.
  */
 export const getById = async ({
   savedObjectsRepository,

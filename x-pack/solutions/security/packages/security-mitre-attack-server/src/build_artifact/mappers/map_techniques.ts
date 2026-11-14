@@ -6,7 +6,7 @@
  */
 
 import type { MitreFramework, MitreTechnique } from '@kbn/security-mitre-attack-common';
-import type { StixBundle, StixSourceName } from '../types';
+import type { StixBundle, StixFrameworkSource } from '../types';
 import {
   buildRevokedByTargetRefs,
   buildTacticByShortname,
@@ -20,7 +20,7 @@ export const mapTechniques = (
   bundle: StixBundle,
   framework: MitreFramework,
   frameworkVersion: string,
-  sourceName: StixSourceName
+  source: StixFrameworkSource
 ): MitreTechnique[] => {
   const { objects } = bundle;
 
@@ -34,7 +34,7 @@ export const mapTechniques = (
 
   return techniqueEntities
     .flatMap((stixEntity) => {
-      const mitreReference = getMitreReference(stixEntity, sourceName);
+      const mitreReference = getMitreReference(stixEntity, source);
       if (mitreReference == null) return [];
       return [
         {
@@ -51,9 +51,9 @@ export const mapTechniques = (
             stixEntity.id,
             entityById,
             revokedByTargetRefs,
-            sourceName
+            source
           ),
-          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname, sourceName),
+          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname, source),
         },
       ];
     })

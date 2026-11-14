@@ -6,7 +6,7 @@
  */
 
 import type { MitreFramework, MitreTactic } from '@kbn/security-mitre-attack-common';
-import type { StixBundle, StixSourceName } from '../types';
+import type { StixBundle, StixFrameworkSource } from '../types';
 import { buildRevokedByTargetRefs, getMitreReference, resolveSupersededBy } from './helpers';
 
 /**
@@ -17,7 +17,7 @@ export const mapTactics = (
   bundle: StixBundle,
   framework: MitreFramework,
   frameworkVersion: string,
-  sourceName: StixSourceName
+  source: StixFrameworkSource
 ): MitreTactic[] => {
   const { objects } = bundle;
 
@@ -31,7 +31,7 @@ export const mapTactics = (
   return objects
     .filter((entity) => entity.type === 'x-mitre-tactic')
     .flatMap((stixEntity) => {
-      const mitreReference = getMitreReference(stixEntity, sourceName);
+      const mitreReference = getMitreReference(stixEntity, source);
       if (mitreReference == null) return [];
 
       const position = tacticPositionByRef.get(stixEntity.id);
@@ -57,7 +57,7 @@ export const mapTactics = (
             stixEntity.id,
             entityById,
             revokedByTargetRefs,
-            sourceName
+            source
           ),
           position,
         },

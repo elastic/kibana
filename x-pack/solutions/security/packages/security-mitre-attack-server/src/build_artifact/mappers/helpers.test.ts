@@ -12,13 +12,22 @@ import {
   getMockRelationshipEntity,
   getMockMitreExternalReferences,
   getMockAtlasTechniqueEntity,
+  getMockIcsTacticEntity,
+  getMockIcsTechniqueEntity,
+  getMockIcsT1xxxTechniqueEntity,
 } from '../stix_entities.mock';
-import { getMitreReference, resolveTacticIds, resolveSupersededBy } from './helpers';
+import {
+  buildTacticByShortname,
+  getMitreReference,
+  resolveTacticIds,
+  resolveSupersededBy,
+} from './helpers';
+import { ATLAS_STIX_SOURCE, ENTERPRISE_STIX_SOURCE, ICS_STIX_SOURCE } from '../stix_sources';
 
 describe('getMitreReference', () => {
   it('returns id and reference for a valid mitre-attack external reference', () => {
     const tactic = getMockTacticEntity();
-    const result = getMitreReference(tactic, 'mitre-attack');
+    const result = getMitreReference(tactic, ENTERPRISE_STIX_SOURCE);
     expect(result).toEqual({
       id: 'TA0006',
       reference: 'https://attack.mitre.org/tactics/TA0006/',
@@ -35,14 +44,14 @@ describe('getMitreReference', () => {
         },
       ],
     });
-    const result = getMitreReference(tactic, 'mitre-attack');
+    const result = getMitreReference(tactic, ENTERPRISE_STIX_SOURCE);
     expect(result?.reference).toBe('https://attack.mitre.org/tactics/TA0006/');
   });
 
   it('matches the source name exactly, so an atlas technique resolves to its mitre-atlas reference', () => {
     // The mock ATLAS technique also carries a 'mitre-attack' reference to T1567.
     const atlasTechnique = getMockAtlasTechniqueEntity();
-    expect(getMitreReference(atlasTechnique, 'mitre-atlas')).toEqual({
+    expect(getMitreReference(atlasTechnique, ATLAS_STIX_SOURCE)).toEqual({
       id: 'AML.T0024',
       reference: 'https://atlas.mitre.org/techniques/AML.T0024/',
     });
@@ -50,11 +59,11 @@ describe('getMitreReference', () => {
 
   it('returns the mitre-attack reference of an atlas technique only when explicitly asked for it', () => {
     const atlasTechnique = getMockAtlasTechniqueEntity();
-    expect(getMitreReference(atlasTechnique, 'mitre-attack')?.id).toBe('T1567');
+    expect(getMitreReference(atlasTechnique, ENTERPRISE_STIX_SOURCE)?.id).toBe('T1567');
   });
 
   it('returns null for an enterprise entity when asked for a mitre-atlas reference', () => {
-    expect(getMitreReference(getMockTacticEntity(), 'mitre-atlas')).toBeNull();
+    expect(getMitreReference(getMockTacticEntity(), ATLAS_STIX_SOURCE)).toBeNull();
   });
 
   it('returns null when there is no mitre-attack external reference', () => {
@@ -63,7 +72,7 @@ describe('getMitreReference', () => {
       type: 'attack-pattern',
       external_references: [{ source_name: 'capec', external_id: 'CAPEC-1' }],
     };
-    expect(getMitreReference(entity, 'mitre-attack')).toBeNull();
+    expect(getMitreReference(entity, ENTERPRISE_STIX_SOURCE)).toBeNull();
   });
 
   it('returns null when external_id is missing', () => {
@@ -78,7 +87,7 @@ describe('getMitreReference', () => {
         },
       ],
     };
-    expect(getMitreReference(entity, 'mitre-attack')).toBeNull();
+    expect(getMitreReference(entity, ENTERPRISE_STIX_SOURCE)).toBeNull();
   });
 
   it('returns null when url is missing', () => {
@@ -93,7 +102,7 @@ describe('getMitreReference', () => {
         },
       ],
     };
-    expect(getMitreReference(entity, 'mitre-attack')).toBeNull();
+    expect(getMitreReference(entity, ENTERPRISE_STIX_SOURCE)).toBeNull();
   });
 });
 
@@ -116,7 +125,7 @@ describe('resolveTacticIds', () => {
         { kill_chain_name: 'mitre-attack', phase_name: 'credential-access' }, // unsorted input
       ],
     });
-    const result = resolveTacticIds(technique, tacticByShortname, 'mitre-attack');
+    const result = resolveTacticIds(technique, tacticByShortname, ENTERPRISE_STIX_SOURCE);
     expect(result).toEqual(['TA0002', 'TA0006']); // sorted
   });
 
@@ -126,7 +135,7 @@ describe('resolveTacticIds', () => {
       type: 'attack-pattern',
       kill_chain_phases: [{ kill_chain_name: 'other-chain', phase_name: 'credential-access' }],
     };
-    expect(resolveTacticIds(technique, tacticByShortname, 'mitre-attack')).toEqual([]);
+    expect(resolveTacticIds(technique, tacticByShortname, ENTERPRISE_STIX_SOURCE)).toEqual([]);
   });
 
   it('only considers phases from the requested kill chain', () => {
@@ -139,8 +148,10 @@ describe('resolveTacticIds', () => {
         { kill_chain_name: 'mitre-attack', phase_name: 'credential-access' },
       ],
     });
-    expect(resolveTacticIds(technique, tacticByShortname, 'mitre-attack')).toEqual(['TA0006']);
-    expect(() => resolveTacticIds(technique, tacticByShortname, 'mitre-atlas')).toThrow(
+    expect(resolveTacticIds(technique, tacticByShortname, ENTERPRISE_STIX_SOURCE)).toEqual([
+      'TA0006',
+    ]);
+    expect(() => resolveTacticIds(technique, tacticByShortname, ATLAS_STIX_SOURCE)).toThrow(
       /Cannot resolve kill_chain phase 'exfiltration'/
     );
   });
@@ -149,7 +160,7 @@ describe('resolveTacticIds', () => {
     const technique = getMockTechniqueEntity({
       kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'nonexistent-phase' }],
     });
-    expect(() => resolveTacticIds(technique, tacticByShortname, 'mitre-attack')).toThrow(
+    expect(() => resolveTacticIds(technique, tacticByShortname, ENTERPRISE_STIX_SOURCE)).toThrow(
       /Cannot resolve kill_chain phase 'nonexistent-phase'/
     );
   });
@@ -159,7 +170,7 @@ describe('resolveTacticIds', () => {
       revoked: true,
       kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'nonexistent-phase' }],
     });
-    expect(resolveTacticIds(technique, tacticByShortname, 'mitre-attack')).toEqual([]);
+    expect(resolveTacticIds(technique, tacticByShortname, ENTERPRISE_STIX_SOURCE)).toEqual([]);
   });
 
   it('returns [] (skips) for a deprecated entity with an unresolvable phase', () => {
@@ -167,7 +178,7 @@ describe('resolveTacticIds', () => {
       x_mitre_deprecated: true,
       kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'nonexistent-phase' }],
     });
-    expect(resolveTacticIds(technique, tacticByShortname, 'mitre-attack')).toEqual([]);
+    expect(resolveTacticIds(technique, tacticByShortname, ENTERPRISE_STIX_SOURCE)).toEqual([]);
   });
 });
 
@@ -192,7 +203,7 @@ describe('resolveSupersededBy', () => {
       'attack-pattern--revoked',
       entityByIdMulti,
       revokedByTargetRefs,
-      'mitre-attack'
+      ENTERPRISE_STIX_SOURCE
     );
     expect(result).toEqual(['T1002', 'T1003']); // sorted
   });
@@ -203,7 +214,7 @@ describe('resolveSupersededBy', () => {
       'attack-pattern--revoked',
       entityById,
       revokedByTargetRefs,
-      'mitre-attack'
+      ENTERPRISE_STIX_SOURCE
     );
     expect(result).toBeUndefined();
   });
@@ -225,8 +236,30 @@ describe('resolveSupersededBy', () => {
       'attack-pattern--revoked',
       entityById,
       revokedByTargetRefs,
-      'mitre-attack'
+      ENTERPRISE_STIX_SOURCE
     );
     expect(result).toEqual(['T1003']);
+  });
+});
+
+describe('ICS source', () => {
+  it('accepts either mitre-attack or mitre-ics-attack as the canonical reference source_name', () => {
+    expect(getMitreReference(getMockIcsTechniqueEntity(), ICS_STIX_SOURCE)?.id).toBe('T0800');
+    expect(getMitreReference(getMockIcsT1xxxTechniqueEntity(), ICS_STIX_SOURCE)?.id).toBe('T1691');
+  });
+
+  it('does not match an ICS entity under the Enterprise source when only mitre-ics-attack is present', () => {
+    expect(getMitreReference(getMockIcsTechniqueEntity(), ENTERPRISE_STIX_SOURCE)).toBeNull();
+  });
+
+  it('resolves tactic ids through the mitre-ics-attack kill chain only', () => {
+    const tacticByShortname = buildTacticByShortname([getMockIcsTacticEntity()]);
+
+    expect(
+      resolveTacticIds(getMockIcsTechniqueEntity(), tacticByShortname, ICS_STIX_SOURCE)
+    ).toEqual(['TA0100']);
+    expect(
+      resolveTacticIds(getMockIcsTechniqueEntity(), tacticByShortname, ENTERPRISE_STIX_SOURCE)
+    ).toEqual([]);
   });
 });

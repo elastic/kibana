@@ -72,6 +72,24 @@ const createMockDeps = () => {
 };
 
 describe('buildMitreCoverageFromRules', () => {
+  it('ignores ICS entries and does not count ICS-only rules as mapped', () => {
+    const icsEntry = {
+      ...mitre('TA0107', 'Inhibit Response Function'),
+      framework: 'MITRE ATT&CK ICS',
+    };
+    const result = buildMitreCoverageFromRules(
+      rules(
+        rule([icsEntry]),
+        rule([icsEntry, mitre('TA0001', 'Initial Access')]),
+        rule([mitre('TA0001', 'Initial Access')])
+      )
+    );
+
+    expect(result.total_with_mitre_mapping).toBe(2);
+    expect(result.tactics.map(({ id }) => id)).toEqual(['TA0001']);
+    expect(result.tactics[0].count).toBe(2);
+  });
+
   it('keeps each technique paired with its own name (regression: the flattened-agg bug)', () => {
     // One rule mapping to two techniques. The old aggregation-based implementation
     // cross-contaminated names across techniques; reading the structured object keeps them paired.

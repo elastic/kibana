@@ -15,7 +15,11 @@ export {
   createAtlasMitreTactic,
   createAtlasMitreTechnique,
   createAtlasMitreSubtechnique,
+  createIcsMitreTactic,
+  createIcsMitreTechnique,
+  createIcsMitreSubtechnique,
   DEFAULT_MOCK_FRAMEWORK_VERSION,
   OLDER_MOCK_FRAMEWORK_VERSION,
   ATLAS_MOCK_FRAMEWORK_VERSION,
+  ICS_MOCK_FRAMEWORK_VERSION,
 } from './create_mitre_entity';

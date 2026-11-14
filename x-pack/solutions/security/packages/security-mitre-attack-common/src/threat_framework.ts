@@ -15,6 +15,7 @@ import type { MitreFramework } from './schema';
 export const THREAT_FRAMEWORK_NAME: Record<MitreFramework, string> = {
   enterprise: 'MITRE ATT&CK',
   atlas: 'MITRE ATLAS',
+  ics: 'MITRE ATT&CK ICS',
 };
 
 /**
@@ -24,12 +25,15 @@ export const THREAT_FRAMEWORK_NAME: Record<MitreFramework, string> = {
 export const THREAT_FRAMEWORK_DISPLAY_NAME: Record<MitreFramework, string> = {
   enterprise: 'MITRE ATT&CK®',
   atlas: 'MITRE ATLAS™',
+  ics: 'MITRE ATT&CK® for ICS',
 };
 
 /** Framework string carried by MITRE ATT&CK Enterprise threat entries on rules and alerts. */
 export const MITRE_ATTACK_FRAMEWORK = THREAT_FRAMEWORK_NAME.enterprise;
 /** Framework string carried by MITRE ATLAS threat entries on rules and alerts. */
 export const MITRE_ATLAS_FRAMEWORK = THREAT_FRAMEWORK_NAME.atlas;
+/** Framework string carried by MITRE ATT&CK for ICS threat entries on rules and alerts. */
+export const MITRE_ICS_FRAMEWORK = THREAT_FRAMEWORK_NAME.ics;
 
 const MITRE_FRAMEWORK_BY_THREAT_NAME = new Map<string, MitreFramework>(
   (Object.entries(THREAT_FRAMEWORK_NAME) as Array<[MitreFramework, string]>).map(
@@ -49,13 +53,7 @@ export const getMitreFrameworkByThreatName = (
 ): MitreFramework | undefined =>
   threatFrameworkName == null ? undefined : MITRE_FRAMEWORK_BY_THREAT_NAME.get(threatFrameworkName);
 
-/**
- * Infers the framework from a MITRE entity id alone. ATLAS ids carry the `AML.` prefix;
- * everything else is treated as ATT&CK Enterprise. Use only where the threat entry's
- * `framework` string is unavailable.
- */
-export const getMitreFrameworkById = (id: string): MitreFramework =>
-  id.startsWith(ATLAS_ID_PREFIX) ? 'atlas' : 'enterprise';
+export const isAtlasEntityId = (id: string): boolean => id.startsWith(ATLAS_ID_PREFIX);
 
 const MITRE_ATTACK_BASE_URL = 'https://attack.mitre.org';
 const MITRE_ATLAS_BASE_URL = 'https://atlas.mitre.org';
@@ -90,13 +88,14 @@ const buildAtlasReferenceUrl = (id: string): string | undefined => {
 };
 
 /**
- * Builds the public MITRE reference URL for a tactic, technique, or subtechnique id.
- * The framework is inferred from the id when not given. Returns undefined for ids that
- * do not match the framework's id format.
+ * Builds the public MITRE reference URL for a tactic, technique, or subtechnique id under the
+ * given framework. ATT&CK for ICS pages live on attack.mitre.org with the same paths as
+ * Enterprise, so both share one builder. Returns undefined for ids that do not match the
+ * framework's id format.
  */
 export const buildMitreReferenceUrl = (
   id: string,
-  framework: MitreFramework = getMitreFrameworkById(id)
+  framework: MitreFramework
 ): string | undefined => {
   if (!id) {
     return undefined;
