@@ -61,6 +61,7 @@ import { finishedWithNoPendingCallbacks, getContentStream } from '../content_str
 import type { EmailNotificationService } from '../../services/notifications/email_notification_service';
 import type { ScheduledReportType } from '../../types';
 import { retryOnError } from '../retry_on_error';
+import { isNonRetryableError } from '../is_non_retryable_error';
 import type { RenderRetryState } from './render_retry';
 import { attemptsMade, decideRenderRetry } from './render_retry';
 import { reportingTelemetry } from './reporting_telemetry';
@@ -794,11 +795,15 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             }
 
             const attemptCount = attemptsMade(renderRetryState, taskAttempts ?? 0, attempts);
-            const isLastAttempt = renderRetry
-              ? renderRetry.action === RenderRetryAction.FAIL
-              : attemptCount
-              ? attemptCount >= maxAttempts.maxTaskAttempts
-              : true;
+            // The browser or the PDF worker died, which the same report would likely cause again.
+            const isNonRetryable = isNonRetryableError(failedToExecuteErr);
+            const isLastAttempt =
+              isNonRetryable ||
+              (renderRetry
+                ? renderRetry.action === RenderRetryAction.FAIL
+                : attemptCount
+                ? attemptCount >= maxAttempts.maxTaskAttempts
+                : true);
             eventLog.logError(failedToExecuteErr);
 
             // A prior attempt may have advanced the doc's seq_no before failing; refresh so the
@@ -807,8 +812,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               await this.refreshReportSeqNo(report);
             }
 
+            let isFailureSaved = true;
             await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
               (failedToSaveError) => {
+                isFailureSaved = false;
                 errorLogger(
                   this.logger,
                   `Error in saving execution error ${jobId}`,
@@ -822,7 +829,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               cancellationToken.cancel();
             }
 
-            if (isLastAttempt) {
+            if (isNonRetryable) {
+              this.logger.info(
+                `Job ${jobId} failed and will not be retried, as it would likely fail again. Error: ${failedToExecuteErr.message}.`,
+                { tags: [jobId] }
+              );
+            } else if (isLastAttempt) {
               this.logger.info(
                 `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`,
                 { tags: [jobId] }
@@ -842,6 +854,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               (isLastAttempt && attemptCount > (taskAttempts ?? 0))
             ) {
               // A reschedule may have restarted Task Manager's count: don't rerun a spent report.
+              throwUnrecoverableError(failedToExecuteErr);
+            }
+            // An unrecoverable error deletes a recurring task, so a scheduled report waits for its
+            // next run instead. If the failure was not saved, retry rather than leave the report
+            // processing with no task.
+            if (isNonRetryable && isFailureSaved && !taskInstance.schedule) {
               throwUnrecoverableError(failedToExecuteErr);
             }
 

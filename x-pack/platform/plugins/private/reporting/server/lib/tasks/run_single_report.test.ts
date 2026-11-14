@@ -27,6 +27,7 @@ import {
   type ExportType,
   type ReportingConfigType,
 } from '@kbn/reporting-server';
+import { errors } from '@kbn/screenshotting-plugin/common';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource, isUnrecoverableError } from '@kbn/task-manager-plugin/server/task_running';
@@ -1050,6 +1051,135 @@ describe('Run Single Report Task', () => {
         error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
       }
     );
+  });
+
+  describe('errors that are not retried', () => {
+    const setupFailingTask = async (error: Error) => {
+      configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+      mockReporting = await createMockReportingCore(configType);
+      mockReporting.getExportTypesRegistry().register({
+        id: 'test1',
+        name: 'Test1',
+        setup: jest.fn(),
+        start: jest.fn(),
+        createJob: () => new Promise(() => {}),
+        runTask: jest.fn().mockRejectedValue(error),
+        shouldNotifyUsage: () => true,
+        getFeatureUsageName: () => 'Reporting: test1 single export',
+        notifyUsage: jest.fn(),
+        jobContentEncoding: 'base64',
+        jobType: 'test1',
+        validLicenses: [],
+      } as unknown as ExportType);
+      const store = await mockReporting.getStore();
+      store.setReportFailed = jest.fn().mockResolvedValue({ _id: 'test', jobtype: 'test1' });
+      store.setReportError = jest.fn().mockResolvedValue({ _id: 'test', jobtype: 'test1' });
+      logger.info = jest.fn();
+      logger.error = jest.fn();
+
+      const task = new RunSingleReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      jest
+        // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+        .spyOn(task, 'claimJob')
+        .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+      jest
+        // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
+        .spyOn(task, 'getEventTracker')
+        .mockReturnValue(mockEventTracker as never);
+      await task.init(taskManagerMock.createStart());
+      const taskRunner = task.getTaskDefinition().createTaskRunner({
+        taskInstance: {
+          id: 'random-task-id',
+          attempts: 1, // the first of three attempts
+          params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      const run = (): Promise<Error> =>
+        taskRunner.run().then(
+          () => {
+            throw new Error('Expected the task run to fail');
+          },
+          (runError: Error) => runError
+        );
+
+      return { store, run };
+    };
+
+    it('fails the report on its first attempt when the browser closed unexpectedly', async () => {
+      const { store, run } = await setupFailingTask(
+        new errors.BrowserClosedUnexpectedly('Browser was closed unexpectedly!')
+      );
+
+      const error = await run();
+
+      expect(isUnrecoverableError(error)).toBe(true);
+      expect(store.setReportError).not.toHaveBeenCalled();
+      expect(store.setReportFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ _id: 'test' }),
+        expect.objectContaining({
+          completed_at: expect.any(String),
+          output: expect.objectContaining({
+            error_code: 'browser_unexpectedly_closed_error',
+            content: expect.stringContaining('The report was not retried'),
+          }),
+        })
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('failed and will not be retried, as it would likely fail again'),
+        { tags: ['test1'] }
+      );
+    });
+
+    it('fails the report on its first attempt when the PDF worker ran out of memory', async () => {
+      const { store, run } = await setupFailingTask(
+        new errors.PdfWorkerOutOfMemoryError('Cannot generate PDF due to low memory')
+      );
+
+      const error = await run();
+
+      expect(isUnrecoverableError(error)).toBe(true);
+      expect(store.setReportError).not.toHaveBeenCalled();
+      expect(store.setReportFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ _id: 'test' }),
+        expect.objectContaining({
+          output: expect.objectContaining({
+            error_code: 'pdf_worker_out_of_memory_error',
+            content: expect.stringContaining('The report was not retried'),
+          }),
+        })
+      );
+    });
+
+    it('keeps the task when the failed status could not be saved', async () => {
+      const { store, run } = await setupFailingTask(
+        new errors.BrowserClosedUnexpectedly('Browser was closed unexpectedly!')
+      );
+      store.setReportFailed = jest.fn().mockRejectedValue(new Error('version conflict'));
+
+      const error = await run();
+
+      // removing the task would leave the report processing forever
+      expect(isUnrecoverableError(error)).toBe(false);
+      expect(store.setReportFailed).toHaveBeenCalledTimes(1);
+    });
+
+    it('still retries a failed screenshot capture', async () => {
+      const { store, run } = await setupFailingTask(
+        new errors.FailedToCaptureScreenshot('Protocol error: Internal error')
+      );
+
+      const error = await run();
+
+      expect(isUnrecoverableError(error)).toBe(false);
+      expect(store.setReportFailed).not.toHaveBeenCalled();
+      expect(store.setReportError).toHaveBeenCalledTimes(1);
+    });
   });
 
   // Regression test for https://github.com/elastic/kibana/issues/255230 and
