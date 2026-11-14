@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EMPTY, filter, map, scan, switchMap, tap, type Observable } from 'rxjs';
+import { EMPTY, filter, map, switchMap, tap, type Observable } from 'rxjs';
 import type {
   ActiveConversation,
   AgentBuilderPluginStart,
@@ -34,8 +34,6 @@ export interface ConversationChange {
   conversationId: string | undefined;
   /** The conversation's dashboard attachments, each at its latest version. */
   attachments: DashboardAttachment[];
-  /** Whether a new conversation started, which only gets an id once its first message is sent. */
-  isNewConversationStart: boolean;
 }
 
 export interface ChatAdapter {
@@ -97,19 +95,11 @@ export const createChatAdapter = ({
         draftAttachmentId.next();
       }
     }),
-    scan<ActiveConversation | null, ConversationChange | null>((previous, change) => {
-      if (!change) {
-        return null;
-      }
-      const { id: conversationId, conversation } = change;
-      return {
-        conversationId,
-        attachments: toDashboardAttachments(conversation),
-        // a new conversation is published again as it changes, before it gets its id
-        isNewConversationStart:
-          !conversationId && (previous === null || previous.conversationId !== undefined),
-      };
-    }, null)
+    map((change) =>
+      change
+        ? { conversationId: change.id, attachments: toDashboardAttachments(change.conversation) }
+        : null
+    )
   );
 
   const dashboardUpdates$ = activeConversation$.pipe(

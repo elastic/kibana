@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { concatMap, debounceTime, filter, map, merge, Observable, takeWhile, tap } from 'rxjs';
+import {
+  concatMap,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+  Observable,
+  takeWhile,
+  tap,
+} from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
@@ -83,8 +93,9 @@ export const registerDashboardAppIntegration = ({
   const isLinkable = () => canWriteDashboards && canApplyAgentChangesInPlace(api);
 
   const reconcile = async (): Promise<JobOutcome> => {
-    const dashboardId = isLinkable() ? api.savedObjectId$.getValue() : undefined;
-    const dashboardAttachment = isLinkable()
+    const linkable = isLinkable();
+    const dashboardId = linkable ? api.savedObjectId$.getValue() : undefined;
+    const dashboardAttachment = linkable
       ? findDashboardAttachment({ attachments: attachments ?? [], dashboardId })
       : undefined;
     const action = reconcileStaging({
@@ -96,7 +107,7 @@ export const registerDashboardAppIntegration = ({
       chat.unstage();
       return undefined;
     }
-    if (!isLinkable()) {
+    if (!linkable) {
       unlinkedStagedAttachmentIds.add(action.attachmentId);
     }
     chat.stage({
@@ -169,9 +180,12 @@ export const registerDashboardAppIntegration = ({
       attachments = change?.attachments;
       conversationId = change?.conversationId;
     }),
-    // a new conversation needs the dashboard once; an existing one is reconciled whenever it was
-    // switched to, fetched again, or just got its id
-    filter((change) => Boolean(change && (change.conversationId || change.isNewConversationStart))),
+    // a new conversation is published again while its first message is sent, before it gets its
+    // id, so it needs the dashboard only once
+    distinctUntilChanged((previous, current) =>
+      Boolean(previous && current && !previous.conversationId && !current.conversationId)
+    ),
+    filter(Boolean),
     // the chat can only stage attachments once the change of the conversation has propagated
     debounceTime(0),
     map(() => reconcile)
