@@ -113,6 +113,7 @@ export const AddParamForm = ({
           name="tags"
           render={({ field }) => (
             <EuiComboBox
+              data-test-subj="syntheticsAddParamFormTagsComboBox"
               fullWidth
               aria-label={TAGS_LABEL}
               placeholder={TAGS_LABEL}

@@ -31,6 +31,7 @@ export function TagsField({
         control={control}
         render={({ field }) => (
           <TagsComboBox
+            data-test-subj="syntheticsPrivateLocationTagsComboBox"
             isDisabled={isDisabled}
             fullWidth
             aria-label={TAGS_LABEL}
