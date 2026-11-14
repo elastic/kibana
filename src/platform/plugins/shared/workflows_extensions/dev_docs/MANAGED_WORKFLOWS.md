@@ -420,6 +420,8 @@ but intentionally tolerate extension-registered triggers, connectors, and plugin
 Full validation of those runtime extensions requires a plugin-level schema built from the
 workflows extension registries.
 
+> **Page triggers are not supported in managed workflows.** The managed install never creates or retires the workflow page that a `page` trigger needs, and a page belongs to one space, so a global install could not have one. If you need a page, create the workflow in a specific space through the workflows API instead.
+
 ## 8) Visibility
 
 Managed workflows are hidden from selector UIs by default. Use the optional `visibility` field when a managed workflow should appear in a specific product surface.

@@ -204,6 +204,7 @@ When reviewing a PR that adds or modifies managed workflows:
 - [ ] `execute` passes request and requesting space (not `'*'` for execution stamping)
 - [ ] Template definitions updated in `templateRepresentativeValuesById` when added/changed
 - [ ] YAML references triggers/steps the owning plugin (or dependencies) actually register
+- [ ] YAML has no `page` trigger: managed workflows do not support pages
 - [ ] Every raw request path carries `/s/<executing space>/` (usually `{{ workflow.spaceId }}`) across `kibana.request`, `with.request`, `with.form_data`, or the exception is justified in the PR
 
 ## Reference implementations

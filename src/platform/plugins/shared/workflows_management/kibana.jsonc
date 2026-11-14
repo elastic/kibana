@@ -32,7 +32,8 @@
       "embeddable",
       "controls",
       "uiActions",
-      "licensing"
+      "licensing",
+      "encryptedSavedObjects"
     ],
     "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
     "runtimePluginDependencies": ["agentBuilder"],

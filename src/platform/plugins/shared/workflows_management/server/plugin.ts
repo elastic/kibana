@@ -30,8 +30,9 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
-import { WorkflowsManagementFeatureConfig } from './features';
+import { getWorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { WorkflowPagesService } from './pages/workflow_pages_service';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
@@ -61,6 +62,7 @@ export class WorkflowsPlugin
   private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
   private audit: WorkflowManagementAuditLog | null = null;
   private unregisterHitlLifecycleAuditor: (() => void) | null = null;
+  private pagesService?: WorkflowPagesService;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -76,7 +78,21 @@ export class WorkflowsPlugin
 
     registerUISettings(core, plugins);
 
-    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
+    plugins.features?.registerKibanaFeature(
+      getWorkflowsManagementFeatureConfig({ pagesEnabled: this.config.pages.enabled })
+    );
+
+    // `workflow-page` is a work-in-progress saved object type: it is registered only with
+    // `workflowsManagement.pages.enabled`, so its shape can change until pages graduate.
+    // See docs/extend/key-concepts/saved-objects/validate.md#saved-objects-wip-types-scenario-b.
+    // TODO: register unconditionally when pages graduate.
+    if (this.config.pages.enabled) {
+      this.pagesService = new WorkflowPagesService();
+      this.pagesService.setup({
+        savedObjects: core.savedObjects,
+        encryptedSavedObjects: plugins.encryptedSavedObjects,
+      });
+    }
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
@@ -85,7 +101,7 @@ export class WorkflowsPlugin
       plugins,
       this.logger,
       this.kibanaVersion,
-      this.config.pages.enabled
+      this.pagesService
     );
     this.workflowsService = workflowsService;
 
