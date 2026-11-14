@@ -10,6 +10,7 @@ import { alertOutcomeBenignClassificationJudge } from './alert_outcome_benign_cl
 import { alertOutcomeRcaAccuracyJudge } from './alert_outcome_rca_accuracy';
 import { alertOutcomeRcaReportingGapJudge } from './alert_outcome_rca_reporting_gap';
 import { conclusionQualityJudge } from './conclusion_quality';
+import { missingDataJudge } from './missing_data';
 import { wikiPageInfluenceJudge } from './wiki_page_influence';
 import { wikiPagesReadJudge } from './wiki_pages_read';
 import { investigationProcessJudge } from './investigation_process';
@@ -47,6 +48,7 @@ export const referenceFreeJudges: readonly RegisteredEvaluatorDefinition[] = [
   rcaRewardJudge,
   investigationProcessJudge,
   conclusionQualityJudge,
+  missingDataJudge,
 ];
 
 /** Reference-based judges ported from Deductive's alert-outcome scoring. */
