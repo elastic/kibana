@@ -14,4 +14,5 @@ export { useCopy } from './hooks/use_copy';
 export { usePlaceholder } from './hooks/use_placeholder';
 export { useFitToContent } from './hooks/use_fit_content';
 export { usePersistHoverContentWidget } from './hooks/use_persist_hover_content_widget';
+export { useFindWidgetTooltipPosition } from './hooks/use_find_widget_tooltip_position';
 export { globalMonacoStyleOverrides } from './styles.css';
