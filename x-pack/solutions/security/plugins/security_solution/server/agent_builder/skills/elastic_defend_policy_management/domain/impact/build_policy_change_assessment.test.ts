@@ -77,22 +77,22 @@ const weakenedSettingCases: ReadonlyArray<{
     path: 'windows.malware.blocklist',
     value: false,
     setting: 'malware.blocklist',
-    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
-    text: 'Malware blocklist on Windows, macOS, Linux is turned off.',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Malware blocklist on Windows is turned off.',
   },
   {
     path: 'windows.malware.on_write_scan',
     value: false,
     setting: 'malware.on_write_scan',
-    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
-    text: 'Scan files upon modification on Windows, macOS, Linux is turned off.',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Scan files upon modification on Windows is turned off.',
   },
   {
     path: 'windows.behavior_protection.reputation_service',
     value: false,
     setting: 'behavior_protection.reputation_service',
-    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
-    text: 'Reputation service on Windows, macOS, Linux is turned off.',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Reputation service on Windows is turned off.',
     stored: policyFactory({ cloud: true }),
   },
   {
@@ -473,8 +473,8 @@ describe('buildPolicyChangeAssessment', () => {
       {
         code: 'protection_setting_weakened',
         setting: 'malware.blocklist',
-        os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
-        text: 'Malware blocklist on Windows, macOS, Linux is turned off.',
+        os: [PolicyOperatingSystem.windows],
+        text: 'Malware blocklist on Windows is turned off.',
       },
     ]);
   });
