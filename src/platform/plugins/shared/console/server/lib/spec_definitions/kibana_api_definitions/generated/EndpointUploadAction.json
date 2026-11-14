@@ -1,0 +1,11 @@
+{
+  "EndpointUploadAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/upload"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointUploadAction"
+  }
+}

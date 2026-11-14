@@ -1,0 +1,36 @@
+{
+  "put-security-entity-store": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-entity-store",
+    "data_autocomplete_rules": {
+      "excludedUserNames": [],
+      "historySnapshot": {
+        "frequency": "",
+        "retentionDays": ""
+      },
+      "logExtraction": {
+        "additionalIndexPatterns": [],
+        "delay": "",
+        "docsLimit": "",
+        "excludedIndexPatterns": [],
+        "fieldHistoryLength": "",
+        "frequency": "",
+        "lookbackPeriod": "",
+        "maxLogsPerPage": "",
+        "maxLogsPerWindow": "",
+        "maxLogsPerWindowCapBehavior": {
+          "__one_of": [
+            "defer",
+            "drop"
+          ]
+        },
+        "maxTimeWindowSize": ""
+      }
+    }
+  }
+}

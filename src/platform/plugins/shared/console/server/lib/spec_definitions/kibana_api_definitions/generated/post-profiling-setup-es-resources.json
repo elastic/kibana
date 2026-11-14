@@ -1,0 +1,11 @@
+{
+  "post-profiling-setup-es-resources": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/profiling/setup/es_resources"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-profiling-setup-es-resources"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "post-workflows-step-test": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/step/test"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-workflows-step-test",
+    "data_autocomplete_rules": {
+      "contextOverride": {},
+      "executionContext": {},
+      "stepId": "",
+      "workflowId": "",
+      "workflowYaml": ""
+    }
+  }
+}

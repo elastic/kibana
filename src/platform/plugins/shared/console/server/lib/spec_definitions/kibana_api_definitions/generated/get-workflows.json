@@ -1,0 +1,36 @@
+{
+  "get-workflows": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows",
+    "url_params": {
+      "query": [],
+      "size": [],
+      "page": [],
+      "enabled": [
+        "true",
+        "false"
+      ],
+      "createdBy": [],
+      "tags": [],
+      "managed": [
+        "all",
+        "managed",
+        "unmanaged"
+      ],
+      "visibilityContext": [],
+      "sortField": [
+        "name",
+        "enabled"
+      ],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

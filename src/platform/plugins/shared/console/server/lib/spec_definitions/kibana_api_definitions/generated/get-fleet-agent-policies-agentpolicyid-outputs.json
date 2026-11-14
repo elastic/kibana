@@ -1,0 +1,11 @@
+{
+  "get-fleet-agent-policies-agentpolicyid-outputs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/{agentPolicyId}/outputs"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agent-policies-agentpolicyid-outputs"
+  }
+}

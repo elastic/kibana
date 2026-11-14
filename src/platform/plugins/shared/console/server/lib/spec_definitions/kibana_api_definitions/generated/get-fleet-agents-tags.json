@@ -1,0 +1,15 @@
+{
+  "get-fleet-agents-tags": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/tags"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agents-tags",
+    "url_params": {
+      "kuery": [],
+      "showInactive": "__flag__"
+    }
+  }
+}

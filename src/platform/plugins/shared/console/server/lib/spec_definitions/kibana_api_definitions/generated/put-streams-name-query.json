@@ -1,0 +1,17 @@
+{
+  "put-streams-name-query": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/streams/{name}/_query"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-streams-name-query",
+    "data_autocomplete_rules": {
+      "field_descriptions": {},
+      "query": {
+        "esql": ""
+      }
+    }
+  }
+}

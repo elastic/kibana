@@ -1,0 +1,22 @@
+{
+  "post-agent-builder-tools-execute": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/tools/_execute"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-tools-execute",
+    "data_autocomplete_rules": {
+      "approvals": {
+        "auto_approved_apis": {
+          "elasticsearch": [],
+          "kibana": []
+        }
+      },
+      "connector_id": "",
+      "tool_id": "",
+      "tool_params": {}
+    }
+  }
+}

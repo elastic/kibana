@@ -1,0 +1,14 @@
+{
+  "delete-agent-builder-skills-skillid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/agent_builder/skills/{skillId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-agent-builder-skills-skillid",
+    "url_params": {
+      "force": "__flag__"
+    }
+  }
+}

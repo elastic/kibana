@@ -1,0 +1,11 @@
+{
+  "getCaseCommentDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/comments/{commentId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseCommentDefaultSpace"
+  }
+}

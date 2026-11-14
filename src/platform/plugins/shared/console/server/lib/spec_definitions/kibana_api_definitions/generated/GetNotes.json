@@ -1,0 +1,29 @@
+{
+  "GetNotes": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/note"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetNotes",
+    "url_params": {
+      "documentIds": [],
+      "savedObjectIds": [],
+      "page": [],
+      "perPage": [],
+      "search": [],
+      "sortField": [],
+      "sortOrder": [],
+      "filter": [],
+      "createdByFilter": [],
+      "associatedFilter": [
+        "all",
+        "document_only",
+        "saved_object_only",
+        "document_and_saved_object",
+        "orphan"
+      ]
+    }
+  }
+}

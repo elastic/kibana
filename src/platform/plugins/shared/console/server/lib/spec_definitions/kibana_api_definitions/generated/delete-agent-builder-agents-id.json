@@ -1,0 +1,11 @@
+{
+  "delete-agent-builder-agents-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/agent_builder/agents/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-agent-builder-agents-id"
+  }
+}

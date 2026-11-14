@@ -1,0 +1,28 @@
+{
+  "get-fleet-epm-packages-installed": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/installed"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-packages-installed",
+    "url_params": {
+      "dataStreamType": [
+        "logs",
+        "metrics",
+        "traces",
+        "synthetics",
+        "profiles"
+      ],
+      "showOnlyActiveDataStreams": "__flag__",
+      "nameQuery": [],
+      "searchAfter": [],
+      "perPage": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

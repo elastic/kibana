@@ -11,6 +11,8 @@ import _ from 'lodash';
 import { populateContext } from '../autocomplete/engine';
 
 import * as kb from '.';
+import { KibanaValuesProvider } from './kibana_values';
+import type { HttpSetup } from '@kbn/core/public';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../services';
 import type { AutoCompleteContext, ResultTerm } from '../autocomplete/types';
 import { isRecord } from '../../../common/utils/record_utils';
@@ -145,25 +147,91 @@ describe('Knowledge base', () => {
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
 
-  describe('Kibana API doc links', () => {
+  describe('Kibana API endpoints', () => {
+    const suggestionsFor = (tokenPath: string[], isKibanaRequest: boolean) => {
+      const context: AutoCompleteContext = {};
+      populateContext(
+        tokenPath,
+        context,
+        null,
+        true,
+        kb.getTopLevelUrlCompleteComponents('GET', isKibanaRequest)
+      );
+      return (context.autoCompleteSet ?? []).map((term) => term.name);
+    };
+
+    beforeEach(() => {
+      kb._test.setKibanaApi({
+        'get-spaces-space-id': { methods: ['GET'], patterns: ['api/spaces/space/{id}'] },
+        'get-features': { methods: ['GET'], patterns: ['api/features'] },
+      });
+    });
+
     afterEach(() => {
-      kb._test.setKibanaApiDocLinks({});
+      kb._test.setKibanaApi({});
     });
 
-    it('returns an empty map by default', () => {
-      expect(kb.getKibanaApiDocLinks()).toEqual({});
+    it('suggests Kibana API paths when resolving a Kibana request', () => {
+      expect(suggestionsFor([], true)).toEqual(['api/spaces/space', 'api/features']);
+      expect(suggestionsFor(['api', 'spaces', 'space'], true)).toEqual([]);
     });
 
-    it('stores and returns the provided doc links map', () => {
-      const docLinks = { '/api/spaces/space/{id}': { get: 'get-spaces-space-id' } };
-      kb._test.setKibanaApiDocLinks(docLinks);
-      expect(kb.getKibanaApiDocLinks()).toEqual(docLinks);
+    it('does not leak Kibana API paths into Elasticsearch requests', () => {
+      expect(suggestionsFor([], false)).toEqual([]);
+    });
+
+    it('does not suggest the Elasticsearch url params for Kibana endpoints', () => {
+      const context: AutoCompleteContext = { method: 'GET' };
+      populateContext(
+        ['api', 'features', '__url_path_end__'],
+        context,
+        null,
+        true,
+        kb.getTopLevelUrlCompleteComponents('GET', true)
+      );
+      expect(context.endpoint?.id).toBe('get-features');
+      expect(context.endpoint?.paramsAutocomplete.getTopLevelComponents('GET')).toEqual([]);
+    });
+
+    describe('WHEN a path param holds a cluster specific value', () => {
+      beforeEach(() => {
+        const get = jest.fn().mockResolvedValue([{ id: 'marketing', name: 'Marketing' }]);
+        kb._test.setKibanaValues(new KibanaValuesProvider({ get } as unknown as HttpSetup));
+        kb._test.setKibanaApi({
+          'get-spaces-space-id': {
+            methods: ['GET'],
+            patterns: ['api/spaces/space/{id}'],
+            url_components: { id: '__kibana_space' },
+          },
+        });
+      });
+
+      afterEach(() => {
+        kb._test.setKibanaValues(undefined);
+      });
+
+      it('suggests the values loaded from the cluster and accepts any value', async () => {
+        // the first request starts loading the values in the background
+        suggestionsFor(['api', 'spaces', 'space'], true);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(suggestionsFor(['api', 'spaces', 'space'], true)).toStrictEqual(['marketing']);
+
+        const context: AutoCompleteContext = { method: 'GET' };
+        populateContext(
+          ['api', 'spaces', 'space', 'anything', '__url_path_end__'],
+          context,
+          null,
+          true,
+          kb.getTopLevelUrlCompleteComponents('GET', true)
+        );
+        expect(context.endpoint?.id).toBe('get-spaces-space-id');
+      });
     });
 
     it('ignores non-record values', () => {
-      kb._test.setKibanaApiDocLinks({ foo: 'bar' });
-      kb._test.setKibanaApiDocLinks('not a record');
-      expect(kb.getKibanaApiDocLinks()).toEqual({ foo: 'bar' });
+      kb._test.setKibanaApi('not a record');
+      expect(suggestionsFor([], true)).toEqual(['api/spaces/space', 'api/features']);
     });
   });
 

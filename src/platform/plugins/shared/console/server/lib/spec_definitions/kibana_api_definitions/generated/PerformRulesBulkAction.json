@@ -1,0 +1,76 @@
+{
+  "PerformRulesBulkAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/rules/_bulk_action"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PerformRulesBulkAction",
+    "url_params": {
+      "dry_run": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "action": {
+        "__one_of": [
+          "delete"
+        ]
+      },
+      "edit": [
+        {
+          "type": {
+            "__one_of": [
+              "add_tags",
+              "delete_tags",
+              "set_tags"
+            ]
+          },
+          "value": [],
+          "overwrite_data_views": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        }
+      ],
+      "gap_auto_fill_scheduler_id": "",
+      "gap_fill_statuses": [
+        {
+          "__one_of": [
+            "unfilled",
+            "in_progress",
+            "filled",
+            "error"
+          ]
+        }
+      ],
+      "gaps_range_end": "",
+      "gaps_range_start": "",
+      "ids": [],
+      "query": "",
+      "fill_gaps": {
+        "end_date": "",
+        "start_date": ""
+      },
+      "run": {
+        "end_date": "",
+        "start_date": ""
+      },
+      "duplicate": {
+        "include_exceptions": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "include_expired_exceptions": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      }
+    }
+  }
+}

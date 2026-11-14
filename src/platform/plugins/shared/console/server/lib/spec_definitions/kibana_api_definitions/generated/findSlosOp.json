@@ -1,0 +1,29 @@
+{
+  "findSlosOp": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-findSlosOp",
+    "url_params": {
+      "kqlQuery": [],
+      "size": [],
+      "searchAfter": [],
+      "page": [],
+      "perPage": [],
+      "sortBy": [
+        "sli_value",
+        "status",
+        "error_budget_consumed",
+        "error_budget_remaining"
+      ],
+      "sortDirection": [
+        "asc",
+        "desc"
+      ],
+      "hideStale": "__flag__"
+    }
+  }
+}

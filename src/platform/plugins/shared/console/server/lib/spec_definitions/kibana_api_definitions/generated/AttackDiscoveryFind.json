@@ -1,0 +1,39 @@
+{
+  "AttackDiscoveryFind": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/attack_discovery/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-AttackDiscoveryFind",
+    "url_params": {
+      "alert_ids": [],
+      "connector_names": [],
+      "enable_field_rendering": "__flag__",
+      "end": [],
+      "ids": [],
+      "include_unique_alert_ids": "__flag__",
+      "page": [],
+      "per_page": [],
+      "search": [],
+      "shared": "__flag__",
+      "include_all_authors": "__flag__",
+      "scheduled": "__flag__",
+      "sort_field": [
+        "@timestamp"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "start": [],
+      "status": [
+        "acknowledged",
+        "closed",
+        "open"
+      ],
+      "with_replacements": "__flag__"
+    }
+  }
+}

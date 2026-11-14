@@ -1,0 +1,11 @@
+{
+  "post-maintenance-window-id-unarchive": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/maintenance_window/{id}/_unarchive"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-maintenance-window-id-unarchive"
+  }
+}

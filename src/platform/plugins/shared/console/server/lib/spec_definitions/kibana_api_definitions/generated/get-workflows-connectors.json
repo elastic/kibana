@@ -1,0 +1,11 @@
+{
+  "get-workflows-connectors": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/connectors"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-connectors"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "put-alerting-v2-rules-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-alerting-v2-rules-id",
+    "data_autocomplete_rules": {
+      "artifacts": [
+        {
+          "data": {},
+          "id": "",
+          "type": ""
+        }
+      ],
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "grouping": {
+        "fields": []
+      },
+      "kind": {
+        "__one_of": [
+          "alert",
+          "signal"
+        ]
+      },
+      "metadata": {
+        "builder": {
+          "type": ""
+        },
+        "description": "",
+        "name": "",
+        "routing_tags": [],
+        "tags": []
+      },
+      "no_data": {
+        "query": "",
+        "strategy": {
+          "__one_of": [
+            "ignore"
+          ]
+        }
+      },
+      "query": {
+        "base": "",
+        "breach": {
+          "segment": ""
+        }
+      },
+      "recovery": {
+        "strategy": {
+          "__one_of": [
+            "no_breach"
+          ]
+        },
+        "query": "",
+        "segment": ""
+      },
+      "schedule": {
+        "every": "",
+        "lookback": ""
+      },
+      "state_transition": {
+        "pending": {
+          "count": "",
+          "operator": {
+            "__one_of": [
+              "and",
+              "or"
+            ]
+          },
+          "timeframe": ""
+        },
+        "recovering": {
+          "count": "",
+          "operator": {
+            "__one_of": [
+              "and",
+              "or"
+            ]
+          },
+          "timeframe": ""
+        }
+      },
+      "time_field": ""
+    }
+  }
+}

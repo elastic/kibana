@@ -1,0 +1,21 @@
+{
+  "put-fleet-epm-packages-pkgname-pkgversion": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-epm-packages-pkgname-pkgversion",
+    "data_autocomplete_rules": {
+      "keepPoliciesUpToDate": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "namespace_customization_enabled_for": [],
+      "namespace_customization_settings": {}
+    }
+  }
+}

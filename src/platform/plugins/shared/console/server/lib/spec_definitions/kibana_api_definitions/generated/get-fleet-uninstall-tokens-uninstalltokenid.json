@@ -1,0 +1,11 @@
+{
+  "get-fleet-uninstall-tokens-uninstalltokenid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/uninstall_tokens/{uninstallTokenId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-uninstall-tokens-uninstalltokenid"
+  }
+}

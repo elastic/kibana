@@ -1,0 +1,41 @@
+{
+  "post-agent-builder-conversations": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-conversations",
+    "data_autocomplete_rules": {
+      "access_control": {
+        "access_mode": {
+          "__one_of": [
+            "private",
+            "public"
+          ]
+        },
+        "entries": [
+          {
+            "id": "",
+            "role": {
+              "__one_of": [
+                "member"
+              ]
+            },
+            "type": {
+              "__one_of": [
+                "user"
+              ]
+            }
+          }
+        ]
+      },
+      "agent_id": "",
+      "conversation_id": "",
+      "metadata": {},
+      "template_id": "",
+      "title": ""
+    }
+  }
+}

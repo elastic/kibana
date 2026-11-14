@@ -1,0 +1,20 @@
+{
+  "search-discover-sessions": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/discover_sessions"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-search-discover-sessions",
+    "url_params": {
+      "page": [],
+      "per_page": [],
+      "query": [],
+      "tags": [],
+      "excluded_tags": [],
+      "tag_names": [],
+      "excluded_tag_names": []
+    }
+  }
+}

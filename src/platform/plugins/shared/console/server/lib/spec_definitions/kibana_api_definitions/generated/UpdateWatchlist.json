@@ -1,0 +1,22 @@
+{
+  "UpdateWatchlist": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-UpdateWatchlist",
+    "data_autocomplete_rules": {
+      "description": "",
+      "managed": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "riskModifier": ""
+    }
+  }
+}

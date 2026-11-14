@@ -1,0 +1,16 @@
+{
+  "DeleteList": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/lists"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteList",
+    "url_params": {
+      "id": [],
+      "deleteReferences": "__flag__",
+      "ignoreReferences": "__flag__"
+    }
+  }
+}

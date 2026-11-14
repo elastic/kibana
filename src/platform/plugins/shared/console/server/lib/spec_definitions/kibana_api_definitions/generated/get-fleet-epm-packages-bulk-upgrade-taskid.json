@@ -1,0 +1,11 @@
+{
+  "get-fleet-epm-packages-bulk-upgrade-taskid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/_bulk_upgrade/{taskId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-packages-bulk-upgrade-taskid"
+  }
+}

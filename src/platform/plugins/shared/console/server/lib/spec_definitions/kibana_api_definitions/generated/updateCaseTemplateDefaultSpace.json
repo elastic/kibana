@@ -1,0 +1,33 @@
+{
+  "updateCaseTemplateDefaultSpace": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/cases/templates/{template_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-updateCaseTemplateDefaultSpace",
+    "url_params": {
+      "dry_run": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "definition": "",
+      "description": "",
+      "isEnabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "owner": {
+        "__one_of": [
+          "cases",
+          "observability",
+          "securitySolution"
+        ]
+      },
+      "tags": []
+    }
+  }
+}

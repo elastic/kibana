@@ -1,0 +1,28 @@
+{
+  "getCaseFieldDefinitionsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/field_definitions"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseFieldDefinitionsDefaultSpace",
+    "url_params": {
+      "owner": [],
+      "isGlobal": "__flag__",
+      "page": [],
+      "perPage": [],
+      "sortField": [
+        "name",
+        "owner",
+        "isGlobal",
+        "displayOrder"
+      ],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ],
+      "search": []
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "post-workflows-workflow-id-run": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/workflow/{id}/run"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-workflows-workflow-id-run",
+    "data_autocomplete_rules": {
+      "inputs": {},
+      "metadata": {}
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "post-agent-builder-conversations-conversation-id-attachments-attachment-id-restore": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/_restore"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-conversations-conversation-id-attachments-attachment-id-restore"
+  }
+}

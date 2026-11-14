@@ -1,0 +1,11 @@
+{
+  "upsert-visualization": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/visualizations/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-upsert-visualization"
+  }
+}

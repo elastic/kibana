@@ -1,0 +1,26 @@
+{
+  "post-security-session-invalidate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/session/_invalidate"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-security-session-invalidate",
+    "data_autocomplete_rules": {
+      "match": {
+        "__one_of": [
+          "all",
+          "query"
+        ]
+      },
+      "query": {
+        "provider": {
+          "name": "",
+          "type": ""
+        },
+        "username": ""
+      }
+    }
+  }
+}

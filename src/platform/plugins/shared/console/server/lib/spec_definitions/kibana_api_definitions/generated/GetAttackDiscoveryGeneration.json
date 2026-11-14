@@ -1,0 +1,15 @@
+{
+  "GetAttackDiscoveryGeneration": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/attack_discovery/generations/{execution_uuid}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetAttackDiscoveryGeneration",
+    "url_params": {
+      "enable_field_rendering": "__flag__",
+      "with_replacements": "__flag__"
+    }
+  }
+}

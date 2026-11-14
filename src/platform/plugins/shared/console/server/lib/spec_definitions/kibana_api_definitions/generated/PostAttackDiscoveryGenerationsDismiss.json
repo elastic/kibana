@@ -1,0 +1,11 @@
+{
+  "PostAttackDiscoveryGenerationsDismiss": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/generations/{execution_uuid}/_dismiss"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PostAttackDiscoveryGenerationsDismiss"
+  }
+}

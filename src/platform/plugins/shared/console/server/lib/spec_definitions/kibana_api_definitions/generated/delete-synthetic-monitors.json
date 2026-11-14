@@ -1,0 +1,14 @@
+{
+  "delete-synthetic-monitors": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/monitors/_bulk_delete"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-synthetic-monitors",
+    "data_autocomplete_rules": {
+      "ids": []
+    }
+  }
+}

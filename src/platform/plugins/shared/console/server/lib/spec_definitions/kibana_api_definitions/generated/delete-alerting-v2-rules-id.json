@@ -1,0 +1,11 @@
+{
+  "delete-alerting-v2-rules-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-alerting-v2-rules-id"
+  }
+}

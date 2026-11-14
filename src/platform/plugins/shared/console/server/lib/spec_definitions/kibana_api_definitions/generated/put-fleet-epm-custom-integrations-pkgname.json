@@ -1,0 +1,15 @@
+{
+  "put-fleet-epm-custom-integrations-pkgname": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/epm/custom_integrations/{pkgName}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-epm-custom-integrations-pkgname",
+    "data_autocomplete_rules": {
+      "categories": [],
+      "readMeData": ""
+    }
+  }
+}

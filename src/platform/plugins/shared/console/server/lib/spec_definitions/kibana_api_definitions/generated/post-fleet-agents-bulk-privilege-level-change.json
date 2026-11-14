@@ -1,0 +1,26 @@
+{
+  "post-fleet-agents-bulk-privilege-level-change": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_privilege_level_change"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-bulk-privilege-level-change",
+    "data_autocomplete_rules": {
+      "agents": "",
+      "batchSize": "",
+      "dryRun": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "user_info": {
+        "groupname": "",
+        "password": "",
+        "username": ""
+      }
+    }
+  }
+}

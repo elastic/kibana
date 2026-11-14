@@ -1,0 +1,11 @@
+{
+  "delete-fleet-fleet-server-hosts-itemid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/fleet_server_hosts/{itemId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-fleet-server-hosts-itemid"
+  }
+}

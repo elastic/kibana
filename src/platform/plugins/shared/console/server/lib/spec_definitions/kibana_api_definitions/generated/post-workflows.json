@@ -1,0 +1,23 @@
+{
+  "post-workflows": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-workflows",
+    "url_params": {
+      "overwrite": "__flag__",
+      "dryRun": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "workflows": [
+        {
+          "id": "",
+          "yaml": ""
+        }
+      ]
+    }
+  }
+}

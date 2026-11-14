@@ -1,0 +1,11 @@
+{
+  "post-alerting-rules-backfill-schedule": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rules/backfill/_schedule"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rules-backfill-schedule"
+  }
+}

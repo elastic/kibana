@@ -1,0 +1,366 @@
+{
+  "post-streams-name-fork": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/{name}/_fork"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-streams-name-fork",
+    "data_autocomplete_rules": {
+      "draft": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "status": {
+        "__one_of": [
+          "enabled",
+          "disabled"
+        ]
+      },
+      "stream": {
+        "name": ""
+      },
+      "where": {
+        "never": {},
+        "always": {},
+        "not": {
+          "never": {},
+          "always": {},
+          "not": {},
+          "or": [
+            {}
+          ],
+          "and": [
+            {}
+          ],
+          "exists": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "field": "",
+          "contains": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "endsWith": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "eq": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "gt": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "gte": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "includes": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "lt": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "lte": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "neq": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "range": {},
+          "startsWith": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "or": [
+          {
+            "never": {},
+            "always": {},
+            "not": {},
+            "or": [
+              {}
+            ],
+            "and": [
+              {}
+            ],
+            "exists": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "field": "",
+            "contains": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "endsWith": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "eq": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "gt": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "gte": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "includes": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "lt": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "lte": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "neq": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "range": {},
+            "startsWith": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        ],
+        "and": [
+          {
+            "never": {},
+            "always": {},
+            "not": {},
+            "or": [
+              {}
+            ],
+            "and": [
+              {}
+            ],
+            "exists": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "field": "",
+            "contains": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "endsWith": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "eq": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "gt": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "gte": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "includes": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "lt": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "lte": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "neq": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "range": {},
+            "startsWith": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        ],
+        "exists": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "field": "",
+        "contains": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "endsWith": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "eq": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "gt": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "gte": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "includes": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "lt": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "lte": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "neq": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "range": {
+          "gt": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "gte": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "lt": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "lte": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "startsWith": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      }
+    }
+  }
+}

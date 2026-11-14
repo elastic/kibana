@@ -1,0 +1,74 @@
+{
+  "createSloOp": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-createSloOp",
+    "data_autocomplete_rules": {
+      "artifacts": {
+        "dashboards": [
+          {
+            "id": ""
+          }
+        ]
+      },
+      "budgetingMethod": {
+        "__one_of": [
+          "occurrences",
+          "timeslices"
+        ]
+      },
+      "description": "",
+      "groupBy": "",
+      "id": "",
+      "indicator": {
+        "params": {
+          "dataViewId": "",
+          "filter": {},
+          "good": {},
+          "index": "",
+          "timestampField": "",
+          "total": {}
+        },
+        "type": ""
+      },
+      "name": "",
+      "objective": {
+        "target": "",
+        "timesliceTarget": "",
+        "timesliceWindow": ""
+      },
+      "settings": {
+        "frequency": "",
+        "preventCrossProjectSearch": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "preventInitialBackfill": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "projectRoutings": "",
+        "syncDelay": "",
+        "syncField": ""
+      },
+      "tags": [],
+      "timeWindow": {
+        "duration": "",
+        "type": {
+          "__one_of": [
+            "rolling",
+            "calendarAligned"
+          ]
+        }
+      }
+    }
+  }
+}

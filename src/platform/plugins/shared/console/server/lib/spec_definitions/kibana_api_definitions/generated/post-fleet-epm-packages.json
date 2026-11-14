@@ -1,0 +1,15 @@
+{
+  "post-fleet-epm-packages": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages",
+    "url_params": {
+      "ignoreMappingUpdateErrors": "__flag__",
+      "skipDataStreamRollover": "__flag__"
+    }
+  }
+}
