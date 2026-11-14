@@ -7,14 +7,12 @@
 
 import React, { useEffect, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiHighlight, EuiLink, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
+import { EuiHighlight, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import { useSelectedLocation } from '../hooks/use_selected_location';
-import { AddMonitorLink } from '../../common/links/add_monitor';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 
 type MonitorOption = EuiSelectableOption & {
   locationIds?: string[];
@@ -28,8 +26,6 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
   const [searchValue, setSearchValue] = useState('');
 
   const selectedLocation = useSelectedLocation();
-
-  const { basePath } = useSyntheticsSettingsContext();
 
   const { values, loading: searchLoading } = useMonitorName({ search: searchValue });
 
@@ -76,40 +72,23 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
       onChange={(selectedOptions) => {
         setOptions(selectedOptions);
         const option = selectedOptions.find((opt) => opt.checked === 'on');
-        if (option) {
+        if (option && !option.isGroupLabel) {
           history.push(`/monitor/${option.key}?locationId=${getLocationId(option)}`);
+          closePopover();
         }
-        closePopover();
       }}
       singleSelection={true}
       listProps={{
         showIcons: false,
       }}
-      renderOption={(option, search) => (
-        <EuiLink
-          data-test-subj="syntheticsMonitorSearchableListLink"
-          href={`${basePath}/app/synthetics/monitor/${option.key}?locationId=${getLocationId(
-            option
-          )}`}
-        >
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </EuiLink>
-      )}
+      renderOption={(option) => <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>}
       noMatchesMessage={NO_RESULT_FOUND}
-      emptyMessage={<AddMonitorLink />}
+      emptyMessage={NO_RESULT_FOUND}
       loadingMessage={LOADING_MONITORS}
     >
       {(list, search) => (
-        <div style={{ width: 280 }}>
-          <EuiPopoverTitle paddingSize="s">
-            {options.length > 0 || searchValue || searchLoading || recentMonitorsLoading ? (
-              search
-            ) : (
-              <EuiText color="subdued" size="s" className="eui-textCenter">
-                {NO_OTHER_MONITORS_EXISTS}
-              </EuiText>
-            )}
-          </EuiPopoverTitle>
+        <div css={{ width: 320 }}>
+          <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
           {list}
         </div>
       )}
@@ -119,10 +98,6 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
 
 const LOADING_MONITORS = i18n.translate('xpack.synthetics.monitorSummary.loadingMonitors', {
   defaultMessage: 'Loading monitors',
-});
-
-const NO_OTHER_MONITORS_EXISTS = i18n.translate('xpack.synthetics.monitorSummary.noOtherMonitors', {
-  defaultMessage: 'No other monitors exist.',
 });
 
 const NO_RESULT_FOUND = i18n.translate('xpack.synthetics.monitorSummary.noResultsFound', {
