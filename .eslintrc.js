@@ -24,26 +24,21 @@ module.exports = {
 
   overrides: [
     /**
-     * `formatjs/*` rules run in oxlint (.oxlint/formatjs.mts). The plugin stays registered so
-     * `eslint-disable` directives naming its rules resolve.
+     * The rules of these plugins run in oxlint (.oxlint/*.mts). The plugins stay registered so
+     * `eslint-disable` directives naming their rules resolve.
      */
     {
       files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
       plugins: ['formatjs'],
     },
-
-    /**
-     * Fleet overrides
-     */
     {
-      files: ['x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}'],
-      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
+      files: [
+        'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx',
+        'x-pack/solutions/security/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}',
+      ],
       plugins: ['testing-library'],
     },
-
-    /**
-     * Security Solution: `n/*` rules run in oxlint (.oxlint/n.mts); registered for `eslint-disable` directives.
-     */
     {
       files: [
         'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
@@ -57,49 +52,9 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
-      ],
-      plugins: ['eslint-plugin-n'],
-    },
-    {
-      files: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx'],
-      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
-      plugins: ['testing-library'],
-    },
-
-    {
-      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
-      excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
-      // `eslint-plugin-playwright` rules run in oxlint (.oxlint/playwright.mts). The plugin stays
-      // registered so `eslint-disable` directives naming its rules resolve.
-      plugins: ['playwright'],
-    },
-    {
-      files: ['x-pack/solutions/security/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
-      // `react-perf/*` rules run in oxlint (.oxlint/team_overrides.mts); registered for `eslint-disable` directives.
-      plugins: ['react-perf'],
-    },
-    {
-      // Lists: `n/*` rules run in oxlint (.oxlint/n.mts); registered for `eslint-disable` directives.
-      files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
-      plugins: ['eslint-plugin-n'],
-    },
-
-    /**
-     * Osquery: `react-perf/*` rules run in oxlint (.oxlint/team_overrides.mts); registered for `eslint-disable` directives.
-     */
-    {
-      files: ['x-pack/platform/plugins/shared/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
-      plugins: ['react-perf'],
-    },
-
-    /**
-     * Workflows: `n/*` rules run in oxlint (.oxlint/n.mts); registered for `eslint-disable` directives.
-     */
-    {
-      files: [
         'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
         'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
         'src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
@@ -108,15 +63,19 @@ module.exports = {
       ],
       plugins: ['eslint-plugin-n'],
     },
-
-    /**
-     * Cloud Security Team overrides
-     */
     {
-      files: ['x-pack/solutions/security/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
-      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
-      plugins: ['testing-library'],
+      files: [
+        'x-pack/solutions/security/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/osquery/public/**/!(*.test).{js,mjs,ts,tsx}',
+      ],
+      plugins: ['react-perf'],
     },
+    {
+      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
+      plugins: ['playwright'],
+    },
+
     /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
