@@ -15,7 +15,7 @@ jest.mock('./run_node', () => ({
   runNode: jest.fn().mockResolvedValue(undefined),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { runNode } = require('./run_node');
 
 describe('executionFlowLoop', () => {

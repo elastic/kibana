@@ -21,7 +21,7 @@ import type {
 } from '../common';
 import { parseExpression } from '../common';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
 const element = null as unknown as HTMLElement;
@@ -40,7 +40,7 @@ jest.mock('./services', () => {
   };
 
   const service: ExpressionsService =
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     new (require('../common/service/expressions_services').ExpressionsService)();
 
   const testFn: AnyExpressionFunctionDefinition = {
@@ -51,7 +51,7 @@ jest.mock('./services', () => {
   };
   service.registerFunction(testFn);
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   for (const func of require('../common/test_helpers/expression_functions').functionTestSpecs) {
     service.registerFunction(func);
   }

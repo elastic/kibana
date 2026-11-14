@@ -12,7 +12,7 @@ import { useFetchErrorToast } from '../../../../../hooks/use_fetch_error_toast';
 
 jest.mock('react-use/lib/useUpdateEffect', () => {
   return (cb: () => void, deps: unknown[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const ReactImport = require('react');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ReactImport.useEffect(cb, deps as any);

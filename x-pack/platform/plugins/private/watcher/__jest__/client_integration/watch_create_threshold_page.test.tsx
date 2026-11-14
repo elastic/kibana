@@ -51,11 +51,11 @@ const WATCH_VISUALIZE_DATA = {
 // Since watchID's are dynamically created, we have to mock the function that generates them.
 jest.mock('uuid', () => ({
   v4: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     return require('./helpers/jest_constants').WATCH_ID;
   },
   v1: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     return require('./helpers/jest_constants').WATCH_ID;
   },
 }));

@@ -35,7 +35,7 @@ import { ChartType } from '@kbn/visualization-utils';
 import dedent from 'dedent';
 
 jest.mock('./attachments/inline_attachment_with_actions', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const _React = require('react');
   return {
     InlineAttachmentWithActions: () =>
@@ -44,7 +44,7 @@ jest.mock('./attachments/inline_attachment_with_actions', () => {
 });
 
 jest.mock('./attachments/attachment_loading_skeleton', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const _React = require('react');
   return {
     AttachmentLoadingSkeleton: () =>
@@ -53,7 +53,7 @@ jest.mock('./attachments/attachment_loading_skeleton', () => {
 });
 
 jest.mock('@kbn/agent-builder-visualizations', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const _React = require('react'); // Use require to avoid hoisting issues with jest.mock
   return {
     VisualizeESQL: jest.fn(() =>

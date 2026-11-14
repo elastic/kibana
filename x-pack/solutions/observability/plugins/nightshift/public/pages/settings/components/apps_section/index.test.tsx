@@ -52,7 +52,7 @@ const mockUseBindChannel = useBindChannel as jest.MockedFunction<typeof useBindC
 const mockUseUnbindChannel = useUnbindChannel as jest.MockedFunction<typeof useUnbindChannel>;
 
 // SlackChannelsSection pulls the connection state and the bindings together.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { SlackChannelsSection } = require('.');
 
 const bindChannel = jest.fn().mockResolvedValue(undefined);

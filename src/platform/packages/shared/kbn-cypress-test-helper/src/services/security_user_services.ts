@@ -22,7 +22,7 @@ export const createSecuritySuperuser = async (
 ): Promise<CreatedSecuritySuperuser> => {
   // Dynamically load userInfo from 'os' if no username is provided
   if (!username) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const os = require('os') as typeof import('os');
     username = os.userInfo().username;
   }

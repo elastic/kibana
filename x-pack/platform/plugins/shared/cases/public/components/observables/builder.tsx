@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
+/* eslint-disable @kbn/compat/react-display-name */
 
 import React, { type ComponentType } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';

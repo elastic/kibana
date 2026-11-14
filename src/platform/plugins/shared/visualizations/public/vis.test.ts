@@ -12,9 +12,9 @@ import type { VisTypeDefinition } from './vis_types';
 import { BaseVisType } from './vis_types';
 
 jest.mock('./services', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { SearchSource } = require('@kbn/data-plugin/common/search/search_source');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const stubIndexPattern = require('@kbn/data-plugin/common/stubs');
 
   return {

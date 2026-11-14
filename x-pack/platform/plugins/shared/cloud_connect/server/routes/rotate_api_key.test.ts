@@ -82,7 +82,7 @@ describe('Rotate API Key Routes', () => {
     beforeEach(() => {
       const mockGetStartServices = jest.fn();
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getApiKeyData } = require('../lib/create_storage_service');
       getApiKeyData.mockResolvedValue({
         apiKeyData: {
@@ -147,7 +147,7 @@ describe('Rotate API Key Routes', () => {
     beforeEach(() => {
       const mockGetStartServices = jest.fn();
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getApiKeyData } = require('../lib/create_storage_service');
       getApiKeyData.mockResolvedValue({
         apiKeyData: {
@@ -180,7 +180,7 @@ describe('Rotate API Key Routes', () => {
     });
 
     it('should rotate EIS service API key and update inference CCM', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { enableInferenceCCM } = require('../services/inference_ccm');
 
       mockCloudConnectInstance.rotateServiceApiKey.mockResolvedValue({

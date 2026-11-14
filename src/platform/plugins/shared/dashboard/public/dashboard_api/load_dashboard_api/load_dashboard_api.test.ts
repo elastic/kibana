@@ -31,7 +31,7 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
 });
 
 jest.mock('../../dashboard_client', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const defaultState = require('../../../common/default_dashboard_state');
   return {
     dashboardClient: {
@@ -52,7 +52,7 @@ describe('loadDashboardApi', () => {
   const storeViewModeMock = jest.fn();
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
     getDashboardApiMock.mockReturnValue({
       api: { userActivity$ },
@@ -61,7 +61,7 @@ describe('loadDashboardApi', () => {
     });
 
     backupState = { query: lastSavedQuery };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../../services/dashboard_api_services').getDashboardBackupService = () => ({
       getState: () => backupState,
       storeViewMode: storeViewModeMock,

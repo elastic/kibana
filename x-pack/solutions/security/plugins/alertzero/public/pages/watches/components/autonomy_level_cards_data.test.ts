@@ -33,10 +33,10 @@ const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const loadCardsWithCatalog = (messages: Record<string, string>): AutonomyLevelCardsCopy | null => {
   let cards: AutonomyLevelCardsCopy | null = null;
   jest.isolateModules(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { i18n: isolatedI18n } = require('@kbn/i18n');
     isolatedI18n.init({ locale: 'xx', messages });
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     cards = require('./autonomy_level_cards_data').getAutonomyLevelCards(AD_WORKER_ID);
   });
   return cards;

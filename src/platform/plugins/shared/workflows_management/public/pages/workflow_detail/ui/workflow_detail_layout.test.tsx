@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @kbn/compat/typescript-no-var-requires */
 // Mock react-reverse-portal to simplify rendering
 jest.mock('react-reverse-portal', () => {
   const R = require('react');

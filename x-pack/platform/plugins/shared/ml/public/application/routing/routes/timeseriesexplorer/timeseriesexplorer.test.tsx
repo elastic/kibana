@@ -45,7 +45,7 @@ const MockedTimeseriesexplorerNoJobsFound = TimeseriesexplorerNoJobsFound as jes
 >;
 
 const getMockedTimefilter = () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { of } = require('rxjs');
   return {
     timefilter: {

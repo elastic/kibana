@@ -90,7 +90,7 @@ describe('unsavedChangesManager', () => {
 
     layoutUnsavedChanges$.next({});
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../services/dashboard_api_services').getDashboardBackupService = () => ({
       setState: setBackupStateMock,
     });
