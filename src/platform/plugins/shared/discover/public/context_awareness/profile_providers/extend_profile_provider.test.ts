@@ -32,4 +32,23 @@ describe('extendProfileProvider', () => {
       resolve,
     });
   });
+
+  it('should append extension telemetry labels to the base labels', () => {
+    const extendedProfileProvider = extendProfileProvider(
+      {
+        ...dataSourceProfileProviderMock,
+        telemetryLabels: ['logs-data-source-profile', 'shared-label'],
+      },
+      {
+        profileId: 'extended-profile',
+        telemetryLabels: ['shared-label', 'extended-profile'],
+      }
+    );
+
+    expect(extendedProfileProvider.telemetryLabels).toEqual([
+      'logs-data-source-profile',
+      'shared-label',
+      'extended-profile',
+    ]);
+  });
 });

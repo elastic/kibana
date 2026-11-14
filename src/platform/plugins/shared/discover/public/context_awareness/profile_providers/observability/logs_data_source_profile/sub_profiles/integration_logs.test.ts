@@ -33,6 +33,20 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
     profileProviderServices.uiSettings
   );
 
+  it('inherits the logs parent telemetry label', () => {
+    expect(logsDataSourceProfileProvider.telemetryLabels).toEqual([
+      'observability-logs-data-source-profile',
+    ]);
+    expect(
+      providers.map(({ profileId, telemetryLabels }) => ({ profileId, telemetryLabels }))
+    ).toEqual(
+      providers.map(({ profileId }) => ({
+        profileId,
+        telemetryLabels: ['observability-logs-data-source-profile'],
+      }))
+    );
+  });
+
   // Helper to get the expected columns for each profile
   const expectedColumnsMap: Record<string, Array<{ name: string; width?: number }>> = {
     'observability-apache-error-logs-data-source-profile': [

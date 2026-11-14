@@ -2,7 +2,7 @@
 
 Discover reports product telemetry through three channels: custom EBT events, standard `performance_metric` events for durations, and `trackUiMetric` UI counters for legacy usage counts. EBT registrations live in [discover_ebt_manager_registrations.ts](./discover_ebt_manager_registrations.ts).
 
-All Discover EBT events can include the `discover_context` context provider. Its `discoverProfiles` field contains the active Discover context awareness profile IDs.
+All Discover EBT events can include the `discover_context` context provider. Its `discoverProfiles` field contains the active Discover context awareness profile IDs. Inherited telemetry labels are included, so a specialized logs profile also carries its parent profile id.
 
 ## Custom EBT events
 

@@ -49,6 +49,7 @@ export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): LogsDataSourceProfileProvider => ({
   profileId: LOGS_DATA_SOURCE_PROFILE_ID,
+  telemetryLabels: [LOGS_DATA_SOURCE_PROFILE_ID],
   profile: {
     getDefaultAppState: createGetDefaultAppState(),
     getCellRenderers,
