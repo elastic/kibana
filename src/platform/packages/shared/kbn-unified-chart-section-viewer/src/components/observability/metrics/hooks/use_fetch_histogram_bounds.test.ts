@@ -106,6 +106,7 @@ const createProps = (overrides: Partial<HookProps> = {}): HookProps => ({
     filters: [],
     esqlVariables: [],
     relativeTimeRange: { from: 'now-15m', to: 'now' },
+    searchSessionId: 'cached-session',
   }),
   services,
   whereStatements: [],
@@ -200,7 +201,7 @@ describe('useFetchHistogramBounds', () => {
     ]);
   });
 
-  it('passes the relative time range, filters, variables, and bounds execution context, without approximation', async () => {
+  it('passes the relative time range, session, filters, variables, and bounds execution context, without approximation', async () => {
     renderBoundsHook(
       createProps({
         metricItems: [histogramA],
@@ -218,6 +219,7 @@ describe('useFetchHistogramBounds', () => {
       expect.objectContaining({
         timeFieldName: 'timestamp',
         timeRange: { from: 'now-15m', to: 'now' },
+        sessionId: 'cached-session',
         filters: [],
         variables: [],
         profileId: 'test-profile-id',

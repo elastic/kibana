@@ -129,6 +129,7 @@ export const useFetchHistogramBounds = ({
   const enabledRef = useLatest(fetchEnabled);
   const dataSourceRef = useLatest(dataSource);
   const relativeTimeRangeRef = useLatest(relativeTimeRange);
+  const searchSessionIdRef = useLatest(searchSessionId);
   const filtersRef = useLatest(filters);
   const esqlVariablesRef = useLatest(esqlVariables);
   const searchRef = useLatest(search);
@@ -189,6 +190,7 @@ export const useFetchHistogramBounds = ({
           } = await executeEsqlQuery<BoundsRow>({
             esqlQuery: boundsQuery.esqlQuery,
             search: searchRef.current,
+            sessionId: searchSessionIdRef.current,
             signal,
             timeFieldName: currentDataSource.timeFieldName,
             timeRange: relativeTimeRangeRef.current,
@@ -228,6 +230,7 @@ export const useFetchHistogramBounds = ({
       enabledRef,
       dataSourceRef,
       relativeTimeRangeRef,
+      searchSessionIdRef,
       filtersRef,
       esqlVariablesRef,
       searchRef,
