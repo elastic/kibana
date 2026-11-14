@@ -70,6 +70,7 @@ import {
   ProvisioningCallbackSchemaV1,
   CloudOnboardingDeploymentSchemaV7,
   CloudOnboardingDeploymentSchemaV8,
+  CloudOnboardingDeploymentSchemaV9,
 } from '../types';
 
 import {
@@ -2310,6 +2311,18 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV8,
+          },
+        },
+        9: {
+          // policySettings values may also be string arrays (additional_datastreams_permissions).
+          // No mappings_addition — policySettings is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV9.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV9,
           },
         },
       },

@@ -32,6 +32,7 @@ import { SharedAdvancedSettings } from './shared_advanced_settings';
 import type { OutputFieldProps } from './output_field';
 import type { ProxyUrlFieldProps } from './proxy_url_field';
 import type { ConditionFieldProps } from './condition_field';
+import type { ReroutePermissionsFieldProps } from './reroute_permissions_field';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
 const ADVANCED_ANIMATION_MS = 300;
@@ -71,6 +72,8 @@ interface SharedSettingsSectionProps {
    * stays open while it has an error.
    */
   condition?: ConditionFieldProps;
+  /** The reroute permissions field, offered for agent-based and managed integration deploys. */
+  reroutePermissions?: ReroutePermissionsFieldProps;
 }
 
 /**
@@ -102,6 +105,7 @@ export function SharedSettingsSection({
   output,
   proxyUrl,
   condition,
+  reroutePermissions,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
@@ -109,7 +113,11 @@ export function SharedSettingsSection({
   // Collapsed by default. It cannot be collapsed over an error, which would hide why Next is off.
   const [advancedToggled, setAdvancedToggled] = useState(false);
   const isAdvancedOpen =
-    advancedToggled || !!namespaceError || !!proxyUrl?.error || !!condition?.errors?.length;
+    advancedToggled ||
+    !!namespaceError ||
+    !!proxyUrl?.error ||
+    !!condition?.errors?.length ||
+    !!reroutePermissions?.error;
   const advancedId = useGeneratedHtmlId({ prefix: 'sharedAdvancedSettings' });
   const { euiTheme } = useEuiTheme();
 
@@ -290,6 +298,7 @@ export function SharedSettingsSection({
             output={output}
             proxyUrl={proxyUrl}
             condition={condition}
+            reroutePermissions={reroutePermissions}
           />
         </div>
       </div>
