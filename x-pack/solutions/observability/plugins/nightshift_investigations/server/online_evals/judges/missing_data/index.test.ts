@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { missingDataJudge } from '.';
+import { missingDataOutputSchema } from './prompt';
 
 const round = {
   input: { message: 'Investigate the checkout latency alert' },
@@ -86,12 +87,12 @@ describe('nightshift_missing_data', () => {
     expect(scores[0]).toEqual(expect.objectContaining({ score: 3, label: '3 gaps' }));
   });
 
-  it('retries a reason it does not know, then fails', async () => {
-    const { evaluate, chatComplete } = judgeReturning([{ what: 'x', why: 'because' }]);
+  it('only accepts the four reasons', () => {
+    const schema = missingDataOutputSchema;
 
-    await expect(evaluate()).rejects.toThrow('Invalid judge output');
-    expect(chatComplete.mock.calls.length).toBeGreaterThan(1);
-  }, 60_000);
+    expect(schema.safeParse({ gaps: [{ what: 'x', why: 'no_access' }] }).success).toBe(true);
+    expect(schema.safeParse({ gaps: [{ what: 'x', why: 'because' }] }).success).toBe(false);
+  });
 
   it('requires an input and a final answer', () => {
     const { evidenceSchema } = missingDataJudge;

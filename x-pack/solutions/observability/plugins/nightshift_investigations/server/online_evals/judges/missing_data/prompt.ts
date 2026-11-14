@@ -80,11 +80,7 @@ export const missingDataTool: { name: string; description: string; schema: ToolS
 };
 
 /** The human message that closes the conversation and asks for the report. */
-export const buildScoringRequest = ({
-  omittedToolCalls,
-}: {
-  omittedToolCalls: number;
-}): string =>
+export const buildScoringRequest = ({ omittedToolCalls }: { omittedToolCalls: number }): string =>
   [
     'The conversation above is the investigation to audit.',
     omittedToolCalls > 0
