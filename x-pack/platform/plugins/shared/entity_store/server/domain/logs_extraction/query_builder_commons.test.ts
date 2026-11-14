@@ -28,7 +28,8 @@ import {
   aggregationStats,
   buildExtractionSourceClause,
   buildFieldEvaluations,
-  buildPaginationSection,
+  buildPaginationCursorFilter,
+  buildPaginationSortAndLimit,
   buildPostStatsLogicalToColumnMap,
   buildSetFieldsByCondition,
   extractPaginationParams,
@@ -422,40 +423,34 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
   });
 });
 
-describe('buildPaginationSection', () => {
+describe('pagination query fragments', () => {
   const paginationFields: PaginationFields = {
     idFieldInQuery: 'recent.id',
     finalIdField: 'final.id',
   };
 
-  it('should emit SORT and LIMIT only when pagination is absent', () => {
-    expect(buildPaginationSection(25, paginationFields)).toEqual([
-      '| SORT recent.id ASC',
-      '| LIMIT 25',
-    ]);
+  it('should emit no cursor filter on the first page', () => {
+    expect(buildPaginationCursorFilter(paginationFields)).toEqual([]);
   });
 
-  it('should sort by the id field alone, never by a timestamp', () => {
-    const parts = buildPaginationSection(25, paginationFields, { idCursor: 'cursor-id' });
-    expect(parts[0]).toBe('| SORT recent.id ASC');
+  it('should add an id-only WHERE cursor clause when pagination is provided', () => {
+    const parts = buildPaginationCursorFilter(paginationFields, { idCursor: 'cursor-id' });
+    expect(parts).toEqual(['| WHERE recent.id > "cursor-id"']);
     expect(parts.join('\n')).not.toContain('@timestamp');
     expect(parts.join('\n')).not.toContain('TO_DATETIME');
   });
 
-  it('should add an id-only WHERE cursor clause when pagination is provided', () => {
-    const parts = buildPaginationSection(25, paginationFields, { idCursor: 'cursor-id' });
-    expect(parts).toEqual([
-      '| SORT recent.id ASC',
-      '| WHERE recent.id > "cursor-id"',
-      '| LIMIT 25',
-    ]);
-  });
-
   it('should escape double quotes and backslashes in idCursor to prevent ESQL injection', () => {
-    const parts = buildPaginationSection(25, paginationFields, {
+    const parts = buildPaginationCursorFilter(paginationFields, {
       idCursor: 'evil"id\\with"chars',
     });
-    expect(parts[1]).toBe('| WHERE recent.id > "evil\\"id\\\\with\\"chars"');
+    expect(parts).toEqual(['| WHERE recent.id > "evil\\"id\\\\with\\"chars"']);
+  });
+
+  it('should sort by the id field alone, never by a timestamp, and cap at docsLimit', () => {
+    const parts = buildPaginationSortAndLimit(25, paginationFields);
+    expect(parts).toEqual(['| SORT recent.id ASC', '| LIMIT 25']);
+    expect(parts.join('\n')).not.toContain('@timestamp');
   });
 });
 

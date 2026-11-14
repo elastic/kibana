@@ -573,6 +573,7 @@ FROM test-index-*
  host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
  host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
  recent.entity.EngineMetadata.UntypedId = COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null)
+| WHERE recent.entity.EngineMetadata.UntypedId > \\"123\\"
 | STATS
     recent.timestamp = MAX(@timestamp),
     recent.entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE TO_STRING(host.name) IS NOT NULL,
@@ -703,7 +704,6 @@ FROM test-index-*
  recent.entity.relationships.supervises.ids = VALUES(TO_STRING(host.entity.relationships.supervises.entity.id))
     BY recent.entity.EngineMetadata.UntypedId
 | SORT recent.entity.EngineMetadata.UntypedId ASC
-| WHERE recent.entity.EngineMetadata.UntypedId > \\"123\\"
 | LIMIT 10000
 | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
 | LOOKUP JOIN _coordinator:latest-index
