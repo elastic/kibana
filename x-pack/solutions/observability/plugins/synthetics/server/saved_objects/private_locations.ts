@@ -15,6 +15,7 @@ import {
 export const PRIVATE_LOCATION_SAVED_OBJECT_TYPE: SavedObjectsType = {
   name: privateLocationSavedObjectName,
   hidden: false,
+  hiddenFromHttpApis: true,
   namespaceType: 'multiple',
   mappings: {
     dynamic: false,
