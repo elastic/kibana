@@ -381,3 +381,23 @@ export const getConnectorSpecResponseBodySchema = schema.object({
     }
   ),
 });
+
+export const getConnectorSpecSummariesResponseBodySchema = schema.arrayOf(
+  schema.object({
+    id: schema.string({
+      meta: { description: 'The connector type identifier.' },
+    }),
+    icon: schema.maybe(
+      schema.string({
+        meta: { description: 'Optional icon key or URL for this connector type in the UI.' },
+      })
+    ),
+    is_ears_experimental: schema.boolean({
+      meta: { description: 'When true, the EARS auth type of this connector is experimental.' },
+    }),
+  }),
+  {
+    maxSize: 1000,
+    meta: { description: 'Display data for all spec-backed connector types.' },
+  }
+);

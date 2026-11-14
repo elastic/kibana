@@ -307,7 +307,7 @@ export class ActionsClient {
     configurationUtilities,
   }: {
     id: string;
-    configurationUtilities: ActionsConfigurationUtilities;
+    configurationUtilities?: ActionsConfigurationUtilities;
   }) {
     return getConnectorSpecAsJsonSchema({
       context: this.context,

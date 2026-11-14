@@ -8,12 +8,14 @@
 import type { IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { KibanaRequest, Logger, CoreSetup } from '@kbn/core/server';
+import type { ConnectorSpecSummary } from '../../common/connector_spec';
 import { getAllConnectorsRoute } from './connector/get_all';
 import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
 import { connectorAuthStatusRoute } from './connector/auth_status';
 import { listTypesRoute } from './connector/list_types';
 import { listTypesWithSystemRoute } from './connector/list_types_system';
 import { getConnectorSpecRoute } from './connector/get_spec';
+import { listSpecsRoute } from './connector/list_specs';
 import type { ILicenseState } from '../lib';
 import type { ActionsRequestHandlerContext } from '../types';
 import { createConnectorRoute } from './connector/create';
@@ -47,6 +49,7 @@ export interface RouteOptions {
   core: CoreSetup<ActionsPluginsStart>;
   oauthRateLimiter: OAuthRateLimiter;
   inboundEvents?: InboundEventsSetup;
+  getConnectorSpecSummaries: () => ConnectorSpecSummary[];
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -58,6 +61,7 @@ export function defineRoutes(opts: RouteOptions) {
     core,
     oauthRateLimiter,
     inboundEvents,
+    getConnectorSpecSummaries,
   } = opts;
 
   if (actionsConfigUtils.isConnectorSigningKeysEnabled()) {
@@ -83,6 +87,7 @@ export function defineRoutes(opts: RouteOptions) {
   listTypesWithSystemRoute(router, licenseState);
 
   getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
+  listSpecsRoute(router, licenseState, getConnectorSpecSummaries);
 
   // Only register when `xpack.actions.inboundEvents.enabled` — absent when off (not 403).
   if (inboundEvents) {

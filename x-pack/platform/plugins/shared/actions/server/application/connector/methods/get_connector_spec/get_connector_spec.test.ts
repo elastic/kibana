@@ -137,6 +137,20 @@ describe('getConnectorSpecAsJsonSchema', () => {
     ]);
   });
 
+  describe('configurationUtilities', () => {
+    test('defaults to the utilities held by the action type registry', async () => {
+      actionTypeRegistry.getUtils.mockReturnValue(configurationUtilities);
+
+      const result = await getConnectorSpecAsJsonSchema({
+        context: createContext(),
+        id: '.alienvault-otx',
+      });
+
+      expect(actionTypeRegistry.getUtils).toHaveBeenCalled();
+      expect(result.metadata.id).toBe('.alienvault-otx');
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to get actions before returning a connector type spec', async () => {
       await getConnectorSpecAsJsonSchema({
