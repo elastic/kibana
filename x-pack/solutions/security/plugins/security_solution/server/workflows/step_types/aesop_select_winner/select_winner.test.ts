@@ -132,6 +132,40 @@ describe('selectWinner', () => {
     ]);
   });
 
+  it('keeps an arm whose regression equals code_tolerance despite float error', () => {
+    // 0.9 - 0.85 is 0.05000000000000004, which must fall inside the epsilon margin.
+    const result = selectWinner(
+      build(
+        [
+          arm('at-limit', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+            row({ evaluatorName: 'esql-compile', meanBaseline: 0.9, meanTarget: 0.85 }),
+          ]),
+        ],
+        { code_tolerance: 0.05 }
+      )
+    );
+
+    expect(result).toMatchObject({ winner_target_id: 'at-limit', rejected: [] });
+  });
+
+  it('rejects an arm whose regression is just beyond code_tolerance', () => {
+    const result = selectWinner(
+      build(
+        [
+          arm('just-over', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+            row({ evaluatorName: 'esql-compile', meanBaseline: 0.9, meanTarget: 0.849 }),
+          ]),
+        ],
+        { code_tolerance: 0.05 }
+      )
+    );
+
+    expect(result.winner_index).toBe(-1);
+    expect(result.rejected.map(({ target_id: id }) => id)).toEqual(['just-over']);
+  });
+
   it('treats a higher mean as the regression for a code evaluator that minimizes', () => {
     const result = selectWinner(
       build([

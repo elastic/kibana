@@ -544,7 +544,7 @@ steps:
           {{ variables.winner_content }}
           ```
 
-          **Evaluators:** skill-secret-scanner, skill-prompt-injection, skill-pii, esql-compile, skill-index-resolves, correctness (judge)
+          **Evaluators:** skill-secret-scanner, skill-prompt-injection, skill-pii, esql-compile, skill-index-resolves, correctness.factuality (judge, ranks arms); code evaluators reject a regression beyond {{ consts.CODE_TOLERANCE }} vs baseline
 
           **On approval**
           {% if variables.has_live_skill == true %}If you approve, the agent stores the current content of `{{ variables.target_skill_id }}` (so a drift rollback can restore it), PUTs the winner onto it as the AESOP identity (the user who enabled the explorer, acting after your approval), and enables the skill's drift monitor.{% else %}If you approve, the agent creates the skill as the AESOP identity (the user who enabled the explorer, acting after your approval) and enables its drift monitor.{% endif %} Scratch variant skills are deleted either way. If you dismiss, the decision and your reason are recorded and nothing is deployed.

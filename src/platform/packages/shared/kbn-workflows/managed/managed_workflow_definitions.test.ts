@@ -313,7 +313,7 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
-  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '7:c9c9db84'],
+  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '8:d5fdfb9a'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '10:9dc52fe8'],
   [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '2:84917074'],
 ] as const)(
@@ -592,6 +592,12 @@ describe('managedWorkflowDefinitions', () => {
             'steps.winner.output.tiebreak_beats_baseline == true'
           );
         }
+      });
+
+      it('writes the rejection KI only when no tiebreak arm beats the baseline', () => {
+        expect(stepsByName().get('write_rejection_ki')?.if).toContain(
+          'steps.winner.output.tiebreak_beats_baseline != true'
+        );
       });
 
       it.each([
