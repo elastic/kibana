@@ -93,6 +93,24 @@ describe('normalizeInventories', () => {
     });
   });
 
+  it('does not scan a distro that only lists rhel in platform_like against the RHEL feed', () => {
+    // Amazon Linux 2: platform is the os-release ID, platform_like is ID_LIKE.
+    const result = normalizeInventories([
+      agent({
+        agentId: 'amzn',
+        os: {
+          platform: 'amzn',
+          platform_like: 'centos rhel fedora',
+          major: '2',
+          name: 'Amazon Linux 2',
+        },
+        rpm: [{ name: 'openssl-libs', version: '1', release: '2' }],
+      }),
+    ]);
+    expect(result.hosts).toEqual([]);
+    expect(result.skippedHosts).toEqual({ unsupported_os: 1 });
+  });
+
   it('counts dropped package rows per reason', () => {
     const result = normalizeInventories([
       agent({

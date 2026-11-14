@@ -115,16 +115,17 @@ type HostOs = HostInventory['os'];
 
 /**
  * Maps `os_version` to the feed key. osquery reports `platform` from os-release `ID` and forces
- * `rhel` whenever `/etc/redhat-release` exists (so RHEL rebuilds report `rhel` too).
+ * `rhel` whenever `/etc/redhat-release` exists (so RHEL rebuilds report `rhel` too);
+ * `platform_like` is deliberately not consulted — Amazon Linux 2 (`ID_LIKE="centos rhel fedora"`)
+ * would otherwise be matched against the RHEL feed for the wrong major.
  */
 export const normalizeOs = (row: OsqueryRow): HostOs | HostSkipReason => {
   const platform = text(row.platform)?.toLowerCase();
-  const like = (text(row.platform_like)?.toLowerCase() ?? '').split(/\s+/);
   if (platform === 'ubuntu') {
     const codename = text(row.codename)?.toLowerCase();
     return codename ? { family: 'ubuntu', version: codename } : 'missing_os_release';
   }
-  if (platform === 'rhel' || like.includes('rhel')) {
+  if (platform === 'rhel') {
     const major = text(row.major);
     // osquery defaults `major` to "0" when it cannot read a version.
     return major && /^[1-9]\d*$/.test(major)
