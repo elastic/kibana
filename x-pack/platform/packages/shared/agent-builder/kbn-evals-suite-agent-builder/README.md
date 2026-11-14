@@ -117,6 +117,26 @@ Notes:
 - In this mode, the suite **does not** create or upsert datasets/examples — the stored dataset is the source of truth.
 - Dataset examples must match the example schema used in the eval suite (at minimum `input.question`, plus any `output.expected` / `output.groundTruth` needed by evaluators).
 
+### PROMQL and TS query evaluations
+
+`evals/esql/promql_ts.spec.ts` runs `generate_esql` on PromQL and time series questions and scores the generated query with code evaluators: the source command (`PROMQL` or `TS`), whether it runs over the dataset's time range, whether it returns rows, and per-example rules such as binding `start`/`end` to `?_tstart`/`?_tend` or not using a fixed range selector like `[5m]`. An LLM judge also compares it with the ground-truth query.
+
+The `node_exporter follow-up queries` test asks the default agent two PromQL questions in one conversation, answered in the chat or as charts. As the first answer shows the agent a PROMQL query, it may write the second one itself instead of calling `generate_esql` again. The `Generated Queries Only` evaluator scores the share of queries the agent passes to `execute_esql` or to a visualization that a tool generated, ignoring exploratory `FROM` or `TS` queries without `STATS` and dropped `start`/`end` options. A turn that used no query scores 0, and the second question isn't asked if the first one failed. The second answer's query is also checked for its source command and rules and, for chat answers, whether it runs and returns rows.
+
+It has no examples that divide two different metrics, such as used memory in percent. `PROMQL` returns no rows for an unaggregated `a / b` instead of failing, so such examples only measure whether the model aggregates both operands.
+
+It loads its own data, so it needs no snapshot. Run it with Claude Sonnet 5, the default Agent Builder model, as both the evaluated model and the judge:
+
+```bash
+node scripts/evals run --suite esql-generation --project eis-anthropic-claude-5-sonnet --evaluation-connector-id eis-anthropic-claude-5-sonnet --grep "node_exporter"
+```
+
+With `node scripts/evals start`, the `local` profile writes datasets and scores to a Kibana on `localhost:5601`. To keep them in the Scout stack the evals run against instead, use a profile whose `evaluationsKbn`, `evaluationsEs` and `tracingEs` URLs point to `localhost:5620` and `localhost:9220`, such as `--profile scout` with `config.scout.json` in `kbn-evals/scripts/vault`.
+
+The dataset in `src/fixtures/node_exporter_metrics.ndjson.gz` is one hour of Prometheus `node_exporter` metrics from three instances at a 30s interval, as stored by the Elasticsearch Prometheus remote write endpoint. It is loaded into the TSDB data stream `metrics-node_exporter.prometheus-evals`, with its timestamps shifted to end at the current minute, as TSDB rejects documents older than `index.look_back_time`. The follow-up questions ask about the last 2 hours, so the data stays in range for runs of up to an hour after it was loaded.
+
+It was generated with the `builtin/node_exporter` scenario of [metricsgenreceiver](https://github.com/elastic/metricsgenreceiver) (`seed: 123`, `scale: 3`, `interval: 15s`, one hour) and the `prometheusremotewrite` exporter, then reduced to a subset of the metrics a node_exporter dashboard uses and to 30s samples. As the generator varies each gauge independently, the export rescales the available and free memory and filesystem gauges to stay below their totals, with a fixed share per instance: `host-2:9100` is low on memory and its root filesystem is nearly full.
+
 ### Evaluation comparisons
 
 Use the evals CLI to compare two evaluation runs (persisted to the `.evaluation-scores` data stream) using paired t-tests.
