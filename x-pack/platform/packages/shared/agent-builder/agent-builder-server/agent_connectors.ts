@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { getConnectorSpec, isSelectedActionEnabled, isToolAction } from '@kbn/connector-specs';
+import { isSelectedActionEnabled } from '@kbn/connector-specs';
 import type { SelectedActions } from '@kbn/connector-specs';
-import { formatSchemaForLlm } from './tools';
+import type { ConnectorSpecProvider } from './connector_spec_provider';
+import { createPackageConnectorSpecProvider } from './connector_spec_provider';
+import { formatJsonSchemaForLlm } from './tools';
 
 /** Minimal actions-client interface needed by the connector helpers below. */
 interface MinimalActionsClient {
@@ -57,24 +59,23 @@ export const resolveAllowedConnectorIds = (
  */
 export const listAgentConnectors = async (
   actionsClient: MinimalActionsClient,
-  { allowedIds }: { allowedIds?: string[] }
+  {
+    allowedIds,
+    specProvider = createPackageConnectorSpecProvider(),
+  }: { allowedIds?: string[]; specProvider?: ConnectorSpecProvider }
 ): Promise<ConnectorSummary[]> => {
   const allConnectors = await actionsClient.getAll();
   const allowedSet = allowedIds !== undefined ? new Set(allowedIds) : null;
 
-  return allConnectors
-    .filter(
-      (c) => !!getConnectorSpec(c.actionTypeId) && (allowedSet === null || allowedSet.has(c.id))
-    )
-    .map((c) => {
-      const spec = getConnectorSpec(c.actionTypeId)!;
-      return {
-        id: c.id,
-        name: c.name,
-        type: c.actionTypeId,
-        description: spec.metadata.description ?? c.name,
-      };
-    });
+  const inScope = allConnectors.filter((c) => allowedSet === null || allowedSet.has(c.id));
+  const specs = await Promise.all(inScope.map((c) => specProvider.getSpec(c.actionTypeId)));
+
+  return inScope.flatMap((c, index) => {
+    const spec = specs[index];
+    return spec
+      ? [{ id: c.id, name: c.name, type: c.actionTypeId, description: spec.description ?? c.name }]
+      : [];
+  });
 };
 
 /**
@@ -85,29 +86,32 @@ export const listAgentConnectors = async (
 export const getAgentConnectorDetail = async (
   actionsClient: MinimalActionsClient,
   connectorId: string,
-  { allowedIds }: { allowedIds?: string[] } = {}
+  {
+    allowedIds,
+    specProvider = createPackageConnectorSpecProvider(),
+  }: { allowedIds?: string[]; specProvider?: ConnectorSpecProvider } = {}
 ): Promise<ConnectorDetail | null> => {
   if (allowedIds !== undefined && !allowedIds.includes(connectorId)) return null;
 
   const connector = await actionsClient.get({ id: connectorId });
-  const spec = getConnectorSpec(connector.actionTypeId);
+  const spec = await specProvider.getSpecDetail(connector.actionTypeId);
   if (!spec) return null;
 
   const selectedActions = connector.config?.selectedActions as SelectedActions;
 
-  const subActions: ConnectorSubActionDetail[] = Object.entries(spec.actions)
-    .filter(([name]) => isToolAction(spec, name) && isSelectedActionEnabled(name, selectedActions))
-    .map(([name, action]) => ({
+  const subActions: ConnectorSubActionDetail[] = spec.actions
+    .filter(({ name, isTool }) => isTool && isSelectedActionEnabled(name, selectedActions))
+    .map(({ name, description, inputSchema }) => ({
       name,
-      description: action.description ?? name,
-      params: action.input ? formatSchemaForLlm(action.input) : 'No parameters',
+      description: description ?? name,
+      params: formatJsonSchemaForLlm(inputSchema),
     }));
 
   return {
     id: connector.id,
     name: connector.name,
     type: connector.actionTypeId,
-    description: spec.metadata.description ?? connector.name,
+    description: spec.description ?? connector.name,
     subActions,
   };
 };

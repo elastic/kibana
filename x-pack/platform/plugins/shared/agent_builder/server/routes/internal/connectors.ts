@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
-import { listAgentConnectors, getAgentConnectorDetail } from '@kbn/agent-builder-server';
+import {
+  createConnectorSpecProvider,
+  listAgentConnectors,
+  getAgentConnectorDetail,
+} from '@kbn/agent-builder-server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -75,11 +79,18 @@ export function registerInternalConnectorRoutes({
       const allowedIds = await resolveAgentConnectorIdsFromRequest(request, getInternalServices());
 
       const { id: connectorId } = request.query;
+      const specProvider = createConnectorSpecProvider({
+        actionsStart: pluginsStart.actions,
+        actionsClient,
+      });
 
       if (connectorId) {
         let detail: Awaited<ReturnType<typeof getAgentConnectorDetail>>;
         try {
-          detail = await getAgentConnectorDetail(actionsClient, connectorId, { allowedIds });
+          detail = await getAgentConnectorDetail(actionsClient, connectorId, {
+            allowedIds,
+            specProvider,
+          });
         } catch (e) {
           const statusCode = (e as { output?: { statusCode?: number } }).output?.statusCode;
           if (statusCode === 404) {
@@ -101,7 +112,7 @@ export function registerInternalConnectorRoutes({
         return response.ok<AgentConnectorDetailResponse>({ body: detail });
       }
 
-      const connectors = await listAgentConnectors(actionsClient, { allowedIds });
+      const connectors = await listAgentConnectors(actionsClient, { allowedIds, specProvider });
       return response.ok<ListAgentConnectorsResponse>({ body: connectors });
     })
   );

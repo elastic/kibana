@@ -18,7 +18,10 @@ import { createListConnectorsTool } from './list_connectors_tool';
 import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_tool';
 
 jest.mock('@kbn/connector-specs', () => ({
+  connectorsSpecs: {},
   getConnectorSpec: jest.fn(),
+  isEarsExperimentalConnector: jest.fn().mockReturnValue(false),
+  resolveActionScope: jest.fn().mockReturnValue('read'),
   isToolAction: jest.fn(),
   isSelectedActionEnabled: jest.fn().mockReturnValue(true),
 }));
@@ -305,7 +308,7 @@ describe('connector-discovery inline tools', () => {
       });
       const spec = makeSpec('GitHub connector', {
         createIssue: { isTool: true, description: 'Create an issue', input: createIssueInput },
-        internalOp: { isTool: false, description: 'Internal', input: {} },
+        internalOp: { isTool: false, description: 'Internal', input: z.object({}) },
       });
       mockGetConnectorSpec.mockReturnValue(spec);
       mockIsToolAction.mockImplementation((_: unknown, name: string) => name === 'createIssue');
@@ -332,7 +335,7 @@ describe('connector-discovery inline tools', () => {
         makeConnector({ id: 'abc', name: 'My GitHub', actionTypeId: '.github' }),
       ]);
       const spec = makeSpec('Manage GitHub issues', {
-        createIssue: { isTool: true, description: 'Create an issue', input: {} },
+        createIssue: { isTool: true, description: 'Create an issue', input: z.object({}) },
       });
       mockGetConnectorSpec.mockReturnValue(spec);
       mockIsToolAction.mockReturnValue(true);
@@ -399,7 +402,7 @@ describe('connector-discovery inline tools', () => {
     ])('says the connector is not assigned when %s', async (_, context) => {
       const { actionsStart, mockGet } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
       mockGetConnectorSpec.mockReturnValue(
-        makeSpec('GitHub connector', { createIssue: { isTool: true, input: {} } })
+        makeSpec('GitHub connector', { createIssue: { isTool: true, input: z.object({}) } })
       );
       mockIsToolAction.mockReturnValue(true);
       const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });

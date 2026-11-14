@@ -13,7 +13,8 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { AgentFormattedAttachment } from '@kbn/agent-builder-server/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import { formatSchemaForLlm } from '@kbn/agent-builder-server';
+import { formatJsonSchemaForLlm } from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { createConnectorAttachmentType } from './connector';
 import { renderSurface, surfaceContext } from './test_utils';
@@ -25,11 +26,13 @@ jest.mock('@kbn/connector-specs', () => ({
 
 jest.mock('@kbn/agent-builder-server', () => ({
   ...jest.requireActual('@kbn/agent-builder-server'),
-  formatSchemaForLlm: jest.fn(),
+  formatJsonSchemaForLlm: jest.fn(),
 }));
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
-const formatSchemaForLlmMock = formatSchemaForLlm as jest.MockedFunction<typeof formatSchemaForLlm>;
+const formatSchemaForLlmMock = formatJsonSchemaForLlm as jest.MockedFunction<
+  typeof formatJsonSchemaForLlm
+>;
 
 const createAttachment = (
   data: ConnectorAttachmentData
@@ -54,6 +57,8 @@ describe('connector attachment type', () => {
   const soClient = { get: jest.fn() };
   const connectorType = createConnectorAttachmentType({
     getActionSavedObjectsClient: async () => soClient as never,
+    getActionsStart: async () =>
+      ({ getActionsClientWithRequest: async () => ({}) } as unknown as ActionsPluginStart),
   });
 
   beforeEach(() => {
@@ -87,14 +92,14 @@ describe('connector attachment type', () => {
 
   describe('format', () => {
     describe('getRepresentation', () => {
-      it('returns text with connector name and description when no spec is found', () => {
+      it('returns text with connector name and description when no spec is found', async () => {
         getConnectorSpecMock.mockReturnValue(undefined);
 
         const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const representation = formatted.getRepresentation!();
 
         expect(representation).toEqual({
@@ -109,7 +114,7 @@ describe('connector attachment type', () => {
         );
       });
 
-      it('uses metadata.description from connector spec when available', () => {
+      it('uses metadata.description from connector spec when available', async () => {
         getConnectorSpecMock.mockReturnValue({
           metadata: {
             id: '.github',
@@ -123,31 +128,31 @@ describe('connector attachment type', () => {
         });
 
         const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('Generic GitHub connector');
         expect(representation.value).toContain('platform.core.execute_connector_sub_action');
       });
 
-      it('falls back to connector_type when no spec is found', () => {
+      it('falls back to connector_type when no spec is found', async () => {
         getConnectorSpecMock.mockReturnValue(undefined);
 
         const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('Description: .github');
         expect(representation.value).toContain('"connectorId":"connector-123"');
       });
 
-      it('lists sub-actions from ConnectorSpec when available', () => {
+      it('lists sub-actions from ConnectorSpec when available', async () => {
         const inputSchema = z.object({
           query: z.string().describe('Search query'),
         });
@@ -190,10 +195,10 @@ describe('connector attachment type', () => {
           ...validData,
           connector_type: '.slack2',
         });
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('execute_connector_sub_action');
@@ -207,7 +212,7 @@ describe('connector attachment type', () => {
         );
       });
 
-      it('filters sub-actions by selected_actions allowlist', () => {
+      it('filters sub-actions by selected_actions allowlist', async () => {
         const inputSchema = z.object({ query: z.string() });
         getConnectorSpecMock.mockReturnValue({
           metadata: {
@@ -249,10 +254,10 @@ describe('connector attachment type', () => {
           connector_type: '.slack2',
           selected_actions: ['sendMessage', 'internalAction'],
         });
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('sendMessage: Send a message to a channel');
@@ -260,7 +265,7 @@ describe('connector attachment type', () => {
         expect(representation.value).not.toContain('searchMessages');
       });
 
-      it('includes skill content when spec has skill', () => {
+      it('includes skill content when spec has skill', async () => {
         const inputSchema = z.object({});
         getConnectorSpecMock.mockReturnValue({
           metadata: {
@@ -288,10 +293,10 @@ describe('connector attachment type', () => {
           ...validData,
           connector_type: '.slack2',
         });
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain(
@@ -300,7 +305,7 @@ describe('connector attachment type', () => {
         expect(representation.value).not.toContain('Note: not every action may be available');
       });
 
-      it('prepends a cross-reference note before skill content when selected_actions is restricted', () => {
+      it('prepends a cross-reference note before skill content when selected_actions is restricted', async () => {
         const inputSchema = z.object({});
         getConnectorSpecMock.mockReturnValue({
           metadata: {
@@ -329,10 +334,10 @@ describe('connector attachment type', () => {
           connector_type: '.slack2',
           selected_actions: ['sendMessage'],
         });
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain(
@@ -351,7 +356,7 @@ describe('connector attachment type', () => {
           formatSchemaForLlmMock.mockReturnValue('channel (string, required): Channel name');
         });
 
-        it('shows [WRITE] for a write-scoped action', () => {
+        it('shows [WRITE] for a write-scoped action', async () => {
           getConnectorSpecMock.mockReturnValue({
             metadata: {
               id: '.slack2',
@@ -380,10 +385,10 @@ describe('connector attachment type', () => {
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
-          const formatted = connectorType.format(
+          const formatted = (await connectorType.format(
             attachment,
             formatContext
-          ) as AgentFormattedAttachment;
+          )) as AgentFormattedAttachment;
           const representation = formatted.getRepresentation!() as { value: string };
 
           expect(representation.value).toContain(
@@ -393,7 +398,7 @@ describe('connector attachment type', () => {
           expect(representation.value).not.toContain('searchMessages [');
         });
 
-        it('shows [DESTROY] for a destroy-scoped action', () => {
+        it('shows [DESTROY] for a destroy-scoped action', async () => {
           getConnectorSpecMock.mockReturnValue({
             metadata: {
               id: '.slack2',
@@ -415,16 +420,16 @@ describe('connector attachment type', () => {
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
-          const formatted = connectorType.format(
+          const formatted = (await connectorType.format(
             attachment,
             formatContext
-          ) as AgentFormattedAttachment;
+          )) as AgentFormattedAttachment;
           const representation = formatted.getRepresentation!() as { value: string };
 
           expect(representation.value).toContain('deleteMessage [DESTROY]: Delete a message');
         });
 
-        it('shows no hint tag for a read-only action with no annotations', () => {
+        it('shows no hint tag for a read-only action with no annotations', async () => {
           getConnectorSpecMock.mockReturnValue({
             metadata: {
               id: '.slack2',
@@ -446,10 +451,10 @@ describe('connector attachment type', () => {
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
-          const formatted = connectorType.format(
+          const formatted = (await connectorType.format(
             attachment,
             formatContext
-          ) as AgentFormattedAttachment;
+          )) as AgentFormattedAttachment;
           const representation = formatted.getRepresentation!() as { value: string };
 
           expect(representation.value).toMatch(/- searchMessages: Search messages/);
@@ -459,20 +464,20 @@ describe('connector attachment type', () => {
     });
 
     describe('getBoundedTools', () => {
-      it('always returns empty array', () => {
+      it('always returns empty array', async () => {
         getConnectorSpecMock.mockReturnValue(undefined);
 
         const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const boundedTools = formatted.getBoundedTools!();
 
         expect(boundedTools).toEqual([]);
       });
 
-      it('returns empty array when spec has sub-actions', () => {
+      it('returns empty array when spec has sub-actions', async () => {
         const inputSchema = z.object({});
         getConnectorSpecMock.mockReturnValue({
           metadata: {
@@ -495,10 +500,10 @@ describe('connector attachment type', () => {
         });
 
         const attachment = createAttachment(validData);
-        const formatted = connectorType.format(
+        const formatted = (await connectorType.format(
           attachment,
           formatContext
-        ) as AgentFormattedAttachment;
+        )) as AgentFormattedAttachment;
         const boundedTools = formatted.getBoundedTools!();
 
         expect(boundedTools).toEqual([]);
@@ -551,6 +556,8 @@ describe('connector attachment type', () => {
 describe('connector toSurfaceComposition', () => {
   const connectorType = createConnectorAttachmentType({
     getActionSavedObjectsClient: async () => ({} as never),
+    getActionsStart: async () =>
+      ({ getActionsClientWithRequest: async () => ({}) } as unknown as ActionsPluginStart),
   });
   const spec = {
     metadata: {

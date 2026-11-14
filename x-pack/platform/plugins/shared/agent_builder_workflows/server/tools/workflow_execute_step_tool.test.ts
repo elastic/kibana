@@ -6,6 +6,7 @@
  */
 
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type {
   ConfirmPromptDefinition,
   ConfirmationPrompt,
@@ -183,6 +184,8 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
   };
 };
 
+const getActions = () => ({} as ActionsPluginStart);
+
 describe('registerWorkflowExecuteStepTool', () => {
   let registeredTool: BuiltinToolDefinition;
   const getSecurity = jest.fn<SecurityPluginStart | undefined, []>();
@@ -205,7 +208,7 @@ describe('registerWorkflowExecuteStepTool', () => {
       },
     } as any;
 
-    registerWorkflowExecuteStepTool(agentBuilder, mockApi, getSecurity);
+    registerWorkflowExecuteStepTool(agentBuilder, mockApi, getSecurity, getActions);
   });
 
   afterEach(() => {

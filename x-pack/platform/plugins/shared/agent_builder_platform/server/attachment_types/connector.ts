@@ -16,11 +16,14 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ComponentsNode } from '@kbn/isomer-components';
 import { i18n } from '@kbn/i18n';
-import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
-  filterActionsBySelection,
+  createConnectorSpecProvider,
+  filterSpecActionsBySelection,
+  formatJsonSchemaForLlm,
+} from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import {
   formatConnectorActionLine,
-  getConnectorSpec,
   isSpecificActionsSelection,
   type SelectedActions,
 } from '@kbn/connector-specs';
@@ -39,9 +42,19 @@ import {
  */
 export const createConnectorAttachmentType = ({
   getActionSavedObjectsClient,
+  getActionsStart,
 }: {
   getActionSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+  getActionsStart: () => Promise<ActionsPluginStart>;
 }): AttachmentTypeDefinition<AttachmentType.connector, ConnectorAttachmentData> => {
+  const getSpecProvider = async (request: KibanaRequest) => {
+    const actionsStart = await getActionsStart();
+    return createConnectorSpecProvider({
+      actionsStart,
+      actionsClient: await actionsStart.getActionsClientWithRequest(request),
+    });
+  };
+
   return {
     id: AttachmentType.connector,
 
@@ -73,7 +86,7 @@ export const createConnectorAttachmentType = ({
       return { valid: false, error: parseResult.error.message };
     },
 
-    format: (attachment) => {
+    format: async (attachment, { request }) => {
       const {
         connector_id: connectorId,
         connector_name: connectorName,
@@ -81,12 +94,15 @@ export const createConnectorAttachmentType = ({
         selected_actions: selectedActions,
       } = attachment.data;
 
-      const spec = getConnectorSpec(connectorType);
-      const subActionEntries = spec ? filterActionsBySelection(spec.actions, selectedActions) : [];
+      const specProvider = await getSpecProvider(request);
+      const spec = await specProvider.getSpecDetail(connectorType);
+      const subActionEntries = spec
+        ? filterSpecActionsBySelection(spec.actions, selectedActions)
+        : [];
 
       return {
         getRepresentation: () => {
-          const description = spec?.metadata.description ?? connectorType;
+          const description = spec?.description ?? connectorType;
           const toolId = platformCoreTools.executeConnectorSubAction;
 
           const parts: string[] = [
@@ -107,11 +123,9 @@ export const createConnectorAttachmentType = ({
             if (Array.isArray(selectedActions)) {
               parts.push('Note: only selected sub-actions are enabled; do not call others.');
             }
-            for (const [actionName, action] of subActionEntries) {
-              const paramsSummary = action.input
-                ? formatSchemaForLlm(action.input)
-                : 'No parameters';
-              parts.push(`  - ${formatConnectorActionLine(actionName, action)}`);
+            for (const action of subActionEntries) {
+              const paramsSummary = formatJsonSchemaForLlm(action.inputSchema);
+              parts.push(`  - ${formatConnectorActionLine(action.name, action)}`);
               parts.push(`    Parameters: ${paramsSummary}`);
             }
 
@@ -135,19 +149,22 @@ export const createConnectorAttachmentType = ({
       };
     },
 
-    toSurfaceComposition: ({
-      data: {
-        connector_name: connectorName,
-        connector_type: connectorType,
-        selected_actions: selectedActions,
+    toSurfaceComposition: async (
+      {
+        data: {
+          connector_name: connectorName,
+          connector_type: connectorType,
+          selected_actions: selectedActions,
+        },
       },
-    }) => {
-      const spec = getConnectorSpec(connectorType);
+      { request }
+    ) => {
+      const spec = await (await getSpecProvider(request)).getSpec(connectorType);
       const actionNames = spec
-        ? filterActionsBySelection(spec.actions, selectedActions).map(([actionName]) => actionName)
+        ? filterSpecActionsBySelection(spec.actions, selectedActions).map(({ name }) => name)
         : [];
-      const typeName = spec?.metadata.displayName ?? connectorType;
-      const description = spec?.metadata.description;
+      const typeName = spec?.displayName ?? connectorType;
+      const description = spec?.description;
 
       const fields: ComponentsNode = {
         type: 'fields',

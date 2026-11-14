@@ -10,12 +10,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   getToolResultId,
+  createConnectorSpecProvider,
   createErrorResult,
   getAgentConnectorDetail,
   resolveAllowedConnectorIds,
 } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { getConnectorSpec } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
 const getConnectorSubActionsSchema = z.object({
@@ -62,6 +62,7 @@ export const createGetConnectorSubActionsTool = ({
     try {
       const actionsStart = await getActionsStart();
       const actionsClient = await actionsStart.getActionsClientWithRequest(context.request);
+      const specProvider = createConnectorSpecProvider({ actionsStart, actionsClient });
 
       const allowedIds = resolveAllowedConnectorIds(context.agentConfiguration);
       if (allowedIds !== undefined && !allowedIds.includes(input.connector_id)) {
@@ -72,7 +73,7 @@ export const createGetConnectorSubActionsTool = ({
         return {
           results: [
             createErrorResult({
-              message: getConnectorSpec(actionTypeId)
+              message: (await specProvider.getSpec(actionTypeId))
                 ? notAssignedMessage(input.connector_id)
                 : noSpecMessage(input.connector_id),
             }),
@@ -82,6 +83,7 @@ export const createGetConnectorSubActionsTool = ({
 
       const detail = await getAgentConnectorDetail(actionsClient, input.connector_id, {
         allowedIds,
+        specProvider,
       });
 
       if (!detail) {

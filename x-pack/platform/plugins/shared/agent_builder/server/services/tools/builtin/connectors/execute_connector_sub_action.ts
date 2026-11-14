@@ -12,16 +12,12 @@ import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-c
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import {
+  createConnectorSpecSummaryProvider,
   getToolResultId,
   createErrorResult,
   resolveAllowedConnectorIds,
 } from '@kbn/agent-builder-server';
-import {
-  getConnectorSpec,
-  isSelectedActionEnabled,
-  isToolAction,
-  type SelectedActions,
-} from '@kbn/connector-specs';
+import { isSelectedActionEnabled, type SelectedActions } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
@@ -177,7 +173,9 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     // Validate that we have a known connector spec
-    const spec = getConnectorSpec(connectorType);
+    const spec = await createConnectorSpecSummaryProvider({ actionsStart: actions }).getSpec(
+      connectorType
+    );
     if (!spec) {
       return {
         results: [
@@ -192,7 +190,7 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     // Reject workflow-only actions — isTool: false actions are not callable by agents.
-    if (!isToolAction(spec, subAction)) {
+    if (!spec.actions.some(({ name, isTool }) => name === subAction && isTool)) {
       return {
         results: [
           createErrorResult({

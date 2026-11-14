@@ -6,11 +6,9 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import {
-  filterActionsBySelection,
-  getConnectorSpec,
-  type SelectedActions,
-} from '@kbn/connector-specs';
+import type { ConnectorSpecSummaryProvider } from '@kbn/agent-builder-server';
+import { filterSpecActionsBySelection } from '@kbn/agent-builder-server';
+import type { SelectedActions } from '@kbn/connector-specs';
 import type { ConnectorItem, ConnectorSubAction, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
@@ -33,25 +31,30 @@ export const getSSEResponseHeaders = (): Record<string, string> => ({
   'X-Accel-Buffering': 'no',
 });
 
-export const getConnectorSubActions = (
-  actionTypeId: string,
-  selectedActions?: SelectedActions
-): ConnectorSubAction[] => {
-  const spec = getConnectorSpec(actionTypeId);
+export const getConnectorSubActions = async ({
+  actionTypeId,
+  selectedActions,
+  specProvider,
+}: {
+  actionTypeId: string;
+  selectedActions?: SelectedActions;
+  specProvider: ConnectorSpecSummaryProvider;
+}): Promise<ConnectorSubAction[]> => {
+  const spec = await specProvider.getSpec(actionTypeId);
   if (!spec) return [];
 
-  return filterActionsBySelection(spec.actions, selectedActions).map(([name, action]) => ({
-    name,
-    description: action.description,
-  }));
+  return filterSpecActionsBySelection(spec.actions, selectedActions).map(
+    ({ name, description }) => ({ name, description })
+  );
 };
 
-export const toConnectorItem = (
+export const toConnectorItem = async (
   connector: Connector,
-  options?: {
+  options: {
+    specProvider: ConnectorSpecSummaryProvider;
     oauthStatus?: OAuthStatus;
   }
-): ConnectorItem => {
+): Promise<ConnectorItem> => {
   const selectedActions = connector.config?.selectedActions as SelectedActions;
   return {
     id: connector.id,
@@ -64,7 +67,11 @@ export const toConnectorItem = (
     isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated,
     config: connector.config,
     authMode: connector.authMode,
-    oauthStatus: options?.oauthStatus,
-    subActions: getConnectorSubActions(connector.actionTypeId, selectedActions),
+    oauthStatus: options.oauthStatus,
+    subActions: await getConnectorSubActions({
+      actionTypeId: connector.actionTypeId,
+      selectedActions,
+      specProvider: options.specProvider,
+    }),
   };
 };

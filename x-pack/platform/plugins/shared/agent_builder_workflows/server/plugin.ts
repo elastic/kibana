@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { PluginConfig } from './config';
 import type {
   PluginSetupDependencies,
@@ -49,6 +50,7 @@ export class AgentBuilderWorkflowsPlugin
   private readonly logger: Logger;
   private api: WorkflowsManagementApi | null = null;
   private security?: SecurityPluginStart;
+  private actions?: ActionsPluginStart;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
@@ -63,6 +65,7 @@ export class AgentBuilderWorkflowsPlugin
     this.api = api;
 
     const getSecurity = () => this.security;
+    const getActions = () => this.actions;
 
     const aiTelemetryClient = new WorkflowsAiTelemetryClient(coreSetup.analytics, this.logger);
 
@@ -73,7 +76,7 @@ export class AgentBuilderWorkflowsPlugin
     registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(agentBuilder, api, getSecurity);
+    registerWorkflowExecuteStepTool(agentBuilder, api, getSecurity, getActions);
 
     // Workflow attachment types
     registerWorkflowYamlAttachment(agentBuilder, api, getSecurity);
@@ -91,7 +94,7 @@ export class AgentBuilderWorkflowsPlugin
       resumeWorkflowExecutionTool({ workflowsManagement, getSecurity }),
       listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
-      executeWorkflowTool({ workflowsManagement, getSecurity }),
+      executeWorkflowTool({ workflowsManagement, getSecurity, getActions }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 
@@ -103,6 +106,7 @@ export class AgentBuilderWorkflowsPlugin
     startDeps: PluginStartDependencies
   ): AgentBuilderWorkflowsPluginStart {
     this.security = startDeps.security;
+    this.actions = startDeps.actions;
     if (this.api) {
       this.api.setSmlClient(startDeps.agentBuilderSml, this.logger.get('sml'));
     }

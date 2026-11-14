@@ -11,5 +11,6 @@ import type { ActionsConfigurationUtilities } from '../../../../../actions_confi
 export interface GetConnectorSpecParams {
   context: ActionsClientContext;
   id: string;
-  configurationUtilities: ActionsConfigurationUtilities;
+  /** Defaults to the utilities held by the action type registry. */
+  configurationUtilities?: ActionsConfigurationUtilities;
 }

@@ -10,6 +10,7 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",
+    "@kbn/actions-plugin",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
@@ -34,6 +35,5 @@
     "@kbn/security-plugin-types-server",
     "@kbn/workflows-extensions",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/connector-specs"
   ]
 }

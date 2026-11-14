@@ -23,7 +23,10 @@ import { createConnectorSetupAttachmentType } from './connector_setup';
 import { SURFACE_BASE_URL, renderSurface, surfaceContext } from './test_utils';
 
 jest.mock('@kbn/connector-specs', () => ({
+  connectorsSpecs: {},
   getConnectorSpec: jest.fn(),
+  isEarsExperimentalConnector: jest.fn().mockReturnValue(false),
+  resolveActionScope: jest.fn().mockReturnValue('read'),
 }));
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
@@ -115,14 +118,17 @@ describe('connector_setup attachment type', () => {
   });
 
   describe('format', () => {
-    it('uses connector_type_name when provided', () => {
+    it('uses connector_type_name when provided', async () => {
       getConnectorSpecMock.mockReturnValue(undefined);
 
-      const formatted = attachmentType.format(
+      const formatted = (await attachmentType.format(
         createAttachment(validData),
         formatContext
-      ) as AgentFormattedAttachment;
-      const representation = formatted.getRepresentation!() as { type: string; value: string };
+      )) as AgentFormattedAttachment;
+      const representation = (await formatted.getRepresentation!()) as {
+        type: string;
+        value: string;
+      };
 
       expect(representation.type).toBe('text');
       expect(representation.value).toContain('GitHub');
@@ -131,7 +137,7 @@ describe('connector_setup attachment type', () => {
       expect(representation.value).toContain('never appear in chat');
     });
 
-    it('falls back to the connector spec display name', () => {
+    it('falls back to the connector spec display name', async () => {
       getConnectorSpecMock.mockReturnValue({
         metadata: {
           id: '.notion',
@@ -144,11 +150,11 @@ describe('connector_setup attachment type', () => {
         test: { handler: jest.fn(), enabled: false },
       });
 
-      const formatted = attachmentType.format(
+      const formatted = (await attachmentType.format(
         createAttachment({ connector_type: '.notion' }),
         formatContext
-      ) as AgentFormattedAttachment;
-      const representation = formatted.getRepresentation!() as { value: string };
+      )) as AgentFormattedAttachment;
+      const representation = (await formatted.getRepresentation!()) as { value: string };
 
       expect(representation.value).toContain('Notion');
     });
@@ -261,7 +267,7 @@ describe('connector_setup attachment type', () => {
 describe('connector_setup toSurfaceComposition', () => {
   const definition = createConnectorSetupAttachmentType({
     getAgentsStart: jest.fn(),
-    getActionsStart: jest.fn(),
+    getActionsStart: async () => makeActionsStart().actionsStart,
     logger: loggingSystemMock.createLogger(),
   });
   const configureButton = (primary?: boolean) => ({

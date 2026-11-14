@@ -6,25 +6,28 @@
  */
 
 import type { ActionType } from '@kbn/actions-plugin/common';
-import { getConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpecInfo, ConnectorSpecSummaryProvider } from '@kbn/agent-builder-server';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 
 /**
  * Human-readable connector type name, preferring the spec display name when one
  * exists so `list_connector_types` and `propose_connector` stay aligned.
  */
-export const getConnectorTypeDisplayName = (actionType: ActionType): string => {
-  const spec = getConnectorSpec(actionType.id);
-  return spec?.metadata.displayName ?? actionType.name;
-};
+export const getConnectorTypeDisplayName = (
+  actionType: ActionType,
+  spec: ConnectorSpecInfo | undefined
+): string => spec?.displayName ?? actionType.name;
 
 /**
  * Whether a connector type can actually be *used* by the agent in a chat conversation once created.
  * Connector types that fail this check can still be created (they may be useful in Workflows), but
  * the agent has no way to call them from chat.
  */
-export const isChatCallableConnectorType = (connectorTypeId: string): boolean =>
-  connectorTypeId === MCP_CONNECTOR_TYPE_ID || !!getConnectorSpec(connectorTypeId);
+export const isChatCallableConnectorType = async (
+  connectorTypeId: string,
+  specProvider: ConnectorSpecSummaryProvider
+): Promise<boolean> =>
+  connectorTypeId === MCP_CONNECTOR_TYPE_ID || !!(await specProvider.getSpec(connectorTypeId));
 
 export interface ConnectorTypeAvailabilityOptions {
   /** Include connector types marked deprecated in the Actions registry. Defaults to `false`. */

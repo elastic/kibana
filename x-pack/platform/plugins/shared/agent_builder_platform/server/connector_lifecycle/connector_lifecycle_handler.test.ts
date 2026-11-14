@@ -14,6 +14,8 @@ import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 jest.mock('@kbn/connector-specs', () => ({
   connectorsSpecs: {},
   getConnectorSpec: jest.fn(),
+  isEarsExperimentalConnector: jest.fn().mockReturnValue(false),
+  resolveActionScope: jest.fn().mockReturnValue('read'),
 }));
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
@@ -43,6 +45,7 @@ const createMockGetStartServices = (
     {
       spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } },
       agentBuilderSml,
+      actions: {},
     },
     {},
   ]);

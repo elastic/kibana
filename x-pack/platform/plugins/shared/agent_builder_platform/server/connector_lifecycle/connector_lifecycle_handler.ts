@@ -8,7 +8,9 @@
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { createConnectorSpecSummaryProvider } from '@kbn/agent-builder-server';
 import type {
+  PluginStartContract as ActionsPluginStart,
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
 } from '@kbn/actions-plugin/server';
@@ -22,7 +24,11 @@ interface ConnectorLifecycleHandlerDeps {
   getStartServices: () => Promise<
     [
       CoreStart,
-      { spaces?: SpacesPluginStart; agentBuilderSml: AgentBuilderSmlPluginStart },
+      {
+        spaces?: SpacesPluginStart;
+        agentBuilderSml: AgentBuilderSmlPluginStart;
+        actions: ActionsPluginStart;
+      },
       unknown
     ]
   >;
@@ -42,14 +48,19 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
 
       const { connectorId, connectorType } = params;
 
-      // Skipping SML indexing for connector, because it can't be called from chat
-      if (!isChatCallableConnectorType(connectorType)) {
-        return;
-      }
-
       try {
         const [coreStart, startDeps] = await getStartServices();
         const request = params.request;
+
+        // Skipping SML indexing for connector, because it can't be called from chat
+        if (
+          !(await isChatCallableConnectorType(
+            connectorType,
+            createConnectorSpecSummaryProvider({ actionsStart: startDeps.actions })
+          ))
+        ) {
+          return;
+        }
         const soClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
         // SML ingest lives in the Agent Builder family, so crawling connectors

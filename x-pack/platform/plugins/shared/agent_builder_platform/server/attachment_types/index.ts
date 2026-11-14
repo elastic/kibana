@@ -64,7 +64,7 @@ export const registerAttachmentTypes = ({
         setupDeps.share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR),
     }),
     createGraphAttachmentType(),
-    createConnectorAttachmentType({ getActionSavedObjectsClient }),
+    createConnectorAttachmentType({ getActionSavedObjectsClient, getActionsStart }),
     createConnectorSetupAttachmentType({
       getAgentsStart,
       getActionsStart,
