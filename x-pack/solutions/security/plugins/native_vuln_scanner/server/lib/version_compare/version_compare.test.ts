@@ -18,6 +18,7 @@ import {
   rpmKey,
   UnencodableVersionError,
 } from '.';
+import { parseEpoch } from './common';
 
 interface LabelledPair {
   readonly a: string;
@@ -122,6 +123,12 @@ describe('rpm', () => {
   it('parses EVR with and without epoch and release', () => {
     expect(parseEvr('1:2.3-4.el9')).toEqual({ epoch: 1, version: '2.3', release: '4.el9' });
     expect(parseEvr('2.3')).toEqual({ epoch: 0, version: '2.3', release: '' });
+  });
+
+  it('yields 0, not -0, for sign-only and empty epochs', () => {
+    expect(Object.is(parseEpoch('-0'), 0)).toBe(true);
+    expect(parseEpoch('-')).toBe(0);
+    expect(parseEpoch('')).toBe(0);
   });
 
   it('rejects numbers longer than the key length char can encode', () => {

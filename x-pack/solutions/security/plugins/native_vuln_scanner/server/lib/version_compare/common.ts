@@ -27,6 +27,7 @@ export const trimVersion = (raw: string): string =>
 /**
  * Optional sign then leading ASCII digits, else 0. Mirrors the painless parseEpoch, including
  * that it stops accumulating past {@link MAX_EPOCH} (callers reject anything above it).
+ * `-0`/`+0` both yield 0: painless longs have no negative zero to mirror.
  */
 export const parseEpoch = (s: string): number => {
   let i = 0;
@@ -36,7 +37,7 @@ export const parseEpoch = (s: string): number => {
   for (; isDigit(s[i]); i++) {
     if (value <= MAX_EPOCH) value = value * 10 + (s.charCodeAt(i) - 48);
   }
-  return negative ? -value : value;
+  return negative && value !== 0 ? -value : value;
 };
 
 // Leading zeros are stripped, then one length char (0x30 + digit count) precedes the digits, so
