@@ -22,7 +22,6 @@ import {
 import {
   clearInstalledEntityStoreDocuments,
   forceLogExtraction,
-  normalizeKeywordList,
   setupLogsTestDataStream,
   stopEntityTypes,
   startEntityTypes,
@@ -76,7 +75,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
   });
 
   apiTest(
-    'history snapshot: copies latest to history index and resets behaviors on latest',
+    'history snapshot: copies latest to a stamped history index and leaves latest unchanged',
     async ({ apiClient, esClient }) => {
       await forceLogExtraction(
         apiClient,
@@ -86,8 +85,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         '2026-01-20T13:00:00Z'
       );
 
-      // Behaviors are managed fields — not populated by log extraction.
-      // Seed them directly to simulate the detection engine writing behaviors.
+      // Behaviors are managed fields, not populated by log extraction. Seed them directly.
       await esClient.update({
         index: LATEST_ALIAS,
         id: hashEuid('host:host-123'),
@@ -105,6 +103,24 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         },
       });
 
+      const entityIds = ['host:host-123', 'host:server-01'] as const;
+      const searchSources = async (index: string) => {
+        const result = await esClient.search<Record<string, unknown>>({
+          index,
+          query: { terms: { 'entity.id': [...entityIds] } },
+          size: entityIds.length,
+        });
+        return result.hits.hits
+          .map(({ _source }) => _source)
+          .filter((source): source is Record<string, unknown> => source != null);
+      };
+      const findByEntityId = (sources: Array<Record<string, unknown>>, entityId: string) =>
+        sources.find((source) => (source.entity as Record<string, unknown>)?.id === entityId);
+
+      const latestBefore = await searchSources(LATEST_ALIAS);
+      expect(latestBefore).toHaveLength(entityIds.length);
+
+      const snapshotStartedAt = Date.now();
       const snapshotResponse = await apiClient.post(
         ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
         {
@@ -118,77 +134,42 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         ok: boolean;
         historySnapshotIndex: string;
         docCount: number;
-        resetCount: number;
       };
       expect(body.ok).toBe(true);
-
       expect(body.historySnapshotIndex).toMatch(
         /\.entities\.v2\.history\.default\.\d{4}-\d{2}-\d{2}-\d{2}$/
       );
       expect(typeof body.docCount).toBe('number');
-      expect(typeof body.resetCount).toBe('number');
-      expect(body.resetCount).toBe(body.docCount);
 
       const historyIndex = body.historySnapshotIndex;
       await esClient.indices.refresh({ index: historyIndex });
       const historyCount = await esClient.count({ index: historyIndex });
       expect(historyCount.count).toBe(body.docCount);
 
-      const entityIdsWithBehaviors = ['host:host-123', 'host:server-01'] as const;
-      const expectedBehaviorsInHistory = [
-        { rule_names: ['rule-a', 'rule-b'], anomaly_job_ids: ['job-1'] },
-        { rule_names: ['rule-c'], anomaly_job_ids: ['job-2', 'job-3'] },
-      ] as const;
+      const history = await searchSources(historyIndex);
+      const latestAfter = await searchSources(LATEST_ALIAS);
+      expect(history).toHaveLength(entityIds.length);
 
-      const historySearchResult = await esClient.search({
-        index: historyIndex,
-        query: { terms: { 'entity.id': [...entityIdsWithBehaviors] } },
-        size: entityIdsWithBehaviors.length,
-      });
+      const historyTimestamps = new Set(history.map((source) => source['@timestamp']));
+      expect(historyTimestamps.size).toBe(1);
+      const [snapshotTimestamp] = historyTimestamps;
+      expect(Date.parse(snapshotTimestamp as string)).toBeGreaterThanOrEqual(
+        snapshotStartedAt - 1000
+      );
 
-      const latestSearchResult = await esClient.search({
-        index: LATEST_ALIAS,
-        query: { terms: { 'entity.id': [...entityIdsWithBehaviors] } },
-        size: entityIdsWithBehaviors.length,
-      });
+      for (const entityId of entityIds) {
+        const before = findByEntityId(latestBefore, entityId);
+        const historyDoc = findByEntityId(history, entityId);
+        const after = findByEntityId(latestAfter, entityId);
+        expect(historyDoc).toBeDefined();
 
-      const historyHits = (
-        historySearchResult.hits.hits as Array<{ _source?: Record<string, unknown> }>
-      ).filter((h) => h._source != null);
-      const latestHits = (
-        latestSearchResult.hits.hits as Array<{ _source?: Record<string, unknown> }>
-      ).filter((h) => h._source != null);
-
-      expect(historyHits).toHaveLength(entityIdsWithBehaviors.length);
-      expect(latestHits).toHaveLength(entityIdsWithBehaviors.length);
-
-      for (let i = 0; i < entityIdsWithBehaviors.length; i++) {
-        const entityId = entityIdsWithBehaviors[i];
-        const expectedBehavior = expectedBehaviorsInHistory[i];
-
-        const historyHit = historyHits.find(
-          (h) => (h._source!.entity as Record<string, unknown>)?.id === entityId
-        );
-        expect(historyHit).toBeDefined();
-        const historyEntity = historyHit!._source!.entity as Record<string, unknown>;
-        const historyBehaviors = historyEntity.behaviors as Record<string, unknown> | undefined;
-        expect(normalizeKeywordList(historyBehaviors?.rule_names).sort()).toStrictEqual(
-          [...expectedBehavior.rule_names].sort()
-        );
-        expect(normalizeKeywordList(historyBehaviors?.anomaly_job_ids).sort()).toStrictEqual(
-          [...expectedBehavior.anomaly_job_ids].sort()
-        );
-
-        const latestHit = latestHits.find(
-          (h) => (h._source!.entity as Record<string, unknown>)?.id === entityId
-        );
-        expect(latestHit).toBeDefined();
-        expect(latestHit!._source!['@timestamp']).toBeDefined();
-        const latestEntity = latestHit!._source!.entity as Record<string, unknown>;
-        const latestBehaviors = latestEntity.behaviors as Record<string, unknown> | undefined;
-        expect(normalizeKeywordList(latestBehaviors?.rule_names)).toStrictEqual([]);
-        expect(normalizeKeywordList(latestBehaviors?.anomaly_job_ids)).toStrictEqual([]);
-        expect((latestEntity.lifecycle as Record<string, unknown>)?.last_activity).toBeDefined();
+        // History keeps the entity as it was in latest, apart from the snapshot time.
+        expect({ ...historyDoc, '@timestamp': undefined }).toStrictEqual({
+          ...before,
+          '@timestamp': undefined,
+        });
+        // Latest is not modified by the snapshot.
+        expect(after).toStrictEqual(before);
       }
     }
   );

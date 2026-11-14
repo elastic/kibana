@@ -285,11 +285,4 @@ export const entityStoreMetrics = {
       advice: { explicitBucketBoundaries: LONG_DURATION_MS_BOUNDARIES },
     }
   ),
-
-  historySnapshotResetDurationMs: meter.createHistogram(m('history_snapshot.reset.duration_ms'), {
-    description: 'Duration of the updateByQuery that resets entity fields after snapshot',
-    unit: 'ms',
-    valueType: ValueType.DOUBLE,
-    advice: { explicitBucketBoundaries: LONG_DURATION_MS_BOUNDARIES },
-  }),
 };
