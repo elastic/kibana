@@ -10,7 +10,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "alert-analysis-a"
       ]
     },
@@ -21,7 +21,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "alert-analysis-b"
       ]
     },
@@ -32,7 +32,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "alert-analysis-c"
       ]
     },
@@ -43,7 +43,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "entity-analytics-a"
       ]
     },
@@ -54,7 +54,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "entity-analytics-b"
       ]
     },
@@ -65,7 +65,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "entity-analytics-c"
       ]
     },
@@ -76,7 +76,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "threat-hunting-a"
       ]
     },
@@ -87,7 +87,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "threat-hunting-b"
       ]
     },
@@ -98,7 +98,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "threat-hunting-c"
       ]
     },
@@ -109,7 +109,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "detection-rule-edit-a"
       ]
     },
@@ -120,7 +120,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "detection-rule-edit-b"
       ]
     },
@@ -131,7 +131,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "detection-rule-edit-c"
       ]
     },
@@ -142,7 +142,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "workflow-authoring-a"
       ]
     },
@@ -153,7 +153,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "workflow-authoring-b"
       ]
     },
@@ -164,7 +164,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "workflow-authoring-c"
       ]
     },
@@ -175,7 +175,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "workflow-execution-a"
       ]
     },
@@ -186,7 +186,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "workflow-execution-b"
       ]
     },
@@ -197,7 +197,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "workflow-execution-c"
       ]
     },
@@ -208,7 +208,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "multi-step-a"
       ]
     },
@@ -219,7 +219,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "multi-step-b"
       ]
     },
@@ -230,7 +230,7 @@
       "suites": [
         "security-persona-matrix"
       ],
-      "datasetIds": [
+      "examplePrefixes": [
         "multi-step-c"
       ]
     }
