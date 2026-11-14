@@ -92,6 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should bring both dashboard context and visualization context to discover', async () => {
       await dashboard.switchToEditMode();
       await dashboardPanelActions.navigateToEditorFromFlyout();
+      await testSubjects.existOrFail('lnsApp', { timeout: 30_000 });
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('lucene');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
@@ -102,6 +103,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.sleep(1000);
 
       await lens.saveAndReturn();
+      await testSubjects.missingOrFail('lnsApp', { timeout: 30_000 });
+      await dashboard.waitForRenderComplete();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('kql');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
