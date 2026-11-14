@@ -207,6 +207,7 @@ tags:
       | `image` | Image |
       | `markdown` | Markdown text |
       | `links` | Navigation links to dashboards and external URLs |
+      | `vega` | Vega or Vega-Lite visualization |
       | `esql_control` | ES&#124;QL variable control |
       | `options_list_control` | Dropdown filter by field value |
       | `range_slider_control` | Slider filter by numeric range |
@@ -255,14 +256,14 @@ tags:
       | Synthetics | Since 9.4 | N/A |
       | APM service map | Since 9.5 | N/A |
       | Machine learning and AIOps | Since 9.5 | N/A |
+      | Vega | Since 9.6 | Since 9.6 |
       | Maps | Coming soon | Coming soon |
-      | Vega | Coming soon | Coming soon |
       | Alerts table | Coming soon | N/A |
       | Legacy visualizations | N/A | N/A |
 
       ### Embedding library items
 
-      `vis`, `discover_session`, `markdown`, and `links` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
+      `vis`, `discover_session`, `markdown`, `links`, and `vega` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
       For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](../operation/operation-create-visualization).
 
@@ -734,6 +735,7 @@ tags:
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
     x-displayName: Task manager
+  - name: Vega
   - name: Visualizations
     description: |
       Create, retrieve, update, and delete [Kibana visualizations](https://www.elastic.co/docs/explore-analyze/visualize/lens). Visualizations created through this API are saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library).
@@ -138839,7 +138841,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_63___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_70___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -143216,6 +143218,1230 @@ paths:
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/vega:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/vega</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of Vega library items. Each result includes title, description, tags, and metadata, but not the spec. Use `GET /api/vega/{id}` to retrieve the complete state.
+      operationId: get-vega
+      parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.
+          in: query
+          name: tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.
+          in: query
+          name: excluded_tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are included. If the same name is shared by multiple tags, items matching any of those tags are included.
+          in: query
+          name: tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available
+        - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are excluded. If the same name is shared by multiple tags, items matching any of those tags are excluded.
+          in: query
+          name: excluded_tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchVegaResponse:
+                  description: Paginated list of Vega library item summaries with `title`, `description`, `tags`, and metadata. The spec, query, and filters are not included; use `GET /api/vega/{id}` to retrieve a specific item.
+                  summary: Search Vega library items response
+                  value:
+                    data:
+                      - data:
+                          description: Hourly request count from the sample web logs.
+                          tags: []
+                          title: Requests over time
+                        id: 7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
+                        meta:
+                          created_at: '2026-09-30T10:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-09-30T10:00:00.000Z'
+                          version: WzU5LDFd
+                    meta:
+                      page: 1
+                      per_page: 10
+                      total: 1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of Vega library items matching the query.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: A short description of the Vega library item.
+                              maxLength: 10000
+                              minLength: 0
+                              type: string
+                            tags:
+                              default: []
+                              description: Tag IDs associated with this Vega library item.
+                              items:
+                                maxLength: 250
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            title:
+                              description: The Vega library item title.
+                              maxLength: 1024
+                              minLength: 1
+                              type: string
+                          required:
+                            - title
+                        id:
+                          description: The Vega library item ID.
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    minItems: 0
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: List Vega library items
+      tags:
+        - Vega
+      x-codeSamples:
+        - label: Search Vega library items - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/vega?query=requests&per_page=10" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Search Vega library items - Console
+          lang: Console
+          source: |
+            GET kbn:/api/vega?query=requests&per_page=10
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/vega</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new Vega library item and returns its ID, full state, and metadata.
+      operationId: post-vega
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createFilteredVega:
+                description: 'The filters and query are applied to data sources that use `%context%: true`, together with the dashboard query and filters.'
+                summary: Create a Vega library item with a JSON spec, filters, and a KQL query
+                value:
+                  filters:
+                    - condition:
+                        field: geo.dest
+                        operator: is
+                        value: US
+                      data_view_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                      type: condition
+                    - dsl:
+                        range:
+                          bytes:
+                            gte: 1000
+                      type: dsl
+                  query:
+                    expression: 'machine.os.keyword : "osx"'
+                    language: kql
+                  spec:
+                    format: json
+                    value:
+                      $schema: https://vega.github.io/schema/vega-lite/v5.json
+                      data:
+                        format:
+                          property: aggregations.extensions.buckets
+                        url:
+                          '%context%': true
+                          '%timefield%': timestamp
+                          body:
+                            aggs:
+                              extensions:
+                                terms:
+                                  field: extension.keyword
+                            size: 0
+                          index: kibana_sample_data_logs
+                      encoding:
+                        x:
+                          field: key
+                          type: nominal
+                        'y':
+                          field: doc_count
+                          type: quantitative
+                      mark: bar
+                  title: Top extensions (US, macOS)
+              createHjsonVega:
+                summary: Create a Vega library item with an HJSON spec
+                value:
+                  description: Hourly request count from the sample web logs.
+                  spec:
+                    format: hjson
+                    value: |-
+                      {
+                        $schema: https://vega.github.io/schema/vega-lite/v5.json
+                        // Applies the dashboard time range, query, and filters
+                        data: {
+                          url: {
+                            %context%: true
+                            %timefield%: timestamp
+                            index: kibana_sample_data_logs
+                            body: {
+                              size: 0
+                              aggs: { hours: { date_histogram: { field: "timestamp", fixed_interval: "1h" } } }
+                            }
+                          }
+                          format: { property: "aggregations.hours.buckets" }
+                        }
+                        mark: line
+                        encoding: {
+                          x: { field: "key", type: "temporal", title: null }
+                          y: { field: "doc_count", type: "quantitative", title: "Requests" }
+                        }
+                      }
+                  title: Requests over time
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  description: A short description of the Vega library item.
+                  maxLength: 10000
+                  minLength: 0
+                  type: string
+                filters:
+                  description: 'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                  items:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                  maxItems: 100
+                  type: array
+                query:
+                  additionalProperties: false
+                  description: 'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                  type: object
+                  properties:
+                    expression:
+                      description: A query expression in KQL or Lucene syntax.
+                      maxLength: 1000000
+                      minLength: 0
+                      type: string
+                    language:
+                      description: Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.
+                      enum:
+                        - kql
+                        - lucene
+                      type: string
+                  required:
+                    - expression
+                    - language
+                spec:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-vega-spec'
+                tags:
+                  default: []
+                  description: Tag IDs associated with this library item.
+                  items:
+                    maxLength: 250
+                    type: string
+                  maxItems: 1000
+                  type: array
+                title:
+                  description: The Vega library item title.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
+              required:
+                - title
+                - spec
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createVegaResponse:
+                  description: Returns the generated ID, the full item state in `data`, and metadata.
+                  summary: Create Vega library item response
+                  value:
+                    data:
+                      description: Hourly request count from the sample web logs.
+                      spec:
+                        format: hjson
+                        value: |-
+                          {
+                            $schema: https://vega.github.io/schema/vega-lite/v5.json
+                            // Applies the dashboard time range, query, and filters
+                            data: {
+                              url: {
+                                %context%: true
+                                %timefield%: timestamp
+                                index: kibana_sample_data_logs
+                                body: {
+                                  size: 0
+                                  aggs: { hours: { date_histogram: { field: "timestamp", fixed_interval: "1h" } } }
+                                }
+                              }
+                              format: { property: "aggregations.hours.buckets" }
+                            }
+                            mark: line
+                            encoding: {
+                              x: { field: "key", type: "temporal", title: null }
+                              y: { field: "doc_count", type: "quantitative", title: "Requests" }
+                            }
+                          }
+                      title: Requests over time
+                    id: 7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
+                    meta:
+                      created_at: '2026-09-30T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-09-30T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: A short description of the Vega library item.
+                        maxLength: 10000
+                        minLength: 0
+                        type: string
+                      filters:
+                        description: 'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                        items:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                        maxItems: 100
+                        type: array
+                      query:
+                        additionalProperties: false
+                        description: 'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                        type: object
+                        properties:
+                          expression:
+                            description: A query expression in KQL or Lucene syntax.
+                            maxLength: 1000000
+                            minLength: 0
+                            type: string
+                          language:
+                            description: Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.
+                            enum:
+                              - kql
+                              - lucene
+                            type: string
+                        required:
+                          - expression
+                          - language
+                      spec:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-vega-spec'
+                      tags:
+                        default: []
+                        description: Tag IDs associated with this library item.
+                        items:
+                          maxLength: 250
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      title:
+                        description: The Vega library item title.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                    required:
+                      - title
+                      - spec
+                  id:
+                    description: The unique ID of the Vega library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Create a Vega library item
+      tags:
+        - Vega
+      x-codeSamples:
+        - label: Create a Vega library item - cURL
+          lang: cURL
+          source: |
+            curl -X POST "${KIBANA_URL}/api/vega" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Requests over time",
+              "description": "Hourly request count from the sample web logs.",
+              "spec": {
+                "format": "hjson",
+                "value": "{\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\n  // Applies the dashboard time range, query, and filters\n  data: {\n    url: {\n      %context%: true\n      %timefield%: timestamp\n      index: kibana_sample_data_logs\n      body: {\n        size: 0\n        aggs: { hours: { date_histogram: { field: \"timestamp\", fixed_interval: \"1h\" } } }\n      }\n    }\n    format: { property: \"aggregations.hours.buckets\" }\n  }\n  mark: line\n  encoding: {\n    x: { field: \"key\", type: \"temporal\", title: null }\n    y: { field: \"doc_count\", type: \"quantitative\", title: \"Requests\" }\n  }\n}"
+              }
+            }'
+        - label: Create a Vega library item - Console
+          lang: Console
+          source: |
+            POST kbn:/api/vega
+            {
+              "title": "Requests over time",
+              "description": "Hourly request count from the sample web logs.",
+              "spec": {
+                "format": "hjson",
+                "value": "{\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\n  // Applies the dashboard time range, query, and filters\n  data: {\n    url: {\n      %context%: true\n      %timefield%: timestamp\n      index: kibana_sample_data_logs\n      body: {\n        size: 0\n        aggs: { hours: { date_histogram: { field: \"timestamp\", fixed_interval: \"1h\" } } }\n      }\n    }\n    format: { property: \"aggregations.hours.buckets\" }\n  }\n  mark: line\n  encoding: {\n    x: { field: \"key\", type: \"temporal\", title: null }\n    y: { field: \"doc_count\", type: \"quantitative\", title: \"Requests\" }\n  }\n}"
+              }
+            }
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/vega/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/vega/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Deletes a Vega library item by its ID.
+      operationId: delete-vega-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The Vega library item ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content, the Vega library item was successfully deleted.
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Delete a Vega library item
+      tags:
+        - Vega
+      x-codeSamples:
+        - label: Delete a Vega library item - cURL
+          lang: cURL
+          source: |
+            curl -X DELETE "${KIBANA_URL}/api/vega/7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - label: Delete a Vega library item - Console
+          lang: Console
+          source: |
+            DELETE kbn:/api/vega/7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/vega/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a single Vega library item by its ID.
+      operationId: get-vega-id
+      parameters:
+        - description: The Vega library item ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getVegaResponse:
+                  description: The full Vega library item state including the spec, query, filters, and metadata.
+                  summary: Get Vega library item response
+                  value:
+                    data:
+                      filters:
+                        - condition:
+                            field: geo.dest
+                            operator: is
+                            value: US
+                          data_view_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                          type: condition
+                        - dsl:
+                            range:
+                              bytes:
+                                gte: 1000
+                          type: dsl
+                      query:
+                        expression: 'machine.os.keyword : "osx"'
+                        language: kql
+                      spec:
+                        format: json
+                        value:
+                          $schema: https://vega.github.io/schema/vega-lite/v5.json
+                          data:
+                            format:
+                              property: aggregations.extensions.buckets
+                            url:
+                              '%context%': true
+                              '%timefield%': timestamp
+                              body:
+                                aggs:
+                                  extensions:
+                                    terms:
+                                      field: extension.keyword
+                                size: 0
+                              index: kibana_sample_data_logs
+                          encoding:
+                            x:
+                              field: key
+                              type: nominal
+                            'y':
+                              field: doc_count
+                              type: quantitative
+                          mark: bar
+                      title: Top extensions (US, macOS)
+                    id: 7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
+                    meta:
+                      created_at: '2026-09-30T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-09-30T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: A short description of the Vega library item.
+                        maxLength: 10000
+                        minLength: 0
+                        type: string
+                      filters:
+                        description: 'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                        items:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                        maxItems: 100
+                        type: array
+                      query:
+                        additionalProperties: false
+                        description: 'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                        type: object
+                        properties:
+                          expression:
+                            description: A query expression in KQL or Lucene syntax.
+                            maxLength: 1000000
+                            minLength: 0
+                            type: string
+                          language:
+                            description: Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.
+                            enum:
+                              - kql
+                              - lucene
+                            type: string
+                        required:
+                          - expression
+                          - language
+                      spec:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-vega-spec'
+                      tags:
+                        default: []
+                        description: Tag IDs associated with this library item.
+                        items:
+                          maxLength: 250
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      title:
+                        description: The Vega library item title.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                    required:
+                      - title
+                      - spec
+                  id:
+                    description: The unique ID of the Vega library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: ok
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Get a Vega library item
+      tags:
+        - Vega
+      x-codeSamples:
+        - label: Get a Vega library item - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/vega/7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Get a Vega library item - Console
+          lang: Console
+          source: |
+            GET kbn:/api/vega/7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/vega/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replaces the full state of a Vega library item. If no item exists with the specified ID, a new one is created.
+      operationId: put-vega-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique ID of the Vega library item to be created or updated.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upsertVega:
+                summary: Upsert a Vega library item
+                value:
+                  filters:
+                    - condition:
+                        field: geo.dest
+                        operator: is
+                        value: US
+                      data_view_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                      type: condition
+                    - dsl:
+                        range:
+                          bytes:
+                            gte: 1000
+                      type: dsl
+                  query:
+                    expression: 'machine.os.keyword : win*'
+                    language: kql
+                  spec:
+                    format: json
+                    value:
+                      $schema: https://vega.github.io/schema/vega-lite/v5.json
+                      data:
+                        format:
+                          property: aggregations.extensions.buckets
+                        url:
+                          '%context%': true
+                          '%timefield%': timestamp
+                          body:
+                            aggs:
+                              extensions:
+                                terms:
+                                  field: extension.keyword
+                            size: 0
+                          index: kibana_sample_data_logs
+                      encoding:
+                        x:
+                          field: key
+                          type: nominal
+                        'y':
+                          field: doc_count
+                          type: quantitative
+                      mark: bar
+                  title: Top extensions (US, Windows)
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  description: A short description of the Vega library item.
+                  maxLength: 10000
+                  minLength: 0
+                  type: string
+                filters:
+                  description: 'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                  items:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                  maxItems: 100
+                  type: array
+                query:
+                  additionalProperties: false
+                  description: 'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                  type: object
+                  properties:
+                    expression:
+                      description: A query expression in KQL or Lucene syntax.
+                      maxLength: 1000000
+                      minLength: 0
+                      type: string
+                    language:
+                      description: Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.
+                      enum:
+                        - kql
+                        - lucene
+                      type: string
+                  required:
+                    - expression
+                    - language
+                spec:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-vega-spec'
+                tags:
+                  default: []
+                  description: Tag IDs associated with this library item.
+                  items:
+                    maxLength: 250
+                    type: string
+                  maxItems: 1000
+                  type: array
+                title:
+                  description: The Vega library item title.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
+              required:
+                - title
+                - spec
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updatedVegaResponse:
+                  description: The complete updated state. PUT replaces the entire item, so fields omitted from the request, such as `query` or `filters`, are removed.
+                  summary: Update Vega library item response
+                  value:
+                    data:
+                      filters:
+                        - condition:
+                            field: geo.dest
+                            operator: is
+                            value: US
+                          data_view_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                          type: condition
+                        - dsl:
+                            range:
+                              bytes:
+                                gte: 1000
+                          type: dsl
+                      query:
+                        expression: 'machine.os.keyword : win*'
+                        language: kql
+                      spec:
+                        format: json
+                        value:
+                          $schema: https://vega.github.io/schema/vega-lite/v5.json
+                          data:
+                            format:
+                              property: aggregations.extensions.buckets
+                            url:
+                              '%context%': true
+                              '%timefield%': timestamp
+                              body:
+                                aggs:
+                                  extensions:
+                                    terms:
+                                      field: extension.keyword
+                                size: 0
+                              index: kibana_sample_data_logs
+                          encoding:
+                            x:
+                              field: key
+                              type: nominal
+                            'y':
+                              field: doc_count
+                              type: quantitative
+                          mark: bar
+                      title: Top extensions (US, Windows)
+                    id: 7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
+                    meta:
+                      created_at: '2026-09-30T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-09-30T11:00:00.000Z'
+                      version: WzYwLDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: A short description of the Vega library item.
+                        maxLength: 10000
+                        minLength: 0
+                        type: string
+                      filters:
+                        description: 'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                        items:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                        maxItems: 100
+                        type: array
+                      query:
+                        additionalProperties: false
+                        description: 'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                        type: object
+                        properties:
+                          expression:
+                            description: A query expression in KQL or Lucene syntax.
+                            maxLength: 1000000
+                            minLength: 0
+                            type: string
+                          language:
+                            description: Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.
+                            enum:
+                              - kql
+                              - lucene
+                            type: string
+                        required:
+                          - expression
+                          - language
+                      spec:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-vega-spec'
+                      tags:
+                        default: []
+                        description: Tag IDs associated with this library item.
+                        items:
+                          maxLength: 250
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      title:
+                        description: The Vega library item title.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                    required:
+                      - title
+                      - spec
+                  id:
+                    description: The unique ID of the Vega library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                createdVegaResponse:
+                  description: Returned when no item existed with the specified ID and a new one was created.
+                  summary: Create Vega library item response (via upsert)
+                  value:
+                    data:
+                      filters:
+                        - condition:
+                            field: geo.dest
+                            operator: is
+                            value: US
+                          data_view_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                          type: condition
+                        - dsl:
+                            range:
+                              bytes:
+                                gte: 1000
+                          type: dsl
+                      query:
+                        expression: 'machine.os.keyword : win*'
+                        language: kql
+                      spec:
+                        format: json
+                        value:
+                          $schema: https://vega.github.io/schema/vega-lite/v5.json
+                          data:
+                            format:
+                              property: aggregations.extensions.buckets
+                            url:
+                              '%context%': true
+                              '%timefield%': timestamp
+                              body:
+                                aggs:
+                                  extensions:
+                                    terms:
+                                      field: extension.keyword
+                                size: 0
+                              index: kibana_sample_data_logs
+                          encoding:
+                            x:
+                              field: key
+                              type: nominal
+                            'y':
+                              field: doc_count
+                              type: quantitative
+                          mark: bar
+                      title: Top extensions (US, Windows)
+                    id: 7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
+                    meta:
+                      created_at: '2026-09-30T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-09-30T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: A short description of the Vega library item.
+                        maxLength: 10000
+                        minLength: 0
+                        type: string
+                      filters:
+                        description: 'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                        items:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                        maxItems: 100
+                        type: array
+                      query:
+                        additionalProperties: false
+                        description: 'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+                        type: object
+                        properties:
+                          expression:
+                            description: A query expression in KQL or Lucene syntax.
+                            maxLength: 1000000
+                            minLength: 0
+                            type: string
+                          language:
+                            description: Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.
+                            enum:
+                              - kql
+                              - lucene
+                            type: string
+                        required:
+                          - expression
+                          - language
+                      spec:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-vega-spec'
+                      tags:
+                        default: []
+                        description: Tag IDs associated with this library item.
+                        items:
+                          maxLength: 250
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      title:
+                        description: The Vega library item title.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                    required:
+                      - title
+                      - spec
+                  id:
+                    description: The unique ID of the Vega library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+      summary: Upsert a Vega library item
+      tags:
+        - Vega
+      x-codeSamples:
+        - label: Upsert a Vega library item - cURL
+          lang: cURL
+          source: |
+            curl -X PUT "${KIBANA_URL}/api/vega/7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Top extensions (US, Windows)",
+              "spec": {
+                "format": "json",
+                "value": {
+                  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                  "data": {
+                    "url": {
+                      "%context%": true,
+                      "%timefield%": "timestamp",
+                      "index": "kibana_sample_data_logs",
+                      "body": {
+                        "size": 0,
+                        "aggs": {
+                          "extensions": {
+                            "terms": {
+                              "field": "extension.keyword"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "format": {
+                      "property": "aggregations.extensions.buckets"
+                    }
+                  },
+                  "mark": "bar",
+                  "encoding": {
+                    "x": {
+                      "field": "key",
+                      "type": "nominal"
+                    },
+                    "y": {
+                      "field": "doc_count",
+                      "type": "quantitative"
+                    }
+                  }
+                }
+              },
+              "query": {
+                "expression": "machine.os.keyword : win*",
+                "language": "kql"
+              },
+              "filters": [
+                {
+                  "type": "condition",
+                  "data_view_id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+                  "condition": {
+                    "field": "geo.dest",
+                    "operator": "is",
+                    "value": "US"
+                  }
+                },
+                {
+                  "type": "dsl",
+                  "dsl": {
+                    "range": {
+                      "bytes": {
+                        "gte": 1000
+                      }
+                    }
+                  }
+                }
+              ]
+            }'
+        - label: Upsert a Vega library item - Console
+          lang: Console
+          source: |
+            PUT kbn:/api/vega/7c1d8e40-9b2f-11f0-a5c3-2f6e4b8d9a10
+            {
+              "title": "Top extensions (US, Windows)",
+              "spec": {
+                "format": "json",
+                "value": {
+                  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                  "data": {
+                    "url": {
+                      "%context%": true,
+                      "%timefield%": "timestamp",
+                      "index": "kibana_sample_data_logs",
+                      "body": {
+                        "size": 0,
+                        "aggs": {
+                          "extensions": {
+                            "terms": {
+                              "field": "extension.keyword"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "format": {
+                      "property": "aggregations.extensions.buckets"
+                    }
+                  },
+                  "mark": "bar",
+                  "encoding": {
+                    "x": {
+                      "field": "key",
+                      "type": "nominal"
+                    },
+                    "y": {
+                      "field": "doc_count",
+                      "type": "quantitative"
+                    }
+                  }
+                }
+              },
+              "query": {
+                "expression": "machine.os.keyword : win*",
+                "language": "kql"
+              },
+              "filters": [
+                {
+                  "type": "condition",
+                  "data_view_id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+                  "condition": {
+                    "field": "geo.dest",
+                    "operator": "is",
+                    "value": "US"
+                  }
+                },
+                {
+                  "type": "dsl",
+                  "dsl": {
+                    "range": {
+                      "bytes": {
+                        "gte": 1000
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -155451,7 +156677,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_63___schema0:
+    Kibana_HTTP_APIs__zod_v4_70___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -155480,7 +156706,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_63___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_70___schema0'
                       - type: object
                         properties:
                           destination:
@@ -167138,6 +168364,7 @@ components:
                     synthetics_monitors: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors'
                     synthetics_stats_overview: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                     time_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
+                    vega: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vega'
                     vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
                   propertyName: type
                 oneOf:
@@ -167165,6 +168392,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vega'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-section'
           maxItems: 1000
@@ -169115,6 +170343,26 @@ components:
         - config
       title: Time slider control
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-vega:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-vega-embeddable'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - vega
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Vega
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis:
       additionalProperties: false
       properties:
@@ -169453,6 +170701,7 @@ components:
                 synthetics_monitors: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors'
                 synthetics_stats_overview: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                 time_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
+                vega: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vega'
                 vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               propertyName: type
             oneOf:
@@ -169480,6 +170729,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vega'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
           maxItems: 1000
           type: array
@@ -171350,6 +172600,318 @@ components:
       description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
       title: Time field
       type: string
+    Kibana_HTTP_APIs_kbn-vega-embeddable:
+      anyOf:
+        - additionalProperties: false
+          description: Panel configuration stored inline
+          properties:
+            description:
+              description: A short description of the panel.
+              type: string
+            drilldowns:
+              items:
+                anyOf:
+                  - allOf:
+                      - additionalProperties: false
+                        default:
+                          open_in_new_tab: false
+                          use_filters: true
+                          use_time_range: true
+                        type: object
+                        properties:
+                          open_in_new_tab:
+                            default: false
+                            description: When enabled, the dashboard opens in a new browser tab.
+                            type: boolean
+                          use_filters:
+                            default: true
+                            description: When enabled, filters are passed to the opening dashboard.
+                            type: boolean
+                          use_time_range:
+                            default: true
+                            description: When enabled, time range is passed to the opening dashboard.
+                            type: boolean
+                      - type: object
+                        properties:
+                          dashboard_id:
+                            type: string
+                        required:
+                          - dashboard_id
+                      - type: object
+                        properties:
+                          label:
+                            type: string
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_apply_filter
+                                type: string
+                          type:
+                            enum:
+                              - dashboard_drilldown
+                            type: string
+                        required:
+                          - label
+                          - trigger
+                          - type
+                    title: dashboard_drilldown
+                  - properties:
+                      label:
+                        type: string
+                      open_in_new_tab:
+                        default: true
+                        type: boolean
+                      trigger:
+                        anyOf:
+                          - enum:
+                              - on_apply_filter
+                            type: string
+                      type:
+                        enum:
+                          - discover_drilldown
+                        type: string
+                    required:
+                      - label
+                      - trigger
+                      - type
+                    title: discover_drilldown
+                    type: object
+                  - properties:
+                      encode_url:
+                        default: true
+                        description: When true, URL is escaped using percent encoding
+                        type: boolean
+                      label:
+                        type: string
+                      open_in_new_tab:
+                        default: true
+                        type: boolean
+                      trigger:
+                        anyOf:
+                          - enum:
+                              - on_open_panel_menu
+                            type: string
+                      type:
+                        enum:
+                          - url_drilldown
+                        type: string
+                      url:
+                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: string
+                    required:
+                      - url
+                      - label
+                      - trigger
+                      - type
+                    title: url_drilldown
+                    type: object
+              maxItems: 100
+              type: array
+            filters:
+              description: 'Panel-level filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+              maxItems: 100
+              type: array
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            query:
+              additionalProperties: false
+              description: 'Panel-level KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.'
+              type: object
+              properties:
+                expression:
+                  description: A query expression in KQL or Lucene syntax.
+                  maxLength: 1000000
+                  minLength: 0
+                  type: string
+                language:
+                  description: Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.
+                  enum:
+                    - kql
+                    - lucene
+                  type: string
+              required:
+                - expression
+                - language
+            spec:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-vega-spec'
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              description: The panel title.
+              type: string
+          required:
+            - spec
+          title: By value
+          type: object
+        - additionalProperties: false
+          description: Panel configuration stored in a linked library item
+          properties:
+            description:
+              description: A short description of the panel.
+              type: string
+            drilldowns:
+              items:
+                anyOf:
+                  - allOf:
+                      - additionalProperties: false
+                        default:
+                          open_in_new_tab: false
+                          use_filters: true
+                          use_time_range: true
+                        type: object
+                        properties:
+                          open_in_new_tab:
+                            default: false
+                            description: When enabled, the dashboard opens in a new browser tab.
+                            type: boolean
+                          use_filters:
+                            default: true
+                            description: When enabled, filters are passed to the opening dashboard.
+                            type: boolean
+                          use_time_range:
+                            default: true
+                            description: When enabled, time range is passed to the opening dashboard.
+                            type: boolean
+                      - type: object
+                        properties:
+                          dashboard_id:
+                            type: string
+                        required:
+                          - dashboard_id
+                      - type: object
+                        properties:
+                          label:
+                            type: string
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_apply_filter
+                                type: string
+                          type:
+                            enum:
+                              - dashboard_drilldown
+                            type: string
+                        required:
+                          - label
+                          - trigger
+                          - type
+                    title: dashboard_drilldown
+                  - properties:
+                      label:
+                        type: string
+                      open_in_new_tab:
+                        default: true
+                        type: boolean
+                      trigger:
+                        anyOf:
+                          - enum:
+                              - on_apply_filter
+                            type: string
+                      type:
+                        enum:
+                          - discover_drilldown
+                        type: string
+                    required:
+                      - label
+                      - trigger
+                      - type
+                    title: discover_drilldown
+                    type: object
+                  - properties:
+                      encode_url:
+                        default: true
+                        description: When true, URL is escaped using percent encoding
+                        type: boolean
+                      label:
+                        type: string
+                      open_in_new_tab:
+                        default: true
+                        type: boolean
+                      trigger:
+                        anyOf:
+                          - enum:
+                              - on_open_panel_menu
+                            type: string
+                      type:
+                        enum:
+                          - url_drilldown
+                        type: string
+                      url:
+                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: string
+                    required:
+                      - url
+                      - label
+                      - trigger
+                      - type
+                    title: url_drilldown
+                    type: object
+              maxItems: 100
+              type: array
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            ref_id:
+              description: The ID of the Vega library item.
+              type: string
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              description: The panel title.
+              type: string
+          required:
+            - ref_id
+          title: By reference
+          type: object
+      description: Vega panel config.
+      title: Vega
+    Kibana_HTTP_APIs_kbn-vega-spec:
+      description: 'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.'
+      discriminator:
+        propertyName: format
+      oneOf:
+        - additionalProperties: false
+          properties:
+            format:
+              enum:
+                - hjson
+              type: string
+            value:
+              description: The Vega or Vega-Lite specification in HJSON format. Comments and unquoted keys are preserved.
+              maxLength: 1000000
+              minLength: 1
+              type: string
+          required:
+            - format
+            - value
+          title: HJSON spec
+          type: object
+        - additionalProperties: false
+          properties:
+            format:
+              enum:
+                - json
+              type: string
+            value:
+              additionalProperties: {}
+              description: The Vega or Vega-Lite specification as a JSON object.
+              type: object
+              properties: {}
+          required:
+            - format
+            - value
+          title: JSON spec
+          type: object
+      title: Vega spec
     Kibana_HTTP_APIs_kibana_asset_reference:
       additionalProperties: false
       properties:

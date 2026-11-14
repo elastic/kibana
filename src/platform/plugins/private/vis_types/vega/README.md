@@ -17,15 +17,5 @@ dashboard, and any other close — Cancel or Esc — reverts, removing a new pan
 existing panel's prior spec. Clicking outside the editor does not close it, so a stray click cannot
 discard unsaved edits.
 
-Creation and panel JSON export are gated by the `vega.asCodeEnabled` feature flag (off by
-default), which also gates the `/api/vega` library API and Vega library items in the Visualize
-listing and on dashboards. The embeddable definition itself is always registered so existing
-by-value panels keep rendering after a flag rollback; only the creation actions attach and detach as
-the flag changes. By-reference panels load their spec from `/api/vega`, so they can't render while
-the flag is off and report that their library item can't be found.
-
-When the flag is enabled, `visTypeVega` also registers a server embeddable schema for
-`type: vega`, so Dashboard's public REST API and generated OpenAPI include `vega` and validate its
-config. When disabled, the public API treats `vega` as an unmapped panel type: writes reject it
-and reads drop stored panels with a `dropped_panel` warning. The Dashboard app's own internal
-save/load routes store and return it as-is.
+`visTypeVega` registers a server embeddable schema for `type: vega`, so Dashboard's public REST API
+and generated OpenAPI include `vega` and validate its config.

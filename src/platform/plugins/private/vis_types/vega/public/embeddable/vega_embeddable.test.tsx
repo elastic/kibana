@@ -16,7 +16,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { AbortReason, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
-import { BehaviorSubject, of, skip } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import {
@@ -29,7 +29,7 @@ import { getMockPresentationContainer } from '@kbn/presentation-publishing/inter
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaRenderDescriptor } from '../data_model/types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
-import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
@@ -149,19 +149,14 @@ describe('vegaEmbeddableFactory', () => {
   let coreStart = coreMock.createStart();
 
   const buildEmbeddable = async ({
-    asCodeEnabled = false,
     spec = { format: 'hjson' as const, value: '{ mark: point }' },
     filters,
     initialState = { spec, filters, title: 'Initial title' },
   }: {
-    asCodeEnabled?: boolean;
     spec?: VegaByValueState['spec'];
     filters?: VegaByValueState['filters'];
     initialState?: VegaEmbeddableState;
   } = {}) => {
-    coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
-      of(key === VEGA_AS_CODE_ENABLED_FLAG ? asCodeEnabled : fallback)
-    );
     const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
       SearchBar: (() => null) as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'],
@@ -284,16 +279,11 @@ describe('vegaEmbeddableFactory', () => {
     expect((api.serializeState() as VegaByValueState).filters).toEqual([panelFilter]);
   });
 
-  it.each([
-    [true, true],
-    [false, false],
-  ] as const)(
-    'gates JSON export on the as code flag (enabled=%s)',
-    async (asCodeEnabled, supportsJsonExport) => {
-      const { api } = await buildEmbeddable({ asCodeEnabled });
-      expect(api.supportsJsonExport).toBe(supportsJsonExport);
-    }
-  );
+  it('supports JSON export and library transforms', async () => {
+    const { api } = await buildEmbeddable();
+    expect(api.supportsJsonExport).toBe(true);
+    expect(apiHasLibraryTransforms(api)).toBe(true);
+  });
 
   it('renders the Vega component from the resolved parser', async () => {
     const { api, Component: PanelComponent } = await buildEmbeddable();
@@ -747,7 +737,6 @@ describe('vegaEmbeddableFactory', () => {
     const buildByReference = (initialState: Partial<VegaByReferenceState> = {}) => {
       coreStart.http.get.mockResolvedValue({ id: 'library-item', data: libraryItem, meta: {} });
       return buildEmbeddable({
-        asCodeEnabled: true,
         initialState: { ref_id: 'library-item', ...initialState },
       });
     };
@@ -781,22 +770,15 @@ describe('vegaEmbeddableFactory', () => {
     it('fails to build when the library item is missing', async () => {
       coreStart.http.get.mockRejectedValue({ response: { status: 404 } });
 
-      await expect(
-        buildEmbeddable({ asCodeEnabled: true, initialState: { ref_id: 'missing' } })
-      ).rejects.toThrow(SavedObjectNotFound);
-    });
-
-    it('has no library transforms when the library is disabled', async () => {
-      const { api } = await buildEmbeddable();
-
-      expect(apiHasLibraryTransforms(api)).toBe(false);
+      await expect(buildEmbeddable({ initialState: { ref_id: 'missing' } })).rejects.toThrow(
+        SavedObjectNotFound
+      );
     });
 
     it('moves the spec, query and filters to a new library item', async () => {
       coreStart.http.post.mockResolvedValue({ id: 'new-item' });
       const query = { language: 'kql' as const, expression: 'response : 404' };
       const { api } = await buildEmbeddable({
-        asCodeEnabled: true,
         initialState: { spec: libraryItem.spec, query, filters: [panelFilter], title: 'Panel' },
       });
 

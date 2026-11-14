@@ -67,7 +67,7 @@ export const openVegaLibraryEditor = async ({
   const sharedFlyoutProps = {
     // A stray click would otherwise discard unsaved edits.
     outsideClickCloses: false,
-    // The flyout's close button would skip the editor's unsaved changes check, so Cancel closes it.
+    // The flyout's close button would skip the editor's unsaved changes check, so the footer's Close button closes it.
     hideCloseButton: true,
     'data-test-subj': 'vegaLibraryEditorFlyout',
   } as const;

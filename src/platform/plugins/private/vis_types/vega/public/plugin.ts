@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, filter, take, type Subscription } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -46,8 +45,8 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
-import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from './constants';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -84,9 +83,6 @@ export interface VegaPluginStartDependencies {
 /** @internal */
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
-  private addActionsSubscription?: Subscription;
-  private librarySubscription?: Subscription;
-  private registerLibrary?: () => Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -142,11 +138,9 @@ export class VegaPlugin implements Plugin<void, void> {
       });
     });
 
-    // Registered in `start`, once the feature flag can be read.
-    this.registerLibrary = async () => {
-      const { registerVegaLibrary } = await import('./library/register_vega_library');
-      registerVegaLibrary({ visualizations, embeddable, openLibraryEditor });
-    };
+    void import('./library/register_vega_library').then(({ registerVegaLibrary }) =>
+      registerVegaLibrary({ visualizations, embeddable, openLibraryEditor })
+    );
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
@@ -159,45 +153,15 @@ export class VegaPlugin implements Plugin<void, void> {
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
 
-    const asCodeEnabled$ = core.featureFlags
-      .getBooleanValue$(VEGA_AS_CODE_ENABLED_FLAG, false)
-      .pipe(distinctUntilChanged());
-
-    // Without the flag, the Visualize listing shouldn't query the library API.
-    this.librarySubscription = asCodeEnabled$
-      .pipe(filter(Boolean), take(1))
-      .subscribe(() => this.registerLibrary?.());
-
-    deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
-      const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
-      return getAddVegaPanelAction(deps);
-    });
-
-    // The embeddable definition is always registered (see setup) so existing Vega panels keep
-    // rendering even after a flag rollback.
     deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
       const { getAddVegaEmbeddableAction } = await import(
         './embeddable/add_vega_embeddable_action'
       );
       return getAddVegaEmbeddableAction(core);
     });
-
-    // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the
-    // standalone embeddable action.
-    this.addActionsSubscription = asCodeEnabled$.subscribe((useEmbeddableAction) => {
-      const [actionToAttach, actionToDetach] = useEmbeddableAction
-        ? [ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID]
-        : [ADD_VEGA_PANEL_ACTION_ID, ADD_VEGA_EMBEDDABLE_ACTION_ID];
-
-      for (const trigger of [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER]) {
-        deps.uiActions.attachAction(trigger, actionToAttach);
-        deps.uiActions.detachAction(trigger, actionToDetach);
-      }
-    });
+    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);
+    deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, ADD_VEGA_EMBEDDABLE_ACTION_ID);
   }
 
-  public stop() {
-    this.addActionsSubscription?.unsubscribe();
-    this.librarySubscription?.unsubscribe();
-  }
+  public stop() {}
 }

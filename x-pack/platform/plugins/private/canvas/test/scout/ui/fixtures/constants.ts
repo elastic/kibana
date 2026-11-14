@@ -60,6 +60,10 @@ export const EMBEDDABLES = {
     libraryName: 'Artistpreviouslyknownaslens',
     headingId: 'Artistpreviouslyknownaslens',
   },
+  VEGA: {
+    libraryName: 'CanvasVegaLibraryItem',
+    headingId: 'CanvasVegaLibraryItem',
+  },
 } as const;
 
 /** Expected legacy-metric label/value rendered by the saved Lens visualization. */

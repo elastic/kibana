@@ -114,6 +114,7 @@ actions:
         | `image` | Image |
         | `markdown` | Markdown text |
         | `links` | Navigation links to dashboards and external URLs |
+        | `vega` | Vega or Vega-Lite visualization |
         | `esql_control` | ES&#124;QL variable control |
         | `options_list_control` | Dropdown filter by field value |
         | `range_slider_control` | Slider filter by numeric range |
@@ -162,14 +163,14 @@ actions:
         | Synthetics | Since 9.4 | N/A |
         | APM service map | Since 9.5 | N/A |
         | Machine learning and AIOps | Since 9.5 | N/A |
+        | Vega | Since 9.6 | Since 9.6 |
         | Maps | Coming soon | Coming soon |
-        | Vega | Coming soon | Coming soon |
         | Alerts table | Coming soon | N/A |
         | Legacy visualizations | N/A | N/A |
 
         ### Embedding library items
 
-        `vis`, `discover_session`, `markdown`, and `links` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
+        `vis`, `discover_session`, `markdown`, `links`, and `vega` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
         For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization).
 

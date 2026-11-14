@@ -16,7 +16,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { VEGA_API_PATH, VEGA_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig, VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION } from '../constants';
-import { isVegaApiEnabled } from '../is_vega_api_enabled';
 import { deleteItem } from './delete';
 
 const deleteRequestParamsSchema = z.object({
@@ -61,10 +60,6 @@ export const registerDeleteRoute = (
     },
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter }, async () => {
-        const { core } = await ctx.resolve(['core']);
-        if (!(await isVegaApiEnabled(core.featureFlags))) {
-          return res.notFound();
-        }
         try {
           await deleteItem(ctx, req.params.id);
           return res.noContent();
