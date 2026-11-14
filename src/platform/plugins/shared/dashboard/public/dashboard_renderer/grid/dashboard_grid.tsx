@@ -20,15 +20,15 @@ import { GridLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import type { GridData } from '@kbn/as-code-dashboard-schema';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constants';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_MARGIN_SIZE,
+  DASHBOARD_GRID_ROW_HEIGHT,
+} from '@kbn/dashboard-constants';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import {
-  DASHBOARD_GRID_HEIGHT,
-  DASHBOARD_MARGIN_SIZE,
-  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
-} from './constants';
+import { DEFAULT_DASHBOARD_DRAG_TOP_OFFSET } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { PanelSelectHint } from './panel_select_hint';
 import { SelectionMarquee } from './selection_marquee';
@@ -196,8 +196,8 @@ export const DashboardGrid = () => {
         css={layoutStyles}
         layout={layout}
         gridSettings={{
-          gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
-          rowHeight: DASHBOARD_GRID_HEIGHT,
+          gutterSize: useMargins ? DASHBOARD_GRID_MARGIN_SIZE : 0,
+          rowHeight: DASHBOARD_GRID_ROW_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
           keyboardDragTopLimit: topOffset,
         }}

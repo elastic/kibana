@@ -24,11 +24,19 @@ export type PanelContentAttempt =
       type: 'success';
       panelContent: PanelContent;
       authoringNote?: string;
+      /** Pixel height the content needs, when the renderer estimated one for this call. */
+      heightHint?: number;
     }
   | {
       type: 'failure';
       error: string;
     };
+
+/** The pixel height a panel's content needs, for the layout step to size the panel by. */
+export interface PanelHeightHint {
+  panelId: string;
+  heightPx: number;
+}
 
 /** One-sentence note describing a chart authored during the current turn. */
 export interface PanelAuthoringNote {

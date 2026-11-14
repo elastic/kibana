@@ -101,6 +101,7 @@ describe('createAttachmentPanelResolver', () => {
           esql_query: ['FROM logs | STATS count() BY host'],
         },
       },
+      heightHint: 420,
     });
   });
 

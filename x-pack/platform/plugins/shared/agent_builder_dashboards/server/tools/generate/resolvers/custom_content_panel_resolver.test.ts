@@ -91,6 +91,7 @@ describe('createCustomContentPanelResolver', () => {
             template: '<div>resolved</div>',
           },
         },
+        heightHint: 320,
       });
     });
 
@@ -113,6 +114,14 @@ describe('createCustomContentPanelResolver', () => {
 
       expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ esql: 'FROM metrics-*' }));
     });
+  });
+
+  it('passes no height hint when the builder kept the existing template', async () => {
+    mockedBuild.mockResolvedValue({ esqlQueries: [], template: '<div>old</div>' });
+
+    const result = await resolve(addRequest({ hasData: false }));
+
+    expect(result).toMatchObject({ type: 'success', heightHint: undefined });
   });
 
   it('hands the control values resolver of the request to the builder', async () => {

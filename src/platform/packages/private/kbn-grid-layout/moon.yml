@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/ui-theme'
   - '@kbn/core-chrome-layout-utils'
+  - '@kbn/dashboard-constants'
 tags:
   - shared-browser
   - package

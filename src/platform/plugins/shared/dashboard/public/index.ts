@@ -10,7 +10,6 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
-export { DASHBOARD_GRID_COLUMN_COUNT } from '../common/page_bundle_constants';
 export type {
   DashboardApi,
   DashboardInternalApi,

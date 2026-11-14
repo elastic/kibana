@@ -11,6 +11,8 @@
     "@kbn/agent-builder-dashboards-common",
     "@kbn/agent-builder-visualizations-common",
     "@kbn/as-code-dashboard-schema",
+    "@kbn/dashboard-constants",
+    "@kbn/ui-theme",
     "@kbn/controls-constants",
     "@kbn/custom-content-common",
     "@kbn/dashboard-markdown-schemas",

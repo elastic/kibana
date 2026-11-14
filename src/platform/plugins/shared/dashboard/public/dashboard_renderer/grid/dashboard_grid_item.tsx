@@ -16,10 +16,10 @@ import { apiCanCancelRequests, useBatchedPublishingSubjects } from '@kbn/present
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { DASHBOARD_GRID_MARGIN_SIZE } from '@kbn/dashboard-constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { printViewportVisStyles } from '../print_styles';
-import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { getHighlightStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
@@ -171,7 +171,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
           scrollMarginTop: `${
             dashboardContainerTopOffset +
             globalNavTopOffset +
-            DASHBOARD_MARGIN_SIZE +
+            DASHBOARD_GRID_MARGIN_SIZE +
             hoverActionsHeight
           }px`,
         });

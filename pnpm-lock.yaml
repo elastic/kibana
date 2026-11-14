@@ -1808,6 +1808,9 @@ importers:
       '@kbn/dashboard-agent-authoring':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/dashboard-agent-authoring
+      '@kbn/dashboard-constants':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/dashboards/dashboard-constants
       '@kbn/dashboard-markdown':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dashboard_markdown
@@ -7963,6 +7966,8 @@ importers:
   src/platform/packages/shared/controls/controls-constants: {}
 
   src/platform/packages/shared/controls/controls-schemas: {}
+
+  src/platform/packages/shared/dashboards/dashboard-constants: {}
 
   src/platform/packages/shared/dashboard-markdown-schemas: {}
 
