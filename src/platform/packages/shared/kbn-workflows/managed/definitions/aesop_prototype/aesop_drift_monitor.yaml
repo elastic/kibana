@@ -45,6 +45,8 @@ outputs:
     type: boolean
   - name: rolled_back
     type: boolean
+  - name: prior_forget_warning
+    type: string
 triggers:
   - type: scheduled
     with:
@@ -238,6 +240,13 @@ steps:
     if: '${{ steps.resolve_rollback.output.can_propose == true }}'
     # Same route into the gate as the A/B compare: default run-as mode,
     # `origin: alertzero` for the decision queue.
+    #
+    # Known platform gap: the restore below runs as the AESOP identity, not as
+    # the approver. A resumed parent has no run-as-approver: see
+    # resume_sync_parent_if_needed.ts lines 34-38 and 74-81 in
+    # workflows_execution_engine, and the explorer's start_ab_compare
+    # workflow.executeAsync that picks the identity this run inherits. The
+    # approver is recorded in the rollback KI instead.
     with:
       workflow-id: system-create-proposal
       inputs:
@@ -255,7 +264,7 @@ steps:
           ```
 
           **On approval**
-          If you approve, the agent PUTs the previous content back onto `{{ consts.SKILL_ID }}` under your identity. If you dismiss, nothing changes.
+          If you approve, the agent PUTs the previous content back onto `{{ consts.SKILL_ID }}` as the AESOP identity (the user who enabled the explorer, acting after your approval). If you dismiss, nothing changes.
         impact: medium
         confidence: medium
         autoApprove: false
@@ -267,6 +276,16 @@ steps:
     type: data.set
     with:
       approved: '${{ steps.propose_rollback.output.decision == "approved" }}'
+
+  # Who approved. The create-proposal workflow does not return the decider, so
+  # read it back from the proposal. A failed read leaves the approver empty.
+  - name: get_approval
+    type: proposals.getProposal
+    if: '${{ steps.resolve_decision.output.approved == true }}'
+    with:
+      proposalId: '{{ steps.propose_rollback.output.proposalId }}'
+    on-failure:
+      continue: true
 
   - name: restore_skill
     type: kibana.request
@@ -299,6 +318,31 @@ steps:
     on-failure:
       continue: true
 
+  # Rollback record: the restore ran as the AESOP identity, so this KI is
+  # where the analyst who approved it is recorded.
+  - name: write_rollback_ki
+    type: context-engine.createKi
+    if: '${{ steps.restore_skill.output != null and steps.restore_skill.error == null }}'
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+      ki_id: 'rollback-{{ execution.id }}'
+      ki:
+        type: aesop.rollback
+        title: 'AESOP rolled back {{ consts.SKILL_ID }}'
+        description: >-
+          Rolled back to the previous content; approved by {{ steps.get_approval.output.decidedBy.username | default: steps.get_approval.output.decidedBy.fullName | default: 'an unknown approver' }}. The write ran as the AESOP identity.
+        content: '{{ steps.get_prior_content.output.document.content | truncate: 60000, "" }}'
+        tags:
+          - aesop
+          - aesop:rollback
+        attributes:
+          skill_id: '{{ consts.SKILL_ID }}'
+          approved_by: "{{ steps.get_approval.output.decidedBy.username | default: steps.get_approval.output.decidedBy.fullName | default: '' }}"
+          proposal_id: '{{ steps.propose_rollback.output.proposalId }}'
+          workflow_execution_id: '{{ execution.id }}'
+    on-failure:
+      continue: true
+
   - name: emit_result
     type: workflow.output
     status: completed
@@ -309,3 +353,5 @@ steps:
       mean_score: '${{ steps.resolve_drift.output.mean_score }}'
       rollback_proposed: '${{ steps.resolve_rollback.output.can_propose == true and steps.propose_rollback.error == null }}'
       rolled_back: '${{ steps.restore_skill.output != null and steps.restore_skill.error == null }}'
+      prior_forget_warning: >-
+        {% if steps.forget_prior_content.error != null %}WARNING: the rollback restored the skill but the stored prior content for {{ consts.SKILL_ID }} could not be deleted, so the next tick may propose the same rollback again.{% endif %}

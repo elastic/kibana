@@ -124,6 +124,8 @@ steps:
       winner_variant: ''
       winner_content: ''
       deploy_candidate: false
+      tie_deploy: false
+      is_tie: false
       reject_reason: ''
       deployed: false
 
@@ -376,6 +378,27 @@ steps:
     with:
       winner_content: '{{ inputs.variants[variables.winner_variant] }}'
 
+  # A tie has no winner, so the arm a tie approval deploys is the tiebreak arm:
+  # the tied arm with the highest mean (the lowest index on equal means),
+  # chosen by the select-winner step. It goes through the same winner_variant
+  # and winner_content variables as a normal winner, so the deploy steps below
+  # do not care which proposal asked for it.
+  - name: resolve_tiebreak
+    type: data.set
+    if: '${{ steps.resolve_comparison.output.is_tie == true }}'
+    with:
+      winner_variant: '${{ variables.arm_variant_indexes[steps.winner.output.tiebreak_index] }}'
+      is_tie: true
+
+  - name: resolve_tiebreak_content
+    type: data.set
+    if: '${{ steps.resolve_comparison.output.is_tie == true and variables.winner_variant != "live" }}'
+    with:
+      winner_content: '{{ inputs.variants[variables.winner_variant] }}'
+      # Every tied arm already beat the baseline, so the tiebreak arm is
+      # deployable unless it is the live skill itself (nothing to write then).
+      tie_deploy: true
+
   # A variant is deployed only when it won, beat the no-skill baseline, and is
   # not the live skill itself. Anything else is a rejection.
   - name: resolve_deploy_candidate
@@ -420,8 +443,11 @@ steps:
 
   # ----------------------------------------------------------------------
   # Tie: two or more arms beat the baseline and sit within min_delta of each
-  # other, so the evidence cannot pick one. Hand the choice to the analyst. This
-  # path deploys nothing and records no rejection, because no arm lost.
+  # other, so the evidence cannot pick one. Hand the choice to the analyst.
+  # Approving deploys the tiebreak arm (highest mean, lowest variant index on
+  # equal means) through the same deploy steps as propose_deploy; dismissing
+  # rejects every tied arm. No rejection is recorded up front, because no arm
+  # lost.
   # ----------------------------------------------------------------------
   - name: propose_tie_pick
     type: workflow.execute
@@ -437,7 +463,11 @@ steps:
 
           {{ steps.winner.output.reasons | join: ' ' }}
 
-          Nothing has been deployed. To choose one, revise this proposal with the arm you want deployed; if none is acceptable, dismiss it.
+          Nothing has been deployed yet.
+          {% assign tiebreak_marker = variables.arm_variant_indexes[steps.winner.output.tiebreak_index] %}
+          **If you approve**, {% if tiebreak_marker == 'live' %}the live skill stays as it is: it has the highest mean of the tied arms (experiment `{{ steps.winner.output.tiebreak_target_id }}`), so nothing is changed.{% else %}the agent deploys variant {{ tiebreak_marker }} of {{ inputs.variants.size }} (experiment `{{ steps.winner.output.tiebreak_target_id }}`), the tied arm with the highest mean{% if variables.has_live_skill == true %}, onto `{{ variables.target_skill_id }}` after storing its current content for a drift rollback{% else %}, as the new skill `{{ variables.target_skill_name }}`{% endif %}. On equal means the lowest variant index wins. The write runs as the AESOP identity (the user who enabled the explorer), after you approve.{% endif %}
+          **If you dismiss**, every tied arm is rejected and nothing is deployed.
+          **To deploy a different tied arm**, dismiss this proposal and re-run the A/B with only that variant.
 
           **Tied arms**
           {% for tied_index in steps.winner.output.tied_indexes %}{% assign tied_marker = variables.arm_variant_indexes[tied_index] %}
@@ -470,6 +500,12 @@ steps:
   - name: propose_deploy
     type: workflow.execute
     if: '${{ variables.deploy_candidate == true }}'
+    # Known platform gap: the write after this gate cannot run as the approver.
+    # A parent resumed from a human gate continues under its own pre-scheduled
+    # task identity (resume_sync_parent_if_needed.ts), and there is no
+    # run-as-approver for it. The deploy therefore runs as the AESOP identity,
+    # the user who enabled the explorer, after the analyst approves; the
+    # approver is recorded as approved_by on the deploy record instead.
     # Straight to the proposals gate in default run-as mode, not through the
     # AlertZero bridge: the bridge delegates with `run-as-mode: inherit`, which
     # needs a parent running as a bound service account, and this run executes
@@ -501,7 +537,7 @@ steps:
           **Evaluators:** skill-secret-scanner, skill-prompt-injection, skill-pii, esql-compile, skill-index-resolves, correctness (judge)
 
           **On approval**
-          {% if variables.has_live_skill == true %}If you approve, the agent stores the current content of `{{ variables.target_skill_id }}` (so a drift rollback can restore it), PUTs the winner onto it under your identity, and enables the skill's drift monitor.{% else %}If you approve, the agent creates the skill under your identity and enables its drift monitor.{% endif %} Scratch variant skills are deleted either way. If you dismiss, the decision and your reason are recorded and nothing is deployed.
+          {% if variables.has_live_skill == true %}If you approve, the agent stores the current content of `{{ variables.target_skill_id }}` (so a drift rollback can restore it), PUTs the winner onto it as the AESOP identity (the user who enabled the explorer, acting after your approval), and enables the skill's drift monitor.{% else %}If you approve, the agent creates the skill as the AESOP identity (the user who enabled the explorer, acting after your approval) and enables its drift monitor.{% endif %} Scratch variant skills are deleted either way. If you dismiss, the decision and your reason are recorded and nothing is deployed.
         impact: medium
         confidence: medium
         autoApprove: false
@@ -509,20 +545,31 @@ steps:
     on-failure:
       continue: true
 
+  # Whichever proposal ran (propose_deploy, or propose_tie_pick on a tie) feeds
+  # the same decision, so every step below is shared. A tie approval whose
+  # tiebreak arm is the live skill leaves nothing to deploy: tie_deploy is false,
+  # so it is not counted as an approval to write.
+  - name: resolve_tie_decision
+    type: data.set
+    with:
+      tie_approved: '${{ variables.tie_deploy == true and steps.propose_tie_pick.output.decision == "approved" }}'
+
   - name: resolve_decision
     type: data.set
     with:
-      approved: '${{ steps.propose_deploy.output.decision == "approved" }}'
-      dismissed: '${{ steps.propose_deploy.output.decision == "dismissed" }}'
+      approved: '${{ steps.propose_deploy.output.decision == "approved" or variables.tie_approved == true }}'
+      dismissed: '${{ steps.propose_deploy.output.decision == "dismissed" or steps.propose_tie_pick.output.decision == "dismissed" }}'
+      decision: "{{ steps.propose_tie_pick.output.decision | default: steps.propose_deploy.output.decision | default: '' }}"
+      proposal_id: "{{ steps.propose_tie_pick.output.proposalId | default: steps.propose_deploy.output.proposalId | default: '' }}"
 
   # ----------------------------------------------------------------------
   # Dismissal: record the analyst's reason and rationale.
   # ----------------------------------------------------------------------
   - name: get_dismissal
     type: proposals.getProposal
-    if: '${{ steps.resolve_decision.output.dismissed == true and steps.propose_deploy.output.proposalId != blank }}'
+    if: '${{ steps.resolve_decision.output.dismissed == true and steps.resolve_decision.output.proposal_id != blank }}'
     with:
-      proposalId: '{{ steps.propose_deploy.output.proposalId }}'
+      proposalId: '{{ steps.resolve_decision.output.proposal_id }}'
     on-failure:
       continue: true
 
@@ -534,10 +581,10 @@ steps:
       ki_id: 'rejection-{{ execution.id }}'
       ki:
         type: aesop.rejection
-        title: 'AESOP winner dismissed for {{ variables.target_skill_id }}'
+        title: '{% if variables.is_tie == true %}AESOP tied variants dismissed{% else %}AESOP winner dismissed{% endif %} for {{ variables.target_skill_id }}'
         description: >-
-          An analyst dismissed the winning variant: {{ steps.get_dismissal.output.dismissReason | default: 'no reason recorded' }}.
-        content: '{{ variables.winner_content | truncate: 60000, "" }}'
+          An analyst dismissed the {% if variables.is_tie == true %}tied variants{% else %}winning variant{% endif %}: {{ steps.get_dismissal.output.dismissReason | default: 'no reason recorded' }}.
+        content: '{% if variables.is_tie == true %}{{ inputs.variants | json | truncate: 60000, "" }}{% else %}{{ variables.winner_content | truncate: 60000, "" }}{% endif %}'
         tags:
           - aesop
           - aesop:dismissed
@@ -556,6 +603,23 @@ steps:
   # KI keyed by the skill id, and only then PUT the winner. The PUT is gated on
   # the KI write: without the prior content a rollback has nothing to restore.
   # ----------------------------------------------------------------------
+  # Who approved. The create-proposal workflow does not return the decider, so
+  # read it back from the proposal. A failed read leaves approved_by empty, it
+  # does not stop the deploy.
+  - name: get_approval
+    type: proposals.getProposal
+    if: '${{ steps.resolve_decision.output.approved == true }}'
+    with:
+      proposalId: '{{ steps.resolve_decision.output.proposal_id }}'
+    on-failure:
+      continue: true
+
+  - name: resolve_approver
+    type: data.set
+    if: '${{ steps.resolve_decision.output.approved == true }}'
+    with:
+      approved_by: "{{ steps.get_approval.output.decidedBy.username | default: steps.get_approval.output.decidedBy.fullName | default: '' }}"
+
   - name: get_prior_skill
     type: kibana.request
     if: '${{ steps.resolve_decision.output.approved == true and variables.has_live_skill == true }}'
@@ -598,6 +662,7 @@ steps:
         attributes:
           skill_id: '{{ variables.target_skill_id }}'
           replaced_by_execution: '{{ execution.id }}'
+          approved_by: '{{ variables.approved_by }}'
     on-failure:
       continue: true
 
@@ -618,7 +683,9 @@ steps:
       continue: true
 
   # ----------------------------------------------------------------------
-  # Approval, new skill: create it under the approver's identity.
+  # Approval, new skill: create it. The write runs as the AESOP identity (the
+  # user who enabled the explorer), after the analyst approves; see the
+  # platform-gap note at propose_deploy.
   # ----------------------------------------------------------------------
   - name: create_skill
     type: kibana.request
@@ -652,10 +719,39 @@ steps:
       deployed: true
 
   # ----------------------------------------------------------------------
+  # Deploy record: the write above ran as the AESOP identity, so this KI is
+  # where the analyst who approved it is recorded.
+  # ----------------------------------------------------------------------
+  - name: write_deploy_ki
+    type: context-engine.createKi
+    if: '${{ variables.deployed == true }}'
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+      ki_id: 'deploy-{{ execution.id }}'
+      ki:
+        type: aesop.deploy
+        title: 'AESOP deployed a variant of {{ variables.target_skill_id }}'
+        description: >-
+          {% if variables.is_tie == true %}The analyst picked the tiebreak arm of a tie{% else %}The analyst approved the winning variant{% endif %}; approved by {{ variables.approved_by | default: 'an unknown approver' }}. The write ran as the AESOP identity.
+        content: '{{ variables.winner_content | truncate: 60000, "" }}'
+        tags:
+          - aesop
+          - aesop:deploy
+        attributes:
+          skill_id: '{{ variables.target_skill_id }}'
+          source: ab_compare
+          approved_by: '{{ variables.approved_by }}'
+          proposal_id: '{{ steps.resolve_decision.output.proposal_id }}'
+          via_tie_pick: '{{ variables.is_tie }}'
+          workflow_execution_id: '{{ execution.id }}'
+    on-failure:
+      continue: true
+
+  # ----------------------------------------------------------------------
   # Post-deploy: install + enable the per-skill drift monitor through the
-  # security internal route, which enables it as the identity that approved
-  # the deploy (the run's API key). Non-fatal: a failed monitor enable must
-  # not mark the deploy itself failed.
+  # security internal route. It enables the monitor as the AESOP identity
+  # (the user who enabled the explorer), not as the approver. Non-fatal: a
+  # failed monitor enable must not mark the deploy itself failed.
   # ----------------------------------------------------------------------
   - name: enable_drift_monitor
     type: kibana.request
@@ -706,8 +802,8 @@ steps:
     with:
       baseline_experiment_id: '${{ steps.baseline_start.output.experiment_id }}'
       winner_experiment_id: "${{ steps.winner.output.winner_target_id | default: '' }}"
-      decision: "${{ steps.propose_deploy.output.decision | default: '' }}"
+      decision: "${{ steps.resolve_decision.output.decision | default: '' }}"
       deployed: '${{ variables.deployed }}'
       skill_id: '{{ variables.target_skill_id }}'
       skip_reason: >-
-        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif steps.resolve_comparison.output.is_tie == true %}{% if steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% else %}Tied arms, nothing deployed; the analyst was asked to pick one.{% endif %}{% elsif variables.deploy_candidate != true %}Rejected: {{ variables.reject_reason }}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

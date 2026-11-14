@@ -155,6 +155,13 @@ steps:
 
       # Fire and forget: the A/B run parks on an analyst approval for up to
       # 72h, far beyond this workflow's own timeout.
+      #
+      # Known platform gap: the child inherits this run's identity (the user
+      # who enabled the explorer, the AESOP identity) and a resumed parent has
+      # no run-as-approver (resume_sync_parent_if_needed.ts lines 34-38 and
+      # 74-81 in workflows_execution_engine). The deploy therefore runs as the
+      # AESOP identity after approval; the approver is recorded in the deploy
+      # KI, not used as the write identity.
       - name: hand_to_ab_compare
         type: foreach
         foreach: '${{ steps.explorer_pass.output.structured_output.candidates | default: consts.EMPTY_ARRAY }}'

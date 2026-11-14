@@ -22,7 +22,7 @@ export const AESOP_EXPLORER_WORKFLOW_ID = 'system-security-aesop-explorer';
 export const AESOP_AB_COMPARE_WORKFLOW = {
   id: AESOP_AB_COMPARE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 4,
+  version: 5,
   billable: false,
   yaml: AESOP_AB_COMPARE_YAML,
   management: {
@@ -83,7 +83,7 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW = {
   pluginId: 'securitySolution',
   // Bump on every YAML edit: yamlTemplate hashing does not see the imported
   // YAML, so installed instances only re-render on a version bump.
-  version: 9,
+  version: 10,
   billable: false,
   // When the name is missing (instances stored before skillName existed, or an
   // enable that could not resolve it) the monitor matches on the id, so it only
@@ -137,7 +137,7 @@ export const AESOP_EXPLORER_WORKFLOW = {
   pluginId: 'securitySolution',
   // Bump on every YAML edit: yamlTemplate hashing does not see the imported
   // YAML, so installed instances only re-render on a version bump.
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: ({ mode, intervalMinutes, connectorId, datasetId, abAgentId, investigationId }) =>
     renderTemplate(AESOP_EXPLORER_YAML, {
