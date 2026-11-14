@@ -17,10 +17,43 @@ import { stripSourceCode } from './strip_source_code';
 
 const EMPTY = new Set<string>();
 
+export interface ImportLocatorOptions {
+  /**
+   * Skip `import type` / `export type` statements and specifier lists where every member is
+   * `type`, i.e. statements the compiler elides so they never load a module at runtime.
+   */
+  ignoreTypeOnly?: boolean;
+}
+
+const allTypeOnly = (elements: Ts.NodeArray<Ts.ImportSpecifier | Ts.ExportSpecifier>): boolean =>
+  elements.length > 0 && elements.every((element) => element.isTypeOnly);
+
+const isTypeOnly = (node: Ts.ImportDeclaration | Ts.ExportDeclaration): boolean => {
+  if (Ts.isImportDeclaration(node)) {
+    const clause = node.importClause;
+    if (!clause) {
+      return false;
+    }
+    return (
+      clause.isTypeOnly ||
+      (!clause.name &&
+        !!clause.namedBindings &&
+        Ts.isNamedImports(clause.namedBindings) &&
+        allTypeOnly(clause.namedBindings.elements))
+    );
+  }
+  return (
+    node.isTypeOnly ||
+    (!!node.exportClause &&
+      Ts.isNamedExports(node.exportClause) &&
+      allTypeOnly(node.exportClause.elements))
+  );
+};
+
 export class ImportLocator {
   private readonly scanner: Ts.Scanner;
 
-  constructor() {
+  constructor(private readonly options: ImportLocatorOptions = {}) {
     this.scanner = Ts.createScanner(Ts.ScriptTarget.Latest, false, Ts.LanguageVariant.JSX);
   }
 
@@ -46,7 +79,9 @@ export class ImportLocator {
         node.moduleSpecifier &&
         Ts.isStringLiteral(node.moduleSpecifier)
       ) {
-        imports.add(node.moduleSpecifier.text);
+        if (!this.options.ignoreTypeOnly || !isTypeOnly(node)) {
+          imports.add(node.moduleSpecifier.text);
+        }
         continue;
       }
 

@@ -803,4 +803,45 @@ describe('run_check', () => {
       expect(output).toContain('node scripts/regenerate_moon_projects.js --update');
     });
   });
+
+  describe('server import graph step', () => {
+    it('runs the whole-graph check regardless of changed files', async () => {
+      mockResolveValidationBaseContext.mockResolvedValue({
+        ...baseContext,
+        runContext: { ...baseContext.runContext, changedFiles: [] },
+      });
+
+      await handler(createArgs());
+
+      expect(mockExeca).toHaveBeenCalledWith(
+        process.execPath,
+        ['scripts/check_server_import_graph'],
+        expect.objectContaining({ reject: false })
+      );
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('graph ✓ no new browser imports on server');
+      expect(process.exitCode).toBeUndefined();
+    });
+
+    it('reports the check output and rerun command when it fails', async () => {
+      mockExeca.mockImplementation(async (_bin: string, args: string[]) =>
+        args.includes('scripts/check_server_import_graph')
+          ? {
+              exitCode: 1,
+              stdout: '',
+              stderr:
+                'x-pack/foo/common/palette.ts imports @elastic/eui and is loaded by the server',
+            }
+          : { exitCode: 0, stdout: '', stderr: '' }
+      );
+
+      await handler(createArgs());
+
+      expect(process.exitCode).toBe(1);
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('graph ✗ failed');
+      expect(output).toContain('x-pack/foo/common/palette.ts imports @elastic/eui');
+      expect(output).toContain('node scripts/check_server_import_graph');
+    });
+  });
 });
