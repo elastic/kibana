@@ -15,7 +15,9 @@ import { omit } from 'lodash';
 import { join } from 'path';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import Boom from '@hapi/boom';
 import type {
+  Headers,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
@@ -23,6 +25,7 @@ import type {
   RouteValidationFunction,
   RequestHandlerContextBase,
 } from '@kbn/core-http-server';
+import type { TenantId } from '@kbn/core-tenants-server';
 import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
 import { createServer } from '@kbn/server-http-tools';
 import type { HttpConfig } from './http_config';
@@ -2436,6 +2439,55 @@ describe('space extraction in onRequest', () => {
     const response = await supertest(innerServer.listener).get('/foo').expect(200);
 
     expect(response.body).toEqual({ basePath: '', spaceId: 'default' });
+  });
+
+  test('sets request.tenantId from the tenants service and rejects unknown tenants', async () => {
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: { tenantId: req.tenantId ?? null } });
+      }
+    );
+
+    const tenants = {
+      enabled: true,
+      getTenantId: jest.fn(({ 'x-elastic-project-id': id }: Headers) => {
+        if (id === 'project-z') {
+          throw Boom.badRequest('Unknown tenant [project-z]');
+        }
+        return id as TenantId | undefined;
+      }),
+      resolve: jest.fn(),
+      getProjectName: jest.fn(),
+      getClientConfig: jest.fn(),
+    };
+    const { registerRouter, server: innerServer } = await server.setup({ config$, tenants });
+    registerRouter(router);
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/foo')
+      .set('x-elastic-project-id', 'project-b')
+      .expect(200, { tenantId: 'project-b' });
+    await supertest(innerServer.listener).get('/foo').expect(200, { tenantId: null });
+    await supertest(innerServer.listener)
+      .get('/foo')
+      .set('x-elastic-project-id', 'project-z')
+      .expect(400, {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Unknown tenant [project-z]',
+      });
   });
 
   for (const method of ['get', 'put', 'post', 'delete', 'patch'] as const) {

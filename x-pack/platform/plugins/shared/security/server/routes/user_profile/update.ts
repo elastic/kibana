@@ -199,7 +199,7 @@ export function defineUpdateUserProfileDataRoute({
 
       const userProfileService = getUserProfileService();
       try {
-        await userProfileService.update(session.value.userProfileId, userProfileData);
+        await userProfileService.update(session.value.userProfileId, userProfileData, request);
         return response.ok();
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

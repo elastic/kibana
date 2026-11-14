@@ -48,7 +48,11 @@ export function registerKqlTelemetryRoute(
       },
       async (context, request, response) => {
         const [{ savedObjects }] = await getStartServices();
-        const internalRepository = savedObjects.createInternalRepository();
+        const internalRepository = savedObjects.createInternalRepository(
+          undefined,
+          undefined,
+          request
+        );
 
         const {
           body: { opt_in: optIn },

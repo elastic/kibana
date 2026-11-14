@@ -1,0 +1,85 @@
+# Echo backend behind the Cloud Proxy, to check multi-tenant routing and the headers the proxy sends.
+# Apply, then run route_test.sh. Delete with: kubectl delete ns mt-route-test
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mt-route-test
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: echo
+  namespace: mt-route-test
+spec:
+  commonName: echo
+  dnsNames: [echo, echo.mt-route-test.svc, echo.mt-route-test.svc.cluster.local]
+  issuerRef: { kind: ClusterIssuer, name: ecp-issuer }
+  privateKey: { algorithm: ECDSA, size: 256 }
+  secretName: echo-tls
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo
+  namespace: mt-route-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: echo }
+  template:
+    metadata:
+      labels: { app: echo }
+    spec:
+      containers:
+        - name: echo
+          image: mendhak/http-https-echo:35
+          env:
+            - { name: HTTP_PORT, value: '8080' }
+            - { name: HTTPS_PORT, value: '8443' }
+            - { name: HTTPS_CERT_FILE, value: /tls/tls.crt }
+            - { name: HTTPS_KEY_FILE, value: /tls/tls.key }
+          ports:
+            - { name: https, containerPort: 8443 }
+          readinessProbe:
+            httpGet: { path: /, port: 8080 }
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { memory: 128Mi }
+          volumeMounts:
+            - { name: tls, mountPath: /tls, readOnly: true }
+      volumes:
+        - name: tls
+          secret: { secretName: echo-tls }
+---
+# The proxy builds a multi-tenant route from this Service's EndpointSlice (labels are copied to it).
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  namespace: mt-route-test
+  labels:
+    k8s.elastic.co/application-id: mtkb
+    k8s.elastic.co/is-multi-tenant-service: 'true'
+spec:
+  selector: { app: echo }
+  ports:
+    - { name: https, port: 8443, targetPort: 8443 }
+---
+# One Ingress per project. regional-network-controller normally creates these from an AppNetwork;
+# the proxy only reads the annotations and forwards <project-id>.kb.<domain> to the target-refs Service.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: project-route-test
+  namespace: mt-route-test
+  annotations:
+    k8s.elastic.co/project-id: 0000000000000000000000000000beef
+    k8s.elastic.co/project-alias: route-test
+    k8s.elastic.co/project-type: elasticsearch
+    k8s.elastic.co/application-id: mtkb
+    k8s.elastic.co/organization-id: '10'
+    k8s.elastic.co/appstatus: Running
+    k8s.elastic.co/target-refs: mt-route-test/echo
+spec:
+  defaultBackend:
+    service: { name: echo, port: { name: https } }

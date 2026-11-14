@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SessionStorage } from '@kbn/core/server';
+import type { KibanaRequest, SessionStorage } from '@kbn/core/server';
 import {
   httpServerMock,
   httpServiceMock,
@@ -16,6 +16,11 @@ import {
 import type { SessionCookieOptions } from './session_cookie';
 import { SessionCookie } from './session_cookie';
 import { sessionCookieMock } from './session_cookie.mock';
+
+const createTenantRequest = (tenantId: string) =>
+  Object.assign(httpServerMock.createKibanaRequest(), {
+    tenantId: tenantId as KibanaRequest['tenantId'],
+  });
 
 describe('Session cookie', () => {
   let sessionCookieOptions: SessionCookieOptions;
@@ -122,9 +127,43 @@ describe('Session cookie', () => {
       expect(mockSessionStorageFactory.asScoped).toHaveBeenCalledWith(request);
       expect(mockSessionStorage.clear).toHaveBeenCalledTimes(1);
     });
+
+    it("returns value if session belongs to the request's tenant", async () => {
+      const sessionValue = sessionCookieMock.createValue({ tenantId: 'project-b' });
+      mockSessionStorage.get.mockResolvedValue(sessionValue);
+
+      await expect(sessionCookie.get(createTenantRequest('project-b'))).resolves.toBe(sessionValue);
+    });
+
+    it('returns `null` without clearing it if session belongs to another tenant', async () => {
+      mockSessionStorage.get.mockResolvedValue(
+        sessionCookieMock.createValue({ tenantId: 'project-b' })
+      );
+
+      await expect(sessionCookie.get(createTenantRequest('project-a'))).resolves.toBeNull();
+      await expect(sessionCookie.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
+      expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+    });
+
+    it('returns `null` if session without a tenant is used by a tenant', async () => {
+      mockSessionStorage.get.mockResolvedValue(sessionCookieMock.createValue());
+
+      await expect(sessionCookie.get(createTenantRequest('project-b'))).resolves.toBeNull();
+    });
   });
 
   describe('#set', () => {
+    it("records the request's tenant", async () => {
+      const sessionValue = sessionCookieMock.createValue();
+
+      await sessionCookie.set(createTenantRequest('project-b'), sessionValue);
+
+      expect(mockSessionStorage.set).toHaveBeenCalledWith(
+        { ...sessionValue, path: '/mock-base-path', tenantId: 'project-b' },
+        undefined
+      );
+    });
+
     it('properly sets value in the session storage', async () => {
       const sessionValue = sessionCookieMock.createValue();
 

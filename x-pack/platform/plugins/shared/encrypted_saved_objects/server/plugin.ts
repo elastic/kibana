@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import nodeCrypto from '@elastic/node-crypto';
+import nodeCrypto, { type Crypto } from '@elastic/node-crypto';
 import { createHash } from 'crypto';
 
 import type {
   CoreSetup,
+  CoreStart,
   ISavedObjectTypeRegistry,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -63,10 +65,26 @@ export class EncryptedSavedObjectsPlugin
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
   #service?: Readonly<EncryptedSavedObjectsService>;
+  readonly #tenantServices = new WeakMap<Crypto, EncryptedSavedObjectsService>();
+  #getTenantCrypto?: CoreStart['savedObjects']['getTenantCrypto'];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
+
+  private getTenantService = ({ tenantId }: KibanaRequest) => {
+    const crypto = tenantId === undefined ? undefined : this.#getTenantCrypto?.(tenantId);
+    if (!crypto || !this.#service) {
+      return undefined;
+    }
+
+    let tenantService = this.#tenantServices.get(crypto);
+    if (!tenantService) {
+      tenantService = this.#service.withPrimaryCrypto(crypto);
+      this.#tenantServices.set(crypto, tenantService);
+    }
+    return tenantService;
+  };
 
   public setup(core: CoreSetup): EncryptedSavedObjectsPluginSetup {
     const config = this.initializerContext.config.get<ConfigType>();
@@ -115,6 +133,7 @@ export class EncryptedSavedObjectsPlugin
 
     this.savedObjectsSetup = setupSavedObjects({
       service: this.#service,
+      getTenantService: this.getTenantService,
       savedObjects: core.savedObjects,
       getStartServices: core.getStartServices,
       logger: this.logger,
@@ -181,8 +200,9 @@ export class EncryptedSavedObjectsPlugin
     };
   }
 
-  public start() {
+  public start(core: CoreStart) {
     this.logger.debug('Starting plugin');
+    this.#getTenantCrypto = core.savedObjects.getTenantCrypto;
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getClient: (options = {}) => this.savedObjectsSetup(options),

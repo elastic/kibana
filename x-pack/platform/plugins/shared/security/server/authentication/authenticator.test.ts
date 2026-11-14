@@ -874,7 +874,10 @@ describe('Authenticator', () => {
       );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
-      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(
+        userProfileGrant,
+        request
+      );
     });
 
     it('activates profiles for the Elastic Cloud users if profile grant is provided', async () => {
@@ -910,7 +913,10 @@ describe('Authenticator', () => {
       );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
-      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(
+        userProfileGrant,
+        request
+      );
     });
 
     it('returns `notHandled` if login attempt is targeted to not configured provider.', async () => {
@@ -2185,6 +2191,11 @@ describe('Authenticator', () => {
           username: 'new-user',
           authentication_provider: provider,
         });
+        // Without multi-tenancy, a request's internal user is the cluster's internal user.
+        mockOptions.clusterClient.asScoped.mockReturnValue({
+          ...elasticsearchServiceMock.createScopedClusterClient(),
+          asInternalUser: mockOptions.clusterClient.asInternalUser,
+        });
         mockOptions.clusterClient.asInternalUser.security.invalidateToken.mockResponse({
           invalidated_tokens: 1,
           previously_invalidated_tokens: 0,
@@ -2210,6 +2221,7 @@ describe('Authenticator', () => {
           )
         );
 
+        expect(mockOptions.clusterClient.asScoped).toHaveBeenCalledWith(request);
         expect(
           mockOptions.clusterClient.asInternalUser.security.invalidateToken
         ).toHaveBeenCalledWith({ token: 'old-token' });
@@ -2228,7 +2240,10 @@ describe('Authenticator', () => {
         );
         expect(mockOptions.session.update).not.toHaveBeenCalled();
         expect(mockOptions.session.extend).not.toHaveBeenCalled();
-        expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
+        expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(
+          userProfileGrant,
+          request
+        );
         expectAuditEvents(
           { action: 'user_logout', outcome: 'unknown' },
           {
@@ -2331,7 +2346,10 @@ describe('Authenticator', () => {
       );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
-      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(
+        userProfileGrant,
+        request
+      );
     });
 
     it('does not extend session for system API calls.', async () => {
@@ -2517,7 +2535,10 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(auditLogger.log).not.toHaveBeenCalled();
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
-      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(
+        userProfileGrant,
+        request
+      );
     });
 
     it('clears session if provider failed to authenticate system API request with 401 with active session.', async () => {

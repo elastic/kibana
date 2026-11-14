@@ -1,0 +1,104 @@
+# One multi-tenant Kibana behind the Cloud Proxy. deploy.sh fills in __KIBANA_IMAGE__ and __APP_ID__, and creates
+# the mt-kibana-config Secret (kibana.yml, tenants.yml and each tenant's CA) and one Ingress per project.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mt-kibana
+  labels:
+    # Makes the elastic-docker-registry ClusterExternalSecret copy the pull secret into this namespace.
+    common.k8s.elastic.co/type: system
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kibana
+  namespace: mt-kibana
+spec:
+  commonName: kibana
+  dnsNames: [kibana, kibana.mt-kibana.svc, kibana.mt-kibana.svc.cluster.local]
+  issuerRef: { kind: ClusterIssuer, name: ecp-issuer }
+  privateKey: { algorithm: ECDSA, size: 256 }
+  secretName: kibana-tls
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: mt-kibana
+  labels: &labels
+    app.kubernetes.io/name: mt-kibana
+    app.kubernetes.io/component: kibana
+    owner.k8s.elastic.co/division: engineering
+    owner.k8s.elastic.co/org: platform
+    owner.k8s.elastic.co/team: kibana-core
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: mt-kibana }
+  template:
+    metadata:
+      labels: *labels
+      annotations:
+        mt-kibana/config-hash: __CONFIG_HASH__
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - { key: infra.k8s.elastic.co/hardware-profile, operator: In, values: [general-purpose] }
+                  - { key: infra.k8s.elastic.co/schedulable-for-hardware-profile, operator: In, values: ['true'] }
+      imagePullSecrets:
+        - name: elastic-docker-registry
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: kibana
+          image: __KIBANA_IMAGE__
+          env:
+            - { name: NODE_OPTIONS, value: --max-old-space-size=2048 }
+          ports:
+            - { name: https, containerPort: 5601 }
+          readinessProbe:
+            httpGet:
+              scheme: HTTPS
+              port: 5601
+              path: /api/_elu_history?elasticInternalOrigin=true&apiVersion=1
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests: { cpu: '1', memory: 3Gi }
+            limits: { memory: 3Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: config, mountPath: /usr/share/kibana/config/kibana.yml, subPath: kibana.yml, readOnly: true }
+            - { name: config, mountPath: /usr/share/kibana/config/mt, readOnly: true }
+            - { name: tls, mountPath: /tls, readOnly: true }
+      volumes:
+        - name: config
+          secret: { secretName: mt-kibana-config }
+        - name: tls
+          secret: { secretName: kibana-tls }
+---
+# The proxy builds the multi-tenant route from this Service's EndpointSlice, which copies these labels.
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: mt-kibana
+  labels:
+    app.kubernetes.io/name: mt-kibana
+    app.kubernetes.io/component: kibana
+    owner.k8s.elastic.co/division: engineering
+    owner.k8s.elastic.co/org: platform
+    owner.k8s.elastic.co/team: kibana-core
+    k8s.elastic.co/application-id: __APP_ID__
+    k8s.elastic.co/is-multi-tenant-service: 'true'
+spec:
+  # component too: the ECK and init pods in this namespace must never become proxy endpoints.
+  selector: { app.kubernetes.io/name: mt-kibana, app.kubernetes.io/component: kibana }
+  ports:
+    - { name: https, port: 5601, targetPort: 5601 }

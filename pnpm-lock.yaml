@@ -1646,6 +1646,12 @@ importers:
       '@kbn/core-status-server-internal':
         specifier: workspace:*
         version: link:src/core/packages/status/server-internal
+      '@kbn/core-tenants-server':
+        specifier: workspace:*
+        version: link:src/core/packages/tenants/server
+      '@kbn/core-tenants-server-internal':
+        specifier: workspace:*
+        version: link:src/core/packages/tenants/server-internal
       '@kbn/core-test-helpers-deprecations-getters':
         specifier: workspace:*
         version: link:src/core/packages/test-helpers/deprecations-getters
@@ -7591,6 +7597,10 @@ importers:
   src/core/packages/status/server-internal: {}
 
   src/core/packages/status/server-mocks: {}
+
+  src/core/packages/tenants/server: {}
+
+  src/core/packages/tenants/server-internal: {}
 
   src/core/packages/test-helpers/deprecations-getters: {}
 

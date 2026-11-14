@@ -23,6 +23,7 @@ import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
+import type { InternalTenantsServiceSetup } from '@kbn/core-tenants-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
@@ -207,6 +208,7 @@ export interface HttpServerSetupOptions {
   config$: Observable<HttpConfig>;
   executionContext?: InternalExecutionContextSetup;
   userActivity?: InternalUserActivityServiceSetup;
+  tenants?: InternalTenantsServiceSetup;
 }
 
 /** @internal */
@@ -281,6 +283,7 @@ export class HttpServer {
     config$,
     executionContext,
     userActivity,
+    tenants,
   }: HttpServerSetupOptions): Promise<HttpServerSetup> {
     const config = await firstValueFrom(config$);
     this.config = config;
@@ -324,7 +327,13 @@ export class HttpServer {
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
-    this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
+    this.setupRequestStateAssignment(
+      config,
+      basePathService,
+      executionContext,
+      userActivity,
+      tenants
+    );
     this.server.ext('onPreHandler', createSelfCallPreHandler());
     this.server.ext('onPreResponse', createSelfCallPreResponseHandler(this.log.get('self-client')));
     this.setupConditionalCompression(config);
@@ -596,7 +605,8 @@ export class HttpServer {
     config: HttpConfig,
     basePathService: BasePath,
     executionContext?: InternalExecutionContextSetup,
-    userActivity?: InternalUserActivityServiceSetup
+    userActivity?: InternalUserActivityServiceSetup,
+    tenants?: InternalTenantsServiceSetup
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const app = request.app as KibanaRequestState;
@@ -647,6 +657,7 @@ export class HttpServer {
         throw Boom.notFound();
       }
 
+      const tenantId = tenants?.getTenantId(request.headers);
       const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
       const requestId = getRequestId(request, config.requestId);
       const parentContext = executionContext?.getParentContextFrom(request.headers);
@@ -697,6 +708,7 @@ export class HttpServer {
       app.requestId = requestId;
       app.requestUuid = uuidv4();
       app.spaceId = spaceId;
+      app.tenantId = tenantId;
       const serverBasePath = config.basePath ?? '';
       app.basePath = `${serverBasePath}${spaceBasePath}`;
       app.rewrittenUrl = request.url !== originalUrl ? originalUrl : undefined;

@@ -120,7 +120,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
 
     if (session?.state) {
       try {
-        await this.options.tokens.invalidate(session.state);
+        await this.options.getTokens(request).invalidate(session.state);
       } catch (err) {
         this.logger.debug(
           () => `Failed invalidating access and/or refresh tokens: ${getDetailedErrorMessage(err)}`
@@ -159,7 +159,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
     };
     try {
       // @ts-expect-error SecurityGetTokenResponse types refresh_token/authentication as optional
-      tokens = await this.options.client.asInternalUser.security.getToken({
+      tokens = await this.options.getInternalClient(request).security.getToken({
         grant_type: '_kerberos',
         kerberos_ticket: kerberosTicket,
       });
@@ -274,7 +274,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
 
     let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshTokenResult = await this.options.tokens.refresh(session.state.refreshToken);
+      refreshTokenResult = await this.options
+        .getTokens(request)
+        .refresh(session.state.refreshToken);
     } catch (err) {
       // If refresh token is no longer valid, let's try to renegotiate new tokens using SPNEGO. We
       // allow this because expired underlying token is an implementation detail and Kibana user

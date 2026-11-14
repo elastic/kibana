@@ -15,7 +15,7 @@ import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { KibanaRequest, RequestTiming } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   ElasticsearchClient,
@@ -61,6 +61,7 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
+import type { InternalTenantsServiceStart } from '@kbn/core-tenants-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
 import { registerRoutes } from './routes';
@@ -112,6 +113,7 @@ export interface SavedObjectsStartDeps {
   pluginsInitialized?: boolean;
   docLinks: DocLinksServiceStart;
   node: NodeInfo;
+  tenants: InternalTenantsServiceStart;
 }
 
 export class SavedObjectsService
@@ -253,6 +255,7 @@ export class SavedObjectsService
     pluginsInitialized = true,
     docLinks,
     node,
+    tenants,
   }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
@@ -338,7 +341,7 @@ export class SavedObjectsService
       esClient: ElasticsearchClient,
       includedHiddenTypes: string[] = [],
       extensions?: SavedObjectsExtensions,
-      serverTiming?: RequestTiming
+      request?: KibanaRequest
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
@@ -348,7 +351,8 @@ export class SavedObjectsService
         this.logger.get('repository'),
         includedHiddenTypes,
         extensions,
-        serverTiming
+        request?.serverTiming,
+        request?.tenantId
       );
     };
 
@@ -356,19 +360,20 @@ export class SavedObjectsService
       createInternalRepository: (
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions | undefined,
-        serverTiming?: RequestTiming
-      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions, serverTiming),
+        request?: KibanaRequest
+      ) =>
+        createRepository(
+          request ? client.asScoped(request).asInternalUser : client.asInternalUser,
+          includedHiddenTypes,
+          extensions,
+          request
+        ),
       createScopedRepository: (
         req: KibanaRequest,
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions
       ) =>
-        createRepository(
-          client.asScoped(req).asCurrentUser,
-          includedHiddenTypes,
-          extensions,
-          req.serverTiming
-        ),
+        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions, req),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
@@ -397,12 +402,13 @@ export class SavedObjectsService
 
     return {
       getScopedClient: clientProvider.getClient.bind(clientProvider),
-      getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [] } = {}) => {
+      getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [], request } = {}) => {
         const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
-        const extensions = this.getInternalExtensions(safeExcludedExtensions);
+        const extensions = this.getInternalExtensions(safeExcludedExtensions, request?.tenantId);
         const repository = repositoryFactory.createInternalRepository(
           includedHiddenTypes,
-          extensions
+          extensions,
+          request
         );
         return new SavedObjectsClient(repository);
       },
@@ -440,13 +446,17 @@ export class SavedObjectsService
         return [...indices];
       },
       getAllIndices: () => [...allIndices],
+      getTenantCrypto: tenants.getEncryptionCrypto,
       metrics: {
         migrationDuration,
       },
     };
   }
 
-  private getInternalExtensions(excludedExtensions: string[] = []): SavedObjectsExtensions {
+  private getInternalExtensions(
+    excludedExtensions: string[] = [],
+    tenantId?: KibanaRequest['tenantId']
+  ): SavedObjectsExtensions {
     // For internal clients, we automatically exclude security extension to avoid user scoping
     // and handle extensions that can work without a request context
     const createExt = <T>(
@@ -467,6 +477,7 @@ export class SavedObjectsService
         route: { settings: {} },
         url: { href: '/' },
         raw: { req: { url: '/' } },
+        tenantId,
       } as unknown as KibanaRequest;
 
       return extensionFactory({

@@ -49,6 +49,8 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-spaces-common'
   - '@kbn/apm-utils'
+  - '@kbn/core-tenants-server'
+  - '@kbn/core-tenants-server-internal'
 tags:
   - shared-server
   - package

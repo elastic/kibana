@@ -33,6 +33,7 @@ import {
 
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
+import type { InternalTenantsServiceSetup } from '@kbn/core-tenants-server-internal';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -50,6 +51,7 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
+import { TenantClients } from './multi_tenancy/tenant_clients';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -57,6 +59,7 @@ export interface SetupDeps {
   executionContext: InternalExecutionContextSetup;
   security: InternalSecurityServiceSetup;
   loggingSystem: Pick<ILoggingSystem, 'setGlobalContext'>;
+  tenants: InternalTenantsServiceSetup;
 }
 
 /** @internal */
@@ -78,6 +81,7 @@ export class ElasticsearchService
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
   private security?: InternalSecurityServiceSetup;
+  private tenantClients?: TenantClients;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -127,6 +131,15 @@ export class ElasticsearchService
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
     this.security = deps.security;
+
+    if (deps.tenants.enabled) {
+      this.tenantClients = new TenantClients({
+        tenants: deps.tenants,
+        createClient: (tenantId, clientConfig) =>
+          this.createClusterClient(`tenant-${tenantId}`, config, clientConfig),
+      });
+    }
+
     this.client = this.createClusterClient('data', config);
 
     // Both polls run until the service stops.
@@ -251,7 +264,8 @@ export class ElasticsearchService
     return {
       client: {
         asInternalUser: this.client!.asInternalUser,
-        asScoped: this.client!.asScoped.bind(this.client!),
+        asScoped: (request, opts) =>
+          (this.tenantClients?.resolve(request) ?? this.client!).asScoped(request, opts),
       },
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
@@ -265,6 +279,7 @@ export class ElasticsearchService
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
     this.stop$.next();
+    await this.tenantClients?.close();
     if (this.client) {
       await this.client.close();
     }

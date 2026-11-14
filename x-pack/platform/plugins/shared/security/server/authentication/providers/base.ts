@@ -6,6 +6,7 @@
  */
 
 import type {
+  ElasticsearchClient,
   Headers,
   HttpServiceSetup,
   IClusterClient,
@@ -36,8 +37,11 @@ export interface AuthenticationProviderOptions {
     additionalQueryStringParameters?: Array<[string, string]>
   ) => string;
   client: IClusterClient;
+  /** Returns the internal user's client of the request's tenant. */
+  getInternalClient: (request: KibanaRequest) => ElasticsearchClient;
   logger: Logger;
-  tokens: PublicMethodsOf<Tokens>;
+  /** Returns the token service of the request's tenant. */
+  getTokens: (request: KibanaRequest) => PublicMethodsOf<Tokens>;
   uiam?: UiamServicePublic;
   urls: {
     loggedOut: (request: KibanaRequest) => string;
@@ -184,7 +188,11 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
       await this.options.client
         // Use original request if no additional auth headers are provided, otherwise fall back to
         // the "fake" request with combined headers.
-        .asScoped(authHeaders ? { headers: { ...request.headers, ...authHeaders } } : request)
+        .asScoped(
+          authHeaders
+            ? { headers: { ...request.headers, ...authHeaders }, tenantId: request.tenantId }
+            : request
+        )
         .asCurrentUser.security.authenticate()
     );
   }

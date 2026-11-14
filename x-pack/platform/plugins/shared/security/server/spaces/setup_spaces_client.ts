@@ -38,7 +38,7 @@ export const setupSpacesClient = ({
 
   spacesClient.setClientRepositoryFactory((request, savedObjectsStart) => {
     if (authz.mode.useRbacForRequest(request)) {
-      return savedObjectsStart.createInternalRepository(['space']);
+      return savedObjectsStart.createInternalRepository(['space'], undefined, request);
     }
     return savedObjectsStart.createScopedRepository(request, ['space']);
   });

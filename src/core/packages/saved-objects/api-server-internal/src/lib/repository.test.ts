@@ -25,6 +25,7 @@ import {
 } from '../test_helpers/repository.test.common';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server';
+import type { TenantId } from '@kbn/core-tenants-server';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 describe('SavedObjectsRepository', () => {
@@ -93,6 +94,30 @@ describe('SavedObjectsRepository', () => {
         // @ts-expect-error type is ISavedObjectsRepository, but in reality is SavedObjectsRepository
         repository.extensions.spacesExtension
       );
+    });
+  });
+
+  describe('#getTenantId', () => {
+    it('returns undefined for the home cluster', () => {
+      expect(repository.getTenantId?.()).toBeUndefined();
+    });
+
+    it('returns the tenant it was created for, including when scoped to a namespace', () => {
+      const tenantId = 'project-b' as TenantId;
+      repository = SavedObjectsRepository.createRepository(
+        migrator,
+        registry,
+        '.kibana-test',
+        client,
+        logger,
+        [],
+        {},
+        undefined,
+        tenantId
+      );
+
+      expect(repository.getTenantId?.()).toBe(tenantId);
+      expect(repository.asScopedToNamespace('space-a').getTenantId?.()).toBe(tenantId);
     });
   });
 

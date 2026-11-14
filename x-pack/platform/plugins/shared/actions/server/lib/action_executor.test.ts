@@ -377,6 +377,29 @@ describe('Action Executor', () => {
     );
   });
 
+  test('decrypts the connector with a client for the request when one is available', async () => {
+    const requestEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+    requestEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    const getEncryptedSavedObjectsClient = jest
+      .fn()
+      .mockReturnValue(requestEncryptedSavedObjectsClient);
+    const executor = new ActionExecutor({ isESOCanEncrypt: true, connectorRateLimiter });
+    executor.initialize({ ...actionExecutorInitializationParams, getEncryptedSavedObjectsClient });
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await executor.execute(executeParams);
+
+    expect(getEncryptedSavedObjectsClient).toHaveBeenCalledWith(executeParams.request);
+    expect(requestEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'some-namespace' }
+    );
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+  });
+
   for (const executeUnsecure of [false, true]) {
     const label = executeUnsecure ? 'executes unsecured' : 'executes';
 

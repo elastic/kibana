@@ -151,9 +151,12 @@ export class UiSettingsService
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
       const isNamespaceScope = scope === 'namespace';
-      const namespace = isNamespaceScope
+      const space = isNamespaceScope
         ? savedObjectsClient.getCurrentNamespace() || 'default'
         : '__global__';
+      // Each tenant stores its own settings, so tenants must not share cache entries.
+      const tenantId = savedObjectsClient.getTenantId?.();
+      const namespace = tenantId ? `${tenantId}:${space}` : space;
 
       const options = {
         type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',

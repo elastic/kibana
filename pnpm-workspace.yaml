@@ -539,6 +539,8 @@ packages:
   - 'src/core/packages/status/server'
   - 'src/core/packages/status/server-internal'
   - 'src/core/packages/status/server-mocks'
+  - 'src/core/packages/tenants/server'
+  - 'src/core/packages/tenants/server-internal'
   - 'src/core/packages/test-helpers/deprecations-getters'
   - 'src/core/packages/test-helpers/http-setup-browser'
   - 'src/core/packages/test-helpers/so-type-serializer'

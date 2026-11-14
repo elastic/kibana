@@ -53,7 +53,11 @@ describe('setupSpacesClient', () => {
     repositoryFactory(request, savedObjects);
 
     expect(savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
-    expect(savedObjects.createInternalRepository).toHaveBeenCalledWith(['space']);
+    expect(savedObjects.createInternalRepository).toHaveBeenCalledWith(
+      ['space'],
+      undefined,
+      request
+    );
     expect(savedObjects.createScopedRepository).not.toHaveBeenCalled();
   });
 

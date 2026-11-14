@@ -19,6 +19,7 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
 }));
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
@@ -150,20 +151,22 @@ describe('WorkflowsPlugin', () => {
       ([contextName]: [string]) => contextName === 'workflowsManagement'
     )?.[1];
     expect(contextProvider).toBeDefined();
-    await contextProvider?.(
-      {} as never,
-      httpServerMock.createKibanaRequest(),
-      httpServerMock.createResponseFactory()
-    );
+    const request = Object.assign(httpServerMock.createKibanaRequest(), {
+      tenantId: 'project-b' as KibanaRequest['tenantId'],
+    });
+    await contextProvider?.({} as never, request, httpServerMock.createResponseFactory());
 
     expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledTimes(1);
+    expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({ request });
     const internalSavedObjectsClient =
       coreStart.savedObjects.getUnsafeInternalClient.mock.results[0].value;
     expect(internalSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith('marketing');
+    expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
     expect(ensureForSpace).toHaveBeenCalledWith(
       'marketing',
       internalSavedObjectsClient.asScopedToNamespace.mock.results[0].value,
-      coreStart.elasticsearch.client.asInternalUser
+      jest.mocked(coreStart.elasticsearch.client.asScoped).mock.results[0].value.asInternalUser,
+      'project-b'
     );
     expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
   });

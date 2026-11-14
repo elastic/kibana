@@ -33,10 +33,10 @@ export function defineBulkGetUserProfilesRoute({
     createLicensedRouteHandler(async (context, request, response) => {
       const userProfileServiceInternal = getUserProfileService();
       try {
-        const profiles = await userProfileServiceInternal.bulkGet({
-          uids: new Set(request.body.uids),
-          dataPath: request.body.dataPath,
-        });
+        const profiles = await userProfileServiceInternal.bulkGet(
+          { uids: new Set(request.body.uids), dataPath: request.body.dataPath },
+          request
+        );
         return response.ok({ body: profiles });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

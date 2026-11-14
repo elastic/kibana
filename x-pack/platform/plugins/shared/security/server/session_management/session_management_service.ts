@@ -8,15 +8,16 @@
 import type { Observable, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs';
 
-import type { ElasticsearchClient, HttpServiceSetup, Logger } from '@kbn/core/server';
+import type { HttpServiceSetup, IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
+  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
-import { Session } from './session';
+import { Session, type SessionOptions } from './session';
 import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';
 import type { ConfigType } from '../config';
@@ -30,7 +31,8 @@ export interface SessionManagementServiceSetupParams {
 }
 
 export interface SessionManagementServiceStartParams {
-  readonly elasticsearchClient: ElasticsearchClient;
+  readonly clusterClient: IClusterClient;
+  readonly getTenantCrypto?: SessionOptions['getTenantCrypto'];
   readonly kibanaIndexName: string;
   readonly online$: Observable<OnlineStatusRetryScheduler>;
   readonly taskManager: TaskManagerStartContract;
@@ -52,6 +54,7 @@ export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
 export class SessionManagementService {
   private statusSubscription?: Subscription;
   private sessionIndex!: SessionIndex;
+  private readonly tenantSessionIndices = new Map<string, SessionIndex>();
   private sessionCookie!: SessionCookie;
   private config!: ConfigType;
   private isCleanupTaskScheduled = false;
@@ -72,13 +75,19 @@ export class SessionManagementService {
     taskManager.registerTaskDefinitions({
       [SESSION_INDEX_CLEANUP_TASK_NAME]: {
         title: 'Cleanup expired or invalid user sessions',
-        createTaskRunner: (context) => ({ run: () => this.sessionIndex.cleanUp(context) }),
+        createTaskRunner: (context) => ({
+          run: async () => {
+            await this.cleanUpTenantSessionIndices(context);
+            return this.sessionIndex.cleanUp(context);
+          },
+        }),
       },
     });
   }
 
   start({
-    elasticsearchClient,
+    clusterClient,
+    getTenantCrypto,
     kibanaIndexName,
     online$,
     taskManager,
@@ -86,11 +95,32 @@ export class SessionManagementService {
   }: SessionManagementServiceStartParams): SessionManagementServiceStart {
     this.sessionIndex = new SessionIndex({
       config: this.config,
-      elasticsearchClient,
+      elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName,
       logger: this.logger.get('index'),
       auditLogger: audit.withoutRequest,
     });
+
+    // Sessions of a tenant are stored in that tenant's cluster. Its index is created on first use.
+    const getSessionIndex = (request: KibanaRequest) => {
+      const { tenantId } = request;
+      if (tenantId === undefined) {
+        return this.sessionIndex;
+      }
+
+      let sessionIndex = this.tenantSessionIndices.get(tenantId);
+      if (!sessionIndex) {
+        sessionIndex = new SessionIndex({
+          config: this.config,
+          elasticsearchClient: clusterClient.asScoped(request).asInternalUser,
+          kibanaIndexName,
+          logger: this.logger.get('index', tenantId),
+          auditLogger: audit.withoutRequest,
+        });
+        this.tenantSessionIndices.set(tenantId, sessionIndex);
+      }
+      return sessionIndex;
+    };
 
     this.statusSubscription = online$
       .pipe(
@@ -112,7 +142,8 @@ export class SessionManagementService {
       session: new Session({
         logger: this.logger,
         sessionCookie: this.sessionCookie,
-        sessionIndex: this.sessionIndex,
+        getSessionIndex,
+        getTenantCrypto,
         config: this.config,
         audit,
       }),
@@ -123,6 +154,23 @@ export class SessionManagementService {
     if (this.statusSubscription !== undefined) {
       this.statusSubscription.unsubscribe();
       this.statusSubscription = undefined;
+    }
+  }
+
+  /**
+   * Cleans up the session indices of tenants. Only tenants that this Kibana instance served since it started are
+   * known here, and each one gets its own task state so a missing shard in one tenant doesn't affect the others.
+   */
+  private async cleanUpTenantSessionIndices(context: RunContext) {
+    for (const [tenantId, sessionIndex] of this.tenantSessionIndices) {
+      try {
+        await sessionIndex.cleanUp({
+          ...context,
+          taskInstance: { ...context.taskInstance, state: {} },
+        });
+      } catch (err) {
+        this.logger.error(`Failed to clean up sessions of tenant [${tenantId}]: ${err.message}`);
+      }
     }
   }
 

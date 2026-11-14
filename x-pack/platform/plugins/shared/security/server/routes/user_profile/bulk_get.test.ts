@@ -92,10 +92,10 @@ describe('Bulk get profile routes', () => {
       ).resolves.toEqual(expect.objectContaining({ status: 500, payload: unhandledException }));
 
       expect(userProfileService.bulkGet).toHaveBeenCalledTimes(1);
-      expect(userProfileService.bulkGet).toHaveBeenCalledWith({
-        uids: new Set(['uid-1', 'uid-2']),
-        dataPath: '*',
-      });
+      expect(userProfileService.bulkGet).toHaveBeenCalledWith(
+        { uids: new Set(['uid-1', 'uid-2']), dataPath: '*' },
+        expect.anything()
+      );
     });
 
     it('returns user profiles.', async () => {
@@ -105,19 +105,18 @@ describe('Bulk get profile routes', () => {
       ];
       userProfileService.bulkGet.mockResolvedValue(userProfiles);
 
-      await expect(
-        routeHandler(
-          getMockContext(),
-          httpServerMock.createKibanaRequest({ body: { uids: ['uid-1', 'uid-2'], dataPath: '*' } }),
-          kibanaResponseFactory
-        )
-      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: userProfiles }));
+      const request = httpServerMock.createKibanaRequest({
+        body: { uids: ['uid-1', 'uid-2'], dataPath: '*' },
+      });
+      await expect(routeHandler(getMockContext(), request, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({ status: 200, payload: userProfiles })
+      );
 
       expect(userProfileService.bulkGet).toHaveBeenCalledTimes(1);
-      expect(userProfileService.bulkGet).toHaveBeenCalledWith({
-        uids: new Set(['uid-1', 'uid-2']),
-        dataPath: '*',
-      });
+      expect(userProfileService.bulkGet).toHaveBeenCalledWith(
+        { uids: new Set(['uid-1', 'uid-2']), dataPath: '*' },
+        request
+      );
     });
   });
 });

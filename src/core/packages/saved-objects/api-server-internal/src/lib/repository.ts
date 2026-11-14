@@ -9,6 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { RequestTiming } from '@kbn/core-http-server';
+import type { TenantId } from '@kbn/core-tenants-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   SavedObjectsBaseOptions,
@@ -119,6 +120,7 @@ export interface SavedObjectsRepositoryOptions {
   logger: Logger;
   extensions?: SavedObjectsExtensions;
   serverTiming?: RequestTiming;
+  tenantId?: TenantId;
 }
 
 /**
@@ -158,6 +160,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     includedHiddenTypes: string[] = [],
     extensions?: SavedObjectsExtensions,
     serverTiming?: RequestTiming,
+    tenantId?: TenantId,
     /** The injectedConstructor is only used for unit testing */
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
@@ -186,6 +189,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       logger,
       extensions,
       serverTiming,
+      tenantId,
     });
   }
 
@@ -700,6 +704,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   getCurrentNamespace(namespace?: string) {
     return this.helpers.common.getCurrentNamespace(namespace);
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.getTenantId}
+   */
+  getTenantId() {
+    return this.options.tenantId;
   }
 
   /**

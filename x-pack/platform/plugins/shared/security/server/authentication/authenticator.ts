@@ -263,14 +263,16 @@ export class Authenticator {
       'session_invalidation'
     );
 
+    const getInternalClient = (request: KibanaRequest) =>
+      this.options.clusterClient.asScoped(request).asInternalUser;
+    const tokensLogger = this.options.loggers.get('tokens');
     const providerCommonOptions = {
       client: this.options.clusterClient,
+      getInternalClient,
       basePath: this.options.basePath,
       getRequestOriginalURL: this.getRequestOriginalURL.bind(this),
-      tokens: new Tokens({
-        client: this.options.clusterClient.asInternalUser,
-        logger: this.options.loggers.get('tokens'),
-      }),
+      getTokens: (request: KibanaRequest) =>
+        new Tokens({ client: getInternalClient(request), logger: tokensLogger }),
       getServerBaseURL: this.options.getServerBaseURL,
       isElasticCloudDeployment: this.options.isElasticCloudDeployment,
       uiam: this.options.uiam,
@@ -928,7 +930,10 @@ export class Authenticator {
       const startTime = performance.now();
 
       userProfileId = (
-        await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
+        await this.options.userProfileService.activate(
+          authenticationResult.userProfileGrant,
+          request
+        )
       ).uid;
 
       const duration = performance.now() - startTime;

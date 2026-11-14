@@ -29,6 +29,7 @@ import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import type {
   SavedObjectsClientFactoryProvider,
@@ -124,6 +125,7 @@ describe('SavedObjectsService', () => {
       elasticsearch: elasticsearchServiceMock.createInternalStart(),
       docLinks: docLinksServiceMock.createStartContract(),
       node: nodeServiceMock.createInternalStartContract(),
+      tenants: { getEncryptionCrypto: jest.fn(), getSessionCrypto: jest.fn() },
     };
   };
 
@@ -706,6 +708,22 @@ describe('SavedObjectsService', () => {
           expect(includedHiddenTypes).toEqual([]);
         });
 
+        it("passes the request's tenant to the repository", async () => {
+          const coreContext = createCoreContext({ skipMigration: false });
+          const soService = new SavedObjectsService(coreContext);
+          await soService.setup(createSetupDeps());
+          const { createScopedRepository } = await soService.start(createStartDeps());
+
+          const req = httpServerMock.createKibanaRequest();
+          Object.defineProperty(req, 'tenantId', { value: 'project-b' });
+          createScopedRepository(req);
+
+          const [[, , , , , , , , tenantId]] = (
+            SavedObjectsRepository.createRepository as jest.Mocked<any>
+          ).mock.calls;
+          expect(tenantId).toBe('project-b');
+        });
+
         it('creates a repository including hidden types when specified', async () => {
           const coreContext = createCoreContext({ skipMigration: false });
           const soService = new SavedObjectsService(coreContext);
@@ -758,6 +776,27 @@ describe('SavedObjectsService', () => {
           ).mock.calls;
 
           expect(includedHiddenTypes).toEqual(['someHiddenType']);
+        });
+
+        it("uses the internal user of the request's tenant when a request is given", async () => {
+          const coreContext = createCoreContext({ skipMigration: false });
+          const soService = new SavedObjectsService(coreContext);
+          await soService.setup(createSetupDeps());
+          const coreStart = createStartDeps();
+          const { createInternalRepository } = await soService.start(coreStart);
+          const request = httpServerMock.createKibanaRequest();
+
+          createInternalRepository(['someHiddenType'], undefined, request);
+
+          const [[, , , client, , includedHiddenTypes, , serverTiming]] = (
+            SavedObjectsRepository.createRepository as jest.Mocked<any>
+          ).mock.calls;
+          const { asScoped } = coreStart.elasticsearch.client;
+          expect(asScoped).toHaveBeenCalledWith(request);
+          expect(client).toBe(jest.mocked(asScoped).mock.results[0].value.asInternalUser);
+          expect(client).not.toBe(coreStart.elasticsearch.client.asInternalUser);
+          expect(includedHiddenTypes).toEqual(['someHiddenType']);
+          expect(serverTiming).toBe(request.serverTiming);
         });
       });
 
@@ -906,6 +945,23 @@ describe('SavedObjectsService', () => {
           expect(lastCallIncludedHiddenTypes).toEqual(includedHiddenTypes);
         });
 
+        it("uses the internal user of the request's tenant when a request is given", async () => {
+          const coreContext = createCoreContext();
+          const soService = new SavedObjectsService(coreContext);
+          await soService.setup(createSetupDeps());
+          const coreStart = createStartDeps();
+          const startContract = await soService.start(coreStart);
+          const request = httpServerMock.createKibanaRequest();
+
+          startContract.getUnsafeInternalClient({ request });
+
+          const calls = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+          const [, , , client] = calls[calls.length - 1];
+          const { asScoped } = coreStart.elasticsearch.client;
+          expect(asScoped).toHaveBeenCalledWith(request);
+          expect(client).toBe(jest.mocked(asScoped).mock.results[0].value.asInternalUser);
+        });
+
         it('passes excludedExtensions to getInternalExtensions', async () => {
           const coreContext = createCoreContext();
           const soService = new SavedObjectsService(coreContext);
@@ -918,7 +974,25 @@ describe('SavedObjectsService', () => {
 
           getUnsafeInternalClient({ excludedExtensions });
 
-          expect(getInternalExtensionsSpy).toHaveBeenCalledWith(excludedExtensions);
+          expect(getInternalExtensionsSpy).toHaveBeenCalledWith(excludedExtensions, undefined);
+        });
+
+        it("gives the extensions the request's tenant when a request is given", async () => {
+          const coreContext = createCoreContext();
+          const soService = new SavedObjectsService(coreContext);
+          const setup = await soService.setup(createSetupDeps());
+          const encryptionExtensionFactory = jest.fn();
+          setup.setEncryptionExtension(encryptionExtensionFactory);
+          const { getUnsafeInternalClient } = await soService.start(createStartDeps());
+          const request = Object.assign(httpServerMock.createKibanaRequest(), {
+            tenantId: 'project-b' as KibanaRequest['tenantId'],
+          });
+
+          getUnsafeInternalClient({ request });
+
+          expect(encryptionExtensionFactory).toHaveBeenCalledWith(
+            expect.objectContaining({ request: expect.objectContaining({ tenantId: 'project-b' }) })
+          );
         });
 
         it('calls internal repository factory, not scoped repository factory', async () => {

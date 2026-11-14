@@ -35,12 +35,12 @@ import type {
   RenderingResponse,
 } from './types';
 import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
-import { AuthStatus } from '@kbn/core-http-server';
+import { AuthStatus, type KibanaRequest } from '@kbn/core-http-server';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
 import type { UserSettings } from '@kbn/core-user-settings-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
 const INJECTED_METADATA = {
@@ -715,6 +715,58 @@ describe('RenderingService', () => {
         await render(createKibanaRequest(), uiSettings, { isAnonymousPage: true });
 
         expect(mockRenderingSetupDeps.userSettings.getUserSettings).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('tenant project name', () => {
+      const { uiPlugins } = mockRenderingSetupDeps;
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+
+      beforeEach(() => {
+        uiSettings.client.getRegistered.mockReturnValue({});
+        uiPlugins.public.set('cloud', { id: 'cloud', requiredPlugins: [] });
+        uiPlugins.browserConfigs.set(
+          'cloud',
+          of({
+            browserConfig: { serverless: { project_id: 'home-id', project_name: 'Home' } },
+            exposedConfigKeys: {},
+          })
+        );
+      });
+
+      afterEach(() => {
+        uiPlugins.public.delete('cloud');
+        uiPlugins.browserConfigs.delete('cloud');
+      });
+
+      const renderCloudConfig = async (request: KibanaRequest) => {
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup({
+          ...mockRenderingSetupDeps,
+          getTenantProjectName: (tenantId) => (tenantId === 'project-b' ? 'Project B' : undefined),
+        });
+        const { body } = await render(request, uiSettings);
+        const data = JSON.parse(load(body)('kbn-injected-metadata').attr('data') ?? '""');
+        return data.uiPlugins.find(({ id }: { id: string }) => id === 'cloud').config;
+      };
+
+      it("uses the project name of the request's tenant", async () => {
+        const request = Object.assign(createKibanaRequest(), {
+          tenantId: 'project-b' as KibanaRequest['tenantId'],
+        });
+
+        await expect(renderCloudConfig(request)).resolves.toEqual({
+          serverless: { project_id: 'home-id', project_name: 'Project B' },
+        });
+      });
+
+      it('keeps the configured project name for requests without a tenant', async () => {
+        await expect(renderCloudConfig(createKibanaRequest())).resolves.toEqual({
+          serverless: { project_id: 'home-id', project_name: 'Home' },
+        });
       });
     });
 

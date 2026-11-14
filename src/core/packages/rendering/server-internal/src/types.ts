@@ -65,6 +65,8 @@ export interface RenderingSetupDeps {
   customBranding: InternalCustomBrandingSetup;
   userSettings: InternalUserSettingsServiceSetup;
   i18n: InternalI18nServiceSetup;
+  /** Returns the project name of a tenant, if it has one. */
+  getTenantProjectName?: (tenantId: NonNullable<KibanaRequest['tenantId']>) => string | undefined;
 }
 
 /** @internal */

@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import {
   coreMock,
+  httpServerMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
@@ -64,9 +65,51 @@ describe('#setupSavedObjects', () => {
     it('includes hiddenTypes when specified', async () => {
       setupContract({ includedHiddenTypes: ['hiddenType'] });
       await nextTick();
-      expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith([
-        'hiddenType',
+      expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith(
+        ['hiddenType'],
+        undefined,
+        undefined
+      );
+    });
+
+    it('builds the internal repository for the request when one is given', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      setupContract({ includedHiddenTypes: ['hiddenType'], request });
+      await nextTick();
+      expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith(
+        ['hiddenType'],
+        undefined,
+        request
+      );
+    });
+  });
+
+  describe('per-tenant encryption keys', () => {
+    it("decrypts with the service of the request's tenant when it has its own key", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const tenantService = encryptedSavedObjectsServiceMock.createWithTypes([
+        { type: 'known-type', attributesToEncrypt: new Set(['attrSecret']) },
       ]);
+      const tenantContract = setupSavedObjects({
+        service: mockEncryptedSavedObjectsService,
+        getTenantService: (tenantRequest) =>
+          tenantRequest === request ? tenantService : undefined,
+        savedObjects: coreSetupMock.savedObjects,
+        getStartServices: coreSetupMock.getStartServices,
+        logger: mockLogger,
+      });
+      mockSavedObjectsRepository.get.mockResolvedValue({
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrSecret: '*secret*' },
+        references: [],
+      });
+
+      await tenantContract({ request }).getDecryptedAsInternalUser('known-type', 'some-id');
+      await tenantContract().getDecryptedAsInternalUser('known-type', 'some-id');
+
+      expect(tenantService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
     });
   });
 

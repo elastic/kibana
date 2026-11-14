@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Crypto } from '@elastic/node-crypto';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SavedObjectsClientContract,
@@ -208,7 +209,10 @@ export interface SavedObjectsServiceStart {
    * ```
    */
   getUnsafeInternalClient: (
-    options?: SavedObjectsClientProviderOptions
+    options?: SavedObjectsClientProviderOptions & {
+      /** Picks the request's tenant when multi-tenancy is enabled. Its credentials are not used. */
+      request?: KibanaRequest;
+    }
   ) => SavedObjectsClientContract;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
@@ -234,10 +238,13 @@ export interface SavedObjectsServiceStart {
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
+   * @param request - Optional request the repository works for. Its credentials are not used: it picks the
+   * request's tenant when multi-tenancy is enabled.
    */
   createInternalRepository: (
     includedHiddenTypes?: string[],
-    extensions?: SavedObjectsExtensions
+    extensions?: SavedObjectsExtensions,
+    request?: KibanaRequest
   ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsSerializer | serializer} that is aware of all registered types.
@@ -282,4 +289,9 @@ export interface SavedObjectsServiceStart {
    * @remarks Only the indices effectively present in the current running environment will be returned.
    */
   getAllIndices: () => string[];
+  /**
+   * Returns the crypto for the saved objects encryption key of a tenant, such as `request.tenantId`.
+   * @internal
+   */
+  getTenantCrypto?: (tenantId: NonNullable<KibanaRequest['tenantId']>) => Crypto;
 }

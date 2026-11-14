@@ -52,6 +52,11 @@ describe('UserProfileService', () => {
       session: sessionMock.create(),
       getCurrentUser: jest.fn().mockReturnValue(null),
     };
+    // Without multi-tenancy, a request's internal user is the cluster's internal user.
+    mockStartParams.clusterClient.asScoped.mockReturnValue({
+      ...elasticsearchServiceMock.createScopedClusterClient(),
+      asInternalUser: mockStartParams.clusterClient.asInternalUser,
+    });
     mockAuthz = authorizationMock.create();
 
     userProfileService = new UserProfileService(logger);
@@ -270,6 +275,7 @@ describe('UserProfileService', () => {
         expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
         expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
 
+        expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
         expect(
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).toHaveBeenCalledTimes(1);
@@ -1573,6 +1579,24 @@ describe('UserProfileService', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
       expect(logger.error).toHaveBeenCalled();
     });
+
+    it("should update application data on the request's cluster when a request is given", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const tenantClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockStartParams.clusterClient.asScoped.mockReturnValue(tenantClient);
+
+      const startContract = userProfileService.start(mockStartParams);
+      await startContract.update('UID', { avatar: { imageUrl: 'boring.png' } }, request);
+
+      expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(request);
+      expect(tenantClient.asInternalUser.security.updateUserProfileData).toHaveBeenCalledWith({
+        uid: 'UID',
+        data: { kibana: { avatar: { imageUrl: 'boring.png' } } },
+      });
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.updateUserProfileData
+      ).not.toHaveBeenCalled();
+    });
   });
 
   describe('#activate', () => {
@@ -1640,6 +1664,17 @@ describe('UserProfileService', () => {
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledTimes(1);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
+    });
+
+    it("should activate user profile on the request's cluster when a request is given", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const startContract = userProfileService.start(mockStartParams);
+      await startContract.activate({ type: 'accessToken', accessToken: 'some-token' }, request);
+
+      expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(request);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
@@ -1911,6 +1946,24 @@ describe('UserProfileService', () => {
   });
 
   describe('#bulkGet', () => {
+    it("retrieves profiles from the request's cluster when a request is given", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const tenantClient = elasticsearchServiceMock.createScopedClusterClient();
+      tenantClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+        profiles: [userProfileMock.createWithSecurity({ uid: 'UID-1' })],
+      } as unknown as SecurityGetUserProfileResponse);
+      mockStartParams.clusterClient.asScoped.mockReturnValue(tenantClient);
+
+      const startContract = userProfileService.start(mockStartParams);
+      const profiles = await startContract.bulkGet({ uids: new Set(['UID-1']) }, request);
+
+      expect(profiles.map(({ uid }) => uid)).toEqual(['UID-1']);
+      expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(request);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).not.toHaveBeenCalled();
+    });
+
     it('properly parses and sorts returned profiles', async () => {
       mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
         profiles: [

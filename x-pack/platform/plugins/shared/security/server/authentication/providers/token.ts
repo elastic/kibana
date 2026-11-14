@@ -67,7 +67,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider<Prov
         access_token: accessToken,
         refresh_token: refreshToken,
         authentication: authenticationInfo,
-      } = await this.options.client.asInternalUser.security.getToken({
+      } = await this.options.getInternalClient(request).security.getToken({
         grant_type: 'password',
         username,
         password,
@@ -147,7 +147,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider<Prov
     this.logger.debug('Token-based logout has been initiated by the user.');
     if (session?.state) {
       try {
-        await this.options.tokens.invalidate(session.state);
+        await this.options.getTokens(request).invalidate(session.state);
       } catch (err) {
         this.logger.debug(
           `Failed invalidating user's access token: ${getDetailedErrorMessage(err)}`
@@ -204,7 +204,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider<Prov
 
     let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      refreshTokenResult = await this.options.getTokens(request).refresh(state.refreshToken);
     } catch (err) {
       // If refresh token is no longer valid, then we should clear session and redirect user to the
       // login page to re-authenticate, or fail if redirect isn't possible.

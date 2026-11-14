@@ -40,19 +40,22 @@ export class ExecutionDataViewsBootstrap {
   ensureForSpaceFireAndForget(
     spaceId: string,
     savedObjectsClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient
+    esClient: ElasticsearchClient,
+    tenantId?: string
   ): void {
-    const cached = this.bootstrappedSpaces.get(spaceId);
+    // Each tenant has its own cluster, so a space bootstrapped for one tenant isn't bootstrapped for another.
+    const key = tenantId ? `${tenantId}:${spaceId}` : spaceId;
+    const cached = this.bootstrappedSpaces.get(key);
     if (cached !== undefined && Date.now() - cached < BOOTSTRAP_CACHE_TTL_MS) {
       return;
     }
-    if (this.inFlight.has(spaceId)) {
+    if (this.inFlight.has(key)) {
       return;
     }
 
     const operation = this.ensureForSpace(spaceId, savedObjectsClient, esClient)
       .then(() => {
-        this.bootstrappedSpaces.set(spaceId, Date.now());
+        this.bootstrappedSpaces.set(key, Date.now());
       })
       .catch((err) => {
         this.logger.warn(
@@ -60,9 +63,9 @@ export class ExecutionDataViewsBootstrap {
         );
       })
       .finally(() => {
-        this.inFlight.delete(spaceId);
+        this.inFlight.delete(key);
       });
-    this.inFlight.set(spaceId, operation);
+    this.inFlight.set(key, operation);
   }
 
   private async ensureForSpace(

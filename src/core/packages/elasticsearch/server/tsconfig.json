@@ -15,7 +15,8 @@
     "@kbn/es-errors",
     "@kbn/core-http-server",
     "@kbn/core-spaces-common",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/core-tenants-server"
   ],
   "exclude": [
     "target/**/*",

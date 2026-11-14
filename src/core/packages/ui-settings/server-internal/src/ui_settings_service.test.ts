@@ -361,6 +361,26 @@ describe('uiSettings', () => {
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
       });
+
+      it('keys the cache by space', async () => {
+        await service.setup(setupDeps);
+        const start = await service.start();
+        savedObjectsClient.getCurrentNamespace.mockReturnValue('space-1');
+        start.asScopedToClient(savedObjectsClient);
+
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].namespace).toBe('space-1');
+      });
+
+      it("keys the cache by the saved objects client's tenant and space", async () => {
+        await service.setup(setupDeps);
+        const start = await service.start();
+        savedObjectsClient.getTenantId = jest.fn().mockReturnValue('project-b');
+        start.asScopedToClient(savedObjectsClient);
+
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].namespace).toBe(
+          'project-b:default'
+        );
+      });
     });
 
     describe('#asScopedToGlobalClient', () => {

@@ -349,6 +349,15 @@ describe('SavedObjectsClient', () => {
     expect(mockRepository.getCurrentNamespace).toHaveBeenCalledWith();
   });
 
+  test(`#getTenantId`, () => {
+    const client = new SavedObjectsClient({
+      ...mockRepository,
+      getTenantId: jest.fn().mockReturnValue('project-b'),
+    });
+
+    expect(client.getTenantId()).toEqual('project-b');
+  });
+
   test('#asScopedToNamespace', () => {
     const client = new SavedObjectsClient(mockRepository);
 

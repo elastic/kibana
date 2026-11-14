@@ -334,6 +334,8 @@ src/core/packages/status/common @elastic/kibana-core
 src/core/packages/status/server @elastic/kibana-core
 src/core/packages/status/server-internal @elastic/kibana-core
 src/core/packages/status/server-mocks @elastic/kibana-core
+src/core/packages/tenants/server @elastic/kibana-core
+src/core/packages/tenants/server-internal @elastic/kibana-core
 src/core/packages/test-helpers/deprecations-getters @elastic/kibana-core
 src/core/packages/test-helpers/http-setup-browser @elastic/kibana-core
 src/core/packages/test-helpers/so-type-serializer @elastic/kibana-core

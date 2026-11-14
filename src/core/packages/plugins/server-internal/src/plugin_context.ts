@@ -418,6 +418,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getIndexForType: deps.savedObjects.getIndexForType,
       getIndicesForTypes: deps.savedObjects.getIndicesForTypes,
       getAllIndices: deps.savedObjects.getAllIndices,
+      getTenantCrypto: deps.savedObjects.getTenantCrypto,
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,
@@ -440,6 +441,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       authc: deps.security.authc,
       audit: deps.security.audit,
       serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
+      getTenantSessionCrypto: deps.security.getTenantSessionCrypto,
     },
     userProfile: deps.userProfile,
     injection: {

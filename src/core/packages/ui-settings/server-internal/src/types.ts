@@ -42,6 +42,6 @@ export interface UiSettingsServiceOptions {
   log: Logger;
   /** Shared getUserProvided cache instance (injected from service) */
   sharedUserProvidedCache?: NamespacedCache<Record<string, any>>;
-  /** Namespace for cache keys (typically space ID) */
+  /** Namespace for cache keys (the space ID, prefixed with the tenant when the client targets one) */
   namespace: string;
 }

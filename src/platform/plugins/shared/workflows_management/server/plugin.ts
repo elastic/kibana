@@ -144,14 +144,16 @@ export class WorkflowsPlugin
         }
 
         const spaceId = spaces.getSpaceId(request);
+        // Both clients target the request's tenant, so the data views are created in its cluster.
         const savedObjectsClient = coreStart.savedObjects
-          .getUnsafeInternalClient()
+          .getUnsafeInternalClient({ request })
           .asScopedToNamespace(spaceId);
 
         this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
           spaceId,
           savedObjectsClient,
-          coreStart.elasticsearch.client.asInternalUser
+          coreStart.elasticsearch.client.asScoped(request).asInternalUser,
+          request.tenantId
         );
       }
     );

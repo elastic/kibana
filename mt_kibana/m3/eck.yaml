@@ -1,0 +1,40 @@
+# One small stateful Elasticsearch cluster per project, run by the devenv's ECK operator. eck.sh substitutes
+# __NAME__ (home, a, b) and applies it once per project. Data is on emptyDir: deleting a pod loses the cluster.
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: mt-es-__NAME__
+  namespace: mt-kibana
+spec:
+  version: 9.7.0-SNAPSHOT
+  nodeSets:
+    - name: default
+      count: 1
+      config:
+        node.store.allow_mmap: false
+      podTemplate:
+        metadata:
+          labels:
+            app.kubernetes.io/name: mt-kibana-es
+            app.kubernetes.io/component: elasticsearch
+            owner.k8s.elastic.co/division: engineering
+            owner.k8s.elastic.co/org: platform
+            owner.k8s.elastic.co/team: kibana-core
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - { key: infra.k8s.elastic.co/hardware-profile, operator: In, values: [general-purpose] }
+                      - { key: infra.k8s.elastic.co/schedulable-for-hardware-profile, operator: In, values: ['true'] }
+          imagePullSecrets:
+            - name: elastic-docker-registry
+          containers:
+            - name: elasticsearch
+              resources:
+                requests: { cpu: 500m, memory: 2Gi }
+                limits: { memory: 2Gi }
+          volumes:
+            - name: elasticsearch-data
+              emptyDir: {}

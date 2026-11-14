@@ -573,6 +573,8 @@
     "@kbn/core-status-common": "workspace:*",
     "@kbn/core-status-server": "workspace:*",
     "@kbn/core-status-server-internal": "workspace:*",
+    "@kbn/core-tenants-server": "workspace:*",
+    "@kbn/core-tenants-server-internal": "workspace:*",
     "@kbn/core-test-helpers-deprecations-getters": "workspace:*",
     "@kbn/core-test-helpers-http-setup-browser": "workspace:*",
     "@kbn/core-test-helpers-so-type-serializer": "workspace:*",

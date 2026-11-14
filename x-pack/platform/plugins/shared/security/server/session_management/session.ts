@@ -90,7 +90,8 @@ export interface SessionValue<TState = unknown> {
 
 export interface SessionOptions {
   readonly logger: Logger;
-  readonly sessionIndex: PublicMethodsOf<SessionIndex>;
+  readonly getSessionIndex: (request: KibanaRequest) => PublicMethodsOf<SessionIndex>;
+  readonly getTenantCrypto?: (tenantId: NonNullable<KibanaRequest['tenantId']>) => Crypto;
   readonly sessionCookie: PublicMethodsOf<SessionCookie>;
   readonly config: Pick<ConfigType, 'encryptionKey' | 'session'>;
   readonly audit: AuditServiceSetup;
@@ -196,7 +197,8 @@ export class Session {
       return { error: new SessionExpiredError(reason), value: null };
     }
 
-    const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
+    const sessionIndex = this.options.getSessionIndex(request);
+    const sessionIndexValue = await sessionIndex.get(sessionCookieValue.sid);
     if (!sessionIndexValue) {
       sessionLogger.debug(
         'Session value is not available in the index, session cookie will be invalidated.'
@@ -208,7 +210,10 @@ export class Session {
     let decryptedContent: SessionValueContentToEncrypt;
     try {
       decryptedContent = JSON.parse(
-        (await this.crypto.decrypt(sessionIndexValue.content, sessionCookieValue.aad)) as string
+        (await this.getCrypto(request).decrypt(
+          sessionIndexValue.content,
+          sessionCookieValue.aad
+        )) as string
       );
     } catch (err) {
       sessionLogger.warn(
@@ -221,8 +226,9 @@ export class Session {
 
     // The only reason why we check if the session is within the concurrent session limit _after_ decryption
     // is to record decrypted username and profile id in the audit logs.
-    const isSessionWithinConcurrentSessionLimit =
-      await this.options.sessionIndex.isWithinConcurrentSessionLimit(sessionIndexValue);
+    const isSessionWithinConcurrentSessionLimit = await sessionIndex.isWithinConcurrentSessionLimit(
+      sessionIndexValue
+    );
     if (!isSessionWithinConcurrentSessionLimit) {
       this.options.audit.asScoped(request).log(
         userSessionConcurrentLimitLogoutEvent({
@@ -279,13 +285,16 @@ export class Session {
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
-    const sessionIndexValue = await this.options.sessionIndex.create({
+    const sessionIndexValue = await this.options.getSessionIndex(request).create({
       ...publicSessionValue,
       ...sessionExpirationInfo,
       sid,
       createdAt: Date.now(),
       usernameHash: username && Session.getUsernameHash(username),
-      content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
+      content: await this.getCrypto(request).encrypt(
+        JSON.stringify({ username, userProfileId, state }),
+        aad
+      ),
     });
 
     await this.options.sessionCookie.set(
@@ -337,12 +346,12 @@ export class Session {
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
-    const sessionIndexValue = await this.options.sessionIndex.update({
+    const sessionIndexValue = await this.options.getSessionIndex(request).update({
       ...sessionValue.metadata.index,
       ...publicSessionInfo,
       ...sessionExpirationInfo,
       usernameHash: username && Session.getUsernameHash(username),
-      content: await this.crypto.encrypt(
+      content: await this.getCrypto(request).encrypt(
         JSON.stringify({ username, userProfileId, state }),
         sessionCookieValue.aad
       ),
@@ -446,7 +455,7 @@ export class Session {
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
     if (updateSessionIndex) {
-      const sessionIndexValue = await this.options.sessionIndex.update({
+      const sessionIndexValue = await this.options.getSessionIndex(request).update({
         ...sessionValue.metadata.index,
         ...sessionExpirationInfo,
       });
@@ -518,9 +527,19 @@ export class Session {
         : filter;
     }
 
-    const invalidatedCount = await this.options.sessionIndex.invalidate(invalidateIndexValueFilter);
+    const invalidatedCount = await this.options
+      .getSessionIndex(request)
+      .invalidate(invalidateIndexValueFilter);
     sessionLogger.debug(`Successfully invalidated ${invalidatedCount} session(s).`);
     return invalidatedCount;
+  }
+
+  private getCrypto({ tenantId }: KibanaRequest) {
+    const { getTenantCrypto } = this.options;
+    if (tenantId === undefined || !getTenantCrypto) {
+      return this.crypto;
+    }
+    return getTenantCrypto(tenantId);
   }
 
   private calculateExpiry(

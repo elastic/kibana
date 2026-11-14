@@ -326,7 +326,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
         const redirect = isIdPInitiatedSLORequest
           ? await this.performIdPInitiatedSingleLogout(request, this.realm || state?.realm)
           : state
-          ? await this.performUserInitiatedSingleLogout(state.accessToken!, state.refreshToken!)
+          ? await this.performUserInitiatedSingleLogout(
+              request,
+              state.accessToken!,
+              state.refreshToken!
+            )
           : // Once Elasticsearch can consume logout response we'll be sending it here. See https://github.com/elastic/elasticsearch/issues/40901
             null;
 
@@ -419,7 +423,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
       // user usually doesn't have `cluster:admin/xpack/security/saml/authenticate`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      result = (await this.options.client.asInternalUser.transport.request({
+      result = (await this.options.getInternalClient(request).transport.request({
         method: 'POST',
         path: '/_security/saml/authenticate',
         body: {
@@ -596,7 +600,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
     // Now let's invalidate tokens from the existing session.
     try {
       this.logger.debug('Perform IdP initiated local logout.');
-      await this.options.tokens.invalidate({
+      await this.options.getTokens(request).invalidate({
         accessToken: existingState.accessToken!,
         refreshToken: existingState.refreshToken!,
       });
@@ -685,7 +689,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
           authenticationInfo: uiamAuthenticatedUser,
         };
       } else {
-        refreshTokenResult = await this.options.tokens.refresh(session.state.refreshToken);
+        refreshTokenResult = await this.options
+          .getTokens(request)
+          .refresh(session.state.refreshToken);
       }
     } catch (err) {
       // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
@@ -756,7 +762,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
         id: requestId,
         redirect,
         realm,
-      } = (await this.options.client.asInternalUser.transport.request({
+      } = (await this.options.getInternalClient(request).transport.request({
         method: 'POST',
         path: '/_security/saml/prepare',
         body: preparePayload,
@@ -826,14 +832,18 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
    * @param accessToken Access token to invalidate.
    * @param refreshToken Refresh token to invalidate.
    */
-  private async performUserInitiatedSingleLogout(accessToken: string, refreshToken: string) {
+  private async performUserInitiatedSingleLogout(
+    request: KibanaRequest,
+    accessToken: string,
+    refreshToken: string
+  ) {
     this.logger.debug('Single logout has been initiated by the user.');
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/logout`.
     // We can replace generic `transport.request` with a dedicated API method call once
     // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-    const { redirect } = (await this.options.client.asInternalUser.transport.request({
+    const { redirect } = (await this.options.getInternalClient(request).transport.request({
       method: 'POST',
       path: '/_security/saml/logout',
       body: { token: accessToken, refresh_token: refreshToken },
@@ -860,7 +870,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
     // We can replace generic `transport.request` with a dedicated API method call once
     // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-    const { redirect } = (await this.options.client.asInternalUser.transport.request({
+    const { redirect } = (await this.options.getInternalClient(request).transport.request({
       method: 'POST',
       path: '/_security/saml/invalidate',
       // Elasticsearch expects `query_string` without leading `?`, so we should strip it with `slice`.

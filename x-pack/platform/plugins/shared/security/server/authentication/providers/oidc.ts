@@ -259,7 +259,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
       // user usually doesn't have `cluster:admin/xpack/security/oidc/authenticate`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      result = (await this.options.client.asInternalUser.transport.request({
+      result = (await this.options.getInternalClient(request).transport.request({
         method: 'POST',
         path: '/_security/oidc/authenticate',
         body: {
@@ -307,8 +307,9 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      const { state, nonce, realm, redirect } =
-        (await this.options.client.asInternalUser.transport.request({
+      const { state, nonce, realm, redirect } = (await this.options
+        .getInternalClient(request)
+        .transport.request({
           method: 'POST',
           path: '/_security/oidc/prepare',
           body: params,
@@ -383,7 +384,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
 
     let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      refreshTokenResult = await this.options.getTokens(request).refresh(state.refreshToken);
     } catch (err) {
       // When user has neither valid access nor refresh token, the only way to resolve this issue is to redirect
       // user to OpenID Connect provider, re-initiate the authentication flow and get a new access/refresh token
@@ -440,7 +441,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
         // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
         // We can replace generic `transport.request` with a dedicated API method call once
         // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-        const { redirect } = (await this.options.client.asInternalUser.transport.request({
+        const { redirect } = (await this.options.getInternalClient(request).transport.request({
           method: 'POST',
           path: '/_security/oidc/logout',
           body: {

@@ -1,0 +1,301 @@
+<title>Multi-tenant Kibana M3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+<style>
+/* Layout: one reading column; evidence sits in terminal-style blocks that scroll sideways on their own. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5b6577;
+  --rule: #dde1e8;
+  --accent: #0b6e79;
+  --term-bg: #18202c;
+  --term-fg: #d7dde8;
+  --term-dim: #8a95a8;
+  --ok: #1f8a4c;
+  --ok-term: #5ad08a;
+  --warn: #9a5b00;
+  --warn-bg: #fff4e0;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161e; --surface: #171e28; --fg: #e3e8f0; --muted: #98a3b5; --rule: #2a3442;
+    --accent: #4fc3cf; --term-bg: #0b1017; --term-fg: #d7dde8; --term-dim: #7f8aa0;
+    --ok: #5ad08a; --ok-term: #5ad08a; --warn: #f0b45a; --warn-bg: #2a2111; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161e; --surface: #171e28; --fg: #e3e8f0; --muted: #98a3b5; --rule: #2a3442;
+  --accent: #4fc3cf; --term-bg: #0b1017; --term-fg: #d7dde8; --term-dim: #7f8aa0;
+  --ok: #5ad08a; --ok-term: #5ad08a; --warn: #f0b45a; --warn-bg: #2a2111; color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg); font: 16px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 80px;
+}
+main { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: 2.6rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.6rem; padding-top: 12px; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.15rem; font-family: var(--font-body); }
+p, ul, ol { margin: 0; max-width: 68ch; }
+ul, ol { padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 0 4px; overflow-wrap: anywhere; }
+.eyebrow { font: 500 0.78rem/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 1.15rem; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 24px; font: 0.85rem/1.4 var(--font-mono); color: var(--muted); }
+.verdict { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding: 16px 20px; background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--ok); border-radius: 6px; }
+.verdict strong { font: 600 1.5rem/1 var(--font-display); color: var(--ok); font-variant-numeric: tabular-nums; }
+.term { background: var(--term-bg); color: var(--term-fg); border-radius: 6px; padding: 14px 16px; overflow-x: auto; font: 0.8rem/1.55 var(--font-mono); margin: 0; white-space: pre; }
+.term .c { color: var(--term-dim); }
+.term .ok { color: var(--ok-term); }
+.claim { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.claim h3 { display: flex; gap: 10px; align-items: baseline; }
+.claim h3 .n { font-family: var(--font-mono); color: var(--accent); font-size: 0.95rem; }
+.how { color: var(--muted); font-size: 0.95rem; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 500 0.75rem/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+.tag { font: 500 0.72rem/1 var(--font-mono); padding: 3px 6px; border-radius: 3px; white-space: nowrap; }
+.tag.real { color: var(--ok); border: 1px solid var(--ok); }
+.tag.stand { color: var(--warn); border: 1px solid var(--warn); }
+.note { background: var(--warn-bg); border-radius: 6px; padding: 12px 16px; font-size: 0.95rem; }
+.steps { counter-reset: s; list-style: none; padding: 0; gap: 18px; }
+.steps > li { counter-increment: s; display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 4px 8px; }
+.steps > li::before { content: counter(s); font: 600 1.1rem/1.5 var(--font-display); color: var(--accent); }
+.steps > li > div { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.diagram { overflow-x: auto; }
+.diagram svg { display: block; min-width: 640px; width: 100%; height: auto; }
+.diagram .box { fill: var(--surface); stroke: var(--rule); stroke-width: 1.5; }
+.diagram .hl { stroke: var(--accent); }
+.diagram text { fill: var(--fg); font-family: var(--font-body); font-size: 13px; }
+.diagram .sub { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+.diagram .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.diagram .arrow { fill: var(--muted); }
+@media (max-width: 520px) { h1 { font-size: 2rem; } body { padding-block: 24px 56px; } }
+</style>
+
+<main>
+<header style="display:flex;flex-direction:column;gap:14px">
+  <span class="eyebrow">Multi-tenant Kibana hackathon · Milestone 3</span>
+  <h1>One Kibana, three projects, behind the real Cloud Proxy</h1>
+  <p class="lede">A single Kibana process runs in a dev MKI cluster behind the serverless Cloud Proxy. Each project's hostname reaches that one Kibana, and Kibana sends the request to that project's Elasticsearch. Every claim below is checked from both sides: what Kibana returns through the proxy, and what each Elasticsearch cluster says when asked directly.</p>
+  <div class="meta">
+    <span>Run 2026-11-04</span>
+    <span>devenv briando-devenv-012164 (eu-west-1)</span>
+    <span>branch multi-tenant-kibana-hackathon @ 26d59c7012d5</span>
+  </div>
+  <div class="verdict"><strong>16 / 16</strong><span>demo checks passed (marker <code>mt-demo-011115</code>), and 9 / 9 in the separate smoke test.</span></div>
+</header>
+
+<section>
+  <h2>What runs where</h2>
+  <div class="diagram" role="img" aria-label="Client sends a request for a project hostname to the Cloud Proxy load balancer. The proxy matches the Host header to a per-project route, sets X-Elastic-Project-Id, and forwards to the single Kibana pod. Kibana picks the tenant client for that project id and calls mt-es-home, mt-es-a or mt-es-b.">
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <rect class="box" x="10" y="120" width="130" height="62" rx="6"/>
+      <text x="22" y="146">Client (curl)</text>
+      <text class="sub" x="22" y="166">Host: &lt;id&gt;.mtkb…</text>
+      <rect class="box" x="180" y="100" width="170" height="102" rx="6"/>
+      <text x="192" y="126">Cloud Proxy</text>
+      <text class="sub" x="192" y="146">route by Host header</text>
+      <text class="sub" x="192" y="164">sets X-Elastic-Project-Id</text>
+      <text class="sub" x="192" y="182">404 for unknown ids</text>
+      <rect class="box hl" x="390" y="100" width="160" height="102" rx="6"/>
+      <text x="402" y="126">Kibana (1 pod)</text>
+      <text class="sub" x="402" y="146">tenants.yml</text>
+      <text class="sub" x="402" y="164">project id → client</text>
+      <text class="sub" x="402" y="182">per-project SO + keys</text>
+      <rect class="box" x="600" y="30" width="150" height="54" rx="6"/>
+      <text x="612" y="54">mt-es-home</text>
+      <text class="sub" x="612" y="72">ECK, 9.7.0-SNAPSHOT</text>
+      <rect class="box" x="600" y="124" width="150" height="54" rx="6"/>
+      <text x="612" y="148">mt-es-a</text>
+      <text class="sub" x="612" y="166">ECK, 9.7.0-SNAPSHOT</text>
+      <rect class="box" x="600" y="218" width="150" height="54" rx="6"/>
+      <text x="612" y="242">mt-es-b</text>
+      <text class="sub" x="612" y="260">ECK, 9.7.0-SNAPSHOT</text>
+      <path class="edge" d="M140,151 L178,151" marker-end="url(#ah)"/>
+      <path class="edge" d="M350,151 L388,151" marker-end="url(#ah)"/>
+      <path class="edge" d="M550,140 C575,120 575,60 598,57" marker-end="url(#ah)"/>
+      <path class="edge" d="M550,151 L598,151" marker-end="url(#ah)"/>
+      <path class="edge" d="M550,162 C575,182 575,242 598,245" marker-end="url(#ah)"/>
+      <text class="sub" x="180" y="232">one Ingress per project id</text>
+      <text class="sub" x="180" y="250">→ Service mt-kibana/kibana</text>
+      <text class="sub" x="390" y="232">namespace mt-kibana</text>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <h2>Methodology</h2>
+  <p>The goal was to put M1/M2's multi-tenant Kibana on the real request path: client hostname → Cloud Proxy → one Kibana Deployment → that project's Elasticsearch. The parts that decide routing and isolation are the real production components. Parts that the devenv couldn't provide are stand-ins, and the table says which is which.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Piece</th><th></th><th>How it's set up</th></tr></thead>
+      <tbody>
+        <tr><td>Cloud Proxy</td><td><span class="tag real">real</span></td><td>The devenv's own serverless <code>ingress-proxy</code>, unmodified.</td></tr>
+        <tr><td>Multi-tenant route</td><td><span class="tag real">real mechanism</span></td><td>A Service labeled <code>is-multi-tenant-service</code> and <code>application-id: mtkb</code>, which is how the proxy discovers multi-tenant backends (read from <code>elastic/proxy</code>).</td></tr>
+        <tr><td>Per-project Ingress</td><td><span class="tag stand">hand-written</span></td><td>regional-network-controller normally writes these from an AppNetwork. The proxy only reads their annotations, so <code>deploy.sh</code> writes them.</td></tr>
+        <tr><td>Kibana</td><td><span class="tag real">PR image</span></td><td>The branch built by CI (<code>kibana-serverless-pr:pr-302955-26d59c7012d5</code>), one pod, run in stateful mode like M1.</td></tr>
+        <tr><td>Elasticsearch</td><td><span class="tag stand">stand-in</span></td><td>Three single-node stateful clusters run by the devenv's ECK operator, with made-up 32-hex project ids. Real serverless projects couldn't be used (see below).</td></tr>
+        <tr><td>Credentials</td><td><span class="tag real">real pattern</span></td><td>Kibana uses each cluster's <code>elastic/kibana</code> service-account token, the same kind project-controller gives a real project's Kibana. TLS to every cluster is verified against its own CA.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>How each claim is verified</h3>
+  <ul>
+    <li><strong>Two independent views.</strong> Every result Kibana returns through the proxy is compared with what the Elasticsearch cluster reports when queried directly from inside its own pod (<code>kubectl exec</code>), which bypasses both the proxy and Kibana.</li>
+    <li><strong>Kibana's own record.</strong> Kibana's per-tenant query logger (<code>elasticsearch.query.tenant-&lt;projectId&gt;</code>) is on, so its log names the tenant client behind every call.</li>
+    <li><strong>Fresh data each run.</strong> The demo writes a new marker (<code>mt-demo-HHMMSS</code>) every time, so a pass can't come from an earlier run's data.</li>
+    <li><strong>Negative cases.</strong> A spoofed project header, another project's credentials, and an unknown project id must all fail in the expected way.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Proof</h2>
+  <p>All output below is unedited from <code>mt_kibana/m3/demo.sh</code> (run 3, marker <code>mt-demo-011115</code>), except where lines were trimmed for length. Hostnames end in <code>.mtkb.eu-west-1.aws.dev.elastic.cloud</code>.</p>
+
+  <div class="claim">
+    <h3><span class="n">1</span>The proxy sends every project to the one Kibana pod</h3>
+    <pre class="term"><span class="c">$ kubectl -n mt-kibana get ingress   # project id → Service, read by the Cloud Proxy</span>
+6c710c21315bfc5807669f454d727731  mt-kibana-m3-home  → mt-kibana/kibana
+6d71e05d8849b7bdeffc8f7191b68de7  mt-kibana-m3-b     → mt-kibana/kibana
+acde0ccbefcaf042cf5853d08ce9806a  mt-kibana-m3-a     → mt-kibana/kibana
+<span class="c">$ kubectl -n mt-kibana get endpointslices -l kubernetes.io/service-name=kibana</span>
+kibana-74bff77c7b-mlz2h
+<span class="ok">✓ the proxy route has exactly one backend, the Kibana pod</span></pre>
+  </div>
+
+  <div class="claim">
+    <h3><span class="n">2</span>Each hostname reaches its own cluster</h3>
+    <p class="how">Left: <code>cluster_uuid</code> from Kibana's <code>/api/stats</code> through the proxy. Right: the same field read directly from each cluster.</p>
+    <pre class="term">6c710c21…  Kibana: 5xVc-_ACQOG6WiRo943ZNA   ES mt-es-home: 5xVc-_ACQOG6WiRo943ZNA  <span class="ok">✓</span>
+acde0ccb…  Kibana: rV0OX2JvRfqKI7Afqw1ToQ   ES mt-es-a:    rV0OX2JvRfqKI7Afqw1ToQ  <span class="ok">✓</span>
+6d71e05d…  Kibana: 8D5EblzARI6yHbsso2LZIg   ES mt-es-b:    8D5EblzARI6yHbsso2LZIg  <span class="ok">✓</span></pre>
+  </div>
+
+  <div class="claim">
+    <h3><span class="n">3</span>Data written through one project lands only in that project</h3>
+    <pre class="term"><span class="c">$ PUT /mt-demo-011115/_doc/1   # Kibana console, on mt-a's hostname</span>
+{"_index":"mt-demo-011115","result":"created"}
+<span class="c"># asked directly, bypassing Kibana and the proxy:</span>
+ES mt-es-home: mt-demo-011115 docs → no such index
+ES mt-es-a:    mt-demo-011115 docs → 1
+ES mt-es-b:    mt-demo-011115 docs → no such index
+<span class="c">$ GET /mt-demo-011115/_doc/1   # Kibana console, on each hostname</span>
+via mt-a: {"found":true}
+via mt-b: {"error":"index_not_found_exception"}</pre>
+  </div>
+
+  <div class="claim">
+    <h3><span class="n">4</span>Saved objects are per project</h3>
+    <p class="how">A data view created through mt-a's hostname is stored in mt-es-a's <code>.kibana_analytics</code> index and doesn't show up in the other projects. This exercises M2's per-project saved objects repository.</p>
+    <pre class="term"><span class="c">$ POST /api/data_views/data_view   # on mt-a's hostname</span>
+{"id":"b5b015c8-1b5c-4c86-8f30-cf05f0b2986b","name":"mt-demo-011115"}
+GET /api/data_views via mt-a:    1 match   <span class="ok">✓</span>
+GET /api/data_views via mt-b:    0 match   <span class="ok">✓</span>
+GET /api/data_views via mt-home: 0 match   <span class="ok">✓</span>
+<span class="ok">✓ stored in mt-es-a's .kibana* indices</span>
+<span class="ok">✓ not in mt-es-b's .kibana* indices</span></pre>
+  </div>
+
+  <div class="claim">
+    <h3><span class="n">5</span>Kibana's log names the tenant client behind each call</h3>
+    <pre class="term"><span class="c">$ kubectl -n mt-kibana logs kibana-74bff77c7b-mlz2h   # ES calls mentioning mt-demo-011115</span>
+tenant-acde0ccbefcaf042cf5853d08ce9806a  {"from":0,"_source":["index-pattern.name","namespace",…
+tenant-acde0ccbefcaf042cf5853d08ce9806a  {"index-pattern":{"title":"mt-demo-011115*",…
+tenant-acde0ccbefcaf042cf5853d08ce9806a  POST /mt-demo-011115*/_field_caps?ignore_unavailable=true…
+<span class="ok">✓ every logged call for mt-demo-011115 used mt-a's client</span></pre>
+  </div>
+
+  <div class="claim">
+    <h3><span class="n">6</span>The proxy owns the project header; clients can't choose a project</h3>
+    <p class="how">An echo server behind the same kind of route shows what the proxy actually forwards. The client sent <code>X-Elastic-Project-Id: ffff…</code> and <code>X-Elastic-Organization-Id: 999</code>.</p>
+    <pre class="term"><span class="c">$ curl -H 'Host: 0000000000000000000000000000beef.mtkb…' \
+       -H 'X-Elastic-Project-Id: ffffffffffffffffffffffffffffffff' -H 'X-Elastic-Organization-Id: 999' …/hello</span>
+host:                       192.168.41.167:8443
+x-elastic-project-id:       0000000000000000000000000000beef   <span class="c"># overwritten by the proxy</span>
+x-elastic-organization-id:  10                                 <span class="c"># overwritten by the proxy</span>
+x-forwarded-host:           0000000000000000000000000000beef.mtkb.eu-west-1.aws.dev.elastic.cloud</pre>
+    <pre class="term"><span class="c"># and against Kibana (demo step 6):</span>
+<span class="ok">✓ spoofed x-elastic-project-id: &lt;mt-b's id&gt; on mt-a's hostname still reaches mt-es-a</span>
+<span class="ok">✓ mt-a's credentials on mt-b's hostname → 401</span>
+<span class="c">$ curl …ffffffffffffffffffffffffffffffff.mtkb…/api/status</span>
+{"ok":false,"message":"Unknown resource."}
+<span class="ok">✓ unknown project id: the proxy answers 404, Kibana never sees it</span></pre>
+  </div>
+</section>
+
+<section>
+  <h2>Repeat it or demo it</h2>
+  <p>The scripts live in <code>mt_kibana/m3/</code> on the hackathon branch. Run everything from the repo root. A fresh setup takes about 2 hours, almost all of it waiting for the devenv; once it exists, the clusters and Kibana take about 15 minutes.</p>
+  <ol class="steps">
+    <li><div>
+      <strong>Prerequisites.</strong> <code>devctl</code> installed and logged in to <code>docker.elastic.co</code>. Connect the Aviatrix VPN, then log in to Teleport. <code>preflight.sh</code> checks every tool and login and says how to fix anything missing.
+      <pre class="term">tsh login --proxy=teleport-proxy.staging.getin.cloud --auth=okta
+mt_kibana/m3/preflight.sh</pre>
+    </div></li>
+    <li><div>
+      <strong>Get a devenv.</strong> Use a direct one: a pooled devenv came with a broken CosmosDB account. It only needs the Cloud Proxy and the ECK operator, not working serverless projects.
+      <pre class="term">devctl create --direct --cosmos-rbac --follow
+devctl update-kubeconfig &lt;name&gt; &amp;&amp; kubectl config use-context &lt;name&gt;-&lt;suffix&gt;</pre>
+    </div></li>
+    <li><div>
+      <strong>Create the three clusters.</strong> Waits for green, creates an <code>elastic/kibana</code> token in each, and records ids, tokens, <code>cluster_uuid</code>s and CAs in <code>.es/mt/m3/</code> (gitignored).
+      <pre class="term">mt_kibana/m3/eck.sh create</pre>
+    </div></li>
+    <li><div>
+      <strong>Deploy Kibana.</strong> Initializes tenants a and b with a one-off single-tenant Kibana Job (like M1's <code>init_tenant.sh</code>), then deploys the multi-tenant Kibana, its Service and one Ingress per project.
+      <pre class="term">export KIBANA_IMAGE=docker.elastic.co/kibana-ci/kibana-serverless-pr:pr-302955-26d59c7012d5
+mt_kibana/m3/deploy.sh</pre>
+    </div></li>
+    <li><div>
+      <strong>Prove it.</strong> <code>smoke.sh</code> is the short pass/fail test. <code>demo.sh</code> is the narrated version above; with <code>DEMO_PAUSE=1</code> it waits for Enter between steps, for presenting live. Both can be rerun at any time.
+      <pre class="term">mt_kibana/m3/smoke.sh
+DEMO_PAUSE=1 mt_kibana/m3/demo.sh</pre>
+    </div></li>
+    <li><div>
+      <strong>Optional: show the proxy headers.</strong> Deploys the echo backend for claim 6.
+      <pre class="term">kubectl apply -f mt_kibana/m3/route_test.yaml</pre>
+    </div></li>
+    <li><div>
+      <strong>Clean up.</strong>
+      <pre class="term">kubectl delete ns mt-kibana mt-route-test
+devctl destroy &lt;name&gt;</pre>
+    </div></li>
+  </ol>
+  <p>The devenv auto-hibernates; run <code>devctl wake &lt;name&gt;</code> before a demo. The clusters store data on emptyDir, so if an ES pod has restarted, rerun <code>eck.sh delete</code>, <code>eck.sh create</code> and <code>deploy.sh</code>.</p>
+</section>
+
+<section>
+  <h2>Why not real serverless projects</h2>
+  <ul>
+    <li><strong>QA projects</strong> can't be tenants. Serverless Kibana calls internal APIs such as <code>_nodes</code>, which serverless Elasticsearch allows only with operator privileges. Only the <code>elastic/kibana</code> service-account token has them, and a project's <code>admin</code> user can't create one.</li>
+    <li><strong>Devenv projects</strong> would get that token, but they never got Elasticsearch in our devenvs. A pooled devenv had no control-plane CosmosDB account. A direct devenv was missing the <code>OtelDeliveryConfig</code> CRD, which we installed by hand. After that, global-escluster-controller never created a cluster.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Findings and limits</h2>
+  <ul>
+    <li><strong>Routing is safe by construction at the proxy.</strong> The proxy overwrites the project and organization headers and rejects unknown ids, so Kibana's 400 guard for unknown projects only catches drift between the Ingresses and <code>tenants.yml</code>.</li>
+    <li><strong>The Service selector must be exact.</strong> At first the ES pods carried the same <code>app.kubernetes.io/name</code> label as Kibana, so the proxy route had three ES pods as extra endpoints, and the first smoke test passed anyway. The Service now also selects on <code>component: kibana</code>, and demo step 1 checks that Kibana is the only endpoint.</li>
+    <li><strong>One CA list for every tenant.</strong> Tenant clients inherit <code>elasticsearch.ssl</code> from the base config, so every cluster's CA is trusted for every tenant.</li>
+    <li><strong>Per-process settings.</strong> <code>server.publicBaseUrl</code>, the serverless project id and similar values still have one value per Kibana process.</li>
+    <li><strong>Tenant init is manual.</strong> Each tenant needs a single-tenant Kibana boot before the multi-tenant Kibana can serve it.</li>
+    <li><strong>No browser path yet.</strong> There's no DNS for these hostnames, the proxy's wildcard cert doesn't cover <code>*.mtkb.&lt;domain&gt;</code>, and M2 notes that browser login for non-home projects fails. The proof uses <code>curl --resolve</code> with TLS verified against a name the cert covers.</li>
+    <li><strong>Stateful, not serverless.</strong> Kibana runs without <code>serverless: es</code>, as in M1. Running in serverless mode also needs UIAM configured.</li>
+  </ul>
+</section>
+</main>

@@ -38,6 +38,8 @@
     "@kbn/core-security-server-internal",
     "@kbn/core-security-server-mocks",
     "@kbn/core-logging-server-internal",
+    "@kbn/core-tenants-server",
+    "@kbn/core-tenants-server-internal",
   ],
   "exclude": [
     "target/**/*",
