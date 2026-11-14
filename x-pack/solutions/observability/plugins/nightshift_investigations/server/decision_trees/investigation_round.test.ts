@@ -209,11 +209,19 @@ describe('buildInvestigationRound', () => {
 });
 
 describe('buildInvestigationConversation', () => {
-  it('holds only the investigator round, owned by the reinforcement agent', () => {
+  it('places earlier rounds before the latest round in chronological order', () => {
+    const earlier = buildInvestigationRound({
+      roundId: 'round-0',
+      prompt: 'Alert fired',
+      response: 'Initial hypothesis',
+      toolCalls: [],
+      startedAt: '2026-09-30T02:20:00.000Z',
+    });
     const round = build([]);
     const conversation = buildInvestigationConversation({
       conversationId: 'conv-1',
       agentId: 'significant-events.decision-tree-reinforcement',
+      earlierRounds: [earlier],
       round,
       now: '2026-09-30T02:32:00.000Z',
     });
@@ -221,7 +229,7 @@ describe('buildInvestigationConversation', () => {
     expect(conversation).toMatchObject({
       id: 'conv-1',
       agent_id: 'significant-events.decision-tree-reinforcement',
-      rounds: [round],
+      rounds: [earlier, round],
     });
     // No events: Agent Builder then rebuilds the history from `rounds`.
     expect(conversation.events).toBeUndefined();

@@ -147,6 +147,21 @@ describe('buildCausalCheckTranscript', () => {
     expect(transcript).not.toContain('Message: round 0\n');
     expect(transcript).toContain('Message: round 19\n');
   });
+
+  it('labels an alert-recovery round as a notification, not a human message', () => {
+    const transcript = buildCausalCheckTranscript({
+      earlierRounds: [round('r1', '2026-11-02T10:00:00.000Z', 'Alert', 'Answer')],
+      prompt:
+        'An alert in this investigation has recovered. Everything inside the alert_data block',
+      response: 'Verdict: confirmed',
+      toolCalls: [],
+    });
+
+    expect(transcript).toContain(
+      'Alert-recovery notification: An alert in this investigation has recovered.'
+    );
+    expect(transcript).not.toContain('Human message:');
+  });
 });
 
 describe('CAUSAL_CHECK_SYSTEM_PROMPT', () => {
@@ -157,6 +172,18 @@ describe('CAUSAL_CHECK_SYSTEM_PROMPT', () => {
     );
     expect(CAUSAL_CHECK_SYSTEM_PROMPT).toContain(
       'they cannot confirm a component, dependency, or change that no tool result implicates'
+    );
+  });
+
+  // Deductive's check never saw the investigator's reply to an alert recovery, so a recovery round
+  // could not reinforce a tree; the recovery alone, or a verdict short of confirmed, must not either.
+  it('judges an alert-recovery round on the resolution the tool results show', () => {
+    expect(CAUSAL_CHECK_SYSTEM_PROMPT).toContain(
+      'An automated notification that an alert in the investigation has recovered is also a feedback message'
+    );
+    expect(CAUSAL_CHECK_SYSTEM_PROMPT).toContain('the recovery alone is never proof of it');
+    expect(CAUSAL_CHECK_SYSTEM_PROMPT).toContain(
+      "the investigator's answer concludes that the cause is confirmed (not partially supported, contradicted, or unresolved)"
     );
   });
 });

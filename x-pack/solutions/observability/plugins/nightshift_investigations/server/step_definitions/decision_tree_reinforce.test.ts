@@ -99,6 +99,78 @@ describe('decisionTreeReinforceStepDefinition', () => {
     ]);
   });
 
+  it('replays earlier rounds before a follow-up round while prioritizing the latest round result budget', async () => {
+    const huge = 'x'.repeat(150_000);
+    const r1Results = [
+      { tool_result_id: 'r-1', type: ToolResultType.other, data: { stdout: huge } },
+    ];
+    const r2Results = [
+      { tool_result_id: 'r-2', type: ToolResultType.other, data: { stdout: huge } },
+    ];
+    const get = jest.fn().mockResolvedValue({
+      id: 'inv-1',
+      rounds: [
+        {
+          id: 'round-1',
+          started_at: '2026-11-06T07:20:01.000Z',
+          input: { message: 'Alert fired' },
+          response: { message: 'Initial breaker hypothesis' },
+          steps: [
+            {
+              type: ConversationRoundStepType.toolCall,
+              tool_id: SANDBOX_BASH_TOOL_ID,
+              tool_call_id: 'toolu_r1',
+              params: { command: 'esql r1' },
+              results: r1Results,
+            },
+          ],
+        },
+        {
+          id: 'round-2',
+          started_at: '2026-11-09T11:43:30.000Z',
+          input: { message: 'Alert recovered' },
+          response: { message: 'Deployment 1ffce804 had 0 500s\n\nVerdict: contradicted' },
+          steps: [
+            {
+              type: ConversationRoundStepType.toolCall,
+              tool_id: SANDBOX_BASH_TOOL_ID,
+              tool_call_id: 'toolu_r2',
+              params: { command: 'esql r2' },
+              results: r2Results,
+            },
+          ],
+        },
+      ],
+    });
+    const withConversations = {
+      agents: { runAgent },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    } as unknown as AgentBuilderPluginStart;
+
+    await decisionTreeReinforceStepDefinition({ getAgentBuilder: () => withConversations }).handler(
+      createContext({
+        prompt: 'Alert recovered',
+        response: 'Deployment 1ffce804 had 0 500s\n\nVerdict: contradicted',
+        conversation_id: 'inv-1',
+        round_id: 'round-2',
+        message: 'Task: merge follow-up',
+        turn_kind: 'feedback_reinforcement',
+      })
+    );
+
+    const [{ agentParams }] = runAgent.mock.calls[0];
+    expect(agentParams.conversation.rounds.map((r: { id: string }) => r.id)).toEqual([
+      'round-1',
+      'round-2',
+    ]);
+    // Latest round keeps its full result; older round overflows the 200k shared budget gracefully.
+    expect(JSON.stringify(agentParams.conversation.rounds[1].steps)).toContain(huge);
+    expect(agentParams.conversation.rounds[0].steps[0]).toMatchObject({
+      tool_call_id: 'toolu_r1',
+      results: [{ data: { omitted: 'transcript result budget exhausted' } }],
+    });
+  });
+
   it('skips a round in a conversation the caller cannot read, without running the agent', async () => {
     const get = jest
       .fn()
