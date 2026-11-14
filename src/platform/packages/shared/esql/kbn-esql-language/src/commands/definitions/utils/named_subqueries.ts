@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isBinaryExpression, isIdentifier, isSource, isSubQuery } from '@elastic/esql';
-import { uniqBy } from 'lodash';
+import { isBinaryExpression, isIdentifier, isSource, isSubQuery, Walker } from '@elastic/esql';
 import type {
-  ESQLAstCommand,
+  ESQLAstAllCommands,
   ESQLAstHeaderCommand,
   ESQLAstLetHeaderCommand,
   ESQLAstQueryExpression,
+  ESQLCommand,
   ESQLIdentifier,
   ESQLSource,
 } from '@elastic/esql/types';
@@ -68,11 +68,32 @@ export const getNamedSubqueriesAvailableTo = (
   return index < 0 ? [] : namedSubqueries.slice(0, index);
 };
 
-/** Returns the index sources of a source command, replacing LET references with the sources of their bodies. */
-export const resolveNamedSubquerySources = (
-  sourceCommand: ESQLAstCommand | undefined,
+/** Returns the named subqueries referenced by the commands, directly or through other named subqueries. */
+export const getUsedNamedSubqueries = (
+  commands: ESQLAstAllCommands[],
   namedSubqueries: readonly NamedSubquery[]
-): ESQLSource[] => uniqBy(collectIndexSources(sourceCommand, namedSubqueries, new Set()), 'name');
+): ReadonlySet<NamedSubquery> => {
+  const usedNamedSubqueries = new Set(getReferencedNamedSubqueries(commands, namedSubqueries));
+
+  for (let index = namedSubqueries.length - 1; index >= 0; index--) {
+    const namedSubquery = namedSubqueries[index];
+
+    if (!usedNamedSubqueries.has(namedSubquery)) {
+      continue;
+    }
+
+    const dependencies = getReferencedNamedSubqueries(
+      namedSubquery.query.commands,
+      getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery)
+    );
+
+    for (const dependency of dependencies) {
+      usedNamedSubqueries.add(dependency);
+    }
+  }
+
+  return usedNamedSubqueries;
+};
 
 const toNamedSubquery = (command: ESQLAstLetHeaderCommand): NamedSubquery | undefined => {
   const [binding] = command.args;
@@ -90,36 +111,16 @@ const toNamedSubquery = (command: ESQLAstLetHeaderCommand): NamedSubquery | unde
   return { name: left.name, identifier: left, query: right.child, command };
 };
 
-const collectIndexSources = (
-  sourceCommand: ESQLAstCommand | undefined,
-  namedSubqueries: readonly NamedSubquery[],
-  visitedBindings: Set<NamedSubquery>
-): ESQLSource[] =>
-  (sourceCommand?.args ?? []).flatMap((arg) => {
-    if (isSubQuery(arg)) {
-      return collectIndexSources(arg.child.commands[0], namedSubqueries, visitedBindings);
-    }
+const getReferencedNamedSubqueries = (
+  commands: ESQLAstAllCommands[],
+  namedSubqueries: readonly NamedSubquery[]
+) => {
+  const fromCommands = Walker.matchAll(commands, {
+    type: 'command',
+    // Only FROM can read a LET; TS and JOIN targets must not mark it as used.
+    name: 'from',
+  }) as Array<ESQLCommand<'from'>>;
+  const sources = fromCommands.flatMap(({ args }) => args.filter(isSource));
 
-    if (!isSource(arg) || arg.sourceType !== 'index') {
-      return [];
-    }
-
-    const namedSubquery = findNamedSubqueryForSource(arg, namedSubqueries);
-
-    if (!namedSubquery) {
-      return [arg];
-    }
-
-    // Shared dependencies only need to be expanded once.
-    if (visitedBindings.has(namedSubquery)) {
-      return [];
-    }
-
-    visitedBindings.add(namedSubquery);
-
-    return collectIndexSources(
-      namedSubquery.query.commands[0],
-      getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery),
-      visitedBindings
-    );
-  });
+  return sources.flatMap((source) => findNamedSubqueryForSource(source, namedSubqueries) ?? []);
+};

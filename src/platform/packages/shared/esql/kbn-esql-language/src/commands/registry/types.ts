@@ -231,6 +231,8 @@ export interface ICommandContext {
   isTimeseriesSource?: boolean;
   /** LET bindings that the sources of the current pipeline can reference. */
   namedSubqueries?: readonly NamedSubquery[];
+  /** LET bindings declared from the binding of the current pipeline onward: referencing them is a forward reference. */
+  forwardNamedSubqueries?: readonly NamedSubquery[];
 }
 /**
  * This is a list of locations within an ES|QL query.

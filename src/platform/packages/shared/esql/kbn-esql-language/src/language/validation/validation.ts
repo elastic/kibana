@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLAstHeaderCommand, ESQLCommand } from '@elastic/esql/types';
 import { EsqlQuery, isList, within } from '@elastic/esql';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands/registry';
@@ -19,13 +19,23 @@ import { areCompatibleStringTypes } from '../../commands/definitions/utils/signa
 import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
-import { getInSubqueries, getSubqueriesToValidate, type InSubqueryReference } from './subqueries';
+import {
+  getInSubqueries,
+  getPipelinesToValidate,
+  getSubqueriesToValidate,
+  type InSubqueryReference,
+} from './subqueries';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
 import type { ESQLMessage } from '../../commands';
 
 const UNRESOLVED_TYPES = new Set(['unknown', 'unsupported', 'param']);
+
+const NAMED_SUBQUERY_REFERENCE_ERRORS = new Set<string>([
+  'namedSubqueryForwardReference',
+  'namedSubqueryNotSupportedInCommand',
+]);
 
 /**
  * ES|QL validation public API
@@ -73,13 +83,18 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
+  const pipelines = getPipelinesToValidate(headerCommands, rootCommands);
+  const analyzedCommands = pipelines
+    .filter(({ analyzed }) => analyzed)
+    .flatMap(({ commands }) => commands);
+
   const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets, license] =
     await Promise.all([
       shouldValidateCallback(callbacks, 'getSources')
-        ? retrieveSources(rootCommands, callbacks)
+        ? retrieveSources(analyzedCommands, callbacks)
         : new Set<string>(),
       shouldValidateCallback(callbacks, 'getPolicies')
-        ? retrievePolicies(rootCommands, callbacks)
+        ? retrievePolicies(analyzedCommands, callbacks)
         : new Map(),
       shouldValidateCallback(callbacks, 'getJoinIndices')
         ? callbacks?.getJoinIndices?.()
@@ -97,27 +112,97 @@ async function validateAst(
 
   const isRootTimeseries = isTimeseriesSourceCommand(rootCommands);
 
+  const references: Omit<ReferenceMaps, 'columns'> = {
+    sources,
+    policies: availablePolicies,
+    query: queryString,
+    joinIndices: joinIndices?.indices || [],
+    timeSeriesSources: timeSeriesSources?.indices,
+    views: views?.views ?? [],
+    datasets: datasets?.datasets ?? [],
+  };
+
   // Validate the header commands
   for (const command of headerCommands) {
-    const references: ReferenceMaps = {
-      sources,
-      columns: new Map(), // no columns available in header
-      policies: availablePolicies,
-      query: queryString,
-      joinIndices: joinIndices?.indices || [],
-      timeSeriesSources: timeSeriesSources?.indices,
-      views: views?.views ?? [],
-      datasets: datasets?.datasets ?? [],
-    };
-
-    const commandMessages = validateCommand(command, references, rootCommands, isRootTimeseries, {
-      ...callbacks,
-      hasMinimumLicenseRequired,
-    });
+    const commandMessages = validateCommand(
+      command,
+      { ...references, columns: new Map() }, // no columns available in header
+      rootCommands,
+      isRootTimeseries,
+      {
+        ...callbacks,
+        hasMinimumLicenseRequired,
+      }
+    );
     messages.push(...commandMessages);
   }
 
-  const unmappedFieldsStrategyFromHeader = getUnmappedFieldsStrategy(headerCommands);
+  for (const pipeline of pipelines) {
+    const { commands, header, namedSubqueries, forwardNamedSubqueries, analyzed } = pipeline;
+    const pipelineReferences = { ...references, namedSubqueries, forwardNamedSubqueries };
+
+    if (analyzed) {
+      const pipelineMessages = await validatePipeline(
+        commands,
+        header,
+        pipelineReferences,
+        callbacks,
+        options,
+        hasMinimumLicenseRequired
+      );
+      messages.push(...pipelineMessages);
+      continue;
+    }
+
+    // Elasticsearch does not analyze unused LET bodies, it only checks their LET references.
+    const unusedBodyMessages = await validatePipeline(
+      commands,
+      header,
+      pipelineReferences,
+      undefined,
+      options,
+      undefined
+    );
+    messages.push(
+      ...unusedBodyMessages.filter(({ code }) => NAMED_SUBQUERY_REFERENCE_ERRORS.has(code))
+    );
+  }
+
+  const parserErrors = parsingResult.errors;
+
+  /**
+   * Some changes to the grammar deleted the literal names for some tokens.
+   * This is a workaround to restore the literals that were lost.
+   *
+   * See https://github.com/elastic/elasticsearch/pull/124177 for context.
+   */
+  for (const error of parserErrors) {
+    error.message = error.message.replace(/\bLP\b/, "'('");
+    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
+  }
+
+  return {
+    errors: [...parserErrors, ...messages.filter(({ type }) => type === 'error')],
+    warnings: messages.filter(({ type }) => type === 'warning'),
+  };
+}
+
+/**
+ * Validates the commands of a pipeline, including its FORK branches and nested subqueries,
+ * against the columns produced by the commands before each of them.
+ */
+async function validatePipeline(
+  commands: ESQLCommand[],
+  header: ESQLAstHeaderCommand[],
+  references: Omit<ReferenceMaps, 'columns'>,
+  callbacks: ESQLCallbacks | undefined,
+  options: ValidationOptions | undefined,
+  hasMinimumLicenseRequired: ICommandCallbacks['hasMinimumLicenseRequired']
+): Promise<ESQLMessage[]> {
+  const messages: ESQLMessage[] = [];
+  const { query: queryString } = references;
+
+  const unmappedFieldsStrategyFromHeader = getUnmappedFieldsStrategy(header);
 
   /**
    * Even though we are validating single commands, we work with subqueries.
@@ -125,7 +210,7 @@ async function validateAst(
    * The reason is that building the list of columns available in each command requires
    * the full command subsequence that precedes that command.
    */
-  const subqueries = getSubqueriesToValidate(rootCommands, headerCommands);
+  const subqueries = getSubqueriesToValidate(commands, header);
   for (const subquery of subqueries) {
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
@@ -143,25 +228,14 @@ async function validateAst(
       ? await new QueryColumns(subqueryForColumns, queryForColumns, callbacks, options).asMap()
       : new Map();
 
-    const references: ReferenceMaps = {
-      sources,
-      columns,
-      policies: availablePolicies,
-      query: queryString,
-      joinIndices: joinIndices?.indices || [],
-      timeSeriesSources: timeSeriesSources?.indices,
-      views: views?.views ?? [],
-      datasets: datasets?.datasets ?? [],
-    };
-
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
       ? unmappedFieldsStrategyFromHeader
       : UnmappedFieldsStrategy.DEFAULT;
 
     const commandMessages = validateCommand(
       currentCommand,
-      references,
-      currentCommand.name === 'fork' ? subquery.commands : rootCommands,
+      { ...references, columns },
+      currentCommand.name === 'fork' ? subquery.commands : commands,
       isTimeseriesSourceCommand(subquery.commands),
       {
         ...callbacks,
@@ -187,7 +261,7 @@ async function validateAst(
       // Cheap anyway: its source columns were already cached earlier in this loop.
       const rightColumns = await Promise.all(
         inSubqueries.map(({ query }) =>
-          new QueryColumns(query, queryString, callbacks, options).asMap()
+          new QueryColumns({ ...query, header }, queryString, callbacks, options).asMap()
         )
       );
       messages.push(
@@ -196,23 +270,7 @@ async function validateAst(
     }
   }
 
-  const parserErrors = parsingResult.errors;
-
-  /**
-   * Some changes to the grammar deleted the literal names for some tokens.
-   * This is a workaround to restore the literals that were lost.
-   *
-   * See https://github.com/elastic/elasticsearch/pull/124177 for context.
-   */
-  for (const error of parserErrors) {
-    error.message = error.message.replace(/\bLP\b/, "'('");
-    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
-  }
-
-  return {
-    errors: [...parserErrors, ...messages.filter(({ type }) => type === 'error')],
-    warnings: messages.filter(({ type }) => type === 'warning'),
-  };
+  return messages;
 }
 
 function validateInSubqueries(
@@ -318,6 +376,8 @@ function validateCommand(
     datasets: references.datasets,
     unmappedFieldsStrategy,
     isTimeseriesSource,
+    namedSubqueries: references.namedSubqueries,
+    forwardNamedSubqueries: references.forwardNamedSubqueries,
   };
 
   if (commandDefinition.methods.validate) {
