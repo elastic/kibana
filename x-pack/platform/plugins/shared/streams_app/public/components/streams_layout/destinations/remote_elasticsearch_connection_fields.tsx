@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useController } from 'react-hook-form';
-import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFieldPassword, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DestinationCreationFormData, RemoteElasticsearchConnectionErrors } from './types';
 
@@ -55,14 +55,6 @@ export const RemoteElasticsearchConnectionFields = ({
 
   return (
     <>
-      <EuiTitle size="xxs">
-        <h3>
-          {i18n.translate('xpack.streams.destinations.remoteElasticsearch.connectionTitle', {
-            defaultMessage: 'Connection',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.streams.destinations.remoteElasticsearch.endpointLabel', {

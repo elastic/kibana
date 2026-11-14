@@ -46,8 +46,8 @@ export const getRemoteIndexBySignal = (
 };
 
 /**
- * One node per remote cluster. Fixed saves one unscoped `index` when all filled OTel signals share
- * a name, otherwise one telemetry-scoped `index` per signal. Docs always gets its own scoped entry.
+ * One node per remote cluster. Fixed saves one telemetry-scoped `index` per filled signal, as the
+ * OTel data stream name differs per signal and docs takes a full index name.
  */
 export const createRemoteElasticsearchUnitDestination = ({
   id,
@@ -72,18 +72,10 @@ export const createRemoteElasticsearchUnitDestination = ({
     tracesIndex,
     docsIndex,
   });
-  const indexed = PREFIXED_DESTINATION_SIGNALS.flatMap((signal) => {
+  const indexEntries = DESTINATION_SIGNALS.flatMap((signal) => {
     const value = indexBySignal[signal];
-    return value ? [{ signal, value }] : [];
+    return value ? [{ name: 'index', value, telemetry: [signal] }] : [];
   });
-  const otelIndexEntries =
-    new Set(indexed.map(({ value }) => value)).size === 1
-      ? [{ name: 'index', value: indexed[0].value }]
-      : indexed.map(({ signal, value }) => ({ name: 'index', value, telemetry: [signal] }));
-  // A scoped entry wins over the unscoped one, so the shared OTel name never reaches docs.
-  const docsIndexEntries = indexBySignal.docs
-    ? [{ name: 'index', value: indexBySignal.docs, telemetry: ['docs' as const] }]
-    : [];
 
   const trimmedDescription = description?.trim();
   return {
@@ -96,8 +88,7 @@ export const createRemoteElasticsearchUnitDestination = ({
       : DESTINATION_SIGNALS.filter((signal) => indexBySignal[signal]),
     config: [
       { name: 'endpoint', value: endpoint.trim() },
-      ...otelIndexEntries,
-      ...docsIndexEntries,
+      ...indexEntries,
       { name: 'api_key', value: { credential: remoteElasticsearchCredentialName(id) } },
     ],
   };

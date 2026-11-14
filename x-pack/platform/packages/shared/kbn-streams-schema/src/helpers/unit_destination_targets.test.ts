@@ -6,6 +6,8 @@
  */
 
 import {
+  getPrometheusDataStream,
+  getSignalTargetsWritePatterns,
   getUnitDestinationSignalTargets,
   getUnitDestinationWritePatterns,
   readUnitDestinationSignals,
@@ -96,7 +98,7 @@ describe('getUnitDestinationWritePatterns', () => {
           ['logs', 'metrics']
         )
       )
-    ).toEqual(['logs-app-default', 'metrics-app-default']);
+    ).toEqual(['logs-app-default', 'metrics-app-default', 'metrics-app.prometheus-default']);
     expect(
       getUnitDestinationWritePatterns(
         elasticsearch(
@@ -148,7 +150,7 @@ describe('getUnitDestinationWritePatterns', () => {
             ['logs', 'metrics', 'traces']
           )
         )
-      ).toEqual(['logs-shared-default', 'metrics-app-default']);
+      ).toEqual(['logs-shared-default', 'metrics-app-default', 'metrics-app.prometheus-default']);
     });
 
     it('applies unscoped write_patterns to signals without an index', () => {
@@ -239,5 +241,54 @@ describe('readUnitDestinationSignals', () => {
       docs: 'logs-app-default',
     });
     expect(getUnitDestinationWritePatterns(docsOnly)).toEqual(['logs-app-default']);
+  });
+});
+
+describe('getPrometheusDataStream', () => {
+  it.each([
+    // streams-transpiler split
+    ['metrics-billing.otel-default', 'metrics-billing.prometheus-default'],
+    ['metrics-billing.prometheus-default', 'metrics-billing.prometheus-default'],
+    ['metrics-billing-default', 'metrics-billing.prometheus-default'],
+    ['metrics-billing.otel-prod-eu', 'metrics-billing.prometheus-prod-eu'],
+    // Elasticsearch sanitization
+    ['metrics-a.b-c-prod', 'metrics-a.b_c.prometheus-prod'],
+    ['metrics-Bad.otel-x#y', 'metrics-bad.prometheus-x_y'],
+    [`metrics-${'a'.repeat(101)}.otel-default`, `metrics-${'a'.repeat(100)}.prometheus-default`],
+    // default endpoint
+    ['metrics-billing', 'metrics-generic.prometheus-default'],
+    ['metrics-..-default', 'metrics-generic.prometheus-default'],
+    ['metrics-billing.otel-', 'metrics-generic.prometheus-default'],
+    ['my-metrics', 'metrics-generic.prometheus-default'],
+  ])('%s -> %s', (index, expected) => {
+    expect(getPrometheusDataStream(index)).toBe(expected);
+  });
+});
+
+describe('getSignalTargetsWritePatterns', () => {
+  const targets = (indexBySignal: Partial<Record<'logs' | 'metrics', string>>) =>
+    getSignalTargetsWritePatterns({
+      signals: ['logs', 'metrics'].filter((signal): signal is 'logs' | 'metrics' =>
+        Object.hasOwn(indexBySignal, signal)
+      ),
+      indexBySignal,
+      writePatternsBySignal: {},
+    });
+
+  it('adds the Prometheus remote write data stream to a fixed metrics index', () => {
+    expect(targets({ metrics: 'metrics-billing.otel-default' })).toEqual([
+      'metrics-billing.otel-default',
+      'metrics-billing.prometheus-default',
+    ]);
+  });
+
+  it('adds it once', () => {
+    expect(targets({ metrics: 'metrics-billing.prometheus-default' })).toEqual([
+      'metrics-billing.prometheus-default',
+    ]);
+  });
+
+  it('leaves other signals alone', () => {
+    expect(targets({ logs: 'logs-billing.otel-default' })).toEqual(['logs-billing.otel-default']);
   });
 });

@@ -6,6 +6,11 @@
  */
 
 import type { StreamsUnit } from '../models/unit';
+import {
+  MAX_OTEL_DATA_STREAM_PART_LENGTH,
+  OTEL_TYPE_SEPARATOR,
+  PROMETHEUS_TYPE_SEPARATOR,
+} from './otel_data_stream_name';
 
 export type UnitDestination = NonNullable<StreamsUnit.Configuration['destinations']>[number];
 
@@ -98,6 +103,57 @@ export const getUnitDestinationSignalTargets = (
   return { signals, indexBySignal, writePatternsBySignal };
 };
 
+const METRICS_PREFIX = 'metrics-';
+const PROMETHEUS_TYPE_SEPARATORS = [OTEL_TYPE_SEPARATOR, PROMETHEUS_TYPE_SEPARATOR];
+const DISALLOWED_IN_DATASET = /[\\/*?"<>| ,#:-]/g;
+const DISALLOWED_IN_NAMESPACE = /[\\/*?"<>| ,#:]/g;
+
+const isDotSegment = (part: string): boolean => part === '.' || part === '..';
+
+const splitDatasetAndNamespace = (rest: string): [string, string] => {
+  const [typeSeparator] = PROMETHEUS_TYPE_SEPARATORS.map((separator) => ({
+    at: rest.indexOf(separator),
+    length: separator.length,
+  }))
+    .filter(({ at }) => at >= 0)
+    .sort((left, right) => left.at - right.at);
+  if (typeSeparator) {
+    return [rest.slice(0, typeSeparator.at), rest.slice(typeSeparator.at + typeSeparator.length)];
+  }
+  const lastDash = rest.lastIndexOf('-');
+  return lastDash >= 0 ? [rest.slice(0, lastDash), rest.slice(lastDash + 1)] : ['', ''];
+};
+
+const splitPrometheusIndex = (
+  index: string
+): { dataset: string; namespace: string } | undefined => {
+  if (!index.startsWith(METRICS_PREFIX)) {
+    return undefined;
+  }
+  const [dataset, namespace] = splitDatasetAndNamespace(index.slice(METRICS_PREFIX.length));
+  return dataset && namespace && !isDotSegment(dataset) && !isDotSegment(namespace)
+    ? { dataset, namespace }
+    : undefined;
+};
+
+const sanitizeDataStreamPart = (part: string, disallowed: RegExp): string =>
+  part.toLowerCase().slice(0, MAX_OTEL_DATA_STREAM_PART_LENGTH).replace(disallowed, '_');
+
+/**
+ * The data stream Prometheus remote write lands in for a fixed metrics index. Mirrors
+ * streams-transpiler `prometheusDataStream`, then Elasticsearch `DataStream.sanitizeDataset`/`sanitizeNamespace`.
+ */
+export const getPrometheusDataStream = (metricsIndex: string): string => {
+  const { dataset, namespace } = splitPrometheusIndex(metricsIndex) ?? {
+    dataset: 'generic',
+    namespace: 'default',
+  };
+  return `metrics-${sanitizeDataStreamPart(
+    dataset,
+    DISALLOWED_IN_DATASET
+  )}.prometheus-${sanitizeDataStreamPart(namespace, DISALLOWED_IN_NAMESPACE)}`;
+};
+
 /**
  * Indices, or index globs, written to per signal: a static `index`, else its `write_patterns`,
  * else the auto signal pattern. A static index is where documents go, so `write_patterns` next
@@ -112,7 +168,7 @@ export const getSignalTargetsWritePatterns = ({
     signals.flatMap((signal) => {
       const index = indexBySignal[signal];
       if (index) {
-        return [index];
+        return signal === 'metrics' ? [index, getPrometheusDataStream(index)] : [index];
       }
       const writePatterns = writePatternsBySignal[signal];
       return writePatterns?.length ? writePatterns : AUTO_WRITE_PATTERNS_BY_SIGNAL[signal];

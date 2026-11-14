@@ -170,7 +170,7 @@ POST /_security/api_key
 
 Index privileges are on the targets of a local Elasticsearch destination, which depend on its configuration. The key, `_resolve_indices` and the indices table all use the same targets (`getSignalTargetsWritePatterns` in `@kbn/streams-schema`). For each signal the destination sends, the first of these that is set wins:
 
-1. `index`: that index.
+1. `index`: that index. A metrics `index` also covers the data stream Prometheus remote write lands in (`getPrometheusDataStream`): `metrics-<dataset>.prometheus-<namespace>`, or `metrics-generic.prometheus-default` when the name doesn't split.
 2. `write_patterns`: those patterns.
 3. Neither: the Auto pattern `<signal>-*-*` (`logs-*`, `metrics-*` and `traces-*` for docs).
 
@@ -178,9 +178,9 @@ Index privileges are on the targets of a local Elasticsearch destination, which 
 | --- | --- | --- |
 | Auto, all signals | No `index` and no `write_patterns` | `logs-*-*`, `metrics-*-*`, `traces-*-*` |
 | Auto with custom write patterns | `write_patterns`, shaped `<signal>-<dataset>-<namespace>`, where either part may contain `*` | `logs-billing-*` for logs only |
-| Static index | `index`, shaped `<signal>-<dataset>-<namespace>` with no wildcards. "All" applies one `<dataset>-<namespace>` to every signal. | `logs-app-default`, `metrics-app-default` |
+| Static index | `index`, shaped `<signal>-<dataset>.otel-<namespace>` with no wildcards | `logs-app.otel-default`, `metrics-app.otel-default`, `metrics-app.prometheus-default` |
 
-The create form enforces those shapes. A unit written with the API can contain anything.
+The create form enforces those shapes. The unit `PUT` rejects (400) a new or changed logs, metrics or traces `index` on an `elasticsearch` or `remote_elasticsearch` destination with any other shape, because the exporter writes in OTel mapping mode and only `*.otel-*` data streams have its templates. The docs `index` is free-form. Anything else a unit written with the API contains is left to the config distributor.
 
 - A wildcard target needs a role covering every name it could match. `logs-*` covers `logs-*-*`; `logs-billing-*` doesn't, so that user can't create an Auto destination.
 - Grant write (`create_doc`, `auto_configure`) and read (`view_index_metadata`, `read`, `monitor`, `read_failure_store`) on the same names, covering the union of the targets the user manages. Otherwise they can create destinations whose indices they can't see.

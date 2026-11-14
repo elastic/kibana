@@ -157,7 +157,7 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
     });
 
     expect(resolveIndex).toHaveBeenCalledWith({
-      name: 'logs-*-*,metrics-host-default',
+      name: 'logs-*-*,metrics-host-default,metrics-host.prometheus-default',
       expand_wildcards: 'open',
       ignore_unavailable: true,
       allow_no_indices: true,
