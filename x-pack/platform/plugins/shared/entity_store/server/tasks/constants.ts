@@ -17,5 +17,6 @@ export const EntityStoreTaskType = lazySchema(() =>
     'resilience',
     'statusReport',
     'legacySecurityAssetsMigration',
+    'latestIndexMappingsMigration',
   ])
 );

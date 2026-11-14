@@ -101,6 +101,44 @@ describe('resolveEntityStoreWriteTargets', () => {
     );
   });
 
+  describe('abort signal', () => {
+    it('passes the signal to every Elasticsearch request', async () => {
+      mockConcrete([]);
+      const { signal } = new AbortController();
+
+      await resolveEntityStoreWriteTargets(esClient, namespace, signal);
+
+      // Compared by identity: jest cannot print a diff of an AbortSignal
+      for (const mockFn of [
+        esClient.indices.getAlias,
+        esClient.indices.getDataStream,
+        esClient.indices.get,
+      ]) {
+        expect(mockFn).toHaveBeenCalled();
+        const allCarrySignal = mockFn.mock.calls.every(
+          ([, options]: [unknown, { signal?: AbortSignal } | undefined]) =>
+            options?.signal === signal
+        );
+        expect(allCarrySignal).toBe(true);
+      }
+    });
+
+    it('does not pass request options to the data stream and index lookups without a signal', async () => {
+      mockConcrete([]);
+
+      await resolveEntityStoreWriteTargets(esClient, namespace);
+
+      expect(esClient.indices.getDataStream).toHaveBeenCalled();
+      for (const args of esClient.indices.getDataStream.mock.calls) {
+        expect(args).toHaveLength(1);
+      }
+      expect(esClient.indices.get).toHaveBeenCalled();
+      for (const args of esClient.indices.get.mock.calls) {
+        expect(args).toHaveLength(1);
+      }
+    });
+  });
+
   describe('resolveHistorySnapshotIndexPatterns', () => {
     it('returns neutral and legacy patterns so un-migrated snapshots stay readable', async () => {
       mockConcrete([]);

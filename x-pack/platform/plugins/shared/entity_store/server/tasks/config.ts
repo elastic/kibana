@@ -59,6 +59,11 @@ export const TasksConfig = {
     // Latest/metadata reindex can take a long time on large entity indices.
     timeout: '60m',
   },
+  [EntityStoreTaskType.enum.latestIndexMappingsMigration]: {
+    title: 'Entity Store - Latest Index Mappings Migration',
+    type: 'entity_store:v2:latest_index_mappings_migration',
+    timeout: '10m',
+  },
 } as const satisfies Record<EntityStoreTaskType, EntityStoreTaskConfig>;
 
 export const getHistorySnapshotTaskId = (namespace: string): string =>

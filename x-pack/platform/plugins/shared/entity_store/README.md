@@ -35,6 +35,16 @@ Each process keeps its own cursor, status and error on the engine descriptor (`l
 
 Pagination, sampling, the volume cap and crash recovery are described in [server/domain/logs_extraction/PAGINATION.md](server/domain/logs_extraction/PAGINATION.md).
 
+## Changing the latest index mappings
+
+Templates only apply to indices created after an edit, so an installed `.entities.v2.latest.{namespace}-00001` does not get new fields from the component templates. When a definition field with a `mapping` is added, bump `LATEST_INDEX_MAPPINGS_VERSION` (`common/domain/entity_index.ts`) in the same change. Removing a field also needs a bump for the guard test, but the migration never removes a field from an existing index: it only refreshes the templates and the version in `_meta`. The guard test in `server/domain/asset_manager/latest_index_mappings.test.ts` snapshots the version together with all the properties, so it fails on any change of the properties until you bump the version and update the snapshot.
+
+On every Kibana start, the `entity_store:v2:latest_index_mappings_migration` task checks each installed space. If the `latestMappingsVersion` in the index `_meta` is lower than the constant, it refreshes the component and index templates and runs `putMapping` with the fields that are missing from the existing index and the new `_meta`. It never re-applies settings (the index is `index.mode: lookup`) and does not change `MAPPING_VERSION`, which is the index-name suffix. The migration only adds fields: a field that already exists with a different type is not changed, and is logged as one warning when that space is migrated (the version is still bumped, so it is not repeated on every start). Changing a field type needs a reindex, not a version bump. A failed `putMapping` fails that space, which is logged with its namespace; the task is retried, and again on the next start, because the version in `_meta` is only written by a successful `putMapping`.
+
+Not migrated and not covered by the guard test: `dynamic_templates`, `date_detection` and the ECS component template.
+
+Queries that read a newly added field from the entities index must tolerate an index that has not been migrated yet. `SET unmapped_fields="nullify"` is not enough once a `STATS` or `KEEP` precedes a `LOOKUP JOIN`: put `| EVAL <field> = TO_STRING(null)` before the join instead (see `LOOKUP_FIELDS_UNMAPPED_ON_OLDER_INDICES` in the logs extraction query builder and `buildLookupJoinClause` in the entities grid).
+
 ## Entity AI Summary — index privileges
 
 The Entity AI Summary is persisted to the entity **metadata** datastream

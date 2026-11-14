@@ -12,6 +12,8 @@ import {
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
   MAPPING_VERSION,
+  LATEST_INDEX_MAPPINGS_VERSION,
+  LATEST_INDEX_MAPPINGS_VERSION_META_KEY,
   getLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
 import { getComponentTemplateName } from './component_templates';
@@ -49,7 +51,10 @@ export const getLatestEntityIndexTemplateConfig = (
   priority: 200,
   template: {
     mappings: {
-      _meta: { mappingsVersion: MAPPING_VERSION },
+      _meta: {
+        mappingsVersion: MAPPING_VERSION,
+        [LATEST_INDEX_MAPPINGS_VERSION_META_KEY]: LATEST_INDEX_MAPPINGS_VERSION,
+      },
       date_detection: false,
       dynamic_templates: [
         {
