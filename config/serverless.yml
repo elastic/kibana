@@ -259,6 +259,10 @@ xpack.alerting.rules.run.actions.max: 3000
 xpack.alerting.rules.run.timeout: 1m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
+# Serverless rules run with UIAM API keys. Every production region reached uiam on 2026-08-25
+# (https://github.com/elastic/response-ops-team/issues/675). A project override that pins this
+# back to es still wins over this file (https://github.com/elastic/response-ops-team/issues/719).
+xpack.alerting.rules.apiKeyType: 'uiam'
 # Alerting v2 mirrors the v1 serverless budget; the plugin default is the hosted budget (32000)
 xpack.alerting_v2.rules.maxScheduledPerMinute: 400
 # Alerting v2: cap ES|QL response size per rule execution. Each execution holds ~4x the
@@ -278,6 +282,10 @@ uiSettings:
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
 xpack.task_manager.metrics_reset_interval: 120000
+# Grant UIAM API keys and use them for background tasks, matching xpack.alerting.rules.apiKeyType.
+# A project override that pins api_key_type back to es still wins over this file.
+xpack.task_manager.api_key_type: 'uiam'
+xpack.task_manager.grant_uiam_api_keys: true
 
 # Reporting feature
 xpack.screenshotting.enabled: false

@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        expect(body.aggregated_fields.tags).to.eql([
+        expect(stripMissingUiamApiKeyTag(body.aggregated_fields.tags)).to.eql([
           'test-tag',
           'test-tag-1',
           'test-tag-2',
