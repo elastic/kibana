@@ -129,6 +129,74 @@ describe('useLatencyGrid', () => {
     expect(runEsql).toHaveBeenCalledTimes(2);
   });
 
+  describe('with the operations feature', () => {
+    const operationsTable: ESQLSearchResponse = {
+      columns: [
+        { name: 'service.name', type: 'keyword' },
+        { name: 'operation', type: 'keyword' },
+        ...['yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
+      ],
+      values: [['cart', 'GET /cart', 5, 40, 10]],
+    } as ESQLSearchResponse;
+    const isOperationsQuery = (query: string) => query.includes('BY service.name, operation, yi');
+    const createOperationsRunner = () =>
+      jest.fn(async (query: string) => {
+        if (query.includes('PERCENTILE')) return statsTable(100);
+        if (isOperationsQuery(query)) return operationsTable;
+        return gridTable([[1, 2, 7, 3]]);
+      });
+
+    it('loads the histograms after the grid, and not at all without the feature', async () => {
+      const runEsql = createOperationsRunner();
+      const { result } = renderHook(() =>
+        useLatencyGrid({ source, runEsql, targetBins: 60, loadOperations: true })
+      );
+      await waitFor(() => expect(result.current.operations).toBeDefined());
+      expect(result.current.operations).toHaveLength(1);
+      expect(result.current.operations?.[0].operation).toEqual({
+        service: 'cart',
+        name: 'GET /cart',
+      });
+      expect(runEsql).toHaveBeenCalledTimes(3);
+
+      const withoutFeature = createOperationsRunner();
+      const { result: plain } = renderHook(() =>
+        useLatencyGrid({ source, runEsql: withoutFeature, targetBins: 60 })
+      );
+      await waitFor(() => expect(plain.current.isLoading).toBe(false));
+      expect(withoutFeature.mock.calls.some(([query]) => isOperationsQuery(query))).toBe(false);
+    });
+
+    it('keeps the histograms of the source when only the columns change', async () => {
+      const runEsql = createOperationsRunner();
+      const { result, rerender } = renderHook(
+        (props: { targetBins: number }) =>
+          useLatencyGrid({ source, runEsql, loadOperations: true, ...props }),
+        { initialProps: { targetBins: 60 } }
+      );
+      await waitFor(() => expect(result.current.operations).toBeDefined());
+
+      rerender({ targetBins: 120 });
+      await waitFor(() => expect(result.current.timeGrid?.bins).toBe(120));
+      await waitFor(() => expect(result.current.operations).toBeDefined());
+      expect(runEsql.mock.calls.filter(([query]) => isOperationsQuery(query))).toHaveLength(1);
+    });
+
+    it('only loses the bands when the histogram query fails, never the grid', async () => {
+      const runEsql = jest.fn(async (query: string) => {
+        if (query.includes('PERCENTILE')) return statsTable(100);
+        if (isOperationsQuery(query)) throw new Error('boom');
+        return gridTable([[1, 2, 7, 3]]);
+      });
+      const { result } = renderHook(() =>
+        useLatencyGrid({ source, runEsql, targetBins: 60, loadOperations: true })
+      );
+      await waitFor(() => expect(result.current.operations).toEqual([]));
+      expect(result.current.grid?.cells.size).toBe(1);
+      expect(result.current.error).toBeUndefined();
+    });
+  });
+
   it('drops the answer of a source that was replaced', async () => {
     let releaseFirst: (table: ESQLSearchResponse) => void = () => {};
     let statsCalls = 0;

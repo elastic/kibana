@@ -13,6 +13,7 @@ import { parseDurationStats } from '../query/duration_rows';
 import {
   buildDurationStatsQuery,
   buildLatencyGridQuery,
+  buildOperationHistogramQuery,
   getMapQueryParts,
   getMapSampling,
 } from '../query/latency_map_query';
@@ -21,6 +22,8 @@ import { addTableToGrid, createEmptyGrid } from '../query/parse';
 import type { LatencyGrid } from '../query/parse';
 import { getTimeGrid } from '../query/time_grid';
 import type { TimeGrid } from '../query/time_grid';
+import { parseOperationHistograms } from '../operations/operation_bands';
+import type { OperationHistogram } from '../operations/operation_bands';
 
 export interface LatencyGridState {
   isLoading: boolean;
@@ -29,6 +32,8 @@ export interface LatencyGridState {
   grid?: LatencyGrid;
   /** How the dense part of the range was sampled; undefined when every span was read. */
   sampling?: MapSampling;
+  /** Per-operation duration histograms, once loaded; [] when their query failed. */
+  operations?: OperationHistogram[];
   isEmpty: boolean;
   error?: Error;
   /** The source of the map shown, once it finished loading. */
@@ -49,12 +54,15 @@ export function useLatencyGrid({
   runEsql,
   targetBins,
   enabled = true,
+  loadOperations = false,
 }: {
   source: TraceSource;
   runEsql: RunEsql;
   targetBins: number;
   /** Loads nothing until true: a map that has not been measured has no columns to ask for. */
   enabled?: boolean;
+  /** Also loads the per-operation duration histograms, for the duration bands. */
+  loadOperations?: boolean;
 }): LatencyGridState {
   // Keyed by content, so a host passing an equal source in a new object does not reload.
   const sourceKey = JSON.stringify(source);
@@ -64,6 +72,8 @@ export function useLatencyGrid({
   // The statistics of a source do not depend on the columns: a resize into another tier
   // reloads the grid with the stats it already has, not the percentiles again.
   const statsCache = useRef<{ key: string; stats: DurationStats }>();
+  // Neither do the operation histograms, which have no time axis.
+  const operationsCache = useRef<{ key: string; operations: OperationHistogram[] }>();
   const [state, setState] = useState<LatencyGridState>(LOADING);
 
   useEffect(() => {
@@ -110,7 +120,7 @@ export function useLatencyGrid({
           await run(buildLatencyGridQuery(stableSource, stats, timeGrid))
         );
       }
-      return {
+      const gridState: LatencyGridState = {
         isLoading: false,
         sampling,
         isEmpty: grid.cells.size === 0,
@@ -119,6 +129,23 @@ export function useLatencyGrid({
         grid,
         loadedSource: stableSource,
       };
+      if (!loadOperations) return gridState;
+      if (operationsCache.current?.key === sourceKey) {
+        return { ...gridState, operations: operationsCache.current.operations };
+      }
+      // The map shows while the histograms load; the bands join it when they arrive.
+      if (!controller.signal.aborted) setState(gridState);
+      let operations: OperationHistogram[];
+      try {
+        const table = await run(buildOperationHistogramQuery(stableSource, stats, sampling));
+        operations = parseOperationHistograms(table, sampling ? 1 / sampling.probability : 1);
+      } catch (error) {
+        if (controller.signal.aborted || isAbort(error)) throw error;
+        // Without the histograms the map only loses its bands, never the grid.
+        operations = [];
+      }
+      operationsCache.current = { key: sourceKey, operations };
+      return { ...gridState, operations };
     })().then(
       (next) => {
         if (!controller.signal.aborted) setState(next);
@@ -134,7 +161,7 @@ export function useLatencyGrid({
     );
 
     return () => controller.abort();
-  }, [sourceKey, stableSource, targetBins, enabled]);
+  }, [sourceKey, stableSource, targetBins, enabled, loadOperations]);
 
   return state;
 }

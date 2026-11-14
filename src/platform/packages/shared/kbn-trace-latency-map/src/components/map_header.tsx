@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -23,7 +24,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DurationStats } from '../types';
 import type { MapSampling } from '../query/latency_map_query';
-import { formatDuration } from '../geometry/ticks';
+import type { LatencyMapOperation, OperationBands } from '../operations/operation_bands';
+import { formatDuration, formatShare } from '../geometry/ticks';
+import { DurationGroupsPicker } from './duration_groups_picker';
 import { ErrorsMenu } from './errors_menu';
 
 export type SlowestPercentile = 90 | 95 | 99;
@@ -31,8 +34,6 @@ export const SLOWEST_PERCENTILES: SlowestPercentile[] = [90, 95, 99];
 
 const percentileDuration = (stats: DurationStats, percentile: SlowestPercentile) =>
   percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
-
-const formatShare = (share: number) => `${(share * 100).toFixed(1)}%`;
 
 /** Says what a sampled map draws exactly and what it estimates. */
 function SamplingNote({ stats, sampling }: { stats: DurationStats; sampling: MapSampling }) {
@@ -64,6 +65,10 @@ export function MapHeader({
   sampling,
   isDisabled,
   selectionSummary,
+  operationsWithGroups,
+  onFocusOperation,
+  focusedOperation,
+  onClearOperation,
 }: {
   stats?: DurationStats;
   failedOnly: boolean;
@@ -74,6 +79,12 @@ export function MapHeader({
   isDisabled: boolean;
   /** The selection at the far right, as in the prototype; the slowest shortcuts make way. */
   selectionSummary?: ReactNode;
+  /** Operations with distinct duration groups, offered in a dropdown while none is focused. */
+  operationsWithGroups?: OperationBands[];
+  onFocusOperation?: (operation: LatencyMapOperation) => void;
+  /** The operation the host is narrowed to, shown as a badge with a way back to all. */
+  focusedOperation?: LatencyMapOperation;
+  onClearOperation?: () => void;
 }) {
   const [isSlowestOpen, setIsSlowestOpen] = useState(false);
   return (
@@ -109,12 +120,39 @@ export function MapHeader({
           <SamplingNote stats={stats} sampling={sampling} />
         </EuiFlexItem>
       )}
+      {focusedOperation && onClearOperation && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            iconType="cross"
+            iconSide="right"
+            iconOnClick={onClearOperation}
+            iconOnClickAriaLabel={i18n.translate('traceLatencyMap.header.showAllOperations', {
+              defaultMessage: 'Show all operations',
+            })}
+            data-test-subj="traceLatencyMapOperationBadge"
+          >
+            {i18n.translate('traceLatencyMap.header.operationBadge', {
+              defaultMessage: 'Operation: {service} {operation}',
+              values: { service: focusedOperation.service, operation: focusedOperation.name },
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {!selectionSummary && onFocusOperation && operationsWithGroups?.length ? (
+        <EuiFlexItem grow={false}>
+          <DurationGroupsPicker
+            operations={operationsWithGroups}
+            onFocusOperation={onFocusOperation}
+          />
+        </EuiFlexItem>
+      ) : null}
       {!selectionSummary && (
         <EuiPopover
           button={
             <EuiButtonEmpty
               size="xs"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               isDisabled={isDisabled || !stats}
               onClick={() => setIsSlowestOpen((open) => !open)}

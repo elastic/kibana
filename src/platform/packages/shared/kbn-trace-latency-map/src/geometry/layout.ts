@@ -37,6 +37,8 @@ export const LAYOUT = {
    * under the header, so the slowest row is easy to catch from the top.
    */
   grabAbovePx: 8,
+  /** Room right of the plot for the duration band labels, when bands are drawn. */
+  bandLabelsWidth: 94,
 };
 
 /**
@@ -48,9 +50,11 @@ const TIME_BIN_TIERS = [LAYOUT.minTimeBins, 60, 80, 120, 160, 240, 320, MAX_TIME
 /**
  * Time columns for a map of this width: the largest tier that gives cells no narrower than
  * `LAYOUT.cellWidth`, so that a resize loads again only when it crosses into another tier.
+ * A map that may draw band labels counts as if their gutter were always there, so bands
+ * appearing after the grid change the margin but never the tier - nothing reloads.
  */
-export const getTimeBinsForWidth = (width: number) => {
-  const plotWidth = Math.max(width, LAYOUT.minWidth) - LAYOUT.plotInset.horizontal;
+export const getTimeBinsForWidth = (width: number, rightGutter = 0) => {
+  const plotWidth = Math.max(width, LAYOUT.minWidth) - LAYOUT.plotInset.horizontal - rightGutter;
   const fitting = TIME_BIN_TIERS.filter((tier) => tier * LAYOUT.cellWidth <= plotWidth);
   return fitting.length ? Math.max(...fitting) : LAYOUT.minTimeBins;
 };

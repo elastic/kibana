@@ -34,7 +34,7 @@ export function ErrorsMenu({
         <EuiButtonEmpty
           size="xs"
           color="danger"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           isDisabled={isDisabled}
           onClick={() => setIsOpen((open) => !open)}

@@ -44,10 +44,15 @@ import { useLatencyMapColors } from '../hooks/use_latency_map_colors';
 import { useSettledWidth } from '../hooks/use_settled_width';
 import { endGesture, moveGesture, startGesture } from '../selection/gesture';
 import type { Gesture } from '../selection/gesture';
+import { getMapBands } from '../operations/operation_bands';
+import type { LatencyMapOperation } from '../operations/operation_bands';
+import { operationToEsqlCondition } from '../operations/to_esql';
+import type { DurationBand } from '../operations/detect_bands';
 import { getKeyboardRange, reduceKeyboard } from '../selection/keyboard';
 import type { KeyboardState } from '../selection/keyboard';
 import { getGridTotals, getSelectionCounts, isFailureRegion } from '../selection/counts';
 import { selectionToEsqlCondition } from '../selection/to_esql';
+import { BandMarkers } from './band_markers';
 import { CellDetails } from './cell_details';
 import { LatencyHeatmap } from './latency_heatmap';
 import { LatencyMapLegend } from './legend';
@@ -105,6 +110,16 @@ export interface LatencyMapProps {
   onLoad?: (source: TraceSource) => void;
   /** Buttons and links of the host, next to the selection's bounds. */
   renderSelectionActions?: (selection: LatencyMapSelection, esqlCondition: string) => ReactNode;
+  /**
+   * Narrow the host to one operation, with the operation's ES|QL condition
+   * (`operationToEsqlCondition`), ready to put in a query. With this, the map loads the
+   * per-operation duration histograms and offers the duration-groups dropdown; a focused
+   * map draws the groups as labelled bands right of the plot, where a click selects one.
+   */
+  onFocusOperation?: (operation: LatencyMapOperation, esqlCondition: string) => void;
+  /** The operation the host is narrowed to: shows the badge and reserves the band gutter. */
+  focusedOperation?: LatencyMapOperation;
+  onClearOperation?: () => void;
   /** Height of the chart, axes included, in pixels. */
   height?: number;
   /** IANA time zone of the time axis. The browser's when absent. */
@@ -142,6 +157,9 @@ export function LatencyMap({
   onStats,
   onLoad,
   renderSelectionActions,
+  onFocusOperation,
+  focusedOperation,
+  onClearOperation,
   height = LAYOUT.defaultHeight,
   timeZone,
   'data-test-subj': dataTestSubj = 'traceLatencyMap',
@@ -154,11 +172,31 @@ export function LatencyMap({
   // Nothing is loaded before the map is measured, and a resize is followed once it stops, into
   // the time columns of its tier: dragging a window edge does not load the data again.
   const settledWidth = useSettledWidth(measuredWidth);
-  const targetBins = getTimeBinsForWidth(settledWidth);
+  // With the operations feature, the band gutter always counts against the bin tier, so
+  // bands appearing after the grid change the margin but never the tier - nothing reloads.
+  const operationsEnabled = Boolean(onFocusOperation || focusedOperation);
+  const targetBins = getTimeBinsForWidth(
+    settledWidth,
+    operationsEnabled ? LAYOUT.bandLabelsWidth : 0
+  );
   const mapSource = getMapSource(source, { unit, selectionCondition, mapFilters });
-  const { grid, stats, timeGrid, sampling, isLoading, isEmpty, error, loadedSource } =
-    useLatencyGrid({ source: mapSource, runEsql, targetBins, enabled: settledWidth > 0 });
+  const { grid, stats, timeGrid, sampling, operations, isLoading, isEmpty, error, loadedSource } =
+    useLatencyGrid({
+      source: mapSource,
+      runEsql,
+      targetBins,
+      enabled: settledWidth > 0,
+      loadOperations: operationsEnabled,
+    });
   const sampled = Boolean(sampling);
+  const mapBands = useMemo(
+    () => (operations && stats ? getMapBands(operations, stats) : undefined),
+    [operations, stats]
+  );
+  // Room for the band labels only while bands are drawn. A host focused on one operation
+  // has bands to show, so the room is there from the start and the map does not shift later.
+  const showBands = Boolean(mapBands?.focused ?? focusedOperation);
+  const rightMargin = operationsEnabled && showBands ? LAYOUT.bandLabelsWidth : 0;
 
   const callbacks = useRef({ onStats, onLoad });
   callbacks.current = { onStats, onLoad };
@@ -172,16 +210,33 @@ export function LatencyMap({
   // Where the chart put its cells. Known from the first cell it tells of, and only for as long as
   // the chart keeps its size and its columns.
   const plotKey = `${width}x${height}:${timeGrid?.fromMs}:${timeGrid?.binMs}:${timeGrid?.bins}`;
-  const [calibrated, setCalibrated] = useState<{ key: string; plot: PlotArea }>();
-  const plot = calibrated?.key === plotKey ? calibrated.plot : undefined;
+  const [calibrated, setCalibrated] = useState<{
+    key: string;
+    plot: PlotArea;
+    rightMargin: number;
+  }>();
+  const plot = useMemo(() => {
+    if (!calibrated || calibrated.key !== plotKey) return undefined;
+    if (calibrated.rightMargin === rightMargin || !timeGrid) return calibrated.plot;
+    // The band gutter only narrows the grid, so the calibration follows it exactly: same
+    // corner and rows, the columns squeezed by the margin's share of each. The chart's
+    // next event confirms it.
+    return {
+      ...calibrated.plot,
+      colWidth:
+        calibrated.plot.colWidth - (rightMargin - calibrated.rightMargin) / timeGrid.bins,
+    };
+  }, [calibrated, plotKey, rightMargin, timeGrid]);
   const handlePlot = useCallback(
     (next: PlotArea) =>
       setCalibrated((previous) =>
-        previous?.key === plotKey && isSamePlot(previous.plot, next)
+        previous?.key === plotKey &&
+        previous.rightMargin === rightMargin &&
+        isSamePlot(previous.plot, next)
           ? previous
-          : { key: plotKey, plot: next }
+          : { key: plotKey, plot: next, rightMargin }
       ),
-    [plotKey]
+    [plotKey, rightMargin]
   );
 
   const geometry = useMemo(
@@ -370,6 +425,18 @@ export function LatencyMap({
     (event.target as Element).releasePointerCapture?.(event.pointerId);
     if (end.type === 'range') commitRange(end.range);
     else if (end.type === 'click') clickCell(end.cell);
+  };
+
+  const focusOperation = useCallback(
+    (operation: LatencyMapOperation) =>
+      onFocusOperation?.(operation, operationToEsqlCondition(operation)),
+    [onFocusOperation]
+  );
+
+  // A band covers every column: its duration rows across the whole range.
+  const selectBand = (band: DurationBand, label: string) => {
+    if (!geometry) return;
+    commitRange({ x0: 0, x1: geometry.bins, y0: band.lowRow, y1: band.highRow + 1 }, label);
   };
 
   const selectSlowest = (percentile: SlowestPercentile) => {
@@ -666,6 +733,7 @@ export function LatencyMap({
             colors={colors}
             failedOnly={failedOnly}
             height={height}
+            rightMargin={rightMargin}
             highlight={highlight}
             summary={summary}
             onBrush={commitRange}
@@ -673,6 +741,16 @@ export function LatencyMap({
             onPlot={handlePlot}
             onCellHover={setHoverCell}
           />
+          {plot && mapBands?.focused && (
+            <BandMarkers
+              operationBands={mapBands.focused}
+              geometry={geometry}
+              colors={colors}
+              width={width}
+              height={height}
+              onSelectBand={selectBand}
+            />
+          )}
           {plot && !keyboard && (
             <SelectionOverlay
               geometry={geometry}
@@ -752,6 +830,10 @@ export function LatencyMap({
         sampling={grid && !isEmpty ? sampling : undefined}
         isDisabled={!geometry || isEmpty}
         selectionSummary={selectionSummary || undefined}
+        operationsWithGroups={onFocusOperation ? mapBands?.operations : undefined}
+        onFocusOperation={onFocusOperation ? focusOperation : undefined}
+        focusedOperation={focusedOperation}
+        onClearOperation={onClearOperation}
       />
       <EuiSpacer size="s" />
       {body}

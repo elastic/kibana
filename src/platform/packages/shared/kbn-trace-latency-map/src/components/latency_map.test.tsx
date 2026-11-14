@@ -123,11 +123,16 @@ beforeAll(() => {
 
 function renderMap(
   props: Partial<LatencyMapProps> = {},
-  table: ESQLSearchResponse = gridTable(CELLS)
+  table: ESQLSearchResponse = gridTable(CELLS),
+  operationsTable?: ESQLSearchResponse
 ) {
-  const runEsql = jest.fn(async (query: string) =>
-    query.includes('PERCENTILE') ? statsTable : table
-  );
+  const runEsql = jest.fn(async (query: string) => {
+    if (query.includes('PERCENTILE')) return statsTable;
+    if (operationsTable && query.includes('BY service.name, operation, yi')) {
+      return operationsTable;
+    }
+    return table;
+  });
   const onSelectionCommit = jest.fn();
   const mapProps = { source, runEsql, onSelectionCommit, timeZone: 'UTC', ...props };
   const view = render(<LatencyMap {...mapProps} />);
@@ -540,6 +545,85 @@ describe('LatencyMap', () => {
         expect.objectContaining({ spans: 40, failed: 10, from: '2026-10-26T10:04:30.000Z' })
       );
       expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with operations', () => {
+    const operationsColumns = [
+      { name: 'service.name', type: 'keyword' },
+      { name: 'operation', type: 'keyword' },
+      ...['yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
+    ];
+    /** Two bimodal operations, neither dominant: the picker offers both. */
+    const mixedOperations = {
+      columns: operationsColumns,
+      values: [
+        ['cart', 'GET /cart', 5, 200, 0],
+        ['cart', 'GET /cart', 15, 150, 30],
+        ['checkout', 'POST /checkout', 6, 180, 0],
+        ['checkout', 'POST /checkout', 16, 120, 0],
+      ],
+    } as ESQLSearchResponse;
+    /** One operation holds every span: the map focuses on it and draws its bands. */
+    const focusedOperations = {
+      columns: operationsColumns,
+      values: [
+        ['cart', 'GET /cart', 5, 200, 0],
+        ['cart', 'GET /cart', 15, 150, 30],
+      ],
+    } as ESQLSearchResponse;
+
+    it('offers the operations with duration groups in a dropdown, which focuses one', async () => {
+      const onFocusOperation = jest.fn();
+      renderMap({ onFocusOperation }, gridTable(CELLS), mixedOperations);
+      fireEvent.click(await screen.findByTestId('traceLatencyMapDurationGroups'));
+      expect(screen.getByTestId('traceLatencyMapDurationGroup-1')).toHaveTextContent('cart');
+      fireEvent.click(screen.getByTestId('traceLatencyMapDurationGroup-1'));
+      expect(onFocusOperation).toHaveBeenCalledWith(
+        { service: 'cart', name: 'GET /cart' },
+        'service.name == "cart" AND (transaction.name == "GET /cart" OR span.name == "GET /cart" OR name == "GET /cart")'
+      );
+    });
+
+    it('hides the dropdown while a selection exists, as the slowest shortcuts do', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ onFocusOperation: jest.fn(), selection }, gridTable(CELLS), mixedOperations);
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      expect(screen.queryByTestId('traceLatencyMapDurationGroups')).not.toBeInTheDocument();
+    });
+
+    it('draws the bands of a dominant operation, and a click selects the band', async () => {
+      const { onSelectionCommit } = renderMap(
+        { onFocusOperation: jest.fn() },
+        gridTable(CELLS),
+        focusedOperations
+      );
+      await waitForChart();
+      hover(4, 5);
+      const band = await screen.findByTestId('traceLatencyMapBand-1');
+      fireEvent.click(band);
+      const [selection] = onSelectionCommit.mock.calls[0];
+      // The whole range, over the band's rows.
+      expect(selection.from).toBe(source.timeRange.from);
+      expect(selection.to).toBe(source.timeRange.to);
+      expect(selection.label).toBe('Fast group');
+    });
+
+    it('shows the focused operation as a badge whose cross clears it', async () => {
+      const onClearOperation = jest.fn();
+      renderMap(
+        {
+          onFocusOperation: jest.fn(),
+          focusedOperation: { service: 'cart', name: 'GET /cart' },
+          onClearOperation,
+        },
+        gridTable(CELLS),
+        focusedOperations
+      );
+      const badge = await screen.findByTestId('traceLatencyMapOperationBadge');
+      expect(badge).toHaveTextContent('Operation: cart GET /cart');
+      fireEvent.click(screen.getByLabelText('Show all operations'));
+      expect(onClearOperation).toHaveBeenCalled();
     });
   });
 
