@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_NAME_BYTES, relativeLocation, sanitize, sanitizeLocation } from './sanitize';
+import { capLocation, capName, relativeLocation } from './sanitize';
+
+interface CallFrame {
+  functionName: string;
+  url?: string;
+  /** 0-based; -1 when unknown. */
+  lineNumber?: number;
+}
 
 /** The parts of a V8 CPU profile (`Profiler.Profile`) `summarizeProfile` reads. */
 export interface SummarizableProfile {
   nodes: ReadonlyArray<{
     id: number;
-    callFrame: {
-      functionName: string;
-      url?: string;
-      /** 0-based; -1 when unknown. */
-      lineNumber?: number;
-    };
+    callFrame: CallFrame;
     children?: readonly number[];
   }>;
   /** Microseconds on the profile's monotonic clock. */
@@ -41,7 +43,7 @@ export interface FrameSummary {
 }
 
 export interface KibanaFrameSummary extends FrameSummary {
-  /** Innermost Kibana callers of the call frame's heaviest caller chain. */
+  /** Nearest Kibana callers: the most common pair among the call frame's samples. */
   callers: CallerSummary[];
 }
 
@@ -73,243 +75,161 @@ const MAX_KIBANA_FRAMES = 3;
 const MAX_CALLERS = 2;
 const IDLE = '(idle)';
 const NOT_A_FRAME = new Set(['(program)', IDLE, '(root)']);
-const CHAIN_KEY_STRIDE = 16_777_216;
+
+interface Counted<T> {
+  value: T;
+  count: number;
+}
+
+const bump = <T>(counts: Map<string, Counted<T>>, key: string, value: T): void => {
+  const entry = counts.get(key);
+  if (entry) {
+    entry.count++;
+  } else {
+    counts.set(key, { value, count: 1 });
+  }
+};
 
 const isKibanaPath = (rel: string | undefined): boolean =>
   rel !== undefined &&
   (rel.startsWith('src/') || rel.startsWith('x-pack/') || rel.startsWith('node_modules/@kbn/'));
 
-const rawLocation = (url: string, lineNumber: number, root: string): string => {
-  const rel = relativeLocation(url, root);
-  if (rel === undefined) {
-    return '';
-  }
-  return lineNumber >= 0 ? `${rel}:${lineNumber + 1}` : rel;
-};
-
 const percentOf = (part: number, total: number): number =>
   total === 0 ? 0 : Math.round((part / total) * 1000) / 10;
 
-/**
- * Summarises a block's CPU profile: busy call frames, and the Kibana code they were reached from.
- * Memory follows node count: one record per distinct `callFrame`, per-node links in `Int32Array`s,
- * Kibana caller chains interned as `(frame, parentChain)` pairs, and sanitised strings built only
- * for the call frames in the output.
- */
+const compareStrings = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/** Most samples first; ties broken by location, then name, so the order is stable. */
+const compareFrames = (a: Counted<CallerSummary>, b: Counted<CallerSummary>): number =>
+  b.count - a.count ||
+  compareStrings(a.value.location ?? '', b.value.location ?? '') ||
+  compareStrings(a.value.name, b.value.name);
+
+const top = (counts: Map<string, Counted<CallerSummary>>, limit: number) =>
+  [...counts.entries()].sort(([, a], [, b]) => compareFrames(a, b)).slice(0, limit);
+
+const cap = ({ name, location }: CallerSummary): CallerSummary =>
+  location === undefined
+    ? { name: capName(name) }
+    : { name: capName(name), location: capLocation(location) };
+
+/** Summarises a block's CPU profile: busy call frames, and the Kibana code they were reached from. */
 export const summarizeProfile = (
-  profile: SummarizableProfile,
+  { nodes, samples = [], timeDeltas = [], startTime }: SummarizableProfile,
   { root, inBlockUntilUs }: SummarizeProfileOptions
 ): ProfileSummary => {
-  const { nodes, samples = [], timeDeltas = [], startTime } = profile;
-  const n = nodes.length;
-
-  let maxId = 0;
-  for (let i = 0; i < n; i++) {
-    if (nodes[i].id > maxId) {
-      maxId = nodes[i].id;
-    }
-  }
-  const indexOfId = new Int32Array(maxId + 1).fill(-1);
-  for (let i = 0; i < n; i++) {
-    indexOfId[nodes[i].id] = i;
-  }
-
-  const parent = new Int32Array(n).fill(-1);
-  for (let i = 0; i < n; i++) {
-    const { children } = nodes[i];
-    if (children) {
-      for (const childId of children) {
-        const childIndex = indexOfId[childId];
-        if (childIndex !== undefined && childIndex >= 0) {
-          parent[childIndex] = i;
-        }
-      }
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const parentById = new Map<number, number>();
+  for (const { id, children = [] } of nodes) {
+    for (const child of children) {
+      parentById.set(child, id);
     }
   }
 
-  // Distinct call frames. -1 = not a call frame ((program), (idle), (root)).
-  const frameOf = new Int32Array(n);
-  const frameKey = new Map<string, number>();
-  const frameNode: number[] = [];
-  const frameIsKibana: boolean[] = [];
+  const keyOf = ({ functionName, url = '', lineNumber = -1 }: CallFrame): string =>
+    `${functionName}\u0000${url}\u0000${lineNumber}`;
+
+  const describe = ({ functionName, url = '', lineNumber = -1 }: CallFrame): CallerSummary => {
+    const name = functionName || '(anonymous)';
+    const path = relativeLocation(url, root);
+    if (path === undefined) {
+      return { name };
+    }
+    return { name, location: lineNumber >= 0 ? `${path}:${lineNumber + 1}` : path };
+  };
+
+  // Matched on the full repo-relative path: a capped location can lose its `src/` prefix.
   const kibanaByUrl = new Map<string, boolean>();
-  for (let i = 0; i < n; i++) {
-    const { functionName, url = '', lineNumber = -1 } = nodes[i].callFrame;
+  const isKibana = ({ functionName, url = '' }: CallFrame): boolean => {
     if (NOT_A_FRAME.has(functionName)) {
-      frameOf[i] = -1;
-      continue;
+      return false;
     }
-    const key = `${lineNumber}\u0000${functionName}\u0000${url}`;
-    let f = frameKey.get(key);
-    if (f === undefined) {
-      f = frameNode.length;
-      frameKey.set(key, f);
-      frameNode.push(i);
-      let isKibana = kibanaByUrl.get(url);
-      if (isKibana === undefined) {
-        // Match on the repo-relative path before the location length limit: locations keep their
-        // end, so a cut location would lose its `src/` / `x-pack/` / `node_modules/@kbn/` prefix.
-        isKibana = isKibanaPath(relativeLocation(url, root));
-        kibanaByUrl.set(url, isKibana);
-      }
-      frameIsKibana.push(isKibana);
+    let kibana = kibanaByUrl.get(url);
+    if (kibana === undefined) {
+      kibana = isKibanaPath(relativeLocation(url, root));
+      kibanaByUrl.set(url, kibana);
     }
-    frameOf[i] = f;
-  }
-  frameKey.clear();
-  kibanaByUrl.clear();
-
-  // Nearest Kibana node (self or ancestor), and the interned Kibana caller chain above it.
-  const nearestKibana = new Int32Array(n).fill(-2); // -2 = not computed, -1 = none
-  const chainOfNode = new Int32Array(n).fill(-1);
-  const chainFrame: number[] = [];
-  const chainParent: number[] = [];
-  const chainIntern = new Map<number, number>();
-  const internChain = (frame: number, parentChain: number): number => {
-    const key = frame * CHAIN_KEY_STRIDE + (parentChain + 1);
-    let id = chainIntern.get(key);
-    if (id === undefined) {
-      id = chainFrame.length;
-      chainFrame.push(frame);
-      chainParent.push(parentChain);
-      chainIntern.set(key, id);
-    }
-    return id;
+    return kibana;
   };
-  const pending: number[] = [];
-  const resolve = (start: number) => {
-    for (let i = start; i !== -1 && nearestKibana[i] === -2; i = parent[i]) {
-      pending.push(i);
-    }
-    while (pending.length > 0) {
-      const i = pending.pop()!;
-      const p = parent[i];
-      const above = p === -1 ? -1 : nearestKibana[p];
-      const f = frameOf[i];
-      if (f !== -1 && frameIsKibana[f]) {
-        nearestKibana[i] = i;
-        chainOfNode[i] = above === -1 ? -1 : internChain(frameOf[above], chainOfNode[above]);
-      } else {
-        nearestKibana[i] = above;
-      }
-    }
-  };
-  for (let i = 0; i < n; i++) {
-    resolve(i);
-  }
-  chainIntern.clear();
 
-  const selfCount = new Int32Array(frameNode.length);
-  const kibanaCount = new Int32Array(frameNode.length);
-  const byCallers = new Map<number, number>();
+  const selfCounts = new Map<string, Counted<CallerSummary>>();
+  const kibanaCounts = new Map<string, Counted<CallerSummary>>();
+  // Per Kibana call frame: samples counted by the callers that get printed.
+  const callerCounts = new Map<string, Map<string, Counted<CallFrame[]>>>();
   let busy = 0;
   let t = startTime;
   for (let s = 0; s < samples.length; s++) {
     t += timeDeltas[s] ?? 0;
+    // Samples are in time order, so the first one after the block's end ends the block.
     if (inBlockUntilUs !== undefined && t > inBlockUntilUs) {
       break;
     }
-    const i = indexOfId[samples[s]];
-    if (i === undefined || i < 0 || nodes[i].callFrame.functionName === IDLE) {
+    const leaf = nodeById.get(samples[s]);
+    if (!leaf || leaf.callFrame.functionName === IDLE) {
       continue;
     }
     busy++;
-    const f = frameOf[i];
-    if (f !== -1) {
-      selfCount[f]++;
+    if (!NOT_A_FRAME.has(leaf.callFrame.functionName)) {
+      bump(selfCounts, keyOf(leaf.callFrame), describe(leaf.callFrame));
     }
-    const k = nearestKibana[i];
-    if (k !== -1) {
-      const kf = frameOf[k];
-      kibanaCount[kf]++;
-      const key = kf * CHAIN_KEY_STRIDE + (chainOfNode[k] + 1);
-      byCallers.set(key, (byCallers.get(key) ?? 0) + 1);
-    }
-  }
 
-  const describe = (f: number): CallerSummary => {
-    const { functionName, url = '', lineNumber = -1 } = nodes[frameNode[f]].callFrame;
-    const name = sanitize(functionName || '(anonymous)', {
-      maxBytes: MAX_NAME_BYTES,
-      keep: 'start',
-    });
-    const location = sanitizeLocation(url, lineNumber, root);
-    return location !== undefined ? { name, location } : { name };
-  };
-
-  const compareFrames = (counts: Int32Array, a: number, b: number): number => {
-    const diff = counts[b] - counts[a];
-    if (diff !== 0) {
-      return diff;
-    }
-    const frameA = nodes[frameNode[a]].callFrame;
-    const frameB = nodes[frameNode[b]].callFrame;
-    const locA = rawLocation(frameA.url ?? '', frameA.lineNumber ?? -1, root);
-    const locB = rawLocation(frameB.url ?? '', frameB.lineNumber ?? -1, root);
-    if (locA !== locB) {
-      return locA < locB ? -1 : 1;
-    }
-    const nameA = frameA.functionName || '(anonymous)';
-    const nameB = frameB.functionName || '(anonymous)';
-    return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
-  };
-
-  const top = (counts: Int32Array, limit: number): number[] => {
-    const out: number[] = [];
-    for (let f = 0; f < counts.length; f++) {
-      if (counts[f] === 0) {
-        continue;
-      }
-      out.push(f);
-      out.sort((a, b) => compareFrames(counts, a, b));
-      if (out.length > limit) {
-        out.pop();
+    // Walk up the stack: the nearest Kibana call frame, then up to MAX_CALLERS Kibana callers.
+    const kibanaStack: CallFrame[] = [];
+    for (
+      let id: number | undefined = leaf.id;
+      id !== undefined && kibanaStack.length <= MAX_CALLERS;
+      id = parentById.get(id)
+    ) {
+      const callFrame = nodeById.get(id)?.callFrame;
+      if (callFrame && isKibana(callFrame)) {
+        kibanaStack.push(callFrame);
       }
     }
-    return out;
-  };
-
-  const heaviestChain = new Map<number, [chain: number, samples: number]>();
-  for (const [key, count] of byCallers) {
-    const kf = Math.floor(key / CHAIN_KEY_STRIDE);
-    const chain = (key % CHAIN_KEY_STRIDE) - 1;
-    const best = heaviestChain.get(kf);
-    if (!best || count > best[1]) {
-      heaviestChain.set(kf, [chain, count]);
+    const [frame, ...callers] = kibanaStack;
+    if (!frame) {
+      continue;
     }
+    const frameKey = keyOf(frame);
+    bump(kibanaCounts, frameKey, describe(frame));
+    let byCallers = callerCounts.get(frameKey);
+    if (!byCallers) {
+      byCallers = new Map();
+      callerCounts.set(frameKey, byCallers);
+    }
+    bump(byCallers, callers.map(keyOf).join('\u0001'), callers);
   }
 
-  const frames: FrameSummary[] = top(selfCount, MAX_FRAMES).map((f) => ({
-    ...describe(f),
-    percent: percentOf(selfCount[f], busy),
+  const frames: FrameSummary[] = top(selfCounts, MAX_FRAMES).map(([, { value, count }]) => ({
+    ...cap(value),
+    percent: percentOf(count, busy),
   }));
 
-  const kibanaFrames: KibanaFrameSummary[] = top(kibanaCount, MAX_KIBANA_FRAMES).map((f) => {
-    const callers: CallerSummary[] = [];
-    for (
-      let c = heaviestChain.get(f)?.[0] ?? -1;
-      c !== -1 && callers.length < MAX_CALLERS;
-      c = chainParent[c]
-    ) {
-      callers.push(describe(chainFrame[c]));
+  const kibanaFrames: KibanaFrameSummary[] = top(kibanaCounts, MAX_KIBANA_FRAMES).map(
+    ([frameKey, { value, count }]) => {
+      let mostCommon: Counted<CallFrame[]> | undefined;
+      for (const entry of callerCounts.get(frameKey)?.values() ?? []) {
+        if (!mostCommon || entry.count > mostCommon.count) {
+          mostCommon = entry;
+        }
+      }
+      return {
+        ...cap(value),
+        percent: percentOf(count, busy),
+        callers: (mostCommon?.value ?? []).map((caller) => cap(describe(caller))),
+      };
     }
-    return {
-      ...describe(f),
-      percent: percentOf(kibanaCount[f], busy),
-      callers,
-    };
-  });
+  );
 
-  const [firstKibana] = kibanaFrames;
+  const [first] = kibanaFrames;
   return {
     samples: busy,
     frames,
     kibanaFrames,
-    ...(firstKibana
+    ...(first
       ? {
           topKibanaFrame: {
-            ...(firstKibana.location !== undefined ? { location: firstKibana.location } : {}),
-            percent: firstKibana.percent,
+            ...(first.location !== undefined ? { location: first.location } : {}),
+            percent: first.percent,
           },
         }
       : {}),

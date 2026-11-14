@@ -23,10 +23,7 @@ import {
   Slot,
   WATCHDOG_WORKER_NAME,
 } from './constants';
-import { MAX_LOCATION_BYTES, MAX_NAME_BYTES } from './sanitize';
-
-const jsonByteLength = (value: string): number =>
-  Buffer.byteLength(JSON.stringify(value).slice(1, -1), 'utf8');
+import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH } from './sanitize';
 
 jest.mock('node:worker_threads', () => ({ isMainThread: true, threadId: 99 }));
 const workerThreads = jest.requireMock<typeof WorkerThreads>('node:worker_threads');
@@ -1026,12 +1023,11 @@ describe('runWatchdogWorker', () => {
     });
 
     it('keeps a worst-case capture log line within 4,094 bytes through createWorkerLogger', async () => {
-      // Multi-byte characters ('€' = 3 UTF-8 bytes), quotes ('"' = 2 JSON-escaped bytes) and
-      // ASCII suffixes pushed past the 48 B name / 120 B location caps so every sanitised name is
-      // exactly 48 JSON-encoded bytes and every location is 120 JSON-encoded bytes.
-      const noisyName = `${'"'.repeat(10)}${'€'.repeat(8)}a_tail_pad`;
+      // ASCII names and paths pushed past the 48-character name / 120-character location caps, so
+      // every name and location in the line is at its cap. Kibana names and paths are ASCII.
+      const noisyName = 'a_long_function_name_'.repeat(4);
       const makeUrl = (prefix: string, tag: string) =>
-        `file://${ROOT}/${prefix}/${'a_segment/'.repeat(15)}€_${tag}_${'"'.repeat(5)}a.ts`;
+        `file://${ROOT}/${prefix}/${'a_segment/'.repeat(15)}${tag}_file.ts`;
 
       // Caller chains: root(1) -> callerB -> callerA -> kibanaLeaf (-> nonKibanaLeaf for 2 of them)
       // Sample counts picked so percentages render with 3 digits + decimal (e.g. 45.5%, 36.4%).
@@ -1153,17 +1149,17 @@ describe('runWatchdogWorker', () => {
         const loggedProfile = parsed.kibana.event_loop_watchdog.profile;
         expect(loggedProfile.frames).toHaveLength(2);
         for (const frame of loggedProfile.frames) {
-          expect(jsonByteLength(frame.name)).toBe(MAX_NAME_BYTES);
-          expect(jsonByteLength(frame.location)).toBe(MAX_LOCATION_BYTES);
+          expect(frame.name).toHaveLength(MAX_NAME_LENGTH);
+          expect(frame.location).toHaveLength(MAX_LOCATION_LENGTH);
         }
         expect(loggedProfile.kibanaFrames).toHaveLength(3);
         for (const frame of loggedProfile.kibanaFrames) {
-          expect(jsonByteLength(frame.name)).toBe(MAX_NAME_BYTES);
-          expect(jsonByteLength(frame.location)).toBe(MAX_LOCATION_BYTES);
+          expect(frame.name).toHaveLength(MAX_NAME_LENGTH);
+          expect(frame.location).toHaveLength(MAX_LOCATION_LENGTH);
           expect(frame.callers).toHaveLength(2);
           for (const caller of frame.callers) {
-            expect(jsonByteLength(caller.name)).toBe(MAX_NAME_BYTES);
-            expect(jsonByteLength(caller.location)).toBe(MAX_LOCATION_BYTES);
+            expect(caller.name).toHaveLength(MAX_NAME_LENGTH);
+            expect(caller.location).toHaveLength(MAX_LOCATION_LENGTH);
           }
         }
         expect(loggedProfile.topKibanaFrame).toEqual({

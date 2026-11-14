@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { summarizeProfile, type SummarizableProfile } from './profile_summary';
-import { MAX_LOCATION_BYTES, MAX_NAME_BYTES } from './sanitize';
+import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH } from './sanitize';
 
 const ROOT = '/kibana';
 
@@ -147,6 +147,27 @@ describe('summarizeProfile', () => {
     });
   });
 
+  it('picks the most common pair of printed callers, not the heaviest full caller chain', () => {
+    // A <- B <- X (40) and A <- B <- Y (40) both print as A <- B (80), which beats A <- C (50).
+    const summary = summarizeProfile(
+      buildProfile([
+        ...Array.from({ length: 40 }, () => ['hot', 'callerA', 'callerB', 'callerX']),
+        ...Array.from({ length: 40 }, () => ['hot', 'callerA', 'callerB', 'callerY']),
+        ...Array.from({ length: 50 }, () => ['hot', 'callerA', 'callerC']),
+      ]),
+      { root: ROOT }
+    );
+    expect(summary.kibanaFrames[0]).toEqual({
+      name: 'hot',
+      location: 'src/hot.ts:10',
+      percent: 100,
+      callers: [
+        { name: 'callerA', location: 'src/callerA.ts:10' },
+        { name: 'callerB', location: 'src/callerB.ts:10' },
+      ],
+    });
+  });
+
   it('counts (program) as busy but not a call frame, keeps GC as a call frame, and ignores (idle)', () => {
     const summary = summarizeProfile(
       buildProfile([['(idle)'], ['(idle)'], ['(program)'], ['(garbage collector)']]),
@@ -183,7 +204,7 @@ describe('summarizeProfile', () => {
     });
   });
 
-  it('caps frames at 2, kibanaFrames at 3, callers at 2, string lengths at MAX_NAME_BYTES / MAX_LOCATION_BYTES, and breaks ties by location', () => {
+  it('caps frames at 2, kibanaFrames at 3, callers at 2, string lengths at MAX_NAME_LENGTH / MAX_LOCATION_LENGTH, and breaks ties by location', () => {
     const longName = 'fn_' + 'a'.repeat(100);
     const longPath = `file://${ROOT}/src/${'segment/'.repeat(15)}deep_kibana.ts`;
     const tiedProfile = buildProfile([
@@ -215,13 +236,9 @@ describe('summarizeProfile', () => {
       ]),
       { root: ROOT }
     );
-    expect(Buffer.byteLength(JSON.stringify(longOnly.kibanaFrames[0].name).slice(1, -1))).toBe(
-      MAX_NAME_BYTES
-    );
-    expect(
-      Buffer.byteLength(JSON.stringify(longOnly.kibanaFrames[0].location!).slice(1, -1))
-    ).toBeLessThanOrEqual(MAX_LOCATION_BYTES);
-    expect(longOnly.kibanaFrames[0].location!.startsWith('…')).toBe(true);
+    expect(longOnly.kibanaFrames[0].name).toHaveLength(MAX_NAME_LENGTH);
+    expect(longOnly.kibanaFrames[0].location).toHaveLength(MAX_LOCATION_LENGTH);
+    expect(longOnly.kibanaFrames[0].location!.startsWith('...')).toBe(true);
     expect(longOnly.kibanaFrames[0].callers).toEqual([
       { name: 'callerOne', location: 'src/callerOne.ts:10' },
       { name: 'callerTwo', location: 'src/callerTwo.ts:10' },
@@ -293,9 +310,9 @@ describe('summarizeProfile', () => {
     );
     expect(summary.kibanaFrames).toHaveLength(1);
     expect(summary.kibanaFrames[0].name).toBe('deepHandler');
-    // The truncated location lost its `node_modules/@kbn/` prefix because keep: 'end' kept the tail,
+    // The capped location lost its `node_modules/@kbn/` prefix because capping keeps the end,
     // yet it was still recognised as a Kibana frame.
-    expect(summary.kibanaFrames[0].location!.startsWith('…')).toBe(true);
+    expect(summary.kibanaFrames[0].location!.startsWith('...')).toBe(true);
     expect(summary.kibanaFrames[0].location!.endsWith('/handler.js:30')).toBe(true);
     expect(summary.topKibanaFrame).toEqual({
       location: summary.kibanaFrames[0].location,
@@ -320,10 +337,10 @@ describe('summarizeProfile', () => {
     expect(summary.frames).toHaveLength(2);
     expect(summary.kibanaFrames).toHaveLength(3);
     for (const frame of summary.kibanaFrames) {
-      expect(frame.location).toMatch(/^(src\/|x-pack\/|node_modules\/@kbn\/|…)/);
+      expect(frame.location).toMatch(/^(src\/|x-pack\/|node_modules\/@kbn\/|\.\.\.)/);
       expect(frame.callers.length).toBeLessThanOrEqual(2);
       for (const caller of frame.callers) {
-        expect(caller.location).toMatch(/^(src\/|x-pack\/|node_modules\/@kbn\/|…)/);
+        expect(caller.location).toMatch(/^(src\/|x-pack\/|node_modules\/@kbn\/|\.\.\.)/);
       }
     }
     expect(summary.topKibanaFrame).toEqual({

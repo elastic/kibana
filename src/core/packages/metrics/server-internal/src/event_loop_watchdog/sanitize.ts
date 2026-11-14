@@ -7,123 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { basename, isAbsolute, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const MAX_NAME_BYTES = 48;
-export const MAX_LOCATION_BYTES = 120;
-const ELLIPSIS = '…';
-const ELLIPSIS_BYTES = 3;
+export const MAX_NAME_LENGTH = 48;
+export const MAX_LOCATION_LENGTH = 120;
+const ELLIPSIS = '...';
 
-export interface SanitizeOptions {
-  maxBytes: number;
-  keep: 'start' | 'end';
-}
+/** C0/C1 control characters (incl. CR/LF and ESC) could forge log lines or terminal escapes. */
+const isControlCharacter = (code: number): boolean => code < 0x20 || (code >= 0x7f && code <= 0x9f);
 
-/** C0/C1 control characters and lone UTF-16 surrogates. */
-const isUnsafeCodePoint = (code: number): boolean =>
-  code < 0x20 || (code >= 0x7f && code <= 0x9f) || (code >= 0xd800 && code <= 0xdfff);
+const replaceControlCharacters = (value: string): string =>
+  Array.from(value, (char) => (isControlCharacter(char.charCodeAt(0)) ? '?' : char)).join('');
 
-/** Byte length of a single valid code point once JSON-encoded (`"` and `\` are escaped). */
-const jsonCharBytes = (char: string, code: number): number => {
-  if (char === '"' || char === '\\') {
-    return 2;
-  }
-  if (code <= 0x7f) {
-    return 1;
-  }
-  if (code <= 0x7ff) {
-    return 2;
-  }
-  if (code <= 0xffff) {
-    return 3;
-  }
-  return 4;
-};
+/** Keeps the start of a function name, capped at `MAX_NAME_LENGTH` characters. */
+export const capName = (name: string): string =>
+  replaceControlCharacters(name.slice(0, MAX_NAME_LENGTH));
 
-/**
- * Replaces control characters and lone surrogates with `?`, and bounds `value` to `maxBytes`
- * JSON-encoded UTF-8 bytes without splitting a code point.
- */
-export const sanitize = (value: string, { maxBytes, keep }: SanitizeOptions): string => {
-  const chars: string[] = [];
-  const sizes: number[] = [];
-  let totalBytes = 0;
+/** Keeps the end of a location (file name and line), capped at `MAX_LOCATION_LENGTH` characters. */
+export const capLocation = (location: string): string =>
+  replaceControlCharacters(
+    location.length <= MAX_LOCATION_LENGTH
+      ? location
+      : `${ELLIPSIS}${location.slice(ELLIPSIS.length - MAX_LOCATION_LENGTH)}`
+  );
 
-  for (const raw of value) {
-    const code = raw.codePointAt(0)!;
-    const char = isUnsafeCodePoint(code) ? '?' : raw;
-    const size = jsonCharBytes(char, isUnsafeCodePoint(code) ? 0x3f : code);
-    chars.push(char);
-    sizes.push(size);
-    totalBytes += size;
-  }
-
-  if (totalBytes <= maxBytes) {
-    return chars.join('');
-  }
-
-  if (keep === 'start') {
-    let used = 0;
-    let end = 0;
-    while (end < chars.length && used + sizes[end] <= maxBytes) {
-      used += sizes[end];
-      end++;
-    }
-    return chars.slice(0, end).join('');
-  }
-
-  if (maxBytes < ELLIPSIS_BYTES) {
-    return '';
-  }
-  const tailBudget = maxBytes - ELLIPSIS_BYTES;
-  let used = 0;
-  let start = chars.length;
-  while (start > 0 && used + sizes[start - 1] <= tailBudget) {
-    start--;
-    used += sizes[start];
-  }
-  return `${ELLIPSIS}${chars.slice(start).join('')}`;
-};
-
-/**
- * Resolves a profiler `callFrame.url` to a repo-relative path, a `node:` specifier, or a basename
- * (without applying length truncation, so the caller can match `src/` / `x-pack/` / `node_modules/@kbn/`
- * before capping).
- */
+/** Repo-relative path, `node:` specifier, or the file name for paths outside the repo. */
 export const relativeLocation = (url: string, root: string): string | undefined => {
-  if (!url) {
-    return undefined;
-  }
-  let path = url.replace(/[?#].*$/, '');
-  if (path.startsWith('file://')) {
-    try {
-      path = fileURLToPath(new URL(path));
-    } catch {
-      path = path.slice('file://'.length);
-    }
-  }
-  const normalizedRoot = root.endsWith('/') ? root : `${root}/`;
-  if (path.startsWith(normalizedRoot)) {
-    return path.slice(normalizedRoot.length);
-  }
-  if (path.startsWith('node:')) {
-    return path;
-  }
-  return path.slice(path.lastIndexOf('/') + 1);
-};
-
-/**
- * Formats a `callFrame` URL and 0-based `lineNumber` as a sanitised, length-capped location.
- */
-export const sanitizeLocation = (
-  url: string,
-  lineNumber: number,
-  root: string
-): string | undefined => {
-  const path = relativeLocation(url, root);
-  if (path === undefined) {
-    return undefined;
-  }
-  const withLine = lineNumber >= 0 ? `${path}:${lineNumber + 1}` : path;
-  return sanitize(withLine, { maxBytes: MAX_LOCATION_BYTES, keep: 'end' });
+  if (!url) return undefined;
+  if (url.startsWith('node:')) return url;
+  const path = url.startsWith('file://') ? fileURLToPath(url) : url;
+  const rel = relative(root, path);
+  return rel.startsWith('..') || isAbsolute(rel) ? basename(path) : rel;
 };
