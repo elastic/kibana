@@ -211,6 +211,29 @@ describe('TracesLatencyMapView', () => {
     );
   });
 
+  it('gives the opened span its real identity when the metadata is there', async () => {
+    jest.mocked(getESQLResults).mockResolvedValue({
+      response: {
+        columns: [
+          { name: 'service.name', type: 'keyword' },
+          { name: '_id', type: 'keyword' },
+          { name: '_index', type: 'keyword' },
+        ],
+        values: [['cart', 'span-1', '.ds-traces-apm-000001']],
+      },
+    } as Awaited<ReturnType<typeof getESQLResults>>);
+    const { actions, mapProps } = renderView();
+    await act(() => mapProps.onCellClick!(cell));
+    // The identity lets the traces document profile recognize the record, and the flyout
+    // write a URL reference from raw._id/_index.
+    expect(actions.setExpandedDoc).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: '.ds-traces-apm-000001::span-1::',
+        raw: expect.objectContaining({ _id: 'span-1', _index: '.ds-traces-apm-000001' }),
+      })
+    );
+  });
+
   it('leaves the view as it is when the cell has no span to open', async () => {
     jest.mocked(getESQLResults).mockRejectedValue(new Error('shards failed'));
     const { actions, mapProps } = renderView();

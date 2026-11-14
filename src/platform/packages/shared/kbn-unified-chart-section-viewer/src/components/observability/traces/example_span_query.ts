@@ -15,7 +15,9 @@ import type { LatencyMapCell } from '@kbn/trace-latency-map';
  * condition is the map's own (`selectionToEsqlCondition`), so the span opened is one the
  * cell counted. Each condition in brackets: a host's `a OR b` would otherwise escape the
  * cell. `SET unmapped_fields="NULLIFY"` keeps one query working on classic-only, OTel-only
- * and mixed clusters, as in the map's queries.
+ * and mixed clusters, as in the map's queries. `METADATA _id, _index` gives the opened
+ * record its identity: the traces document profile reads the index, and the flyout's URL
+ * reference and row actions need the id.
  */
 export function buildExampleSpanQuery({
   indexPattern,
@@ -29,7 +31,7 @@ export function buildExampleSpanQuery({
   const conditions = [selectionToEsqlCondition(cell), ...filters];
   return [
     'SET unmapped_fields="NULLIFY";',
-    `FROM ${indexPattern}`,
+    `FROM ${indexPattern} METADATA _id, _index`,
     `| WHERE ${conditions.map((condition) => `(${condition})`).join(' AND ')}`,
     '| SORT @timestamp DESC',
     '| LIMIT 1',

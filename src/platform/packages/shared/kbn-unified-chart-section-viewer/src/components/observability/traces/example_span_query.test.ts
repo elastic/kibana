@@ -29,7 +29,8 @@ describe('buildExampleSpanQuery', () => {
     expect(query).toBe(
       [
         'SET unmapped_fields="NULLIFY";',
-        'FROM traces-apm*',
+        // The metadata gives the opened record its identity for the flyout and its profile.
+        'FROM traces-apm* METADATA _id, _index',
         `| WHERE (${selectionToEsqlCondition(cell)}) AND (service.name == "cart")`,
         '| SORT @timestamp DESC',
         '| LIMIT 1',
