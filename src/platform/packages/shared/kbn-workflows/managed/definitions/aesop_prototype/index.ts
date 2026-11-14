@@ -22,7 +22,7 @@ export const AESOP_EXPLORER_WORKFLOW_ID = 'system-security-aesop-explorer';
 export const AESOP_AB_COMPARE_WORKFLOW = {
   id: AESOP_AB_COMPARE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 9,
+  version: 10,
   billable: false,
   yaml: AESOP_AB_COMPARE_YAML,
   management: {

@@ -17,9 +17,11 @@ settings:
   timeout: '96h'
   concurrency:
     # A run that proposes a new skill has no skill id yet, so it keys on its
-    # own execution id and never collides.
+    # own execution id and never collides. Candidates for the same skill queue
+    # behind the in-flight run (telemetry-mode passes propose several
+    # improvements to one skill minutes apart; `drop` lost all but the first).
     key: 'aesop-ab-{{ inputs.skill_id | default: execution.id }}'
-    strategy: drop
+    strategy: queue
     max: 1
 consts:
   AI_INDEX_ID: aesop
