@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { usageApiPluginMock } from '@kbn/usage-api-plugin/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
@@ -22,8 +24,10 @@ import { resumeWorkflow } from './resume_workflow';
 import { runWorkflow } from './run_workflow';
 import { setupDependencies } from './setup_dependencies';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
+import { isWorkflowIdentityTaskError } from '../lib/workflow_identity_task_error';
 import { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
+import { isBulkUpdaterItem } from '../repositories/data_access_layer';
 import {
   createMockGetExecutionsByIdsResponse,
   createMockStepDataClient,
@@ -75,7 +79,7 @@ const setup = () => {
   }));
   dataClient.bulk.mockImplementation(async ({ items }) => {
     const item = items[0];
-    if (item.seqNo !== seqNo) {
+    if (isBulkUpdaterItem(item) || item.seqNo !== seqNo) {
       return {
         errors: true,
         items: [
@@ -159,6 +163,45 @@ describe.each([
       params.dependencies.cloudSetup
     );
     expect(setupDependencies).not.toHaveBeenCalled();
+  });
+
+  it('reports a permanent identity failure to Task Manager as a user error', async () => {
+    const { params, accounts } = setup();
+    const missingAccount = Boom.notFound('No service account is bound to workload workflow.');
+    jest.mocked(accounts.withScopedRequestForWorkload).mockRejectedValueOnce(missingAccount);
+    await expect(execute(params)).rejects.toBe(missingAccount);
+    expect(getErrorSource(missingAccount)).toBe(TaskErrorSource.USER);
+    expect(isWorkflowIdentityTaskError(missingAccount)).toBe(true);
+    expect(params.meteringService.reportWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.FAILED }),
+      params.dependencies.cloudSetup
+    );
+  });
+
+  it('reports a permanent identity failure as a user error when the execution is already terminal', async () => {
+    const { params, accounts } = setup();
+    const rebound = Boom.forbidden(
+      'The workload binding does not match the expected service account.'
+    );
+    jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+      await params.workflowExecutionRepository.updateWorkflowExecution({
+        id: 'child',
+        status: ExecutionStatus.CANCELLED,
+        cancelRequested: true,
+      });
+      throw rebound;
+    });
+    await expect(execute(params)).rejects.toBe(rebound);
+    expect(getErrorSource(rebound)).toBe(TaskErrorSource.USER);
+  });
+
+  it('keeps a transient identity failure a framework error', async () => {
+    const { params, accounts } = setup();
+    const unavailable = Boom.serverUnavailable('Token exchange unavailable.');
+    jest.mocked(accounts.withScopedRequestForWorkload).mockRejectedValueOnce(unavailable);
+    await expect(execute(params)).rejects.toBe(unavailable);
+    expect(getErrorSource(unavailable)).toBeUndefined();
+    expect(isWorkflowIdentityTaskError(unavailable)).toBe(false);
   });
 
   it('finalizes a waiting step that has not been refreshed before publishing failure', async () => {
@@ -251,7 +294,11 @@ describe.each([
         // The stale failure write lands after cancellation has won.
         approval.status = ExecutionStatus.CANCELLED;
       }
-      for (const { document } of items) {
+      for (const item of items) {
+        if (isBulkUpdaterItem(item)) {
+          throw new Error('identity_failure test mock does not apply updater items');
+        }
+        const { document } = item;
         const step = steps.find(({ id }) => id === document.id);
         if (!step) throw new Error(`Missing test step ${document.id}`);
         Object.assign(step, document);

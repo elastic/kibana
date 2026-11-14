@@ -14,7 +14,10 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
+import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { loggerMock } from '@kbn/logging-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 import type {
   StepExecutionsDataClient,
@@ -25,13 +28,20 @@ import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
+import type { IndexWorkflowDocumentOptions } from './workflow_occ_types';
 import type { WorkflowValidationService } from './workflow_validation_service';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import * as workflowDeletion from '../api/lib/workflow_deletion';
-import { disableAllWorkflows as disableAllWorkflowsLib } from '../api/lib/workflow_disable_all';
+import {
+  disableAllWorkflows as disableAllWorkflowsLib,
+  mutateWorkflowToDisabled,
+} from '../api/lib/workflow_disable_all';
 import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
+import { applyWorkflowVersion } from '../lib/workflow_version';
+import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
+import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 jest.mock('../lib/log_workflow_changes', () => ({
   logWorkflowChanges: jest.fn().mockResolvedValue(undefined),
@@ -109,9 +119,11 @@ const makeDeps = (
     }),
   } as unknown as WorkflowValidationService;
   const workflowExecutionsDataClient = {
+    refresh: jest.fn().mockResolvedValue(undefined),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
+    refresh: jest.fn().mockResolvedValue(undefined),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
@@ -184,18 +196,15 @@ describe('WorkflowCrudService', () => {
 
       await expect(
         service.getWorkflow('wf-1', 'default', { includeDeleted: true })
-      ).rejects.toThrow('Could not determine workflow access from an incomplete search.');
+      ).rejects.toThrow('Could not read workflow wf-1 from an incomplete search.');
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({ allow_partial_search_results: false })
       );
     });
 
     it('returns WorkflowDetailDto for existing workflow', async () => {
-      const source = makeSource();
       const { deps, client } = makeDeps();
-      client.search.mockResolvedValue({
-        hits: { hits: [{ _id: 'wf-1', _source: source }] },
-      });
+      client.search.mockResolvedValue({ hits: { hits: [occSearchHit('wf-1')] } });
 
       const service = new WorkflowCrudService(deps);
       const result = await service.getWorkflow('wf-1', 'default');
@@ -488,6 +497,317 @@ describe('WorkflowCrudService', () => {
           },
         })
       );
+    });
+  });
+
+  describe('getWorkflowDocumentsWithVersionByIds', () => {
+    const makeMgetDeps = () => {
+      const core = {
+        ...coreMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      const { deps } = makeDeps(undefined, { getCoreStart: () => core });
+      return { deps, mget: core.elasticsearch.client.asInternalUser.mget };
+    };
+
+    it('reads every requested id once in real time, across spaces and including deleted documents', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            found: true,
+            _seq_no: 3,
+            _primary_term: 2,
+            _source: makeSource({
+              spaceId: 'other',
+              deleted_at: new Date('2024-02-01T00:00:00.000Z'),
+            }),
+          },
+          { _index: workflowIndexName, _id: 'wf-2', found: false },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.getWorkflowDocumentsWithVersionByIds(['wf-1', 'wf-2', 'wf-1']);
+
+      expect(mget).toHaveBeenCalledWith({
+        index: workflowIndexName,
+        ids: ['wf-1', 'wf-2'],
+        realtime: true,
+      });
+      expect([...result]).toEqual([
+        [
+          'wf-1',
+          {
+            source: expect.objectContaining({ spaceId: 'other', deleted_at: expect.any(Date) }),
+            seqNo: 3,
+            primaryTerm: 2,
+          },
+        ],
+      ]);
+    });
+
+    it('reads no workflows before the workflow index exists', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        })
+      );
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1'])).resolves.toEqual(
+        new Map()
+      );
+    });
+
+    it('reads no workflows when Elasticsearch answers 200 with index_not_found_exception per document', async () => {
+      const { deps, mget } = makeMgetDeps();
+      // The real response for a missing index: HTTP 200, with the error on every document.
+      mget.mockResolvedValue({
+        docs: ['wf-1', 'wf-2'].map((id) => ({
+          _index: workflowIndexName,
+          _id: id,
+          error: {
+            type: 'index_not_found_exception',
+            reason: `no such index [${workflowIndexName}]`,
+          },
+        })),
+      });
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1', 'wf-2'])).resolves.toEqual(
+        new Map()
+      );
+    });
+
+    it('throws without retrying instead of reporting a workflow as missing when it cannot be read', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            error: { type: 'illegal_argument_exception', reason: 'invalid read' },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1'])).rejects.toThrow(
+        'Could not read workflow wf-1: invalid read'
+      );
+      expect(mget).toHaveBeenCalledTimes(1);
+    });
+
+    describe('while the shard is not ready', () => {
+      // The response Elasticsearch gives right after another node or plugin creates the index.
+      const shardUnavailableResponse = {
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            error: {
+              type: 'no_shard_available_action_exception',
+              reason: 'No shard available for [MultiGetShardRequest/unset]',
+            },
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('reads again until the shard is ready', async () => {
+        const { deps, mget } = makeMgetDeps();
+        mget
+          .mockResolvedValueOnce(shardUnavailableResponse)
+          .mockResolvedValueOnce(shardUnavailableResponse)
+          .mockResolvedValueOnce({
+            docs: [
+              {
+                _index: workflowIndexName,
+                _id: 'wf-1',
+                found: true,
+                _seq_no: 0,
+                _primary_term: 1,
+                _source: makeSource(),
+              },
+            ],
+          });
+
+        const service = new WorkflowCrudService(deps);
+        const read = service.getWorkflowDocumentsWithVersionByIds(['wf-1']);
+        await jest.advanceTimersByTimeAsync(100 + 200);
+
+        await expect(read).resolves.toEqual(
+          new Map([['wf-1', { source: expect.any(Object), seqNo: 0, primaryTerm: 1 }]])
+        );
+        expect(mget).toHaveBeenCalledTimes(3);
+      });
+
+      it('throws when the shard is still not ready after the retries', async () => {
+        const { deps, mget } = makeMgetDeps();
+        mget.mockResolvedValue(shardUnavailableResponse);
+
+        const service = new WorkflowCrudService(deps);
+        const read = service.getWorkflowDocumentsWithVersionByIds(['wf-1']);
+        const assertion = expect(read).rejects.toThrow(
+          'Could not read workflow wf-1: No shard available for [MultiGetShardRequest/unset]'
+        );
+        await jest.advanceTimersByTimeAsync(100 + 200 + 400 + 800 + 1600);
+
+        await assertion;
+        expect(mget).toHaveBeenCalledTimes(6);
+      });
+    });
+  });
+
+  describe('bulkWriteWorkflowDocuments', () => {
+    it('creates new documents and updates existing ones against their seq_no in one refreshed request', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: 'wf-new', status: 201 } },
+          { index: { _id: 'wf-updated', status: 200 } },
+          { index: { _id: 'wf-raced', status: 409, error: { type: 'version_conflict' } } },
+          { create: { _id: 'wf-broken', status: 400, error: { type: 'x', reason: 'bad doc' } } },
+        ],
+      });
+      const document = makeSource();
+      const previous = { source: makeSource(), seqNo: 4, primaryTerm: 2 };
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-new', document },
+        { id: 'wf-updated', document, previous },
+        { id: 'wf-raced', document, previous },
+        { id: 'wf-broken', document },
+      ]);
+
+      expect(client.bulk).toHaveBeenCalledWith({
+        operations: [
+          { create: { _id: 'wf-new', document } },
+          { index: { _id: 'wf-updated', document, if_seq_no: 4, if_primary_term: 2 } },
+          { index: { _id: 'wf-raced', document, if_seq_no: 4, if_primary_term: 2 } },
+          { create: { _id: 'wf-broken', document } },
+        ],
+        refresh: true,
+      });
+      expect(results).toEqual([
+        { status: 'written' },
+        { status: 'written' },
+        { status: 'conflict' },
+        { status: 'failed', error: new Error('bad doc') },
+      ]);
+    });
+
+    it('refuses documents that carry or replace a service-account binding', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({ items: [{ create: { _id: 'wf-plain', status: 201 } }] });
+      const bound = makeSource({
+        definition: {
+          version: '1',
+          name: 'Test',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+          settings: { run_as: 'service-account-1' },
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-binds', document: bound },
+        {
+          id: 'wf-unbinds',
+          document: makeSource(),
+          previous: { source: bound, seqNo: 1, primaryTerm: 1 },
+        },
+        { id: 'wf-plain', document: makeSource() },
+      ]);
+
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operations: [{ create: { _id: 'wf-plain', document: makeSource() } }],
+        })
+      );
+      expect(results.map(({ status }) => status)).toEqual(['failed', 'failed', 'written']);
+    });
+
+    it('reports items Elasticsearch rejected as too busy as rejected, not failed', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: 'wf-written', status: 201 } },
+          {
+            create: {
+              _id: 'wf-rejected',
+              status: 429,
+              error: { type: 'es_rejected_execution_exception', reason: 'queue full' },
+            },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-written', document: makeSource() },
+        { id: 'wf-rejected', document: makeSource() },
+      ]);
+
+      expect(results).toEqual([
+        { status: 'written' },
+        { status: 'rejected', error: new Error('queue full') },
+      ]);
+    });
+
+    it('reports every item as rejected when Elasticsearch rejects the whole request as too busy', async () => {
+      const { deps, client } = makeDeps();
+      const tooManyRequests = new errors.ResponseError({
+        statusCode: 429,
+        body: { error: { type: 'es_rejected_execution_exception' } },
+        headers: {},
+        warnings: [],
+        meta: {} as any,
+      });
+      client.bulk.mockRejectedValue(tooManyRequests);
+
+      const service = new WorkflowCrudService(deps);
+      const results = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-1', document: makeSource() },
+        { id: 'wf-2', document: makeSource() },
+      ]);
+
+      expect(results).toEqual([
+        { status: 'rejected', error: tooManyRequests },
+        { status: 'rejected', error: tooManyRequests },
+      ]);
+    });
+
+    it('throws when the whole request fails for another reason', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockRejectedValue(new Error('connection reset'));
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.bulkWriteWorkflowDocuments([{ id: 'wf-1', document: makeSource() }])
+      ).rejects.toThrow('connection reset');
     });
   });
 
@@ -1155,6 +1475,64 @@ describe('WorkflowCrudService', () => {
           }),
         })
       );
+    });
+
+    describe('overwrite=true without read access to the existing workflow', () => {
+      const setup = (sourceOverrides: Partial<WorkflowProperties>) => {
+        const core = coreMock.createStart();
+        core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+        const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+        client.search.mockResolvedValue({
+          hits: { hits: [occSearchHit('wf-1', sourceOverrides, 7, 2)] },
+        });
+        return { service: new WorkflowCrudService(deps), client };
+      };
+      const hidden = {
+        owner_id: 'owner',
+        access_control: { access_mode: 'private' as const, entries: [] },
+      };
+
+      it.each([
+        ['in the target space', 'default'],
+        ['in another space', 'space-a'],
+      ])('reports a hidden workflow %s as already existing', async (_, existingSpaceId) => {
+        const { service, client } = setup({ ...hidden, spaceId: existingSpaceId });
+
+        const result = await service.bulkCreateWorkflows(
+          [{ id: 'wf-1', yaml: validYaml('A') }],
+          'default',
+          request,
+          { overwrite: true }
+        );
+
+        expect(result.created).toEqual([]);
+        expect(result.failed).toEqual([
+          { index: 0, id: 'wf-1', error: "Workflow with id 'wf-1' already exists" },
+        ]);
+        expect(client.index).not.toHaveBeenCalled();
+      });
+
+      it('keeps the access error for a workflow the caller can read but not edit', async () => {
+        const { service, client } = setup({
+          ...hidden,
+          access_control: {
+            access_mode: 'private',
+            entries: [{ type: 'user', id: 'outsider', role: 'viewer', added_at: '2026-09-10' }],
+          },
+        });
+
+        const result = await service.bulkCreateWorkflows(
+          [{ id: 'wf-1', yaml: validYaml('A') }],
+          'default',
+          request,
+          { overwrite: true }
+        );
+
+        expect(result.failed).toEqual([
+          { index: 0, id: 'wf-1', error: 'You do not have access to this workflow.' },
+        ]);
+        expect(client.index).not.toHaveBeenCalled();
+      });
     });
 
     it('overwrite=true retries OCC conflicts for existing workflows', async () => {
@@ -2383,7 +2761,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2455,7 +2833,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2638,7 +3016,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('returns hoisted YAML validation errors without changing stored definition', async () => {
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
@@ -2699,7 +3077,7 @@ describe('WorkflowCrudService', () => {
       // `applyYamlUpdate` is mocked, so this asserts that `updateWorkflow` spreads the
       // returned patch (including `name`) into the indexed document — not that the name
       // is recovered from the raw YAML (that parsing is covered in workflow_prepare.test.ts).
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
@@ -3190,13 +3568,201 @@ describe('WorkflowCrudService', () => {
   });
 });
 
+describe('WorkflowCrudService administrator writes', () => {
+  it.each([false, true])(
+    'requires an Editor grant before changing a scheduled workflow (editor=%s)',
+    async (isEditor) => {
+      const core = coreMock.createStart();
+      const request = httpServerMock.createKibanaRequest();
+      core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
+      jest
+        .mocked(core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges)
+        .mockResolvedValue({
+          has_all_requested: true,
+          username: 'admin',
+          application: {},
+          cluster: {},
+          index: {},
+        });
+      const taskScheduler = new WorkflowTaskScheduler(
+        loggerMock.create(),
+        taskManagerMock.createStart()
+      );
+      jest.spyOn(taskScheduler, 'updateWorkflowTasks').mockResolvedValue();
+      jest.spyOn(taskScheduler, 'unscheduleWorkflowTasks').mockResolvedValue();
+      const { deps, client } = makeDeps(undefined, {
+        getCoreStart: () => core,
+        getTaskScheduler: () => taskScheduler,
+      });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit('scheduled', {
+              enabled: true,
+              valid: true,
+              owner_id: 'owner',
+              access_control: {
+                access_mode: 'private',
+                entries: isEditor
+                  ? [{ type: 'user', id: 'admin', role: 'editor', added_at: '2026-09-30' }]
+                  : [],
+              },
+              definition: {
+                version: '1',
+                name: 'Scheduled',
+                enabled: true,
+                triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+                steps: [],
+              },
+            }),
+          ],
+        },
+      });
+      const update = new WorkflowCrudService(deps).updateWorkflow(
+        'scheduled',
+        { description: 'Fixed typo' },
+        'default',
+        request
+      );
+      if (isEditor) {
+        await expect(update).resolves.toMatchObject({ id: 'scheduled' });
+        expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'scheduled' }),
+          'default',
+          request
+        );
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({ document: expect.objectContaining({ owner_id: 'owner' }) })
+        );
+      } else {
+        await expect(update).rejects.toThrow();
+        expect(client.index).not.toHaveBeenCalled();
+        expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+        expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
+      }
+    }
+  );
+
+  it.each([true, false])(
+    'requires an Editor grant for edits and bulk overwrites (admin=%s)',
+    async (isAdmin) => {
+      const core = coreMock.createStart();
+      const request = httpServerMock.createKibanaRequest();
+      jest
+        .mocked(core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges)
+        .mockResolvedValue({
+          has_all_requested: isAdmin,
+          username: 'user',
+          application: {},
+          cluster: {},
+          index: {},
+        });
+      core.userProfile.getCurrentProfileId.mockResolvedValue('non-owner');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(
+          securityServiceMock.createMockAuthenticatedUser({ roles: isAdmin ? ['superuser'] : [] })
+        );
+      const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit('private-workflow', {
+              owner_id: 'owner',
+              access_control: { access_mode: 'private', entries: [] },
+            }),
+          ],
+        },
+      });
+      const service = new WorkflowCrudService(deps);
+      const update = service.updateWorkflow(
+        'private-workflow',
+        { enabled: false },
+        'default',
+        request
+      );
+      await expect(update).rejects.toThrow();
+      expect(client.index).not.toHaveBeenCalled();
+      const imported = await service.bulkCreateWorkflows(
+        [{ id: 'private-workflow', yaml: lightweightWorkflowYaml }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+      expect(imported.created).toHaveLength(0);
+      expect(imported.failed).toHaveLength(1);
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'workflow_access_control_denied',
+          }),
+          message: expect.stringContaining('"entityId":"private-workflow"'),
+        })
+      );
+    }
+  );
+
+  it.each([true, false])('requires an Editor grant for disable-all (admin=%s)', async (isAdmin) => {
+    const core = coreMock.createStart();
+    const request = httpServerMock.createKibanaRequest();
+    jest
+      .mocked(core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges)
+      .mockResolvedValue({
+        has_all_requested: isAdmin,
+        username: 'user',
+        application: {},
+        cluster: {},
+        index: {},
+      });
+    core.userProfile.getCurrentProfileId.mockResolvedValue('non-owner');
+    jest
+      .spyOn(core.security.authc, 'getCurrentUser')
+      .mockReturnValue(
+        securityServiceMock.createMockAuthenticatedUser({ roles: isAdmin ? ['superuser'] : [] })
+      );
+    const { deps } = makeDeps(undefined, { getCoreStart: () => core });
+    mockedDisableAllWorkflowsLib
+      .mockReset()
+      .mockImplementation(async ({ assertCanEdit, accessControlFilter }) => {
+        expect(accessControlFilter).toEqual(
+          buildEntityReadAccessQuery({
+            profileId: 'non-owner',
+            ownerField: 'owner_id',
+            accessControlField: 'access_control',
+            includeMissing: true,
+          })
+        );
+        const check = () =>
+          assertCanEdit?.(
+            makeSource({
+              owner_id: 'owner',
+              access_control: { access_mode: 'private', entries: [] },
+            }),
+            'private-workflow'
+          );
+        expect(check).toThrow();
+        return { total: 0, disabled: 0, failures: [], disabledWorkflows: [] };
+      });
+    await new WorkflowCrudService(deps).disableAllWorkflows('default', request);
+    expect(mockedDisableAllWorkflowsLib).toHaveBeenCalledTimes(1);
+    expect(
+      core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges
+    ).not.toHaveBeenCalled();
+  });
+});
+
 describe('WorkflowCrudService force deletion access', () => {
   it.each([
-    ['legacy', undefined, 'another-user', true],
-    ['public non-owner', { access_mode: 'public', entries: [] }, 'another-user', true],
-    ['public API key', { access_mode: 'public', entries: [] }, undefined, true],
-    ['private owner', { access_mode: 'private', entries: [] }, 'owner', true],
-    ['private non-owner', { access_mode: 'private', entries: [] }, 'another-user', false],
+    ['legacy', undefined, 'another-user', 'deleted'],
+    ['public non-owner', { access_mode: 'public', entries: [] }, 'another-user', 'deleted'],
+    ['public API key', { access_mode: 'public', entries: [] }, undefined, 'deleted'],
+    ['private owner', { access_mode: 'private', entries: [] }, 'owner', 'deleted'],
+    ['private administrator', { access_mode: 'private', entries: [] }, 'admin', 'deleted'],
+    ['private API key', { access_mode: 'private', entries: [] }, 'admin-api-key', 'hidden'],
+    ['private non-owner', { access_mode: 'private', entries: [] }, 'another-user', 'hidden'],
     [
       'private editor',
       {
@@ -3211,12 +3777,28 @@ describe('WorkflowCrudService force deletion access', () => {
         ],
       },
       'another-user',
-      false,
+      'forbidden',
     ],
-  ] as const)('%s', async (_, accessControl, profileId, allowed) => {
+  ] as const)('%s', async (_, accessControl, profileId, outcome) => {
     const core = coreMock.createStart();
+    const request = httpServerMock.createKibanaRequest();
     core.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
-    const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+    jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
+      securityServiceMock.createMockAuthenticatedUser({
+        roles: profileId?.startsWith('admin') ? ['superuser'] : [],
+        authentication_type: profileId === 'admin-api-key' ? 'api_key' : 'realm',
+      })
+    );
+    const security = securityMock.createStart();
+    security.authz.checkPrivilegesWithRequest.mockReturnValue({
+      globally: jest.fn().mockResolvedValue({ hasAllRequested: profileId?.startsWith('admin') }),
+      atSpace: jest.fn(),
+      atSpaces: jest.fn(),
+    });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      authz: security.authz,
+    });
     client.search.mockResolvedValue({
       hits: {
         hits: [
@@ -3239,16 +3821,28 @@ describe('WorkflowCrudService force deletion access', () => {
         force: true,
         acknowledgeAclLoss: accessControl?.access_mode === 'private',
       },
-      httpServerMock.createKibanaRequest()
+      request
     );
 
-    if (allowed) {
+    if (profileId === 'admin') {
+      await result;
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'workflow_access_control_admin_override' }),
+        })
+      );
+    }
+    if (outcome === 'deleted') {
       await expect(result).resolves.toMatchObject({ deleted: 1, failures: [] });
       expect(core.elasticsearch.client.asInternalUser.delete).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'wf-1', if_seq_no: 6, if_primary_term: 1 })
       );
     } else {
-      await expect(result).rejects.toThrow();
+      if (outcome === 'hidden') {
+        await expect(result).resolves.toMatchObject({ deleted: 0, failures: [] });
+      } else {
+        await expect(result).rejects.toThrow();
+      }
       expect(client.index).not.toHaveBeenCalled();
       expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
       expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
@@ -3438,6 +4032,76 @@ describe('batched ordinary workflow deletion', () => {
   });
 });
 
+describe('deleting hidden and already deleted workflows', () => {
+  const hiddenSource = {
+    owner_id: 'owner',
+    access_control: { access_mode: 'private' as const, entries: [] },
+  };
+
+  const setup = () => {
+    const core = coreMock.createStart();
+    core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+    const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+    return {
+      service: new WorkflowCrudService(deps),
+      request: httpServerMock.createKibanaRequest(),
+      client,
+    };
+  };
+
+  it('deletes an already soft-deleted workflow again', async () => {
+    const { service, request, client } = setup();
+    client.search.mockResolvedValue({
+      hits: {
+        hits: [
+          occSearchHit('gone', {
+            enabled: false,
+            deleted_at: new Date('2024-02-01T00:00:00.000Z'),
+          }),
+        ],
+      },
+    });
+
+    await expect(service.deleteWorkflows(['gone'], 'default', {}, request)).resolves.toEqual({
+      total: 1,
+      deleted: 1,
+      failures: [],
+      successfulIds: ['gone'],
+    });
+  });
+
+  it('skips a hidden workflow in a batch exactly like an unknown one', async () => {
+    const { service, request, client } = setup();
+    client.bulk.mockResolvedValue({ items: [{ index: { _id: 'visible', status: 200 } }] });
+    client.search.mockResolvedValueOnce({
+      hits: { hits: [occSearchHit('hidden', hiddenSource), occSearchHit('visible')] },
+    });
+    const hidden = await service.deleteWorkflows(['hidden', 'visible'], 'default', {}, request);
+    client.search.mockResolvedValueOnce({ hits: { hits: [occSearchHit('visible')] } });
+    const unknown = await service.deleteWorkflows(['unknown', 'visible'], 'default', {}, request);
+
+    expect(hidden).toEqual({ total: 2, deleted: 1, failures: [], successfulIds: ['visible'] });
+    expect(unknown).toEqual(hidden);
+    for (const [{ operations }] of client.bulk.mock.calls) {
+      expect(operations).toEqual([{ index: expect.objectContaining({ _id: 'visible' }) }]);
+    }
+  });
+
+  it('skips a single hidden workflow without writing', async () => {
+    const { service, request, client } = setup();
+    client.search.mockResolvedValue({ hits: { hits: [occSearchHit('hidden', hiddenSource)] } });
+
+    await expect(service.deleteWorkflows(['hidden'], 'default', {}, request)).resolves.toEqual({
+      total: 1,
+      deleted: 0,
+      failures: [],
+      successfulIds: [],
+    });
+    expect(client.index).not.toHaveBeenCalled();
+    expect(client.bulk).not.toHaveBeenCalled();
+  });
+});
+
 describe('bound workflow deletion errors', () => {
   afterEach(() => jest.restoreAllMocks());
 
@@ -3557,6 +4221,40 @@ describe('bound workflow deletion errors', () => {
     expect(bindings.unbindWorkload).not.toHaveBeenCalled();
     expect(bindings.bindWorkload).not.toHaveBeenCalled();
     expect(deleteDocuments).not.toHaveBeenCalled();
+  });
+
+  it('rejects a plain delete of a bound workflow with an active execution', async () => {
+    const { service, request, deps, bindings, deleteDocuments } = setup();
+    jest
+      .mocked(deps.executionQueryService.getWorkflowExecutions)
+      .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
+    await expect(service.deleteWorkflows(['bound'], 'default', {}, request)).rejects.toThrow(
+      'Cannot delete workflow with running executions: bound'
+    );
+    expect(deps.executionQueryService.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowId: 'bound' }),
+      'default'
+    );
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(deleteDocuments).not.toHaveBeenCalled();
+  });
+
+  it('keeps a bound workflow with an active execution out of a bulk delete', async () => {
+    const { service, request, deps, bindings, deleteDocuments } = setup();
+    jest
+      .mocked(deps.executionQueryService.getWorkflowExecutions)
+      .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
+    deleteDocuments
+      .mockReset()
+      .mockResolvedValue({ total: 1, deleted: 1, failures: [], successfulIds: ['ordinary'] });
+    await expect(
+      service.deleteWorkflows(['bound', 'ordinary'], 'default', {}, request)
+    ).resolves.toMatchObject({
+      deleted: 1,
+      successfulIds: ['ordinary'],
+      failures: [{ id: 'bound', error: expect.stringContaining('running executions') }],
+    });
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
   });
 
   it('preserves a concurrent winning binding and returns a typed deletion conflict', async () => {
@@ -3945,5 +4643,349 @@ describe('service account mutation race regressions', () => {
         serviceAccountId: 'account-b',
       })
     );
+  });
+});
+
+describe('managed orphan cleanup without a request', () => {
+  const ORPHAN = { managedBy: 'removedPlugin', definitionId: 'system-orphan' };
+
+  const setup = ({ runAs = 'account-a' }: { runAs?: string } = {}) => {
+    const core = {
+      ...coreMock.createStart(),
+      security: securityServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
+    };
+    const bindings = core.security.serviceAccounts;
+    bindings.isEnabled.mockReturnValue(true);
+    const getWorkflowExecutions = jest.fn().mockResolvedValue({ total: 0, results: [] });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      getServiceAccountBindings: () => bindings,
+      executionQueryService: {
+        getWorkflowExecutions,
+      } as unknown as WorkflowExecutionQueryService,
+    });
+    const source = makeSource({
+      managed: true,
+      managedBy: ORPHAN.managedBy,
+      originManagedWorkflowId: ORPHAN.definitionId,
+      yaml: 'name: Test Workflow\nenabled: true',
+      definition: {
+        version: '1',
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: runAs ? { run_as: runAs } : {},
+      },
+    });
+    client.search.mockResolvedValue({
+      hits: { hits: [{ ...occSearchHit('system-orphan', undefined, 5, 1), _source: source }] },
+    });
+    client.index.mockResolvedValue({ result: 'updated', _seq_no: 6, _primary_term: 1 });
+    return {
+      core,
+      bindings,
+      client,
+      source,
+      deps,
+      getWorkflowExecutions,
+      service: new WorkflowCrudService(deps),
+    };
+  };
+
+  describe('deleteManagedOrphan', () => {
+    const expectBindingUntouched = (bindings: ReturnType<typeof setup>['bindings']) => {
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+      expect(bindings.getWorkloadBinding).not.toHaveBeenCalled();
+    };
+
+    it('deletes the observed revision of a bound orphan and leaves its binding', async () => {
+      const { core, bindings, client, service } = setup();
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
+        true
+      );
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 5, if_primary_term: 1 })
+      );
+      expect(core.elasticsearch.client.asInternalUser.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'system-orphan', if_seq_no: 6, if_primary_term: 1 })
+      );
+      expectBindingUntouched(bindings);
+      expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('deletes an unbound orphan', async () => {
+      const { core, bindings, service } = setup({ runAs: '' });
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
+        true
+      );
+
+      expect(core.elasticsearch.client.asInternalUser.delete).toHaveBeenCalled();
+      expectBindingUntouched(bindings);
+    });
+
+    it('resolves false when the workflow is already gone', async () => {
+      const { client, core, service } = setup();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
+        false
+      );
+      expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+    });
+
+    it('restores the workflow when a run is found after the disable', async () => {
+      const { core, client, getWorkflowExecutions, service } = setup();
+      getWorkflowExecutions.mockResolvedValue({ total: 1, results: [] });
+
+      await expect(
+        service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)
+      ).rejects.toBeInstanceOf(WorkflowConflictError);
+
+      // The disable write, then the restore of the original document.
+      expect(client.index).toHaveBeenCalledTimes(2);
+      expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
+    });
+
+    it('fails when a concurrent save wins the guarded delete', async () => {
+      const { core, service } = setup();
+      core.elasticsearch.client.asInternalUser.delete.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).rejects.toThrow(
+        'version conflict'
+      );
+    });
+
+    it.each([
+      { managed: false },
+      { managedBy: 'ownerPlugin' },
+      { originManagedWorkflowId: 'system-other' },
+      { spaceId: 'other-space' },
+    ])('refuses a workflow that no longer matches the sweep snapshot %j', async (changed) => {
+      const { client, source, service } = setup();
+      Object.assign(source, changed);
+
+      await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).rejects.toThrow(
+        'observed'
+      );
+      expect(client.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('disableManagedWorkflowWithoutRequest', () => {
+    it('disables a bound orphan with OCC without a request or binding change', async () => {
+      const { core, bindings, client, service } = setup();
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toEqual(expect.objectContaining({ enabled: false }));
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'system-orphan',
+          if_seq_no: 5,
+          if_primary_term: 1,
+          document: expect.objectContaining({
+            enabled: false,
+            yaml: expect.stringContaining('enabled: false'),
+            definition: expect.objectContaining({ settings: { run_as: 'account-a' } }),
+          }),
+        })
+      );
+      expect(bindings.getWorkloadBinding).not.toHaveBeenCalled();
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+      expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('reads only live workflows', async () => {
+      const { client, service } = setup();
+
+      await service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN);
+
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: expect.objectContaining({
+              must_not: expect.arrayContaining([{ exists: { field: 'deleted_at' } }]),
+            }),
+          },
+        })
+      );
+    });
+
+    it.each([
+      ['missing', null],
+      ['not managed', { managed: false }],
+      ['already off', { enabled: false }],
+    ] as const)('resolves to null without writing when the workflow is %s', async (_, changed) => {
+      const { client, source, service } = setup();
+      if (changed) {
+        Object.assign(source, changed);
+      } else {
+        client.search.mockResolvedValue({ hits: { hits: [] } });
+      }
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toBeNull();
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('fails instead of resolving to null when the guarded read is incomplete', async () => {
+      const { client, service } = setup();
+      client.search.mockResolvedValue({ timed_out: true, hits: { hits: [] } });
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).rejects.toThrow('incomplete search');
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('switches a bound workflow off for its registered owner without a binding change', async () => {
+      const { bindings, client, source, service } = setup();
+      source.managedBy = 'ownerPlugin';
+      const owner = { managedBy: 'ownerPlugin', definitionId: 'system-orphan' };
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', owner)
+      ).resolves.toEqual(
+        expect.objectContaining({
+          enabled: false,
+          definition: expect.objectContaining({ settings: { run_as: 'account-a' } }),
+        })
+      );
+      expect(client.index).toHaveBeenCalledTimes(1);
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    });
+
+    // A lost OCC write re-reads the workflow; the re-read decides whether to write again.
+    const loseFirstWriteThenReread = (
+      { client, source }: ReturnType<typeof setup>,
+      reread: WorkflowProperties | null
+    ) => {
+      client.search
+        .mockResolvedValueOnce({
+          hits: { hits: [{ ...occSearchHit('system-orphan', undefined, 5, 1), _source: source }] },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: reread
+              ? [{ ...occSearchHit('system-orphan', undefined, 6, 1), _source: reread }]
+              : [],
+          },
+        });
+      client.index.mockRejectedValueOnce(Object.assign(new Error('conflict'), { statusCode: 409 }));
+    };
+
+    it('skips the write when the re-read finds the workflow already disabled', async () => {
+      const context = setup();
+      loseFirstWriteThenReread(context, { ...context.source, enabled: false });
+
+      await expect(
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toBeNull();
+      expect(context.client.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips the write when the re-read no longer finds the workflow because it was soft-deleted', async () => {
+      const context = setup();
+      // The live-only read filters out the tombstone, so the re-read comes back empty.
+      loseFirstWriteThenReread(context, null);
+
+      await expect(
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toBeNull();
+      expect(context.client.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses the write when the re-read finds the workflow owned by someone else', async () => {
+      const context = setup();
+      loseFirstWriteThenReread(context, { ...context.source, managedBy: 'otherPlugin' });
+
+      await expect(
+        context.service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).rejects.toThrow('observed');
+      expect(context.client.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses a workflow that no longer matches the sweep snapshot', async () => {
+      const { client, source, service } = setup();
+      source.managedBy = 'ownerPlugin';
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).rejects.toThrow('observed');
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    const writeDisabled = (
+      { service, source }: ReturnType<typeof setup>,
+      overrides: Partial<WorkflowProperties> = {},
+      options: Partial<IndexWorkflowDocumentOptions> = {}
+    ) =>
+      service.indexWorkflowDocument(
+        'system-orphan',
+        { ...applyWorkflowVersion(mutateWorkflowToDisabled(source), source), ...overrides },
+        {
+          ifSeqNo: 5,
+          ifPrimaryTerm: 1,
+          previousDocument: source,
+          managedOrphanDisable: ORPHAN,
+          ...options,
+        }
+      );
+
+    it('accepts exactly the disable transformation', async () => {
+      const context = setup();
+      await expect(writeDisabled(context)).resolves.toEqual({ seqNo: 6, primaryTerm: 1 });
+    });
+
+    it.each([
+      ['another field change', { name: 'Renamed' }, {}],
+      [
+        'a changed run_as',
+        {
+          definition: {
+            version: '1',
+            name: 'Test Workflow',
+            enabled: true,
+            triggers: [{ type: 'manual' }],
+            steps: [],
+            settings: { run_as: 'account-b' },
+          },
+        },
+        {},
+      ],
+      ['a request', {}, { request: httpServerMock.createKibanaRequest() }],
+      ['missing OCC', {}, { ifPrimaryTerm: undefined }],
+      ['a create', {}, { create: true }],
+    ] as const)('rejects a write with %s', async (_name, overrides, options) => {
+      const context = setup();
+      await expect(
+        writeDisabled(context, overrides as Partial<WorkflowProperties>, options)
+      ).rejects.toThrow('observed');
+      expect(context.client.index).not.toHaveBeenCalled();
+    });
+
+    it('keeps the normal disable path gated for bound workflows', async () => {
+      const { client, service } = setup();
+
+      await expect(service.disableWorkflow('system-orphan', 'default')).rejects.toThrow(
+        'authenticated request'
+      );
+      expect(client.index).not.toHaveBeenCalled();
+    });
   });
 });

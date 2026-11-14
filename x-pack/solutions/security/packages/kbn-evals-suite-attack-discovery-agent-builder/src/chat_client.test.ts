@@ -48,7 +48,7 @@ describe('parseInsightsFromSteps', () => {
     const insights = parseInsightsFromSteps([
       { type: 'tool_call', tool_id: 'security.attack-discovery.run', results: [] },
       { type: 'reasoning', reasoning: REASONING_WITH_INSIGHTS },
-      { type: 'update_todos' },
+      { type: 'compaction' },
     ]);
 
     expect(insights).toEqual([
@@ -66,7 +66,7 @@ describe('parseInsightsFromSteps', () => {
     expect(
       parseInsightsFromSteps([
         { type: 'reasoning', reasoning: 'Retrieved 2 alerts. Running the pipeline now.' },
-        { type: 'update_todos' },
+        { type: 'compaction' },
       ])
     ).toBeNull();
   });
@@ -76,6 +76,34 @@ describe('parseInsightsFromSteps', () => {
   // not the agent renders it, so reading tool results would make the
   // insight-backed evaluators structurally blind to a missing report — which is
   // what `AdToolResult` already covers.
+  // Kills a revert to FIRST-block parsing: an earlier non-insights block (a
+  // proposed rule) precedes the insights block, so forward parsing returns
+  // null while the backward scan finds the insights.
+  it('finds insights that follow an earlier non-insights fenced block', () => {
+    const reasoning = `Proposed rule:\n\n\`\`\`json\n{"rule": "not insights"}\n\`\`\`\n\nReport:\n\n\`\`\`json\n${JSON.stringify(
+      {
+        insights: [{ title: 'Encoded PowerShell Followed by LSASS Dump' }],
+      }
+    )}\n\`\`\`\n`;
+
+    const insights = parseInsightsFromSteps([{ type: 'reasoning', reasoning }]);
+
+    expect(insights?.[0].title).toBe('Encoded PowerShell Followed by LSASS Dump');
+  });
+
+  // Kills a BLIND last-block parse: the insights block is followed by a block
+  // that is not valid JSON, so the last block cannot be taken as-is — the scan
+  // must skip it on the parse-failure path.
+  it('skips a later malformed fenced block after the insights block', () => {
+    const reasoning = `\`\`\`json\n${JSON.stringify({
+      insights: [{ title: 'Encoded PowerShell Followed by LSASS Dump' }],
+    })}\n\`\`\`\n\n\`\`\`json\n{ truncated json \n\`\`\`\n`;
+
+    const insights = parseInsightsFromSteps([{ type: 'reasoning', reasoning }]);
+
+    expect(insights?.[0].title).toBe('Encoded PowerShell Followed by LSASS Dump');
+  });
+
   it('ignores insights sitting in a tool result rather than agent output', () => {
     expect(
       parseInsightsFromSteps([
@@ -158,7 +186,7 @@ describe('AttackDiscoveryAgentBuilderChatClient.converse', () => {
   it('falls back to the reasoning steps when the final message has no fence', async () => {
     const client = buildClient({
       response: { message: 'Pipeline status: completed — 1 validated discovery.' },
-      steps: [{ type: 'reasoning', reasoning: REASONING_WITH_INSIGHTS }, { type: 'update_todos' }],
+      steps: [{ type: 'reasoning', reasoning: REASONING_WITH_INSIGHTS }, { type: 'compaction' }],
     });
 
     const result = await client.converse('run attack discovery');
@@ -173,6 +201,34 @@ describe('AttackDiscoveryAgentBuilderChatClient.converse', () => {
     });
 
     const result = await client.converse('check status');
+
+    expect(result.insights).toBeNull();
+  });
+
+  // Insight-backed evaluators must measure what the agent RENDERED, not the
+  // pipeline's internal return value: if `attack_discoveries` from the run
+  // tool's result fed `insights`, every insight evaluator would pass even when
+  // the agent omitted or altered the discoveries in its response
+  // (`AdToolResult` already covers the tool return separately).
+  it('does not source insights from the AD tool result', async () => {
+    const client = buildClient({
+      response: { message: 'Pipeline status: completed.' },
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.attack-discovery.run',
+          results: [
+            {
+              data: {
+                attack_discoveries: [{ title: 'Tool Return', alertIds: ['a1'] }],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = await client.converse('run attack discovery');
 
     expect(result.insights).toBeNull();
   });

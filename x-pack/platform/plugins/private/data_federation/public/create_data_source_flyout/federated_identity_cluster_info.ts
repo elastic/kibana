@@ -19,6 +19,8 @@ export interface FederatedIdentityClusterInfo {
   deploymentId?: string;
   /** True when running on serverless Elastic Cloud. Controls the label shown to the user. */
   isServerless: boolean;
+  /** Template the AWS CloudFormation quick create link loads. */
+  awsCloudFormationTemplateUrl: string;
 }
 
 /**
@@ -27,11 +29,15 @@ export interface FederatedIdentityClusterInfo {
  * workload identity binding).
  *
  * The JWT issuer comes from `xpack.dataFederation.workloadIdentityIssuerUrl` injected into
- * kibana.yml by the controller; it is absent when not configured.
+ * kibana.yml by the controller; it is absent when not configured. The CloudFormation template
+ * URL comes from `xpack.dataFederation.awsCloudFormationTemplateUrl`.
  */
 export const buildFederatedIdentityClusterInfo = (
-  cloud?: CloudSetup,
-  injectedIssuerUrl?: string
+  cloud: CloudSetup | undefined,
+  {
+    workloadIdentityIssuerUrl,
+    awsCloudFormationTemplateUrl,
+  }: { workloadIdentityIssuerUrl?: string; awsCloudFormationTemplateUrl: string }
 ): FederatedIdentityClusterInfo => {
   const deploymentId =
     cloud?.isServerlessEnabled && cloud.serverless?.projectId
@@ -41,9 +47,10 @@ export const buildFederatedIdentityClusterInfo = (
       : undefined;
 
   return {
-    jwtIssuer: injectedIssuerUrl,
+    jwtIssuer: workloadIdentityIssuerUrl,
     cloudOrgId: cloud?.organizationId,
     deploymentId,
     isServerless: Boolean(cloud?.isServerlessEnabled),
+    awsCloudFormationTemplateUrl,
   };
 };

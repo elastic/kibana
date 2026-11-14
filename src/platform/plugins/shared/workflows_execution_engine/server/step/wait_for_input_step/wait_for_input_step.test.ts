@@ -20,6 +20,7 @@ import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_man
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
 jest.mock('./hitl_external_resume_helpers', () => ({
+  ...jest.requireActual('./hitl_external_resume_helpers'),
   invalidateHitlExternalResumeTokenIfPresent: jest.fn(),
   mintHitlExternalResumeToken: jest.fn().mockReturnValue({
     token: 'resume-token',
@@ -84,6 +85,7 @@ describe('WaitForInputStepImpl', () => {
       tryEnterWaitUntil: jest.fn().mockReturnValue(true),
       finishStep: jest.fn(),
       setInput: jest.fn(),
+      getCurrentStepState: jest.fn().mockReturnValue({ dynamicTimeout: '72h' }),
       setCurrentStepState: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
@@ -300,16 +302,26 @@ describe('WaitForInputStepImpl', () => {
       expect(mockMintHitlExternalResumeToken).toHaveBeenCalledWith(
         expect.objectContaining({ timeout: '72h' })
       );
-      expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          _hitlTokenHash: 'resume-token-hash',
-          _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
-          message: 'Please approve',
-        })
-      );
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(1, {
+        message: 'Please approve',
+      });
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(2, {
+        message: 'Please approve',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      });
+      expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+        dynamicTimeout: '72h',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      });
       expect(mockSendWaitForInputNotifications).toHaveBeenCalled();
-      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(2);
+      expect(mockStepExecutionRuntime.setInput.mock.invocationCallOrder[0]).toBeLessThan(
+        mockSendWaitForInputNotifications.mock.invocationCallOrder[0]
+      );
+      expect(
+        mockStepExecutionRuntime.setCurrentStepState.mock.invocationCallOrder.at(-1)
+      ).toBeLessThan(mockSendWaitForInputNotifications.mock.invocationCallOrder[0]);
     });
 
     it('should persist the external resume token metadata when notification delivery fails', async () => {
@@ -327,7 +339,12 @@ describe('WaitForInputStepImpl', () => {
 
       await expect(underTest.run()).rejects.toThrow('Slack connector failed');
 
-      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith({
+        message: 'Please approve',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      });
+      expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
         expect.objectContaining({
           _hitlTokenHash: 'resume-token-hash',
           _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
@@ -418,10 +435,20 @@ describe('WaitForInputStepImpl', () => {
       expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
     });
 
-    it('should clear resumeInput from context while preserving other keys', async () => {
+    it('clears the consumed response and interactive intent while preserving other keys', async () => {
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        ...mockWorkflowRuntime.getWorkflowExecution(),
+        id: 'exec-abc',
+        context: { resumeInput, pendingInteractiveResume: true, otherKey: 'preserved' },
+      });
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { resumedBy: 'jane.doe', otherKey: 'preserved', resumeInput: null },
+        context: {
+          otherKey: 'preserved',
+          resumeInput: null,
+          pendingInteractiveResume: false,
+          resumeInputTakenFor: null,
+        },
       });
     });
 

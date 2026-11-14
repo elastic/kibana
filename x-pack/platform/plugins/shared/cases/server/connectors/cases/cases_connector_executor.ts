@@ -8,7 +8,7 @@
 import pMap from 'p-map';
 import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
-import { CaseStatuses } from '@kbn/cases-components';
+import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -29,8 +29,15 @@ import {
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
-import { getCaseSettings, resolveExtractObservables } from '../../../common/utils/case_settings';
+import {
+  canOverrideExtractObservables,
+  getCaseSettings,
+  resolveExtractObservables,
+} from '../../../common/utils/case_settings';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
+import type { ExtractObservablesSource } from '../../common/types/case';
+import { getExtractObservablesSource } from '../../common/extract_observables_source';
+import type { BulkCreateCasesClientOptions } from '../../client/cases/bulk_create';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case, CaseSeverity } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
@@ -105,6 +112,47 @@ const getAssigneesFromTemplate = (
 
   return { assignees: templateAssignees };
 };
+
+/**
+ * Resolves the rule-level `extractObservables` override. Returns `null` when the rule inherits the
+ * space default, or when the owner does not auto-extract by default — the owner gate wins over a
+ * rule choice.
+ */
+const getExtractObservablesOverride = (
+  owner: string,
+  extractObservables: boolean | null | undefined
+): boolean | null =>
+  extractObservables == null || !canOverrideExtractObservables(owner) ? null : extractObservables;
+
+type CreateCaseRequest = Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string };
+
+interface BuiltCreateCaseRequest {
+  request: CreateCaseRequest;
+  /** Where `settings.extractObservables` came from. Never sent in the request itself. */
+  extractObservablesSource: ExtractObservablesSource;
+}
+
+/**
+ * Splits the built requests into the bulkCreate cases and the internal options. The source map
+ * and the cases come from the same pairs, so every created case id has a source entry.
+ */
+const toBulkCreateArgs = (
+  builtRequests: BuiltCreateCaseRequest[]
+): {
+  cases: CreateCaseRequest[];
+  options: BulkCreateCasesClientOptions;
+} => ({
+  cases: builtRequests.map(({ request }) => request),
+  options: {
+    relaxRequiredFields: true,
+    extractObservablesSourceByCaseId: new Map(
+      builtRequests.map(({ request, extractObservablesSource }) => [
+        request.id,
+        extractObservablesSource,
+      ])
+    ),
+  },
+});
 
 export class CasesConnectorExecutor {
   private readonly logger: Logger;
@@ -723,7 +771,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:upsertCases'] })
     );
 
-    const bulkCreateReq = [];
+    const builtCreateRequests: BuiltCreateCaseRequest[] = [];
     const casesMap = new Map<string, GroupedAlertsWithCases>();
 
     const ids = Array.from(groupedAlertsWithCaseId.values()).map(({ caseId }) => caseId);
@@ -799,7 +847,7 @@ export class CasesConnectorExecutor {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
         const data = groupedAlertsWithCaseId.get(error.caseId) as GroupedAlertsWithCaseId;
 
-        bulkCreateReq.push(
+        builtCreateRequests.push(
           this.getCreateCaseRequest(
             params,
             data,
@@ -817,6 +865,8 @@ export class CasesConnectorExecutor {
       }
     }
 
+    const { cases: bulkCreateReq, options: bulkCreateOptions } =
+      toBulkCreateArgs(builtCreateRequests);
     const idsToCreate = bulkCreateReq.map(({ id }) => id);
 
     this.logger.debug(
@@ -835,7 +885,7 @@ export class CasesConnectorExecutor {
       {
         cases: bulkCreateReq,
       },
-      { relaxRequiredFields: true }
+      bulkCreateOptions
     );
 
     this.logger.debug(
@@ -869,7 +919,7 @@ export class CasesConnectorExecutor {
     hasPlatinumLicenseOrGreater = true,
     legacyKeysWithV2Values?: ReadonlySet<string>,
     spaceExtractObservables?: boolean
-  ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
+  ): BuiltCreateCaseRequest {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
 
@@ -886,15 +936,25 @@ export class CasesConnectorExecutor {
     );
     const { syncAlerts } = getCaseSettings(params.owner);
     const extractObservables = resolveExtractObservables(params.owner, spaceExtractObservables);
+    const extractObservablesOverride = getExtractObservablesOverride(
+      params.owner,
+      params.extractObservables
+    );
 
-    const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
+    const baseRequest: CreateCaseRequest = {
       id: caseId,
       description: v2Template.description ?? this.getCaseDescription(params, flattenGrouping),
       tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
       title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: resolvedConnector ?? { ...NONE_CASE_CONNECTOR },
-      // Template settings keys are individually optional; merge over owner defaults so syncAlerts is always set.
-      settings: { syncAlerts, extractObservables, ...v2Template.settings },
+      settings: {
+        syncAlerts,
+        extractObservables,
+        ...v2Template.settings,
+        ...(extractObservablesOverride != null
+          ? { extractObservables: extractObservablesOverride }
+          : {}),
+      },
       ...getAssigneesFromTemplate(v2Template.assignees, hasPlatinumLicenseOrGreater),
       owner: params.owner,
       customFields: builtCustomFields,
@@ -919,7 +979,15 @@ export class CasesConnectorExecutor {
       baseRequest.category = v2Template.category;
     }
 
-    return baseRequest;
+    return {
+      request: baseRequest,
+      extractObservablesSource: getExtractObservablesSource({
+        chosenValue: extractObservablesOverride,
+        chosenSource: 'rule',
+        templateValue: v2Template.settings?.extractObservables,
+        defaultValue: extractObservables,
+      }),
+    };
   }
 
   private getCreateCaseRequest(
@@ -934,7 +1002,7 @@ export class CasesConnectorExecutor {
     hasPlatinumLicenseOrGreater = true,
     legacyKeysWithV2Values?: ReadonlySet<string>,
     spaceExtractObservables?: boolean
-  ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
+  ): BuiltCreateCaseRequest {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
 
@@ -976,8 +1044,17 @@ export class CasesConnectorExecutor {
 
     const { syncAlerts } = getCaseSettings(params.owner);
     const extractObservables = resolveExtractObservables(params.owner, spaceExtractObservables);
+    const extractObservablesOverride = getExtractObservablesOverride(
+      params.owner,
+      params.extractObservables
+    );
+    const baseSettings = caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables };
+    const resolvedSettings =
+      extractObservablesOverride != null
+        ? { ...baseSettings, extractObservables: extractObservablesOverride }
+        : baseSettings;
 
-    return {
+    const request: CreateCaseRequest = {
       id: caseId,
       description:
         caseFieldsFromTemplate?.description ?? this.getCaseDescription(params, flattenGrouping),
@@ -987,12 +1064,22 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? { ...NONE_CASE_CONNECTOR },
-      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables },
+      settings: resolvedSettings,
       ...getAssigneesFromTemplate(caseFieldsFromTemplate?.assignees, hasPlatinumLicenseOrGreater),
       ...(caseFieldsFromTemplate?.severity ? { severity: caseFieldsFromTemplate?.severity } : {}),
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
       owner: params.owner,
       customFields: builtCustomFields,
+    };
+
+    return {
+      request,
+      extractObservablesSource: getExtractObservablesSource({
+        chosenValue: extractObservablesOverride,
+        chosenSource: 'rule',
+        templateValue: caseFieldsFromTemplate?.settings?.extractObservables,
+        defaultValue: extractObservables,
+      }),
     };
   }
 
@@ -1259,7 +1346,7 @@ export class CasesConnectorExecutor {
     const hasPlatinumLicenseOrGreater = await this.isAtLeastPlatinum();
     const spaceExtractObservablesForReopened = extractObservablesMapForReopened.get(params.owner);
 
-    const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
+    const builtCreateRequests = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(
         params,
         record,
@@ -1275,6 +1362,8 @@ export class CasesConnectorExecutor {
       )
     );
 
+    const { cases: bulkCreateReq, options: bulkCreateOptions } =
+      toBulkCreateArgs(builtCreateRequests);
     const idsToCreate = bulkCreateReq.map(({ id }) => id);
 
     this.logger.debug(
@@ -1292,7 +1381,7 @@ export class CasesConnectorExecutor {
       {
         cases: bulkCreateReq,
       },
-      { relaxRequiredFields: true }
+      bulkCreateOptions
     );
 
     this.logger.debug(

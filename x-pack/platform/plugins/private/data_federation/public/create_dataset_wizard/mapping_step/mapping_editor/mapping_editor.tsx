@@ -20,7 +20,6 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { DatasetMappingFieldType, DatasetMappings } from '../../../../common';
 import { FieldMappingForm } from './field_mapping_form';
@@ -28,6 +27,7 @@ import type { FieldMappingFormValue } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
 import { emptyMappingEditorValue, TYPE_LABEL_BY_VALUE } from './constants';
 import { DeleteConfirmModal } from './delete_confirm_modal';
+import { MappingValidationCallout } from './mapping_validation_callout';
 import { validateMappingEditorValue } from './validate_mapping_editor_value';
 
 export { validateMappingEditorValue };
@@ -248,17 +248,17 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
   }, [pendingRemoveField, removeField]);
 
   return (
-    <div data-test-subj="dataFederationMappingEditor">
+    <EuiPanel paddingSize="none" hasBorder={false} data-test-subj="dataFederationMappingEditor">
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h3>
               {isInferSchemaSelected
                 ? i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsTitleOptional', {
-                    defaultMessage: 'Field mappings (optional)',
+                    defaultMessage: 'Field definitions (optional)',
                   })
                 : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsTitle', {
-                    defaultMessage: 'Field mappings',
+                    defaultMessage: 'Field definitions',
                   })}
             </h3>
           </EuiTitle>
@@ -277,41 +277,14 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
       <EuiText size="s" color="subdued">
         {isInferSchemaSelected
           ? i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheadingInfer', {
-              defaultMessage: "Schema will be inferred at query time for fields you don't map.",
+              defaultMessage: "Fields you don't define are inferred at query time.",
             })
           : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheading', {
               defaultMessage:
-                'Map at least one field to continue. Unmapped fields will not be available to query.',
+                "Define at least one field to continue. Fields you don't define aren't available to query.",
             })}
       </EuiText>
       <EuiSpacer size="m" />
-
-      {!validation.isValid && shouldShowValidationCallout ? (
-        <>
-          <KbnDangerCallout
-            title={i18n.translate('xpack.dataFederation.mappingEditor.validation.title', {
-              defaultMessage: 'Fix mapping errors',
-            })}
-            text={
-              <ul>
-                {validation.globalErrors.map((e, idx) => (
-                  <li key={idx}>{e}</li>
-                ))}
-                {hasValidatedFieldErrors ? (
-                  <li>
-                    {i18n.translate('xpack.dataFederation.mappingEditor.validation.fieldErrors', {
-                      defaultMessage: 'One or more fields are incomplete or invalid.',
-                    })}
-                  </li>
-                ) : null}
-              </ul>
-            }
-            data-test-subj="dataFederationMappingEditorValidationError"
-          />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-      <EuiSpacer size="s" />
       {value.fields.length > 0 ? (
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
@@ -421,22 +394,29 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
       ) : null}
 
       {isAddFieldFormOpen && editingFieldId === null ? (
+        <EuiPanel paddingSize="m" color="subdued" hasBorder={false}>
+          <FieldMappingForm
+            key={draftFormKey}
+            value={emptyDraftInitialValue}
+            errors={draftErrors}
+            onDraftChange={() => {
+              if (Object.keys(draftErrors).length === 0) return;
+              setDraftErrors({});
+            }}
+            mode="create"
+            onSubmit={addDraftField}
+            onCancel={closeAddFieldForm}
+          />
+        </EuiPanel>
+      ) : null}
+
+      {!validation.isValid && shouldShowValidationCallout ? (
         <>
           <EuiSpacer size="m" />
-          <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
-            <FieldMappingForm
-              key={draftFormKey}
-              value={emptyDraftInitialValue}
-              errors={draftErrors}
-              onDraftChange={() => {
-                if (Object.keys(draftErrors).length === 0) return;
-                setDraftErrors({});
-              }}
-              mode="create"
-              onSubmit={addDraftField}
-              onCancel={closeAddFieldForm}
-            />
-          </EuiPanel>
+          <MappingValidationCallout
+            globalErrors={validation.globalErrors}
+            hasFieldErrors={hasValidatedFieldErrors}
+          />
         </>
       ) : null}
 
@@ -447,6 +427,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
           onConfirm={confirmRemoveField}
         />
       ) : null}
-    </div>
+    </EuiPanel>
   );
 };

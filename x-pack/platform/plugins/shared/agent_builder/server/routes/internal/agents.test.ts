@@ -8,21 +8,30 @@
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  InferenceConnectorType,
+  createInferenceRequestError,
+  type InferenceConnector,
+} from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerInternalAgentRoutes } from './agents';
 import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
 import type {
   GetAgentAiIndicesResponse,
+  GetAgentModelResponse,
   ListAgentAiIndicesResponse,
 } from '../../../common/http_api/agents';
 
 type Handler = (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
-describe('registerInternalAgentRoutes - agent AI indices', () => {
+describe('registerInternalAgentRoutes', () => {
   const handlers = new Map<string, Handler>();
   let mockList: jest.Mock;
   let mockGet: jest.Mock;
   let mockResolveBase: jest.Mock;
+  let mockGetForFeature: jest.Mock;
+  let mockResolveFeatureConnector: jest.MockedFn<InferenceServerStart['resolveFeatureConnector']>;
 
   const createMockContext = (contextEngineEnabled: boolean) => ({
     core: Promise.resolve({
@@ -43,6 +52,10 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
   const mockResponse = {
     ok: jest.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
     notFound: jest.fn(() => ({ type: 'notFound' })),
+    customError: jest.fn((params: { body?: unknown; statusCode: number }) => ({
+      type: 'customError',
+      ...params,
+    })),
   };
 
   const callList = (contextEngineEnabled: boolean) =>
@@ -82,6 +95,22 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       agentType === 'chat' ? { ai_indices: ['elastic'] } : { ai_indices: ['another-one'] }
     );
 
+    mockGetForFeature = jest.fn().mockResolvedValue({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+    mockResolveFeatureConnector = jest.fn();
+    const coreSetup = {
+      getStartServices: jest.fn().mockResolvedValue([
+        {},
+        {
+          searchInferenceEndpoints: { endpoints: { getForFeature: mockGetForFeature } },
+          inference: { resolveFeatureConnector: mockResolveFeatureConnector },
+        },
+      ]),
+    };
+
     const getInternalServices = jest.fn().mockReturnValue({
       agents: {
         getRegistry: jest.fn().mockResolvedValue({ list: mockList, get: mockGet }),
@@ -98,6 +127,7 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
 
     registerInternalAgentRoutes({
       router: mockRouter,
+      coreSetup,
       getInternalServices,
       logger: loggingSystemMock.createLogger(),
     } as unknown as RouteDependencies);
@@ -126,10 +156,10 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       ]);
     });
 
-    it('lists agents with no options, matching the public list endpoint visibility', async () => {
+    it('lists all agents including hidden ones', async () => {
       await callList(true);
 
-      expect(mockList).toHaveBeenCalledWith();
+      expect(mockList).toHaveBeenCalledWith({ includeHidden: true });
     });
 
     it('returns not found and does not resolve anything when the Context Engine is disabled', async () => {
@@ -204,6 +234,159 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
           agent_type: 'chat',
         },
       ]);
+    });
+  });
+
+  describe('GET /agents/{id}/_model', () => {
+    const callModel = (id = 'chat-agent') =>
+      handlers.get(`${internalApiPath}/agents/{id}/_model`)!(
+        createMockContext(false),
+        { params: { id } },
+        mockResponse
+      ) as Promise<{
+        type: string;
+        body: GetAgentModelResponse;
+      }>;
+
+    const mockEndpointsByFeature = (endpointsByFeature: Record<string, string[]>) => {
+      mockGetForFeature.mockImplementation(async (featureId: string) => ({
+        endpoints: (endpointsByFeature[featureId] ?? []).map((connectorId) => ({
+          connectorId,
+          name: `${connectorId} name`,
+        })),
+        warnings: [],
+        soEntryFound: false,
+      }));
+    };
+
+    const mockAgentFeature = (inferenceFeatureId: string) => {
+      mockGet.mockResolvedValue({
+        id: 'chat-agent',
+        type: 'chat',
+        configuration: { tools: [], inference_feature_id: inferenceFeatureId },
+      });
+    };
+
+    it('registers the model route under the internal api path', () => {
+      expect(handlers.has(`${internalApiPath}/agents/{id}/_model`)).toBe(true);
+    });
+
+    const createConnector = (connectorId: string): InferenceConnector => ({
+      type: InferenceConnectorType.Inference,
+      name: `${connectorId} name`,
+      connectorId,
+      config: {},
+      capabilities: {},
+      isInferenceEndpoint: true,
+      isPreconfigured: true,
+    });
+
+    it("reports the connector the inference plugin resolves for the agent's feature", async () => {
+      mockAgentFeature('my_feature');
+      mockResolveFeatureConnector.mockResolvedValue(createConnector('feature-1'));
+      mockEndpointsByFeature({ agent_builder: ['default'] });
+
+      const result = await callModel();
+
+      expect(mockGet).toHaveBeenCalledWith('chat-agent');
+      expect(mockResolveFeatureConnector).toHaveBeenCalledWith('my_feature', expect.anything());
+      expect(mockGetForFeature).not.toHaveBeenCalled();
+      expect(result.body).toEqual({
+        inference_feature_id: 'my_feature',
+        connector: { id: 'feature-1', name: 'feature-1 name' },
+        source: 'agent_feature',
+      });
+    });
+
+    it('omits the connector when the agent feature has no model, without falling back', async () => {
+      mockAgentFeature('my_feature');
+      mockResolveFeatureConnector.mockRejectedValue(
+        createInferenceRequestError('No endpoint for feature my_feature', 400)
+      );
+      mockEndpointsByFeature({ agent_builder: ['default'] });
+
+      const result = await callModel();
+
+      expect(mockGetForFeature).not.toHaveBeenCalled();
+      expect(result.body).toEqual({ inference_feature_id: 'my_feature', source: 'agent_feature' });
+    });
+
+    it.each([
+      {
+        cause: 'the feature is not registered',
+        message: 'Feature "my_feature" is not registered',
+      },
+      {
+        cause: 'the feature is not a chat completion feature',
+        message:
+          'Feature "my_feature" is not a chat completion feature (task type "sparse_embedding")',
+      },
+    ])(
+      'reports no connector for the agent feature when $cause (inference 400)',
+      async ({ message }) => {
+        mockAgentFeature('my_feature');
+        mockResolveFeatureConnector.mockRejectedValue(createInferenceRequestError(message, 400));
+        mockEndpointsByFeature({ agent_builder: ['default'] });
+
+        const result = await callModel();
+
+        expect(result.type).toBe('ok');
+        expect(mockGetForFeature).not.toHaveBeenCalled();
+        expect(result.body).toEqual({
+          inference_feature_id: 'my_feature',
+          source: 'agent_feature',
+        });
+      }
+    );
+
+    it('surfaces a non-400 inference request error from the feature resolution', async () => {
+      mockAgentFeature('my_feature');
+      mockResolveFeatureConnector.mockRejectedValue(
+        createInferenceRequestError('Forbidden to read the feature connector', 403)
+      );
+
+      const result = await callModel();
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'customError',
+          statusCode: 403,
+          body: { message: 'Forbidden to read the feature connector' },
+        })
+      );
+    });
+
+    it('surfaces other feature resolution failures', async () => {
+      mockAgentFeature('my_feature');
+      mockResolveFeatureConnector.mockRejectedValue(new Error('resolver unavailable'));
+
+      const result = await callModel();
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'customError',
+          statusCode: 500,
+          body: { message: 'resolver unavailable' },
+        })
+      );
+    });
+
+    it('reports the default model when the agent declares no feature', async () => {
+      mockEndpointsByFeature({ agent_builder: ['default'] });
+
+      const result = await callModel();
+
+      expect(mockResolveFeatureConnector).not.toHaveBeenCalled();
+      expect(result.body).toEqual({
+        connector: { id: 'default', name: 'default name' },
+        source: 'default',
+      });
+    });
+
+    it('omits the connector when no default model resolves', async () => {
+      const result = await callModel();
+
+      expect(result.body).toEqual({ source: 'default' });
     });
   });
 });

@@ -32,7 +32,8 @@ import {
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
 import { getSortingCriteria } from '@kbn/sort-predicates';
-import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
   ColumnState,

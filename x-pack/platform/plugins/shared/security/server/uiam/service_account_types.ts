@@ -78,9 +78,13 @@ export interface UiamRoleAssignments {
  */
 export interface UiamServiceAccount {
   id: string;
-  type: 'project';
+  type: 'organization';
+  scope: 'project';
   name: string;
+  description?: string;
   organization_id: string;
+  project_type: UiamProjectType;
+  project_id: string;
   role_assignments: UiamRoleAssignments;
   assumable_by: ServiceAccountAssumableBy[];
 }
@@ -103,11 +107,16 @@ export type UiamServiceAccountCreator =
     };
 
 /**
- * A service account as UIAM reports it from get and list, which add `creator` to what create
- * returns.
+ * A service account as UIAM reports it from get and list, which add `creator` and `revoked` to
+ * what create returns.
  */
 export interface UiamServiceAccountDetails extends UiamServiceAccount {
   creator: UiamServiceAccountCreator;
+  /**
+   * Whether the account was revoked. A revoked account stays around for a short while, and `get`
+   * still reports it until then. `list` leaves revoked accounts out.
+   */
+  revoked: boolean;
 }
 
 /**

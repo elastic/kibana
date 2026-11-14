@@ -17,14 +17,9 @@ import {
   datasetNameSchema,
   datasetTagsSchema,
   evalsDatasetTools,
-  formatExamplesPreview,
-  formatMaturity,
-  formatTags,
-  inlineCode,
   isDatasetAlreadyExistsError,
   loadDatasetClient,
   otherResult,
-  toConfirmationMessage,
   toErrorResult,
 } from './tool_utils';
 
@@ -49,25 +44,6 @@ export const createDatasetTool = (
   type: ToolType.builtin,
   description: `Create an evaluation dataset in the current space. Fails when the name already exists; use ${evalsDatasetTools.editExamples} or ${evalsDatasetTools.upsertDataset} to change the examples of an existing dataset.`,
   schema,
-  confirmation: {
-    askUser: 'always',
-    getConfirmation: ({ toolParams: { name, description, tags, maturity, examples = [] } }) => ({
-      title: 'Create evaluation dataset?',
-      message: toConfirmationMessage([
-        'This creates a dataset in the current space.',
-        [
-          `- **Name:** ${inlineCode(name)}`,
-          `- **Description:** ${inlineCode(description)}`,
-          `- **Tags:** ${formatTags(tags)}`,
-          `- **Maturity:** ${formatMaturity(maturity)}`,
-          `- **Examples:** ${examples.length}`,
-        ].join('\n'),
-        ...formatExamplesPreview(examples),
-      ]),
-      confirm_text: 'Create dataset',
-      cancel_text: 'Cancel',
-    }),
-  },
   handler: async ({ name, description, tags, maturity, examples }, { request, spaceId }) => {
     try {
       const loaded = await loadDatasetClient(

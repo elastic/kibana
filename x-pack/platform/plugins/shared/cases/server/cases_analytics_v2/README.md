@@ -530,7 +530,9 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `/state.active_reset.status: "running"` for hours | Backfill task is mid-walk on a large tenant | Wait. Raise `resetTaskTimeoutMinutes` in `kibana.yml` if it exceeds your tolerance window (see "Tuning /reset at scale") |
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
+| Analytics docs whose `space_id` names a deleted space | Deleting a space removes the cases SOs by namespace, bypassing the cases delete cascade | Handled automatically — each reconciliation tick deletes the analytics docs of spaces that no longer exist. |
 | `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
+| `case.incremental_id` missing from `.cases` while the case shows a number in the UI, no case edits since | The incremental-id task assigns the number after creation via a raw SO update, which doesn't bump `attributes.updated_at`. The task mirrors numbered cases to `.cases`, but that write is best effort | Handled automatically — each reconciliation tick repairs these docs; see "Incremental id backfill" below. Manual fallback: POST /reset. |
 
 ### Templates migration coupling
 
@@ -594,6 +596,43 @@ Safety properties (all covered by tests):
   own errors (scheduling failures are logged, never propagated), so it
   can never fail or retry the migration task.
 
+### Incremental id backfill
+
+The incremental-id task numbers cases with a raw SO update that doesn't bump
+`attributes.updated_at`, so the cursor walks never re-emit a case just because
+it was numbered. The task mirrors newly numbered cases to `.cases` itself, but
+that write is best effort: it can exhaust its retries, be lost to a restart
+between numbering and mirroring, hit the no-op writer while `.cases` is still
+bootstrapping, be overwritten by a reconciliation tick holding an older
+snapshot, or never happen on an older node during a rolling upgrade. Docs
+written before 9.6, when the mirror didn't exist, have the same gap.
+
+`incremental_id_backfill/` closes all of these. It runs at the end of every
+reconciliation tick, after the three cursor walks and the deleted-spaces
+sweep. It searches `.cases` for docs without `case.incremental_id`, re-reads
+those cases, and re-emits the ones that now have a number. Cases that are
+still unnumbered are skipped. When nothing is missing an id, the pass is one
+empty search.
+
+- **Time-boxed within the tick.** The reconciliation task runs under Task
+  Manager's default 5m timeout, and a timed-out run's state is discarded,
+  cursors included. So the repair starts no new page once the tick is 3
+  minutes old (`INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS`); it pauses, the
+  tick's state persists, and the next tick picks up the rest.
+- **Resumable.** A paused pass stores the last `case.id` it read as
+  `incremental_id_backfill_resume_after` in the reconciliation task state, and
+  the next tick resumes after it. Skipped docs (still-unnumbered cases, docs
+  whose case is gone) stay in the query, so without this a large skipped
+  prefix could eat the budget every tick. A completed pass clears the field,
+  and the next tick starts over from the beginning.
+- **A failed pass** keeps the previous resume point, is reported via
+  `taskRunError`, and is retried on the next tick.
+- **Skipped** when `xpack.cases.incrementalId.enabled` is false, or when
+  `.cases` failed to bootstrap and the case writer is a no-op.
+- **`POST /reset` clears the resume point** along with the cursors.
+- **Not removable** while the mirror is best effort: it's the only repair
+  path for a missed mirror write.
+
 ## Activity surface
 
 `.cases-activity` mirrors the `cases-user-actions` SO — one analytics
@@ -626,6 +665,11 @@ deliberate differences driven by the user-action shape:
   and doc values, so an oversized payload (large bulk-edit) would read
   back as `null` in ES|QL; `wildcard` has no such cap and is built for
   large, opaque strings queried with grep-style predicates.
+- **Action source.** `source.{type,id,name,run_id}` mirrors the
+  user-action SO `source` (agent, workflow, rule, attack, api, user).
+  It is omitted when the SO has no `source`, and on rows indexed before
+  `.cases-activity` mapped it. `POST /internal/cases/_analyticsV2/reset`
+  backfills those.
 - **No `index.mode: lookup`.** `.cases-activity` is the **fact** table
   in the analytics model. ES|QL queries `FROM .cases-activity | LOOKUP
   JOIN .cases ON case.id`; the lookup-mode index is on the cases side.
@@ -711,9 +755,10 @@ cases_analytics_v2/
 ├── constants.ts       index name + administrator route URLs
 │
 ├── ensure_indices/
-│   ├── case.ts            idempotent bootstrap for .cases (lookup-mode)
-│   ├── activity.ts        idempotent bootstrap for .cases-activity (fact table)
-│   └── attachments.ts     idempotent bootstrap for .cases-attachments (fact table)
+│   ├── ensure_index.ts    shared idempotent bootstrap + additive mapping sync
+│   ├── case.ts            .cases (lookup-mode)
+│   ├── activity.ts        .cases-activity (fact table)
+│   └── attachments.ts     .cases-attachments (fact table)
 │
 ├── mappings/
 │   ├── case.ts                             CASE_INDEX_MAPPING (dynamic: strict)
@@ -735,9 +780,14 @@ cases_analytics_v2/
 │   ├── retry.ts                          bounded jittered exponential backoff
 │   └── retry.test.ts
 │
+├── incremental_id_backfill/   per-tick repair of case.incremental_id in .cases
+│   └── runner.ts            search .cases for missing ids → bulkGet → re-emit numbered cases;
+│                            called from the reconciliation tick
+│
 ├── reconciliation/
 │   ├── index.ts             periodic task type registration + scheduling
-│   │                        (cases → activity → attachments per tick;
+│   │                        (cases → activity → attachments → deleted
+│   │                        spaces sweep → incremental id backfill per tick;
 │   │                        independent cursors; per-surface error
 │   │                        isolation via taskRunError; maxAttempts: 1)
 │   ├── runner.ts            walks cases by `updated_at > last_run_at OR
@@ -749,6 +799,8 @@ cases_analytics_v2/
 │   │                        `find` opt into `namespaces: ['*']` — the
 │   │                        unscoped internal SO client otherwise silently
 │   │                        scopes to `default`.
+│   ├── deleted_spaces_sweep.ts  deletes analytics docs whose `space_id` no
+│   │                        longer names an existing space.
 │   ├── activity_runner.ts      walks user-actions by `created_at > last_run_at`
 │   │                           (immutable SOs — no `updated_at` branch needed).
 │   ├── attachments_runner.ts   walks cases-comments + cases-attachments (both unconditionally)

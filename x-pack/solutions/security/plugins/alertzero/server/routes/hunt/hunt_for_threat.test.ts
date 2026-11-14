@@ -5,35 +5,45 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { ResolvedIndexScope } from '@kbn/alertzero-common';
+import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntForThreatRoute } from './hunt_for_threat';
-import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
+import {
+  resolveHuntScope,
+  type ResolvedHuntScope,
+} from '../../services/watches/hunt/common/resolve_index_scope';
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import type { HuntForThreatServiceResult } from '../../services/watches/hunt/tier1/types';
 
 jest.mock('../../services/watches/hunt/common/resolve_index_scope', () => {
   const actual = jest.requireActual('../../services/watches/hunt/common/resolve_index_scope');
-  return { ...actual, resolveIndexScope: jest.fn() };
+  return { ...actual, resolveHuntScope: jest.fn() };
 });
 jest.mock('../../services/watches/hunt/tier1/hunt_for_threat', () => ({
   huntForThreat: jest.fn(),
 }));
 
-const resolveIndexScopeMock = resolveIndexScope as jest.MockedFunction<typeof resolveIndexScope>;
+const resolveHuntScopeMock = resolveHuntScope as jest.MockedFunction<typeof resolveHuntScope>;
 const huntForThreatMock = huntForThreat as jest.MockedFunction<typeof huntForThreat>;
 
-const okScope: ResolvedIndexScope = {
-  technology: 'aws_iam',
+const UNIVERSE = ['logs-*', 'filebeat-*', '-*elastic-cloud-logs-*'];
+
+const okScope: ResolvedHuntScope = {
   status: 'ok',
-  required: ['logs-aws.*'],
-  optional: [],
+  resolution: 'universe',
+  index_patterns: UNIVERSE,
   missing: [],
+  report_matches: [],
+  actionable_indices: [],
   window: { from: 'now-7d', to: 'now' },
   row_limit: 100,
+  discovered: [],
 };
+
+const { discovered: _discovered, ...wireScope } = okScope;
 
 const tier1Result: HuntForThreatServiceResult = {
   status: 'no_environment_hits',
@@ -49,24 +59,35 @@ const tier1Result: HuntForThreatServiceResult = {
   per_index: [],
 };
 
-const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
+const makeDeps = ({
+  spaceId = 'default',
+  indexPatterns = UNIVERSE,
+  cpsEnabled = false,
+}: { spaceId?: string; indexPatterns?: string[]; cpsEnabled?: boolean } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
+  const clusterClient = elasticsearchServiceMock.createClusterClient();
+  const scoped = elasticsearchServiceMock.createScopedClusterClient();
+  clusterClient.asScoped.mockReturnValue(scoped);
 
   registerHuntForThreatRoute({
     router: router as unknown as RouteDependencies['router'],
     logger,
     getSpaceId: () => spaceId,
+    getClusterClient: () => clusterClient,
+    isCpsEnabled: () => cpsEnabled,
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
+  const uiSettingsGet = jest.fn().mockResolvedValue(indexPatterns);
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
-      uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
-      elasticsearch: { client: { asCurrentUser, asInternalUser } },
+      uiSettings: { client: { get: uiSettingsGet } },
     }),
   };
 
@@ -78,18 +99,19 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
       response: ReturnType<typeof httpServerMock.createResponseFactory>
     ) => Promise<unknown>,
     context,
-    asCurrentUser,
-    asInternalUser,
+    clusterClient,
+    scoped,
     logger,
+    uiSettingsGet,
   };
 };
 
 const requestFor = (body: Record<string, unknown> = {}) =>
-  httpServerMock.createKibanaRequest({ body: { technology: 'aws_iam', ...body } });
+  httpServerMock.createKibanaRequest({ body });
 
 describe('registerHuntForThreatRoute', () => {
   beforeEach(() => {
-    resolveIndexScopeMock.mockReset().mockResolvedValue(okScope);
+    resolveHuntScopeMock.mockReset().mockResolvedValue(okScope);
     huntForThreatMock.mockReset().mockResolvedValue(tier1Result);
   });
 
@@ -108,25 +130,87 @@ describe('registerHuntForThreatRoute', () => {
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
-    expect(resolveIndexScopeMock).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'hunt-space' })
+    expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'hunt-space', indexPatterns: UNIVERSE })
+    );
+  });
+
+  it('reads the Security Solution default data view as the hunt universe', async () => {
+    const { handler, context, uiSettingsGet } = makeDeps({
+      indexPatterns: ['logs-*', 'winlogbeat-*'],
+    });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(uiSettingsGet).toHaveBeenCalledWith(SECURITY_SOLUTION_DEFAULT_INDEX_ID);
+    expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+      expect.objectContaining({ indexPatterns: ['logs-*', 'winlogbeat-*'] })
     );
   });
 
   it('searches as the current user so the caller index privileges apply', async () => {
-    const { handler, context, asCurrentUser, asInternalUser } = makeDeps();
+    const { handler, context, scoped } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
-    expect(huntForThreatMock).toHaveBeenCalledWith(asCurrentUser, expect.anything());
-    expect(huntForThreatMock).not.toHaveBeenCalledWith(asInternalUser, expect.anything());
+    expect(huntForThreatMock).toHaveBeenCalledWith(scoped.asCurrentUser, expect.anything());
+  });
+
+  it('tells scope resolution whether cross-project search is on', async () => {
+    const off = makeDeps();
+    await off.handler(
+      off.context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+    expect(resolveHuntScopeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ crossProjectSearch: false })
+    );
+
+    const on = makeDeps({ cpsEnabled: true });
+    await on.handler(
+      on.context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+    expect(resolveHuntScopeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ crossProjectSearch: true })
+    );
+  });
+
+  it('scopes the client to the request with the space project routing', async () => {
+    const { handler, context, clusterClient } = makeDeps();
+    const request = requestFor();
+
+    await handler(context, request, httpServerMock.createResponseFactory());
+
+    expect(clusterClient.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+  });
+
+  it('passes search_patterns from the resolved scope to huntForThreat', async () => {
+    const { handler, context } = makeDeps();
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(huntForThreatMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        scope: {
+          search_patterns: UNIVERSE,
+          window: okScope.window,
+          row_limit: okScope.row_limit,
+        },
+      })
+    );
   });
 
   it('refuses a blocked scope with 409 rather than reading as a clean zero-hit search', async () => {
-    resolveIndexScopeMock.mockResolvedValue({
+    resolveHuntScopeMock.mockResolvedValue({
       ...okScope,
       status: 'blocked',
-      missing: ['logs-aws.*'],
+      resolution: 'blocked:empty_universe',
+      index_patterns: [],
+      missing: ['logs-*'],
     });
     const { handler, context } = makeDeps();
     const response = httpServerMock.createResponseFactory();
@@ -136,7 +220,7 @@ describe('registerHuntForThreatRoute', () => {
     expect(huntForThreatMock).not.toHaveBeenCalled();
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 409,
-      body: { message: expect.stringContaining('logs-aws.*') },
+      body: { message: expect.stringContaining('logs-*') },
     });
   });
 
@@ -155,13 +239,15 @@ describe('registerHuntForThreatRoute', () => {
     expect(body.result).toEqual(tier1Result);
   });
 
-  it('returns the resolved scope alongside the result', async () => {
+  it('returns the resolved scope without discovered alongside the result', async () => {
     const { handler, context } = makeDeps();
     const response = httpServerMock.createResponseFactory();
 
     await handler(context, requestFor(), response);
 
-    expect(response.ok).toHaveBeenCalledWith({ body: { scope: okScope, result: tier1Result } });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { scope: wireScope, result: tier1Result },
+    });
   });
 
   it('logs and returns a generic 500 when the search throws', async () => {

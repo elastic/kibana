@@ -11,6 +11,9 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 export { validateSslPathInput, validateSslPathsCombo };
 
+// 1 day, as in the API
+const MAX_OAUTH2_DURATION_SECONDS = 86400;
+
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
   (value: string | { id: string } | undefined) => {
@@ -298,6 +301,197 @@ export function validateKafkaPassword(value: string) {
 
 export const validateKafkaPasswordSecret = toSecretValidator(validateKafkaPassword);
 
+export function validateKafkaOAuth2ClientId(value: string) {
+  if (!value || value.trim() === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientIdIsRequired', {
+        defaultMessage: 'Client ID is required',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2ClientSecret(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientSecretIsRequired', {
+        defaultMessage: 'Client secret is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaOAuth2ClientSecretSecret = toSecretValidator(
+  validateKafkaOAuth2ClientSecret
+);
+
+export function validateKafkaOAuth2ClientCertificateKey(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientCertificateKeyIsRequired', {
+        defaultMessage: 'Private key is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaOAuth2ClientCertificateKeySecret = toSecretValidator(
+  validateKafkaOAuth2ClientCertificateKey
+);
+
+const requiredText = (value: string, message: string) => {
+  if (!value || value.trim() === '') {
+    return [message];
+  }
+};
+
+export function validateKafkaKerberosConfigPath(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosConfigPathIsRequired', {
+      defaultMessage: 'Kerberos configuration file is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosRealm(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosRealmIsRequired', {
+      defaultMessage: 'Realm is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosKeytab(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosKeytabIsRequired', {
+      defaultMessage: 'Keytab file is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosUsername(value: string) {
+  return requiredText(
+    value,
+    i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosUsernameIsRequired', {
+      defaultMessage: 'Username is required',
+    })
+  );
+}
+
+export function validateKafkaKerberosPassword(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaKerberosPasswordIsRequired', {
+        defaultMessage: 'Password is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaKerberosPasswordSecret = toSecretValidator(validateKafkaKerberosPassword);
+
+/** A duration in seconds: optional, and a number that is not negative. */
+export function validateKafkaOAuth2Seconds(value: string) {
+  if (!value || value.trim() === '') {
+    return;
+  }
+
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0 || seconds > MAX_OAUTH2_DURATION_SECONDS) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2SecondsInvalid', {
+        defaultMessage: 'Specify a number of seconds between 0 and {max}',
+        values: { max: MAX_OAUTH2_DURATION_SECONDS },
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2Claims(value: string) {
+  if (!value || value.trim() === '') {
+    return;
+  }
+
+  try {
+    const claims = JSON.parse(value);
+    if (claims === null || typeof claims !== 'object' || Array.isArray(claims)) {
+      throw new Error('not an object');
+    }
+  } catch (error) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClaimsInvalid', {
+        defaultMessage: 'The claims must be a JSON object, for example {example}',
+        values: { example: '{"sub": "my-client"}' },
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2TokenUrl(value: string) {
+  if (!value || value.trim() === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlIsRequired', {
+        defaultMessage: 'Token URL is required',
+      }),
+    ];
+  }
+
+  try {
+    const url = new URL(value.trim());
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return [
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlInvalidProtocol', {
+          defaultMessage: 'Token URL must start with http:// or https://',
+        }),
+      ];
+    }
+  } catch (error) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlInvalid', {
+        defaultMessage: 'Invalid URL',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2EndpointParams(value: Array<{ key: string; value: string }>) {
+  const errors = value.flatMap((row, index) => {
+    // the server refuses a request body with a `__proto__` key
+    if (row.key === '__proto__') {
+      return [
+        {
+          message: i18n.translate(
+            'xpack.fleet.settings.outputForm.kafkaOAuth2EndpointParamsReservedNameError',
+            { defaultMessage: '"__proto__" is a reserved name and cannot be used' }
+          ),
+          index,
+          hasKeyError: true,
+          hasValueError: false,
+        },
+      ];
+    }
+    if ((row.key === '') !== (row.value === '')) {
+      return [
+        {
+          message: i18n.translate(
+            'xpack.fleet.settings.outputForm.kafkaOAuth2EndpointParamsError',
+            { defaultMessage: 'Specify both the name and the value of the parameter' }
+          ),
+          index,
+          hasKeyError: row.key === '',
+          hasValueError: row.value === '',
+        },
+      ];
+    }
+    return [];
+  });
+
+  return errors.length ? errors : undefined;
+}
+
 export function validateCATrustedFingerPrint(value: string) {
   if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
     return [
@@ -491,4 +685,99 @@ export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }
   if (errors.length) {
     return errors;
   }
+}
+
+const GO_DURATION_UNIT = '(?:ns|us|µs|μs|ms|s|m|h)';
+const GO_DURATION_REGEX = new RegExp(
+  `^(?:0|(?:(?:\\d+(?:\\.\\d*)?|\\.\\d+)${GO_DURATION_UNIT})+)$`
+);
+
+export function validateOtlpEndpoint(value: string) {
+  const endpoint = value?.trim() ?? '';
+  if (!endpoint) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointIsRequired', {
+        defaultMessage: 'Endpoint is required',
+      }),
+    ];
+  }
+  if (/\s/.test(endpoint)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointInvalid', {
+        defaultMessage: 'Endpoint must not contain spaces',
+      }),
+    ];
+  }
+  if (endpoint.length > 2048) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpEndpointTooLong', {
+        defaultMessage: 'Endpoint must be at most {max} characters',
+        values: { max: 2048 },
+      }),
+    ];
+  }
+}
+
+/** An optional duration in the Go format used by the collector, such as `5s` or `1m30s`. */
+export function validateOtlpDuration(value: string) {
+  const duration = value?.trim() ?? '';
+  if (!duration) {
+    return;
+  }
+  if (duration.length > 64 || !GO_DURATION_REGEX.test(duration)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpDurationInvalid', {
+        defaultMessage: 'Specify a duration such as {examples}',
+        values: { examples: '500ms, 5s, 1m30s' },
+      }),
+    ];
+  }
+}
+
+/** An optional number of bytes: a whole number that is not negative. */
+export function validateOtlpByteSize(value: string) {
+  const size = value?.trim() ?? '';
+  if (!size) {
+    return;
+  }
+  if (!/^\d+$/.test(size) || !Number.isSafeInteger(Number(size))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpByteSizeInvalid', {
+        defaultMessage: 'Specify a whole number of bytes, 0 or more',
+      }),
+    ];
+  }
+}
+
+/** An optional string of at most 256 characters. */
+export function validateOtlpShortString(value: string) {
+  if ((value?.trim() ?? '').length > 256) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpShortStringTooLong', {
+        defaultMessage: 'Must be at most {max} characters',
+        values: { max: 256 },
+      }),
+    ];
+  }
+}
+
+export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>) {
+  const errors = [...(validateKafkaHeaders(pairs) ?? [])];
+
+  pairs.forEach(({ key, value }, index) => {
+    if (key.length > 256 || value.length > 1000) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpHeaderTooLong', {
+          defaultMessage:
+            'Header names must be at most {maxKey} characters and values at most {maxValue}',
+          values: { maxKey: 256, maxValue: 1000 },
+        }),
+        index,
+        hasKeyError: key.length > 256,
+        hasValueError: value.length > 1000,
+      });
+    }
+  });
+
+  return errors.length ? errors : undefined;
 }

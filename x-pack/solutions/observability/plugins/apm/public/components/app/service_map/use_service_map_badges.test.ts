@@ -297,7 +297,7 @@ describe('useServiceMapBadges()', () => {
 
       expect(callApmApi).toHaveBeenCalledWith(
         'POST /internal/apm/service-map/service_badges',
-        expect.anything()
+        expect.objectContaining({ isCachable: false })
       );
       const [, requestArgs] = callApmApi.mock.calls[0];
       expect(requestArgs.params.query).not.toHaveProperty('kuery');

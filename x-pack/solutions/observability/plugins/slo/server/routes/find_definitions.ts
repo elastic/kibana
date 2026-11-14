@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-import { findSloDefinitionsParamsSchema } from '@kbn/slo-schema';
+import path from 'path';
+import { findSloDefinitionsParamsSchema, findSloDefinitionsResponseSchema } from '@kbn/slo-schema';
 import { FindSLODefinitions } from '../services/find_slo_definitions';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
 export const findSloDefinitionsRoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/_definitions 2023-10-31',
-  options: { access: 'public' },
+  options: {
+    access: 'public',
+    summary: 'Get the SLO definitions',
+    description:
+      'You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.',
+    operationId: 'getDefinitionsOp',
+    oasOperationObject: () => path.join(__dirname, 'examples/find_definitions.yaml'),
+  },
   security: {
     authz: {
       requiredPrivileges: ['slo_read'],
     },
   },
   params: findSloDefinitionsParamsSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => findSloDefinitionsResponseSchema },
+  },
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
     const { repository, scopedClusterClient } = await getScopedClients({ request, logger });

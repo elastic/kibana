@@ -22,6 +22,7 @@ import { uniqBy } from 'lodash';
 import {
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_DEFAULT_COLOR_STEPS,
 } from '@kbn/lens-common/visualizations/datatable/constants';
 
 import type { LensAttributes } from '../../../../types';
@@ -38,7 +39,7 @@ import {
 } from './common';
 import {
   getAccessorName,
-  inferDatatypeFromColor,
+  inferColumnDatatype,
   isMetricColumnNoESQL,
   isMetricColumnESQL,
 } from '../../../../transforms/charts/datatable/helpers';
@@ -322,12 +323,12 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
         return;
       }
       const visCol = visColumnByNewId.get(newColumnId);
-      const color = visCol ? buildColorProps(visCol).color : undefined;
+      const colorProps = visCol ? buildColorProps(visCol) : {};
       if (isMetricColumnId(newColumnId)) {
-        return inferDatatypeFromColor(color, 'number');
+        return inferColumnDatatype(colorProps, 'number');
       }
       if (isRowColumnId(newColumnId)) {
-        return inferDatatypeFromColor(color, 'string');
+        return inferColumnDatatype(colorProps, 'string');
       }
       return;
     }
@@ -341,7 +342,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       return;
     }
 
-    return inferDatatypeFromColor(buildColorProps(visCol).color, 'number');
+    return inferColumnDatatype(buildColorProps(visCol), 'number');
   };
 
   // Filter out visualization columns that only exist in the visualization state
@@ -491,6 +492,39 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
+  const alignProgressBarColumns: NormalizerConfig<DatatableAttributes> = {
+    original: (attrs) => {
+      for (const col of attrs.state.visualization.columns) {
+        const { colorMode, fillStyle } = col;
+        if (colorMode !== 'progress' || !fillStyle) {
+          continue;
+        }
+        // The toAPI path drops the values the editor keeps for another fill mode (the palette behind
+        // a single fill, the color behind a palette fill) instead of persisting them. They are editor
+        // memory rather than chart configuration, and persisting them would need a second color field.
+        // After a dashboard save, switching fill mode in the editor restores the defaults.
+        if (fillStyle.fillMode === 'single') {
+          delete col.palette;
+        } else {
+          delete fillStyle.color;
+        }
+        // The editor seeds palette fills with a bare named palette, which renders as the
+        // distributed palette with the default band count. The toAPI path exports it as a
+        // `distributed_palette`, and the palette normalizer below rebuilds the params the in
+        // path writes.
+        if (col.palette && !col.palette.params) {
+          col.palette.params = {};
+        }
+        // The editor leaves the alignment unset, which renders `right`, and the toAPI path outputs
+        // it explicitly
+        if (col.alignment === undefined) {
+          col.alignment = 'right';
+        }
+      }
+      return attrs;
+    },
+  };
+
   // Remove duplicate visualization columns by columnId.
   const deduplicateColumns: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
@@ -559,7 +593,11 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     sortColumns,
     sortEsqlDatasourceColumns,
     alignLegacyTypes,
+    alignProgressBarColumns,
     getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
-    getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),
+    getPaletteNormalizer<DatatableAttributes>(
+      'state.visualization.columns.*.palette',
+      LENS_DATATABLE_DEFAULT_COLOR_STEPS
+    ),
   ])(attributes);
 };

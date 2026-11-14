@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const WatchlistObject = lazySchema(() =>
   z.object({
@@ -59,17 +59,13 @@ export const WatchlistObject = lazySchema(() =>
     /**
      * Timestamp indicating when the watchlist was created
      */
-    createdAt: z
-      .string()
-      .datetime()
+    createdAt: isoDateTime()
       .optional()
       .describe('Timestamp indicating when the watchlist was created'),
     /**
      * Timestamp indicating when the watchlist was last updated
      */
-    updatedAt: z
-      .string()
-      .datetime()
+    updatedAt: isoDateTime()
       .optional()
       .describe('Timestamp indicating when the watchlist was last updated'),
   })

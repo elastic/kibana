@@ -9,9 +9,8 @@
 
 import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
-import type { ColorMapping } from '../../shared_components';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '../../shared_components';
-import { isNotNull } from '../../shared_components/color_mapping/components/assignment/match';
+import type { ColorMapping } from '../../color_mapping/config';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '../../color_mapping/config/default_color_mapping';
 
 const singleColorGradientPalettes = new Set<KbnPaletteId>([
   KbnPalette.Red,
@@ -53,22 +52,19 @@ export function getConfigFromPalette(
       if (singleColorGradientPalettes.has(palette.id) && i > 0) return null;
       return color;
     })
-    .filter(isNotNull)
+    .filter((color): color is number | string => color !== null)
     .map(
-      (color) =>
-        ({
-          touched: false,
-          ...(typeof color === 'number'
-            ? {
-                paletteId: KbnPalette.Default,
-                type: 'categorical',
-                colorIndex: color,
-              }
-            : {
-                type: 'colorCode',
-                colorCode: color,
-              }),
-        } satisfies ColorMapping.ColorStep)
+      (color): ColorMapping.ColorStep =>
+        typeof color === 'number'
+          ? {
+              paletteId: KbnPalette.Default,
+              type: 'categorical',
+              colorIndex: color,
+            }
+          : {
+              type: 'colorCode',
+              colorCode: color,
+            }
     );
 
   return {

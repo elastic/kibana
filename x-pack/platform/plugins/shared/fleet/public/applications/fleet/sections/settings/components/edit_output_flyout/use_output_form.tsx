@@ -17,15 +17,19 @@ import {
   getDefaultPresetForEsOutput,
   isBeatsOutput,
   isOtelExporterOutput,
+  isOtlpOutput,
 } from '../../../../../../../common/services/output_helpers';
 
 import type {
   KafkaOutput,
   NewElasticsearchOutput,
   NewLogstashOutput,
+  NewOtlpOutput,
   NewOutput,
   NewRemoteElasticsearchOutput,
   OtelExporterOutput,
+  SOSecret,
+  SOSecretOrNull,
 } from '../../../../../../../common/types/models';
 
 import {
@@ -86,10 +90,28 @@ import {
   validateSslPathsCombo,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
+import type { KafkaKerberosInputs } from './use_kafka_kerberos_inputs';
+import {
+  buildKafkaKerberosConfig,
+  extractKafkaKerberosSecrets,
+  hasKafkaKerberosInput,
+  isKafkaKerberosWithoutSettings,
+  useKafkaKerberosInputs,
+  validateKafkaKerberosInputs,
+} from './use_kafka_kerberos_inputs';
+import type { KafkaOAuth2Inputs } from './use_kafka_oauth2_inputs';
+import {
+  buildKafkaOAuth2Config,
+  extractKafkaOAuth2Secrets,
+  useKafkaOAuth2Inputs,
+  validateKafkaOAuth2Inputs,
+} from './use_kafka_oauth2_inputs';
+import type { OtlpInputs } from './use_otlp_inputs';
+import { buildOtlpExporterConfig, useOtlpInputs, validateOtlpInputs } from './use_otlp_inputs';
 
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
-export interface OutputFormInputsType {
+export interface OutputFormInputsType extends KafkaOAuth2Inputs, KafkaKerberosInputs, OtlpInputs {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
@@ -156,25 +178,67 @@ export interface OutputFormInputsType {
   otelDisableBeatsauthInput: ReturnType<typeof useSwitchInput>;
 }
 
-function extractKafkaOutputSecrets(
+/**
+ * The secret to send for a credential, or `undefined` to send none. An update that leaves out a
+ * stored secret keeps it, so a stored secret the user cleared, or replaced with a plain text value,
+ * is removed with an explicit `null`.
+ */
+export const getSecretToSend = (
+  plainValue: string | undefined,
+  secretValue: SOSecret | undefined,
+  storedSecret: SOSecret | undefined
+): SOSecretOrNull | undefined => {
+  if (!plainValue && secretValue) {
+    return secretValue;
+  }
+  return storedSecret ? null : undefined;
+};
+
+/** The secrets of a Kafka output payload, where `null` removes a stored secret. */
+type KafkaOutputSecretsPayload = Pick<
+  NonNullable<KafkaOutput['secrets']>,
+  'oauth2' | 'kerberos'
+> & {
+  ssl?: { key: SOSecretOrNull };
+  password?: SOSecretOrNull;
+};
+
+export function extractKafkaOutputSecrets(
   inputs: Pick<
     OutputFormInputsType,
     | 'kafkaSslKeyInput'
     | 'kafkaSslKeySecretInput'
     | 'kafkaAuthPasswordInput'
     | 'kafkaAuthPasswordSecretInput'
-  >
-): KafkaOutput['secrets'] | null {
-  const secrets: KafkaOutput['secrets'] = {};
+  >,
+  methodSecrets?: Pick<NonNullable<KafkaOutput['secrets']>, 'oauth2' | 'kerberos'>,
+  storedSecrets?: KafkaOutput['secrets']
+): KafkaOutputSecretsPayload | null {
+  const secrets: KafkaOutputSecretsPayload = {};
 
-  if (!inputs.kafkaSslKeyInput.value && inputs.kafkaSslKeySecretInput.value) {
-    secrets.ssl = {
-      key: inputs.kafkaSslKeySecretInput.value,
-    };
+  if (methodSecrets?.oauth2) {
+    secrets.oauth2 = methodSecrets.oauth2;
+  }
+  if (methodSecrets?.kerberos) {
+    secrets.kerberos = methodSecrets.kerberos;
   }
 
-  if (!inputs.kafkaAuthPasswordInput.value && inputs.kafkaAuthPasswordSecretInput.value) {
-    secrets.password = inputs.kafkaAuthPasswordSecretInput.value;
+  const sslKey = getSecretToSend(
+    inputs.kafkaSslKeyInput.value,
+    inputs.kafkaSslKeySecretInput.value,
+    storedSecrets?.ssl?.key
+  );
+  if (sslKey !== undefined) {
+    secrets.ssl = { key: sslKey };
+  }
+
+  const password = getSecretToSend(
+    inputs.kafkaAuthPasswordInput.value,
+    inputs.kafkaAuthPasswordSecretInput.value,
+    storedSecrets?.password
+  );
+  if (password !== undefined) {
+    secrets.password = password;
   }
 
   return Object.keys(secrets).length ? secrets : null;
@@ -229,6 +293,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       | keyof KafkaOutput
       | keyof NewRemoteElasticsearchOutput
       | keyof NewElasticsearchOutput
+      | keyof NewOtlpOutput
   ) {
     if (!authz.fleet.allSettings) {
       return true;
@@ -549,6 +614,26 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isDisabled('password')
   );
 
+  const isKafkaOAuth2Selected = kafkaAuthMethodInput.value === kafkaAuthType.OAuth2;
+  const kafkaOAuth2Inputs = useKafkaOAuth2Inputs(
+    kafkaOutput,
+    isKafkaOAuth2Selected,
+    isDisabled('oauth2')
+  );
+
+  const isKafkaKerberosSelected = kafkaAuthMethodInput.value === kafkaAuthType.Kerberos;
+  const kafkaKerberosInputs = useKafkaKerberosInputs(
+    kafkaOutput,
+    isKafkaKerberosSelected,
+    isDisabled('kerberos')
+  );
+  // An output with the kerberos type and no settings was set up outside of this form, e.g. in the
+  // advanced YAML. Until a Kerberos setting is entered, whether the form is shown or not, there is
+  // nothing to validate or to send for it: the update keeps the authentication as it is.
+  const isKafkaKerberosConfigured =
+    isKafkaKerberosSelected &&
+    (!isKafkaKerberosWithoutSettings(kafkaOutput) || hasKafkaKerberosInput(kafkaKerberosInputs));
+
   const kafkaSslCertificateAuthoritiesInput = useComboInput(
     'kafkaSslCertificateAuthoritiesComboBox',
     kafkaOutput?.ssl?.certificate_authorities ?? [],
@@ -687,6 +772,14 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isLogstash = typeInput.value === outputType.Logstash;
   const isKafka = typeInput.value === outputType.Kafka;
   const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
+  const isOtlp = typeInput.value === outputType.Otlp;
+
+  const isOtlpExporterDisabled = isDisabled('otlp_exporter');
+  const otlpInputs = useOtlpInputs(
+    output && isOtlpOutput(output) ? output : undefined,
+    isOtlp,
+    isOtlpExporterDisabled
+  );
 
   const inputs: OutputFormInputsType = {
     nameInput,
@@ -731,6 +824,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
+    ...kafkaOAuth2Inputs,
+    ...kafkaKerberosInputs,
+    ...otlpInputs,
     kafkaSaslMechanismInput,
     kafkaPartitionTypeInput,
     kafkaPartitionTypeRandomInput,
@@ -765,6 +861,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
     const kafkaPasswordSecretValid = kafkaAuthPasswordSecretInput.validate();
+    const kafkaOAuth2Valid = validateKafkaOAuth2Inputs(kafkaOAuth2Inputs);
+    const kafkaKerberosValid =
+      !isKafkaKerberosConfigured || validateKafkaKerberosInputs(kafkaKerberosInputs);
     const kafkaClientIDValid = kafkaClientIdInput.validate();
     const kafkaSslCertificateAuthoritiesValid = kafkaSslCertificateAuthoritiesInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
@@ -797,6 +896,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       ? kafkaPasswordPlainValid
       : kafkaPasswordSecretValid;
 
+    if (isOtlp) {
+      return [nameInputValid, validateOtlpInputs(otlpInputs)].every(Boolean);
+    }
     if (isLogstash) {
       // validate logstash
       return (
@@ -818,6 +920,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         kafkaSslKeyValid &&
         kafkaUsernameValid &&
         kafkaPasswordValid &&
+        kafkaOAuth2Valid &&
+        kafkaKerberosValid &&
         kafkaHeadersValid &&
         additionalYamlConfigValid &&
         kafkaClientIDValid &&
@@ -863,6 +967,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     elasticsearchUrlInput,
     remoteElasticsearchUrlInput,
     kafkaHostsInput,
+    kafkaOAuth2Inputs,
+    kafkaKerberosInputs,
+    isKafkaKerberosConfigured,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
@@ -890,9 +997,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaPartitionTypeRoundRobinInput,
     kafkaStaticTopicInput,
     kafkaDynamicTopicInput,
+    otlpInputs,
     isLogstash,
     isKafka,
     isRemoteElasticsearch,
+    isOtlp,
   ]);
 
   const submit = useCallback(async () => {
@@ -945,6 +1054,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
       };
 
+      // the client SSL key of the Elasticsearch, remote Elasticsearch and Logstash outputs
+      const sslKeySecret = getSecretToSend(
+        sslKeyInput.value,
+        sslKeySecretInput.value,
+        (output as NewElasticsearchOutput | undefined)?.secrets?.ssl?.key
+      );
+
       const payload: NewOutput = (() => {
         const parseIntegerIfStringDefined = (value: string | undefined): number | undefined => {
           if (value !== undefined) {
@@ -957,17 +1073,41 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         };
 
         switch (typeInput.value) {
+          case outputType.Otlp:
+            // an OTLP output can be the default neither for data nor for monitoring
+            return {
+              name: nameInput.value,
+              type: outputType.Otlp,
+              is_default: false,
+              is_default_monitoring: false,
+              // an update without the exporter keeps it as it is: a preconfigured output that
+              // does not allow editing it must not send it, or the server rejects the update
+              ...(output && isOtlpExporterDisabled
+                ? {}
+                : { otlp_exporter: buildOtlpExporterConfig(otlpInputs) }),
+            } as NewOtlpOutput;
           case outputType.Kafka:
             const definedCA = kafkaSslCertificateAuthoritiesInput.value.filter(
               (val) => val !== ''
             ).length;
 
-            const maybeSecrets = extractKafkaOutputSecrets({
-              kafkaSslKeyInput,
-              kafkaSslKeySecretInput,
-              kafkaAuthPasswordInput,
-              kafkaAuthPasswordSecretInput,
-            });
+            const maybeSecrets = extractKafkaOutputSecrets(
+              {
+                kafkaSslKeyInput,
+                kafkaSslKeySecretInput,
+                kafkaAuthPasswordInput,
+                kafkaAuthPasswordSecretInput,
+              },
+              {
+                ...(isKafkaOAuth2Selected && {
+                  oauth2: extractKafkaOAuth2Secrets(kafkaOAuth2Inputs),
+                }),
+                ...(isKafkaKerberosConfigured && {
+                  kerberos: extractKafkaKerberosSecrets(kafkaKerberosInputs),
+                }),
+              },
+              kafkaOutput?.secrets
+            );
 
             return {
               name: nameInput.value,
@@ -1027,6 +1167,16 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               kafkaSaslMechanismInput.value
                 ? { sasl: { mechanism: kafkaSaslMechanismInput.value } }
                 : {}),
+              ...(isKafkaOAuth2Selected
+                ? {
+                    oauth2: buildKafkaOAuth2Config(kafkaOutput?.oauth2, kafkaOAuth2Inputs),
+                  }
+                : {}),
+              ...(isKafkaKerberosConfigured
+                ? {
+                    kerberos: buildKafkaKerberosConfig(kafkaOutput?.kerberos, kafkaKerberosInputs),
+                  }
+                : {}),
 
               partition: kafkaPartitionTypeInput.value,
               ...(kafkaPartitionTypeInput.value === kafkaPartitionType.Random &&
@@ -1067,7 +1217,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                   }
                 : {}),
               headers: kafkaHeadersInput.value,
-              timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
+              // not supported with OAuth2, the form does not show it then
+              ...(isKafkaOAuth2Selected
+                ? {}
+                : { timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value) }),
               broker_timeout: parseIntegerIfStringDefined(
                 kafkaBrokerReachabilityTimeoutInput.value
               ),
@@ -1092,35 +1245,24 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                     ),
                   }
                 : null,
-              ...(!sslKeyInput.value &&
-                sslKeySecretInput.value && {
-                  secrets: {
-                    ssl: logstashEnableSSLInput.value
-                      ? {
-                          key: sslKeySecretInput.value,
-                        }
-                      : undefined,
-                  },
+              // with SSL disabled, `ssl: null` removes the stored key along with the SSL settings
+              ...(logstashEnableSSLInput.value &&
+                sslKeySecret !== undefined && {
+                  secrets: { ssl: { key: sslKeySecret } },
                 }),
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewLogstashOutput;
           case outputType.RemoteElasticsearch:
-            let secrets;
-            if (!serviceTokenInput.value && serviceTokenSecretInput.value) {
-              secrets = {
-                service_token: serviceTokenSecretInput.value,
-              };
-            }
-
-            if (!sslKeyInput.value && sslKeySecretInput.value) {
-              secrets = {
-                ...(secrets ?? {}),
-                ssl: {
-                  key: sslKeySecretInput.value,
-                },
-              };
-            }
+            const serviceTokenSecret = getSecretToSend(
+              serviceTokenInput.value,
+              serviceTokenSecretInput.value,
+              (output as NewRemoteElasticsearchOutput | undefined)?.secrets?.service_token
+            );
+            const secrets = {
+              ...(serviceTokenSecret !== undefined && { service_token: serviceTokenSecret }),
+              ...(sslKeySecret !== undefined && { ssl: { key: sslKeySecret } }),
+            };
             return {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
@@ -1132,7 +1274,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               ...otelExporterParams,
               service_token: serviceTokenInput.value || undefined,
               kibana_api_key: kibanaAPIKeyInput.value || undefined,
-              ...(secrets ? { secrets } : {}),
+              ...(Object.keys(secrets).length ? { secrets } : {}),
               sync_integrations: syncIntegrationsInput.value,
               kibana_url: kibanaURLInput.value || null,
               sync_uninstalled_integrations: syncUninstalledIntegrationsInput.value,
@@ -1169,14 +1311,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                   (val) => val !== ''
                 ),
               },
-              ...(!sslKeyInput.value &&
-                sslKeySecretInput.value && {
-                  secrets: {
-                    ssl: {
-                      key: sslKeySecretInput.value,
-                    },
-                  },
-                }),
+              ...(sslKeySecret !== undefined && {
+                secrets: { ssl: { key: sslKeySecret } },
+              }),
             } as NewElasticsearchOutput;
         }
       })();
@@ -1232,6 +1369,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaSslKeySecretInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
+    kafkaOAuth2Inputs,
+    isKafkaOAuth2Selected,
+    kafkaKerberosInputs,
+    isKafkaKerberosConfigured,
+    kafkaOutput,
+    otlpInputs,
+    isOtlpExporterDisabled,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
@@ -1283,7 +1427,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     notifications.toasts,
   ]);
 
-  const isHostsMissing = isKafka
+  const isHostsMissing = isOtlp
+    ? !otlpInputs.otlpEndpointInput.value.trim()
+    : isKafka
     ? !kafkaHostsInput.value.some((v) => v.trim())
     : isLogstash
     ? !logstashHostsInput.value.some((v) => v.trim())
@@ -1302,6 +1448,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       (output && !hasChanged) ||
       !nameInput.value ||
       isHostsMissing ||
+      (isOtlp &&
+        Object.values(otlpInputs).some(
+          (input) => (input.formRowProps as { isInvalid?: boolean }).isInvalid
+        )) ||
       (isLogstash && !hasEncryptedSavedObjectConfigured) ||
       (!isKafka &&
         (sslCertificateAuthoritiesInput.props.isInvalid ||

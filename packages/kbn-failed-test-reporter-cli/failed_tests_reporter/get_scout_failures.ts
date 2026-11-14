@@ -10,6 +10,7 @@
 import fs from 'fs';
 import stripAnsi from 'strip-ansi';
 import type { TestFailure } from './get_failures';
+import { getInfraReason } from './infra_failure_rules';
 
 // Extended TestFailure type for Scout failures
 export interface ScoutTestFailureExtended extends TestFailure {
@@ -54,6 +55,7 @@ interface ScoutFailureTrackingEntry {
     stack_trace?: string;
   };
   stdout?: string;
+  consoleErrors?: string;
   attachments: Array<{
     name: string;
     path?: string;
@@ -67,22 +69,6 @@ interface ScoutFailureTrackingEntry {
     branch?: string;
   };
 }
-
-// Failure substrings that indicate environmental/infrastructure issues rather than
-// real test failures. Matches mark the failure as "likely irrelevant" so we skip
-// filing GitHub issues for them.
-const LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS: readonly string[] = [
-  // SAML response parsing failures are environmental (cloud IAM service, test account).
-  'Failed to parse SAML response value',
-  // Cloud session creation failures are environmental (cloud login endpoint unavailable, MFA, etc.).
-  'Failed to create the new cloud session',
-  // Network connection refused errors are environmental (target host/service unreachable).
-  'ECONNREFUSED',
-];
-
-const isLikelyIrrelevant = (name: string, failure: string) => {
-  return LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS.some((substring) => failure.includes(substring));
-};
 
 export async function getScoutFailures(reportPath: string): Promise<ScoutTestFailureExtended[]> {
   if (!fs.existsSync(reportPath)) {
@@ -109,7 +95,13 @@ export async function getScoutFailures(reportPath: string): Promise<ScoutTestFai
   for (const entry of lines) {
     // Convert Scout failure tracking entry to compatible TestFailure format
     const failure = stripAnsi(entry.error.stack_trace || entry.error.message || '');
-    const likelyIrrelevant = isLikelyIrrelevant(entry.title, failure);
+    const infraReason = getInfraReason({
+      runner: 'scout',
+      target: entry.target,
+      failure,
+      consoleErrors: entry.consoleErrors,
+    });
+    const likelyIrrelevant = infraReason !== undefined;
 
     const testFailure: ScoutTestFailureExtended = {
       // Map Scout fields to JUnit-compatible fields
@@ -129,6 +121,7 @@ export async function getScoutFailures(reportPath: string): Promise<ScoutTestFai
       kibanaModule: entry.kibanaModule,
       duration: entry.duration,
       attachments: entry.attachments,
+      infraReason,
 
       // Additional fields for compatibility
       time: String(entry.duration / 1000), // Convert ms to seconds

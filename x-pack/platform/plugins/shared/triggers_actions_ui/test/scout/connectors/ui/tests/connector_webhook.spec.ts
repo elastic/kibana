@@ -103,7 +103,7 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await authSSL.waitFor({ state: 'visible' });
     await authSSL.click();
 
-    const tabs = page.testSubj.locator('webhookCertTypeTabs').locator('.euiTab');
+    const tabs = page.testSubj.locator('webhookCertTypeTabs').getByRole('tab');
     await expect(tabs).toHaveCount(2);
     await expect(page.testSubj.locator('webhookCertTypeCRTab')).toBeVisible();
     await expect(page.testSubj.locator('webhookCertTypePFXTab')).toBeVisible();

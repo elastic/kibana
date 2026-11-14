@@ -12,9 +12,8 @@ import type {
   AgentBuilderAnalytics,
   AgentBuilderTracking,
   InternalBuiltinToolDefinition,
-  ToolReturnSummarizerFn,
 } from '@kbn/agent-builder-server';
-import { loadSkillTools } from '../../../skills/load_skill_tools';
+import { loadSkillTools, type LoadSkillToolsResult } from '../../../skills/load_skill_tools';
 import { resolveSkill } from '../../../skills/utils';
 import {
   getSkillAbsolutePath,
@@ -25,37 +24,43 @@ const schema = z.object({
   skill: z.string().describe('The skill name or path'),
 });
 
-/**
- * Identity transform. Returning the original results unchanged causes the
- * conversation result transformer to mark them as cleaned, which opts the
- * tool's results out of filestore substitution at high context usage.
- */
-const preserveResults: ToolReturnSummarizerFn = (toolReturn) => toolReturn.results;
+const skillParamDescription = `The 'skill' parameter accepts the skill name, the full path of the skill's folder, or the full path of the skill's SKILL.md file.`;
 
-export const createLoadSkillTool = ({
-  analyticsService,
-  trackingService,
-}: {
-  analyticsService?: AgentBuilderAnalytics;
-  trackingService?: AgentBuilderTracking;
-} = {}): InternalBuiltinToolDefinition<typeof schema> => ({
-  id: internalTools.loadSkill,
-  description: `Load a skill.
+const description = `Load a skill.
 
 Returns the skill content, its referenced files, and the list of tools the skill makes available.
 Loading a skill also dynamically registers its specialized tools so you can use them in subsequent calls.
 
-The 'skill' parameter accepts the skill name, the full path of the skill's folder, or the full path of the skill's SKILL.md file.`,
+${skillParamDescription}`;
+
+const descriptionWithDynamicTools = `Load a skill.
+
+Returns the skill content, its referenced files, and the tools the skill makes available.
+Loading a skill also registers its specialized tools so you can use them in subsequent calls: 'dynamic_tools' carries their definitions.
+
+${skillParamDescription}`;
+
+export const createLoadSkillTool = ({
+  analyticsService,
+  trackingService,
+  dynamicToolsEnabled = false,
+}: {
+  analyticsService?: AgentBuilderAnalytics;
+  trackingService?: AgentBuilderTracking;
+  /** Mirrors `experimentalFeatures.dynamicTools`; selects the description the model sees. */
+  dynamicToolsEnabled?: boolean;
+} = {}): InternalBuiltinToolDefinition<typeof schema> => ({
+  id: internalTools.loadSkill,
+  description: dynamicToolsEnabled ? descriptionWithDynamicTools : description,
   type: ToolType.builtin,
   schema,
   tags: ['skills'],
-  summarizeToolReturn: preserveResults,
   // greater limit for skill content
   maxResultTokens: 100_000,
   handler: async ({ skill: skillInput }, ctx) => {
     const { skills, skillsStore, toolProvider, toolManager, request, logger, runContext } = ctx;
 
-    const allSkills = await skills.list({ includePlugins: true });
+    const allSkills = await skills.list({ includePlugins: true, includeHidden: true });
     const resolution = resolveSkill(skillInput, allSkills);
 
     if ('error' in resolution) {
@@ -74,9 +79,9 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
       };
     }
 
-    let loadedToolIds: string[];
+    let loaded: LoadSkillToolsResult;
     try {
-      loadedToolIds = await loadSkillTools({
+      loaded = await loadSkillTools({
         skill,
         skillsService: skills,
         toolProvider,
@@ -84,6 +89,7 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
         toolManager,
         logger,
         runContext,
+        dynamicToolsEnabled: ctx.experimentalFeatures.dynamicTools,
         analyticsService,
         trackingService,
       });
@@ -107,7 +113,8 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
             name: rc.name,
             path: getSkillReferencedContentAbsolutePath({ skill, referencedContent: rc }),
           })),
-          loaded_tools: loadedToolIds,
+          loaded_tools: loaded.loadedToolIds,
+          ...(loaded.dynamicTools.length > 0 ? { dynamic_tools: loaded.dynamicTools } : {}),
         }),
       ],
     };

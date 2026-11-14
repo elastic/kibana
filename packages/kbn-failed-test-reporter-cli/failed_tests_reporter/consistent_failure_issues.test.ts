@@ -1,0 +1,672 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { computeTestID } from '@kbn/scout-reporting';
+import { ToolingLog } from '@kbn/tooling-log';
+import { replacedIssueComment } from '../flaky_test_issues/replace_per_test_issues';
+import { FLAKY_TEST_SUITE_METADATA_PREFIX } from '../flaky_test_issues/issue_body';
+import {
+  MAX_NEW_ISSUES_PER_JOB,
+  reportConsistentFailureIssues,
+  type ConsistentFailureIssuesOptions,
+} from './consistent_failure_issues';
+import { failingPostedAt, renderFailingSuiteIssueBody } from './failing_suite_issue';
+import type { TestFailure } from './get_failures';
+import type { ScoutTestFailureExtended } from './get_scout_failures';
+import type { GithubApi, GithubIssue } from './github_api';
+import { getIssueMetadata } from './issue_metadata';
+
+const log = new ToolingLog();
+const build = { pipeline: 'kibana-on-merge', branch: 'main' };
+
+const SPEC = 'x-pack/platform/plugins/shared/discover/test/scout/ui/tests/esql.spec.ts';
+const FTR_FILE = 'x-pack/platform/test/functional/apps/discover/group1/_discover.ts';
+const FTR_NAME = 'discover app discover test shows results';
+const FTR_TEST_ID = computeTestID(FTR_FILE, FTR_NAME);
+
+const scoutFailure = (
+  id: string,
+  name: string,
+  overrides: Partial<ScoutTestFailureExtended> = {}
+): ScoutTestFailureExtended => ({
+  classname: 'Discover ES|QL mode',
+  name,
+  time: '1.5',
+  failure: 'Error: boom\n    at esql.spec.ts:10',
+  likelyIrrelevant: false,
+  errorMessage: `Error: ${name} boom`,
+  owners: '@elastic/kibana-data-discovery',
+  id,
+  target: 'local-stateful-classic',
+  location: SPEC,
+  duration: 1500,
+  ...overrides,
+});
+
+const ftrFailure: TestFailure = {
+  classname: `Chrome X-Pack UI Functional Tests.${FTR_FILE.replace(/\./g, '·')}`,
+  name: FTR_NAME,
+  time: '2',
+  failure: 'Error: ftr boom\n    at _discover.ts:20',
+  likelyIrrelevant: false,
+  owners: '@elastic/kibana-data-discovery,@elastic/appex-qa',
+  testType: 'ftr',
+};
+
+const cypressFailure: TestFailure = {
+  classname:
+    'Cypress Tests.x-pack/solutions/security/plugins/security_solution/cypress/e2e/foo·cy·ts',
+  name: 'foo does bar',
+  time: '1',
+  failure: 'boom',
+  likelyIrrelevant: false,
+  testType: 'cypress',
+};
+
+/** One row of the recent runs query: a build's runs of a test in one setup. */
+const row = (testId: string, buildNumber: number, overrides: Record<string, unknown> = {}) => ({
+  test_id: testId,
+  config_path: 'x-pack/platform/plugins/shared/discover/test/scout/ui/playwright.config.ts',
+  target_mode: 'stateful-classic',
+  target_type: 'local',
+  build: buildNumber,
+  passed: 1,
+  failed: 0,
+  recovered: 0,
+  skipped: 0,
+  attempts: null,
+  last_at: '2026-10-16T10:00:00.000Z',
+  build_url: `https://buildkite.com/elastic/kibana-on-merge/builds/${buildNumber}`,
+  commit: `commit-${buildNumber}`,
+  suite_title: 'Discover ES|QL mode',
+  config_category: 'ui-test',
+  ...overrides,
+});
+
+/** Twenty passes, then a test that failed every attempt of the latest builds. */
+const brokenSince = (testId: string, from: number, to: number, overrides = {}) => [
+  ...Array.from({ length: 20 }, (_, index) => row(testId, from - 20 + index, overrides)),
+  ...Array.from({ length: to - from + 1 }, (_, index) =>
+    row(testId, from + index, { passed: 0, failed: 2, attempts: 2, ...overrides })
+  ),
+];
+
+/** Rows go out as they come in, the query itself is covered in @kbn/scout-reporting. */
+const mockEs = (rows: Array<Record<string, unknown>>) => {
+  const esql = jest.fn().mockImplementation(({ query }: { query: string }) => ({
+    toRecords: async () => ({
+      records: rows.filter((record) => query.includes(`"${record.test_id}"`)),
+    }),
+  }));
+  return { es: { helpers: { esql } } as any, esql };
+};
+
+const issue = (
+  number: number,
+  body: string,
+  overrides: Partial<GithubIssue> = {}
+): GithubIssue => ({
+  number,
+  id: 1000 + number,
+  html_url: `https://github.com/elastic/appex-qa-ai/issues/${number}`,
+  node_id: `node-${number}`,
+  title: `Issue ${number}`,
+  labels: [],
+  body,
+  state: 'open',
+  ...overrides,
+});
+
+const mockGithub = (issues: GithubIssue[] = []) => {
+  const listIssues = jest
+    .fn()
+    .mockImplementation(async ({ state }: { state: string }) =>
+      issues.filter((listed) => listed.state === state)
+    );
+  const createIssue = jest.fn().mockImplementation(async (title: string, body: string) => ({
+    number: 500,
+    id: 1500,
+    html_url: 'https://github.com/elastic/appex-qa-ai/issues/500',
+    node_id: 'node-500',
+    body,
+  }));
+  const getIssue = jest
+    .fn()
+    .mockImplementation(async (number: number) =>
+      issues.find((listed) => listed.number === number)
+    );
+  const editIssue = jest.fn();
+  const addIssueComment = jest.fn();
+  const closeAsDuplicate = jest.fn();
+  return {
+    github: {
+      listIssues,
+      createIssue,
+      getIssue,
+      editIssue,
+      addIssueComment,
+      closeAsDuplicate,
+    } as unknown as GithubApi,
+    listIssues,
+    createIssue,
+    editIssue,
+    addIssueComment,
+    closeAsDuplicate,
+  };
+};
+
+/** A per-test issue as `report_failed_tests` files it for a Scout test of the ES|QL spec. */
+const perTestIssue = (number: number, testId: string, overrides: Partial<GithubIssue> = {}) =>
+  issue(
+    number,
+    `A test failed on a tracked branch\n\n| Test ID | ${testId} |\n| Location | ${SPEC} |\n\n` +
+      `<!-- kibanaCiData = ${JSON.stringify({
+        'failed-test': {
+          'test.class': 'Discover ES|QL mode',
+          'test.name': 'x',
+          'test.type': 'scout',
+        },
+      })} -->`,
+    overrides
+  );
+
+/** A failing suite issue the check filed for `test-1` of the ES|QL spec, on `kibana-on-merge` `main`. */
+const failingSuiteIssue = (postedAt: Date, overrides: Partial<GithubIssue> = {}) => {
+  const run = (number: number) => ({
+    build: number,
+    lastAt: new Date('2026-10-15T10:00:00.000Z'),
+    passed: 0,
+    failed: 2,
+    recovered: 0,
+    skipped: 0,
+    settled: true,
+  });
+  return issue(
+    42,
+    renderFailingSuiteIssueBody(
+      {
+        filePath: SPEC,
+        framework: 'playwright',
+        suiteTitle: 'Discover ES|QL mode',
+        targets: [],
+        owners: [],
+        tests: [{ testId: 'test-1', title: 'Discover ES|QL mode shows results' }],
+        failingBuilds: [run(90), run(91)],
+      },
+      { pipeline: 'kibana-on-merge', branch: 'main', postedAt }
+    ),
+    overrides
+  );
+};
+
+/** The issues a suite issue's body lists as previously tracking it. */
+const previousIssuesOf = (body: string): number[] | undefined =>
+  getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
+
+const NOW = new Date('2026-10-16T10:00:00.000Z');
+const HOUR_MS = 60 * 60 * 1000;
+
+const report = (
+  overrides: Partial<ConsistentFailureIssuesOptions> & Pick<ConsistentFailureIssuesOptions, 'es'>
+) =>
+  reportConsistentFailureIssues({
+    log,
+    failures: [],
+    github: mockGithub().github,
+    repo: 'elastic/appex-qa-ai',
+    build,
+    replacePerTestIssues: false,
+    dryRun: false,
+    ...overrides,
+  });
+
+describe('reportConsistentFailureIssues', () => {
+  it('files one issue per file for the tests that failed every attempt of the latest builds', async () => {
+    const { es } = mockEs([
+      ...brokenSince('test-1', 101, 102),
+      ...brokenSince('test-2', 101, 102),
+      ...brokenSince(FTR_TEST_ID, 101, 102, {
+        config_path: 'x-pack/platform/test/functional/apps/discover/group1/config.ts',
+        target_mode: 'unknown',
+        target_type: 'unknown',
+        suite_title: 'discover app discover test',
+        config_category: 'ui-test',
+      }),
+      // flaky: failed, then passed on the job's retry
+      ...brokenSince('test-3', 101, 102).map((record) =>
+        record.failed ? { ...record, passed: 1, failed: 1 } : record
+      ),
+    ]);
+    const { github, createIssue, listIssues } = mockGithub();
+
+    const summary = await report({
+      es,
+      github,
+      failures: [
+        scoutFailure('test-1', 'shows results'),
+        scoutFailure('test-2', 'switches back'),
+        scoutFailure('test-3', 'is flaky'),
+        ftrFailure,
+        cypressFailure,
+      ],
+      now: NOW,
+    });
+
+    expect(listIssues).toHaveBeenCalledWith({ state: 'open', labels: ['failed-test'] });
+    // a suite whose issue was closed lately gets it reopened, see below
+    expect(listIssues).toHaveBeenCalledWith({
+      state: 'closed',
+      labels: ['failed-test'],
+      since: new Date(NOW.getTime() - 30 * 24 * HOUR_MS),
+    });
+    expect(createIssue).toHaveBeenCalledTimes(2);
+    const [[scoutTitle, scoutBody, scoutLabels], [ftrTitle, ftrBody, ftrLabels]] =
+      createIssue.mock.calls;
+    expect(scoutTitle).toBe('Failing Scout UI suite: Discover ES|QL mode');
+    expect(scoutBody).toContain('> 2 tests in [`esql.spec.ts`]');
+    expect(scoutBody).toContain(
+      'builds [#101](https://buildkite.com/elastic/kibana-on-merge/builds/101) and [#102]'
+    );
+    expect(scoutBody).toContain('after passing in [#100]');
+    expect(scoutBody).toContain('- `Discover ES|QL mode shows results`');
+    expect(scoutBody).toContain('- `Discover ES|QL mode switches back`');
+    expect(scoutBody).not.toContain('is flaky');
+    expect(scoutBody).toContain('| **Target** | `stateful-classic` · Local deployment |');
+    expect(scoutBody).toContain('| **Owners** | `@elastic/kibana-data-discovery` |');
+    expect(scoutBody).toContain('```text\nError: shows results boom\n```');
+    expect(scoutLabels).toEqual(['failed-test']);
+    // the issue is the break's first post, the next comes a day later at the earliest
+    expect(failingPostedAt(scoutBody)).toEqual({ 'kibana-on-merge main': NOW.toISOString() });
+    expect(ftrTitle).toBe('Failing FTR UI suite: discover app discover test');
+    expect(ftrBody).toContain(
+      `> 1 test in [\`_discover.ts\`](https://github.com/elastic/kibana/blob/main/${FTR_FILE})`
+    );
+    expect(ftrBody).not.toContain('**Target**');
+    expect(ftrBody).toContain(
+      '| **Owners** | `@elastic/kibana-data-discovery`, `@elastic/appex-qa` |'
+    );
+    expect(ftrBody).toContain('```text\nError: ftr boom\n```');
+    expect(ftrLabels).toEqual(['failed-test']);
+    expect(summary).toEqual({
+      created: [
+        { filePath: SPEC, url: 'https://github.com/elastic/appex-qa-ai/issues/500' },
+        { filePath: FTR_FILE, url: 'https://github.com/elastic/appex-qa-ai/issues/500' },
+      ],
+      commented: [],
+      tracked: [],
+      skipped: [],
+      replaced: [],
+    });
+  });
+
+  it('files nothing when no test fails consistently', async () => {
+    const { es } = mockEs([
+      // broke in this build only
+      ...brokenSince('test-1', 102, 102),
+      // failed every attempt a few builds ago too: not a clean history
+      ...brokenSince('test-2', 101, 102).map((record) =>
+        record.build === 95 ? { ...record, passed: 0, failed: 2, attempts: 2 } : record
+      ),
+    ]);
+    const { github, createIssue, listIssues } = mockGithub();
+
+    const summary = await report({
+      es,
+      github,
+      failures: [
+        scoutFailure('test-1', 'broke in this build'),
+        scoutFailure('test-2', 'failed before'),
+      ],
+    });
+
+    expect(listIssues).not.toHaveBeenCalled();
+    expect(createIssue).not.toHaveBeenCalled();
+    expect(summary).toEqual({
+      created: [],
+      commented: [],
+      tracked: [],
+      skipped: [],
+      replaced: [],
+    });
+  });
+
+  it('leaves a build whose retry has not reported the test out of the count', async () => {
+    // the current build's job failed once, its retry has not run: #101 alone is one build short
+    const current = brokenSince('test-1', 101, 102).map((record) =>
+      record.build === 102 ? { ...record, failed: 1, attempts: 1 } : record
+    );
+    const short = await report({ es: mockEs(current).es, failures: [scoutFailure('test-1', 'x')] });
+    expect(short.created).toHaveLength(0);
+
+    // an earlier build with a single failing report neither counts nor breaks the streak
+    const earlier = brokenSince('test-1', 100, 102).map((record) =>
+      record.build === 101 ? { ...record, failed: 1, attempts: 1 } : record
+    );
+    const { github, createIssue } = mockGithub();
+    const found = await report({
+      es: mockEs(earlier).es,
+      github,
+      failures: [scoutFailure('test-1', 'x')],
+    });
+    expect(found.created).toHaveLength(1);
+    expect(createIssue.mock.calls[0][1]).toContain(
+      'builds [#100](https://buildkite.com/elastic/kibana-on-merge/builds/100) and [#102]'
+    );
+  });
+
+  it('posts the break on the issue already about the suite instead of filing one, once a day per pipeline and branch', async () => {
+    const { es } = mockEs(brokenSince('test-1', 101, 102));
+    const failures = [scoutFailure('test-1', 'shows results')];
+    const existing = failingSuiteIssue(new Date(NOW.getTime() - 25 * HOUR_MS));
+    const { github, createIssue, editIssue, addIssueComment } = mockGithub([existing]);
+
+    const summary = await report({ es, github, failures, now: NOW });
+
+    expect(createIssue).not.toHaveBeenCalled();
+    expect(addIssueComment).toHaveBeenCalledWith(
+      42,
+      '🔴 `Discover ES|QL mode shows results` is consistently failing on `main`, in `kibana-on-merge` ' +
+        'builds [#101](https://buildkite.com/elastic/kibana-on-merge/builds/101) and ' +
+        '[#102](https://buildkite.com/elastic/kibana-on-merge/builds/102), after passing ' +
+        'in [#100](https://buildkite.com/elastic/kibana-on-merge/builds/100). Changes in between: ' +
+        '[`commit-...commit-`](https://github.com/elastic/kibana/compare/commit-100...commit-101).'
+    );
+    const [[number, { body, state }]] = editIssue.mock.calls;
+    expect(number).toBe(42);
+    expect(state).toBeUndefined();
+    expect(failingPostedAt(body)).toEqual({ 'kibana-on-merge main': NOW.toISOString() });
+    expect(summary.commented).toEqual([
+      { filePath: SPEC, url: existing.html_url, reopened: false },
+    ]);
+
+    // the next builds find the same break: nothing more until a day has passed
+    const posted = mockGithub([{ ...existing, body }]);
+    const later = await report({
+      es,
+      github: posted.github,
+      failures,
+      now: new Date(NOW.getTime() + 10 * HOUR_MS),
+    });
+    expect(posted.addIssueComment).not.toHaveBeenCalled();
+    expect(posted.editIssue).not.toHaveBeenCalled();
+    expect(later.tracked).toEqual([{ filePath: SPEC, url: existing.html_url }]);
+
+    // the same break on another branch is posted on its own
+    const otherBranch = await report({
+      es,
+      github: posted.github,
+      failures,
+      now: new Date(NOW.getTime() + 10 * HOUR_MS),
+      build: { pipeline: 'kibana-on-merge', branch: '9.6' },
+    });
+    expect(otherBranch.commented).toHaveLength(1);
+    expect(posted.addIssueComment.mock.calls[0][1]).toContain('on `9.6`');
+  });
+
+  it('records the post only once the comment is posted, so the next build posts a failed one', async () => {
+    const { es } = mockEs(brokenSince('test-1', 101, 102));
+    const existing = failingSuiteIssue(new Date(NOW.getTime() - 25 * HOUR_MS), {
+      state: 'closed',
+      state_reason: 'completed',
+    });
+    const { github, editIssue, addIssueComment } = mockGithub([existing]);
+    addIssueComment.mockRejectedValueOnce(new Error('GitHub is down'));
+
+    await expect(
+      report({ es, github, failures: [scoutFailure('test-1', 'shows results')], now: NOW })
+    ).rejects.toThrow('GitHub is down');
+    // neither recorded as posted nor reopened without the comment
+    expect(editIssue).not.toHaveBeenCalled();
+  });
+
+  it('reopens an issue about the suite closed lately, but leaves one closed as a duplicate alone', async () => {
+    const failures = [scoutFailure('test-1', 'shows results')];
+    // closed right after the last post: the reopen does not wait for the next day
+    const postedAt = new Date(NOW.getTime() - 2 * HOUR_MS);
+    const closed = failingSuiteIssue(postedAt, { state: 'closed', state_reason: 'completed' });
+    const { github, createIssue, editIssue } = mockGithub([closed]);
+
+    const summary = await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github,
+      failures,
+      now: NOW,
+    });
+
+    expect(createIssue).not.toHaveBeenCalled();
+    expect(editIssue).toHaveBeenCalledWith(42, expect.objectContaining({ state: 'open' }));
+    expect(summary.commented).toEqual([{ filePath: SPEC, url: closed.html_url, reopened: true }]);
+
+    const duplicate = mockGithub([{ ...closed, state_reason: 'duplicate' }]);
+    const filed = await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github: duplicate.github,
+      failures,
+      now: NOW,
+    });
+    expect(duplicate.editIssue).not.toHaveBeenCalled();
+    expect(filed.created).toHaveLength(1);
+  });
+
+  it('skips a suite whose every test has a per-test issue, but not one with a test without', async () => {
+    const covered = await report({
+      es: mockEs([...brokenSince('test-1', 101, 102), ...brokenSince('test-2', 101, 102)]).es,
+      github: mockGithub([perTestIssue(1, 'test-1'), perTestIssue(2, 'test-2')]).github,
+      failures: [scoutFailure('test-1', 'a'), scoutFailure('test-2', 'b')],
+    });
+    expect(covered.tracked).toHaveLength(1);
+    expect(covered.created).toHaveLength(0);
+
+    const { github, createIssue } = mockGithub([perTestIssue(1, 'test-1')]);
+    const partlyCovered = await report({
+      es: mockEs([...brokenSince('test-1', 101, 102), ...brokenSince('test-2', 101, 102)]).es,
+      github,
+      failures: [scoutFailure('test-1', 'a'), scoutFailure('test-2', 'b')],
+    });
+    expect(partlyCovered.created).toHaveLength(1);
+    expect(createIssue.mock.calls[0][1]).toContain('Possibly related: #1.');
+
+    // a closed per-test issue no longer tracks its test, the reporter reopens it on its own
+    const closedPerTest = await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github: mockGithub([{ ...perTestIssue(1, 'test-1'), state: 'closed' }]).github,
+      failures: [scoutFailure('test-1', 'a')],
+    });
+    expect(closedPerTest.created).toHaveLength(1);
+  });
+
+  describe('replacing per-test issues', () => {
+    const brokenTests = () => ({
+      es: mockEs([...brokenSince('test-1', 101, 102), ...brokenSince('test-2', 101, 102)]).es,
+      failures: [scoutFailure('test-1', 'a'), scoutFailure('test-2', 'b')],
+      replacePerTestIssues: true,
+    });
+
+    it('files the suite issue even when every broken test has a per-test issue, and closes them as its duplicates', async () => {
+      const { github, createIssue, addIssueComment, closeAsDuplicate } = mockGithub([
+        perTestIssue(1, 'test-1'),
+        perTestIssue(2, 'test-2'),
+        perTestIssue(3, 'test-3'),
+      ]);
+
+      const summary = await report({ ...brokenTests(), github });
+
+      expect(createIssue).toHaveBeenCalledTimes(1);
+      const [, body] = createIssue.mock.calls[0];
+      // next to their test, rather than in a line of their own
+      expect(body).toMatch(/^- `.* a` · \[history\]\(.*\) · previously tracked in #1$/m);
+      expect(body).toMatch(/^- `.* b` · \[history\]\(.*\) · previously tracked in #2$/m);
+      expect(body).not.toContain('Previously tracked in #');
+      expect(body).toContain('Possibly related: #3.');
+      expect(closeAsDuplicate.mock.calls).toEqual([
+        [1, 1500],
+        [2, 1500],
+      ]);
+      expect(addIssueComment.mock.calls).toEqual([
+        [1, replacedIssueComment(500)],
+        [2, replacedIssueComment(500)],
+      ]);
+      expect(summary.tracked).toEqual([]);
+      expect(summary.replaced).toEqual([
+        'https://github.com/elastic/appex-qa-ai/issues/1',
+        'https://github.com/elastic/appex-qa-ai/issues/2',
+      ]);
+    });
+
+    it('replaces them with the suite issue the break is posted on, even within the day', async () => {
+      const existing = failingSuiteIssue(new Date(NOW.getTime() - 2 * HOUR_MS));
+      const { github, createIssue, addIssueComment, closeAsDuplicate, editIssue } = mockGithub([
+        existing,
+        perTestIssue(3, 'test-1'),
+      ]);
+
+      const summary = await report({
+        es: mockEs(brokenSince('test-1', 101, 102)).es,
+        github,
+        failures: [scoutFailure('test-1', 'shows results')],
+        replacePerTestIssues: true,
+        now: NOW,
+      });
+
+      expect(createIssue).not.toHaveBeenCalled();
+      // the break was posted 2 hours ago, but the move is named right away
+      expect(addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/^🔴 .*\n\nPreviously tracked in #3\.$/s)],
+        [3, replacedIssueComment(42)],
+      ]);
+      expect(closeAsDuplicate).toHaveBeenCalledWith(3, 1042);
+      expect(summary.commented).toEqual([
+        { filePath: SPEC, url: existing.html_url, reopened: false },
+      ]);
+      expect(summary.tracked).toEqual([]);
+      expect(summary.replaced).toEqual(['https://github.com/elastic/appex-qa-ai/issues/3']);
+      const [[, { body }]] = editIssue.mock.calls;
+      expect(body).toContain('\n\nPreviously tracked in #3.\n\n<!-- kibanaCiData');
+      expect(previousIssuesOf(body)).toEqual([3]);
+    });
+
+    it('names the per-test issues it replaces in the break it posts', async () => {
+      const existing = failingSuiteIssue(new Date(NOW.getTime() - 25 * HOUR_MS));
+      const { github, addIssueComment, editIssue } = mockGithub([
+        existing,
+        perTestIssue(3, 'test-1'),
+      ]);
+
+      await report({
+        es: mockEs(brokenSince('test-1', 101, 102)).es,
+        github,
+        failures: [scoutFailure('test-1', 'shows results')],
+        replacePerTestIssues: true,
+        now: NOW,
+      });
+
+      expect(addIssueComment.mock.calls).toEqual([
+        [42, expect.stringMatching(/^🔴 .*\n\nPreviously tracked in #3\.$/s)],
+        [3, replacedIssueComment(42)],
+      ]);
+      const [[, { body }]] = editIssue.mock.calls;
+      expect(body).toContain('Previously tracked in #3.');
+      expect(previousIssuesOf(body)).toEqual([3]);
+    });
+
+    it('leaves the per-test issue of a skipped test open and out of the count', async () => {
+      const { github, createIssue, closeAsDuplicate } = mockGithub([
+        perTestIssue(1, 'test-1', { labels: [{ name: 'skipped-test' }] }),
+      ]);
+
+      await report({
+        es: mockEs(brokenSince('test-1', 101, 102)).es,
+        github,
+        failures: [scoutFailure('test-1', 'a')],
+        replacePerTestIssues: true,
+      });
+
+      expect(createIssue).toHaveBeenCalledTimes(1);
+      expect(createIssue.mock.calls[0][1]).toContain('Possibly related: #1.');
+      expect(closeAsDuplicate).not.toHaveBeenCalled();
+    });
+  });
+
+  it('caps the issues a job files, most broken tests first', async () => {
+    const files = Array.from({ length: MAX_NEW_ISSUES_PER_JOB + 1 }, (_, index) => `${index}`);
+    const rows = files.flatMap((file) => brokenSince(`test-${file}`, 101, 102));
+    const failures = files.map((file) =>
+      scoutFailure(`test-${file}`, 'x', {
+        location: `x-pack/test/scout/ui/tests/file_${file}.spec.ts`,
+      })
+    );
+    // the last file has two broken tests, so it goes first
+    rows.push(...brokenSince('test-extra', 101, 102));
+    failures.push(
+      scoutFailure('test-extra', 'y', {
+        location: `x-pack/test/scout/ui/tests/file_${files.at(-1)}.spec.ts`,
+      })
+    );
+    const { github, createIssue } = mockGithub();
+
+    const summary = await report({ es: mockEs(rows).es, github, failures });
+
+    expect(createIssue).toHaveBeenCalledTimes(MAX_NEW_ISSUES_PER_JOB);
+    expect(summary.created[0].filePath).toBe(
+      `x-pack/test/scout/ui/tests/file_${files.at(-1)}.spec.ts`
+    );
+    expect(summary.skipped).toEqual([
+      `x-pack/test/scout/ui/tests/file_${MAX_NEW_ISSUES_PER_JOB - 1}.spec.ts`,
+    ]);
+  });
+
+  it('files a Cypress break by the full title in its JUnit name', async () => {
+    const file =
+      'x-pack/solutions/security/plugins/security_solution/public/management/cypress/e2e/artifacts/event_filters.cy.ts';
+    const { es } = mockEs(
+      brokenSince(computeTestID(file, 'Event Filters edits a filter'), 101, 102, {
+        config_path: null,
+        target_mode: 'unknown',
+        target_type: 'unknown',
+        suite_title: 'Event Filters',
+        config_category: null,
+      })
+    );
+    const { github, createIssue } = mockGithub();
+
+    const summary = await report({
+      es,
+      github,
+      failures: [
+        {
+          ...cypressFailure,
+          classname: `Security Solution Cypress.${file.replace(/\./g, '·')}`,
+          // Security Solution's junit_transformer follows the full title with the test's own title
+          name: 'Event Filters edits a filter edits a filter',
+        },
+      ],
+    });
+
+    expect(summary.created).toHaveLength(1);
+    expect(createIssue.mock.calls[0][0]).toBe('Failing Cypress suite: Event Filters');
+  });
+
+  it('asks nothing when no failure has a test id', async () => {
+    const { es, esql } = mockEs([]);
+
+    const summary = await report({
+      es,
+      failures: [{ ...ftrFailure, classname: 'Chrome X-Pack UI Functional Tests' }],
+    });
+
+    expect(esql).not.toHaveBeenCalled();
+    expect(summary).toEqual({
+      created: [],
+      commented: [],
+      tracked: [],
+      skipped: [],
+      replaced: [],
+    });
+  });
+});

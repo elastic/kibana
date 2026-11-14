@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { Observable, shareReplay } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -14,11 +15,19 @@ import type {
   AgentConfigurationOverrides,
   AgentExecutionMode,
   ConversationRoundAuthor,
+  EventActor,
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import type {
+  ExecutionConversationAccess,
+  ModelSource,
+  RunAgentFn,
+} from '@kbn/agent-builder-server';
+import type {
+  ExecutionConversationOrigin,
+  ExecutionRunAs,
+} from '@kbn/agent-builder-server/execution';
 import type {
   ChatCompletionReasoningEffort,
   ConnectorTelemetryMetadata,
@@ -35,8 +44,11 @@ export const executeAgent$ = ({
   nextInput,
   origin,
   author,
+  actor,
+  owner,
+  runAs,
   abortSignal,
-  defaultConnectorId,
+  defaultModel,
   telemetryMetadata,
   maxContentLength,
   reasoningLevel,
@@ -47,6 +59,8 @@ export const executeAgent$ = ({
   parentExecutionId,
   projectRouting,
   roundId,
+  conversationAccess,
+  workflowExecutionId,
 }: {
   agentId: string;
   executionId: string;
@@ -58,8 +72,14 @@ export const executeAgent$ = ({
   nextInput: ConverseInput;
   origin?: ExecutionConversationOrigin;
   author?: ConversationRoundAuthor;
+  /** The actor that posted the input, when it is an agent rather than the requesting user. */
+  actor?: EventActor;
+  /** Identity conversation writes are attributed to; see {@link RunAgentParams.owner}. */
+  owner?: UserIdAndName;
+  /** Service account the execution runs as; see {@link RunAgentParams.runAs}. */
+  runAs?: ExecutionRunAs;
   abortSignal?: AbortSignal;
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
   reasoningLevel?: ChatCompletionReasoningEffort;
@@ -70,14 +90,18 @@ export const executeAgent$ = ({
   parentExecutionId?: string;
   projectRouting?: string;
   roundId?: string;
+  conversationAccess?: ExecutionConversationAccess;
+  workflowExecutionId?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
       request,
       agentId,
       executionId,
+      owner,
+      runAs,
       abortSignal,
-      defaultConnectorId,
+      defaultModel,
       telemetryMetadata,
       maxContentLength,
       reasoningLevel,
@@ -85,11 +109,14 @@ export const executeAgent$ = ({
       interactive: interactivity,
       parentExecutionId,
       projectRouting,
+      conversationAccess,
+      workflowExecutionId,
       agentParams: {
         nextInput,
         conversation,
         origin,
         author,
+        actor,
         browserApiTools,
         configurationOverrides,
         structuredOutput,

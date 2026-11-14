@@ -31,6 +31,7 @@ import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
 import { registerTaskDefinitions } from './tasks';
 import { waitForInstallLock, type InstallLockManager } from './services/install_lock';
+import { resolveArtifactRepositoryUrl } from './artifact_repository';
 
 // Sentinels that mean no default AI connector/model is configured. Either can
 // appear depending on which settings UI last wrote genAiSettings:defaultAIConnector
@@ -108,9 +109,13 @@ export class ProductDocBasePlugin
       productDocClient,
       kibanaVersion: this.context.env.packageInfo.version,
       artifactsFolder: 'ai-kb-artifacts',
-      artifactRepositoryUrl: productDocConfig.artifactRepositoryUrl,
+      artifactRepositoryUrl: resolveArtifactRepositoryUrl({
+        config: productDocConfig,
+        isServerless,
+        logger: this.logger,
+      }),
       artifactRepositoryProxyUrl: productDocConfig.artifactRepositoryProxyUrl,
-      elserInferenceId: this.context.config.get().elserInferenceId,
+      elserInferenceId: productDocConfig.elserInferenceId,
       logger: this.logger.get('package-installer'),
       isServerless,
     });
@@ -189,6 +194,13 @@ export class ProductDocBasePlugin
       this.logger.error(
         `Error purging leftover documentation artifacts: ${(err as Error).message}`
       );
+    }
+
+    if (!this.context.config.get().autoInstallEnabled) {
+      this.logger.info(
+        'Skipping product documentation auto-install: xpack.productDocBase.autoInstallEnabled is false'
+      );
+      return;
     }
 
     const uiSettingsSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());

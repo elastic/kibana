@@ -8,6 +8,7 @@
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
+import type { ApiTarget } from '../apis';
 
 /**
  * ID of the default agent type
@@ -31,6 +32,12 @@ export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
  * ID of the AI index available to every chat agent by default.
  */
 export const agentBuilderDefaultAiIndexId = 'elastic';
+
+/**
+ * ID of the Context Engine retrieval skill. Agent Builder grants it at runtime to any agent that
+ * can reach an AI Index; it is never part of the agent's own configuration.
+ */
+export const kiRetrievalSkillId = 'ki-retrieval';
 
 /**
  * Definition of a agentBuilder agent.
@@ -58,6 +65,12 @@ export interface AgentDefinition {
    * Built-in agents are readonly, user-created agent are not.
    */
   readonly: boolean;
+  /**
+   * When true, the agent is hidden from UI listings (agent picker, management page) by default.
+   * Built-in agents must set this explicitly during registration; it defaults to false.
+   * Persisted agents derive it automatically: system-created non-chat agents are hidden.
+   */
+  hidden?: boolean;
   /**
    * Access control controls who can read, run, write, delete, and manage this agent.
    */
@@ -95,6 +108,11 @@ export interface AgentDefinition {
    */
   avatar_symbol?: string;
   /**
+   * Service account the agent runs as for every conversation. A reference only: the binding
+   * itself is held by Core's service account workload bindings, never a credential.
+   */
+  service_account_id?: string;
+  /**
    * Configuration associated with this agent
    */
   configuration: AgentConfiguration;
@@ -119,6 +137,7 @@ export interface AgentConfiguration {
 
   /**
    * When true, enables built-in Elastic capabilities for the agent.
+   * It adds Elastic's default tools and skills, and is unrelated to `capabilities`.
    */
   enable_elastic_capabilities?: boolean;
 
@@ -158,14 +177,78 @@ export interface AgentConfiguration {
    * Must use SELF_AGENT_ID (_self) to reference itself.
    */
   subagent_ids?: string[];
+
+  /**
+   * Optional ID of the inference feature whose first model this agent runs on.
+   */
+  inference_feature_id?: string;
+
+  /**
+   * Destructive APIs pre-approved for every run of this agent.
+   */
+  approvals?: AgentApprovals;
+
+  /**
+   * Turns off built-in Agent Builder features for this agent. A missing key means the feature is on.
+   * Only agent types and built-in agents can set it: it cannot be set through the HTTP API, the
+   * agent form, `configuration_overrides` or the `ai.agent` workflow step.
+   */
+  capabilities?: AgentCapabilities;
 }
+
+/**
+ * The setting for one built-in agent feature.
+ */
+export interface AgentCapabilityConfig {
+  /**
+   * Set to `false` to turn the feature off. A missing value means on.
+   */
+  enabled?: boolean;
+}
+
+/**
+ * Built-in agent features that an agent type or built-in agent can turn off.
+ */
+export interface AgentCapabilities {
+  /**
+   * The generic attachment tools and the attachment instructions in the system prompt.
+   */
+  attachment_tools?: AgentCapabilityConfig;
+  /**
+   * The API tools: `discover_apis`, `describe_api`, `describe_api_type` and `execute_api`.
+   */
+  api_tools?: AgentCapabilityConfig;
+}
+
+/**
+ * Agent-level destructive API auto-approval defaults.
+ */
+export interface AgentApprovals {
+  /**
+   * API selectors keyed by backend. Each entry is an exact API identifier, a namespace
+   * wildcard (`indices.*`), or `*`.
+   */
+  auto_approved_apis?: Partial<Record<ApiTarget, string[]>>;
+}
+
+/**
+ * Agent configuration without the fields that only code can declare: built-in agents, and agent
+ * types for `capabilities`.
+ */
+export type AgentConfigurationInput = Omit<
+  AgentConfiguration,
+  'inference_feature_id' | 'capabilities'
+>;
 
 /**
  * Runtime configuration overrides for agent execution.
  * These override the stored agent configuration for a single execution instance.
  * Each field, if provided, completely replaces the corresponding field in the stored configuration.
+ *
+ * Excludes `approvals`, since per-run grants go through the execution's interactivity config, which
+ * adds to the stored defaults instead of replacing them.
  */
-export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
+export type AgentConfigurationOverrides = Partial<Omit<AgentConfigurationInput, 'approvals'>>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.

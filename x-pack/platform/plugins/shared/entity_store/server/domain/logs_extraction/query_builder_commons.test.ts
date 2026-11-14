@@ -8,7 +8,10 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import {
+  getEntityDefinition,
+  getBuiltInEntityDefinition,
+} from '../../../common/domain/definitions/registry';
 import type {
   EntityField,
   SetFieldsByCondition,
@@ -64,7 +67,9 @@ describe('buildExtractionSourceClause', () => {
     expect(withCursor).not.toContain('METADATA');
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
-    expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
+    expect(withCursor).toContain(
+      getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))
+    );
 
     const withoutCursor = buildExtractionSourceClause({ ...baseParams });
     expect(withoutCursor).toContain(
@@ -456,7 +461,7 @@ describe('buildPaginationSection', () => {
 
 describe('statsFieldDestinations', () => {
   it('should collect all field destinations for user definition', () => {
-    const { fields } = getEntityDefinition('user', 'default');
+    const { fields } = getEntityDefinition('user', 'default').extraction;
     const dest = statsFieldDestinations(fields);
     expect(dest.has('event.kind')).toBe(true);
     expect(dest.has('user.name')).toBe(true);
@@ -485,8 +490,11 @@ describe('statsFieldDestinations', () => {
 describe('mapPostAggFilterFieldsToRecentForEsql', () => {
   it('should prefix STATS destinations with recent. and leave entity.id plain', () => {
     const userDef = getEntityDefinition('user', 'default');
-    expect(userDef.postAggFilter).toBeDefined();
-    const mapped = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
+    expect(userDef.extraction.postAggFilter).toBeDefined();
+    const mapped = mapPostAggFilterFieldsToRecentForEsql(
+      userDef.extraction.postAggFilter!,
+      userDef
+    );
     const esql = conditionToESQL(mapped);
     expect(esql).toContain(recentData('event.kind'));
     expect(esql).toContain('entity.id');
@@ -495,7 +503,7 @@ describe('mapPostAggFilterFieldsToRecentForEsql', () => {
 
   it('should be idempotent when fields are already recent.*', () => {
     const userDef = getEntityDefinition('user', 'default');
-    const once = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
+    const once = mapPostAggFilterFieldsToRecentForEsql(userDef.extraction.postAggFilter!, userDef);
     const twice = mapPostAggFilterFieldsToRecentForEsql(once, userDef);
     expect(twice).toEqual(once);
   });

@@ -21,6 +21,7 @@ const mockGetRuleLibraryRedirectUrl = jest.fn(
   ({ templateId }: { templateId?: string }) =>
     `/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=${templateId}`
 );
+let mockProjectType: string | undefined;
 
 jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
@@ -43,13 +44,14 @@ jest.mock('../../../../../hooks', () => ({
     version: '1.0.0',
   })),
   useLink: jest.fn().mockReturnValue({ getPath: jest.fn().mockReturnValue('/mock') }),
-  useStartServices: jest.fn().mockReturnValue({
+  useStartServices: () => ({
     notifications: {
       toasts: { addInfo: jest.fn(), addSuccess: jest.fn(), addError: jest.fn() },
     },
     http: {
       basePath: { prepend: (path: string) => `/mock${path}` },
     },
+    cloud: mockProjectType ? { serverless: { projectType: mockProjectType } } : undefined,
   }),
   useFleetStatus: jest.fn().mockReturnValue({ spaceId: 'default' }),
   useAuthz: (...args: any[]) => mockUseAuthz(...args),
@@ -109,6 +111,7 @@ describe('AlertingPage', () => {
     jest.clearAllMocks();
 
     mockIsAlertingV2Enabled.mockReturnValue(false);
+    mockProjectType = undefined;
 
     mockUseGetPackageInstallStatus.mockReturnValue(() => ({
       status: InstallStatus.installed,
@@ -184,20 +187,69 @@ describe('AlertingPage', () => {
     expect(
       screen.getByTestId('fleetAssetsAccordion.button.alerting_rule_template')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('ES|QL Rules');
-    expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Standard Rules');
+    expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Universal rules');
+    expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Classic rules');
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: '[System] Metrics template' })).toHaveAttribute(
-      'href',
-      '/mock/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=template-2'
-    );
-    expect(mockGetRuleLibraryRedirectUrl).toHaveBeenCalledWith({ templateId: 'template-2' });
     expect(screen.queryByText('[System] Logs template')).not.toBeInTheDocument();
-    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent('ES|QL');
+    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent(
+      'Universal'
+    );
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
   });
 
-  it('should show v1 templates on the Kibana Standard Rules tab', async () => {
+  it('should link v2 templates to the Observability rule library in Observability projects', async () => {
+    mockIsAlertingV2Enabled.mockReturnValue(true);
+    mockProjectType = 'observability';
+    renderComponent();
+
+    const link = await screen.findByRole('link', { name: '[System] Metrics template' });
+
+    expect(link).toHaveAttribute(
+      'href',
+      '/mock/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=template-2'
+    );
+    expect(mockGetRuleLibraryRedirectUrl).toHaveBeenCalledWith({
+      templateId: 'template-2',
+      host: { app: 'observabilityAlerting', pathPrefix: '/rule-library' },
+    });
+  });
+
+  it('should link v2 templates to the Observability rule library on stateful clusters', async () => {
+    mockIsAlertingV2Enabled.mockReturnValue(true);
+    renderComponent();
+
+    const link = await screen.findByRole('link', { name: '[System] Metrics template' });
+
+    expect(link).toHaveAttribute(
+      'href',
+      '/mock/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=template-2'
+    );
+    expect(mockGetRuleLibraryRedirectUrl).toHaveBeenCalledWith({
+      templateId: 'template-2',
+      host: { app: 'observabilityAlerting', pathPrefix: '/rule-library' },
+    });
+  });
+
+  it('should hide Universal rules and show only the Classic count in non-Observability projects', async () => {
+    mockIsAlertingV2Enabled.mockReturnValue(true);
+    mockProjectType = 'security';
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText('[System] Metrics template')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fleetAlertingEngineTabs')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v2')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('fleetAssetsAccordion.button.alerting_rule_template')
+    ).toHaveTextContent('1');
+    expect(mockGetRuleLibraryRedirectUrl).not.toHaveBeenCalled();
+  });
+
+  it('should show v1 templates on the Kibana Classic rules tab', async () => {
     mockIsAlertingV2Enabled.mockReturnValue(true);
     renderComponent();
 
@@ -212,7 +264,7 @@ describe('AlertingPage', () => {
       '/mock/app/management/insightsAndAlerting/triggersActions/create/template/template-1'
     );
     expect(screen.queryByText('[System] Metrics template')).not.toBeInTheDocument();
-    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v1')).toHaveTextContent('Standard');
+    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v1')).toHaveTextContent('Classic');
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v2')).not.toBeInTheDocument();
   });
 

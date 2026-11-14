@@ -16,6 +16,8 @@ import {
   type OpenContentEditorParams,
 } from '@kbn/content-management-content-editor';
 import {
+  contentListKeys,
+  contentListQueryClient,
   CREATED_BY_FILTER_ID,
   type FindItemsParams,
   TAG_FILTER_ID,
@@ -174,6 +176,32 @@ describe('ContentListClientProvider', () => {
 
       // onFetchSuccess is optional and not set by the client provider.
       expect(result.current.dataSource.onFetchSuccess).toBeUndefined();
+    });
+  });
+
+  describe('filter facet invalidation', () => {
+    it('invalidates facet queries when the item snapshot changes', async () => {
+      const invalidateQueries = jest
+        .spyOn(contentListQueryClient, 'invalidateQueries')
+        .mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ id: 'facet-list' }),
+      });
+
+      await act(async () => {
+        await result.current.dataSource.findItems({
+          searchQuery: '',
+          filters: {},
+          page: { index: 0, size: 20 },
+        });
+      });
+
+      expect(invalidateQueries).toHaveBeenCalledWith({
+        queryKey: contentListKeys.allFilterFacets('facet-list-listing'),
+      });
+
+      invalidateQueries.mockRestore();
     });
   });
 
@@ -677,6 +705,43 @@ describe('ContentListClientProvider', () => {
       // Read-only flyout: nothing to wrap, no synthesised handler.
       const params = openContentEditor.mock.calls[0]?.[0];
       expect(params?.onSave).toBeUndefined();
+    });
+
+    it('forwards the configured edit restriction to the content editor', () => {
+      const restrictionReason = 'You cannot edit this dashboard.';
+      const editRestriction = jest.fn(() => restrictionReason);
+      const openContentEditor = stubOpenContentEditor();
+
+      const { open } = captureOpen({
+        features: {
+          contentEditor: {
+            isReadonly: false,
+            onSave: jest.fn(async () => {}),
+          },
+        },
+        item: {
+          actions: {
+            edit: {
+              onItemAction: jest.fn(),
+              restriction: editRestriction,
+            },
+          },
+        },
+      });
+      const item = { id: '1', title: 'Dashboard 1' };
+
+      act(() => {
+        open(item);
+      });
+
+      expect(editRestriction).toHaveBeenCalledWith(item);
+      expect(openContentEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isReadonly: true,
+          readonlyReason: restrictionReason,
+          onSave: undefined,
+        })
+      );
     });
   });
 });

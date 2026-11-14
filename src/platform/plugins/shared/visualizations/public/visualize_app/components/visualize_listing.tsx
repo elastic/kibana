@@ -8,7 +8,7 @@
  */
 
 import type { MouseEvent, MutableRefObject } from 'react';
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,8 +25,10 @@ import {
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import type { TableListViewProps } from '@kbn/content-management-table-list-view';
-import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
+import {
+  TableListViewTable,
+  type TableListViewTableProps,
+} from '@kbn/content-management-table-list-view-table';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -69,7 +71,7 @@ const visualizeListingStyles = {
 };
 
 type CustomTableViewProps = Pick<
-  TableListViewProps<VisualizeUserContent>,
+  TableListViewTableProps<VisualizeUserContent>,
   | 'createItem'
   | 'findItems'
   | 'deleteItems'
@@ -77,6 +79,7 @@ type CustomTableViewProps = Pick<
   | 'contentEditor'
   | 'emptyPrompt'
   | 'rowItemActions'
+  | 'refreshListBouncer'
 >;
 
 const useTableListViewProps = (
@@ -98,18 +101,22 @@ const useTableListViewProps = (
   } = useKibana<VisualizeServices>();
 
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+  const refreshList = useCallback(() => setRefreshListBouncer((bouncer) => !bouncer), []);
 
   const createNewVis = useCallback(() => {
     closeNewVisModal.current = showNewVisModal({
-      originatingApp: VisualizeConstants.APP_ID,
-      breadcrumbs: [
-        {
-          text: visualizeLibraryPageTitle,
-          href: application.getUrlForApp(VisualizeConstants.APP_ID, {
-            path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
-          }),
-        },
-      ],
+      embeddableState: {
+        originatingApp: VisualizeConstants.APP_ID,
+        breadcrumbs: [
+          {
+            text: visualizeLibraryPageTitle,
+            href: application.getUrlForApp(VisualizeConstants.APP_ID, {
+              path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
+            }),
+          },
+        ],
+      },
     });
   }, [closeNewVisModal, application]);
 
@@ -117,6 +124,8 @@ const useTableListViewProps = (
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
       if (!('editApp' in editor || 'editUrl' in editor)) {
         await editor.onEdit(id);
+        // The editor may have saved changes, so reload the list once it closes.
+        refreshList();
         return;
       }
 
@@ -131,7 +140,7 @@ const useTableListViewProps = (
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [history, stateTransferService]
+    [history, stateTransferService, refreshList]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -257,6 +266,7 @@ const useTableListViewProps = (
       customValidators: contentEditorValidators,
     },
     editItem,
+    refreshListBouncer,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
     rowItemActions: ({ managed, attributes: { readOnly } }) =>
@@ -378,7 +388,9 @@ export const VisualizeListing = () => {
     );
 
     return {
-      title: 'Visualizations',
+      title: i18n.translate('visualizations.visualizeListingVisualizationsTabTitle', {
+        defaultMessage: 'Visualizations',
+      }),
       id: 'visualizations',
       getTableList: (propsFromParent) => (
         <>

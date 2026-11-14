@@ -22,8 +22,25 @@ function renderMessage(serviceOverflowCount?: number) {
 }
 
 describe('MaxGroupsMessage', () => {
-  it('resolves the troubleshooting docs link through the doc links service', () => {
-    renderMessage();
+  it('resolves the transactions troubleshooting docs link through the doc links service', () => {
+    render(
+      <MockApmPluginContextWrapper>
+        <MaxGroupsMessage type="transactions" />
+      </MockApmPluginContextWrapper>
+    );
+
+    expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
+      'href',
+      mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyTransactions
+    );
+  });
+
+  it('resolves the services troubleshooting docs link through the doc links service', () => {
+    render(
+      <MockApmPluginContextWrapper>
+        <MaxGroupsMessage type="services" />
+      </MockApmPluginContextWrapper>
+    );
 
     expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
       'href',
@@ -37,10 +54,14 @@ describe('MaxGroupsMessage', () => {
     expect(screen.getByText(/1 additional service is not shown/i)).toBeInTheDocument();
   });
 
-  it('shows the hidden-service count when multiple services overflow', () => {
+  it('shows the hidden-service count and services docs link when multiple services overflow', () => {
     renderMessage(47);
 
     expect(screen.getByText(/47 additional services are not shown/i)).toBeInTheDocument();
+    expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
+      'href',
+      mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyServices
+    );
   });
 
   it('formats a large hidden-service count for the current locale', () => {
@@ -58,16 +79,24 @@ describe('MaxGroupsMessage', () => {
         screen.getByText(/The cardinality of APM data being collected is too high/i)
       ).toBeInTheDocument();
       expect(screen.queryByText(/additional service/i)).not.toBeInTheDocument();
+      expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
+        'href',
+        mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyServices
+      );
     }
   );
 
-  it('preserves transaction messaging and its documentation link', () => {
+  it('keeps the transactions fallback and docs link when a service overflow count is provided', () => {
     render(
       <MockApmPluginContextWrapper>
         <MaxGroupsMessage type="transactions" serviceOverflowCount={47} />
       </MockApmPluginContextWrapper>
     );
-    expect(screen.getByText(/The cardinality of APM data being collected is too high/i)).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/The cardinality of APM data being collected is too high/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/additional service/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('apmMaxGroupsMessageDocsLink')).toHaveAttribute(
       'href',
       mockApmPluginContextValue.core.docLinks.links.apm.troubleshootingTooManyTransactions

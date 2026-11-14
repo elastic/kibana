@@ -52,6 +52,7 @@ All routes are internal Kibana APIs. Clients must include:
 | `x-elastic-internal-origin` | Yes | Must be `kibana`. Identifies the request as an internal API call. |
 | `kbn-xsrf` | POST/PUT only | Any non-empty value (e.g. `true`). Required for non-GET requests. |
 | `x-connector-id` | No | Override the connector ID to use for chat completions |
+| `x-session-id` / `x-session-affinity` | No | Session ID used for prompt caching (see [Prompt caching](#prompt-caching)) |
 
 ### Example: curl
 
@@ -106,6 +107,8 @@ OpenAI-compatible chat completions endpoint. Supports:
 - **Multi-turn conversations** — include full message history with `assistant` and `tool` role messages
 - **Image content** — base64 data URIs in user message content arrays
 
+Request bodies can be up to 20MB, to fit long agent conversations with large tool results or images.
+
 #### Request body
 
 ```json
@@ -132,6 +135,20 @@ The `model` field is used to resolve which AI connector to use:
 4. As a last resort, the first available connector is used
 
 Use `"model": "default"` to always use the default connector.
+
+#### Prompt caching
+
+Clients can pass a stable, per-conversation session ID to enable prompt caching. It is forwarded to the inference plugin as `sessionId` together with an ephemeral `cacheControl` directive. Today, only Elastic-managed (EIS) inference endpoints honor these values; other connectors ignore them.
+
+The session ID is resolved from (first match wins):
+
+1. The `prompt_cache_key` body field (standard OpenAI field)
+2. The `x-session-id` header (OpenRouter convention)
+3. The `x-session-affinity` header
+
+The cache TTL defaults to `5m`. Set `"prompt_cache_retention": "24h"` to request the longest TTL supported by EIS (`1h`). Session IDs longer than 256 characters are ignored.
+
+Reuse the same session ID for every request of a conversation, and use a new one for each new conversation.
 
 ### Conversations
 
@@ -239,7 +256,46 @@ console.log(response.choices[0].message.content);
 
 ### Claude Code / other agents
 
-Set the base URL to `https://my-kibana:5601/internal/elastic_ramen/v1` and use the API key from the setup endpoint. Include `x-elastic-internal-origin: kibana` in all requests, and include `kbn-xsrf: true` for non-GET requests.
+Set the base URL to `https://my-kibana:5601/internal/elastic_ramen/v1` and use the API key from the setup endpoint. Include `x-elastic-internal-origin: kibana` in all requests, and include `kbn-xsrf: true` for non-GET requests. To benefit from prompt caching, send a per-conversation `prompt_cache_key` or `x-session-id` (see [Prompt caching](#prompt-caching)).
+
+### Pi coding agent
+
+Add a provider to `~/.pi/agent/models.json` and export the API key from the setup endpoint as `KIBANA_API_KEY`. The `sendSessionAffinityHeaders` / `sessionAffinityFormat` compat flags make pi send its session ID as an `x-session-id` header on each request, which enables prompt caching. Set `PI_CACHE_RETENTION=long` to request the `1h` TTL.
+
+```json
+{
+  "providers": {
+    "kibana": {
+      "baseUrl": "https://my-kibana:5601/internal/elastic_ramen/v1",
+      "api": "openai-completions",
+      "apiKey": "${KIBANA_API_KEY}",
+      "headers": {
+        "Authorization": "ApiKey ${KIBANA_API_KEY}",
+        "x-elastic-internal-origin": "kibana",
+        "kbn-xsrf": "true"
+      },
+      "compat": {
+        "sendSessionAffinityHeaders": true,
+        "sessionAffinityFormat": "openrouter",
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false,
+        "maxTokensField": "max_tokens"
+      },
+      "models": [
+        {
+          "id": ".anthropic-claude-4.5-sonnet-chat_completion",
+          "name": "Claude Sonnet 4.5 (Kibana)",
+          "contextWindow": 200000,
+          "maxTokens": 16384
+        }
+      ]
+    }
+  }
+}
+```
+
+The model `id` is the Kibana connector ID; list them with `GET /internal/elastic_ramen/v1/models`.
 
 ## Development
 

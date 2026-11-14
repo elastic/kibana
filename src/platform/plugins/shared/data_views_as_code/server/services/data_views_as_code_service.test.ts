@@ -30,6 +30,7 @@ const createMockDataViewLazy = ({
   spec = {},
   minimalSpec = spec,
   fieldAttrs = (spec.fieldAttrs as Record<string, unknown> | undefined) ?? {},
+  scriptedFields = {},
   savedObjectBody,
 }: {
   id?: string;
@@ -39,6 +40,7 @@ const createMockDataViewLazy = ({
   spec?: Record<string, unknown>;
   minimalSpec?: Record<string, unknown>;
   fieldAttrs?: Record<string, unknown>;
+  scriptedFields?: Record<string, Record<string, unknown>>;
   savedObjectBody?: Record<string, unknown>;
 } = {}) =>
   ({
@@ -49,10 +51,22 @@ const createMockDataViewLazy = ({
     toSpec: jest.fn().mockResolvedValue(spec),
     toMinimalSpec: jest.fn().mockResolvedValue(minimalSpec),
     getFieldAttrs: jest.fn().mockReturnValue(new Map(Object.entries(fieldAttrs))),
+    getScriptedFields: jest
+      .fn()
+      .mockReturnValue(
+        Object.fromEntries(
+          Object.entries(scriptedFields).map(([name, field]) => [
+            name,
+            { toSpec: () => ({ name, scripted: true, ...field }) },
+          ])
+        )
+      ),
     getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
   } as unknown as DataViewLazy);
 
-const createService = () => {
+const createService = ({
+  scriptedFieldsEnabled = true,
+}: { scriptedFieldsEnabled?: boolean } = {}) => {
   dataViewsService.clearInstanceCache = jest.fn();
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockFieldFormats = {
@@ -61,7 +75,8 @@ const createService = () => {
   const service = new DataViewsAsCodeService(
     dataViewsService,
     mockSavedObjectsClient,
-    mockFieldFormats
+    mockFieldFormats,
+    scriptedFieldsEnabled
   );
   return {
     service,
@@ -127,7 +142,7 @@ describe('DataViewsAsCodeService', () => {
             meta: {
               managed: true,
               version: '2',
-              namespaces: ['default', 'space-1'],
+              spaces: ['default', 'space-1'],
             },
           },
           {
@@ -140,7 +155,7 @@ describe('DataViewsAsCodeService', () => {
             meta: {
               managed: false,
               version: '1',
-              namespaces: ['default'],
+              spaces: ['default'],
             },
           },
         ],
@@ -218,7 +233,7 @@ describe('DataViewsAsCodeService', () => {
         meta: {
           managed: true,
           version: '2',
-          namespaces: ['default', 'space-1'],
+          spaces: ['default', 'space-1'],
         },
       });
     });
@@ -252,7 +267,7 @@ describe('DataViewsAsCodeService', () => {
         meta: {
           managed: false,
           version: '1',
-          namespaces: [],
+          spaces: [],
         },
       });
     });
@@ -274,7 +289,7 @@ describe('DataViewsAsCodeService', () => {
         meta: {
           managed: false,
           version: '1',
-          namespaces: ['default'],
+          spaces: ['default'],
         },
       });
     });
@@ -297,6 +312,63 @@ describe('DataViewsAsCodeService', () => {
       const result = await service.get('dv-3');
 
       expect(result.data).toEqual(getExpectedMappedData(detailedSpec));
+    });
+
+    it('should include scripted fields with their format, label and popularity', async () => {
+      const { service, mockDataViewsService } = createService();
+      const spec = {
+        title: 'logs-*',
+        fieldFormats: { double_bytes: { id: 'bytes', params: { pattern: '0,0.0b' } } },
+        fieldAttrs: { double_bytes: { customLabel: 'Double bytes', count: 3 } },
+      };
+      mockDataViewsService.getDataViewLazy = jest.fn().mockResolvedValue(
+        createMockDataViewLazy({
+          spec,
+          scriptedFields: {
+            double_bytes: { type: 'number', lang: 'painless', script: "doc['bytes'].value * 2" },
+          },
+        })
+      );
+
+      const result = await service.get('test-id');
+
+      expect(result.data).toEqual({
+        index_pattern: 'logs-*',
+        // The overrides are stored by field name, so they are returned in `field_settings` as well
+        field_settings: {
+          double_bytes: {
+            custom_label: 'Double bytes',
+            format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+            popularity: 3,
+          },
+        },
+        scripted_fields: {
+          double_bytes: {
+            type: 'number',
+            lang: 'painless',
+            script: "doc['bytes'].value * 2",
+            custom_label: 'Double bytes',
+            format: { type: 'bytes', params: { pattern: '0,0.0b' } },
+            popularity: 3,
+          },
+        },
+      });
+    });
+
+    it('should not include scripted fields when scripted fields are disabled', async () => {
+      const { service, mockDataViewsService } = createService({ scriptedFieldsEnabled: false });
+      const dataView = createMockDataViewLazy({
+        spec: { title: 'logs-*' },
+        scriptedFields: {
+          double_bytes: { type: 'number', lang: 'painless', script: "doc['bytes'].value * 2" },
+        },
+      });
+      mockDataViewsService.getDataViewLazy = jest.fn().mockResolvedValue(dataView);
+
+      const result = await service.get('test-id');
+
+      expect(result.data).toEqual({ index_pattern: 'logs-*' });
+      expect(dataView.getScriptedFields).not.toHaveBeenCalled();
     });
 
     it('should restore fieldAttrs from getFieldAttrs so popularity is mapped', async () => {
@@ -354,7 +426,7 @@ describe('DataViewsAsCodeService', () => {
         meta: {
           managed: false,
           version: '1',
-          namespaces: ['default'],
+          spaces: ['default'],
         },
       });
     });
@@ -411,7 +483,7 @@ describe('DataViewsAsCodeService', () => {
       expect(result.meta).toEqual({
         managed: true,
         version: '3',
-        namespaces: ['default', 'space-a'],
+        spaces: ['default', 'space-a'],
       });
     });
 
@@ -514,7 +586,7 @@ describe('DataViewsAsCodeService', () => {
           meta: {
             managed: true,
             version: '2',
-            namespaces: ['default', 'space-1'],
+            spaces: ['default', 'space-1'],
           },
         },
       });
@@ -550,7 +622,7 @@ describe('DataViewsAsCodeService', () => {
           meta: {
             managed: false,
             version: '1',
-            namespaces: ['default'],
+            spaces: ['default'],
           },
         },
       });

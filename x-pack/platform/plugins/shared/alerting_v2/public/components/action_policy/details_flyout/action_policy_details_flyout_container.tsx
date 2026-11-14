@@ -70,22 +70,13 @@ export const ActionPolicyDetailsFlyoutContainer = ({
   };
 
   const clonePolicy = (source: ActionPolicyResponse) => {
-    const {
-      name,
-      description,
-      destinations,
-      matcher,
-      group_by: groupBy,
-      throttle,
-      grouping_mode: groupingMode,
-    } = source;
+    const { name, description, destinations, matcher, grouping, throttle } = source;
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
-      grouping_mode: groupingMode ?? 'per_episode',
+      grouping: grouping ?? { mode: 'per_alert' },
       ...(matcher != null && { matcher }),
-      ...(groupBy != null && { group_by: groupBy }),
       ...(throttle != null && { throttle }),
     };
     createActionPolicy(data);

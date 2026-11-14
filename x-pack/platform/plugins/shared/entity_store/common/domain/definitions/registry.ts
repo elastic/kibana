@@ -7,17 +7,21 @@
 
 import assert from 'assert';
 
-import { EXTRACTION_MODE, type EntityType, type ExtractionMode } from './entity_schema';
+import { EXTRACTION_MODE, EntityType, type ExtractionMode } from './entity_schema';
 import {
-  type EntityDefinitionWithoutId,
   type GatedEntityDefinition,
   type ManagedEntityDefinition,
+  type ManagedEntityDefinitionWithoutId,
 } from './entity_schema';
 import { resolveExtractionGate } from './extraction_gate';
 import { hostEntityDefinition } from './host';
-import { userEntityDefinition } from './user';
+import { buildUserEntityDefinition, userEntityDefinition } from './user';
 import { serviceEntityDefinition } from './service';
 import { genericEntityDefinition } from './generic';
+
+export interface EntityDefinitionOptions {
+  excludedUserNames?: string[];
+}
 
 /** One definition per entity type; the extraction processes are modes of it, not copies of it. */
 const entitiesDefinitionRegistry = {
@@ -25,11 +29,16 @@ const entitiesDefinitionRegistry = {
   user: userEntityDefinition,
   service: serviceEntityDefinition,
   generic: genericEntityDefinition,
-} as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
+} as const satisfies Record<EntityType, ManagedEntityDefinitionWithoutId>;
 
-const getRegisteredDefinition = (type: EntityType): EntityDefinitionWithoutId => {
+const getRegisteredDefinition = (type: EntityType): ManagedEntityDefinitionWithoutId => {
   const definition = entitiesDefinitionRegistry[type];
-  assert(definition, `No entity description found for type: ${type}`);
+  assert(
+    definition,
+    `No entity definition found for type: ${type}. Only the Entity Store's built-in types can be ` +
+      `resolved by name; for any other definition, read it from the entity definition registry ` +
+      `and pass it to the euid helper.`
+  );
 
   return definition;
 };
@@ -40,14 +49,15 @@ const getRegisteredDefinition = (type: EntityType): EntityDefinitionWithoutId =>
  * the complement the same gate defines.
  */
 export const hasPriorityExtractionGate = (type: EntityType): boolean =>
-  getRegisteredDefinition(type).priorityExtractionGate !== undefined;
+  getRegisteredDefinition(type).extraction.priorityExtractionGate !== undefined;
 
 /**
  * Whether this type's non-priority process applies sampling. Requires the priority gate, since
  * sampling only exists where a non-priority process does.
  */
 export const supportsNonPrioritySampling = (type: EntityType): boolean =>
-  hasPriorityExtractionGate(type) && getRegisteredDefinition(type).nonPrioritySampling === true;
+  hasPriorityExtractionGate(type) &&
+  getRegisteredDefinition(type).extraction.nonPrioritySampling === true;
 
 /**
  * 'nonPriority' is excluded: the non-priority task hardcodes its own mode directly.
@@ -71,9 +81,10 @@ export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
 export function getEntityDefinition(
   type: EntityType,
   namespace: string,
-  extractionMode: ExtractionMode = EXTRACTION_MODE.single
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single,
+  options?: EntityDefinitionOptions
 ): GatedEntityDefinition<ManagedEntityDefinition> {
-  const definition = getEntityDefinitionWithoutId(type, extractionMode);
+  const definition = getBuiltInEntityDefinition(type, extractionMode, options);
 
   return {
     ...definition,
@@ -83,23 +94,34 @@ export function getEntityDefinition(
 }
 
 /**
- * Resolves an entity definition for an extraction mode. The default `'single'` mode returns the
- * registered definition untouched, which is what every consumer outside log extraction reads.
+ * Resolves one of the Entity Store's built-in definitions (`user`, `host`, `service`, `generic`)
+ * by type name; definitions other plugins register are read from the entity definition registry.
+ *
+ * The default `'single'` mode returns the registered definition untouched, which is what every
+ * consumer outside log extraction reads.
  *
  * The process modes return it with `extractionGate` resolved from `priorityExtractionGate`. Both
  * gates come from that one declaration, so they cannot drift out of being complements.
  */
-export function getEntityDefinitionWithoutId(
+export function getBuiltInEntityDefinition(
   type: EntityType,
-  extractionMode: ExtractionMode = EXTRACTION_MODE.single
-): GatedEntityDefinition<EntityDefinitionWithoutId> {
-  const definition = getRegisteredDefinition(type);
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single,
+  options?: EntityDefinitionOptions
+): GatedEntityDefinition<ManagedEntityDefinitionWithoutId> {
+  const definition =
+    type === EntityType.enum.user && options?.excludedUserNames?.length
+      ? buildUserEntityDefinition({ excludedUserNames: options.excludedUserNames })
+      : getRegisteredDefinition(type);
+
   assert(
-    extractionMode === EXTRACTION_MODE.single || definition.priorityExtractionGate,
+    extractionMode === EXTRACTION_MODE.single || definition.extraction.priorityExtractionGate,
     `No priority extraction gate declared for entity type: ${type}, cannot resolve '${extractionMode}' mode`
   );
 
-  const extractionGate = resolveExtractionGate(definition.priorityExtractionGate, extractionMode);
+  const extractionGate = resolveExtractionGate(
+    definition.extraction.priorityExtractionGate,
+    extractionMode
+  );
   if (!extractionGate) return definition;
 
   return { ...definition, extractionGate };

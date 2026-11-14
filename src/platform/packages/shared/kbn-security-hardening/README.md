@@ -16,4 +16,4 @@ The packaged Kibana server (`bin/kibana` / `bin/kibana.bat`) runs with the V8 fl
 
 ## Testing
 
-Scout API tests live in `test/scout_hardening/api/` and verify that server-side hardening measures are active at runtime (e.g. `--disallow-code-generation-from-strings` blocking `eval()` and `new Function()`). These tests require the `hardening` server config set which loads the test plugin from `src/platform/test/plugin_functional/plugins/hardening/`.
+Scout API tests live in `test/scout_hardening/api/` and verify that server-side hardening measures are active at runtime (e.g. `--disallow-code-generation-from-strings` blocking `eval()` and `new Function()`). These tests require the `hardening` server config set which loads the test plugin from `src/platform/test_plugins/plugin_functional/plugins/hardening/`.

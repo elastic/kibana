@@ -9,15 +9,11 @@
 
 import queryString from 'query-string';
 import { useCallback, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 export function useInRouterContext() {
-  try {
-    useLocation();
-    return true;
-  } catch (e: unknown) {
-    return false;
-  }
+  // `useHistory` reads the context provided by `<Router>`, so it is undefined outside of one.
+  return useHistory() !== undefined;
 }
 
 export function useUrlState<
@@ -46,7 +42,7 @@ export function useUrlState<
       };
 
       history.replace({
-        search: `?${queryString.stringify(queryParams, { encode: false })}`,
+        search: `?${queryString.stringify(queryParams)}`,
       });
     },
     [history, queryParamsSerializer]

@@ -89,6 +89,7 @@ import {
   ESQL_ASYNC_SEARCH_STRATEGY,
   SearchMethodsService,
 } from '../../common/search';
+import { getEsQueryConfig } from '../../common/es_query';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
   getShardDelayBucketAgg,
@@ -580,7 +581,12 @@ export class SearchService {
         options: ISearchOptions = {}
       ) => this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options);
 
-      const searchMethodsService = new SearchMethodsService(search as ISearchGeneric);
+      const searchMethodsService = new SearchMethodsService(search as ISearchGeneric, {
+        getEsQueryConfig: async () => {
+          const settings = await deps.uiSettingsClient.getAll();
+          return getEsQueryConfig({ get: (key) => settings[key] });
+        },
+      });
 
       return {
         search,

@@ -27,14 +27,15 @@ interface ApprovalContentHeaderProps {
    * {@link ProposedActionStatusBadge}'s own defaults.
    */
   badge?: ProposedActionStatusBadgeProps;
-  /** Category/reversibility line, or the decider's name and time once decided/deciding. */
+  showStatusBadge?: boolean;
+  /** Category/reversibility line, plus who decided when there is no outcome banner to say so. */
   caption?: React.ReactNode;
   title: string;
   titleId: string;
 }
 
 export const ApprovalContentHeader = memo<ApprovalContentHeaderProps>(
-  ({ badge, caption, title, titleId }) => {
+  ({ badge, showStatusBadge = true, caption, title, titleId }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -43,6 +44,9 @@ export const ApprovalContentHeader = memo<ApprovalContentHeaderProps>(
           flexDirection: 'column',
           alignItems: 'flex-start',
           padding: euiTheme.size.base,
+          // The modal's close button sits over the header's top-right corner, so a long title
+          // has to stop short of it.
+          paddingInlineEnd: euiTheme.size.xxl,
         })}
       >
         <EuiTitle id={titleId} size="s">
@@ -50,9 +54,11 @@ export const ApprovalContentHeader = memo<ApprovalContentHeaderProps>(
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <ProposedActionStatusBadge {...badge} />
-          </EuiFlexItem>
+          {showStatusBadge && (
+            <EuiFlexItem grow={false}>
+              <ProposedActionStatusBadge {...badge} />
+            </EuiFlexItem>
+          )}
           {caption && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">

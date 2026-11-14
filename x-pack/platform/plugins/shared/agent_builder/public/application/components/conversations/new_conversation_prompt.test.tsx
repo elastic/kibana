@@ -11,6 +11,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useKibana } from '../../hooks/use_kibana';
+import { useNowrapFitsContainer } from './use_nowrap_fits_container';
 
 jest.mock('../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
@@ -29,8 +30,13 @@ jest.mock('./use_typewriter_loop', () => ({
     enabled && messages.length > 0 ? messages[0] : '',
 }));
 
+jest.mock('./use_nowrap_fits_container', () => ({
+  useNowrapFitsContainer: jest.fn(() => true),
+}));
+
 const mockedUseConversationContext = jest.mocked(useConversationContext);
 const mockedUseKibana = jest.mocked(useKibana);
+const mockedUseNowrapFitsContainer = jest.mocked(useNowrapFitsContainer);
 
 const mockGetActiveSpace = jest.fn();
 
@@ -53,6 +59,7 @@ describe('NewConversationPrompt', () => {
         },
       },
     } as never);
+    mockedUseNowrapFitsContainer.mockReturnValue(true);
   });
 
   it('renders the static greeting and typed capability slot', async () => {
@@ -118,5 +125,18 @@ describe('NewConversationPrompt', () => {
     expect(screen.queryByTestId('agentBuilderWelcomeTypedText')).not.toBeInTheDocument();
 
     await waitFor(() => expect(mockGetActiveSpace).toHaveBeenCalled());
+  });
+
+  it('wraps and centers typed capability messages when the greeting no longer fits on one line', async () => {
+    mockedUseNowrapFitsContainer.mockReturnValue(false);
+
+    render(<NewConversationPrompt />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agentBuilderWelcomeTypedText')).toHaveAttribute(
+        'data-wrap-and-center',
+        'true'
+      );
+    });
   });
 });

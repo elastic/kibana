@@ -165,6 +165,55 @@ const { content, tokens } = chatResponse;
 // do something with the output
 ```
 
+#### Using a feature's configured model
+
+On the server, an unbound client from `getClient({ request })` also accepts a `featureId` instead of a `connectorId`.
+The inference plugin calls the feature's top endpoint, using the `reasoning` configured for that endpoint.
+
+```ts
+const chatResponse = await inferenceClient.chatComplete({
+  featureId: 'my_feature',
+  messages: [{ role: MessageRole.User, content: 'Do something' }],
+});
+```
+
+The top endpoint is the first one returned by `searchInferenceEndpoints.endpoints.getForFeature`, which applies the default AI connector settings, the admin's model settings for the feature, and the feature's `recommendedEndpoints`. When that endpoint has no configured parameters, it is called without `reasoning`.
+
+- The feature must be registered with `searchInferenceEndpoints` with the `chat_completion` task type.
+- `connectorId` and `reasoning` cannot be passed together with `featureId`.
+- `stream: true` and tools work the same way as with `connectorId`.
+- `featureId` is not supported by `getClientWithoutRequest`.
+- The call fails with a request error (400) when the feature is not registered, is not a chat completion feature, or has no endpoint, and with an internal error when the `searchInferenceEndpoints` plugin is disabled.
+
+A server client can also be bound to a feature with `bindTo: { featureId }`. Every `chatComplete`, `output` and `prompt` call on that client then uses the feature's top endpoint, resolved on each call, and the feature's `reasoning` applies even when the call passes its own.
+
+```ts
+const inferenceClient = myStartDeps.inference.getClient({
+  request,
+  bindTo: { featureId: 'my_feature' },
+});
+
+const chatResponse = await inferenceClient.chatComplete({
+  messages: [{ role: MessageRole.User, content: 'Do something' }],
+});
+```
+
+`getChatModel` accepts a `featureId` the same way. The feature's top endpoint is resolved once to load the connector returned by `getConnector()`, and every call then goes through `chatComplete({ featureId })`: the feature's `reasoning` applies and `chatModelOptions.reasoning` is ignored, while the other `chatModelOptions` (such as `temperature`) are forwarded as usual.
+
+```ts
+const chatModel = await myStartDeps.inference.getChatModel({
+  request,
+  featureId: 'my_feature',
+  chatModelOptions: {},
+});
+```
+
+To know which connector a feature runs on without calling the model, `resolveFeatureConnector(featureId, request)` resolves the feature's top endpoint and returns its connector. It fails the same way `chatComplete({ featureId })` does: a request error (400) when the feature has no endpoint, an internal error when no resolver is registered.
+
+```ts
+const connector = await myStartDeps.inference.resolveFeatureConnector('my_feature', request);
+```
+
 #### Streaming mode
 
 Passing `stream: true` when calling the API enables streaming mode.
@@ -439,12 +488,14 @@ Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, 
 
 ### Configuring rules
 
-1.  Navigate to **Management ➜ Advanced Settings** and search for
-    **"Anonymization Settings"** (category *Observability*).
+1.  Navigate to **Management ➜ Anonymization** (sibling page to **GenAI Settings**), or to
+    **Management ➜ Advanced Settings** and search for **"Anonymization Settings"**.
 2.  Paste a JSON object with a `rules` array similar to the examples above.  The default template that
     ships with the plugin looks like:
     ```jsonc
     {
+      "maskingEnabled": false,   // master switch: no rule runs while this is false
+      "onFailure": "block",      // "block" fails the request when a regex rule cannot run; "allow_unsafe" skips a rule with an invalid pattern and still applies the others (if regex masking cannot run at all, the request is sent unmasked)
       "rules": [
         {
           "entityClass": "EMAIL",
@@ -461,9 +512,9 @@ Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, 
       ]
     }
     ```
-3.  Toggle `enabled` to `true` (or add your own rules) and save.  A page refresh is required UI highlighting in chat.
+3.  Set `maskingEnabled` to `true`, toggle each rule's `enabled` to `true` (or add your own rules) and save.  A page refresh is required UI highlighting in chat.
 
-If **no rules are enabled**, anonymization does not run.
+If `maskingEnabled` is `false`, or **no rules are enabled**, anonymization does not run. Settings saved before `maskingEnabled` existed have no such key; for those, anonymization runs exactly when at least one rule is enabled.
 
 > Note: Each request is processed with whatever rules are active at the time of the request, and those rules are applied to all messages included in that request – including any previous conversation history passed along.
 

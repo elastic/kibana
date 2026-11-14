@@ -238,7 +238,7 @@ interface LogstashSpaceSetupContext {
   scoutSpace: {
     id: string;
     uiSettings: {
-      set: (values: Record<string, string>) => Promise<void>;
+      set: (values: Record<string, string | number>) => Promise<void>;
       unset: (...keys: string[]) => Promise<unknown>;
     };
     savedObjects: {
@@ -349,6 +349,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     await scoutSpace.uiSettings.set({
       defaultIndex: storedDataViewId ?? DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
+      'histogram:barTarget': 50,
       'timepicker:timeDefaults': JSON.stringify({
         from: timeRange.from,
         to: timeRange.to,
@@ -379,7 +380,12 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     if (storedDataViewId) {
       await apiServices.dataViews.delete(storedDataViewId, scoutSpace.id);
     }
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
+    await scoutSpace.uiSettings.unset(
+      'defaultIndex',
+      'dateFormat:tz',
+      'histogram:barTarget',
+      'timepicker:timeDefaults'
+    );
     await scoutSpace.savedObjects.cleanStandardList();
   };
 
@@ -526,10 +532,10 @@ export async function convertToEsqlViaModal({
   pageObjects,
   page,
 }: {
-  pageObjects: DashboardAndLens;
+  pageObjects: Pick<LensPageObjects, 'lens' | 'esqlEditor'>;
   page: ScoutPage;
 }) {
-  const { lens } = pageObjects;
+  const { lens, esqlEditor } = pageObjects;
 
   // Click on the "Conver to ES|QL" button in the in-line editor
   await lens.workspace.convertToEsqlButton.click();
@@ -542,7 +548,7 @@ export async function convertToEsqlViaModal({
 
   // Confirm that the in-line editor has been updated
   await expect(lens.workspace.convertToEsqlButton).toBeHidden();
-  await expect(page.getByTestId('ESQLEditor')).toBeVisible();
+  await expect(esqlEditor.editor).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
 }
 

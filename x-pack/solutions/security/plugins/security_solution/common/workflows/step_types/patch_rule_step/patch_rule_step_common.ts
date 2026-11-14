@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -33,20 +33,22 @@ export const PatchRuleStepId = 'security.patchRule' as const;
 // This is a plain union rather than a discriminated one: a discriminated union makes the
 // editor pre-fill `type: ""`, and a required discriminator breaks template-string inputs
 // (https://github.com/elastic/kibana/issues/276711).
-export const patchRuleInputSchema = z.object({
-  patch: z.union([
-    EqlRulePatchProps.extend({ type: z.literal('eql').optional() }).strict(),
-    QueryRulePatchProps.extend({ type: z.literal('query').optional() }).strict(),
-    SavedQueryRulePatchProps.extend({ type: z.literal('saved_query').optional() }).strict(),
-    ThresholdRulePatchProps.extend({ type: z.literal('threshold').optional() }).strict(),
-    ThreatMatchRulePatchProps.extend({ type: z.literal('threat_match').optional() }).strict(),
-    MachineLearningRulePatchProps.extend({
-      type: z.literal('machine_learning').optional(),
-    }).strict(),
-    NewTermsRulePatchProps.extend({ type: z.literal('new_terms').optional() }).strict(),
-    EsqlRulePatchProps.extend({ type: z.literal('esql').optional() }).strict(),
-  ]),
-});
+export const patchRuleInputSchema = lazySchema(() =>
+  z.object({
+    patch: z.union([
+      EqlRulePatchProps.extend({ type: z.literal('eql').optional() }).strict(),
+      QueryRulePatchProps.extend({ type: z.literal('query').optional() }).strict(),
+      SavedQueryRulePatchProps.extend({ type: z.literal('saved_query').optional() }).strict(),
+      ThresholdRulePatchProps.extend({ type: z.literal('threshold').optional() }).strict(),
+      ThreatMatchRulePatchProps.extend({ type: z.literal('threat_match').optional() }).strict(),
+      MachineLearningRulePatchProps.extend({
+        type: z.literal('machine_learning').optional(),
+      }).strict(),
+      NewTermsRulePatchProps.extend({ type: z.literal('new_terms').optional() }).strict(),
+      EsqlRulePatchProps.extend({ type: z.literal('esql').optional() }).strict(),
+    ]),
+  })
+);
 
 export const patchRuleOutputSchema = RuleResponse;
 

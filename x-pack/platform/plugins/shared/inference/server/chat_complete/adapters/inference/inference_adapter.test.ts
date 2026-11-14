@@ -540,4 +540,99 @@ describe('inferenceAdapter', () => {
       );
     });
   });
+
+  describe('forced tool choice', () => {
+    const tools = { set_title: { description: 'set the title' } };
+
+    const mockConnectorModel = (modelId: string) => {
+      executorMock.getConnector.mockImplementation(() => {
+        return {
+          type: InferenceConnectorType.Inference,
+          name: 'inference connector',
+          connectorId: '.id',
+          config: { provider: 'amazonbedrock', providerConfig: { model_id: modelId } },
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        };
+      });
+    };
+
+    const getBody = () =>
+      (executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, any>).body;
+
+    beforeEach(() => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: '',
+          status: 'ok',
+          data: new PassThrough(),
+        };
+      });
+    });
+
+    it('sends `auto` instead of a named function for a Claude model that rejects forced tool choice', () => {
+      mockConnectorModel('eu.anthropic.claude-sonnet-5-5');
+
+      inferenceAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+
+    it('sends `auto` instead of `required` for a Claude model that rejects forced tool choice', () => {
+      mockConnectorModel('eu.anthropic.claude-opus-5-5');
+
+      inferenceAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: ToolChoiceType.required,
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+
+    it('keeps the named function for a Claude model that accepts forced tool choice', () => {
+      mockConnectorModel('eu.anthropic.claude-sonnet-4-6');
+
+      inferenceAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
+      });
+    });
+
+    it('prefers the request model name over the connector model', () => {
+      mockConnectorModel('eu.anthropic.claude-sonnet-4-6');
+
+      inferenceAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'eu.anthropic.claude-sonnet-5-5',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+  });
 });

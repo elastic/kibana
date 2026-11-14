@@ -144,6 +144,14 @@ export interface PublicEmbeddableConversationInputProps {
    * Agent the input is bound to. Defaults to `agentBuilderDefaultAgentId` when omitted.
    */
   agentId?: string;
+  /**
+   * Optional override for the submit action. When provided, submitting the
+   * input calls this handler with the message and its attachments (e.g. pasted
+   * images) instead of navigating to the Agent Builder app. Use this when
+   * embedding the input in a host UI that handles the message locally (e.g.
+   * via `openChat`).
+   */
+  onSubmit?: (message: string, attachments: ConversationAttachment[]) => void;
 }
 
 /**
@@ -163,6 +171,8 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
+  /** Called each time a change made from the flyout, such as a severity or status update, succeeds. */
+  onConversationUpdated?: () => void;
   /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
   trailingActions?: EuiFlyoutMenuAction[];
 }

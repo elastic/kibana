@@ -21,6 +21,7 @@ import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
 import type { ActionsConfig } from '../config';
+import { defaultInboundEventsLimitConfigs } from '../config';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
@@ -336,13 +337,13 @@ describe('axios connections', () => {
     });
   });
 
-  // targetHttps, proxyHttps, and proxyAuth should all range over [false, true], but
-  // currently the true versions are not passing
+  // targetHttps and proxyHttps should also range over [false, true], but currently
+  // the https versions are not passing
   describe(`proxy`, () => {
     for (const targetHttps of [false]) {
       for (const targetAuth of [false, true]) {
         for (const proxyHttps of [false]) {
-          for (const proxyAuth of [false]) {
+          for (const proxyAuth of [false, true]) {
             const targetLabel = testLabel('target', targetHttps, targetAuth);
             const proxyLabel = testLabel('proxy', proxyHttps, proxyAuth);
             const testName = `${targetLabel} :: ${proxyLabel}`;
@@ -436,12 +437,8 @@ async function wrongProxyPasswordProxyTest(opts: RunTestOptions) {
       ssl: { verificationMode: 'none' },
     });
 
-    try {
-      await request({ ...axiosDefaults, configurationUtilities: acu });
-      expect('request should have thrown error').toBeUndefined();
-    } catch (err) {
-      expect(err.message).toMatch('407');
-    }
+    const res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(407);
   });
 }
 
@@ -453,12 +450,8 @@ async function missingProxyPasswordProxyTest(opts: RunTestOptions) {
       ssl: { verificationMode: 'none' },
     });
 
-    try {
-      await request({ ...axiosDefaults, configurationUtilities: acu });
-      expect('request should have thrown error').toBeUndefined();
-    } catch (err) {
-      expect(err.message).toMatch('407');
-    }
+    const res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(407);
   });
 }
 
@@ -656,10 +649,8 @@ interface CreateProxyResult {
   server: http.Server | https.Server;
 }
 
-type AuthenticateCallback = (err: null | Error, authenticated: boolean) => void;
-
 interface IAuthenticate {
-  authenticate(req: http.IncomingMessage, callback: AuthenticateCallback): void;
+  authenticate(req: http.IncomingMessage): boolean;
 }
 
 async function createProxy(options: CreateProxyOptions): Promise<CreateProxyResult> {
@@ -677,9 +668,9 @@ async function createProxy(options: CreateProxyOptions): Promise<CreateProxyResu
 
   proxy.createProxy(proxyServer);
   if (requireAuth) {
-    (proxyServer as unknown as IAuthenticate).authenticate = (req, callback) => {
+    (proxyServer as unknown as IAuthenticate).authenticate = (req) => {
       const auth = req.headers['proxy-authorization'];
-      callback(null, auth === `Basic ${AuthB64}`);
+      return auth === `Basic ${AuthB64}`;
     };
   }
 
@@ -728,7 +719,9 @@ const BaseActionsConfig: ActionsConfig = {
     enabled: false,
     maxBodyBytes: new ByteSizeValue(1024 * 1024),
     maxEmitted: 25,
+    ...defaultInboundEventsLimitConfigs,
   },
+  connectorSigningKeys: { enabled: false },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

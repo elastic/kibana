@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
@@ -67,13 +67,15 @@ export const aiIndexTraceSchema = z.discriminatedUnion('type', [
   }),
 ]);
 
-export const aiIndexPropertiesSchema = z.object({
-  description: z.string().max(MAX_AI_INDEX_DESCRIPTION_LENGTH).optional(),
-  dest: aiIndexDestSchema,
-  sources: z.array(aiIndexSourceSchema).max(MAX_AI_INDEX_SOURCES).default([]),
-  automations: z.array(aiIndexAutomationSchema).max(MAX_AI_INDEX_AUTOMATIONS).default([]),
-  traces: z.array(aiIndexTraceSchema).max(MAX_AI_INDEX_TRACES).default([]),
-});
+export const aiIndexPropertiesSchema = lazySchema(() =>
+  z.object({
+    description: z.string().max(MAX_AI_INDEX_DESCRIPTION_LENGTH).optional(),
+    dest: aiIndexDestSchema,
+    sources: z.array(aiIndexSourceSchema).max(MAX_AI_INDEX_SOURCES).default([]),
+    automations: z.array(aiIndexAutomationSchema).max(MAX_AI_INDEX_AUTOMATIONS).default([]),
+    traces: z.array(aiIndexTraceSchema).max(MAX_AI_INDEX_TRACES).default([]),
+  })
+);
 
 export const aiIndexIdFieldSchema = z
   .string()

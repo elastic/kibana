@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/i18n'
   - '@kbn/es-query'
+  - '@kbn/flyout-template'
   - '@kbn/ui-callout'
   - '@kbn/ui-theme'
   - '@kbn/synthtrace-client'
@@ -110,6 +111,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/shared-ux-utility'
   - '@kbn/management-settings-components-field-row'
+  - '@kbn/management-settings-hooks'
   - '@kbn/shared-ux-markdown'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/core-http-request-handler-context-server'
@@ -181,12 +183,15 @@ dependsOn:
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/lens-common'
   - '@kbn/core-http-browser-mocks'
+  - '@kbn/genai-common'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*
@@ -199,6 +204,4 @@ fileGroups:
     - server/**/*.json
     - test/scenarios/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

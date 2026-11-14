@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Global, css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -23,7 +23,7 @@ import {
 import type { Point } from '../lib/anchor';
 import { holdsPassThrough, isPassingThrough, passThrough } from '../lib/pass_through';
 import { BOUNDARY_EVENTS, FOCUS_EVENTS, MOVE_EVENTS, createTooltipHold } from '../lib/tooltip_hold';
-import { useComments } from './comments_context';
+import { useComments, useCommentsState } from './comments_context';
 import { useLayerPortal, useLayerZIndex, useLayoutTick } from './hooks';
 
 const POINTER_EVENTS = [
@@ -120,7 +120,9 @@ const TooltipAim = ({ tooltip, onGone }: { tooltip: Element; onGone: () => void 
  * the pointer heads over to it, to be clicked, and while the layer's UI at it
  * has focus, the page meanwhile told nothing of the pointer or focus; with the
  * keyboard, an arrow key aims at the tooltip the focused element shows. With
- * Alt held, pointer input goes to the page.
+ * Alt held, pointer input goes to the page. A full-screen screenshot gets it
+ * too: this stays mounted, so a tooltip the comment is on keeps showing, while
+ * pointer and key input reach the screenshot.
  */
 export const CommentModeOverlay = () => {
   const controller = useComments();
@@ -131,6 +133,33 @@ export const CommentModeOverlay = () => {
   aimRef.current = aim;
   const clearAim = useCallback(() => setAim(null), []);
   const hold = useMemo(createTooltipHold, []);
+  // Unmounting to let the screenshot through would end the hold, and a tooltip the comment is on would go.
+  const overlayOpen = useCommentsState((state) => state.overlayOpen);
+  const overlayOpenRef = useRef(false);
+  overlayOpenRef.current = overlayOpen;
+  useLayoutEffect(() => {
+    hold.suspend(overlayOpen);
+  }, [hold, overlayOpen]);
+  // EUI draws a tooltip at the toasts' level, over the screenshot's mask. Tuck it under the mask; it stays, so the comment does.
+  const { euiTheme } = useEuiTheme();
+  useLayoutEffect(() => {
+    if (!overlayOpen) {
+      return;
+    }
+    const underMask = String(Number(euiTheme.levels.mask) - 1);
+    const previous: Array<[HTMLElement, string]> = [];
+    document.querySelectorAll('[role="tooltip"]').forEach((tooltip) => {
+      if (tooltip instanceof HTMLElement) {
+        previous.push([tooltip, tooltip.style.zIndex]);
+        tooltip.style.zIndex = underMask;
+      }
+    });
+    return () => {
+      previous.forEach(([tooltip, zIndex]) => {
+        tooltip.style.zIndex = zIndex;
+      });
+    };
+  }, [overlayOpen, euiTheme.levels.mask]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => setAltHeld(event.altKey);
@@ -181,6 +210,9 @@ export const CommentModeOverlay = () => {
     };
 
     const onPointer = (event: Event) => {
+      if (overlayOpenRef.current) {
+        return;
+      }
       const target = pageTarget(event);
       if (!target || isPassingThrough()) {
         return;
@@ -206,7 +238,7 @@ export const CommentModeOverlay = () => {
       if (!(event instanceof MouseEvent)) {
         return;
       }
-      if (holdsPassThrough(event)) {
+      if (!overlayOpenRef.current && holdsPassThrough(event)) {
         hold.release({ x: event.clientX, y: event.clientY });
       } else {
         hold.hold(event, ignoreSelectors);
@@ -217,7 +249,7 @@ export const CommentModeOverlay = () => {
       if (!(event instanceof MouseEvent)) {
         return;
       }
-      if (holdsPassThrough(event)) {
+      if (!overlayOpenRef.current && holdsPassThrough(event)) {
         hold.release({ x: event.clientX, y: event.clientY });
       } else {
         hold.move(event, ignoreSelectors);
@@ -231,6 +263,9 @@ export const CommentModeOverlay = () => {
     };
 
     const onInput = (event: Event) => {
+      if (overlayOpenRef.current) {
+        return;
+      }
       if (pageTarget(event)) {
         event.preventDefault();
         event.stopPropagation();
@@ -238,6 +273,9 @@ export const CommentModeOverlay = () => {
     };
 
     const onKey = (event: KeyboardEvent) => {
+      if (overlayOpenRef.current) {
+        return;
+      }
       const target = pageTarget(event);
       if (!target || passesThrough(event)) {
         return;
@@ -289,7 +327,7 @@ export const CommentModeOverlay = () => {
 
   return (
     <>
-      {!altHeld && <Global styles={cursorStyles} />}
+      {!altHeld && !overlayOpen && <Global styles={cursorStyles} />}
       {aim && <TooltipAim tooltip={aim.tooltip} onGone={clearAim} />}
     </>
   );

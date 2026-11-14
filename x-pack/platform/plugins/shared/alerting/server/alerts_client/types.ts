@@ -47,8 +47,17 @@ export interface TrackedAADAlerts<AlertData extends RuleAlertData> {
   all: Record<string, Alert & AlertData>;
   seqNo: Record<string, number | undefined>;
   primaryTerm: Record<string, number | undefined>;
+  // Alert instance id -> alert uuid, per status. When several documents share an
+  // instance id within a status, the one with the most recent start wins.
+  instanceIdIndex: TrackedAlertsInstanceIdIndex;
   get: (uuid: string) => (Alert & AlertData) | undefined;
   getById: (id: string) => (Alert & AlertData) | undefined;
+}
+
+export interface TrackedAlertsInstanceIdIndex {
+  active: Record<string, string>;
+  recovered: Record<string, string>;
+  delayed: Record<string, string>;
 }
 
 export interface AlertRuleData {
@@ -235,6 +244,7 @@ export interface SearchResult<AlertData, Aggregation = unknown> {
   hits: SearchResponseBody<Alert & AlertData>['hits']['hits'];
   total: SearchResponseBody<Alert & AlertData>['hits']['total'];
   aggregations: SearchResponseBody<Alert & AlertData, Aggregation>['aggregations'];
+  _shards: SearchResponseBody<Alert & AlertData>['_shards'];
 }
 
 export type GetSummarizedAlertsParams = {

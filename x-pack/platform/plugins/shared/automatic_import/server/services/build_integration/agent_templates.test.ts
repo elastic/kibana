@@ -5,7 +5,37 @@
  * 2.0.
  */
 
+import Handlebars, { type HelperOptions } from '@kbn/handlebars';
+import { parse } from 'yaml';
 import { buildAgentTemplate } from './agent_templates';
+
+interface RenderedStream {
+  readonly prefix?: string;
+  readonly preserve_original_event?: boolean;
+  readonly processors?: ReadonlyArray<Record<string, unknown>>;
+}
+
+const handlebars = Handlebars.create();
+handlebars.registerHelper(
+  'contains',
+  function (this: unknown, item: string, check: string | string[], options: HelperOptions) {
+    return check.includes(item) ? options.fn(this) : '';
+  }
+);
+
+const USER_PROCESSORS_YAML =
+  '- add_fields:\n    target: labels\n    fields:\n      source: webhook';
+const USER_PROCESSOR = { add_fields: { target: 'labels', fields: { source: 'webhook' } } };
+const DROP_JSON_PROCESSOR = { drop_fields: { fields: ['json'], ignore_missing: true } };
+
+// Fleet splices a yaml var's value into the template as block YAML at column 0, like the raw string here.
+const renderTemplate = (inputType: string, vars: Record<string, unknown>): RenderedStream =>
+  parse(
+    handlebars.compileAST(buildAgentTemplate(inputType), { noEscape: true })({
+      tags: ['forwarded'],
+      ...vars,
+    })
+  );
 
 const ALL_INPUT_TYPES = [
   'filestream',
@@ -85,6 +115,7 @@ describe('buildAgentTemplate', () => {
       expect(template).toContain('max_connections: {{max_connections}}');
       expect(template).toContain('timeout: {{timeout}}');
       expect(template).toContain('keep_null: {{keep_null}}');
+      expect(template).toContain('ssl: {{ssl}}');
     });
 
     it('wraps optional fields in #if blocks', () => {
@@ -92,6 +123,12 @@ describe('buildAgentTemplate', () => {
       expect(template).toContain('{{#if max_message_size}}');
       expect(template).toContain('{{#if framing}}');
       expect(template).toContain('{{#if timeout}}');
+      expect(template).toContain('{{#if ssl}}');
+    });
+
+    it('renders ssl as a conditional block', () => {
+      const template = buildAgentTemplate('tcp');
+      expect(template).toContain('{{#if ssl}}\nssl: {{ssl}}\n{{/if}}');
     });
 
     it('does NOT wrap host in an #if block (always rendered)', () => {
@@ -121,6 +158,7 @@ describe('buildAgentTemplate', () => {
       expect(template).not.toContain('framing:');
       expect(template).not.toContain('line_delimiter:');
       expect(template).not.toContain('max_connections:');
+      expect(template).not.toContain('ssl:');
     });
   });
 
@@ -297,6 +335,45 @@ describe('buildAgentTemplate', () => {
     });
   });
 
+  describe('rendered agent config', () => {
+    it('http_endpoint maps the body under json, copies it to event.original and drops the json copy', () => {
+      expect(renderTemplate('http_endpoint', {})).toMatchObject({
+        prefix: 'json',
+        preserve_original_event: true,
+        processors: [DROP_JSON_PROCESSOR],
+      });
+    });
+
+    it('http_endpoint runs user processors before dropping the json copy, in a single list', () => {
+      const { processors } = renderTemplate('http_endpoint', { processors: USER_PROCESSORS_YAML });
+      expect(processors).toEqual([USER_PROCESSOR, DROP_JSON_PROCESSOR]);
+    });
+
+    it('other inputs omit processors when the user sets none', () => {
+      const rendered = renderTemplate('filestream', { paths: ['/var/log/app.log'] });
+      expect(rendered.processors).toBeUndefined();
+    });
+
+    it('other inputs render only the user processors', () => {
+      const { processors } = renderTemplate('filestream', {
+        paths: ['/var/log/app.log'],
+        processors: USER_PROCESSORS_YAML,
+      });
+      expect(processors).toEqual([USER_PROCESSOR]);
+    });
+  });
+
+  describe('processors section for other inputs', () => {
+    it.each(ALL_INPUT_TYPES.filter((inputType) => inputType !== 'http_endpoint'))(
+      '%s only renders processors when the user sets them',
+      (inputType) => {
+        const template = buildAgentTemplate(inputType);
+        expect(template).toContain('{{#if processors}}\nprocessors:\n{{processors}}\n{{/if}}');
+        expect(template).not.toContain('drop_fields');
+      }
+    );
+  });
+
   describe('kafka', () => {
     it('renders hosts and topics as arrays', () => {
       const template = buildAgentTemplate('kafka');
@@ -420,6 +497,7 @@ describe('buildAgentTemplate', () => {
         '{{#if max_connections}}\nmax_connections: {{max_connections}}\n{{/if}}',
         '{{#if timeout}}\ntimeout: {{timeout}}\n{{/if}}',
         '{{#if keep_null}}\nkeep_null: {{keep_null}}\n{{/if}}',
+        '{{#if ssl}}\nssl: {{ssl}}\n{{/if}}',
       ];
       for (const pattern of expectedPatterns) {
         expect(template).toContain(pattern);

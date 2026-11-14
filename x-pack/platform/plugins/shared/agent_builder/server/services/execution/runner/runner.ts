@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
@@ -13,6 +14,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   ChatCompletionReasoningEffort,
   ConnectorTelemetryMetadata,
@@ -33,6 +35,7 @@ import type {
   ExperimentalFeatures,
   HooksServiceStart,
   ModelProvider,
+  ModelSource,
   RunAgentReturn,
   RunContext,
   RunApprovals,
@@ -42,6 +45,7 @@ import type {
   ScopedRunnerRunAgentParams,
   SubAgentExecutor,
   WritableToolResultStore,
+  ExecutionConversationAccess,
 } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -60,9 +64,8 @@ import type {
 } from '@kbn/agent-builder-server/runner';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
-import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
-import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type { AgentExecutionService, ExecutionRunAs } from '@kbn/agent-builder-server/execution';
+import { AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID } from '../../../../common/constants';
 import { DEDUCTIVE_AGENT_ID, getDeductiveConfig } from '../run_agent/deductive/config';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
@@ -71,6 +74,7 @@ import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import type { ModelProviderFactoryFn } from './model_provider';
+import { connectorModelSource } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import {
   createConversationStateManager,
@@ -86,6 +90,7 @@ import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -97,6 +102,7 @@ export interface CreateScopedRunnerDeps {
   // external plugin deps
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
+  licensing: LicensingPluginStart;
   // internal service deps
   modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
@@ -114,7 +120,15 @@ export interface CreateScopedRunnerDeps {
   // other deps
   logger: Logger;
   request: KibanaRequest;
-  defaultConnectorId?: string;
+  /**
+   * The identity conversation writes are attributed to when it differs from the request's
+   * principal, as when the request carries a bound service account's credential.
+   */
+  owner?: UserIdAndName;
+  /** Service account the execution runs as; see {@link RunAgentParams.runAs}. */
+  runAs?: ExecutionRunAs;
+  /** Where this run's default model comes from; undefined leaves the provider on its own default. */
+  defaultModel?: ModelSource;
   /**
    * Optional CPS project routing expression scoping this run's search tools to a set of projects
    * Defaults to space-level routing (all linked projects in the current space) when omitted.
@@ -129,7 +143,6 @@ export interface CreateScopedRunnerDeps {
   resultStore: WritableToolResultStore;
   skillsStore: WritableSkillsStore;
   attachmentStateManager: AttachmentStateManager;
-  todoStateManager: TodoStateManager;
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
@@ -139,8 +152,17 @@ export interface CreateScopedRunnerDeps {
   interactivity: InteractivityConfig;
   /** Id of the parent execution that spawned this one, if any. */
   parentExecutionId?: string;
+  /** How this run relates to its conversation. */
+  conversationAccess: ExecutionConversationAccess;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
+  /**
+   * The workflow run whose `ai.agent` step started this run, if any. Kept so a sub-agent executor
+   * rebuilt for an agent run (see `runAgent`) still passes it on to the sub-agents it spawns.
+   */
+  workflowExecutionId?: string;
+  /** Lazy getter for the execution service. */
+  getExecutionService: () => AgentExecutionService;
   /** Experimental features enabled for this runner context. */
   experimentalFeatures: ExperimentalFeatures;
   /** The effective agent configuration for the current run (with overrides applied). */
@@ -150,6 +172,8 @@ export interface CreateScopedRunnerDeps {
    * Populated only for the `deductive.ai` agent when the deployment opted in.
    */
   deductive?: DeductiveRuntimeConfig;
+  /** Static deployment information exposed to agents. */
+  deploymentInfo: DeploymentInfo;
   /**
    * `xpack.agentBuilder.deductive.register` for this deployment. One half of the
    * Deductive double switch; the other is the `agentBuilder:deductiveEnabled` setting.
@@ -160,25 +184,24 @@ export interface CreateScopedRunnerDeps {
 export type CreateRunnerDeps = Omit<
   CreateScopedRunnerDeps,
   | 'request'
-  | 'defaultConnectorId'
+  | 'defaultModel'
   | 'projectRouting'
   | 'resultStore'
   | 'skillsStore'
   | 'attachmentStateManager'
-  | 'todoStateManager'
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
   | 'toolManager'
   | 'subAgentExecutor'
+  | 'workflowExecutionId'
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'conversationAccess'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
-  /** Lazy getter for the execution service (breaks circular dep with runner). */
-  getExecutionService: () => AgentExecutionService;
 };
 
 const toToolRunInteractivity = (approvals?: RunApprovals): InteractivityConfig => {
@@ -245,8 +268,14 @@ export class RunnerManager {
     };
   };
 
-  createChild(childContext: RunContext): RunnerManager {
-    return new RunnerManager(this.deps, childContext);
+  createChild(
+    childContext: RunContext,
+    depsOverrides?: Partial<CreateScopedRunnerDeps>
+  ): RunnerManager {
+    return new RunnerManager(
+      depsOverrides ? { ...this.deps, ...depsOverrides } : this.deps,
+      childContext
+    );
   }
 }
 
@@ -256,12 +285,15 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, getExecutionService, ...runnerDeps } = deps;
+  const { modelProviderFactory, ...runnerDeps } = deps;
+  const { getExecutionService } = runnerDeps;
 
   const createScopedRunnerWithDeps = async ({
     request,
+    owner,
+    runAs,
     agentId,
-    defaultConnectorId,
+    defaultModel,
     projectRouting,
     telemetryMetadata,
     maxContentLength,
@@ -273,11 +305,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode,
     interactivity,
     parentExecutionId,
+    conversationAccess = 'readWrite',
+    workflowExecutionId,
   }: {
     request: KibanaRequest;
+    owner?: UserIdAndName;
+    runAs?: ExecutionRunAs;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
     agentId?: string;
-    defaultConnectorId?: string;
+    defaultModel?: ModelSource;
     projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
     maxContentLength?: number;
@@ -289,6 +325,9 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode: AgentExecutionMode;
     interactivity: InteractivityConfig;
     parentExecutionId?: string;
+    conversationAccess?: ExecutionConversationAccess;
+    /** Passed on to the sub-agents this run spawns, so their rounds join to the workflow run. */
+    workflowExecutionId?: string;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -297,15 +336,13 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
     });
 
-    const todoStateManager = createTodoStateManager(conversation?.state?.todos);
-
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
     const modelProvider = modelProviderFactory({
       request,
-      defaultConnectorId,
+      defaultModel,
       telemetryMetadata,
       maxContentLength,
       reasoningLevel,
@@ -316,31 +353,40 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       getExecutionService,
       projectRouting,
       interactivity,
+      workflowExecutionId,
     });
 
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
       runnerDeps.savedObjects.getScopedClient(request)
     );
-    const [experimentalEnabled, bashEnabled, apiDiscoveryEnabled, contextEngineEnabled] =
-      await Promise.all([
-        uiSettingsClient
-          .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-          .catch(() => false),
-        uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
-        uiSettingsClient.get<boolean>(AGENT_BUILDER_API_DISCOVERY_SETTING_ID).catch(() => false),
-        uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID).catch(() => false),
-      ]);
+    const [
+      experimentalEnabled,
+      bashEnabled,
+      apiDiscoveryEnabled,
+      contextEngineEnabled,
+      dynamicToolsEnabled,
+    ] = await Promise.all([
+      uiSettingsClient
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+        .catch(() => false),
+      uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+      uiSettingsClient.get<boolean>(AGENT_BUILDER_API_DISCOVERY_SETTING_ID).catch(() => false),
+      uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID).catch(() => false),
+      uiSettingsClient
+        .get<boolean | undefined>(AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID)
+        .then((value) => !!value)
+        .catch(() => false),
+    ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
-      aiIndices: experimentalEnabled && contextEngineEnabled,
+      aiIndices: contextEngineEnabled,
+      sml: experimentalEnabled,
       relevantSkills: experimentalEnabled,
-      subagents: experimentalEnabled,
-      todos: experimentalEnabled,
-      datasets: experimentalEnabled,
+      backgroundWake: experimentalEnabled,
       // forcefully disabled until the UI is implemented
-      askUserQuestion: false, // isExperimentalEnabled,
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
+      dynamicTools: dynamicToolsEnabled,
     };
 
     // External Deductive execution path: gated per-deployment by the LaunchDarkly feature
@@ -361,20 +407,23 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       ...runnerDeps,
       modelProvider,
       request,
-      defaultConnectorId,
+      owner,
+      runAs,
+      defaultModel,
       projectRouting,
       abortSignal,
       resultStore,
       skillsStore,
       attachmentStateManager,
-      todoStateManager,
       stateManager,
       promptManager,
       toolManager,
       executionMode,
       interactivity,
       parentExecutionId,
+      conversationAccess,
       subAgentExecutor,
+      workflowExecutionId,
       experimentalFeatures,
       ...(deductive ? { deductive } : {}),
     };
@@ -388,7 +437,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const runner = await createScopedRunnerWithDeps({
         request,
         promptState,
-        defaultConnectorId,
+        defaultModel: connectorModelSource(defaultConnectorId),
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
@@ -402,7 +451,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const runner = await createScopedRunnerWithDeps({
         request,
         promptState,
-        defaultConnectorId,
+        defaultModel: connectorModelSource(defaultConnectorId),
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
@@ -413,7 +462,9 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runAgent: async (params) => {
       const {
         request,
-        defaultConnectorId,
+        owner,
+        runAs,
+        defaultModel,
         projectRouting,
         telemetryMetadata,
         maxContentLength,
@@ -422,6 +473,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode = AgentExecutionMode.conversation,
         interactive,
         parentExecutionId,
+        conversationAccess = 'readWrite',
+        workflowExecutionId,
         ...otherParams
       } = params;
       const { agentId } = params;
@@ -429,8 +482,10 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,
+        owner,
+        runAs,
         agentId,
-        defaultConnectorId,
+        defaultModel,
         projectRouting,
         telemetryMetadata,
         maxContentLength,
@@ -441,9 +496,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode,
         interactivity,
         parentExecutionId,
+        conversationAccess,
+        workflowExecutionId,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
+          allowResume: conversationAccess === 'readWrite',
         }),
       });
       return runner.runAgent(otherParams);

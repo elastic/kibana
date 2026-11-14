@@ -8,7 +8,7 @@
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 import { getAssistantMessages, requireNonEmptyStringList, skippedResult } from '../evaluator_utils';
-import type { ExpectAttachmentDataFn, RuleManagementExample } from '../types';
+import type { AttachmentDataChecks, ExpectAttachmentDataFn, RuleManagementExample } from '../types';
 
 export const RENDER_ATTACHMENT_TAG_RE =
   /<render_attachment\b(?=[^>]*\bid\s*=\s*["'][^"']+["'])(?=[^>]*\bversion\s*=\s*["'][^"']+["'])[^>]*\/?>/i;
@@ -100,17 +100,82 @@ const getRenderedAttachmentTypes = (
   ),
 ];
 
-const requireAttachmentDataFn = (
-  value: ExpectAttachmentDataFn | undefined
-): ExpectAttachmentDataFn | undefined => {
+const UNNAMED_CHECK = '';
+
+const isCheckRecord = (value: unknown): value is AttachmentDataChecks =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.keys(value).length > 0 &&
+  Object.values(value).every((check) => typeof check === 'function');
+
+/** Normalizes `expectAttachmentData` into named checks; a bare function becomes one unnamed check. */
+const toAttachmentDataChecks = (
+  value: RuleManagementExample['output']['expectAttachmentData'] | undefined
+): AttachmentDataChecks | undefined => {
   if (value == null) {
     return undefined;
   }
-  if (typeof value !== 'function') {
-    throw new Error('expectAttachmentData must be a function');
+  if (typeof value === 'function') {
+    return { [UNNAMED_CHECK]: value };
+  }
+  if (!isCheckRecord(value)) {
+    throw new Error(
+      'expectAttachmentData must be a function or a non-empty record of named check functions'
+    );
   }
   return value;
 };
+
+const runCheck = async (
+  check: ExpectAttachmentDataFn,
+  attachments: VersionedAttachment[]
+): Promise<string | null> => {
+  try {
+    await check(attachments);
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
+};
+
+const ATTACHMENT_DATA_CHECK_PREFIX = 'AttachmentData:';
+
+/** Distinct named attachment-data checks across examples, in first-seen order. */
+export const collectAttachmentDataCheckNames = (
+  examples: readonly RuleManagementExample[]
+): string[] => [
+  ...new Set(
+    examples.flatMap(({ output }) =>
+      Object.keys(toAttachmentDataChecks(output.expectAttachmentData) ?? {}).filter(
+        (name) => name !== UNNAMED_CHECK
+      )
+    )
+  ),
+];
+
+/** Scores one named attachment-data check; examples that don't define it are skipped. */
+export const createAttachmentDataCheckEvaluator = (
+  checkName: string
+): Evaluator<RuleManagementExample, TaskOutput> => ({
+  name: `${ATTACHMENT_DATA_CHECK_PREFIX}${checkName}`,
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output, expected }) => {
+    const check = toAttachmentDataChecks(expected?.expectAttachmentData)?.[checkName];
+    if (check == null) {
+      return skippedResult(`No "${checkName}" attachment-data check for this example`);
+    }
+
+    const attachments = getAttachments(output);
+    const failure = await runCheck(check, attachments);
+    return {
+      score: failure === null ? 1 : 0,
+      ...(failure === null ? {} : { explanation: failure }),
+      metadata: attachmentListMetadata(attachments),
+    };
+  },
+});
 
 const attachmentListMetadata = (attachments: VersionedAttachment[]) => ({
   attachmentCount: attachments.length,
@@ -163,23 +228,33 @@ export const createExpectedAttachmentDataEvaluator = (): Evaluator<
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const assertAttachmentData = requireAttachmentDataFn(expected?.expectAttachmentData);
-    if (assertAttachmentData == null) {
+    const checks = toAttachmentDataChecks(expected?.expectAttachmentData);
+    if (checks == null) {
       return skippedResult('No attachment-data expectation for this example');
     }
 
     const attachments = getAttachments(output);
-    const metadata = attachmentListMetadata(attachments);
-
-    try {
-      await assertAttachmentData(attachments);
-      return { score: 1, metadata };
-    } catch (error) {
-      return {
-        score: 0,
-        explanation: error instanceof Error ? error.message : String(error),
-        metadata,
-      };
+    const failures: Array<{ name: string; message: string }> = [];
+    for (const [name, check] of Object.entries(checks)) {
+      const message = await runCheck(check, attachments);
+      if (message !== null) {
+        failures.push({ name, message });
+      }
     }
+    const metadata = {
+      ...attachmentListMetadata(attachments),
+      failedChecks: failures.map(({ name }) => name).filter((name) => name !== UNNAMED_CHECK),
+    };
+
+    if (failures.length === 0) {
+      return { score: 1, metadata };
+    }
+    return {
+      score: 0,
+      explanation: failures
+        .map(({ name, message }) => (name === UNNAMED_CHECK ? message : `[${name}] ${message}`))
+        .join('\n'),
+      metadata,
+    };
   },
 });

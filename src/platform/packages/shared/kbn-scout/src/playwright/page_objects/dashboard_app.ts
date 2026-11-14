@@ -12,6 +12,7 @@ import { euiSelectors } from '../eui_components';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
+import { Chrome } from './chrome';
 import { RenderablePage } from './utils/renderable_page';
 import { Toasts } from './toasts';
 
@@ -30,11 +31,17 @@ interface TimeoutOptions {
 
 const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 const DEFAULT_LIBRARY_TIMEOUT = 30_000;
+/**
+ * Dashboard viewport can be slow to appear on cold CI runs (see https://github.com/elastic/kibana/pull/275767);
+ * the default 10s flakes on slower agents. Revisit once the root cause is fixed.
+ */
+const DEFAULT_VIEWPORT_TIMEOUT = 30_000;
 
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
   private readonly appMenu: AppMenu;
+  private readonly chrome: Chrome;
   // Dashboard shell and mode controls
   private readonly settingsFlyout;
   private readonly settingsButton;
@@ -66,10 +73,6 @@ export class DashboardApp {
   private readonly addEmbeddableSuccess;
   private readonly savedSearchDocTable;
 
-  // Markdown panel
-  private readonly markdownEditorApplyButton;
-  private readonly markdownRenderer;
-
   // ES|QL / Visualize editor actions
   private readonly applyFlyoutButton;
   private readonly visualizeSaveAndReturnButton;
@@ -87,6 +90,7 @@ export class DashboardApp {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
     this.appMenu = new AppMenu(page);
+    this.chrome = new Chrome(page);
 
     // Dashboard shell and mode controls
     this.settingsFlyout = this.page.testSubj.locator('dashboardSettingsFlyout');
@@ -128,10 +132,6 @@ export class DashboardApp {
     this.addEmbeddableSuccess = this.page.testSubj.locator('addEmbeddableToDashboardSuccess');
     this.savedSearchDocTable = this.page.testSubj.locator('embeddedSavedSearchDocTable');
 
-    // Markdown panel
-    this.markdownEditorApplyButton = this.page.testSubj.locator('markdownEditorApplyButton');
-    this.markdownRenderer = this.page.testSubj.locator('markdownRenderer');
-
     // ES|QL / Visualize editor actions
     this.applyFlyoutButton = this.page.testSubj.locator('applyFlyoutButton');
     this.visualizeSaveAndReturnButton = this.page.testSubj.locator('visualizesaveAndReturnButton');
@@ -164,6 +164,34 @@ export class DashboardApp {
     if (opts.waitForRender) {
       await this.waitForRenderComplete();
     }
+  }
+
+  async getDashboardIdFromCurrentUrl(): Promise<string | undefined> {
+    if (this.page.url().includes('/app/r?l=DASHBOARD')) {
+      await this.page.waitForURL((url) => !url.toString().includes('/app/r?l=DASHBOARD'));
+    }
+    return this.getDashboardIdFromUrl(this.page.url());
+  }
+
+  getDashboardIdFromUrl(url: string): string | undefined {
+    const urlSubstring = '#/view/';
+    const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
+    if (startOfIdIndex < urlSubstring.length) {
+      return undefined;
+    }
+    const idSubstring = url.substring(startOfIdIndex);
+    const slashIndex = idSubstring.indexOf('/');
+    const queryIndex = idSubstring.indexOf('?');
+    if (slashIndex === -1 && queryIndex === -1) {
+      return idSubstring;
+    }
+    const endIndex =
+      slashIndex === -1
+        ? queryIndex
+        : queryIndex === -1
+        ? slashIndex
+        : Math.min(slashIndex, queryIndex);
+    return idSubstring.substring(0, endIndex);
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
@@ -214,18 +242,34 @@ export class DashboardApp {
   // ============================================================
 
   /**
+   * Reads the dashboard mode from the `data-view-mode` attribute on the viewport, mirroring the
+   * FTR `DashboardPageObject`. The viewport only renders once the dashboard has loaded, so a
+   * missing element or attribute means the app never got there and is surfaced as an error
+   * rather than a wrong verdict.
+   */
+  async getViewMode(): Promise<string> {
+    const viewMode = await this.dashboardViewport.getAttribute('data-view-mode', {
+      timeout: DEFAULT_VIEWPORT_TIMEOUT,
+    });
+    if (!viewMode) {
+      throw new Error('The dashboard viewport rendered without a "data-view-mode" attribute');
+    }
+    return viewMode;
+  }
+
+  /**
    * Checks if the dashboard is in view mode.
    */
   async getIsInViewMode(): Promise<boolean> {
-    return this.editModeButton.isVisible();
+    return (await this.getViewMode()) === 'view';
   }
 
   /**
    * Switches the dashboard to edit mode.
    */
   async switchToEditMode() {
-    await this.editModeButton.click();
-    await this.waitForEditModeActive();
+    await this.appMenu.clickItem(this.editModeButton);
+    await this.waitForViewMode('edit');
   }
 
   /**
@@ -235,24 +279,28 @@ export class DashboardApp {
   async openDashboardWithIdInEditMode(id: string) {
     await this.page.gotoApp('dashboards', { hash: `/view/${id}?_a=(viewMode:edit)` });
     await this.waitForRenderComplete();
-    await this.waitForEditModeActive();
+    await this.waitForViewMode('edit');
   }
 
-  private async waitForEditModeActive() {
-    // Wait for edit mode to be active (drag handles appear).
-    // Multiple drag handles are expected when multiple panels exist.
-    await expect
-      .poll(() => this.page.testSubj.locator('embeddablePanelDragHandle').count())
-      .toBeGreaterThan(0);
+  private async waitForViewMode(mode: 'view' | 'edit') {
+    await this.dashboardViewport
+      .and(this.page.locator(`[data-view-mode="${mode}"]`))
+      .waitFor({ state: 'attached' });
   }
 
   /**
    * Clicks the cancel button to exit edit mode without saving.
    */
-  async clickCancelOutOfEditMode() {
-    await expect(this.viewOnlyModeButton).toBeVisible();
-    await this.viewOnlyModeButton.click();
-    await expect(this.editModeButton).toBeVisible();
+  async clickCancelOutOfEditMode(options?: { discardChanges?: boolean }) {
+    await this.appMenu.clickItem(this.viewOnlyModeButton);
+    if (options?.discardChanges) {
+      // The dashboard can flag unsaved changes on its own, which opens a "Reset dashboard?" modal
+      const confirmDiscardButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await confirmDiscardButton.click({ timeout: 2_000 }).catch(() => {
+        // No unsaved changes, so there is nothing to confirm
+      });
+    }
+    await this.waitForViewMode('view');
   }
 
   async ensureViewMode() {
@@ -442,27 +490,6 @@ export class DashboardApp {
     return this.addEmbeddable(lensName, 'lens', options);
   }
 
-  /**
-   * Adds a new Markdown panel (by value) to the dashboard.
-   *
-   * @param content - Markdown content to save
-   */
-  async addMarkdownPanel(content: string) {
-    await this.openAddPanelFlyout();
-    await this.panelSelectionSearchInput.fill('Markdown text');
-    await this.page.testSubj.click('create-action-Markdown text');
-
-    const editorInput = this.page.locator('textarea[aria-label="Dashboard markdown editor"]');
-    await expect(editorInput).toBeVisible();
-    await editorInput.fill(content);
-    await this.markdownEditorApplyButton.click();
-
-    // Scope to the renderer containing the content we just typed; the dashboard may
-    // already have other markdown panels, in which case an unfiltered `markdownRenderer`
-    // locator would resolve to multiple elements and trip strict mode.
-    await expect(this.markdownRenderer.filter({ hasText: content })).toBeVisible();
-  }
-
   async addMapPanel() {
     await this.openAddPanelFlyout();
     await this.panelSelectionSearchInput.fill('Maps');
@@ -629,9 +656,7 @@ export class DashboardApp {
    * Uses the data-render-complete attribute to determine panel rendering completion.
    */
   async waitForRenderComplete() {
-    // Dashboard viewport can be slow to appear on cold CI runs (see https://github.com/elastic/kibana/pull/275767);
-    // the default 10s flakes on slower agents. Revisit once the root cause is fixed.
-    await this.dashboardViewport.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.dashboardViewport.waitFor({ state: 'visible', timeout: DEFAULT_VIEWPORT_TIMEOUT });
 
     await this.waitForControlsReady();
 
@@ -1105,9 +1130,7 @@ export class DashboardApp {
 
   /** Navigates to a dashboard by clicking its title link on the listing page. */
   async clickDashboardTitleLink(dashboardTitle: string) {
-    await this.page.testSubj.click(
-      `dashboardListingTitleLink-${dashboardTitle.split(' ').join('-')}`
-    );
+    await this.getDashboardListingLink(dashboardTitle).click();
     await this.waitForRenderComplete();
   }
 
@@ -1116,13 +1139,18 @@ export class DashboardApp {
    * fills in the new title, and confirms.
    */
   async saveDashboardAsCopy(dashboardTitle?: string) {
-    await this.quickSaveSecondaryButton.click();
-    await this.interactiveSaveMenuItem.isVisible();
     // The dashboard sometimes flags spurious unsaved changes on initial layout,
     // which triggers a continuous toolbar re-render that nudges the popover by a
     // pixel each frame and defeats Playwright's stability check. The menu item
-    // is visibly clickable; bypass actionability to land the click.
-    await this.interactiveSaveMenuItem.click({ force: true });
+    // is visibly clickable, so bypass actionability and retry only the click.
+    // The modal wait stays outside the retry: once the click lands, the menu is
+    // closed and a retry would try to click the toolbar behind a loading modal.
+    await expect(async () => {
+      if (!(await this.interactiveSaveMenuItem.isVisible())) {
+        await this.quickSaveSecondaryButton.click();
+      }
+      await this.interactiveSaveMenuItem.click({ force: true, timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
     await expect(this.savedObjectTitleInput).toBeVisible();
 
     if (dashboardTitle !== undefined) {
@@ -1155,8 +1183,14 @@ export class DashboardApp {
   // Dashboard Listing
   // ============================================================
 
+  // Scoped to the listing table because the chrome's "Recently viewed" nav renders links with the
+  // same accessible name. The subject mirrors `CONTENT_LIST_TEST_SUBJECTS.table` from `@kbn/content-list-common` but
+  // isn't imported because `@kbn/scout` is on the Scout selective-testing critical path and must
+  // not depend on that package (see `content_list.ts` for the same treatment).
   getDashboardListingLink(title: string) {
-    return this.page.testSubj.locator(`dashboardListingTitleLink-${title.split(' ').join('-')}`);
+    return this.page.testSubj
+      .locator('content-list-table')
+      .getByRole('link', { name: title, exact: true });
   }
 
   // Project (chrome-next) shows the dashboard title in the app header; classic chrome shows it as
@@ -1167,9 +1201,28 @@ export class DashboardApp {
       .or(this.page.testSubj.locator('breadcrumb last'));
   }
 
+  // Navigates from the current dashboard to the listing through the UI (no page reload), unlike
+  // `goto()`, which loads the listing URL directly. The new chrome header has no breadcrumbs, so it uses the app header link; headers
+  // with a breadcrumb trail use the listing breadcrumb (test subject differs on serverless).
+  async navigateToListingFromCurrentDashboard() {
+    if (await this.chrome.isProjectChrome()) {
+      await this.page.testSubj.click('appHeaderBack');
+    } else {
+      await this.page.testSubj
+        .locator('breadcrumb dashboardListingBreadcrumb first')
+        .or(this.page.testSubj.locator('breadcrumb breadcrumb-deepLinkId-dashboards'))
+        .click();
+    }
+    await expect(this.page.testSubj.locator('dashboardLandingPage')).toBeVisible();
+  }
+
   // ============================================================
   // Fullscreen
   // ============================================================
+
+  async hasFullscreenMenuItem(): Promise<boolean> {
+    return this.appMenu.hasItem('dashboardFullScreenMode');
+  }
 
   async enterFullscreen() {
     await this.appMenu.clickItem('dashboardFullScreenMode');

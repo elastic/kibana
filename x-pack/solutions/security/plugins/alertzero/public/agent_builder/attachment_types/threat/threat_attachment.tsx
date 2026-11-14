@@ -10,25 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import { buildThreatReportLookupEsql } from '../navigation';
-import {
-  buildDiscoverActionButton,
-  joinSubtitle,
-  lazyInlineContent,
-} from '../shared/attachment_definition_helpers';
+import { joinSubtitle, lazyInlineContent } from '../shared/attachment_definition_helpers';
 import { asString } from '../shared/runtime_guards';
-import { isValidThreatAttachmentData } from './types';
 import type { ThreatAttachment } from './types';
 import type { ThreatAttachmentInlineContentProps } from './threat_inline_content';
 
 const DEFAULT_LABEL = i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.label', {
   defaultMessage: 'Threat Report',
 });
-
-const OPEN_REPORT_LABEL = i18n.translate(
-  'xpack.alertzero.agentBuilder.attachments.threat.openInDiscover',
-  { defaultMessage: 'Open report in Discover' }
-);
 
 /**
  * Lazy-loaded inline renderer. Pulls the `useQuery`/`http.fetch` dependencies into their own
@@ -74,14 +63,8 @@ export const createThreatAttachmentDefinition = ({
   renderInlineContent: (props) => (
     <LazyThreatAttachmentInlineContent {...props} http={http} navigation={navigation} />
   ),
-  getActionButtons: ({ attachment }) => {
-    if (!isValidThreatAttachmentData(attachment?.data)) {
-      return [];
-    }
-    const esql = buildThreatReportLookupEsql({
-      reportId: attachment.data.report_id,
-      spaceId: navigation.spaceId,
-    });
-    return buildDiscoverActionButton({ share: navigation.share, esql, label: OPEN_REPORT_LABEL });
-  },
+  // No action buttons: the inline content above already renders the full live
+  // document (title/severity/source, IOCs, TTPs, Diamond, categories, geography) via
+  // the same authorized route a Discover exit against `.kibana-threat-reports*` could
+  // never reach for a non-superuser — see elastic/security-team#19733.
 });

@@ -27,10 +27,13 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
   - '@kbn/i18n'
+  - '@kbn/inspector-plugin'
   - '@kbn/search-types'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/ui-callout'
   - '@kbn/core'
+  - '@kbn/std'
+  - '@kbn/core-spaces-common'
 tags:
   - shared-browser
   - package
@@ -43,6 +46,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

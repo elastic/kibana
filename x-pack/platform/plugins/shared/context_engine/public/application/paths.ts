@@ -7,8 +7,52 @@
 
 export const CONTEXT_ENGINE_PATHS = {
   landing: '/',
-  create: '/ai_index/create',
   detail: '/ai_index/:id',
+  detailSources: '/ai_index/:id/sources',
+  detailKnowledgeIndicators: '/ai_index/:id/knowledge_indicators',
+  detailSettings: '/ai_index/:id/settings',
+  dreamingTemplate: '/ai_index/:id/dreaming_template',
+  viewKi: '/ai_index/:id/ki/:kiId',
+  viewKiDocument: '/ai_index/:id/ki/:kiId/document',
 } as const;
 
 export const getAiIndexDetailPath = (id: string): string => `/ai_index/${id}`;
+
+export const getAiIndexSourcesPath = (id: string): string => `/ai_index/${id}/sources`;
+
+export const getAiIndexKnowledgeIndicatorsPath = (id: string): string =>
+  `/ai_index/${id}/knowledge_indicators`;
+
+export const getAiIndexSettingsPath = (id: string): string => `/ai_index/${id}/settings`;
+
+/** Path of the page for picking an example dreaming config for a new AI index with memory. */
+export const getAiIndexDreamingTemplatePath = (id: string): string =>
+  `/ai_index/${id}/dreaming_template`;
+
+/**
+ * KI ids are free-form (set by automations, no format restriction) and can
+ * contain any character, so they're percent-encoded to stay a single path
+ * segment. The `index` (backing store) of the KI must be passed as the
+ * `index` query param.
+ */
+export const getViewKiPath = (aiIndexId: string, kiId: string): string =>
+  `/ai_index/${aiIndexId}/ki/${encodeURIComponent(kiId)}`;
+
+export const getViewKiDocumentPath = (aiIndexId: string, kiId: string): string =>
+  `${getViewKiPath(aiIndexId, kiId)}/document`;
+
+/**
+ * Best-effort decode for a KI id read from the URL. `history` already runs
+ * `decodeURI` once, so a malformed leftover `%` throws here; falling back to
+ * the raw value keeps the page from crashing. KI ids are free-form, so for
+ * pathological content (e.g. a literal `%41` substring) this may not recover
+ * the exact original id, in which case the KI simply fails to load instead
+ * of rendering.
+ */
+export const decodeRouteParam = (value: string): string => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};

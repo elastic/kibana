@@ -44,7 +44,7 @@ export function toListItem(
     id: document.event.id,
     created_at: document['@timestamp'],
     actor: {
-      name: document.user.name,
+      name: document.user.full_name || document.user.email || document.user.name,
       ...(document.user.id ? { profile_id: document.user.id } : {}),
     },
     action: asAction(document.event.action),

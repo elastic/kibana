@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -61,6 +62,13 @@ const KI_DOCS = {
     title: 'Stale errors',
     tags: ['errors'],
     expires_at: '2000-01-01T00:00:00Z',
+  },
+  memory: {
+    type: 'memory.session_fact',
+    title: 'Remembered billing detail',
+    description: 'A memory that ordinary KI counts and queries must exclude',
+    content: 'Billing retries use exponential backoff.',
+    tags: ['billing', 'memory-only'],
   },
   other: {
     type: 'hidden',
@@ -148,8 +156,9 @@ const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; valu
   sources: [],
 });
 
-// The `agent_builder` Scout config set pins `contextEngine:enabled=true` through `uiSettings.overrides`,
-// which is read-only and applies to every space, so the tests never toggle it.
+// The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
+// `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables only the
+// behavior it exercises.
 apiTest.describe('context engine AI index describe API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let describeCredentials: RoleApiCredentials;
@@ -157,7 +166,12 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   let metadataOnlyCredentials: RoleApiCredentials;
   let otherIndexCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esClient, apiClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, esClient, apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.updateGlobal({
+      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+    });
+    await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
     adminCredentials = await requestAuth.getApiKey('admin');
     describeCredentials = await requestAuth.getApiKeyForCustomRole(DESCRIBE_ROLE);
     readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
@@ -216,7 +230,12 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     }
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
+    await kbnClient.uiSettings.updateGlobal({
+      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+    });
+    await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
     for (const id of [
       SINGLE_AI_INDEX_ID,
       TEMPLATE_AI_INDEX_ID,
@@ -241,9 +260,9 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
     expect(block.split('\n').slice(0, 3)).toStrictEqual([
-      `AI index: ${SINGLE_AI_INDEX_ID}`,
+      `AI-index registry ID: ${SINGLE_AI_INDEX_ID}`,
       `Scout describe fixture ${SINGLE_AI_INDEX_ID}`,
-      `Query with ES|QL against: ${INDEX_A}`,
+      `Backing Elasticsearch target (use only in ES|QL queries): ${INDEX_A}`,
     ]);
     // Fields not truncated: plain heading, no `(showing …)`.
     expect(block).toContain('\n\nFields\n');
@@ -282,12 +301,14 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${DATA_STREAM}\n`);
+    expect(block).toContain(
+      `\nBacking Elasticsearch target (use only in ES|QL queries): ${DATA_STREAM}\n`
+    );
     expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
   apiTest(
-    'counts types and tags for active KIs visible in the current space',
+    'describes memory capability and excludes stored memory from ordinary counts',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
@@ -296,6 +317,15 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
       expect(response).toHaveStatusCode(200);
       const block = blockOf(response.body);
+      expect(sectionLines(block, 'Memory')).toStrictEqual(
+        expect.arrayContaining([
+          'Memory writes are enabled for this AI-index registry entry.',
+          'memory.session',
+          'memory.session_fact',
+          'Use platform.context_engine.remember to write memory.',
+          'Use platform.context_engine.forget with a memory id to tombstone memory.',
+        ])
+      );
       expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
         '"document": 2',
         '"detection": 1',
@@ -318,7 +348,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
     expect(
       hybrid.startsWith(
-        `FROM ${INDEX_A} METADATA _id, _index, _score\n| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()\n| FORK\n`
+        `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
+          '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n' +
+          '| WHERE expires_at IS NULL OR expires_at > NOW()\n' +
+          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")\n' +
+          '| FORK\n'
       )
     ).toBe(true);
     expect(hybrid).toContain('\n| FUSE\n');
@@ -404,7 +438,9 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
     expect(response).toHaveStatusCode(200);
     const block = blockOf(response.body);
-    expect(block).toContain(`\nQuery with ES|QL against: ${MISSING_INDEX}\n`);
+    expect(block).toContain(
+      `\nBacking Elasticsearch target (use only in ES|QL queries): ${MISSING_INDEX}\n`
+    );
     expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
   });
 });

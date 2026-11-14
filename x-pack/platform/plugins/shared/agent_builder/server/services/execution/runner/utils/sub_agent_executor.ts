@@ -12,17 +12,27 @@ import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-co
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import { unionBy } from 'lodash';
 
+// A background sub-agent outlives the run that spawned it, so it gets its own task and credential.
+const backgroundDispatch = { useTaskManager: true, requestImmediateClaim: true } as const;
+
 export const createSubAgentExecutor = ({
   request,
   getExecutionService,
   projectRouting,
   interactivity,
+  workflowExecutionId,
 }: {
   request: KibanaRequest;
   getExecutionService: () => AgentExecutionService;
   /** CPS routing of the parent run, inherited by every sub-agent it spawns. */
   projectRouting?: string;
   interactivity: InteractivityConfig;
+  /**
+   * The workflow run that started the parent run. Every sub-agent inherits it, so a persistent
+   * sub-agent's rounds join to that run. Sub-agents don't send it to EIS: only the main agent's
+   * LLM calls carry it as their `interactionId` (see `buildExecutionTelemetryMetadata`).
+   */
+  workflowExecutionId?: string;
 }): SubAgentExecutor => {
   const inheritedApis = interactivity.auto_approved_apis;
   const subAgentInteractivity = createNonInteractiveConfig(inheritedApis);
@@ -41,12 +51,19 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.standalone,
         interactive: interactivityWith(params.autoApprovedApis),
         request,
+        ...(params.background ? backgroundDispatch : {}),
         params: {
           agentId: params.agentId,
-          connectorId: params.connectorId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
+          ...(params.background?.parentTriggerMode
+            ? { parentTriggerMode: params.background.parentTriggerMode }
+            : {}),
           nextInput: { message: params.prompt },
           projectRouting,
+          // Standalone runs report no round events; it's passed on to the sub-agents they spawn.
+          ...(workflowExecutionId ? { workflowExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });
@@ -58,10 +75,15 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.conversation,
         interactive: interactivityWith(params.autoApprovedApis),
         request,
+        ...(params.background ? backgroundDispatch : {}),
         params: {
           agentId: params.agentId,
-          connectorId: params.connectorId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
+          ...(params.background?.parentTriggerMode
+            ? { parentTriggerMode: params.background.parentTriggerMode }
+            : {}),
           conversationId: params.conversationId,
           autoCreateConversationWithId: true,
           nextInput: { message: params.prompt },
@@ -70,6 +92,7 @@ export const createSubAgentExecutor = ({
             subagentName: params.subagentName,
             subagentPurpose: params.subagentPurpose,
           },
+          ...(workflowExecutionId ? { workflowExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });
@@ -81,12 +104,19 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.conversation,
         interactive: subAgentInteractivity,
         request,
+        ...(params.background ? backgroundDispatch : {}),
         params: {
-          connectorId: params.connectorId,
+          agentId: params.agentId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
+          ...(params.background?.parentTriggerMode
+            ? { parentTriggerMode: params.background.parentTriggerMode }
+            : {}),
           conversationId: params.conversationId,
           autoCreateConversationWithId: false,
           nextInput: { message: params.prompt },
+          ...(workflowExecutionId ? { workflowExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });

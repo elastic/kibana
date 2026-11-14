@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   ChatCompletionReasoningEffort,
@@ -15,7 +16,9 @@ import type {
   AgentExecutionMode,
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
-import type { AgentParams, AgentResponse } from './provider';
+import type { ModelSource } from '../runner';
+import type { AgentParams, AgentResponse, ExecutionConversationAccess } from './provider';
+import type { ExecutionRunAs } from '../execution/types';
 
 export interface RunAgentReturn {
   /** return from the agent */
@@ -39,6 +42,16 @@ export interface RunAgentParams {
    */
   parentExecutionId?: string;
   /**
+   * How this run relates to its conversation, see {@link ExecutionConversationAccess}. Defaults to
+   * `readWrite`.
+   */
+  conversationAccess?: ExecutionConversationAccess;
+  /**
+   * The workflow execution whose `ai.agent` step started this run, when applicable; passed on to
+   * the sub-agents the run spawns so their rounds join to the same workflow run.
+   */
+  workflowExecutionId?: string;
+  /**
    * ID of the agent to call.
    */
   agentId: string;
@@ -46,6 +59,17 @@ export interface RunAgentParams {
    * Parameters to call the agent with.
    */
   agentParams: AgentParams;
+  /**
+   * The identity conversation writes are attributed to when it differs from the request's
+   * principal, as when the request carries a bound service account's credential.
+   */
+  owner?: UserIdAndName;
+  /**
+   * The service account the execution runs as. The agent is then resolved for that account
+   * rather than through the request's access control, which already authorized the run at
+   * dispatch.
+   */
+  runAs?: ExecutionRunAs;
   /**
    * ID of the agent execution to associate with the run.
    */
@@ -63,10 +87,10 @@ export interface RunAgentParams {
    */
   request: KibanaRequest;
   /**
-   * Optional genAI connector id to use as default.
+   * Where the run's default model comes from: an explicit connector or an inference feature.
    * If unspecified, will use internal logic to use the default connector
    */
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   /**
    * Optional connector telemetry used to attribute this run's LLM calls to a specific
    * feature. When omitted, the default Agent Builder telemetry is used.

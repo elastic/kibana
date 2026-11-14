@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { isValidElement, type ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EntityType } from '../../../common/entity_analytics/types';
 import { RiskScoreLeftPanelSubTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useEntityFlyoutApi } from './use_entity_flyout_api';
+import { useEntityFlyoutApi, type EntityFlyoutApi } from './use_entity_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -48,15 +49,28 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 
 const mockWriteOnOpen = jest.fn();
 const mockBuildOnClose = jest.fn(() => jest.fn());
+const mockReadRootDescriptor = jest.fn((): unknown => null);
 jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
   useFlyoutV2UrlWriter: jest.fn(() => ({
     writeOnOpen: mockWriteOnOpen,
     buildOnClose: mockBuildOnClose,
+    readRootDescriptor: mockReadRootDescriptor,
   })),
 }));
 
 const mockOpenSystemFlyout = jest.fn();
 const mockReportEvent = jest.fn();
+
+const unwrapChildren = (node: ReactNode): ReactNode =>
+  isValidElement<{ children?: ReactNode }>(node) ? node.props.children : undefined;
+
+/** Props of the content handed to the system flyout: session provider > suspense > the lazy content. */
+const getOpenedContentProps = (): { entryPoint?: string } => {
+  const content = unwrapChildren(
+    unwrapChildren(jest.mocked(flyoutProviders).mock.calls[0][0].children)
+  );
+  return isValidElement<{ entryPoint?: string }>(content) ? content.props : {};
+};
 
 const managedUser = { _id: 'managed-user-id', _index: 'managed-user-index' };
 
@@ -113,6 +127,81 @@ describe('useEntityFlyoutApi', () => {
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
+  it('openHostFlyout persists resolved mode in the descriptor and omits the default single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+
+    result.current.openHostFlyout({ hostName: 'host-1', entityId: 'entity-1', mode: 'resolved' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kind: FLYOUT_DESCRIPTOR_KIND.host, mode: 'resolved' })
+    );
+
+    result.current.openHostFlyout({ hostName: 'host-1', entityId: 'entity-1', mode: 'single' });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+  });
+
+  it('entity CSP tools persist resolved mode in the descriptor and omit the default single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    const base = {
+      entityType: EntityType.host,
+      value: 'my-host',
+      entityId: 'host:my-host',
+    } as const;
+
+    result.current.openEntityAlertsInsights({ ...base, mode: 'resolved', scopeId: 'scope-1' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityAlertsInsights,
+        mode: 'resolved',
+        scopeId: 'scope-1',
+      })
+    );
+    result.current.openEntityMisconfigurationInsights({ ...base, mode: 'resolved' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityMisconfigurationInsights,
+        mode: 'resolved',
+      })
+    );
+    result.current.openEntityVulnerabilityInsights({
+      ...base,
+      mode: 'resolved',
+      onShowHost: jest.fn(),
+    });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityVulnerabilityInsights,
+        mode: 'resolved',
+      })
+    );
+
+    result.current.openEntityAlertsInsights({ ...base, mode: 'single' });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+    result.current.openEntityMisconfigurationInsights({ ...base });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+    result.current.openEntityVulnerabilityInsights({ ...base, onShowHost: jest.fn() });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+  });
+
+  it('openEntityFlyout forwards resolved mode to the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+
+    result.current.openEntityFlyout({
+      engineType: 'user',
+      entityId: 'entity-1',
+      entityName: 'alice',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith({
+      kind: FLYOUT_DESCRIPTOR_KIND.user,
+      userName: 'alice',
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+  });
+
   it('openHostFlyoutAsChild opens a system flyout that inherits the current session', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openHostFlyoutAsChild({ hostName: 'host-1' });
@@ -149,7 +238,7 @@ describe('useEntityFlyoutApi', () => {
       },
       'inherit'
     );
-    // readFirstDescriptor returns null (history has no location in tests)
+    // readRootDescriptor returns null (nothing is open in tests)
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
@@ -209,6 +298,42 @@ describe('useEntityFlyoutApi', () => {
       scopeId: undefined,
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it.each([
+    ['openHostFlyout', (api: EntityFlyoutApi) => api.openHostFlyout],
+    ['openHostFlyoutAsChild', (api: EntityFlyoutApi) => api.openHostFlyoutAsChild],
+  ])('%s hands the graph entry point to the host flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ hostName: 'host-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
+  });
+
+  it.each([
+    ['openUserFlyout', (api: EntityFlyoutApi) => api.openUserFlyout],
+    ['openUserFlyoutAsChild', (api: EntityFlyoutApi) => api.openUserFlyoutAsChild],
+  ])('%s hands the graph entry point to the user flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ userName: 'user-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
+  });
+
+  it.each([
+    ['openServiceFlyout', (api: EntityFlyoutApi) => api.openServiceFlyout],
+    ['openServiceFlyoutAsChild', (api: EntityFlyoutApi) => api.openServiceFlyoutAsChild],
+  ])('%s hands the graph entry point to the service flyout it renders', (_, getOpener) => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    getOpener(result.current)({ serviceName: 'svc-1', graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ graphEntryPoint: 'ai_chat_attachment' })
+    );
   });
 
   it('openGenericEntityFlyout writes a genericEntity descriptor to the URL', () => {
@@ -417,6 +542,23 @@ describe('useEntityFlyoutApi', () => {
     });
   });
 
+  it('openEntityRiskInputs persists the scopeId on the URL descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityRiskInputs({
+      entityType: EntityType.host,
+      entityName: 'my-host',
+      entityId: 'e-1',
+      scopeId: 'entity-analytics-new-entities-table-7d',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
+        scopeId: 'entity-analytics-new-entities-table-7d',
+      })
+    );
+  });
+
   it('openEntityAnomalyInsights writes an entityAnomalyInsights descriptor and clears the param on close', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAnomalyInsights({
@@ -432,6 +574,47 @@ describe('useEntityFlyoutApi', () => {
       entityId: 'e-2',
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityAnomalyInsights persists the resolved mode in the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: 'e-2', mode: 'resolved' })
+    );
+  });
+
+  it('openEntityAnomalyInsights persists the originating scope in the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      scopeId: 'entity-analytics-new-entities-table-7d',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeId: 'entity-analytics-new-entities-table-7d' })
+    );
+  });
+
+  it('openEntityAnomalyInsights omits the mode from the descriptor in single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      mode: 'single',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(expect.objectContaining({ entityId: 'e-2' }));
+    expect(mockWriteOnOpen.mock.calls[0][0]).not.toHaveProperty('mode', 'single');
   });
 
   it('openEntityAlertsInsights writes null fallback for generic entity (no scopeId available)', () => {
@@ -459,6 +642,7 @@ describe('useEntityFlyoutApi', () => {
       scopeId: 'scope-1',
       entityName: 'entity-name',
       onShowEntity: jest.fn(),
+      entryPoint: 'entity_flyout',
     });
 
     expect(mockWriteOnOpen).toHaveBeenCalledWith({
@@ -468,6 +652,36 @@ describe('useEntityFlyoutApi', () => {
       entityName: 'entity-name',
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityGraphView hands the entry point to the graph view it renders', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityGraphView({
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      entityName: 'entity-name',
+      onShowEntity: jest.fn(),
+      entryPoint: 'entity_data_grid',
+    });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ entityId: 'entity-1', entryPoint: 'entity_data_grid' })
+    );
+  });
+
+  it('openEntityGraphView hands an undefined entry point to the graph view it renders as is', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityGraphView({
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      entityName: 'entity-name',
+      onShowEntity: jest.fn(),
+      entryPoint: undefined,
+    });
+
+    const props = getOpenedContentProps();
+    expect(props).toEqual(expect.objectContaining({ entityId: 'entity-1' }));
+    expect(props).toHaveProperty('entryPoint', undefined);
   });
 
   it('openEntityResolution writes an entityResolution descriptor and clears the param on close', () => {
@@ -487,6 +701,25 @@ describe('useEntityFlyoutApi', () => {
       scopeId: 'scope-1',
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityResolution persists the resolved mode of the originating flyout', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityResolution({
+      entityId: 'entity-1',
+      entityType: EntityType.host,
+      entityName: 'host-1',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityResolution,
+        entityId: 'entity-1',
+        mode: 'resolved',
+      })
+    );
   });
 
   it('openEntityEntraInsights writes an entityEntraInsights descriptor and clears the param on close', () => {

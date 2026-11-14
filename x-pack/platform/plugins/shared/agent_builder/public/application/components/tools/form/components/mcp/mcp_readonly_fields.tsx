@@ -9,6 +9,7 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { ToolType } from '@kbn/agent-builder-common';
 import React, { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { isMcpConnectorItem } from '../../../../../../../common/http_api/tools';
 import { appPaths } from '../../../../../utils/app_paths';
 import { labels } from '../../../../../utils/i18n';
 import { McpToolHealthStatus } from '../../types/mcp';
@@ -62,8 +63,8 @@ export const McpReadOnlyFields = ({
       return;
     }
 
-    // MCP connector deleted
-    if (loadingConnectorError) {
+    // MCP connector deleted, or replaced by a non-MCP connector with the same ID
+    if (loadingConnectorError || (connector && !isMcpConnectorItem(connector))) {
       setMcpHealthStatus(McpToolHealthStatus.ConnectorNotFound);
       setError('connectorId', {
         message: labels.tools.mcpHealthStatus.connectorNotFound.title,
@@ -104,6 +105,7 @@ export const McpReadOnlyFields = ({
     mcpToolName,
     mcpTools,
     toolHealth,
+    connector,
     loadingConnectorError,
     loadingMcpToolsError,
     isLoadingConnector,

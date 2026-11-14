@@ -12,6 +12,7 @@ import type {
   FlakyTestEntry,
   FlakyTestPipelineStats,
   FlakyTestReport,
+  JudgedScope,
   TestFramework,
 } from '@kbn/scout-reporting';
 import { redactSensitiveGithubFailureText } from '../failed_tests_reporter/report_failure';
@@ -62,6 +63,17 @@ export const table = (header: string[], rows: string[][]): string =>
 export const plural = (count: number, singular: string, pluralForm = `${singular}s`): string =>
   `${count} ${count === 1 ? singular : pluralForm}`;
 
+/** `#1, #2` */
+export const issueList = (numbers: readonly number[]): string =>
+  numbers.map((number) => `#${number}`).join(', ');
+
+/** `Previously tracked in #1, #2.`: the issues a suite issue replaces. */
+export const previouslyTrackedIn = (numbers: readonly number[]): string =>
+  `Previously tracked in ${issueList(numbers)}.`;
+
+/** Issues a suite issue replaces, by the id of the test they were about. */
+export type PreviousIssues = ReadonlyMap<string, readonly number[]>;
+
 /** `19%`, or `<1%` for a rate that is positive but rounds down to nothing. */
 export const formatPercent = (rate: number): string => {
   const percent = Math.round(rate * 100);
@@ -84,6 +96,32 @@ export const targetEnvironment = ({ mode, type }: { mode: string; type: string }
     if (arch === 'serverless') return 'MKI';
   }
   return type;
+};
+
+/** How a pipeline judged on its own runs the tests differently, for its targets' environment. */
+const PIPELINE_ENVIRONMENTS: Readonly<Record<string, string>> = {
+  'kibana-fips': 'FIPS enabled',
+};
+
+/**
+ * `Local deployment (FIPS enabled)`: the environment of a target of a pipeline judged on its own,
+ * whose local targets would otherwise read like those of the pipelines judged together. A Cloud
+ * target already says where it ran.
+ */
+export const pipelineTargetEnvironment = (target: {
+  mode: string;
+  type: string;
+  pipeline?: string;
+}): string => {
+  const environment = targetEnvironment(target);
+  if (target.pipeline === undefined) {
+    return environment;
+  }
+  const note = PIPELINE_ENVIRONMENTS[target.pipeline];
+  if (note) {
+    return `${environment} (${note})`;
+  }
+  return target.type === 'local' ? `${environment} (${inlineCode(target.pipeline)})` : environment;
 };
 
 /** `98 / 505 (**19%**)`, the rate in bold so it stands out in a table. */
@@ -147,6 +185,10 @@ export const branchesByFailedBuilds = (
   );
 };
 
+/** `` `main` ``, or `` `main` in `kibana-fips` `` for a pipeline judged on its own. */
+export const formatScope = ({ branch, pipeline }: JudgedScope): string =>
+  pipeline === undefined ? inlineCode(branch) : `${inlineCode(branch)} in ${inlineCode(pipeline)}`;
+
 /** The thresholds a branch has to clear on its own for the test to count as flaky there. */
 export type BranchThresholds = Pick<
   FlakyTestReport['thresholds'],
@@ -164,8 +206,8 @@ export const isFlakyBranch = (
 
 /**
  * `` **`9.5` 3% (4 / 122)** ``, one line per branch on which the test clears every threshold of the
- * report, highest rate first. The total over branches is left out on purpose, a clean branch
- * dilutes it below what qualified.
+ * report, highest rate first, a pipeline judged on its own named. The total over branches is left
+ * out on purpose, a clean branch dilutes it below what qualified.
  */
 export const formatBranchRates = (
   test: Pick<FlakyTestEntry, 'byBranch'>,
@@ -180,18 +222,20 @@ export const formatBranchRates = (
       (a, b) =>
         b.buildFailRate - a.buildFailRate ||
         b.failedBuilds - a.failedBuilds ||
-        a.branch.localeCompare(b.branch)
+        formatScope(a).localeCompare(formatScope(b))
     )
     .map(
-      ({ branch, builds, failedBuilds, buildFailRate }) =>
-        `**${inlineCode(branch)} ${formatPercent(buildFailRate)} (${failedBuilds} / ${builds})**`
+      (stats) =>
+        `**${formatScope(stats)} ${formatPercent(stats.buildFailRate)} (${stats.failedBuilds} / ${
+          stats.builds
+        })**`
     )
     .join('<br>');
 };
 
 /**
- * Rows of the per-test table, with a link to each test's dashboard unless told otherwise; the
- * suite's tests come ranked.
+ * Rows of the per-test table, with a link to each test's dashboard unless told otherwise, and the
+ * issues each test was tracked in before when any has some; the suite's tests come ranked.
  */
 export const testsTable = (
   tests: readonly FlakyTestEntry[],
@@ -199,19 +243,32 @@ export const testsTable = (
     withDashboardLinks,
     maxRows,
     thresholds,
-  }: { withDashboardLinks: boolean; maxRows: number; thresholds: BranchThresholds }
+    previousIssues,
+  }: {
+    withDashboardLinks: boolean;
+    maxRows: number;
+    thresholds: BranchThresholds;
+    previousIssues?: PreviousIssues;
+  }
 ): string => {
-  const header = ['Test', 'Flaky branches'];
-  const rows = tests
-    .slice(0, maxRows)
-    .map((test) => [
-      test.title,
-      formatBranchRates(test, thresholds),
-      ...(withDashboardLinks ? [`[dashboard](${testDashboardUrl(test.testId)})`] : []),
-    ]);
+  const shown = tests.slice(0, maxRows);
+  const previousOf = (test: FlakyTestEntry) => previousIssues?.get(test.testId) ?? [];
+  const withPrevious = shown.some((test) => previousOf(test).length > 0);
+  const header = [
+    'Test',
+    'Flaky branches',
+    ...(withDashboardLinks ? ['Dashboard'] : []),
+    ...(withPrevious ? ['Previously tracked in'] : []),
+  ];
+  const rows = shown.map((test) => [
+    test.title,
+    formatBranchRates(test, thresholds),
+    ...(withDashboardLinks ? [`[dashboard](${testDashboardUrl(test.testId)})`] : []),
+    ...(withPrevious ? [issueList(previousOf(test))] : []),
+  ]);
   const rest = tests.length - maxRows;
   return [
-    table(withDashboardLinks ? [...header, 'Dashboard'] : header, rows),
+    table(header, rows),
     ...(rest > 0 ? [`and ${plural(rest, 'more flaky test')} in this file.`] : []),
   ].join('\n\n');
 };
@@ -246,9 +303,9 @@ export const formatFullFailureMessage = (message: string): string =>
 
 export const codeBlock = (text: string): string => `\`\`\`text\n${text}\n\`\`\``;
 
-/** A `<details>` block, collapsed by default; blank lines keep the markdown inside rendering. */
-export const collapsed = (summary: string, body: string): string =>
-  `<details>\n<summary>${summary}</summary>\n\n${body}\n\n</details>`;
+/** A `<details>` block, collapsed unless `open`; blank lines keep the markdown inside rendering. */
+export const collapsed = (summary: string, body: string, { open = false } = {}): string =>
+  `<details${open ? ' open' : ''}>\n<summary>${summary}</summary>\n\n${body}\n\n</details>`;
 
 /** A Buildkite build and, when known, the job within it that ran the test. */
 export interface BuildkiteRef {

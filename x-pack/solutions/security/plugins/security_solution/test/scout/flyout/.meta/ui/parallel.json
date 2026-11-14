@@ -1,5 +1,5 @@
 {
-  "sha1": "f053d586e1dd9980fef7895166664b144d355111",
+  "sha1": "330eb258d5e7c9d6b2903f09a6619518f616edd1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -160,6 +160,22 @@
       }
     },
     {
+      "id": "f0304b4b9a64817-3ea4a4b2b408d9a",
+      "title": "Document flyout v2 — Threat intelligence tool shows each matching indicator once and the insights count matches the tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/threat_intelligence.spec.ts",
+        "line": 102,
+        "column": 25
+      }
+    },
+    {
       "id": "d89449ed16e39bf-f08b7b918d47b6a",
       "title": "Host entity flyout v2 opens from the alerts table host cell",
       "expectedStatus": "passed",
@@ -235,7 +251,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/rule/rule_flyout.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 15
       }
     }

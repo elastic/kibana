@@ -44,6 +44,7 @@
     "@kbn/fleet-plugin",
     "@kbn/i18n",
     "@kbn/es-query",
+    "@kbn/flyout-template",
     "@kbn/ui-callout",
     "@kbn/ui-theme",
     "@kbn/synthtrace-client",
@@ -111,6 +112,7 @@
     "@kbn/code-editor",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
+    "@kbn/management-settings-hooks",
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-http-request-handler-context-server",
@@ -181,7 +183,9 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-browser-hooks",
     "@kbn/lens-common",
-    "@kbn/core-http-browser-mocks"
+    "@kbn/core-http-browser-mocks",
+    "@kbn/genai-common",
+    "@kbn/slo-constants"
   ],
   "exclude": ["target/**/*"]
 }

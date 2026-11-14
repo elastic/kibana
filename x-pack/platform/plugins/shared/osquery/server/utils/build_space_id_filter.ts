@@ -50,9 +50,9 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
  * enumerates across actions.
  *
  * That id binding narrows the read to documents the caller named; it is not by
- * itself an authorization gate, because route-level ownership checks are uneven
- * (`get_action_results_route.ts` verifies the action document only when CPS is
- * active). What contains the blast radius is this clause: it matches only
+ * itself an authorization gate. Live-query reads that pass the search strategy's
+ * action document gate omit this filter altogether; on every other read, what
+ * contains the blast radius is this clause: it matches only
  * documents whose surviving provenance already names the caller's active space,
  * so possessing another space's id yields nothing. The residual exposure is an
  * agent that forges `action_data.space_id`, which the top-level `must_not` below

@@ -28,12 +28,14 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import type {
+  ExceptionListPreDeleteListBlocker,
   ExtensionPointStorageClientInterface,
   ServerExtensionCallbackContext,
 } from '../extension_points';
 
 import type {
   BulkDeleteExceptionListItemsOptions,
+  BulkDeleteExceptionListOptions,
   ClosePointInTimeOptions,
   ConstructorOptions,
   CreateEndpointListItemOptions,
@@ -75,6 +77,14 @@ import { createExceptionListItem } from './create_exception_list_item';
 import { updateExceptionList } from './update_exception_list';
 import { updateExceptionListItem } from './update_exception_list_item';
 import { deleteExceptionList } from './delete_exception_list';
+import type {
+  BulkDeleteExceptionListResult,
+  PreDeleteListHook,
+} from './bulk_delete_exception_list';
+import {
+  bulkDeleteExceptionList,
+  validatePreDeleteListResponse,
+} from './bulk_delete_exception_list';
 import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
@@ -558,6 +568,33 @@ export class ExceptionListClient {
     });
   };
 
+  public bulkDeleteExceptionList = async ({
+    ids,
+    namespaceType,
+  }: BulkDeleteExceptionListOptions): Promise<BulkDeleteExceptionListResult> => {
+    const { savedObjectsClient } = this;
+
+    const preDeleteListHook: PreDeleteListHook = async (
+      lists
+    ): Promise<ExceptionListPreDeleteListBlocker[]> => {
+      const listIds = lists.map(({ id }) => id);
+      const { blockedLists } = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreDeleteList',
+        { blockedLists: [], lists, namespaceType },
+        this.getServerExtensionCallbackContext(),
+        (returnedData) => validatePreDeleteListResponse(listIds, returnedData)
+      );
+      return blockedLists;
+    };
+
+    return bulkDeleteExceptionList({
+      ids,
+      namespaceType,
+      preDeleteListHook: this.enableServerExtensionPoints ? preDeleteListHook : undefined,
+      savedObjectsClient,
+    });
+  };
+
   /**
    * Create an exception list item container
    * @param options
@@ -857,7 +894,7 @@ export class ExceptionListClient {
       }
     }
 
-    return bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+    await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
   };
 
   /**

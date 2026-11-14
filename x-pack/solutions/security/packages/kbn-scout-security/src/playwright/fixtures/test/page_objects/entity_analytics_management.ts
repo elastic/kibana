@@ -17,8 +17,6 @@ export class EntityAnalyticsManagementPage {
   public managementPage: Locator;
   public pageTitle: Locator;
   public entityAnalyticsSwitch: Locator;
-  public entityAnalyticsHealth: Locator;
-  public statusLoading: Locator;
   public errorPanel: Locator;
 
   // Tabs
@@ -26,6 +24,9 @@ export class EntityAnalyticsManagementPage {
   public riskScoreTab: Locator;
   public assetCriticalityTab: Locator;
   public engineStatusTab: Locator;
+  /** Rendered only when the `entityAnalyticsWatchlistEnabled` experimental feature is on. */
+  public readonly watchlistsTab: Locator;
+  public readonly watchlistsTable: Locator;
 
   // Risk Score tab
   public riskPreviewError: Locator;
@@ -55,18 +56,18 @@ export class EntityAnalyticsManagementPage {
 
   constructor(private readonly page: ScoutPage) {
     // Page header
-    this.managementPage = this.page.testSubj.locator('entityAnalyticsManagementPage');
-    this.pageTitle = this.page.testSubj.locator('entityAnalyticsManagementPageTitle');
+    this.managementPage = this.page.testSubj.locator('appHeader');
+    this.pageTitle = this.page.testSubj.locator('appHeaderTitle');
     this.entityAnalyticsSwitch = this.page.testSubj.locator('entity-analytics-switch');
-    this.entityAnalyticsHealth = this.page.testSubj.locator('entity-analytics-health');
-    this.statusLoading = this.page.testSubj.locator('entity-analytics-status-loading');
     this.errorPanel = this.page.testSubj.locator('entity-analytics-error-panel');
 
     // Tabs
-    this.tabs = this.page.testSubj.locator('entityAnalyticsManagementTabs');
+    this.tabs = this.page.testSubj.locator('appHeaderTabs');
     this.riskScoreTab = this.page.testSubj.locator('riskScoreTab');
     this.assetCriticalityTab = this.page.testSubj.locator('assetCriticalityTab');
     this.engineStatusTab = this.page.testSubj.locator('engineStatusTab');
+    this.watchlistsTab = this.page.testSubj.locator('watchlistsTab');
+    this.watchlistsTable = this.page.testSubj.locator('watchlistsManagementTable');
 
     // Risk Score tab
     this.riskPreviewError = this.page.testSubj.locator('risk-preview-error');
@@ -129,6 +130,19 @@ export class EntityAnalyticsManagementPage {
     await this.engineStatusTab.click();
   }
 
+  async navigateToWatchlistsTab() {
+    await this.watchlistsTab.click();
+  }
+
+  /** Row of the watchlists table whose text contains the given watchlist name. */
+  watchlistRow(name: string): Locator {
+    return this.watchlistsTable.getByRole('row').filter({ hasText: name });
+  }
+
+  async openWatchlistEdit(name: string) {
+    await this.watchlistRow(name).getByRole('button', { name: 'Edit watchlist' }).click();
+  }
+
   async toggleEntityAnalytics() {
     // `'visible'` (not `'attached'`) — the switch is rendered while the entity
     // store / risk engine status queries are still loading, but is correctly
@@ -142,12 +156,15 @@ export class EntityAnalyticsManagementPage {
   }
 
   async waitForStatusLoaded() {
-    await this.statusLoading.waitFor({ state: 'detached', timeout: 30000 });
-    await this.entityAnalyticsHealth.waitFor({ state: 'visible', timeout: 30000 });
+    // `entity-analytics-switch` is rendered only after the status query settles.
+    // While loading, the control is mounted under a different test id, disabled,
+    // and labeled "Disabled", so visibility of this locator is the terminal signal.
+    await this.entityAnalyticsSwitch.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   async clearEntityData() {
     const modal = this.page.testSubj.locator('clear-entity-data-modal');
+    await this.page.testSubj.locator('app-menu-overflow-button').click();
     await this.page.testSubj.locator('clear-entity-data-button').click();
     await modal.waitFor({ state: 'visible' });
     await this.page.testSubj.locator('confirmModalConfirmButton').click();

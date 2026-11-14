@@ -11,4 +11,4 @@ export {
   getInlineActionStepDefinition,
   getDefaultInlineActionStepDefinition,
 } from './registry';
-export { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from './payload_variables';
+export { getContextVariables } from './payload_variables';

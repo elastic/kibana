@@ -25,25 +25,24 @@ export function MaxGroupsMessage({ type, serviceOverflowCount }: MaxGroupsMessag
       ? docLinks.links.apm.troubleshootingTooManyServices
       : docLinks.links.apm.troubleshootingTooManyTransactions;
 
+  const apmServerDocs = (
+    <EuiLink
+      data-test-subj="apmMaxGroupsMessageDocsLink"
+      href={troubleshootingHref}
+      target="_blank"
+    >
+      {i18n.translate('xpack.apm.tooltip.link.apmServerDocs', {
+        defaultMessage: 'docs',
+      })}
+    </EuiLink>
+  );
+
   if (type === 'services' && serviceOverflowCount !== undefined && serviceOverflowCount > 0) {
     return (
       <FormattedMessage
         defaultMessage="The number of services has exceeded the current capacity. {serviceOverflowCount, plural, one {# additional service is not shown.} other {# additional services are not shown.}} Please review {apmServerDocs} to mitigate the situation."
         id="xpack.apm.tooltip.maxGroup.messageWithOverflowCount"
-        values={{
-          serviceOverflowCount,
-          apmServerDocs: (
-            <EuiLink
-              data-test-subj="apmMaxGroupsMessageDocsLink"
-              href={troubleshootingHref}
-              target="_blank"
-            >
-              {i18n.translate('xpack.apm.tooltip.link.apmServerDocs', {
-                defaultMessage: 'docs',
-              })}
-            </EuiLink>
-          ),
-        }}
+        values={{ serviceOverflowCount, apmServerDocs }}
       />
     );
   }
@@ -52,19 +51,7 @@ export function MaxGroupsMessage({ type, serviceOverflowCount }: MaxGroupsMessag
     <FormattedMessage
       defaultMessage="The cardinality of APM data being collected is too high. Please review {apmServerDocs} to mitigate the situation."
       id="xpack.apm.tooltip.maxGroup.message"
-      values={{
-        apmServerDocs: (
-          <EuiLink
-            data-test-subj="apmMaxGroupsMessageDocsLink"
-            href={troubleshootingHref}
-            target="_blank"
-          >
-            {i18n.translate('xpack.apm.tooltip.link.apmServerDocs', {
-              defaultMessage: 'docs',
-            })}
-          </EuiLink>
-        ),
-      }}
+      values={{ apmServerDocs }}
     />
   );
 }

@@ -9,7 +9,6 @@ import type { Observable } from 'rxjs';
 import { merge, of } from 'rxjs';
 import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
-import type { Logger } from '@kbn/core/server';
 import type { JsonObject } from '@kbn/utility-types';
 import type { SummarizedWorkloadStat, WorkloadStat } from './workload_statistics';
 import { createWorkloadAggregator, summarizeWorkloadStat } from './workload_statistics';
@@ -22,6 +21,7 @@ import type { ConfigStat } from './configuration_statistics';
 import { createConfigurationAggregator } from './configuration_statistics';
 import type { TaskManagerConfig } from '../config';
 import type { CapacityEstimationStat } from './capacity_estimation';
+import type { HealthStatusLogger } from '../lib/health_status_logger';
 import { withCapacityEstimate } from './capacity_estimation';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import type { CreateMonitoringStatsOpts } from '.';
@@ -132,12 +132,19 @@ export function createMonitoringStatsStream(
   );
 }
 
+export const isEsBackpressureActive = ({ stats: { utilization } }: MonitoringStats): boolean =>
+  utilization?.value.es_backpressure_active === 1;
+
 export function summarizeMonitoringStats(
-  logger: Logger,
-  { last_update, stats: { runtime, workload, configuration, utilization } }: MonitoringStats,
+  logger: HealthStatusLogger,
+  monitoringStats: MonitoringStats,
   config: TaskManagerConfig,
   assumedKibanaInstances: number
 ): RawMonitoringStats {
+  const {
+    last_update,
+    stats: { runtime, workload, configuration },
+  } = monitoringStats;
   const summarizedStats = withCapacityEstimate(
     logger,
     {
@@ -166,7 +173,8 @@ export function summarizeMonitoringStats(
           }
         : {}),
     },
-    assumedKibanaInstances
+    assumedKibanaInstances,
+    isEsBackpressureActive(monitoringStats)
   );
 
   return {

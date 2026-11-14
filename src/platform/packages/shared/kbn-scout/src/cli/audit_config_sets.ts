@@ -10,21 +10,47 @@
 import Fs from 'fs';
 import Path from 'path';
 import { getPackages } from '@kbn/repo-packages';
+import { testConfigs } from '@kbn/scout-reporting';
 import { snakeCase } from 'lodash';
 import ts from 'typescript';
 import type { ScoutServerConfig } from '../types';
 import { loadRawServerConfig } from '../servers/configs/loader/read_config_file';
+import { getScoutCiExcludedConfigs } from '../tests_discovery/search_configs';
 
 const CONFIG_SETS_DIR = 'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets';
 const DEFAULT_SET = 'default';
 
 /**
  * Sets that must stay separate on purpose, with the reason. The audit leaves them out of every
- * merge suggestion. Add a set here only when its owners confirmed the separate server is needed.
+ * merge suggestion. Add a set here only when its tests or docs show the separate server is needed.
  */
-export const KEEP_SEPARATE: Readonly<Record<string, string>> = {
+export const MUST_STAY_SEPARATE: Readonly<Record<string, string>> = {
   shared_ux_no_data: 'tests need a clean ES and Kibana with no data from other suites',
   trial_license: 'tests permanently downgrade the license and would break a shared cluster',
+  interactive_setup_no_tls_api:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_no_tls_ui:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_tls_enrollment_api:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_tls_enrollment_ui:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_tls_manual_api:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  interactive_setup_tls_manual_ui:
+    'tests finish the setup, which ends the preboot stage and reboots Kibana',
+  initial_solution_setup:
+    'completing the setup is one way, so the UI and API suites need fresh servers',
+  initial_solution_setup_api:
+    'completing the setup is one way, so the UI and API suites need fresh servers',
+  synthetics_agent_e2e:
+    'the EDR set presets a default Fleet Server and output that would conflict with the ones this suite registers at runtime',
+  search_sessions:
+    'the examples set loads every example plugin, which would change the Data, Dashboard, Discover and Lens UI tests',
+  uiam_local:
+    'tests run on every serverless project type and service_accounts only has configs for two of them',
+  ai_value_report:
+    'tests also run on serverless security_ease and security_attacks_alignment has no config for it',
 };
 
 /** Config keys core lets tests change at runtime through `/internal/core/_settings`. */
@@ -234,6 +260,17 @@ export function listConfigSetFiles(repoRoot: string): ConfigSetFile[] {
   return out;
 }
 
+/**
+ * Config sets with at least one test config that CI runs in a Scout lane. A set nobody runs in
+ * CI costs no lane, so the audit ignores it.
+ */
+export const findSetsRunInCi = (): Set<string> => {
+  const excluded = new Set(getScoutCiExcludedConfigs());
+  return new Set(
+    testConfigs.all.filter(({ path }) => !excluded.has(path)).map(({ server }) => server.configSet)
+  );
+};
+
 /** Compares every config set against the default set of the same flavor and file. */
 export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsReport> {
   const runtimeKeys = findRuntimeUpdatableKeys(repoRoot);
@@ -251,8 +288,9 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
 
   const sets: ConfigSetOverrides[] = [];
   const failed: ConfigSetsReport['failed'] = [];
+  const runInCi = findSetsRunInCi();
   for (const entry of listConfigSetFiles(repoRoot)) {
-    if (entry.name in KEEP_SEPARATE) continue;
+    if (entry.name in MUST_STAY_SEPARATE || !runInCi.has(entry.name)) continue;
     let set: ScoutServerConfig;
     let base: ScoutServerConfig;
     try {

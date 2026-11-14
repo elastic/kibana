@@ -1,5 +1,5 @@
 {
-  "sha1": "ef98cc470f715d3fd1d191fa1f4ee52c182ff496",
+  "sha1": "68d35e0b71df45665622df18b8b22236ade70a02",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -274,6 +274,86 @@
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/annotations.spec.ts",
         "line": 172,
         "column": 23
+      }
+    },
+    {
+      "id": "b68e8e2d7decce7-299a88353129dbe",
+      "title": "Custom Threshold rule - metric KQL filter avg: evaluates only the documents matching the KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_metric_filter.spec.ts",
+        "line": 212,
+        "column": 34
+      }
+    },
+    {
+      "id": "b68e8e2d7decce7-8e275080fa99495",
+      "title": "Custom Threshold rule - metric KQL filter median: evaluates only the documents matching the KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_metric_filter.spec.ts",
+        "line": 212,
+        "column": 34
+      }
+    },
+    {
+      "id": "b68e8e2d7decce7-a981ae1e5835dd8",
+      "title": "Custom Threshold rule - metric KQL filter last_value: evaluates only the documents matching the KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_metric_filter.spec.ts",
+        "line": 212,
+        "column": 34
+      }
+    },
+    {
+      "id": "b68e8e2d7decce7-6d6c9cf02f1c408",
+      "title": "Custom Threshold rule - metric KQL filter rate: evaluates only the documents matching the KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_metric_filter.spec.ts",
+        "line": 212,
+        "column": 34
+      }
+    },
+    {
+      "id": "b68e8e2d7decce7-1897372d0874c37",
+      "title": "Custom Threshold rule - metric KQL filter avg: still evaluates all documents when there is no filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_metric_filter.spec.ts",
+        "line": 220,
+        "column": 13
       }
     },
     {

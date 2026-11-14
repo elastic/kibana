@@ -46,8 +46,9 @@ import {
   loadIndexPatterns,
   ensureESQLTimeFieldOnAdHocDataViews,
 } from '../../data_views_service/loader';
+import { withEsqlLayerDataViewSpecs } from '../../data_views_service/esql_layer_data_view_specs';
 import { getDatasourceLayers } from '../../state_management/utils';
-import { applyLegacySecondaryLabelIfMetric } from '../../visualizations/metric/runtime_state/apply_legacy_secondary_label';
+import { applyStateHydration } from '../../state_hydration';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
 // specific terms, and the palette assignment where the colors are assinged automatically
@@ -239,6 +240,7 @@ export async function initializeSources(
     storage,
     defaultIndexPatternId,
     references,
+    internalReferences,
     initialContext,
     adHocDataViews,
     http,
@@ -252,7 +254,10 @@ export async function initializeSources(
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage: IStorageWrapper;
+    /** References to saved objects. Only these tell a saved data view from an ES|QL dataset. */
     references?: Reference[];
+    /** References of the ad hoc data views of the chart, kept apart from the saved ones. */
+    internalReferences?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
     http?: HttpStart;
@@ -260,9 +265,12 @@ export async function initializeSources(
   },
   options?: InitializationOptions
 ) {
+  const allReferences = internalReferences
+    ? [...(references ?? []), ...internalReferences]
+    : references;
   const annotationGroups = await initializeEventAnnotationGroups(
     eventAnnotationService,
-    references
+    allReferences
   );
 
   // Regenerate ESQL ad-hoc DataViews once at editor initialization.
@@ -270,7 +278,7 @@ export async function initializeSources(
   // from the actual ES|QL queries, including time field detection via http.
   const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
   const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
-    adHocDataViews: adHocDataViews ?? {},
+    adHocDataViews: withEsqlLayerDataViewSpecs(adHocDataViews, textBasedState?.layers, references),
     textBasedState,
     dataViewsService: dataViews,
     http,
@@ -285,7 +293,7 @@ export async function initializeSources(
       dataViews,
       storage,
       defaultIndexPatternId,
-      references,
+      references: allReferences,
       adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
@@ -298,31 +306,32 @@ export async function initializeSources(
     initialContext,
     indexPatternRefs,
     indexPatterns,
-    references,
+    references: allReferences,
   });
 
-  const {
-    visualizationState: runtimeVisualizationState,
-    datasourceStates: syncedDatasourceStates,
-  } = applyLegacySecondaryLabelIfMetric(
-    visualizationState.activeId,
-    initializeVisualization({
-      visualizationMap,
-      visualizationState,
-      datasourceStates,
-      references,
-      initialContext,
-      annotationGroups,
-    }),
-    initializedDatasourceStates
-  );
+  const initializedVisualizationState = initializeVisualization({
+    visualizationMap,
+    visualizationState,
+    datasourceStates,
+    references: allReferences,
+    initialContext,
+    annotationGroups,
+  });
+
+  const hydratedState = applyStateHydration({
+    visualizationId: visualizationState.activeId,
+    visualizationState: initializedVisualizationState,
+    datasourceStates: initializedDatasourceStates,
+    context: 'editor',
+    indexPatterns,
+  });
 
   return {
     indexPatterns,
     indexPatternRefs,
     annotationGroups,
-    datasourceStates: syncedDatasourceStates,
-    visualizationState: runtimeVisualizationState,
+    datasourceStates: hydratedState.datasourceStates,
+    visualizationState: hydratedState.visualizationState,
   };
 }
 
@@ -445,7 +454,7 @@ export async function persistedStateToExpression(
     | TextBasedPersistedState
     | undefined;
   const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
-    adHocDataViews: adHocDataViews ?? {},
+    adHocDataViews: withEsqlLayerDataViewSpecs(adHocDataViews, textBasedState?.layers, references),
     textBasedState,
     dataViewsService: services.dataViews,
     http: services.http,
@@ -465,7 +474,7 @@ export async function persistedStateToExpression(
     },
     { isFullEditor: false }
   );
-  const datasourceStates = initializeDatasources({
+  const initializedDatasourceStates = initializeDatasources({
     datasourceMap,
     datasourceStates: datasourceStatesFromSO,
     references: [...references, ...(internalReferences || [])],
@@ -473,19 +482,31 @@ export async function persistedStateToExpression(
     indexPatternRefs,
   });
 
-  const activeVisualizationState = initializeVisualization({
+  const initializedVisualizationState = initializeVisualization({
     visualizationMap: visualizations,
     visualizationState: {
       state: persistedVisualizationState,
       activeId: visualizationType,
       selectedLayerId: null,
     },
-    datasourceStates,
+    datasourceStates: initializedDatasourceStates,
     annotationGroups,
     references: [...references, ...(internalReferences || [])],
   });
 
-  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
+  const hydratedState = applyStateHydration({
+    visualizationId: visualizationType,
+    visualizationState: initializedVisualizationState,
+    datasourceStates: initializedDatasourceStates,
+    context: 'expression',
+    indexPatterns,
+  });
+
+  const datasourceLayers = getDatasourceLayers(
+    hydratedState.datasourceStates,
+    datasourceMap,
+    indexPatterns
+  );
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
@@ -493,7 +514,7 @@ export async function persistedStateToExpression(
       ast: null,
       indexPatterns,
       indexPatternRefs,
-      activeVisualizationState,
+      activeVisualizationState: hydratedState.visualizationState,
       activeDatasourceState: null,
     };
   }
@@ -505,17 +526,17 @@ export async function persistedStateToExpression(
       title,
       description,
       visualization,
-      visualizationState: activeVisualizationState,
+      visualizationState: hydratedState.visualizationState,
       datasourceMap,
-      datasourceStates,
+      datasourceStates: hydratedState.datasourceStates,
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
       forceDSL: services.forceDSL,
       nowInstant: services.nowProvider.get(),
     }),
-    activeVisualizationState,
-    activeDatasourceState: datasourceStates[datasourceId]?.state,
+    activeVisualizationState: hydratedState.visualizationState,
+    activeDatasourceState: hydratedState.datasourceStates[datasourceId]?.state,
     indexPatterns,
     indexPatternRefs,
   };

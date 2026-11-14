@@ -27,8 +27,15 @@ export interface ManagedWorkflowUpgrade {
   definitionId: string;
 }
 
+/** Internal snapshot of a managed workflow taken by the orphan sweep, never by a user request. */
+export interface ManagedWorkflowOrphan {
+  managedBy: string | null;
+  definitionId: string | null;
+}
+
 export interface IndexWorkflowDocumentOptions {
   managedWorkflowUpgrade?: ManagedWorkflowUpgrade;
+  managedOrphanDisable?: ManagedWorkflowOrphan;
   previousDocument?: WorkflowProperties;
   request?: KibanaRequest;
   create?: boolean;
@@ -44,6 +51,20 @@ export interface WriteWorkflowDocumentWithOccParams {
   ifSeqNo: number;
   ifPrimaryTerm: number;
 }
+
+export interface WorkflowDocumentBulkWrite {
+  id: string;
+  document: WorkflowProperties;
+  /** The stored document this write replaces, guarded by its seq_no; omit to create. */
+  previous?: VersionedWorkflowDocument;
+}
+
+export type WorkflowDocumentBulkWriteResult =
+  | { status: 'written' }
+  | { status: 'conflict' }
+  /** Elasticsearch was too busy (429) and did not write it, so it can be retried. */
+  | { status: 'rejected'; error: Error }
+  | { status: 'failed'; error: Error };
 
 export interface ReadModifyWriteWorkflowDocumentParams {
   request?: KibanaRequest;

@@ -14,11 +14,11 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
     kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_map_only_dashboard'],
   }),
-  dashboardName: 'Ecommerce Dashboard with Map only',
-  dashboardLinkSubj: 'dashboardListingTitleLink-[eCommerce]-Map-Only',
+  dashboardTitle: '[eCommerce] Map Only',
   loadCompleteAwaiter: async (page, kibanaPage) => {
     await page.waitForSelector(
-      'div[data-title="[eCommerce] Orders by Country"][data-render-complete="true"]'
+      'div[data-title="[eCommerce] Orders by Country"][data-render-complete="true"]',
+      { timeout: 60_000 }
     );
   },
 });

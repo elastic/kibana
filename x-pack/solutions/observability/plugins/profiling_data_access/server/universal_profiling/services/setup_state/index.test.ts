@@ -62,6 +62,7 @@ describe('setup state services', () => {
 
       const result = await setupStateModule.getCloudSetupState({
         createProfilingEsClient,
+        buildFlavor: 'traditional',
         deps: {
           cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
           fleet: { packagePolicyService } as RegisterServicesParams['deps']['fleet'],
@@ -89,6 +90,7 @@ describe('setup state services', () => {
       await expect(
         setupStateModule.getCloudSetupState({
           createProfilingEsClient,
+          buildFlavor: 'traditional',
           deps: {
             cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
           },
@@ -109,6 +111,7 @@ describe('setup state services', () => {
 
       const result = await setupStateModule.getSelfManagedSetupState({
         createProfilingEsClient,
+        buildFlavor: 'traditional',
         deps: {},
         esClient,
         logger,
@@ -139,6 +142,7 @@ describe('setup state services', () => {
       const abortSignal = new AbortController().signal;
       const getSetupState = createService({
         createProfilingEsClient,
+        buildFlavor: 'traditional',
         deps: {
           cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
           fleet: { packagePolicyService } as RegisterServicesParams['deps']['fleet'],
@@ -162,6 +166,7 @@ describe('setup state services', () => {
       const abortSignal = new AbortController().signal;
       const getSetupState = createService({
         createProfilingEsClient,
+        buildFlavor: 'traditional',
         deps: {
           cloud: { isCloudEnabled: true } as RegisterServicesParams['deps']['cloud'],
           fleet: { packagePolicyService } as RegisterServicesParams['deps']['fleet'],

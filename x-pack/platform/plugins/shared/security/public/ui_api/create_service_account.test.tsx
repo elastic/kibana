@@ -13,6 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getUiApi } from '.';
+import * as roleSelector from '../management/service_accounts/service_account_role_selector';
 
 const renderComponent = async ({
   enabled = true,
@@ -51,27 +52,87 @@ const renderComponent = async ({
 
 describe('getCreateServiceAccount UI API', () => {
   it('loads the standalone flyout and reports the created account', async () => {
-    const { core, account, onCreated } = await renderComponent();
-    expect(await screen.findByTestId('createServiceAccountFlyout')).toBeVisible();
-    const selector = screen.getByTestId('serviceAccountRolesSelector');
-    await waitFor(() => expect(selector).toBeEnabled());
+    const selector = jest
+      .spyOn(roleSelector, 'ServiceAccountRoleSelector')
+      .mockImplementation(({ onChange }) => (
+        <button
+          type="button"
+          data-test-subj="selectViewerRole"
+          onClick={() => onChange(['viewer'])}
+        >
+          Select roles
+        </button>
+      ));
+    try {
+      const { core, account, onCreated } = await renderComponent();
+      expect(await screen.findByTestId('createServiceAccountFlyout')).toBeVisible();
+      fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+        target: { value: account.name },
+      });
+      fireEvent.click(screen.getByTestId('selectViewerRole'));
+      const submit = screen.getByTestId('createServiceAccountSubmit');
+      await waitFor(() => expect(submit).toBeEnabled());
+      fireEvent.click(submit);
+
+      await waitFor(() => expect(onCreated).toHaveBeenCalledWith(account));
+      expect(core.security.serviceAccounts.create).toHaveBeenCalledWith({
+        name: account.name,
+        roles: account.roles,
+      });
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/api/security/role',
+        expect.objectContaining({ query: expect.objectContaining({ includeReservedRoles: true }) })
+      );
+    } finally {
+      selector.mockRestore();
+    }
+  });
+
+  it.each([
+    [
+      'backend failure',
+      Object.assign(new Error('Backend unavailable'), {
+        request: {},
+        response: { status: 500 },
+        body: { message: 'Backend unavailable' },
+      }),
+    ],
+    ['network failure', new Error('fetch failed')],
+  ])('shows a toast on %s and allows retry', async (_, error) => {
+    const { core, account, onCreated, onClose } = await renderComponent();
+    core.security.serviceAccounts.create.mockRejectedValueOnce(error);
+    const roles = screen.getByRole('combobox', { name: 'Set privileges' });
+    await waitFor(() => expect(roles).toBeEnabled());
     fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
       target: { value: account.name },
     });
-    fireEvent.click(selector);
+    fireEvent.click(roles);
     fireEvent.click(await screen.findByTestId('roleOption-viewer'));
-    fireEvent.click(selector);
-    fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+    fireEvent.keyDown(roles, { key: 'Escape' });
+    const submit = screen.getByTestId('createServiceAccountSubmit');
+    fireEvent.click(submit);
+
+    await waitFor(() =>
+      expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to create "workflow-runner"',
+      })
+    );
+    expect(core.notifications.toasts.addError).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('createServiceAccountFlyout')).toBeVisible();
+    expect(screen.getByTestId('serviceAccountNameInput')).toHaveValue(account.name);
+    expect(screen.getByTestId('serviceAccountRolesSelector')).toHaveTextContent('viewer');
+    expect(submit).toBeEnabled();
+    expect(onCreated).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.click(submit);
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith(account));
-    expect(core.security.serviceAccounts.create).toHaveBeenCalledWith({
+    expect(core.security.serviceAccounts.create).toHaveBeenCalledTimes(2);
+    expect(core.security.serviceAccounts.create).toHaveBeenLastCalledWith({
       name: account.name,
       roles: account.roles,
     });
-    expect(core.http.get).toHaveBeenCalledWith(
-      '/api/security/role',
-      expect.objectContaining({ query: expect.objectContaining({ includeReservedRoles: true }) })
-    );
   });
 
   it.each([
@@ -93,8 +154,6 @@ describe('getCreateServiceAccount UI API', () => {
     await renderComponent(options);
     const selector = await screen.findByTestId('serviceAccountRolesSelector');
     await waitFor(() => expect(selector).toBeEnabled());
-    fireEvent.click(selector);
-    await screen.findByText('Custom roles');
     const link = screen.queryByTestId('createServiceAccountRoleLink');
     if (options.roleManagementEnabled && options.canSaveRole) {
       expect(link).toHaveAttribute('href', '/app/management/security/roles/edit');

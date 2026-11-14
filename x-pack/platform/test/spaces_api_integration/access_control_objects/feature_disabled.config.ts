@@ -19,7 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const accessControlTestPlugin = resolve(
     __dirname,
-    '../common/plugins/access_control_test_plugin'
+    '../../../test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin'
   );
 
   return {

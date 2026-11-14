@@ -9,8 +9,13 @@
 
 import { Query } from '@elastic/eui';
 import type { ParsedQuery, UrlStateSlices } from './types';
-import type { SortState } from './url_codec';
-
+import {
+  isAllowedSort,
+  isSortDirection,
+  type SortDirection,
+  type SortDirectionsByField,
+} from '../sorting';
+import { NO_CREATOR_USER_FILTER } from '../../item';
 const LEGACY_KEYS = ['s', 'title', 'filter', 'sort', 'sortdir', 'created_by', 'favorites'] as const;
 
 export interface LegacyDecodeResult {
@@ -34,24 +39,32 @@ const stringArray = (value: ParsedQuery[string]): string[] => {
 
 const resolveLegacySortField = (
   field: string,
-  validSortFields: ReadonlySet<string>
+  sortDirectionsByField: SortDirectionsByField
 ): string | undefined => {
   if (field === 'title') {
-    if (validSortFields.has('title')) {
+    if (sortDirectionsByField.has('title')) {
       return 'title';
     }
-    if (validSortFields.has('attributes.title')) {
+    if (sortDirectionsByField.has('attributes.title')) {
       return 'attributes.title';
     }
     return undefined;
   }
-
-  if ((field === 'updatedAt' || field === 'accessedAt') && validSortFields.has(field)) {
+  if ((field === 'updatedAt' || field === 'accessedAt') && sortDirectionsByField.has(field)) {
     return field;
   }
-
   return undefined;
 };
+
+/**
+ * Legacy tables persisted the no-creator selection as `no-user`, while the provider keys
+ * creator-less items with {@link NO_CREATOR_USER_FILTER}. Without translating it, an old
+ * bookmarked URL filters on a creator that matches nothing.
+ */
+const LEGACY_NO_CREATOR_FILTER = 'no-user';
+
+const toCreatorKey = (user: string): string =>
+  user === LEGACY_NO_CREATOR_FILTER ? NO_CREATOR_USER_FILTER : user;
 
 const buildQueryText = ({
   freeText,
@@ -65,7 +78,7 @@ const buildQueryText = ({
   let query = Query.parse('');
 
   for (const user of createdBy) {
-    query = query.addSimpleFieldValue('createdBy', user);
+    query = query.addSimpleFieldValue('createdBy', toCreatorKey(user));
   }
 
   if (favorites) {
@@ -85,13 +98,13 @@ const buildQueryText = ({
  * Decodes legacy URL parameters into a {@link UrlStateSlices} object.
  *
  * @param params - The parsed URL parameters.
- * @param validSortFields - The valid sort fields.
+ * @param sortDirectionsByField - The directions offered for each sortable field.
  * @param onUnknownValue - A callback to call when an unknown value is encountered.
  * @returns A {@link LegacyDecodeResult} object.
  */
 export const decodeLegacyParams = (
   params: ParsedQuery,
-  validSortFields: ReadonlySet<string>,
+  sortDirectionsByField: SortDirectionsByField,
   onUnknownValue?: (key: string, value: unknown) => void
 ): LegacyDecodeResult | null => {
   const consumed = LEGACY_KEYS.filter((key) => params[key] !== undefined);
@@ -114,13 +127,13 @@ export const decodeLegacyParams = (
 
   const legacySort = firstString(params.sort);
   if (legacySort) {
-    const field = resolveLegacySortField(legacySort, validSortFields);
+    const field = resolveLegacySortField(legacySort, sortDirectionsByField);
     const directionParam = firstString(params.sortdir);
     const defaultDirection = legacySort === 'title' ? 'asc' : 'desc';
-    const direction: SortState['direction'] =
-      directionParam === 'asc' || directionParam === 'desc' ? directionParam : defaultDirection;
-
-    if (field) {
+    const direction: SortDirection = isSortDirection(directionParam)
+      ? directionParam
+      : defaultDirection;
+    if (field && isAllowedSort(sortDirectionsByField, { field, direction })) {
       state.sort = { field, direction };
     } else {
       onUnknownValue?.('sort', legacySort);

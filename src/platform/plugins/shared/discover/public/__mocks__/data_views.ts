@@ -11,11 +11,16 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from './data_view_complex';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 export const dataViewMockList = [dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock];
 
 export function createDiscoverDataViewsMock() {
+  // Creates and caches by id like the real service, so the ES|QL DataView shim resolves.
+  const { create, clearInstanceCache } = createMockDataViewsService();
   return {
+    hasData: dataViewPluginMocks.createStartContract().hasData,
     getCache: async () => {
       return [dataViewMock];
     },
@@ -37,8 +42,8 @@ export function createDiscoverDataViewsMock() {
       return Promise.resolve(dataViewMockList);
     }),
     createFilter: jest.fn(),
-    create: jest.fn(),
-    clearInstanceCache: jest.fn(),
+    create,
+    clearInstanceCache,
     getFieldsForIndexPattern: jest.fn((dataView) => dataView.fields),
     refreshFields: jest.fn(),
   } as unknown as jest.Mocked<DataViewsContract>;

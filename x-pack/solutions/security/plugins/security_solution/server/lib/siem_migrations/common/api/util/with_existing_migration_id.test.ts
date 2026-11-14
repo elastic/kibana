@@ -25,11 +25,20 @@ const mockDashboardMigrationsClient = {
   },
 };
 
+const mockWorkflowMigrationsClient = {
+  data: {
+    migrations: {
+      get: jest.fn(),
+    },
+  },
+};
+
 const mockSecuritySolutionContext = {
   securitySolution: {
     siemMigrations: {
       getRulesClient: jest.fn().mockReturnValue(mockRuleMigrationsClient),
       getDashboardsClient: jest.fn().mockReturnValue(mockDashboardMigrationsClient),
+      getWorkflowsClient: jest.fn().mockReturnValue(mockWorkflowMigrationsClient),
     },
   },
 };
@@ -68,6 +77,35 @@ describe('withExistingMigrationId', () => {
       await wrappedHandler(mockContext, mockReq, mockRes);
 
       expect(handler).toHaveBeenCalledWith(mockContext, mockReq, mockRes);
+    });
+  });
+
+  describe('when the path is a workflow migration', () => {
+    const workflowReq = {
+      params: {
+        migration_id: 'test-migration-id',
+      },
+      route: {
+        path: '/internal/siem_migrations/workflows/test-migration-id',
+      },
+    } as unknown as KibanaRequest<{ migration_id: string }, unknown, unknown, never>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockWorkflowMigrationsClient.data.migrations.get.mockResolvedValue(mockMigration);
+    });
+
+    it('should read the migration from the workflows client', async () => {
+      const handler = jest.fn();
+      const wrappedHandler = withExistingMigration(handler);
+      await wrappedHandler(mockContext, workflowReq, mockRes);
+
+      expect(mockWorkflowMigrationsClient.data.migrations.get).toHaveBeenCalledWith(
+        'test-migration-id'
+      );
+      expect(mockRuleMigrationsClient.data.migrations.get).not.toHaveBeenCalled();
+      expect(mockDashboardMigrationsClient.data.migrations.get).not.toHaveBeenCalled();
+      expect(handler).toHaveBeenCalledWith(mockContext, workflowReq, mockRes);
     });
   });
 

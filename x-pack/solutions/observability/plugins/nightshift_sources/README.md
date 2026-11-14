@@ -12,18 +12,19 @@ require it without creating a cycle.
 ## API
 
 All routes are internal (`x-elastic-internal-origin: kibana`, `elastic-api-version: 1`) and
-gated by the Nightshift feature privileges: reads need `read_nightshift`, writes need
-`manage_nightshift`. `configure_nightshift` is never required.
+gated by the Nightshift feature privileges: reads need `read_nightshift`, writes need both
+`manage_nightshift` and `configure_nightshift` (see [Access model](#access-model)).
 
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. |
-| `POST` | `/internal/nightshift/sources` | manage | Validates the query, writes the saved object, creates the view |
+| `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. `search` matches titles that contain every word, in any order, ignoring case; the last word may be a partial word. `ids` narrows the list to those sources; `search`, `enabled` and paging apply to them. |
+| `POST` | `/internal/nightshift/sources` | manage + configure | Validates the query, derives `type`, writes the saved object, creates the view. Takes `enabled` (default `true`) to create the source switched off |
+| `POST` | `/internal/nightshift/sources/_validate` | manage + configure | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` for a structurally invalid query (a 400 on create). |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
-| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
-| `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object |
-| `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage | Flips `enabled` only |
-| `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage | Flips `enabled` only |
+| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage + configure | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view. Does not take `enabled` |
+| `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage + configure | Deletes the view (404 ignored), then the saved object. The engine knowledge of the source is cleaned up asynchronously; a failed cleanup is logged and retried by the sync sweep, which does not run while maintenance is paused |
+| `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage + configure | Flips `enabled` only |
+| `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage + configure | Flips `enabled` only |
 
 There is no `_repair` endpoint: a `PUT` with the current values recreates a missing view or
 overwrites a drifted one.
@@ -31,6 +32,10 @@ overwrites a drifted one.
 Wire schemas and types (`NightshiftSource`, `SourceHealth`, request/response shapes) live in
 `@kbn/nightshift-shared` so browser code can import them. A typed repository client is exposed
 on the public start contract through `getClient()`.
+
+`type` (`logs`, `metrics`, `traces` or `unknown`) is stored on the source and returned by
+every read. It is derived from the query on create and when an update changes the query. A
+title-only PUT keeps the stored type. Request bodies cannot set it.
 
 ## Engine access
 
@@ -41,6 +46,17 @@ security extension authorizes each call against the Nightshift feature (`all` ca
 does not include the type. `create` and `update` parse the same wire schemas as HTTP, so a
 blank title still 400s.
 
+The saved-object grant does not enforce the manage and configure gate: `all` can write the type
+without configure. The routes enforce the gate, and so do the Agent Builder source tools. A caller
+that writes through `getSourcesClient` on behalf of a user has to check
+`NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES` itself.
+
+`setup.onSourceChange(listener)` subscribes an engine to every committed write: `created`,
+`updated` (with `previous`, which covers `_enable` and `_disable`) and `deleted`, each with the
+request that made it. The write awaits every listener before it returns, so an engine can
+clean up after a deleted source before the caller refetches. A listener that throws is logged;
+the write already happened and is not undone. Rolled-back writes are not reported.
+
 ## Query validation
 
 A source is rows only. On create and update the ES|QL must:
@@ -48,10 +64,27 @@ A source is rows only. On create and update the ES|QL must:
 - parse without errors;
 - start with `FROM` or `TS`;
 - contain nothing but `WHERE` after the source command (this also rejects subqueries);
-- not use `METADATA`, because ES|QL returns nulls for metadata columns read through a view;
-- not reference a remote cluster (`cluster:index`), because views cannot target remote indices;
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
-  `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself.
+  `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself;
+- target exactly one kind of data. Every index in `FROM` or `TS` must classify as the same
+  value, and `unknown` counts. `FROM logs-*, my-app-*` is rejected because `my-app-*` is not
+  logs, metrics or traces. A single name that matches more than one kind (`logs-traces-*`) is
+  rejected. One `logs`, `metrics` or `traces` segment wins over a dataset token, so
+  `metrics-logstash.node-*` is metrics, while `metrics-logs-*` is still a mix. A `TS` command
+  is metrics, so `TS logs-*` mixes logs and metrics, while `TS my-tsdb-*` is metrics. An
+  unscoped wildcard (`*`, `*log*`, `cluster:*`) is rejected. A remote cluster prefix is allowed
+  and is not part of the type: `FROM remote:logs-*` and `FROM *:logs-*` are logs, and
+  `FROM remote:logs-*, other:traces-*` is still a mix. An exclusion (`-cluster:*`,
+  `cluster:-index`) is not a target.
+
+`METADATA` belongs to the source command (`FROM logs-* METADATA _id`). A field declared there is a
+column of the view. A later query that asks for a metadata field the view did not declare gets nulls.
+
+Classification reads the index name. The same bases Discover uses (`logs`, `filebeat`,
+`traces`, `metrics`, `metricbeat`, and the rest of those lists) decide the kind. A name that
+matches none of them is `unknown`, including `apm-*` and a custom index that does not contain
+one of those words. `traces-apm*`, `logs-apm*` and `metrics-apm*` are traces, logs and metrics.
+The error names the kinds and the indices.
 
 The view name is `$.nightshift.sources.<spaceId>.<slug>`. `<spaceId>` is the Kibana space that
 owns the saved object. `<slug>` is derived from the title at create (`nginx-errors` from
@@ -60,12 +93,47 @@ this space — another source, or an orphaned view — create walks `-2`, `-3`, 
 both have an `nginx-errors` source; the views are `….default.nginx-errors` and
 `….marketing.nginx-errors`. The saved-object id stays a uuid; it is not in the view name.
 
-Wildcards, several sources and date math are fine. Create always runs `<esql> | LIMIT 0` as
-the calling user. Update does too when the normalized query changes. A title-only PUT, or a
-repair that sends the stored query, skips that probe so a vanished `WHERE` field cannot block
-rename or restoring a deleted view; GET reports `unresolvable` instead. A pattern that
-matches no index yet is accepted, which means field names in `WHERE` are only checked once
-data exists.
+Wildcards, several sources and date math are fine. An unscoped `*` is not. Create always runs
+`<esql> | LIMIT 0` as the calling user. Update does too when the normalized query changes. A
+title-only PUT, or a repair that sends the stored query, skips that probe and keeps the stored
+type, so a vanished `WHERE` field cannot block rename or restoring a deleted view; GET reports
+`unresolvable` instead. A pattern that matches no index yet is accepted,
+which means field names in `WHERE` are only checked once data exists.
+
+## Access model
+
+Two switches decide what Nightshift reads, and both belong to the admin:
+
+1. **What engines read** is set by the role of the service account they run as, not by the author
+   of a source. A source's ES|QL view is read with the privileges of whoever queries it, so that
+   account needs read on every index a source names. Letting admins define that role is planned.
+2. **Who tells it what to read** is the privilege to change sources. Create, update, delete,
+   enable, disable and `_validate` need `manage_nightshift` and `configure_nightshift`, which the
+   Manage engines sub-feature grants and base privileges leave out. The Agent Builder tools that
+   create, update and delete sources check the same pair.
+
+Nightshift does not compare the author's index privileges with a source's query. A check made when
+the source is saved would freeze that user's access at that moment and could not see document or
+field level security, nested views, or indices created later. The gate sits on who may change
+sources instead, and it assumes a user holding it could grant themselves read on the data anyway.
+`configure_nightshift` is a Nightshift privilege, not `manage_security`, so it does not guarantee
+that. Admins should hand it out accordingly.
+
+Create still runs `<esql> | LIMIT 0` as the calling user, so an author who cannot run the query
+cannot save it. That is a syntax and field check, not an access control.
+
+Consequences to plan for:
+
+- The service account has no document or field level security. A source over an index that is
+  restricted that way is read in full.
+- A wildcard means whatever matches when engines read. `logs-*` includes `logs-restricted` the day
+  it is created.
+- Reads of a source's knowledge indicators still check the reader's own index privileges. Routes
+  and Agent Builder tools call `SourcesClient.assertReadable`, which answers 403 (or leaves the
+  source out) when the reader cannot read the source's local indices. Remote cluster targets are
+  trusted, not checked.
+- Significant events and detections derived from the source have no such check. Everyone with
+  Nightshift read in the space sees them, whatever their own access to the indices.
 
 ## Health
 
@@ -88,12 +156,19 @@ moves only when the normalized query changes, and is monotonic so two edits in t
 millisecond still advance the cursor) and reconcile their own state: disable rules,
 cancel onboarding, skip the source when picking candidates, re-onboard after a query change.
 The plugin cannot call engines directly without reintroducing the dependency cycle it exists to
-avoid; a lifecycle listener registry on the setup contract is the planned follow-up if the
-reconcile latency turns out to matter.
+avoid. Engines that need to react right away subscribe through `setup.onSourceChange` (see
+[Engine access](#engine-access)); the reconcile stays as the safety net.
+
+A source is created enabled unless `POST` sends `enabled: false`. Engines see a source created
+disabled like any other disabled source, and start onboarding it when it is enabled later. `enabled`
+belongs to creation: the `PUT` body does not take it, so it is rejected like any other unknown key,
+and an update keeps the stored state. `_enable` and `_disable` are the only way to change it
+afterwards.
 
 ## Elasticsearch privileges
 
-The plugin runs every Elasticsearch call as the current user. Kibana feature privileges are
+The plugin runs every Elasticsearch call as the current user, except that list tokenizes its
+`search` with `_analyze` as `kibana_system`, which reads no index. Kibana feature privileges are
 not enough on their own; users also need index privileges on the view names and on the data
 the query reads. ES|QL view operations are index privileges applied to the view name.
 
@@ -150,6 +225,34 @@ in `config/serverless.oblt.yml` and back on for Observability Complete in
   events. HTTP audit events still cover the `/internal/nightshift/sources` routes.
 - Views show up in the ES|QL editor's source suggestions under their
   `$.nightshift.sources.<spaceId>.<slug>` name.
+
+## Telemetry
+
+A Task Manager task (`nightshift-sources:source-volume-telemetry:1.0.0`) is scheduled when an
+administrator enables Nightshift and runs once a day. Task Manager captures that administrator's
+credentials; enabling Nightshift again refreshes them. Disabling Nightshift in the last space
+that has it removes the task and invalidates those credentials. Each run sends one
+`nightshift-sources-daily-volume` EBT event, with one entry per configured source of every space
+(`space_id` is on the entry) holding its `enabled` state, `doc_count` and `bytes_estimated` over the
+past 24 hours. `doc_count` runs the stored query (its `WHERE` included) with those credentials, so
+it is the volume the source reads, not what was ingested; under cross-project search it fans out to
+every linked project, as the source's own reads do.
+`bytes_estimated` is `doc_count` times the average document size of the local indices behind the
+query, read from `indices.stats` on
+stateful and `_metering/stats` on serverless. Neither size API reaches linked projects or remote
+clusters, so that local average is extrapolated to their documents; `has_remote` marks the
+entries where a remote cluster contributed. A source with no local index gets no
+`bytes_estimated`. Each source is measured on its own, so overlapping sources (`logs*` and
+`logs-otel.generic-*`) count the same documents more than once; summing across sources can
+double count. Disabled sources are still measured and marked with `enabled: false`, so the event
+covers every configured source. A source whose query fails is reported with `status: error` (or
+`timeout`) and the Elasticsearch error type, without blocking the others. A query that runs but
+is incomplete (a skipped remote cluster or linked project, `is_partial`) is reported with
+`status: partial`: `doc_count` is then a lower bound, `bytes_estimated` is omitted, and
+`clusters_total` / `clusters_unsuccessful` say how many clusters did not answer (every cluster
+skipped gives `partial` with `doc_count: 0`, not an empty window). Nothing is sent when no source
+is configured, or when Task Manager aborts the run. The event carries no title, slug, view name
+or query text.
 
 ## Development
 

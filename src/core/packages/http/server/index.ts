@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import './src/hapi_request_refs';
+
 export {
   OnPreRoutingResultType,
   AuthResultType,
@@ -178,6 +180,17 @@ export type {
   HttpSelfUnauthorizedErrorHandlerRetryResult,
   HttpSelfUnauthorizedErrorHandlerToolkit,
 } from './src/self_client_unauthorized_error_handler';
+export type {
+  HttpSelfCredentialRefresher,
+  HttpSelfCredentialRefresherNotHandledResult,
+  HttpSelfCredentialRefresherOptions,
+  HttpSelfCredentialRefresherRejectParams,
+  HttpSelfCredentialRefresherRejectResult,
+  HttpSelfCredentialRefresherReplaceParams,
+  HttpSelfCredentialRefresherReplaceResult,
+  HttpSelfCredentialRefresherResult,
+  HttpSelfCredentialRefresherToolkit,
+} from './src/self_client_credential_refresher';
 
 export type {
   HttpAuth,

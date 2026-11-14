@@ -38,6 +38,8 @@ const storageSettings = {
       impact: types.keyword({}),
       confidence: types.keyword({}),
       category: types.keyword({}),
+      // Absent on every document written before the flag existed, which readers treat as `false`.
+      skipDiscardReason: types.boolean({}),
       origin: types.keyword({}),
       expiresAt: types.date({}),
 
@@ -66,12 +68,17 @@ const storageSettings = {
         },
       }),
       decidedAt: types.date({}),
+      decisionMode: types.keyword({}),
       dismissReason: types.keyword({}),
       rationale: types.text({}),
       executionError: types.text({}),
       previousExecutionError: types.text({}),
 
+      // Absent on every document written before gateless proposals existed,
+      // which the readers treat as `workflow`.
+      gate: types.keyword({}),
       workflowExecutionId: types.keyword({}),
+      gateReleasedAt: types.date({}),
 
       createdAt: types.date({}),
       createdBy: types.object({
@@ -93,7 +100,9 @@ export type ProposalsStorageSettings = typeof storageSettings;
  * ranks are a storage concern and are stripped before a proposal leaves the
  * service, so they never reach the API contract.
  */
-export type ProposalDocument = Omit<Proposal, 'id'> & ProposalSortRanks;
+export type ProposalDocument = Omit<Proposal, 'id'> &
+  Required<Pick<Proposal, 'rootProposalId' | 'revision'>> &
+  ProposalSortRanks;
 
 export type ProposalsStorageClient = IStorageClient<ProposalsStorageSettings, ProposalDocument>;
 

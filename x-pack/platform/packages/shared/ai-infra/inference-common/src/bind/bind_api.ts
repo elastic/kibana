@@ -54,18 +54,26 @@ function mergeBoundMetadata(
   };
 }
 
+// The server-side client can bind a `featureId` in place of the `connectorId`; the shared
+// `BoundOptions` type stays connector-only, so the binding is only widened at runtime.
+type RuntimeBoundOptions = Omit<BoundOptions, 'connectorId'> & {
+  connectorId?: string;
+  featureId?: string;
+};
+
 export function bindApi<T extends BindableAPI, U extends BoundOptions>(
   api: T,
   boundParams: U
 ): BoundAPI<T>;
 
-export function bindApi(api: BindableAPI, boundParams: BoundOptions) {
-  const { functionCalling, connectorId, metadata: boundMetadata } = boundParams;
+export function bindApi(api: BindableAPI, boundParams: RuntimeBoundOptions) {
+  const { functionCalling, connectorId, featureId, metadata: boundMetadata } = boundParams;
   return (params: UnboundOptions<BoundOptions>) => {
     return api({
       ...params,
       functionCalling,
       connectorId,
+      featureId,
       ...(boundMetadata ? { metadata: mergeBoundMetadata(boundMetadata, params.metadata) } : {}),
     });
   };

@@ -9,7 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ToolManager, ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
-import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
+import type { DeploymentContext, ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ResolvedConfiguration } from '../types';
@@ -30,6 +30,7 @@ export interface PromptFactoryParams {
    * system prompt does not break prompt caching.
    */
   spaceId: string;
+  deployment: DeploymentContext;
   processedConversation: ProcessedConversation;
   skills: InternalSkillDefinition[];
   toolManager: ToolManager;
@@ -54,6 +55,12 @@ export interface PromptFactoryParams {
   relevantSkillsEnabled: boolean;
   imageResolver?: PromptImageResolver;
   conversationTemplates: ConversationTemplatesService;
+  /** Whether the run can write the conversation's metadata (`set_conversation_metadata` is registered). */
+  conversationMetadataWritable: boolean;
+  /** Whether the agent's effective configuration assigns at least one connector. */
+  connectorsAssigned: boolean;
+  /** Whether `sml_search` is among the run's static tools. */
+  smlSearchSelected: boolean;
 }
 
 export interface HandoverParams {

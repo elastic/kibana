@@ -65,7 +65,6 @@ dependsOn:
   - '@kbn/security-solution-test-api-clients'
   - '@kbn/setup-node-env'
   - '@kbn/security-solution-test-api-clients'
-  - '@kbn/cloud-security-posture-common'
   - '@kbn/detections-response-ftr-services'
   - '@kbn/connector-schemas'
   - '@kbn/security-solution-features'

@@ -18,7 +18,7 @@ export interface CreateModelResponse {
 }
 
 export const createModel = async ({ modelId }: CreateModelArgs): Promise<CreateModelResponse> => {
-  const route = `/internal/enterprise_search/ml/models/${modelId}`;
+  const route = `/internal/enterprise_search/ml/models/${encodeURIComponent(modelId)}`;
   return await HttpLogic.values.http.post<CreateModelResponse>(route);
 };
 

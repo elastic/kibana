@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { savedObjectId, z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
+import { isAutomationWorkflowMissing } from '../../lib/automations/is_automation_workflow_missing';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
-import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
+import type {
+  NightshiftAutomationAttributes,
+  NightshiftAutomationRecord,
+} from '../../lib/automations/types';
 
 export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/automations/{id}',
@@ -21,10 +25,18 @@ export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['read_nightshift'] },
   },
-  params: z.object({
-    path: z.object({ id: z.string().min(1).max(512) }),
-  }),
-  handler: async ({ request, params, getAutomationsSoClient, context }) => {
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ id: savedObjectId() }),
+    })
+  ),
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    context,
+  }): Promise<NightshiftAutomationRecord & { author: string; isWorkflowMissing: boolean }> => {
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
@@ -34,6 +46,17 @@ export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
       params.path.id
     );
 
-    return { id: so.id, ...so.attributes };
+    const automation = {
+      id: so.id,
+      ...so.attributes,
+      author: so.attributes.author ?? 'System',
+    };
+    const isWorkflowMissing = await isAutomationWorkflowMissing(
+      automation.workflowId,
+      spaceId,
+      request,
+      getWorkflowsManagement
+    );
+    return { ...automation, isWorkflowMissing };
   },
 });

@@ -20,6 +20,13 @@ export const OBSERVABILITY_SPA_SHELL_TIMEOUT_MS = OBSERVABILITY_PRIMARY_NAV_LOAD
 export class ObservabilityNavigation {
   public readonly sidenav: Locator;
   public readonly primaryNav: Locator;
+  /**
+   * `primaryNav`, but only while its overflow split is measured (`data-overflow-measured`). Chrome
+   * publishes a new nav item set with every item in the primary menu and only then measures which
+   * ones fit, so reading placement from `primaryNav` alone can catch an item moments before it
+   * moves into the "More" overflow.
+   */
+  public readonly measuredPrimaryNav: Locator;
   public readonly footerNav: Locator;
   public readonly morePopover: Locator;
   public readonly moreMenuTrigger: Locator;
@@ -27,6 +34,9 @@ export class ObservabilityNavigation {
   constructor(private readonly page: ScoutPage) {
     this.sidenav = this.page.testSubj.locator('kbnChromeLayoutNavigation');
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
+    this.measuredPrimaryNav = this.primaryNav.and(
+      this.page.locator('[data-overflow-measured="true"]')
+    );
     this.footerNav = this.page.testSubj.locator('kbnChromeNav-footer');
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
@@ -134,24 +144,113 @@ export class ObservabilityNavigation {
     return this.sidePanel(id).or(this.nestedPanel(id));
   }
 
+  /** Child of a side panel or a nested More panel — overflow opens the latter. */
+  navItemInPanelByDeepLinkId(panelId: string, deepLinkId: string): Locator {
+    return this.anyPanel(panelId).locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`);
+  }
+
+  navItemInPanelById(panelId: string, id: string): Locator {
+    return this.anyPanel(panelId).locator(`[data-test-subj~="nav-item-id-${id}"]`);
+  }
+
   /**
    * Resolve a body nav item wherever it renders. It lives in the primary nav on some
    * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);
    * open "More" when it is not in the primary nav so the returned locator is reachable.
+   *
+   * Do not `or()` the primary item with the More trigger and `waitFor` — both can
+   * be visible at once, which Playwright treats as a strict-mode violation.
+   *
+   * Wait for a placement signal before choosing a branch: chrome can paint the
+   * More trigger (for other overflow items) before this item lands in primary,
+   * or paint primary late after `waitForLoad()` only saw the nav container.
+   *
+   * The primary branch reads through `measuredPrimaryNav`, so an item that is
+   * only in the primary menu because the overflow split has not been measured
+   * yet does not win the branch.
    */
   async revealBodyNavItemByDeepLinkId(deepLinkId: string): Promise<Locator> {
-    const primaryItem = this.navItemInPrimaryByDeepLinkId(deepLinkId);
+    return this.revealBodyNavItem(
+      this.measuredPrimaryNav.locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`),
+      this.navItemInMoreByDeepLinkId(deepLinkId)
+    );
+  }
+
+  /** Same overflow handling as `revealBodyNavItemByDeepLinkId`, keyed by node `id`. */
+  async revealBodyNavItemById(id: string): Promise<Locator> {
+    return this.revealBodyNavItem(
+      this.measuredPrimaryNav.locator(`[data-test-subj~="nav-item-id-${id}"]`),
+      this.navItemInMoreById(id)
+    );
+  }
+
+  private async revealBodyNavItem(primaryItem: Locator, moreItem: Locator): Promise<Locator> {
+    await this.waitForLoad();
+    await this.waitForFirstVisible([primaryItem, this.moreMenuTrigger]);
+
     if (await primaryItem.isVisible()) {
       return primaryItem;
     }
+
     await this.openMoreMenu();
-    return this.navItemInMoreByDeepLinkId(deepLinkId);
+    await this.waitForFirstVisible([primaryItem, moreItem]);
+
+    if (await primaryItem.isVisible()) {
+      return primaryItem;
+    }
+
+    return moreItem;
+  }
+
+  /** First of `locators` to become visible; prefers no one-shot `isVisible()` race. */
+  private async waitForFirstVisible(locators: Locator[]): Promise<Locator> {
+    if (locators.length === 0) {
+      throw new Error('waitForFirstVisible requires at least one locator');
+    }
+
+    const timeout = OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS;
+
+    return new Promise<Locator>((resolve, reject) => {
+      let pending = locators.length;
+      let settled = false;
+
+      for (const locator of locators) {
+        locator.waitFor({ state: 'visible', timeout }).then(
+          () => {
+            if (!settled) {
+              settled = true;
+              resolve(locator);
+            }
+          },
+          (error) => {
+            pending -= 1;
+            if (!settled && pending === 0) {
+              reject(error);
+            }
+          }
+        );
+      }
+    });
   }
 
   /** Click a body nav item wherever it renders — primary nav or the "More" overflow menu. */
   async clickBodyNavItemByDeepLinkId(deepLinkId: string) {
     const item = await this.revealBodyNavItemByDeepLinkId(deepLinkId);
     await item.click();
+  }
+
+  async openPanelById(id: string): Promise<void> {
+    const opener = await this.revealBodyNavItemById(id);
+    await opener.click();
+    await this.anyPanel(id).waitFor({
+      state: 'visible',
+      timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+    });
+  }
+
+  async clickPanelNavItemByDeepLinkId(panelId: string, deepLinkId: string): Promise<void> {
+    await this.openPanelById(panelId);
+    await this.navItemInPanelByDeepLinkId(panelId, deepLinkId).click();
   }
 
   /** If More is already open, Escape first so the next open is the root list. */

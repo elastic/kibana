@@ -16,16 +16,30 @@ export * from './definitions/constants';
 export * from './definitions/types';
 export * from './definitions/all_operators';
 export * from './definitions/utils/promql';
-export { inlineCastsMapping } from './definitions/generated/inline_casts_mapping';
+export * from './definitions/utils/named_subqueries';
+export { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';
 
 // Utilities from definitions
 export { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from './registry/constants';
 export { METADATA_FIELDS } from './registry/options/metadata';
-export { TIME_SYSTEM_PARAMS } from './definitions/utils/literals';
+export { getRecommendedQueriesTemplates } from './registry/options/recommended_queries';
+export type { QueryTemplate } from './registry/options/recommended_queries';
+export {
+  TIME_SYSTEM_PARAMS,
+  GEOTILE_PRECISION_PARAM,
+  GEOHEX_PRECISION_PARAM,
+  GEOHASH_PRECISION_PARAM,
+  GEOTILE_PRECISION_SYSTEM_PARAM,
+  GEOHEX_PRECISION_SYSTEM_PARAM,
+  GEOHASH_PRECISION_SYSTEM_PARAM,
+  GEO_PRECISION_SYSTEM_PARAMS,
+  GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS,
+} from './definitions/utils/literals';
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
 export { getIndexSourcesFromQuery, shouldBeQuotedSource } from './definitions/utils/sources';
 export { getPromqlBracketsToClose } from './definitions/utils/ast';
 export { escapeEsqlColumnName } from './definitions/utils/columns';
+export { deriveQueryFieldNames } from './registry/highlight/utils';
 export {
   Commands as CommandNames,
   Functions as FunctionNames,

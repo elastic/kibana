@@ -22,26 +22,36 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { of } from 'rxjs';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import * as savedSearchUrlConflictCallout from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 
 const setup = async ({
   dataView,
+  columns,
   hideSidebar,
   hideTable = false,
   isEsqlEnabled = false,
+  esqlQuery,
+  hasEnterpriseLicense = true,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
   },
 }: {
   dataView: DataView;
+  columns?: string[];
   hideSidebar?: boolean;
   hideTable?: boolean;
   isEsqlEnabled?: boolean;
+  /** Puts Discover in ES|QL mode, with this query. */
+  esqlQuery?: string;
+  hasEnterpriseLicense?: boolean;
   dataMainMsg?: DataMainMsg;
 }) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
@@ -50,6 +60,9 @@ const setup = async ({
   const originalGetImplementation = getUiSettingsMock.getMockImplementation();
 
   services.profilesManager = profilesManagerMock;
+  services.licensing = {
+    license$: of({ isActive: true, hasAtLeast: () => hasEnterpriseLicense }),
+  } as unknown as LicensingPluginStart;
   getUiSettingsMock.mockImplementation((key, defaultOverride) => {
     if (key === ENABLE_ESQL) {
       return isEsqlEnabled;
@@ -69,10 +82,13 @@ const setup = async ({
     internalStateActions.updateAppState({
       tabId: toolkit.getCurrentTab().id,
       appState: {
-        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        dataSource: esqlQuery
+          ? createEsqlDataSource()
+          : createDataViewDataSource({ dataViewId: dataView.id! }),
+        columns,
         hideTable,
         hideSidebar,
-        query: { query: '', language: 'kuery' },
+        query: esqlQuery ? { esql: esqlQuery } : { query: '', language: 'kuery' },
       },
     })
   );
@@ -110,7 +126,9 @@ const setup = async ({
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
-      <DiscoverLayout />
+      <RootDragDropProvider>
+        <DiscoverLayout />
+      </RootDragDropProvider>
     </DiscoverToolkitTestProvider>
   );
 
@@ -212,6 +230,56 @@ describe('Discover component', () => {
         expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
       });
     }, 10000);
+
+    test('should reorder the table columns when a selected field is dropped onto another one', async () => {
+      // `_source` is not shown in the sidebar, so the sidebar position of a field doesn't match its column index
+      const { toolkit } = await setup({
+        dataView: dataViewWithTimefieldMock,
+        columns: ['_source', 'extension', 'bytes'],
+      });
+
+      const getSelectedFieldItem = (fieldName: string) => {
+        const item = screen
+          .getByTestId('fieldListGroupedSelectedFields')
+          .querySelector(`li[data-attr-field="${fieldName}"]`);
+        if (!(item instanceof HTMLElement)) {
+          throw new Error(`Selected field "${fieldName}" was not found`);
+        }
+        return item;
+      };
+
+      await waitFor(() => {
+        expect(getSelectedFieldItem('bytes')).toBeInTheDocument();
+      });
+
+      fireEvent.dragStart(
+        within(getSelectedFieldItem('extension')).getByTestId('dscFieldListPanelField-extension'),
+        {
+          // DataTransfer is not implemented in jsdom
+          dataTransfer: { setData: jest.fn(), getData: jest.fn() },
+        }
+      );
+
+      // the drop targets are rendered once the drag state has been set
+      const dropLayer = await within(getSelectedFieldItem('bytes')).findByTestId(
+        'domDragDrop-reorderableDropLayer'
+      );
+      fireEvent.drop(dropLayer);
+
+      // the sidebar is updated right away...
+      expect(
+        Array.from(
+          screen
+            .getByTestId('fieldListGroupedSelectedFields')
+            .querySelectorAll('li[data-attr-field]')
+        ).map((item) => item.getAttribute('data-attr-field'))
+      ).toEqual(['bytes', 'extension']);
+
+      // ...and the columns follow after the next paint
+      await waitFor(() => {
+        expect(toolkit.getCurrentTab().appState.columns).toEqual(['_source', 'bytes', 'extension']);
+      });
+    }, 10000);
   });
 
   it('shows the no results error display', async () => {
@@ -231,4 +299,48 @@ describe('Discover component', () => {
     expect(screen.queryByTestId('dscHideTableButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
   }, 10000);
+
+  describe('explaining an error with AI', () => {
+    const errorMsg = {
+      fetchStatus: FetchStatus.ERROR,
+      foundDocuments: false,
+      error: new Error('circuit_breaking_exception'),
+    };
+
+    it('offers it in the callout for an ES|QL error when it can be used', async () => {
+      await setup({
+        dataView: dataViewWithTimefieldMock,
+        isEsqlEnabled: true,
+        esqlQuery: 'FROM logs | STATS COUNT(*) BY host',
+        dataMainMsg: errorMsg,
+      });
+
+      expect(await screen.findByTestId('discoverErrorExplainButton')).toBeInTheDocument();
+      expect(screen.getByTestId('discoverErrorCalloutWide')).toBeInTheDocument();
+    });
+
+    it('keeps the standard callout for an ES|QL error without an enterprise license', async () => {
+      await setup({
+        dataView: dataViewWithTimefieldMock,
+        isEsqlEnabled: true,
+        esqlQuery: 'FROM logs | STATS COUNT(*) BY host',
+        hasEnterpriseLicense: false,
+        dataMainMsg: errorMsg,
+      });
+
+      expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+      expect(screen.queryByTestId('discoverErrorCalloutWide')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
+    });
+
+    it('does not offer it outside of ES|QL mode', async () => {
+      await setup({
+        dataView: dataViewWithTimefieldMock,
+        dataMainMsg: errorMsg,
+      });
+
+      expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+      expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
+    });
+  });
 });

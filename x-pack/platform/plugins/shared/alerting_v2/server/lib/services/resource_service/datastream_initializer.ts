@@ -59,6 +59,15 @@ export class DatastreamInitializer implements IResourceInitializer {
       },
     };
 
+    await this.initializeDataStream(dataStreamDefinition);
+    await this.updateExistingIndicesFinalPipeline();
+    await this.updateDataStreamLifecycle();
+    await this.updateExistingIndicesReplicaSettings();
+  }
+
+  private async initializeDataStream(
+    dataStreamDefinition: DataStreamDefinition<ResourceDefinition['mappings']>
+  ): Promise<void> {
     try {
       await DataStreamClient.initialize({
         logger: this.logger,
@@ -72,9 +81,6 @@ export class DatastreamInitializer implements IResourceInitializer {
 
       this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
     }
-
-    await this.updateExistingIndicesFinalPipeline();
-    await this.updateExistingIndicesReplicaSettings();
   }
 
   /**
@@ -149,6 +155,26 @@ export class DatastreamInitializer implements IResourceInitializer {
       this.logger.warn(
         `Failed to update auto_expand_replicas for ${this.resourceDefinition.dataStreamName}: ${error.message}`
       );
+    }
+  }
+
+  /**
+   * Replaces the data stream's lifecycle, so omitting `data_retention` removes it. Failures block
+   * initialization so a previous, retention is not kept. `enabled` avoids an empty body.
+   */
+  private async updateDataStreamLifecycle(): Promise<void> {
+    const { dataStreamName, lifecycle, manageLifecycle } = this.resourceDefinition;
+    if (!manageLifecycle) {
+      return;
+    }
+
+    const { acknowledged } = await this.esClient.indices.putDataLifecycle({
+      name: dataStreamName,
+      enabled: true,
+      ...lifecycle,
+    });
+    if (!acknowledged) {
+      throw new EsUnacknowledgedError(`apply lifecycle to ${dataStreamName}`);
     }
   }
 }

@@ -17,12 +17,12 @@ import type { ScoutServerConfig } from '../../../../types';
 
 const SAML1_IDP_METADATA_PATH = resolve(
   REPO_ROOT,
-  'x-pack/platform/test/security_api_integration/packages/helpers/saml/idp_metadata.xml'
+  'x-pack/platform/test_plugins/security_api_integration/packages/helpers/saml/idp_metadata.xml'
 );
 
 export const TEST_ENDPOINTS_PLUGIN_PATH = resolve(
   REPO_ROOT,
-  'x-pack/platform/test/security_functional/plugins/test_endpoints'
+  'x-pack/platform/test_plugins/security_functional/plugins/test_endpoints'
 );
 
 export const addOrReplaceArg = (serverArgs: string[], argName: string, newValue: string) => {

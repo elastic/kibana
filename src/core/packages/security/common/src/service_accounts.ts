@@ -14,7 +14,10 @@
  */
 export interface CreateServiceAccountParams {
   name: string;
-  /** Optional description, supported by Elasticsearch service accounts. */
+  /**
+   * Free text of up to 1,000 characters that describes the account. Kibana trims leading and
+   * trailing whitespace, and treats a blank description as no description.
+   */
   description?: string;
   /**
    * Role names that bound the new account's privileges. Required and non-empty: an account is
@@ -85,10 +88,44 @@ export interface ServiceAccountWorkloadCoordinates extends ServiceAccountWorkloa
   spaceId: string;
 }
 
+/**
+ * A workload bound to a service account, as reported to the account's management surfaces. The
+ * workload type is scoped to the plugin that registered it, so `pluginId` and `workloadType` name
+ * the type together.
+ *
+ * @public
+ */
+export interface ServiceAccountBoundWorkload {
+  pluginId: string;
+  workloadType: string;
+  workloadId: string;
+  /**
+   * What to call the workload in the UI: the title its workload type resolved, or the workload id
+   * when there is none.
+   */
+  displayName: string;
+  /**
+   * The name the owning plugin registered for the workload type. Absent when that plugin is not
+   * loaded, in which case the UI shows `workloadType`.
+   */
+  typeName?: string;
+  /**
+   * Link to the workload. It already carries the base path and the space of the binding, so use
+   * it as is.
+   */
+  href?: string;
+}
+
 /** Parameters for minting credentials for a workload, optionally pinned to an account. @public */
 export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkloadCoordinates {
   /** Reject before minting if the verified binding points to another account. */
   expectedServiceAccountId?: string;
+  /**
+   * The id of this run of the workload in the calling plugin's own records, such as a workflow
+   * execution id. Recorded on the run's `service_account_assume` audit events; the other events of
+   * the run share their `trace.id`. Held to the same length limit as a workload ID.
+   */
+  executionId?: string;
 }
 
 /**
@@ -115,8 +152,35 @@ export interface ServiceAccount {
   id: string;
   /** The name the account was created with. */
   name: string;
-  /** Optional description, supported by Elasticsearch service accounts. */
+  /** The description the account was created with. It is absent when the account has none. */
   description?: string;
   /** The role names the account was created with. See {@link CreateServiceAccountParams.roles}. */
   roles: string[];
+}
+
+/**
+ * The parts of a service account that name it, for showing which account a workload runs as to
+ * users who may see the workload but not manage service accounts. Deliberately smaller than
+ * {@link ServiceAccount}: roles and description stay with the users who manage accounts.
+ *
+ * @public
+ */
+export interface ServiceAccountSummary {
+  /** See {@link ServiceAccount.id}. */
+  id: string;
+  /** See {@link ServiceAccount.name}. */
+  name: string;
+  /**
+   * Whether the account can authenticate. Always `true` on Serverless for now, because UIAM does
+   * not yet report whether an account is disabled.
+   */
+  enabled: boolean;
+  /**
+   * Whether this Kibana expects to be able to run as the account, judged without asking the
+   * account's identity provider. On Elasticsearch, that means Kibana holds a credential for it,
+   * which can be stale for an account that was deleted and recreated outside Kibana. On
+   * Serverless, it is always `true`, because UIAM only returns accounts that this project may
+   * assume.
+   */
+  assumable: boolean;
 }

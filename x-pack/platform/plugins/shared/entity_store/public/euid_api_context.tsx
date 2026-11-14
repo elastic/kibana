@@ -22,6 +22,7 @@ export function EntityStoreEuidApiProvider({ children }: Readonly<{ children: Re
       if (!cancelled) {
         setApi({
           euid: mod.euid,
+          getBuiltInEntityDefinition: mod.getBuiltInEntityDefinition,
         });
       }
     });

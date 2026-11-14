@@ -137,7 +137,7 @@ export interface CommentsHostServices {
    */
   navigateToPath(path: string): Promise<void>;
   getCurrentUser(): Promise<CommentsUser>;
-  /** Renders the viewport, at its size in CSS pixels, to a canvas, leaving out elements marked with `IGNORE_ATTR`; without it, comments have no screenshots. */
+  /** Renders the viewport, at its size in CSS pixels, to a canvas, leaving out the layer's own UI (`IGNORE_ATTR`) except the comments toolbar button; without it, comments have no screenshots. */
   captureViewport?(): Promise<HTMLCanvasElement>;
   /** Formats a moment in time (ISO 8601) as `Intl.DateTimeFormat` would, in the host's locale: `@kbn/i18n-react`'s `formatDate`. */
   formatDate(iso: string, options: Intl.DateTimeFormatOptions): string;

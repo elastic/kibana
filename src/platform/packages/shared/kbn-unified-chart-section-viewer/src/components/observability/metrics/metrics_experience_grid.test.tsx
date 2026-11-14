@@ -43,7 +43,7 @@ import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
 jest.mock('./context/metrics_experience_state_provider');
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
@@ -158,6 +158,8 @@ jest.mock('lodash', () => {
     debounce: (fn: any) => {
       const debounced = (...args: any[]) => fn(...args);
       debounced.cancel = jest.fn();
+      // This mock invokes synchronously, so there is never a pending call to flush.
+      debounced.flush = jest.fn();
       return debounced;
     },
   };
@@ -250,7 +252,6 @@ describe('MetricsExperienceGrid', () => {
     jest.clearAllMocks();
 
     fetchParams = getFetchParamsMock({
-      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
       filters: [],
       query: { esql: 'TS metrics-*' },
       esqlVariables: [],

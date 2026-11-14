@@ -7,6 +7,7 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -118,6 +119,112 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     }
   });
 
+  apiTest(
+    'keeps the dreaming config behind the internal route while the global memory setting is on',
+    async ({ apiClient, esClient, kbnClient, requestAuth }) => {
+      const id = 'scout_memory_toggle_ai_index';
+      const path = aiIndexPath(id);
+      const dreamingPath = testData.aiIndexDreamingPath(id);
+      const dest = 'ai-index-ds-scout-memory-toggle';
+      const credentials = await requestAuth.getApiKey('admin');
+      const headers = { ...credentials.apiKeyHeader, ...API_HEADERS };
+      const internalHeaders = { ...credentials.apiKeyHeader, ...testData.INTERNAL_API_HEADERS };
+      const dreaming = { enabled: false, facts: [{ type: 'preference' }] };
+      const body = {
+        description: 'Memory toggle integration test',
+        dest: dataStreamDest(dest),
+        automations: [],
+        sources: [],
+      };
+
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
+      await apiClient.delete(path, { headers, responseType: 'json' });
+      await esClient.indices.createDataStream({ name: dest }, { ignore: [400] });
+
+      try {
+        await apiTest.step('rejects a dreaming config on the public API', async () => {
+          const response = await apiClient.post(COLLECTION, {
+            headers,
+            responseType: 'json',
+            body: { id, ...body, dreaming },
+          });
+          expect(response).toHaveStatusCode(400);
+
+          const createResponse = await apiClient.post(COLLECTION, {
+            headers,
+            responseType: 'json',
+            body: { id, ...body },
+          });
+          expect(createResponse).toHaveStatusCode(201);
+        });
+
+        await apiTest.step('hides the dreaming route while memory is off', async () => {
+          const getResponse = await apiClient.get(dreamingPath, {
+            headers: internalHeaders,
+            responseType: 'json',
+          });
+          expect(getResponse).toHaveStatusCode(404);
+
+          const putResponse = await apiClient.put(dreamingPath, {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: dreaming,
+          });
+          expect(putResponse).toHaveStatusCode(404);
+        });
+
+        await kbnClient.uiSettings.updateGlobal({
+          [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+        });
+        await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
+        await apiTest.step('stores the config while memory is on', async () => {
+          const putResponse = await apiClient.put(dreamingPath, {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: dreaming,
+          });
+          expect(putResponse).toHaveStatusCode(200);
+          expect(putResponse.body).toStrictEqual({ dreaming });
+        });
+
+        await apiTest.step(
+          'keeps the config out of the public AI index and through a public replace',
+          async () => {
+            const getResponse = await apiClient.get(path, { headers, responseType: 'json' });
+            expect(getResponse).toHaveStatusCode(200);
+            expect('dreaming' in getResponse.body).toBe(false);
+            expect('memory_enabled' in getResponse.body).toBe(false);
+
+            const replaceResponse = await apiClient.put(path, {
+              headers,
+              responseType: 'json',
+              body: { ...body, description: 'Replaced' },
+            });
+            expect(replaceResponse).toHaveStatusCode(200);
+
+            const dreamingResponse = await apiClient.get(dreamingPath, {
+              headers: internalHeaders,
+              responseType: 'json',
+            });
+            expect(dreamingResponse).toHaveStatusCode(200);
+            expect(dreamingResponse.body).toStrictEqual({ dreaming });
+          }
+        );
+      } finally {
+        await apiClient.delete(path, { headers, responseType: 'json' });
+        await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
+        await kbnClient.uiSettings.updateGlobal({
+          [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+        });
+        await kbnClient.uiSettings.waitForEventualCacheRefresh();
+      }
+    }
+  );
+
   apiTest('manages an AI index through its full lifecycle', async ({ apiClient }) => {
     let dateCreated: string;
     const path = aiIndexPath(AI_INDEX.lifecycle);
@@ -151,6 +258,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({ id: AI_INDEX.lifecycle, ...aiIndexBody });
+      expect('memory_enabled' in response.body).toBe(false);
       expect(response.body.date_created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       expect(response.body.date_modified).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       dateCreated = response.body.date_created;
@@ -172,7 +280,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       const response = await apiClient.put(path, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: { ...aiIndexBody, description: 'Updated description' },
+        body: { ...aiIndexBody, description: 'Updated description', memory_enabled: false },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -183,6 +291,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
         responseType: 'json',
       });
       expect(updatedResponse.body.description).toBe('Updated description');
+      expect('memory_enabled' in updatedResponse.body).toBe(false);
       expect(updatedResponse.body.date_created).toBe(dateCreated);
     });
 

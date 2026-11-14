@@ -11,10 +11,12 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Watchlists', function () {
     loadTestFile(require.resolve('./index_source_sync'));
     loadTestFile(require.resolve('./store_source_sync'));
+    loadTestFile(require.resolve('./integration_source_sync'));
     loadTestFile(require.resolve('./entity_store_sync'));
     loadTestFile(require.resolve('./manual_assignment'));
     loadTestFile(require.resolve('./lifecycle'));
     loadTestFile(require.resolve('./index_source_api_key'));
     loadTestFile(require.resolve('./watchlist_privileges'));
+    loadTestFile(require.resolve('./non_default_spaces'));
   });
 }

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const endpointFieldsRequestSchema = z.object({
-  indices: z.array(z.string()),
-  onlyCheckIfIndicesExist: z.boolean(),
-});
+export const endpointFieldsRequestSchema = lazySchema(() =>
+  z.object({
+    indices: z.array(z.string()),
+    onlyCheckIfIndicesExist: z.boolean(),
+  })
+);
 
 export type EndpointFieldsRequestSchemaInput = z.input<typeof endpointFieldsRequestSchema>;
 

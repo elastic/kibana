@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
+  RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
 } from '../service/response_actions/constants';
 import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
@@ -98,6 +99,16 @@ describe('actions schemas', () => {
         }).not.toThrow();
       });
 
+      it('should not accept a list of more than the allowed number of `types`', () => {
+        const overLimit = [...RESPONSE_ACTION_TYPE, RESPONSE_ACTION_TYPE[0]];
+
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ types: overLimit });
+        }).toThrow(
+          `array size is [${overLimit.length}], but cannot be greater than [${RESPONSE_ACTION_TYPE.length}]`
+        );
+      });
+
       it('should not accept an empty list for `types`', () => {
         expect(() => {
           EndpointActionListRequestSchema.query.validate({
@@ -183,6 +194,16 @@ describe('actions schemas', () => {
             agentTypes: RESPONSE_ACTION_AGENT_TYPE,
           });
         }).not.toThrow();
+      });
+
+      it('should not accept a list of more than the allowed number of agentTypes', () => {
+        const overLimit = [...RESPONSE_ACTION_AGENT_TYPE, RESPONSE_ACTION_AGENT_TYPE[0]];
+
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ agentTypes: overLimit });
+        }).toThrow(
+          `array size is [${overLimit.length}], but cannot be greater than [${RESPONSE_ACTION_AGENT_TYPE.length}]`
+        );
       });
 
       it('should not accept empty agentTypes list', () => {
@@ -381,6 +402,26 @@ describe('actions schemas', () => {
             statuses: ['failed', 'pending', 'successful'],
           });
         }).not.toThrow();
+      });
+
+      it('should work with all allowed `statuses` in a list', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            startDate: 'now-1d',
+            endDate: 'now',
+            statuses: RESPONSE_ACTION_STATUS,
+          });
+        }).not.toThrow();
+      });
+
+      it('should not work with a list of more than the allowed number of `statuses`', () => {
+        const overLimit = [...RESPONSE_ACTION_STATUS, RESPONSE_ACTION_STATUS[0]];
+
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ statuses: overLimit });
+        }).toThrow(
+          `array size is [${overLimit.length}], but cannot be greater than [${RESPONSE_ACTION_STATUS.length}]`
+        );
       });
 
       it('should not work with empty list for `statuses` filter', () => {
@@ -1643,6 +1684,191 @@ describe('actions schemas', () => {
             parameters: { path: charsOfLength(4096) },
           });
         }).not.toThrow();
+      });
+
+      it('should reject when neither `path` nor `paths` are defined', () => {
+        expect(() => {
+          EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            parameters: {},
+          });
+        }).toThrow('[parameters]: one of [path] or [paths] must be defined');
+      });
+
+      describe('and `paths` parameter', () => {
+        it('should accept `paths` without `path`', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: ['/one', '/two'] },
+            });
+          }).not.toThrow();
+        });
+
+        it('should accept `paths` with agent type `endpoint`', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              agent_type: 'endpoint',
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: ['/one', '/two'] },
+            });
+          }).not.toThrow();
+        });
+
+        it('should accept a single entry in `paths`', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: ['/one'] },
+            });
+          }).not.toThrow();
+        });
+
+        it('should reject `paths` used together with `path`', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { path: '/one', paths: ['/two'] },
+            });
+          }).toThrow('[parameters]: [path] and [paths] cannot be used together');
+        });
+
+        it('should reject an empty `paths` array', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: [] },
+            });
+          }).toThrow();
+        });
+
+        it('should reject `paths` with an empty string entry', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: ['/one', ''] },
+            });
+          }).toThrow();
+        });
+
+        it('should reject `paths` that is not an array of strings', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: '/one' },
+            });
+          }).toThrow();
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: [1] },
+            });
+          }).toThrow();
+        });
+
+        it('should reject a `paths` entry longer than 4096 characters', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: [charsOfLength(4097)] },
+            });
+          }).toThrow();
+        });
+
+        it('should accept a `paths` entry of exactly 4096 characters', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: [charsOfLength(4096)] },
+            });
+          }).not.toThrow();
+        });
+
+        it('should accept exactly 100 entries in `paths`', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: Array.from({ length: 100 }, (_, i) => `/file/${i}`) },
+            });
+          }).not.toThrow();
+        });
+
+        it('should reject more than 100 entries in `paths`', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { paths: Array.from({ length: 101 }, (_, i) => `/file/${i}`) },
+            });
+          }).toThrow();
+        });
+
+        it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+          'should reject `paths` with agent type `%s`',
+          (agentType) => {
+            expect(() => {
+              EndpointActionGetFileSchema.body.validate({
+                agent_type: agentType,
+                endpoint_ids: ['endpoint_id'],
+                parameters: { paths: ['/one', '/two'] },
+              });
+            }).toThrow(`[parameters.paths]: is not valid with agent type of ${agentType}`);
+          }
+        );
+
+        it('should accept `path` for non-endpoint agent types', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              agent_type: 'sentinel_one',
+              endpoint_ids: ['endpoint_id'],
+              parameters: { path: '/one' },
+            });
+          }).not.toThrow();
+        });
+      });
+
+      describe('and `force` parameter', () => {
+        it.each([true, false])('should accept `force` set to `%s`', (force) => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { path: 'C:\\locked.dat', force },
+            });
+          }).not.toThrow();
+        });
+
+        it('should accept `force` with agent type `endpoint`', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              agent_type: 'endpoint',
+              endpoint_ids: ['endpoint_id'],
+              parameters: { path: 'C:\\locked.dat', force: true },
+            });
+          }).not.toThrow();
+        });
+
+        it('should reject a `force` that is not a boolean', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              parameters: { path: 'C:\\locked.dat', force: 'yes' },
+            });
+          }).toThrow();
+        });
+
+        describe.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+          'with agent type `%s`',
+          (agentType) => {
+            it.each([true, false])('should reject `force` set to `%s`', (force) => {
+              expect(() => {
+                EndpointActionGetFileSchema.body.validate({
+                  agent_type: agentType,
+                  endpoint_ids: ['endpoint_id'],
+                  parameters: { path: 'C:\\locked.dat', force },
+                });
+              }).toThrow(`[parameters.force]: is not valid with agent type of ${agentType}`);
+            });
+          }
+        );
       });
     });
 

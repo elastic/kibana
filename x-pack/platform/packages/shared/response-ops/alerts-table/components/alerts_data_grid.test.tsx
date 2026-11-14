@@ -181,6 +181,15 @@ describe('AlertsDataGrid', () => {
       expect(mockRenderContext.onPageIndexChange).toHaveBeenCalledWith(1);
     });
 
+    it('should hide the page size selector when not interactive', () => {
+      const { rerender } = render(<TestComponent {...mockDataGridProps} />);
+      expect(screen.getByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
+
+      rerender(<TestComponent {...mockDataGridProps} isInteractive={false} />);
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('pagination-button-1')).toBeInTheDocument();
+    });
+
     it('should show when it was updated', () => {
       render(<TestComponent {...mockDataGridProps} />);
       expect(screen.getByTestId('toolbar-updated-at')).not.toBe(null);
@@ -677,16 +686,12 @@ describe('AlertsDataGrid', () => {
 
       it('should provide IndividualTagsActionContext to child components', async () => {
         const TestChildComponent = () => {
-          try {
-            const context = useIndividualTagsActionContext();
-            return (
-              <div data-test-subj="context-test">
-                {context.isFlyoutOpen ? 'Flyout Open' : 'Flyout Closed'}
-              </div>
-            );
-          } catch (e) {
-            return <div data-test-subj="context-test">Context Not Available</div>;
-          }
+          const context = useIndividualTagsActionContext();
+          return (
+            <div data-test-subj="context-test">
+              {context.isFlyoutOpen ? 'Flyout Open' : 'Flyout Closed'}
+            </div>
+          );
         };
 
         render(

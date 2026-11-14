@@ -36,7 +36,8 @@ const mockKibana = () => {
 
 const dataViewMock = dataViewPluginMocks.createStartContract();
 
-describe('Expression', () => {
+// Failing: See https://github.com/elastic/kibana/issues/253621
+describe.skip('Expression', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();

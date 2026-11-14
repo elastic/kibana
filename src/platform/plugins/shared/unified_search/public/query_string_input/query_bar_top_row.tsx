@@ -18,6 +18,7 @@ import { throttle, debounce } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
+import { css as cssClassName } from '@emotion/css';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
@@ -29,9 +30,17 @@ import {
   ESQLLangEditor,
   QuickSearchVisor,
   type ESQLEditorProps,
-  type RestorableStateProviderApi,
+  type ESQLEditorApi,
+  type QuickSearchVisorProps,
+  type VisorNlResultHandler,
 } from '@kbn/esql/public';
-import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
+import type {
+  EuiButtonColor,
+  EuiFieldText,
+  EuiIconProps,
+  OnRefreshProps,
+  UseEuiTheme,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -45,18 +54,22 @@ import {
   EuiIconTip,
   EuiSplitButton,
   useEuiTheme,
+  getEuiButtonColorValues,
+  getEuiFilledButtonColorValues,
+  transparentize,
   type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { FirstDayOfWeek } from '@kbn/date-range-picker';
 import {
   DATE_RANGE_PICKER_FEATURE_FLAG,
   DateRangePicker,
@@ -65,6 +78,7 @@ import {
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
+import moment from 'moment';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -107,6 +121,14 @@ export const strings = {
   getSearchButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchButton', {
       defaultMessage: 'Search',
+    }),
+  getSearchAgainAriaLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchAgainAriaLabel', {
+      defaultMessage: 'Search again',
+    }),
+  getSearchWithUpdatedQueryAriaLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchWithUpdatedQueryAriaLabel', {
+      defaultMessage: 'Search with updated query',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
@@ -162,6 +184,11 @@ const getWrapperWithTooltip = (
 // @internal
 export type ShowDatePicker = boolean | { disabled: boolean; disabledReason?: string };
 
+export type LegacyDatePickerProps = Pick<
+  React.ComponentProps<typeof EuiSuperDatePicker>,
+  'minDate' | 'commonlyUsedRanges'
+>;
+
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
   customSubmitButton?: any;
@@ -172,7 +199,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   disableAutoFocus?: boolean;
   fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
-  indexPatterns?: Array<DataView | string>;
+  indexPatterns?: Array<FilterableSource | string>;
   indicateNoData?: boolean;
   isClearable?: boolean;
   isDirty: boolean;
@@ -213,6 +240,12 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
   /**
+   * When false, hide the date picker's previous / next / zoom time-window buttons.
+   * Defaults to true.
+   */
+  showTimeWindowButtons?: boolean;
+  legacyDatePickerProps?: LegacyDatePickerProps;
+  /**
    * Style of the submit button
    * `iconOnly` - use IconButton
    * `full` - use SuperUpdateButton
@@ -231,6 +264,12 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
+
+  /**
+   * Restorable state of the ES|QL quick search visor (KQL vs. natural language mode), persisted by the host.
+   */
+  visorInitialState?: QuickSearchVisorProps['initialState'];
+  onVisorInitialStateChange?: QuickSearchVisorProps['onInitialStateChange'];
 
   /**
    * Optional configuration for ES|QL variables.
@@ -276,6 +315,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Optional ES|QL prop - Enable data source browser in ESQL editor
    */
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
+  /**
+   * Optional ES|QL prop - Show the action to create an ES|QL view from the editor query.
+   * Hidden unless a host opts in.
+   */
+  enableCreateView?: ESQLEditorProps['enableCreateView'];
   useBackgroundSearchButton?: boolean;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
@@ -292,9 +336,42 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     isApproximate: boolean;
     onChange: (isApproximate: boolean) => void;
     additionalText?: string;
+    additionalDisabledText?: string;
     disabled?: boolean;
     disabledReason?: string;
   };
+}
+
+/** Returns the absolute ISO representation of a date math string, or `undefined` if it's invalid. */
+function toAbsoluteString(value: string, roundUp = false): string | undefined {
+  const valueAsMoment = dateMath.parse(value, { roundUp });
+  if (!valueAsMoment) {
+    return value;
+  }
+  return valueAsMoment.isValid() ? valueAsMoment.toISOString() : undefined;
+}
+
+function SharedTimefilterDuration({
+  timeFrom,
+  timeTo,
+  dateFormat,
+}: {
+  timeFrom: string;
+  timeTo: string;
+  dateFormat: string;
+}) {
+  const dateRangePretty = usePrettyDuration({
+    timeFrom,
+    timeTo,
+    quickRanges: [],
+    dateFormat,
+  });
+  return (
+    <div
+      data-shared-timefilter-duration={dateRangePretty}
+      data-test-subj="dataSharedTimefilterDuration"
+    />
+  );
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -306,30 +383,14 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   to: string;
   dateFormat: string;
 }) {
-  function toAbsoluteString(value: string, roundUp = false) {
-    const valueAsMoment = dateMath.parse(value, { roundUp });
-    if (!valueAsMoment) {
-      return value;
-    }
-    return valueAsMoment.toISOString();
-  }
+  const timeFrom = toAbsoluteString(from);
+  const timeTo = toAbsoluteString(to, true);
 
-  try {
-    const dateRangePretty = usePrettyDuration({
-      timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to, true),
-      quickRanges: [],
-      dateFormat,
-    });
-    return (
-      <div
-        data-shared-timefilter-duration={dateRangePretty}
-        data-test-subj="dataSharedTimefilterDuration"
-      />
-    );
-  } catch (e) {
+  if (timeFrom === undefined || timeTo === undefined) {
     return <div data-test-subj="dataSharedTimefilterDuration" />;
   }
+
+  return <SharedTimefilterDuration timeFrom={timeFrom} timeTo={timeTo} dateFormat={dateFormat} />;
 });
 
 type GenericQueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
@@ -341,10 +402,12 @@ export const QueryBarTopRow = React.memo(
     props: QueryBarTopRowProps<QT>
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
+    const isEsqlLayoutStacked = useIsWithinBreakpoints(['xs', 's', 'm']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
-    const { euiTheme } = useEuiTheme();
+    const euiThemeContext = useEuiTheme();
+    const { euiTheme } = euiThemeContext;
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -369,18 +432,16 @@ export const QueryBarTopRow = React.memo(
       }
     }, [props.isLoading]);
 
-    const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
+    const esqlEditorRef = useRef<ESQLEditorApi>(null);
 
-    // Temporary, the empty page will change and we wont need to control it
-    useEffect(() => {
-      esqlEditorRef.current?.refreshInitialState();
-    }, [props.esqlEditorInitialState]);
+    const focusEsqlEditor = useCallback(() => esqlEditorRef.current?.focus(), []);
 
     const {
       showQueryInput = true,
       showDatePicker = true,
       showAutoRefreshOnly = false,
       showSubmitButton = true,
+      showTimeWindowButtons = true,
       enableDateRangePicker = true,
     } = props;
 
@@ -537,7 +598,7 @@ export const QueryBarTopRow = React.memo(
       timeHistory$,
       toRecentlyUsedRanges(timeHistory?.get() ?? [])
     );
-    const [commonlyUsedRanges] = useState(() => {
+    const [uiSettingsCommonlyUsedRanges] = useState(() => {
       return (
         uiSettings
           ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
@@ -550,6 +611,13 @@ export const QueryBarTopRow = React.memo(
           }) ?? []
       );
     });
+    const commonlyUsedRanges =
+      props.legacyDatePickerProps?.commonlyUsedRanges ?? uiSettingsCommonlyUsedRanges;
+
+    // A submit (e.g. a manual Refresh) refetches the data without changing the date range props,
+    // so tell the DateRangePicker to re-resolve relative bounds (e.g. `now-15m`) against the new
+    // "now" and keep the dates it displays in step with the data.
+    const [submitEpoch, setSubmitEpoch] = useState(0);
 
     const onSubmit = useCallback(
       (
@@ -560,6 +628,7 @@ export const QueryBarTopRow = React.memo(
           timeHistory.add(dateRange);
         }
 
+        setSubmitEpoch((epoch) => epoch + 1);
         propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
@@ -567,10 +636,12 @@ export const QueryBarTopRow = React.memo(
 
     const onClickSubmitButton = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        // Accepting a pending AI proposal submits the resulting query itself.
+        if (esqlEditorRef.current?.acceptPendingReview()) return;
         if (persistedLog && queryRef.current && isOfQueryType(queryRef.current)) {
           persistedLog.add(queryRef.current.query);
         }
-        event.preventDefault();
         onSubmit(
           {
             query: queryRef.current,
@@ -697,16 +768,14 @@ export const QueryBarTopRow = React.memo(
     // stays in sync with real query cadence. The timefilter drives data fetches in consumers like
     // Discover and Dashboard; without this the two independent timers drift apart over time.
     const [autoRefreshEpoch, setAutoRefreshEpoch] = useState<number | undefined>(undefined);
-    const visorNlResultHandlerRef = useRef<((generatedQuery: string) => void) | undefined>(
-      undefined
-    );
+    const visorNlResultHandlerRef = useRef<VisorNlResultHandler | undefined>(undefined);
     const [visorNlResultHandlerReady, setVisorNlResultHandlerReady] = useState(false);
-    const onVisorNlResultReady = useCallback((fn: (generatedQuery: string) => void) => {
+    const onVisorNlResultReady = useCallback((fn: VisorNlResultHandler) => {
       visorNlResultHandlerRef.current = fn;
       setVisorNlResultHandlerReady(true);
     }, []);
-    const onVisorNlResult = useCallback((generatedQuery: string) => {
-      visorNlResultHandlerRef.current?.(generatedQuery);
+    const onVisorNlResult = useCallback<VisorNlResultHandler>((generatedQuery, review) => {
+      visorNlResultHandlerRef.current?.(generatedQuery, review);
     }, []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
@@ -720,6 +789,15 @@ export const QueryBarTopRow = React.memo(
 
       return () => subscription.unsubscribe();
     }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
+
+    const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
+
+    const calendarOptions = useMemo(
+      () => ({
+        firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+      }),
+      [dayOfWeekSetting]
+    );
 
     // Visualize-style consumers request auto-refresh-only mode via
     // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
@@ -960,13 +1038,14 @@ export const QueryBarTopRow = React.memo(
             recentlyUsedRanges={recentlyUsedRanges}
             locale={i18n.getLocale()}
             commonlyUsedRanges={commonlyUsedRanges}
+            minDate={props.legacyDatePickerProps?.minDate}
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
             isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
             width={isMobile ? 'full' : 'auto'}
             compressed
-            showTimeWindowButtons
+            showTimeWindowButtons={showTimeWindowButtons}
             timeZoneDisplayProps={{
               timeZone: timeZoneName,
               customRender: timeZoneCustomRender,
@@ -1003,7 +1082,7 @@ export const QueryBarTopRow = React.memo(
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}
-              showTimeWindowButtons
+              showTimeWindowButtons={showTimeWindowButtons}
               presets={dateRangePickerPresets.presets}
               recent={recentlyUsedRanges}
               onPresetSave={dateRangePickerPresets.onPresetSave}
@@ -1012,8 +1091,10 @@ export const QueryBarTopRow = React.memo(
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
+              resolveEpoch={submitEpoch}
               inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
+              calendarOptions={calendarOptions}
               prependBasePath={http?.basePath.prepend}
               canAccessAdvancedSettings={
                 (application?.capabilities.advancedSettings?.save as boolean | undefined) ?? false
@@ -1054,6 +1135,10 @@ export const QueryBarTopRow = React.memo(
               {buttonLabelCancel}
             </EuiSplitButton.ActionPrimary>
             <EuiSplitButton.ActionSecondary
+              className={getSplitButtonSecondaryActionClassName(euiThemeContext, {
+                color: 'text',
+                fill: false,
+              })}
               isLoading={isSendingToBackground}
               isDisabled={!canSendToBackground}
               onClick={onClickSendToBackground}
@@ -1107,8 +1192,15 @@ export const QueryBarTopRow = React.memo(
 
     const getSubmitButtonProps = () => {
       if (shouldRenderESQLUi) {
-        const label = strings.getSearchButtonLabel();
-        return { icon: undefined, text: label, ariaLabel: label, color: 'primary' as const };
+        return {
+          icon: undefined,
+          text: strings.getSearchButtonLabel(),
+          ariaLabel: props.isDirty
+            ? strings.getSearchWithUpdatedQueryAriaLabel()
+            : strings.getSearchAgainAriaLabel(),
+          color: 'primary' as const,
+          fill: Boolean(props.isDirty),
+        };
       }
 
       if (props.isDirty) {
@@ -1117,6 +1209,7 @@ export const QueryBarTopRow = React.memo(
           text: strings.getUpdateButtonLabel(),
           ariaLabel: strings.getNeedsUpdatingLabel(),
           color: 'success' as const,
+          fill: false,
         };
       }
 
@@ -1125,6 +1218,7 @@ export const QueryBarTopRow = React.memo(
         text: strings.getRefreshButtonLabel(),
         ariaLabel: strings.getRefreshQueryLabel(),
         color: 'primary' as const,
+        fill: false,
       };
     };
 
@@ -1138,21 +1232,30 @@ export const QueryBarTopRow = React.memo(
         text: buttonText,
         ariaLabel: buttonAriaLabel,
         color: buttonColor,
+        fill: buttonFill,
       } = getSubmitButtonProps();
       const submitTooltip = buttonAriaLabel;
       const splitButton = (
-        <EuiSplitButton color={buttonColor} size="s">
+        <EuiSplitButton color={buttonColor} fill={buttonFill} size="s">
           <EuiSplitButton.ActionPrimary
             iconType={buttonIcon}
             isLoading={props.isLoading}
             isDisabled={isSubmitDisabled}
             onClick={onClickSubmitButton}
             aria-label={buttonAriaLabel}
+            tooltipProps={{
+              content: submitTooltip,
+              disableScreenReaderOutput: true,
+            }}
             data-test-subj="querySubmitButton"
           >
             {buttonText}
           </EuiSplitButton.ActionPrimary>
           <EuiSplitButton.ActionSecondary
+            className={getSplitButtonSecondaryActionClassName(euiThemeContext, {
+              color: buttonColor,
+              fill: buttonFill,
+            })}
             iconType="backgroundTask"
             isLoading={isSendingToBackground}
             isDisabled={!canSendToBackground || Boolean(props.disableSubmitAction)}
@@ -1179,7 +1282,7 @@ export const QueryBarTopRow = React.memo(
           onClick={onClickSubmitButton}
           size="s"
           color={buttonColor}
-          fill={false}
+          fill={buttonFill}
           needsUpdate={props.isDirty}
           data-test-subj="querySubmitButton"
           toolTipProps={{
@@ -1215,6 +1318,7 @@ export const QueryBarTopRow = React.memo(
                   isApproximate={props.esqlApproximation.isApproximate}
                   onChange={props.esqlApproximation.onChange}
                   additionalText={props.esqlApproximation.additionalText}
+                  additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                   disabled={props.esqlApproximation.disabled}
                   disabledReason={props.esqlApproximation.disabledReason}
                 />
@@ -1392,8 +1496,10 @@ export const QueryBarTopRow = React.memo(
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            enableCreateView={props.enableCreateView}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
+            hasExternalVisor
           />
         )
       );
@@ -1429,7 +1535,10 @@ export const QueryBarTopRow = React.memo(
         {!isScreenshotMode &&
           (shouldRenderESQLUi ? (
             <>
-              <EuiFlexGroup {...queryBarFlexGroupProps}>
+              <EuiFlexGroup
+                {...queryBarFlexGroupProps}
+                direction={isEsqlLayoutStacked ? 'column' : 'row'}
+              >
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
                 <EuiFlexItem>
                   <QuickSearchVisor
@@ -1438,7 +1547,11 @@ export const QueryBarTopRow = React.memo(
                     }
                     onNlResult={visorNlResultHandlerReady ? onVisorNlResult : undefined}
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
-                    isDisabled={isSubmitDisabled}
+                    isDisabled={Boolean(isDateRangeInvalid || props.isDisabled)}
+                    disableSubmitAction={Boolean(props.disableSubmitAction)}
+                    onKqlSubmitted={focusEsqlEditor}
+                    initialState={props.visorInitialState}
+                    onInitialStateChange={props.onVisorInitialStateChange}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}
@@ -1472,6 +1585,7 @@ export const QueryBarTopRow = React.memo(
                     isApproximate={props.esqlApproximation.isApproximate}
                     onChange={props.esqlApproximation.onChange}
                     additionalText={props.esqlApproximation.additionalText}
+                    additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                     disabled={props.esqlApproximation.disabled}
                     disabledReason={props.esqlApproximation.disabledReason}
                   />
@@ -1503,4 +1617,21 @@ const inputStringStyles = {
         backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
       },
     }),
+};
+
+// Temporary override until implemented in EUI
+const getSplitButtonSecondaryActionClassName = (
+  euiThemeContext: UseEuiTheme,
+  { color, fill }: { color: EuiButtonColor; fill: boolean }
+) => {
+  const { backgroundColor: disabledBackgroundColor } = fill
+    ? getEuiFilledButtonColorValues(euiThemeContext, 'disabled')
+    : getEuiButtonColorValues(euiThemeContext, 'disabled');
+
+  return cssClassName({
+    "&:is(:disabled, [aria-disabled='true'])": {
+      backgroundColor: transparentize(disabledBackgroundColor, 0.2),
+      ...(fill && { color: getEuiFilledButtonColorValues(euiThemeContext, color).color }),
+    },
+  });
 };

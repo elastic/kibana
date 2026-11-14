@@ -103,6 +103,7 @@ export const TemplateForm = ({
   history,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
+  const [isReviewSaveBlocked, setIsReviewSaveBlocked] = useState(false);
   const {
     config: { enableIndexMode },
   } = useAppContext();
@@ -113,20 +114,23 @@ export const TemplateForm = ({
     aliases: true,
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const indexTemplate = defaultValue ?? {
-    name: '',
-    indexPatterns: [],
-    dataStream: {},
-    indexMode: enableIndexMode ? STANDARD_INDEX_MODE : undefined,
-    template: {},
-    _kbnMeta: {
-      type: 'default',
-      hasDatastream: false,
-      isLegacy,
-    },
-    allowAutoCreate: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
-  };
+  const indexTemplate = useMemo<TemplateDeserialized>(
+    () =>
+      defaultValue ?? {
+        name: '',
+        indexPatterns: [],
+        dataStream: {},
+        indexMode: enableIndexMode ? STANDARD_INDEX_MODE : undefined,
+        template: {},
+        _kbnMeta: {
+          type: 'default',
+          hasDatastream: false,
+          isLegacy,
+        },
+        allowAutoCreate: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
+      },
+    [defaultValue, enableIndexMode, isLegacy]
+  );
 
   const {
     template: {
@@ -304,6 +308,7 @@ export const TemplateForm = ({
           onSave={onSaveTemplate}
           isEditing={isEditing}
           isSaving={isSaving}
+          isNextButtonDisabled={isReviewSaveBlocked}
           apiError={apiError}
           texts={i18nTexts}
           onChange={onWizardContentChange}
@@ -351,6 +356,7 @@ export const TemplateForm = ({
             <StepReviewContainer
               getTemplateData={buildTemplateObject(indexTemplate)}
               dataStreamOptions={dataStreamOptions}
+              onSaveBlockedChange={setIsReviewSaveBlocked}
             />
           </FormWizardStep>
         </FormWizard>

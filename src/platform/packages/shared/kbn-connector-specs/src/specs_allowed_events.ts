@@ -12,12 +12,20 @@
  * `ConnectorSpec.events`.
  *
  * This is not a runtime registry. While inbound events are still being built
- * (kill switch `xpack.actions.inboundEvents.enabled` defaults to false), an
- * empty/explicit allowlist prevents drive-by specs from opting into the
- * inbound surface just because the type exists.
+ * (`xpack.actions.inboundEvents.enabled` defaults to true; LaunchDarkly
+ * `actions.inboundEventsEnabled` can force ingress off), an explicit allowlist
+ * prevents drive-by specs from opting into the inbound surface just because
+ * the type exists.
  *
  * Sunset: once phase-1 inbound events are working and events are generally
  * available, delete this set and rely on code review, the kill switch, and
  * route authz. "Accept whatever specs define" is the intended end state.
  */
-export const SPECS_ALLOWED_EVENTS = new Set<string>(['.datadog', '.inboundWebhook', '.slack2']);
+export const SPECS_ALLOWED_EVENTS = new Set<string>([
+  '.datadog',
+  '.github',
+  '.inboundWebhook',
+  '.microsoft-teams',
+  '.servicenow_search',
+  '.slack2',
+]);
