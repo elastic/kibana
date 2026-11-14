@@ -13,8 +13,9 @@ import path from 'path';
 import type { ConnectorSpec } from '../../connector_spec';
 import { loadVendorSpec } from './load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from './load_vendor_specs';
-import type { VendorApiManifest } from './manifest';
-import { parseManifest } from './manifest';
+import type { ManifestSource, VendorApiManifest } from './manifest';
+import { isProtocolFormat, parseManifest } from './manifest';
+import { diffProtocolSnapshots, loadProtocolSpec } from './protocol_sources';
 import type { DiffSpecs, OasdiffEntry } from './run_oasdiff';
 import { createOasdiff } from './run_oasdiff';
 import { toStableJson } from './stable_json';
@@ -26,10 +27,13 @@ export type ChangeKind = 'breaking' | 'deprecation' | 'non-breaking';
 /** A change in the latest vendor spec to an operation the connector calls. */
 export interface SpecChange {
   readonly kind: ChangeKind;
-  /** The `oasdiff` rule, e.g. `response-property-enum-value-added`. */
+  /**
+   * The rule: of `oasdiff`, e.g. `response-property-enum-value-added`; of `graphql`, e.g.
+   * `FIELD_REMOVED`; or for MCP, e.g. `mcp-tool-removed`.
+   */
   readonly id: string;
   readonly text: string;
-  /** `METHOD /path`, for changes to an operation. */
+  /** `METHOD /path`, or an MCP tool's name, for changes to an operation. */
   readonly operation?: string;
 }
 
@@ -147,6 +151,26 @@ const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
     : 'none';
 };
 
+const classifyChanges = async (
+  format: ManifestSource['format'],
+  committed: string | undefined,
+  current: string | undefined,
+  diff: DiffSpecs
+): Promise<readonly SpecChange[] | undefined> => {
+  if (!isProtocolFormat(format)) {
+    return (await diff(committed ?? '{}', current ?? '{}'))?.map(toSpecChange);
+  }
+  if (committed === undefined || current === undefined) {
+    return undefined;
+  }
+  // A snapshot that can't be read leaves the change unclassified, which gets an issue.
+  try {
+    return diffProtocolSnapshots(format, committed, current);
+  } catch {
+    return undefined;
+  }
+};
+
 interface LatestComparison {
   readonly sources: Record<string, SourceDrift>;
   readonly operationsChanged: boolean;
@@ -191,18 +215,15 @@ const compareWithLatest = async ({
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
-    for (const name of Object.keys(manifest.sources)) {
+    for (const [name, { format }] of Object.entries(manifest.sources)) {
       const [committed, current] = await Promise.all(
-        [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name))))
+        [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name, format))))
       );
       if (committed === current) {
         sources[name] = { status: 'unchanged' };
       } else {
-        const entries = await diff(committed ?? '{}', current ?? '{}');
-        sources[name] = {
-          status: 'changed',
-          ...(entries === undefined ? {} : { changes: entries.map(toSpecChange) }),
-        };
+        const changes = await classifyChanges(format, committed, current, diff);
+        sources[name] = { status: 'changed', ...(changes === undefined ? {} : { changes }) };
       }
     }
     return {
@@ -265,7 +286,9 @@ export const detectDrift = async ({
   for (const [name, source] of Object.entries(manifest.sources)) {
     const { url } = source;
     try {
-      await loadVendorSpec(url, fetchOnce, source);
+      await (isProtocolFormat(source.format)
+        ? loadProtocolSpec(url, fetchOnce, source.format, source.endpoints ?? [])
+        : loadVendorSpec(url, fetchOnce, source));
     } catch (error) {
       log.warning(`${connector.metadata.id}: ${name} at ${url} didn't load: ${message(error)}`);
       sources[name] = { status: 'unreachable', error: message(error) };

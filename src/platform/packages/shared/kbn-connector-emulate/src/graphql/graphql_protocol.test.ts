@@ -134,6 +134,33 @@ describe('GraphQL specs', () => {
     expect(calls.map(({ operation }) => operation)).toEqual(['query boards', 'query node']);
   });
 
+  it('reports the types a request names, without the built-in scalars', async () => {
+    const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
+
+    await post(mockFetch, {
+      query: `query Named($id: ID!) { node(id: $id) { ... on Board { name } } }`,
+      variables: { id: '1' },
+    });
+    await post(mockFetch, { query: 'query { boards { id } }' });
+
+    expect(calls.map(({ namedTypes }) => namedTypes)).toEqual([['Board'], undefined]);
+  });
+
+  it('reports the root fields a document mentions, called or not', async () => {
+    const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
+
+    await post(mockFetch, {
+      query: `query Other { node(id: "1") { id } } query Selected { boards { id } }`,
+      operationName: 'Selected',
+    });
+    await post(mockFetch, { query: 'query { boards { id } }' });
+
+    expect(calls.map(({ operation, namedRootFields }) => [operation, namedRootFields])).toEqual([
+      ['query boards', ['query boards', 'query node']],
+      ['query boards', ['query boards']],
+    ]);
+  });
+
   it('leaves out root fields that @skip or @include drop', async () => {
     const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
 
@@ -149,6 +176,26 @@ describe('GraphQL specs', () => {
 
     expect(await response.json()).toEqual({ data: { board: { id: 'string' } } });
     expect(calls.map(({ operation }) => operation)).toEqual(['query board']);
+  });
+
+  it('records what a request depends on when every root field is skipped', async () => {
+    const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
+
+    const response = await post(mockFetch, {
+      query: 'query { boards @skip(if: true) { id } }',
+    });
+
+    expect(response.status).toBe(200);
+    expect(calls).toEqual([
+      {
+        request: 'POST https://api.example.com/v2',
+        status: 200,
+        readOnly: true,
+        namedRootFields: ['query boards'],
+        requestViolations: [],
+        responseViolations: [],
+      },
+    ]);
   });
 
   it('rejects documents that break the schema, and still records the operations', async () => {
