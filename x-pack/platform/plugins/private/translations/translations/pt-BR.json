@@ -8119,7 +8119,6 @@
     "inspector.requests.clusters.table.responseTimeInMilliseconds": "{responseTime} ms",
     "inspector.requests.clusters.table.responseTimeLabel": "Tempo de resposta",
     "inspector.requests.clusters.table.statusLabel": "Status",
-    "inspector.requests.clusters.timedOutMessage": "A solicitação expirou antes de ser concluída. Os resultados podem estar incompletos ou vazios.",
     "inspector.requests.clusters.totalClustersLabel": "{total} {total, plural, one {cluster} other {clusters}}",
     "inspector.requests.clusters.view.statusFilterLabel": "Status",
     "inspector.requests.clustersTabLabel": "Clusters e shards",

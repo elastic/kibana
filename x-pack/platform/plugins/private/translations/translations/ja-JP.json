@@ -8100,7 +8100,6 @@
     "inspector.requests.clusters.table.responseTimeInMilliseconds": "{responseTime}ミリ秒",
     "inspector.requests.clusters.table.responseTimeLabel": "応答時間",
     "inspector.requests.clusters.table.statusLabel": "ステータス",
-    "inspector.requests.clusters.timedOutMessage": "要求が完了する前にタイムアウトしました。結果は不完全であるか、空である可能性があります。",
     "inspector.requests.clusters.totalClustersLabel": "{total} {total, plural, one {cluster} other {クラスター}}",
     "inspector.requests.clusters.view.statusFilterLabel": "ステータス",
     "inspector.requests.clustersTabLabel": "クラスターとシャード",

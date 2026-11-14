@@ -8096,7 +8096,6 @@
     "inspector.requests.clusters.table.responseTimeInMilliseconds": "{responseTime}毫秒",
     "inspector.requests.clusters.table.responseTimeLabel": "响应时间",
     "inspector.requests.clusters.table.statusLabel": "状态",
-    "inspector.requests.clusters.timedOutMessage": "请求在完成前超时。结果可能不完整或为空。",
     "inspector.requests.clusters.totalClustersLabel": "{total} 个{total, plural, one {cluster} other {集群}}",
     "inspector.requests.clusters.view.statusFilterLabel": "状态",
     "inspector.requests.clustersTabLabel": "集群和分片",

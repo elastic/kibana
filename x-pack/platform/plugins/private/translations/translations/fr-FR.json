@@ -8083,7 +8083,6 @@
     "inspector.requests.clusters.table.responseTimeInMilliseconds": "{responseTime} ms",
     "inspector.requests.clusters.table.responseTimeLabel": "Temps de réponse",
     "inspector.requests.clusters.table.statusLabel": "État",
-    "inspector.requests.clusters.timedOutMessage": "Requête expirée avant achèvement. Les résultats peuvent être incomplets ou vides.",
     "inspector.requests.clusters.totalClustersLabel": "{total} {total, plural, one {cluster} other {clusters}}",
     "inspector.requests.clusters.view.statusFilterLabel": "Statut",
     "inspector.requests.clustersTabLabel": "Clusters et partitions",
