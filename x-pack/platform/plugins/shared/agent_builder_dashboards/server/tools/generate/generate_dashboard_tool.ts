@@ -19,8 +19,8 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import {
-  arrangeDashboardLayout,
   executeDashboardUpsert,
+  createDashboardLayout,
   getErrorMessage,
   hasValidNewDashboardMetadata,
   upsertDashboardSchema,
@@ -179,6 +179,12 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
+        const dashboardLayout = createDashboardLayout({
+          originalPanels: latestVersion?.data.panels ?? [],
+          instructions: layout,
+          arrangeLayout: createLayoutArranger({ modelProvider }),
+          logger,
+        });
         const {
           dashboardData: validatedDashboardData,
           created,
@@ -204,17 +210,12 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
             esClient: esClient.asCurrentUser,
           }),
           validator: await getDashboardValidator(),
+          onPlanned: dashboardLayout.start,
         });
 
         // The arranger checks its own output and writes only grids, so the result is not validated again.
         const { dashboardData: generatedDashboardData, failure: layoutFailure } =
-          await arrangeDashboardLayout({
-            originalPanels: latestVersion?.data.panels ?? [],
-            dashboardData: validatedDashboardData,
-            instructions: layout,
-            arrangeLayout: createLayoutArranger({ modelProvider }),
-            logger,
-          });
+          await dashboardLayout.finish(validatedDashboardData);
         if (layoutFailure) {
           failures.push(layoutFailure);
         }
