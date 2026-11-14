@@ -15,7 +15,8 @@ import {
   overlayRepeatedCacheTrails,
   queryMatrixTraces,
 } from './query_matrix_traces';
-import type { MatrixTraceData } from './trace_types';
+import { directTraceKey, type MatrixTraceData } from './trace_types';
+import { reliabilityCellsFromTraces } from './render_reliability_html';
 import type { JudgeVerdict } from './judge_agreement';
 
 const doc = (evaluatorName: string | undefined, score: number | null): EvaluationScoreDocument =>
@@ -1192,6 +1193,559 @@ describe('round 8 review findings: trace policy filtering', () => {
     expect(judgeVerdicts).toHaveLength(2);
     expect(traces['model-x:direct:suite-1:example-1'].scores).toEqual({
       Correctness: 0.5,
+    });
+  });
+});
+
+describe('queryMatrixTraces trace hydration', () => {
+  const span = (
+    name: string,
+    spanId: string,
+    parentId: string | undefined,
+    startOffsetMs: number,
+    durationMs: number,
+    attributes: Record<string, unknown> = {}
+  ) => ({
+    span_id: spanId,
+    trace_id: 'trace-1',
+    parent_span_id: parentId,
+    name,
+    kind: 'Internal',
+    status: 'Ok',
+    start_time: new Date(Date.parse('2026-09-05T19:30:58.391Z') + startOffsetMs).toISOString(),
+    duration_ms: durationMs,
+    attributes,
+  });
+
+  // Shape of a real persisted trace: root agent span (parent outside the set), a nested
+  // agent span, chat spans with usage attributes and execute_tool spans listed out of order.
+  const traceResponse = {
+    trace_id: 'trace-1',
+    total_spans: 8,
+    duration_ms: 16340.4,
+    spans: [
+      span('execute_tool security.security_labs_search', 's6', 's3', 6776, 313, {
+        'gen_ai.tool.name': 'security.security_labs_search',
+      }),
+      span('invoke_agent Elastic AI Agent', 's1', 'outside-the-trace', 0, 16340.4),
+      span('chat anthropic-claude-4.5-haiku', 's2', 's3', 1500, 1096, {
+        'gen_ai.usage.input_tokens': 1000,
+        'gen_ai.usage.output_tokens': 50,
+      }),
+      span('invoke_agent Elastic AI Agent', 's3', 's1', 544, 14237),
+      span('execute_tool load_skill', 's4', 's3', 4117, 94, { 'gen_ai.tool.name': 'load_skill' }),
+      span('chat anthropic-claude-4.5-haiku', 's5', 's3', 7106, 7645, {
+        'gen_ai.usage.input_tokens': '2345',
+        'gen_ai.usage.output_tokens': 400,
+      }),
+      span('select_relevant_skills', 's7', 's3', 926, 1695),
+      span('execute_tool attachments.read', 's8', 's3', 4116, 2, {
+        'gen_ai.tool.name': 'attachments.read',
+      }),
+    ],
+  };
+
+  const scoredDoc = (
+    taskOverrides: Record<string, unknown>,
+    repetition = 0
+  ): EvaluationScoreDocument =>
+    ({
+      example: { id: 'example-1', input: { question: 'Triage this alert' } },
+      evaluator: { name: 'Correctness', score: 1 },
+      metadata: { execution_id: 'exec-a' },
+      task: { model: { id: 'model-x' }, repetition_index: repetition, ...taskOverrides },
+    } as unknown as EvaluationScoreDocument);
+
+  const clientWith = (docs: EvaluationScoreDocument[], getTrace?: jest.Mock) => ({
+    getExperimentScores: jest.fn(
+      async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+    ),
+    getExampleScores: jest.fn(async () => docs),
+    ...(getTrace ? { getTrace } : {}),
+  });
+
+  const aggregated = [
+    {
+      modelId: 'model-x',
+      suites: [{ suiteId: 'suite-1', experimentId: 'exec-a', datasets: [], evaluators: [] }],
+    },
+  ];
+
+  const makeLog = () => ({ debug: jest.fn(), info: jest.fn(), warning: jest.fn() });
+
+  it('hydrates tool steps, tokens and latency for a doc with a trace id but no task.output', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const log = makeLog();
+
+    const traces = await queryMatrixTraces(
+      clientWith([scoredDoc({ trace_id: 'trace-1' })], getTrace) as never,
+      log as never,
+      aggregated as never
+    );
+
+    const entry = traces['model-x:direct:suite-1:example-1'];
+    expect(entry.toolTrail).toEqual([
+      'attachments.read',
+      'load_skill',
+      'security.security_labs_search',
+    ]);
+    expect(entry.stepCount).toBe(3);
+    expect(entry.toolCount).toBe(3);
+    expect(entry.inputTokens).toBe(3345);
+    expect(entry.outputTokens).toBe(450);
+    expect(entry.latencyMs).toBeCloseTo(16340.4);
+    expect(entry.answer).toBeUndefined();
+    expect(entry.traceFetchFailed).toBeUndefined();
+    expect(entry.repTrails).toEqual([
+      ['attachments.read', 'load_skill', 'security.security_labs_search'],
+    ]);
+    expect(traces['model-x:suite-1']).toBeDefined();
+    expect(log.warning).not.toHaveBeenCalled();
+    expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Hydrated 1/1 traces'));
+  });
+
+  describe('trace answer hydration', () => {
+    const answerSpan = (model: string, id: string, startOffsetMs: number, content: string) => ({
+      name: `chat ${model}`,
+      span_id: id,
+      parent_span_id: 's1',
+      start_time: new Date(Date.parse('2026-09-05T19:30:58.391Z') + startOffsetMs).toISOString(),
+      duration_ms: 10,
+      attributes: {
+        'gen_ai.output.messages': JSON.stringify([
+          { role: 'assistant', finish_reason: 'stop', parts: [{ type: 'text', content }] },
+        ]),
+      },
+    });
+    const SUBJECT_ANSWER = 'subject final answer that is comfortably longer than fifty characters';
+    const answerTrace = {
+      ...traceResponse,
+      spans: [
+        ...traceResponse.spans,
+        answerSpan('model-x', 'a1', 20000, SUBJECT_ANSWER),
+        answerSpan('helper-model', 'a2', 21000, 'helper text that must not leak'),
+      ],
+    };
+
+    it('fills repAnswers from the subject model stop span when no output is stored', async () => {
+      const traces = await queryMatrixTraces(
+        clientWith(
+          [scoredDoc({ trace_id: 'trace-1' })],
+          jest.fn(async () => answerTrace)
+        ) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      const entry = traces['model-x:direct:suite-1:example-1'];
+      expect(entry.repAnswers).toEqual([SUBJECT_ANSWER]);
+      expect(entry.answer).toBe(SUBJECT_ANSWER);
+    });
+
+    it('keeps the stored task.output answer over the trace answer', async () => {
+      const stored = 'stored answer that is comfortably longer than fifty characters in total';
+      const traces = await queryMatrixTraces(
+        clientWith(
+          [
+            scoredDoc({
+              trace_id: 'trace-1',
+              output: { steps: [], messages: [{ message: stored }] },
+            }),
+          ],
+          jest.fn(async () => answerTrace)
+        ) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      expect(traces['model-x:direct:suite-1:example-1'].repAnswers).toEqual([stored]);
+    });
+  });
+
+  describe('trace reasoning hydration', () => {
+    const narrationSpan = (id: string, startOffsetMs: number, content: string) =>
+      span('chat model-x', id, 's3', startOffsetMs, 10, {
+        'gen_ai.output.messages': JSON.stringify([
+          {
+            role: 'assistant',
+            finish_reason: 'tool_calls',
+            parts: [
+              { type: 'text', content },
+              { type: 'tool_call', id: 'c1', name: 'load_skill', arguments: {} },
+            ],
+          },
+        ]),
+      });
+    const reasoningTrace = {
+      ...traceResponse,
+      spans: [...traceResponse.spans, narrationSpan('n1', 4000, 'x'.repeat(800))],
+    };
+
+    it('counts reasoning toward steps but not tool calls, truncated to 500 chars', async () => {
+      const traces = await queryMatrixTraces(
+        clientWith(
+          [scoredDoc({ trace_id: 'trace-1' })],
+          jest.fn(async () => reasoningTrace)
+        ) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      const entry = traces['model-x:direct:suite-1:example-1'];
+      expect(entry.stepCount).toBe(4);
+      expect(entry.toolCount).toBe(3);
+      expect(entry.toolTrail).toEqual([
+        'attachments.read',
+        'load_skill',
+        'security.security_labs_search',
+      ]);
+      expect(entry.steps?.[0]).toEqual({ type: 'reasoning', text: 'x'.repeat(500) });
+      expect(entry.repTrails).toEqual([
+        ['attachments.read', 'load_skill', 'security.security_labs_search'],
+      ]);
+    });
+
+    it('keeps stored task.output steps authoritative over trace reasoning', async () => {
+      const traces = await queryMatrixTraces(
+        clientWith(
+          [
+            scoredDoc({
+              trace_id: 'trace-1',
+              output: { steps: [{ type: 'tool_call', tool_id: 'stored' }] },
+            }),
+          ],
+          jest.fn(async () => reasoningTrace)
+        ) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      const entry = traces['model-x:direct:suite-1:example-1'];
+      expect(entry.steps).toEqual([{ type: 'tool', toolId: 'stored', toolParams: undefined }]);
+    });
+  });
+
+  it('fetches each trace id once even when several docs share it', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const docs = [scoredDoc({ trace_id: 'trace-1' }), scoredDoc({ trace_id: 'trace-1' })];
+
+    await queryMatrixTraces(
+      clientWith(docs, getTrace) as never,
+      makeLog() as never,
+      aggregated as never
+    );
+
+    expect(getTrace).toHaveBeenCalledTimes(1);
+  });
+
+  it('negative control: without a trace id the trace stays unavailable', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const log = makeLog();
+
+    const traces = await queryMatrixTraces(
+      clientWith([scoredDoc({})], getTrace) as never,
+      log as never,
+      aggregated as never
+    );
+
+    expect(getTrace).not.toHaveBeenCalled();
+    expect(traces['model-x:direct:suite-1:example-1'].stepCount).toBe(0);
+    expect(traces['model-x:suite-1']).toBeUndefined();
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('No complete score documents found')
+    );
+  });
+
+  it('does not treat a null-scored doc with a trace id as complete', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const nullScored = {
+      ...scoredDoc({ trace_id: 'trace-1' }),
+      evaluator: { name: 'Correctness', score: null },
+    } as unknown as EvaluationScoreDocument;
+    const log = makeLog();
+
+    await queryMatrixTraces(
+      clientWith([nullScored], getTrace) as never,
+      log as never,
+      aggregated as never
+    );
+
+    expect(getTrace).not.toHaveBeenCalled();
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('No complete score documents found')
+    );
+  });
+
+  it('keeps stored task.output authoritative and skips the trace fetch', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const withOutput = scoredDoc({
+      trace_id: 'trace-1',
+      output: {
+        steps: [{ type: 'tool_call', tool_id: 'stored.tool' }],
+        messages: [{ message: 'x'.repeat(60) }],
+      },
+    });
+
+    const traces = await queryMatrixTraces(
+      clientWith([withOutput], getTrace) as never,
+      makeLog() as never,
+      aggregated as never
+    );
+
+    expect(getTrace).not.toHaveBeenCalled();
+    const entry = traces['model-x:direct:suite-1:example-1'];
+    expect(entry.toolTrail).toEqual(['stored.tool']);
+    expect(entry.answer).toHaveLength(60);
+    expect(entry.latencyMs).toBeUndefined();
+  });
+
+  it('falls back to the enumeration docs when the example route returns only other runs (bare-index ids)', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const ownDoc = scoredDoc({ trace_id: 'trace-1' });
+    const otherRun = {
+      ...scoredDoc({ trace_id: 'other-trace' }),
+      metadata: { execution_id: 'exec-other' },
+    } as unknown as EvaluationScoreDocument;
+    const client = {
+      getExperimentScores: jest.fn(async () => [ownDoc]),
+      getExampleScores: jest.fn(async () => [otherRun, otherRun]),
+      getTrace,
+    };
+
+    const traces = await queryMatrixTraces(
+      client as never,
+      makeLog() as never,
+      aggregated as never
+    );
+
+    expect(getTrace).toHaveBeenCalledTimes(1);
+    expect(getTrace).toHaveBeenCalledWith('trace-1');
+    expect(traces['model-x:direct:suite-1:example-1'].stepCount).toBe(3);
+    expect(traces['model-x:suite-1']).toBeDefined();
+  });
+
+  it('does not warn about total trace loss when the enumeration fallback filled the cells', async () => {
+    const otherRun = {
+      ...scoredDoc({ trace_id: 'other-trace' }),
+      metadata: { execution_id: 'exec-other' },
+    } as unknown as EvaluationScoreDocument;
+    const client = {
+      getExperimentScores: jest.fn(async () => [scoredDoc({ trace_id: 'trace-1' })]),
+      getExampleScores: jest.fn(async () => [otherRun]),
+      getTrace: jest.fn(async () => traceResponse),
+    };
+    const log = makeLog();
+
+    await queryMatrixTraces(client as never, log as never, aggregated as never);
+
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('Trace fetch returned no documents')
+    );
+  });
+
+  it('negative control: still warns when neither route yields documents for the run', async () => {
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [] as EvaluationScoreDocument[]),
+      getTrace: jest.fn(async () => traceResponse),
+    };
+    const log = makeLog();
+
+    await queryMatrixTraces(client as never, log as never, aggregated as never);
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Trace fetch returned no documents')
+    );
+  });
+
+  it('negative control: keeps the example-route docs when they belong to the run', async () => {
+    const getTrace = jest.fn(async () => traceResponse);
+    const enumerationDoc = scoredDoc({ trace_id: 'enumeration-only-trace' });
+    const client = {
+      getExperimentScores: jest.fn(async () => [enumerationDoc]),
+      getExampleScores: jest.fn(async () => [scoredDoc({ trace_id: 'trace-1' })]),
+      getTrace,
+    };
+
+    await queryMatrixTraces(client as never, makeLog() as never, aggregated as never);
+
+    expect(getTrace).toHaveBeenCalledTimes(1);
+    expect(getTrace).toHaveBeenCalledWith('trace-1');
+  });
+
+  it('retries a failed trace fetch once and degrades to an empty trail after two failures', async () => {
+    jest.useFakeTimers();
+    try {
+      const getTrace = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('503'))
+        .mockResolvedValueOnce(traceResponse);
+      const flaky = queryMatrixTraces(
+        clientWith([scoredDoc({ trace_id: 'trace-1' })], getTrace) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+      await jest.advanceTimersByTimeAsync(1000);
+      const traces = await flaky;
+      expect(getTrace).toHaveBeenCalledTimes(2);
+      expect(traces['model-x:direct:suite-1:example-1'].toolCount).toBe(3);
+
+      const failing = jest.fn().mockRejectedValue(new Error('down'));
+      const log = makeLog();
+      const degraded = queryMatrixTraces(
+        clientWith([scoredDoc({ trace_id: 'trace-1' })], failing) as never,
+        log as never,
+        aggregated as never
+      );
+      await jest.advanceTimersByTimeAsync(1000);
+      const degradedTraces = await degraded;
+      expect(failing).toHaveBeenCalledTimes(2);
+      // A failed fetch is "unavailable", not "the agent called no tools".
+      expect(degradedTraces['model-x:direct:suite-1:example-1'].traceFetchFailed).toBe(true);
+      expect(degradedTraces['model-x:suite-1']).toBeUndefined();
+      expect(log.warning).toHaveBeenCalledWith(
+        expect.stringContaining('No complete score documents found')
+      );
+      expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Hydrated 0/1 traces'));
+      expect(log.info).toHaveBeenCalledWith(expect.stringContaining('1 failed'));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+  it('treats a successful trace response with no spans as unavailable, not an empty trail', async () => {
+    const getTrace = jest.fn(async () => ({
+      trace_id: 'trace-1',
+      total_spans: 0,
+      duration_ms: 0,
+      spans: [],
+    }));
+    const log = makeLog();
+
+    const traces = await queryMatrixTraces(
+      clientWith([scoredDoc({ trace_id: 'trace-1' })], getTrace) as never,
+      log as never,
+      aggregated as never
+    );
+
+    const entry = traces['model-x:direct:suite-1:example-1'];
+    expect(entry.traceEmpty).toBe(true);
+    expect(entry.traceFetchFailed).toBeUndefined();
+    expect(entry.repTrails).toBeUndefined();
+    expect(traces['model-x:suite-1']).toBeUndefined();
+    expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Hydrated 0/1 traces'));
+    expect(log.info).toHaveBeenCalledWith(expect.stringContaining('1 with no spans'));
+  });
+
+  it('leaves repetitions whose trace failed out of repTrails', async () => {
+    jest.useFakeTimers();
+    try {
+      const getTrace = jest.fn(async (traceId: string) => {
+        if (traceId === 'trace-bad') throw new Error('down');
+        return traceResponse;
+      });
+      const docs = [
+        scoredDoc({ trace_id: 'trace-1' }, 0),
+        scoredDoc({ trace_id: 'trace-bad' }, 1),
+        scoredDoc({ trace_id: 'trace-1' }, 2),
+      ];
+      const pending = queryMatrixTraces(
+        clientWith(docs, getTrace) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+      await jest.advanceTimersByTimeAsync(1000);
+      const traces = await pending;
+
+      const trail = ['attachments.read', 'load_skill', 'security.security_labs_search'];
+      expect(traces['model-x:direct:suite-1:example-1'].repTrails).toEqual([trail, trail]);
+      expect(traces['model-x:direct:suite-1:example-1'].repAnswers).toHaveLength(2);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  describe('dataset-keyed direct traces', () => {
+    const datasetDoc = (datasetId: string, traceId: string, executionId = 'exec-a') =>
+      ({
+        example: { id: '0', dataset: { id: datasetId }, input: { question: `q ${datasetId}` } },
+        evaluator: { name: 'Correctness', score: 1 },
+        metadata: { execution_id: executionId },
+        task: { model: { id: 'model-x' }, repetition_index: 0, trace_id: traceId },
+      } as unknown as EvaluationScoreDocument);
+
+    const twoDatasetClient = () => ({
+      getExperimentScores: jest.fn(async () => [{ example: { id: '0' } }] as never),
+      getExampleScores: jest.fn(async () => [
+        datasetDoc('dataset-a', 'trace-a'),
+        datasetDoc('dataset-b', 'trace-b'),
+      ]),
+      getTrace: jest.fn(async (traceId: string) => ({
+        ...traceResponse,
+        spans:
+          traceId === 'trace-a'
+            ? traceResponse.spans
+            : [
+                span('execute_tool only.tool', 'x1', undefined, 0, 10, {
+                  'gen_ai.tool.name': 'only.tool',
+                }),
+              ],
+      })),
+    });
+
+    it('gives two datasets sharing example id 0 two distinct entries and two cells', async () => {
+      const traces = await queryMatrixTraces(
+        twoDatasetClient() as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      const a = traces[directTraceKey('model-x', 'suite-1', '0', 'dataset-a')];
+      const b = traces[directTraceKey('model-x', 'suite-1', '0', 'dataset-b')];
+      expect(a.question).toBe('q dataset-a');
+      expect(a.toolCount).toBe(3);
+      expect(b.question).toBe('q dataset-b');
+      expect(b.toolTrail).toEqual(['only.tool']);
+      expect(reliabilityCellsFromTraces(traces).filter((c) => c.example === '0')).toHaveLength(2);
+    });
+
+    it('negative control: examplePrefixes buckets keep the dataset-free suite-scoped key', async () => {
+      const client = twoDatasetClient();
+      client.getExperimentScores = jest.fn(
+        async () => [{ example: { id: 'persona-a-1' } }] as never
+      );
+      client.getExampleScores = jest.fn(
+        async () =>
+          [
+            {
+              ...datasetDoc('dataset-a', 'trace-a'),
+              example: { id: 'persona-a-1', dataset: { id: 'dataset-a' } },
+            },
+          ] as never
+      );
+      const prefixed = [
+        {
+          modelId: 'model-x',
+          suites: [
+            {
+              suiteId: 'suite-1',
+              experimentId: 'exec-a',
+              datasets: [{ datasetId: 'prefix:persona-a' }],
+              evaluators: [],
+            },
+          ],
+        },
+      ];
+
+      const traces = await queryMatrixTraces(
+        client as never,
+        makeLog() as never,
+        prefixed as never
+      );
+
+      expect(traces['model-x:direct:suite-1:persona-a-1']).toBeDefined();
+      expect(Object.keys(traces).some((key) => key.includes('|'))).toBe(false);
     });
   });
 });

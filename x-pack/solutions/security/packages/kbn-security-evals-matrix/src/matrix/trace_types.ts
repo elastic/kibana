@@ -39,6 +39,16 @@ export interface MatrixTraceEntry {
   stepCount?: number;
   /** Number of tool calls (cached for summary table). */
   toolCount?: number;
+  /** Input tokens summed over the model calls of the shown run (hydrated from the trace). */
+  inputTokens?: number;
+  /** Output tokens summed over the model calls of the shown run (hydrated from the trace). */
+  outputTokens?: number;
+  /** Wall-clock duration of the shown run in ms (root span of the trace). */
+  latencyMs?: number;
+  /** The run has a trace id but fetching the trace failed, so the empty trail is not evidence. */
+  traceFetchFailed?: boolean;
+  /** The trace route answered but the trace holds no spans, so the empty trail is not evidence. */
+  traceEmpty?: boolean;
   /** Per-evaluator mean score for this example over its repetitions. */
   scores?: Record<string, number>;
   /** Number of repetitions aggregated into this entry's scores. */
@@ -72,14 +82,26 @@ export const traceKey = (modelId: string, columnId: string): string => `${modelI
  * validated only as nonempty strings and may contain `:`, so the suite
  * component is percent-encoded (colon included) and the parser decodes it —
  * the first colon after `:direct:` then always ends the suite.
+ *
+ * Bare-index example ids (`'0'`, `'1'`) are shared by every dataset of a suite, so
+ * when the score documents carry a dataset id it is appended to the suite segment
+ * (`<suite>|<dataset>`, both percent-encoded, so `|` is unambiguous). Documents with
+ * no dataset id keep the suite-only form.
  */
-export const directTraceKey = (modelId: string, suiteId: string, exampleId: string): string =>
-  `${modelId}:direct:${encodeURIComponent(suiteId)}:${exampleId}`;
+export const directTraceKey = (
+  modelId: string,
+  suiteId: string,
+  exampleId: string,
+  datasetId?: string
+): string =>
+  `${modelId}:direct:${encodeURIComponent(suiteId)}${
+    datasetId ? `|${encodeURIComponent(datasetId)}` : ''
+  }:${exampleId}`;
 
-/** Splits a `directTraceKey` back into its model, suite and example ids. */
+/** Splits a `directTraceKey` back into its model, suite, optional dataset and example ids. */
 export const parseDirectTraceKey = (
   key: string
-): { modelId: string; suiteId: string; exampleId: string } | undefined => {
+): { modelId: string; suiteId: string; datasetId?: string; exampleId: string } | undefined => {
   if (!key.includes(':direct:')) {
     return undefined;
   }
@@ -89,13 +111,16 @@ export const parseDirectTraceKey = (
   if (first < 1 || second < 0 || third < 0) {
     return undefined;
   }
-  const suiteId = decodeSafe(key.slice(second + 1, third));
-  if (suiteId === undefined) {
+  const [suiteSegment, datasetSegment] = key.slice(second + 1, third).split('|');
+  const suiteId = decodeSafe(suiteSegment);
+  const datasetId = datasetSegment === undefined ? undefined : decodeSafe(datasetSegment);
+  if (suiteId === undefined || (datasetSegment !== undefined && datasetId === undefined)) {
     return undefined;
   }
   return {
     modelId: key.slice(0, first),
     suiteId,
+    ...(datasetId !== undefined ? { datasetId } : {}),
     exampleId: key.slice(third + 1),
   };
 };
