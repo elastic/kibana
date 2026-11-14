@@ -294,4 +294,31 @@ describe('cancel-on-gate-failure', () => {
       expect(mockCancelStep).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('auto-commit cancellation', () => {
+    it('also cancels base build and gate steps (excluding self) when auto_commit_pushed is true', () => {
+      process.env.BUILDKITE_STEP_KEY = 'check';
+      process.env.BUILDKITE_LABEL = 'Local Check';
+      mockGetMetadataKeys.mockReturnValue(['cancel_on_gate_failure_batch:pipeline']);
+      mockGetMetadata.mockImplementation((key: string) => {
+        if (key === 'cancel_on_gate_failure_batch:pipeline') return JSON.stringify(['jest']);
+        if (key === 'auto_commit_pushed') return 'true';
+        return null;
+      });
+
+      runCancelModule();
+
+      const cancelCalls = mockCancelStep.mock.calls.map(([k]: [string]) => k);
+      expect(cancelCalls).toEqual([
+        'build',
+        'quick_checks',
+        'checks',
+        'linting',
+        'linting_with_types',
+        'check_types',
+        'jest',
+      ]);
+      expect(cancelCalls).not.toContain('check');
+    });
+  });
 });
