@@ -20,7 +20,11 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { DataSource, DataSourceWithSecrets } from '../../../../common';
+import type {
+  DataSource,
+  DataSourceConnectionTestResult,
+  DataSourceWithSecrets,
+} from '../../../../common';
 import { DATA_SOURCE_TYPES_TO_ICONS } from '../../../../common';
 import { CreateDataSourceFlyout } from '../../../create_data_source_flyout';
 import { getFlyoutSaveErrorMessage } from '../../../get_flyout_save_error_message';
@@ -149,6 +153,12 @@ export function DataSourceSelect({
     [dataSourcesClient, loadDataSources, onChange, onDataSourceCreated, reportUiCounter]
   );
 
+  const onTestCreateDataSource = useCallback(
+    (dataSource: DataSourceWithSecrets): Promise<DataSourceConnectionTestResult> =>
+      dataSourcesClient.testConnection(dataSource),
+    [dataSourcesClient]
+  );
+
   const showAuthenticationCallout = Boolean(value) && !createdDataSourceNames.includes(value);
 
   return (
@@ -195,6 +205,7 @@ export function DataSourceSelect({
           existingDataSourceNames={existingDataSourceNames}
           onClose={onCloseCreateDataSource}
           onSave={onSaveCreateDataSource}
+          onTestConnection={onTestCreateDataSource}
         />
       ) : null}
     </>

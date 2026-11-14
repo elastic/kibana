@@ -8,8 +8,11 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { DataSource } from '../common';
-import type { putDataSourceBodySchema } from './routes/data_sources/data_source_schema';
+import type { DataSource, DataSourceConnectionTestResult } from '../common';
+import type {
+  putDataSourceBodySchema,
+  testDataSourceBodySchema,
+} from './routes/data_sources/data_source_schema';
 
 /**
  * Server-side Elasticsearch client for data source management.
@@ -51,6 +54,22 @@ export class DataSourcesClient {
       path: `${path}/${encoded}`,
       body,
     });
+  }
+
+  /**
+   * Calls Elasticsearch `POST /_query/data_source/_test` to check a configuration that has not
+   * been saved.
+   */
+  public async testConnection(
+    body: TypeOf<typeof testDataSourceBodySchema>
+  ): Promise<DataSourceConnectionTestResult> {
+    // Elasticsearch gives every node 30 seconds to answer the probe, the same as the default
+    // `elasticsearch.requestTimeout`, so allow headroom above it. A retry would run the probe
+    // on every node again.
+    return this.esClient.transport.request(
+      { method: 'POST', path: `${path}/_test`, body },
+      { requestTimeout: '60s', maxRetries: 0 }
+    );
   }
 
   /**

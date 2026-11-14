@@ -24,6 +24,9 @@ export class DataFederationPage {
   readonly createDataSourceFlyoutS3SecretKey;
   readonly createDataSourceFlyoutSubmit;
   readonly createDataSourceFlyoutSaveError;
+  readonly createDataSourceFlyoutAuthentication;
+  readonly createDataSourceFlyoutTestConnection;
+  readonly createDataSourceFlyoutTestConnectionUntestable;
   readonly editDataSourceFlyout;
 
   readonly createDatasetWizard;
@@ -62,6 +65,15 @@ export class DataFederationPage {
     );
     this.createDataSourceFlyoutSubmit = page.testSubj.locator('createDataSourceFlyoutSubmit');
     this.createDataSourceFlyoutSaveError = page.testSubj.locator('createDataSourceFlyoutSaveError');
+    this.createDataSourceFlyoutAuthentication = page.testSubj.locator(
+      'createDataSourceFlyoutAuthentication'
+    );
+    this.createDataSourceFlyoutTestConnection = page.testSubj.locator(
+      'createDataSourceFlyoutTestConnection'
+    );
+    this.createDataSourceFlyoutTestConnectionUntestable = page.testSubj.locator(
+      'createDataSourceFlyoutTestConnectionUntestable'
+    );
     this.editDataSourceFlyout = page.testSubj.locator('editDataSourceFlyout');
 
     this.createDatasetWizard = page.testSubj.locator('createDatasetWizard');
@@ -139,6 +151,12 @@ export class DataFederationPage {
 
     await this.createDataSourceFlyoutSubmit.click();
     await this.createDataSourceFlyout.waitFor({ state: 'hidden' });
+  }
+
+  async selectDataSourceAuthentication(label: string): Promise<void> {
+    await this.createDataSourceFlyoutAuthentication.click();
+    // The EuiSuperSelect options render in a portal, outside the flyout.
+    await this.page.getByRole('option', { name: label }).click();
   }
 
   async editDataSourceDescription({

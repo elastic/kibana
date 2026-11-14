@@ -9,7 +9,12 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
+import type {
+  DataSetWithName,
+  DataSourceConnectionTestResult,
+  DataSourceWithSecrets,
+  DataSource,
+} from '../common';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
 import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
@@ -202,6 +207,12 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     [dataSourcesClient, flyout.mode, onClose, reportUiCounter]
   );
 
+  const onTestConnection = useCallback(
+    (dataSource: DataSourceWithSecrets): Promise<DataSourceConnectionTestResult> =>
+      dataSourcesClient.testConnection(dataSource),
+    [dataSourcesClient]
+  );
+
   return (
     <>
       <DataSourcesTable
@@ -225,6 +236,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
           existingDataSourceNames={existingDataSourceNames}
           onClose={onClose}
           onSave={onSave}
+          onTestConnection={onTestConnection}
         />
       ) : null}
       {pendingDeleteDataSource ? (
