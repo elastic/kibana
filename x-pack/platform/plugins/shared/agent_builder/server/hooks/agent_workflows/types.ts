@@ -39,6 +39,11 @@ export interface AfterExecutionWorkflowParams {
    */
   round_connector_id?: string;
   /**
+   * OpenTelemetry trace id of the agent run that produced this round, so the workflow can add
+   * its spans to the same trace. Sent only to workflows that declare this input.
+   */
+  round_trace_id?: string;
+  /**
    * Workflow state persisted by the before-agent workflow for this round. Sent only to
    * workflows that declare this input.
    */

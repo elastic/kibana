@@ -523,6 +523,27 @@ describe('runAfterExecutionWorkflows', () => {
         expect(params).not.toHaveProperty('workflow_context');
       });
 
+      it('sends the round trace id (first one when merged) only when declared', async () => {
+        const { workflowApi, getInternalServices, getStartServices } = createDeps({
+          definition: strictDefinition([...legacyInputNames, 'round_trace_id']),
+        });
+
+        await runAfterExecutionWorkflows({
+          context: createContext({
+            round: { ...round, trace_id: ['trace-1', 'trace-2'] },
+            connectorId: 'current-connector',
+          }),
+          workflowApi,
+          getInternalServices,
+          getStartServices,
+          logger,
+        });
+
+        const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+        expect(params).toHaveProperty('round_trace_id', 'trace-1');
+        expect(params).not.toHaveProperty('round_connector_id');
+      });
+
       describe('tool_results', () => {
         const toolResults = [
           { tool_result_id: 'r-1', type: ToolResultType.other, data: { rows: 5000 } },

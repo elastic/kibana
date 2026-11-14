@@ -99,6 +99,11 @@ export const decisionTreePrepareStepDefinition = ({
         .max(128)
         .optional()
         .describe('Deterministic T_background trace id from materialize.'),
+      round_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe("Trace id of the agent run for this round, so the step's spans join it."),
     }),
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
@@ -248,6 +253,7 @@ export const decisionTreePrepareStepDefinition = ({
         {
           name: 'nightshift.decisionTreePrepare',
           traceId: context.input.background_trace_id || executionId,
+          foregroundTraceId: context.input.round_trace_id,
           spaceId,
           workflowExecutionId: executionId,
           request: context.contextManager?.getFakeRequest?.(),

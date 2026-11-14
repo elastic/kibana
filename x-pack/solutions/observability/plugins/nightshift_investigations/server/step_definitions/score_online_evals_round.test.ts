@@ -10,6 +10,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { EvaluateFn } from '@kbn/evals-plugin/server';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import type { EvaluateResult } from '../online_evals/build_score_event';
+import * as tracing from '../tracing';
 import { scoreOnlineEvalsRoundStepDefinition } from './score_online_evals_round';
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -117,6 +118,29 @@ const setup = ({
 };
 
 describe('scoreOnlineEvalsRoundStepDefinition', () => {
+  it('runs the judges in a span on the investigator round trace', async () => {
+    const roundTraceId = 'ebf7677419199e9edc53ac5dc26b9e0e';
+    const spanSpy = jest
+      .spyOn(tracing, 'withNightshiftBackgroundSpan')
+      .mockImplementation((_options, fn) => fn(undefined));
+    const evaluate = jest.fn().mockResolvedValue([okResult('conclusion_quality')]);
+    const { run } = setup({ evaluate, rounds: [{ ...ROUND, trace_id: [roundTraceId, 'other'] }] });
+
+    await run();
+
+    expect(spanSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'nightshift.onlineEvals.score',
+        foregroundTraceId: roundTraceId,
+        roundId: 'round-1',
+        spaceId: 'ops',
+      }),
+      expect.any(Function)
+    );
+    expect(evaluate).toHaveBeenCalledTimes(1);
+    spanSpy.mockRestore();
+  });
+
   it('scores the round with every evaluator on the judge connector and reports the event', async () => {
     const evaluate = jest
       .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
