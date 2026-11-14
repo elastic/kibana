@@ -30,6 +30,7 @@
     "@kbn/core-threads-server-internal",
     "@kbn/core-feature-flags-server",
     "@kbn/core-status-common",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

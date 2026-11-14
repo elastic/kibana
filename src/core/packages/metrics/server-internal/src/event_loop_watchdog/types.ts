@@ -10,6 +10,14 @@
 import type { LogMeta } from '@kbn/logging';
 import type { WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
 import type { BlockStatsSnapshot } from './block_stats';
+import type {
+  FrameSummary,
+  KibanaFrameSummary,
+  ProfileSummary,
+  TopKibanaFrame,
+} from './profile_summary';
+
+export type { FrameSummary, KibanaFrameSummary, ProfileSummary, TopKibanaFrame };
 
 /** Startup is noisier than steady state, so blocks are counted per phase. */
 export type Phase = 'starting' | 'running';
@@ -50,7 +58,7 @@ export type CaptureStopReason = 'block_ended' | 'max_duration';
 export interface ProfileLogMeta extends LogMeta {
   kibana: {
     event_loop_watchdog: {
-      profile: {
+      profile: ProfileSummary & {
         phase: Phase;
         /** The block's length at the stop; still growing unless `stopReason` is `block_ended`. */
         blockedMs: number;
@@ -58,17 +66,23 @@ export interface ProfileLogMeta extends LogMeta {
         profiledAfterMs: number;
         /** Time from the request until the profiler was sampling: the main thread's cold start. */
         profilerStartMs: number;
-        /** Time from the first sample to the stop. */
+        /**
+         * Time from the first sample to the block's end (`block_ended`) or to the stop
+         * (`max_duration`).
+         */
         sampledMs: number;
-        /** Share of the block, as of the stop, covered by samples: `sampledMs / blockedMs`, at most 1. */
+        /**
+         * Share of the block covered by samples: `sampledMs / blockedMs`, at most 1 (as of the stop
+         * for `max_duration`).
+         */
         coverage: number;
         /** Time from the request until the profile reached the worker. */
         captureDurationMs: number;
-        /** Number of CPU samples in the profile. */
+        /** Number of busy (non-idle) CPU samples within the block. */
         samples: number;
         /** Number of distinct call-stack frames in the profile. */
         nodes: number;
-        /** The worker's heap in bytes while it holds the profile. */
+        /** The worker's heap in bytes after the profile is summarised. */
         heapUsed: number;
         stopReason: CaptureStopReason;
         /**
@@ -89,15 +103,14 @@ export interface ProfilingStats {
    * its profile arrives, just after its block ends, so the two can land in different periods.
    */
   pastStartAfter: number;
-  /** Captures with at least one sample outside `(idle)`. */
+  /** Captures with at least one busy (non-idle) sample within the block. */
   profiled: number;
   /**
-   * Captures with no samples outside `(idle)`, usually because the block ended while the profiler
-   * was starting. A capture whose busy samples all come after the block still counts as `profiled`:
-   * sample times aren't compared with the block's end yet.
+   * Captures with no busy (non-idle) samples within the block, usually because the block ended
+   * while the profiler was starting.
    */
   emptyTooLate: number;
-  /** Captures that failed to start or to stop. */
+  /** Captures that failed to start, to stop, or to summarise. */
   captureFailed: number;
   /** Blocks past `startAfter` that ended without a capture because of the cooldown. */
   skippedCooldown: number;
