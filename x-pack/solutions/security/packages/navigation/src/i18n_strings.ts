@@ -34,6 +34,9 @@ export const i18nStrings = {
       discover: i18n.translate('securitySolutionPackages.navLinks.rules.discover', {
         defaultMessage: 'Discover',
       }),
+      detectionRulesV2: i18n.translate('securitySolutionPackages.navLinks.rules.detectionRulesV2', {
+        defaultMessage: 'Detection rules (SIEM) v2',
+      }),
     },
   },
   investigations: {

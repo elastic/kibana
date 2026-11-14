@@ -24,6 +24,7 @@ import {
   useEuiFlyoutReregister,
 } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
+import type { RuleBuilderCreateOptionItem } from '@kbn/alerting-v2-rule-form';
 import { RuleCreateOptionsPanel, type LegacyRuleTypeItem } from './rule_create_options_panel';
 
 const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
@@ -44,7 +45,8 @@ export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
-  onCreateThresholdRule?: () => void;
+  builderOptions?: RuleBuilderCreateOptionItem[];
+  onCreateBuilderRule?: (builderType: string) => void;
   onBuildSequence?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
   /**
@@ -64,7 +66,8 @@ export const RuleCreateOptionsFlyout = ({
   onClose,
   onCreateEsqlRule,
   onCreateWithAgent,
-  onCreateThresholdRule,
+  builderOptions,
+  onCreateBuilderRule,
   onBuildSequence,
   legacyRuleTypes,
   historyKey,
@@ -155,7 +158,8 @@ export const RuleCreateOptionsFlyout = ({
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
+          builderOptions={builderOptions}
+          onCreateBuilderRule={onCreateBuilderRule}
           onBuildSequence={onBuildSequence}
           legacyRuleTypes={legacyRuleTypes}
         />

@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Container } from 'inversify';
 import { createAlertingV2HostApp } from '../common/locators';
+import { applyRuleBuilderRegistrations } from './lib/rule_builder_registrations';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
@@ -37,7 +38,9 @@ const lazyPageWithContainer = (
   }>,
   container: Container
 ): React.ComponentType<AlertingV2PageProps> => {
-  const LazyComponent = React.lazy(loader);
+  // Builders contributed by other plugins must be in the registry before the create and edit
+  // flows read it.
+  const LazyComponent = React.lazy(() => applyRuleBuilderRegistrations().then(loader));
   return (props: AlertingV2PageProps) =>
     React.createElement(
       React.Suspense,
