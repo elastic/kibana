@@ -66,21 +66,43 @@ type Step = Awaited<ReturnType<AgentBuilderClient['converse']>>['steps'][number]
 /**
  * Folds a resumed round's steps into what is already recorded. Resuming a confirmation returns
  * the whole logical round, so the paused call comes back with its results filled in next to steps
- * already recorded. A tool call replaces its earlier copy by `tool_call_id`; a step that was
- * already recorded verbatim is not recorded twice, and anything else is appended.
+ * already recorded.
+ *
+ * Only the round being resumed is rewritten: tool-call ids can repeat across rounds, so a call
+ * from an earlier round must never be matched. Matching is one-to-one — each recorded step is
+ * matched at most once, so a step that genuinely occurs twice in the round is kept, while the
+ * same replay still collapses onto one copy.
  */
-const mergeResumedSteps = (recorded: Step[], incoming: Step[]): Step[] => {
+const mergeResumedSteps = (recorded: Step[], incoming: Step[], from: number): Step[] => {
   const merged = [...recorded];
+  const matched = new Set<number>();
+  const matchInRound = (predicate: (step: Step) => boolean): number => {
+    for (let i = from; i < merged.length; i++) {
+      if (!matched.has(i) && predicate(merged[i])) {
+        return i;
+      }
+    }
+    return -1;
+  };
   for (const step of incoming) {
     const serialized = JSON.stringify(step);
     const callIndex =
       typeof step.tool_call_id === 'string'
-        ? merged.findIndex((existing) => existing.tool_call_id === step.tool_call_id)
+        ? matchInRound((existing) => existing.tool_call_id === step.tool_call_id)
         : -1;
     if (callIndex !== -1) {
+      matched.add(callIndex);
       merged[callIndex] = step;
-    } else if (!merged.some((existing) => JSON.stringify(existing) === serialized)) {
-      merged.push(step);
+    } else {
+      const copyIndex = matchInRound((existing) => JSON.stringify(existing) === serialized);
+      if (copyIndex !== -1) {
+        matched.add(copyIndex);
+      } else {
+        merged.push(step);
+        // a freshly appended step is marked matched, so a later identical replay is
+        // appended as its own occurrence rather than collapsed onto it
+        matched.add(merged.length - 1);
+      }
     }
   }
   return merged;
@@ -121,6 +143,8 @@ export const converseQuestionToTaskOutput = async (
     { message: response.message },
   ];
   let steps: Step[] = [...response.steps];
+  // Index in `steps` where the current (latest) round begins; a resume replays this round only.
+  let currentRoundFrom = 0;
   const errors: unknown[] = [];
   const pendingConfirmations = toPendingConfirmations(response.prompts ?? []);
   const confirmationDecisions: ConfirmationDecision[] = [];
@@ -164,9 +188,12 @@ export const converseQuestionToTaskOutput = async (
 
     response = next;
     messages.push({ message: response.message });
-    steps = resumesConfirmation
-      ? mergeResumedSteps(steps, response.steps)
-      : [...steps, ...response.steps];
+    if (resumesConfirmation) {
+      steps = mergeResumedSteps(steps, response.steps, currentRoundFrom);
+    } else {
+      steps = [...steps, ...response.steps];
+      currentRoundFrom = steps.length - response.steps.length;
+    }
     pendingConfirmations.push(...toPendingConfirmations(response.prompts ?? []));
   }
 
