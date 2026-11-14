@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { ObjectType } from '@kbn/config-schema';
+import type { SavedObject, SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   createModelVersionTestMigrator,
   type ModelVersionTestMigrator,
@@ -85,6 +86,83 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
 
         expect(migrated.attributes.extractObservables).toBe(true);
       });
+    });
+  });
+
+  describe('Model version 3 to 4', () => {
+    const observableTypes = [{ key: 'employee-id', label: 'Employee ID' }];
+
+    it('does not change a document', () => {
+      const document = createConfigureDocument({
+        owner: SECURITY_SOLUTION_OWNER,
+        extractObservables: true,
+        observableTypes,
+      });
+
+      const migrated = migrator.migrate<Record<string, unknown>, Record<string, unknown>>({
+        document,
+        fromVersion: 3,
+        toVersion: 4,
+      });
+
+      expect(migrated.attributes).toEqual(document.attributes);
+    });
+  });
+
+  describe('Model version 4 schemas', () => {
+    const modelVersions = caseConfigureSavedObjectType.modelVersions as SavedObjectsModelVersionMap;
+    const create = modelVersions['4']?.schemas?.create as ObjectType;
+    const forwardCompatibility = modelVersions['4']?.schemas?.forwardCompatibility as ObjectType;
+
+    it('accepts settings of built-in types, custom types, and a type without paths', () => {
+      expect(() =>
+        create.validate({
+          observableTypeSettings: [
+            { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+            { key: 'employee-id', valuePattern: '^E\\d{6}$', paths: [] },
+            { key: 'ticket-ref' },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts excluded values on a path', () => {
+      expect(() =>
+        create.validate({
+          observableTypeSettings: [
+            {
+              key: 'observable-type-ipv4',
+              paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+            },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('keeps keys of a later version on read, in an entry and in a path', () => {
+      const attributes = {
+        extractObservables: true,
+        observableTypeSettings: [
+          {
+            key: 'observable-type-agent-id',
+            futureEntryKey: 'entry',
+            paths: [
+              { path: 'agent.id', enabled: false, excludedValues: ['a'], futurePathKey: 'path' },
+            ],
+          },
+        ],
+        futureAttribute: 'attribute',
+      };
+
+      expect(forwardCompatibility.validate(attributes)).toEqual(attributes);
+    });
+
+    it('rejects a path without the enabled flag', () => {
+      expect(() =>
+        create.validate({
+          observableTypeSettings: [{ key: 'employee-id', paths: [{ path: 'a' }] }],
+        })
+      ).toThrow();
     });
   });
 });
