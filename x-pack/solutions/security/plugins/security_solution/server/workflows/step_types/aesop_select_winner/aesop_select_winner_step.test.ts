@@ -37,6 +37,46 @@ describe('aesopSelectWinnerStepDefinition', () => {
     expect(result.output).toMatchObject({ winner_target_id: 'arm', beats_baseline: true });
   });
 
+  it('does not gate on a regressing evaluator when quality_evaluators is omitted', async () => {
+    const result = await aesopSelectWinnerStepDefinition.handler({
+      input: {
+        comparison: {
+          baseline_id: 'base',
+          comparisons: [
+            {
+              target_id: 'arm',
+              results: [
+                {
+                  evaluatorName: 'correctness.factuality',
+                  sampleSize: 15,
+                  meanBaseline: 0.4,
+                  meanTarget: 0.8,
+                  pValue: 0.01,
+                  direction: 'maximize',
+                },
+                {
+                  evaluatorName: 'skill-pii',
+                  sampleSize: 15,
+                  meanBaseline: 1,
+                  meanTarget: 0,
+                  pValue: 0.001,
+                  direction: 'maximize',
+                },
+              ],
+            },
+          ],
+        },
+        code_tolerance: 0.05,
+      },
+    } as unknown as Context);
+
+    expect(result.output).toMatchObject({
+      winner_target_id: 'arm',
+      beats_baseline: true,
+      rejected: [],
+    });
+  });
+
   it('returns an error for invalid input', async () => {
     const result = await aesopSelectWinnerStepDefinition.handler({
       input: { comparison: {} },

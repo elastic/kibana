@@ -238,6 +238,30 @@ describe('selectWinner', () => {
       ]);
     });
 
+    it('rejects a drop beyond the tolerance whose p-value equals alpha', () => {
+      expect(
+        withQuality(quality({ pValue: 0.05 })).rejected.map(({ target_id: id }) => id)
+      ).toEqual(['a']);
+    });
+
+    it('treats a higher mean as the regression for a quality evaluator that minimizes', () => {
+      const result = withQuality(
+        quality({ meanBaseline: 2, meanTarget: 3, direction: 'minimize', pValue: 0.01 })
+      );
+
+      expect(result.rejected[0].reasons[0]).toContain(
+        'quality evaluator skill-pii scored 3 against a baseline of 2'
+      );
+    });
+
+    it('keeps a minimizing quality evaluator whose mean falls', () => {
+      expect(
+        withQuality(
+          quality({ meanBaseline: 3, meanTarget: 2, direction: 'minimize', pValue: 0.01 })
+        ).rejected
+      ).toEqual([]);
+    });
+
     it('rejects a drop beyond the tolerance when no p-value is available', () => {
       const result = withQuality(quality({ pValue: null }));
 
@@ -265,11 +289,31 @@ describe('selectWinner', () => {
     });
 
     it('rejects only the significant quality drop when replaying a live lab run', () => {
-      // Means and p-values from a three-arm lab run in which every arm lost to the strict gate.
-      const pii = row({ evaluatorName: 'skill-pii', meanBaseline: 0.4, meanTarget: 1 / 3 });
+      // Factuality and esql-compile means and p-values come from a three-arm lab run in which
+      // every arm lost to the strict gate; skill-pii uses that run's means (a 1-in-15 gap)
+      // with an illustrative non-significant p-value.
+      const pii = row({
+        evaluatorName: 'skill-pii',
+        sampleSize: 15,
+        meanBaseline: 0.4,
+        meanTarget: 1 / 3,
+        pValue: 0.5,
+      });
       const safety = [
-        row({ evaluatorName: 'skill-secret-scanner', meanBaseline: 1, meanTarget: 1, pValue: 1 }),
-        row({ evaluatorName: 'skill-prompt-injection', meanBaseline: 1, meanTarget: 1, pValue: 1 }),
+        row({
+          evaluatorName: 'skill-secret-scanner',
+          sampleSize: 15,
+          meanBaseline: 1,
+          meanTarget: 1,
+          pValue: 1,
+        }),
+        row({
+          evaluatorName: 'skill-prompt-injection',
+          sampleSize: 15,
+          meanBaseline: 1,
+          meanTarget: 1,
+          pValue: 1,
+        }),
       ];
       const liveArm = (id: string, factuality: number, p: number, esql: number, esqlP: number) =>
         arm(id, [
@@ -287,7 +331,7 @@ describe('selectWinner', () => {
             meanTarget: esql,
             pValue: esqlP,
           }),
-          { ...pii, sampleSize: 15 },
+          pii,
           ...safety,
         ]);
       const result = selectWinner(
