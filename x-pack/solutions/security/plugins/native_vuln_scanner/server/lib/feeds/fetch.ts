@@ -15,6 +15,12 @@ export type FeedOs = FeedParseResult['os'];
 /** The largest compressed feed we accept; the biggest today (Ubuntu noble) is about 12 MB. */
 export const MAX_FEED_BYTES = 64 * 1024 * 1024;
 
+/**
+ * The largest decompressed feed we accept. bzip2 expands up to ~1.4 GB per block, so the
+ * 64 MiB cap on the download bounds nothing once decompression starts.
+ */
+export const MAX_DECOMPRESSED_FEED_BYTES = 512 * 1024 * 1024;
+
 const UBUNTU_CODENAME = /^[a-z]+$/;
 const RHEL_MAJOR = /^[1-9]\d*$/;
 
@@ -40,6 +46,8 @@ export type LoadFeedResult =
 export interface LoadFeedOptions {
   signal?: AbortSignal;
   fetchImpl?: typeof fetch;
+  /** Overrides {@link MAX_DECOMPRESSED_FEED_BYTES}; for tests. */
+  maxDecompressedBytes?: number;
 }
 
 const tooLarge = (url: string, bytes: number): Error =>
@@ -69,10 +77,34 @@ const readCapped = async (response: Response, url: string): Promise<Uint8Array> 
   return Buffer.concat(chunks, total);
 };
 
+/**
+ * Counts decompressed output and checks the abort signal between blocks, so a hostile feed
+ * decompressing to gigabytes cannot pin the CPU and an abort stops the parse, not just the
+ * download.
+ */
+const guardBlocks = function* (
+  blocks: Generator<Buffer>,
+  url: string,
+  signal: AbortSignal | undefined,
+  maxDecompressedBytes: number
+): Generator<Buffer> {
+  let total = 0;
+  for (const block of blocks) {
+    signal?.throwIfAborted();
+    total += block.byteLength;
+    if (total > maxDecompressedBytes) {
+      throw new Error(
+        `Advisory feed ${url} decompresses past ${maxDecompressedBytes} bytes`
+      );
+    }
+    yield block;
+  }
+};
+
 /** Downloads, decompresses and parses the advisory feed for one OS release. */
 export const loadFeed = async (
   os: FeedOs,
-  { signal, fetchImpl = fetch }: LoadFeedOptions = {}
+  { signal, fetchImpl = fetch, maxDecompressedBytes }: LoadFeedOptions = {}
 ): Promise<LoadFeedResult> => {
   const url = feedUrl(os);
   const response = await fetchImpl(url, { signal });
@@ -85,7 +117,12 @@ export const loadFeed = async (
     throw new Error(`Advisory feed ${url} returned HTTP ${response.status}`);
   }
   const body = await readCapped(response, url);
-  const blocks = bunzip2Blocks(body);
+  const blocks = guardBlocks(
+    bunzip2Blocks(body),
+    url,
+    signal,
+    maxDecompressedBytes ?? MAX_DECOMPRESSED_FEED_BYTES
+  );
   const feed =
     os.family === 'ubuntu'
       ? await parseUbuntuOval(blocks, { release: os.version })

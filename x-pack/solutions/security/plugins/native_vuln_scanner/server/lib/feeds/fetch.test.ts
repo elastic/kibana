@@ -133,4 +133,23 @@ describe('loadFeed', () => {
     }) as unknown as typeof fetch;
     await expect(loadFeed(rhel9, { signal: controller.signal, fetchImpl })).rejects.toThrow();
   });
+
+  it('refuses a feed that decompresses past the decompressed cap', async () => {
+    const fetchImpl = respond(rhelBz2);
+    await expect(loadFeed(rhel9, { fetchImpl, maxDecompressedBytes: 8 })).rejects.toThrow(
+      'decompresses past 8 bytes'
+    );
+  });
+
+  it('stops decompressing when the signal aborts mid-parse', async () => {
+    const controller = new AbortController();
+    const fetchImpl = jest.fn(async () => {
+      // Abort after the download, before the parse consumes any block.
+      controller.abort();
+      return fakeResponse(rhelBz2);
+    }) as unknown as typeof fetch;
+    await expect(
+      loadFeed(rhel9, { signal: controller.signal, fetchImpl })
+    ).rejects.toThrow();
+  });
 });
