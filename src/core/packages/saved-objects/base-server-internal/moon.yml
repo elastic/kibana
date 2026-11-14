@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/logging-mocks'
   - '@kbn/safer-lodash-set'
+  - '@kbn/config'
 tags:
   - shared-server
   - package

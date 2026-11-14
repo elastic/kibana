@@ -55,6 +55,7 @@ export interface SavedObjectsType<Attributes = any> {
    * It is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.
    *
    * @remarks Setting this property for hidden types is not recommended and will fail validation if set to `false`.
+   * Setting `hiddenFromHttpApis: true` could be a breaking changes since it will no longer be accessible via the HTTP APIs.
    * @internalRemarks Using 'hiddenFromHttpApis' is an alternative to registering types as `hidden:true` to hide a type from the HTTP APIs without effecting repositories access.
    */
   hiddenFromHttpApis?: boolean;
