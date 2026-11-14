@@ -83,6 +83,7 @@ steps:
             {% if consts.MODE == 'discovery' %}Mode: discovery. Look through the security data in this space (alerts, detection rules, the indices you can list) for a recurring analyst task no existing skill covers, and propose new skills for it.{% else %}Mode: telemetry. Look at how the existing skills are used (invocation counts, tool patterns, failure rates in the traces) and propose improved variants of the skills that underperform.{% endif %}
 
             This is pass {{ while.iteration | plus: 1 }} of at most 3. Pick a different angle from earlier passes.
+            {% if variables.explored and variables.explored.size > 0 %}Already proposed in this run (do not repeat them or a near-duplicate of them): {{ variables.explored | join: '; ' }}{% endif %}
 
             What AESOP already recorded (do not propose these again; a rejection or dismissal stands unless you have new evidence):
             {{ steps.read_prior_knowledge.output.kis | json | truncate: 6000 }}
@@ -178,8 +179,27 @@ steps:
                 agent_id: '__AB_AGENT_ID__'
                 variants: '${{ foreach.item.variants }}'
                 investigation_id: '__INVESTIGATION_ID__'
+                repetitions: 3
             on-failure:
               continue: true
+
+      # Carries this pass's titles into the next pass's prompt so the agent
+      # sees what this run already proposed. `data.set` writes variables that
+      # survive inner-output eviction between while iterations. The titles are
+      # resolved first (a failed pass yields [] before concat ever runs, the
+      # same resolve-then-accumulate shape as the drift monitor).
+      - name: resolve_explored_titles
+        type: data.set
+        with:
+          titles: >-
+            ${{ steps.explorer_pass.output.structured_output.candidates
+              | default: consts.EMPTY_ARRAY
+              | map: 'title' }}
+
+      - name: remember_explored
+        type: data.set
+        with:
+          explored: '${{ variables.explored | default: consts.EMPTY_ARRAY | concat: steps.resolve_explored_titles.output.titles }}'
 
   - name: output_result
     type: workflow.output
