@@ -20,6 +20,8 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod
