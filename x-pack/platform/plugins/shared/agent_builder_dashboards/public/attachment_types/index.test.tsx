@@ -187,6 +187,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
+      removeAttachment: jest.fn(),
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) =>
@@ -306,6 +307,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       agentBuilder: {
         attachments: { addAttachmentType },
         addAttachment: jest.fn(),
+        removeAttachment: jest.fn(),
         updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
         events: {
           getChatEvents$: jest.fn(() => new Subject<ChatEvent>().asObservable()),
