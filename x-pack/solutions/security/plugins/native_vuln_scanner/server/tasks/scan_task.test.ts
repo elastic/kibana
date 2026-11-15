@@ -413,6 +413,58 @@ describe('registerScanTask', () => {
 
       expectAbortedRun(result);
     });
+
+    describe('before the release loop', () => {
+      const runInventoryRead = async (abortSignal: boolean) => {
+        const controller = new AbortController();
+        const taskManager = taskManagerMock.createSetup();
+        const { deps } = setup([rhelAgent('a1', '9')]);
+        readMock.mockImplementation(() => {
+          if (abortSignal) controller.abort();
+          throw Object.assign(new Error('This operation was aborted'), { name: 'AbortError' });
+        });
+        registerScanTask(taskManager, async () => deps);
+        const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][SCAN_TASK_TYPE];
+        const runner = definition.createTaskRunner({
+          taskInstance: { id: SCAN_TASK_ID } as ConcreteTaskInstance,
+          signal: controller.signal,
+          executionUuid: 'exec-1',
+        } as Parameters<typeof definition.createTaskRunner>[0]);
+        return { result: await runner.run(), loadFeed: deps.loadFeed };
+      };
+
+      it('records an abort while reading the inventory as aborted, not failed', async () => {
+        const { result, loadFeed } = await runInventoryRead(true);
+
+        expect(result).not.toHaveProperty('error');
+        expect(result?.state.lastRun).not.toHaveProperty('error');
+        expect(result?.state.lastRun).toMatchObject({
+          runId: 'exec-1',
+          status: 'aborted',
+          hosts: 0,
+          findings: 0,
+          releases: {},
+        });
+        expect(() => stateSchemaByVersion[1].schema.validate(result?.state)).not.toThrow();
+        expect(loadFeed).not.toHaveBeenCalled();
+      });
+
+      it('still records the same error as failed while the signal is not aborted', async () => {
+        const { result } = await runInventoryRead(false);
+
+        expect(result).toEqual({
+          state: {
+            lastRun: expect.objectContaining({
+              runId: 'exec-1',
+              status: 'failed',
+              error: 'This operation was aborted',
+            }),
+          },
+          error: expect.objectContaining({ name: 'AbortError' }),
+        });
+        expect(() => stateSchemaByVersion[1].schema.validate(result?.state)).not.toThrow();
+      });
+    });
   });
 
   it('records a run without the inventory pack as no_pack', async () => {
