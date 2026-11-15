@@ -25,8 +25,10 @@ export const trimVersion = (raw: string): string =>
   raw.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '');
 
 /**
- * Optional sign then leading ASCII digits, else 0. Mirrors the painless parseEpoch, including
- * that it stops accumulating past {@link MAX_EPOCH} (callers reject anything above it).
+ * Optional sign then leading ASCII digits, else 0. Never saturates, so huge epochs still order
+ * correctly against each other (exactly up to 2^53); callers reject anything above
+ * {@link MAX_EPOCH} when building a key. The painless parseEpoch stops accumulating instead,
+ * which only matters for keys, and those are rejected there too.
  * `-0`/`+0` both yield 0: painless longs have no negative zero to mirror.
  */
 export const parseEpoch = (s: string): number => {
@@ -34,9 +36,7 @@ export const parseEpoch = (s: string): number => {
   const negative = s[0] === '-';
   if (negative || s[0] === '+') i++;
   let value = 0;
-  for (; isDigit(s[i]); i++) {
-    if (value <= MAX_EPOCH) value = value * 10 + (s.charCodeAt(i) - 48);
-  }
+  for (; isDigit(s[i]); i++) value = value * 10 + (s.charCodeAt(i) - 48);
   return negative && value !== 0 ? -value : value;
 };
 

@@ -131,6 +131,15 @@ describe('rpm', () => {
     expect(parseEpoch('')).toBe(0);
   });
 
+  it('orders epochs beyond the key range instead of treating them as equal', () => {
+    expect(parseEpoch('99999999999')).toBe(99999999999);
+    expect(compareDpkg('99999999999:1', '999999999999:1')).toBe(-1);
+    expect(compareDpkg('999999999999:1', '99999999999:1')).toBe(1);
+    expect(compareDpkg('99999999999:1', '99999999999:1')).toBe(0);
+    expect(compareRpm('99999999999:1-1', '999999999999:1-1')).toBe(-1);
+    expect(compareRpm('99999999999:1-1', '1:1-1')).toBe(1);
+  });
+
   it('rejects numbers longer than the key length char can encode', () => {
     expect(() => rpmKey(`1.${'9'.repeat(79)}-1`)).toThrow(UnencodableVersionError);
     expect(() => rpmKey('-1:1.0-1')).toThrow(UnencodableVersionError);
