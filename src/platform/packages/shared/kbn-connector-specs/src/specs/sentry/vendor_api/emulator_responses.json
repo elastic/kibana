@@ -1,0 +1,1725 @@
+[
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/api/0/organizations/{organization_id_or_slug}/issues/",
+    "status": 200,
+    "body": [
+      {
+        "annotations": [
+          {
+            "displayName": "Ada Lovelace",
+            "url": "https://example.com/checkout"
+          }
+        ],
+        "assignedTo": {
+          "email": "ada@example.com",
+          "id": "8801",
+          "name": "web-frontend",
+          "type": "user"
+        },
+        "count": "1284",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "derivedData": {
+          "blocker": "example blocker",
+          "hasOpenFixPr": true,
+          "hasRootCause": true,
+          "isAssigned": true,
+          "lastCompletedAutofixStep": "example last completed autofix step",
+          "lastProgressedAt": "2026-11-12T09:41:00Z",
+          "progress": "example progress",
+          "status": "unresolved",
+          "viewCount": 12
+        },
+        "filtered": {
+          "count": "1284",
+          "firstSeen": "2026-11-03T08:12:00Z",
+          "lastSeen": "2026-11-12T09:41:00Z",
+          "stats": {},
+          "userCount": 17
+        },
+        "firstSeen": "2026-11-03T08:12:00Z",
+        "hasSeen": true,
+        "id": "4501",
+        "inbox": {
+          "date_added": "2026-11-12T09:41:00Z",
+          "reason": 0,
+          "reason_details": {
+            "count": 0,
+            "until": "example until",
+            "user_count": 0,
+            "user_window": 0,
+            "window": 0
+          }
+        },
+        "integrationIssues": [
+          {}
+        ],
+        "isBookmarked": false,
+        "isPublic": false,
+        "isSubscribed": false,
+        "isUnhandled": true,
+        "issueCategory": "error",
+        "issueType": "error",
+        "lastSeen": "2026-11-12T09:41:00Z",
+        "latestEventHasAttachments": true,
+        "level": "error",
+        "lifetime": {},
+        "logger": "sentry",
+        "matchingEventEnvironment": "example matching event environment",
+        "matchingEventId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+        "metadata": {},
+        "numComments": 0,
+        "owners": {
+          "date_added": "2026-11-12T09:41:00Z",
+          "owner": "team:backend",
+          "type": "error"
+        },
+        "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+        "platform": "javascript",
+        "priority": "high",
+        "priorityLockedAt": "2026-11-12T09:41:00Z",
+        "project": {
+          "id": "1234",
+          "name": "web-frontend",
+          "platform": "javascript",
+          "slug": "web-frontend"
+        },
+        "seerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+        "seerExplorerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+        "seerFixabilityScore": 0,
+        "sentryAppIssues": [
+          {}
+        ],
+        "sessionCount": 0,
+        "shareId": "c0ffee",
+        "shortId": "WEB-1A",
+        "stats": {},
+        "status": "unresolved",
+        "statusDetails": {
+          "actor": {
+            "authenticators": [
+              {}
+            ],
+            "avatar": {
+              "avatarType": "example avatar type",
+              "avatarUrl": "example avatar url",
+              "avatarUuid": "example avatar uuid"
+            },
+            "avatarUrl": "example avatar url",
+            "canReset2fa": true,
+            "dateJoined": "2026-11-12T09:41:00Z",
+            "email": "ada@example.com",
+            "emails": [
+              {
+                "email": "ada@example.com",
+                "id": "4501",
+                "is_verified": true
+              }
+            ],
+            "experiments": {},
+            "has2fa": true,
+            "hasPasswordAuth": true,
+            "id": "4501",
+            "identities": [
+              {
+                "dateSynced": "2026-11-12T09:41:00Z",
+                "dateVerified": "2026-11-12T09:41:00Z",
+                "id": "4501",
+                "name": "web-frontend",
+                "organization": {
+                  "name": "web-frontend",
+                  "slug": "web-frontend"
+                },
+                "provider": {
+                  "id": "4501",
+                  "name": "web-frontend"
+                }
+              }
+            ],
+            "isActive": true,
+            "isManaged": true,
+            "isStaff": true,
+            "isSuperuser": true,
+            "isSuspended": true,
+            "lastActive": "2026-11-12T09:41:00Z",
+            "lastLogin": "2026-11-12T09:41:00Z",
+            "name": "web-frontend",
+            "username": "ada"
+          },
+          "ignoreCount": 0,
+          "ignoreUntil": "2026-11-12T09:41:00Z",
+          "ignoreUserCount": 0,
+          "ignoreUserWindow": 0,
+          "ignoreWindow": 0,
+          "inCommit": "example in commit",
+          "inNextRelease": true,
+          "inRelease": "example in release",
+          "info": {
+            "dateCreated": "example date created",
+            "syncCount": 0,
+            "totalEvents": 0
+          },
+          "pendingEvents": 0
+        },
+        "subscriptionDetails": {
+          "disabled": true,
+          "reason": "ongoing"
+        },
+        "substatus": "archived_until_escalating",
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "type": "default",
+        "userCount": 17
+      },
+      {
+        "annotations": [
+          {
+            "displayName": "Ada Lovelace",
+            "url": "https://example.com/checkout"
+          }
+        ],
+        "assignedTo": {
+          "email": "ada@example.com",
+          "id": "8801",
+          "name": "web-frontend",
+          "type": "user"
+        },
+        "count": "1284",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "derivedData": {
+          "blocker": "example blocker",
+          "hasOpenFixPr": true,
+          "hasRootCause": true,
+          "isAssigned": true,
+          "lastCompletedAutofixStep": "example last completed autofix step",
+          "lastProgressedAt": "2026-11-12T09:41:00Z",
+          "progress": "example progress",
+          "status": "unresolved",
+          "viewCount": 12
+        },
+        "filtered": {
+          "count": "1284",
+          "firstSeen": "2026-11-03T08:12:00Z",
+          "lastSeen": "2026-11-12T09:41:00Z",
+          "stats": {},
+          "userCount": 17
+        },
+        "firstSeen": "2026-11-03T08:12:00Z",
+        "hasSeen": true,
+        "id": "4502",
+        "inbox": {
+          "date_added": "2026-11-12T09:41:00Z",
+          "reason": 0,
+          "reason_details": {
+            "count": 0,
+            "until": "example until",
+            "user_count": 0,
+            "user_window": 0,
+            "window": 0
+          }
+        },
+        "integrationIssues": [
+          {}
+        ],
+        "isBookmarked": false,
+        "isPublic": false,
+        "isSubscribed": false,
+        "isUnhandled": true,
+        "issueCategory": "error",
+        "issueType": "error",
+        "lastSeen": "2026-11-12T09:41:00Z",
+        "latestEventHasAttachments": true,
+        "level": "error",
+        "lifetime": {},
+        "logger": "sentry",
+        "matchingEventEnvironment": "example matching event environment",
+        "matchingEventId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+        "metadata": {},
+        "numComments": 0,
+        "owners": {
+          "date_added": "2026-11-12T09:41:00Z",
+          "owner": "team:backend",
+          "type": "error"
+        },
+        "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+        "platform": "javascript",
+        "priority": "high",
+        "priorityLockedAt": "2026-11-12T09:41:00Z",
+        "project": {
+          "id": "1234",
+          "name": "web-frontend",
+          "platform": "javascript",
+          "slug": "web-frontend"
+        },
+        "seerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+        "seerExplorerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+        "seerFixabilityScore": 0,
+        "sentryAppIssues": [
+          {}
+        ],
+        "sessionCount": 0,
+        "shareId": "c0ffee",
+        "shortId": "WEB-1A",
+        "stats": {},
+        "status": "unresolved",
+        "statusDetails": {
+          "actor": {
+            "authenticators": [
+              {}
+            ],
+            "avatar": {
+              "avatarType": "example avatar type",
+              "avatarUrl": "example avatar url",
+              "avatarUuid": "example avatar uuid"
+            },
+            "avatarUrl": "example avatar url",
+            "canReset2fa": true,
+            "dateJoined": "2026-11-12T09:41:00Z",
+            "email": "ada@example.com",
+            "emails": [
+              {
+                "email": "ada@example.com",
+                "id": "4501",
+                "is_verified": true
+              }
+            ],
+            "experiments": {},
+            "has2fa": true,
+            "hasPasswordAuth": true,
+            "id": "4501",
+            "identities": [
+              {
+                "dateSynced": "2026-11-12T09:41:00Z",
+                "dateVerified": "2026-11-12T09:41:00Z",
+                "id": "4501",
+                "name": "web-frontend",
+                "organization": {
+                  "name": "web-frontend",
+                  "slug": "web-frontend"
+                },
+                "provider": {
+                  "id": "4501",
+                  "name": "web-frontend"
+                }
+              }
+            ],
+            "isActive": true,
+            "isManaged": true,
+            "isStaff": true,
+            "isSuperuser": true,
+            "isSuspended": true,
+            "lastActive": "2026-11-12T09:41:00Z",
+            "lastLogin": "2026-11-12T09:41:00Z",
+            "name": "web-frontend",
+            "username": "ada"
+          },
+          "ignoreCount": 0,
+          "ignoreUntil": "2026-11-12T09:41:00Z",
+          "ignoreUserCount": 0,
+          "ignoreUserWindow": 0,
+          "ignoreWindow": 0,
+          "inCommit": "example in commit",
+          "inNextRelease": true,
+          "inRelease": "example in release",
+          "info": {
+            "dateCreated": "example date created",
+            "syncCount": 0,
+            "totalEvents": 0
+          },
+          "pendingEvents": 0
+        },
+        "subscriptionDetails": {
+          "disabled": true,
+          "reason": "ongoing"
+        },
+        "substatus": "archived_until_escalating",
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "type": "default",
+        "userCount": 17
+      },
+      {
+        "annotations": [
+          {
+            "displayName": "Ada Lovelace",
+            "url": "https://example.com/checkout"
+          }
+        ],
+        "assignedTo": {
+          "email": "ada@example.com",
+          "id": "8801",
+          "name": "web-frontend",
+          "type": "user"
+        },
+        "count": "1284",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "derivedData": {
+          "blocker": "example blocker",
+          "hasOpenFixPr": true,
+          "hasRootCause": true,
+          "isAssigned": true,
+          "lastCompletedAutofixStep": "example last completed autofix step",
+          "lastProgressedAt": "2026-11-12T09:41:00Z",
+          "progress": "example progress",
+          "status": "unresolved",
+          "viewCount": 12
+        },
+        "filtered": {
+          "count": "1284",
+          "firstSeen": "2026-11-03T08:12:00Z",
+          "lastSeen": "2026-11-12T09:41:00Z",
+          "stats": {},
+          "userCount": 17
+        },
+        "firstSeen": "2026-11-03T08:12:00Z",
+        "hasSeen": true,
+        "id": "4501",
+        "inbox": {
+          "date_added": "2026-11-12T09:41:00Z",
+          "reason": 0,
+          "reason_details": {
+            "count": 0,
+            "until": "example until",
+            "user_count": 0,
+            "user_window": 0,
+            "window": 0
+          }
+        },
+        "integrationIssues": [
+          {}
+        ],
+        "isBookmarked": false,
+        "isPublic": false,
+        "isSubscribed": false,
+        "isUnhandled": true,
+        "issueCategory": "error",
+        "issueType": "error",
+        "lastSeen": "2026-11-12T09:41:00Z",
+        "latestEventHasAttachments": true,
+        "level": "error",
+        "lifetime": {},
+        "logger": "sentry",
+        "matchingEventEnvironment": "example matching event environment",
+        "matchingEventId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+        "metadata": {},
+        "numComments": 0,
+        "owners": {
+          "date_added": "2026-11-12T09:41:00Z",
+          "owner": "team:backend",
+          "type": "error"
+        },
+        "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+        "platform": "javascript",
+        "priority": "high",
+        "priorityLockedAt": "2026-11-12T09:41:00Z",
+        "project": {
+          "id": "1234",
+          "name": "web-frontend",
+          "platform": "javascript",
+          "slug": "web-frontend"
+        },
+        "seerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+        "seerExplorerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+        "seerFixabilityScore": 0,
+        "sentryAppIssues": [
+          {}
+        ],
+        "sessionCount": 0,
+        "shareId": "c0ffee",
+        "shortId": "WEB-1A",
+        "stats": {},
+        "status": "unresolved",
+        "statusDetails": {
+          "actor": {
+            "authenticators": [
+              {}
+            ],
+            "avatar": {
+              "avatarType": "example avatar type",
+              "avatarUrl": "example avatar url",
+              "avatarUuid": "example avatar uuid"
+            },
+            "avatarUrl": "example avatar url",
+            "canReset2fa": true,
+            "dateJoined": "2026-11-12T09:41:00Z",
+            "email": "ada@example.com",
+            "emails": [
+              {
+                "email": "ada@example.com",
+                "id": "4501",
+                "is_verified": true
+              }
+            ],
+            "experiments": {},
+            "has2fa": true,
+            "hasPasswordAuth": true,
+            "id": "4501",
+            "identities": [
+              {
+                "dateSynced": "2026-11-12T09:41:00Z",
+                "dateVerified": "2026-11-12T09:41:00Z",
+                "id": "4501",
+                "name": "web-frontend",
+                "organization": {
+                  "name": "web-frontend",
+                  "slug": "web-frontend"
+                },
+                "provider": {
+                  "id": "4501",
+                  "name": "web-frontend"
+                }
+              }
+            ],
+            "isActive": true,
+            "isManaged": true,
+            "isStaff": true,
+            "isSuperuser": true,
+            "isSuspended": true,
+            "lastActive": "2026-11-12T09:41:00Z",
+            "lastLogin": "2026-11-12T09:41:00Z",
+            "name": "web-frontend",
+            "username": "ada"
+          },
+          "ignoreCount": 0,
+          "ignoreUntil": "2026-11-12T09:41:00Z",
+          "ignoreUserCount": 0,
+          "ignoreUserWindow": 0,
+          "ignoreWindow": 0,
+          "inCommit": "example in commit",
+          "inNextRelease": true,
+          "inRelease": "example in release",
+          "info": {
+            "dateCreated": "example date created",
+            "syncCount": 0,
+            "totalEvents": 0
+          },
+          "pendingEvents": 0
+        },
+        "subscriptionDetails": {
+          "disabled": true,
+          "reason": "ongoing"
+        },
+        "substatus": "archived_until_escalating",
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "type": "default",
+        "userCount": 17
+      }
+    ]
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+    "status": 200,
+    "body": {
+      "activity": [
+        {}
+      ],
+      "annotations": [
+        {
+          "displayName": "Ada Lovelace",
+          "url": "https://example.com/checkout"
+        }
+      ],
+      "assignedTo": {
+        "email": "ada@example.com",
+        "id": "8801",
+        "name": "web-frontend",
+        "type": "user"
+      },
+      "count": "1284",
+      "culprit": "app/checkout/cart.js in applyDiscount",
+      "derivedData": {
+        "blocker": "example blocker",
+        "hasOpenFixPr": true,
+        "hasRootCause": true,
+        "isAssigned": true,
+        "lastCompletedAutofixStep": "example last completed autofix step",
+        "lastProgressedAt": "2026-11-12T09:41:00Z",
+        "progress": "example progress",
+        "status": "unresolved",
+        "viewCount": 12
+      },
+      "firstRelease": {},
+      "firstSeen": "2026-11-03T08:12:00Z",
+      "forecast": {},
+      "hasSeen": true,
+      "id": "4501",
+      "inbox": {
+        "date_added": "2026-11-12T09:41:00Z",
+        "reason": 0,
+        "reason_details": {
+          "count": 0,
+          "until": "example until",
+          "user_count": 0,
+          "user_window": 0,
+          "window": 0
+        }
+      },
+      "integrationIssues": [
+        {}
+      ],
+      "isBookmarked": false,
+      "isPublic": false,
+      "isSubscribed": false,
+      "isUnhandled": true,
+      "issueCategory": "error",
+      "issueType": "error",
+      "lastRelease": {},
+      "lastSeen": "2026-11-12T09:41:00Z",
+      "latestEventHasAttachments": true,
+      "level": "error",
+      "logger": "sentry",
+      "metadata": {},
+      "numComments": 0,
+      "owners": [
+        {
+          "date_added": "2026-11-12T09:41:00Z",
+          "owner": "team:backend",
+          "type": "error"
+        }
+      ],
+      "participants": [
+        {}
+      ],
+      "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+      "platform": "javascript",
+      "priority": "high",
+      "priorityLockedAt": "2026-11-12T09:41:00Z",
+      "project": {
+        "id": "1234",
+        "name": "web-frontend",
+        "platform": "javascript",
+        "slug": "web-frontend"
+      },
+      "seenBy": [
+        {}
+      ],
+      "seerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+      "seerExplorerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+      "seerFixabilityScore": 0,
+      "sentryAppIssues": [
+        {
+          "displayName": "Ada Lovelace",
+          "id": "4501",
+          "issueId": "4501",
+          "serviceType": "example service type",
+          "webUrl": "https://sentry.io/organizations/elastic-demo/issues/4501/"
+        }
+      ],
+      "shareId": "c0ffee",
+      "shortId": "WEB-1A",
+      "stats": {},
+      "status": "unresolved",
+      "statusDetails": {
+        "actor": {
+          "authenticators": [
+            {}
+          ],
+          "avatar": {
+            "avatarType": "example avatar type",
+            "avatarUrl": "example avatar url",
+            "avatarUuid": "example avatar uuid"
+          },
+          "avatarUrl": "example avatar url",
+          "canReset2fa": true,
+          "dateJoined": "2026-11-12T09:41:00Z",
+          "email": "ada@example.com",
+          "emails": [
+            {
+              "email": "ada@example.com",
+              "id": "4501",
+              "is_verified": true
+            }
+          ],
+          "experiments": {},
+          "has2fa": true,
+          "hasPasswordAuth": true,
+          "id": "4501",
+          "identities": [
+            {
+              "dateSynced": "2026-11-12T09:41:00Z",
+              "dateVerified": "2026-11-12T09:41:00Z",
+              "id": "4501",
+              "name": "web-frontend",
+              "organization": {
+                "name": "web-frontend",
+                "slug": "web-frontend"
+              },
+              "provider": {
+                "id": "4501",
+                "name": "web-frontend"
+              }
+            }
+          ],
+          "isActive": true,
+          "isManaged": true,
+          "isStaff": true,
+          "isSuperuser": true,
+          "isSuspended": true,
+          "lastActive": "2026-11-12T09:41:00Z",
+          "lastLogin": "2026-11-12T09:41:00Z",
+          "name": "web-frontend",
+          "username": "ada"
+        },
+        "ignoreCount": 0,
+        "ignoreUntil": "2026-11-12T09:41:00Z",
+        "ignoreUserCount": 0,
+        "ignoreUserWindow": 0,
+        "ignoreWindow": 0,
+        "inCommit": "example in commit",
+        "inNextRelease": true,
+        "inRelease": "example in release",
+        "info": {
+          "dateCreated": "example date created",
+          "syncCount": 0,
+          "totalEvents": 0
+        },
+        "pendingEvents": 0
+      },
+      "subscriptionDetails": {
+        "disabled": true,
+        "reason": "ongoing"
+      },
+      "substatus": "archived_until_escalating",
+      "tags": [
+        {}
+      ],
+      "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+      "type": "default",
+      "userCount": 17,
+      "userReportCount": 0
+    }
+  },
+  {
+    "source": "v0",
+    "method": "PUT",
+    "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+    "status": 200,
+    "body": {
+      "annotations": [
+        {
+          "displayName": "Ada Lovelace",
+          "url": "https://example.com/checkout"
+        }
+      ],
+      "assignedTo": {
+        "email": "ada@example.com",
+        "id": "8801",
+        "name": "web-frontend",
+        "type": "user"
+      },
+      "count": "1284",
+      "culprit": "app/checkout/cart.js in applyDiscount",
+      "derivedData": {
+        "blocker": "example blocker",
+        "hasOpenFixPr": true,
+        "hasRootCause": true,
+        "isAssigned": true,
+        "lastCompletedAutofixStep": "example last completed autofix step",
+        "lastProgressedAt": "2026-11-12T09:41:00Z",
+        "progress": "example progress",
+        "status": "unresolved",
+        "viewCount": 12
+      },
+      "firstSeen": "2026-11-03T08:12:00Z",
+      "hasSeen": true,
+      "id": "4501",
+      "isBookmarked": false,
+      "isPublic": false,
+      "isSubscribed": false,
+      "isUnhandled": true,
+      "issueCategory": "error",
+      "issueType": "error",
+      "lastSeen": "2026-11-12T09:41:00Z",
+      "level": "error",
+      "logger": "sentry",
+      "metadata": {},
+      "numComments": 0,
+      "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+      "platform": "javascript",
+      "priority": "high",
+      "priorityLockedAt": "2026-11-12T09:41:00Z",
+      "project": {
+        "id": "1234",
+        "name": "web-frontend",
+        "platform": "javascript",
+        "slug": "web-frontend"
+      },
+      "seerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+      "seerExplorerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+      "seerFixabilityScore": 0,
+      "shareId": "c0ffee",
+      "shortId": "WEB-1A",
+      "status": "unresolved",
+      "statusDetails": {
+        "actor": {
+          "authenticators": [
+            {}
+          ],
+          "avatar": {
+            "avatarType": "example avatar type",
+            "avatarUrl": "example avatar url",
+            "avatarUuid": "example avatar uuid"
+          },
+          "avatarUrl": "example avatar url",
+          "canReset2fa": true,
+          "dateJoined": "2026-11-12T09:41:00Z",
+          "email": "ada@example.com",
+          "emails": [
+            {
+              "email": "ada@example.com",
+              "id": "4501",
+              "is_verified": true
+            }
+          ],
+          "experiments": {},
+          "has2fa": true,
+          "hasPasswordAuth": true,
+          "id": "4501",
+          "identities": [
+            {
+              "dateSynced": "2026-11-12T09:41:00Z",
+              "dateVerified": "2026-11-12T09:41:00Z",
+              "id": "4501",
+              "name": "web-frontend",
+              "organization": {
+                "name": "web-frontend",
+                "slug": "web-frontend"
+              },
+              "provider": {
+                "id": "4501",
+                "name": "web-frontend"
+              }
+            }
+          ],
+          "isActive": true,
+          "isManaged": true,
+          "isStaff": true,
+          "isSuperuser": true,
+          "isSuspended": true,
+          "lastActive": "2026-11-12T09:41:00Z",
+          "lastLogin": "2026-11-12T09:41:00Z",
+          "name": "web-frontend",
+          "username": "ada"
+        },
+        "ignoreCount": 0,
+        "ignoreUntil": "2026-11-12T09:41:00Z",
+        "ignoreUserCount": 0,
+        "ignoreUserWindow": 0,
+        "ignoreWindow": 0,
+        "inCommit": "example in commit",
+        "inNextRelease": true,
+        "inRelease": "example in release",
+        "info": {
+          "dateCreated": "example date created",
+          "syncCount": 0,
+          "totalEvents": 0
+        },
+        "pendingEvents": 0
+      },
+      "subscriptionDetails": {
+        "disabled": true,
+        "reason": "ongoing"
+      },
+      "substatus": "archived_until_escalating",
+      "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+      "type": "default",
+      "userCount": 17
+    }
+  },
+  {
+    "source": "v0",
+    "method": "PUT",
+    "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+    "status": 200,
+    "body": {
+      "annotations": [
+        {
+          "displayName": "Ada Lovelace",
+          "url": "https://example.com/checkout"
+        }
+      ],
+      "assignedTo": {
+        "email": "ada@example.com",
+        "id": "8801",
+        "name": "web-frontend",
+        "type": "user"
+      },
+      "count": "1284",
+      "culprit": "app/checkout/cart.js in applyDiscount",
+      "derivedData": {
+        "blocker": "example blocker",
+        "hasOpenFixPr": true,
+        "hasRootCause": true,
+        "isAssigned": true,
+        "lastCompletedAutofixStep": "example last completed autofix step",
+        "lastProgressedAt": "2026-11-12T09:41:00Z",
+        "progress": "example progress",
+        "status": "unresolved",
+        "viewCount": 12
+      },
+      "firstSeen": "2026-11-03T08:12:00Z",
+      "hasSeen": true,
+      "id": "4501",
+      "isBookmarked": false,
+      "isPublic": false,
+      "isSubscribed": false,
+      "isUnhandled": true,
+      "issueCategory": "error",
+      "issueType": "error",
+      "lastSeen": "2026-11-12T09:41:00Z",
+      "level": "error",
+      "logger": "sentry",
+      "metadata": {},
+      "numComments": 0,
+      "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+      "platform": "javascript",
+      "priority": "high",
+      "priorityLockedAt": "2026-11-12T09:41:00Z",
+      "project": {
+        "id": "1234",
+        "name": "web-frontend",
+        "platform": "javascript",
+        "slug": "web-frontend"
+      },
+      "seerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+      "seerExplorerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+      "seerFixabilityScore": 0,
+      "shareId": "c0ffee",
+      "shortId": "WEB-1A",
+      "status": "resolved",
+      "statusDetails": {
+        "actor": {
+          "authenticators": [
+            {}
+          ],
+          "avatar": {
+            "avatarType": "example avatar type",
+            "avatarUrl": "example avatar url",
+            "avatarUuid": "example avatar uuid"
+          },
+          "avatarUrl": "example avatar url",
+          "canReset2fa": true,
+          "dateJoined": "2026-11-12T09:41:00Z",
+          "email": "ada@example.com",
+          "emails": [
+            {
+              "email": "ada@example.com",
+              "id": "4501",
+              "is_verified": true
+            }
+          ],
+          "experiments": {},
+          "has2fa": true,
+          "hasPasswordAuth": true,
+          "id": "4501",
+          "identities": [
+            {
+              "dateSynced": "2026-11-12T09:41:00Z",
+              "dateVerified": "2026-11-12T09:41:00Z",
+              "id": "4501",
+              "name": "web-frontend",
+              "organization": {
+                "name": "web-frontend",
+                "slug": "web-frontend"
+              },
+              "provider": {
+                "id": "4501",
+                "name": "web-frontend"
+              }
+            }
+          ],
+          "isActive": true,
+          "isManaged": true,
+          "isStaff": true,
+          "isSuperuser": true,
+          "isSuspended": true,
+          "lastActive": "2026-11-12T09:41:00Z",
+          "lastLogin": "2026-11-12T09:41:00Z",
+          "name": "web-frontend",
+          "username": "ada"
+        },
+        "ignoreCount": 0,
+        "ignoreUntil": "2026-11-12T09:41:00Z",
+        "ignoreUserCount": 0,
+        "ignoreUserWindow": 0,
+        "ignoreWindow": 0,
+        "inCommit": "example in commit",
+        "inNextRelease": true,
+        "inRelease": "example in release",
+        "info": {
+          "dateCreated": "example date created",
+          "syncCount": 0,
+          "totalEvents": 0
+        },
+        "pendingEvents": 0
+      },
+      "subscriptionDetails": {
+        "disabled": true,
+        "reason": "ongoing"
+      },
+      "substatus": "archived_until_escalating",
+      "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+      "type": "default",
+      "userCount": 17
+    },
+    "when": {
+      "body": {
+        "status": "resolved"
+      }
+    }
+  },
+  {
+    "source": "v0",
+    "method": "PUT",
+    "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+    "status": 200,
+    "body": {
+      "annotations": [
+        {
+          "displayName": "Ada Lovelace",
+          "url": "https://example.com/checkout"
+        }
+      ],
+      "assignedTo": {
+        "email": "ada@example.com",
+        "id": "8801",
+        "name": "web-frontend",
+        "type": "user"
+      },
+      "count": "1284",
+      "culprit": "app/checkout/cart.js in applyDiscount",
+      "derivedData": {
+        "blocker": "example blocker",
+        "hasOpenFixPr": true,
+        "hasRootCause": true,
+        "isAssigned": true,
+        "lastCompletedAutofixStep": "example last completed autofix step",
+        "lastProgressedAt": "2026-11-12T09:41:00Z",
+        "progress": "example progress",
+        "status": "unresolved",
+        "viewCount": 12
+      },
+      "firstSeen": "2026-11-03T08:12:00Z",
+      "hasSeen": true,
+      "id": "4501",
+      "isBookmarked": false,
+      "isPublic": false,
+      "isSubscribed": false,
+      "isUnhandled": true,
+      "issueCategory": "error",
+      "issueType": "error",
+      "lastSeen": "2026-11-12T09:41:00Z",
+      "level": "error",
+      "logger": "sentry",
+      "metadata": {},
+      "numComments": 0,
+      "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+      "platform": "javascript",
+      "priority": "high",
+      "priorityLockedAt": "2026-11-12T09:41:00Z",
+      "project": {
+        "id": "1234",
+        "name": "web-frontend",
+        "platform": "javascript",
+        "slug": "web-frontend"
+      },
+      "seerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+      "seerExplorerAutofixLastTriggered": "2026-11-12T09:41:00Z",
+      "seerFixabilityScore": 0,
+      "shareId": "c0ffee",
+      "shortId": "WEB-1A",
+      "status": "ignored",
+      "statusDetails": {
+        "actor": {
+          "authenticators": [
+            {}
+          ],
+          "avatar": {
+            "avatarType": "example avatar type",
+            "avatarUrl": "example avatar url",
+            "avatarUuid": "example avatar uuid"
+          },
+          "avatarUrl": "example avatar url",
+          "canReset2fa": true,
+          "dateJoined": "2026-11-12T09:41:00Z",
+          "email": "ada@example.com",
+          "emails": [
+            {
+              "email": "ada@example.com",
+              "id": "4501",
+              "is_verified": true
+            }
+          ],
+          "experiments": {},
+          "has2fa": true,
+          "hasPasswordAuth": true,
+          "id": "4501",
+          "identities": [
+            {
+              "dateSynced": "2026-11-12T09:41:00Z",
+              "dateVerified": "2026-11-12T09:41:00Z",
+              "id": "4501",
+              "name": "web-frontend",
+              "organization": {
+                "name": "web-frontend",
+                "slug": "web-frontend"
+              },
+              "provider": {
+                "id": "4501",
+                "name": "web-frontend"
+              }
+            }
+          ],
+          "isActive": true,
+          "isManaged": true,
+          "isStaff": true,
+          "isSuperuser": true,
+          "isSuspended": true,
+          "lastActive": "2026-11-12T09:41:00Z",
+          "lastLogin": "2026-11-12T09:41:00Z",
+          "name": "web-frontend",
+          "username": "ada"
+        },
+        "ignoreCount": 0,
+        "ignoreUntil": "2026-11-12T09:41:00Z",
+        "ignoreUserCount": 0,
+        "ignoreUserWindow": 0,
+        "ignoreWindow": 0,
+        "inCommit": "example in commit",
+        "inNextRelease": true,
+        "inRelease": "example in release",
+        "info": {
+          "dateCreated": "example date created",
+          "syncCount": 0,
+          "totalEvents": 0
+        },
+        "pendingEvents": 0
+      },
+      "subscriptionDetails": {
+        "disabled": true,
+        "reason": "ongoing"
+      },
+      "substatus": "archived_until_escalating",
+      "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+      "type": "default",
+      "userCount": 17
+    },
+    "when": {
+      "body": {
+        "status": "ignored"
+      }
+    }
+  },
+  {
+    "source": "v0",
+    "method": "DELETE",
+    "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/",
+    "status": 202
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/api/0/organizations/{organization_id_or_slug}/issues/{issue_id}/events/",
+    "status": 200,
+    "body": [
+      {
+        "crashFile": "example crash file",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "dateCreated": "2026-10-01T10:00:00Z",
+        "event.type": "example event type",
+        "eventID": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+        "groupID": "4501",
+        "id": "4501",
+        "location": "app/checkout/cart.js",
+        "message": "Cannot read properties of undefined (reading 'id')",
+        "metadata": {},
+        "platform": "javascript",
+        "projectID": "1234",
+        "tags": [
+          {
+            "key": "browser",
+            "query": "is:unresolved",
+            "value": "Chrome 119"
+          }
+        ],
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "user": {
+          "data": {},
+          "email": "ada@example.com",
+          "geo": {},
+          "id": "8801",
+          "ip_address": "203.0.113.7",
+          "name": "web-frontend",
+          "username": "ada"
+        }
+      },
+      {
+        "crashFile": "example crash file",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "dateCreated": "2026-10-01T10:00:00Z",
+        "event.type": "example event type",
+        "eventID": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+        "groupID": "4501",
+        "id": "4502",
+        "location": "app/checkout/cart.js",
+        "message": "Cannot read properties of undefined (reading 'id')",
+        "metadata": {},
+        "platform": "javascript",
+        "projectID": "1234",
+        "tags": [
+          {
+            "key": "browser",
+            "query": "is:unresolved",
+            "value": "Chrome 119"
+          }
+        ],
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "user": {
+          "data": {},
+          "email": "ada@example.com",
+          "geo": {},
+          "id": "8801",
+          "ip_address": "203.0.113.7",
+          "name": "web-frontend",
+          "username": "ada"
+        }
+      },
+      {
+        "crashFile": "example crash file",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "dateCreated": "2026-10-01T10:00:00Z",
+        "event.type": "example event type",
+        "eventID": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+        "groupID": "4501",
+        "id": "4501",
+        "location": "app/checkout/cart.js",
+        "message": "Cannot read properties of undefined (reading 'id')",
+        "metadata": {},
+        "platform": "javascript",
+        "projectID": "1234",
+        "tags": [
+          {
+            "key": "browser",
+            "query": "is:unresolved",
+            "value": "Chrome 119"
+          }
+        ],
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "user": {
+          "data": {},
+          "email": "ada@example.com",
+          "geo": {},
+          "id": "8801",
+          "ip_address": "203.0.113.7",
+          "name": "web-frontend",
+          "username": "ada"
+        }
+      }
+    ]
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/api/0/organizations/{organization_id_or_slug}/projects/",
+    "status": 200,
+    "body": [
+      {
+        "access": [
+          "project:read"
+        ],
+        "dateCreated": "2026-10-01T10:00:00Z",
+        "environments": [
+          "production"
+        ],
+        "features": [
+          "alert-filters"
+        ],
+        "firstEvent": "2026-11-12T09:41:00Z",
+        "firstTransactionEvent": true,
+        "hasAccess": true,
+        "hasFeedbacks": true,
+        "hasFlags": true,
+        "hasInsightsAgentMonitoring": true,
+        "hasInsightsAppStart": true,
+        "hasInsightsAssets": true,
+        "hasInsightsCaches": true,
+        "hasInsightsDb": true,
+        "hasInsightsHttp": true,
+        "hasInsightsMCP": true,
+        "hasInsightsQueues": true,
+        "hasInsightsScreenLoad": true,
+        "hasInsightsVitals": true,
+        "hasLogs": true,
+        "hasMinifiedStackTrace": true,
+        "hasMonitors": true,
+        "hasNewFeedbacks": true,
+        "hasProfiles": true,
+        "hasReplays": true,
+        "hasSessions": true,
+        "hasTraceMetrics": true,
+        "hasUserReports": true,
+        "id": "4501",
+        "isBookmarked": false,
+        "isMember": true,
+        "latestDeploys": {},
+        "latestRelease": {
+          "version": "web-frontend@2026.11.1"
+        },
+        "name": "web-frontend",
+        "options": {},
+        "platform": "javascript",
+        "platforms": [
+          "javascript"
+        ],
+        "sessionStats": {},
+        "slug": "web-frontend",
+        "stats": {},
+        "team": {
+          "id": "77",
+          "name": "web-frontend",
+          "slug": "web-frontend"
+        },
+        "teams": [
+          {
+            "id": "77",
+            "name": "web-frontend",
+            "slug": "web-frontend"
+          }
+        ],
+        "transactionStats": {}
+      },
+      {
+        "access": [
+          "project:read"
+        ],
+        "dateCreated": "2026-10-01T10:00:00Z",
+        "environments": [
+          "production"
+        ],
+        "features": [
+          "alert-filters"
+        ],
+        "firstEvent": "2026-11-12T09:41:00Z",
+        "firstTransactionEvent": true,
+        "hasAccess": true,
+        "hasFeedbacks": true,
+        "hasFlags": true,
+        "hasInsightsAgentMonitoring": true,
+        "hasInsightsAppStart": true,
+        "hasInsightsAssets": true,
+        "hasInsightsCaches": true,
+        "hasInsightsDb": true,
+        "hasInsightsHttp": true,
+        "hasInsightsMCP": true,
+        "hasInsightsQueues": true,
+        "hasInsightsScreenLoad": true,
+        "hasInsightsVitals": true,
+        "hasLogs": true,
+        "hasMinifiedStackTrace": true,
+        "hasMonitors": true,
+        "hasNewFeedbacks": true,
+        "hasProfiles": true,
+        "hasReplays": true,
+        "hasSessions": true,
+        "hasTraceMetrics": true,
+        "hasUserReports": true,
+        "id": "4502",
+        "isBookmarked": false,
+        "isMember": true,
+        "latestDeploys": {},
+        "latestRelease": {
+          "version": "web-frontend@2026.11.1"
+        },
+        "name": "web-frontend",
+        "options": {},
+        "platform": "javascript",
+        "platforms": [
+          "javascript"
+        ],
+        "sessionStats": {},
+        "slug": "web-frontend",
+        "stats": {},
+        "team": {
+          "id": "77",
+          "name": "web-frontend",
+          "slug": "web-frontend"
+        },
+        "teams": [
+          {
+            "id": "77",
+            "name": "web-frontend",
+            "slug": "web-frontend"
+          }
+        ],
+        "transactionStats": {}
+      },
+      {
+        "access": [
+          "project:read"
+        ],
+        "dateCreated": "2026-10-01T10:00:00Z",
+        "environments": [
+          "production"
+        ],
+        "features": [
+          "alert-filters"
+        ],
+        "firstEvent": "2026-11-12T09:41:00Z",
+        "firstTransactionEvent": true,
+        "hasAccess": true,
+        "hasFeedbacks": true,
+        "hasFlags": true,
+        "hasInsightsAgentMonitoring": true,
+        "hasInsightsAppStart": true,
+        "hasInsightsAssets": true,
+        "hasInsightsCaches": true,
+        "hasInsightsDb": true,
+        "hasInsightsHttp": true,
+        "hasInsightsMCP": true,
+        "hasInsightsQueues": true,
+        "hasInsightsScreenLoad": true,
+        "hasInsightsVitals": true,
+        "hasLogs": true,
+        "hasMinifiedStackTrace": true,
+        "hasMonitors": true,
+        "hasNewFeedbacks": true,
+        "hasProfiles": true,
+        "hasReplays": true,
+        "hasSessions": true,
+        "hasTraceMetrics": true,
+        "hasUserReports": true,
+        "id": "4501",
+        "isBookmarked": false,
+        "isMember": true,
+        "latestDeploys": {},
+        "latestRelease": {
+          "version": "web-frontend@2026.11.1"
+        },
+        "name": "web-frontend",
+        "options": {},
+        "platform": "javascript",
+        "platforms": [
+          "javascript"
+        ],
+        "sessionStats": {},
+        "slug": "web-frontend",
+        "stats": {},
+        "team": {
+          "id": "77",
+          "name": "web-frontend",
+          "slug": "web-frontend"
+        },
+        "teams": [
+          {
+            "id": "77",
+            "name": "web-frontend",
+            "slug": "web-frontend"
+          }
+        ],
+        "transactionStats": {}
+      }
+    ]
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/",
+    "status": 200,
+    "body": {
+      "_meta": {},
+      "breakdowns": {},
+      "context": {},
+      "contexts": {},
+      "crashFile": "example crash file",
+      "culprit": "app/checkout/cart.js in applyDiscount",
+      "dateCreated": "2026-10-01T10:00:00Z",
+      "dateReceived": "2026-11-12T09:41:02Z",
+      "dist": "2026.11.1",
+      "endTimestamp": 0,
+      "entries": [
+        {}
+      ],
+      "errors": [
+        {
+          "data": {},
+          "message": "Cannot read properties of undefined (reading 'id')",
+          "type": "error"
+        }
+      ],
+      "eventID": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+      "fingerprints": [
+        "{{ default }}"
+      ],
+      "groupID": "4501",
+      "groupingConfig": {
+        "enhancements": "example enhancements",
+        "id": "4501"
+      },
+      "id": "4501",
+      "location": "app/checkout/cart.js",
+      "measurements": {},
+      "message": "Cannot read properties of undefined (reading 'id')",
+      "metadata": {},
+      "nextEventID": "b2c3d4e5f60718293a4b5c6d7e8f90a1",
+      "occurrence": {
+        "assignee": "example assignee",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "detectionTime": 0,
+        "eventId": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+        "evidenceData": {},
+        "evidenceDisplay": [
+          {
+            "important": true,
+            "name": "web-frontend",
+            "value": "Chrome 119"
+          }
+        ],
+        "fingerprint": [
+          "{{ default }}"
+        ],
+        "id": "4501",
+        "issueTitle": "example issue title",
+        "level": "error",
+        "priority": 1,
+        "projectId": 0,
+        "resourceId": "example resource id",
+        "subtitle": "example subtitle",
+        "type": 0
+      },
+      "packages": {},
+      "platform": "javascript",
+      "previousEventID": "9f8e7d6c5b4a39281706f5e4d3c2b1a0",
+      "projectID": "1234",
+      "release": {
+        "commitCount": 0,
+        "data": {},
+        "dateCreated": "2026-10-01T10:00:00Z",
+        "dateReleased": "2026-11-12T09:41:00Z",
+        "deployCount": 0,
+        "id": 0,
+        "lastCommit": {},
+        "lastDeploy": {
+          "dateFinished": "example date finished",
+          "dateStarted": "example date started",
+          "environment": "production",
+          "id": "4501",
+          "name": "web-frontend",
+          "url": "https://example.com/checkout"
+        },
+        "ref": "example ref",
+        "status": "unresolved",
+        "url": "https://example.com/checkout",
+        "userAgent": "example user agent",
+        "version": "web-frontend@2026.11.1",
+        "versionInfo": {
+          "buildHash": "example build hash",
+          "description": "example description",
+          "package": "web-frontend",
+          "version": {}
+        }
+      },
+      "resolvedWith": [
+        "example resolved with"
+      ],
+      "sdk": {
+        "name": "web-frontend",
+        "version": "web-frontend@2026.11.1"
+      },
+      "sdkUpdates": [
+        {}
+      ],
+      "size": 0,
+      "startTimestamp": 0,
+      "tags": [
+        {
+          "key": "browser",
+          "query": "is:unresolved",
+          "value": "Chrome 119"
+        }
+      ],
+      "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+      "type": "default",
+      "user": {
+        "data": {},
+        "email": "ada@example.com",
+        "geo": {},
+        "id": "8801",
+        "ip_address": "203.0.113.7",
+        "name": "web-frontend",
+        "username": "ada"
+      },
+      "userReport": {
+        "comments": "example comments",
+        "dateCreated": "example date created",
+        "email": "ada@example.com",
+        "event": {
+          "eventID": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+          "id": "4501"
+        },
+        "eventID": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+        "id": "4501",
+        "name": "web-frontend",
+        "user": {
+          "avatarUrl": "example avatar url",
+          "email": "ada@example.com",
+          "id": "8801",
+          "ipAddress": "203.0.113.7",
+          "name": "web-frontend",
+          "username": "ada"
+        }
+      }
+    }
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/",
+    "status": 200,
+    "body": [
+      {
+        "annotations": [
+          "example annotations"
+        ],
+        "assignedTo": {},
+        "count": "1284",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "firstSeen": "example first seen",
+        "hasSeen": true,
+        "id": "4501",
+        "isBookmarked": false,
+        "isPublic": false,
+        "isSubscribed": false,
+        "lastSeen": "example last seen",
+        "level": "error",
+        "logger": "sentry",
+        "metadata": {
+          "filename": "app/checkout/cart.js",
+          "type": "error",
+          "value": "Chrome 119"
+        },
+        "numComments": 0,
+        "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+        "project": {
+          "id": "1234",
+          "name": "web-frontend",
+          "slug": "web-frontend"
+        },
+        "shareId": "c0ffee",
+        "shortId": "WEB-1A",
+        "stats": {
+          "24h": [
+            [
+              0
+            ]
+          ]
+        },
+        "status": "unresolved",
+        "statusDetails": {},
+        "subscriptionDetails": {},
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "type": "error",
+        "userCount": 17
+      },
+      {
+        "annotations": [
+          "example annotations"
+        ],
+        "assignedTo": {},
+        "count": "1284",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "firstSeen": "example first seen",
+        "hasSeen": true,
+        "id": "4502",
+        "isBookmarked": false,
+        "isPublic": false,
+        "isSubscribed": false,
+        "lastSeen": "example last seen",
+        "level": "error",
+        "logger": "sentry",
+        "metadata": {
+          "filename": "app/checkout/cart.js",
+          "type": "error",
+          "value": "Chrome 119"
+        },
+        "numComments": 0,
+        "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+        "project": {
+          "id": "1234",
+          "name": "web-frontend",
+          "slug": "web-frontend"
+        },
+        "shareId": "c0ffee",
+        "shortId": "WEB-1A",
+        "stats": {
+          "24h": [
+            [
+              0
+            ]
+          ]
+        },
+        "status": "unresolved",
+        "statusDetails": {},
+        "subscriptionDetails": {},
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "type": "error",
+        "userCount": 17
+      },
+      {
+        "annotations": [
+          "example annotations"
+        ],
+        "assignedTo": {},
+        "count": "1284",
+        "culprit": "app/checkout/cart.js in applyDiscount",
+        "firstSeen": "example first seen",
+        "hasSeen": true,
+        "id": "4501",
+        "isBookmarked": false,
+        "isPublic": false,
+        "isSubscribed": false,
+        "lastSeen": "example last seen",
+        "level": "error",
+        "logger": "sentry",
+        "metadata": {
+          "filename": "app/checkout/cart.js",
+          "type": "error",
+          "value": "Chrome 119"
+        },
+        "numComments": 0,
+        "permalink": "https://sentry.io/organizations/elastic-demo/issues/4501/",
+        "project": {
+          "id": "1234",
+          "name": "web-frontend",
+          "slug": "web-frontend"
+        },
+        "shareId": "c0ffee",
+        "shortId": "WEB-1A",
+        "stats": {
+          "24h": [
+            [
+              0
+            ]
+          ]
+        },
+        "status": "unresolved",
+        "statusDetails": {},
+        "subscriptionDetails": {},
+        "title": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "type": "error",
+        "userCount": 17
+      }
+    ]
+  },
+  {
+    "source": "v0",
+    "method": "PUT",
+    "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/issues/",
+    "status": 200,
+    "body": {
+      "isPublic": false,
+      "status": "unresolved",
+      "statusDetails": {}
+    }
+  }
+]

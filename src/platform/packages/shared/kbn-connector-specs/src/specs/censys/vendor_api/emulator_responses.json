@@ -1,0 +1,307 @@
+[
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/global/asset/host/{host_id}",
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.censys.api.v3.host.v1+json"
+    },
+    "body": {
+      "result": {
+        "extensions": {},
+        "resource": {
+          "ip": "8.8.8.8",
+          "location": {
+            "city": "Mountain View",
+            "country": "United States",
+            "country_code": "US"
+          },
+          "autonomous_system": {
+            "asn": 15169,
+            "name": "GOOGLE",
+            "country_code": "US"
+          },
+          "dns": {
+            "reverse_dns": {
+              "names": [
+                "dns.google"
+              ]
+            }
+          },
+          "services": [
+            {
+              "port": 53,
+              "protocol": "DNS"
+            },
+            {
+              "port": 443,
+              "protocol": "HTTP"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/global/asset/enrichment/host/{host_ip}",
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.censys.api.v3.host-enrichment.v1+json"
+    },
+    "body": {
+      "result": {
+        "extensions": {},
+        "resource": {
+          "ip": "8.8.8.8",
+          "location": {
+            "city": "Mountain View",
+            "country": "United States",
+            "country_code": "US"
+          },
+          "autonomous_system": {
+            "asn": 15169,
+            "name": "GOOGLE",
+            "country_code": "US"
+          },
+          "dns": {
+            "reverse_dns": {
+              "names": [
+                "dns.google"
+              ]
+            }
+          },
+          "services": [
+            {
+              "port": 53,
+              "protocol": "DNS"
+            },
+            {
+              "port": 443,
+              "protocol": "HTTP"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/global/asset/certificate/{certificate_id}",
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.censys.api.v3.certificate.v1+json"
+    },
+    "body": {
+      "result": {
+        "extensions": {},
+        "resource": {
+          "fingerprint_sha256": "3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b",
+          "fingerprint_sha1": "9d0b8cbd2d5a1b4f6e3c7a1f0e2d4c6b8a9f1e3d",
+          "fingerprint_md5": "b1946ac92492d2347c6235b4d2611184",
+          "names": [
+            "example.com",
+            "www.example.com"
+          ],
+          "parse_status": "success",
+          "validation_level": "dv",
+          "precert": false,
+          "revoked": false,
+          "ever_seen_in_scan": true,
+          "added_at": "2026-03-02T08:15:00Z",
+          "modified_at": "2026-03-02T08:15:00Z",
+          "validated_at": "2026-03-02T09:00:00Z"
+        }
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/global/asset/host/{host_id}/timeline",
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.censys.api.v3.host_timeline_event.v1+json"
+    },
+    "body": {
+      "result": {
+        "events": [
+          {
+            "extensions": {},
+            "resource": {
+              "event_time": "2025-01-20T11:42:08Z",
+              "service_scanned": {}
+            }
+          },
+          {
+            "extensions": {},
+            "resource": {
+              "event_time": "2025-01-12T03:10:51Z"
+            }
+          }
+        ],
+        "scanned_to": "2025-01-31T23:59:59Z"
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/global/asset/webproperty/{webproperty_id}",
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.censys.api.v3.webproperty.v1+json"
+    },
+    "body": {
+      "result": {
+        "extensions": {},
+        "resource": {
+          "hostname": "example.com",
+          "port": 443,
+          "scan_time": "2026-11-10T06:30:12Z",
+          "labels": [
+            {
+              "value": "login-page",
+              "source": "censys",
+              "confidence": 0.9
+            }
+          ],
+          "endpoints": [
+            {
+              "endpoint_type": "HTTP",
+              "hostname": "example.com",
+              "ip": "93.184.216.34"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "POST",
+    "path": "/v3/global/scans/rescan",
+    "status": 200,
+    "body": {
+      "result": {
+        "completed": false,
+        "create_time": "2026-11-12T10:00:00Z",
+        "tracked_scan_id": "0b7c9d8e-5f4a-4c3b-9a21-6d8e1f2a3b4c",
+        "target": {
+          "service_id": {
+            "ip": "8.8.8.8",
+            "port": 53,
+            "protocol": "dns",
+            "transport_protocol": "udp"
+          }
+        },
+        "tasks": [
+          {
+            "description": "Scan 8.8.8.8:53/udp",
+            "status": "scanning",
+            "update_time": "2026-11-12T10:00:05Z"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/global/scans/{scan_id}",
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.censys.api.v3.trackedscan.v1+json"
+    },
+    "body": {
+      "result": {
+        "completed": true,
+        "create_time": "2026-11-12T10:00:00Z",
+        "tracked_scan_id": "0b7c9d8e-5f4a-4c3b-9a21-6d8e1f2a3b4c",
+        "target": {
+          "service_id": {
+            "ip": "8.8.8.8",
+            "port": 53,
+            "protocol": "dns",
+            "transport_protocol": "udp"
+          }
+        },
+        "tasks": [
+          {
+            "description": "Scan 8.8.8.8:53/udp",
+            "status": "completed",
+            "update_time": "2026-11-12T10:00:05Z"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "POST",
+    "path": "/v3/threat-hunting/censeye/jobs",
+    "status": 200,
+    "body": {
+      "result": {
+        "job_id": "7e1f2a3b-9c4d-4e5f-8a6b-0c1d2e3f4a5b",
+        "state": "started",
+        "target": {
+          "host_id": "8.8.8.8"
+        },
+        "create_time": "2026-11-12T10:05:00Z"
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/threat-hunting/censeye/jobs/{job_id}",
+    "status": 200,
+    "body": {
+      "result": {
+        "job_id": "7e1f2a3b-9c4d-4e5f-8a6b-0c1d2e3f4a5b",
+        "state": "completed",
+        "target": {
+          "host_id": "8.8.8.8"
+        },
+        "create_time": "2026-11-12T10:05:00Z",
+        "update_time": "2026-11-12T10:05:42Z",
+        "result_count": 2
+      }
+    }
+  },
+  {
+    "source": "platform",
+    "method": "GET",
+    "path": "/v3/threat-hunting/censeye/jobs/{job_id}/results",
+    "status": 200,
+    "body": {
+      "result": {
+        "results": [
+          {
+            "field_value_pairs": [
+              {
+                "field": "services.port",
+                "value": "53"
+              }
+            ],
+            "count": 1204
+          },
+          {
+            "field_value_pairs": [
+              {
+                "field": "autonomous_system.asn",
+                "value": "15169"
+              }
+            ],
+            "count": 58312
+          }
+        ],
+        "next_page_token": ""
+      }
+    }
+  }
+]

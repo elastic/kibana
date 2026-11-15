@@ -38,6 +38,9 @@ first. The connector's entry in the report has:
   one of them.
 - `snapshotProblems` and `latestProblems`: what recording the actions reported against each.
 - `overlayFindings`: actions in `overlay.yaml` that no longer apply to the latest specs.
+- `responsesFindings`: responses in `vendor_api/emulator_responses.json`, the realistic ones the Scout
+  suites make the emulator answer with, that the latest specs reject, one line per operation with what
+  doesn't fit. They are written by hand, so the pipeline never refreshes them.
 - `outcome`: `none` and `refresh` need no work here. Say so on the issue and stop: the pipeline closes
   the issue on its next run, and refreshes in its bot PR.
 
@@ -115,6 +118,16 @@ nothing in the latest specs. Either the vendor fixed the spec, so remove the act
 now says what the overlay said, or the vendor moved the operation, so retarget the action, keeping its
 evidence in `description`.
 
+### Emulator responses that no longer fit
+
+Each entry in `responsesFindings` names an operation in `vendor_api/emulator_responses.json` and what in
+its response the latest specs reject: a new required property, a renamed or removed one, a value outside
+a changed enum or format. They are checked against the refreshed snapshots, so fix them after Step 3,
+once `--refresh` has written those. Edit the response by hand: add the new property with a realistic
+value, rename the moved one, or drop the removed one, and keep the rest of it. Don't blank a field or
+swap the response for a sample; the file exists so that a recording shows real-looking data. An
+operation the connector no longer calls (it is gone from `manifest.json`) loses its response.
+
 ## Step 3: Refresh the Artifacts
 
 ```bash
@@ -134,6 +147,7 @@ Run each check and fix every failure for this connector:
 ```bash
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
+node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/emulator_responses.test.ts
 node scripts/jest <connector folder>
 node scripts/type_check --project src/platform/packages/shared/kbn-connector-specs/tsconfig.json
 node scripts/connector_vendor_api --drift --connector $0

@@ -139,6 +139,7 @@ packages:
     - kbn-streamlang-tests
   disabled:
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
+    - kbn-connector-specs # Its Scout suite needs the connector emulator running before the servers start, so the Connector Emulator Scout step runs it (connector_emulator_scout.sh), not the Scout lanes
 
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
@@ -147,6 +148,7 @@ excluded_configs:
   - x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel.playwright.config.ts
   - x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
+  - src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel.playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts

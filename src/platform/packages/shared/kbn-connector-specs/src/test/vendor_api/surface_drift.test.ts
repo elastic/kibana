@@ -24,6 +24,7 @@ const healthy: ConnectorDrift = {
   latestProblems: [],
   verdict: 'healthy',
   overlayFindings: [],
+  responsesFindings: [],
   outcome: 'none',
 };
 
@@ -274,6 +275,26 @@ describe('renderDriftIssue', () => {
     expect(body).toContain('node scripts/connector_vendor_api --drift --connector acme');
     expect(body).toContain('`/update-connector acme <this issue>`');
     expect(body).not.toContain('cc ');
+  });
+
+  it('lists the emulator responses that no longer fit the latest specs', () => {
+    const { body } = renderDriftIssue(
+      {
+        ...healthy,
+        responsesFindings: ['GET /items: Response body at /color: Instance does not have it.'],
+        outcome: 'issue',
+      },
+      []
+    );
+
+    expect(body).toContain(
+      '### Responses in `vendor_api/emulator_responses.json` that no longer fit the latest specs'
+    );
+    expect(body).toContain('- GET /items: Response body at /color: Instance does not have it.');
+  });
+
+  it('leaves out the emulator responses section when they fit', () => {
+    expect(renderDriftIssue(drifted, []).body).not.toContain('emulator_responses.json');
   });
 
   it('reports unreachable sources and caps long change lists', () => {

@@ -13,6 +13,18 @@ export type { CombinedEmulator } from './src/fetch/combine_emulators';
 export { issueAccessToken } from './src/openapi/token_endpoints';
 export { createCertificateAuthority } from './src/server/certificate_authority';
 export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
+export {
+  DEFAULT_EMULATOR_CA_DIRECTORY,
+  DEFAULT_EMULATOR_HOST,
+  DEFAULT_EMULATOR_PORT,
+  EMULATOR_CA_DIR_ENV,
+  EMULATOR_HOST_ENV,
+  EMULATOR_PORT_ENV,
+  isPort,
+  resolveEmulatorLocation,
+} from './src/server/emulator_location';
+export type { EmulatorLocation } from './src/server/emulator_location';
+export { DEFAULT_LOGGED_RESPONSE_LINES, formatResponse } from './src/fetch/format_response';
 export { createEmulatorProxy } from './src/server/create_emulator_proxy';
 export type { EmulatorProxy, EmulatorProxyOptions } from './src/server/create_emulator_proxy';
 export {

@@ -1,0 +1,137 @@
+[
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/shodan/host/search",
+    "status": 200,
+    "body": {
+      "total": 2,
+      "matches": [
+        {
+          "ip_str": "203.0.113.10",
+          "ip": 134744072,
+          "port": 80,
+          "transport": "tcp",
+          "org": "Example Hosting GmbH",
+          "isp": "Google LLC",
+          "asn": "AS15169",
+          "hostnames": [
+            "web1.example.de"
+          ],
+          "domains": [
+            "dns.google"
+          ],
+          "os": null,
+          "location": {
+            "city": "Mountain View",
+            "country_code": "US",
+            "country_name": "United States",
+            "latitude": 37.4056,
+            "longitude": -122.0775
+          },
+          "product": "Apache httpd",
+          "version": "2.4.58"
+        },
+        {
+          "ip_str": "203.0.113.24",
+          "ip": 134744072,
+          "port": 443,
+          "transport": "tcp",
+          "org": "Example Hosting GmbH",
+          "isp": "Google LLC",
+          "asn": "AS15169",
+          "hostnames": [
+            "web2.example.de"
+          ],
+          "domains": [
+            "dns.google"
+          ],
+          "os": null,
+          "location": {
+            "city": "Mountain View",
+            "country_code": "US",
+            "country_name": "United States",
+            "latitude": 37.4056,
+            "longitude": -122.0775
+          },
+          "product": "Apache httpd",
+          "version": "2.4.57"
+        }
+      ],
+      "facets": {}
+    }
+  },
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/shodan/host/count",
+    "status": 200,
+    "body": {
+      "total": 4812,
+      "facets": {
+        "country": [
+          {
+            "value": "US",
+            "count": 1903
+          },
+          {
+            "value": "DE",
+            "count": 877
+          },
+          {
+            "value": "NL",
+            "count": 412
+          }
+        ]
+      }
+    }
+  },
+  {
+    "source": "rest",
+    "method": "GET",
+    "path": "/shodan/host/{ip}",
+    "status": 200,
+    "body": {
+      "ip_str": "8.8.8.8",
+      "ip": 134744072,
+      "port": 443,
+      "transport": "tcp",
+      "org": "Google LLC",
+      "isp": "Google LLC",
+      "asn": "AS15169",
+      "hostnames": [
+        "dns.google"
+      ],
+      "domains": [
+        "dns.google"
+      ],
+      "os": null,
+      "location": {
+        "city": "Mountain View",
+        "country_code": "US",
+        "country_name": "United States",
+        "latitude": 37.4056,
+        "longitude": -122.0775
+      },
+      "city": "Mountain View",
+      "country_name": "United States",
+      "ports": [
+        53,
+        443
+      ],
+      "data": [
+        {
+          "port": 53,
+          "transport": "udp",
+          "product": "Google DNS",
+          "data": "Recursion: enabled"
+        },
+        {
+          "port": 443,
+          "transport": "tcp",
+          "data": "HTTP/1.1 302 Found"
+        }
+      ]
+    }
+  }
+]

@@ -38,7 +38,7 @@ const { fetch, calls } = createEmulatorFetch({ specs: [spec], capture: true });
 - **Capped.** Both limits must be whole numbers of at least 0, or creating the emulator throws. Bodies longer than `maxBodyBytes` serialized (default 8 KiB) are cut to their first bytes as text, with `bodyTruncated: true`. Only the latest `maxCalls` calls (default 100) keep `captured`; older calls lose it but stay in `calls`, so indices such as `since` keep their meaning.
 - Calls recorded by one request, such as the tool calls of an MCP batch, share its capture. Requests no connector of a combined emulator matches aren't captured.
 
-Capture is off by default, as it takes memory in long Jest runs. Server mode (`node scripts/connector_emulate`) turns it on, so `GET /_mock/calls` and the MCP server's `list_calls` show what Kibana sent.
+Capture is off by default, as it takes memory in long Jest runs. Server mode (`node scripts/connector_emulate`) turns it on, so `GET /_mock/calls` and the MCP server's `list_calls` show what Kibana sent. `--log-responses` also prints what each request was answered with under its line in the log: the status, where the answer came from (`generated` from the spec, a fixture, a recording or a runtime fixture) and the start of its body as indented JSON: the first 30 lines, with longer lines cut.
 
 Connectors that call several vendor specs (one per API version or product) can name them:
 
@@ -142,6 +142,8 @@ Every call is recorded in the combined `calls` with its `connector`, and `operat
 Runtime fixtures and `describeOperation` are per connector too. A fixture goes to its `connector` (or the `?connector=` of `PUT /_mock/fixtures`, or `runtimeFixtures.set(fixtures, { connector })`), else to the one connector whose specs have its operation; when several have it, as Outlook and OneDrive both have Graph's `GET /me`, it is rejected until one is named, and when any fixture is rejected none is set on any connector. Listed fixtures carry their `connector`, and `GET /_mock/operations/<id>?connector=<id>` describes one connector's operation (without it, the first connector's that has it). The MCP server's tools take a `connector` argument, listing the connectors in their schemas.
 
 **Running tests in parallel.** One Kibana sends its requests through one emulator, so tests running at the same time share its state. Tests on different connectors may run in parallel when they scope what they read and change with `?connector=` (or `createEmulatorControl(proxyUrl, { connector })`). Tests on the same connector that set fixtures, read calls or reset must run serially: they share that connector's calls and runtime fixtures, so one test's fixture answers another's requests, and one test's reset clears what another set up.
+
+**Scout.** The `connector_emulator` Scout server config set starts Kibana against the emulator: `xpack.actions.proxyUrl` and `NODE_EXTRA_CA_CERTS` for its CA. Start the emulator before the Scout servers, as it creates the CA. Where the emulator listens and keeps its CA is `resolveEmulatorLocation`, which the script and that config both use, moved by `KBN_CONNECTOR_EMULATOR_PORT`, `KBN_CONNECTOR_EMULATOR_HOST` and `KBN_CONNECTOR_EMULATOR_CA_DIR`. The set's README has the commands.
 
 ## GraphQL
 

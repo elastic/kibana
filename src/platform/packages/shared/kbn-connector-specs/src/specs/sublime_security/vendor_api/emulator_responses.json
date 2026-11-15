@@ -1,0 +1,309 @@
+[
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/v0/mailboxes",
+    "status": 200,
+    "body": {
+      "active": 2,
+      "count": 2,
+      "mailboxes": [
+        {
+          "active": true,
+          "email_address": "soc@example.com",
+          "id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01",
+          "subscription_error_status": ""
+        },
+        {
+          "active": true,
+          "email_address": "soc@example.com",
+          "id": "a93c5e17-2b6d-4f08-8d34-7e1c9a0b2f63",
+          "subscription_error_status": ""
+        },
+        {
+          "active": true,
+          "email_address": "soc@example.com",
+          "id": "c4e8b2d6-1a7f-4390-b5c2-8d3e6f1a7b94",
+          "subscription_error_status": ""
+        }
+      ],
+      "total": 3
+    }
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/v0/message-groups",
+    "status": 200,
+    "body": {
+      "count": 2,
+      "message_groups": [
+        {
+          "classification": "phishing",
+          "flagged_rules": [
+            {}
+          ],
+          "id": "5b9a1c2d-3e4f-4a60-8b71-c2d3e4f5a6b7",
+          "message_links_clicked": [
+            {}
+          ],
+          "messages": [
+            {
+              "id": "5b9a1c2d-3e4f-4a60-8b71-c2d3e4f5a6b7",
+              "mailbox": {
+                "email": "soc@example.com",
+                "id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01"
+              },
+              "recipients": [],
+              "sender": {
+                "email": "billing@micr0soft-support.example"
+              },
+              "subject": "Action required: verify your account"
+            }
+          ],
+          "organization_id": "org_9f31a2",
+          "review_comment": "Confirmed credential phishing campaign",
+          "review_label": "malicious",
+          "review_status": "example review status",
+          "state": "completed",
+          "user_reports": [
+            {}
+          ]
+        },
+        {
+          "classification": "phishing",
+          "flagged_rules": [
+            {}
+          ],
+          "id": "8d1e2f3a-4b5c-4d6e-9f70-a1b2c3d4e5f6",
+          "message_links_clicked": [
+            {}
+          ],
+          "messages": [
+            {
+              "id": "5b9a1c2d-3e4f-4a60-8b71-c2d3e4f5a6b7",
+              "mailbox": {
+                "email": "soc@example.com",
+                "id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01"
+              },
+              "recipients": [],
+              "sender": {
+                "email": "billing@micr0soft-support.example"
+              },
+              "subject": "Action required: verify your account"
+            }
+          ],
+          "organization_id": "org_9f31a2",
+          "review_comment": "Confirmed credential phishing campaign",
+          "review_label": "malicious",
+          "review_status": "example review status",
+          "state": "completed",
+          "user_reports": [
+            {}
+          ]
+        },
+        {
+          "classification": "phishing",
+          "flagged_rules": [
+            {}
+          ],
+          "id": "5b9a1c2d-3e4f-4a60-8b71-c2d3e4f5a6b7",
+          "message_links_clicked": [
+            {}
+          ],
+          "messages": [
+            {
+              "id": "5b9a1c2d-3e4f-4a60-8b71-c2d3e4f5a6b7",
+              "mailbox": {
+                "email": "soc@example.com",
+                "id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01"
+              },
+              "recipients": [],
+              "sender": {
+                "email": "billing@micr0soft-support.example"
+              },
+              "subject": "Action required: verify your account"
+            }
+          ],
+          "organization_id": "org_9f31a2",
+          "review_comment": "Confirmed credential phishing campaign",
+          "review_label": "malicious",
+          "review_status": "example review status",
+          "state": "completed",
+          "user_reports": [
+            {}
+          ]
+        }
+      ],
+      "stats_limit_exceeded": false,
+      "total": 2
+    }
+  },
+  {
+    "source": "v0",
+    "method": "POST",
+    "path": "/v0/message-groups/quarantine",
+    "status": 202,
+    "body": {
+      "task_id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01"
+    }
+  },
+  {
+    "source": "v0",
+    "method": "POST",
+    "path": "/v0/message-groups/restore",
+    "status": 202,
+    "body": {
+      "task_id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01"
+    }
+  },
+  {
+    "source": "v0",
+    "method": "POST",
+    "path": "/v0/message-groups/trash",
+    "status": 202,
+    "body": {
+      "task_id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01"
+    }
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/v0/message-groups/{id}",
+    "status": 200,
+    "body": {
+      "classification": "phishing",
+      "flagged_rules": [
+        {
+          "id": "e2a4c6d8-1f3b-4a5c-8e7d-9b0a1c2d3e4f",
+          "name": "Brand impersonation: Microsoft",
+          "tags": [
+            "Credential Phishing"
+          ]
+        }
+      ],
+      "id": "5b9a1c2d-3e4f-4a60-8b71-c2d3e4f5a6b7",
+      "message_links_clicked": [
+        {
+          "clicks": [
+            {}
+          ],
+          "url": "https://micr0soft-login.example/verify"
+        }
+      ],
+      "messages": [
+        {
+          "created_at": "2026-11-12T09:20:00Z",
+          "delivered": true,
+          "forward_recipients": [
+            "secops@example.com"
+          ],
+          "forwarded_at": "2026-11-12T09:20:00Z",
+          "id": "5b9a1c2d-3e4f-4a60-8b71-c2d3e4f5a6b7",
+          "mailbox": {
+            "email": "soc@example.com",
+            "id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01"
+          },
+          "read_at": "2026-11-12T09:20:00Z",
+          "recipients": [
+            {
+              "email": "soc@example.com"
+            }
+          ],
+          "replied_at": "2026-11-12T09:20:00Z",
+          "sender": {
+            "email": "billing@micr0soft-support.example"
+          },
+          "subject": "Action required: verify your account"
+        }
+      ],
+      "organization_id": "org_9f31a2",
+      "review_comment": "Confirmed credential phishing campaign",
+      "review_label": "malicious",
+      "review_status": "example review status",
+      "state": "completed",
+      "user_reports": [
+        {
+          "channel": "example channel",
+          "reported_at": "2026-11-12T09:20:00Z",
+          "reported_by_message_id": "example reported by message id",
+          "reporter": "example reporter"
+        }
+      ]
+    }
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/v0/messages/{id}",
+    "status": 200,
+    "body": {
+      "canonical_id": "<20261112.4412@micr0soft-support.example>",
+      "created_at": "2026-11-12T09:20:00Z",
+      "external_id": "AAMkAGI2THVSAAA=",
+      "forward_recipients": [
+        "secops@example.com"
+      ],
+      "forwarded_at": "2026-11-12T09:20:00Z",
+      "id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01",
+      "landed_in_spam": false,
+      "mailbox": {
+        "email": "soc@example.com",
+        "external_id": "AAMkAGI2THVSAAA=",
+        "id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01"
+      },
+      "message_source_id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01",
+      "read_at": "2026-11-12T09:20:00Z",
+      "recipients": [
+        {
+          "email": "soc@example.com"
+        }
+      ],
+      "replied_at": "2026-11-12T09:20:00Z",
+      "sender": {
+        "display_name": "example display name",
+        "email": "billing@micr0soft-support.example"
+      },
+      "subject": "Action required: verify your account"
+    }
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/v0/messages/{id}/asa_verdict",
+    "status": 200,
+    "body": {
+      "verdict": "malicious"
+    }
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/v0/messages/{id}/attack_score",
+    "status": 200,
+    "body": {
+      "graymail_score": 0,
+      "score": 0,
+      "top_signals": [
+        {
+          "category": "Sender",
+          "description": "Display name impersonates a known brand",
+          "rank": 1
+        }
+      ],
+      "verdict": "malicious"
+    }
+  },
+  {
+    "source": "v0",
+    "method": "GET",
+    "path": "/v0/tasks/{id}",
+    "status": 200,
+    "body": {
+      "created_at": "2026-11-12T09:20:00Z",
+      "error": "",
+      "id": "6f1d3a52-8c4b-4e7a-9b10-2d5e7f8a9c01",
+      "state": "succeeded"
+    }
+  }
+]

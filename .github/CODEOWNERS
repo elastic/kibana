@@ -2802,6 +2802,10 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 # Connector vendor API contracts (must stay after the per-connector rules above)
 src/platform/packages/shared/kbn-connector-specs/src/specs/**/vendor_api/ @elastic/workflows-eng
 
+# Connector emulator Scout setup: the server config set and the example suite that uses it
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/connector_emulator @elastic/workflows-eng
+/src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator @elastic/workflows-eng @elastic/response-ops
+
 
 # Connector Workflow Tests
 
