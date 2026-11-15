@@ -29,7 +29,8 @@ export interface ConversationsUrlParams {
  * the same link take the identical path.
  *
  * Opening and closing push, so Back closes the flyout. The flyout's own tab state belongs to Agent
- * Builder and is deliberately not mirrored here.
+ * Builder and is deliberately not mirrored here. Flyouts stacked on it get their own history
+ * entries (see `useInvestigationFlyoutBrowserHistory`), so Back returns to it first.
  */
 export const useConversationsUrlParams = (): ConversationsUrlParams => {
   const history = useHistory();

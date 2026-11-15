@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getFlyoutManagerStore } from '@elastic/eui';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
@@ -162,5 +163,53 @@ describe('openConversationDetailsFlyout', () => {
     dismiss();
 
     expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  describe('with flyouts stacked on it', () => {
+    const store = getFlyoutManagerStore();
+    const getSessionMainIds = () =>
+      store.getState().sessions.map(({ mainFlyoutId }) => mainFlyoutId);
+
+    afterEach(() => {
+      while (store.getState().sessions.length > 0) {
+        store.closeAllFlyouts();
+      }
+    });
+
+    it('closes them along with it through the handle', async () => {
+      const { core, close, open } = setup();
+
+      const dismiss = await open();
+      const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+      const flyoutId = options?.id;
+      if (!flyoutId) {
+        throw new Error('The flyout was opened without an id');
+      }
+      store.addFlyout(flyoutId, 'Summary', 'main', 'm', CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY);
+      store.addFlyout('entityFlyout', 'Host', 'main', 'm', CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY);
+
+      dismiss();
+
+      // The conversation flyout is the current session again, so closing it closes the group.
+      expect(getSessionMainIds()).toEqual([flyoutId]);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves flyouts in other history groups alone', async () => {
+      const { core, open } = setup();
+
+      const dismiss = await open();
+      const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+      const flyoutId = options?.id;
+      if (!flyoutId) {
+        throw new Error('The flyout was opened without an id');
+      }
+      store.addFlyout('pageFlyout', 'Page', 'main', 'm', Symbol('page'));
+      store.addFlyout(flyoutId, 'Summary', 'main', 'm', CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY);
+
+      dismiss();
+
+      expect(getSessionMainIds()).toEqual(['pageFlyout', flyoutId]);
+    });
   });
 });
