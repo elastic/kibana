@@ -8,8 +8,10 @@
 import edotJavaDashboard from './otel_native-edot-java.json';
 import otelOtherJavaDashboard from './otel_native-otel_other-java.json';
 
-// jvm.memory.limit can be mapped as `double` (e.g. when produced by Micrometer) in some indices and
-// as `long` in others. Without an explicit cast ES|QL rejects the query with a verification_exception.
+// These JVM memory metrics can be mapped as `double` (e.g. when produced by Micrometer) in some indices
+// and as `long` in others. Without an explicit cast ES|QL rejects the query with a verification_exception.
+const FIELDS_REQUIRING_LONG_CAST = ['jvm.memory.limit', 'jvm.memory.used', 'jvm.memory.committed'];
+
 describe('Java OTel-native dashboards', () => {
   describe.each([
     ['otel_native-edot-java', edotJavaDashboard],
@@ -17,12 +19,18 @@ describe('Java OTel-native dashboards', () => {
   ])('%s', (_name, dashboard) => {
     const serialized = JSON.stringify(dashboard);
 
-    it('references jvm.memory.limit', () => {
-      expect(serialized).toContain('jvm.memory.limit');
-    });
+    describe.each(FIELDS_REQUIRING_LONG_CAST)('%s', (field) => {
+      it('is referenced', () => {
+        expect(serialized).toContain(field);
+      });
 
-    it('casts every jvm.memory.limit reference to long', () => {
-      expect(serialized.match(/jvm\.memory\.limit(?!::long)/g)).toBeNull();
+      it('is always cast to long', () => {
+        // `(?!\w)` keeps longer field names that start with the same prefix (such as
+        // `jvm.memory.used_after_last_gc`) from being reported as an uncast `jvm.memory.used`.
+        const uncastReference = new RegExp(`${field.replace(/\./g, '\\.')}(?!\\w|::long)`, 'g');
+
+        expect(serialized.match(uncastReference)).toBeNull();
+      });
     });
   });
 });
