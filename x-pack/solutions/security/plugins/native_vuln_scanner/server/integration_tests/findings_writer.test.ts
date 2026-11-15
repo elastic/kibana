@@ -8,6 +8,7 @@
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import type { Finding } from '../lib/matcher';
 import type { FindingDoc, HostMeta } from '../lib/findings';
 import {
@@ -16,8 +17,6 @@ import {
   FINDINGS_INDEX,
   writeFindings,
 } from '../lib/findings';
-
-const CDR_PATTERN = 'security_solution-*.vulnerability_latest';
 
 const HOST: HostMeta = { id: 'h1', name: 'web-1', os: { family: 'ubuntu', version: 'noble' } };
 
@@ -138,7 +137,9 @@ describe('findings writer', () => {
     expect(docs.get('CVE-2026-2')?.['@timestamp']).toBe(at(1));
 
     // The CNVM UI reads through the alias pattern and must not list the fixed finding.
-    expect([...(await byCve(CDR_PATTERN)).keys()]).toEqual(['CVE-2026-1']);
+    expect([...(await byCve(CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN)).keys()]).toEqual(
+      ['CVE-2026-1']
+    );
 
     expect(await write(2, [finding('CVE-2026-1'), finding('CVE-2026-2')])).toMatchObject({
       written: 2,
@@ -150,7 +151,9 @@ describe('findings writer', () => {
       first_seen: at(0),
     });
     expect(docs.get('CVE-2026-2')?.native_vuln_scanner.fixed_at).toBeUndefined();
-    expect([...(await byCve(CDR_PATTERN)).keys()].sort()).toEqual(['CVE-2026-1', 'CVE-2026-2']);
+    expect(
+      [...(await byCve(CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN)).keys()].sort()
+    ).toEqual(['CVE-2026-1', 'CVE-2026-2']);
   });
 
   it('leaves findings of hosts outside the run untouched', async () => {

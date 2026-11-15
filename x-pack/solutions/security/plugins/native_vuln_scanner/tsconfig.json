@@ -6,6 +6,7 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/cloud-security-posture-common",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/core-test-helpers-kbn-server",
