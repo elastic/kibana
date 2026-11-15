@@ -29,12 +29,16 @@ export interface Evr {
   readonly release: string;
 }
 
-/** Accepts "E:V-R", "V-R" or "V". Missing epoch = 0; missing release = "". */
+/**
+ * Accepts "E:V-R", "V-R" or "V". Missing epoch = 0; missing release = "". Like librpm's parseEVR,
+ * a prefix is an epoch only when it is all ASCII digits directly followed by ':' (an empty prefix
+ * is epoch 0); otherwise the whole string is the version, so "x:1.0-1" keeps its "x:" prefix.
+ */
 export const parseEvr = (raw: string): Evr => {
   const trimmed = trimVersion(raw);
-  const colon = trimmed.indexOf(':');
-  const epoch = colon >= 0 ? parseEpoch(trimmed.slice(0, colon)) : 0;
-  const rest = colon >= 0 ? trimmed.slice(colon + 1) : trimmed;
+  const match = /^([0-9]*):/.exec(trimmed);
+  const epoch = match ? parseEpoch(match[1]) : 0;
+  const rest = match ? trimmed.slice(match[0].length) : trimmed;
   const dash = rest.lastIndexOf('-');
   return dash >= 0
     ? { epoch, version: rest.slice(0, dash), release: rest.slice(dash + 1) }

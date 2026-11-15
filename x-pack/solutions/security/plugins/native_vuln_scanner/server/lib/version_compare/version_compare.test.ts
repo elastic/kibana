@@ -125,6 +125,15 @@ describe('rpm', () => {
     expect(parseEvr('2.3')).toEqual({ epoch: 0, version: '2.3', release: '' });
   });
 
+  it('splits an epoch only from an all-digit prefix, like librpm parseEVR', () => {
+    expect(parseEvr('x:1.0-1')).toEqual({ epoch: 0, version: 'x:1.0', release: '1' });
+    expect(parseEvr('1a:2-3')).toEqual({ epoch: 0, version: '1a:2', release: '3' });
+    expect(parseEvr('-1:1.0-1')).toEqual({ epoch: 0, version: '-1:1.0', release: '1' });
+    expect(parseEvr(':1.0-1')).toEqual({ epoch: 0, version: '1.0', release: '1' });
+    expect(parseEvr('007:1.0-1')).toEqual({ epoch: 7, version: '1.0', release: '1' });
+    expect(compareRpm('x:1.0-1', '1.0-1')).not.toBe(0);
+  });
+
   it('yields 0, not -0, for sign-only and empty epochs', () => {
     expect(Object.is(parseEpoch('-0'), 0)).toBe(true);
     expect(parseEpoch('-')).toBe(0);
@@ -142,7 +151,6 @@ describe('rpm', () => {
 
   it('rejects numbers longer than the key length char can encode', () => {
     expect(() => rpmKey(`1.${'9'.repeat(79)}-1`)).toThrow(UnencodableVersionError);
-    expect(() => rpmKey('-1:1.0-1')).toThrow(UnencodableVersionError);
     expect(() => rpmKey(`${'9'.repeat(19)}:1.0-1`)).toThrow(UnencodableVersionError);
   });
 });

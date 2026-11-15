@@ -104,6 +104,12 @@ if (scheme != 'dpkg' && scheme != 'rpm') {
   return;
 }
 int colon = raw.indexOf(':');
+// rpm (librpm parseEVR) only treats an all-digit prefix as the epoch; dpkg takes anything.
+if (colon >= 0 && scheme == 'rpm') {
+  for (int p = 0; p < colon; p++) {
+    if (!isDigit(raw.charAt(p))) { colon = -1; break; }
+  }
+}
 long epoch = colon >= 0 ? parseEpoch(raw.substring(0, colon)) : 0L;
 String rest = colon >= 0 ? raw.substring(colon + 1) : raw;
 int dash = rest.lastIndexOf('-');

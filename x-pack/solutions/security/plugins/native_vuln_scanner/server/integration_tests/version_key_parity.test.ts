@@ -46,6 +46,7 @@ const EDGE_CASES: Readonly<Record<Scheme, readonly string[]>> = {
       '1..0',
       '.1',
       '-1:1.0-1',
+      ...['x:1.0-1', ':1.0-1', '1a:2-3', '+1:1.0-1', '1:2:3-4'],
     ],
     ...[`1.${'9'.repeat(79)}`, 'ü1.0'],
     ...EPOCH_EDGES.map((epoch) => `${epoch}:1.0-1.el9`),
