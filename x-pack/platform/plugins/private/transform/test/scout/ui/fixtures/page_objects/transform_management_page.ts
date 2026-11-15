@@ -17,7 +17,7 @@ export type TransformRowAction =
   | 'Start'
   | 'Stop';
 
-export type TransformRowColumn = 'Id' | 'Description' | 'Type' | 'Status' | 'Mode';
+export type TransformRowColumn = 'Id' | 'Description' | 'Type' | 'Status' | 'Execution';
 
 export type ExpandedRowTab = 'Details' | 'Stats' | 'Json' | 'Health' | 'Messages' | 'Preview';
 

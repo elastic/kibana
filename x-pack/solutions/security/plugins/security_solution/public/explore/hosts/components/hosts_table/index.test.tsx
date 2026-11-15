@@ -46,13 +46,6 @@ jest.mock('../../../../helper_hooks', () => ({
 }));
 
 const mockOpenHostFlyout = jest.fn();
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
-}));
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => true,
-}));
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({
     openHostFlyout: mockOpenHostFlyout,
@@ -78,7 +71,6 @@ describe('Hosts Table', () => {
 
   beforeEach(() => {
     mockOpenHostFlyout.mockClear();
-    mockOpenFlyout.mockClear();
   });
 
   describe('rendering', () => {
@@ -294,7 +286,6 @@ describe('Hosts Table', () => {
       fireEvent.click(screen.getByTestId('host-details-button'));
 
       expect(mockOpenHostFlyout).not.toHaveBeenCalled();
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
 
     describe('Sorting on Table', () => {

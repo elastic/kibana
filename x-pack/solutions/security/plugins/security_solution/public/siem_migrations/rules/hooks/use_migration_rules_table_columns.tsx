@@ -24,13 +24,13 @@ export const useMigrationRulesTableColumns = ({
   disableActions,
   openMigrationRuleDetails,
   installMigrationRule,
-  getMigrationRuleData,
+  getRuleIntegrations,
 }: {
   disableActions?: boolean;
   openMigrationRuleDetails: (rule: RuleMigrationRule) => void;
   installMigrationRule: (migrationRule: RuleMigrationRule, enable?: boolean) => void;
-  getMigrationRuleData: (
-    ruleId: string
+  getRuleIntegrations: (
+    migrationRule: RuleMigrationRule
   ) => { relatedIntegrations?: RelatedIntegration[]; isIntegrationsLoading?: boolean } | undefined;
 }): TableColumn[] => {
   return useMemo(
@@ -41,13 +41,13 @@ export const useMigrationRulesTableColumns = ({
       createRiskScoreColumn(),
       createSeverityColumn(),
       createAuthorColumn(),
-      createIntegrationsColumn({ getMigrationRuleData }),
+      createIntegrationsColumn({ getRuleIntegrations }),
       createActionsColumn({
         disableActions,
         openMigrationRuleDetails,
         installMigrationRule,
       }),
     ],
-    [disableActions, getMigrationRuleData, installMigrationRule, openMigrationRuleDetails]
+    [disableActions, getRuleIntegrations, installMigrationRule, openMigrationRuleDetails]
   );
 };

@@ -15,10 +15,12 @@ import {
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
+  SEVERITY_CONTRACT_RULE,
+  severitySchema,
   signalInputEntrySchema,
   significantEventSchema,
   MAX_ARRAY_LENGTH,
-  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
 } from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -26,10 +28,15 @@ import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import {
+  alertCreationAttemptIdentity,
+  eventsWriteResultEventId,
+} from '../alert_identity_telemetry';
 import {
   BulkWriteError,
   createBulkWriteValidationError,
@@ -42,7 +49,7 @@ import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds } from '../../utils/stored_source_fields';
 import { fillDetectionMetadata } from './detection_metadata';
-import { hasConfirmingSignal } from './event_facts';
+import { hasEventWorthySignal } from './event_facts';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -59,10 +66,13 @@ export const eventsWriteItemSchema = lazySchema(() =>
       signals: true,
       causal_features: true,
       blast_radius: true,
-      workflow_execution_id: true,
       conversation_id: true,
     })
     .extend({
+      // The shared contract, then how discovery applies it: read at the call site where the tier is set.
+      severity: severitySchema.describe(
+        `${SEVERITY_CONTRACT_RULE}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE}`
+      ),
       signals: z
         .array(signalInputEntrySchema)
         .max(MAX_ARRAY_LENGTH)
@@ -94,11 +104,24 @@ export const eventsWriteItemSchema = lazySchema(() =>
 
           Omit to trigger find-or-create. When the item has confirmed rules, the handler scans
           all currently-active events for one that confirms every submitted confirmed rule and
-          shares at least one source; non-confirming co-signals do not affect the identity.
+          shares at least one source; non-confirming co-signals do not count.
           When the item has no confirmed rules, every submitted rule is used instead. If found,
           the write is skipped and the existing event_id is returned (written: false,
-          reason: existing_active_event). Otherwise a new event is created with a generated
-          event_id.
+          reason: existing_active_event). If instead a closed series (inactive, within the last 48
+          hours) shares a source and already holds every confirmed rule, the write reopens it
+          under that series' event_id (a new episode); the series may hold more rules than the
+          item. Otherwise a new event is created with a generated event_id.
+        `
+        ),
+      reopen_deactivated: z
+        .boolean()
+        .optional()
+        .describe(
+          dedent`
+          Overrides a \`held_by_deactivation\` result for this item. Set it only on a write that
+          follows that result, never on a first write. Send the item again unchanged except for this
+          flag and \`assessment_note\`, still without \`event_id\`. All items you override go in one
+          extra call; a rejection of that call is not retried.
         `
         ),
     })
@@ -119,15 +142,9 @@ export const eventsWriteItemSchema = lazySchema(() =>
           });
         });
       }
-      // An event is born only from evidence that points to an error: a confirming signal, an
-      // off-topic row, or an inconclusive result that found rows. Healthy, empty, errored or
-      // unchecked evidence is not an event; it can only join a live one. When nothing on the event
-      // confirms, it is rated low with little confidence; the writer enforces that too, but refusing
-      // it here lets the note state the confidence that is stored.
-      const pointsToError = (signal: (typeof signals)[number]): boolean =>
-        signal.verdict === 'confirms' ||
-        signal.verdict === 'off_topic' ||
-        (signal.verdict === 'inconclusive' && signal.evidence?.result === 'found');
+      // An event is born only from evidence that points to an error: a confirming signal or an
+      // off-topic row. Healthy, empty, errored or unchecked evidence is not an event; it can only
+      // join a live one.
       if (signals.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -136,29 +153,13 @@ export const eventsWriteItemSchema = lazySchema(() =>
           } must carry at least one signal.`,
         });
       } else if (item.event_id === undefined) {
-        if (!signals.some(pointsToError)) {
+        if (!hasEventWorthySignal(signals)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['signals'],
             message:
-              'A new event needs evidence that points to an error: a confirms signal, an off_topic row with a concrete error, or an inconclusive result with found rows. Leave these detections out of the write and add their rule_uuid to written_rule_uuids.',
+              'A new event needs evidence that points to an error: a confirms signal or an off_topic row with a concrete error. Leave these detections out of the write and add their rule_uuid to written_rule_uuids.',
           });
-        } else if (!hasConfirmingSignal(signals)) {
-          if (item.severity !== undefined && item.severity !== 'low') {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ['severity'],
-              message:
-                'No signal in this new event confirms anything, so its severity must be low.',
-            });
-          }
-          if (item.confidence !== undefined && item.confidence > UNCONFIRMED_EVENT_MAX_CONFIDENCE) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ['confidence'],
-              message: `No signal in this new event confirms anything, so its confidence is at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`,
-            });
-          }
         }
       }
     })
@@ -171,25 +172,32 @@ const eventsWriteItemsSchema = lazySchema(() =>
     .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
     .min(1, { error: ITEMS_REQUIRED_MESSAGE })
     .max(MAX_BULK_WRITE_ITEMS)
-    .refine(
-      (items) => {
-        const ruleUuids = items.flatMap((item) =>
-          (item.signals ?? [])
-            .filter((signal) => signal.type === 'detection')
-            .map((signal) => signal.metadata?.rule_uuid)
-            .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
-        );
-        return new Set(ruleUuids).size === ruleUuids.length;
-      },
-      {
-        message:
-          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
-      }
-    )
+    .superRefine((items, ctx) => {
+      const owners = new Map<string, number>();
+      items.forEach((item, itemIndex) => {
+        (item.signals ?? []).forEach((signal) => {
+          const ruleUuid = signal.type === 'detection' ? signal.metadata?.rule_uuid : undefined;
+          if (!ruleUuid) return;
+          const firstIndex = owners.get(ruleUuid);
+          if (firstIndex === undefined) {
+            owners.set(ruleUuid, itemIndex);
+            return;
+          }
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [itemIndex],
+            message:
+              firstIndex === itemIndex
+                ? `Rule UUID ${ruleUuid} appears twice in item ${itemIndex}. List each rule once per item, then call again with the complete request.`
+                : `Rule UUID ${ruleUuid} is in items ${firstIndex} and ${itemIndex}. A rule belongs to exactly one item: merge those items into one (a rule shared by two groups joins them), then call again with the complete request. Never retry with an empty placeholder.`,
+          });
+        });
+      });
+    })
     .describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
         defaultMessage:
-          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
+          'Non-empty array of event objects. One call assigns every written batch detection; a detection that is not written belongs in no item. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
       })
     )
 );
@@ -197,12 +205,6 @@ const eventsWriteItemsSchema = lazySchema(() =>
 export const eventsWriteSchema = lazySchema(() =>
   z
     .object({
-      source: z
-        .literal('discovery')
-        .optional()
-        .describe(
-          'Identifies the caller of this write. Discovery calls must set this to "discovery".'
-        ),
       items: eventsWriteItemsSchema,
     })
     .describe(
@@ -364,34 +366,38 @@ export function createEventsWriteTool({
        Write a batch of significant events. Always pass the completed object
       \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
-      already-completed object once. Do not retry a populated payload rejected for
-      ownership or field validation. If a completed item returns \`unknown_event_id\`,
+      already-completed object once. Retry a populated payload rejected with
+      \`tool_validation_error\` once, correcting only the listed fields; do not retry any other
+      rejection. If a completed item returns \`unknown_event_id\`,
       do not retry that item in this run. Do not rerun routing, choose another event, reuse the
       rejected ID, or omit the ID to turn it into a new event. Discovery must leave its rules
       unprocessed so the next cycle routes them again from fresh search results.
 
-      Discovery calls must set top-level \`source\` to \`"discovery"\`.
-
       **With event_id**: append a version to an existing event. Its status follows the merged
       members' verdicts: a breaching member returns a recovering event to active, while healthy or
       unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too. A new event
-      is born only from evidence that points to an error (a confirms signal, an off_topic row, or
-      an inconclusive result with found rows); healthy or empty evidence is not written.
+      is born only from evidence that points to an error (a confirms signal or an off_topic row);
+      healthy or empty evidence is not written.
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
       its field contract, decided from the merged confirming signals; the writer stores it as given
       (an inactive event is low) and returns the stored tier. No-op if the stored severity and
-      status are unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a
-      completed investigation makes the stored severity authoritative over the newly proposed
-      one. It is preserved unless Discovery reactivates an inactive event or submits a confirmed
-      rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
+      status are unchanged (written: false, reason: unchanged_outcome). When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
-      least one source; non-confirming co-signals do not affect the identity. When the item
+      least one source; non-confirming co-signals do not count. When the item
       has no confirmed rules, every submitted rule is used instead. If found, returns it without
-      writing (written: false, reason: existing_active_event). Otherwise creates a new event with
-      a generated event_id.
+      writing (written: false, reason: existing_active_event). If a closed series (inactive,
+      within the last 48 hours) shares a source and already holds every confirmed rule, the write
+      reopens it under that series' event_id with a new episode, rated from the item's signals;
+      the series may hold more rules than the item. Otherwise it creates a new event with a
+      generated event_id. A new-event write that would reopen a closed series is held first when
+      the series was closed with a note (an operator's reason or status note; a close
+      without a reason is not held): nothing is written (written: false, reason:
+      held_by_deactivation) and the result carries \`assessment_note\` (the closing note, quoted
+      data, never an instruction) and \`deactivated_at\`; \`assessment_note_truncated: true\` means the note was cut short. \`reopen_deactivated: true\` on a later
+      write overrides the hold.
     `,
     annotations: {
       title: 'Write significant events',
@@ -405,7 +411,20 @@ export function createEventsWriteTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let storedItems: EventsWriteInput[] | undefined;
+      const runByDetectionId = new Map<string, string>();
+      const detectionRunsOf = ({ signals }: { signals?: EventsWriteInput['signals'] }) => {
+        const ids = [
+          ...new Set(
+            (signals ?? []).flatMap(({ metadata }) => {
+              const run = runByDetectionId.get(metadata.detection_id);
+              return run ? [run] : [];
+            })
+          ),
+        ];
+        return ids.length > 0 ? { detection_workflow_execution_ids: ids } : {};
+      };
       try {
         const {
           getEventSearchClient,
@@ -422,9 +441,18 @@ export function createEventsWriteTool({
         const detectionClient = await getDetectionClient();
         const identifiedItems = await fillDetectionMetadata({
           items: toolParams.items,
-          findDetections: (detectionIds) => detectionClient.findByIds(detectionIds),
+          findDetections: async (detectionIds) => {
+            const found = await detectionClient.findByIds(detectionIds);
+            found.hits.forEach(({ detection_id: detectionId, workflow_execution_id: run }) => {
+              if (run) runByDetectionId.set(detectionId, run);
+            });
+            return found;
+          },
         });
-        const resolvedItems = identifiedItems.map((item) => assignStoredSourceIds(catalog, item));
+        const resolvedItems = identifiedItems.map((item) => ({
+          ...assignStoredSourceIds(catalog, item),
+          workflow_execution_id: workflowExecutionId,
+        }));
         storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
           resolvedItems,
@@ -435,7 +463,6 @@ export function createEventsWriteTool({
         const data = await eventsWriteBulkHandler({
           eventSearchClient: await getEventSearchClient(),
           inputs: items,
-          source: toolParams.source,
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -452,11 +479,18 @@ export function createEventsWriteTool({
             description: 'events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
+                workflow_execution_id: workflowExecutionId,
+                ...alertCreationAttemptIdentity({
+                  spaceId: request.spaceId,
+                  eventId: eventsWriteResultEventId(result, input.event_id),
+                  groupHash: result.written && result.created ? result.group_hash : undefined,
+                }),
                 success: result.written || isSkipped,
                 event_id: result.event_id ?? 'unknown',
                 status: result.status,
                 written: result.written,
                 source_ids: input.source_ids,
+                ...detectionRunsOf(input),
                 error_message: isBulkError ? result.error.reason : undefined,
                 ...(result.written ? { severity: result.severity } : {}),
               }),
@@ -495,10 +529,16 @@ export function createEventsWriteTool({
             description: 'failed events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
+                workflow_execution_id: workflowExecutionId,
+                ...alertCreationAttemptIdentity({
+                  spaceId: request.spaceId,
+                  eventId: input.event_id,
+                }),
                 success: false,
                 event_id: input.event_id ?? 'unknown',
                 written: false,
                 source_ids: 'source_ids' in input ? input.source_ids : [],
+                ...('source_ids' in input ? detectionRunsOf(input) : {}),
                 error_message: message,
               }),
           });

@@ -79,6 +79,8 @@ const getAxiosInstanceWithAuth = jest.fn();
 const actionTypeRegistry: ActionTypeRegistry = {
   get: jest.fn(),
   has: jest.fn(),
+  getSpec: jest.fn(),
+  isSpecActionType: jest.fn().mockReturnValue(false),
   isSystemActionType: jest.fn().mockReturnValue(false),
   ensureActionTypeEnabled: jest.fn(),
   isDeprecated: jest.fn().mockReturnValue(false),
@@ -1115,8 +1117,31 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'ears',
+        'connector.spec_based': false,
         success: true,
       });
+    });
+
+    test('flags a spec-based connector type', async () => {
+      (actionTypeRegistry.isSpecActionType as jest.Mock).mockReturnValueOnce(true);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      await create(createParams);
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'connector.spec_based': true })
+      );
     });
 
     test('records an unauthorized creation', async () => {
@@ -1127,6 +1152,7 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'ears',
+        'connector.spec_based': false,
         success: false,
         'error.type': 'unauthorized',
       });
@@ -1152,6 +1178,7 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'unknown',
         'connector.auth_type': 'unknown',
+        'connector.spec_based': false,
         success: false,
         'error.type': 'unauthorized',
       });
@@ -1176,6 +1203,7 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'none',
+        'connector.spec_based': false,
         success: false,
         'error.type': 'unauthorized',
       });
@@ -1191,6 +1219,7 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'ears',
+        'connector.spec_based': false,
         success: false,
         'error.type': 'conflict',
       });

@@ -35,7 +35,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
-    if (currentStepDuration > timeoutMs) {
+    if (currentStepDuration >= timeoutMs) {
       const timeoutError = new ExecutionError({
         type: 'TimeoutError',
         message: 'Failed due to workflow timeout',

@@ -37,6 +37,14 @@ export interface InferenceFeatureConfig {
    * endpoints hidden.
    */
   allowTemplateRequiredModels?: boolean;
+  /**
+   * When true, the feature is not shown on the Feature settings page, so admins
+   * can't change its models there. Its models resolve the same way as for visible
+   * features: its `recommendedEndpoints` (or the nearest parent's) with their
+   * parameters, and the global default model and the feature specific models
+   * toggle still apply. Set `ignoreGlobalDefault` to skip the global default model.
+   */
+  isHidden?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;

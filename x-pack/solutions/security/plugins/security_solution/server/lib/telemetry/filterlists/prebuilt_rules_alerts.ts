@@ -885,7 +885,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     audit: {
       LogonError: true,
       ModifiedProperties: {
-        /* eslint-disable @typescript-eslint/naming-convention */
+        /* eslint-disable @kbn/compat/typescript-naming-convention */
         Role_DisplayName: {
           NewValue: true,
         },

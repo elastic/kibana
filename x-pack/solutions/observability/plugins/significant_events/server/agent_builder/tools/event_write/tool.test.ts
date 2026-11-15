@@ -7,8 +7,14 @@
 
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import {
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
+  MAX_TEXT_LENGTH,
+  SEVERITY_CONTRACT_RULE,
+} from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -60,13 +66,14 @@ const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
 const createTool = (
   telemetry: { trackAgentToolEventsWrite: jest.Mock },
-  logger = loggingSystemMock.createLogger()
+  logger = loggingSystemMock.createLogger(),
+  storedDetections: Array<SignalEntry['metadata'] & { workflow_execution_id?: string }> = []
 ) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventSearchClient: jest.fn().mockReturnValue({}),
     getDetectionClient: jest
       .fn()
-      .mockResolvedValue({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
+      .mockResolvedValue({ findByIds: jest.fn().mockResolvedValue({ hits: storedDetections }) }),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),
@@ -111,6 +118,21 @@ describe('events_write tool', () => {
     ).toBe(false);
   });
 
+  it('exposes reopen_deactivated to the agent', () => {
+    expect(
+      eventsWriteSchema.safeParse({ items: [{ ...input, reopen_deactivated: true }] }).success
+    ).toBe(true);
+  });
+
+  it('does not expose workflow provenance as model input', () => {
+    const parsed = eventsWriteItemSchema.parse({
+      ...input,
+      workflow_execution_id: 'model-supplied',
+    });
+
+    expect(parsed).not.toHaveProperty('workflow_execution_id');
+  });
+
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });
@@ -140,14 +162,19 @@ describe('events_write tool', () => {
       items: [{ ...input, signals: [signal, signal] }],
     });
 
-    [duplicateAcrossItems, duplicateWithinItem].forEach((result) => {
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toBe(
-          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.'
-        );
-      }
-    });
+    expect(duplicateAcrossItems.success).toBe(false);
+    if (!duplicateAcrossItems.success) {
+      expect(duplicateAcrossItems.error.issues.at(-1)?.message).toContain(
+        'Rule UUID rule-1 is in items 0 and 1'
+      );
+      expect(duplicateAcrossItems.error.issues.at(-1)?.message).toContain('merge those items');
+    }
+    expect(duplicateWithinItem.success).toBe(false);
+    if (!duplicateWithinItem.success) {
+      expect(duplicateWithinItem.error.issues.at(-1)?.message).toBe(
+        'Rule UUID rule-1 appears twice in item 0. List each rule once per item, then call again with the complete request.'
+      );
+    }
   });
 
   describe('breaching signal invariant', () => {
@@ -178,13 +205,13 @@ describe('events_write tool', () => {
     };
     const { event_id: _omitted, ...newEventInput } = input;
 
-    it('accepts a new event backed only by an inconclusive result that found rows, rated low', () => {
+    it('accepts a new event backed only by an off_topic row, rated low', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [
             {
               ...newEventInput,
-              signals: [signalWith('inconclusive')],
+              signals: [signalWith('off_topic')],
               severity: 'low',
               confidence: 0.2,
             },
@@ -196,6 +223,7 @@ describe('events_write tool', () => {
     it.each([
       ['refuting evidence', [signalWith('refutes')]],
       ['a quiet not_checked rule', [quiet]],
+      ['an inconclusive result', [signalWith('inconclusive')]],
       [
         'an inconclusive result with no rows',
         [
@@ -217,23 +245,6 @@ describe('events_write tool', () => {
         );
       }
     });
-
-    it.each([
-      ['severity', { severity: 'medium', confidence: 0.2 }, 'severity must be low'],
-      ['confidence', { severity: 'low', confidence: 0.6 }, 'confidence is at most 0.3'],
-    ])(
-      'rejects a new event with nothing confirmed that rates its %s too high',
-      (_label, fields, message) => {
-        const result = eventsWriteSchema.safeParse({
-          items: [{ ...newEventInput, signals: [signalWith('inconclusive')], ...fields }],
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.issues.map(({ message: m }) => m).join(' ')).toContain(message);
-        }
-      }
-    );
 
     it('rejects a new event with no signals at all', () => {
       const result = eventsWriteSchema.safeParse({
@@ -383,13 +394,6 @@ describe('events_write tool', () => {
     expect(result.items[0].event_id).toBeUndefined();
   });
 
-  it('accepts only discovery as the optional caller source', () => {
-    expect(eventsWriteSchema.safeParse({ source: 'discovery', items: [input] }).success).toBe(true);
-    expect(eventsWriteSchema.safeParse({ source: 'investigation', items: [input] }).success).toBe(
-      false
-    );
-  });
-
   it.each<{
     label: string;
     stack: RunContextStackEntry[];
@@ -423,12 +427,12 @@ describe('events_write tool', () => {
 
       await invokeHandler(
         createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
-        { source: 'discovery', items: [input] },
+        { items: [input] },
         context
       );
 
       expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ source: 'discovery', rejectUnknownEventIds: expected })
+        expect.objectContaining({ rejectUnknownEventIds: expected })
       );
     }
   );
@@ -470,7 +474,6 @@ describe('events_write tool', () => {
     await invokeHandler(
       createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
       {
-        source: 'discovery',
         items: [
           {
             ...input,
@@ -508,7 +511,6 @@ describe('events_write tool', () => {
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
         eventSearchClient: {},
-        source: 'discovery',
         inputs: [
           expect.objectContaining({
             causal_features: [
@@ -698,6 +700,29 @@ describe('events_write tool', () => {
     );
   });
 
+  it('accepts a blast radius entry without a source_id and writes it as sent', async () => {
+    getFeatures.mockResolvedValue({ hits: [] });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+    const blastRadius = [{ type: 'entity' as const, feature_id: 'checkout-api', name: 'Checkout' }];
+
+    expect(eventsWriteItemSchema.safeParse({ ...input, blast_radius: blastRadius }).success).toBe(
+      true
+    );
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      { items: [{ ...input, blast_radius: blastRadius }] },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [expect.objectContaining({ blast_radius: blastRadius })],
+      })
+    );
+  });
+
   it('refuses a feature_id that names no Knowledge Indicator of a source that has some', async () => {
     getFeatures.mockImplementation((_sourceIds, options) => {
       const known = {
@@ -768,6 +793,62 @@ describe('events_write tool', () => {
     );
   });
 
+  it('stamps the invoking workflow run on the written items and the telemetry', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const context = createMockToolContext();
+    setWorkflowEventChainContext(context.request, { depth: 0, sourceExecutionId: 'discovery-run' });
+
+    await invokeHandler(createTool(telemetry) as never, { items: [input] }, context);
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [expect.objectContaining({ workflow_execution_id: 'discovery-run' })],
+      })
+    );
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'discovery-run' })
+    );
+  });
+
+  it('reports the distinct detection runs behind the signals', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true, severity: 'high' },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const detection = (rule: string, run?: string) => ({
+      ...confirmingSignal.metadata,
+      rule_uuid: rule,
+      detection_id: `detection-${rule}`,
+      ...(run ? { workflow_execution_id: run } : {}),
+    });
+    const signalFor = (rule: string): SignalEntry => ({
+      ...confirmingSignal,
+      metadata: {
+        ...confirmingSignal.metadata,
+        rule_uuid: rule,
+        detection_id: `detection-${rule}`,
+      },
+    });
+
+    await invokeHandler(
+      createTool(telemetry, undefined, [
+        detection('a', 'run-1'),
+        detection('b', 'run-1'),
+        detection('c', 'run-2'),
+        detection('d'),
+      ]) as never,
+      { items: [{ ...input, signals: ['a', 'b', 'c', 'd'].map(signalFor) }] },
+      createMockToolContext()
+    );
+
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ detection_workflow_execution_ids: ['run-1', 'run-2'] })
+    );
+  });
+
   it('sends no status to the writer, which takes it from the lifecycle', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       { index: 0, event_id: 'event-1', status: 'active', written: true },
@@ -810,6 +891,60 @@ describe('events_write tool', () => {
     expect(result).toEqual(
       expect.objectContaining({ results: [expect.objectContaining({ type: 'other' })] })
     );
+  });
+
+  it('reports only persisted alert identities and the creation group_hash', async () => {
+    const { event_id: _eventId, ...newItem } = input;
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      {
+        index: 0,
+        event_id: 'event-1',
+        status: 'active',
+        written: true,
+        created: true,
+        group_hash: 'hash-1',
+      },
+      { index: 1, event_id: 'event-2', status: 'active', written: true, created: false },
+      {
+        index: 2,
+        event_id: 'generated-2',
+        written: false,
+        reason: 'bulk_error',
+        error: { type: 'rule_events_write_error', reason: 'busy' },
+      },
+      {
+        index: 3,
+        event_id: 'closed-event',
+        existing_event_id: 'closed-event',
+        written: false,
+        reason: 'bulk_error',
+        error: { type: 'rule_events_write_error', reason: 'busy' },
+      },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
+
+    await invokeHandler(
+      createTool(telemetry) as never,
+      { items: [input, { ...input, event_id: 'event-2' }, newItem, newItem] },
+      context
+    );
+
+    const identity = { alert_source: 'elastic.significant_events', space_id: 'space-a' };
+    const payloads = telemetry.trackAgentToolEventsWrite.mock.calls.map(([payload]) => payload);
+    expect(payloads[0]).toMatchObject({
+      ...identity,
+      fingerprint: 'event-1',
+      group_hash: 'hash-1',
+    });
+    expect(payloads[1]).toMatchObject({ ...identity, fingerprint: 'event-2' });
+    expect(payloads[1]).not.toHaveProperty('group_hash');
+    expect(payloads[2]).toMatchObject(identity);
+    expect(payloads[2]).not.toHaveProperty('fingerprint');
+    expect(payloads[2]).not.toHaveProperty('group_hash');
+    expect(payloads[3]).toMatchObject({ ...identity, fingerprint: 'closed-event' });
+    expect(payloads[3]).not.toHaveProperty('group_hash');
   });
 
   it('returns a classified validation error', async () => {
@@ -862,6 +997,13 @@ describe('eventsWriteItemSchema', () => {
       },
     ],
   };
+
+  it('describes severity with the shared contract and the discovery application rule', () => {
+    const description = eventsWriteItemSchema.shape.severity.description;
+
+    expect(description).toContain(SEVERITY_CONTRACT_RULE);
+    expect(description).toContain(DISCOVERY_SEVERITY_APPLICATION_RULE);
+  });
 
   it('accepts a valid item at the field length boundaries', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);

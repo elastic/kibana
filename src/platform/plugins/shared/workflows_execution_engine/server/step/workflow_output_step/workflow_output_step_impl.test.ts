@@ -315,4 +315,31 @@ describe('WorkflowOutputStepImpl', () => {
       expect.objectContaining({ message: 'custom failure reason' })
     );
   });
+
+  it.each([
+    ['the given type', { type: 'NonRetryableError' }, 'NonRetryableError'],
+    ['Error when no type is given', {}, 'Error'],
+  ])('fails the workflow with %s', async (_, typeOverride, expectedType) => {
+    const stepExecutionRuntime = createRuntime();
+    const workflowRuntime = createWorkflowRuntime();
+    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const step = new WorkflowOutputStepImpl(
+      {
+        configuration: {
+          status: 'failed',
+          with: { message: 'process not found', ...typeOverride },
+        },
+      } as any,
+      stepExecutionRuntime as any,
+      workflowRuntime as any,
+      workflowLogger as any,
+      { createStepExecutionRuntime: jest.fn() } as any
+    );
+
+    await step.run();
+
+    expect(workflowRuntime.setWorkflowError).toHaveBeenCalledWith(
+      expect.objectContaining({ type: expectedType, message: 'process not found' })
+    );
+  });
 });

@@ -9,12 +9,13 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
-  agentToolEventInvestigationAttachEventType,
   agentToolEventStatusUpdateEventType,
   agentToolKiIdentificationStartedEventType,
-  codeAnalysisGroundingEventType,
   detectionScanEventType,
+  discoveryCompletedEventType,
+  discoveryStartedEventType,
   discoveryTriggeredEventType,
+  eventStatusChangedEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,
@@ -38,9 +39,10 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(agentToolEventStatusUpdateEventType);
     this.analytics.registerEventType(agentToolEventWriteEventType);
     this.analytics.registerEventType(agentToolEventSearchEventType);
-    this.analytics.registerEventType(agentToolEventInvestigationAttachEventType);
-    this.analytics.registerEventType(codeAnalysisGroundingEventType);
+    this.analytics.registerEventType(eventStatusChangedEventType);
     this.analytics.registerEventType(discoveryTriggeredEventType);
+    this.analytics.registerEventType(discoveryStartedEventType);
+    this.analytics.registerEventType(discoveryCompletedEventType);
     this.analytics.registerEventType(detectionScanEventType);
     this.analytics.registerEventType(onboardingScheduledEventType);
   }

@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Hunt worker index coverage API endpoint
+  version: '1'
+paths:
+  /internal/alertzero/hunt/index_scope/worker_coverage:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntWorkerIndexCoverage
+      description: >-
+        Which patterns of the space's default data view the Hunt worker's service
+        account cannot read but the caller can. Answered from the last finished
+        sweep when it evaluated the current patterns, otherwise from the
+        worker's built-in role.
+      summary: Hunt worker index coverage
+      tags:
+        - AlertZero API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - universe
+                  - unreadable_by_worker
+                  - missing_for_everyone
+                  - source
+                  - checked_at
+                  - service_account_id
+                  - role_name
+                  - account_label
+                  - is_serverless
+                additionalProperties: false
+                properties:
+                  universe:
+                    type: array
+                    maxItems: 500
+                    items:
+                      type: string
+                      maxLength: 512
+                    description: The positive patterns of the space's default data view.
+                  unreadable_by_worker:
+                    type: array
+                    maxItems: 500
+                    items:
+                      type: string
+                      maxLength: 512
+                    description: Patterns the caller can resolve and the worker's account cannot.
+                  missing_for_everyone:
+                    type: array
+                    maxItems: 500
+                    items:
+                      type: string
+                      maxLength: 512
+                    description: Patterns that resolve to nothing for the caller either.
+                  source:
+                    type: string
+                    enum: [last_sweep, role, unavailable]
+                  unavailable_reason:
+                    type: string
+                    enum: [role_unreadable, discovery_failed, caller_unreadable]
+                  checked_at:
+                    type: string
+                    nullable: true
+                    maxLength: 64
+                  service_account_id:
+                    type: string
+                    nullable: true
+                    maxLength: 1024
+                  role_name:
+                    type: string
+                    maxLength: 256
+                  account_label:
+                    type: string
+                    maxLength: 1024
+                  is_serverless:
+                    type: boolean

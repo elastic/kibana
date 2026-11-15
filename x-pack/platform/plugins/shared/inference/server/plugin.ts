@@ -47,6 +47,7 @@ import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { shouldStreamInferenceEndpoint } from './util/should_stream_inference_endpoint';
+import { resolveFeatureEndpointOrThrow } from './util/resolve_feature_endpoint';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
 
@@ -194,6 +195,12 @@ export class InferencePlugin
       await installTokenUsageDashboard(savedObjectsImporter, this.logger);
     };
 
+    // Apply mapping changes to an existing data stream at startup, so that during a rolling upgrade
+    // the mappings are in place before any node writes documents with new fields.
+    this.tokenUsageLogger.updateExistingDataStream().catch((e) => {
+      this.logger.error(`Failed to update token usage data stream: ${e.message}`);
+    });
+
     installDashboardIfTokenUsageTrackingEnabled().catch((e) => {
       this.logger.error(`Failed to install token usage dashboard: ${e.message}`);
     });
@@ -267,9 +274,14 @@ export class InferencePlugin
       const legacySettingsPromise = anonymizationEnabled
         ? undefined
         : readLegacyAnonymizationSettings(request);
+      const anonymizationRulesPromise = createAnonymizationRulesPromise(
+        request,
+        legacySettingsPromise
+      );
+      void anonymizationRulesPromise.catch(() => {});
       return {
         namespace,
-        anonymizationRulesPromise: createAnonymizationRulesPromise(request, legacySettingsPromise),
+        anonymizationRulesPromise,
         regexWorker: (() => {
           if (!this.regexWorker) {
             this.logger.error(
@@ -376,10 +388,7 @@ export class InferencePlugin
 
       getChatModel: async (options) => {
         return createChatModel({
-          request: options.request,
-          connectorId: options.connectorId,
-          chatModelOptions: options.chatModelOptions,
-          callbacks: options.callbacks,
+          ...options,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
           regexWorker: this.regexWorker!,
@@ -392,6 +401,23 @@ export class InferencePlugin
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
           shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
+          resolveFeatureEndpoint: createFeatureEndpointResolver(options.request),
+        });
+      },
+
+      resolveFeatureConnector: async (featureId: string, request: KibanaRequest) => {
+        // Only the connector is exposed: the endpoint's `reasoning` applies on each
+        // `chatComplete({ featureId })` call, and `temperature` stays a caller option.
+        const { connectorId } = await resolveFeatureEndpointOrThrow({
+          featureId,
+          resolveFeatureEndpoint: createFeatureEndpointResolver(request),
+        });
+        return getConnectorById({
+          connectorId,
+          actions: pluginsStart.actions,
+          request,
+          esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
+          logger: this.logger,
         });
       },
 

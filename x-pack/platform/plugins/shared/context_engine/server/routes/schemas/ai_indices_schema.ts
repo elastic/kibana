@@ -32,6 +32,7 @@ import {
   MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MAX_INDEX_NAME_BYTES,
+  MAX_KI_CONTENT_LENGTH,
   MAX_KI_PAGE_SIZE,
   MAX_KI_SEARCH_QUERY_LENGTH,
   MAX_KI_TYPE_FILTER_LENGTH,
@@ -41,7 +42,6 @@ import type { ImprovementAction } from '../../../common/http_api/improvement_act
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
 import {
   KI_LIFECYCLE_STATUSES,
-  MAX_KI_CONTENT_LENGTH,
   MAX_KI_ID_LENGTH,
   type KiLifecycleStatus,
 } from '../../../common/step_types/ki';
@@ -54,7 +54,6 @@ import {
   validateSignalWindowCoversInterval,
 } from '../../../common/validation';
 import { validateSignalFilter } from '../../ai_indices/signal_filter';
-
 const aiIndexIdSchema = schema.string({
   minLength: 1,
   maxLength: MAX_AI_INDEX_ID_LENGTH,
@@ -266,7 +265,9 @@ const aiIndexPropertiesSchema = {
   memory_enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+        description:
+          'Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.',
+        deprecated: true,
       },
     })
   ),
@@ -542,9 +543,6 @@ export const aiIndexHttpItemResponseSchema = () =>
       meta: {
         description: 'Whether the AI Index is managed by a plugin and therefore immutable.',
       },
-    }),
-    memory_enabled: schema.boolean({
-      meta: { description: 'Whether this AI Index accepts memory writes.' },
     }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },

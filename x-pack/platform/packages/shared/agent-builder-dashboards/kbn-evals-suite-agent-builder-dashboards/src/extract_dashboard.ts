@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { ToolResultType, type Conversation } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -65,6 +66,24 @@ export const getLastWrittenDashboardId = (steps: Step[]): string | undefined => 
 };
 
 /**
+ * Whether the turn changed the dashboard. A `generate_dashboard` call that
+ * changed nothing still returns the attachment id, so on a seeded example a
+ * result equal to the seed counts as no write.
+ */
+export const hasWrittenDashboard = ({
+  steps = [],
+  before,
+  dashboard,
+}: {
+  steps?: Step[];
+  before?: DashboardAttachmentData;
+  dashboard?: DashboardAttachmentData;
+}): boolean =>
+  dashboard !== undefined &&
+  getLastWrittenDashboardId(steps) !== undefined &&
+  !(before !== undefined && isEqual(before, dashboard));
+
+/**
  * Steps of the round across the opening and the answer turn. Answering a
  * prompt resumes the same round, so the answer turn may already report the
  * opening's tool calls; joining both lists would then count them twice.
@@ -99,7 +118,7 @@ export const readDashboardVersions = (
 
 export interface AskUserQuestionPrompt {
   id: string;
-  questions: Array<{ question: string; options: Array<{ label: string }> }>;
+  questions: Array<{ question: string; options: Array<{ label: string; description?: string }> }>;
 }
 
 export const findAskUserQuestionPrompt = (prompts: unknown[]): AskUserQuestionPrompt | undefined =>

@@ -12,8 +12,10 @@ import { test, testData } from '../fixtures';
 import {
   PACKAGES,
   PRODUCTION_NAMESPACE,
+  buildDataStreamName,
   cleanUpAll,
   datasetNames,
+  deleteDataStreamIfExists,
   ensurePackageInstalled,
   getInitialTestLogs,
   getLogsForDataset,
@@ -41,6 +43,11 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let uninstallApache: () => Promise<void>;
+
+    const ownedDataStreams = [
+      ...datasetNames.map((dataset) => buildDataStreamName({ dataset })),
+      buildDataStreamName({ dataset: APACHE_ACCESS_DATASET, namespace: PRODUCTION_NAMESPACE }),
+    ];
 
     // Read-only data, seeded once. Filter state needs no reset — each test gets a
     // fresh browser context.
@@ -70,12 +77,17 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
       await pageObjects.datasetQuality.goto();
     });
 
-    test.afterAll(async ({ logsSynthtraceEsClient }) => {
-      await cleanUpAll([() => logsSynthtraceEsClient.clean(), () => uninstallApache()]);
+    test.afterAll(async ({ esClient, log }) => {
+      await cleanUpAll([
+        ...ownedDataStreams.map(
+          (dataStream) => () => deleteDataStreamIfExists(esClient, dataStream, log)
+        ),
+        () => uninstallApache(),
+      ]);
     });
 
     test('shows full data set names when toggled', async ({ pageObjects }) => {
