@@ -18,6 +18,7 @@ import type { AgentInventoryRows } from '../lib/inventory';
 import { findInventoryScheduleIds, readAgentInventories } from '../lib/inventory';
 import { ensureFindingsIndex, writeFindings } from '../lib/findings';
 import type { ScanDeps } from './scan_task';
+import { MAX_STATE_MESSAGE_LENGTH, stateSchemaByVersion } from './task_state';
 import {
   registerScanTask,
   runScan,
@@ -241,6 +242,7 @@ describe('registerScanTask', () => {
         timeout: '30m',
         cost: TaskCost.ExtraLarge,
         priority: TaskPriority.Deferrable,
+        stateSchemaByVersion,
       })
     );
     const { signal } = new AbortController();
@@ -291,6 +293,71 @@ describe('registerScanTask', () => {
     });
   });
 
+  it('stamps finishedAt after the scan, on success and on failure', async () => {
+    const ticking = () => {
+      let calls = 0;
+      const now = jest.fn(() => new Date(Date.UTC(2026, 10, 13, 0, 0, calls++)));
+      return now;
+    };
+    for (const failing of [false, true]) {
+      const taskManager = taskManagerMock.createSetup();
+      const { deps } = setup(
+        [rhelAgent('a1', '9')],
+        failing
+          ? async () => {
+              throw new Error('boom');
+            }
+          : rhel9Feed
+      );
+      const now = ticking();
+      registerScanTask(taskManager, async () => ({ ...deps, now }));
+      const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][SCAN_TASK_TYPE];
+      const runner = definition.createTaskRunner({
+        taskInstance: { id: SCAN_TASK_ID } as ConcreteTaskInstance,
+        signal: new AbortController().signal,
+        executionUuid: 'exec-1',
+      } as Parameters<typeof definition.createTaskRunner>[0]);
+
+      const result = await runner.run();
+
+      const { lastRun } = result?.state as { lastRun: { finishedAt: string } };
+      const lastTick = now.mock.results[now.mock.results.length - 1].value as Date;
+      expect(lastRun.finishedAt).toBe(lastTick.toISOString());
+      // The scan itself read the clock before the run was stamped.
+      expect(now.mock.calls.length).toBe(failing ? 1 : 2);
+    }
+  });
+
+  it('keeps the per-release failures and the partial summary in the failed run', async () => {
+    const taskManager = taskManagerMock.createSetup();
+    const { deps } = setup([ubuntuAgent('u1'), rhelAgent('a1', '9')], async (os) => {
+      if (os.family === 'ubuntu') throw new Error('x'.repeat(MAX_STATE_MESSAGE_LENGTH + 50));
+      return rhel9Feed();
+    });
+    registerScanTask(taskManager, async () => deps);
+    const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][SCAN_TASK_TYPE];
+    const runner = definition.createTaskRunner({
+      taskInstance: { id: SCAN_TASK_ID } as ConcreteTaskInstance,
+      signal: new AbortController().signal,
+      executionUuid: 'exec-1',
+    } as Parameters<typeof definition.createTaskRunner>[0]);
+
+    const result = await runner.run();
+
+    const { lastRun } = result?.state as { lastRun: Record<string, unknown> };
+    expect(lastRun).toMatchObject({
+      status: 'failed',
+      hosts: 2,
+      findings: expect.any(Number),
+      releases: { 'ubuntu:noble': 'failed', 'rhel:9': 'matched' },
+    });
+    expect(lastRun.findings).toBeGreaterThan(0);
+    const failures = lastRun.failures as Record<string, string>;
+    expect(Object.keys(failures)).toEqual(['ubuntu:noble']);
+    expect(failures['ubuntu:noble']).toHaveLength(MAX_STATE_MESSAGE_LENGTH);
+    expect(() => stateSchemaByVersion[1].schema.validate(result?.state)).not.toThrow();
+  });
+
   it('records a run without the inventory pack as no_pack', async () => {
     const taskManager = taskManagerMock.createSetup();
     const { deps } = setup([]);
@@ -332,5 +399,56 @@ describe('scheduleScanTask', () => {
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       expect.objectContaining({ schedule: { interval: '6h' } })
     );
+  });
+});
+
+describe('task state schema', () => {
+  const { schema, up } = stateSchemaByVersion[1];
+
+  it('accepts the empty state and a recorded run', () => {
+    expect(() => schema.validate({})).not.toThrow();
+    expect(() =>
+      schema.validate({
+        lastRun: {
+          runId: 'r1',
+          finishedAt: '2026-11-13T00:00:00.000Z',
+          status: 'failed',
+          hosts: 1,
+          findings: 0,
+          releases: { 'rhel:9': 'failed' },
+          failures: { 'rhel:9': 'boom' },
+          error: 'boom',
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('migrates an older state to the v1 shape', () => {
+    expect(up({})).toEqual({ lastRun: undefined });
+    expect(() => schema.validate(up({ unrelated: 1 }))).not.toThrow();
+  });
+
+  it('rejects unbounded messages and maps', () => {
+    const lastRun = {
+      runId: 'r1',
+      finishedAt: 'now',
+      status: 'failed',
+      hosts: 0,
+      findings: 0,
+      releases: {},
+    };
+    expect(() =>
+      schema.validate({ lastRun: { ...lastRun, error: 'x'.repeat(MAX_STATE_MESSAGE_LENGTH + 1) } })
+    ).toThrow();
+    expect(() =>
+      schema.validate({
+        lastRun: {
+          ...lastRun,
+          releases: Object.fromEntries(
+            Array.from({ length: 501 }, (_, i) => [`r${i}`, 'matched'])
+          ),
+        },
+      })
+    ).toThrow();
   });
 });

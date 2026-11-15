@@ -22,6 +22,12 @@ import {
 import type { Finding, MatchStats } from '../lib/matcher';
 import { buildAdvisoryIndex, matchHost } from '../lib/matcher';
 import { ensureFindingsIndex, writeFindings } from '../lib/findings';
+import {
+  emptyState,
+  MAX_STATE_MESSAGE_LENGTH,
+  stateSchemaByVersion,
+  type LatestTaskStateSchema,
+} from './task_state';
 
 export const SCAN_TASK_TYPE = 'native-vuln-scanner:scan';
 export const SCAN_TASK_ID = 'native-vuln-scanner:scan';
@@ -52,18 +58,14 @@ export interface ScanSummary {
 export type ScanRunStatus = 'success' | 'failed' | 'aborted' | 'no_pack';
 
 /** Outcome of the latest run, kept in the task state so it can be read without the logs. */
-export interface ScanLastRun {
-  runId: string;
-  finishedAt: string;
-  status: ScanRunStatus;
-  hosts: number;
-  findings: number;
-  releases: Record<string, 'matched' | 'unavailable' | 'failed'>;
-  error?: string;
-}
+export type ScanLastRun = NonNullable<LatestTaskStateSchema['lastRun']>;
 
 export class ScanFailedError extends Error {
-  constructor(public readonly failures: Record<string, string>) {
+  /** `summary` keeps what the other releases did, so the failed run can still report it. */
+  constructor(
+    public readonly failures: Record<string, string>,
+    public readonly summary?: ScanSummary
+  ) {
     super(
       `Vulnerability scan failed for ${Object.keys(failures).join(', ')}: ${JSON.stringify(
         failures
@@ -72,6 +74,8 @@ export class ScanFailedError extends Error {
     this.name = 'ScanFailedError';
   }
 }
+
+const truncate = (text: string): string => text.slice(0, MAX_STATE_MESSAGE_LENGTH);
 
 const releaseKey = ({ family, version }: FeedOs): string => `${family}:${version}`;
 
@@ -186,7 +190,7 @@ export const runScan = async (
   }
 
   logger.info(`Vulnerability scan ${runId}: ${JSON.stringify(summary)}`);
-  if (Object.keys(failures).length > 0) throw new ScanFailedError(failures);
+  if (Object.keys(failures).length > 0) throw new ScanFailedError(failures, summary);
   return summary;
 };
 
@@ -201,11 +205,11 @@ export const registerScanTask = (
       timeout: '30m',
       cost: TaskCost.ExtraLarge,
       priority: TaskPriority.Deferrable,
+      stateSchemaByVersion,
       createTaskRunner: ({ signal, executionUuid }) => ({
         run: async () => {
           const deps = await getDeps();
           const now = deps.now ?? (() => new Date());
-          const base = { runId: executionUuid, finishedAt: now().toISOString() };
           try {
             const summary = await runScan(deps, { signal, runId: executionUuid });
             const status: ScanRunStatus = summary.packMissing
@@ -214,19 +218,36 @@ export const registerScanTask = (
               ? 'aborted'
               : 'success';
             const { hosts, findings, releases } = summary;
-            return { state: { lastRun: { ...base, status, hosts, findings, releases } } };
+            const lastRun: ScanLastRun = {
+              runId: executionUuid,
+              finishedAt: now().toISOString(),
+              status,
+              hosts,
+              findings,
+              releases,
+            };
+            return { state: { lastRun } };
           } catch (error) {
             // Returning the error (not throwing) lets Task Manager persist the state; a recurring
             // task is rescheduled on its interval either way. Marking it unrecoverable would
             // delete the task instead.
             const failed = error instanceof Error ? error : new Error(String(error));
+            const failures =
+              failed instanceof ScanFailedError
+                ? Object.fromEntries(
+                    Object.entries(failed.failures).map(([key, message]) => [key, truncate(message)])
+                  )
+                : undefined;
+            const partial = failed instanceof ScanFailedError ? failed.summary : undefined;
             const lastRun: ScanLastRun = {
-              ...base,
+              runId: executionUuid,
+              finishedAt: now().toISOString(),
               status: 'failed',
-              hosts: 0,
-              findings: 0,
-              releases: {},
-              error: failed.message,
+              hosts: partial?.hosts ?? 0,
+              findings: partial?.findings ?? 0,
+              releases: partial?.releases ?? {},
+              ...(failures ? { failures } : {}),
+              error: truncate(failed.message),
             };
             return { state: { lastRun }, error: failed };
           }
@@ -244,6 +265,6 @@ export const scheduleScanTask = async (taskManager: TaskManagerStartContract): P
     taskType: SCAN_TASK_TYPE,
     schedule: existing?.schedule ?? { interval: DEFAULT_INTERVAL },
     params: {},
-    state: {},
+    state: emptyState,
   });
 };
