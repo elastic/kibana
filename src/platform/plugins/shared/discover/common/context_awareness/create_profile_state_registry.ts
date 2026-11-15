@@ -9,6 +9,7 @@
 
 import { ProfileStateRegistry } from './profile_state';
 import { EXAMPLE_PROFILE_STATE_DEF } from './profile_state_definitions/example_profile_state';
+import { HUNT_SESSION_STATE_DEF } from './profile_state_definitions/hunt_session_profile_state';
 import { METRICS_STATE_DEF } from './profile_state_definitions/metrics_grid_profile_state';
 import { METRICS_GRID_SAVED_STATE_TRANSFORM } from './profile_state_transforms/metrics_grid_saved_state_transform';
 
@@ -21,6 +22,7 @@ export const createProfileStateRegistry = () => {
    */
   registry.registerDefinition(EXAMPLE_PROFILE_STATE_DEF);
   registry.registerDefinition(METRICS_STATE_DEF);
+  registry.registerDefinition(HUNT_SESSION_STATE_DEF);
 
   /**
    * Register saved state transforms

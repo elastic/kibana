@@ -239,6 +239,12 @@ export class WorkflowExecutionQueryService {
       must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
     }
 
+    if (params.labels) {
+      for (const [key, value] of Object.entries(params.labels)) {
+        must.push({ term: { [`labels.${key}`]: value } });
+      }
+    }
+
     if (params.omitStepRuns) {
       must.push({ bool: { must_not: { exists: { field: 'stepId' } } } });
     }

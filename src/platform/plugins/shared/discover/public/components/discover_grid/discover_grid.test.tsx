@@ -9,6 +9,7 @@
 
 const mockUnifiedDataTable = jest.fn<void, [Record<string, unknown>]>();
 const mockGroupBySelectorMount = jest.fn();
+let mockProfileBulkActions: unknown[] = [];
 
 jest.mock('@kbn/unified-data-table', () => ({
   DEFAULT_PAGINATION_MODE: 'multiPage',
@@ -23,6 +24,7 @@ jest.mock('../../context_awareness', () => ({
   useProfileAccessor: jest.fn((key: string) => {
     if (key === 'getRowIndicatorProvider') return () => () => () => undefined;
     if (key === 'getRowAdditionalLeadingControls') return () => (controls: unknown) => controls;
+    if (key === 'getBulkActions') return () => () => mockProfileBulkActions;
     if (key === 'getPaginationConfig') return () => () => ({ paginationMode: 'multiPage' });
     if (key === 'getColumnsConfiguration') return () => () => ({});
     return () => () => undefined;
@@ -46,6 +48,7 @@ jest.mock('../../application/main/components/layout/cascaded_documents', () => {
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -110,6 +113,47 @@ describe('DiscoverGrid renderMode', () => {
     render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.renderMode).toBeUndefined();
+  });
+});
+
+describe('DiscoverGrid bulk actions', () => {
+  const rows = [{ id: 'a' }, { id: 'b' }] as DataTableRecord[];
+
+  beforeEach(() => {
+    mockUnifiedDataTable.mockClear();
+    mockProfileBulkActions = [];
+  });
+
+  const getCustomBulkActions = (props: Partial<DiscoverGridProps> = {}) => {
+    render(
+      <DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} rows={rows} {...props} />
+    );
+    return mockUnifiedDataTable.mock.calls.at(-1)?.[0]
+      .customBulkActions as DiscoverGridProps['customBulkActions'];
+  };
+
+  it('leaves customBulkActions untouched when the profile adds none', () => {
+    expect(getCustomBulkActions()).toBeUndefined();
+  });
+
+  it('adds profile bulk actions that receive the selected records', () => {
+    const onClick = jest.fn();
+    mockProfileBulkActions = [{ key: 'profile', label: 'Profile action', onClick }];
+
+    const actions = getCustomBulkActions();
+
+    expect(actions).toHaveLength(1);
+    actions?.[0].onClick({ selectedDocIds: ['b'] });
+    expect(onClick).toHaveBeenCalledWith({ selectedDocs: [rows[1]] });
+  });
+
+  it('keeps bulk actions passed as props ahead of the profile actions', () => {
+    const provided = { key: 'provided', label: 'Provided', onClick: jest.fn() };
+    mockProfileBulkActions = [{ key: 'profile', label: 'Profile action', onClick: jest.fn() }];
+
+    const actions = getCustomBulkActions({ customBulkActions: [provided] });
+
+    expect(actions?.map(({ key }) => key)).toEqual(['provided', 'profile']);
   });
 });
 

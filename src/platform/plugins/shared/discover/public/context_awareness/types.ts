@@ -346,6 +346,52 @@ export interface RowControlsExtensionParams {
 }
 
 /**
+ * Parameters passed to the bulk actions extension
+ */
+export interface BulkActionsExtensionParams {
+  /**
+   * The current data view
+   */
+  dataView: DataView;
+  /**
+   * The current query
+   */
+  query?: DiscoverAppState['query'];
+  /**
+   * The columns currently shown in the data grid
+   */
+  columns: string[];
+}
+
+/**
+ * The selection a bulk action runs against, in selection order
+ */
+export interface BulkActionSelection {
+  /**
+   * The selected records
+   */
+  selectedDocs: DataTableRecord[];
+}
+
+/**
+ * An action offered in the data grid's selection menu, receiving the selected records
+ */
+export type DiscoverBulkAction = Omit<
+  NonNullable<UnifiedDataTableProps['customBulkActions']>[number],
+  'onClick' | 'isAvailable' | 'getDisabledReason'
+> & {
+  onClick: (selection: BulkActionSelection) => void;
+  /**
+   * Hides the action when it returns `false` for the current selection
+   */
+  isAvailable?: (selection: BulkActionSelection) => boolean;
+  /**
+   * Renders the action disabled, with the returned reason as its tooltip
+   */
+  getDisabledReason?: (selection: BulkActionSelection) => string | undefined;
+};
+
+/**
  * Metadata passed to Discover cell actions
  */
 export interface DiscoverCellActionMetadata extends Record<string, unknown> {
@@ -553,6 +599,14 @@ export interface Profile {
   getRowAdditionalLeadingControls: (
     params: RowControlsExtensionParams
   ) => UnifiedDataTableProps['rowAdditionalLeadingControls'] | undefined;
+
+  /**
+   * Gets additional actions for the data grid's selection menu. Unlike the data table's own
+   * `customBulkActions`, handlers receive the selected records, not only their ids.
+   * @param params The bulk actions extension parameters
+   * @returns The additional bulk actions to show for a row selection
+   */
+  getBulkActions: (params: BulkActionsExtensionParams) => DiscoverBulkAction[];
 
   /**
    * Gets additional cell actions to show within expanded cell popovers in the data grid

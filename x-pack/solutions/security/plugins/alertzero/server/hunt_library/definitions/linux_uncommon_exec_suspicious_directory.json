@@ -1,0 +1,95 @@
+{
+  "id": "linux_uncommon_exec_suspicious_directory",
+  "version": 1,
+  "name": "Uncommon Process Execution from Suspicious Directory",
+  "description": "This hunt identifies uncommon process executions from suspicious directories on Linux systems. It looks for processes executed from directories that are often associated with malicious activity, such as /dev/shm, /var/www, /boot, /srv, /tmp, /var/tmp, /run, and /var/run. The goal is to detect potentially malicious processes while excluding common, benign ones.",
+  "hypothesis": "An executable launched from a world-writable or web-served directory, seen on few hosts and only a few times, may be dropped malware or an attacker tool.",
+  "platform": [
+    "linux"
+  ],
+  "mitreTechniques": [
+    "T1036.004",
+    "T1049",
+    "T1059",
+    "T1059.004"
+  ],
+  "references": [],
+  "guidance": {
+    "analystNotes": [
+      "Excluded /tmp, /var/tmp, /run, /var/run subdirectories to reduce noise.",
+      "Excluded /tmp, /var/tmp files starting or ending with digits to exclude real temporary files.",
+      "Included a process or parent process count of <= 3, and a host count of <= 3 to eliminate common processes across different hosts."
+    ],
+    "expectedFalsePositives": [
+      "Build, test and deployment tooling that runs generated binaries from /tmp or /var/www.",
+      "Package installation scripts executing from temporary directories."
+    ],
+    "suggestedPivots": [
+      "Pivot on process.executable and host.name for the full process tree.",
+      "Check how the file arrived (download, web request, scp) shortly before execution.",
+      "Look for persistence (cron, systemd, rc files) created by the same user."
+    ]
+  },
+  "query": {
+    "id": "main",
+    "language": "esql",
+    "query": "from logs-endpoint.events.process-*\n| where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and (\n  process.executable like \"/dev/shm/*\" or\n  process.executable like \"/var/www/*\" or\n  process.executable like \"/boot/*\" or\n  process.executable like \"/srv/*\" or\n  process.executable rlike \"/tmp/[^/]+\" or\n  process.executable rlike \"/var/tmp/[^/]+\" or\n  process.executable rlike \"/run/[^/]+\" or\n  process.executable rlike \"/var/run/[^/]+\"\n) and not (\n  process.parent.executable in (\"/usr/sbin/dpkg-preconfigure\") or\n  process.executable rlike \"/tmp/[0-9].*\" or\n  process.executable rlike \"/tmp/.*[0-9]/?\" or\n  process.executable rlike \"/var/tmp/[0-9].*\" or\n  process.executable rlike \"/var/tmp/.*[0-9]/?\"\n)\n| eval parent_executable = coalesce(process.parent.executable, \"unknown\")\n| stats cc = count(), host_count = count_distinct(host.name), last_seen = max(@timestamp) by process.executable, parent_executable\n// Alter this threshold to make sense for your environment\n| where cc <= 3 and host_count <= 3\n| sort cc asc",
+    "resultKind": "aggregate",
+    "defaultTimeRange": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "recommendedColumns": [
+      "process.executable",
+      "parent_executable",
+      "cc",
+      "host_count",
+      "last_seen"
+    ],
+    "requiredIndexPatterns": [
+      "logs-endpoint.events.process-*"
+    ],
+    "requiredFields": [
+      "host.os.type",
+      "event.type",
+      "event.action",
+      "process.executable",
+      "process.parent.executable",
+      "host.name",
+      "@timestamp"
+    ],
+    "evidenceFields": [
+      "process.executable",
+      "parent_executable",
+      "cc",
+      "host_count",
+      "last_seen"
+    ],
+    "adjudicationFields": [
+      "process.executable",
+      "parent_executable",
+      "cc",
+      "host_count",
+      "last_seen",
+      "host.name",
+      "user.name",
+      "process.command_line",
+      "process.parent.executable"
+    ],
+    "surroundingEventQuery": "from logs-endpoint.events.process-* METADATA _index, _id\n| where @timestamp >= {{param.bucket_start}} and @timestamp < {{param.bucket_end}}\n| where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and (\n  process.executable like \"/dev/shm/*\" or\n  process.executable like \"/var/www/*\" or\n  process.executable like \"/boot/*\" or\n  process.executable like \"/srv/*\" or\n  process.executable rlike \"/tmp/[^/]+\" or\n  process.executable rlike \"/var/tmp/[^/]+\" or\n  process.executable rlike \"/run/[^/]+\" or\n  process.executable rlike \"/var/run/[^/]+\"\n) and not (\n  process.parent.executable in (\"/usr/sbin/dpkg-preconfigure\") or\n  process.executable rlike \"/tmp/[0-9].*\" or\n  process.executable rlike \"/tmp/.*[0-9]/?\" or\n  process.executable rlike \"/var/tmp/[0-9].*\" or\n  process.executable rlike \"/var/tmp/.*[0-9]/?\"\n)\n| eval parent_executable = coalesce(process.parent.executable, \"unknown\")\n| where process.executable == {{param.process.executable}} and parent_executable == {{param.parent_executable}}\n| sort @timestamp desc\n| keep _index, _id, @timestamp, host.name, user.name, process.executable, process.parent.executable, process.command_line",
+    "occurrence": {
+      "keyFields": [
+        "process.executable",
+        "parent_executable"
+      ],
+      "timeField": "last_seen",
+      "bucket": "1d"
+    }
+  },
+  "source": {
+    "kind": "elastic_seed",
+    "tradeId": "0ea47044-b161-4785-ba99-e11f46d6ac51",
+    "path": "hunting/linux/queries/execution_uncommon_process_execution_from_suspicious_directory.toml",
+    "revision": "20120bad39156ffdcf95311f12cfee6b4246d13a"
+  }
+}

@@ -428,6 +428,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.significant_security_event',
   // hidden; server-registered only
   'security.hunt_coordinator_result',
+  'security.hunt_session',
 
   // Observability
   'observability.ai_insight',

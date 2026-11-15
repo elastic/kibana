@@ -332,6 +332,78 @@ export type ObservabilityTracesFeature =
 
 /** ****************************************************************************************/
 
+/** **************** Hunt sessions ****************/
+
+/** What a verified Hunt session resolves to, for Discover's Hunt mode. */
+export interface HuntSessionInfo {
+  sessionId: string;
+  sessionExecutionId: string;
+  /** Set when the session continues an existing Investigation. */
+  investigationId?: string;
+  /** ISO-8601 time the session stops being accepted. */
+  expiresAt: string;
+  definition: {
+    id: string;
+    version: number;
+    name: string;
+    hypothesis: string;
+    /** Whether the hunt returns events (preserved by reference) or aggregate rows (preserved as shown). */
+    resultKind: 'raw_event' | 'aggregate';
+    references: string[];
+    guidance: {
+      analystNotes: string[];
+      expectedFalsePositives: string[];
+      suggestedPivots: string[];
+    };
+  };
+}
+
+/**
+ * Lets Discover enter Hunt mode only for genuine sessions. The owner of Hunt sessions checks the
+ * session id, opaque to Discover, and returns the hunt to show, or `undefined` when the session is
+ * unknown, expired or not the caller's.
+ */
+export interface HuntSessionFeature {
+  id: 'hunt-session';
+  verifySession: (token: string) => Promise<HuntSessionInfo | undefined>;
+  /** Preserves selected rows as evidence on the session's Investigation. Rejects with a readable message. */
+  preserveEvidence: (request: HuntPreserveRequest) => Promise<HuntPreserveResult>;
+}
+
+/** A row an analyst selected: a reference to an event, or the values of an aggregate row. */
+export type HuntEvidenceSelection =
+  | { kind: 'raw_event'; index: string; id: string }
+  | { kind: 'aggregate'; values: Record<string, string | number | boolean | null> };
+
+export interface HuntPreserveRequest {
+  /** The session id the tab was opened with. */
+  token: string;
+  /** Minted once per attempt and reused on retry, so a retry never adds evidence twice. */
+  preservationId: string;
+  query: string;
+  filters: Array<Record<string, string | number | boolean | null>>;
+  timeRange: { from: string; to: string };
+  columns: string[];
+  dataViewId: string;
+  /** Context the analyst wrote for this preservation. */
+  note?: string;
+  rows: HuntEvidenceSelection[];
+}
+
+export interface HuntPreserveResult {
+  investigationId: string;
+  /** Link to the Investigation, for the confirmation. */
+  investigationUrl: string;
+  /** Unique evidence rows on the Investigation after this request. */
+  evidenceCount: number;
+  /** Rows this request added. Zero for a retry or a repeated selection. */
+  addedCount: number;
+  /** The session id; the session is now linked to the Investigation, so later preservations append to it. */
+  profileToken: string;
+}
+
+/** ****************************************************************************************/
+
 // This should be a union of all the available client features.
 export type DiscoverFeature =
   | ObservabilityStreamsFeature
@@ -342,7 +414,8 @@ export type DiscoverFeature =
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature
   | ObservabilityLogsFetchDocumentByIdFeature
-  | SecuritySolutionFeature;
+  | SecuritySolutionFeature
+  | HuntSessionFeature;
 
 /**
  * Service types

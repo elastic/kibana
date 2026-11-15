@@ -20,3 +20,7 @@ export const NAV_ESCALATIONS = i18n.translate('xpack.alertzero.chrome.nav.escala
 export const NAV_WATCHES = i18n.translate('xpack.alertzero.chrome.nav.watches', {
   defaultMessage: 'Watches',
 });
+
+export const NAV_HUNT_LIBRARY = i18n.translate('xpack.alertzero.chrome.nav.huntLibrary', {
+  defaultMessage: 'Hunt library',
+});

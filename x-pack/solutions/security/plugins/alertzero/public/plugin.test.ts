@@ -169,7 +169,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
       const update = await nextUpdate;
       expect(update?.status).toBe(AppStatus.accessible);
       expect(update?.visibleIn).toEqual(canRead ? ['projectSideNav', 'globalSearch'] : []);
-      expect(update?.deepLinks?.length).toBe(canRead ? 2 : 0);
+      expect(update?.deepLinks?.length).toBe(canRead ? 3 : 0);
       plugin.stop();
     }
   );
@@ -205,7 +205,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
         visibleIn: license.visible ? ['projectSideNav', 'globalSearch'] : [],
         deepLinks: license.visible ? expect.any(Array) : [],
       });
-      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
     }
     subscription.unsubscribe();
     plugin.stop();
@@ -237,7 +237,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
       visibleIn: ['projectSideNav', 'globalSearch'],
       deepLinks: expect.any(Array),
     });
-    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
     contract.setServerlessTierAvailable(false);
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,
@@ -403,7 +403,7 @@ describe('AlertZeroPublicPlugin UI telemetry registration', () => {
     expect(registeredEventTypes()).toEqual([]);
   });
 
-  it('registers the four AlertZero UI events when the app first mounts', async () => {
+  it('registers the AlertZero UI events when the app first mounts', async () => {
     const { mount, registeredEventTypes } = setupPlugin(true);
 
     await mount();
@@ -413,6 +413,9 @@ describe('AlertZeroPublicPlugin UI telemetry registration', () => {
       'alertzero_ui_queue_filtered',
       'alertzero_ui_brief_card_clicked',
       'alertzero_ui_error_shown',
+      'alertzero_ui_hunt_library_opened',
+      'alertzero_ui_hunt_library_filtered',
+      'alertzero_ui_hunt_launched',
     ]);
   });
 
@@ -422,7 +425,7 @@ describe('AlertZeroPublicPlugin UI telemetry registration', () => {
     await mount();
     await mount();
 
-    expect(registeredEventTypes()).toHaveLength(4);
+    expect(registeredEventTypes()).toHaveLength(7);
   });
 
   it('registers no UI event when the deployment kill switch is off', () => {
@@ -525,8 +528,9 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
     const { attachments } = startPlugin();
     await flushRegistration();
 
-    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(2);
+    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(3);
     expect(attachments.addAttachmentType.mock.calls.map(([type]) => type).sort()).toEqual([
+      'security.hunt_session',
       'security.significant_security_event',
       'security.threat',
     ]);

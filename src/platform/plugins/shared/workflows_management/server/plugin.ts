@@ -91,6 +91,9 @@ export class WorkflowsPlugin
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available, this.logger);
     this.api = api;
+    api.setExecutionLabelNamespaceRegistrar(
+      plugins.workflowsExecutionEngine.registerExecutionLabelNamespace
+    );
 
     if (plugins.actions) {
       plugins.actions.registerType(getWorkflowsConnectorType(api));

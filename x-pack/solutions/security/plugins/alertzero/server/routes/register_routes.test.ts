@@ -32,6 +32,7 @@ const setup = () => {
     getThreatIntelSupplyService: service,
     isServerless: false,
     getWorkflowsManagement: service,
+    resolveUserNames: service,
     reportTelemetryEvent: service,
   });
   const routes = (['get', 'post', 'put', 'patch', 'delete'] as const).flatMap((method) =>

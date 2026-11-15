@@ -143,6 +143,7 @@ export enum SecurityPageName {
   alertZeroWatches = 'watches',
   alertZeroWatchesWorkers = 'watches_workers',
   alertZeroWatchesSkills = 'watches_skills',
+  alertZeroHuntLibrary = 'watches_hunt_library',
   alertZeroWatchFloor = 'watch_floor',
   alertZeroWatchOfficer = 'watch_officer',
   alertZeroWatchHunt = 'watch_hunt',

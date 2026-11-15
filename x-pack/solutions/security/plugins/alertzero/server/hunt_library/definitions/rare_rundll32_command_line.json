@@ -1,0 +1,95 @@
+{
+  "id": "rare_rundll32_command_line",
+  "version": 1,
+  "name": "Rundll32 Execution Aggregated by Command Line",
+  "description": "This hunt aggregate Rundll32 execution by normalized `process.command_line` and returns instances that are unique by frequency. Rundll32 is one of the most abused binaries to proxy execution of malicious commands and modules.",
+  "hypothesis": "A rundll32.exe command line, after normalising user paths and GUIDs, that appears on only one host and is not a known benign pattern may be proxy execution of a malicious DLL.",
+  "platform": [
+    "windows"
+  ],
+  "mitreTechniques": [
+    "T1127",
+    "T1218",
+    "T1218.011"
+  ],
+  "references": [],
+  "guidance": {
+    "analystNotes": [
+      "Execution of DLLs from suspicious paths or with suspicious export function names or from suspicious parent should be further reviewed.",
+      "Parents such as svchost, `explorer.exe`, `wmiprvse.exe`, `winword.exe` and others should be carefully reviewed."
+    ],
+    "expectedFalsePositives": [
+      "Vendor installers and updaters that invoke rundll32.exe with unique arguments.",
+      "Per-device printer, driver and shell-extension command lines not covered by the exclusion list."
+    ],
+    "suggestedPivots": [
+      "Pivot on the DLL path in the command line and check its signature and creation time.",
+      "Review the parent process and what the host did next (network, child processes)."
+    ]
+  },
+  "query": {
+    "id": "main",
+    "language": "esql",
+    "query": "from logs-endpoint.events.process-*, logs-windows.sysmon_operational-*, logs-system.security-*\n| where host.os.family == \"windows\" and event.category == \"process\" and event.action in (\"start\", \"Process creation\", \"created-process\") and\n  to_lower(process.name) == \"rundll32.exe\" and\n  not process.command_line rlike \"\"\".*(zzzzInvokeManagedCustomActionOutOfProc|GeneralTel.dll,RunInUserCxt|ShOpenVerbApplication|davclnt.dll,DavSetCookie|FileProtocolHandler|EDGEHTML.dll|FirewallControlPanel.dll,ShowNotificationDialog|printui.dll,PrintUIEntryDPIAware|Program Files|SHCreateLocalServerRunDll|ImageView_Fullscreen|StatusMonitorEntryPoint|Control_RunDLL|HotPlugSafeRemovalDriveNotification|AppxDeploymentClient.dll|acproxy.dll,PerformAutochkOperations|CapabilityAccessManagerDoStoreMaintenance|dfshim.dll|display.dll,ShowAdapterSettings|ForceProxyDetectionOnNextRun|PfSvWsSwapAssessmentTask|acmigration.dll,ApplyMigrationShims|LenovoBatteryGaugePackage.dll|-localserver|DriverStore|CnmDxPEntryPoint|DeferredDelete|DeviceProperties_RunDLL|AppxDeploymentClient.dll|spool\\\\DRIVERS|printui.dll,PrintUIEntry|DfdGetDefaultPolicyAndSMART|cryptext.dll,CryptExt|WininetPlugin.dll|ClearMyTracksByProcess|SusRunTask|OpenURL|CleanupTemporaryState).*\"\"\"\n| keep @timestamp, process.parent.name, process.command_line, host.id\n| eval parent_name = coalesce(process.parent.name, \"unknown\")\n| eval cmdline = replace(process.command_line, \"\"\"[cC]:\\\\[uU][sS][eE][rR][sS]\\\\[a-zA-Z0-9\\.\\-\\_\\$~ ]+\\\\\"\"\", \"C:\\\\\\\\users\\\\\\\\user\\\\\\\\\")\n| eval cmdline = replace(cmdline, \"\"\"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|ns[a-z][A-Z0-9]{3,4}\\.tmp|DX[A-Z0-9]{3,4}\\.tmp|7z[A-Z0-9]{3,5}\\.tmp|[0-9\\.\\-\\_]{3,})\"\"\", \"\")\n| stats hosts = count_distinct(host.id), total = count(), last_seen = max(@timestamp) by cmdline, parent_name\n| where hosts == 1",
+    "resultKind": "aggregate",
+    "defaultTimeRange": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "recommendedColumns": [
+      "cmdline",
+      "parent_name",
+      "hosts",
+      "total",
+      "last_seen"
+    ],
+    "requiredIndexPatterns": [
+      "logs-endpoint.events.process-*",
+      "logs-windows.sysmon_operational-*",
+      "logs-system.security-*"
+    ],
+    "requiredFields": [
+      "host.os.family",
+      "event.category",
+      "event.action",
+      "process.name",
+      "process.command_line",
+      "process.parent.name",
+      "host.id",
+      "@timestamp"
+    ],
+    "evidenceFields": [
+      "cmdline",
+      "parent_name",
+      "hosts",
+      "total",
+      "last_seen"
+    ],
+    "adjudicationFields": [
+      "cmdline",
+      "parent_name",
+      "hosts",
+      "total",
+      "last_seen",
+      "host.name",
+      "user.name",
+      "process.command_line",
+      "process.parent.name"
+    ],
+    "surroundingEventQuery": "from logs-endpoint.events.process-*, logs-windows.sysmon_operational-*, logs-system.security-* METADATA _index, _id\n| where @timestamp >= {{param.bucket_start}} and @timestamp < {{param.bucket_end}}\n| where host.os.family == \"windows\" and event.category == \"process\" and event.action in (\"start\", \"Process creation\", \"created-process\") and\n  to_lower(process.name) == \"rundll32.exe\" and\n  not process.command_line rlike \"\"\".*(zzzzInvokeManagedCustomActionOutOfProc|GeneralTel.dll,RunInUserCxt|ShOpenVerbApplication|davclnt.dll,DavSetCookie|FileProtocolHandler|EDGEHTML.dll|FirewallControlPanel.dll,ShowNotificationDialog|printui.dll,PrintUIEntryDPIAware|Program Files|SHCreateLocalServerRunDll|ImageView_Fullscreen|StatusMonitorEntryPoint|Control_RunDLL|HotPlugSafeRemovalDriveNotification|AppxDeploymentClient.dll|acproxy.dll,PerformAutochkOperations|CapabilityAccessManagerDoStoreMaintenance|dfshim.dll|display.dll,ShowAdapterSettings|ForceProxyDetectionOnNextRun|PfSvWsSwapAssessmentTask|acmigration.dll,ApplyMigrationShims|LenovoBatteryGaugePackage.dll|-localserver|DriverStore|CnmDxPEntryPoint|DeferredDelete|DeviceProperties_RunDLL|AppxDeploymentClient.dll|spool\\\\DRIVERS|printui.dll,PrintUIEntry|DfdGetDefaultPolicyAndSMART|cryptext.dll,CryptExt|WininetPlugin.dll|ClearMyTracksByProcess|SusRunTask|OpenURL|CleanupTemporaryState).*\"\"\"\n| eval parent_name = coalesce(process.parent.name, \"unknown\")\n| eval cmdline = replace(process.command_line, \"\"\"[cC]:\\\\[uU][sS][eE][rR][sS]\\\\[a-zA-Z0-9\\.\\-\\_\\$~ ]+\\\\\"\"\", \"C:\\\\\\\\users\\\\\\\\user\\\\\\\\\")\n| eval cmdline = replace(cmdline, \"\"\"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|ns[a-z][A-Z0-9]{3,4}\\.tmp|DX[A-Z0-9]{3,4}\\.tmp|7z[A-Z0-9]{3,5}\\.tmp|[0-9\\.\\-\\_]{3,})\"\"\", \"\")\n| where cmdline == {{param.cmdline}} and parent_name == {{param.parent_name}}\n| sort @timestamp desc\n| keep _index, _id, @timestamp, host.name, user.name, process.command_line, process.parent.name",
+    "occurrence": {
+      "keyFields": [
+        "cmdline",
+        "parent_name"
+      ],
+      "timeField": "last_seen",
+      "bucket": "1d"
+    }
+  },
+  "source": {
+    "kind": "elastic_seed",
+    "tradeId": "44e6adc6-e183-4bfa-b06d-db41669641fa",
+    "path": "hunting/windows/queries/rundll32_execution_aggregated_by_cmdline.toml",
+    "revision": "20120bad39156ffdcf95311f12cfee6b4246d13a"
+  }
+}

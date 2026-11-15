@@ -140,6 +140,7 @@ describe('ES FLS allowlist cross-repo sync', () => {
       'eventChainVisitedWorkflowIds',
       'dispatchEventId',
       'concurrencyGroupKey',
+      'labels',
       'version',
       'stepType',
       'workflowRunId',

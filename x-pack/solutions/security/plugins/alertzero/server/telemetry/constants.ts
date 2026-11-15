@@ -25,6 +25,10 @@ export const ALERTZERO_TELEMETRY_EVENTS = {
   RuleCoverageReviewCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_rule_coverage_review_completed`,
   HuntReportCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_hunt_report_completed`,
   EndpointAnalysisCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_endpoint_analysis_completed`,
+  HuntSessionPreserved: `${ALERTZERO_TELEMETRY_PREFIX}_hunt_session_preserved`,
+  HuntEvidenceAppended: `${ALERTZERO_TELEMETRY_PREFIX}_hunt_evidence_appended`,
+  HuntContinued: `${ALERTZERO_TELEMETRY_PREFIX}_hunt_continued`,
+  HuntInvestigationCreated: `${ALERTZERO_TELEMETRY_PREFIX}_hunt_investigation_created`,
 } as const;
 
 export type AlertZeroTelemetryEventType =
@@ -67,3 +71,8 @@ export const TRIGGER_TYPES = [
 ] as const;
 
 export type AlertZeroTriggerType = (typeof TRIGGER_TYPES)[number];
+
+/** What started the Hunt that created an Investigation. Only a person does so until the worker ships. */
+export const HUNT_INVESTIGATION_TRIGGERS = ['manual'] as const;
+
+export type HuntInvestigationTrigger = (typeof HUNT_INVESTIGATION_TRIGGERS)[number];

@@ -25,6 +25,10 @@ export {
   type ExampleProfileState,
 } from './profile_state_definitions/example_profile_state';
 export {
+  HUNT_SESSION_STATE_DEF,
+  type HuntSessionState,
+} from './profile_state_definitions/hunt_session_profile_state';
+export {
   METRICS_STATE_DEF,
   type MetricsState,
 } from './profile_state_definitions/metrics_grid_profile_state';

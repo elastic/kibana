@@ -16,6 +16,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
+import { toCustomBulkActions } from '../../context_awareness/utils/to_custom_bulk_actions';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
 import {
@@ -43,6 +44,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     dataSource,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+    customBulkActions: providedBulkActions,
     onFullScreenChange,
     ...props
   }) => {
@@ -70,6 +72,24 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       getRowAdditionalLeadingControlsAccessor,
       query,
     ]);
+
+    const getBulkActionsAccessor = useProfileAccessor('getBulkActions');
+    const customBulkActions = useMemo(() => {
+      const profileBulkActions = getBulkActionsAccessor(() => [])({
+        dataView,
+        query,
+        columns: props.columns ?? [],
+      });
+
+      if (!profileBulkActions.length) {
+        return providedBulkActions;
+      }
+
+      return [
+        ...(providedBulkActions ?? []),
+        ...toCustomBulkActions(profileBulkActions, props.rows ?? []),
+      ];
+    }, [dataView, getBulkActionsAccessor, props.columns, props.rows, providedBulkActions, query]);
 
     const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
     const paginationModeConfig = useMemo(() => {
@@ -143,6 +163,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         showColumnTokens
         renderCustomToolbar={renderCustomToolbar}
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+        customBulkActions={customBulkActions}
         paginationMode={paginationModeConfig.paginationMode}
         customGridColumnsConfiguration={customGridColumnsConfiguration}
         shouldKeepAdHocDataViewImmutable
