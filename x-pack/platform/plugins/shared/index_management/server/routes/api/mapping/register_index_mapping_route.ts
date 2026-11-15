@@ -7,9 +7,7 @@
 
 import type { RouteDependencies } from '../../../types';
 import { registerGetMappingRoute } from './register_mapping_route';
-import { registerUpdateMappingRoute } from './register_update_mapping_route';
 
 export function registerIndexMappingRoutes(dependencies: RouteDependencies) {
   registerGetMappingRoute(dependencies);
-  registerUpdateMappingRoute(dependencies);
 }

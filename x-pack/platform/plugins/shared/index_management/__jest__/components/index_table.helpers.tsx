@@ -30,6 +30,8 @@ import { breadcrumbService } from '../../public/application/services/breadcrumbs
 import { UiMetricService } from '../../public/application/services/ui_metric';
 import { NotificationService } from '../../public/application/services/notification';
 import { httpService } from '../../public/application/services/http';
+import { esClientService } from '../../public/application/services/es_client';
+import { createEsClientMock } from '../../public/application/services/es_client.mock';
 import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
@@ -193,6 +195,7 @@ export const renderIndexApp = async (options?: {
   setUiMetricService(services.uiMetricService);
 
   httpService.setup(httpSetup);
+  esClientService.setup(createEsClientMock(httpSetup));
   breadcrumbService.setup(() => undefined);
 
   const store = indexManagementStore(services);

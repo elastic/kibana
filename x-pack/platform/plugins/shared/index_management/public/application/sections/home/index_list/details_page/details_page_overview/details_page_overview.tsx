@@ -68,7 +68,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
     services: { extensionsService },
   } = useAppContext();
   const state = useMappingsState();
-  const { data: mappingsData, resendRequest } = useLoadIndexMappings(name || '');
+  const { data: mappingsData, refetch: refetchMappings } = useLoadIndexMappings(name || '');
   const { isAtLeastEnterprise } = useLicense();
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
@@ -134,7 +134,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
       {isUpdatingElserMappings && (
         <UpdateElserMappingsModal
           indexName={name}
-          refetchMapping={resendRequest}
+          refetchMapping={refetchMappings}
           setIsModalOpen={setIsUpdatingElserMappings}
           hasUpdatePrivileges={hasUpdateMappingsPrivileges}
           modalId="indexDetailsOverview"

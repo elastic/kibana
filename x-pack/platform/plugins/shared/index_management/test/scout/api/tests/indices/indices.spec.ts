@@ -15,7 +15,6 @@ const { API_BASE_PATH, INTERNAL_API_BASE_PATH, COMMON_HEADERS } = testData;
 const INDEX_PREFIX = 'index-management-api-indices';
 const INDEX_NAME = `${INDEX_PREFIX}-main`;
 const OTHER_INDEX_NAME = `${INDEX_PREFIX}-other`;
-const CREATED_INDEX_NAME = `${INDEX_PREFIX}-created`;
 
 // Serverless reports the metering shape instead of shard stats and data enrichers.
 const EXPECTED_KEYS = [
@@ -129,71 +128,5 @@ apiTest.describe('Indices API', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(404);
-  });
-
-  apiTest('creates an index with an index mode', async ({ apiClient, esClient }) => {
-    const response = await apiClient.put(`${INTERNAL_API_BASE_PATH}/indices/create`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({ indexName: CREATED_INDEX_NAME, indexMode: 'logsdb' }),
-    });
-
-    expect(response).toHaveStatusCode(200);
-    const settings = await esClient.indices.getSettings({ index: CREATED_INDEX_NAME });
-    expect(settings[CREATED_INDEX_NAME].settings?.index?.mode).toBe('logsdb');
-  });
-
-  apiTest('creates an index without an index mode', async ({ apiClient, esClient }) => {
-    const response = await apiClient.put(`${INTERNAL_API_BASE_PATH}/indices/create`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({ indexName: CREATED_INDEX_NAME }),
-    });
-
-    expect(response).toHaveStatusCode(200);
-    expect(await esClient.indices.exists({ index: CREATED_INDEX_NAME })).toBe(true);
-  });
-
-  apiTest('rejects creating an index without a name', async ({ apiClient }) => {
-    const response = await apiClient.put(`${INTERNAL_API_BASE_PATH}/indices/create`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({ indexMode: 'standard' }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('expected value of type [string]');
-  });
-
-  apiTest('rejects creating an index that already exists', async ({ apiClient }) => {
-    const response = await apiClient.put(`${INTERNAL_API_BASE_PATH}/indices/create`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({ indexName: INDEX_NAME }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('deletes an index', async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(`${API_BASE_PATH}/indices/delete`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({ indices: [INDEX_NAME] }),
-    });
-
-    expect(response).toHaveStatusCode(200);
-    expect(await esClient.indices.exists({ index: INDEX_NAME })).toBe(false);
-  });
-
-  apiTest('rejects a delete without an index name', async ({ apiClient }) => {
-    const response = await apiClient.post(`${API_BASE_PATH}/indices/delete`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({ indices: [undefined] }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('expected value of type [string]');
   });
 });

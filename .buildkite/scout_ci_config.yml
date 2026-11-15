@@ -43,6 +43,7 @@ plugins:
     - entity_inventory
     - entity_store
     - error_boundary_example
+    - es_client
     - esql_views
     - event_annotation_listing
     - exploratory_view

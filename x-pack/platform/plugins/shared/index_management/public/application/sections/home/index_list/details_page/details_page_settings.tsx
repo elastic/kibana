@@ -18,7 +18,7 @@ export const DetailsPageSettings: FunctionComponent<{
   indexName: string;
   hasUpdateSettingsPrivilege?: boolean;
 }> = ({ indexName, hasUpdateSettingsPrivilege }) => {
-  const { isLoading, data, error, resendRequest } = useLoadIndexSettings(indexName);
+  const { isLoading, data, error, refetch } = useLoadIndexSettings(indexName);
 
   if (isLoading) {
     return (
@@ -58,7 +58,7 @@ export const DetailsPageSettings: FunctionComponent<{
             <EuiSpacer />
             <EuiButton
               iconSide="right"
-              onClick={resendRequest}
+              onClick={() => refetch()}
               iconType="refresh"
               color="danger"
               data-test-subj="indexDetailsSettingsReloadButton"
@@ -77,7 +77,7 @@ export const DetailsPageSettings: FunctionComponent<{
     <DetailsPageSettingsContent
       data={data}
       indexName={indexName}
-      reloadIndexSettings={resendRequest}
+      reloadIndexSettings={refetch}
       hasUpdateSettingsPrivilege={hasUpdateSettingsPrivilege}
     />
   );

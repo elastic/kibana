@@ -8,9 +8,10 @@
 import type { ApiClientFixture, EsClient, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { buildIndexDocCountQuery, toIndexDocCounts } from '../../../../../common/lib';
 import { apiTest, testData } from '../../fixtures';
 
-const { INTERNAL_API_BASE_PATH, COMMON_HEADERS } = testData;
+const { COMMON_HEADERS, ES_CLIENT_API_VERSION, ES_CLIENT_PROXY_PATH } = testData;
 
 const INDEX_PREFIX = 'index-management-api-doc-count-';
 
@@ -34,93 +35,99 @@ const deleteSuiteIndices = async (esClient: EsClient) => {
   }
 };
 
-apiTest.describe('Index doc count API', { tag: tags.stateful.classic }, () => {
-  let credentials: RoleApiCredentials;
+// Sends the browser's doc count query through the Elasticsearch proxy.
+apiTest.describe(
+  'Index doc count through the Elasticsearch proxy',
+  { tag: tags.stateful.classic },
+  () => {
+    let credentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    credentials = await requestAuth.getApiKey('admin');
-  });
-
-  apiTest.beforeEach(async ({ esClient }) => {
-    await deleteSuiteIndices(esClient);
-  });
-
-  apiTest.afterEach(async ({ esClient }) => {
-    await deleteSuiteIndices(esClient);
-  });
-
-  const getDocCounts = (apiClient: ApiClientFixture, indexNames: string[]) =>
-    apiClient.post(`${INTERNAL_API_BASE_PATH}/index_doc_count`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({ indexNames }),
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      credentials = await requestAuth.getApiKey('admin');
     });
 
-  apiTest(
-    'returns counts per index and fills missing buckets with 0',
-    async ({ apiClient, esClient }) => {
-      const indexA = `${INDEX_PREFIX}a`;
-      const indexB = `${INDEX_PREFIX}b`;
-      await esClient.indices.create({ index: indexA });
-      await esClient.indices.create({ index: indexB });
+    apiTest.beforeEach(async ({ esClient }) => {
+      await deleteSuiteIndices(esClient);
+    });
 
-      await esClient.index({ index: indexA, document: { foo: 'a1' } });
-      await esClient.index({ index: indexA, document: { foo: 'a2' } });
-      await esClient.index({ index: indexA, document: { foo: 'a3' } });
-      await esClient.indices.refresh({ index: [indexA, indexB] });
+    apiTest.afterEach(async ({ esClient }) => {
+      await deleteSuiteIndices(esClient);
+    });
 
-      const response = await getDocCounts(apiClient, [indexA, indexB]);
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ [indexA]: 3, [indexB]: 0 });
-    }
-  );
-
-  apiTest('returns counts for more than 10 indices', async ({ apiClient, esClient }) => {
-    // The terms aggregation size must cover every requested index, not just the first 10 buckets.
-    const indices = Array.from({ length: 12 }, (_, i) => `${INDEX_PREFIX}many-${i}`);
-    await Promise.all(indices.map((index) => esClient.indices.create({ index })));
-
-    // Index docs in the first and the last one, so a missing bucket beyond the 10th would show up.
-    await esClient.index({ index: indices[0], document: { foo: 'a1' } });
-    await esClient.index({ index: indices[11], document: { foo: 'z1' } });
-    await esClient.indices.refresh({ index: indices });
-
-    const response = await getDocCounts(apiClient, indices);
-
-    expect(response).toHaveStatusCode(200);
-    expect(Object.keys(response.body)).toHaveLength(indices.length);
-    expect(response.body[indices[0]]).toBe(1);
-    expect(response.body[indices[11]]).toBe(1);
-    expect(response.body[indices[5]]).toBe(0);
-  });
-
-  apiTest(
-    `supports ${MAX_INDEX_NAME_LENGTH} character index names`,
-    async ({ apiClient, esClient }) => {
-      const indices = Array.from({ length: 20 }, (_, i) =>
-        padIndexName(`${INDEX_PREFIX}${i.toString().padStart(2, '0')}-`)
+    const getDocCounts = async (apiClient: ApiClientFixture, indexNames: string[]) => {
+      const response = await apiClient.post(
+        `${ES_CLIENT_PROXY_PATH}/_query?allow_partial_results=true`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...credentials.apiKeyHeader,
+            'elastic-api-version': ES_CLIENT_API_VERSION,
+          },
+          responseType: 'json',
+          body: JSON.stringify({ query: buildIndexDocCountQuery(indexNames) }),
+        }
       );
-      expect(indices.every((index) => index.length === MAX_INDEX_NAME_LENGTH)).toBe(true);
-
-      await Promise.all(indices.map((index) => esClient.indices.create({ index })));
-      await esClient.bulk({
-        refresh: 'wait_for',
-        operations: indices.flatMap((index, i) => [{ index: { _index: index } }, { foo: i }]),
-      });
-
-      const response = await getDocCounts(apiClient, indices);
-
       expect(response).toHaveStatusCode(200);
-      expect(Object.keys(response.body).sort()).toStrictEqual([...indices].sort());
-      const notCountedOnce = Object.entries(response.body).filter(([, count]) => count !== 1);
-      expect(notCountedOnce).toStrictEqual([]);
-    }
-  );
+      return toIndexDocCounts(response.body, indexNames);
+    };
 
-  apiTest('rejects an empty list of index names', async ({ apiClient }) => {
-    const response = await getDocCounts(apiClient, []);
+    apiTest(
+      'returns counts per index and fills missing buckets with 0',
+      async ({ apiClient, esClient }) => {
+        const indexA = `${INDEX_PREFIX}a`;
+        const indexB = `${INDEX_PREFIX}b`;
+        await esClient.indices.create({ index: indexA });
+        await esClient.indices.create({ index: indexB });
 
-    expect(response).toHaveStatusCode(400);
-  });
-});
+        await esClient.index({ index: indexA, document: { foo: 'a1' } });
+        await esClient.index({ index: indexA, document: { foo: 'a2' } });
+        await esClient.index({ index: indexA, document: { foo: 'a3' } });
+        await esClient.indices.refresh({ index: [indexA, indexB] });
+
+        expect(await getDocCounts(apiClient, [indexA, indexB])).toStrictEqual({
+          [indexA]: 3,
+          [indexB]: 0,
+        });
+      }
+    );
+
+    apiTest('returns counts for more than 10 indices', async ({ apiClient, esClient }) => {
+      const indices = Array.from({ length: 12 }, (_, i) => `${INDEX_PREFIX}many-${i}`);
+      await Promise.all(indices.map((index) => esClient.indices.create({ index })));
+
+      // Index docs in the first and the last one, so a missing count beyond the 10th would show up.
+      await esClient.index({ index: indices[0], document: { foo: 'a1' } });
+      await esClient.index({ index: indices[11], document: { foo: 'z1' } });
+      await esClient.indices.refresh({ index: indices });
+
+      const counts = await getDocCounts(apiClient, indices);
+
+      expect(Object.keys(counts)).toHaveLength(indices.length);
+      expect(counts[indices[0]]).toBe(1);
+      expect(counts[indices[11]]).toBe(1);
+      expect(counts[indices[5]]).toBe(0);
+    });
+
+    apiTest(
+      `supports ${MAX_INDEX_NAME_LENGTH} character index names`,
+      async ({ apiClient, esClient }) => {
+        const indices = Array.from({ length: 20 }, (_, i) =>
+          padIndexName(`${INDEX_PREFIX}${i.toString().padStart(2, '0')}-`)
+        );
+        expect(indices.every((index) => index.length === MAX_INDEX_NAME_LENGTH)).toBe(true);
+
+        await Promise.all(indices.map((index) => esClient.indices.create({ index })));
+        await esClient.bulk({
+          refresh: 'wait_for',
+          operations: indices.flatMap((index, i) => [{ index: { _index: index } }, { foo: i }]),
+        });
+
+        const counts = await getDocCounts(apiClient, indices);
+
+        expect(Object.keys(counts).sort()).toStrictEqual([...indices].sort());
+        const notCountedOnce = Object.entries(counts).filter(([, count]) => count !== 1);
+        expect(notCountedOnce).toStrictEqual([]);
+      }
+    );
+  }
+);

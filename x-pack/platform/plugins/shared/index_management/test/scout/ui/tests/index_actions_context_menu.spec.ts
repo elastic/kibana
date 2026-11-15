@@ -36,9 +36,8 @@ test.describe('Index actions context menu', { tag: NOT_SVL_SEARCH }, () => {
     await pageObjects.indexManagement.clickCreateIndexButton();
     await pageObjects.indexManagement.setCreateIndexName(createdIndexName);
     await pageObjects.indexManagement.clickCreateIndexSaveButton();
-    await expect(pageObjects.indexManagement.indexLink(createdIndexName)).toBeVisible({
-      timeout: 30000,
-    });
+    await pageObjects.indexManagement.filterIndices(createdIndexName);
+    await expect(pageObjects.indexManagement.indexLink(createdIndexName)).toBeVisible();
   });
 
   test('navigates to overview, settings, and mappings tabs from the manage index menu', async ({

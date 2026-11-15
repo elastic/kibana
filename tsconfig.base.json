@@ -1295,6 +1295,8 @@
       "@kbn/es/*": ["./src/platform/packages/shared/kbn-es/*"],
       "@kbn/es-archiver": ["./src/platform/packages/shared/kbn-es-archiver"],
       "@kbn/es-archiver/*": ["./src/platform/packages/shared/kbn-es-archiver/*"],
+      "@kbn/es-client-plugin": ["./src/platform/plugins/shared/es_client"],
+      "@kbn/es-client-plugin/*": ["./src/platform/plugins/shared/es_client/*"],
       "@kbn/es-errors": ["./src/platform/packages/shared/kbn-es-errors"],
       "@kbn/es-errors/*": ["./src/platform/packages/shared/kbn-es-errors/*"],
       "@kbn/es-mappings": ["./src/platform/packages/shared/kbn-es-mappings"],

@@ -69,7 +69,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   data: string;
   showAboutMappings: boolean;
   jsonData: any;
-  refetchMapping: () => void;
+  refetchMapping: () => Promise<unknown>;
 }> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     core: {
@@ -233,7 +233,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 }
               )
             );
-            refetchMapping();
+            // Leave add-fields mode once the saved mappings are loaded, so they aren't listed as pending.
+            await refetchMapping();
+            setAddingFields(false);
             setHasSavedFields(false);
           } else {
             setSaveMappingError(error.message);

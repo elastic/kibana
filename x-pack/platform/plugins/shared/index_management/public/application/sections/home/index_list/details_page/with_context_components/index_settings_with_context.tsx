@@ -8,6 +8,7 @@ import React from 'react';
 import { documentationService } from '../../../../../services';
 import { UIM_APP_NAME } from '../../../../../../../common/constants/ui_metric';
 import { httpService } from '../../../../../services/http';
+import { esClientService } from '../../../../../services/es_client';
 import { NotificationService } from '../../../../../services/notification';
 import { UiMetricService } from '../../../../../services/ui_metric';
 import type { AppDependencies } from '../../../../..';
@@ -29,6 +30,9 @@ export const IndexSettingsWithContext: React.FC<IndexSettingWithContextProps> = 
   // can't do it in an effect because then the first http call fails as the instantiation happens after first render
   if (!httpService.httpClient) {
     httpService.setup(core.http);
+  }
+  if (!esClientService.esClient) {
+    esClientService.setup(dependencies.plugins.esClient);
   }
   const notificationService = new NotificationService(core.notifications.toasts);
   documentationService.setup(core.docLinks);
