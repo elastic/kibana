@@ -65,7 +65,10 @@ apiTest.describe('Patch rule saved object', { tag: testData.API_ENGINE_NON_MKI_T
 
     expect(omit(after, ['updatedAt'])).toStrictEqual({
       ...omit(before, ['grouping', 'updatedAt']),
-      metadata: { name: 'patch-clear' },
+      metadata: {
+        ...omit(before.metadata, ['description', 'tags', 'routing_tags']),
+        revision: created.metadata.revision + 1,
+      },
       query: { base: BASE_QUERY },
       version: 2,
     });
@@ -74,7 +77,13 @@ apiTest.describe('Patch rule saved object', { tag: testData.API_ENGINE_NON_MKI_T
     expect(findNullPaths(after)).toStrictEqual([]);
 
     const projected = await rules.get(created.id);
-    expect(projected.metadata).toStrictEqual({ name: 'patch-clear' });
+    expect(projected.metadata).toStrictEqual({
+      name: 'patch-clear',
+      signature_id: created.metadata.signature_id,
+      revision: created.metadata.revision + 1,
+      source: created.metadata.source,
+      ownership: created.metadata.ownership,
+    });
   });
 
   apiTest('leaves every branch the body omits byte-identical on disk', async ({ apiServices }) => {
@@ -105,7 +114,11 @@ apiTest.describe('Patch rule saved object', { tag: testData.API_ENGINE_NON_MKI_T
 
     expect(omit(after, ['updatedAt'])).toStrictEqual({
       ...omit(before, ['updatedAt']),
-      metadata: { ...before.metadata, name: 'patch-preserve-renamed' },
+      metadata: {
+        ...before.metadata,
+        name: 'patch-preserve-renamed',
+        revision: created.metadata.revision + 1,
+      },
       version: 2,
     });
 

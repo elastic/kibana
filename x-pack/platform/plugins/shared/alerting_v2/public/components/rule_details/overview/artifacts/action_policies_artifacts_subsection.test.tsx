@@ -68,7 +68,15 @@ const baseRule: RuleApiResponse = {
   kind: 'alert',
   enabled: true,
   version: 1,
-  metadata: { name: 'Test Rule', tags: ['prod'], routing_tags: ['sre'] },
+  metadata: {
+    name: 'Test Rule',
+    signature_id: 'test-sig-id',
+    revision: 0,
+    tags: ['prod'],
+    routing_tags: ['sre'],
+    source: { type: 'internal' as const, version: 1 },
+    ownership: { managed: false },
+  },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { base: 'FROM logs-*' },
@@ -140,7 +148,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   it('loads linked policies with an empty list when the rule has no routing tags', () => {
     renderSubsection({
       ...baseRule,
-      metadata: { name: 'Untagged Rule' },
+      metadata: { ...baseRule.metadata, name: 'Untagged Rule', routing_tags: undefined },
     });
     expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith([]);
   });

@@ -23,6 +23,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RuleBuilderCreateOptionItem } from '@kbn/alerting-v2-rule-form';
 import type { CreateOptionItem } from '../create_options';
 import { CreateOptionsPanel } from '../create_options';
 import {
@@ -44,7 +45,14 @@ interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
-  onCreateThresholdRule?: () => void;
+  /**
+   * Registered rule builders to offer, in display order. Sourced from the
+   * builder registry so a newly registered builder appears here without this
+   * component knowing about it.
+   */
+  builderOptions?: RuleBuilderCreateOptionItem[];
+  /** Opens the flyout on the given builder's form. */
+  onCreateBuilderRule?: (builderType: string) => void;
   onBuildSequence?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
@@ -83,17 +91,6 @@ export const getCreateWithAgentTooltipText = ({
 }: AgentBuilderSkillsRequirements): string | undefined =>
   hasAgentBuilderCapability ? undefined : CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
 
-const THRESHOLD_RULE_TITLE = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
-  { defaultMessage: 'Threshold rule' }
-);
-const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
-  {
-    defaultMessage: 'Use the query builder to monitor metrics against threshold conditions.',
-  }
-);
-
 const SEQUENCE_TITLE = i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.sequenceTitle', {
   defaultMessage: 'Build a sequence',
 });
@@ -115,6 +112,17 @@ const SequenceTitleWithBadge = () => (
   </EuiFlexGroup>
 );
 
+/**
+ * Stable per-builder test subject derived from the builder type, so adding a
+ * builder needs no change here. Snake-cased types are pascal-cased, which keeps
+ * `threshold` on the `createThresholdRuleCard` subject its tests already use.
+ */
+const builderCardTestSubj = (builderType: string) =>
+  `create${builderType
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('')}RuleCard`;
+
 /** Applied to the EuiCard in the flyout layout when the option is disabled. */
 const flyoutCardDisabledStyle = css({
   cursor: 'not-allowed',
@@ -125,7 +133,8 @@ const flyoutCardDisabledStyle = css({
 const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  onCreateThresholdRule,
+  builderOptions = [],
+  onCreateBuilderRule,
 }) => {
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(
@@ -161,17 +170,16 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   );
 
   const secondaryItems = useMemo<CreateOptionItem[]>(
-    () => [
-      {
-        id: 'create-threshold-rule',
-        iconType: 'chartThreshold',
-        title: THRESHOLD_RULE_TITLE,
-        description: THRESHOLD_RULE_DESCRIPTION,
-        onClick: onCreateThresholdRule ?? noop,
-        'data-test-subj': 'createThresholdRuleCard',
-      },
-    ],
-    [onCreateThresholdRule]
+    () =>
+      builderOptions.map(({ type, title, description, iconType }) => ({
+        id: `create-${type}-rule`,
+        iconType,
+        title,
+        description,
+        onClick: onCreateBuilderRule ? () => onCreateBuilderRule(type) : noop,
+        'data-test-subj': builderCardTestSubj(type),
+      })),
+    [builderOptions, onCreateBuilderRule]
   );
 
   return (
@@ -195,10 +203,14 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
       items={primaryItems}
       secondaryItems={secondaryItems}
       secondaryLabel={
-        <FormattedMessage
-          id="xpack.alertingV2.ruleCreateOptionsPanel.orStartFromBuilderLabel"
-          defaultMessage="or start from a builder"
-        />
+        // Omitted when no builders are registered, so the divider does not
+        // introduce an empty section.
+        secondaryItems.length > 0 ? (
+          <FormattedMessage
+            id="xpack.alertingV2.ruleCreateOptionsPanel.orStartFromBuilderLabel"
+            defaultMessage="or start from a builder"
+          />
+        ) : undefined
       }
       data-test-subj="ruleCreateOptionsPanel"
     />
@@ -275,7 +287,8 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  onCreateThresholdRule,
+  builderOptions = [],
+  onCreateBuilderRule,
   onBuildSequence,
   legacyRuleTypes,
 }) => {
@@ -345,18 +358,29 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <RuleBuilderSectionDivider />
-      <EuiCard
-        layout="horizontal"
-        display="plain"
-        titleElement="h3"
-        titleSize="xs"
-        hasBorder={true}
-        title={THRESHOLD_RULE_TITLE}
-        description={THRESHOLD_RULE_DESCRIPTION}
-        onClick={onCreateThresholdRule ?? noop}
-        icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
-      />
+      {builderOptions.length > 0 && (
+        <>
+          <RuleBuilderSectionDivider />
+          <EuiFlexGroup direction="column" gutterSize="l">
+            {builderOptions.map(({ type, title, description, iconType }) => (
+              <EuiFlexItem key={type}>
+                <EuiCard
+                  layout="horizontal"
+                  display="plain"
+                  titleElement="h3"
+                  titleSize="xs"
+                  hasBorder={true}
+                  title={title}
+                  description={description}
+                  onClick={onCreateBuilderRule ? () => onCreateBuilderRule(type) : noop}
+                  icon={<EuiIcon type={iconType} color="text" size="l" aria-hidden={true} />}
+                  data-test-subj={builderCardTestSubj(type)}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
       {legacyRuleTypes && <LegacyRuleTypesSection items={legacyRuleTypes} />}
     </>
   );

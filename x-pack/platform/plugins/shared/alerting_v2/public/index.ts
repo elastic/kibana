@@ -6,7 +6,7 @@
  */
 
 import { Container, ContainerModule } from 'inversify';
-import { OnSetup, PluginSetup, Start } from '@kbn/core-di';
+import { OnSetup, PluginSetup, Setup, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
@@ -17,10 +17,13 @@ import { RuleChangeHistoryApi } from './services/rule_change_history_api';
 import { RulesApi } from './services/rules_api';
 import { RuleTemplatesApi } from './services/rule_templates_api';
 import { UserCapabilities } from './services/user_capabilities';
+import { queueRuleBuilderRegistration } from './lib/rule_builder_registrations';
 import { createStartContract } from './start_contract';
 import { registerOnSetup } from './setup';
+import type { AlertingV2PublicSetup } from './types';
 
 export type {
+  AlertingV2PublicSetup,
   AlertingV2PublicStart,
   CreateRuleOptionsFlyoutLegacyItem,
   AlertingV2PageProps,
@@ -50,6 +53,9 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(WorkflowApi)
     .toResolvedValue((http) => new WorkflowApi(http), [CoreStart('http')])
     .inSingletonScope();
+  bind(Setup).toConstantValue({
+    registerRuleBuilder: queueRuleBuilderRegistration,
+  } satisfies AlertingV2PublicSetup);
   bind(Start).toResolvedValue(createStartContract, [Container]).inSingletonScope();
   bind(OnSetup).toResolvedValue(registerOnSetup, [
     CoreSetup('getStartServices'),

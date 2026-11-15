@@ -21,11 +21,15 @@ import type { History } from 'history';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
+import type {
+  ComposeDiscoverFlyoutProps,
+  RuleBuilderCreateOptionItem,
+} from '@kbn/alerting-v2-rule-form';
 import { Context, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
+import { applyRuleBuilderRegistrations } from './lib/rule_builder_registrations';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
@@ -61,12 +65,13 @@ export interface CreateRuleOptionsFlyoutProps {
 type Step =
   | { type: 'selector' }
   | { type: 'esql' }
-  | { type: 'threshold' }
+  | { type: 'builder'; builderType: string }
   | { type: 'legacy'; id: string };
 
 interface LoadedModules {
   services: AlertingV2KibanaServices;
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
+  builderOptions: RuleBuilderCreateOptionItem[];
 }
 
 const ActionPolicyAwareComposeDiscoverFlyout = ({
@@ -152,12 +157,14 @@ const CreateRuleOptionsFlyoutInner = ({
       import('@kbn/alerting-v2-rule-form'),
       import('./components/action_policy/form_flyout/create_action_policy_form_flyout'),
     ]);
+    await applyRuleBuilderRegistrations();
     return {
       services: {
         ...services,
         createActionPolicyFormFlyout: actionPolicyFormModule.CreateActionPolicyFormFlyout,
       },
       ComposeDiscoverFlyout: ruleFormModule.ComposeDiscoverFlyout,
+      builderOptions: ruleFormModule.getRuleBuilderCreateOptions(),
     };
   }, []);
 
@@ -218,7 +225,7 @@ const CreateRuleOptionsFlyoutInner = ({
   }, []);
   const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
   const closeRequestRef = useRef<(() => void) | null>(null);
-  const isAuthoringStep = step.type === 'esql' || step.type === 'threshold';
+  const isAuthoringStep = step.type === 'esql' || step.type === 'builder';
 
   const handlePickerClose = useCallback(() => {
     if (isAuthoringStep) {
@@ -288,7 +295,7 @@ const CreateRuleOptionsFlyoutInner = ({
     );
   }
 
-  const { services, ComposeDiscoverFlyout } = value;
+  const { services, ComposeDiscoverFlyout, builderOptions } = value;
 
   if (step.type === 'legacy') {
     const legacyItem = legacyRuleTypes?.find((item) => item.id === step.id);
@@ -305,7 +312,8 @@ const CreateRuleOptionsFlyoutInner = ({
         onClose={handlePickerClose}
         onCreateEsqlRule={() => setStep({ type: 'esql' })}
         onCreateWithAgent={navigateToAgentBuilder}
-        onCreateThresholdRule={() => setStep({ type: 'threshold' })}
+        builderOptions={builderOptions}
+        onCreateBuilderRule={(builderType) => setStep({ type: 'builder', builderType })}
         legacyRuleTypes={legacyPanelItems}
       />
       {isAuthoringStep ? (
@@ -318,7 +326,7 @@ const CreateRuleOptionsFlyoutInner = ({
           closeRequestRef={closeRequestRef}
           stackedOnPicker
           services={services}
-          builderType={step.type === 'threshold' ? 'threshold' : undefined}
+          builderType={step.type === 'builder' ? step.builderType : undefined}
           onCreateRule={handleCreateRule}
           isSaving={isSaving}
           initialQuery={query}

@@ -49,7 +49,16 @@ apiTest.describe('Upsert rule API', { tag: testData.API_ENGINE_TAG }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.id).toBe(id);
-      expect(response.body.metadata).toStrictEqual(body.metadata);
+      expect(response.body.metadata).toStrictEqual({
+        ...body.metadata,
+        // Step 4 response-only fields: server-derived, never accepted from a request body.
+        signature_id: response.body.metadata.signature_id,
+        revision: 0,
+        source: { type: 'internal', version: 1 },
+        ownership: { managed: false },
+      });
+      expect(typeof response.body.metadata.signature_id).toBe('string');
+      expect(response.body.metadata.signature_id.length).toBeGreaterThan(0);
       expect(response.body.kind).toBe(body.kind);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
@@ -79,7 +88,15 @@ apiTest.describe('Upsert rule API', { tag: testData.API_ENGINE_TAG }, () => {
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(response.body.metadata).toStrictEqual(replacementBody.metadata);
+      expect(response.body.metadata).toStrictEqual({
+        ...replacementBody.metadata,
+        // Step 4 response-only fields. signature_id is preserved from the original
+        // rule across a replace. revision bumps when the replacement changes content.
+        signature_id: created.metadata.signature_id,
+        revision: created.metadata.revision + 1,
+        source: created.metadata.source,
+        ownership: created.metadata.ownership,
+      });
       expect(response.body.schedule).toStrictEqual(replacementBody.schedule);
       expect(response.body.query).toStrictEqual(replacementBody.query);
       // createdAt / createdBy / enabled are preserved across an upsert-replace.
@@ -436,7 +453,13 @@ apiTest.describe('Upsert rule API', { tag: testData.API_ENGINE_TAG }, () => {
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata).toStrictEqual({ name: 'replaced' });
+      expect(response.body.metadata).toStrictEqual({
+        name: 'replaced',
+        signature_id: created.metadata.signature_id,
+        revision: created.metadata.revision + 1,
+        source: created.metadata.source,
+        ownership: created.metadata.ownership,
+      });
       expect(response.body.query).toStrictEqual({ base: 'FROM logs-* | LIMIT 10' });
     }
   );

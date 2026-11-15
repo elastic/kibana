@@ -65,6 +65,9 @@ const stateTransitionIsYamlOnly = (
 /** True when the rule can only be edited through the YAML fallback. */
 export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
   if (rule.kind !== 'alert') return false;
+  // A rule with no persisted query is builder-authored; it is represented by its
+  // builder form, not by a query editor, so it is not non-representable.
+  if (rule.query == null) return false;
   if (isNonRepresentable(rule.kind, rule)) return true;
 
   return stateTransitionIsYamlOnly(

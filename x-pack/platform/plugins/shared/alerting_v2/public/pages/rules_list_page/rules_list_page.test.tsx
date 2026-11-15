@@ -121,6 +121,14 @@ jest.mock('@kbn/alerting-v2-rule-form', () => {
       );
     },
     RULE_BUILDER_REGISTRY: { threshold: {} },
+    getRuleBuilderCreateOptions: () => [
+      {
+        type: 'threshold',
+        title: 'Threshold rule',
+        description: 'Detect when a count crosses a threshold.',
+        iconType: 'chartThreshold',
+      },
+    ],
     STACKED_FLYOUT_SIZE: 540,
     STACKED_FLYOUT_MIN_WIDTH: 480,
     useEuiFlyoutReregister: () => ({ flyoutKey: 0, reregister: jest.fn() }),
@@ -189,8 +197,12 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
     enabled: true,
     metadata: {
       name: 'Rule One',
+      signature_id: 'test-sig-id',
+      revision: 0,
+      source: { type: 'internal' as const, version: 1 },
       description: 'Monitors log errors',
       tags: ['prod'],
+      ownership: { managed: false },
     },
     schedule: { every: '1m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
@@ -207,7 +219,14 @@ const mockRules: RuleApiResponse[] = [
   createRule({
     id: 'rule-2',
     enabled: false,
-    metadata: { name: 'Rule Two', tags: [] as string[] },
+    metadata: {
+      name: 'Rule Two',
+      signature_id: 'test-sig-id',
+      tags: [] as string[],
+      revision: 0,
+      source: { type: 'internal' as const, version: 1 },
+      ownership: { managed: false },
+    },
     schedule: { every: '5m' },
     query: { base: 'FROM metrics-*' },
   }),
@@ -1038,11 +1057,25 @@ describe('RulesListPage', () => {
       const page2 = [
         createRule({
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [] as string[] },
+          metadata: {
+            name: 'Rule Three',
+            signature_id: 'test-sig-id',
+            tags: [] as string[],
+            revision: 0,
+            source: { type: 'internal' as const, version: 1 },
+            ownership: { managed: false },
+          },
         }),
         createRule({
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [] as string[] },
+          metadata: {
+            name: 'Rule Four',
+            signature_id: 'test-sig-id',
+            tags: [] as string[],
+            revision: 0,
+            source: { type: 'internal' as const, version: 1 },
+            ownership: { managed: false },
+          },
         }),
       ];
 
