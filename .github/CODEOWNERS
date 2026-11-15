@@ -3256,6 +3256,9 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/endpoint @elastic
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-investigations
 
+# AESOP prototype managed workflows (A/B compare, explorer, drift monitor)
+src/platform/packages/shared/kbn-workflows/managed/definitions/aesop_prototype @elastic/security-generative-ai
+
 # Threat intel supply pipeline
 src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-investigations
