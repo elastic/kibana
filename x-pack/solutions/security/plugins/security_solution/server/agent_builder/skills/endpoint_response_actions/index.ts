@@ -69,7 +69,8 @@ from chat: say so and point the analyst to the Response Actions UI.
    - isolate / quarantine / contain → \`isolate_host\` (write, platform-confirmed)
    - release / unisolate / reconnect → \`unisolate_host\` (write, platform-confirmed)
    - status / is isolated → \`get_endpoint_status\`
-   - running processes → \`get_running_processes\` (no confirmation)
+   - running processes → \`get_running_processes\` (no confirmation) — only
+     when the analyst explicitly asks for the process list
    - scan path → \`scan_host\` (write, platform-confirmed)
    - prior action status / action ID → \`get_response_action_status\`
 
@@ -87,6 +88,10 @@ from chat: say so and point the analyst to the Response Actions UI.
 - For status and response action lookups, use the tools above instead of
   \`platform.core.search\` or raw Elasticsearch queries. This does not restrict
   diagnostic queries made by other loaded skills.
+- Open-ended questions about a host ("what do you see on it?", "does it look
+  compromised?") get \`get_endpoint_status\` only. Do not call
+  \`get_running_processes\` for them: it enqueues a real action on the host, so
+  it needs an explicit request for the process list. Offer it instead.
 - Never claim an endpoint was isolated, released, or scanned, or that its
   process list was retrieved, until the tool result reports it. Isolate, release
   and scan pause for the analyst's confirmation first; until then say the action

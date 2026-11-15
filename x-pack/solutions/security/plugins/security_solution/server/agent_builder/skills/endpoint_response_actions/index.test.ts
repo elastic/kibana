@@ -112,6 +112,9 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.content).toMatch(
         /isolate, release and scan pause for\s+the analyst's confirmation/i
       );
+      // running processes still enqueues a real action, so it needs an explicit ask
+      expect(skill.content).toMatch(/only\s+when the analyst explicitly asks for the process list/);
+      expect(skill.content).toMatch(/Do not call\s+`get_running_processes` for them/);
     });
 
     it('includes system instructions in content', () => {

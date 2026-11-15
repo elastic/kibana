@@ -130,6 +130,9 @@ describe('getRunningProcessesTool', () => {
     expect(tool.id).toBe(RUNNING_PROCESSES_TOOL_ID);
     expect(RUNNING_PROCESSES_TOOL_ID).toBe('endpoint-response-actions.get_running_processes');
     expect(tool.description).toContain('running processes');
+    expect(tool.description).toContain(
+      'only when the analyst explicitly asks for the process list'
+    );
   });
 
   it('dispatches in one call without asking the analyst to confirm', async () => {
