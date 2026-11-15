@@ -124,7 +124,7 @@ describe('parseRhelOval', () => {
         ],
       }),
     ]);
-    expect(result.skipped).toEqual({ kpatch_without_package: 1 });
+    expect(result.skipped).toEqual({ branch_without_package: 1 });
   });
 
   it('keeps bug-fix advisories that list CVEs', () => {
@@ -170,6 +170,25 @@ describe('parseRhelOval', () => {
     expect(records.map((r) => r.package)).toEqual([
       { name: 'hivex', arch: { operation: 'equals', value: 'i686' } },
       { name: 'hivex', arch: { operation: 'pattern match', value: 'x86_64|aarch64' } },
+    ]);
+  });
+
+  it('treats an arch state without an operation as equals', async () => {
+    const earlier = 'hivex is earlier than 0:1.3.15-7.el8';
+    const doc = `<oval_definitions xmlns:red-def="urn:red-def"><definitions>
+      <definition class="patch" id="oval:x:def:1"><metadata><title>RHSA-1:1</title>
+        <reference ref_id="RHSA-1:1" source="RHSA"/><advisory><cve>CVE-1-1</cve></advisory></metadata>
+        <criteria operator="AND">
+          <criterion comment="Red Hat Enterprise Linux 8 is installed"/>
+          <criterion comment="${earlier}" test_ref="t1"/>
+        </criteria>
+      </definition></definitions>
+      <tests><red-def:rpminfo_test id="t1" comment="${earlier}"><red-def:state state_ref="s1"/></red-def:rpminfo_test></tests>
+      <states><red-def:rpminfo_state id="s1"><red-def:arch>x86_64</red-def:arch></red-def:rpminfo_state></states>
+    </oval_definitions>`;
+    const { records } = await parseRhelOval([doc], { major: '8' });
+    expect(records.map((r) => r.package)).toEqual([
+      { name: 'hivex', arch: { operation: 'equals', value: 'x86_64' } },
     ]);
   });
 

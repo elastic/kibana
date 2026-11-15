@@ -220,7 +220,7 @@ export const parseRhelOval = async (
       conjunctions,
       // Per test, not per name+evr: tests for the same package can carry different arch states.
       (leaf) => leaf.testRef ?? `${leaf.name}\u0000${leaf.evr}`,
-      (reason) => countInto(skipped, reason === 'no_leaf' ? 'kpatch_without_package' : reason)
+      (reason) => countInto(skipped, reason === 'no_leaf' ? 'branch_without_package' : reason)
     );
     if (leaves.length === 0) return;
     for (const { leaf } of leaves) if (leaf.testRef) wantedTests.add(leaf.testRef);
@@ -252,7 +252,8 @@ export const parseRhelOval = async (
         }
       } else if (section === 'states' && wantedStates.has(node.attrs.id)) {
         const arch = child(node, 'arch');
-        const operation = arch?.attrs.operation;
+        // OVAL's default operation is 'equals'.
+        const operation = arch?.attrs.operation ?? 'equals';
         if (arch && (operation === 'equals' || operation === 'pattern match')) {
           stateArch.set(node.attrs.id, { operation, value: arch.text });
         }
