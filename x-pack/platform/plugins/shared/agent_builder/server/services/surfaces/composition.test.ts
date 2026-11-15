@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { ConversationRound } from '@kbn/agent-builder-common';
-import type {
-  AttachmentVersionRef,
-  VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
@@ -54,23 +50,15 @@ const echoAttachment: ToSurfaceComposition = ({ id, data }) => ({
 
 interface ComposeOptions {
   attachments?: VersionedAttachment[];
-  attachmentRefs?: AttachmentVersionRef[];
   toSurfaceComposition?: ToSurfaceComposition;
 }
 
 const compose = (
   message: string,
-  {
-    attachments = [createAttachment()],
-    attachmentRefs,
-    toSurfaceComposition = echoAttachment,
-  }: ComposeOptions = {}
+  { attachments = [createAttachment()], toSurfaceComposition = echoAttachment }: ComposeOptions = {}
 ) =>
   buildComposition({
-    round: {
-      input: { message: 'hello', attachment_refs: attachmentRefs },
-      response: { message },
-    } as ConversationRound,
+    message,
     attachments,
     attachmentsService: {
       getTypeDefinition: (type: string) => (type === 'text' ? { toSurfaceComposition } : undefined),
@@ -128,14 +116,6 @@ describe('buildComposition', () => {
 
   it('uses the latest version of tags without a version', async () => {
     expect(await build('<render_attachment id="a1" />')).toEqual(['[a1 v2]']);
-  });
-
-  it('uses the latest version even when the round sent an older one', async () => {
-    expect(
-      await build('<render_attachment id="a1" />', {
-        attachmentRefs: [{ attachment_id: 'a1', version: 1 }],
-      })
-    ).toEqual(['[a1 v2]']);
   });
 
   it('ignores versions that are not positive integers', async () => {

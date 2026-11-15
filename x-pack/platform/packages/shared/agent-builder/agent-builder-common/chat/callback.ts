@@ -7,10 +7,34 @@
 
 import type { SerializedExecutionError } from '../agents/execution_status';
 import type { ChatEvent } from './events';
+import type { SurfacePayload } from './surface_payload';
+import type { ExecutionTerminatedEvent } from './timeline_events';
+
+/** A tool call of the execution, as summarized for a callback. */
+export interface ChatCallbackToolCall {
+  tool_call_id: string;
+  tool_id: string;
+  /** What the agent was doing with the call, as described by the model. */
+  intent?: string;
+}
+
+/**
+ * `execution_terminated` as delivered to a callback, with the response message rendered for its
+ * surface and the execution's tool calls.
+ */
+export type ChatCallbackExecutionTerminatedEvent = ExecutionTerminatedEvent & {
+  surface_payload?: SurfacePayload;
+  tool_calls?: ChatCallbackToolCall[];
+};
+
+/** An event as delivered to a callback. */
+export type ChatCallbackEvent =
+  | Exclude<ChatEvent, ExecutionTerminatedEvent>
+  | ChatCallbackExecutionTerminatedEvent;
 
 export interface ChatCallbackEventResponse {
   execution_id: string;
-  event: ChatEvent;
+  event: ChatCallbackEvent;
   idempotency_key?: string;
 }
 

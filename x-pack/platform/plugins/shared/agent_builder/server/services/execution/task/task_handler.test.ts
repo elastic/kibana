@@ -216,6 +216,7 @@ describe('TaskHandler event streaming and finalization', () => {
       events$: expect.anything(),
       request: fakeRequest,
       callbackDeliveryService,
+      conversationService,
       surfacesService,
       logger: expect.anything(),
     });
