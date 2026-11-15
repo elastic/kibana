@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { EsqlEditor } from '@kbn/scout';
 import type { RuleSeverity } from '../../../constants/detection_rules';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
@@ -48,6 +49,13 @@ export class RuleCreateWizardPage {
   readonly addMitreFrameworkButton: Locator;
   readonly editAboutTab: Locator;
   readonly editSubmitButton: Locator;
+  readonly esqlRuleTypeButton: Locator;
+  /** Container of the ES|QL query bar on the Define step, including its validation errors. */
+  readonly esqlQueryBar: Locator;
+  readonly investigationFieldsRow: Locator;
+  readonly ruleNameOverrideRow: Locator;
+
+  private readonly esqlEditor: EsqlEditor;
 
   constructor(private readonly page: ScoutPage) {
     this.defineStep = this.page.testSubj.locator('stepDefineRule');
@@ -106,6 +114,47 @@ export class RuleCreateWizardPage {
     this.addMitreFrameworkButton = this.page.testSubj.locator('addMitreFramework');
     this.editAboutTab = this.page.testSubj.locator('edit-rule-about-tab');
     this.editSubmitButton = this.page.testSubj.locator('ruleEditSubmitButton');
+    this.esqlRuleTypeButton = this.page.testSubj.locator('esqlRuleType');
+    this.esqlQueryBar = this.page.testSubj.locator('ruleEsqlQueryBar');
+    this.investigationFieldsRow = this.page.testSubj.locator(
+      'detectionEngineStepAboutRuleInvestigationFields'
+    );
+    this.ruleNameOverrideRow = this.page.testSubj.locator(
+      'detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType'
+    );
+    this.esqlEditor = new EsqlEditor(this.page, 'ruleEsqlQueryBar');
+  }
+
+  /** Switches the Define step to the ES|QL rule type and waits for the query bar. */
+  async selectEsqlRuleType(): Promise<void> {
+    await this.esqlRuleTypeButton.click();
+    await this.esqlQueryBar.waitFor({ state: 'visible' });
+  }
+
+  /** Replaces the query in the ES|QL query bar of the Define step. */
+  async setEsqlQuery(query: string): Promise<void> {
+    await this.esqlEditor.setQuery(query);
+  }
+
+  /**
+   * Picks fields in the investigation fields combo box of the About step (Advanced settings).
+   * Options come from the ES|QL query columns and load asynchronously, so pass a generous timeout.
+   */
+  async setInvestigationFields(fields: readonly string[], timeout?: number): Promise<void> {
+    // The form row carries the test subject; the EuiComboBox itself is its `input`.
+    await this.page.components
+      .comboBox('input', this.investigationFieldsRow)
+      .setSelectedOptions([...fields], { timeout });
+  }
+
+  /**
+   * Picks the rule name override field in the About step (Advanced settings). The options are
+   * the columns of the ES|QL query, not the data view fields.
+   */
+  async setRuleNameOverride(field: string, timeout?: number): Promise<void> {
+    await this.page.components
+      .comboBox('input', this.ruleNameOverrideRow)
+      .setSelectedOptions([field], { timeout });
   }
 
   /** Locator for the MITRE picker section of one framework on the About step. */
