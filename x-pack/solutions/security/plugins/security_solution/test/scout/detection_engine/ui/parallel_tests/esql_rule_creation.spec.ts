@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaUrl, Locator, ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
+import type { KibanaUrl, ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 const RULE_NAME = 'Scout ES|QL rule';
 const RULE_DESCRIPTION = 'Rule created by the Scout ES|QL rule creation spec';
 const RULE_NAME_OVERRIDE = 'test_id';
-const QUERY_BAR_TEST_SUBJ = 'ruleEsqlQueryBar';
-const ESQL_RULE_TYPE_TEST_SUBJ = 'esqlRuleType';
-const INVESTIGATION_FIELDS_TEST_SUBJ = 'detectionEngineStepAboutRuleInvestigationFields';
-const RULE_NAME_OVERRIDE_TEST_SUBJ = 'detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType';
 const INVESTIGATION_FIELD = '_custom_agent_name';
 // Full wizard flows chain several helper waits of up to 60 s each (Continue enabled after
 // ES|QL validation, step navigation retries), which can exceed the default per-test budget.
@@ -33,49 +29,7 @@ const RETRY_ATTEMPT_TIMEOUT_MS = 5_000;
 const sourceIndexName = (spaceId: string): string =>
   `auditbeat-scout-esql-${spaceId.replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
 
-interface InvalidQueryCase {
-  title: string;
-  buildQuery: (index: string) => string;
-  expectedError: string;
-}
-
-interface ConfirmationModalCase {
-  title: string;
-  buildQuery: (index: string) => string;
-  expectedErrorText: string;
-}
-
-const INVALID_QUERY_CASES: InvalidQueryCase[] = [
-  {
-    title: 'shows error when ES|QL query is invalid',
-    buildQuery: (index) => `from ${index} metadata _id, _version, _index | not_existing_operator`,
-    expectedError: 'Error validating ES|QL',
-  },
-  {
-    title: 'shows syntax error when query is syntactically invalid',
-    buildQuery: (index) => `from ${index} | where true test`,
-    expectedError: `Error validating ES|QL: "SyntaxError: extraneous input 'test' expecting <EOF>"`,
-  },
-];
-
-const CONFIRMATION_MODAL_CASES: ConfirmationModalCase[] = [
-  {
-    title: 'shows confirmation modal about existing non-blocking validation errors',
-    buildQuery: () => 'from fake metadata _id, _version, _index | limit 5',
-    expectedErrorText: 'fake',
-  },
-  {
-    title: 'shows confirmation modal when non-aggregating query drops _id',
-    buildQuery: (index) => `from ${index} metadata _id, _version, _index | drop _id | limit 5`,
-    expectedErrorText: '_id',
-  },
-];
-
 type RuleCreateWizard = SecurityPageObjects['ruleCreateWizard'];
-
-/** `ComboBoxField` spreads its test subject onto the form row, the EuiComboBox itself is `input`. */
-const formFieldComboBox = (page: ScoutPage, rowTestSubj: string) =>
-  page.components.comboBox('input', page.testSubj.locator(rowTestSubj));
 
 /** Opens the create wizard in the worker space and switches the rule type to ES|QL. */
 const openEsqlWizard = async (
@@ -86,8 +40,7 @@ const openEsqlWizard = async (
 ) => {
   await page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
   await expect(ruleCreateWizard.defineStep).toBeVisible();
-  await page.testSubj.locator(ESQL_RULE_TYPE_TEST_SUBJ).click();
-  await expect(page.testSubj.locator(QUERY_BAR_TEST_SUBJ)).toBeVisible();
+  await ruleCreateWizard.selectEsqlRuleType();
 };
 
 /**
@@ -124,7 +77,6 @@ const continueAboutStep = async (ruleCreateWizard: RuleCreateWizard) => {
 /** Clicks "Continue" with a pending validation possibly swallowing the first click. */
 const expectQueryBarErrorOnContinue = async (
   ruleCreateWizard: RuleCreateWizard,
-  queryBar: Locator,
   expectedError: string
 ) => {
   await expect(ruleCreateWizard.defineContinue).toBeEnabled({
@@ -132,15 +84,15 @@ const expectQueryBarErrorOnContinue = async (
   });
   await expect(async () => {
     await ruleCreateWizard.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
-    await expect(queryBar).toContainText(expectedError, { timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+    await expect(ruleCreateWizard.esqlQueryBar).toContainText(expectedError, {
+      timeout: RETRY_ATTEMPT_TIMEOUT_MS,
+    });
   }).toPass({ timeout: QUERY_ERROR_RETRY_TIMEOUT_MS });
 };
 
-// Stateful classic only: the serverless lane has no repeated green runs yet. Add
-// `...tags.serverless.security.complete` (via `getPlaywrightTagsFor(...)`) once it does.
 spaceTest.describe(
   'Detection ES|QL rules - Rule Creation',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
       const index = sourceIndexName(scoutSpace.id);
@@ -173,17 +125,16 @@ spaceTest.describe(
     });
 
     // Revived: effectively skipped in Cypress on main (describe.skip, issues #257365 and #257364).
-    // Stays active only while repeated runs stay green.
     spaceTest(
       'creates an ES|QL rule',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
         testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
-        const { ruleCreateWizard, ruleDetailsPage, rulesManagementPage, esqlEditor } = pageObjects;
+        const { ruleCreateWizard, ruleDetailsPage, rulesManagementPage } = pageObjects;
         const index = sourceIndexName(scoutSpace.id);
         const query = `from ${index} metadata _id, _version, _index | keep agent.name, _id`;
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
-        await esqlEditor.inContainer(QUERY_BAR_TEST_SUBJ).setQuery(query);
+        await ruleCreateWizard.setEsqlQuery(query);
         await continueDefineStep(ruleCreateWizard);
 
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
@@ -208,21 +159,18 @@ spaceTest.describe(
       'creates an ES|QL rule and overrides its name',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
         testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
-        const { ruleCreateWizard, ruleDetailsPage, esqlEditor } = pageObjects;
+        const { ruleCreateWizard, ruleDetailsPage } = pageObjects;
         const index = sourceIndexName(scoutSpace.id);
         const query = `from ${index} metadata _id, _version, _index | keep agent.name, _id | eval test_id = _id`;
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
-        await esqlEditor.inContainer(QUERY_BAR_TEST_SUBJ).setQuery(query);
+        await ruleCreateWizard.setEsqlQuery(query);
         await continueDefineStep(ruleCreateWizard);
 
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
         await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
         await ruleCreateWizard.expandAdvancedSettings();
-        await formFieldComboBox(page, RULE_NAME_OVERRIDE_TEST_SUBJ).setSelectedOptions(
-          [RULE_NAME_OVERRIDE],
-          { timeout: ASYNC_VALIDATION_TIMEOUT_MS }
-        );
+        await ruleCreateWizard.setRuleNameOverride(RULE_NAME_OVERRIDE, ASYNC_VALIDATION_TIMEOUT_MS);
         await continueAboutStep(ruleCreateWizard);
         await ruleCreateWizard.scheduleContinue.click();
         await ruleCreateWizard.createWithoutEnablingRule();
@@ -234,80 +182,58 @@ spaceTest.describe(
     );
 
     // Revived: effectively skipped in Cypress on main (describe.skip, issue #257365).
+    // The required-query message itself is also unit tested in `step_define_rule.test.tsx`.
     spaceTest(
       'shows error when ES|QL query is empty and proceeds once the query is fixed',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
         testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
-        const { ruleCreateWizard, esqlEditor } = pageObjects;
-        const queryBar = page.testSubj.locator(QUERY_BAR_TEST_SUBJ);
+        const { ruleCreateWizard } = pageObjects;
         const query = `from ${sourceIndexName(scoutSpace.id)} metadata _id, _version, _index`;
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
 
         await spaceTest.step('shows the required error for an empty query', async () => {
-          await expectQueryBarErrorOnContinue(
-            ruleCreateWizard,
-            queryBar,
-            'ES|QL query is required'
-          );
+          await expectQueryBarErrorOnContinue(ruleCreateWizard, 'ES|QL query is required');
         });
 
         await spaceTest.step('moves on to About once the query is valid', async () => {
-          await esqlEditor.inContainer(QUERY_BAR_TEST_SUBJ).setQuery(query);
+          await ruleCreateWizard.setEsqlQuery(query);
           await continueDefineStep(ruleCreateWizard);
-          await expect(queryBar).toBeHidden();
+          await expect(ruleCreateWizard.esqlQueryBar).toBeHidden();
         });
       }
     );
 
     // Revived: effectively skipped in Cypress on main (describe.skip, issue #257365).
+    // Rendering of the validator error under the query bar. The messages for syntax errors and
+    // a missing `_id` are unit tested in `esql_query_validator_factory.test.ts`.
     spaceTest(
-      'allows non-aggregating ES|QL query without metadata operator (auto-injected at execution)',
+      'shows error when ES|QL query is invalid',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
         testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
-        const { ruleCreateWizard, esqlEditor } = pageObjects;
-        const queryBar = page.testSubj.locator(QUERY_BAR_TEST_SUBJ);
+        const { ruleCreateWizard } = pageObjects;
+        const index = sourceIndexName(scoutSpace.id);
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
-        await esqlEditor
-          .inContainer(QUERY_BAR_TEST_SUBJ)
-          .setQuery(`from ${sourceIndexName(scoutSpace.id)} | limit 5`);
-        await continueDefineStep(ruleCreateWizard);
+        await ruleCreateWizard.setEsqlQuery(
+          `from ${index} metadata _id, _version, _index | not_existing_operator`
+        );
 
-        // Cypress asserted `not.contain 'metadata _id'` on the hidden query bar, which cannot
-        // fail. The behavior under test is that the query is accepted without a metadata error.
-        await expect(ruleCreateWizard.aboutRuleName).toBeVisible();
-        await expect(queryBar).toBeHidden();
+        await expectQueryBarErrorOnContinue(ruleCreateWizard, 'Error validating ES|QL');
       }
     );
 
     // Revived: effectively skipped in Cypress on main (describe.skip, issue #257365).
-    for (const { title, buildQuery, expectedError } of INVALID_QUERY_CASES) {
-      spaceTest(title, async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
+    // The missing-data-source error is non-blocking and only the server can report it.
+    spaceTest(
+      'shows confirmation modal about existing non-blocking validation errors',
+      async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
         testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
-        const { ruleCreateWizard, esqlEditor } = pageObjects;
-        const queryBar = page.testSubj.locator(QUERY_BAR_TEST_SUBJ);
-
-        await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
-        await esqlEditor
-          .inContainer(QUERY_BAR_TEST_SUBJ)
-          .setQuery(buildQuery(sourceIndexName(scoutSpace.id)));
-
-        await expectQueryBarErrorOnContinue(ruleCreateWizard, queryBar, expectedError);
-      });
-    }
-
-    // Revived: effectively skipped in Cypress on main (describe.skip, issue #257365).
-    for (const { title, buildQuery, expectedErrorText } of CONFIRMATION_MODAL_CASES) {
-      spaceTest(title, async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
-        testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
-        const { ruleCreateWizard, ruleEditPage, esqlEditor } = pageObjects;
+        const { ruleCreateWizard, ruleEditPage } = pageObjects;
         const { saveWithWarningsModal } = ruleEditPage;
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
-        await esqlEditor
-          .inContainer(QUERY_BAR_TEST_SUBJ)
-          .setQuery(buildQuery(sourceIndexName(scoutSpace.id)));
+        await ruleCreateWizard.setEsqlQuery('from fake metadata _id, _version, _index | limit 5');
         await continueDefineStep(ruleCreateWizard);
 
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
@@ -317,43 +243,41 @@ spaceTest.describe(
         await ruleCreateWizard.createAndEnable.click();
 
         await expect(saveWithWarningsModal).toBeVisible();
-        await expect(saveWithWarningsModal).toContainText(expectedErrorText);
+        await expect(saveWithWarningsModal).toContainText('fake');
 
         await ruleEditPage.saveWithWarningsConfirmButton.click();
         await expect(saveWithWarningsModal).toBeHidden();
         await expect(ruleCreateWizard.createAndEnable).toBeHidden();
-      });
-    }
+      }
+    );
 
     // Revived: effectively skipped in Cypress on main (describe.skip, issue #257365).
     spaceTest(
       'shows custom ES|QL field in investigation fields autocomplete and saves it in rule',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
         testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
-        const { ruleCreateWizard, esqlEditor } = pageObjects;
+        const { ruleCreateWizard, ruleDetailsPage } = pageObjects;
         const index = sourceIndexName(scoutSpace.id);
         const query =
           `from ${index} metadata _id, _version, _index | eval ${INVESTIGATION_FIELD} = agent.name` +
           ` | keep _id, ${INVESTIGATION_FIELD} | limit 5`;
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
-        await esqlEditor.inContainer(QUERY_BAR_TEST_SUBJ).setQuery(query);
+        await ruleCreateWizard.setEsqlQuery(query);
         await continueDefineStep(ruleCreateWizard);
 
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
         await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
         await ruleCreateWizard.expandAdvancedSettings();
-        await formFieldComboBox(page, INVESTIGATION_FIELDS_TEST_SUBJ).setSelectedOptions(
+        await ruleCreateWizard.setInvestigationFields(
           [INVESTIGATION_FIELD],
-          { timeout: ASYNC_VALIDATION_TIMEOUT_MS }
+          ASYNC_VALIDATION_TIMEOUT_MS
         );
         await continueAboutStep(ruleCreateWizard);
         await ruleCreateWizard.scheduleContinue.click();
         await ruleCreateWizard.createWithoutEnablingRule();
 
-        await expect(page.getByTestId('investigationFieldsPropertyValueItem')).toContainText(
-          INVESTIGATION_FIELD
-        );
+        await expect(ruleDetailsPage.investigationFieldValues).toHaveText(INVESTIGATION_FIELD);
       }
     );
   }
