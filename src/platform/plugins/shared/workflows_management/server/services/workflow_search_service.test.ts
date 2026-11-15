@@ -142,6 +142,28 @@ describe('WorkflowSearchService', () => {
         },
       });
     });
+
+    it('returns whether each caller is managed, which decides what it can run', async () => {
+      const { deps, esClient } = makeDeps();
+      esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' } as any);
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'a', _source: { name: 'A', enabled: true, definition: {}, managed: true } },
+            { _id: 'b', _source: { name: 'B', enabled: true, definition: {} } },
+          ],
+        },
+      } as any);
+
+      const service = new WorkflowSearchService(deps);
+      const callers = await service.findWorkflowsCalling(['child'], 'default', {});
+
+      expect((esClient.search.mock.calls[0][0] as any)._source).toContain('managed');
+      expect(callers.map(({ id, managed }) => [id, managed])).toEqual([
+        ['a', true],
+        ['b', false],
+      ]);
+    });
   });
 
   describe('getWorkflows', () => {

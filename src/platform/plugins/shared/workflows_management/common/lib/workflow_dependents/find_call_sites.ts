@@ -90,6 +90,16 @@ const isWorkflowStep = (node: unknown): node is WorkflowStep =>
 const alwaysRunsNestedSteps = (step: WorkflowStep, pathSuffix: string): boolean =>
   step.type === 'merge' || (step.type === 'parallel' && pathSuffix.startsWith('.branch['));
 
+// Whether a container step completes when one of its nested steps fails: a loop that continues
+// past failed iterations, or a `parallel` step that waits for every branch to settle.
+const containsNestedFailures = (step: WorkflowStep): boolean => {
+  const record: Record<string, unknown> = step;
+  return (
+    continuesOnFailure(record['iteration-on-failure']) ||
+    (step.type === 'parallel' && record.mode === 'settled')
+  );
+};
+
 // Steps the execution engine never wraps in the workflow-level `on-failure`.
 const NO_WORKFLOW_ON_FAILURE_STEP_TYPES = new Set([
   'if',
@@ -123,8 +133,7 @@ const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: WalkContex
       isConditional: parentContext.isConditional || record.if !== undefined,
     };
     visit(record, context);
-    const isContainedInside =
-      context.isContained || continuesOnFailure(record['iteration-on-failure']);
+    const isContainedInside = context.isContained || containsNestedFailures(step);
     for (const { pathSuffix, steps: nestedSteps } of getNestedStepGroups(step)) {
       walkSteps(nestedSteps, visit, {
         isContained: isContainedInside,

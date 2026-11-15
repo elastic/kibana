@@ -699,6 +699,7 @@ export class WorkflowsManagementApi {
       savedDefinition,
       draftDefinition: draft?.definition ?? savedDefinition,
       isDraftValid: draft?.isValid ?? true,
+      managed: workflow.managed === true,
       lookup: await this.getDependentsLookup(spaceId, request),
     });
   }
@@ -748,7 +749,7 @@ export class WorkflowsManagementApi {
         const workflows = await this.workflowsService.getWorkflowsSourceByIds(
           ids,
           spaceId,
-          ['name', 'enabled', 'definition'],
+          ['name', 'enabled', 'definition', 'managed'],
           { accessControlFilter }
         );
         return workflows.map((workflow) => ({
@@ -756,6 +757,7 @@ export class WorkflowsManagementApi {
           name: workflow.name ?? workflow.id,
           enabled: workflow.enabled ?? true,
           definition: withEnabledState(workflow),
+          managed: workflow.managed === true,
         }));
       },
     };
@@ -777,6 +779,7 @@ export class WorkflowsManagementApi {
         workflowId: originalWorkflow.id,
         savedDefinition,
         draftDefinition,
+        managed: originalWorkflow.managed === true,
         lookup: await this.getDependentsLookup(spaceId, request),
       });
       return summarizeSaveImpact(analysis);

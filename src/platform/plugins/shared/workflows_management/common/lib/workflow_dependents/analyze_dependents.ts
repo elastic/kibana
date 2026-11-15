@@ -51,7 +51,7 @@ import {
   isTypeWithin,
   typesOverlap,
 } from './workflow_contract';
-import { getFinalOutputStep } from '../get_returned_output_names';
+import { getFinalEndStep } from '../get_returned_output_names';
 
 /** How many levels of callers-of-callers the analysis follows; runs nest at most 10 deep by default. */
 export const MAX_INDIRECT_DEPTH = 10;
@@ -72,6 +72,7 @@ interface CallerScope {
 // Kinds that fail the step before the called workflow starts, whatever the step type.
 const PRE_RUN_FAILURES = new Set<ImpactIssueKind>([
   'childNotFound',
+  'childManaged',
   'childDisabled',
   'childInvalid',
   'selfCall',
@@ -90,6 +91,12 @@ const CHILD_RUN_FAILURES = new Set<ImpactIssueKind>([
   'childFails',
   'callCycle',
   'outputValueRejected',
+  'runEndsUnsuccessfully',
+]);
+// Child run failures that come from the called workflow's own end step, which callers keep naming.
+const END_STEP_FAILURES = new Set<ImpactIssueKind>([
+  'outputValueRejected',
+  'runEndsUnsuccessfully',
 ]);
 const OUTPUT_LOSSES = new Set<ImpactIssueKind>(['removedOutput', 'unreturnedOutput']);
 
@@ -100,6 +107,12 @@ const stepIssue = (kind: ImpactIssueKind, stepName: string, field = ''): DraftIs
   stepName,
   field,
 });
+
+// The engine only finds a managed workflow, including every global one, for a managed caller.
+const canRun = (
+  caller: Pick<WorkflowLookupItem, 'managed'>,
+  called: Pick<WorkflowLookupItem, 'managed'>
+): boolean => caller.managed === true || called.managed !== true;
 
 const appendTo = <Key, Item>(groups: Map<Key, Item[]>, key: Key, items: readonly Item[]): void => {
   groups.set(key, [...(groups.get(key) ?? []), ...items]);
@@ -536,10 +549,10 @@ export interface RunFailure {
 }
 
 // A run that fails because it nests a loop of runs keeps reporting the loop further up, and one
-// that fails on its own outputs keeps naming them.
+// that fails on its own end step keeps naming it.
 const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue => {
   const { kind } = failure.issue;
-  if (kind === 'outputValueRejected') {
+  if (END_STEP_FAILURES.has(kind) && failure.calledName === undefined) {
     return { ...failure.issue, stepName, from: failure.stepName };
   }
   return {
@@ -549,13 +562,28 @@ const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue =>
   };
 };
 
-/** Finds the `workflow.output` step every run reaches, when its values fail the declared outputs. */
-const findOutputFailure = (definition: unknown): RunFailure | undefined => {
-  const step = getFinalOutputStep(definition);
+// The status a `workflow.output` or `workflow.fail` step ends the run with.
+const getEndStatus = (step: Record<string, unknown>): unknown =>
+  step.type === 'workflow.fail' ? 'failed' : step.status ?? 'completed';
+
+/**
+ * Finds the end step every run reaches, when it fails the run: it ends it as failed or cancelled,
+ * or its values fail the declared outputs.
+ */
+const findEndStepFailure = (definition: unknown): RunFailure | undefined => {
+  const step = getFinalEndStep(definition);
+  if (!step) {
+    return undefined;
+  }
+  const stepName = typeof step.name === 'string' ? step.name : '';
+  const status = getEndStatus(step);
+  if (status === 'failed' || status === 'cancelled') {
+    return { stepName, issue: stepIssue('runEndsUnsuccessfully', stepName, status) };
+  }
   const outputsSchema = normalizeFieldsToJsonSchema(
     isRecord(definition) ? definition.outputs : undefined
   );
-  if (!step || !outputsSchema?.properties || Object.keys(outputsSchema.properties).length === 0) {
+  if (!outputsSchema?.properties || Object.keys(outputsSchema.properties).length === 0) {
     return undefined;
   }
   const values = isRecord(step.with) ? step.with : {};
@@ -571,7 +599,6 @@ const findOutputFailure = (definition: unknown): RunFailure | undefined => {
   if (!firstIssue) {
     return undefined;
   }
-  const stepName = typeof step.name === 'string' ? step.name : '';
   return {
     stepName,
     issue: {
@@ -606,7 +633,8 @@ const analyzeDependent = (
   callSites: WorkflowCallSite[],
   saved: ContractVersion,
   draft: ContractVersion,
-  contractChanges: ContractChange[]
+  contractChanges: ContractChange[],
+  isChildManaged: boolean
 ): Omit<DependentImpact, 'upstream'> => {
   const savedSeverities = new Map<string, ImpactIssue['severity']>();
   const savedIssues = [
@@ -628,17 +656,28 @@ const analyzeDependent = (
     ...evaluations.flatMap(({ issues: callIssues }) => callIssues),
     ...getRunFailureIssues(callSites, draft.contract, draft.runFailure),
   ];
+  const impacts = evaluations.map(({ impact }) => impact);
+  const dependent = {
+    workflowId: parent.id,
+    workflowName: parent.name,
+    enabled: parent.enabled,
+    callSites: impacts,
+  };
+  if (!canRun(parent, { managed: isChildManaged })) {
+    // The engine never finds the workflow for this caller, whichever version is saved.
+    const issues = callSites.map(({ stepName }) => ({
+      ...stepIssue('childManaged', stepName),
+      isNew: false,
+    }));
+    return { ...dependent, status: 'alreadyBroken', issues };
+  }
   const issues = draftIssues.map((issue) => ({
     ...issue,
     isNew: isNewIssue(issue, savedSeverities),
   }));
-  const impacts = evaluations.map(({ impact }) => impact);
   return {
-    workflowId: parent.id,
-    workflowName: parent.name,
-    enabled: parent.enabled,
+    ...dependent,
     status: getImpactStatus(issues, impacts, contractChanges),
-    callSites: impacts,
     issues,
   };
 };
@@ -765,8 +804,13 @@ const propagateUpstream = (
   for (let depth = 2; depth <= MAX_INDIRECT_DEPTH && frontier.length > 0; depth++) {
     const next = new Map<string, { workflow: WorkflowLookupItem; effect: WorkflowEffect }>();
     for (const { workflow, effect } of frontier) {
+      // A caller that can't run the workflow fails the same way before and after.
       const edges = (callerEdges.get(workflow.id) ?? []).filter(
-        ({ parent }) => parent.enabled && parent.id !== root.id && !excludedIds.has(parent.id)
+        ({ parent }) =>
+          parent.enabled &&
+          parent.id !== root.id &&
+          !excludedIds.has(parent.id) &&
+          canRun(parent, workflow)
       );
       for (const edge of edges) {
         const callerEffect = getCallerEffect(edge, effect);
@@ -843,6 +887,8 @@ export interface AnalyzeDependentsParams {
   savedRunFailure?: RunFailure;
   /** The step that makes every run of the draft fail, if any. */
   draftRunFailure?: RunFailure;
+  /** Whether the workflow is managed, so that only managed workflows can run it. */
+  managed?: boolean;
 }
 
 /** Grades how the draft definition of a workflow affects each workflow that calls it. */
@@ -853,6 +899,7 @@ export const analyzeDependents = ({
   isDraftValid = true,
   savedRunFailure,
   draftRunFailure,
+  managed = false,
 }: AnalyzeDependentsParams): DependentsAnalysis => {
   const savedContract = extractWorkflowContract(savedDefinition);
   // A draft saved invalid is stored without a definition, so nothing in it reaches callers.
@@ -869,7 +916,8 @@ export const analyzeDependents = ({
         callSites,
         { contract: savedContract, runFailure: savedRunFailure },
         { contract: draftContract, runFailure: draftRunFailure },
-        contractChanges
+        contractChanges,
+        managed
       );
       const upstream = isBreakingRun(dependent)
         ? propagateUpstream(
@@ -938,6 +986,9 @@ const getCallFailure = (
     // Callees outside the fetched set (for example, ones the user can't read) aren't judged.
     return undefined;
   }
+  if (!canRun(caller, called)) {
+    return { ...stepIssue('childManaged', stepName), to: called.name };
+  }
   const failing = evaluateCallSite(callSite, caller.definition, getContract(called)).issues.find(
     ({ kind, severity }) => severity === 'breaking' && stepFails(kind, callSite)
   );
@@ -981,7 +1032,7 @@ const findRunFailures = (workflows: ReadonlyMap<string, WorkflowLookupItem>): Ru
       return undefined;
     }
     inProgress.add(workflowId);
-    let failure = findOutputFailure(workflow.definition);
+    let failure = findEndStepFailure(workflow.definition);
     for (const [calledId, callSites] of groupCallSites(workflow.definition)) {
       const called = workflows.get(calledId);
       // Only a step that runs every time, and stops the run when it fails, fails every run.
@@ -1071,6 +1122,8 @@ export interface AnalyzeCalledWorkflowsParams {
   definition: unknown;
   /** The workflows it runs, and the ones they run in turn, as far as they are known. */
   workflows: readonly WorkflowLookupItem[];
+  /** Whether the checked workflow is managed, which lets it run managed workflows. */
+  managed?: boolean;
 }
 
 /**
@@ -1081,6 +1134,7 @@ export const analyzeCalledWorkflows = ({
   workflowId: selfId,
   definition,
   workflows,
+  managed = false,
 }: AnalyzeCalledWorkflowsParams): CalledWorkflowImpact[] => {
   const selfName =
     isRecord(definition) && typeof definition.name === 'string' ? definition.name : selfId;
@@ -1090,6 +1144,7 @@ export const analyzeCalledWorkflows = ({
     name: selfName,
     enabled: isRecord(definition) && definition.enabled !== false,
     definition,
+    managed,
   };
   const workflowsById = new Map(
     [...workflows.filter(({ id }) => id !== selfId), self].map((workflow) => [
@@ -1109,6 +1164,10 @@ export const analyzeCalledWorkflows = ({
       if (!child) {
         const issues = stepIssues('childNotFound', callSites, workflowId);
         return { workflowId, status: 'breaking', callSites: [], issues };
+      }
+      if (!canRun(self, child)) {
+        const issues = stepIssues('childManaged', callSites);
+        return { workflowId, workflowName: child.name, status: 'breaking', callSites: [], issues };
       }
       const contract = getContract(child);
       const evaluations = callSites.map((callSite) =>

@@ -208,7 +208,7 @@ export class WorkflowSearchService {
             esClient.search<WorkflowProperties>({
               pit: { id: pitId, keep_alive: keepAlive },
               size: pageSize,
-              _source: ['name', 'enabled', 'definition'],
+              _source: ['name', 'enabled', 'definition', 'managed'],
               query,
               sort,
               ...(searchAfter ? { search_after: searchAfter } : {}),
@@ -225,6 +225,7 @@ export class WorkflowSearchService {
               name: source.name,
               enabled: source.enabled,
               definition: source.definition,
+              managed: source.managed === true,
             });
           }
         }

@@ -12,6 +12,7 @@ import {
   analyzeDependents,
   analyzeRemovalImpact,
   buildDependentsIndex,
+  findRunFailure,
   MAX_INDIRECT_DEPTH,
 } from './analyze_dependents';
 import {
@@ -174,6 +175,23 @@ describe('collectWorkflowCallSites', () => {
             'iteration-on-failure': { continue: true },
             steps: [callStep('iteration', {})],
           },
+          {
+            name: 'fail-fast',
+            type: 'parallel',
+            branches: [
+              { name: 'a', steps: [callStep('fast-branch', {})] },
+              { name: 'b', steps: [{ name: 'noop', type: 'console', with: {} }] },
+            ],
+          },
+          {
+            name: 'settled',
+            type: 'parallel',
+            mode: 'settled',
+            branches: [
+              { name: 'a', steps: [callStep('settled-branch', {})] },
+              { name: 'b', steps: [{ name: 'noop', type: 'console', with: {} }] },
+            ],
+          },
         ],
       })
     ).toEqual({
@@ -182,6 +200,8 @@ describe('collectWorkflowCallSites', () => {
       'fallback-only': false,
       inside: true,
       iteration: true,
+      'fast-branch': false,
+      'settled-branch': true,
     });
     expect(
       contained({ settings: { 'on-failure': { continue: true } }, steps: [callStep('any', {})] })
@@ -980,6 +1000,72 @@ describe('analyzeDependents', () => {
 
       expect(statusById(analysis).triage).toBe('alreadyBroken');
     });
+
+    it('breaks the callers that wait for a draft that always ends the run unsuccessfully', () => {
+      const draft = {
+        ...makeChild(),
+        steps: [
+          { name: 'skip', type: 'workflow.fail', if: 'inputs.depth > 1' },
+          { name: 'stop', type: 'workflow.output', status: 'cancelled', with: {} },
+        ],
+      };
+      const analysis = analyzeDependents({
+        index,
+        savedDefinition: makeChild(),
+        draftDefinition: draft,
+        draftRunFailure: findRunFailure({ ...childItem, definition: draft }, []),
+      });
+
+      expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual([
+        'runEndsUnsuccessfully:breaking',
+      ]);
+      expect(dependentOf(analysis, 'triage')?.issues[0]).toMatchObject({
+        from: 'stop',
+        field: 'cancelled',
+      });
+      expect(statusById(analysis).fanout).not.toBe('breaking');
+      expect(analysis.summary.indirectBreaking).toBe(1);
+    });
+  });
+
+  describe('managed workflows', () => {
+    const managedNightly = { ...nightly, id: 'managed-nightly', managed: true };
+    const workflows = [triage, { ...triage, id: 'managed-triage', managed: true }, nightly];
+
+    it('marks the callers that aren’t managed as already broken, since they can’t run it', () => {
+      const analysis = analyzeDependents({
+        index: buildDependentsIndex(CHILD_ID, workflows),
+        savedDefinition: makeChild(),
+        draftDefinition: withoutSeverity,
+        managed: true,
+      });
+
+      expect(statusById(analysis)).toEqual({
+        'managed-triage': 'breaking',
+        triage: 'alreadyBroken',
+      });
+      expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual(['childManaged:breaking']);
+      expect(analysis.summary.indirectBreaking).toBe(0);
+    });
+
+    it('doesn’t blame a draft for callers further up that can’t run a managed caller', () => {
+      const managedTriage = { ...triage, managed: true };
+      const callsManaged = workflow('calls-managed', [callStep('run', {}, undefined, 'triage')]);
+      const analysis = analyzeDependents({
+        index: buildDependentsIndex(CHILD_ID, [managedTriage, callsManaged, managedNightly]),
+        savedDefinition: makeChild(),
+        draftDefinition: makeChild({
+          inputs: [
+            { name: 'alert_id', type: 'string', required: true },
+            { name: 'tenant', type: 'string', required: true },
+          ],
+        }),
+      });
+
+      expect(dependentOf(analysis, 'triage')?.upstream.map(({ workflowId }) => workflowId)).toEqual(
+        ['managed-nightly']
+      );
+    });
   });
 });
 
@@ -1088,6 +1174,70 @@ describe('analyzeCalledWorkflows', () => {
       ['ends-earlier', []],
     ]);
     expect(called[0].issues[0]).toMatchObject({ stepName: 'ctx', from: 'emit', field: 'severity' });
+  });
+
+  it('flags a child whose runs always end as failed or cancelled', () => {
+    const fails = {
+      ...childItem,
+      definition: {
+        ...childItem.definition,
+        steps: [{ name: 'stop', type: 'workflow.fail', with: { message: 'not ready' } }],
+      },
+    };
+    const failsSometimes = {
+      ...fails,
+      id: 'fails-sometimes',
+      definition: {
+        ...fails.definition,
+        steps: [{ ...fails.definition.steps[0], if: 'inputs.depth > 1' }],
+      },
+    };
+    const callsFailing = workflow('calls-failing', [
+      callStep('ctx', { inputs: { alert_id: 'a' } }),
+    ]);
+    const called = analyzeParent(
+      [
+        callStep('ctx', { inputs: { alert_id: 'a' } }),
+        callStep('maybe', { inputs: { alert_id: 'a' } }, undefined, 'fails-sometimes'),
+        callStep('up', {}, undefined, 'calls-failing'),
+        callStep('bg', { inputs: { alert_id: 'a' } }, 'workflow.executeAsync'),
+      ],
+      [fails, failsSometimes, callsFailing]
+    );
+
+    expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
+      [CHILD_ID, ['runEndsUnsuccessfully:breaking']],
+      ['calls-failing', ['childFails:breaking']],
+      ['fails-sometimes', []],
+    ]);
+    expect(called[0].issues[0]).toMatchObject({ stepName: 'ctx', from: 'stop', field: 'failed' });
+  });
+
+  it('flags a managed child, which only a managed workflow can run', () => {
+    const managedChild = { ...childItem, managed: true };
+    const middle = workflow('middle', [callStep('ctx', { inputs: { alert_id: 'a' } })]);
+    const steps = [
+      callStep('ctx', { inputs: { alert_id: 'a' } }),
+      callStep('bg', { inputs: { alert_id: 'a' } }, 'workflow.executeAsync'),
+      callStep('m', {}, undefined, 'middle'),
+    ];
+
+    const called = analyzeParent(steps, [managedChild, middle]);
+    expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
+      [CHILD_ID, ['childManaged:breaking', 'childManaged:breaking']],
+      ['middle', ['childFails:breaking']],
+    ]);
+
+    const fromManaged = analyzeCalledWorkflows({
+      workflowId: 'parent',
+      definition: { name: 'Parent', steps },
+      workflows: [managedChild, middle],
+      managed: true,
+    });
+    expect(fromManaged.map(({ workflowId, status }) => [workflowId, status])).toEqual([
+      ['middle', 'breaking'],
+      [CHILD_ID, 'safe'],
+    ]);
   });
 
   it('can’t vouch for a child that always runs a workflow that wasn’t found', () => {

@@ -63,6 +63,12 @@ export const getIssueMessage = (
         defaultMessage: 'Runs a workflow that doesn’t exist (ID "{field}")',
         values: { field },
       });
+    case 'childManaged':
+      return i18n.translate('workflows.dependents.issue.childManaged', {
+        defaultMessage:
+          '{childName} is a managed workflow, and only managed workflows can run it, so running it fails',
+        values: { childName },
+      });
     case 'childDisabled':
       return i18n.translate('workflows.dependents.issue.childDisabled', {
         defaultMessage: '{childName} is turned off, so running it fails',
@@ -84,6 +90,12 @@ export const getIssueMessage = (
         defaultMessage:
           '{childName} fails every time it runs: its step "{from}" returns a value for "{field}" that its declared outputs don’t allow: {detail}',
         values: { childName, from, field, detail },
+      });
+    case 'runEndsUnsuccessfully':
+      return i18n.translate('workflows.dependents.issue.runEndsUnsuccessfully', {
+        defaultMessage:
+          '{childName} fails every time it runs: its step "{from}" always ends the run as {status, select, cancelled {cancelled} other {failed}}',
+        values: { childName, from, status: field },
       });
     case 'callCycle':
       return i18n.translate('workflows.dependents.issue.callCycle', {

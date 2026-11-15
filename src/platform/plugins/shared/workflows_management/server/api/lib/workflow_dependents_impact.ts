@@ -10,7 +10,7 @@
 import { isEqual } from 'lodash';
 import { parseDocument } from 'yaml';
 import { InvalidYamlSyntaxError, isRecord } from '@kbn/workflows-yaml';
-import { getFinalOutputStep } from '../../../common/lib/get_returned_output_names';
+import { getFinalEndStep } from '../../../common/lib/get_returned_output_names';
 import {
   analyzeCalledWorkflows,
   analyzeDependents,
@@ -109,6 +109,7 @@ export const analyzeWorkflowDependentsImpact = async ({
   savedDefinition,
   draftDefinition,
   isDraftValid = true,
+  managed = false,
   lookup,
 }: {
   workflowId: string;
@@ -116,6 +117,8 @@ export const analyzeWorkflowDependentsImpact = async ({
   draftDefinition: unknown;
   /** False when saving the draft would store it invalid. */
   isDraftValid?: boolean;
+  /** Whether the workflow is managed, which decides what it can run and what can run it. */
+  managed?: boolean;
   lookup: WorkflowDependentsLookup;
 }): Promise<WorkflowDependentsImpactResponse> => {
   const [callers, calledWorkflows, calledBySaved] = await Promise.all([
@@ -124,7 +127,10 @@ export const analyzeWorkflowDependentsImpact = async ({
     collectCalledWorkflows(workflowId, savedDefinition, lookup),
   ]);
   const getRunFailure = (definition: unknown, called: readonly WorkflowLookupItem[]) =>
-    findRunFailure({ id: workflowId, name: workflowId, enabled: true, definition }, called);
+    findRunFailure(
+      { id: workflowId, name: workflowId, enabled: true, definition, managed },
+      called
+    );
 
   return {
     analysis: analyzeDependents({
@@ -134,11 +140,13 @@ export const analyzeWorkflowDependentsImpact = async ({
       isDraftValid,
       savedRunFailure: getRunFailure(savedDefinition, calledBySaved),
       draftRunFailure: getRunFailure(draftDefinition, calledWorkflows),
+      managed,
     }),
     calledWorkflows: analyzeCalledWorkflows({
       workflowId,
       definition: draftDefinition,
       workflows: calledWorkflows,
+      managed,
     }),
   };
 };
@@ -154,7 +162,7 @@ export const analyzeWorkflowRemovalImpact = async (
 const getRunDependencies = (definition: unknown) => ({
   callSites: collectWorkflowCallSites(definition),
   consts: isRecord(definition) ? definition.consts : undefined,
-  finalOutputStep: getFinalOutputStep(definition),
+  finalEndStep: getFinalEndStep(definition),
 });
 
 /**

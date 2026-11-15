@@ -102,6 +102,8 @@ export interface ContractChange {
 
 export type ImpactIssueKind =
   | 'childNotFound'
+  /** The called workflow is managed, and only a managed workflow can run one. */
+  | 'childManaged'
   | 'childDisabled'
   | 'childInvalid'
   /** The called workflow fails every run: its step `from` runs `to`, which is broken. */
@@ -110,6 +112,8 @@ export type ImpactIssueKind =
   | 'callCycle'
   /** The called workflow fails every run: its `workflow.output` step `from` sets `field` to a value its declared outputs reject. */
   | 'outputValueRejected'
+  /** The called workflow fails every run: its step `from` always ends the run with status `field`. */
+  | 'runEndsUnsuccessfully'
   | 'selfCall'
   | 'missingRequiredInput'
   | 'unknownInput'
@@ -254,4 +258,6 @@ export interface WorkflowLookupItem {
   name: string;
   enabled: boolean;
   definition: unknown;
+  /** Managed workflows can only be run by other managed workflows. */
+  managed?: boolean;
 }
