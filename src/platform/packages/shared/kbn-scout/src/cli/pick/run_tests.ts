@@ -16,14 +16,15 @@ import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getPlaywrightLimitOptions } from '../../playwright/tags';
+import { resolveTargetAttributes } from '../../tests_discovery/tag_utils';
 import type { Selection } from './pick_tests';
 import type { ServersMode } from './servers';
 
 const LOG_FILE = '.scout/logs/scout_pick.log';
 
-// `run-tests` adds this for us; calling Playwright directly has to skip the same tests, or a
-// local run would pick up tests that need attributes a local target doesn't declare, e.g. fips
-const { grepInvert } = getPlaywrightLimitOptions([]);
+// `run-tests` resolves these for us; calling Playwright directly has to skip the same tests, or
+// a local run would pick up tests that need attributes the target doesn't declare, e.g. fips
+const { grepInvert } = getPlaywrightLimitOptions(resolveTargetAttributes(undefined));
 
 /** Playwright runs the specs directly against servers that are already up; otherwise run-tests
  * starts them, runs and stops them again */
@@ -85,6 +86,24 @@ const runQuietly = async (command: string[]) => {
   return result;
 };
 
+/**
+ * Ctrl+C reaches the tests too, so it stops them and leaves this session open. The CLI runner
+ * installs an exit hook on SIGINT that would end the session instead, so its handlers are
+ * detached for the length of the run and put back afterwards.
+ */
+const holdInterrupt = () => {
+  const handlers = process.listeners('SIGINT') as NodeJS.SignalsListener[];
+  handlers.forEach((handler) => process.off('SIGINT', handler));
+  const ignore: NodeJS.SignalsListener = () => {};
+  process.on('SIGINT', ignore);
+
+  return () => {
+    process.off('SIGINT', ignore);
+    // exit-hook registers with `once`, so putting them back that way keeps Ctrl+C working after
+    handlers.forEach((handler) => process.once('SIGINT', handler));
+  };
+};
+
 export const runTests = async (
   log: ToolingLog,
   selection: Selection,
@@ -94,9 +113,7 @@ export const runTests = async (
   const command = getCommand(selection, mode, onlyFailed);
   log.write(`\n${chalk.cyan('▶')} ${command.join(' ')}\n`);
 
-  // Ctrl+C reaches the tests too, so it stops them and keeps this session open
-  const ignoreInterrupt = () => {};
-  process.on('SIGINT', ignoreInterrupt);
+  const releaseInterrupt = holdInterrupt();
   let result;
   try {
     if (mode === 'with-run' && !selection.verbose) {
@@ -110,7 +127,7 @@ export const runTests = async (
       });
     }
   } finally {
-    process.off('SIGINT', ignoreInterrupt);
+    releaseInterrupt();
   }
 
   const { exitCode, signal } = result;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { timeoutSignal } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 import chalk from 'chalk';
@@ -32,12 +33,71 @@ const STOP_TIMEOUT_MS = 120_000;
 
 const SERVERS_CONFIG_FILE = Path.join(SCOUT_SERVERS_ROOT, 'local.json');
 
+interface ServersConfig {
+  hosts?: { kibana?: string };
+  auth?: { username?: string; password?: string };
+}
+
+const readServersConfig = (): ServersConfig | undefined => {
+  try {
+    return JSON.parse(Fs.readFileSync(SERVERS_CONFIG_FILE, 'utf8'));
+  } catch {
+    return undefined;
+  }
+};
+
 /**
- * The file the tests read to reach the servers, written once when they boot. A start-server
- * process alone doesn't mean they are reachable: it may belong to another checkout, or it may
- * still be starting. Without the file the run fails deep inside a Playwright fixture instead.
+ * Whether the servers answer. The config file is written before Elasticsearch and Kibana are
+ * started, so its presence only means a start-server got that far; running tests against it
+ * while it boots fails deep inside a Playwright fixture instead.
  */
-const hasServersConfig = () => Fs.existsSync(SERVERS_CONFIG_FILE);
+const isKibanaReady = async (): Promise<boolean> => {
+  const config = readServersConfig();
+  if (!config?.hosts?.kibana) {
+    return false;
+  }
+
+  const { username, password } = config.auth ?? {};
+  try {
+    const deadline2 = timeoutSignal(5_000);
+    try {
+      const response = await fetch(new URL('/api/status', config.hosts.kibana), {
+        headers: username
+          ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }
+          : {},
+        signal: deadline2,
+      });
+      return response.ok;
+    } finally {
+      deadline2.dispose();
+    }
+  } catch {
+    return false;
+  }
+};
+
+/** The directory a process was started in, so servers of another checkout can be told apart */
+const getProcessCwd = async (pid: number): Promise<string | undefined> => {
+  const { stdout } = await execa('lsof', ['-a', '-p', String(pid), '-d', 'cwd', '-Fn'], {
+    reject: false,
+  });
+  return stdout
+    .split('\n')
+    .find((line) => line.startsWith('n'))
+    ?.slice(1);
+};
+
+/** Why a server started for the right target still can't be used */
+type MatchState = 'ready' | 'other-checkout' | 'starting';
+
+const inspectMatch = async (pid: number): Promise<MatchState> => {
+  const cwd = await getProcessCwd(pid);
+  // without lsof the checkout can't be told, and readiness is the only thing left to go on
+  if (cwd && Path.resolve(cwd) !== Path.resolve(REPO_ROOT)) {
+    return 'other-checkout';
+  }
+  return (await isKibanaReady()) ? 'ready' : 'starting';
+};
 
 const getFlag = (args: string[], name: string) => {
   const index = args.findIndex((arg) => arg === `--${name}` || arg.startsWith(`--${name}=`));
@@ -68,6 +128,13 @@ export const isServingConfig = (
   { configSet }: PinnedConfig,
   { arch, domain }: Pick<ScoutTestTarget, 'arch' | 'domain'>
 ) => server.configSet === configSet && server.arch === arch && server.domain === domain;
+
+const describeUnusable = (matching: RunningServers, state?: MatchState) =>
+  state === 'other-checkout'
+    ? `Scout servers for this target are running (PID ${matching.pid}), but they were started ` +
+      `in another checkout, so the tests would not run against this one`
+    : `Scout servers for this target are running (PID ${matching.pid}), but they are not ` +
+      `answering yet, so they are most likely still starting`;
 
 const describeServers = (servers: RunningServers[]) =>
   servers
@@ -133,7 +200,8 @@ const stopServers = async (servers: RunningServers[]) => {
 const findServers = async (config: PinnedConfig, target: ScoutTestTarget) => {
   const servers = await getRunningServers();
   const matching = servers.find((server) => isServingConfig(server, config, target));
-  return { servers, matching, usable: matching && hasServersConfig() ? matching : undefined };
+  const state = matching ? await inspectMatch(matching.pid) : undefined;
+  return { servers, matching, state, usable: state === 'ready' ? matching : undefined };
 };
 
 const askAboutServers = async (
@@ -141,21 +209,13 @@ const askAboutServers = async (
   config: PinnedConfig,
   target: ScoutTestTarget
 ): Promise<ServersMode | undefined> => {
-  const { servers, matching, usable } = await findServers(config, target);
+  const { servers, matching, state, usable } = await findServers(config, target);
   if (usable) {
     log.write(chalk.dim(`Using the Scout servers running for this target (PID ${usable.pid})`));
     return 'running';
   }
   if (matching) {
-    log.write(
-      chalk.yellow(
-        `Scout servers for this target are running (PID ${matching.pid}), but ${Path.relative(
-          REPO_ROOT,
-          SERVERS_CONFIG_FILE
-        )} is missing, so the tests can't reach them. They are either still starting or they ` +
-          `belong to another checkout.`
-      )
-    );
+    log.write(chalk.yellow(describeUnusable(matching, state)));
   }
   if (servers.length) {
     // servers for this target would fail to start on the ports they hold
@@ -213,10 +273,7 @@ const askAboutServers = async (
     log.write(
       chalk.yellow(
         found.matching
-          ? `Scout servers are up but still starting, ${Path.relative(
-              REPO_ROOT,
-              SERVERS_CONFIG_FILE
-            )} is not written yet`
+          ? describeUnusable(found.matching, found.state)
           : `No Scout servers for ${describeTarget(target)} found yet`
       )
     );

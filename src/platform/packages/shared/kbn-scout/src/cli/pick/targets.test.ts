@@ -107,14 +107,31 @@ describe('getTargetCoverage', () => {
     });
   });
 
-  it('falls back when the manifest lists the specs but none declares a local target', () => {
+  it('offers nothing when the manifest lists the specs but none declares a local target', () => {
     givenManifest([{ file: SPEC_A, tags: ['@cloud-stateful-classic'] }]);
 
-    // offering nothing would leave the picker with an empty Target list
+    // the manifest answered: falling back to the config's targets would offer one that runs
+    // none of these specs, which is the outcome the coverage check exists to prevent
+    expect(getTargetCoverage(config, [SPEC_A])).toMatchObject({ tags: [], known: true });
+  });
+
+  it('does not count tests the run would grep out for an unsatisfied limit', () => {
+    givenManifest([
+      { file: SPEC_A, tags: ['@local-stateful-classic', '@limit/only-fips'] },
+      { file: SPEC_A, tags: ['@local-serverless-search'] },
+    ]);
+
+    // without FIPS attributes the only-fips test never runs, so it earns no coverage
     expect(getTargetCoverage(config, [SPEC_A])).toMatchObject({
-      tags: config.targets,
-      known: false,
+      tags: ['local-serverless-search'],
+      known: true,
     });
+  });
+
+  it('offers nothing when every test of a spec is limited out', () => {
+    givenManifest([{ file: SPEC_A, tags: ['@local-stateful-classic', '@limit/only-fips'] }]);
+
+    expect(getTargetCoverage(config, [SPEC_A])).toMatchObject({ tags: [], known: true });
   });
 });
 

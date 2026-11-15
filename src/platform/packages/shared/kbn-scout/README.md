@@ -744,7 +744,7 @@ It opens with the entry points you are most likely to want:
   pick the config yourself.
 - **A pinned config** -- the configs you marked as yours on first use.
 - **Find another config** -- search all Scout configs by group, module and path.
-- **Edit pins** -- add or drop pinned configs.
+- **Edit pins** -- unpin configs you no longer use. Configs are pinned when you pick them.
 
 Then it asks what to run from that config (changed specs, the whole config, or specs you pick), on
 which test target, and how to get the servers.
@@ -773,7 +773,9 @@ There are two ways to get the servers:
 - **Start them with the tests** -- one `run-tests` call, servers stopped afterwards. Server output
   goes to `.scout/logs/scout_pick.log` so only test results are on screen.
 
-Servers already running for the chosen target are detected and reused. Servers running for a
+Servers already running for the chosen target are detected and reused, but only once Kibana
+answers and only when they were started from this checkout -- a stack that is still booting, or
+one belonging to another worktree, is reported rather than used. Servers running for a
 *different* target are offered for shutdown first, since they hold the ports the new ones need.
 
 After a run you can rerun the same tests, **rerun only the ones that failed** (with servers kept
@@ -783,7 +785,8 @@ answer. `Esc` goes back a question at a time, `Ctrl+C` stops the tests without c
 
 In any list: type to filter, `↑`/`↓` to move, `Enter` to confirm, and in multi-select `Space` to
 toggle and `Ctrl+A` to select all. In the spec list, the specs you changed are marked `changed`
-and start selected, whichever way you got to the config. Questions with a single answer are skipped, and your settings
+and start selected, whichever way you got to the config; clearing the whole selection re-asks
+rather than quietly running the entire config. Questions with a single answer are skipped, and your settings
 carry over to the next run.
 
 Pins, the last run and your settings are stored in `KIBANA_REPO_ROOT/.scout/pick/pins.json`, so they are

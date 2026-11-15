@@ -8,8 +8,9 @@
  */
 
 import Path from 'path';
-import { testTargets } from '@kbn/scout-info';
+import { testLimits, testTargets } from '@kbn/scout-info';
 import { getGitSHA1ForPath, testConfig } from '@kbn/scout-reporting';
+import { resolveTargetAttributes } from '../../tests_discovery/tag_utils';
 import type { PinnedConfig } from './pins';
 
 const LOCAL_TAGS = new Set(testTargets.local.map(({ tag }) => tag));
@@ -25,6 +26,12 @@ const toLocalTags = (tags: string[]): string[] =>
 /** Local target tags each spec declares, by repo-relative spec path */
 type SpecTags = Map<string, string[]>;
 
+/** Tags of tests the run would grep out anyway, e.g. `@limit/only-fips` off a FIPS target */
+const getUnsatisfiedLimitTags = () =>
+  new Set(
+    testLimits.unsatisfiedBy(resolveTargetAttributes(undefined)).map((limit) => limit.playwrightTag)
+  );
+
 /**
  * Tags recorded by the last manifest update, which runs on a schedule. Tags change far less
  * often than test bodies, so a spec the manifest lists is trusted even when you have edited it.
@@ -36,11 +43,13 @@ const fromManifest = (configPath: string, specs: string[]): SpecTags | undefined
     return undefined;
   }
 
+  const unsatisfied = getUnsatisfiedLimitTags();
   const specTags: SpecTags = new Map();
   for (const { location, tags } of manifest.tests) {
-    // a spec with no local tag still gets an entry, so it isn't mistaken for an unlisted one
+    // a spec with no runnable test still gets an entry, so it isn't mistaken for an unlisted one
     const known = specTags.get(location.file) ?? [];
-    specTags.set(location.file, [...new Set([...known, ...toLocalTags(tags)])]);
+    const runnable = !tags.some((tag) => unsatisfied.has(tag));
+    specTags.set(location.file, runnable ? [...new Set([...known, ...toLocalTags(tags)])] : known);
   }
   return specs.every((spec) => specTags.has(spec)) ? specTags : undefined;
 };
@@ -62,11 +71,10 @@ export interface TargetCoverage {
  */
 export const getTargetCoverage = (config: PinnedConfig, specs: string[]): TargetCoverage => {
   const total = specs.length;
-  const fallback: TargetCoverage = { tags: config.targets, counts: new Map(), total, known: false };
 
   const specTags = fromManifest(config.path, specs);
   if (!specTags) {
-    return fallback;
+    return { tags: config.targets, counts: new Map(), total, known: false };
   }
 
   const counts = new Map<string, number>();
@@ -76,9 +84,10 @@ export const getTargetCoverage = (config: PinnedConfig, specs: string[]): Target
     }
   }
   const countOf = (tag: string) => counts.get(tag) ?? 0;
+  // every offered target runs at least one spec, so the run can't come back with no tests, and
+  // no tag at all means the manifest knows there is nothing here to run
   const tags = [...counts.keys()].sort((a, b) => countOf(b) - countOf(a) || a.localeCompare(b));
-  // every offered target runs at least one spec, so the run can't come back with no tests
-  return tags.length ? { tags, counts, total, known: true } : fallback;
+  return { tags, counts, total, known: true };
 };
 
 /**

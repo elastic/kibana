@@ -216,7 +216,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
           hint: `pinned · ${serversHint(pinned, running)}`,
         })),
         { label: 'Find another config', value: 'find' },
-        { label: 'Edit pins', value: 'edit' },
+        ...(pins.length ? [{ label: 'Edit pins', value: 'edit' }] : []),
       ]);
 
       pin = false;
@@ -283,16 +283,21 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
     },
     specs: async () => {
       const changed = await getChangedSpecs(configSpecs);
-      specs = await multiSelect(
-        'Specs',
-        configSpecs.map((spec) => ({
-          label: specName(spec),
-          value: spec,
-          // preselected, so Enter runs what you edited and Space adds the rest
-          ...(changed.has(spec) ? { hint: chalk.yellow('changed'), checked: true } : {}),
-        }))
-      );
-      return 'target';
+      const choices = configSpecs.map((spec) => ({
+        label: specName(spec),
+        value: spec,
+        // preselected, so Enter runs what you edited and Space adds the rest
+        ...(changed.has(spec) ? { hint: chalk.yellow('changed'), checked: true } : {}),
+      }));
+
+      // an empty selection would run the whole config, the opposite of narrowing it down
+      for (;;) {
+        specs = await multiSelect('Specs', choices);
+        if (specs.length) {
+          return 'target';
+        }
+        log.write(chalk.dim('Pick at least one spec, or go back with Esc to run them all'));
+      }
     },
     target: async () => {
       // scope always runs before this and leaves every spec of the config in configSpecs
@@ -300,6 +305,12 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
         getConfig(),
         specs.length ? specs : configSpecs
       );
+      if (known && !tags.length) {
+        log.write(
+          chalk.yellow('None of these specs runs on a local target, so there is nothing to run')
+        );
+        return 'scope';
+      }
       if (!known) {
         log.write(
           chalk.yellow('No manifest entry for these specs yet, showing every target of the config')
