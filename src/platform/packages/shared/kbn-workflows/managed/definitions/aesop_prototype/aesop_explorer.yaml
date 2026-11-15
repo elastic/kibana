@@ -58,7 +58,8 @@ steps:
   # pick the one that fits the task it is proposing. Read at runtime, not
   # rendered into the YAML: a dataset created after this instance was
   # enabled is still discovered. A failed read leaves the agent without
-  # the list; candidates then fall back to the default dataset.
+  # the list, and the prompt tells it to drop candidates it has no fitting
+  # dataset for, so such a pass usually returns none.
   # ----------------------------------------------------------------------
   - name: read_datasets
     type: kibana.request
@@ -203,8 +204,8 @@ steps:
                 skill_id: '{{ foreach.item.skill_id }}'
                 new_skill_name: '{{ foreach.item.skill_name }}'
                 skill_description: '{{ foreach.item.title | truncate: 1000 }}'
-                # Empty dataset_id means the candidate named no fitting
-                # dataset; the explorer's default dataset applies.
+                # The schema requires dataset_id, so this default is only a
+                # guard against output that skipped schema enforcement.
                 dataset_id: '{{ foreach.item.dataset_id | default: consts.DEFAULT_DATASET_ID }}'
                 connector_id: '__CONNECTOR_ID__'
                 agent_id: '__AB_AGENT_ID__'

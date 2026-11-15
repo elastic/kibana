@@ -126,25 +126,25 @@ export const registerAesopExplorerRoutes = ({
           const [, pluginsStart] = await getStartServices();
           const { body } = request;
           const defaultsDeps = { pluginsStart, request, spaceId: deps.spaceId, logger };
+          // Resolved defaults come from settings and saved names, so they get the body's check.
+          // Each is checked as soon as it resolves, so a bad connector id creates nothing.
+          const reject = (name: string, id: string) =>
+            response.badRequest({
+              body: { message: `The resolved ${name} "${id}" ${validateSafeId(id)}` },
+            });
           const connectorId =
             body.connector_id ??
             (await resolveDefaultConnectorId({
               ...defaultsDeps,
               uiSettingsClient: (await context.core).uiSettings.client,
             }));
+          if (validateSafeId(connectorId) !== undefined) return reject('connectorId', connectorId);
           const datasetId = body.dataset_id ?? (await resolveDefaultDatasetId(defaultsDeps));
+          if (validateSafeId(datasetId) !== undefined) return reject('datasetId', datasetId);
           const investigationId =
             body.investigation_id ?? (await resolveDefaultInvestigationId(defaultsDeps));
-          // Resolved defaults come from settings and saved names, so they get the body's check.
-          const invalid = Object.entries({ connectorId, datasetId, investigationId }).find(
-            ([, id]) => validateSafeId(id) !== undefined
-          );
-          if (invalid) {
-            return response.badRequest({
-              body: {
-                message: `The resolved ${invalid[0]} "${invalid[1]}" ${validateSafeId(invalid[1])}`,
-              },
-            });
+          if (validateSafeId(investigationId) !== undefined) {
+            return reject('investigationId', investigationId);
           }
           // The boot install only covers the default space.
           if (body.ab_agent_id === AESOP_EXPLORER_AGENT_ID && pluginsStart.agentBuilder) {

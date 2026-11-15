@@ -199,6 +199,8 @@ describe('registerAesopExplorerRoutes', () => {
     await post({ mode: 'discovery' });
 
     expect(enableMock).not.toHaveBeenCalled();
+    expect(resolveDatasetMock).not.toHaveBeenCalled();
+    expect(resolveInvestigationMock).not.toHaveBeenCalled();
     expect(mockResponse.badRequest).toHaveBeenCalledWith({
       body: { message: expect.stringContaining('connectorId') },
     });

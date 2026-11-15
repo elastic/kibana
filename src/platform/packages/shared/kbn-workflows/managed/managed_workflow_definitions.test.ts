@@ -315,7 +315,7 @@ it.each([
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
   [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '11:4053f20a'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '10:9dc52fe8'],
-  [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '10:78733670'],
+  [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '11:a740e866'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {
