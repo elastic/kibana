@@ -124,14 +124,21 @@ describe('esqlQueryValidator', () => {
       });
     });
 
-    it('succeeds for non-aggregating query without explicit metadata when injection adds _id', () => {
-      fetchEsqlQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'agent.name' }]);
+    it('succeeds for non-aggregating query without explicit metadata when injection adds _id', async () => {
+      fetchEsqlQueryColumnsMock.mockImplementation(async ({ esqlQuery }: { esqlQuery: string }) =>
+        /metadata _id/i.test(esqlQuery)
+          ? [{ id: '_id' }, { id: 'agent.name' }]
+          : [{ id: 'agent.name' }]
+      );
 
-      return expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue('from test*'),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toBeUndefined();
+      const result = await createValidator()({
+        value: createEsqlQueryFieldValue('from test*'),
+      } as EsqlQueryValidatorArgs);
+
+      expect(result).toBeUndefined();
+      expect(fetchEsqlQueryColumnsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: expect.stringMatching(/metadata _id/i) })
+      );
     });
   });
 
