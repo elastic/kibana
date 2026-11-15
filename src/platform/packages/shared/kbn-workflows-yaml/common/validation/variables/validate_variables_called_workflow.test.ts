@@ -38,7 +38,17 @@ const calledWorkflows: Record<string, CalledWorkflowOutputs> = {
       properties: {
         suggestions: { type: 'array', items: { type: 'object', additionalProperties: true } },
         details: { type: 'object' },
-        declared: { type: 'object', properties: { id: { type: 'string' } } },
+        declared: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            meta: {
+              type: 'object',
+              properties: { source: { type: 'string' } },
+              additionalProperties: false,
+            },
+          },
+        },
         closed: {
           type: 'object',
           properties: { id: { type: 'string' } },
@@ -79,7 +89,7 @@ steps:
       message: "${message}"
 `;
 
-const validate = (yaml: string) => {
+const validateAll = (yaml: string) => {
   const lineCounter = new LineCounter();
   const yamlDocument = YAML.parseDocument(yaml, { lineCounter, keepSourceTokens: true });
   const workflowDefinition = yamlDocument.toJSON() as WorkflowYaml;
@@ -90,8 +100,10 @@ const validate = (yaml: string) => {
     workflowDefinition,
     yamlDocument,
     yaml
-  ).filter(({ severity }) => severity === 'error');
+  );
 };
+
+const validate = (yaml: string) => validateAll(yaml).filter(({ severity }) => severity === 'error');
 
 describe('validateVariables called workflow outputs', () => {
   it('flags outputs the called workflow neither declares nor returns, listing what it returns', () => {
@@ -166,13 +178,23 @@ describe('validateVariables called workflow outputs', () => {
       validate(
         callerYaml(
           'suggestions',
-          '{{ steps.ctx.output.suggestion }} {{ steps.ctx.output.closed.extra }}'
+          '{{ steps.ctx.output.suggestion }} {{ steps.ctx.output.closed.extra }} {{ steps.ctx.output.declared.meta.extra }}'
         )
       ).map(({ message }) => message)
     ).toEqual([
       'Workflow "Suggestions" doesn’t return an output named "suggestion". It returns: suggestions, details, declared, closed',
       'Variable steps.ctx.output.closed.extra is invalid',
+      'Variable steps.ctx.output.declared.meta.extra is invalid',
     ]);
+  });
+
+  it('keeps the declared fields of nested objects that accept any field', () => {
+    const [declared] = validateAll(callerYaml('suggestions', '{{ steps.ctx.output.declared }}'));
+    expect(declared.severity).toBeNull();
+    expect(declared.hoverMessage).toContain('id');
+    expect(
+      validateAll(callerYaml('suggestions', '{{ steps.ctx.output.declared.id }}'))[0].severity
+    ).toBeNull();
   });
 
   it('accepts outputs read with a key computed at runtime', () => {

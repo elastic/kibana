@@ -15,6 +15,8 @@ export interface PropertyReferenceOptions {
   unknownPropertyMessage?: (property: string) => string;
   /** Leaves a property read with a key computed at runtime unchecked, instead of invalid. */
   allowDynamicKeys?: boolean;
+  /** Leaves a reference to any property the schema doesn't declare unchecked, instead of invalid. */
+  allowUnknownProperties?: boolean;
 }
 
 const propertyReferenceOptions = new WeakMap<z.ZodType, PropertyReferenceOptions>();

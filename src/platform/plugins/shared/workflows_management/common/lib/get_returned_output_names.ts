@@ -33,7 +33,8 @@ const visitSteps = (node: unknown, visit: (step: Record<string, unknown>) => voi
 const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
   step.type === 'workflow.output' && (step.status === undefined || step.status === 'completed');
 
-// Whether running `steps` in order always reaches a `workflow.output` step, which ends the run.
+// Whether running `steps` in order always reaches a `workflow.output` or `workflow.fail` step, which
+// ends the run.
 // Only unconditional steps count, and an `if` step only when both of its branches end the run.
 const alwaysEndsRun = (steps: unknown): boolean =>
   Array.isArray(steps) &&
@@ -42,6 +43,7 @@ const alwaysEndsRun = (steps: unknown): boolean =>
       isRecord(step) &&
       step.if === undefined &&
       (step.type === 'workflow.output' ||
+        step.type === 'workflow.fail' ||
         (step.type === 'if' && alwaysEndsRun(step.steps) && alwaysEndsRun(step.else)))
   );
 

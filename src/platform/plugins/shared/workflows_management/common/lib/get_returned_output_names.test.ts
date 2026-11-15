@@ -103,6 +103,23 @@ describe('getReturnedOutputNames', () => {
     ).toEqual(['severity']);
   });
 
+  it('counts workflow.fail as ending the run', () => {
+    expect(
+      getReturnedOutputNames({
+        steps: [
+          {
+            name: 'check',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'emit', type: 'workflow.output', with: { severity: 'high' } }],
+            else: [{ name: 'stop', type: 'workflow.fail', with: { message: 'no context' } }],
+          },
+          { name: 'last', type: 'data.set', with: { other: 1 } },
+        ],
+      })
+    ).toEqual(['severity']);
+  });
+
   it('is undefined without a workflow.output step or when one sets a computed value', () => {
     expect(getReturnedOutputNames({ steps: [{ name: 'log', type: 'console' }] })).toBeUndefined();
     expect(

@@ -34,14 +34,15 @@ const isOpenObjectSchema = ({ type, additionalProperties }: Record<string, unkno
 
 /**
  * Replaces the objects nested in `schema` that accept any field (unless `additionalProperties` is
- * `false` or a schema) with an unconstrained schema, so reading any of their fields is allowed.
+ * `false` or a schema) and declare none with an unconstrained schema, so reading any of their
+ * fields is allowed.
  */
 const openNestedObjects = (schema: Record<string, unknown>): Record<string, unknown> => {
   const openChild = (child: unknown): unknown => {
     if (!isRecord(child)) {
       return child;
     }
-    if (isOpenObjectSchema(child)) {
+    if (isOpenObjectSchema(child) && !isRecord(child.properties)) {
       return child.description === undefined ? {} : { description: child.description };
     }
     return openNestedObjects(child);
@@ -68,6 +69,46 @@ const openNestedObjects = (schema: Record<string, unknown>): Record<string, unkn
     }
   }
   return result;
+};
+
+// Zod wrappers whose inner schema `getSchemaAtPath` walks into.
+const getChildSchemas = (schema: z.ZodType): z.ZodType[] => {
+  if (schema instanceof z.ZodObject) {
+    return Object.values(schema.shape as Record<string, z.ZodType>);
+  }
+  if (schema instanceof z.ZodArray) {
+    return [schema.element as z.ZodType];
+  }
+  if (schema instanceof z.ZodUnion) {
+    return [...(schema.options as readonly z.ZodType[])];
+  }
+  if (
+    schema instanceof z.ZodOptional ||
+    schema instanceof z.ZodNullable ||
+    schema instanceof z.ZodDefault
+  ) {
+    return [schema.unwrap() as z.ZodType];
+  }
+  return [];
+};
+
+// An object that accepts fields it doesn't declare: no catchall, or an untyped one.
+const acceptsUndeclaredFields = (schema: z.ZodType): boolean => {
+  if (!(schema instanceof z.ZodObject)) {
+    return false;
+  }
+  const { catchall } = schema.def;
+  return catchall === undefined || catchall instanceof z.ZodUnknown || catchall instanceof z.ZodAny;
+};
+
+// Lets references read fields the objects nested in `schema` don't declare, as they accept them.
+const allowUnknownNestedProperties = (schema: z.ZodType): void => {
+  getChildSchemas(schema).forEach((child) => {
+    if (acceptsUndeclaredFields(child)) {
+      withPropertyReferenceOptions(child, { allowUnknownProperties: true });
+    }
+    allowUnknownNestedProperties(child);
+  });
 };
 
 const getUnknownOutputMessage = (
@@ -119,6 +160,7 @@ const getCalledWorkflowOutputSchema = (
       ? declaredSchema.extend(Object.fromEntries(undeclaredNames.map((name) => [name, z.any()])))
       : declaredSchema;
   const outputNames = [...declaredNames, ...undeclaredNames];
+  allowUnknownNestedProperties(outputSchema);
   return withPropertyReferenceOptions(outputSchema, {
     unknownPropertyMessage: (field) =>
       getUnknownOutputMessage(calledWorkflow.name, outputNames, field),

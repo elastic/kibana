@@ -45,6 +45,9 @@ const getUnresolvedReference = (
 ): { allowed: true } | { allowed: false; message: string } => {
   const unresolved = getUnresolvedProperty(context, propertyPath);
   const options = unresolved && getPropertyReferenceOptions(unresolved.schema);
+  if (options?.allowUnknownProperties) {
+    return { allowed: true };
+  }
   if (unresolved?.property === LIQUID_DYNAMIC_KEY_SEGMENT) {
     return options?.allowDynamicKeys
       ? { allowed: true }
