@@ -80,7 +80,7 @@ export class TagsTable {
 
   async selectTagByName(tagName: string) {
     const row = this.rowByName(tagName);
-    await row.locator('.euiTableRowCellCheckbox .euiCheckbox__input').click();
+    await row.getByRole('checkbox').click();
   }
 
   async selectAllTags() {
