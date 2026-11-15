@@ -9,6 +9,9 @@ import Bunzip from 'seek-bzip';
 
 const CHUNK_SIZE = 64 * 1024;
 
+/** The most one bzip2 block may expand to; real feed blocks are a few MiB at most. */
+export const MAX_BLOCK_BYTES = 64 * 1024 * 1024;
+
 // seek-bzip keeps CRCs as signed 32-bit ints; compare them as unsigned.
 const toUint32 = (n: number): number => (n < 0 ? n + 2 ** 32 : n);
 
@@ -20,9 +23,14 @@ const startsStream = (input: Uint8Array, at: number): boolean =>
 /**
  * Decompresses a (possibly multi-stream) bzip2 buffer one block at a time, so callers can yield
  * to the event loop between blocks instead of blocking it for the whole feed. Block and stream
- * CRCs are verified; corrupt input throws.
+ * CRCs are verified; corrupt input throws. A block that expands past `maxBlockBytes` throws while
+ * it is being decoded, before its output is concatenated, so one hostile block cannot allocate
+ * its full expansion (up to ~1.4 GB).
  */
-export function* bunzip2Blocks(input: Uint8Array): Generator<Buffer> {
+export function* bunzip2Blocks(
+  input: Uint8Array,
+  { maxBlockBytes = MAX_BLOCK_BYTES }: { maxBlockBytes?: number } = {}
+): Generator<Buffer> {
   let pos = 0;
   const inputStream = {
     readByte: (): number => (pos < input.length ? input[pos++] : -1),
@@ -38,8 +46,12 @@ export function* bunzip2Blocks(input: Uint8Array): Generator<Buffer> {
   const done: Buffer[] = [];
   let current = Buffer.allocUnsafe(CHUNK_SIZE);
   let written = 0;
+  let blockBytes = 0;
   const outputStream = {
     writeByte: (byte: number): void => {
+      if (++blockBytes > maxBlockBytes) {
+        throw new Error(`bzip2 block expands past ${maxBlockBytes} bytes`);
+      }
       current[written++] = byte;
       if (written === CHUNK_SIZE) {
         done.push(current);
@@ -62,6 +74,7 @@ export function* bunzip2Blocks(input: Uint8Array): Generator<Buffer> {
   const bunzip = new Bunzip(inputStream, outputStream);
   while (true) {
     if (bunzip._init_block()) {
+      blockBytes = 0;
       bunzip._read_bunzip();
       const block = flush();
       if (block) yield block;

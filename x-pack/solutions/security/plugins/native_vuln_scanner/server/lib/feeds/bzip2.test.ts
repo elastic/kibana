@@ -39,4 +39,20 @@ describe('bunzip2Blocks', () => {
     corrupt[200] = 255 - corrupt[200];
     expect(() => [...bunzip2Blocks(corrupt)]).toThrow();
   });
+
+  describe('per-block expansion cap', () => {
+    // 4 MiB of zeros in one block: a few dozen bytes compressed.
+    const zeros = readFileSync(join(__dirname, '__fixtures__', 'zeros_4mib.bz2'));
+
+    it('decodes a block under the cap', () => {
+      const out = Buffer.concat([...bunzip2Blocks(zeros)]);
+      expect(out.length).toBe(4 * 1024 * 1024);
+    });
+
+    it('throws while decoding a block that expands past the cap', () => {
+      expect(() => [...bunzip2Blocks(zeros, { maxBlockBytes: 1024 * 1024 })]).toThrow(
+        /expands past 1048576 bytes/
+      );
+    });
+  });
 });

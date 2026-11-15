@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { bunzip2Blocks } from './bzip2';
+import { bunzip2Blocks, MAX_BLOCK_BYTES } from './bzip2';
 import { parseRhelOval } from './rhel_oval';
 import type { FeedParseResult } from './types';
 import { parseUbuntuOval } from './ubuntu_oval';
@@ -17,7 +17,8 @@ export const MAX_FEED_BYTES = 64 * 1024 * 1024;
 
 /**
  * The largest decompressed feed we accept. bzip2 expands up to ~1.4 GB per block, so the
- * 64 MiB cap on the download bounds nothing once decompression starts.
+ * 64 MiB cap on the download bounds nothing once decompression starts. It is checked between
+ * blocks; a single block is capped separately by `MAX_BLOCK_BYTES` while it decodes.
  */
 export const MAX_DECOMPRESSED_FEED_BYTES = 512 * 1024 * 1024;
 
@@ -78,9 +79,9 @@ const readCapped = async (response: Response, url: string): Promise<Uint8Array> 
 };
 
 /**
- * Counts decompressed output and checks the abort signal between blocks, so a hostile feed
- * decompressing to gigabytes cannot pin the CPU and an abort stops the parse, not just the
- * download.
+ * Counts decompressed output and checks the abort signal between blocks, so a feed of many
+ * blocks decompressing to gigabytes is stopped and an abort stops the parse, not just the
+ * download. A single oversized block is stopped earlier, inside `bunzip2Blocks`.
  */
 const guardBlocks = function* (
   blocks: Generator<Buffer>,
@@ -115,11 +116,12 @@ export const loadFeed = async (
     throw new Error(`Advisory feed ${url} returned HTTP ${response.status}`);
   }
   const body = await readCapped(response, url);
+  const cap = maxDecompressedBytes ?? MAX_DECOMPRESSED_FEED_BYTES;
   const blocks = guardBlocks(
-    bunzip2Blocks(body),
+    bunzip2Blocks(body, { maxBlockBytes: MAX_BLOCK_BYTES }),
     url,
     signal,
-    maxDecompressedBytes ?? MAX_DECOMPRESSED_FEED_BYTES
+    cap
   );
   const feed =
     os.family === 'ubuntu'
