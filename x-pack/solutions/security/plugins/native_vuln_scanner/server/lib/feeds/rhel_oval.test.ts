@@ -233,9 +233,7 @@ describe('rhel_9_trimmed fixture', () => {
     );
     const rpmTests = tests.filter((t) => names.has(t.objectRef));
     expect(rpmTests.length).toBeGreaterThan(0);
-    expect(rpmTests.filter((t) => !t.comment.startsWith(`${names.get(t.objectRef)} `))).toEqual(
-      []
-    );
+    expect(rpmTests.filter((t) => !t.comment.startsWith(`${names.get(t.objectRef)} `))).toEqual([]);
   });
 });
 
