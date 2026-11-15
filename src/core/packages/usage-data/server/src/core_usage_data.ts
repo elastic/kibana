@@ -118,6 +118,7 @@ export interface CoreConfigUsageData {
       xContentTypeOptions: string;
       referrerPolicy: string;
       permissionsPolicyConfigured: boolean;
+      permissionsPolicyDisabled: boolean;
       disableEmbedding: boolean;
       crossOriginOpenerPolicy: string;
     };

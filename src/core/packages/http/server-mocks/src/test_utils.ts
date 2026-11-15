@@ -24,8 +24,10 @@ import {
   type HttpConfigType,
   type ExternalUrlConfigType,
   type CspConfigType,
+  type PermissionsPolicyConfigType,
   HttpService,
   config,
+  permissionsPolicyConfig,
 } from '@kbn/core-http-server-internal';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -38,10 +40,17 @@ export const createConfigService = ({
   server,
   externalUrl,
   csp,
+  permissionsPolicy,
 }: Partial<{
-  server: Partial<HttpConfigType>;
+  // `securityResponseHeaders` is spelled out one level deeper because every key of it carries a
+  // schema default, which `TypeOf` renders as required. The merge below is a shallow
+  // `Object.assign`, so one level is also as deep as an override actually reaches.
+  server: Partial<Omit<HttpConfigType, 'securityResponseHeaders'>> & {
+    securityResponseHeaders?: Partial<HttpConfigType['securityResponseHeaders']>;
+  };
   externalUrl: Partial<ExternalUrlConfigType>;
   csp: Partial<CspConfigType>;
+  permissionsPolicy: Partial<PermissionsPolicyConfigType>;
 }> = {}) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
@@ -65,7 +74,9 @@ export const createConfigService = ({
               disableProtection: true,
               allowlist: [],
             },
-            securityResponseHeaders: {},
+            // `null` disables the header. This mock deliberately emits no security response
+            // headers; an absent `permissionsPolicy` would now build Kibana's default policy.
+            securityResponseHeaders: { permissionsPolicy: null },
             customResponseHeaders: {},
             requestId: {
               allowFromAnyIp: true,
@@ -99,9 +110,16 @@ export const createConfigService = ({
       });
     }
     if (path === 'permissionsPolicy') {
-      return new BehaviorSubject({
-        report_to: [],
-      });
+      // Validating the override, rather than spreading it over an already-validated default, keeps
+      // the mock to the same constraints a real deployment has. The schema fills in every key that
+      // the override leaves out.
+      return new BehaviorSubject(
+        permissionsPolicyConfig.schema.validate(
+          permissionsPolicy ?? {},
+          {},
+          permissionsPolicyConfig.path
+        )
+      );
     }
     if (path === 'pricing') {
       return new BehaviorSubject({

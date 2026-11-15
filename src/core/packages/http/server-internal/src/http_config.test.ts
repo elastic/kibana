@@ -8,6 +8,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { DeprecatedConfigDetails } from '@kbn/config';
+import { configDeprecationFactory } from '@kbn/config';
 import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
 import { permissionsPolicyConfig } from './permissions_policy';
@@ -978,5 +980,87 @@ describe('HttpConfig', () => {
       maxRedirects: 0,
       ssl: { verificationMode: 'full', certificateAuthorities: undefined },
     });
+  });
+});
+
+describe('config deprecations', () => {
+  const collect = (server: Record<string, unknown>) => {
+    const deprecations = config.deprecations!(configDeprecationFactory);
+    const collected: DeprecatedConfigDetails[] = [];
+    for (const deprecation of deprecations) {
+      deprecation({ server }, 'server', (details) => collected.push(details), {
+        branch: 'main',
+        version: '9.6.0',
+        // The TLS deprecation reads `docLinks.server.protocol`, so an empty object throws.
+        docLinks: { server: { protocol: 'https://example.com/protocol' } } as never,
+      });
+    }
+    return collected;
+  };
+
+  const permissionsPolicyDeprecations = (server: Record<string, unknown>) =>
+    collect(server).filter(({ configPath }) => configPath?.includes('permissionsPolicy'));
+
+  it('emits only the TLS warning for the default configuration', () => {
+    // `config_deprecation.test.ts` asserts a single warning on a default install, so a new
+    // deprecation that fires when its setting is absent would break it.
+    const collected = collect({});
+    expect(collected).toHaveLength(1);
+    expect(collected[0].configPath).toEqual('server.protocol,server.ssl.enabled');
+  });
+
+  it('warns when the wholesale permissions policy is set', () => {
+    const [deprecation] = permissionsPolicyDeprecations({
+      securityResponseHeaders: { permissionsPolicy: 'camera=()' },
+    });
+    expect(deprecation.level).toEqual('warning');
+    expect(deprecation.configPath).toEqual('server.securityResponseHeaders.permissionsPolicy');
+    expect(deprecation.message).toContain("replaces Kibana's entire permissions policy");
+    // The built-in policy is a baseline the new settings can only add to, so a stricter legacy
+    // policy has no replacement, and administrators must be told before they remove it.
+    expect(deprecation.message).toContain(
+      'a policy stricter than the built-in policy is not supported after this setting is removed'
+    );
+    expect(deprecation.correctiveActions?.manualSteps?.join(' ')).toContain(
+      'permissionsPolicy.<directive>'
+    );
+    expect(deprecation.correctiveActions?.manualSteps?.join(' ')).toContain(
+      'cannot remove its sources'
+    );
+  });
+
+  it('points an administrator who disabled the header at permissionsPolicy.enabled', () => {
+    const [deprecation] = permissionsPolicyDeprecations({
+      securityResponseHeaders: { permissionsPolicy: null },
+    });
+    expect(deprecation.configPath).toEqual('server.securityResponseHeaders.permissionsPolicy');
+    expect(deprecation.message).toContain('Use "permissionsPolicy.enabled: false" instead');
+    const steps = deprecation.correctiveActions?.manualSteps?.join(' ');
+    expect(steps).toContain('"permissionsPolicy.enabled: false"');
+    // Steering a `null` user to the per-directive settings would switch the header back on.
+    expect(steps).not.toContain("permissionsPolicy.camera: ['self']");
+  });
+
+  it('warns when the wholesale report-only policy is set', () => {
+    const [deprecation] = permissionsPolicyDeprecations({
+      securityResponseHeaders: { permissionsPolicyReportOnly: 'camera=()' },
+    });
+    expect(deprecation.level).toEqual('warning');
+    expect(deprecation.configPath).toEqual(
+      'server.securityResponseHeaders.permissionsPolicyReportOnly'
+    );
+  });
+
+  it('tells an administrator who disabled the report-only header that removing it is enough', () => {
+    const [deprecation] = permissionsPolicyDeprecations({
+      securityResponseHeaders: { permissionsPolicyReportOnly: null },
+    });
+    const steps = deprecation.correctiveActions?.manualSteps ?? [];
+    expect(steps).toHaveLength(1);
+    expect(steps[0]).toContain('is not sent unless');
+  });
+
+  it('emits no permissions policy warning when neither setting is present', () => {
+    expect(permissionsPolicyDeprecations({ securityResponseHeaders: {} })).toEqual([]);
   });
 });
