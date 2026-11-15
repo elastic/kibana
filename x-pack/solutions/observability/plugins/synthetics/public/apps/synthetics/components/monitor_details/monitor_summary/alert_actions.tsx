@@ -110,14 +110,7 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
   );
 };
 
-export const useAlertsUrl = ({
-  rangeFrom,
-  rangeTo,
-  monitorId,
-  includeTls,
-  extraKuery,
-  status,
-}: {
+interface AlertsUrlParams {
   monitorId?: string;
   rangeFrom: string;
   rangeTo: string;
@@ -127,9 +120,18 @@ export const useAlertsUrl = ({
   // passes `all` so recovered alerts remain visible, then restricts untracked
   // via `kibana.alert.status` in extraKuery.
   status?: 'all' | 'active' | 'recovered' | 'untracked';
-}) => {
-  const { basePath } = useSyntheticsSettingsContext();
+}
 
+export const useAlertsUrl = (params: AlertsUrlParams): string => {
+  const { basePath } = useSyntheticsSettingsContext();
+  return getAlertsUrl(basePath, params);
+};
+
+/** Observability Alerts app URL scoped to Synthetics alerts, for building links outside render. */
+export const getAlertsUrl = (
+  basePath: string,
+  { rangeFrom, rangeTo, monitorId, includeTls, extraKuery, status }: AlertsUrlParams
+): string => {
   let kuery = includeTls
     ? 'kibana.alert.rule.category : ("Synthetics monitor status" or "Synthetics TLS certificate") '
     : 'kibana.alert.rule.category : "Synthetics monitor status" ';

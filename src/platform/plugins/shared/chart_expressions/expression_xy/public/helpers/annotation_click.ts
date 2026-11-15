@@ -17,6 +17,12 @@ import type {
 import type { MergedAnnotation } from '../../common';
 
 const EXTRA_FIELD_PREFIX = 'field:';
+// `@elastic/charts` reports a clicked line/rect by its rendered element id,
+// `[specId, ...position, index].join('__')`, not by the spec id we passed in.
+const CHART_ELEMENT_ID_SEPARATOR = '__';
+
+const isElementOfSpec = (elementId: string, specId: string): boolean =>
+  elementId === specId || elementId.startsWith(`${specId}${CHART_ELEMENT_ID_SEPARATOR}`);
 
 export const getLineAnnotationChartId = (configId: string, time: string): string =>
   snakeCase(`${configId}-${time}`);
@@ -57,8 +63,8 @@ export const mapAnnotationClickEvents = ({
   const clicked: AnnotationClickDatum[] = [];
 
   for (const line of lines) {
-    const grouped = groupedLineAnnotations.find(
-      (annotation) => getLineAnnotationChartId(annotation.id, annotation.time) === line.id
+    const grouped = groupedLineAnnotations.find((annotation) =>
+      isElementOfSpec(line.id, getLineAnnotationChartId(annotation.id, annotation.time))
     );
     if (!grouped) {
       continue;
@@ -69,7 +75,7 @@ export const mapAnnotationClickEvents = ({
   }
 
   for (const rect of rects) {
-    const range = rangeAnnotations.find((annotation) => annotation.id === rect.id);
+    const range = rangeAnnotations.find((annotation) => isElementOfSpec(rect.id, annotation.id));
     if (range) {
       clicked.push(toAnnotationClickDatum(range));
     }
