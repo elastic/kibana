@@ -109,6 +109,7 @@ export const calculateIntegrationStatus = (
     latest: IndexStatus;
     stream: IndexStatus;
     score?: IndexStatus;
+    nativeLatest?: IndexStatus;
   },
   installation: Installation | undefined,
   healthyAgents: number,
@@ -120,6 +121,9 @@ export const calculateIntegrationStatus = (
 
   if (indicesStatus.latest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
+  // The native vulnerability scanner works without the CSP Fleet package.
+  if (integration === VULN_MGMT_POLICY_TEMPLATE && indicesStatus.nativeLatest === 'not-empty')
+    return 'indexed';
   if (!installation) return 'not-installed';
   if (indicesStatus.latest === 'not-empty') return 'indexed';
   if (indicesStatus.stream === 'not-empty' && indicesStatus.latest === 'empty') return 'indexing';
@@ -346,8 +350,11 @@ export const getCspStatus = async ({
   const latestCspPackageVersion = latestCspPackage.version;
 
   const MIN_DATE = 0;
+  // A CNVM privileges problem must not be masked by native data.
   const vulnerabilitiesLatestIndexStatus =
-    nativeScannerLatestIndexStatus === 'not-empty' ? 'not-empty' : cnvmLatestIndexStatus;
+    cnvmLatestIndexStatus !== 'unprivileged' && nativeScannerLatestIndexStatus === 'not-empty'
+      ? 'not-empty'
+      : cnvmLatestIndexStatus;
   const indicesDetails = [
     {
       index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
@@ -399,6 +406,7 @@ export const getCspStatus = async ({
       latest: vulnerabilitiesLatestIndexStatus,
       stream: vulnerabilitiesIndexStatus,
       score: scoreIndexStatus,
+      nativeLatest: nativeScannerLatestIndexStatus,
     },
     installation,
     healthyAgentsVulMgmt,

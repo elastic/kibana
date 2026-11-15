@@ -485,6 +485,51 @@ describe('CSP status route', () => {
 
         expect(res.vuln_mgmt.status).toBe('indexed');
       });
+
+      it(`Return vuln_mgmt status indexed for the native scanner alone, without the CSP package installed`, async () => {
+        setupEsSearch(deps.esClient, {
+          ...emptyEsScenario(),
+          nativeScannerLatestIndexStatus: 'not-empty',
+        });
+        setupPackagePolicies(deps.packagePolicyService, []);
+        setupAgents(deps.agentPolicyService, deps.agentService, {});
+        setupInstallation(deps.packageServiceMocks, undefined);
+
+        const res = await callGetCspStatus(deps);
+
+        expect(res.vuln_mgmt.status).toBe('indexed');
+        expect(res.cspm.status).toBe('not-installed');
+        expect(res.kspm.status).toBe('not-installed');
+      });
+
+      it(`Return vuln_mgmt status not-installed without the CSP package and without native data`, async () => {
+        setupEsSearch(deps.esClient, emptyEsScenario());
+        setupPackagePolicies(deps.packagePolicyService, []);
+        setupAgents(deps.agentPolicyService, deps.agentService, {});
+        setupInstallation(deps.packageServiceMocks, undefined);
+
+        const res = await callGetCspStatus(deps);
+
+        expect(res.vuln_mgmt.status).toBe('not-installed');
+      });
+
+      it(`Return vuln_mgmt status unprivileged when CNVM is unprivileged even if the native alias has data`, async () => {
+        const vulnPackagePolicy = packagePolicyFor('vuln_mgmt', 'agent-policy-vuln_mgmt');
+        setupEsSearch(deps.esClient, {
+          ...emptyEsScenario(),
+          vulnerabilitiesLatestIndexStatus: 'unprivileged',
+          nativeScannerLatestIndexStatus: 'not-empty',
+        });
+        setupPackagePolicies(deps.packagePolicyService, [vulnPackagePolicy]);
+        setupAgents(deps.agentPolicyService, deps.agentService, {
+          'agent-policy-vuln_mgmt': 1,
+        });
+        setupInstallation(deps.packageServiceMocks, installationFixture(new Date().toISOString()));
+
+        const res = await callGetCspStatus(deps);
+
+        expect(res.vuln_mgmt.status).toBe('unprivileged');
+      });
     });
 
     describe('STATUS = INDEXING', () => {
