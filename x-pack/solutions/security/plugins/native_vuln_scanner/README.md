@@ -46,8 +46,8 @@ still applies. A scan that runs before the first inventory arrives finds nothing
 and the findings only appear at the next scan. To see a first result quickly:
 
 1. Create the pack with a short interval (for example `60`) and assign it to the agent policy.
-2. Wait for the agent to report results, then trigger a scan: restart Kibana once the last scan is older
-   than the scan interval, or run the task from Task Manager.
+2. Wait for the agent to report results, then restart Kibana. A restart triggers a scan only once
+   the last scan is older than the scan interval; otherwise the next run follows the schedule.
 3. Raise the pack interval back to `86400` once the first findings show up.
 
 To check what the last scan did, look for the `Vulnerability scan <run id>: {...}` line in the
