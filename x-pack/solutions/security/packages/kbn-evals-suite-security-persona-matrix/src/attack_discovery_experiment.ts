@@ -15,7 +15,9 @@ import type {
   AttackDiscoveryTaskOutput,
 } from '@kbn/evals-suite-attack-discovery/src/types';
 import { createAdFailureClassEvaluator } from './evaluators/ad_failure_class_evaluator';
+import { createAdAxesRubricEvaluator } from './evaluators/ad_axes_rubric_evaluator';
 import { createChainCoverageEvaluator } from './evaluators/chain_coverage_evaluator';
+import { isPersonaRubricJudgeEnabled } from './evaluators/persona_rubric_evaluator';
 
 // Derived from the rubric evaluator so this package needs no direct inference dependency.
 type EvaluationInferenceClient = Parameters<
@@ -32,7 +34,8 @@ export const CHRYSALIS_AD_DATASET_NAME = 'Attack Discovery Chrysalis kill-chains
 /**
  * Mirrors the attack-discovery suite's own experiment configuration
  * (`configureExperiment` in its `evaluate_dataset.ts`) so the original evaluator
- * names are unchanged; the two deterministic evaluators are appended.
+ * names are unchanged; the two deterministic evaluators are appended, plus the
+ * opt-in four-axis LLM judge when `PERSONA_MATRIX_RUBRIC_JUDGE=1`.
  */
 export const createChrysalisAdExperimentEvaluators = ({
   evaluators,
@@ -57,5 +60,8 @@ export const createChrysalisAdExperimentEvaluators = ({
     cachedTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
     createChainCoverageEvaluator(),
     createAdFailureClassEvaluator(),
+    ...(isPersonaRubricJudgeEnabled()
+      ? [createAdAxesRubricEvaluator({ inferenceClient: evaluationInferenceClient, log })]
+      : []),
   ];
 };

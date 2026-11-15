@@ -1,0 +1,139 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
+import { executeUntilValid } from '@kbn/inference-prompt-utils';
+import type { EvaluationResult, Evaluator } from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  buildPersonaRubricInput,
+  PERSONA_RUBRIC_MAX_SCORE,
+  PERSONA_RUBRIC_MIN_SCORE,
+  PersonaRubricPrompt,
+} from './persona_rubric_prompt';
+import { NO_TOOL_CALL_RUBRIC_CAP } from './rubric_cap_no_tool_call_evaluator';
+import { getAnswerText, getSteps, isRecord } from './task_output_helpers';
+
+export const PERSONA_RUBRIC_EVALUATOR_NAME = 'PersonaRubric';
+
+/** Opt-in: the extra judge call per cell is off unless this is `1`. */
+export const PERSONA_RUBRIC_JUDGE_ENV = 'PERSONA_MATRIX_RUBRIC_JUDGE';
+
+/** Per-result characters the judge sees; the shared judge payload cap bounds the rest. */
+const MAX_RESULT_CHARS = 4000;
+
+export const isPersonaRubricJudgeEnabled = (env: NodeJS.ProcessEnv = process.env): boolean =>
+  env[PERSONA_RUBRIC_JUDGE_ENV]?.trim() === '1';
+
+const unavailable = (explanation: string): EvaluationResult => ({
+  score: null,
+  label: 'unavailable',
+  explanation,
+});
+
+const compact = (value: unknown): string => {
+  const serialized = JSON.stringify(value) ?? '';
+  return serialized.length > MAX_RESULT_CHARS
+    ? `${serialized.slice(0, MAX_RESULT_CHARS)}…[${
+        serialized.length - MAX_RESULT_CHARS
+      } more chars]`
+    : serialized;
+};
+
+const getToolCallsWithResults = (output: unknown) =>
+  getSteps(output).flatMap((step) =>
+    step.type === 'tool_call' && typeof step.tool_id === 'string'
+      ? [
+          {
+            tool_id: step.tool_id,
+            params: isRecord(step.params) ? step.params : {},
+            results: step.results === undefined ? undefined : compact(step.results),
+          },
+        ]
+      : []
+  );
+
+const parseScore = (args: unknown): { score: number; explanation: string } | undefined => {
+  if (!isRecord(args)) return undefined;
+  const { score, explanation } = args;
+  if (
+    typeof score !== 'number' ||
+    !Number.isInteger(score) ||
+    score < PERSONA_RUBRIC_MIN_SCORE ||
+    score > PERSONA_RUBRIC_MAX_SCORE
+  ) {
+    return undefined;
+  }
+  return { score, explanation: typeof explanation === 'string' ? explanation : '' };
+};
+
+/**
+ * Grades one judged submission. Never throws: a judge failure or malformed
+ * verdict degrades to an "unavailable" result so the cell keeps its other scores.
+ */
+export const runPersonaRubricJudge = async ({
+  inferenceClient,
+  category,
+  judgeOutput,
+  log,
+}: {
+  inferenceClient: BoundInferenceClient;
+  category: string | undefined;
+  judgeOutput: unknown;
+  log?: ToolingLog;
+}): Promise<EvaluationResult> => {
+  const toolCalls = getToolCallsWithResults(judgeOutput);
+  try {
+    const response = await executeUntilValid({
+      prompt: PersonaRubricPrompt,
+      inferenceClient,
+      input: buildPersonaRubricInput({
+        category,
+        answer: getAnswerText(judgeOutput),
+        toolCalls,
+      }),
+      finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
+      maxRetries: 3,
+      toolCallbacks: {
+        grade: async (toolCall) => ({ response: toolCall.function.arguments }),
+      },
+    });
+
+    const verdict = parseScore(response.toolCalls[0]?.function.arguments);
+    if (!verdict) {
+      return unavailable('Judge returned no integer score between 1 and 10.');
+    }
+
+    const capped = toolCalls.length === 0;
+    const finalScore = capped ? Math.min(verdict.score, NO_TOOL_CALL_RUBRIC_CAP) : verdict.score;
+    return {
+      score: finalScore / PERSONA_RUBRIC_MAX_SCORE,
+      label: String(finalScore),
+      explanation: verdict.explanation,
+      metadata: {
+        raw_score: verdict.score,
+        capped_score: finalScore,
+        capped,
+        category: category ?? 'unspecified',
+      },
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log?.warning(`[persona-matrix] PersonaRubric judge failed: ${message}`);
+    return unavailable(`Judge call failed: ${message}`.slice(0, 1000));
+  }
+};
+
+/** Reads the verdict the task precomputed on the same judged submission. */
+export const createPersonaRubricEvaluator = (): Evaluator => ({
+  name: PERSONA_RUBRIC_EVALUATOR_NAME,
+  kind: 'LLM',
+  direction: 'maximize',
+  evaluate: async ({ output }) =>
+    (output as { personaRubricAnalysis?: EvaluationResult } | undefined)?.personaRubricAnalysis ??
+    unavailable('PersonaRubric judge did not produce a result for this example.'),
+});

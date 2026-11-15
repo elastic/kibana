@@ -7,6 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isValidTraceId } from '@opentelemetry/api';
 import {
   createQuantitativeCorrectnessEvaluators,
@@ -32,6 +33,11 @@ import {
   createConnectorInvokedEvaluator,
 } from './evaluators/connector_invoked_evaluator';
 import { createEicarTrapEvaluator } from './evaluators/eicar_trap_evaluator';
+import {
+  createPersonaRubricEvaluator,
+  isPersonaRubricJudgeEnabled,
+  runPersonaRubricJudge,
+} from './evaluators/persona_rubric_evaluator';
 import { createRubricCapNoToolCallEvaluator } from './evaluators/rubric_cap_no_tool_call_evaluator';
 import { createSimulationAwarenessEvaluator } from './evaluators/simulation_awareness_evaluator';
 import { createStalledAfterLoadSkillEvaluator } from './evaluators/stalled_after_load_skill_evaluator';
@@ -658,6 +664,7 @@ export function createEvaluatePersonaMatrixDataset({
   log,
   fetch,
   agentProfile = envAgentProfile,
+  evaluationInferenceClient,
 }: {
   chatClient: PersonaMatrixChatClient;
   evaluators: DefaultEvaluators;
@@ -668,6 +675,8 @@ export function createEvaluatePersonaMatrixDataset({
   fetch: HttpHandler;
   /** Agent the chat client converses with; defaults to the `AGENT_PROFILE` env. */
   agentProfile?: AgentProfile;
+  /** Judge-model client for `PersonaRubric`; the judge only runs when this and the env flag are set. */
+  evaluationInferenceClient?: BoundInferenceClient;
 }) {
   const identity = (datasetName: string) => reportingIdentity(datasetName, agentProfile);
   return async function evaluateDataset({
@@ -746,6 +755,11 @@ export function createEvaluatePersonaMatrixDataset({
         },
     };
 
+    const rubricJudgeClient = isPersonaRubricJudgeEnabled() ? evaluationInferenceClient : undefined;
+    if (isPersonaRubricJudgeEnabled() && !evaluationInferenceClient) {
+      log.warning('[persona-matrix] PERSONA_MATRIX_RUBRIC_JUDGE=1 but no judge client; skipping.');
+    }
+
     // Quantitative correctness/groundedness evaluators are pure functions of
     // the precomputed analyses attached to task output below — no LLM calls
     // at evaluate time. Mirrors `buildAlertsRagEvaluators`.
@@ -767,6 +781,7 @@ export function createEvaluatePersonaMatrixDataset({
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       precomputedCriteriaEvaluator,
+      ...(rubricJudgeClient ? [createPersonaRubricEvaluator()] : []),
       inputTokens,
       outputTokens,
       toolCalls,
@@ -877,7 +892,7 @@ export function createEvaluatePersonaMatrixDataset({
           // example's qualitative scores to "unavailable" (the quantitative
           // evaluators handle a missing analysis) rather than discarding the
           // agent's real trajectory, which the deterministic evaluators can score.
-          const [correctnessSettled, groundednessSettled, criteriaSettled] =
+          const [correctnessSettled, groundednessSettled, criteriaSettled, rubricResult] =
             await Promise.allSettled([
               withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
                 evaluators.correctnessAnalysis().evaluate({
@@ -903,6 +918,16 @@ export function createEvaluatePersonaMatrixDataset({
                   metadata: example.metadata,
                 })
               ),
+              rubricJudgeClient
+                ? withEvaluatorSpan('PersonaRubric', {}, () =>
+                    runPersonaRubricJudge({
+                      inferenceClient: rubricJudgeClient,
+                      category: (example as { category?: string }).category,
+                      judgeOutput,
+                      log,
+                    })
+                  )
+                : Promise.resolve(undefined),
             ]);
 
           for (const [name, settled] of [
@@ -931,6 +956,9 @@ export function createEvaluatePersonaMatrixDataset({
             groundednessAnalysis: groundednessResult?.metadata,
             criteriaAnalysis:
               criteriaSettled.status === 'fulfilled' ? criteriaSettled.value : undefined,
+            ...(rubricResult.status === 'fulfilled' && rubricResult.value
+              ? { personaRubricAnalysis: rubricResult.value }
+              : {}),
             ...(judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget
               ? { judgePayloadTrim }
               : {}),

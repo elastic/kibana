@@ -14,6 +14,8 @@ import {
   CHRYSALIS_AD_DATASET_NAME,
   createChrysalisAdExperimentEvaluators,
 } from './attack_discovery_experiment';
+import { AD_AXES_RUBRIC_EVALUATOR_NAME } from './evaluators/ad_axes_rubric_evaluator';
+import { PERSONA_RUBRIC_JUDGE_ENV } from './evaluators/persona_rubric_evaluator';
 import { AD_FAILURE_CLASS_EVALUATOR_NAME } from './evaluators/ad_failure_class_evaluator';
 import { CHAIN_COVERAGE_EVALUATOR_NAME } from './evaluators/chain_coverage_evaluator';
 
@@ -67,5 +69,39 @@ describe('Chrysalis AD experiment', () => {
       'Criteria',
       'AttackDiscoveryRubric',
     ]);
+  });
+
+  describe('AD axes judge flag', () => {
+    const original = process.env[PERSONA_RUBRIC_JUDGE_ENV];
+    const namesWithFlag = (value: string | undefined) => {
+      if (value === undefined) {
+        delete process.env[PERSONA_RUBRIC_JUDGE_ENV];
+      } else {
+        process.env[PERSONA_RUBRIC_JUDGE_ENV] = value;
+      }
+      return createChrysalisAdExperimentEvaluators({
+        evaluators,
+        evaluationInferenceClient,
+        log,
+      }).map(({ name }) => name);
+    };
+
+    afterEach(() => {
+      if (original === undefined) {
+        delete process.env[PERSONA_RUBRIC_JUDGE_ENV];
+      } else {
+        process.env[PERSONA_RUBRIC_JUDGE_ENV] = original;
+      }
+    });
+
+    it('does not register the axes judge when the flag is off', () => {
+      expect(namesWithFlag(undefined)).not.toContain(AD_AXES_RUBRIC_EVALUATOR_NAME);
+      expect(namesWithFlag('0')).not.toContain(AD_AXES_RUBRIC_EVALUATOR_NAME);
+    });
+
+    it('registers the axes judge last when the flag is on', () => {
+      const names = namesWithFlag('1');
+      expect(names[names.length - 1]).toBe(AD_AXES_RUBRIC_EVALUATOR_NAME);
+    });
   });
 });
