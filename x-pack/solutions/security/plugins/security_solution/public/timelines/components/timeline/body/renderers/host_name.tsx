@@ -16,7 +16,6 @@ import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_a
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 interface Props {
-  contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   isButton?: boolean;
   onClick?: () => void;

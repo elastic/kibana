@@ -20,6 +20,15 @@ export const PAGE_LOADS_LABEL = i18n.translate('xpack.digitalExperience.pageLoad
   defaultMessage: 'Page loads',
 });
 
+/** Why the sessions of the applications are not counted, for the places that show them. */
+export const SESSIONS_UNAVAILABLE_LABEL = i18n.translate(
+  'xpack.digitalExperience.sessions.unavailable',
+  {
+    defaultMessage:
+      'Counted from the session summaries, for time ranges within the last 30 days. Set sessions up in the Sessions tab of an EDOT Browser application.',
+  }
+);
+
 /** The name of the load time at the given percentile, e.g. "Load time (p95)". */
 export const loadTimeLabel = (percentile: number): string =>
   i18n.translate('xpack.digitalExperience.loadTime.label', {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
@@ -138,6 +137,7 @@ export interface AgentConfiguration {
 
   /**
    * When true, enables built-in Elastic capabilities for the agent.
+   * It adds Elastic's default tools and skills, and is unrelated to `capabilities`.
    */
   enable_elastic_capabilities?: boolean;
 
@@ -184,15 +184,40 @@ export interface AgentConfiguration {
   inference_feature_id?: string;
 
   /**
-   * Optional default reasoning level for this agent's runs. A `reasoning_level` passed to the
-   * converse API or workflow step overrides it.
-   */
-  reasoning_level?: ChatCompletionReasoningEffort;
-
-  /**
    * Destructive APIs pre-approved for every run of this agent.
    */
   approvals?: AgentApprovals;
+
+  /**
+   * Turns off built-in Agent Builder features for this agent. A missing key means the feature is on.
+   * Only agent types and built-in agents can set it: it cannot be set through the HTTP API, the
+   * agent form, `configuration_overrides` or the `ai.agent` workflow step.
+   */
+  capabilities?: AgentCapabilities;
+}
+
+/**
+ * The setting for one built-in agent feature.
+ */
+export interface AgentCapabilityConfig {
+  /**
+   * Set to `false` to turn the feature off. A missing value means on.
+   */
+  enabled?: boolean;
+}
+
+/**
+ * Built-in agent features that an agent type or built-in agent can turn off.
+ */
+export interface AgentCapabilities {
+  /**
+   * The generic attachment tools and the attachment instructions in the system prompt.
+   */
+  attachment_tools?: AgentCapabilityConfig;
+  /**
+   * The API tools: `discover_apis`, `describe_api`, `describe_api_type` and `execute_api`.
+   */
+  api_tools?: AgentCapabilityConfig;
 }
 
 /**
@@ -207,11 +232,12 @@ export interface AgentApprovals {
 }
 
 /**
- * Agent configuration without the fields that only built-in agents can declare.
+ * Agent configuration without the fields that only code can declare: built-in agents, and agent
+ * types for `capabilities`.
  */
 export type AgentConfigurationInput = Omit<
   AgentConfiguration,
-  'inference_feature_id' | 'reasoning_level'
+  'inference_feature_id' | 'capabilities'
 >;
 
 /**

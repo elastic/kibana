@@ -32,6 +32,7 @@ export type CloudPostureEntityIdentifier =
       EntityIdentifierFields,
       | EntityIdentifierFields.hostName
       | EntityIdentifierFields.userName
+      | EntityIdentifierFields.serviceName
       | EntityIdentifierFields.generic
     >
   | 'related.entity'; // related.entity is not an entity identifier field, but it includes entity ids which we use to filter for related entities

@@ -21,6 +21,7 @@ export const toApplication = (bucket: ClassicBucket): ApplicationSummary => {
     source: APPLICATION_SOURCE.classic,
     environments: bucketKeys(bucket.environments),
     pageLoads: { count: bucket.pageLoads.doc_count },
+    sessions: null,
     webVitals: toWebVitals(bucket),
     jsErrors: {
       count: bucket.jsErrors.doc_count,

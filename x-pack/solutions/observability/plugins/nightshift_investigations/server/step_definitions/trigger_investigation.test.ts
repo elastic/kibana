@@ -97,6 +97,38 @@ describe('triggerInvestigationStepDefinition', () => {
       );
     });
 
+    it('reads the producer run from significant event alert data, ignoring the step context', async () => {
+      const significantEventAlerts = [
+        {
+          alert_version: 'v2',
+          id: 'episode-1',
+          source: 'elastic.significant_events',
+          data: { workflow_execution_id: 'discovery-run-1' },
+        },
+      ];
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue(significantEventAlerts);
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { definition } = createDefinition(start);
+
+      await definition.handler(
+        createContext({
+          subject_type: 'alert',
+          subject_id: 'episode-1',
+          context: { source_workflow_execution_id: 'forged-run' },
+        })
+      );
+
+      expect(start).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: {
+            alerts: significantEventAlerts,
+            source_workflow_execution_id: 'discovery-run-1',
+          },
+        }),
+        expect.anything()
+      );
+    });
+
     describe('title fallback', () => {
       it.each([
         ['an empty title', 'elastic.significant_events', undefined, 'Checkout event'],

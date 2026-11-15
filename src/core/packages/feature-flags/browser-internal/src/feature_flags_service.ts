@@ -20,7 +20,12 @@ import type {
   MultiContextEvaluationContext,
 } from '@kbn/core-feature-flags-browser';
 import { apm } from '@elastic/apm-rum';
-import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
+import {
+  type Client,
+  type EvaluationDetails,
+  ClientProviderEvents,
+  OpenFeature,
+} from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
 import { useMemo } from 'react';
 import type { Observable } from 'rxjs';
@@ -69,6 +74,7 @@ declare global {
 interface ReportedFlagValue {
   type: FeatureFlagValueType;
   value: FeatureFlagValue;
+  reason?: string;
 }
 
 /** Injected provider values, with `feature_flags.overrides` winning. */
@@ -196,15 +202,15 @@ export class FeatureFlagsService {
     }
 
     const getBooleanValue = (flagName: string, fallbackValue: boolean) =>
-      this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue);
+      this.evaluateFlag(this.featureFlagsClient.getBooleanDetails, flagName, fallbackValue);
     const getBooleanValue$ = (flagName: string, fallbackValue: boolean) =>
       observeFeatureFlag$(flagName).pipe(map(() => getBooleanValue(flagName, fallbackValue)));
     const getStringValue = <Value extends string>(flagName: string, fallbackValue: Value) =>
-      this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue);
+      this.evaluateFlag<Value>(this.featureFlagsClient.getStringDetails, flagName, fallbackValue);
     const getStringValue$ = <Value extends string>(flagName: string, fallbackValue: Value) =>
       observeFeatureFlag$(flagName).pipe(map(() => getStringValue(flagName, fallbackValue)));
     const getNumberValue = <Value extends number>(flagName: string, fallbackValue: Value) =>
-      this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue);
+      this.evaluateFlag<Value>(this.featureFlagsClient.getNumberDetails, flagName, fallbackValue);
     const getNumberValue$ = <Value extends number>(flagName: string, fallbackValue: Value) =>
       observeFeatureFlag$(flagName).pipe(map(() => getNumberValue(flagName, fallbackValue)));
 
@@ -396,18 +402,18 @@ export class FeatureFlagsService {
    * @internal
    */
   private evaluateFlag<T extends FeatureFlagValue>(
-    evaluationFn: (flagName: string, fallbackValue: T) => T,
+    evaluationFn: (flagName: string, fallbackValue: T) => EvaluationDetails<T>,
     flagName: string,
     fallbackValue: T
   ): T {
     // Bind the evaluation or the client will lose its internal context.
     // Overrides are already part of the server snapshot this provider reads
     // and are taken into account in the `initialFlags` property when bootstrapping the client.
-    const value = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    const { value, reason } = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
     this.rememberEvaluation(flagName, value);
-    this.reportValueIfChanged(flagName, value);
+    this.reportValueIfChanged(flagName, value, reason);
 
     return value;
   }
@@ -425,8 +431,12 @@ export class FeatureFlagsService {
     this.evaluatedFlags.set(flagName, value);
   }
 
-  private reportValueIfChanged(flagName: string, value: FeatureFlagValue): void {
-    if (!this.shouldReportValue(flagName, value)) {
+  private reportValueIfChanged(
+    flagName: string,
+    value: FeatureFlagValue,
+    reason: string | undefined
+  ): void {
+    if (!this.shouldReportValue(flagName, value, reason)) {
       return;
     }
 
@@ -434,21 +444,29 @@ export class FeatureFlagsService {
     // TODO: When UI has OTel instrumented, we can increment the counter in the browser directly.
     this.http
       ?.post(buildPath('/internal/feature-flags/{flagName}/counter', { flagName }), {
-        body: JSON.stringify({ value }),
+        body: JSON.stringify({ value, reason }),
       })
       .catch(() => {});
   }
 
-  private shouldReportValue(flagName: string, value: FeatureFlagValue): boolean {
+  private shouldReportValue(
+    flagName: string,
+    value: FeatureFlagValue,
+    reason: string | undefined
+  ): boolean {
     const type = getFeatureFlagValueType(value);
     const lastReportedValue = this.lastReportedValues.get(flagName);
     // Object.is takes care string, number (incl. NaN), boolean comparison
-    if (lastReportedValue?.type === type && Object.is(lastReportedValue.value, value)) {
+    if (
+      lastReportedValue?.type === type &&
+      Object.is(lastReportedValue.value, value) &&
+      lastReportedValue.reason === reason
+    ) {
       return false;
     }
 
     // Counter reporting is best effort; record before posting to cap attempts at one per unique value.
-    this.lastReportedValues.set(flagName, { type, value });
+    this.lastReportedValues.set(flagName, { type, value, reason });
     return true;
   }
 

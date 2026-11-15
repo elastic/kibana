@@ -23,7 +23,6 @@ import {
   StatusChange,
 } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 import { mergeSignalsLatestPerRule } from './episode_context';
-import type { EventsWriteSource } from './severity_lock';
 import {
   buildWriteCandidates,
   DEFAULT_INACTIVE_LOOKBACK_MS,
@@ -84,7 +83,6 @@ const MAX_HELD_NOTE_LENGTH = 1000;
 export async function eventsWriteBulkHandler({
   eventSearchClient,
   inputs,
-  source,
   rejectUnknownEventIds,
   inactiveLookbackMs = DEFAULT_INACTIVE_LOOKBACK_MS,
   logger,
@@ -92,7 +90,6 @@ export async function eventsWriteBulkHandler({
   /** Reads prior versions and live events from `.rule-events`, and writes each new version. */
   eventSearchClient: RuleEventsClient;
   inputs: EventsWriteInput[];
-  source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
   rejectUnknownEventIds?: boolean;
   /** How long a closed series stays reusable by a batch it covers (default 48 h). */
@@ -144,11 +141,9 @@ export async function eventsWriteBulkHandler({
     logger,
   });
 
-  // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate,
+  // Facts (merged signals/topology, decided severity) are derived once per candidate,
   // so the no-op check and the final document agree on the same severity.
-  const eventsFacts = held.kept.map((candidate) =>
-    computeEventFacts({ candidate, timestamp, source })
-  );
+  const eventsFacts = held.kept.map((candidate) => computeEventFacts({ candidate, timestamp }));
   const changed = keepChanged({ facts: eventsFacts });
 
   [known, decided, held, changed].forEach(({ skipped }) =>
@@ -243,7 +238,11 @@ const decideStatuses = ({
     const continuesUnknownEvent =
       latest === undefined && input.event_id !== undefined && outcome !== 'breached';
     if (decision.write && !continuesUnknownEvent) {
-      stage.kept.push({ ...candidate, status: decision.status });
+      stage.kept.push({
+        ...candidate,
+        status: decision.status,
+        change: StatusChange.assessed(outcome),
+      });
       return;
     }
     if (latest === undefined && input.event_id !== undefined) {
@@ -409,13 +408,15 @@ const writeVersions = ({
     pendingWrites.map(({ candidate, document }) =>
       writeLimit(async (): Promise<WriteOutcome> => {
         try {
+          const origin = { actor: 'agent_tool' as const, change: candidate.change };
           if (candidate.latest === undefined) {
-            const { groupHash } = await eventSearchClient.createEvent({ event: document });
+            const { groupHash } = await eventSearchClient.createEvent({ event: document, origin });
             return { created: true, groupHash };
           }
           const written = await eventSearchClient.updateEvent({
             event: document,
             prior: candidate.latest,
+            origin,
           });
           return written.updated
             ? { created: false }

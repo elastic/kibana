@@ -71,7 +71,7 @@ describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockBuild.mockResolvedValue({
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       template: '<div>generated</div>',
       height: 320,
     });
@@ -124,14 +124,56 @@ describe('createUpdateCustomContentTool handler', () => {
           index: 'logs-*',
           esql: undefined,
           regenerateESQL: undefined,
-          existing: { esqlQuery: 'FROM logs', template: '<p>old</p>' },
+          existing: { esqlQueries: ['FROM logs'], template: '<p>old</p>' },
         })
       );
     });
 
+    it('hands the additional queries of the panel to the builder, to keep through the edit', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Restyle' },
+        { ...existing, additional_esql_queries: ['FROM metrics', 'FROM traces'] }
+      );
+
+      expect(mockBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          existing: expect.objectContaining({
+            esqlQueries: ['FROM logs', 'FROM metrics', 'FROM traces'],
+          }),
+        })
+      );
+    });
+
+    it('stores the additional queries the builder keeps, and none when it returns none', async () => {
+      mockBuild.mockResolvedValueOnce({
+        esqlQueries: ['FROM logs', 'FROM metrics'],
+        template: '<div>kept</div>',
+        height: 320,
+      });
+      const kept = await callHandler({ embeddable_id: 'p1', prompt: 'Restyle' }, existing);
+
+      expect(kept.ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
+      expect(kept.ctx.sendUiEvent).toHaveBeenCalledWith(
+        CUSTOM_CONTENT_UPDATED_UI_EVENT,
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        })
+      );
+
+      const none = await callHandler({ embeddable_id: 'p1', prompt: 'Restyle' }, existing);
+      const [, { data }] = none.ctx.update.mock.calls[0];
+      expect(data).not.toHaveProperty('additional_esql_queries');
+    });
+
     it('stores the template and the query the builder returns', async () => {
       mockBuild.mockResolvedValue({
-        esqlQuery: 'FROM logs | STATS count = COUNT(*) BY host',
+        esqlQueries: ['FROM logs | STATS count = COUNT(*) BY host'],
         template: '<div>generated</div>',
         height: 320,
       });
@@ -185,7 +227,11 @@ describe('createUpdateCustomContentTool handler', () => {
     });
 
     it('forwards esqlQuery: null, which removes the query, and stores none', async () => {
-      mockBuild.mockResolvedValue({ template: '<p>static</p>', height: 200 });
+      mockBuild.mockResolvedValue({
+        esqlQueries: [],
+        template: '<p>static</p>',
+        height: 200,
+      });
 
       const { ctx } = await callHandler({ embeddable_id: 'p1', esqlQuery: null }, existing);
 
@@ -209,7 +255,7 @@ describe('createUpdateCustomContentTool handler', () => {
       );
 
       expect(mockBuild).toHaveBeenCalledWith(
-        expect.objectContaining({ existing: { esqlQuery: undefined, template: undefined } })
+        expect.objectContaining({ existing: { esqlQueries: [], template: undefined } })
       );
     });
 
