@@ -46,6 +46,20 @@ export interface ScanSummary {
   fixSkipped: number;
   matchStats: MatchStats;
   aborted: boolean;
+  packMissing: boolean;
+}
+
+export type ScanRunStatus = 'success' | 'failed' | 'aborted' | 'no_pack';
+
+/** Outcome of the latest run, kept in the task state so it can be read without the logs. */
+export interface ScanLastRun {
+  runId: string;
+  finishedAt: string;
+  status: ScanRunStatus;
+  hosts: number;
+  findings: number;
+  releases: Record<string, 'matched' | 'unavailable' | 'failed'>;
+  error?: string;
 }
 
 export class ScanFailedError extends Error {
@@ -86,11 +100,17 @@ export const runScan = async (
     fixSkipped: 0,
     matchStats: {},
     aborted: false,
+    packMissing: false,
   };
 
   const scheduleIds = await findInventoryScheduleIds(packRepository);
   if (Object.keys(scheduleIds).length === 0) {
-    logger.info('No "software-inventory" osquery pack found; nothing to scan');
+    summary.packMissing = true;
+    logger.warn(
+      'No "software-inventory" osquery pack found, so there is nothing to scan. Create the pack ' +
+        'with its four inventory queries and assign it to an agent policy (see the ' +
+        'native_vuln_scanner README); the next scan picks it up.'
+    );
     return summary;
   }
 
@@ -99,6 +119,13 @@ export const runScan = async (
   const agents = await collect(readAgentInventories(es, { scheduleIds, signal }));
   const { hosts, skippedHosts, skippedRows } = normalizeInventories(agents);
   Object.assign(summary, { hosts: hosts.length, skippedHosts, skippedRows });
+  if (hosts.length === 0) {
+    logger.warn(
+      'The "software-inventory" pack exists but no agent has reported inventory results yet. ' +
+        'Check that the pack is assigned to an agent policy and that its queries have run ' +
+        '(a pack with a long interval can take that long to report the first time).'
+    );
+  }
 
   const byRelease = new Map<string, NormalizedHost[]>();
   for (const host of hosts) {
@@ -119,8 +146,9 @@ export const runScan = async (
       const result = await load(os, { signal });
       if (result.status === 'unavailable') {
         summary.releases[key] = 'unavailable';
-        logger.info(
-          `No advisory feed for ${key} (${result.url}); skipped ${releaseHosts.length} hosts`
+        logger.warn(
+          `No advisory feed for ${key} (${result.url}); skipped ${releaseHosts.length} hosts. ` +
+            'This OS release is not supported by the native scanner, so its findings are not updated.'
         );
         continue;
       }
@@ -150,7 +178,10 @@ export const runScan = async (
       }
       summary.releases[key] = 'failed';
       failures[key] = error instanceof Error ? error.message : String(error);
-      logger.warn(`Vulnerability scan of ${key} failed: ${failures[key]}`);
+      logger.warn(
+        `Vulnerability scan of ${key} failed: ${failures[key]}. If this is a feed download error, ` +
+          'check that Kibana can reach the vendor advisory host; the scan is retried on its next run.'
+      );
     }
   }
 
@@ -172,10 +203,33 @@ export const registerScanTask = (
       priority: TaskPriority.Deferrable,
       createTaskRunner: ({ signal, executionUuid }) => ({
         run: async () => {
-          // A recurring task is rescheduled on its interval whatever the error, so errors are
-          // thrown as-is. Marking one unrecoverable would delete the task instead.
-          await runScan(await getDeps(), { signal, runId: executionUuid });
-          return { state: {} };
+          const deps = await getDeps();
+          const now = deps.now ?? (() => new Date());
+          const base = { runId: executionUuid, finishedAt: now().toISOString() };
+          try {
+            const summary = await runScan(deps, { signal, runId: executionUuid });
+            const status: ScanRunStatus = summary.packMissing
+              ? 'no_pack'
+              : summary.aborted
+              ? 'aborted'
+              : 'success';
+            const { hosts, findings, releases } = summary;
+            return { state: { lastRun: { ...base, status, hosts, findings, releases } } };
+          } catch (error) {
+            // Returning the error (not throwing) lets Task Manager persist the state; a recurring
+            // task is rescheduled on its interval either way. Marking it unrecoverable would
+            // delete the task instead.
+            const failed = error instanceof Error ? error : new Error(String(error));
+            const lastRun: ScanLastRun = {
+              ...base,
+              status: 'failed',
+              hosts: 0,
+              findings: 0,
+              releases: {},
+              error: failed.message,
+            };
+            return { state: { lastRun }, error: failed };
+          }
         },
       }),
     },

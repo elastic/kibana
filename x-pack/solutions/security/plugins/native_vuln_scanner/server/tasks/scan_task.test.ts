@@ -117,6 +117,8 @@ describe('runScan', () => {
     findIdsMock.mockResolvedValue({});
     const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
     expect(summary.hosts).toBe(0);
+    expect(summary.packMissing).toBe(true);
+    expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('osquery pack found'));
     expect(readMock).not.toHaveBeenCalled();
     expect(ensureMock).not.toHaveBeenCalled();
     expect(loadFeed).not.toHaveBeenCalled();
@@ -156,6 +158,14 @@ describe('runScan', () => {
     expect(summary.findings).toBeGreaterThan(0);
   });
 
+  it('warns when the pack exists but no agent has reported inventory', async () => {
+    const { deps } = setup([]);
+    await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('no agent has reported inventory')
+    );
+  });
+
   it('skips a release with no vendor feed and leaves its hosts out of the write', async () => {
     const { deps } = setup([rhelAgent('a1', '9'), rhelAgent('a10', '10')], async (os) =>
       os.version === '10' ? unavailable(os) : rhel9Feed()
@@ -164,6 +174,7 @@ describe('runScan', () => {
     const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
 
     expect(summary.releases).toEqual({ 'rhel:9': 'matched', 'rhel:10': 'unavailable' });
+    expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('No advisory feed'));
     expect(writeMock).toHaveBeenCalledTimes(1);
     expect(writeMock.mock.calls[0][1].hosts.map(({ id }) => id)).toEqual(['a1']);
   });
@@ -238,12 +249,22 @@ describe('registerScanTask', () => {
       signal,
       executionUuid: 'exec-1',
     } as Parameters<typeof definition.createTaskRunner>[0]);
-    await expect(runner.run()).resolves.toEqual({ state: {} });
+    await expect(runner.run()).resolves.toEqual({
+      state: {
+        lastRun: expect.objectContaining({
+          runId: 'exec-1',
+          finishedAt: '2026-11-13T00:00:00.000Z',
+          status: 'success',
+          hosts: 1,
+          releases: { 'rhel:9': 'matched' },
+        }),
+      },
+    });
     expect(getDeps).toHaveBeenCalledTimes(1);
     expect(writeMock.mock.calls[0][1].runId).toBe('exec-1');
   });
 
-  it('rethrows a scan failure so Task Manager records the run as failed', async () => {
+  it('returns a scan failure with the failed run recorded in the task state', async () => {
     const taskManager = taskManagerMock.createSetup();
     const { deps } = setup([rhelAgent('a1', '9')], async () => {
       throw new Error('boom');
@@ -255,7 +276,36 @@ describe('registerScanTask', () => {
       signal: new AbortController().signal,
       executionUuid: 'exec-1',
     } as Parameters<typeof definition.createTaskRunner>[0]);
-    await expect(runner.run()).rejects.toBeInstanceOf(ScanFailedError);
+
+    const result = await runner.run();
+
+    expect(result).toEqual({
+      state: {
+        lastRun: expect.objectContaining({
+          runId: 'exec-1',
+          status: 'failed',
+          error: expect.stringContaining('boom'),
+        }),
+      },
+      error: expect.any(ScanFailedError),
+    });
+  });
+
+  it('records a run without the inventory pack as no_pack', async () => {
+    const taskManager = taskManagerMock.createSetup();
+    const { deps } = setup([]);
+    findIdsMock.mockResolvedValue({});
+    registerScanTask(taskManager, async () => deps);
+    const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][SCAN_TASK_TYPE];
+    const runner = definition.createTaskRunner({
+      taskInstance: { id: SCAN_TASK_ID } as ConcreteTaskInstance,
+      signal: new AbortController().signal,
+      executionUuid: 'exec-2',
+    } as Parameters<typeof definition.createTaskRunner>[0]);
+
+    await expect(runner.run()).resolves.toEqual({
+      state: { lastRun: expect.objectContaining({ status: 'no_pack', hosts: 0, findings: 0 }) },
+    });
   });
 });
 
