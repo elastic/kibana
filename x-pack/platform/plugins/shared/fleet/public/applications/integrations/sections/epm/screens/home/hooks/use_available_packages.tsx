@@ -163,7 +163,10 @@ export const useAvailablePackages = ({
    * When true, packages sharing a `group` id are collapsed into a single collection
    * tile (subject to the `enableIntegrationCollectionTiles` feature flag).
    * Omit or pass false in contexts where collection tiles are not appropriate
-   * (e.g. the agent policy add-integration flyout, Security onboarding).
+   * (e.g. the agent policy add-integration flyout).
+   * Hosts outside the Integrations app that enable this must also pass
+   * `collectionReturnLocation` to `PackageListGrid` (or render their own chooser), otherwise a
+   * click on a collection tile has nowhere to go.
    */
   enableCollectionGrouping?: boolean;
 }) => {

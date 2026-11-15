@@ -13,13 +13,14 @@ import { APP_INTEGRATIONS_PATH, ONBOARDING_PATH } from '../../../../../common/co
 import {
   CARD_DESCRIPTION_LINE_CLAMP,
   CARD_TITLE_LINE_CLAMP,
+  COLLECTION_CARD_DESCRIPTION_LINE_CLAMP,
   INTEGRATION_APP_ID,
   MAX_CARD_HEIGHT_IN_PX,
   TELEMETRY_INTEGRATION_CARD,
 } from '../constants';
 import { useIntegrationContext } from './integration_context';
 import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
-import { addPathParamToUrl } from '../../../utils/integrations';
+import { addPathParamToUrl, isFeaturedCard } from '../../../utils/integrations';
 import type { UseSelectedTabReturn } from './use_selected_tab';
 
 export type GetCardItemExtraProps = (card: IntegrationCardItem) => Partial<IntegrationCardItem>;
@@ -35,12 +36,19 @@ const useAddSecurityProps = (activeIntegrations: GetInstalledPackagesResponse['i
       const url = card.url.includes(APP_INTEGRATIONS_PATH)
         ? addPathParamToUrl(card.url, ONBOARDING_PATH)
         : card.url;
-      const isActive = activeIntegrations.some((integration) => integration.name === card.name);
+      // A collection card's `name` is its group id, so it is active when any of its members is.
+      const isActive = activeIntegrations.some(
+        (integration) =>
+          integration.name === card.name ||
+          card.groupMembers?.some((member) => member.name === integration.name)
+      );
 
       return {
         ...card,
         titleLineClamp: CARD_TITLE_LINE_CLAMP,
-        descriptionLineClamp: CARD_DESCRIPTION_LINE_CLAMP,
+        descriptionLineClamp: card.isCollectionCard
+          ? COLLECTION_CARD_DESCRIPTION_LINE_CLAMP
+          : CARD_DESCRIPTION_LINE_CLAMP,
         maxCardHeight: MAX_CARD_HEIGHT_IN_PX,
         showInstallationStatus: true,
         url,
@@ -88,7 +96,7 @@ export const useIntegrationCardList = ({
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {
-    return integrationCards.filter((card) => featuredCardIds.includes(card.id));
+    return integrationCards.filter((card) => isFeaturedCard(card, featuredCardIds));
   }
   return integrationCards ?? [];
 };

@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { EuiHorizontalRule, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { CardIcon } from '../../../../../../components/package_icon';
 import { useBreadcrumbs } from '../../../../hooks';
 
 import { PackageListGrid } from '../../components/package_list_grid';
@@ -19,6 +18,7 @@ import { AgentlessFilter } from '../../components/agentless_filter';
 import { NoEprCallout } from '../../components/no_epr_callout';
 
 import { CategoryFacets } from './category_facets';
+import { buildCollectionVariants } from './collection_variants';
 
 import { categoryExists } from '.';
 
@@ -162,28 +162,10 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
   }, [openCollectionGroupId, pathname, search]);
 
   const collectionVariants: CollectionVariant[] = useMemo(() => {
-    if (!openCollectionCard?.groupMembers || !collectionReturnPath) return [];
-    return openCollectionCard.groupMembers.map((member) => {
-      const returnParams = new URLSearchParams({
-        returnAppId: 'integrations',
-        returnPath: collectionReturnPath,
-      });
-      const separator = member.url.includes('?') ? '&' : '?';
-      return {
-        id: member.id,
-        title: member.title,
-        description: member.description,
-        icon: (
-          <CardIcon
-            icons={member.icons}
-            packageName={member.name}
-            version={member.version}
-            size="l"
-          />
-        ),
-        href: `${member.url}${separator}${returnParams.toString()}`,
-        'data-test-subj': `collectionVariantRow-${member.id}`,
-      };
+    if (!openCollectionCard || !collectionReturnPath) return [];
+    return buildCollectionVariants(openCollectionCard, {
+      returnAppId: 'integrations',
+      returnPath: collectionReturnPath,
     });
   }, [openCollectionCard, collectionReturnPath]);
 
