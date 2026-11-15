@@ -11,7 +11,10 @@ import { tags } from '@kbn/evals';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { evaluate } from '../../src/evaluate';
-import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
+import {
+  formatKnowledgeExperimentName,
+  restoreKnowledge,
+} from '../../src/knowledge/restore_knowledge';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import {
@@ -161,6 +164,10 @@ export const registerInvestigationEvaluation = ({
         });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const knowledgeMetadata = await restoreKnowledge({ esClient, log });
+        const resolvedExperimentName = formatKnowledgeExperimentName(
+          experimentName,
+          knowledgeMetadata.knowledge
+        );
         const runExperiment = ({
           runConcurrency,
           task,
@@ -170,7 +177,7 @@ export const registerInvestigationEvaluation = ({
         }) =>
           executorClient.runExperiment(
             {
-              name: experimentName,
+              name: resolvedExperimentName,
               datasets: [dataset],
               trustUpstreamDataset,
               concurrency: runConcurrency,

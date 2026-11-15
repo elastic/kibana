@@ -75,11 +75,17 @@ const inSpace = (spaceId: string): estypes.QueryDslQueryContainer => ({
   term: { [SPACE_ID_FIELD]: spaceId },
 });
 
-const isIndexNotFound = (error: unknown): boolean =>
-  typeof error === 'object' &&
-  error !== null &&
-  'statusCode' in error &&
-  (error as { statusCode?: number }).statusCode === 404;
+const isIndexNotFound = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error === null) return false;
+  const { statusCode, body } = error as {
+    statusCode?: number;
+    body?: { error?: { type?: string } };
+  };
+  return (
+    statusCode === 404 &&
+    (body?.error?.type === undefined || body.error.type === 'index_not_found_exception')
+  );
+};
 
 const readSpace = async (source: Client, index: string, spaceId: string) => {
   const hits: Array<{ _id: string; _source: Record<string, unknown> }> = [];
@@ -104,7 +110,12 @@ const readSystem = async (source: Client, system: KnowledgeSystem, spaceId: stri
   } catch (error) {
     if (system !== 'wiki' || !isIndexNotFound(error)) throw error;
   }
-  return readSpace(source, LEGACY_WIKI_AI_INDEX_DEST, spaceId);
+  try {
+    return await readSpace(source, LEGACY_WIKI_AI_INDEX_DEST, spaceId);
+  } catch (error) {
+    if (isIndexNotFound(error)) return [];
+    throw error;
+  }
 };
 
 const writeAll = async (
@@ -130,6 +141,30 @@ const writeAll = async (
   await esClient.indices.refresh({ index });
 };
 
+const clearSpaceKnowledge = async (esClient: Client, targetSpaceId: string) => {
+  for (const index of Object.values(KNOWLEDGE_INDICES)) {
+    await esClient.deleteByQuery({
+      index,
+      query: inSpace(targetSpaceId),
+      refresh: true,
+      conflicts: 'proceed',
+      ignore_unavailable: true,
+    });
+  }
+};
+
+/**
+ * Appends `(knowledge: <systems>)` to the experiment name when knowledge is enabled so
+ * knowledge-on runs stay in their own score series instead of mixing with baseline runs.
+ */
+export const formatKnowledgeExperimentName = (
+  experimentName: string,
+  knowledge: string | number | undefined
+): string =>
+  knowledge && knowledge !== 'none'
+    ? `${experimentName} (knowledge: ${knowledge})`
+    : experimentName;
+
 /**
  * Replaces the eval space's knowledge with the source space's, for every selected system, before
  * the first example runs. Returns what was loaded, for the experiment's metadata.
@@ -153,7 +188,12 @@ export const restoreKnowledge = async ({
   env?: NodeJS.ProcessEnv;
   createSourceClient?: (url: string, apiKey: string) => Client;
 }): Promise<Record<string, string | number>> => {
-  if (systems.length === 0) return { knowledge: 'none' };
+  if (systems.length === 0) {
+    // `evals run` reuses the running Scout server, so clear any knowledge an earlier run left in
+    // the eval space before recording `knowledge: 'none'`.
+    await clearSpaceKnowledge(esClient, targetSpaceId);
+    return { knowledge: 'none' };
+  }
 
   const { NIGHTSHIFT_KNOWLEDGE_ES_URL: url, NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: apiKey } = env;
   const sourceSpaceId = env.NIGHTSHIFT_KNOWLEDGE_SPACE_ID || 'default';
@@ -184,15 +224,7 @@ export const restoreKnowledge = async ({
 
   // A reused Scout stack keeps the previous run's knowledge. Clear every system, not only the
   // selected ones: decision trees run the Wiki runtime, which must not read an earlier run's pages.
-  for (const index of Object.values(KNOWLEDGE_INDICES)) {
-    await esClient.deleteByQuery({
-      index,
-      query: inSpace(targetSpaceId),
-      refresh: true,
-      conflicts: 'proceed',
-      ignore_unavailable: true,
-    });
-  }
+  await clearSpaceKnowledge(esClient, targetSpaceId);
   for (const [system, hits] of dumps) {
     await writeAll(
       esClient,
