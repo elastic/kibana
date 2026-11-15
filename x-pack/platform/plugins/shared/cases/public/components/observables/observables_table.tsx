@@ -6,7 +6,12 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { Criteria, EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
+import type {
+  Criteria,
+  EuiBasicTableColumn,
+  EuiComboBoxOptionOption,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 
 import {
   EuiBasicTable,
@@ -15,6 +20,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
   EuiSelect,
   EuiSkeletonText,
   EuiSpacer,
@@ -22,9 +28,16 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
-import type { FindObservablesRequest } from '../../../common/types/api';
-import type { Observable, ObservableType } from '../../../common/types/domain';
+import {
+  MAX_OBSERVABLE_METADATA_FILTERS,
+  OBSERVABLE_TYPES_BUILTIN,
+} from '../../../common/constants';
+import type {
+  FindObservablesRequest,
+  ObservableMetadataFilter,
+  ObservableWithMetadata,
+} from '../../../common/types/api';
+import type { ObservableType } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui';
 import * as i18n from './translations';
 import { AddObservable } from './add_observable';
@@ -33,8 +46,14 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 import { useFindObservables } from '../../containers/use_find_observables';
 import { ObservablesUtilityBar } from './observables_utility_bar';
 import { ObservablesLimitCallout } from './observables_limit_callout';
+import { ObservableMetadataBadges } from './observable_metadata_badges';
+import { parseMetadataFilter } from './metadata_filter';
 import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useObservableFlyoutApi } from './flyout/use_observable_flyout_api';
+import { useOpenLinkedObservable } from './flyout/use_open_linked_observable';
+import { ObservableCasesCount } from './observable_cases_count';
+import { useCountCasesByObservables } from '../../containers/use_count_cases_by_observables';
 
 type ObservableSortField = NonNullable<FindObservablesRequest['sortField']>;
 
@@ -55,11 +74,43 @@ const SORT_FIELDS: ReadonlySet<string> = new Set<ObservableSortField>([
 
 const isSortField = (field: string): field is ObservableSortField => SORT_FIELDS.has(field);
 
+const countKey = ({ typeKey, value }: Pick<ObservableWithMetadata, 'typeKey' | 'value'>) =>
+  JSON.stringify([typeKey, value]);
+
+interface RelatedCasesColumnOptions {
+  getCount: (observable: ObservableWithMetadata) => number | undefined;
+  isLoading: boolean;
+  onShowCases: (observable: ObservableWithMetadata) => void;
+}
+
 const getColumns = (
   caseData: CaseUI,
   observableTypes: ObservableType[],
-  canRunWorkflow: boolean
-): Array<EuiBasicTableColumn<Observable>> => [
+  canRunWorkflow: boolean,
+  onViewDetails: (observable: ObservableWithMetadata) => void,
+  relatedCases: RelatedCasesColumnOptions
+): Array<EuiBasicTableColumn<ObservableWithMetadata>> => [
+  {
+    name: (
+      <EuiScreenReaderOnly>
+        <span>{i18n.VIEW_OBSERVABLE_DETAILS}</span>
+      </EuiScreenReaderOnly>
+    ),
+    width: '40px',
+    'data-test-subj': 'cases-observables-table-expand',
+    render: (observable: ObservableWithMetadata) => (
+      <EuiToolTip content={i18n.VIEW_OBSERVABLE_DETAILS} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="maximize"
+          size="xs"
+          color="primary"
+          aria-label={i18n.VIEW_OBSERVABLE_DETAILS}
+          onClick={() => onViewDetails(observable)}
+          data-test-subj={`cases-observables-table-expand-${observable.id}`}
+        />
+      </EuiToolTip>
+    ),
+  },
   {
     name: i18n.OBSERVABLE_VALUE,
     field: 'value',
@@ -80,6 +131,25 @@ const getColumns = (
     'data-test-subj': 'cases-observables-table-description',
   },
   {
+    name: i18n.OBSERVABLE_METADATA,
+    field: 'metadata',
+    'data-test-subj': 'cases-observables-table-metadata',
+    render: (metadata?: Record<string, string>) => <ObservableMetadataBadges metadata={metadata} />,
+  },
+  {
+    name: i18n.RELATED_CASES,
+    'data-test-subj': 'cases-observables-table-related-cases',
+    width: '120px',
+    render: (observable: ObservableWithMetadata) => (
+      <ObservableCasesCount
+        count={relatedCases.getCount(observable)}
+        isLoading={relatedCases.isLoading}
+        onShowCases={() => relatedCases.onShowCases(observable)}
+        data-test-subj={`cases-observables-table-related-cases-${observable.id}`}
+      />
+    ),
+  },
+  {
     name: i18n.DATE_ADDED,
     field: 'createdAt',
     sortable: true,
@@ -94,7 +164,7 @@ const getColumns = (
     actions: [
       {
         name: i18n.OBSERVABLE_ACTIONS,
-        render: (observable: Observable) => {
+        render: (observable: ObservableWithMetadata) => {
           return (
             <ObservableActionsPopoverButton
               caseData={caseData}
@@ -150,6 +220,13 @@ export const ObservablesTable = ({
   const cursor = cursors[pageIndex];
 
   const [selectedTypeKeys, setSelectedTypeKeys] = useState<string[]>([]);
+  const [metadataFilterOptions, setMetadataFilterOptions] = useState<
+    Array<EuiComboBoxOptionOption<ObservableMetadataFilter>>
+  >([]);
+  const metadataFilters = useMemo(
+    () => metadataFilterOptions.flatMap(({ value }) => (value != null ? [value] : [])),
+    [metadataFilterOptions]
+  );
 
   useEffect(() => {
     setCursors([undefined]);
@@ -181,6 +258,7 @@ export const ObservablesTable = ({
       typeKeys,
       ...(cursor != null && { cursor }),
       ...(searchTerm && { search: searchTerm }),
+      ...(metadataFilters.length > 0 && { metadata: metadataFilters }),
     },
     { enabled: !loadingCaseConfigure }
   );
@@ -193,6 +271,26 @@ export const ObservablesTable = ({
     () => typeOptions.filter(({ value }) => selectedTypeKeys.includes(value)),
     [selectedTypeKeys, typeOptions]
   );
+  const onMetadataFilterCreate = useCallback((input: string) => {
+    const filter = parseMetadataFilter(input);
+    if (filter == null) {
+      return false;
+    }
+    setMetadataFilterOptions((previous) =>
+      previous.length >= MAX_OBSERVABLE_METADATA_FILTERS
+        ? previous
+        : [...previous, { label: input.trim(), value: filter }]
+    );
+    setCursors([undefined]);
+  }, []);
+  const onMetadataFilterChange = useCallback(
+    (options: Array<EuiComboBoxOptionOption<ObservableMetadataFilter>>) => {
+      setMetadataFilterOptions(options);
+      setCursors([undefined]);
+    },
+    []
+  );
+
   const onTypeFilterChange = useCallback((options: Array<{ value?: string }>) => {
     setSelectedTypeKeys(options.flatMap(({ value }) => (value != null ? [value] : [])));
     setCursors([undefined]);
@@ -223,18 +321,19 @@ export const ObservablesTable = ({
   );
 
   const onSelectionChange = useCallback(
-    (selectedItems: Observable[]) => setSelectedIds(new Set(selectedItems.map(({ id }) => id))),
+    (selectedItems: ObservableWithMetadata[]) =>
+      setSelectedIds(new Set(selectedItems.map(({ id }) => id))),
     []
   );
 
   const onBulkActionSuccess = useCallback(() => setSelectedIds(new Set()), []);
 
-  const selection: EuiTableSelectionType<Observable> | undefined = useMemo(
+  const selection: EuiTableSelectionType<ObservableWithMetadata> | undefined = useMemo(
     () => (canSelectObservables ? { selected, onSelectionChange } : undefined),
     [canSelectObservables, onSelectionChange, selected]
   );
 
-  const onTableChange = useCallback(({ sort: nextSort }: Criteria<Observable>) => {
+  const onTableChange = useCallback(({ sort: nextSort }: Criteria<ObservableWithMetadata>) => {
     if (nextSort == null || !isSortField(nextSort.field)) {
       return;
     }
@@ -259,15 +358,56 @@ export const ObservablesTable = ({
   }, [nextCursor]);
 
   const filesTableRowProps = useCallback(
-    (observable: Observable) => ({
+    (observable: ObservableWithMetadata) => ({
       'data-test-subj': `cases-observables-table-row-${observable.id}`,
     }),
     []
   );
 
+  const { openObservableFlyout, openObservableCases } = useObservableFlyoutApi();
+  const flyoutParams = useCallback(
+    (observable: ObservableWithMetadata) => ({
+      observable,
+      caseData,
+      typeLabel: observableTypes.find(({ key }) => key === observable.typeKey)?.label,
+    }),
+    [caseData, observableTypes]
+  );
+  const onViewDetails = useCallback(
+    (observable: ObservableWithMetadata) => openObservableFlyout(flyoutParams(observable)),
+    [flyoutParams, openObservableFlyout]
+  );
+  // A copied link to an observable opens its flyout.
+  useOpenLinkedObservable(caseData.id, onViewDetails);
+
+  // The same counts as the flyout's Cases preview: the other cases of the owner holding each
+  // observable of the page, in one request.
+  const pageObservables = useMemo(
+    () => items.map(({ typeKey, value }) => ({ typeKey, value })),
+    [items]
+  );
+  const { data: casesCounts, isLoading: isLoadingCasesCounts } = useCountCasesByObservables({
+    owner: caseData.owner,
+    excludeCaseId: caseData.id,
+    observables: pageObservables,
+  });
+  const relatedCases: RelatedCasesColumnOptions = useMemo(() => {
+    const counts = new Map(
+      (casesCounts?.counts ?? []).map(({ typeKey, value, total: casesTotal }) => [
+        countKey({ typeKey, value }),
+        casesTotal,
+      ])
+    );
+    return {
+      getCount: (observable) => counts.get(countKey(observable)),
+      isLoading: isLoadingCasesCounts,
+      onShowCases: (observable) => openObservableCases(flyoutParams(observable)),
+    };
+  }, [casesCounts, flyoutParams, isLoadingCasesCounts, openObservableCases]);
+
   const columns = useMemo(
-    () => getColumns(caseData, observableTypes, canRunWorkflow),
-    [caseData, observableTypes, canRunWorkflow]
+    () => getColumns(caseData, observableTypes, canRunWorkflow, onViewDetails, relatedCases),
+    [caseData, observableTypes, canRunWorkflow, onViewDetails, relatedCases]
   );
 
   const pageSizeOptions = useMemo(
@@ -285,7 +425,6 @@ export const ObservablesTable = ({
       <ObservablesLimitCallout totalObservables={caseData.totalObservables ?? 0} />
       <ObservablesUtilityBar
         caseData={caseData}
-        totalObservables={total}
         isLoading={isLoading}
         onExtractObservablesChanged={onExtractObservablesChanged}
         selectedObservables={selected}
@@ -305,6 +444,20 @@ export const ObservablesTable = ({
             onChange={onTypeFilterChange}
             isClearable
             data-test-subj="cases-observables-table-type-filter"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 320 }}>
+          <EuiComboBox
+            compressed
+            fullWidth
+            noSuggestions
+            placeholder={i18n.FILTER_OBSERVABLES_BY_METADATA}
+            aria-label={i18n.FILTER_OBSERVABLES_BY_METADATA}
+            selectedOptions={metadataFilterOptions}
+            onCreateOption={onMetadataFilterCreate}
+            onChange={onMetadataFilterChange}
+            isClearable
+            data-test-subj="cases-observables-table-metadata-filter"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

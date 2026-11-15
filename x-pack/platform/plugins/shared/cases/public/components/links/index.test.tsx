@@ -120,6 +120,19 @@ describe('CaseDetailsLink', () => {
     jest.useRealTimers();
   });
 
+  it('opens the case in a new tab without navigating in the app', async () => {
+    render(<CaseDetailsLink {...props} openInNewTab />);
+
+    const link = await screen.findByRole('link');
+    expect(link).toHaveAttribute('href', '/cases/test');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+
+    await userEvent.click(link);
+
+    expect(navigateToCaseView).not.toHaveBeenCalled();
+  });
+
   it('sets the href correctly', async () => {
     render(<CaseDetailsLink {...props} />);
     expect(getCaseViewUrl).toHaveBeenCalledWith({

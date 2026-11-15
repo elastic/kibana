@@ -12,6 +12,7 @@ import { renderWithTestingProviders } from '../../common/mock';
 
 describe('ObservableForm', () => {
   const props: ObservableFormProps = {
+    caseId: 'case-id',
     isLoading: false,
     onSubmit: jest.fn(),
     onCancel: jest.fn(),

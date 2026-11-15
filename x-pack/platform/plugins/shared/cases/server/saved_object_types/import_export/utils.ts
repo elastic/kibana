@@ -7,7 +7,14 @@
 
 import { parse as yamlParse } from 'yaml';
 import { escapeKuery } from '@kbn/es-query';
-import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ISavedObjectsSerializer,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+} from '@kbn/core/server';
 import type {
   CaseUserActionWithoutReferenceIds,
   AttachmentAttributesWithoutRefs,
@@ -25,6 +32,7 @@ import {
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_OBSERVABLE_SAVED_OBJECT,
+  CASE_OBSERVABLE_SHARED_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
   MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../common/constants';
@@ -32,6 +40,12 @@ import { defaultSortField } from '../../common/utils';
 import { stripLegacyKeyForExport } from '../../common/utils/field_definitions';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { ObservablePersistedAttributes } from '../../common/types/observable';
+import type { ObservableSharedPersistedAttributes } from '../../common/types/observable_shared';
+import type { ObservableKey } from '../../services/observables';
+import { keysQuery } from '../../services/observables';
+
+/** Observable values one search of the shared objects looks up during an export. */
+const SHARED_EXPORT_PAGE_SIZE = 5_000;
 
 /**
  * The attachments, user actions and `cases-observables` objects of the exported cases. Import
@@ -252,4 +266,75 @@ function collectRefFieldNamesByOwner(
   }
 
   return names;
+}
+
+/**
+ * The `cases-observable-shared` objects of the exported cases' observable values, in either store,
+ * so the metadata of a value travels with its cases. They are found by owner, type key and value,
+ * the way templates are found by template id, because a shared object is not referenced by its
+ * cases.
+ */
+export async function getSharedObservablesForCases({
+  savedObjectsClient,
+  savedObjectsSerializer,
+  cases,
+  observableObjects,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsSerializer: ISavedObjectsSerializer;
+  cases: Array<SavedObject<CasePersistedAttributes>>;
+  observableObjects: Array<SavedObject<ObservablePersistedAttributes>>;
+}): Promise<Array<SavedObject<ObservableSharedPersistedAttributes>>> {
+  const keysByOwner = new Map<string, ObservableKey[]>();
+  const addKey = (owner: string, typeKey: string, value: string) => {
+    keysByOwner.set(owner, [...(keysByOwner.get(owner) ?? []), { typeKey, value }]);
+  };
+
+  for (const { attributes } of cases) {
+    for (const { typeKey, value } of attributes.observables ?? []) {
+      addKey(attributes.owner, typeKey, value);
+    }
+  }
+  for (const { attributes } of observableObjects) {
+    addKey(attributes.owner, attributes.type_key, attributes.value);
+  }
+
+  const namespaces = [
+    ...new Set(cases.flatMap(({ namespaces: caseNamespaces }) => caseNamespaces ?? [])),
+  ];
+  if (keysByOwner.size === 0 || namespaces.length === 0) {
+    return [];
+  }
+
+  const sharedField = (name: string) => `${CASE_OBSERVABLE_SHARED_SAVED_OBJECT}.${name}`;
+  const shared = new Map<string, SavedObject<ObservableSharedPersistedAttributes>>();
+
+  for (const [owner, keys] of keysByOwner) {
+    for (let start = 0; start < keys.length; start += SHARED_EXPORT_PAGE_SIZE) {
+      const keysChunk = keys.slice(start, start + SHARED_EXPORT_PAGE_SIZE);
+      const response = await savedObjectsClient.search<SavedObjectsRawDocSource>({
+        type: CASE_OBSERVABLE_SHARED_SAVED_OBJECT,
+        namespaces,
+        size: keysChunk.length * 2,
+        query: {
+          bool: {
+            filter: [
+              { term: { [sharedField('owner')]: owner } },
+              keysQuery(keysChunk, sharedField),
+            ],
+          },
+        },
+      });
+
+      for (const hit of response.hits.hits) {
+        const savedObject =
+          savedObjectsSerializer.rawToSavedObject<ObservableSharedPersistedAttributes>(
+            hit as SavedObjectsRawDoc
+          );
+        shared.set(savedObject.id, savedObject);
+      }
+    }
+  }
+
+  return [...shared.values()];
 }

@@ -12,7 +12,7 @@ import { AddObservable } from './add_observable';
 import { mockCase } from '../../containers/mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { postObservable } from '../../containers/api';
 
 jest.mock('../../containers/api');
@@ -79,6 +79,38 @@ describe('AddObservable', () => {
     expect(jest.mocked(postObservable)).toHaveBeenCalledWith(
       { observable: { description: '', typeKey: 'observable-type-ipv4', value: '127.0.0.1' } },
       'mock-id'
+    );
+  });
+
+  it('sends the metadata the user added', async () => {
+    renderWithTestingProviders(<AddObservable {...props} />, {
+      wrapperProps: { license: platinumLicense },
+    });
+
+    await userEvent.click(screen.getByTestId('cases-observables-add'));
+    await userEvent.click(screen.getByTestId('observable-type-select'));
+    await userEvent.click(screen.getByRole('option', { name: 'IPv4' }));
+    await userEvent.click(screen.getByTestId('observable-value-field'));
+    await userEvent.paste('127.0.0.1');
+
+    await userEvent.click(screen.getByTestId('observable-metadata-add'));
+    await userEvent.type(screen.getByTestId('observable-metadata-key'), 'triage');
+    await userEvent.type(screen.getByTestId('observable-metadata-value'), 'confirmed');
+
+    await userEvent.click(screen.getByTestId('save-observable'));
+
+    await waitFor(() =>
+      expect(jest.mocked(postObservable)).toHaveBeenCalledWith(
+        {
+          observable: {
+            description: '',
+            typeKey: 'observable-type-ipv4',
+            value: '127.0.0.1',
+            metadata: { triage: 'confirmed' },
+          },
+        },
+        'mock-id'
+      )
     );
   });
 

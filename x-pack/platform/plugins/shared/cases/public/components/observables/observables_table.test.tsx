@@ -12,7 +12,10 @@ import { mockCase, mockObservables } from '../../containers/mock';
 import { ObservablesTable, type ObservablesTableProps } from './observables_table';
 import { readCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import { useFindObservables } from '../../containers/use_find_observables';
-import type { Observable } from '../../../common/types/domain';
+import type { ObservableWithMetadata } from '../../../common/types/api';
+import { useObservableFlyoutApi } from './flyout/use_observable_flyout_api';
+import { createObservableFlyoutApiMock } from './flyout/use_observable_flyout_api.mock';
+import { useCountCasesByObservables } from '../../containers/use_count_cases_by_observables';
 import {
   MAX_STORED_OBSERVABLES_PER_CASE,
   OBSERVABLE_TYPE_IPV4,
@@ -26,11 +29,15 @@ jest.mock('../workflows/use_run_case_workflow', () => ({
   useCanRunCaseWorkflow: jest.fn(),
 }));
 jest.mock('../../containers/use_find_observables');
+jest.mock('./flyout/use_observable_flyout_api');
+// Its own test covers it; here it would add a `useFindObservables` call of its own.
+jest.mock('./flyout/use_open_linked_observable');
+jest.mock('../../containers/use_count_cases_by_observables');
 
 const useFindObservablesMock = useFindObservables as jest.Mock;
 
 const mockPage = (
-  observables: Observable[],
+  observables: ObservableWithMetadata[],
   { total = observables.length, cursor }: { total?: number; cursor?: string } = {}
 ) =>
   useFindObservablesMock.mockReturnValue({
@@ -40,6 +47,18 @@ const mockPage = (
   });
 
 const lastFindParams = () => useFindObservablesMock.mock.calls.at(-1)?.[1];
+
+const flyoutApi = createObservableFlyoutApiMock();
+
+const useCountCasesByObservablesMock = jest.mocked(useCountCasesByObservables);
+const mockCounts = (
+  counts: Array<{ typeKey: string; value: string; total: number }>,
+  { isLoading = false }: { isLoading?: boolean } = {}
+) =>
+  useCountCasesByObservablesMock.mockReturnValue({
+    data: isLoading ? undefined : { counts },
+    isLoading,
+  } as unknown as ReturnType<typeof useCountCasesByObservables>);
 
 describe('ObservablesTable', () => {
   const { useCanRunCaseWorkflow } = jest.requireMock('../workflows/use_run_case_workflow');
@@ -57,6 +76,8 @@ describe('ObservablesTable', () => {
     jest.clearAllMocks();
     // Default: workflow runs disabled (mirrors a read-only user or feature-off state).
     (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(false);
+    jest.mocked(useObservableFlyoutApi).mockReturnValue(flyoutApi);
+    mockCounts([]);
     mockPage(mockObservables);
   });
 
@@ -65,7 +86,6 @@ describe('ObservablesTable', () => {
 
     expect(screen.getByTestId('cases-observables-table')).toBeInTheDocument();
 
-    expect(screen.getByText('Showing 2 observables')).toBeInTheDocument();
     expect(screen.getByText('Type')).toBeInTheDocument();
     expect(screen.getByText('Name')).toBeInTheDocument();
   });
@@ -104,7 +124,7 @@ describe('ObservablesTable', () => {
 
       await userEvent.click(screen.getByTestId('cases-observables-table-next-page'));
       await userEvent.type(
-        screen.getByTestId('comboBoxSearchInput'),
+        screen.getByRole('combobox', { name: 'Filter by type' }),
         `${OBSERVABLE_TYPE_IPV4.label}{enter}`
       );
 
@@ -118,7 +138,6 @@ describe('ObservablesTable', () => {
       mockPage(mockObservables, { total: 47_552, cursor: 'cursor-1' });
       renderWithTestingProviders(<ObservablesTable {...props} />);
 
-      expect(screen.getByText('Showing 47552 observables')).toBeInTheDocument();
       expect(screen.getByTestId('cases-observables-table-page-range')).toHaveTextContent(
         '1–2 of 47552'
       );
@@ -175,15 +194,43 @@ describe('ObservablesTable', () => {
     });
   });
 
+  describe('metadata', () => {
+    it('shows the metadata of each value as key: value badges', () => {
+      mockPage([{ ...mockObservables[0], metadata: { triage: 'confirmed', owner: 'payments' } }]);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(screen.getAllByTestId('observable-metadata-badge-triage')[0]).toHaveTextContent(
+        'triage: confirmed'
+      );
+      expect(screen.getAllByTestId('observable-metadata-badge-owner')[0]).toHaveTextContent(
+        'owner: payments'
+      );
+    });
+
+    it('filters by a metadata key, value or value prefix', async () => {
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+      const filter = screen.getByRole('combobox', {
+        name: 'Filter by metadata: key, key:value or key:value*',
+      });
+
+      await userEvent.type(filter, 'triage:Confirmed{enter}');
+      await userEvent.type(filter, 'owner:pay*{enter}');
+      await userEvent.type(filter, 'reviewed{enter}');
+
+      expect(lastFindParams().metadata).toEqual([
+        { key: 'triage', value: 'Confirmed' },
+        { key: 'owner', prefix: 'pay' },
+        { key: 'reviewed' },
+      ]);
+    });
+  });
+
   describe('limit', () => {
-    it('shows how close the case is to the limit', () => {
+    it('does not warn when the case is far from the limit', () => {
       renderWithTestingProviders(
         <ObservablesTable {...props} caseData={{ ...props.caseData, totalObservables: 120 }} />
       );
 
-      expect(screen.getByTestId('cases-observables-limit-usage')).toHaveTextContent(
-        `120 of ${MAX_STORED_OBSERVABLES_PER_CASE} observables`
-      );
       expect(screen.queryByTestId('cases-observables-limit-near')).not.toBeInTheDocument();
       expect(screen.queryByTestId('cases-observables-limit-reached')).not.toBeInTheDocument();
     });
@@ -275,6 +322,84 @@ describe('ObservablesTable', () => {
       rerender(<ObservablesTable {...props} />);
       expect(screen.queryByTestId('cases-observables-selected-count')).not.toBeInTheDocument();
       expect(screen.queryAllByRole('checkbox', { checked: true })).toHaveLength(0);
+    });
+  });
+
+  describe('drill-down', () => {
+    it('opens the observable flyout from the row', async () => {
+      const [observable] = mockObservables;
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      await userEvent.click(screen.getByTestId(`cases-observables-table-expand-${observable.id}`));
+
+      expect(flyoutApi.openObservableFlyout).toHaveBeenCalledWith({
+        observable,
+        caseData: props.caseData,
+        typeLabel: OBSERVABLE_TYPE_IPV4.label,
+      });
+    });
+  });
+
+  describe('related cases', () => {
+    const [first, second] = mockObservables;
+
+    it('counts the other cases of the owner holding each observable of the page', () => {
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(useCountCasesByObservablesMock).toHaveBeenLastCalledWith({
+        owner: props.caseData.owner,
+        excludeCaseId: props.caseData.id,
+        observables: [
+          { typeKey: first.typeKey, value: first.value },
+          { typeKey: second.typeKey, value: second.value },
+        ],
+      });
+    });
+
+    it('shows each count, and opens the cases tool from it', async () => {
+      mockCounts([
+        { typeKey: first.typeKey, value: first.value, total: 3 },
+        { typeKey: second.typeKey, value: second.value, total: 0 },
+      ]);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      const firstCount = screen.getByTestId(`cases-observables-table-related-cases-${first.id}`);
+      expect(firstCount).toHaveTextContent('3');
+      expect(
+        screen.getByTestId(`cases-observables-table-related-cases-${second.id}`)
+      ).toBeDisabled();
+
+      await userEvent.click(firstCount);
+
+      expect(flyoutApi.openObservableCases).toHaveBeenCalledWith({
+        observable: first,
+        caseData: props.caseData,
+        typeLabel: OBSERVABLE_TYPE_IPV4.label,
+      });
+    });
+
+    it('shows 10,000+ past the most cases the cases tool lists', () => {
+      mockCounts([
+        { typeKey: first.typeKey, value: first.value, total: 287_636 },
+        { typeKey: second.typeKey, value: second.value, total: 10_000 },
+      ]);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(
+        screen.getByTestId(`cases-observables-table-related-cases-${first.id}`)
+      ).toHaveTextContent(/^10,000\+$/);
+      expect(
+        screen.getByTestId(`cases-observables-table-related-cases-${second.id}`)
+      ).toHaveTextContent(/^10,000$/);
+    });
+
+    it('shows a spinner while counting', () => {
+      mockCounts([], { isLoading: true });
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(
+        screen.getByTestId(`cases-observables-table-related-cases-${first.id}Loading`)
+      ).toBeInTheDocument();
     });
   });
 });

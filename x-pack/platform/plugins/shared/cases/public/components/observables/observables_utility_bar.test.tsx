@@ -17,7 +17,6 @@ jest.mock('../../common/use_cases_features');
 describe('ObservablesUtilityBar', () => {
   const props = {
     caseData: { ...mockCase, observables: mockObservables },
-    totalObservables: mockObservables.length,
     isLoading: false,
     isEnabled: true,
     onExtractObservablesChanged: jest.fn(),
@@ -36,10 +35,6 @@ describe('ObservablesUtilityBar', () => {
     });
     renderWithTestingProviders(<ObservablesUtilityBar {...props} />);
 
-    expect(screen.getByTestId('cases-observables-table-results-count')).toBeInTheDocument();
-    expect(screen.getByTestId('cases-observables-table-results-count')).toHaveTextContent(
-      'Showing 2 observables'
-    );
     expect(screen.getByTestId('extract-observables-switch')).toBeInTheDocument();
     expect(screen.getByTestId('cases-observables-add')).toBeInTheDocument();
   });
@@ -51,7 +46,6 @@ describe('ObservablesUtilityBar', () => {
     });
     renderWithTestingProviders(<ObservablesUtilityBar {...props} />);
 
-    expect(screen.getByTestId('cases-observables-table-results-count')).toBeInTheDocument();
     expect(screen.getByTestId('cases-observables-add')).toBeInTheDocument();
 
     expect(screen.queryByTestId('extract-observables-switch')).not.toBeInTheDocument();
@@ -65,7 +59,6 @@ describe('ObservablesUtilityBar', () => {
     });
     renderWithTestingProviders(<ObservablesUtilityBar {...props} />);
 
-    expect(screen.getByTestId('cases-observables-table-results-count')).toBeInTheDocument();
     expect(screen.getByTestId('cases-observables-add')).toBeInTheDocument();
 
     expect(screen.queryByTestId('extract-observables-switch')).not.toBeInTheDocument();

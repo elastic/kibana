@@ -21,6 +21,7 @@ import type { Template } from '../../../common/types/domain/template/latest';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import {
+  getSharedObservablesForCases,
   getAttachmentsAndUserActionsForCases,
   getTemplatesAndFieldDefinitionsForCases,
 } from './utils';
@@ -490,5 +491,78 @@ describe('import_export utils', () => {
       const templateFindCall = find.mock.calls[0][0];
       expect(templateFindCall.perPage).toBe(MAX_DOCS_PER_PAGE);
     });
+  });
+});
+
+describe('getSharedObservablesForCases', () => {
+  const savedObjectsSerializer = {
+    rawToSavedObject: jest.fn(({ _id, _source }) => ({
+      id: _id.split(':').pop(),
+      type: _source.type,
+      references: [],
+      attributes: _source[_source.type],
+    })),
+  };
+
+  const exportedCase = {
+    id: 'case-1',
+    type: 'cases',
+    namespaces: ['default'],
+    references: [],
+    attributes: {
+      owner: 'securitySolution',
+      observables: [{ id: 'f1', typeKey: 'ipv4', value: '10.0.0.1', description: null }],
+    },
+  } as unknown as SavedObject<CasePersistedAttributes>;
+
+  it('finds the shared objects of the field and type observables by owner, type key and value', async () => {
+    const search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'cases-observable-shared:shared-1',
+            _source: {
+              type: 'cases-observable-shared',
+              'cases-observable-shared': { owner: 'securitySolution', type_key: 'ipv4' },
+            },
+          },
+        ],
+      },
+    });
+
+    const shared = await getSharedObservablesForCases({
+      savedObjectsClient: { search } as unknown as SavedObjectsClientContract,
+      savedObjectsSerializer: savedObjectsSerializer as never,
+      cases: [exportedCase],
+      observableObjects: [
+        {
+          id: 'obs-1',
+          type: 'cases-observables',
+          references: [],
+          attributes: { owner: 'securitySolution', type_key: 'ipv4', value: '10.0.0.2' },
+        } as never,
+      ],
+    });
+
+    expect(search).toHaveBeenCalledTimes(1);
+    const [[request]] = search.mock.calls;
+    expect(request.namespaces).toEqual(['default']);
+    expect(JSON.stringify(request.query)).toContain(
+      JSON.stringify({ terms: { 'cases-observable-shared.value': ['10.0.0.1', '10.0.0.2'] } })
+    );
+    expect(shared.map(({ id }) => id)).toEqual(['shared-1']);
+  });
+
+  it('does not search when the cases hold no observables', async () => {
+    const search = jest.fn();
+
+    await getSharedObservablesForCases({
+      savedObjectsClient: { search } as unknown as SavedObjectsClientContract,
+      savedObjectsSerializer: savedObjectsSerializer as never,
+      cases: [{ ...exportedCase, attributes: { owner: 'cases', observables: [] } } as never],
+      observableObjects: [],
+    });
+
+    expect(search).not.toHaveBeenCalled();
   });
 });

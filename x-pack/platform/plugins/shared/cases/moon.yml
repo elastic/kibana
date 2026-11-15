@@ -134,6 +134,9 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/core-http-common'
   - '@kbn/workflows-ui'
+  - '@kbn/ui-callout'
+  - '@kbn/flyout-template'
+  - '@kbn/flyout-info-blocks'
 tags:
   - plugin
   - prod

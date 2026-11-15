@@ -23961,7 +23961,6 @@
     "xpack.cases.caseView.observables.save": "オブザーバブルを保存",
     "xpack.cases.caseView.observables.searchPlaceholder": "オブザーバブルを検索",
     "xpack.cases.caseView.observables.selectedObservables": "{count}件選択済み",
-    "xpack.cases.caseView.observables.showingObservablesTitle": "{totalObservables} {totalObservables, plural, =1 {observable} other {件のオブザーバブル}}を表示中",
     "xpack.cases.caseView.observables.type": "型",
     "xpack.cases.caseView.observables.updated": "オブザーバブルが更新されました",
     "xpack.cases.caseView.observables.updatedObservables": "は{totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {件のオブザーバブル}}を更新しました",

@@ -17,6 +17,7 @@ import {
   AddObservableRequestSchema,
   BulkAddObservablesRequestSchema,
   BulkDeleteObservablesRequestSchema,
+  FindObservablesRequestSchema,
   UpdateObservableRequestSchema,
 } from './v1';
 
@@ -155,5 +156,49 @@ describe('BulkDeleteObservablesRequestSchema', () => {
     expect(BulkDeleteObservablesRequestSchema.safeParse({ observableIds: ['obs-1'] }).success).toBe(
       false
     );
+  });
+});
+
+describe('observable metadata', () => {
+  const observable = { typeKey: 'observable-type-ipv4', value: '10.0.0.8', description: null };
+
+  it('accepts up to 20 pairs on an add and on an update, and null on an update', () => {
+    const metadata = Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`key-${i}`, 'x']));
+
+    expect(
+      AddObservableRequestSchema.safeParse({ observable: { ...observable, metadata } }).success
+    ).toBe(true);
+    expect(
+      UpdateObservableRequestSchema.safeParse({
+        observable: { value: '10.0.0.8', description: null, metadata: null },
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects more than 20 pairs, an empty or over-long key or value, and a key with *', () => {
+    const tooMany = Object.fromEntries(Array.from({ length: 21 }, (_, i) => [`key-${i}`, 'x']));
+
+    for (const metadata of [
+      tooMany,
+      { '': 'x' },
+      { ['k'.repeat(257)]: 'x' },
+      { key: '' },
+      { key: 'v'.repeat(1025) },
+      { 'tri*': 'x' },
+    ]) {
+      expect(
+        AddObservableRequestSchema.safeParse({ observable: { ...observable, metadata } }).success
+      ).toBe(false);
+    }
+  });
+
+  it('accepts up to 5 metadata filters on the list', () => {
+    const filters = Array.from({ length: 5 }, (_, i) => ({ key: `key-${i}` }));
+
+    expect(FindObservablesRequestSchema.safeParse({ metadata: filters }).success).toBe(true);
+    expect(
+      FindObservablesRequestSchema.safeParse({ metadata: [...filters, { key: 'one-more' }] })
+        .success
+    ).toBe(false);
   });
 });

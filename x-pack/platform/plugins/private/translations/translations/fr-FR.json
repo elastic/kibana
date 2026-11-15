@@ -23886,7 +23886,6 @@
     "xpack.cases.caseView.observables.save": "Enregistrer l'observable",
     "xpack.cases.caseView.observables.searchPlaceholder": "Rechercher des observables",
     "xpack.cases.caseView.observables.selectedObservables": "{count} sélectionnés",
-    "xpack.cases.caseView.observables.showingObservablesTitle": "Affichage de {totalObservables} {totalObservables, plural, =1 {observable} other {observables}}",
     "xpack.cases.caseView.observables.type": "Type",
     "xpack.cases.caseView.observables.updated": "Observable mis à jour",
     "xpack.cases.caseView.observables.updatedObservables": "mis à jour {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}",

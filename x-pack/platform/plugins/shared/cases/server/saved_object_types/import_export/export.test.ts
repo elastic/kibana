@@ -17,6 +17,7 @@ import {
 } from '../../../common/constants';
 import {
   getAttachmentsAndUserActionsForCases,
+  getSharedObservablesForCases,
   getTemplatesAndFieldDefinitionsForCases,
 } from './utils';
 
@@ -24,6 +25,7 @@ jest.mock('./utils', () => {
   return {
     getAttachmentsAndUserActionsForCases: jest.fn().mockResolvedValue([]),
     getTemplatesAndFieldDefinitionsForCases: jest.fn().mockResolvedValue([]),
+    getSharedObservablesForCases: jest.fn().mockResolvedValue([]),
   };
 });
 
@@ -154,6 +156,37 @@ describe('case export', () => {
 
     expect(exported).toContainEqual(expect.objectContaining({ id: 'tmpl-so-1' }));
     expect(exported).toContainEqual(expect.objectContaining({ id: 'fd-so-1' }));
+  });
+
+  it('appends the shared observable objects of the exported cases', async () => {
+    const observableSO = {
+      id: 'obs-1',
+      type: 'cases-observables',
+      attributes: { owner: 'securitySolution', type_key: 'ipv4', value: '10.0.0.8' },
+      references: [],
+    };
+    const sharedSO = {
+      id: 'shared-1',
+      type: 'cases-observable-shared',
+      attributes: { owner: 'securitySolution', type_key: 'ipv4', value: '10.0.0.8' },
+      references: [],
+    };
+    (getAttachmentsAndUserActionsForCases as jest.Mock).mockResolvedValueOnce([observableSO]);
+    (getSharedObservablesForCases as jest.Mock).mockResolvedValueOnce([sharedSO]);
+
+    const coreSetup = coreMock.createSetup();
+    const exported = await handleExport({
+      context: testContext,
+      coreSetup,
+      objects: testCases as unknown as Array<SavedObject<CasePersistedAttributes>>,
+      logger,
+      config,
+    });
+
+    expect(getSharedObservablesForCases).toHaveBeenCalledWith(
+      expect.objectContaining({ observableObjects: [observableSO] })
+    );
+    expect(exported).toContainEqual(expect.objectContaining({ id: 'shared-1' }));
   });
 
   it('calls getTemplatesAndFieldDefinitionsForCases with the cleaned case objects and logger', async () => {

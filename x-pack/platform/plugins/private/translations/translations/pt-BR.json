@@ -23982,7 +23982,6 @@
     "xpack.cases.caseView.observables.save": "Salvar observável",
     "xpack.cases.caseView.observables.searchPlaceholder": "Buscar observáveis",
     "xpack.cases.caseView.observables.selectedObservables": "{count} selecionado",
-    "xpack.cases.caseView.observables.showingObservablesTitle": "Mostrando {totalObservables} {totalObservables, plural, =1 {observable} other {observáveis}}",
     "xpack.cases.caseView.observables.type": "Tipo",
     "xpack.cases.caseView.observables.updated": "Observável atualizado",
     "xpack.cases.caseView.observables.updatedObservables": "atualizou {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observáveis}}",

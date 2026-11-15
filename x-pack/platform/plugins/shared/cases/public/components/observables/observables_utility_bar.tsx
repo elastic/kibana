@@ -6,8 +6,7 @@
  */
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { MAX_STORED_OBSERVABLES_PER_CASE } from '../../../common/constants';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { CaseUI } from '../../../common';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import { AddObservable } from './add_observable';
@@ -20,8 +19,6 @@ import * as i18n from './translations';
 
 export interface ObservablesUtilityBarProps {
   caseData: CaseUI;
-  /** Observables matching the current search, across every page. */
-  totalObservables: number;
   isLoading: boolean;
   onExtractObservablesChanged: (isOn: boolean) => void;
   /** Currently selected observables for bulk operations. */
@@ -34,7 +31,6 @@ export interface ObservablesUtilityBarProps {
 
 export const ObservablesUtilityBar = ({
   caseData,
-  totalObservables,
   isLoading,
   onExtractObservablesChanged,
   selectedObservables,
@@ -46,40 +42,7 @@ export const ObservablesUtilityBar = ({
   const canUseBulkActions = canRunWorkflow || permissions.update;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-          {totalObservables > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiText
-                size="xs"
-                color="subdued"
-                data-test-subj="cases-observables-table-results-count"
-              >
-                {i18n.SHOWING_OBSERVABLES(totalObservables)}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.OBSERVABLES_LIMIT_USAGE_TOOLTIP(MAX_STORED_OBSERVABLES_PER_CASE)}
-            >
-              <EuiText
-                size="xs"
-                color="subdued"
-                tabIndex={0}
-                data-test-subj="cases-observables-limit-usage"
-              >
-                {i18n.OBSERVABLES_LIMIT_USAGE(
-                  caseData.totalObservables ?? 0,
-                  MAX_STORED_OBSERVABLES_PER_CASE
-                )}
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
+    <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
       {canUseBulkActions && (
         <ObservablesBulkActions
           caseData={caseData}
