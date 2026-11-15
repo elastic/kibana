@@ -26,9 +26,31 @@ and produces no findings.
 | `native_vuln_scanner_os_version` | `SELECT platform, platform_like, codename, major, name, version FROM os_version;` |
 | `native_vuln_scanner_kernel_info` | `SELECT version FROM kernel_info;` |
 
-All four run with `platform: linux`, `interval: 86400` (1 day), `snapshot: true` — one run
-reports the full table, which is what makes one result per host a complete inventory. The
-definitions in `server/lib/inventory/queries.ts` are the source of truth for the SQL and ids.
+All four run with `platform: linux` and `snapshot: true` — one run reports the full table,
+which is what makes one result per host a complete inventory. The definitions in
+`server/lib/inventory/queries.ts` are the source of truth for the SQL and ids.
+
+### Interval and time to first findings
+
+Use `interval: 86400` (1 day) for steady state. The osquery schedule is interval-driven: in
+testing, a pack with `interval: 86400` returned no snapshot results within ~8 minutes of being
+assigned to an agent, while `interval: 60` returned results right away. Expect the first
+inventory to take up to one `interval` after the agent receives the pack.
+
+The scan task has its own schedule, independent of osquery. It runs once when Kibana starts and
+then every day (`1d`), so a scan that runs before the first inventory arrives finds nothing and
+the findings only appear at the next scan. To see a first result quickly:
+
+1. Create the pack with a short interval (for example `60`) and assign it to the agent policy.
+2. Wait for the agent to report results, then run the scan again by restarting Kibana or by
+   lowering the interval of the `native-vuln-scanner:scan` task (Stack Management → Task
+   Manager, or `PUT` on the task saved object through the Kibana task-manager tooling).
+3. Raise the pack interval back to `86400` once the first findings show up.
+
+To check what the last scan did, look for the `Vulnerability scan <run id>: {...}` line in the
+Kibana log (`hosts`, `findings` and per-release `releases` status) and for the `lastRun` object
+in the task state (`native-vuln-scanner:scan` in the `.kibana_task_manager` index). A missing
+pack, a release with no vendor feed and a failed feed download are logged as warnings.
 
 ## Agent runtime requirement
 
