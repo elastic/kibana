@@ -241,8 +241,10 @@ describe('isolateHostTool', () => {
       );
       const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
 
-      expect(card).toMatchObject({ color: 'warning' });
-      expect(card.message).toContain('disabled by the endpoint policy');
+      // Refused before the card: the analyst is never asked to approve an
+      // isolation the endpoint would reject.
+      expect(card).toBeUndefined();
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(data).toMatchObject({ error: 'invalid_argument' });
       expect(data.message).toContain('disabled by the endpoint policy');
       expect(isolate).not.toHaveBeenCalled();
@@ -298,10 +300,10 @@ describe('isolateHostTool', () => {
       );
       const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
 
-      expect(card).toMatchObject({ color: 'warning' });
-      expect(card.message).toContain('ip-host');
-      expect(card.message).toContain('disabled by the endpoint policy');
+      expect(card).toBeUndefined();
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(data).toMatchObject({ error: 'invalid_argument' });
+      expect(data.message).toContain('ip-host');
       expect(data.message).toContain('disabled by the endpoint policy');
       expect(isolate).not.toHaveBeenCalled();
       expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
@@ -803,9 +805,12 @@ describe('isolateHostTool', () => {
         () => ({ isolate } as never)
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
-      const { result } = await confirmThenHandle(tool, { hostName: 'my-host' });
+      const { card, result } = await confirmThenHandle(tool, { hostName: 'my-host' });
       const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
 
+      // No card for an isolation that would change nothing.
+      expect(card).toBeUndefined();
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(data).toMatchObject({
         action: 'isolate',
         status: 'completed',

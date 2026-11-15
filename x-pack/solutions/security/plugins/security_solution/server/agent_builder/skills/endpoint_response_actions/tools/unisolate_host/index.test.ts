@@ -420,8 +420,12 @@ describe('unisolateHostTool', () => {
         () => ({ release } as never)
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
-      const { result } = await confirmThenHandle(tool, { hostName: 'my-host' });
+      const { card, result } = await confirmThenHandle(tool, { hostName: 'my-host' });
       const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      // No card for a release that would change nothing.
+      expect(card).toBeUndefined();
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
 
       expect(data).toMatchObject({
         action: 'unisolate',

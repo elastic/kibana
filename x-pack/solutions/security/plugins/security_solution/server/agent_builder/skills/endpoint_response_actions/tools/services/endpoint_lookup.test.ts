@@ -1347,6 +1347,59 @@ describe('createEndpointLookupService', () => {
 
       expect(await lookup.resolveByIp('10.0.0.9')).toHaveProperty('kind', 'found');
     });
+
+    const linkedOnlyMetadata = (originAgentIds: string[]) =>
+      jest.fn(async (_query: unknown, passedScoped?: unknown) => ({
+        data: (passedScoped ? ['linked-agent'] : originAgentIds).map((id) => ({
+          metadata: { elastic: { agent: { id } } },
+          host_status: HostStatus.HEALTHY,
+        })),
+        total: passedScoped ? 1 : originAgentIds.length,
+      }));
+
+    it('dispatch mode reports not_found when only a linked project holds the IP', async () => {
+      // The response-actions client dispatches through origin Fleet, so a host
+      // only a linked project has is not a dispatch target from here.
+      const getHostMetadataList = linkedOnlyMetadata([]);
+      const { lookup } = buildService({
+        resolutionMode: 'dispatch',
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList,
+      });
+
+      expect(await lookup.resolveByIp('10.0.0.7')).toEqual({ kind: 'not_found' });
+      expect(getHostMetadataList).toHaveBeenCalledTimes(2);
+    });
+
+    it('dispatch mode reports ambiguity when a linked project host shares the IP', async () => {
+      const { lookup } = buildService({
+        resolutionMode: 'dispatch',
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: linkedOnlyMetadata(['origin-agent']),
+      });
+
+      const result = await lookup.resolveByIp('10.0.0.7');
+
+      expect(result.kind).toBe('ambiguous');
+      const candidates = (result as { candidates: Array<{ agentId: string }> }).candidates;
+      expect(candidates.map((c) => c.agentId).sort()).toEqual(['linked-agent', 'origin-agent']);
+    });
+
+    it('dispatch mode resolves on origin without a scoped read when CPS is inactive', async () => {
+      const getHostMetadataList = linkedOnlyMetadata(['origin-agent']);
+      const { lookup } = buildService({
+        resolutionMode: 'dispatch',
+        scoped: { isCpsRead: () => false },
+        getHostMetadataList,
+      });
+
+      expect(await lookup.resolveByIp('10.0.0.7')).toMatchObject({
+        kind: 'found',
+        endpoint: { agentId: 'origin-agent', agentType: 'endpoint' },
+      });
+      expect(getHostMetadataList).toHaveBeenCalledTimes(1);
+      expect(getHostMetadataList).toHaveBeenCalledWith(expect.anything(), undefined);
+    });
   });
 
   describe('resolveByAgentId', () => {
