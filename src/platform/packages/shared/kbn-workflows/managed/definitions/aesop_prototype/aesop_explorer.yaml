@@ -113,7 +113,7 @@ steps:
             Eval datasets the A/B can score a candidate on (id, name, description, examples):
             {{ steps.read_datasets.output.datasets | default: consts.EMPTY_ARRAY | json | truncate: 4000 }}
 
-            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id; a candidate for a new skill leaves skill_id empty and names the skill. Every candidate also sets dataset_id, required, no default: copy the id of the dataset from the list above whose examples fit the task it improves. A candidate scored on a dataset that does not fit its task is scored out of domain and will likely be rejected, so prefer tasks one of the datasets covers; if none fits, set dataset_id to the first dataset in the list anyway. Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. Set continue_exploring to true only when another pass would look somewhere new.
+            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id; a candidate for a new skill leaves skill_id empty and names the skill. Every candidate also sets dataset_id, required, no default: copy the id of the dataset from the list above whose examples fit the task it improves. Propose only tasks one of the datasets covers: its examples must ask the same kind of question the skill answers, over the same kind of data. A candidate scored on a dataset that does not fit its task is scored out of domain and is wasted, so drop it instead; returning no candidates from a pass is a valid result. Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. Set continue_exploring to true only when another pass would look somewhere new.
           schema:
             type: object
             properties:
@@ -209,7 +209,7 @@ steps:
                 agent_id: '__AB_AGENT_ID__'
                 variants: '${{ foreach.item.variants }}'
                 investigation_id: '__INVESTIGATION_ID__'
-                repetitions: 3
+                repetitions: 6
             on-failure:
               continue: true
 
