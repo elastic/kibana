@@ -9,7 +9,11 @@ import Bunzip from 'seek-bzip';
 
 const CHUNK_SIZE = 64 * 1024;
 
-/** The most one bzip2 block may expand to; real feed blocks are a few MiB at most. */
+/**
+ * Default cap on one block's output. Any block decodes to at most ~46.6 MB
+ * (44.5 MiB): 900 kB of BWT data, at most 259 output bytes per 5. So this is a backstop against
+ * decoder bugs; a lower `maxBlockBytes` bounds memory further.
+ */
 export const MAX_BLOCK_BYTES = 64 * 1024 * 1024;
 
 // seek-bzip keeps CRCs as signed 32-bit ints; compare them as unsigned.
@@ -23,9 +27,11 @@ const startsStream = (input: Uint8Array, at: number): boolean =>
 /**
  * Decompresses a (possibly multi-stream) bzip2 buffer one block at a time, so callers can yield
  * to the event loop between blocks instead of blocking it for the whole feed. Block and stream
- * CRCs are verified; corrupt input throws. A block that expands past `maxBlockBytes` throws while
- * it is being decoded, before its output is concatenated, so one hostile block cannot allocate
- * its full expansion (up to ~1.4 GB).
+ * CRCs are verified; corrupt input throws. Any block decodes to at most ~46.6 MB (44.5 MiB),
+ * because the decoder caps a block at 900 kB of data before the run-length step. A corrupt or
+ * hostile block reaches that size too: its CRC is checked only after its output is written. A
+ * block whose output exceeds `maxBlockBytes` throws while it is being decoded, before its output
+ * is concatenated.
  */
 export function* bunzip2Blocks(
   input: Uint8Array,
