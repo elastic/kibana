@@ -188,6 +188,32 @@ describe('collectWorkflowCallSites', () => {
     ).toEqual({ any: true });
   });
 
+  it('lets a step-level on-failure replace the workflow-level one, as the engine does', () => {
+    const contained = collectWorkflowCallSites({
+      settings: {
+        'on-failure': { continue: true, fallback: [callStep('workflow-fallback', {})] },
+      },
+      steps: [
+        { ...callStep('own-handler', {}), 'on-failure': { continue: false } },
+        {
+          ...callStep('risky', {}),
+          'on-failure': { fallback: [callStep('step-fallback', {})] },
+        },
+        { name: 'branch', type: 'if', condition: 'true', steps: [callStep('nested', {})] },
+      ],
+    }).map(({ stepName, continuesOnFailure }) => [stepName, continuesOnFailure]);
+
+    expect(Object.fromEntries(contained)).toEqual({
+      'own-handler': false,
+      risky: false,
+      // The workflow-level handler isn't applied inside fallbacks...
+      'step-fallback': false,
+      // ...but applies to steps nested in flow control, and covers its own fallback.
+      nested: true,
+      'workflow-fallback': true,
+    });
+  });
+
   it('finds calls in the workflow-level fallback and knows which calls might not run', () => {
     const callSites = collectWorkflowCallSites({
       settings: { 'on-failure': { fallback: [callStep('on-workflow-failure', {})] } },
@@ -644,6 +670,63 @@ describe('analyzeDependents', () => {
       ]);
     });
 
+    it('warns when an input the caller passes on gets stricter than its type', () => {
+      const saved = childWithInputs({ n: { type: 'number' } });
+      const draft = childWithInputs({ n: { type: 'number', minimum: 10 } });
+      const callerInputs = { inputs: { properties: { n: { type: 'number' } } } };
+
+      expect(issuesFor({ n: '${{ inputs.n }}' }, draft, saved, callerInputs)).toEqual([
+        'inputSchemaChanged:warning',
+      ]);
+      expect(issuesFor({ n: '${{ inputs.n }}' }, draft, draft, callerInputs)).toEqual([]);
+    });
+
+    it('fills in defaults like the run does before reporting a missing input', () => {
+      const saved = childWithInputs({});
+      const draftWith = (value: Record<string, unknown>, extra = {}) =>
+        childWithInputs({ value }, { required: ['value'], ...extra });
+
+      expect(issuesFor({}, draftWith({ type: 'array', items: { type: 'string' } }), saved)).toEqual(
+        []
+      );
+      expect(
+        issuesFor(
+          {},
+          draftWith({
+            type: 'object',
+            properties: { size: { type: 'number', default: 10 } },
+            required: ['size'],
+          }),
+          saved
+        )
+      ).toEqual([]);
+      expect(
+        issuesFor(
+          {},
+          draftWith(
+            { $ref: '#/definitions/value' },
+            { definitions: { value: { type: 'string', default: 'ok' } } }
+          ),
+          saved
+        )
+      ).toEqual([]);
+      // A filled-in default still has to pass validation.
+      expect(
+        issuesFor(
+          {},
+          draftWith({
+            type: 'object',
+            properties: { size: { type: 'number', default: 10 }, host: { type: 'string' } },
+            required: ['size', 'host'],
+          }),
+          saved
+        )
+      ).toEqual(['defaultValueRejected:breaking']);
+      expect(issuesFor({}, draftWith({ type: 'string' }), saved)).toEqual([
+        'missingRequiredInput:breaking',
+      ]);
+    });
+
     it('resolves ${{ consts.x }} to the constant', () => {
       const draft = childWithInputs({ limit: { type: 'number' } });
       expect(
@@ -683,6 +766,14 @@ describe('analyzeDependents', () => {
 
       expect(issuesFor({ a: 'x', extra: 1 }, lenient)).toEqual(['unknownInput:warning']);
       expect(issuesFor({ a: 'x', extra: 1 }, strict, lenient)).toEqual(['unknownInput:breaking']);
+    });
+
+    it('can’t check computed inputs once unknown inputs are rejected', () => {
+      const lenient = childWithInputs({ a: { type: 'string' } });
+      const strict = childWithInputs({ a: { type: 'string' } }, { additionalProperties: false });
+      const caller = workflow('caller', [callStep('ctx', { inputs: '${{ inputs.payload }}' })]);
+
+      expect(statusById(analyzeWith([caller], strict, lenient)).caller).toBe('unknown');
     });
 
     it('counts a problem that turns from a warning into a break as new', () => {
@@ -869,6 +960,21 @@ describe('analyzeDependents', () => {
       ]);
     });
 
+    it('handles invalid drafts of any shape', () => {
+      const draft = { ...makeChild(), triggers: 'invalid' };
+
+      const analysis = analyzeDependents({
+        index,
+        savedDefinition: makeChild(),
+        draftDefinition: draft,
+        isDraftValid: false,
+      });
+      expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual(['childInvalid:breaking']);
+      expect(() =>
+        analyzeDependents({ index, savedDefinition: makeChild(), draftDefinition: draft })
+      ).not.toThrow();
+    });
+
     it('marks callers of a workflow already saved invalid as already broken', () => {
       const analysis = analyzeDependents({ index, savedDefinition: null, draftDefinition: null });
 
@@ -952,6 +1058,62 @@ describe('analyzeCalledWorkflows', () => {
     ]);
     expect(called[0].issues[0]).toMatchObject({ stepName: 'm', from: 'ctx', to: 'Alert context' });
   });
+
+  it('flags a child whose runs always end in outputs its declared outputs reject', () => {
+    const rejects = {
+      ...childItem,
+      definition: makeChild({ emit: { severity: ['high'], score: 9 } }),
+    };
+    const endsEarlier = {
+      ...rejects,
+      id: 'ends-earlier',
+      definition: {
+        ...rejects.definition,
+        steps: [
+          { name: 'early', type: 'workflow.output', if: 'inputs.depth > 1', with: { score: 1 } },
+          ...rejects.definition.steps,
+        ],
+      },
+    };
+    const called = analyzeParent(
+      [
+        callStep('ctx', { inputs: { alert_id: 'a' } }),
+        callStep('other', { inputs: { alert_id: 'a' } }, undefined, 'ends-earlier'),
+      ],
+      [rejects, endsEarlier]
+    );
+
+    expect(called.map(({ workflowId, issues }) => [workflowId, kinds(issues)])).toEqual([
+      [CHILD_ID, ['outputValueRejected:breaking']],
+      ['ends-earlier', []],
+    ]);
+    expect(called[0].issues[0]).toMatchObject({ stepName: 'ctx', from: 'emit', field: 'severity' });
+  });
+
+  it('can’t vouch for a child that always runs a workflow that wasn’t found', () => {
+    const middle = workflow('middle', [callStep('next', {}, undefined, 'deleted')]);
+    const top = workflow('top', [callStep('m', {}, undefined, 'middle')]);
+    const sometimes = workflow('sometimes', [
+      { ...callStep('next', {}, undefined, 'deleted'), if: 'inputs.go : true' },
+    ]);
+    const called = analyzeParent(
+      [
+        callStep('t', {}, undefined, 'top'),
+        callStep('m', {}, undefined, 'middle'),
+        callStep('s', {}, undefined, 'sometimes'),
+        callStep('bg', {}, 'workflow.executeAsync', 'top'),
+      ],
+      [top, middle, sometimes]
+    );
+
+    expect(
+      called.map(({ workflowId, status, uncheckedCall }) => [workflowId, status, uncheckedCall])
+    ).toEqual([
+      ['middle', 'unknown', { from: 'next', to: 'deleted' }],
+      ['top', 'unknown', { from: 'm', to: 'middle' }],
+      ['sometimes', 'safe', undefined],
+    ]);
+  });
 });
 
 describe('analyzeCalledWorkflows cycles', () => {
@@ -996,6 +1158,17 @@ describe('analyzeRemovalImpact', () => {
 
     expect(impact.callers.map(({ id }) => id)).toEqual(['enrich', 'fanout', 'triage']);
     expect(impact.indirect).toBe(1);
+  });
+
+  it('fails callers whose own on-failure overrides a workflow-level continue', () => {
+    const strictStep = workflow(
+      'strict-step',
+      [{ ...callStep('ctx', { inputs: { alert_id: 'a' } }), 'on-failure': { continue: false } }],
+      { settings: { 'on-failure': { continue: true } } }
+    );
+    const top = workflow('top', [callStep('run', {}, undefined, 'strict-step')]);
+
+    expect(analyzeRemovalImpact([CHILD_ID], [strictStep, top]).indirect).toBe(1);
   });
 
   it('ignores calls between workflows that are removed together', () => {

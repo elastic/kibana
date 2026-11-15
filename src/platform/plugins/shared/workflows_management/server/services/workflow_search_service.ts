@@ -185,7 +185,7 @@ export class WorkflowSearchService {
         should: [
           { terms: { calledWorkflowIds: workflowIds } },
           ...(options.includeUnindexed
-            ? [{ bool: { must_not: [{ exists: { field: 'calledWorkflowIds' } }] } }]
+            ? [{ bool: { must_not: [{ term: { calledWorkflowIdsIndexed: true } }] } }]
             : []),
         ],
         minimum_should_match: 1,

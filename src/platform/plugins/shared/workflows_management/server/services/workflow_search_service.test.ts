@@ -122,6 +122,28 @@ describe('WorkflowSearchService', () => {
     });
   });
 
+  describe('findWorkflowsCalling', () => {
+    it('finds unindexed workflows by the indexing marker, since an empty list is not indexed', async () => {
+      const { deps, esClient } = makeDeps();
+      esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' } as any);
+      esClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+      const service = new WorkflowSearchService(deps);
+      await service.findWorkflowsCalling(['child'], 'default', { includeUnindexed: true });
+
+      const searchArgs = esClient.search.mock.calls[0][0] as any;
+      expect(searchArgs.query.bool.must).toContainEqual({
+        bool: {
+          should: [
+            { terms: { calledWorkflowIds: ['child'] } },
+            { bool: { must_not: [{ term: { calledWorkflowIdsIndexed: true } }] } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+  });
+
   describe('getWorkflows', () => {
     it('returns a page with total, page, size, and mapped results', async () => {
       const { deps, storageClient } = makeDeps();

@@ -79,6 +79,12 @@ export const getIssueMessage = (
           '{childName} fails every time it runs: its step "{from}" runs {to}, which is broken',
         values: { childName, from, to },
       });
+    case 'outputValueRejected':
+      return i18n.translate('workflows.dependents.issue.outputValueRejected', {
+        defaultMessage:
+          '{childName} fails every time it runs: its step "{from}" returns a value for "{field}" that its declared outputs don’t allow: {detail}',
+        values: { childName, from, field, detail },
+      });
     case 'callCycle':
       return i18n.translate('workflows.dependents.issue.callCycle', {
         defaultMessage:
@@ -120,6 +126,12 @@ export const getIssueMessage = (
     case 'inputValueRejected':
       return i18n.translate('workflows.dependents.issue.inputValueRejected', {
         defaultMessage: 'Sends a value for "{field}" that {childName} rejects: {detail}',
+        values: { childName, field, detail },
+      });
+    case 'defaultValueRejected':
+      return i18n.translate('workflows.dependents.issue.defaultValueRejected', {
+        defaultMessage:
+          'Doesn’t send "{field}", and the default value {childName} fills in is rejected: {detail}',
         values: { childName, field, detail },
       });
     case 'inputTypeChanged':

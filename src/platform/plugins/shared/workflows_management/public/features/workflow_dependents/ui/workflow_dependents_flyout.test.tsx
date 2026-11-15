@@ -81,4 +81,48 @@ describe('WorkflowDependentsFlyout', () => {
     await userEvent.click(screen.getByTestId('workflowDependentsRetry'));
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
+
+  it('shows every caller again when edits remove the status it was filtered by', async () => {
+    const caller = (workflowId: string, status: DependentImpact['status']): DependentImpact => ({
+      ...computesInputs,
+      workflowId,
+      workflowName: workflowId,
+      status,
+    });
+    const withFirst = (status: DependentImpact['status']): DependentsAnalysis => ({
+      contractChanges: [],
+      dependents: [caller('first', status), caller('second', 'safe')],
+      summary: {
+        direct: 2,
+        breaking: status === 'breaking' ? 1 : 0,
+        warning: 0,
+        unknown: 0,
+        indirectBreaking: 0,
+      },
+    });
+    const flyout = (status: DependentImpact['status']) => (
+      <TestProvider>
+        <WorkflowDependentsFlyout
+          workflowName="Alert context"
+          analysis={withFirst(status)}
+          hasUnsavedChanges
+          isLoading={false}
+          isError={false}
+          initialTab="usedBy"
+          onRefresh={jest.fn()}
+          onClose={jest.fn()}
+        />
+      </TestProvider>
+    );
+    const { rerender } = render(flyout('breaking'));
+    await userEvent.click(screen.getByText('Will break (1)'));
+    expect(screen.getAllByTestId('workflowLinkCard')).toHaveLength(1);
+
+    rerender(flyout('safe'));
+    expect(screen.queryByTestId('workflowDependentsFilter')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('workflowLinkCard')).toHaveLength(2);
+
+    rerender(flyout('breaking'));
+    expect(screen.getAllByTestId('workflowLinkCard')).toHaveLength(2);
+  });
 });

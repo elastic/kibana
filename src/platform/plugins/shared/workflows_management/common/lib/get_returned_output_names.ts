@@ -29,8 +29,8 @@ const visitSteps = (node: unknown, visit: (step: Record<string, unknown>) => voi
   }
 };
 
-// Callers only get the output of a run that completes; `failed` and `cancelled` fail the call.
-const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
+/** Whether a step is a `workflow.output` that completes the run; `failed` and `cancelled` fail the call. */
+export const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
   step.type === 'workflow.output' && (step.status === undefined || step.status === 'completed');
 
 // Whether running `steps` in order always reaches a `workflow.output` or `workflow.fail` step, which
@@ -53,6 +53,31 @@ const alwaysEndsRun = (steps: unknown): boolean =>
  */
 export const alwaysReturnsWorkflowOutput = (definition: unknown): boolean =>
   isRecord(definition) && alwaysEndsRun(definition.steps);
+
+const containsEndStep = (step: Record<string, unknown>): boolean => {
+  let found = false;
+  visitSteps(step, ({ type }) => {
+    found = found || type === 'workflow.output' || type === 'workflow.fail';
+  });
+  return found;
+};
+
+/**
+ * Returns the `workflow.output` step that every run of a workflow reaches: an unconditional
+ * top-level one, with no step before it that might end the run first. Undefined otherwise.
+ */
+export const getFinalOutputStep = (definition: unknown): Record<string, unknown> | undefined => {
+  const steps = isRecord(definition) && Array.isArray(definition.steps) ? definition.steps : [];
+  for (const step of steps.filter(isRecord)) {
+    if (step.type === 'workflow.output' && step.if === undefined) {
+      return step;
+    }
+    if (containsEndStep(step)) {
+      return undefined;
+    }
+  }
+  return undefined;
+};
 
 /**
  * Returns the output names a workflow's completing `workflow.output` steps set, including those in

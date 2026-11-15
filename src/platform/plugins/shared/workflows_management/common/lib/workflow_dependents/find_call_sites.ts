@@ -15,6 +15,7 @@ import { createWorkflowLiquidEngine, extractTemplateVariables } from '@kbn/workf
 import { parsePath } from '@kbn/workflows/common/utils/zod';
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import type { WorkflowCallSite, WorkflowExecuteStepType } from './types';
+import { isCompletingOutputStep } from '../get_returned_output_names';
 import { WORKFLOW_EXECUTE_TYPES, WORKFLOW_REFERENCE_KEY } from '../import';
 
 /** True for values rendered at runtime (`{{ }}`, `{% %}` or `${{ }}`), which cannot be checked statically. */
@@ -75,6 +76,11 @@ interface StepContext {
   isConditional: boolean;
 }
 
+interface WalkContext extends StepContext {
+  /** True when the workflow-level `on-failure` continues, and applies to steps here (not in fallbacks). */
+  workflowContinues: boolean;
+}
+
 type StepVisitor = (step: Record<string, unknown>, context: StepContext) => void;
 
 const isWorkflowStep = (node: unknown): node is WorkflowStep =>
@@ -84,14 +90,36 @@ const isWorkflowStep = (node: unknown): node is WorkflowStep =>
 const alwaysRunsNestedSteps = (step: WorkflowStep, pathSuffix: string): boolean =>
   step.type === 'merge' || (step.type === 'parallel' && pathSuffix.startsWith('.branch['));
 
-const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: StepContext): void => {
+// Steps the execution engine never wraps in the workflow-level `on-failure`.
+const NO_WORKFLOW_ON_FAILURE_STEP_TYPES = new Set([
+  'if',
+  'foreach',
+  'while',
+  'parallel',
+  'loop.break',
+  'loop.continue',
+  'switch',
+  'wait',
+]);
+
+// A step's own `on-failure` replaces the workflow-level one, as in the execution engine.
+const stepContinuesOnFailure = (step: WorkflowStep, workflowContinues: boolean): boolean => {
+  const onFailure = (step as Record<string, unknown>)['on-failure'];
+  if (onFailure) {
+    return continuesOnFailure(onFailure);
+  }
+  return workflowContinues && !NO_WORKFLOW_ON_FAILURE_STEP_TYPES.has(step.type);
+};
+
+const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: WalkContext): void => {
   if (!Array.isArray(steps)) {
     return;
   }
   for (const step of steps.filter(isWorkflowStep)) {
     const record: Record<string, unknown> = step;
     const context: StepContext = {
-      isContained: parentContext.isContained || continuesOnFailure(record['on-failure']),
+      isContained:
+        parentContext.isContained || stepContinuesOnFailure(step, parentContext.workflowContinues),
       isConditional: parentContext.isConditional || record.if !== undefined,
     };
     visit(record, context);
@@ -101,6 +129,7 @@ const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: StepContex
       walkSteps(nestedSteps, visit, {
         isContained: isContainedInside,
         isConditional: context.isConditional || !alwaysRunsNestedSteps(step, pathSuffix),
+        workflowContinues: parentContext.workflowContinues && !pathSuffix.endsWith('.fallback'),
       });
     }
   }
@@ -114,11 +143,17 @@ const getWorkflowOnFailure = (definition: unknown): unknown =>
 // The workflow's steps, then the fallback steps its `settings.on-failure` runs when it fails.
 const walkDefinitionSteps = (definition: unknown, visit: StepVisitor): void => {
   const onFailure = getWorkflowOnFailure(definition);
-  const isContained = continuesOnFailure(onFailure);
-  walkSteps(getSteps(definition), visit, { isContained, isConditional: false });
+  const workflowContinues = continuesOnFailure(onFailure);
+  walkSteps(getSteps(definition), visit, {
+    isContained: false,
+    isConditional: false,
+    workflowContinues,
+  });
+  // The workflow-level handler runs its fallback for the failed step, and its `continue` covers it.
   walkSteps(isRecord(onFailure) ? onFailure.fallback : undefined, visit, {
-    isContained,
+    isContained: workflowContinues,
     isConditional: true,
+    workflowContinues: false,
   });
 };
 
@@ -138,10 +173,6 @@ export const collectWorkflowCallSites = (definition: unknown): WorkflowCallSite[
 export const getCalledWorkflowIds = (definition: unknown): string[] => [
   ...new Set(collectWorkflowCallSites(definition).map(({ workflowId }) => workflowId)),
 ];
-
-// Callers only get the output of a run that completes; `failed` and `cancelled` fail the call.
-const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
-  step.type === 'workflow.output' && (step.status === undefined || step.status === 'completed');
 
 /** Collects the `with` maps of every completing `workflow.output` step in a workflow definition. */
 export const collectWorkflowOutputBlocks = (

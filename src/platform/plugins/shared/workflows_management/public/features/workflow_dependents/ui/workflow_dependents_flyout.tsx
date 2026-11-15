@@ -257,14 +257,6 @@ export const WorkflowDependentsFlyout = ({
     calledWorkflows.filter(needsAttention).map(({ workflowId }) => workflowId)
   );
 
-  const visibleDependents = useMemo(
-    () =>
-      statusFilter === 'all'
-        ? dependents
-        : dependents.filter(({ status }) => status === statusFilter),
-    [dependents, statusFilter]
-  );
-
   const filterOptions = useMemo(() => {
     const counts = new Map<ImpactStatus, number>();
     dependents.forEach(({ status }) => counts.set(status, (counts.get(status) ?? 0) + 1));
@@ -282,6 +274,23 @@ export const WorkflowDependentsFlyout = ({
       })),
     ];
   }, [dependents]);
+
+  // The filter controls only show with two or more statuses, and edits can remove the selected one.
+  const showsFilter = filterOptions.length > 2;
+  const activeFilter: StatusFilter =
+    showsFilter && filterOptions.some(({ id }) => id === statusFilter) ? statusFilter : 'all';
+  useEffect(() => {
+    if (activeFilter !== statusFilter) {
+      setStatusFilter(activeFilter);
+    }
+  }, [activeFilter, statusFilter]);
+  const visibleDependents = useMemo(
+    () =>
+      activeFilter === 'all'
+        ? dependents
+        : dependents.filter(({ status }) => status === activeFilter),
+    [dependents, activeFilter]
+  );
 
   const toggleFromMap = useCallback((cards: ReturnType<typeof useOpenCards>, id: string) => {
     const isOpen = cards.openIds.has(id);
@@ -358,14 +367,14 @@ export const WorkflowDependentsFlyout = ({
           onSelect={(id) => toggleFromMap(callers, id)}
         />
         <EuiSpacer size="m" />
-        {filterOptions.length > 2 && (
+        {showsFilter && (
           <>
             <EuiButtonGroup
               legend={i18n.translate('workflows.dependents.flyout.filterLegend', {
                 defaultMessage: 'Filter workflows by result',
               })}
               options={filterOptions}
-              idSelected={statusFilter}
+              idSelected={activeFilter}
               onChange={(id) => setStatusFilter(id as StatusFilter)}
               buttonSize="compressed"
               isFullWidth={false}

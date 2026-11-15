@@ -238,6 +238,45 @@ describe('analyzeWorkflowDependentsImpact', () => {
       });
     });
 
+    it('breaks them when every run returns an output value the declared outputs reject', async () => {
+      const returning = (severity: unknown, emitExtra = {}) => ({
+        name: 'middle',
+        outputs: [{ name: 'severity', type: 'string' }],
+        steps: [{ name: 'emit', type: 'workflow.output', with: { severity }, ...emitExtra }],
+      });
+      const analyze = async (draft: unknown) =>
+        (
+          await analyzeWorkflowDependentsImpact({
+            workflowId: 'middle',
+            savedDefinition: returning('high'),
+            draftDefinition: draft,
+            lookup: createLookup([waiting, background]),
+          })
+        ).analysis;
+
+      const analysis = await analyze(returning([1]));
+      expect(analysis.contractChanges).toEqual([]);
+      expect(analysis.dependents).toEqual([
+        expect.objectContaining({
+          workflowId: 'waiting',
+          status: 'breaking',
+          issues: [
+            expect.objectContaining({
+              kind: 'outputValueRejected',
+              stepName: 'run-middle',
+              from: 'emit',
+              field: 'severity',
+            }),
+          ],
+        }),
+        expect.objectContaining({ workflowId: 'background', status: 'safe' }),
+      ]);
+      expect(hasCallerFacingChanges(returning('high'), returning([1]))).toBe(true);
+      // Only a step every run reaches fails every run, and only values known before running count.
+      expect((await analyze(returning([1], { if: 'inputs.go : true' }))).summary.breaking).toBe(0);
+      expect((await analyze(returning('${{ steps.x.output }}'))).summary.breaking).toBe(0);
+    });
+
     it('marks the callers as already broken when the saved version fails the same way', async () => {
       const { analysis } = await analyzeWorkflowDependentsImpact({
         workflowId: 'middle',

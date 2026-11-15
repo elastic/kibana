@@ -1189,6 +1189,7 @@ export class WorkflowCrudService {
           merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
         }
         merged.calledWorkflowIds = getCalledWorkflowIds(merged.definition);
+        merged.calledWorkflowIdsIndexed = true;
         previousVersion = existingSource.version;
         return merged;
       },

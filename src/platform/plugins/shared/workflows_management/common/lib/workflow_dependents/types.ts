@@ -108,12 +108,16 @@ export type ImpactIssueKind =
   | 'childFails'
   /** Every run fails: the called workflow always runs, and leads back to one already running. */
   | 'callCycle'
+  /** The called workflow fails every run: its `workflow.output` step `from` sets `field` to a value its declared outputs reject. */
+  | 'outputValueRejected'
   | 'selfCall'
   | 'missingRequiredInput'
   | 'unknownInput'
   | 'inputTypeMismatch'
   | 'inputRendersAsText'
   | 'inputValueRejected'
+  /** The caller omits the input, and the default value the run fills in fails validation. */
+  | 'defaultValueRejected'
   | 'inputTypeChanged'
   | 'inputAllowedValuesChanged'
   | 'inputSchemaChanged'
@@ -196,6 +200,12 @@ export interface DependentImpact {
   upstream: UpstreamImpact[];
 }
 
+/** A step that always runs `to`, a workflow that couldn't be checked (deleted, or not readable). */
+export interface UncheckedCall {
+  from: string;
+  to: string;
+}
+
 export interface CalledWorkflowImpact {
   workflowId: string;
   /** Undefined when no workflow with `workflowId` exists. */
@@ -204,6 +214,8 @@ export interface CalledWorkflowImpact {
   callSites: CallSiteImpact[];
   issues: ImpactIssue[];
   contract?: WorkflowContract;
+  /** Why an otherwise working workflow is `unknown`: its runs depend on a workflow not checked. */
+  uncheckedCall?: UncheckedCall;
 }
 
 export interface DependentsSummary {

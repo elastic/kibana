@@ -11,6 +11,7 @@ import type { JSONSchema7 } from 'json-schema';
 import { isEqual, omit } from 'lodash';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
+  applyInputDefaults,
   getInputsFromDefinition,
   normalizeFieldsToJsonSchema,
   resolveRef,
@@ -29,7 +30,15 @@ const describeType = (property: JSONSchema7, schema: JsonModelSchemaType): strin
   return resolved.type;
 };
 
-const toFields = (schema: JsonModelSchemaType | undefined): Record<string, ContractField> => {
+/** The values a run fills in for omitted inputs, including `$ref`, nested and empty-array defaults. */
+export const getRuntimeInputDefaults = (
+  inputsSchema: JsonModelSchemaType | undefined
+): Record<string, unknown> => applyInputDefaults(undefined, inputsSchema) ?? {};
+
+const toFields = (
+  schema: JsonModelSchemaType | undefined,
+  defaults?: Readonly<Record<string, unknown>>
+): Record<string, ContractField> => {
   const fields: Record<string, ContractField> = {};
   if (!schema?.properties) {
     return fields;
@@ -41,7 +50,7 @@ const toFields = (schema: JsonModelSchemaType | undefined): Record<string, Contr
       name,
       type: describeType(property, schema),
       required: required.has(name),
-      hasDefault: property.default !== undefined,
+      hasDefault: defaults ? defaults[name] !== undefined : property.default !== undefined,
       enumValues: property.enum,
       schema: property,
     };
@@ -59,11 +68,21 @@ const inferOutputFields = (definition: unknown): Record<string, ContractField> =
   return fields;
 };
 
+// Drafts can have any shape, and the schema helpers expect `triggers` to be a list of objects.
+const getInputsSchema = (definition: unknown): JsonModelSchemaType | undefined => {
+  if (!isRecord(definition)) {
+    return undefined;
+  }
+  const { triggers } = definition;
+  return getInputsFromDefinition({
+    ...definition,
+    triggers: Array.isArray(triggers) ? triggers.filter(isRecord) : undefined,
+  } as Partial<WorkflowYaml>);
+};
+
 /** Extracts the input/output contract a workflow exposes to the workflows that call it. */
 export const extractWorkflowContract = (definition: unknown): WorkflowContract => {
-  const inputsSchema = getInputsFromDefinition(
-    isRecord(definition) ? (definition as Partial<WorkflowYaml>) : undefined
-  );
+  const inputsSchema = getInputsSchema(definition);
   const declaredOutputs = normalizeFieldsToJsonSchema(
     isRecord(definition) ? definition.outputs : undefined
   );
@@ -74,7 +93,7 @@ export const extractWorkflowContract = (definition: unknown): WorkflowContract =
     // A workflow saved with errors is stored without a definition (and turned off).
     valid: isRecord(definition),
     enabled: isRecord(definition) && definition.enabled !== false,
-    inputs: toFields(inputsSchema),
+    inputs: toFields(inputsSchema, getRuntimeInputDefaults(inputsSchema)),
     hasDeclaredInputs: Boolean(inputsSchema?.properties),
     inputsSchema: inputsSchema?.properties ? inputsSchema : undefined,
     rejectsUnknownInputs: inputsSchema?.additionalProperties === false,
@@ -146,6 +165,11 @@ export const hasSchemaDetailChange = (saved: ContractField, draft: ContractField
     omit(saved.schema ?? {}, SEPARATELY_COMPARED_KEYS),
     omit(draft.schema ?? {}, SEPARATELY_COMPARED_KEYS)
   );
+
+/** True when the field limits values beyond their type (an enum, a range, a pattern, a shape...). */
+export const hasConstraintsBeyondType = (field: ContractField): boolean =>
+  Boolean(field.enumValues) ||
+  Object.keys(omit(field.schema ?? {}, SEPARATELY_COMPARED_KEYS)).length > 0;
 
 /** True when the draft field accepts fewer values than the saved one at the type or enum level. */
 export const isFieldNarrowed = (saved: ContractField, draft: ContractField): boolean =>

@@ -170,6 +170,7 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     tags: workflowToCreate.tags || [],
     triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
     calledWorkflowIds: getCalledWorkflowIds(workflowToCreate.definition),
+    calledWorkflowIdsIndexed: true,
     yaml,
     definition: workflowToCreate.definition ?? null,
     createdBy: authenticatedUser,

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { convertJsonSchemaToZodWithRefs } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import {
+  buildFieldsZodValidator,
+  convertJsonSchemaToZodWithRefs,
+} from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import { isBreakingRun } from './api';
 import {
@@ -31,6 +35,7 @@ import type {
   OutputRow,
   RemovalImpact,
   RowStatus,
+  UncheckedCall,
   UpstreamImpact,
   WorkflowCallSite,
   WorkflowContract,
@@ -39,11 +44,14 @@ import type {
 import {
   diffWorkflowContracts,
   extractWorkflowContract,
+  getRuntimeInputDefaults,
+  hasConstraintsBeyondType,
   hasSchemaDetailChange,
   isFieldNarrowed,
   isTypeWithin,
   typesOverlap,
 } from './workflow_contract';
+import { getFinalOutputStep } from '../get_returned_output_names';
 
 /** How many levels of callers-of-callers the analysis follows; runs nest at most 10 deep by default. */
 export const MAX_INDIRECT_DEPTH = 10;
@@ -75,9 +83,14 @@ const INPUT_FAILURES = new Set<ImpactIssueKind>([
   'inputTypeMismatch',
   'inputRendersAsText',
   'inputValueRejected',
+  'defaultValueRejected',
 ]);
 // Kinds where the called workflow starts but fails every run; again only a waiting step fails.
-const CHILD_RUN_FAILURES = new Set<ImpactIssueKind>(['childFails', 'callCycle']);
+const CHILD_RUN_FAILURES = new Set<ImpactIssueKind>([
+  'childFails',
+  'callCycle',
+  'outputValueRejected',
+]);
 const OUTPUT_LOSSES = new Set<ImpactIssueKind>(['removedOutput', 'unreturnedOutput']);
 
 // A breaking issue about the step as a whole rather than one of its inputs or outputs.
@@ -197,7 +210,8 @@ const checkReferencedInput = (
     return { isUnknown: true };
   }
   if (isTypeWithin(callerField.type, field.type)) {
-    return { isUnknown: Boolean(field.enumValues) };
+    // The caller's own input only guarantees the type; anything stricter is checked while running.
+    return { isUnknown: hasConstraintsBeyondType(field) };
   }
   return {
     issue: {
@@ -269,6 +283,30 @@ const checkInputValue = (
     },
     isUnknown: false,
   };
+};
+
+const checkOmittedInput = (
+  stepName: string,
+  field: ContractField,
+  defaultValue: unknown,
+  contract: WorkflowContract
+): DraftIssue | undefined => {
+  if (defaultValue === undefined) {
+    return field.required ? stepIssue('missingRequiredInput', stepName, field.name) : undefined;
+  }
+  // Templated defaults are rendered while running, into values of any type.
+  if (containsTemplate(defaultValue)) {
+    return undefined;
+  }
+  const [firstIssue] = validateAgainstField(defaultValue, field, contract).filter((issue) =>
+    isCertainIssue(issue, defaultValue)
+  );
+  return firstIssue
+    ? {
+        ...stepIssue('defaultValueRejected', stepName, field.name),
+        detail: describeIssue(firstIssue),
+      }
+    : undefined;
 };
 
 // A value computed while running can't be checked, so warn when the field now accepts less.
@@ -346,17 +384,21 @@ const evaluateInputs = (
     });
   }
 
+  // Runs fill in defaults for omitted inputs, then validate them like the ones that were sent.
+  const defaults = getRuntimeInputDefaults(contract.inputsSchema);
   for (const field of Object.values(contract.inputs)) {
-    if (!(field.name in provided) && field.required && !field.hasDefault) {
-      const issue = stepIssue('missingRequiredInput', stepName, field.name);
-      issues.push(issue);
-      rows.push({
-        name: field.name,
-        isProvided: false,
-        isRequired: true,
-        status: 'breaking',
-        issueKind: issue.kind,
-      });
+    if (!(field.name in provided)) {
+      const issue = checkOmittedInput(stepName, field, defaults[field.name], contract);
+      if (issue) {
+        issues.push(issue);
+        rows.push({
+          name: field.name,
+          isProvided: false,
+          isRequired: field.required,
+          status: 'breaking',
+          issueKind: issue.kind,
+        });
+      }
     }
   }
 
@@ -461,7 +503,8 @@ const getImpactStatus = (
   if (newIssues.some(({ severity }) => severity === 'warning')) return 'warning';
   if (issues.some(({ severity }) => severity === 'breaking')) return 'alreadyBroken';
   const hasInputChanges = contractChanges.some(
-    ({ kind, severity }) => kind.startsWith('input') && severity !== 'info'
+    ({ kind, severity }) =>
+      (kind.startsWith('input') || kind === 'unknownInputsRejected') && severity !== 'info'
   );
   if (hasInputChanges && callSites.some(({ isDynamicInputs }) => isDynamicInputs)) {
     return 'unknown';
@@ -487,16 +530,59 @@ const compareImpacts = (a: SortableImpact, b: SortableImpact): number =>
 /** A step of a workflow that fails every run of it, and the issue that makes it fail. */
 export interface RunFailure {
   stepName: string;
-  calledName: string;
+  /** The workflow the step runs, when the step fails because of that call. */
+  calledName?: string;
   issue: DraftIssue;
 }
 
-// A run that fails because it nests a loop of runs keeps reporting the loop further up.
-const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue => ({
-  ...stepIssue(failure.issue.kind === 'callCycle' ? 'callCycle' : 'childFails', stepName),
-  from: failure.stepName,
-  to: failure.calledName,
-});
+// A run that fails because it nests a loop of runs keeps reporting the loop further up, and one
+// that fails on its own outputs keeps naming them.
+const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue => {
+  const { kind } = failure.issue;
+  if (kind === 'outputValueRejected') {
+    return { ...failure.issue, stepName, from: failure.stepName };
+  }
+  return {
+    ...stepIssue(kind === 'callCycle' ? 'callCycle' : 'childFails', stepName),
+    from: failure.stepName,
+    to: failure.calledName,
+  };
+};
+
+/** Finds the `workflow.output` step every run reaches, when its values fail the declared outputs. */
+const findOutputFailure = (definition: unknown): RunFailure | undefined => {
+  const step = getFinalOutputStep(definition);
+  const outputsSchema = normalizeFieldsToJsonSchema(
+    isRecord(definition) ? definition.outputs : undefined
+  );
+  if (!step || !outputsSchema?.properties || Object.keys(outputsSchema.properties).length === 0) {
+    return undefined;
+  }
+  const values = isRecord(step.with) ? step.with : {};
+  let issues: ValidationIssue[];
+  try {
+    const result = buildFieldsZodValidator(outputsSchema).safeParse(values);
+    issues = result.success ? [] : (result.error.issues as ValidationIssue[]);
+  } catch {
+    // Schemas the converter can't compile are not checked, the same as in the editor.
+    return undefined;
+  }
+  const [firstIssue] = issues.filter((issue) => isCertainIssue(issue, values));
+  if (!firstIssue) {
+    return undefined;
+  }
+  const stepName = typeof step.name === 'string' ? step.name : '';
+  return {
+    stepName,
+    issue: {
+      kind: 'outputValueRejected',
+      severity: 'breaking',
+      stepName,
+      field: firstIssue.path.length > 0 ? String(firstIssue.path[0]) : '',
+      detail: describeIssue(firstIssue),
+    },
+  };
+};
 
 // A called workflow that is off or invalid already fails the step; its own calls don't matter then.
 const getRunFailureIssues = (
@@ -769,12 +855,10 @@ export const analyzeDependents = ({
   draftRunFailure,
 }: AnalyzeDependentsParams): DependentsAnalysis => {
   const savedContract = extractWorkflowContract(savedDefinition);
-  const parsedDraftContract = extractWorkflowContract(
-    draftDefinition === undefined ? savedDefinition : draftDefinition
-  );
+  // A draft saved invalid is stored without a definition, so nothing in it reaches callers.
   const draftContract = isDraftValid
-    ? parsedDraftContract
-    : { ...parsedDraftContract, valid: false, enabled: false };
+    ? extractWorkflowContract(draftDefinition === undefined ? savedDefinition : draftDefinition)
+    : { ...savedContract, valid: false, enabled: false };
   const contractChanges = diffWorkflowContracts(savedContract, draftContract);
   const excludedIds = new Set([index.childId]);
 
@@ -869,15 +953,21 @@ const getCallFailure = (
   return downstream ? toChildFailsIssue(stepName, downstream) : undefined;
 };
 
+interface RunChecks {
+  failures: Map<string, RunFailure | undefined>;
+  /** For workflows not known to fail, a step that always runs a workflow that couldn't be checked. */
+  unchecked: Map<string, UncheckedCall>;
+}
+
 /**
  * Finds, for each of `workflows`, a step that makes every run of it fail: a waiting step that
  * always runs and runs a broken workflow, one that fails in turn, or one that loops back to a
- * workflow already running.
+ * workflow already running. Calls to workflows outside `workflows` can't be checked, since a
+ * deleted workflow and one the user can't read look the same.
  */
-const findRunFailures = (
-  workflows: ReadonlyMap<string, WorkflowLookupItem>
-): Map<string, RunFailure | undefined> => {
+const findRunFailures = (workflows: ReadonlyMap<string, WorkflowLookupItem>): RunChecks => {
   const failures = new Map<string, RunFailure | undefined>();
+  const unchecked = new Map<string, UncheckedCall>();
   const inProgress = new Set<string>();
   const resolve = (workflowId: string, depth: number): RunFailureResolution => {
     if (inProgress.has(workflowId)) {
@@ -891,7 +981,7 @@ const findRunFailures = (
       return undefined;
     }
     inProgress.add(workflowId);
-    let failure: RunFailure | undefined;
+    let failure = findOutputFailure(workflow.definition);
     for (const [calledId, callSites] of groupCallSites(workflow.definition)) {
       const called = workflows.get(calledId);
       // Only a step that runs every time, and stops the run when it fails, fails every run.
@@ -903,20 +993,28 @@ const findRunFailures = (
           const issue = getCallFailure(callSite, workflow, calledId, called, (id) =>
             resolve(id, depth + 1)
           );
-          failure = issue
-            ? { stepName: callSite.stepName, calledName: called?.name ?? calledId, issue }
-            : undefined;
+          const calledName = called?.name ?? calledId;
+          failure = issue ? { stepName: callSite.stepName, calledName, issue } : undefined;
+          const isUnchecked = called
+            ? callSite.stepType === 'workflow.execute' && unchecked.has(calledId)
+            : calledId !== workflowId;
+          if (!issue && isUnchecked && !unchecked.has(workflowId)) {
+            unchecked.set(workflowId, { from: callSite.stepName, to: calledName });
+          }
         }
       }
     }
     inProgress.delete(workflowId);
     failures.set(workflowId, failure);
+    if (failure) {
+      unchecked.delete(workflowId);
+    }
     return failure;
   };
   for (const workflowId of workflows.keys()) {
     resolve(workflowId, 1);
   }
-  return failures;
+  return { failures, unchecked };
 };
 
 /** Finds the step that makes every run of `workflow` fail, given the workflows it runs down the chain. */
@@ -931,7 +1029,7 @@ export const findRunFailure = (
         item,
       ])
     )
-  ).get(workflow.id);
+  ).failures.get(workflow.id);
 
 /** Lists what fails when `workflowIds` stop running (turned off or deleted), given their callers. */
 export const analyzeRemovalImpact = (
@@ -999,7 +1097,7 @@ export const analyzeCalledWorkflows = ({
       workflow,
     ])
   );
-  const runFailures = findRunFailures(workflowsById);
+  const { failures: runFailures, unchecked } = findRunFailures(workflowsById);
 
   return [...groupCallSites(definition).entries()]
     .map(([workflowId, callSites]): CalledWorkflowImpact => {
@@ -1022,14 +1120,22 @@ export const analyzeCalledWorkflows = ({
       ]);
       const impacts = evaluations.map(({ impact }) => impact);
       const isUnchecked = impacts.some(({ isDynamicInputs }) => isDynamicInputs);
+      // Only a run the step waits for can fail it.
+      const uncheckedCall =
+        contract.enabled &&
+        contract.valid &&
+        callSites.some(({ stepType }) => stepType === 'workflow.execute')
+          ? unchecked.get(workflowId)
+          : undefined;
       const status = getImpactStatus(issues, impacts, []);
       return {
         workflowId,
         workflowName: child.name,
-        status: status === 'safe' && isUnchecked ? 'unknown' : status,
+        status: status === 'safe' && (isUnchecked || uncheckedCall) ? 'unknown' : status,
         callSites: impacts,
         issues,
         contract,
+        ...(status === 'safe' && uncheckedCall ? { uncheckedCall } : {}),
       };
     })
     .sort(compareImpacts);

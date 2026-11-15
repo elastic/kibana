@@ -241,9 +241,15 @@ const getCalledVerdict = (called: CalledWorkflowImpact, childName: string): stri
         defaultMessage: 'Might fail when it runs',
       });
     case 'unknown':
-      return i18n.translate('workflows.dependents.verdict.called.unknown', {
-        defaultMessage: 'Can’t check: the inputs are computed while running',
-      });
+      return called.uncheckedCall
+        ? i18n.translate('workflows.dependents.verdict.called.uncheckedCall', {
+            defaultMessage:
+              'Can’t check: its step "{from}" runs {to}, which wasn’t found or you can’t view',
+            values: { from: called.uncheckedCall.from, to: called.uncheckedCall.to },
+          })
+        : i18n.translate('workflows.dependents.verdict.called.unknown', {
+            defaultMessage: 'Can’t check: the inputs are computed while running',
+          });
     case 'safe':
       return i18n.translate('workflows.dependents.verdict.called.safe', {
         defaultMessage: 'Works: it sends what {childName} needs and only uses outputs it returns',

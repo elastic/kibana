@@ -10,6 +10,7 @@
 import { isEqual } from 'lodash';
 import { parseDocument } from 'yaml';
 import { InvalidYamlSyntaxError, isRecord } from '@kbn/workflows-yaml';
+import { getFinalOutputStep } from '../../../common/lib/get_returned_output_names';
 import {
   analyzeCalledWorkflows,
   analyzeDependents,
@@ -149,18 +150,20 @@ export const analyzeWorkflowRemovalImpact = async (
 ): Promise<RemovalImpact> =>
   analyzeRemovalImpact(workflowIds, await collectCallers(workflowIds, lookup));
 
-const getCalls = (definition: unknown) => ({
+// What decides whether every run fails, apart from the inputs and outputs.
+const getRunDependencies = (definition: unknown) => ({
   callSites: collectWorkflowCallSites(definition),
   consts: isRecord(definition) ? definition.consts : undefined,
+  finalOutputStep: getFinalOutputStep(definition),
 });
 
 /**
  * True when going from `before` to `after` changes anything that callers rely on: the inputs and
- * outputs, or how it runs other workflows, which can make every run of it fail.
+ * outputs, or how it runs other workflows and returns its outputs, which can make every run fail.
  */
 export const hasCallerFacingChanges = (before: unknown, after: unknown): boolean =>
   diffWorkflowContracts(extractWorkflowContract(before), extractWorkflowContract(after)).length >
-    0 || !isEqual(getCalls(before), getCalls(after));
+    0 || !isEqual(getRunDependencies(before), getRunDependencies(after));
 
 /** The callers a save breaks, as returned by the update workflow route. */
 export const summarizeSaveImpact = ({
