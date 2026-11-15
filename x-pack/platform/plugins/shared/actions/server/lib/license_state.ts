@@ -51,6 +51,10 @@ export class LicenseState {
     return this.licenseInformation;
   }
 
+  public isTrial(): boolean {
+    return this.license?.type === 'trial';
+  }
+
   public isLicenseValidForActionType(
     actionType: ActionType,
     { notifyUsage }: { notifyUsage: boolean } = { notifyUsage: false }

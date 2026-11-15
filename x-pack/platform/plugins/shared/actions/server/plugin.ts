@@ -332,6 +332,7 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private isTrial: () => boolean = () => false;
   private connectorCatalogFeatureFlagSubscription?: Subscription;
 
   constructor(initContext: PluginInitializerContext) {
@@ -350,7 +351,14 @@ export class ActionsPlugin
     core: CoreSetup<ActionsPluginsStart, PluginStartContract>,
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
-    this.licenseState = new LicenseState(plugins.licensing.license$);
+    const licenseState = new LicenseState(plugins.licensing.license$);
+    this.licenseState = licenseState;
+    if (plugins.cloud?.isServerlessEnabled) {
+      const isServerlessTrial = plugins.cloud.serverless.organizationInTrial ?? false;
+      this.isTrial = () => isServerlessTrial;
+    } else {
+      this.isTrial = () => licenseState.isTrial();
+    }
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
     if (!this.isESOCanEncrypt) {
@@ -374,7 +382,9 @@ export class ActionsPlugin
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
-    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
+    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig, {
+      isTrial: this.isTrial,
+    });
     this.relayClient = this.actionsConfig.relay
       ? new RelayClient({
           baseUrl: this.actionsConfig.relay.url,
@@ -655,7 +665,9 @@ export class ActionsPlugin
       actionsConfig,
     } = this;
 
-    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
+    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig, {
+      isTrial: this.isTrial,
+    });
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
