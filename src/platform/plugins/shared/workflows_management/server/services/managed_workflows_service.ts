@@ -52,6 +52,7 @@ import {
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import { WorkflowRequiresDelegatedIdentityError } from '../api/workflow_requires_delegated_identity_error';
 import { chunkByCountAndBytes } from '../lib/chunk_by_count_and_bytes';
+import { ManagedWorkflowRenderError } from '../lib/managed_workflow_render_error';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -73,14 +74,6 @@ const hasTemplateValues = (
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
-
-/** A definition's yamlTemplate threw for the values it was given. */
-class ManagedWorkflowRenderError extends Error {
-  constructor(cause: unknown) {
-    super(toError(cause).message, { cause });
-    this.name = 'ManagedWorkflowRenderError';
-  }
-}
 
 type ManagedInstallPlan =
   | { action: 'skip' }
