@@ -12,7 +12,7 @@ import useMount from 'react-use/lib/useMount';
 
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
-import { initialize, setApiError, setFormField, setFormSection } from './actions';
+import { attemptSubmit, initialize, setApiError, setFormField, setFormSection } from './actions';
 import { type FormFieldsState } from './form_field';
 import { type FormSectionsState } from './form_section';
 import { getDefaultState } from './get_default_state';
@@ -32,12 +32,14 @@ export interface State {
   apiErrorMessage?: string;
   formFields: FormFieldsState;
   formSections: FormSectionsState;
+  hasAttemptedSubmit: boolean;
 }
 
 const editTransformFlyoutSlice = createSlice({
   name: 'editTransformFlyout',
   initialState: getDefaultState(),
   reducers: {
+    attemptSubmit,
     initialize,
     setApiError,
     setFormField,

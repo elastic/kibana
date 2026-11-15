@@ -40,9 +40,13 @@ export const EditTransformFlyoutFormTextArea: FC<EditTransformFlyoutFormTextInpu
       helpText={helpText}
       isInvalid={errorMessages.length > 0}
       error={errorMessages}
+      fullWidth
+      display="rowCompressed"
     >
       <EuiTextArea
         data-test-subj={`transformEditFlyout${upperCaseField}Input`}
+        compressed
+        fullWidth
         placeholder={
           placeHolder
             ? i18n.translate('xpack.transform.transformList.editFlyoutFormPlaceholderText', {

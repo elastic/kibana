@@ -141,7 +141,7 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       const isEnabled = await testSubjects.isEnabled('transformEditFlyoutUpdateButton');
       expect(isEnabled).to.eql(
         expectedValue,
-        `Expected "Update" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+        `Expected "Save" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );

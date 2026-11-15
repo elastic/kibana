@@ -49,8 +49,11 @@ const assertEditFlyoutUpdates = async (
   await expect(input('NumFailureRetries')).toHaveValue('');
   await input('NumFailureRetries').fill(numFailureRetries);
 
-  await expect(input('Frequency')).toHaveValue(String(config.frequency ?? ''));
-  await input('Frequency').fill('10m');
+  const [, frequencyValue = '', frequencyUnit = 'm'] =
+    /^(\d+)(s|m|h)$/.exec(String(config.frequency ?? '')) ?? [];
+  await expect(input('Frequency')).toHaveValue(frequencyValue);
+  await expect(transformManagement.editFlyoutFrequencyUnitSelect).toHaveValue(frequencyUnit);
+  await input('Frequency').fill('10');
 };
 
 const assertUpdatedTransform = async (
@@ -109,7 +112,7 @@ test.describe('Edit transform', { tag: tags.deploymentAgnostic }, () => {
     await test.step('updates the fields in the edit flyout', async () => {
       await assertEditFlyoutUpdates(transformManagement, pivotConfig, '0');
       // The pivot destination has no date field to apply a retention policy to.
-      await expect(transformManagement.editFlyoutRetentionPolicySwitch).toBeDisabled();
+      await expect(transformManagement.editFlyoutRetentionPolicySwitch).toBeHidden();
     });
 
     await test.step('saves the transform and shows the update', async () => {
