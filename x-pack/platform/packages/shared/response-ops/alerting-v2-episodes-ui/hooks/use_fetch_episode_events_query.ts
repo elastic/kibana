@@ -8,8 +8,7 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { rowsFromEsql } from '@kbn/alerting-v2-common-queries';
-import { buildEpisodeEventsEsqlQuery } from '../queries/episode_events_query';
+import { buildEpisodeEventsQuery, rowsFromEsql } from '@kbn/alerting-v2-common-queries';
 import { QUERY_STALE_TIME } from '../constants';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
@@ -33,7 +32,7 @@ export const useFetchEpisodeEventsQuery = ({
   return useQuery({
     queryKey: queryKeys.episodeEvents(spaceId, episodeId ?? ''),
     queryFn: ({ signal }) => {
-      const query = buildEpisodeEventsEsqlQuery(spaceId, episodeId!);
+      const query = buildEpisodeEventsQuery(spaceId, episodeId!);
       return runEsqlAsyncSearch({
         data,
         params: {

@@ -6,7 +6,9 @@
  */
 
 import { esql } from '@elastic/esql';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 /**
  * Collapses each alert's per-execution events into status *phases*: one
@@ -14,8 +16,7 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
  * Scoped by the selected `episode.id`s and bounded to the display window — this
  * query supplies the segment *geometry* drawn in view. The bar's true start is
  * resolved separately by the untimed `buildAlertStartsQuery` (window-independent)
- * and overlaid via `applyAlertStarts`. Result shape is the package's
- * `AlertTimelinePhaseRow`.
+ * and overlaid via `applyAlertStarts`.
  *
  * Caveat — flapping: `BY episode.id, episode.status` merges non-contiguous runs of
  * the same status (active → recovering → active collapses to one active span).
@@ -24,28 +25,37 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 /** The four `episode.status` values — upper bound on phase rows per alert. */
 const MAX_PHASES_PER_ALERT = 4;
 
+export interface AlertPhaseRow {
+  'episode.id': string;
+  'episode.status': AlertEpisodeStatus;
+  group_hash: string;
+  seg_start: string;
+  seg_end: string;
+}
+
 export interface BuildAlertPhasesQueryOptions {
   ruleId: string;
-  /** Display window lower bound (epoch ms) — segments are drawn within this window. */
-  windowStartMs: number;
-  windowEndMs: number;
-  /** The exact alerts being drawn (from {@link buildAlertSelectionQuery}). */
+  /** The exact alerts being drawn. */
   alertIds: string[];
+  /** Display window (epoch ms) — segments are drawn within it. */
+  window: {
+    startMs: number;
+    endMs: number;
+  };
 }
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
-export const buildAlertPhasesQuery = ({
+export const buildCollapsedStatusPhasesQuery = ({
   ruleId,
-  windowStartMs,
-  windowEndMs,
   alertIds,
-}: BuildAlertPhasesQueryOptions) => {
-  const fromIso = toIsoUtc(windowStartMs);
-  const toIso = toIsoUtc(windowEndMs);
+  window,
+}: BuildAlertPhasesQueryOptions): TypedEsqlQuery<AlertPhaseRow> => {
+  const fromIso = toIsoUtc(window.startMs);
+  const toIso = toIsoUtc(window.endMs);
   const alertLiterals = alertIds.map((id) => esql.str(id));
 
-  return (
+  return asTypedEsqlQuery<AlertPhaseRow>(
     esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`.where`rule.id == ${ruleId}`
       .where`@timestamp >= ${fromIso}::DATETIME AND @timestamp <= ${toIso}::DATETIME`
       .where`episode.id IN (${alertLiterals})`
