@@ -28,6 +28,7 @@ import {
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_VULNERABILITIES_INDEX_PATTERN,
@@ -71,6 +72,7 @@ interface EsSearchScenario {
   findingsIndexStatusKspm: CheckIndexStatusResult;
   scoreIndexStatusKspm: CheckIndexStatusResult;
   vulnerabilitiesLatestIndexStatus: CheckIndexStatusResult;
+  nativeScannerLatestIndexStatus: CheckIndexStatusResult;
   vulnerabilitiesIndexStatus: CheckIndexStatusResult;
 }
 
@@ -87,6 +89,7 @@ const emptyEsScenario = (): EsSearchScenario => ({
   findingsIndexStatusKspm: 'empty',
   scoreIndexStatusKspm: 'empty',
   vulnerabilitiesLatestIndexStatus: 'empty',
+  nativeScannerLatestIndexStatus: 'empty',
   vulnerabilitiesIndexStatus: 'empty',
 });
 
@@ -244,6 +247,8 @@ const setupEsSearch = (esClient: jest.Mocked<ElasticsearchClient>, scenario: EsS
       result = scenario.scoreIndexStatusKspm;
     } else if (index === CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN) {
       result = scenario.vulnerabilitiesLatestIndexStatus;
+    } else if (index === CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN) {
+      result = scenario.nativeScannerLatestIndexStatus;
     } else if (index === VULNERABILITIES_INDEX_PATTERN) {
       result = scenario.vulnerabilitiesIndexStatus;
     } else if (!posture && index === CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS) {
@@ -434,6 +439,41 @@ describe('CSP status route', () => {
         setupEsSearch(deps.esClient, {
           ...emptyEsScenario(),
           vulnerabilitiesLatestIndexStatus: 'not-empty',
+        });
+        setupPackagePolicies(deps.packagePolicyService, [vulnPackagePolicy]);
+        setupAgents(deps.agentPolicyService, deps.agentService, {
+          'agent-policy-vuln_mgmt': 1,
+        });
+        setupInstallation(deps.packageServiceMocks, installationFixture(new Date().toISOString()));
+
+        const res = await callGetCspStatus(deps);
+
+        expect(res.vuln_mgmt.status).toBe('indexed');
+      });
+
+      it(`Return vuln_mgmt status indexed when only the native scanner alias contains new documents`, async () => {
+        const vulnPackagePolicy = packagePolicyFor('vuln_mgmt', 'agent-policy-vuln_mgmt');
+        setupEsSearch(deps.esClient, {
+          ...emptyEsScenario(),
+          nativeScannerLatestIndexStatus: 'not-empty',
+        });
+        setupPackagePolicies(deps.packagePolicyService, [vulnPackagePolicy]);
+        setupAgents(deps.agentPolicyService, deps.agentService, {
+          'agent-policy-vuln_mgmt': 1,
+        });
+        setupInstallation(deps.packageServiceMocks, installationFixture(new Date().toISOString()));
+
+        const res = await callGetCspStatus(deps);
+
+        expect(res.vuln_mgmt.status).toBe('indexed');
+      });
+
+      it(`Keeps the CNVM result when the native scanner alias is unprivileged`, async () => {
+        const vulnPackagePolicy = packagePolicyFor('vuln_mgmt', 'agent-policy-vuln_mgmt');
+        setupEsSearch(deps.esClient, {
+          ...emptyEsScenario(),
+          vulnerabilitiesLatestIndexStatus: 'not-empty',
+          nativeScannerLatestIndexStatus: 'unprivileged',
         });
         setupPackagePolicies(deps.packagePolicyService, [vulnPackagePolicy]);
         setupAgents(deps.agentPolicyService, deps.agentService, {

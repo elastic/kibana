@@ -12,6 +12,7 @@ import {
   STATUS_ROUTE_PATH,
   LATEST_FINDINGS_RETENTION_POLICY,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   CDR_VULNERABILITIES_INDEX_PATTERN,
@@ -207,7 +208,8 @@ export const getCspStatus = async ({
     findingsLatestIndexStatusKspm,
     findingsIndexStatusKspm,
     scoreIndexStatusKspm,
-    vulnerabilitiesLatestIndexStatus,
+    cnvmLatestIndexStatus,
+    nativeScannerLatestIndexStatus,
     vulnerabilitiesIndexStatus,
     installation,
     latestCspPackage,
@@ -268,6 +270,12 @@ export const getCspStatus = async ({
     }),
 
     checkIndexStatus(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, logger, {
+      postureType: VULN_MGMT_POLICY_TEMPLATE,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
+    // Checked separately: the alias does not exist for CNVM-only customers, and a missing index in
+    // a combined search would report the CNVM index as empty.
+    checkIndexStatus(esClient, CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN, logger, {
       postureType: VULN_MGMT_POLICY_TEMPLATE,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
@@ -338,6 +346,8 @@ export const getCspStatus = async ({
   const latestCspPackageVersion = latestCspPackage.version;
 
   const MIN_DATE = 0;
+  const vulnerabilitiesLatestIndexStatus =
+    nativeScannerLatestIndexStatus === 'not-empty' ? 'not-empty' : cnvmLatestIndexStatus;
   const indicesDetails = [
     {
       index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
@@ -353,7 +363,7 @@ export const getCspStatus = async ({
     },
     {
       index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-      status: vulnerabilitiesLatestIndexStatus,
+      status: cnvmLatestIndexStatus,
     },
   ];
 
