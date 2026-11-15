@@ -113,7 +113,7 @@ steps:
             Eval datasets the A/B can score a candidate on (id, name, description, examples):
             {{ steps.read_datasets.output.datasets | default: consts.EMPTY_ARRAY | json | truncate: 4000 }}
 
-            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id; a candidate for a new skill leaves skill_id empty and names the skill. Each candidate also sets dataset_id to the id of the dataset whose examples fit the task it improves — a candidate scored on a dataset that does not fit its task is scored out of domain and will likely be rejected, so prefer tasks one of the datasets covers and leave dataset_id empty only when none fits (the default dataset then applies). Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. Set continue_exploring to true only when another pass would look somewhere new.
+            Return at most two candidates. A candidate that improves an existing skill sets skill_id to that skill's id; a candidate for a new skill leaves skill_id empty and names the skill. Every candidate also sets dataset_id, required, no default: copy the id of the dataset from the list above whose examples fit the task it improves. A candidate scored on a dataset that does not fit its task is scored out of domain and will likely be rejected, so prefer tasks one of the datasets covers; if none fits, set dataset_id to the first dataset in the list anyway. Each candidate carries one to three complete variants of the skill's instructions (markdown), a rationale and the evidence behind it. Set continue_exploring to true only when another pass would look somewhere new.
           schema:
             type: object
             properties:
@@ -131,6 +131,7 @@ steps:
                       maxLength: 64
                     dataset_id:
                       type: string
+                      minLength: 1
                       maxLength: 128
                     title:
                       type: string
@@ -149,7 +150,7 @@ steps:
                         type: string
                         minLength: 1
                         maxLength: 20000
-                  required: [skill_id, skill_name, title, rationale, evidence, variants]
+                  required: [skill_id, skill_name, dataset_id, title, rationale, evidence, variants]
               continue_exploring:
                 type: boolean
             required: [candidates, continue_exploring]
