@@ -9,6 +9,8 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import { createDefaultInspectorAdapters, type Datatable } from '@kbn/expressions-plugin/common';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { UnifiedHistogramFetchStatus } from '../../types';
 import React from 'react';
 import { act, screen } from '@testing-library/react';
@@ -21,6 +23,7 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import { getFetchParamsMock, getFetch$Mock } from '../../__mocks__/fetch_params';
 import { getLensVisMock } from '../../__mocks__/lens_vis';
 import { of } from 'rxjs';
+import { I18nProvider } from '@kbn/i18n-react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
@@ -47,6 +50,7 @@ interface MountComponentProps {
   isTransformationalESQL?: boolean;
   mockEditVisualization?: jest.Mock | undefined;
   withLensActions?: boolean;
+  comparison?: UnifiedHistogramChartProps['comparison'];
 }
 
 const toggleActionsTestId = 'default-chart-toggle-actions';
@@ -64,6 +68,7 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     isChartLoading,
     isTransformationalESQL,
     withLensActions,
+    comparison,
   } = mountProps;
   const dataSource = propsDataSource ?? new DataViewSource(dataViewWithTimefieldMock);
   const lensDataView =
@@ -151,15 +156,17 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
     isChartAvailable: checkChartAvailability({ chart, dataSource: fetchDataSource }),
+    isHistogramComparisonAvailable: true,
     withLensActions,
     renderToggleActions: () => <span data-test-subj={toggleActionsTestId}>Toggle actions</span>,
     fetch$: getFetch$Mock(),
     fetchParams,
     dataLoading$: undefined,
     lensAdapters: undefined,
+    comparison,
   };
 
-  renderWithI18n(<UnifiedHistogramChart {...props} />);
+  const { rerender } = renderWithI18n(<UnifiedHistogramChart {...props} />);
 
   act(() => {
     props.fetch$?.next({
@@ -168,7 +175,7 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     });
   });
 
-  return { mockOnEditVisualization: mockUseEditVisualization };
+  return { mockOnEditVisualization: mockUseEditVisualization, props, rerender };
 };
 
 describe('Chart', () => {
@@ -428,5 +435,276 @@ describe('Chart', () => {
       | undefined;
     expect(firstCall).toBeDefined();
     expect(firstCall![0].initialInput.attributes.title).toBe('');
+  });
+
+  describe('comparison', () => {
+    const embeddable = jest.mocked(unifiedHistogramServicesMock.lens.EmbeddableComponent);
+    const lastLensProps = () => embeddable.mock.calls[embeddable.mock.calls.length - 1][0];
+    const histogramTable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'timestamp',
+          name: '@timestamp every 30 minute',
+          meta: { type: 'date', esMeta: { bucket: { interval: 30, unit: 'minute' } } },
+        },
+        { id: 'results', name: 'results', meta: { type: 'number' } },
+      ],
+      rows: [
+        { timestamp: 1, results: 10 },
+        { timestamp: 2, results: 4 },
+      ],
+    } as Datatable;
+    const layerId = '662552df-2cdc-4539-bf3b-73b9f827252c';
+    const histogramAdapters = () => {
+      const adapters = createDefaultInspectorAdapters();
+      adapters.tables.tables[layerId] = histogramTable;
+      return adapters;
+    };
+    const histogramAttributes = {
+      title: 'Histogram',
+      visualizationType: 'lnsXY',
+      references: [],
+      state: {
+        datasourceStates: {
+          textBased: {
+            layers: {
+              [layerId]: {
+                columns: [
+                  { columnId: 'timestamp', fieldName: 'timestamp', meta: { type: 'date' } },
+                  { columnId: 'results', fieldName: 'results', meta: { type: 'number' } },
+                ],
+              },
+            },
+          },
+        },
+        visualization: {
+          layers: [{ layerId, seriesType: 'bar_stacked', accessors: ['results'] }],
+        },
+        query: { esql: 'from logs' },
+        filters: [],
+      },
+    } as unknown as LensAttributes;
+    const createComparison = () => ({
+      key: 'pattern',
+      label: 'Selected pattern',
+      description: 'Failed login',
+      loadCounts: jest.fn().mockResolvedValue([{ timestamp: 1, count: 3 }]),
+      onClear: jest.fn(),
+    });
+    const expectComparisonStatus = (status: 'loading' | 'applied' | 'unavailable') => {
+      const badge = screen.queryByTestId('unifiedHistogramComparisonBadge');
+      const note = screen.queryByTestId('unifiedHistogramComparisonNote');
+      if (status === 'loading') {
+        expect(badge).toBeInTheDocument();
+        expect(note).not.toBeInTheDocument();
+        return;
+      }
+      if (status === 'unavailable') {
+        expect(note).toHaveTextContent('Comparison is unavailable.');
+        return;
+      }
+      expect(note).not.toBeInTheDocument();
+    };
+    const mountHistogramComparison = async (
+      comparison: UnifiedHistogramChartProps['comparison']
+    ) => {
+      const mounted = await mountComponent({ isEsql: true, comparison });
+      const { fetch$, fetchParams, lensVisServiceState } = mounted.props;
+      act(() => {
+        fetch$.next({
+          fetchParams,
+          lensVisServiceState: {
+            ...lensVisServiceState,
+            visContext: { ...lensVisServiceState.visContext!, attributes: histogramAttributes },
+          },
+        });
+      });
+      return mounted;
+    };
+
+    beforeEach(() => embeddable.mockClear());
+
+    it('reports unavailable without counting when the chart is not a single bar series', async () => {
+      const comparison = createComparison();
+      await mountComponent({ isEsql: true, comparison });
+
+      await act(async () => {
+        lastLensProps().onLoad?.(false, histogramAdapters());
+      });
+
+      expect(comparison.loadCounts).not.toHaveBeenCalled();
+      expectComparisonStatus('unavailable');
+    });
+
+    it('counts the selection with the params that loaded the histogram and stacks it first', async () => {
+      const comparison = createComparison();
+      const { props } = await mountHistogramComparison(comparison);
+
+      expectComparisonStatus('loading');
+
+      await act(async () => {
+        lastLensProps().onLoad?.(false, histogramAdapters());
+      });
+
+      expect(comparison.loadCounts).toHaveBeenCalledWith({
+        fetchParams: props.fetchParams,
+        timeField: '@timestamp',
+        timeColumn: 'timestamp',
+        interval: '30 minute',
+        signal: expect.any(AbortSignal),
+      });
+      expectComparisonStatus('applied');
+      const visualization = lastLensProps().attributes.state.visualization as {
+        layers: Array<{ accessors: string[] }>;
+      };
+      expect(visualization.layers[0].accessors).toEqual(['overlay', 'remainder']);
+      expect(
+        lastLensProps().attributes.state.datasourceStates.textBased?.layers[layerId]?.table?.rows[0]
+      ).toEqual({ timestamp: 1, results: 10, overlay: 3, remainder: 7 });
+    });
+
+    it('does not treat the comparison render as a new histogram load', async () => {
+      const comparison = createComparison();
+      await mountHistogramComparison(comparison);
+      const { onLoad } = lastLensProps();
+
+      await act(async () => {
+        onLoad?.(false, histogramAdapters());
+      });
+      expectComparisonStatus('applied');
+
+      // Lens keeps calling the `onLoad` it was mounted with, including for the comparison render.
+      await act(async () => {
+        onLoad?.(true, undefined);
+        onLoad?.(false, histogramAdapters());
+      });
+
+      expect(comparison.loadCounts).toHaveBeenCalledTimes(1);
+      expectComparisonStatus('applied');
+      const visualization = lastLensProps().attributes.state.visualization as {
+        layers: Array<{ accessors: string[] }>;
+      };
+      expect(visualization.layers[0].accessors).toEqual(['overlay', 'remainder']);
+    });
+
+    it('does not adopt a comparison table delivered after the comparison is cleared', async () => {
+      const comparison = createComparison();
+      const { props, rerender } = await mountHistogramComparison(comparison);
+      const { onLoad } = lastLensProps();
+
+      await act(async () => {
+        onLoad?.(false, histogramAdapters());
+      });
+      expectComparisonStatus('applied');
+
+      // Keep the provider so this updates the mounted chart instead of remounting it.
+      rerender(
+        <I18nProvider>
+          <UnifiedHistogramChart {...props} comparison={undefined} />
+        </I18nProvider>
+      );
+      const comparisonAdapters = () => {
+        const adapters = createDefaultInspectorAdapters();
+        adapters.tables.tables[layerId] = {
+          ...histogramTable,
+          columns: [
+            ...histogramTable.columns,
+            { id: 'overlay', name: 'Selected pattern', meta: { type: 'number' } },
+            { id: 'remainder', name: 'Other', meta: { type: 'number' } },
+          ],
+          rows: histogramTable.rows.map((row) => ({
+            ...row,
+            overlay: row.timestamp === 1 ? 3 : 0,
+            remainder: row.timestamp === 1 ? 7 : row.results,
+          })),
+        };
+        return adapters;
+      };
+      await act(async () => {
+        onLoad?.(false, comparisonAdapters());
+      });
+
+      rerender(
+        <I18nProvider>
+          <UnifiedHistogramChart {...props} comparison={comparison} />
+        </I18nProvider>
+      );
+      await act(async () => {
+        await comparison.loadCounts.mock.results.at(-1)?.value;
+      });
+
+      const table =
+        lastLensProps().attributes.state.datasourceStates.textBased?.layers[layerId]?.table;
+      expect(table?.columns.map((column) => column.id)).toEqual([
+        'timestamp',
+        'results',
+        'overlay',
+        'remainder',
+      ]);
+      expect(table?.rows[0]).toEqual({ timestamp: 1, results: 10, overlay: 3, remainder: 7 });
+    });
+
+    it('does not count against a table loaded for previous fetch params', async () => {
+      const comparison = createComparison();
+      const { props, rerender } = await mountHistogramComparison(comparison);
+      const staleOnLoad = lastLensProps().onLoad;
+
+      rerender(<UnifiedHistogramChart {...props} fetchParams={{ ...props.fetchParams }} />);
+      await act(async () => {
+        staleOnLoad?.(false, histogramAdapters());
+      });
+
+      expect(comparison.loadCounts).not.toHaveBeenCalled();
+      expectComparisonStatus('loading');
+    });
+
+    it('shows the selection in a toolbar badge before the chart actions, without a loading indicator', async () => {
+      const comparison = createComparison();
+      await mountHistogramComparison(comparison);
+
+      const badge = screen.getByTestId('unifiedHistogramComparisonBadge');
+      expect(badge).toHaveTextContent('Failed login');
+      expect(badge.closest('[data-toolbar-section="right"]')).toBeTruthy();
+      expect(badge.closest('[data-toolbar-section="left"]')).toBeNull();
+      expect(screen.queryByTestId('unifiedHistogramComparisonNote')).not.toBeInTheDocument();
+      const editButton = screen.getByTestId('unifiedHistogramEditFlyoutVisualization');
+      const saveButton = screen.getByTestId('unifiedHistogramSaveVisualization');
+      expect(badge.compareDocumentPosition(editButton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(badge.compareDocumentPosition(saveButton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+
+      await act(async () => {
+        lastLensProps().onLoad?.(false, histogramAdapters());
+      });
+
+      expect(screen.queryByTestId('unifiedHistogramComparisonNote')).not.toBeInTheDocument();
+    });
+
+    it('notes when the comparison is unavailable', async () => {
+      await mountComponent({ isEsql: true, comparison: createComparison() });
+
+      await act(async () => {
+        lastLensProps().onLoad?.(false, histogramAdapters());
+      });
+
+      expect(screen.getByTestId('unifiedHistogramComparisonNote')).toHaveTextContent(
+        'Comparison is unavailable.'
+      );
+    });
+
+    it('clears the comparison from the badge', async () => {
+      const comparison = createComparison();
+      await mountHistogramComparison(comparison);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Clear comparison' }));
+
+      expect(comparison.onClear).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not show the badge without a comparison', async () => {
+      await mountComponent({ isEsql: true });
+
+      expect(screen.queryByTestId('unifiedHistogramComparison')).not.toBeInTheDocument();
+    });
   });
 });

@@ -82,6 +82,9 @@ describe('useUnifiedHistogram', () => {
     ]);
     expect(hook.result.current.chartProps?.fetchParams.controlsState).toBe(esqlControlState);
     expect(hook.result.current.layoutProps).toBeDefined();
+    expect(hook.result.current.chartProps?.isChartAvailable).toBe(true);
+    expect(hook.result.current.chartProps?.isHistogramComparisonAvailable).toBe(false);
+    expect(hook.result.current.layoutProps?.isHistogramComparisonAvailable).toBe(false);
   });
 
   it('should trigger fetch$ when fetch is called', async () => {

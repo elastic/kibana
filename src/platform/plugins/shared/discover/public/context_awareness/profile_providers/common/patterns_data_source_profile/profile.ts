@@ -20,6 +20,12 @@ import { createElement } from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
+import {
+  createPatternsHistogramComparison,
+  getComparableCategorizeColumn,
+  getPatternsRowAdditionalLeadingControls,
+  publishPatternsHistogramComparison,
+} from './histogram_comparison';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
@@ -37,7 +43,7 @@ export const createPatternsDataSourceProfileProvider = (
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
-        const { rowHeight, density } = params;
+        const { rowHeight, density, histogramComparisonSelection } = params;
         const { patternColumns, sparklineColumns } = context;
         if (!patternColumns || patternColumns.length === 0) {
           return prev(params);
@@ -59,7 +65,15 @@ export const createPatternsDataSourceProfileProvider = (
           (acc, column) =>
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
-                createElement(SparklineCellRenderer, { ...props, services, density }),
+                createElement(SparklineCellRenderer, {
+                  ...props,
+                  services,
+                  density,
+                  isSelected:
+                    histogramComparisonSelection !== undefined &&
+                    props.row.flattened[histogramComparisonSelection.column] ===
+                      histogramComparisonSelection.value,
+                }),
             }),
           {}
         );
@@ -128,6 +142,24 @@ export const createPatternsDataSourceProfileProvider = (
             },
           },
         ];
+      },
+    getRowAdditionalLeadingControls: getPatternsRowAdditionalLeadingControls,
+    getHistogramComparison:
+      (prev, { toolkit }) =>
+      (params) => {
+        const esql = isOfAggregateQueryType(params.query) ? params.query.esql : undefined;
+        if (!getComparableCategorizeColumn(esql)) {
+          return prev(params);
+        }
+
+        return createPatternsHistogramComparison(toolkit, params);
+      },
+    publishHistogramComparison:
+      (prev, { toolkit }) =>
+      (params) => {
+        if (!publishPatternsHistogramComparison(toolkit, params)) {
+          prev(params);
+        }
       },
     getDefaultAppState: (prev) => (params) => {
       return {

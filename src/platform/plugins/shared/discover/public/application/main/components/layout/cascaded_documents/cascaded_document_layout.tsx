@@ -37,6 +37,9 @@ import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_comp
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
 import { useCascadedDocumentsTelemetry } from './telemetry';
+import type { GroupHistogramComparison } from './blocks/use_row_header_components';
+import { useProfileAccessor } from '../../../../../context_awareness';
+import { useHistogramComparisonState } from '../histogram_comparison/use_histogram_comparison_state';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -66,7 +69,53 @@ const ESQLDataCascade = React.memo(
       getDataCascadeUiState,
       setDataCascadeUiState,
       cascadeGroupingChangeHandler,
+      esqlQuery,
+      histogramComparisonEnabled,
     } = useCascadedDocumentsContext();
+
+    const canComparePatterns =
+      histogramComparisonEnabled &&
+      queryMeta.groupByFields.length === 1 &&
+      queryMeta.groupByFields[0].type === 'categorize';
+    const publishHistogramComparison = useProfileAccessor('publishHistogramComparison');
+    const { selection: histogramComparisonSelection } = useHistogramComparisonState({
+      query: esqlQuery,
+      esqlVariables,
+      defaultHistogramAvailable: canComparePatterns,
+    });
+    const histogramComparison = useMemo<GroupHistogramComparison | undefined>(() => {
+      if (!canComparePatterns) {
+        return undefined;
+      }
+
+      const isSelected = (rowData: ESQLDataGroupNode) =>
+        histogramComparisonSelection?.column === rowData.groupColumn &&
+        histogramComparisonSelection.value === rowData.groupValue;
+
+      return {
+        isSelected,
+        toggle: (rowData) =>
+          publishHistogramComparison(() => {})(
+            isSelected(rowData)
+              ? undefined
+              : {
+                  label: rowData.groupValue,
+                  column: rowData.groupColumn,
+                  value: rowData.groupValue,
+                  query: esqlQuery,
+                  dataView,
+                  esqlVariables,
+                }
+          ),
+      };
+    }, [
+      canComparePatterns,
+      dataView,
+      esqlQuery,
+      esqlVariables,
+      histogramComparisonSelection,
+      publishHistogramComparison,
+    ]);
 
     const { data: cascadeGroupData, columnTypes } = useGroupedCascadeData({
       selectedCascadeGroups,
@@ -103,7 +152,8 @@ const ESQLDataCascade = React.memo(
       queryMeta,
       columns,
       togglePopover,
-      columnTypes
+      columnTypes,
+      histogramComparison
     );
 
     const cascadeLeafRowRenderer = useCallback<

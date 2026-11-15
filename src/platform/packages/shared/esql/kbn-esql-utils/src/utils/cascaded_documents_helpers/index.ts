@@ -36,6 +36,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
 import { getUsedFields, getFieldTerminals, getFieldDefinitionFromArg } from '../esql_fields_utils';
+import { categorizeRegexToRLikePattern } from '../categorize_regex_to_rlike_pattern';
 import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
 import {
@@ -594,6 +595,26 @@ function handleStatsByCategorizeLeafOperation(
   });
 
   mutate.generic.commands.append(cascadeOperationQuery.ast, categorizeWhereCommand);
+
+  // MATCH drops the pattern wildcards and matches the words in any order. RLIKE keeps that
+  // order. It stays behind MATCH so the regex only runs on the already narrowed documents.
+  const rlikePattern = categorizeRegexToRLikePattern(matchValue);
+  if (rlikePattern) {
+    const rlikeWhereCommand = Builder.command({
+      name: 'where',
+      args: [
+        Builder.expression.func.binary('rlike' as BinaryExpressionComparisonOperator, [
+          Builder.expression.func.call('to_lower', [
+            Builder.identifier({
+              name: categorizedFieldName,
+            }),
+          ]),
+          Builder.expression.literal.string(rlikePattern.toLowerCase()),
+        ]),
+      ],
+    });
+    mutate.generic.commands.append(cascadeOperationQuery.ast, rlikeWhereCommand);
+  }
 
   return {
     esql: BasicPrettyPrinter.print(cascadeOperationQuery.ast),

@@ -13,14 +13,14 @@ import React, { useMemo } from 'react';
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, BarSeries, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
 
-import { useLogRateAnalysisBarColors } from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 
 interface SparklineChartProps {
   charts: ChartsPluginStart;
   values: Array<number | string>;
+  isSelected?: boolean;
 }
 
 const miniHistogramChartTheme: PartialTheme = {
@@ -44,9 +44,12 @@ const miniHistogramChartTheme: PartialTheme = {
   },
 };
 
-export const SparklineChart: FC<SparklineChartProps> = ({ values, charts }) => {
+export const SparklineChart: FC<SparklineChartProps> = ({ values, charts, isSelected = false }) => {
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
-  const barColors = useLogRateAnalysisBarColors();
+  const { euiTheme } = useEuiTheme();
+  const barColor = isSelected
+    ? euiTheme.colors.vis.euiColorVis8
+    : euiTheme.colors.vis.euiColorVisGrey1;
 
   const chartData = useMemo(
     () => values.map((value, index) => ({ key: index, value })) ?? [],
@@ -75,7 +78,7 @@ export const SparklineChart: FC<SparklineChartProps> = ({ values, charts }) => {
           yAccessors={['value']}
           data={chartData}
           stackAccessors={[0]}
-          color={barColors.barColor}
+          color={barColor}
         />
       </Chart>
       <EuiScreenReaderOnly>
