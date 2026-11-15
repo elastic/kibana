@@ -8,6 +8,7 @@
  */
 
 import moment from 'moment';
+import { BehaviorSubject } from 'rxjs';
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { searchSourceMock } from './search_source/mocks';
 import type { ISearchSetup, ISearchStart } from './types';
@@ -59,6 +60,11 @@ function createStartContract(
     session: getSessionServiceMock(),
     sessionsClient: getSessionsClientMock(),
     searchSource: searchSourceMock.createStartContract(),
+    replay: {
+      activate: jest.fn(() => ({ addSessionId: jest.fn(), dispose: jest.fn() })),
+      isActive: jest.fn(() => false),
+      isActive$: new BehaviorSubject(false),
+    },
     ...overrides,
   };
 }

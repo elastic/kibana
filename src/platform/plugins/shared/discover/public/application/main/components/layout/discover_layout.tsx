@@ -52,6 +52,7 @@ import type { DataMainMsg } from '../../state_management/discover_data_state_con
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
+import { SnapshotReplayCallout } from '../snapshot_replay_callout/snapshot_replay_callout';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
@@ -462,6 +463,7 @@ export function DiscoverLayout() {
         `,
       ]}
     >
+      <SnapshotReplayCallout />
       <TopNavMemoized
         savedQuery={savedQuery}
         esqlModeErrors={esqlModeErrors}

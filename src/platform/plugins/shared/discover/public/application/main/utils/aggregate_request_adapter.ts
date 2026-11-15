@@ -15,10 +15,26 @@ import { RequestAdapter } from '@kbn/inspector-plugin/public';
  */
 export class AggregateRequestAdapter extends RequestAdapter {
   private readonly adapters: RequestAdapter[];
+  private readonly names: string[];
 
-  constructor(adapters: RequestAdapter[]) {
+  /**
+   * @param adapters The adapters to aggregate
+   * @param names Optional adapter names (same order), used by Inspector snapshots
+   */
+  constructor(adapters: RequestAdapter[], names: string[] = []) {
     super();
     this.adapters = adapters;
+    this.names = names;
+  }
+
+  /** Returns the requests of each aggregated adapter by its name. */
+  public getRequestsBySource(): Record<string, Request[]> {
+    return Object.fromEntries(
+      this.adapters.map((adapter, index) => [
+        this.names[index] ?? `adapter${index}`,
+        adapter.getRequests(),
+      ])
+    );
   }
 
   public reset(...args: Parameters<RequestAdapter['reset']>): void {

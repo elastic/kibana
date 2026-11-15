@@ -13,7 +13,7 @@ import { lazy } from 'react';
 import type { InspectorViewDescription } from '../../types';
 import type { Adapters } from '../../../common';
 
-const RequestsViewComponent = lazy(() =>
+export const LazyRequestsViewComponent = lazy(() =>
   import('../../async_services').then((module) => ({ default: module.RequestsViewComponent }))
 );
 
@@ -26,5 +26,5 @@ export const getRequestsViewDescription = (): InspectorViewDescription => ({
     defaultMessage: 'View the search requests used to collect the data',
   }),
   shouldShow: (adapters: Adapters) => Boolean(adapters.requests),
-  component: RequestsViewComponent,
+  component: LazyRequestsViewComponent,
 });

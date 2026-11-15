@@ -110,6 +110,7 @@ import type {
 } from '../expressions';
 import { filtersToAst, queryToAst } from '../expressions';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
+import { createReplayKey } from '../create_replay_key';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -359,6 +360,7 @@ export class SearchSource {
   fetch$<T = {}>(
     options: SearchSourceSearchOptions = {}
   ): Observable<IKibanaSearchResponse<estypes.SearchResponse<T>>> {
+    let replayKey: string | undefined;
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
@@ -367,7 +369,9 @@ export class SearchSource {
           options.indexPattern = searchRequest.index;
         }
 
-        return this.fetchSearch$(searchRequest, options);
+        return this.fetchSearch$(searchRequest, options, (key) => {
+          replayKey = key;
+        });
       }),
       tap((response) => {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
@@ -378,7 +382,7 @@ export class SearchSource {
       shareReplay()
     );
 
-    return this.inspectSearch(s$, options) as Observable<
+    return this.inspectSearch(s$, options, () => replayKey) as Observable<
       IKibanaSearchResponse<estypes.SearchResponse<T>>
     >;
   }
@@ -424,7 +428,8 @@ export class SearchSource {
 
   private inspectSearch(
     s$: Observable<IKibanaSearchResponse<unknown>>,
-    options: SearchSourceSearchOptions
+    options: SearchSourceSearchOptions,
+    getReplayKey: () => string | undefined = () => undefined
   ) {
     const { id, title, description, adapter } = options.inspector || { title: '' };
 
@@ -446,6 +451,7 @@ export class SearchSource {
         first(undefined, null),
         tap(() => {
           requestResponder?.stats(getRequestInspectorStats(this));
+          requestResponder?.replayKey(getReplayKey());
           trackRequestBody();
         }),
         catchError(() => {
@@ -536,13 +542,15 @@ export class SearchSource {
    */
   private fetchSearch$(
     searchRequest: SearchRequest,
-    options: SearchSourceSearchOptions
+    options: SearchSourceSearchOptions,
+    onReplayKey?: (replayKey: string) => void
   ): Observable<IKibanaSearchResponse<unknown>> {
     const { search, getConfig, onResponse } = this.dependencies;
     const { indexType, ...restRequest } = searchRequest;
     const params = getSearchParamsFromRequest(restRequest, {
       getConfig,
     });
+    onReplayKey?.(createReplayKey(params));
 
     return search({ params, indexType }, options).pipe(
       switchMap((response) => {

@@ -98,6 +98,7 @@ import {
   createRequestHashForClientCache,
 } from './create_request_hash';
 import { getFallbackPartialResponse } from './get_fallback_partial_response';
+import type { ReplayRegistry } from '../replay/replay_registry';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -109,6 +110,7 @@ export interface SearchInterceptorDeps {
   session: ISessionService;
   searchConfig: SearchConfigSchema;
   getCPSManager?: () => ICPSManager | undefined;
+  replay?: ReplayRegistry;
 }
 
 const MAX_CACHE_SIZE_MB = 10;
@@ -736,6 +738,11 @@ export class SearchInterceptor {
     }
 
     const { sessionId, abortSignal } = searchOptions;
+
+    const replayed$ = this.deps.replay?.match(request, sessionId);
+    if (replayed$) {
+      return replayed$;
+    }
 
     return this.createRequestHash$(request, searchOptions).pipe(
       switchMap((requestHash) => {

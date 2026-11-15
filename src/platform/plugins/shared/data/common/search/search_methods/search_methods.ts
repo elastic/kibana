@@ -49,6 +49,7 @@ import type {
   SQL_SEARCH_STRATEGY,
 } from '..';
 import { getTime } from '../../query';
+import { createReplayKey } from '../create_replay_key';
 import { mapEsqlResponseToDatatable, formatAndRethrowEsqlError } from './datatable_mapper';
 import {
   getDslRequestInspectorStats,
@@ -91,6 +92,7 @@ export class SearchMethodsService implements ISearchMethods {
 
     const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
+      replayKey: createReplayKey(request.params),
     });
 
     requestResponder?.json({
@@ -141,6 +143,7 @@ export class SearchMethodsService implements ISearchMethods {
 
     const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
+      replayKey: createReplayKey(request.params),
     });
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);

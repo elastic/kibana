@@ -10,6 +10,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type {
   InspectorSession,
+  InspectorSnapshotOptions,
+  RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
 import type { DiscoverDataStateContainer } from '../state_management/discover_data_state_container';
@@ -20,11 +22,19 @@ import {
   useInternalStateSelector,
   useCurrentTabAction,
   useInternalStateDispatch,
+  useInternalStateGetState,
   useCurrentTabSelector,
   useRuntimeStateManager,
   selectTabRuntimeState,
+  selectTab,
 } from '../state_management/redux';
 import { createContextsAdapter } from '../../../context_awareness/hooks';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import {
+  DISCOVER_SNAPSHOT_APP_ID,
+  getDiscoverSnapshotAppState,
+  getSnapshotRestoreParams,
+} from '../state_management/utils/inspector_snapshot';
 
 /**
  * Builds an AggregateRequestAdapter from the data state container's inspector adapters
@@ -35,13 +45,16 @@ const getInspectorRequestAdapters = (
   cascadedDocumentsFetcher: CascadedDocumentsFetcher
 ): AggregateRequestAdapter => {
   const { inspectorAdapters } = dataStateContainer;
-  const requestAdapters = [
-    inspectorAdapters.requests,
-    inspectorAdapters.lensRequests,
-    cascadedDocumentsFetcher.getRequestAdapter(),
-  ].filter((adapter) => !!adapter);
+  const namedAdapters = Object.entries({
+    requests: inspectorAdapters.requests,
+    lensRequests: inspectorAdapters.lensRequests,
+    cascadedDocuments: cascadedDocumentsFetcher.getRequestAdapter(),
+  }).filter((entry): entry is [string, RequestAdapter] => !!entry[1]);
 
-  return new AggregateRequestAdapter(requestAdapters);
+  return new AggregateRequestAdapter(
+    namedAdapters.map(([, adapter]) => adapter),
+    namedAdapters.map(([name]) => name)
+  );
 };
 
 export function useInspector({ inspector }: { inspector: InspectorPublicPluginStart }) {
@@ -50,6 +63,8 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
   );
 
   const dispatch = useInternalStateDispatch();
+  const getState = useInternalStateGetState();
+  const services = useDiscoverServices();
   const currentTabId = useCurrentTabSelector((state) => state.id);
   const runtimeStateManager = useRuntimeStateManager();
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
@@ -75,6 +90,28 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
       // prevent overlapping
       dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
+      const snapshot: InspectorSnapshotOptions = {
+        appId: DISCOVER_SNAPSHOT_APP_ID,
+        replay: tabRuntimeState.replay$.getValue()?.meta,
+        getAppState: async () =>
+          getDiscoverSnapshotAppState({
+            data: services.data,
+            getPersistedDiscoverSession: () => getState().persistedDiscoverSession,
+            getCurrentTab: () => selectTab(getState(), currentTabId),
+            getCurrentTabRuntimeState: () => tabRuntimeState,
+            profileStateRegistry: services.profileStateRegistry,
+            runtimeStateManager,
+          }),
+        restore: async (importedSnapshot) => {
+          session?.close();
+          await dispatch(
+            internalStateActions.openLocatorParamsInNewTab(
+              getSnapshotRestoreParams(importedSnapshot)
+            )
+          );
+        },
+      };
+
       const session = inspector.open(
         {
           requests: getInspectorRequestAdapters(dataStateContainer, cascadedDocumentsFetcher),
@@ -85,7 +122,7 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
             },
           }),
         },
-        { title: persistedDiscoverSession?.title }
+        { title: persistedDiscoverSession?.title, snapshot }
       );
 
       setInspectorSession(session);
@@ -99,7 +136,9 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
     [
       currentTabId,
       dispatch,
+      getState,
       inspector,
+      services,
       persistedDiscoverSession?.title,
       runtimeStateManager,
       setExpandedDoc,

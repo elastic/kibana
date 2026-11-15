@@ -42,6 +42,8 @@ export interface RequestParams {
   id?: string;
   description?: string;
   searchSessionId?: string;
+  /** Stable key of the search request params, used to replay the recorded response. */
+  replayKey?: string;
 }
 
 export interface RequestStatistics {

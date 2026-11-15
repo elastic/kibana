@@ -15,6 +15,7 @@ import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public';
+import type { InspectorSnapshotMeta, Request } from '@kbn/inspector-plugin/public';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
@@ -33,6 +34,7 @@ import {
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
+  type TabReplayState,
 } from '../runtime_state';
 import {
   APP_STATE_URL_KEY,
@@ -58,8 +60,11 @@ import { clearOutdatedTabUrlState } from '../../utils/cleanup_url_state';
 import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
-  [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
-> = (params) =>
+  [
+    Parameters<typeof internalStateSlice.actions.setTabs>[0],
+    { replays?: Record<string, TabReplayState> }?
+  ]
+> = (params, { replays } = {}) =>
   function setTabsThunkFn(
     dispatch,
     getState,
@@ -117,6 +122,7 @@ export const setTabs: InternalStateThunkActionCreator<
           unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
             ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
             : undefined,
+          replay: replays?.[tab.id],
         },
       });
     }
@@ -149,11 +155,13 @@ export const updateTabs: InternalStateThunkActionCreator<
       items: TabState[] | TabItem[];
       selectedItem: TabState | TabItem | null;
       updatedDiscoverSession?: DiscoverSession;
+      /** Replay state of added tabs by tab id, set before their first fetch */
+      replays?: Record<string, TabReplayState>;
     },
     void
   ],
   Promise<void>
-> = ({ items, selectedItem, updatedDiscoverSession }) =>
+> = ({ items, selectedItem, updatedDiscoverSession, replays }) =>
   async function updateTabsThunkFn(
     dispatch,
     getState,
@@ -374,12 +382,15 @@ export const updateTabs: InternalStateThunkActionCreator<
     }
 
     dispatch(
-      setTabs({
-        allTabs: updatedTabs,
-        selectedTabId: selectedTab.id,
-        recentlyClosedTabs: selectRecentlyClosedTabs(currentState),
-        updatedDiscoverSession,
-      })
+      setTabs(
+        {
+          allTabs: updatedTabs,
+          selectedTabId: selectedTab.id,
+          recentlyClosedTabs: selectRecentlyClosedTabs(currentState),
+          updatedDiscoverSession,
+        },
+        { replays }
+      )
     );
   };
 
@@ -589,10 +600,23 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
       profileState?: ProfileStateMap;
+      uiState?: Partial<TabState['uiState']>;
+      visContext?: TabState['attributes']['visContext'];
+      replay?: TabReplayState;
     }
   ],
   Promise<void>
-> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
+> = ({
+  tabLabel,
+  appState,
+  globalState,
+  searchSessionId,
+  dataViewSpec,
+  profileState,
+  uiState,
+  visContext,
+  replay,
+}) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -605,6 +629,11 @@ export const openInNewTab: InternalStateThunkActionCreator<
       appState: initialAppState,
       globalState: initialGlobalState,
       profileState: cloneDeep(profileState) ?? {},
+      uiState: { ...DEFAULT_TAB_STATE.uiState, ...cloneDeep(uiState) },
+      attributes: {
+        ...DEFAULT_TAB_STATE.attributes,
+        ...(visContext ? { visContext: cloneDeep(visContext) } : {}),
+      },
     };
 
     if (tabLabel) {
@@ -626,7 +655,11 @@ export const openInNewTab: InternalStateThunkActionCreator<
     }
 
     return dispatch(
-      updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+      updateTabs({
+        items: [...currentTabs, newDefaultTab],
+        selectedItem: newDefaultTab,
+        replays: replay ? { [newDefaultTab.id]: replay } : undefined,
+      })
     );
   };
 
@@ -647,27 +680,36 @@ export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
     );
   };
 
-export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
+export interface OpenLocatorParamsReplay {
+  /** Recorded Inspector requests that are replayed instead of searching */
+  requests: Request[];
+  meta: InspectorSnapshotMeta;
+  /** Send requests that are not in the snapshot to the live cluster */
+  passthrough?: boolean;
+}
+
+/**
+ * Opens Discover locator params in a new tab, optionally replaying recorded Inspector requests.
+ */
+export const openLocatorParamsInNewTab: InternalStateThunkActionCreator<
   [
     {
-      searchSession: UISession;
+      params: DiscoverAppLocatorParams;
+      label?: string;
+      uiState?: Partial<TabState['uiState']>;
+      visContext?: TabState['attributes']['visContext'];
+      replay?: OpenLocatorParamsReplay;
     }
   ],
   Promise<void>
-> = ({ searchSession }) =>
-  async function openSearchSessionInNewTabThunkFn(dispatch, _getState, { services }) {
-    const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;
-
-    if (!restoreState.searchSessionId) {
-      return;
-    }
-
+> = ({ params, label, uiState, visContext, replay }) =>
+  async function openLocatorParamsInNewTabThunkFn(dispatch, _, { services }) {
     const {
       appState,
       globalState: originalGlobalState,
       profileUrlState,
       state: { dataViewSpec, profileState: persistentProfileState },
-    } = parseAppLocatorParams(restoreState, services.profileStateRegistry);
+    } = parseAppLocatorParams(params, services.profileStateRegistry);
     const profileState = services.profileStateRegistry.mergeState(
       persistentProfileState,
       profileUrlState
@@ -684,16 +726,42 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
       globalState.filters = originalGlobalState.filters;
     }
 
-    return dispatch(
+    // The tab adds its search session ids to the replay session, so only its searches are replayed
+    const replaySession = replay
+      ? services.data.search.replay.activate(replay.requests, { passthrough: replay.passthrough })
+      : undefined;
+
+    await dispatch(
       openInNewTab({
-        tabLabel: searchSession.name,
-        searchSessionId: restoreState.searchSessionId,
+        tabLabel: label,
+        searchSessionId: params.searchSessionId,
         appState,
         globalState,
         dataViewSpec,
         profileState,
+        uiState,
+        visContext,
+        replay: replay && replaySession ? { session: replaySession, meta: replay.meta } : undefined,
       })
     );
+  };
+
+export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
+  [
+    {
+      searchSession: UISession;
+    }
+  ],
+  Promise<void>
+> = ({ searchSession }) =>
+  async function openSearchSessionInNewTabThunkFn(dispatch) {
+    const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;
+
+    if (!restoreState.searchSessionId) {
+      return;
+    }
+
+    return dispatch(openLocatorParamsInNewTab({ params: restoreState, label: searchSession.name }));
   };
 
 export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
@@ -711,6 +779,8 @@ export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
   function disconnectTabThunkFn(dispatch, __, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    tabRuntimeState.replay$.getValue()?.session.dispose();
+    tabRuntimeState.replay$.next(undefined);
     tabRuntimeState.dataStateContainer$.getValue()?.cancel();
     dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();

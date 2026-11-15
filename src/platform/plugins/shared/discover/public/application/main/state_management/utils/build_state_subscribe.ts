@@ -128,6 +128,9 @@ export const buildStateSubscribe =
         savedDataViews: getState().savedDataViews,
         runtimeStateManager,
         services,
+        skipFetchFields: Boolean(
+          selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).replay$.getValue()
+        ),
       });
 
       // If the requested data view is not found, don't try to load it,
