@@ -184,6 +184,9 @@ export const OverviewActivityChart = () => {
               name: ERRORS_LABEL,
               color: euiTheme.colors.vis.euiColorVis6,
               filters,
+              // Its own axis: a handful of broken monitor/locations would otherwise
+              // flatten against ping counts in the hundreds and never be visible.
+              axisMode: 'right',
             },
           ]}
         />

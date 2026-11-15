@@ -152,6 +152,7 @@ export interface LayerConfig {
   color: string;
   name: string;
   showPercentileAnnotations?: boolean;
+  axisMode?: YAxisMode;
 }
 
 // A query-driven annotation layer (e.g. vertical markers for alert start times).
@@ -411,12 +412,14 @@ export class LensAttributes {
     seriesConfig,
     operationType,
     columnFilter,
+    emptyAsNull = true,
   }: {
     sourceField: string;
     operationType: SupportedOperations;
     label?: string;
     seriesConfig: SeriesConfig;
     columnFilter?: ColumnFilter;
+    emptyAsNull?: boolean;
   }):
     | MinIndexPatternColumn
     | MaxIndexPatternColumn
@@ -441,7 +444,7 @@ export class LensAttributes {
       params:
         operationType === 'unique_count'
           ? {
-              emptyAsNull: true,
+              emptyAsNull,
             }
           : {},
     };
@@ -597,6 +600,7 @@ export class LensAttributes {
       timeScale,
       columnFilters,
       showPercentileAnnotations,
+      emptyAsNull,
     } = fieldMetaInfo;
 
     if (columnType === FORMULA_COLUMN) {
@@ -660,6 +664,7 @@ export class LensAttributes {
         label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
         columnFilter: columnFilters?.[0],
+        emptyAsNull,
       });
     }
 
@@ -706,6 +711,7 @@ export class LensAttributes {
         showPercentileAnnotations,
         formula,
         format,
+        emptyAsNull,
       } = metricOption;
       const fieldMeta = layerConfig.dataView.getFieldByName(fieldName!);
       return {
@@ -721,6 +727,7 @@ export class LensAttributes {
         paramFilters,
         showPercentileAnnotations:
           layerConfig.showPercentileAnnotations ?? showPercentileAnnotations,
+        emptyAsNull,
       };
     } else {
       const fieldMeta = layerConfig.dataView.getFieldByName(sourceField);
@@ -1128,14 +1135,15 @@ export class LensAttributes {
           {
             forAccessor: `y-axis-column-layer${index}-0`,
             color: layerConfig.color,
-            /* if the fields format matches the field format of the first layer, use the default y axis (right)
-             * if not, use the secondary y axis (left) */
+            /* unless the series pins an axis: if the fields format matches the field format of the
+             * first layer, use the default y axis (left), if not, use the secondary y axis (right) */
             axisMode:
-              layerConfig.dataView.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
+              layerConfig.axisMode ??
+              (layerConfig.dataView.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
               this.layerConfigs[0].dataView.fieldFormatMap[this.layerConfigs[0].selectedMetricField]
                 ?.id
                 ? ('left' as YAxisMode)
-                : ('right' as YAxisMode),
+                : ('right' as YAxisMode)),
           },
         ],
         xAccessor: `x-axis-column-layer${index}`,

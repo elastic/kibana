@@ -109,6 +109,8 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         id: 'monitor_errors',
         columnType: OPERATION_COLUMN,
         field: 'state.id',
+        // No error states in a bucket is a real `0`, not a gap to interpolate across.
+        emptyAsNull: false,
         columnFilters: [
           {
             language: 'kuery',
