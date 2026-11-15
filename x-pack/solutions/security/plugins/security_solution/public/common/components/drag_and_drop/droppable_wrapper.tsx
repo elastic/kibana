@@ -9,7 +9,8 @@ import { rgba } from 'polished';
 import React, { useCallback } from 'react';
 import type { DraggableChildrenFn, DroppableProps } from '@hello-pangea/dnd';
 import { Droppable } from '@hello-pangea/dnd';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
+import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 interface Props {
   children?: React.ReactNode;
@@ -20,64 +21,71 @@ interface Props {
   renderClone?: DraggableChildrenFn;
 }
 
-const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string }>`
+const getDropTargetStyles = ({
+  euiTheme,
+  height,
+  isDraggingOver,
+}: {
+  euiTheme: UseEuiTheme['euiTheme'];
+  height: string;
+  isDraggingOver: boolean;
+}) => css`
   transition: background-color 0.7s ease;
   width: 100%;
-  height: ${({ height }) => height};
+  height: ${height};
 
   .flyout-overlay {
     .euiPanel {
-      background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
+      background-color: ${euiTheme.colors.body};
     }
   }
 
-  ${(props) =>
-    props.isDraggingOver
-      ? `
-    .drop-and-provider-timeline {
-      &:hover {
-        background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
-      }
-    }
-    .drop-and-provider-timeline:hover {
-        background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
-    }
-  > div.timeline-drop-area-empty {
-     color: ${props.theme.eui.euiColorSuccess};
-     background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
+  ${isDraggingOver
+    ? css`
+        .drop-and-provider-timeline {
+          &:hover {
+            background-color: ${rgba(euiTheme.colors.success, 0.3)};
+          }
+        }
+        .drop-and-provider-timeline:hover {
+          background-color: ${rgba(euiTheme.colors.success, 0.3)};
+        }
+        > div.timeline-drop-area-empty {
+          color: ${euiTheme.colors.success};
+          background-color: ${rgba(euiTheme.colors.success, 0.2)};
 
-     & .timeline-drop-area-empty__text {
-      color: ${props.theme.eui.euiColorSuccess};
-     }
-  }
-  > div.timeline-drop-area {
-    background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
-    .provider-item-filter-container div:first-child{
-      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
-      transform: none !important;
-    }
-    .drop-and-provider-timeline {
-      display: block !important;
-      + div {
-        display: none;
-      }
-    }
+          & .timeline-drop-area-empty__text {
+            color: ${euiTheme.colors.success};
+          }
+        }
+        > div.timeline-drop-area {
+          background-color: ${rgba(euiTheme.colors.success, 0.2)};
+          .provider-item-filter-container div:first-child {
+            /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
+            transform: none !important;
+          }
+          .drop-and-provider-timeline {
+            display: block !important;
+            + div {
+              display: none;
+            }
+          }
 
-    & .euiFormHelpText {
-      color: ${props.theme.eui.euiColorSuccess};
-    }
-  }
-  .flyout-overlay {
-    .euiPanel {
-      background-color: ${props.theme.eui.euiColorLightShade};
-    }
-    + div {
-      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
-      display: none !important;
-    }
-  }
-  `
-      : ''}
+          & .euiFormHelpText {
+            color: ${euiTheme.colors.success};
+          }
+        }
+        .flyout-overlay {
+          .euiPanel {
+            background-color: ${euiTheme.colors.lightShade};
+          }
+          + div {
+            /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
+            display: none !important;
+          }
+        }
+      `
+    : ''}
   > div.timeline-drop-area {
     .drop-and-provider-timeline {
       display: none;
@@ -89,23 +97,26 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
     }
   }
 `;
-ReactDndDropTarget.displayName = 'ReactDndDropTarget';
 
 export const DroppableWrapper = React.memo<Props>(
   ({ children = null, droppableId, height = '100%', type, render = null, renderClone }) => {
+    const { euiTheme } = useEuiTheme();
     const DroppableContent = useCallback<DroppableProps['children']>(
       (provided, snapshot) => (
-        <ReactDndDropTarget
-          height={height}
+        <div
+          css={getDropTargetStyles({
+            euiTheme,
+            height,
+            isDraggingOver: snapshot.isDraggingOver,
+          })}
           ref={provided.innerRef}
           {...provided.droppableProps}
-          isDraggingOver={snapshot.isDraggingOver}
         >
           {render == null ? children : render({ isDraggingOver: snapshot.isDraggingOver })}
           {provided.placeholder}
-        </ReactDndDropTarget>
+        </div>
       ),
-      [children, height, render]
+      [children, euiTheme, height, render]
     );
 
     return (
