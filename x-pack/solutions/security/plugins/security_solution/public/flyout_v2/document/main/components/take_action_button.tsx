@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -41,6 +42,15 @@ import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { ADD_NOTE_ACTION_ID, DETONATE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { DETONATE_ACTION } from '../../../detonation/translations';
+import type { DetonateSample } from '../../../detonation/submit_modal';
+import { DetonateSubmitModal } from '../../../detonation/submit_modal';
+import type { DetonateFileOption } from '../../../detonation/select_file_panel';
+import {
+  DETONATE_FILE_PANEL_ID,
+  DETONATE_FILE_PANEL_WIDTH,
+  DetonateSelectFilePanel,
+} from '../../../detonation/select_file_panel';
+import * as detonateFileI18n from '../../../detonation/select_file_translations';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { ActionMenu, getActionGroups } from './action_menu';
 
@@ -207,22 +217,81 @@ export const TakeActionButton = memo(
       closePopoverHandler
     );
 
-    // Prototype: "Detonate" opens a fake detonation report flyout on top of this one.
+    // Prototype: "Detonate" opens a submit modal; submitting opens a fake detonation report flyout.
     const { openDetonationFlyoutAsChild } = useFlyoutApi();
+    const [detonateSample, setDetonateSample] = useState<DetonateSample | null>(null);
+    const hostName = (getFieldValue(hit, 'host.name') as string | undefined) ?? '-';
+    const detonateFiles = useMemo<DetonateFileOption[]>(
+      () => [
+        {
+          id: 'alert-file',
+          fileName:
+            (getFieldValue(hit, 'file.name') as string | undefined) ??
+            (getFieldValue(hit, 'process.name') as string | undefined) ??
+            'invoice_Q3_final.exe',
+          sha256:
+            (getFieldValue(hit, 'file.hash.sha256') as string | undefined) ??
+            '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f',
+          hostName,
+          description: 'File on the host that triggered this alert',
+          badge: detonateFileI18n.BADGE_DETONATED,
+          isDetonated: true,
+        },
+        {
+          id: 'dropped-file',
+          fileName: 'svchost32.exe',
+          sha256: 'a41f09c2d7e83b6f1c5a9d04e7b2c8f13a6d5e90b4c7f2a1d8e6b3095c4a77c2',
+          hostName,
+          description: 'Dropped by the process in %APPDATA%\\Roaming',
+        },
+        {
+          id: 'downloaded-file',
+          fileName: 'update_helper.dll',
+          sha256: 'e0c7bb53a19d4f8e62b07c3d5a1f9e84d6b2c70a3f5e19d8c4b6a2071e3f1d90',
+          hostName,
+          description: 'Downloaded from 185.220.101.47 over HTTPS',
+        },
+      ],
+      [hit, hostName]
+    );
     const detonateItems = useMemo(
       () => [
         {
           'data-test-subj': DETONATE_ACTION_ID,
           key: DETONATE_ACTION_ID,
           name: DETONATE_ACTION,
-          onClick: () => {
-            closePopoverHandler();
-            openDetonationFlyoutAsChild();
-          },
+          panel: DETONATE_FILE_PANEL_ID,
         },
       ],
-      [closePopoverHandler, openDetonationFlyoutAsChild]
+      []
     );
+    const detonatePanels = useMemo<EuiContextMenuPanelDescriptor[]>(
+      () => [
+        {
+          id: DETONATE_FILE_PANEL_ID,
+          title: detonateFileI18n.PANEL_TITLE,
+          width: DETONATE_FILE_PANEL_WIDTH,
+          content: (
+            <DetonateSelectFilePanel
+              files={detonateFiles}
+              onContinue={(file) => {
+                closePopoverHandler();
+                setDetonateSample(file);
+              }}
+            />
+          ),
+        },
+      ],
+      [detonateFiles, closePopoverHandler]
+    );
+    const handleDetonateSubmit = useCallback(() => {
+      setDetonateSample(null);
+      openDetonationFlyoutAsChild();
+    }, [openDetonationFlyoutAsChild]);
+    const handleSeeAnalysis = useCallback(() => {
+      setDetonateSample(null);
+      openDetonationFlyoutAsChild({ skipDetonation: true });
+    }, [openDetonationFlyoutAsChild]);
     const endpointResponseActionsConsoleItems = useMemo(
       () => [...responderActionItems, ...detonateItems],
       [responderActionItems, detonateItems]
@@ -362,6 +431,14 @@ export const TakeActionButton = memo(
             onClose={() => setIsolateAction(null)}
           />
         )}
+        {detonateSample && (
+          <DetonateSubmitModal
+            sample={detonateSample}
+            onClose={() => setDetonateSample(null)}
+            onSubmit={handleDetonateSubmit}
+            onSeeAnalysis={handleSeeAnalysis}
+          />
+        )}
         {osqueryAgentId && (
           <OsqueryFlyout
             agentId={osqueryAgentId}
@@ -386,6 +463,7 @@ export const TakeActionButton = memo(
             alertAssigneePanels={alertAssigneesPanels}
             alertTagItems={alertTagsItems}
             alertTagPanels={alertTagsPanels}
+            detonatePanels={detonatePanels}
             documentWorkflowItems={documentWorkflowMenuItem}
             endpointResponseItems={endpointResponseActionsConsoleItems}
             exceptionItems={exceptionActionItems}

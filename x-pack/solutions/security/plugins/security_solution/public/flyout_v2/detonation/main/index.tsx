@@ -31,13 +31,21 @@ export const DETONATION_DURATION_MS = 4000;
  * Detonation report flyout (prototype): shows a "Detonating" spinner for a few seconds, then
  * the report.
  */
-export const DetonationReport: FC = memo(() => {
-  const [isDetonating, setIsDetonating] = useState(true);
+export interface DetonationReportProps {
+  /** Show the existing report straight away, without the "Detonating" step. */
+  skipDetonation?: boolean;
+}
+
+export const DetonationReport: FC<DetonationReportProps> = memo(({ skipDetonation = false }) => {
+  const [isDetonating, setIsDetonating] = useState(!skipDetonation);
 
   useEffect(() => {
+    if (skipDetonation) {
+      return undefined;
+    }
     const timeout = setTimeout(() => setIsDetonating(false), DETONATION_DURATION_MS);
     return () => clearTimeout(timeout);
-  }, []);
+  }, [skipDetonation]);
 
   if (isDetonating) {
     return (

@@ -19,12 +19,17 @@ const DetonationReport = lazy(() =>
   import('./main').then((m) => ({ default: m.DetonationReport }))
 );
 
+export interface OpenDetonationFlyoutParams {
+  /** Show the existing report straight away, without the "Detonating" step. */
+  skipDetonation?: boolean;
+}
+
 export interface DetonationFlyoutApi {
   /**
    * Opens the detonation report flyout as a child of the currently open flyout (nested in its
    * history stack, so the back button returns to it). Prototype: not persisted in the URL.
    */
-  openDetonationFlyoutAsChild: () => void;
+  openDetonationFlyoutAsChild: (params?: OpenDetonationFlyoutParams) => void;
 }
 
 /**
@@ -36,15 +41,23 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
 
-  const openDetonationFlyoutAsChild = useCallback(() => {
-    const properties: OverlaySystemFlyoutOpenOptions = {
-      ...defaultDocumentFlyoutProperties,
-      historyKey,
-      session: FLYOUT_SESSION_KIND.INHERIT,
-      title: buildFlyoutNavTitle(DETONATION_REPORT_TITLE),
-    };
-    openFlyout(<DetonationReport />, properties, undefined, FLYOUT_SESSION_KIND.INHERIT);
-  }, [openFlyout, defaultDocumentFlyoutProperties, historyKey]);
+  const openDetonationFlyoutAsChild = useCallback(
+    ({ skipDetonation = false }: OpenDetonationFlyoutParams = {}) => {
+      const properties: OverlaySystemFlyoutOpenOptions = {
+        ...defaultDocumentFlyoutProperties,
+        historyKey,
+        session: FLYOUT_SESSION_KIND.INHERIT,
+        title: buildFlyoutNavTitle(DETONATION_REPORT_TITLE),
+      };
+      openFlyout(
+        <DetonationReport skipDetonation={skipDetonation} />,
+        properties,
+        undefined,
+        FLYOUT_SESSION_KIND.INHERIT
+      );
+    },
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey]
+  );
 
   return useMemo(() => ({ openDetonationFlyoutAsChild }), [openDetonationFlyoutAsChild]);
 };
