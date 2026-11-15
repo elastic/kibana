@@ -26,10 +26,17 @@ import {
 } from './threat_intel_workflow/install';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
 
-const AESOP_TEMPLATE_DEFINITION_IDS: ReadonlySet<string> = new Set([
+type AesopTemplateDefinitionId =
+  | typeof AESOP_DRIFT_MONITOR_WORKFLOW_ID
+  | typeof AESOP_EXPLORER_WORKFLOW_ID;
+
+const AESOP_TEMPLATE_DEFINITION_IDS: ReadonlySet<string> = new Set<AesopTemplateDefinitionId>([
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   AESOP_EXPLORER_WORKFLOW_ID,
 ]);
+
+const isAesopTemplateDefinitionId = (id: string | null): id is AesopTemplateDefinitionId =>
+  id !== null && AESOP_TEMPLATE_DEFINITION_IDS.has(id);
 
 const uninstallAesopWorkflows = async ({
   managedWorkflowsClient,
@@ -54,8 +61,8 @@ const uninstallAesopWorkflows = async ({
     return;
   }
 
-  const aesopInstances = instances.filter(({ definitionId }) =>
-    AESOP_TEMPLATE_DEFINITION_IDS.has(definitionId)
+  const aesopInstances = instances.flatMap(({ definitionId, spaceId, workflowId }) =>
+    isAesopTemplateDefinitionId(definitionId) ? [{ definitionId, spaceId, workflowId }] : []
   );
   const results = await Promise.allSettled(
     aesopInstances.map(({ definitionId, spaceId, workflowId }) =>
