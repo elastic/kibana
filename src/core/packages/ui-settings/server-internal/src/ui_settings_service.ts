@@ -167,6 +167,7 @@ export class UiSettingsService
         log: this.log,
         sharedUserProvidedCache: this.sharedUserProvidedCache,
         namespace,
+        cacheScope: readClientCacheScope(savedObjectsClient),
       };
       return UiSettingsClientFactory.create(options) as ClientType<T>;
     };
@@ -273,4 +274,28 @@ export class UiSettingsService
       }
     }
   }
+}
+
+const fallbackCacheScopes = new WeakMap<object, string>();
+let fallbackCacheScopeCount = 0;
+
+/**
+ * Scope saved on the saved objects client by the repository that owns its
+ * Elasticsearch credential. Clients that predate that method stay isolated
+ * from each other, and one client object keeps a stable fallback.
+ */
+function readClientCacheScope(client: SavedObjectsClientContract): string | null {
+  const scoped = client as SavedObjectsClientContract & { getCacheScope?: () => string | null };
+  if (typeof scoped.getCacheScope === 'function') {
+    return scoped.getCacheScope();
+  }
+
+  const existing = fallbackCacheScopes.get(client);
+  if (existing !== undefined) {
+    return existing;
+  }
+
+  const scope = `unscoped:${++fallbackCacheScopeCount}`;
+  fallbackCacheScopes.set(client, scope);
+  return scope;
 }

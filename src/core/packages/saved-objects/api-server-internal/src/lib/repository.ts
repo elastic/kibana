@@ -76,6 +76,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
+import { readEsClientCacheScope } from './es_client_cache_scope';
 import type { RepositoryHelpers } from './apis/helpers';
 import {
   type ApiExecutionContext,
@@ -700,6 +701,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   getCurrentNamespace(namespace?: string) {
     return this.helpers.common.getCurrentNamespace(namespace);
+  }
+
+  /**
+   * Credential this repository authenticates as. Stable for one Elasticsearch
+   * client, so every namespace-scoped copy of that client shares it.
+   */
+  getCacheScope(): string | null {
+    return readEsClientCacheScope(this.options.client);
   }
 
   /**

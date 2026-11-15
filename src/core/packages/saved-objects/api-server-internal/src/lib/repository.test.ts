@@ -14,6 +14,7 @@ import {
 } from './repository.test.mock';
 
 import { SavedObjectsRepository } from './repository';
+import { associateEsClientCacheScope } from './es_client_cache_scope';
 import { loggerMock } from '@kbn/logging-mocks';
 import { kibanaMigratorMock } from '../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -55,6 +56,24 @@ describe('SavedObjectsRepository', () => {
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();
+  });
+
+  describe('#getCacheScope', () => {
+    it('returns the scope associated with its Elasticsearch client', () => {
+      associateEsClientCacheScope(client, 'api-key-a');
+      expect((repository as SavedObjectsRepository).getCacheScope()).toBe('api-key-a');
+    });
+
+    it('returns null when the client is marked as not cacheable', () => {
+      associateEsClientCacheScope(client, null);
+      expect((repository as SavedObjectsRepository).getCacheScope()).toBeNull();
+    });
+
+    it('keeps that scope when rescoping the namespace', () => {
+      associateEsClientCacheScope(client, 'api-key-a');
+      const rescoped = repository.asScopedToNamespace('space-a');
+      expect((rescoped as SavedObjectsRepository).getCacheScope()).toBe('api-key-a');
+    });
   });
 
   describe('#getCurrentNamespace', () => {

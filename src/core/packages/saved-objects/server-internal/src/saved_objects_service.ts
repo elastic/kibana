@@ -51,9 +51,11 @@ import {
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
+  SavedObjectsRepository,
+  associateEsClientCacheScope,
+  INTERNAL_SAVED_OBJECTS_CACHE_SCOPE,
 } from '@kbn/core-saved-objects-api-server-internal';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
   SavedObjectsExporter,
   SavedObjectsImporter,
@@ -63,6 +65,7 @@ import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server'
 import type { NodeInfo } from '@kbn/core-node-server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
+import { credentialCacheScope, readSessionCookieName } from './credential_cache_scope';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
@@ -352,23 +355,29 @@ export class SavedObjectsService
       );
     };
 
+    const sessionCookieName = readSessionCookieName(this.coreContext.configService);
+
     const repositoryFactory: SavedObjectsRepositoryFactory = {
       createInternalRepository: (
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions | undefined,
         serverTiming?: RequestTiming
-      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions, serverTiming),
+      ) => {
+        const esClient = client.asInternalUser;
+        associateEsClientCacheScope(esClient, INTERNAL_SAVED_OBJECTS_CACHE_SCOPE);
+        return createRepository(esClient, includedHiddenTypes, extensions, serverTiming);
+      },
       createScopedRepository: (
         req: KibanaRequest,
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions
-      ) =>
-        createRepository(
-          client.asScoped(req).asCurrentUser,
-          includedHiddenTypes,
-          extensions,
-          req.serverTiming
-        ),
+      ) => {
+        const esClient = client.asScoped(req).asCurrentUser;
+        // Tag the scoped client with this request's credential so settings reads can
+        // be cached per principal. A null scope means the request is not cached.
+        associateEsClientCacheScope(esClient, credentialCacheScope(req, sessionCookieName));
+        return createRepository(esClient, includedHiddenTypes, extensions, req.serverTiming);
+      },
     };
 
     const clientProvider = new SavedObjectsClientProvider({
