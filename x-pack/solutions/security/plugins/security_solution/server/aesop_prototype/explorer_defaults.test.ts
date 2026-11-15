@@ -166,6 +166,21 @@ describe('AESOP explorer defaults', () => {
       expect(createConversation).not.toHaveBeenCalled();
     });
 
+    it('finds the decision log past the first page of fuzzy title matches', async () => {
+      const lookalikes = Array.from({ length: 50 }, (_, index) => ({
+        id: `conv-${index}`,
+        title: `${AESOP_DECISION_LOG_TITLE} ${index}`,
+      }));
+      search.mockResolvedValueOnce({ results: lookalikes, total: 51 }).mockResolvedValueOnce({
+        results: [{ id: 'conv-log', title: AESOP_DECISION_LOG_TITLE }],
+        total: 51,
+      });
+
+      await expect(resolveDefaultInvestigationId(deps())).resolves.toBe('conv-log');
+      expect(search).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+      expect(createConversation).not.toHaveBeenCalled();
+    });
+
     it('creates the decision log when missing', async () => {
       await expect(resolveDefaultInvestigationId(deps())).resolves.toBe('conv-new');
       expect(createConversation).toHaveBeenCalledWith({ title: AESOP_DECISION_LOG_TITLE });

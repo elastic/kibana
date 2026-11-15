@@ -726,9 +726,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       enableDataGeneratorRoutes,
       this.platformCpsEnabled,
       this.securityEventBus,
-      plugins.workflowsManagement?.management
-        ? () => plugins.workflowsManagement?.management
-        : undefined
+      () => plugins.workflowsManagement?.management
     );
 
     registerEndpointRoutes(router, this.endpointContext);

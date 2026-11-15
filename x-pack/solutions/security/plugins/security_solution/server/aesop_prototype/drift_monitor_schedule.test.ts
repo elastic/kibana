@@ -150,7 +150,7 @@ const createClient = (legacyOwners: LegacyOwners = {}) => {
     uninstall,
     getInstalledWorkflowState,
   } as unknown as SecurityManagedWorkflowsClient;
-  return { client, uninstall };
+  return { client, uninstall, getInstalledWorkflowState };
 };
 
 describe('uninstallAesopDriftMonitor', () => {
@@ -192,10 +192,25 @@ describe('uninstallAesopDriftMonitor', () => {
     ]);
   });
 
-  it('skips the legacy instance when the id has no slug', async () => {
-    await expect(uninstall('...')).resolves.toEqual([
-      { spaceId: 'default', workflowIdSuffix: aesopDriftMonitorWorkflowIdSuffix('...') },
-    ]);
+  it('skips the legacy lookup when the id has no slug', async () => {
+    const {
+      client,
+      uninstall: uninstallMock,
+      getInstalledWorkflowState,
+    } = createClient({
+      default: '...',
+      [GLOBAL_WORKFLOW_SPACE_ID]: '...',
+    });
+    await uninstallAesopDriftMonitor(
+      {
+        getManagedWorkflowsClient: async () => client,
+        logger: loggerMock.create(),
+        spaceId: 'default',
+      },
+      { skillId: '...' }
+    );
+    expect(getInstalledWorkflowState).not.toHaveBeenCalled();
+    expect(uninstallMock).toHaveBeenCalledTimes(1);
   });
 
   it('still removes the current monitor when the legacy lookup fails', async () => {

@@ -18,6 +18,8 @@ const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export const AESOP_DEFAULT_DATASET_NAME = 'aesop-explorer-default';
 export const AESOP_DECISION_LOG_TITLE = 'AESOP Decision Log';
+const DECISION_LOG_PAGE_SIZE = 50;
+const DECISION_LOG_MAX_PAGES = 10;
 
 const EVALS_READ_PRIVILEGE = 'read_evals';
 const EVALS_MANAGE_PRIVILEGE = 'manage_evals';
@@ -125,10 +127,20 @@ export const resolveDefaultInvestigationId = async ({
     );
   }
   const client = await conversations.getScopedClient({ request });
-  const { results } = await client.search({ query: AESOP_DECISION_LOG_TITLE, perPage: 20 });
-  const existing = results.find(({ title }) => title === AESOP_DECISION_LOG_TITLE);
-  if (existing) {
-    return existing.id;
+  // The title query is fuzzy, so an exact match can sit past the first page.
+  for (let page = 1; page <= DECISION_LOG_MAX_PAGES; page++) {
+    const { results } = await client.search({
+      query: AESOP_DECISION_LOG_TITLE,
+      page,
+      perPage: DECISION_LOG_PAGE_SIZE,
+    });
+    const existing = results.find(({ title }) => title === AESOP_DECISION_LOG_TITLE);
+    if (existing) {
+      return existing.id;
+    }
+    if (results.length < DECISION_LOG_PAGE_SIZE) {
+      break;
+    }
   }
   const created = await client.create({ title: AESOP_DECISION_LOG_TITLE });
   return created.id;

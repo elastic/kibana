@@ -313,6 +313,55 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(managed.ready).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps sweeping AESOP instances when the flag is off and one uninstall fails', async () => {
+    const managed = createManagedClient();
+    managed.listInstalledWorkflowStates.mockResolvedValue([
+      {
+        workflowId: `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-skill-a`,
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        definitionId: AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+        templateValues: { skillId: 'a' },
+        documentVersion: 1,
+      },
+      {
+        workflowId: `${AESOP_EXPLORER_WORKFLOW_ID}-discovery`,
+        spaceId: 'security',
+        definitionId: AESOP_EXPLORER_WORKFLOW_ID,
+        templateValues: { mode: 'discovery' },
+        documentVersion: 1,
+      },
+    ]);
+    managed.uninstall.mockImplementation(async (definitionId: string) => {
+      if (definitionId !== AESOP_EXPLORER_WORKFLOW_ID) {
+        throw new Error('boom');
+      }
+    });
+    const logger = loggerMock.create();
+    const workflowsExtensions = workflowsExtensionsMock.createStart();
+    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
+
+    await installSecurityManagedWorkflowsAndMarkReady({
+      workflowsExtensions,
+      logger,
+      threatIntelSupplyEnabled: false,
+      aesopPrototypeEnabled: false,
+      automaticTroubleshootingUniversalSkillEnabled: false,
+      bootstrapReady: Promise.resolve(),
+      core: coreMock.createStart(),
+    });
+
+    // The A/B and drift-monitor uninstalls throw; the explorer is still removed.
+    expect(managed.uninstall).toHaveBeenCalledWith(AESOP_EXPLORER_WORKFLOW_ID, {
+      spaceId: 'security',
+      workflowId: `${AESOP_EXPLORER_WORKFLOW_ID}-discovery`,
+    });
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Failed to uninstall AESOP workflow ${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-skill-a in space ${GLOBAL_WORKFLOW_SPACE_ID}`,
+      expect.anything()
+    );
+    expect(managed.ready).toHaveBeenCalledTimes(1);
+  });
+
   it('still calls ready when the AESOP installs fail', async () => {
     const managed = createManagedClient();
     managed.install.mockRejectedValue(new Error('boom'));

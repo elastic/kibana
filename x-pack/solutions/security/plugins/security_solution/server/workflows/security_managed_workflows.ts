@@ -26,6 +26,52 @@ import {
 } from './threat_intel_workflow/install';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
 
+const AESOP_TEMPLATE_DEFINITION_IDS: ReadonlySet<string> = new Set([
+  AESOP_DRIFT_MONITOR_WORKFLOW_ID,
+  AESOP_EXPLORER_WORKFLOW_ID,
+]);
+
+const uninstallAesopWorkflows = async ({
+  managedWorkflowsClient,
+  logger,
+}: {
+  managedWorkflowsClient: SecurityManagedWorkflowsClient;
+  logger: Logger;
+}): Promise<void> => {
+  try {
+    await managedWorkflowsClient.uninstall(AESOP_AB_COMPARE_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+  } catch (error) {
+    logger.warn('Failed to uninstall the AESOP A/B compare workflow', { error });
+  }
+
+  let instances: Awaited<ReturnType<SecurityManagedWorkflowsClient['listInstalledWorkflowStates']>>;
+  try {
+    instances = await managedWorkflowsClient.listInstalledWorkflowStates();
+  } catch (error) {
+    logger.warn('Failed to list AESOP prototype workflow instances to uninstall', { error });
+    return;
+  }
+
+  const aesopInstances = instances.filter(({ definitionId }) =>
+    AESOP_TEMPLATE_DEFINITION_IDS.has(definitionId)
+  );
+  const results = await Promise.allSettled(
+    aesopInstances.map(({ definitionId, spaceId, workflowId }) =>
+      managedWorkflowsClient.uninstall(definitionId, { spaceId, workflowId })
+    )
+  );
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const { workflowId, spaceId } = aesopInstances[index];
+      logger.warn(`Failed to uninstall AESOP workflow ${workflowId} in space ${spaceId}`, {
+        error: result.reason,
+      });
+    }
+  });
+};
+
 /**
  * Single plugin-start entry for securitySolution managed workflows: install alert
  * analysis (always), install or uninstall threat-intel workflows when AlertZero
@@ -78,33 +124,19 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
     logger.warn('Failed to install the alert analysis workflow', { error });
   }
 
-  try {
-    // The drift monitor (per skill, on deploy) and the explorer (per space, on
-    // enable) are templates, so only the A/B workflow installs at boot;
-    // flag-off removes all of them.
-    if (aesopPrototypeEnabled) {
+  // The drift monitor (per skill, on deploy) and the explorer (per space, on
+  // enable) are templates, so only the A/B workflow installs at boot;
+  // flag-off removes all of them, and one failed uninstall does not stop the rest.
+  if (aesopPrototypeEnabled) {
+    try {
       await managedWorkflowsClient.install(AESOP_AB_COMPARE_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
-    } else {
-      await managedWorkflowsClient.uninstall(AESOP_AB_COMPARE_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-      const instances = await managedWorkflowsClient.listInstalledWorkflowStates();
-      await Promise.all(
-        instances.map(({ definitionId, spaceId, workflowId }) => {
-          if (
-            definitionId !== AESOP_DRIFT_MONITOR_WORKFLOW_ID &&
-            definitionId !== AESOP_EXPLORER_WORKFLOW_ID
-          ) {
-            return undefined;
-          }
-          return managedWorkflowsClient.uninstall(definitionId, { spaceId, workflowId });
-        })
-      );
+    } catch (error) {
+      logger.warn('Failed to install the AESOP A/B compare workflow', { error });
     }
-  } catch (error) {
-    logger.warn('Failed to install or uninstall the AESOP prototype workflows', { error });
+  } else {
+    await uninstallAesopWorkflows({ managedWorkflowsClient, logger });
   }
 
   try {
