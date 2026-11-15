@@ -81,6 +81,62 @@ describe('DefaultSLODefinitionRepository', () => {
     });
   });
 
+  describe('findAllByIds', () => {
+    it('returns [] and does not call find for empty ids', async () => {
+      await expect(repository.findAllByIds([])).resolves.toEqual([]);
+
+      expect(soClient.find).not.toHaveBeenCalled();
+    });
+
+    it('does not scope the query when no namespace is given', async () => {
+      soClient.find.mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 2, page: 1 });
+
+      await repository.findAllByIds(['a', 'b']);
+
+      expect(soClient.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 2,
+        filter: 'slo.attributes.id:(a or b)',
+      });
+    });
+
+    it('scopes the query to the given namespace', async () => {
+      soClient.find.mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 1, page: 1 });
+
+      await repository.findAllByIds(['a'], { namespace: 'my-space' });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ namespaces: ['my-space'] })
+      );
+    });
+
+    it('returns decoded SLOs', async () => {
+      const slo = createSLO({ indicator: createKQLCustomIndicator() });
+      await repository.create(slo);
+      const [, attributes] = soClient.create.mock.calls[0];
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'so-id',
+            type: SO_SLO_TYPE,
+            score: 0,
+            references: [],
+            attributes: attributes as StoredSLODefinition,
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      });
+
+      const found = await repository.findAllByIds([slo.id]);
+
+      expect(found).toHaveLength(1);
+      expect(found[0].id).toBe(slo.id);
+    });
+  });
+
   describe('persistence round trip', () => {
     const createAndCapture = async (
       slo: SLODefinition
