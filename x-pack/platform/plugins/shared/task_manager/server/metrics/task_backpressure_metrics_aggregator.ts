@@ -11,6 +11,7 @@ import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import type { TaskManagerBackpressure } from '../task_events';
 import type { BackpressureReason } from '../lib/backpressure_reason';
 import type { ITaskMetricsAggregator } from './types';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 
 /** Point-in-time backpressure gauge: `active` (0|1) with the ES-pressure `reason`. */
 export interface TaskBackpressureMetric extends JsonObject {
@@ -44,6 +45,7 @@ export class TaskBackpressureMetricsAggregator
       return;
     }
     const { active, reason } = event.value;
+    taskManagerMetricsTelemetry.recordTaskBackpressure({ active, reason });
     this.snapshot = {
       active: active ? 1 : 0,
       reason,
