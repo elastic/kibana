@@ -22,12 +22,16 @@ import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
-import { dashboardStateToAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import {
+  dashboardStateToAttachmentData,
+  type DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
 import {
   CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { createChatAdapter } from './chat_adapter';
+import { getPanelIds, getRelabelledPanelPointers, type PanelPointer } from './panel_pointer_labels';
 import {
   findDashboardAttachment,
   isAttachmentShownInDashboard,
@@ -107,6 +111,9 @@ export const registerDashboardAppIntegration = ({
   // agent updates carry no version until the conversation that has them is published
   let attachments: Array<DashboardAttachment & { version?: number }> | undefined;
   let conversationId: string | undefined;
+  let panelPointers: PanelPointer[] = [];
+  // panels a pointer may have been staged for, so the pointers of removed panels can be unstaged
+  let knownPanelIds = new Set<string>();
   // Attachments staged from this dashboard without an origin, because agent changes to a dashboard
   // the user can't edit open in a new dashboard, which the origin then follows on save. One per
   // conversation started here, so switching back to an earlier conversation still finds its own.
@@ -115,7 +122,19 @@ export const registerDashboardAppIntegration = ({
   // a dashboard that can't be linked, e.g. a managed one, is staged as a new attachment every time
   const isLinkable = () => canWriteDashboards && canApplyAgentChangesInPlace(api);
 
+  const getDashboardData = () =>
+    dashboardStateToAttachmentData(api.getSerializedState().attributes);
+
+  const unstageRemovedPanelPointers = (dashboardData: DashboardAttachmentData) => {
+    const panelIds = new Set(getPanelIds(dashboardData));
+    chat.unstagePanelPointers([...knownPanelIds].filter((panelId) => !panelIds.has(panelId)));
+    knownPanelIds = panelIds;
+  };
+
   const stageOpenDashboard = async () => {
+    const { attributes: dashboardState } = api.getSerializedState();
+    const dashboardData = dashboardStateToAttachmentData(dashboardState);
+    unstageRemovedPanelPointers(dashboardData);
     const linkable = isLinkable();
     const dashboardId = linkable ? api.savedObjectId$.getValue() : undefined;
     const dashboardAttachment = linkable
@@ -126,7 +145,6 @@ export const registerDashboardAppIntegration = ({
       isNewConversation: !conversationId,
       draftAttachmentId: draftAttachmentId.current,
     });
-    const { attributes: dashboardState } = api.getSerializedState();
     const isShown = dashboardAttachment
       ? await isAttachmentShownInDashboard({
           areEqual,
@@ -150,11 +168,16 @@ export const registerDashboardAppIntegration = ({
     if (!linkable) {
       unlinkedStagedAttachmentIds.add(attachmentId);
     }
-    chat.stage({
-      id: attachmentId,
-      origin: dashboardId,
-      data: dashboardStateToAttachmentData(dashboardState),
+    chat.stage({ id: attachmentId, origin: dashboardId, data: dashboardData });
+    // pointer pills keep the name the panel has on the dashboard
+    const relabelledPointers = getRelabelledPanelPointers({
+      dashboardData,
+      dashboardAttachmentId: dashboardAttachment?.id,
+      pointers: panelPointers,
     });
+    for (const pointer of relabelledPointers) {
+      chat.stagePanelPointer(pointer);
+    }
   };
 
   // never throws, since a throw would end the integration
@@ -228,6 +251,7 @@ export const registerDashboardAppIntegration = ({
     tap((change) => {
       attachments = change?.attachments;
       conversationId = change?.conversationId;
+      panelPointers = change?.panelPointers ?? [];
     }),
     // a new conversation is published again while its first message is sent, before it gets its
     // id, so it needs the dashboard only once
@@ -279,6 +303,9 @@ export const registerDashboardAppIntegration = ({
     originSyncSubscription.unsubscribe();
     setShownAttachmentVersion(undefined);
     otherDashboardUpdateNotifier.removeAll();
+    // the pointers of a dashboard the user left are no longer context for their next message;
+    // pointers already sent stay in the conversation
+    chat.unstagePanelPointers([...new Set([...knownPanelIds, ...getPanelIds(getDashboardData())])]);
   };
 };
 

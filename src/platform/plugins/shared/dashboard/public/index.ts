@@ -27,6 +27,8 @@ export { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_renderer/viewport/emp
 export type { OpenDashboardChatActionContext } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 export { ENHANCE_DASHBOARD_ACTION_ID } from './dashboard_app/enhance/enhance_dashboard_action';
 export type { EnhanceDashboardActionContext } from './dashboard_app/enhance/enhance_dashboard_action';
+export { REFINE_WITH_CHAT_ACTION_ID } from './dashboard_app/refine_with_chat/refine_with_chat_action';
+export type { RefineWithChatActionContext } from './dashboard_app/refine_with_chat/refine_with_chat_action';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';

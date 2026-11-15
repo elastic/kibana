@@ -20,10 +20,14 @@ import {
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_PANEL_ATTACHMENT_TYPE,
+  getDashboardPanelAttachmentId,
   isDashboardAttachment,
+  isDashboardPanelAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../../common';
 import type { IdGenerator } from '..';
+import type { PanelPointer } from './panel_pointer_labels';
 
 /*
  * Everything the dashboard integration needs from the chat, so it deals with dashboard attachments
@@ -37,6 +41,8 @@ export interface ConversationChange {
   conversationId: string | undefined;
   /** The conversation's dashboard attachments, each at its latest version. */
   attachments: ConversationDashboardAttachment[];
+  /** The conversation's panel pointers the user hasn't removed, each at its latest version. */
+  panelPointers: PanelPointer[];
 }
 
 export interface ChatAdapter {
@@ -48,6 +54,10 @@ export interface ChatAdapter {
   stage: (attachment: Omit<DashboardAttachment, 'type'>) => void;
   /** Removes the attachment from the chat input when it is the one staged. */
   unstage: (attachmentId: string) => void;
+  /** Stages the panel pointer in the chat input, replacing the one with the same id. */
+  stagePanelPointer: (pointer: PanelPointer) => void;
+  /** Removes the pointers to these panels from the chat input. Sent pointers stay. */
+  unstagePanelPointers: (panelIds: readonly string[]) => void;
   /** Persists the attachment's origin, keeping the rendered conversation in sync. */
   updateOrigin: (
     attachmentId: string,
@@ -66,6 +76,14 @@ const toDashboardAttachments = (
       return latestVersion?.data
         ? [{ id, type, origin, data: latestVersion.data, version: latestVersion.version }]
         : [];
+    });
+
+const toPanelPointers = (conversation: ActiveConversation['conversation']): PanelPointer[] =>
+  (conversation?.attachments ?? [])
+    .filter(isDashboardPanelAttachment)
+    .flatMap((pointer): PanelPointer[] => {
+      const data = getLatestVersion(pointer)?.data;
+      return data && pointer.active !== false ? [{ id: pointer.id, data }] : [];
     });
 
 const isDashboardUpdatedUiEvent = (
@@ -102,7 +120,11 @@ export const createChatAdapter = ({
     }),
     map((change) =>
       change
-        ? { conversationId: change.id, attachments: toDashboardAttachments(change.conversation) }
+        ? {
+            conversationId: change.id,
+            attachments: toDashboardAttachments(change.conversation),
+            panelPointers: toPanelPointers(change.conversation),
+          }
         : null
     )
   );
@@ -131,6 +153,14 @@ export const createChatAdapter = ({
       }
       agentBuilder.removeAttachment(attachmentId);
       stagedAttachmentId = undefined;
+    },
+    stagePanelPointer: ({ id, data }) => {
+      agentBuilder.addAttachment({ id, type: DASHBOARD_PANEL_ATTACHMENT_TYPE, data });
+    },
+    unstagePanelPointers: (panelIds) => {
+      for (const panelId of panelIds) {
+        agentBuilder.removeAttachment(getDashboardPanelAttachmentId(panelId));
+      }
     },
     updateOrigin: (attachmentId, origin) => getUpdateOrigin(attachmentId)?.(origin),
   };

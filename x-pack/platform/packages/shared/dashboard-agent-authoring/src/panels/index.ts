@@ -21,6 +21,7 @@ export {
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
   isRequestPanelType,
+  getRequestPanelContentType,
   requiresRegisteredSchema,
   upsertPanelContentSchema,
 } from './registry';

@@ -205,6 +205,13 @@ export const findPanelKind = (embeddableType: string): PanelKind | undefined =>
   PANEL_KINDS.find((kind) => kind.embeddableType === embeddableType);
 
 /**
+ * The content `type` that edits panels stored as the given embeddable type with a natural language
+ * `query`, or `undefined` when no request kind stores that type.
+ */
+export const getRequestPanelContentType = (embeddableType: string): string | undefined =>
+  REQUEST_PANEL_KINDS.find((kind) => kind.embeddableType === embeddableType)?.type;
+
+/**
  * Whether panels of the given embeddable type need its registered schema, so a missing one means the
  * panel type is not available in the deployment (see `schemaAlwaysRegistered`).
  */

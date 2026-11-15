@@ -25,7 +25,11 @@ import { ChatEventType } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../common';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import { createIdGenerator, registerDashboardAttachmentUiDefinition } from '.';
+import {
+  createCanvasDashboardRegistry,
+  createIdGenerator,
+  registerDashboardAttachmentUiDefinition,
+} from '.';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => null),
@@ -235,6 +239,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       currentAppId$,
       draftAttachmentId: createIdGenerator(),
       toasts: notificationServiceMock.createStartContract().toasts,
+      canvasDashboards: createCanvasDashboardRegistry(),
     };
   };
 
@@ -337,6 +342,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       } as unknown as UnifiedSearchPublicPluginStart,
       draftAttachmentId: createIdGenerator(),
       toasts: notificationServiceMock.createStartContract().toasts,
+      canvasDashboards: createCanvasDashboardRegistry(),
     };
 
     let cleanup: (() => void) | undefined;

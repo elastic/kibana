@@ -32,6 +32,7 @@ import {
   type DashboardUpdatedUiEventData,
 } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
+import { refreshDashboardPanelPointers } from './panel_pointers';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
 import { createEsqlControlColumnTypeResolver } from './resolvers/esql_control_column_type_resolver';
@@ -306,6 +307,16 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
         }
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
+
+        if (!isNewDashboard) {
+          await refreshDashboardPanelPointers({
+            attachments,
+            dashboardAttachmentId,
+            updatedIds: updated,
+            dashboardData,
+            logger,
+          });
+        }
 
         events.sendUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData>(
           DASHBOARD_UPDATED_UI_EVENT,

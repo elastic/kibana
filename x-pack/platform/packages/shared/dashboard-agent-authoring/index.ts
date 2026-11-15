@@ -29,6 +29,7 @@ export {
   getPanelTypeSelection,
   getRequestPanelEmbeddableType,
   isRequestPanelType,
+  getRequestPanelContentType,
   parseVegaSpec,
   requiresRegisteredSchema,
 } from './src/panels';
