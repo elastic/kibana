@@ -6,22 +6,57 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  euiPaletteColorBlind,
+} from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { UnifiedBreakdownFieldSelector, resolveBreakdownField } from '@kbn/unified-histogram';
+import { isSelectionCondition } from '@kbn/trace-latency-map';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
+import { useFeatureFlag } from '../../../hooks/use_feature_flag';
+import { FEATURE_FLAGS } from '../../../common/constants';
+import { ExternalServicesProvider } from '../../../context/external_services';
+import { useTracesRestorableState, withTracesRestorableState } from '../../../restorable_state';
+import type { TracesChartView } from '../../../restorable_state';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
+import { TracesLatencyMapView } from './latency_map_view';
 import { ChartsGrid } from '../../charts_grid';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractUsedMetadataFields } from '../../../utils';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
+
+const CHART_VIEW_OPTIONS: Array<EuiButtonGroupOptionProps & { id: TracesChartView }> = [
+  {
+    id: 'metrics',
+    label: i18n.translate('metricsExperience.traces.healthMetricsView', {
+      defaultMessage: 'Health metrics',
+    }),
+    iconType: 'visLine',
+    'data-test-subj': 'tracesHealthMetricsToggle',
+  },
+  {
+    id: 'latencyMap',
+    label: i18n.translate('metricsExperience.traces.latencyMapView', {
+      defaultMessage: 'Latency map',
+    }),
+    iconType: 'chartHeatmap',
+    'data-test-subj': 'tracesLatencyMapToggle',
+  },
+];
 
 function TraceMetricsGrid({
   fetchParams,
@@ -77,21 +112,56 @@ function TraceMetricsGrid({
     [onBreakdownFieldChange]
   );
 
+  // When the flag is on, the latency map can be chosen next to the RED charts, which stay
+  // the default. When it is off, the RED charts only, as before. The map keeps its
+  // selection in the ES|QL query, so only an ES|QL session that can be rewritten gets it.
+  const latencyMapEnabled = useFeatureFlag(FEATURE_FLAGS.IS_TRACES_LATENCY_MAP_ENABLED, false);
+  const latencyMapAvailable =
+    latencyMapEnabled && !!query && 'esql' in query && !!actions.updateESQLQuery;
+  // A query arriving with a selection (a shared URL, a reload) starts on the map that drew
+  // it; the choice is otherwise kept per tab.
+  const [chartView = 'metrics', setChartView] = useTracesRestorableState('chartView', () =>
+    filters.some(isSelectionCondition) ? 'latencyMap' : undefined
+  );
+  const view: TracesChartView = latencyMapAvailable ? chartView : 'metrics';
+
   const toolbar = useMemo(
     () => ({
       toggleActions: renderToggleActions(),
       leftSide: (
-        <UnifiedBreakdownFieldSelector
-          dataSource={dataSource}
-          breakdown={{ field: breakdownDataViewField }}
-          onBreakdownFieldChange={handleBreakdownFieldChange}
-          recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
-          fieldsMetadata={services.fieldsMetadata}
-        />
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {latencyMapAvailable && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={i18n.translate('metricsExperience.traces.chartViewLegend', {
+                  defaultMessage: 'Visualization type',
+                })}
+                buttonSize="compressed"
+                idSelected={view}
+                onChange={(id) => setChartView(id as TracesChartView)}
+                options={CHART_VIEW_OPTIONS}
+              />
+            </EuiFlexItem>
+          )}
+          {view === 'metrics' && (
+            <EuiFlexItem grow={false}>
+              <UnifiedBreakdownFieldSelector
+                dataSource={dataSource}
+                breakdown={{ field: breakdownDataViewField }}
+                onBreakdownFieldChange={handleBreakdownFieldChange}
+                recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
+                fieldsMetadata={services.fieldsMetadata}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       ),
     }),
     [
       renderToggleActions,
+      latencyMapAvailable,
+      view,
+      setChartView,
       dataSource,
       breakdownDataViewField,
       handleBreakdownFieldChange,
@@ -104,6 +174,26 @@ function TraceMetricsGrid({
 
   if (!indexPattern) {
     return undefined;
+  }
+
+  if (view === 'latencyMap') {
+    return (
+      <ChartsGrid
+        id="tracesGrid"
+        toolbarCss={chartToolbarCss}
+        toolbar={toolbar}
+        isComponentVisible={isComponentVisible}
+      >
+        <TracesLatencyMapView
+          indexPattern={indexPattern}
+          filters={filters}
+          timeFrom={fetchParams.timeRange?.from}
+          timeTo={fetchParams.timeRange?.to}
+          services={services}
+          actions={actions}
+        />
+      </ChartsGrid>
+    );
   }
 
   return (
@@ -153,5 +243,11 @@ function TraceMetricsGrid({
   );
 }
 
+const TraceMetricsGridWithServices = (props: UnifiedMetricsGridProps) => (
+  <ExternalServicesProvider externalServices={props.externalServices}>
+    <TraceMetricsGrid {...props} />
+  </ExternalServicesProvider>
+);
+
 // eslint-disable-next-line import/no-default-export
-export default TraceMetricsGrid;
+export default withTracesRestorableState(TraceMetricsGridWithServices);

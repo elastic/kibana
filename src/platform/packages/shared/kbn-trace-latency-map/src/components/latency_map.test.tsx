@@ -140,6 +140,12 @@ function renderMap(
 }
 
 const waitForChart = async () => screen.findByTestId('mockChart');
+
+/** Flips the failed-only filter: opens the errors menu and clicks its filter entry. */
+const toggleFailedOnly = () => {
+  fireEvent.click(screen.getByTestId('traceLatencyMapErrorsMenu'));
+  fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+};
 /** The chart tells of a cell: its hover, which is how the map learns where the plot is. */
 const hover = (xi: number, yi: number) =>
   act(() => mockChart.settings.onElementOver([[chartCell(xi, yi), {}]]));
@@ -213,6 +219,8 @@ describe('LatencyMap', () => {
     expect(screen.getByTestId('traceLatencyMapLegend')).toBeInTheDocument();
     expect(onStats).toHaveBeenCalledWith({ ...stats, sampled: false });
     expect(onLoad).toHaveBeenCalledWith(source);
+    // The header reads the range's statistics.
+    expect(screen.getByTestId('traceLatencyMapStats')).toHaveTextContent('2s max · 10ms p99');
   });
 
   it('gives the chart a time scale of the columns, the rows as categories, one colour scale', async () => {
@@ -268,10 +276,10 @@ describe('LatencyMap', () => {
     expect(await screen.findByTestId('traceLatencyMapError')).toHaveTextContent('index_not_found');
   });
 
-  it('keeps the failed spans only with the switch on', async () => {
+  it('keeps the failed spans only with the errors filter on', async () => {
     renderMap();
     await waitForChart();
-    fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+    toggleFailedOnly();
     await waitFor(() =>
       expect(
         mockChart.heatmap.data.filter((datum: { spans: number }) => datum.spans > 0)
@@ -404,7 +412,7 @@ describe('LatencyMap', () => {
       const onCellClick = jest.fn();
       renderMap({ onCellClick });
       await waitForChart();
-      fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+      toggleFailedOnly();
       await waitFor(() =>
         expect(mockChart.heatmap.data.some((datum: { spans: number }) => datum.spans === 10)).toBe(
           true
@@ -423,17 +431,56 @@ describe('LatencyMap', () => {
       expect(onCellClick).not.toHaveBeenCalled();
     });
 
-    it('selects the slowest 1% and 5% across the whole range', async () => {
+    it('marks a region where failures concentrate as failed only on its own', async () => {
+      // The far cell is all failures: 100% against 17% on the rest of the map.
       const { onSelectionCommit } = renderMap();
       await waitForChart();
+      brush([30, 31], [20]);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBe(true);
+      expect(condition).toContain('event.outcome == "failure"');
+    });
+
+    it('does not infer failures over a region that merely has some', async () => {
+      // 10 of the busy region's 60 spans failed: a sixth, not a concentration.
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      brush([3, 5], [5]);
+      expect(onSelectionCommit.mock.calls[0][0].failedOnly).toBeUndefined();
+    });
+
+    it('leaves the outcome alone once the user chose one with the errors filter', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      toggleFailedOnly();
+      toggleFailedOnly();
+      brush([30, 31], [20]);
+      expect(onSelectionCommit.mock.calls[0][0].failedOnly).toBeUndefined();
+    });
+
+    it('selects the slowest spans across the whole range, labelled, from the menu', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
+      // The menu names the percentiles with their durations.
+      expect(screen.getByTestId('traceLatencyMapSlowest99')).toHaveTextContent(/^Above p99 \(/);
       fireEvent.click(screen.getByTestId('traceLatencyMapSlowest99'));
       const [selection] = onSelectionCommit.mock.calls[0];
       expect(selection.from).toBe(source.timeRange.from);
       expect(selection.minDuration).toBeCloseTo(stats.p99);
       expect(selection.maxDuration).toBeGreaterThan(stats.max);
+      expect(selection.label).toBe('Slowest spans (> p99)');
 
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
       fireEvent.click(screen.getByTestId('traceLatencyMapSlowest95'));
       expect(onSelectionCommit.mock.calls[1][0].minDuration).toBeLessThan(stats.p99);
+
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
+      fireEvent.click(screen.getByTestId('traceLatencyMapSlowest90'));
+      // Snapped to the row edge at or below the p90.
+      const p90Selection = onSelectionCommit.mock.calls[2][0];
+      expect(p90Selection.minDuration).toBeLessThanOrEqual(stats.p90);
+      expect(p90Selection.minDuration).toBeLessThan(onSelectionCommit.mock.calls[1][0].minDuration);
     });
   });
 
@@ -455,6 +502,14 @@ describe('LatencyMap', () => {
       await waitForChart();
       act(() => mockChart.settings.onElementClick([[chartCell(3, 5), {}]]));
       expect(screen.getByTestId('traceLatencyMapOverlay')).toBeInTheDocument();
+    });
+
+    it('veils the plot around the selection with four rectangles around it', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const mask = screen.getByTestId('traceLatencyMapOutsideMask');
+      expect(mask.querySelectorAll('rect')).toHaveLength(4);
     });
 
     it('forgets the plot when the columns change', async () => {
@@ -618,6 +673,12 @@ describe('LatencyMap', () => {
       expect(screen.getByRole('button', { name: /^Filter \(\d+\)$/ })).toBeInTheDocument();
     });
 
+    it('leads with the label of a selection that has one', async () => {
+      renderMap({ selection: { ...selection, label: 'Slowest spans (> p95)' } });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(summary).toHaveTextContent(/^Slowest spans \(> p95\) · /);
+    });
+
     it('counts a selection that does not follow the cells over its own bounds, as an estimate', async () => {
       // The map was resized after the selection was made: its start is in the middle of column 3.
       const shifted = {
@@ -637,20 +698,22 @@ describe('LatencyMap', () => {
       expect(summary).not.toHaveTextContent('~60');
     });
 
-    it('narrows to the failed spans when the switch goes on, keeping the region', async () => {
+    it('narrows to the failed spans when the errors filter goes on, keeping the region', async () => {
       const { onSelectionCommit } = renderMap({ selection });
       await screen.findByTestId('traceLatencyMapSelectionBar');
-      fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+      toggleFailedOnly();
       expect(onSelectionCommit).toHaveBeenCalledWith(
         { ...selection, failedOnly: true },
         expect.stringContaining('event.outcome == "failure"')
       );
     });
 
-    it('follows the switch of a selection about failures, counting its failed spans', async () => {
+    it('follows the filter of a selection about failures, counting its failed spans', async () => {
       renderMap({ selection: { ...selection, failedOnly: true } });
       const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
-      expect(screen.getByTestId('traceLatencyMapFailedOnly')).toBeChecked();
+      expect(screen.getByTestId('traceLatencyMapErrorsMenu')).toHaveTextContent(
+        'Errors (filtered)'
+      );
       expect(summary).toHaveTextContent('10 spans');
       expect(summary).toHaveTextContent('failed only');
     });
@@ -659,6 +722,81 @@ describe('LatencyMap', () => {
       const { onSelectionCommit } = renderMap({ selection });
       fireEvent.click(await screen.findByTestId('traceLatencyMapClearSelection'));
       expect(onSelectionCommit).toHaveBeenCalledWith(undefined, undefined);
+    });
+  });
+
+  describe('with a host failure filter', () => {
+    it('asks the host to change the filter instead of flipping its own', async () => {
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ failedOnly: false, onFailedOnlyChange });
+      await waitForChart();
+      toggleFailedOnly();
+      expect(onFailedOnlyChange).toHaveBeenCalledWith(true);
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+      // The menu shows the host's filter, which has not come back yet.
+      expect(screen.getByTestId('traceLatencyMapErrorsMenu')).not.toHaveTextContent('filtered');
+    });
+
+    it('paints the failed spans alone while the filter is on', async () => {
+      renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() });
+      await waitForChart();
+      expect(screen.getByTestId('traceLatencyMapErrorsMenu')).toHaveTextContent(
+        'Errors (filtered)'
+      );
+      expect(
+        mockChart.heatmap.data.filter((datum: { spans: number }) => datum.spans > 0)
+      ).toHaveLength(2);
+    });
+
+    it('commits a selection without the failure clause: the host filter carries it', async () => {
+      const { onSelectionCommit } = renderMap({
+        failedOnly: true,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      brush([3, 5], [5]);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+
+    it('turns on the host filter for a region where failures concentrate', async () => {
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ failedOnly: false, onFailedOnlyChange });
+      await waitForChart();
+      brush([30, 31], [20]);
+      expect(onFailedOnlyChange).toHaveBeenCalledWith(true);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+
+    it('counts the failed spans of a selection under the filter and says failed only', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ selection, failedOnly: true, onFailedOnlyChange: jest.fn() });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(summary).toHaveTextContent('10 spans');
+      expect(summary).toHaveTextContent('failed only');
+    });
+
+    it('normalizes a selection that carries its own failure clause when the filter changes', async () => {
+      // A selection from before the host filter (a shared URL): its condition says failed.
+      const selection = {
+        ...geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+        failedOnly: true,
+      };
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ selection, failedOnly: false, onFailedOnlyChange });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      // The legacy clause shows as failed even though the host filter is off.
+      expect(screen.getByTestId('traceLatencyMapErrorsMenu')).toHaveTextContent(
+        'Errors (filtered)'
+      );
+      toggleFailedOnly();
+      expect(onFailedOnlyChange).toHaveBeenCalledWith(false);
+      const [next, condition] = onSelectionCommit.mock.calls[0];
+      expect(next.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
     });
   });
 

@@ -16,6 +16,7 @@ import {
   getMapQueryParts,
   getMapSampling,
 } from '../query/latency_map_query';
+import type { MapSampling } from '../query/latency_map_query';
 import { addTableToGrid, createEmptyGrid } from '../query/parse';
 import type { LatencyGrid } from '../query/parse';
 import { getTimeGrid } from '../query/time_grid';
@@ -26,15 +27,15 @@ export interface LatencyGridState {
   stats?: DurationStats;
   timeGrid?: TimeGrid;
   grid?: LatencyGrid;
-  /** The dense part of the range was sampled; counts there are estimates. */
-  sampled: boolean;
+  /** How the dense part of the range was sampled; undefined when every span was read. */
+  sampling?: MapSampling;
   isEmpty: boolean;
   error?: Error;
   /** The source of the map shown, once it finished loading. */
   loadedSource?: TraceSource;
 }
 
-const LOADING: LatencyGridState = { isLoading: true, sampled: false, isEmpty: false };
+const LOADING: LatencyGridState = { isLoading: true, isEmpty: false };
 
 const isAbort = (error: unknown) => error instanceof Error && error.name === 'AbortError';
 
@@ -86,7 +87,6 @@ export function useLatencyGrid({
       if (!stats.spans) {
         return {
           isLoading: false,
-          sampled: false,
           isEmpty: true,
           stats,
           timeGrid,
@@ -112,7 +112,7 @@ export function useLatencyGrid({
       }
       return {
         isLoading: false,
-        sampled: Boolean(sampling),
+        sampling,
         isEmpty: grid.cells.size === 0,
         stats,
         timeGrid,
@@ -127,7 +127,6 @@ export function useLatencyGrid({
         if (controller.signal.aborted || isAbort(error)) return;
         setState({
           isLoading: false,
-          sampled: false,
           isEmpty: false,
           error: error instanceof Error ? error : new Error(String(error)),
         });

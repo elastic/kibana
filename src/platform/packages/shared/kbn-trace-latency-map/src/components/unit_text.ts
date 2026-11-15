@@ -30,6 +30,31 @@ export const getCountText = (unit: LatencyMapUnit, count: number, estimated = fa
     : text;
 };
 
+/** `Slowest spans (> p95)`: the label of a slowest-shortcut selection, by the map's unit. */
+export const getSlowestLabel = (unit: LatencyMapUnit, percentile: number) =>
+  unit === 'traces'
+    ? i18n.translate('traceLatencyMap.slowestTracesLabel', {
+        defaultMessage: 'Slowest traces (> p{percentile})',
+        values: { percentile },
+      })
+    : i18n.translate('traceLatencyMap.slowestSpansLabel', {
+        defaultMessage: 'Slowest spans (> p{percentile})',
+        values: { percentile },
+      });
+
+/** The tooltip's hint at what the pointer can do. */
+export const getInteractionHint = (unit: LatencyMapUnit, canClick: boolean) => {
+  if (!canClick)
+    return i18n.translate('traceLatencyMap.hint.drag', { defaultMessage: 'Drag to select.' });
+  return unit === 'traces'
+    ? i18n.translate('traceLatencyMap.hint.clickTrace', {
+        defaultMessage: 'Click for an example trace. Drag to select.',
+      })
+    : i18n.translate('traceLatencyMap.hint.clickSpan', {
+        defaultMessage: 'Click for an example span. Drag to select.',
+      });
+};
+
 export const getFailedText = (failed: number, spans: number) =>
   i18n.translate('traceLatencyMap.count.failed', {
     // `number` formats in the i18n locale; toLocaleString would use the browser's.

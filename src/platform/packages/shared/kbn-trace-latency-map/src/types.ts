@@ -54,6 +54,12 @@ export interface LatencyMapSelection {
   maxDuration: number;
   /** Only the failed spans of the region. */
   failedOnly?: boolean;
+  /**
+   * What the selection was made from, such as a slowest-spans shortcut. Shown with its bounds.
+   * Not part of the ES|QL condition, so a selection read back from a query carries none, and
+   * moving or resizing drops it: the bounds are then no longer what the label named.
+   */
+  label?: string;
 }
 
 /** A cell of the map with its counts. */

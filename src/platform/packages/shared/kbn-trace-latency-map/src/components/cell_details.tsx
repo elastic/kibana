@@ -23,6 +23,8 @@ export interface CellDetailsProps {
   unit: LatencyMapUnit;
   /** Counts are estimates from a sample. */
   sampled: boolean;
+  /** A line hinting at what the pointer can do, in the tooltip only. */
+  hint?: string;
   timeZone?: string;
 }
 
@@ -36,6 +38,7 @@ export function CellDetails({
   failed,
   unit,
   sampled,
+  hint,
   timeZone,
 }: CellDetailsProps) {
   return (
@@ -55,6 +58,11 @@ export function CellDetails({
       <EuiText size="xs" color="subdued">
         {formatTimestamp(fromMs, timeZone)} – {formatTimestamp(toMs, timeZone)}
       </EuiText>
+      {hint && (
+        <EuiText size="xs" color="subdued">
+          {hint}
+        </EuiText>
+      )}
     </EuiText>
   );
 }

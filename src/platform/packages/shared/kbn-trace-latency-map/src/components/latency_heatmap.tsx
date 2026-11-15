@@ -34,6 +34,7 @@ import type { ChartCell } from '../geometry/plot_calibration';
 import type { PlotArea } from '../geometry/map_geometry';
 import type { LatencyMapColors } from '../hooks/use_latency_map_colors';
 import { CellDetails } from './cell_details';
+import { getInteractionHint } from './unit_text';
 
 /** Room, in pixels, a label of the duration axis needs, to leave blanks between them. */
 const Y_LABEL_PX = 18;
@@ -44,6 +45,8 @@ export interface LatencyHeatmapProps {
   stats: DurationStats;
   unit: LatencyMapUnit;
   sampled: boolean;
+  /** A click on a cell does something, so the tooltip may say so. */
+  canClick: boolean;
   timeZone?: string;
   colors: LatencyMapColors;
   /** The cells of the failed spans alone. */
@@ -94,6 +97,7 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
   stats,
   unit,
   sampled,
+  canClick,
   timeZone,
   colors,
   failedOnly,
@@ -136,7 +140,8 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
         },
         xAxisLabel: { visible: true, fontSize: 10 },
         yAxisLabel: { visible: true, fontSize: 10, width: LAYOUT.yAxisLabelWidth },
-        // The region is tinted and outlined; the rest of the map is not covered.
+        // The region is tinted and outlined; the rest of the map is veiled by the overlay, as the
+        // chart's own mask does not leave the selection out of it.
         brushMask: { visible: false },
         brushArea: {
           visible: true,
@@ -176,12 +181,13 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
               failed={datum.failed}
               unit={unit}
               sampled={sampled}
+              hint={getInteractionHint(unit, canClick)}
               timeZone={timeZone}
             />
           </EuiPanel>
         );
       },
-    [dataByCell, timeGrid, stats, unit, sampled, timeZone]
+    [dataByCell, timeGrid, stats, unit, sampled, canClick, timeZone]
   );
 
   const handleBrush: BrushEndListener = (event) => {

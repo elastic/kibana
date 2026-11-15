@@ -20,6 +20,7 @@ export function SelectionBar({
   selection,
   spans,
   failed,
+  failedOnly,
   unit,
   sampled,
   timeZone,
@@ -29,6 +30,8 @@ export function SelectionBar({
   selection: LatencyMapSelection;
   spans: number;
   failed: number;
+  /** The selection is about failed spans, by its own condition or by the host's filter. */
+  failedOnly: boolean;
   unit: LatencyMapUnit;
   sampled: boolean;
   timeZone?: string;
@@ -44,6 +47,12 @@ export function SelectionBar({
       data-test-subj="traceLatencyMapSelectionBar"
     >
       <EuiText size="xs" data-test-subj="traceLatencyMapSelectionSummary">
+        {selection.label && (
+          <>
+            <strong>{selection.label}</strong>
+            {' · '}
+          </>
+        )}
         <strong>
           {formatDuration(selection.minDuration)} – {formatDuration(selection.maxDuration)}
         </strong>
@@ -58,7 +67,7 @@ export function SelectionBar({
             {getFailedText(failed, spans)}
           </>
         )}
-        {selection.failedOnly &&
+        {failedOnly &&
           ` · ${i18n.translate('traceLatencyMap.selection.failedOnly', {
             defaultMessage: 'failed only',
           })}`}
