@@ -8,7 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 
 import React from 'react';
-import { EntityTable } from '../../../../../flyout/entity_details/shared/components/entity_table';
+import { EntityTable } from '../entity_table';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import type {
   EntityTableLinkRenderer,

@@ -17,7 +17,7 @@ import {
   HostPanelKey,
   UserPanelKey,
   ServicePanelKey,
-} from '../../../public/flyout/entity_details/shared/constants';
+} from '../../../public/flyout_v2/entity/shared/constants';
 import { EntityDetailsLeftPanelTab } from '../../../public/flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../../public/entity_analytics/components/home/constants';
 import { EDIT_WATCHLIST_URL_PARAM as PUBLIC_EDIT_WATCHLIST_URL_PARAM } from '../../../public/entity_analytics/components/watchlists/flyout/constants';

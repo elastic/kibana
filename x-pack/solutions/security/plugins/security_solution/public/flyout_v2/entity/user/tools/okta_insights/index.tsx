@@ -10,7 +10,7 @@ import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import type { ManagedUserHit } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { UserAssetTableType } from '../../../../../explore/users/store/model';
 import { DocumentDetailsProvider } from '../../../../../flyout/document_details/shared/context';
-import { AssetDocumentTab } from '../../../../../flyout/entity_details/user_details_left/tabs/asset_document';
+import { AssetDocumentTab } from '../shared/asset_document';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { OKTA_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
 import { OKTA_INSIGHTS_TOOL_TEST_ID } from './test_ids';

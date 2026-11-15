@@ -24,7 +24,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { API_VERSIONS, WATCHLISTS_URL } from '../../../../../common/entity_analytics/constants';
-import { TruncatedBadgeList } from '../../../../flyout/entity_details/shared/components/entity_source_value';
+import { TruncatedBadgeList } from '../../../../flyout_v2/entity/shared/components/entity_source_value';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 
 interface EntitySummaryGridProps {

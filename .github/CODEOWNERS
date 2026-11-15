@@ -3783,7 +3783,6 @@ x-pack/solutions/security/plugins/security_solution/public/cloud_security_postur
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/contextual-security-apps @elastic/siem-beacon
-x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity/generic @elastic/contextual-security-apps @elastic/siem-beacon
 /x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/graph @elastic/contextual-security-apps @elastic/siem-beacon

@@ -13,7 +13,7 @@ import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_
 import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../../../common/constants';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { Content } from './content';
-import { mockServiceEntityRiskScores } from '../../../../flyout/entity_details/mocks';
+import { mockServiceEntityRiskScores } from '../../shared/mocks';
 
 const mockFlyoutRiskSummary = jest.fn((_props: { isGroupView?: boolean }) => (
   <div data-test-subj="flyoutRiskSummary" />
@@ -31,12 +31,9 @@ jest.mock('../../../../common/hooks/use_has_entity_resolution_license', () => ({
 jest.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => ({
   FlyoutRiskSummary: (props: { isGroupView?: boolean }) => mockFlyoutRiskSummary(props),
 }));
-jest.mock(
-  '../../../../flyout/entity_details/shared/components/right/visualizations_section',
-  () => ({
-    VisualizationsSection: () => <div data-test-subj="visualizationsSection" />,
-  })
-);
+jest.mock('../../shared/components/visualizations_section', () => ({
+  VisualizationsSection: () => <div data-test-subj="visualizationsSection" />,
+}));
 jest.mock(
   '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
   () => ({

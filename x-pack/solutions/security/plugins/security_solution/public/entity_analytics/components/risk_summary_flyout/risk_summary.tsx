@@ -29,7 +29,7 @@ import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
+import { ONE_WEEK_IN_HOURS } from '../../../flyout_v2/entity/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import type { EntityRiskScoresState } from '../../api/hooks/use_entity_risk_scores';

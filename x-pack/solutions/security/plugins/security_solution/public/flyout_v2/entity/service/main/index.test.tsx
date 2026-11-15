@@ -12,13 +12,13 @@ import { TestProviders } from '../../../../common/mock';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
-import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
+import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../shared/components/test_ids';
 import {
   mockServiceEntityRiskScores,
   mockServiceEntityRiskScoresWithResolution,
   mockServiceRiskScoreState,
-} from '../../../../flyout/entity_details/mocks';
-import { mockObservedService } from '../../../../flyout/entity_details/service_right/mocks';
+} from '../../shared/mocks';
+import { mockObservedService } from '../mocks';
 import type { ServiceEntity } from '../../../../../common/api/entity_analytics';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { Service } from '.';

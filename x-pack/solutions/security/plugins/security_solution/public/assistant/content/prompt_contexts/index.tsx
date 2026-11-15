@@ -10,7 +10,7 @@ import * as i18nDataQuality from '@kbn/ecs-data-quality-dashboard';
 import * as i18n from './translations';
 import * as i18nDetections from '../../../detection_engine/common/translations';
 import * as i18nEventDetails from '../../../common/components/event_details/translations';
-import * as i18nEntityDetails from '../../../flyout/entity_details/shared/translations';
+import * as i18nEntityDetails from '../../../flyout_v2/entity/shared/translations';
 
 export const PROMPT_CONTEXT_ALERT_CATEGORY = 'alert';
 export const PROMPT_CONTEXT_EVENT_CATEGORY = 'event';

@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import {
   EntitySourceValue,
   toEntitySourceArray,
-} from '../../../../../../flyout/entity_details/shared/components/entity_source_value';
+} from '../../../../../../flyout_v2/entity/shared/components/entity_source_value';
 
 export const SourceCell = memo(({ value }: { value: unknown }) => (
   <EntitySourceValue values={toEntitySourceArray(value)} textSize="s" />
