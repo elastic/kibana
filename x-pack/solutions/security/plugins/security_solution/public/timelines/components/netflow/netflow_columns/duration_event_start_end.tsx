@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { uniq } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
 import { EVENT_DURATION_FIELD_NAME } from '../../duration';

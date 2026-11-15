@@ -7,14 +7,14 @@
 
 import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { CreateFieldComponent } from '@kbn/response-ops-alerts-fields-browser/types';
 import type { OpenFieldEditor } from '..';
 import * as i18n from './translations';
 
 const StyledButton = styled(EuiButton)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeM};
+  margin-left: ${({ theme }) => theme.euiTheme.size.m};
 `;
 
 export interface UseCreateFieldButtonProps {
