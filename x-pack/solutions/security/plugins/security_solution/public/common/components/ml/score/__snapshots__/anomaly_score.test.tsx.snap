@@ -83,17 +83,25 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       anchorPosition="downLeft"
       aria-label="Anomaly score details"
       button={
-        <Icon
-          type="info"
-        />
+        <EuiToolTip
+          content="View anomaly score details for job-1"
+          disableScreenReaderOutput={true}
+        >
+          <EuiButtonIcon
+            aria-label="View anomaly score details for job-1"
+            color="text"
+            data-test-subj="anomaly-score-popover-button"
+            iconType="info"
+            onClick={[Function]}
+            size="xs"
+          />
+        </EuiToolTip>
       }
       closePopover={[Function]}
       data-test-subj="anomaly-score-popover"
       display="inline-block"
       hasArrow={false}
-      id="anomaly-score-popover"
       isOpen={false}
-      onClick={[Function]}
       ownFocus={true}
       panelPaddingSize="m"
       repositionOnScroll={true}
