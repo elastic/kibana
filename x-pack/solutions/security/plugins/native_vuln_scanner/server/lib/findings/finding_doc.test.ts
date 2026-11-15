@@ -81,7 +81,7 @@ describe('toFindingDoc', () => {
       '@timestamp': CTX.now,
       event: { kind: 'state', id: findingId(finding()), dataset: FINDINGS_DATASET },
       data_stream: { dataset: FINDINGS_DATASET },
-      observer: { vendor: 'Elastic' },
+      observer: { vendor: 'Elastic native scanner' },
       resource: { id: 'h1', name: 'web-1' },
       host: { id: 'h1', name: 'web-1' },
       package: {

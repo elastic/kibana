@@ -23,6 +23,6 @@ export const FINDINGS_INDEX_TEMPLATE = FINDINGS_ALIAS;
 
 export const FINDINGS_DATASET = 'native_vuln_scanner.vulnerability';
 
-export const FINDINGS_VENDOR = 'Elastic';
+export const FINDINGS_VENDOR = 'Elastic native scanner';
 
 export type FindingState = 'new' | 'active' | 'fixed' | 'reopened';
