@@ -28,6 +28,7 @@ tags:
   - group-security
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
