@@ -62,6 +62,14 @@ triggers:
           type: string
           maxLength: 64
           description: Name of the new skill, used only when skill_id is empty.
+        skill_description:
+          type: string
+          maxLength: 1024
+          description: >-
+            What the skill is for. The agent only loads a skill whose
+            description matches the task, so every variant arm and the deployed
+            skill carry it; a generic description leaves the variant unloaded
+            and the arm scores like the baseline.
         dataset_id:
           type: string
           minLength: 1
@@ -267,8 +275,7 @@ steps:
             id: 'aesop-variant-{{ execution.id }}-{{ foreach.index }}'
             name: 'AESOP variant {{ execution.id }} {{ foreach.index }}'
             description: >-
-              AESOP prototype candidate variant {{ foreach.index }}. Created by
-              the A/B compare workflow; safe to delete when no run is active.
+              {{ inputs.skill_description | default: 'AESOP prototype candidate variant. Created by the A/B compare workflow; safe to delete when no run is active.' }}
             content: '{{ foreach.item }}'
         on-failure:
           continue: true
@@ -720,7 +727,7 @@ steps:
       body:
         id: '{{ variables.target_skill_id }}'
         name: '{{ variables.target_skill_name }}'
-        description: 'Created by the AESOP A/B compare workflow ({{ execution.id }}).'
+        description: "{{ inputs.skill_description | default: 'Created by the AESOP A/B compare workflow.' }}"
         content: '{{ variables.winner_content }}'
     on-failure:
       continue: true

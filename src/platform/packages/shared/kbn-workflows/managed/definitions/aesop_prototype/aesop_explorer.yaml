@@ -202,6 +202,7 @@ steps:
               inputs:
                 skill_id: '{{ foreach.item.skill_id }}'
                 new_skill_name: '{{ foreach.item.skill_name }}'
+                skill_description: '{{ foreach.item.title | truncate: 1000 }}'
                 # Empty dataset_id means the candidate named no fitting
                 # dataset; the explorer's default dataset applies.
                 dataset_id: '{{ foreach.item.dataset_id | default: consts.DEFAULT_DATASET_ID }}'
