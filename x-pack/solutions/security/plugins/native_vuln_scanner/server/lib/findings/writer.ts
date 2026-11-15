@@ -18,7 +18,9 @@ const HOST_BATCH = 1000;
 /**
  * Runs on an existing finding: takes the fresh document, keeps the first sighting, and moves
  * the state forward (fixed -> reopened, anything else -> active). `event.created` is kept except
- * on a reopen, where it restarts so a detection rule keyed on it alerts again.
+ * on a reopen, where it restarts. Detection rules filter on `event.created >= <rule creation>`, so
+ * the reset lets a finding first seen before the rule existed match again when it reopens. How
+ * often that alerts depends on the license; see the README.
  */
 export const UPSERT_SCRIPT = `
 def prev = ctx._source.native_vuln_scanner;

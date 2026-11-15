@@ -64,11 +64,22 @@ during the index setup or the inventory read logs no summary line.
 
 A finding is `new` on its first sighting, `active` while later scans still match it, `fixed` once
 a scan of its host no longer does, and `reopened` if it matches again. `event.created` is set on
-the first sighting and kept until a reopen, which resets it to that scan's time; a detection rule
-created from a finding is keyed on it, and its alerts are suppressed per host, so the rule alerts
-once per host for each new finding and again each time a finding reopens.
-`native_vuln_scanner.first_seen` never changes, so "First found" in the flyout
-stays at the original sighting.
+the first sighting and kept until a reopen, which resets it to that scan's time.
+
+A detection rule created from a finding matches `vulnerability.id` and
+`event.created >= <rule creation>`, uses `event.created` as its timestamp, and asks for alert
+suppression per host (`resource.id`). The reset on reopen is what lets a finding first seen
+before the rule existed match again. How often it alerts depends on the license:
+
+| License | Alerts |
+| --- | --- |
+| Platinum, Enterprise or trial | Suppression is applied. Each new finding and every reopen raises a new alert. Scans that fix a finding or change nothing raise none. Matches on one host within a single rule run fold into one alert. |
+| Basic | Suppression is ignored, so there is no per-host grouping. The alert id derives from the finding's stable document id, so the finding alerts once per rule: the first time it is new or reopened after the rule was created. Later reopens raise no alert. |
+
+A reopened finding has `native_vuln_scanner.state: reopened`, which you can filter on or add as a
+column on the findings page.
+`native_vuln_scanner.first_seen` never changes, so "First found" in the flyout stays at the
+original sighting.
 
 ## Agent runtime requirement
 
