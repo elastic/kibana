@@ -88,7 +88,6 @@ describe('ignored kibana fetcher helpers', () => {
     expect(collectIgnoredKibanaFetcherOccurrences(steps)).toEqual([
       expect.objectContaining({
         path: ['steps', 0, 'branches', 1, 'steps', 0, 'with', 'fetcher'],
-        stepType: 'kibana.request',
         stepName: 'status',
       }),
     ]);

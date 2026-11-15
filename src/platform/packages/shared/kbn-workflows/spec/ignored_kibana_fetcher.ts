@@ -33,7 +33,6 @@ type DiagnosticPath = Array<string | number>;
 
 export interface IgnoredKibanaFetcherOccurrence {
   path: DiagnosticPath;
-  stepType: string;
   stepName?: string;
 }
 
@@ -52,7 +51,6 @@ const collectIgnoredKibanaFetcherOccurrencesFromSteps = (
     if (stepHasIgnoredKibanaFetcher(step)) {
       occurrences.push({
         path: [...stepPath, 'with', 'fetcher'],
-        stepType: step.type,
         stepName: typeof step.name === 'string' ? step.name : undefined,
       });
     }

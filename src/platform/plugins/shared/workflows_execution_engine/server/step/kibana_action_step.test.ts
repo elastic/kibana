@@ -10,7 +10,11 @@
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { CallKibanaApiParams } from '../lib/call_kibana_api';
-import { callKibanaApi, CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
+import {
+  callKibanaApi,
+  CallKibanaApiResponseTooLargeError,
+  KibanaApiCallError,
+} from '../lib/call_kibana_api';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -52,20 +56,12 @@ describe('KibanaActionStepImpl', () => {
         url: 'http://localhost:5601/api/test',
       }),
       getCoreStart: jest.fn().mockReturnValue({
-        security: { authc: { apiKeys: {} } },
         http: {
           basePath: {
-            publicBaseUrl: 'https://localhost:5601',
             prepend: jest.fn((path: string) => `/base${path}`),
           },
-          getServerInfo: jest.fn(() => ({
-            protocol: 'https',
-            hostname: 'internal-host',
-            port: 5601,
-          })),
         },
       }),
-      getDependencies: jest.fn().mockReturnValue({ cloudSetup: undefined, config: {} }),
       getFakeRequest: jest.fn().mockReturnValue({
         headers: { authorization: 'ApiKey test-key' },
       }),
@@ -87,6 +83,14 @@ describe('KibanaActionStepImpl', () => {
       await (step as any)._run();
       expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
         expect.objectContaining({ method: 'POST', path: '/api/test', body: '{"x":1}' })
+      );
+    });
+
+    it('handles the top-level kibana.request method/path format', async () => {
+      step = createStep({ method: 'GET', path: '/api/status' });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'GET', path: '/api/status' })
       );
     });
 
@@ -210,6 +214,18 @@ describe('KibanaActionStepImpl', () => {
       expect(call.body).toBeUndefined();
     });
 
+    it('preserves binary multipart content and its MIME type', async () => {
+      const content = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe]);
+      step = createStep({
+        path: '/api/cases/case-id/files',
+        form_data: { file: { content, filename: 'screenshot.png', content_type: 'image/png' } },
+      });
+      await (step as any)._run();
+      const file = contextManager.callKibanaApi.mock.calls[0][0].rawBody.get('file') as Blob;
+      expect(file.type).toBe('image/png');
+      expect(Buffer.from(await file.arrayBuffer())).toEqual(content);
+    });
+
     it('warns when YAML fetcher is present and still calls the adapter', async () => {
       step = createStep({
         request: { method: 'GET', path: '/api/test' },
@@ -233,6 +249,34 @@ describe('KibanaActionStepImpl', () => {
         method: 'GET',
         fullUrl: 'http://localhost:5601/api/test',
       });
+    });
+
+    it.each([
+      [
+        'the requested URL',
+        new KibanaApiCallError({
+          status: 500,
+          headers: {},
+          body: 'boom',
+          message: 'HTTP 500: boom',
+          url: 'http://localhost:5601/api/bad',
+        }),
+        { kibanaUrl: 'http://localhost:5601/api/bad' },
+      ],
+      ['the self-client marker', new Error('socket hang up'), { selfClient: true }],
+    ])('includes %s in failure debug details', async (_label, error, expectedDebug) => {
+      contextManager.callKibanaApi.mockRejectedValue(error);
+      step = createStep({ request: { method: 'POST', path: '/api/bad' }, debug: true });
+      const result = await (step as any)._run();
+      expect(result.error.details._debug).toEqual(expectedDebug);
+    });
+
+    it('routes use_server_info to the local self HTTP target', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/test' }, use_server_info: true });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ target: 'local' })
+      );
     });
 
     it('warns that use_localhost uses the listener, not hardcoded localhost:5601', async () => {

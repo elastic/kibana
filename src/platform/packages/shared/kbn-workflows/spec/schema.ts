@@ -670,8 +670,6 @@ const FetcherConfigObjectSchema = z
   })
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' });
 
-export const FetcherConfigSchema = FetcherConfigObjectSchema.optional();
-
 export const KibanaFetcherConfigSchema = FetcherConfigObjectSchema.meta({
   $id: 'kibanaFetcher',
   deprecated: true,
