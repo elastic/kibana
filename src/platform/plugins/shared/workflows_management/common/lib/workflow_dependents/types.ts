@@ -48,7 +48,8 @@ export interface WorkflowContract {
   /** Workflows saved with errors have no definition, and every step that runs them fails. */
   valid: boolean;
   inputs: Readonly<Record<string, ContractField>>;
-  hasDeclaredInputs: boolean;
+  /** The values a run fills in for omitted (or `null`) inputs. */
+  inputDefaults: Readonly<Record<string, unknown>>;
   /** The inputs JSON schema the run validates against; undefined when no inputs are declared. */
   inputsSchema?: JsonModelSchemaType;
   /** True when the inputs schema rejects inputs it doesn't declare (`additionalProperties: false`). */

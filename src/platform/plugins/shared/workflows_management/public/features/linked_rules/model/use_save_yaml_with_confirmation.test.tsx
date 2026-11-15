@@ -127,6 +127,22 @@ describe('useSaveYamlWithConfirmation', () => {
     expect(mockSaveYaml).toHaveBeenCalled();
   });
 
+  it('ignores a second save while the first is still checking', async () => {
+    let finishCheck: (confirmed: boolean) => void = () => {};
+    const confirmBreakingChange = jest.fn(
+      () => new Promise<boolean>((resolve) => (finishCheck = resolve))
+    );
+    const save = renderSave([true], confirmBreakingChange);
+
+    const first = save();
+    await expect(save()).resolves.toBe(false);
+    finishCheck(true);
+    await expect(first).resolves.toBe(true);
+
+    expect(confirmBreakingChange).toHaveBeenCalledTimes(1);
+    expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+  });
+
   it('checks the draft again when it changes while the check is pending', async () => {
     const editedYaml = `${buildYaml(true)}\n`;
     const confirmBreakingChange = jest

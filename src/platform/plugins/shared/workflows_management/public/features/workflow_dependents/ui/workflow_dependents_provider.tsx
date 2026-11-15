@@ -46,7 +46,8 @@ export const WorkflowDependentsProvider = ({ children }: { children: ReactNode }
           isError={dependents.isError}
           isUpdating={dependents.isUpdating}
           isRefreshError={dependents.isRefreshError}
-          initialTab={linksTab}
+          tab={linksTab}
+          onTabChange={setLinksTab}
           onRefresh={dependents.refetch}
           onClose={() => setLinksTab(null)}
         />

@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getShownStatus } from './shown_status';
 import { getCalledStatusLabel, getIssueMessage, getStatusLabel } from './translations';
 import type { CardDetail, CardProblem, WorkflowLinkCardProps } from './workflow_link_card';
 import type {
@@ -147,13 +148,18 @@ const getCallerVerdict = (
 const MAX_LISTED_NAMES = 5;
 
 const formatNames = (names: readonly string[]): string => {
-  const listed = names.slice(0, MAX_LISTED_NAMES).join(', ');
-  return names.length > MAX_LISTED_NAMES
-    ? i18n.translate('workflows.dependents.card.namesAndMore', {
-        defaultMessage: '{listed} and {count} more',
-        values: { listed, count: names.length - MAX_LISTED_NAMES },
-      })
-    : listed;
+  if (names.length <= MAX_LISTED_NAMES) {
+    return new Intl.ListFormat(i18n.getLocale(), { type: 'conjunction' }).format(names);
+  }
+  return i18n.translate('workflows.dependents.card.namesAndMore', {
+    defaultMessage: '{listed} and {count, plural, one {# more} other {# more}}',
+    values: {
+      listed: new Intl.ListFormat(i18n.getLocale(), { type: 'unit' }).format(
+        names.slice(0, MAX_LISTED_NAMES)
+      ),
+      count: names.length - MAX_LISTED_NAMES,
+    },
+  });
 };
 
 const getUpstreamNotes = (upstream: readonly UpstreamImpact[], workflowName: string): string[] => {
@@ -208,11 +214,12 @@ export const getCallerCardContent = (
 ): CardContent => {
   const { workflowName, enabled, status, callSites, issues, upstream } = dependent;
   const hasManySteps = callSites.length > 1;
+  const shownStatus = getShownStatus(dependent);
   return {
     name: workflowName,
     isTurnedOff: !enabled,
-    status,
-    statusLabel: getStatusLabel(status),
+    status: shownStatus,
+    statusLabel: getStatusLabel(shownStatus),
     verdict: getCallerVerdict(status, childName, hasUnsavedChanges, enabled),
     problems: toProblems(
       issues.filter(({ isNew }) => isNew),

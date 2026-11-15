@@ -428,6 +428,32 @@ describe('WorkflowCrudService', () => {
       ).rejects.toThrow();
     });
 
+    it('reads more ids than one search returns in several searches', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      const ids = Array.from({ length: 10_001 }, (_, index) => `wf-${index}`);
+
+      const service = new WorkflowCrudService(deps);
+      await service.getWorkflowsSourceByIds(ids, 'default', ['name']);
+
+      expect(client.search.mock.calls.map(([params]) => params.size)).toEqual([10_000, 1]);
+      expect(client.search.mock.calls[0][0]).not.toHaveProperty('allow_partial_search_results');
+    });
+
+    it('fails rather than return partial results when asked to', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await service.getWorkflowsSourceByIds(['wf-1'], 'default', ['name'], {
+        allowPartialResults: false,
+      });
+
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+    });
+
     it('uses _source: true when no source fields specified', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({ hits: { hits: [] } });
@@ -497,6 +523,58 @@ describe('WorkflowCrudService', () => {
           },
         })
       );
+    });
+  });
+
+  describe('indexCalledWorkflowIds', () => {
+    it('stores the workflows that unindexed workflows run, unless they were saved meanwhile', async () => {
+      const core = {
+        ...coreMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+      const definition = {
+        steps: [{ name: 'run', type: 'workflow.execute', with: { 'workflow-id': 'child' } }],
+      };
+      core.elasticsearch.client.asInternalUser.mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'old',
+            found: true,
+            _seq_no: 3,
+            _primary_term: 2,
+            _source: makeSource({ definition } as Partial<WorkflowProperties>),
+          },
+          {
+            _index: workflowIndexName,
+            _id: 'saved',
+            found: true,
+            _seq_no: 4,
+            _primary_term: 2,
+            _source: makeSource({ calledWorkflowIds: [], calledWorkflowIdsIndexed: true }),
+          },
+        ],
+      } as any);
+      client.bulk.mockResolvedValue({ items: [{ index: { status: 200 } }] });
+
+      await new WorkflowCrudService(deps).indexCalledWorkflowIds(['old', 'saved']);
+
+      const { operations } = client.bulk.mock.calls[0][0];
+      expect(operations).toEqual([
+        {
+          index: expect.objectContaining({
+            _id: 'old',
+            if_seq_no: 3,
+            if_primary_term: 2,
+            document: expect.objectContaining({
+              definition,
+              calledWorkflowIds: ['child'],
+              calledWorkflowIdsIndexed: true,
+            }),
+          }),
+        },
+      ]);
     });
   });
 

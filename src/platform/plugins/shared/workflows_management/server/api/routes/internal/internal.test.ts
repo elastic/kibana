@@ -61,6 +61,7 @@ describe('Internal Routes', () => {
   };
   let mockAudit: {
     logWorkflowAccessed: jest.Mock;
+    logWorkflowMget: jest.Mock;
     logWorkflowUpdated: jest.Mock;
     logWorkflowRestored: jest.Mock;
   };
@@ -124,6 +125,7 @@ describe('Internal Routes', () => {
     };
     mockAudit = {
       logWorkflowAccessed: jest.fn(),
+      logWorkflowMget: jest.fn(),
       logWorkflowUpdated: jest.fn(),
       logWorkflowRestored: jest.fn(),
     };
@@ -761,12 +763,17 @@ describe('Internal Routes', () => {
     });
   });
 
+  const createImpactRequest = (
+    options: Parameters<typeof httpServerMock.createKibanaRequest>[0],
+    authzResult: Record<string, boolean> = { [WorkflowsManagementApiActions.read]: true }
+  ) => Object.assign(httpServerMock.createKibanaRequest(options), { authzResult });
+
   it('analyzes the draft YAML against the workflows connected to it', async () => {
     const impact = { analysis: { dependents: [] }, calledWorkflows: [] };
     mockApi.getWorkflowDependentsImpact.mockResolvedValue(impact);
 
     const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest({
+    const request = createImpactRequest({
       params: { id: 'wf-1' },
       body: { yaml: 'name: draft' },
     });
@@ -781,16 +788,67 @@ describe('Internal Routes', () => {
       'wf-1',
       'default',
       request,
-      'name: draft'
+      'name: draft',
+      { allowManagedWorkflowRead: false }
     );
     expect(response.ok).toHaveBeenCalledWith({ body: impact });
+    expect(mockAudit.logWorkflowAccessed).toHaveBeenCalledWith(request, { id: 'wf-1' });
+  });
+
+  it('lets the analysis read managed workflows only with the managed read privilege', async () => {
+    mockApi.getWorkflowDependentsImpact.mockResolvedValue({});
+    mockApi.getWorkflowRemovalImpact.mockResolvedValue({ callers: [], indirect: 0 });
+    const authzResult = {
+      [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: true,
+    };
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/_dependents_impact`].handler(
+      mockContext,
+      createImpactRequest({ params: { id: 'wf-1' }, body: {} }, authzResult),
+      httpServerMock.createResponseFactory()
+    );
+    await routeHandlers[`POST:/internal/workflows/_removal_impact`].handler(
+      mockContext,
+      createImpactRequest({ body: { ids: ['wf-1'] } }, authzResult),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(mockApi.getWorkflowDependentsImpact.mock.calls[0][4]).toEqual({
+      allowManagedWorkflowRead: true,
+    });
+    expect(mockApi.getWorkflowRemovalImpact.mock.calls[0][3]).toEqual({
+      allowManagedWorkflowRead: true,
+    });
+  });
+
+  it('rejects impact requests without the base read privilege', async () => {
+    const authzResult = { [WorkflowsManagementApiActions.readManaged]: true };
+    const dependentsResponse = httpServerMock.createResponseFactory();
+    const removalResponse = httpServerMock.createResponseFactory();
+
+    await routeHandlers[`POST:/internal/workflows/workflow/{id}/_dependents_impact`].handler(
+      mockContext,
+      createImpactRequest({ params: { id: 'wf-1' }, body: {} }, authzResult),
+      dependentsResponse
+    );
+    await routeHandlers[`POST:/internal/workflows/_removal_impact`].handler(
+      mockContext,
+      createImpactRequest({ body: { ids: ['wf-1'] } }, authzResult),
+      removalResponse
+    );
+
+    expect(dependentsResponse.forbidden).toHaveBeenCalled();
+    expect(removalResponse.forbidden).toHaveBeenCalled();
+    expect(mockApi.getWorkflowDependentsImpact).not.toHaveBeenCalled();
+    expect(mockApi.getWorkflowRemovalImpact).not.toHaveBeenCalled();
   });
 
   it('returns not found when analyzing a workflow that does not exist', async () => {
     mockApi.getWorkflowDependentsImpact.mockRejectedValue(new WorkflowNotFoundError('wf-1'));
 
     const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' }, body: {} });
+    const request = createImpactRequest({ params: { id: 'wf-1' }, body: {} });
 
     await routeHandlers[`POST:/internal/workflows/workflow/{id}/_dependents_impact`].handler(
       mockContext,
@@ -806,7 +864,7 @@ describe('Internal Routes', () => {
     mockApi.getWorkflowRemovalImpact.mockResolvedValue(impact);
 
     const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1', 'wf-2'] } });
+    const request = createImpactRequest({ body: { ids: ['wf-1', 'wf-2'] } });
 
     await routeHandlers[`POST:/internal/workflows/_removal_impact`].handler(
       mockContext,
@@ -817,9 +875,14 @@ describe('Internal Routes', () => {
     expect(mockApi.getWorkflowRemovalImpact).toHaveBeenCalledWith(
       ['wf-1', 'wf-2'],
       'default',
-      request
+      request,
+      { allowManagedWorkflowRead: false }
     );
     expect(response.ok).toHaveBeenCalledWith({ body: impact });
+    expect(mockAudit.logWorkflowMget).toHaveBeenCalledWith(request, {
+      requestedCount: 2,
+      returnedCount: impact.callers.length,
+    });
   });
 
   it('rejects non-integer workflow history page values at route validation', () => {

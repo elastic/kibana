@@ -14,9 +14,7 @@ import {
   analyzeWorkflowRemovalImpact,
   collectCalledWorkflows,
   collectCallers,
-  hasCallerFacingChanges,
   parseDraftDefinition,
-  summarizeSaveImpact,
 } from './workflow_dependents_impact';
 import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
 import type { WorkflowLookupItem } from '../../../common/lib/workflow_dependents/types';
@@ -120,8 +118,25 @@ describe('collectCalledWorkflows', () => {
   });
 });
 
+describe('analyzeWorkflowDependentsImpact reads', () => {
+  it('reads the workflows the draft and the saved version both run once', async () => {
+    const leaf = workflow('leaf', []);
+    const lookup = createLookup([], [], [leaf]);
+    const definition = { steps: [runs('leaf', {})] };
+
+    await analyzeWorkflowDependentsImpact({
+      workflowId: 'parent',
+      savedDefinition: definition,
+      draftDefinition: { ...definition, description: 'edited' },
+      lookup,
+    });
+
+    expect(lookup.getWorkflowsByIds.mock.calls).toEqual([[['leaf']]]);
+  });
+});
+
 describe('analyzeWorkflowDependentsImpact', () => {
-  it('grades callers against the draft and summarizes what a save breaks', async () => {
+  it('grades callers against the draft and counts what a save breaks', async () => {
     const direct = workflow('direct', [runs('child')]);
     const indirect = workflow('indirect', [runs('direct', {})]);
 
@@ -136,10 +151,7 @@ describe('analyzeWorkflowDependentsImpact', () => {
       expect.objectContaining({ workflowId: 'direct', status: 'breaking' }),
     ]);
     expect(calledWorkflows).toEqual([]);
-    expect(summarizeSaveImpact(analysis)).toEqual({
-      breaking: [{ id: 'direct', name: 'direct' }],
-      indirectBreaking: 1,
-    });
+    expect(analysis.summary).toMatchObject({ breaking: 1, indirectBreaking: 1 });
   });
 
   it('breaks every caller when the draft would be saved invalid', async () => {
@@ -159,7 +171,7 @@ describe('analyzeWorkflowDependentsImpact', () => {
     ]);
   });
 
-  it('leaves callers that are turned off out of the save summary', async () => {
+  it('leaves callers that are turned off out of the breaking count', async () => {
     const { analysis } = await analyzeWorkflowDependentsImpact({
       workflowId: 'child',
       savedDefinition: savedChild,
@@ -168,7 +180,7 @@ describe('analyzeWorkflowDependentsImpact', () => {
     });
 
     expect(analysis.dependents).toEqual([expect.objectContaining({ status: 'breaking' })]);
-    expect(summarizeSaveImpact(analysis)).toEqual({ breaking: [], indirectBreaking: 0 });
+    expect(analysis.summary).toMatchObject({ breaking: 0, indirectBreaking: 0 });
   });
 
   it('grades the workflows the draft runs, including failures further down', async () => {
@@ -232,10 +244,7 @@ describe('analyzeWorkflowDependentsImpact', () => {
         }),
         expect.objectContaining({ workflowId: 'background', status: 'safe', issues: [] }),
       ]);
-      expect(summarizeSaveImpact(analysis)).toEqual({
-        breaking: [{ id: 'waiting', name: 'waiting' }],
-        indirectBreaking: 1,
-      });
+      expect(analysis.summary).toMatchObject({ breaking: 1, indirectBreaking: 1 });
     });
 
     it('breaks them when every run returns an output value the declared outputs reject', async () => {
@@ -271,7 +280,6 @@ describe('analyzeWorkflowDependentsImpact', () => {
         }),
         expect.objectContaining({ workflowId: 'background', status: 'safe' }),
       ]);
-      expect(hasCallerFacingChanges(returning('high'), returning([1]))).toBe(true);
       // Only a step every run reaches fails every run, and only values known before running count.
       expect((await analyze(returning([1], { if: 'inputs.go : true' }))).summary.breaking).toBe(0);
       expect((await analyze(returning('${{ steps.x.output }}'))).summary.breaking).toBe(0);
@@ -300,29 +308,6 @@ describe('analyzeWorkflowRemovalImpact', () => {
     );
 
     expect(impact).toEqual({ callers: [{ id: 'direct', name: 'direct' }], indirect: 1 });
-  });
-});
-
-describe('hasCallerFacingChanges', () => {
-  it('ignores edits that callers cannot see', () => {
-    const renamedStep = {
-      ...savedChild,
-      steps: [{ name: 'log2', type: 'console', with: { message: 'bye' } }],
-    };
-
-    expect(hasCallerFacingChanges(savedChild, renamedStep)).toBe(false);
-    expect(hasCallerFacingChanges(savedChild, draftChild)).toBe(true);
-    expect(hasCallerFacingChanges(savedChild, { ...savedChild, enabled: false })).toBe(true);
-    // Saving invalid YAML stores the workflow without a definition.
-    expect(hasCallerFacingChanges(savedChild, null)).toBe(true);
-  });
-
-  it('counts changes to how it runs other workflows, which can make every run fail', () => {
-    const caller = { ...savedChild, consts: { id: 'a' }, steps: [runs('other')] };
-
-    expect(hasCallerFacingChanges(caller, { ...caller, steps: [runs('other', {})] })).toBe(true);
-    expect(hasCallerFacingChanges(caller, { ...caller, consts: { id: 'b' } })).toBe(true);
-    expect(hasCallerFacingChanges(caller, { ...caller, description: 'edited' })).toBe(false);
   });
 });
 

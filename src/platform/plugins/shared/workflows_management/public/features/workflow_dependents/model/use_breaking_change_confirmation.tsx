@@ -17,6 +17,7 @@ import {
 import React, { useCallback, useRef, useState } from 'react';
 import { useStore } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useQueryClient } from '@kbn/react-query';
 import { dependentsImpactQueryOptions } from './dependents_impact_query_options';
 import type { ConfirmBreakingChange } from './workflow_dependents_context';
@@ -27,9 +28,19 @@ import { selectWorkflow } from '../../../entities/workflows/store/workflow_detai
 import { useKibana } from '../../../hooks/use_kibana';
 import { getIssueMessage } from '../ui/translations';
 
+// Longer lists are cut short; the flyout lists every caller.
+const MAX_LISTED_DEPENDENTS = 10;
+
+interface SaveImpact {
+  breakingDependents: DependentImpact[];
+  indirectBreaking: number;
+  /** True when the draft couldn't be checked, so the save may break callers. */
+  checkFailed: boolean;
+}
+
 /**
- * Asks the user to confirm before saving a draft that breaks workflows calling this one. The
- * server grades the given draft; when it can't, the save goes ahead.
+ * Asks the user to confirm before saving a draft that breaks workflows calling this one, or one
+ * the server couldn't check.
  */
 export const useBreakingChangeConfirmation = (
   onReviewImpact: () => void
@@ -38,39 +49,33 @@ export const useBreakingChangeConfirmation = (
   const queryClient = useQueryClient();
   const store = useStore<RootState>();
   const modalTitleId = useGeneratedHtmlId();
-  const [pending, setPending] = useState<{
-    workflowName: string;
-    breakingDependents: DependentImpact[];
-    indirectBreaking: number;
-  } | null>(null);
+  const [pending, setPending] = useState<(SaveImpact & { workflowName: string }) | null>(null);
   const resolveRef = useRef<(confirmed: boolean) => void>();
 
   const getSaveImpact = useCallback(
-    async (
-      draftYaml: string | undefined
-    ): Promise<{
-      breakingDependents: DependentImpact[];
-      indirectBreaking: number;
-    }> => {
-      const none = { breakingDependents: [], indirectBreaking: 0 };
+    async (draftYaml: string | undefined): Promise<SaveImpact> => {
+      const none = { breakingDependents: [], indirectBreaking: 0, checkFailed: false };
       const workflow = selectWorkflow(store.getState());
       if (!workflow || draftYaml === undefined || draftYaml === workflow.yaml) {
         return none;
       }
       try {
-        const { analysis } = await queryClient.fetchQuery(
-          dependentsImpactQueryOptions(
+        // Callers can change elsewhere at any time, so a save never reuses an earlier check.
+        const { analysis } = await queryClient.fetchQuery({
+          ...dependentsImpactQueryOptions(
             http,
             { id: workflow.id, savedVersion: workflow.lastUpdatedAt },
             draftYaml
-          )
-        );
+          ),
+          staleTime: 0,
+        });
         return {
           breakingDependents: analysis.dependents.filter(isBreakingRun),
           indirectBreaking: analysis.summary.indirectBreaking,
+          checkFailed: false,
         };
       } catch {
-        return none;
+        return { ...none, checkFailed: true };
       }
     },
     [http, queryClient, store]
@@ -79,7 +84,7 @@ export const useBreakingChangeConfirmation = (
   const confirmBreakingChange = useCallback<ConfirmBreakingChange>(
     async (draftYaml) => {
       const impact = await getSaveImpact(draftYaml);
-      if (impact.breakingDependents.length === 0) {
+      if (impact.breakingDependents.length === 0 && !impact.checkFailed) {
         return true;
       }
       const workflowName = selectWorkflow(store.getState())?.name ?? '';
@@ -98,13 +103,22 @@ export const useBreakingChangeConfirmation = (
     setPending(null);
   };
 
+  const listedDependents = pending?.breakingDependents.slice(0, MAX_LISTED_DEPENDENTS) ?? [];
+  const unlistedCount = (pending?.breakingDependents.length ?? 0) - listedDependents.length;
+
   const confirmModal = pending && (
     <EuiConfirmModal
-      title={i18n.translate('workflows.dependents.confirmModal.title', {
-        defaultMessage:
-          'Save changes that break {count, plural, one {# workflow} other {# workflows}}?',
-        values: { count: pending.breakingDependents.length },
-      })}
+      title={
+        pending.checkFailed
+          ? i18n.translate('workflows.dependents.confirmModal.checkFailedTitle', {
+              defaultMessage: 'Save without checking the workflows that run this one?',
+            })
+          : i18n.translate('workflows.dependents.confirmModal.title', {
+              defaultMessage:
+                'Save changes that break {count, plural, one {# workflow} other {# workflows}}?',
+              values: { count: pending.breakingDependents.length },
+            })
+      }
       titleProps={{ id: modalTitleId }}
       aria-labelledby={modalTitleId}
       onCancel={() => close(false)}
@@ -120,25 +134,55 @@ export const useBreakingChangeConfirmation = (
       data-test-subj="workflowBreakingChangeConfirmModal"
     >
       <EuiText size="s">
-        <p>
-          {i18n.translate('workflows.dependents.confirmModal.body', {
-            defaultMessage: 'These workflows run {workflowName} and will fail after you save:',
-            values: { workflowName: pending.workflowName },
-          })}
-        </p>
-        <ul>
-          {pending.breakingDependents.map(({ workflowId, workflowName: callerName, issues }) => {
-            const firstIssue = issues.find(
-              ({ isNew, severity }) => isNew && severity === 'breaking'
-            );
-            return (
-              <li key={workflowId}>
-                <strong>{callerName}</strong>
-                {firstIssue && `: ${getIssueMessage(firstIssue, pending.workflowName)}`}
+        {pending.checkFailed ? (
+          <p>
+            {i18n.translate('workflows.dependents.confirmModal.checkFailedBody', {
+              defaultMessage:
+                'Couldn’t check whether saving breaks the workflows that run {workflowName}.',
+              values: { workflowName: pending.workflowName },
+            })}
+          </p>
+        ) : (
+          <p>
+            {i18n.translate('workflows.dependents.confirmModal.body', {
+              defaultMessage: 'These workflows run {workflowName} and will fail after you save:',
+              values: { workflowName: pending.workflowName },
+            })}
+          </p>
+        )}
+        {listedDependents.length > 0 && (
+          <ul>
+            {listedDependents.map(({ workflowId, workflowName: callerName, issues }) => {
+              const firstIssue = issues.find(
+                ({ isNew, severity }) => isNew && severity === 'breaking'
+              );
+              return (
+                <li key={workflowId}>
+                  {firstIssue ? (
+                    <FormattedMessage
+                      id="workflows.dependents.confirmModal.dependentIssue"
+                      defaultMessage="{name}: {issue}"
+                      values={{
+                        name: <strong>{callerName}</strong>,
+                        issue: getIssueMessage(firstIssue, pending.workflowName),
+                      }}
+                    />
+                  ) : (
+                    <strong>{callerName}</strong>
+                  )}
+                </li>
+              );
+            })}
+            {unlistedCount > 0 && (
+              <li>
+                {i18n.translate('workflows.dependents.confirmModal.unlisted', {
+                  defaultMessage: 'and {count, plural, one {# more} other {# more}}',
+                  values: { count: unlistedCount },
+                })}
               </li>
-            );
-          })}
-        </ul>
+            )}
+          </ul>
+        )}
         {pending.indirectBreaking > 0 && (
           <p>
             {i18n.translate('workflows.dependents.confirmModal.indirect', {

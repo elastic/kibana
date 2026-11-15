@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useStore } from 'react-redux-v7';
 import { parseDocument } from 'yaml';
 import type { ConfirmDisableWorkflows } from './use_disable_workflows_confirmation';
@@ -29,8 +29,10 @@ export const useSaveYamlWithConfirmation = (
   const saveYaml = useSaveYaml();
   const store = useStore<RootState>();
   const confirmBreakingChange = useConfirmBreakingChange();
+  // The checks run before the save marks itself in progress, so guard against a second save here.
+  const isRunningRef = useRef(false);
 
-  return useCallback(async () => {
+  const confirmAndSave = useCallback(async () => {
     // The draft can change while a check is pending, so check again until the checked draft is
     // the one being saved.
     let yamlString: string | undefined;
@@ -50,4 +52,14 @@ export const useSaveYamlWithConfirmation = (
     await saveYaml();
     return true;
   }, [confirmBreakingChange, confirmDisable, saveYaml, store]);
+
+  return useCallback(() => {
+    if (isRunningRef.current) {
+      return Promise.resolve(false);
+    }
+    isRunningRef.current = true;
+    return confirmAndSave().finally(() => {
+      isRunningRef.current = false;
+    });
+  }, [confirmAndSave]);
 };

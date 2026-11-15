@@ -43,8 +43,8 @@ import type {
 } from './types';
 import {
   diffWorkflowContracts,
+  extractInputFields,
   extractWorkflowContract,
-  getRuntimeInputDefaults,
   hasConstraintsBeyondType,
   hasSchemaDetailChange,
   isFieldNarrowed,
@@ -53,7 +53,10 @@ import {
 } from './workflow_contract';
 import { getFinalEndStep } from '../get_returned_output_names';
 
-/** How many levels of callers-of-callers the analysis follows; runs nest at most 10 deep by default. */
+/**
+ * How many levels of callers-of-callers the analysis follows. Runs nest up to the configurable
+ * `maxWorkflowDepth` (10 calls below the first workflow by default).
+ */
 export const MAX_INDIRECT_DEPTH = 10;
 
 type DraftIssue = Omit<ImpactIssue, 'isNew'>;
@@ -126,7 +129,7 @@ const getValueType = (value: unknown): string => {
 };
 
 const getCallerScope = (definition: unknown): CallerScope => ({
-  inputs: extractWorkflowContract(definition).inputs,
+  inputs: extractInputFields(definition),
   consts: isRecord(definition) && isRecord(definition.consts) ? definition.consts : {},
 });
 
@@ -137,10 +140,11 @@ const parseReference = (value: unknown): { scope: string; name: string } | undef
   return match ? { scope: match[1], name: match[2] } : undefined;
 };
 
-// Replaces `${{ consts.name }}` references with the constant, which is known statically.
+// Replaces `${{ consts.name }}` references with the constant, which is known statically. A
+// reference to a constant that doesn't exist renders to nothing.
 const resolveConsts = (value: unknown, consts: CallerScope['consts']): unknown => {
   const reference = parseReference(value);
-  if (reference?.scope === 'consts' && reference.name in consts) {
+  if (reference?.scope === 'consts') {
     return consts[reference.name];
   }
   if (Array.isArray(value)) {
@@ -164,6 +168,7 @@ interface ValidationIssue {
   path: readonly PropertyKey[];
   code: string;
   message: string;
+  origin?: string;
 }
 
 const getAtPath = (value: unknown, path: readonly PropertyKey[]): unknown =>
@@ -186,7 +191,12 @@ const isCertainIssue = (issue: ValidationIssue, value: unknown): boolean => {
     return issue.code === 'invalid_type';
   }
   if (Array.isArray(node) || isRecord(node)) {
-    return issue.code === 'invalid_type' || !containsTemplate(node);
+    // Templates render the items and values, never how many items or which keys there are.
+    const isAboutShape =
+      issue.code === 'invalid_type' ||
+      issue.code === 'unrecognized_keys' ||
+      ((issue.code === 'too_small' || issue.code === 'too_big') && issue.origin === 'array');
+    return isAboutShape || !containsTemplate(node);
   }
   return true;
 };
@@ -220,6 +230,10 @@ const checkReferencedInput = (
   field: ContractField
 ): { issue?: DraftIssue; isUnknown: boolean } => {
   if (!callerField?.type) {
+    return { isUnknown: true };
+  }
+  // The caller can be run without its input, and then sends nothing for a required one.
+  if (field.required && !callerField.required && !callerField.hasDefault) {
     return { isUnknown: true };
   }
   if (isTypeWithin(callerField.type, field.type)) {
@@ -307,10 +321,6 @@ const checkOmittedInput = (
   if (defaultValue === undefined) {
     return field.required ? stepIssue('missingRequiredInput', stepName, field.name) : undefined;
   }
-  // Templated defaults are rendered while running, into values of any type.
-  if (containsTemplate(defaultValue)) {
-    return undefined;
-  }
   const [firstIssue] = validateAgainstField(defaultValue, field, contract).filter((issue) =>
     isCertainIssue(issue, defaultValue)
   );
@@ -366,11 +376,12 @@ const evaluateInputs = (
   }
 
   const provided = callSite.inputs ?? {};
+  const defaults = contract.inputDefaults;
   for (const [name, value] of Object.entries(provided)) {
     const field = contract.inputs[name];
     let issue: DraftIssue | undefined;
     if (!field) {
-      if (contract.hasDeclaredInputs) {
+      if (contract.inputsSchema) {
         issue = {
           kind: 'unknownInput',
           severity: contract.rejectsUnknownInputs ? 'breaking' : 'warning',
@@ -379,7 +390,13 @@ const evaluateInputs = (
         };
       }
     } else {
-      const check = checkInputValue(stepName, name, value, field, contract, scope);
+      // Runs fill in the default for a `null` value as they do for an omitted input.
+      const resolved = resolveConsts(value, scope.consts);
+      const isOmitted =
+        resolved === undefined || (resolved === null && defaults[name] !== undefined);
+      const check = isOmitted
+        ? { issue: checkOmittedInput(stepName, field, defaults[name], contract), isUnknown: false }
+        : checkInputValue(stepName, name, value, field, contract, scope);
       issue =
         check.issue ??
         (check.isUnknown
@@ -398,7 +415,6 @@ const evaluateInputs = (
   }
 
   // Runs fill in defaults for omitted inputs, then validate them like the ones that were sent.
-  const defaults = getRuntimeInputDefaults(contract.inputsSchema);
   for (const field of Object.values(contract.inputs)) {
     if (!(field.name in provided)) {
       const issue = checkOmittedInput(stepName, field, defaults[field.name], contract);
@@ -1033,25 +1049,25 @@ const findRunFailures = (workflows: ReadonlyMap<string, WorkflowLookupItem>): Ru
     }
     inProgress.add(workflowId);
     let failure = findEndStepFailure(workflow.definition);
-    for (const [calledId, callSites] of groupCallSites(workflow.definition)) {
-      const called = workflows.get(calledId);
+    // In step order, so that the failure is the first one a run reaches.
+    for (const callSite of collectWorkflowCallSites(workflow.definition)) {
+      if (failure) {
+        break;
+      }
       // Only a step that runs every time, and stops the run when it fails, fails every run.
-      const alwaysFailingSites = callSites.filter(
-        ({ continuesOnFailure, isConditional }) => !continuesOnFailure && !isConditional
-      );
-      for (const callSite of alwaysFailingSites) {
-        if (!failure) {
-          const issue = getCallFailure(callSite, workflow, calledId, called, (id) =>
-            resolve(id, depth + 1)
-          );
-          const calledName = called?.name ?? calledId;
-          failure = issue ? { stepName: callSite.stepName, calledName, issue } : undefined;
-          const isUnchecked = called
-            ? callSite.stepType === 'workflow.execute' && unchecked.has(calledId)
-            : calledId !== workflowId;
-          if (!issue && isUnchecked && !unchecked.has(workflowId)) {
-            unchecked.set(workflowId, { from: callSite.stepName, to: calledName });
-          }
+      if (!callSite.continuesOnFailure && !callSite.isConditional) {
+        const { workflowId: calledId } = callSite;
+        const called = workflows.get(calledId);
+        const issue = getCallFailure(callSite, workflow, calledId, called, (id) =>
+          resolve(id, depth + 1)
+        );
+        const calledName = called?.name ?? calledId;
+        failure = issue ? { stepName: callSite.stepName, calledName, issue } : undefined;
+        const isUnchecked = called
+          ? callSite.stepType === 'workflow.execute' && unchecked.has(calledId)
+          : calledId !== workflowId;
+        if (!issue && isUnchecked && !unchecked.has(workflowId)) {
+          unchecked.set(workflowId, { from: callSite.stepName, to: calledName });
         }
       }
     }

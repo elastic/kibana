@@ -87,4 +87,41 @@ describe('useWorkflowDependents', () => {
       analysis: response.analysis,
     });
   });
+
+  it('never shows the analysis of the workflow opened before', async () => {
+    let rejectOther: (error: Error) => void = () => {};
+    const { services, store, result } = setup(({ http }) => {
+      http.post.mockResolvedValueOnce(response).mockImplementationOnce(
+        () =>
+          new Promise((_resolve, reject) => {
+            rejectOther = reject;
+          })
+      );
+    });
+    await waitFor(() => expect(result.current.analysis).toBeDefined());
+
+    act(() => {
+      store.dispatch(
+        setWorkflow({
+          id: 'other',
+          name: 'Other',
+          enabled: true,
+          yaml: SAVED_YAML,
+          lastUpdatedAt: '2024-02-01T00:00:00Z',
+          createdAt: '2024-01-01T00:00:00Z',
+          createdBy: 'test-user',
+          lastUpdatedBy: 'test-user',
+          definition: null,
+          valid: true,
+        })
+      );
+    });
+    expect(result.current).toMatchObject({ analysis: undefined, isLoading: true });
+
+    await waitFor(() => expect(services.http.post).toHaveBeenCalledTimes(2));
+    act(() => rejectOther(new Error('Server error')));
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current).toMatchObject({ analysis: undefined, isRefreshError: false });
+  });
 });

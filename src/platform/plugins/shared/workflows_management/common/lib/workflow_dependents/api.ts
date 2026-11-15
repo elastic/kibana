@@ -12,7 +12,6 @@ import type {
   DependentImpact,
   DependentsAnalysis,
   RemovalImpact,
-  WorkflowReference,
 } from './types';
 
 /** True for an enabled caller that a save breaks; a turned-off caller has no runs to break. */
@@ -38,13 +37,6 @@ export interface WorkflowDependentsImpactResponse {
   analysis: DependentsAnalysis;
   /** Workflows this one runs, graded against their saved versions. */
   calledWorkflows: CalledWorkflowImpact[];
-}
-
-/** Summary of the callers a save broke, returned by the update workflow route. */
-export interface WorkflowSaveDependentsImpact {
-  breaking: WorkflowReference[];
-  /** Workflows that fail or lose data because they run one of the `breaking` workflows. */
-  indirectBreaking: number;
 }
 
 /** Internal route that lists what fails when workflows are turned off or deleted. */

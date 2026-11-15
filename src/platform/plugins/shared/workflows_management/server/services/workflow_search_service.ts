@@ -17,6 +17,7 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows/types/v1';
 
@@ -165,6 +166,7 @@ export class WorkflowSearchService {
     options: {
       accessControlFilter?: estypes.QueryDslQueryContainer;
       includeUnindexed?: boolean;
+      managedFilter?: ManagedFilter;
     }
   ): Promise<WorkflowLookupItem[]> {
     const { esClient, logger } = this.deps;
@@ -178,6 +180,7 @@ export class WorkflowSearchService {
     const { must, must_not } = buildWorkflowFilters({
       space: { id: spaceId, includeGlobal: true },
       deleted: 'not_deleted',
+      managed: options.managedFilter,
     });
     if (options.accessControlFilter) must.push(options.accessControlFilter);
     must.push({
@@ -202,7 +205,7 @@ export class WorkflowSearchService {
 
     try {
       const workflows: WorkflowLookupItem[] = [];
-      await paginateWithSearchAfter<WorkflowProperties>(
+      const { truncated } = await paginateWithSearchAfter<WorkflowProperties>(
         {
           search: (searchAfter) =>
             esClient.search<WorkflowProperties>({
@@ -210,6 +213,8 @@ export class WorkflowSearchService {
               size: pageSize,
               _source: ['name', 'enabled', 'definition', 'managed'],
               query,
+              // A caller on an unavailable shard would be missed, and the change reported safe.
+              allow_partial_search_results: false,
               sort,
               ...(searchAfter ? { search_after: searchAfter } : {}),
             }),
@@ -230,6 +235,9 @@ export class WorkflowSearchService {
           }
         }
       );
+      if (truncated) {
+        throw new Error(`findWorkflowsCalling(${spaceId}) found more workflows than it can read`);
+      }
       return workflows;
     } finally {
       try {

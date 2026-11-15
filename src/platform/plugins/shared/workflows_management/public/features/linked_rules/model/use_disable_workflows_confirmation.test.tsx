@@ -179,9 +179,12 @@ describe('useDisableWorkflowsConfirmation', () => {
     expect(screen.getByTestId('workflowLinkedRulesError')).toBeInTheDocument();
   });
 
-  it('still disables without a prompt when only the caller check fails', async () => {
+  it('warns that callers could not be checked when only the caller check fails', async () => {
     mockResponses({ callers: Promise.reject(new Error('boom')) });
 
-    await expect(confirmDisable(['wf-1'])).resolves.toBe(true);
+    await openConfirmation();
+
+    expect(screen.getByTestId('workflowCallersError')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowLinkedRulesError')).not.toBeInTheDocument();
   });
 });

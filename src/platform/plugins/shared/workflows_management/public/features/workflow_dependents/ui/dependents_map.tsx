@@ -11,8 +11,8 @@ import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { ShownStatus } from './shown_status';
 import { getCalledStatusLabel, getStatusLabel } from './translations';
-import type { ImpactStatus } from '../../../../common/lib/workflow_dependents/types';
 
 const NODE_WIDTH = 196;
 const NODE_HEIGHT = 30;
@@ -22,13 +22,23 @@ const PADDING = 4;
 const MAX_NODES = 8;
 const MAX_LABEL_LENGTH = 26;
 
+// Shown next to each name, so the status doesn't rely on color alone.
+const STATUS_SYMBOLS: Record<ShownStatus, string> = {
+  breaking: '✕',
+  warning: '!',
+  alreadyBroken: '✕',
+  unknown: '?',
+  safe: '✓',
+  turnedOff: '–',
+};
+
 const truncate = (label: string): string =>
   label.length > MAX_LABEL_LENGTH ? `${label.slice(0, MAX_LABEL_LENGTH - 1)}…` : label;
 
 export interface MapLink {
   id: string;
   name: string;
-  status: ImpactStatus;
+  status: ShownStatus;
 }
 
 interface PositionedNode {
@@ -37,7 +47,7 @@ interface PositionedNode {
   title: string;
   x: number;
   y: number;
-  status?: ImpactStatus;
+  status?: ShownStatus;
   isOverflow?: boolean;
 }
 
@@ -46,20 +56,29 @@ export interface DependentsMapProps {
   links: readonly MapLink[];
   /** `callers`: links run this workflow. `called`: this workflow runs the links. */
   direction: 'callers' | 'called';
+  /** Links whose cards are expanded. */
+  openIds: ReadonlySet<string>;
   onSelect: (id: string) => void;
 }
 
 /** Draws the open workflow and the workflows linked to it, colored by whether the link still works. */
-export const DependentsMap = ({ workflowName, links, direction, onSelect }: DependentsMapProps) => {
+export const DependentsMap = ({
+  workflowName,
+  links,
+  direction,
+  openIds,
+  onSelect,
+}: DependentsMapProps) => {
   const { euiTheme } = useEuiTheme();
   const markerId = useGeneratedHtmlId({ prefix: 'workflowLinkArrow' });
 
-  const statusStroke: Record<ImpactStatus, string> = {
+  const statusStroke: Record<ShownStatus, string> = {
     breaking: euiTheme.colors.danger,
     warning: euiTheme.colors.warning,
     alreadyBroken: euiTheme.colors.danger,
     unknown: euiTheme.colors.textSubdued,
     safe: euiTheme.colors.success,
+    turnedOff: euiTheme.colors.textSubdued,
   };
 
   const layout = useMemo(() => {
@@ -74,10 +93,14 @@ export const DependentsMap = ({ workflowName, links, direction, onSelect }: Depe
 
     const linkNodes: PositionedNode[] = visible.map((link, index) => ({
       id: link.id,
-      label: truncate(link.name),
-      title: `${link.name}: ${(direction === 'callers' ? getStatusLabel : getCalledStatusLabel)(
-        link.status
-      )}`,
+      label: `${STATUS_SYMBOLS[link.status]} ${truncate(link.name)}`,
+      title: i18n.translate('workflows.dependents.map.nodeTitle', {
+        defaultMessage: '{name}: {status}',
+        values: {
+          name: link.name,
+          status: (direction === 'callers' ? getStatusLabel : getCalledStatusLabel)(link.status),
+        },
+      }),
       status: link.status,
       x: linkX,
       y: PADDING + index * (NODE_HEIGHT + ROW_GAP),
@@ -138,6 +161,7 @@ export const DependentsMap = ({ workflowName, links, direction, onSelect }: Depe
           role: 'button',
           tabIndex: 0,
           'aria-label': node.title,
+          'aria-expanded': openIds.has(node.id),
           onClick: select,
           onKeyDown: (event: React.KeyboardEvent) => {
             if (event.key === 'Enter' || event.key === ' ') {
@@ -177,7 +201,7 @@ export const DependentsMap = ({ workflowName, links, direction, onSelect }: Depe
     <svg
       viewBox={`0 0 ${width} ${height}`}
       css={styles.svg}
-      role="img"
+      role="group"
       aria-label={
         direction === 'callers'
           ? i18n.translate('workflows.dependents.map.callersAriaLabel', {

@@ -30,6 +30,7 @@ interface PendingConfirmation {
   data?: GetLinkedRulesResponse;
   isError: boolean;
   callers?: WorkflowRemovalImpactResponse;
+  isCallersError: boolean;
 }
 
 /** Asks the user to confirm before disabling workflows that alerting rules or other workflows run. */
@@ -51,17 +52,19 @@ export const useDisableWorkflowsConfirmation = (): {
           (data) => ({ data, isError: false }),
           () => ({ data: undefined, isError: true })
         ),
-        // Without the caller check, disabling still goes ahead with the linked rules warning only.
-        queryClient.fetchQuery(removalImpactQueryOptions(http, workflowIds)).catch(() => undefined),
+        queryClient.fetchQuery(removalImpactQueryOptions(http, workflowIds)).then(
+          (data) => ({ callers: data, isCallersError: false }),
+          () => ({ callers: undefined, isCallersError: true })
+        ),
       ]);
       const hasLinkedRules = !(result.data?.total === 0 && result.data.hiddenTotal === 0);
-      if (!hasLinkedRules && !hasRemovalImpact(callers)) {
+      if (!hasLinkedRules && !hasRemovalImpact(callers.callers) && !callers.isCallersError) {
         return true;
       }
       return new Promise((resolve) => {
         resolveRef.current?.(false);
         resolveRef.current = resolve;
-        setPending({ ...result, callers, workflowCount: workflowIds.length });
+        setPending({ ...result, ...callers, workflowCount: workflowIds.length });
       });
     },
     [api, http, queryClient]
@@ -98,13 +101,14 @@ export const useDisableWorkflowsConfirmation = (): {
         data={pending.data}
         isError={pending.isError}
       />
-      {hasRemovalImpact(pending.callers) && (
+      {(hasRemovalImpact(pending.callers) || pending.isCallersError) && (
         <>
           <EuiSpacer size="s" />
           <WorkflowCallersCallout
             workflowCount={pending.workflowCount}
             action="disable"
             data={pending.callers}
+            isError={pending.isCallersError}
           />
         </>
       )}

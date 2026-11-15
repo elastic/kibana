@@ -13,17 +13,21 @@ import { WORKFLOW_DEPENDENTS_IMPACT_ROUTE } from '../../../../common/lib/workflo
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
+import {
+  canReadManagedWorkflows,
+  hasWorkflowReadPrivilege,
+  WORKFLOW_READ_WITH_MANAGED_SECURITY,
+} from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetDependentsImpactRoute(deps: RouteDependencies) {
-  const { router, api, spaces } = deps;
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: WORKFLOW_DEPENDENTS_IMPACT_ROUTE,
       access: 'internal',
-      security: WORKFLOW_READ_SECURITY,
+      security: WORKFLOW_READ_WITH_MANAGED_SECURITY,
       summary: 'Analyze how a workflow draft affects connected workflows',
       description:
         'Grade the workflows that run this workflow, and the workflows it runs, against a draft of its YAML.',
@@ -42,15 +46,21 @@ export function registerGetDependentsImpactRoute(deps: RouteDependencies) {
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
+          if (!hasWorkflowReadPrivilege(request)) {
+            return response.forbidden();
+          }
           const spaceId = spaces.getSpaceId(request);
           const body = await api.getWorkflowDependentsImpact(
             request.params.id,
             spaceId,
             request,
-            request.body.yaml
+            request.body.yaml,
+            { allowManagedWorkflowRead: canReadManagedWorkflows(request) }
           );
+          audit.logWorkflowAccessed(request, { id: request.params.id });
           return response.ok({ body });
         } catch (error) {
+          audit.logWorkflowAccessed(request, { id: request.params.id, error });
           return handleRouteError(response, error);
         }
       })

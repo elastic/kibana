@@ -33,6 +33,9 @@ const visitSteps = (node: unknown, visit: (step: Record<string, unknown>) => voi
 export const isCompletingOutputStep = (step: Record<string, unknown>): boolean =>
   step.type === 'workflow.output' && (step.status === undefined || step.status === 'completed');
 
+/** Whether a step has an `if`, so it might be skipped; an empty `if` always runs, as in the engine. */
+export const hasCondition = (step: Record<string, unknown>): boolean => Boolean(step.if);
+
 // Whether running `steps` in order always reaches a `workflow.output` or `workflow.fail` step, which
 // ends the run.
 // Only unconditional steps count, and an `if` step only when both of its branches end the run.
@@ -41,7 +44,7 @@ const alwaysEndsRun = (steps: unknown): boolean =>
   steps.some(
     (step) =>
       isRecord(step) &&
-      step.if === undefined &&
+      !hasCondition(step) &&
       (step.type === 'workflow.output' ||
         step.type === 'workflow.fail' ||
         (step.type === 'if' && alwaysEndsRun(step.steps) && alwaysEndsRun(step.else)))
@@ -54,7 +57,8 @@ const alwaysEndsRun = (steps: unknown): boolean =>
 export const alwaysReturnsWorkflowOutput = (definition: unknown): boolean =>
   isRecord(definition) && alwaysEndsRun(definition.steps);
 
-const containsCompletingOutputStep = (step: Record<string, unknown>): boolean => {
+/** Whether a step, or one nested in it, might complete the run, so the steps after it might not run. */
+export const containsCompletingOutputStep = (step: Record<string, unknown>): boolean => {
   let found = false;
   visitSteps(step, (child) => {
     found = found || isCompletingOutputStep(child);
@@ -70,10 +74,7 @@ const containsCompletingOutputStep = (step: Record<string, unknown>): boolean =>
 export const getFinalEndStep = (definition: unknown): Record<string, unknown> | undefined => {
   const steps = isRecord(definition) && Array.isArray(definition.steps) ? definition.steps : [];
   for (const step of steps.filter(isRecord)) {
-    if (
-      (step.type === 'workflow.output' || step.type === 'workflow.fail') &&
-      step.if === undefined
-    ) {
+    if ((step.type === 'workflow.output' || step.type === 'workflow.fail') && !hasCondition(step)) {
       return step;
     }
     if (containsCompletingOutputStep(step)) {

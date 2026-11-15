@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
@@ -28,6 +35,8 @@ interface WorkflowCallersCalloutProps {
   /** `disable` when the workflows are turned off, `delete` when they are deleted. */
   action: 'disable' | 'delete';
   data?: WorkflowRemovalImpactResponse;
+  /** True when the workflows that run them couldn't be checked. */
+  isError?: boolean;
 }
 
 /** Warns that workflows which run the given workflows fail once those are turned off or deleted. */
@@ -35,8 +44,28 @@ export const WorkflowCallersCallout = ({
   workflowCount,
   action,
   data,
+  isError = false,
 }: WorkflowCallersCalloutProps) => {
   const { application } = useKibana().services;
+  if (isError) {
+    return (
+      <KbnWarningCallout
+        announceOnMount
+        size="s"
+        title={i18n.translate('workflows.dependents.removal.errorTitle', {
+          defaultMessage:
+            'Could not check for workflows that run {workflowCount, plural, one {this workflow} other {these workflows}}',
+          values: { workflowCount },
+        })}
+        text={i18n.translate('workflows.dependents.removal.errorMessage', {
+          defaultMessage:
+            'If other workflows run {workflowCount, plural, one {it} other {them}}, their steps that do will fail once {workflowCount, plural, one {it is} other {they are}} {action, select, delete {deleted} other {turned off}}.',
+          values: { workflowCount, action },
+        })}
+        data-test-subj="workflowCallersError"
+      />
+    );
+  }
   if (!data || !hasRemovalImpact(data)) {
     return null;
   }
@@ -105,14 +134,40 @@ export const WorkflowCallersCallout = ({
 /** Fetches and shows the workflows that fail when `workflowIds` are deleted. */
 export const WorkflowCallersWarning = ({ workflowIds }: { workflowIds: string[] }) => {
   const { http } = useKibana().services;
-  const { data } = useQuery(removalImpactQueryOptions(http, workflowIds));
-  if (!hasRemovalImpact(data)) {
+  const { data, isError, isLoading } = useQuery(removalImpactQueryOptions(http, workflowIds));
+  if (isLoading) {
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="xs" color="subdued" data-test-subj="workflowCallersLoading">
+              {i18n.translate('workflows.dependents.removal.loading', {
+                defaultMessage:
+                  'Checking for workflows that run {count, plural, one {this workflow} other {these workflows}}…',
+                values: { count: workflowIds.length },
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
+  if (!isError && !hasRemovalImpact(data)) {
     return null;
   }
   return (
     <>
       <EuiSpacer size="s" />
-      <WorkflowCallersCallout workflowCount={workflowIds.length} action="delete" data={data} />
+      <WorkflowCallersCallout
+        workflowCount={workflowIds.length}
+        action="delete"
+        data={data}
+        isError={isError}
+      />
     </>
   );
 };

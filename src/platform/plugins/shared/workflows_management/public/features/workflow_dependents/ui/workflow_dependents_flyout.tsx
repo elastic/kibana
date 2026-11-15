@@ -41,30 +41,31 @@ import {
 } from '@kbn/ui-callout';
 import { getCalledCardContent, getCallerCardContent } from './card_content';
 import { DependentsMap } from './dependents_map';
+import type { ShownStatus } from './shown_status';
+import { getShownStatus } from './shown_status';
 import { getStatusLabel } from './translations';
 import { WorkflowLinkCard } from './workflow_link_card';
 import { PLUGIN_ID } from '../../../../common';
 import type {
   CalledWorkflowImpact,
   DependentsAnalysis,
-  ImpactStatus,
 } from '../../../../common/lib/workflow_dependents/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { WorkflowChangeHistoryMonacoPreview } from '../../change_history/workflow_change_history_monaco_preview';
 import type { WorkflowLinksTab } from '../model/workflow_dependents_context';
 
-type StatusFilter = 'all' | ImpactStatus;
+type StatusFilter = 'all' | ShownStatus;
 
-const STATUS_FILTER_ORDER: readonly ImpactStatus[] = [
+const STATUS_FILTER_ORDER: readonly ShownStatus[] = [
   'breaking',
   'warning',
   'alreadyBroken',
   'unknown',
+  'turnedOff',
   'safe',
 ];
 
-const needsAttention = ({ status }: { status: ImpactStatus }) =>
-  status === 'breaking' || status === 'warning';
+const needsAttention = (status: ShownStatus) => status === 'breaking' || status === 'warning';
 
 /** Tracks which cards are expanded; cards that need attention open automatically. */
 const useOpenCards = (attentionIds: readonly string[]) => {
@@ -221,7 +222,8 @@ export interface WorkflowDependentsFlyoutProps {
   isUpdating?: boolean;
   /** True when checking the latest draft failed, so the results shown are for an earlier one. */
   isRefreshError?: boolean;
-  initialTab: WorkflowLinksTab;
+  tab: WorkflowLinksTab;
+  onTabChange: (tab: WorkflowLinksTab) => void;
   onRefresh: () => void;
   onClose: () => void;
 }
@@ -237,29 +239,40 @@ export const WorkflowDependentsFlyout = ({
   isError,
   isUpdating = false,
   isRefreshError = false,
-  initialTab,
+  tab,
+  onTabChange,
   onRefresh,
   onClose,
 }: WorkflowDependentsFlyoutProps) => {
   const { application } = useKibana().services;
   const titleId = useGeneratedHtmlId({ prefix: 'workflowDependentsFlyout' });
-  const [tab, setTab] = useState<WorkflowLinksTab>(initialTab);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const cardRefs = useRef(new Map<string, HTMLDivElement | null>());
 
-  useEffect(() => setTab(initialTab), [initialTab]);
-
-  const dependents = useMemo(() => analysis?.dependents ?? [], [analysis]);
+  const dependents = useMemo(
+    () =>
+      (analysis?.dependents ?? []).map((dependent) => ({
+        ...dependent,
+        shownStatus: getShownStatus(dependent),
+      })),
+    [analysis]
+  );
   const callers = useOpenCards(
-    dependents.filter(needsAttention).map(({ workflowId }) => workflowId)
+    dependents
+      .filter(({ shownStatus }) => needsAttention(shownStatus))
+      .map(({ workflowId }) => workflowId)
   );
   const called = useOpenCards(
-    calledWorkflows.filter(needsAttention).map(({ workflowId }) => workflowId)
+    calledWorkflows
+      .filter(({ status }) => needsAttention(status))
+      .map(({ workflowId }) => workflowId)
   );
 
   const filterOptions = useMemo(() => {
-    const counts = new Map<ImpactStatus, number>();
-    dependents.forEach(({ status }) => counts.set(status, (counts.get(status) ?? 0) + 1));
+    const counts = new Map<ShownStatus, number>();
+    dependents.forEach(({ shownStatus }) =>
+      counts.set(shownStatus, (counts.get(shownStatus) ?? 0) + 1)
+    );
     return [
       {
         id: 'all',
@@ -270,7 +283,10 @@ export const WorkflowDependentsFlyout = ({
       },
       ...STATUS_FILTER_ORDER.filter((status) => counts.has(status)).map((status) => ({
         id: status,
-        label: `${getStatusLabel(status)} (${counts.get(status)})`,
+        label: i18n.translate('workflows.dependents.flyout.filterStatus', {
+          defaultMessage: '{status} ({count})',
+          values: { status: getStatusLabel(status), count: counts.get(status) },
+        }),
       })),
     ];
   }, [dependents]);
@@ -288,7 +304,7 @@ export const WorkflowDependentsFlyout = ({
     () =>
       activeFilter === 'all'
         ? dependents
-        : dependents.filter(({ status }) => status === activeFilter),
+        : dependents.filter(({ shownStatus }) => shownStatus === activeFilter),
     [dependents, activeFilter]
   );
 
@@ -359,11 +375,12 @@ export const WorkflowDependentsFlyout = ({
         <DependentsMap
           workflowName={workflowName}
           direction="callers"
-          links={dependents.map(({ workflowId, workflowName: name, status }) => ({
+          links={dependents.map(({ workflowId, workflowName: name, shownStatus }) => ({
             id: workflowId,
             name,
-            status,
+            status: shownStatus,
           }))}
+          openIds={callers.openIds}
           onSelect={(id) => toggleFromMap(callers, id)}
         />
         <EuiSpacer size="m" />
@@ -444,6 +461,7 @@ export const WorkflowDependentsFlyout = ({
             name: name ?? workflowId,
             status,
           }))}
+          openIds={called.openIds}
           onSelect={(id) => toggleFromMap(called, id)}
         />
         <EuiSpacer size="m" />
@@ -566,7 +584,7 @@ export const WorkflowDependentsFlyout = ({
         <EuiTabs bottomBorder={false} size="s">
           <EuiTab
             isSelected={tab === 'usedBy'}
-            onClick={() => setTab('usedBy')}
+            onClick={() => onTabChange('usedBy')}
             data-test-subj="workflowLinksTabUsedBy"
           >
             {i18n.translate('workflows.dependents.flyout.usedByTab', {
@@ -576,7 +594,7 @@ export const WorkflowDependentsFlyout = ({
           </EuiTab>
           <EuiTab
             isSelected={tab === 'runs'}
-            onClick={() => setTab('runs')}
+            onClick={() => onTabChange('runs')}
             data-test-subj="workflowLinksTabRuns"
           >
             {i18n.translate('workflows.dependents.flyout.runsTab', {

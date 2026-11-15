@@ -54,32 +54,34 @@ export const useWorkflowDependents = (): UseWorkflowDependentsResult => {
     hasUnsavedChanges ? draftYaml : undefined,
     DRAFT_DEBOUNCE_MS
   );
+  // Once saved, the saved version is analyzed right away rather than the last draft.
+  const queriedDraftYaml = hasUnsavedChanges ? debouncedDraftYaml : undefined;
 
-  const { data, isInitialLoading, isError, isFetching, isPreviousData, refetch } = useQuery({
+  const { data, isError, isFetching, isPreviousData, refetch } = useQuery({
     ...dependentsImpactQueryOptions(
       http,
       { id: workflow?.id ?? '', savedVersion: workflow?.lastUpdatedAt },
-      debouncedDraftYaml
+      queriedDraftYaml
     ),
     enabled: Boolean(workflow?.id),
     // While typing, the draft is briefly invalid YAML; keep showing the last good analysis.
     keepPreviousData: true,
   });
 
-  // `keepPreviousData` drops the previous result once the newer query fails, so keep it here.
+  // The last result of this workflow's own queries. `keepPreviousData` can hand over another
+  // workflow's result after navigating, and drops the previous one once a newer query fails.
   const lastResultRef = useRef<{ id: string; result: WorkflowDependentsImpactResponse }>();
-  if (data && workflow?.id) {
+  if (data && !isPreviousData && workflow?.id) {
     lastResultRef.current = { id: workflow.id, result: data };
   }
   const shown =
-    data ??
-    (lastResultRef.current?.id === workflow?.id ? lastResultRef.current?.result : undefined);
+    lastResultRef.current?.id === workflow?.id ? lastResultRef.current?.result : undefined;
 
   const savedYaml = workflow?.yaml;
-  const isLoading = isInitialLoading;
+  const isLoading = !shown && !isError && Boolean(workflow?.id);
   const hasError = isError && !shown;
   const isRefreshError = isError && Boolean(shown);
-  const isDebouncing = debouncedDraftYaml !== (hasUnsavedChanges ? draftYaml : undefined);
+  const isDebouncing = queriedDraftYaml !== (hasUnsavedChanges ? draftYaml : undefined);
   const isUpdating =
     Boolean(shown) && !isRefreshError && (isFetching || isPreviousData || isDebouncing);
   return useMemo(

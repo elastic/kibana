@@ -135,7 +135,7 @@ describe('useBreakingChangeConfirmation', () => {
 
     expect(screen.getByText('Save changes that break 1 workflow?')).toBeInTheDocument();
     expect(
-      screen.getByText(': Doesn’t send the input "tenant", which Alert context requires', {
+      screen.getByText('Doesn’t send the input "tenant", which Alert context requires', {
         exact: false,
       })
     ).toBeInTheDocument();
@@ -158,10 +158,40 @@ describe('useBreakingChangeConfirmation', () => {
     expect(onReviewImpact).toHaveBeenCalled();
   });
 
-  it('saves without a prompt when the analysis fails', async () => {
+  it('warns that callers could not be checked when the analysis fails', async () => {
     (services.http.post as jest.Mock).mockRejectedValue(new Error('boom'));
     renderWithDraft(`${SAVED_YAML}\n`);
 
-    await expect(confirmBreakingChange(draft)).resolves.toBe(true);
+    const { confirmation } = await openConfirmation();
+
+    expect(
+      screen.getByText('Save without checking the workflows that run this one?')
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    await expect(confirmation).resolves.toBe(true);
+  });
+
+  it('checks again on every save instead of reusing an earlier result', async () => {
+    (services.http.post as jest.Mock).mockResolvedValue(impact([]));
+    renderWithDraft(`${SAVED_YAML}\n`);
+
+    await confirmBreakingChange(draft);
+    await confirmBreakingChange(draft);
+
+    expect(services.http.post).toHaveBeenCalledTimes(2);
+  });
+
+  it('lists at most 10 callers and counts the rest', async () => {
+    const callers = Array.from({ length: 12 }, (_, index) =>
+      caller({ workflowId: `caller-${index}`, workflowName: `Caller ${index}` })
+    );
+    (services.http.post as jest.Mock).mockResolvedValue(impact(callers));
+    renderWithDraft(`${SAVED_YAML}\n`);
+
+    await openConfirmation();
+
+    expect(screen.getByText('Caller 9')).toBeInTheDocument();
+    expect(screen.queryByText('Caller 10')).not.toBeInTheDocument();
+    expect(screen.getByText('and 2 more')).toBeInTheDocument();
   });
 });

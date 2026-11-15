@@ -15,7 +15,11 @@ import { createWorkflowLiquidEngine, extractTemplateVariables } from '@kbn/workf
 import { parsePath } from '@kbn/workflows/common/utils/zod';
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import type { WorkflowCallSite, WorkflowExecuteStepType } from './types';
-import { isCompletingOutputStep } from '../get_returned_output_names';
+import {
+  containsCompletingOutputStep,
+  hasCondition,
+  isCompletingOutputStep,
+} from '../get_returned_output_names';
 import { WORKFLOW_EXECUTE_TYPES, WORKFLOW_REFERENCE_KEY } from '../import';
 
 /** True for values rendered at runtime (`{{ }}`, `{% %}` or `${{ }}`), which cannot be checked statically. */
@@ -45,6 +49,14 @@ const continuesOnFailure = (onFailure: unknown): boolean => {
   );
 };
 
+// The engine sends no inputs for a value that isn't an object, and a list's items by index.
+const toCheckedInputs = (inputs: unknown): Record<string, unknown> | undefined => {
+  if (isRecord(inputs)) {
+    return inputs;
+  }
+  return Array.isArray(inputs) ? { ...inputs } : undefined;
+};
+
 const toCallSite = (
   step: Record<string, unknown>,
   { isContained, isConditional }: StepContext
@@ -62,8 +74,9 @@ const toCallSite = (
     workflowId,
     stepName: typeof name === 'string' ? name : '',
     stepType: type as WorkflowExecuteStepType,
-    inputs: isRecord(inputs) ? inputs : undefined,
-    isDynamicInputs: isTemplatedValue(inputs),
+    inputs: toCheckedInputs(inputs),
+    // Only an expression keeps its type; a `{{ }}` template renders to text, which sends no inputs.
+    isDynamicInputs: isDynamicValue(inputs),
     continuesOnFailure: isContained,
     isConditional,
   };
@@ -86,9 +99,12 @@ type StepVisitor = (step: Record<string, unknown>, context: StepContext) => void
 const isWorkflowStep = (node: unknown): node is WorkflowStep =>
   isRecord(node) && typeof node.type === 'string';
 
-// Nested steps that run whenever their parent does; other containers may skip theirs.
+// Nested steps that run whenever their parent does: every `parallel` branch, and the first
+// iteration of a `while` loop, which runs before its condition is checked. Other containers may
+// skip theirs.
 const alwaysRunsNestedSteps = (step: WorkflowStep, pathSuffix: string): boolean =>
-  step.type === 'merge' || (step.type === 'parallel' && pathSuffix.startsWith('.branch['));
+  (step.type === 'parallel' && pathSuffix.startsWith('.branch[')) ||
+  (step.type === 'while' && pathSuffix === '');
 
 // Whether a container step completes when one of its nested steps fails: a loop that continues
 // past failed iterations, or a `parallel` step that waits for every branch to settle.
@@ -125,12 +141,14 @@ const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: WalkContex
   if (!Array.isArray(steps)) {
     return;
   }
+  // Once a step might complete the run, the steps after it might not run.
+  let mayHaveEndedRun = false;
   for (const step of steps.filter(isWorkflowStep)) {
     const record: Record<string, unknown> = step;
     const context: StepContext = {
       isContained:
         parentContext.isContained || stepContinuesOnFailure(step, parentContext.workflowContinues),
-      isConditional: parentContext.isConditional || record.if !== undefined,
+      isConditional: parentContext.isConditional || mayHaveEndedRun || hasCondition(record),
     };
     visit(record, context);
     const isContainedInside = context.isContained || containsNestedFailures(step);
@@ -141,6 +159,7 @@ const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: WalkContex
         workflowContinues: parentContext.workflowContinues && !pathSuffix.endsWith('.fallback'),
       });
     }
+    mayHaveEndedRun = mayHaveEndedRun || containsCompletingOutputStep(record);
   }
 };
 
@@ -209,7 +228,7 @@ interface VariableRead {
 }
 
 // KQL expressions, where variables are referenced by bare field names.
-const CONDITION_KEYS = new Set(['if', 'condition']);
+const CONDITION_KEYS = new Set(['if', 'condition', 'continue']);
 
 const liquid = createWorkflowLiquidEngine({ strictFilters: false, strictVariables: false });
 

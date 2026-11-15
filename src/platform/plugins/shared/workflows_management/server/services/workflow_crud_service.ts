@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { chunk } from 'lodash';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
@@ -35,6 +36,7 @@ import {
   WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
   type WorkflowYaml,
 } from '@kbn/workflows';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
@@ -119,6 +121,8 @@ import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks'
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
+const MAX_IDS_PER_SEARCH = 10_000;
+const INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE = 500;
 const TOCTOU_MAX_RETRIES = 5;
 
 // `OccWriter.readModifyWrite` always indexes what `mutate` returns; throwing this skips the write.
@@ -331,6 +335,35 @@ export class WorkflowCrudService {
       }
     }
     return { documents, unavailable };
+  }
+
+  /**
+   * Stores which workflows each of `ids` runs, for documents saved before saving stored it. A
+   * document saved meanwhile is left as it is, since the save stored it.
+   */
+  async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    for (const idsChunk of chunk(ids, INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE)) {
+      const { documents } = await this.readWorkflowDocumentsWithVersion(idsChunk);
+      const writes: WorkflowDocumentBulkWrite[] = [];
+      for (const [id, previous] of documents) {
+        const { source } = previous;
+        // Bound workflows can't be written in bulk (see bulkWriteWorkflowDocuments).
+        if (source.calledWorkflowIdsIndexed !== true && !source.definition?.settings?.run_as) {
+          writes.push({
+            id,
+            previous,
+            document: {
+              ...source,
+              calledWorkflowIds: getCalledWorkflowIds(source.definition),
+              calledWorkflowIdsIndexed: true,
+            },
+          });
+        }
+      }
+      if (writes.length > 0) {
+        await this.bulkWriteWorkflowDocuments(writes);
+      }
+    }
   }
 
   /**
@@ -800,29 +833,35 @@ export class WorkflowCrudService {
       includeDeleted?: boolean;
       includeGlobal?: boolean;
       accessControlFilter?: estypes.QueryDslQueryContainer;
+      managedFilter?: ManagedFilter;
+      /** False to fail rather than miss the workflows on unavailable shards. */
+      allowPartialResults?: boolean;
     }
   ): Promise<WorkflowPartialDetailDto[]> {
-    if (ids.length === 0) {
-      return [];
+    const workflows: WorkflowPartialDetailDto[] = [];
+    // A search returns at most `index.max_result_window` (10,000 by default) hits.
+    for (const idsChunk of chunk(ids, MAX_IDS_PER_SEARCH)) {
+      const { must, must_not } = buildWorkflowFilters({
+        ids: idsChunk,
+        space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
+        deleted: options?.includeDeleted ? 'all' : 'not_deleted',
+        managed: options?.managedFilter,
+      });
+
+      const response = await this.deps.workflowStorage.getClient().search({
+        query: { bool: { must, must_not, filter: options?.accessControlFilter } },
+        _source: source ? [...new Set([...source, 'access_control'])] : true,
+        size: idsChunk.length,
+        track_total_hits: false,
+        ...(options?.allowPartialResults === false ? { allow_partial_search_results: false } : {}),
+      });
+
+      for (const hit of response.hits.hits) {
+        storedWorkflowAccessControlSchema.parse(hit._source?.access_control);
+        workflows.push(transformStoragePartialToWorkflowDto(hit._id, hit._source));
+      }
     }
-
-    const { must, must_not } = buildWorkflowFilters({
-      ids,
-      space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
-      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
-    });
-
-    const response = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not, filter: options?.accessControlFilter } },
-      _source: source ? [...new Set([...source, 'access_control'])] : true,
-      size: ids.length,
-      track_total_hits: false,
-    });
-
-    return response.hits.hits.map((hit) => {
-      storedWorkflowAccessControlSchema.parse(hit._source?.access_control);
-      return transformStoragePartialToWorkflowDto(hit._id, hit._source);
-    });
+    return workflows;
   }
 
   async createWorkflow(

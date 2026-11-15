@@ -34,7 +34,7 @@ export const getDependentsBadge = ({
     'data-test-subj': 'workflowDependentsBadge',
     color: 'hollow',
     label: i18n.translate('workflows.dependents.badge.usedBy', {
-      defaultMessage: 'Used by {direct} {direct, plural, one {workflow} other {workflows}}',
+      defaultMessage: 'Used by {direct, plural, one {# workflow} other {# workflows}}',
       values: { direct },
     }),
   };
@@ -60,7 +60,7 @@ export const getCalledWorkflowsBadge = ({
     'data-test-subj': 'workflowCalledBadge',
     color: 'hollow',
     label: i18n.translate('workflows.dependents.calledBadge.label', {
-      defaultMessage: 'Runs {count} {count, plural, one {workflow} other {workflows}}',
+      defaultMessage: 'Runs {count, plural, one {# workflow} other {# workflows}}',
       values: { count },
     }),
   };

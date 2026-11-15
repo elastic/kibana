@@ -25,24 +25,27 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ImpactIssue, ImpactStatus } from '../../../../common/lib/workflow_dependents/types';
+import type { ShownStatus } from './shown_status';
+import type { ImpactIssue } from '../../../../common/lib/workflow_dependents/types';
 
 type StatusColor = 'danger' | 'warning' | 'subdued' | 'success';
 
-const STATUS_COLORS: Record<ImpactStatus, StatusColor> = {
+const STATUS_COLORS: Record<ShownStatus, StatusColor> = {
   breaking: 'danger',
   warning: 'warning',
   alreadyBroken: 'danger',
   unknown: 'subdued',
   safe: 'success',
+  turnedOff: 'subdued',
 };
 
-const STATUS_ICONS: Record<ImpactStatus, string> = {
+const STATUS_ICONS: Record<ShownStatus, string> = {
   breaking: 'errorFill',
   warning: 'warningFill',
   alreadyBroken: 'errorFill',
   unknown: 'question',
   safe: 'checkCircleFill',
+  turnedOff: 'minusInCircle',
 };
 
 export interface CardProblem {
@@ -62,7 +65,7 @@ export interface WorkflowLinkCardProps {
   name: string;
   href?: string;
   isTurnedOff?: boolean;
-  status: ImpactStatus;
+  status: ShownStatus;
   statusLabel: string;
   verdict: string;
   problems: readonly CardProblem[];
@@ -153,7 +156,7 @@ export const WorkflowLinkCard = React.forwardRef<HTMLDivElement, WorkflowLinkCar
                     <strong>{name}</strong>
                   </EuiHealth>
                 </EuiFlexItem>
-                {isTurnedOff && (
+                {isTurnedOff && status !== 'turnedOff' && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">
                       {i18n.translate('workflows.dependents.card.turnedOff', {

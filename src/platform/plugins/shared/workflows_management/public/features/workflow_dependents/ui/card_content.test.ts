@@ -163,7 +163,7 @@ describe('getCalledCardContent', () => {
       alert_id: { name: 'alert_id', type: 'string', required: true, hasDefault: false },
       limit: { name: 'limit', type: 'number', required: true, hasDefault: true },
     },
-    hasDeclaredInputs: true,
+    inputDefaults: { limit: 10 },
     rejectsUnknownInputs: false,
     outputs: {
       severity: { name: 'severity', required: false, hasDefault: false },

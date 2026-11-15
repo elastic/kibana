@@ -8,9 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ImpactIssue, ImpactStatus } from '../../../../common/lib/workflow_dependents/types';
+import type { ShownStatus } from './shown_status';
+import type { ImpactIssue } from '../../../../common/lib/workflow_dependents/types';
 
-export const getStatusLabel = (status: ImpactStatus): string => {
+export const getStatusLabel = (status: ShownStatus): string => {
   switch (status) {
     case 'breaking':
       return i18n.translate('workflows.dependents.status.breaking', {
@@ -30,11 +31,15 @@ export const getStatusLabel = (status: ImpactStatus): string => {
       });
     case 'safe':
       return i18n.translate('workflows.dependents.status.safe', { defaultMessage: 'Works' });
+    case 'turnedOff':
+      return i18n.translate('workflows.dependents.status.turnedOff', {
+        defaultMessage: 'Turned off',
+      });
   }
 };
 
 /** Short status for a workflow that the open workflow runs. */
-export const getCalledStatusLabel = (status: ImpactStatus): string => {
+export const getCalledStatusLabel = (status: ShownStatus): string => {
   switch (status) {
     case 'breaking':
     case 'alreadyBroken':
@@ -51,8 +56,19 @@ export const getCalledStatusLabel = (status: ImpactStatus): string => {
 };
 
 /** Explains a problem in one sentence. `childName` is the workflow being run. */
+// An input or output without a type accepts any value.
+const getAnyTypeLabel = (): string =>
+  i18n.translate('workflows.dependents.issue.anyType', { defaultMessage: 'any type' });
+
 export const getIssueMessage = (
-  { kind, severity, field, from = '?', to = '?', detail = '' }: ImpactIssue,
+  {
+    kind,
+    severity,
+    field,
+    from = getAnyTypeLabel(),
+    to = getAnyTypeLabel(),
+    detail = '',
+  }: ImpactIssue,
   childName: string
 ): string => {
   // Output reads with a `| default:` filter keep working with the default value.

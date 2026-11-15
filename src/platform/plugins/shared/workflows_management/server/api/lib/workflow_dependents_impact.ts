@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEqual } from 'lodash';
 import { parseDocument } from 'yaml';
-import { InvalidYamlSyntaxError, isRecord } from '@kbn/workflows-yaml';
-import { getFinalEndStep } from '../../../common/lib/get_returned_output_names';
+import { InvalidYamlSyntaxError } from '@kbn/workflows-yaml';
 import {
   analyzeCalledWorkflows,
   analyzeDependents,
@@ -19,24 +17,12 @@ import {
   findRunFailure,
   MAX_INDIRECT_DEPTH,
 } from '../../../common/lib/workflow_dependents/analyze_dependents';
-import { isBreakingRun } from '../../../common/lib/workflow_dependents/api';
+import type { WorkflowDependentsImpactResponse } from '../../../common/lib/workflow_dependents/api';
+import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
 import type {
-  WorkflowDependentsImpactResponse,
-  WorkflowSaveDependentsImpact,
-} from '../../../common/lib/workflow_dependents/api';
-import {
-  collectWorkflowCallSites,
-  getCalledWorkflowIds,
-} from '../../../common/lib/workflow_dependents/find_call_sites';
-import type {
-  DependentsAnalysis,
   RemovalImpact,
   WorkflowLookupItem,
 } from '../../../common/lib/workflow_dependents/types';
-import {
-  diffWorkflowContracts,
-  extractWorkflowContract,
-} from '../../../common/lib/workflow_dependents/workflow_contract';
 
 export interface WorkflowDependentsLookup {
   /** Workflows whose indexed `calledWorkflowIds` contain any of `workflowIds`. */
@@ -103,6 +89,30 @@ export const collectCalledWorkflows = async (
   return [...found.values()];
 };
 
+// Reads each workflow once, however many walks ask for it.
+const withSharedWorkflowReads = (lookup: WorkflowDependentsLookup): WorkflowDependentsLookup => {
+  const reads = new Map<string, Promise<WorkflowLookupItem | undefined>>();
+  return {
+    ...lookup,
+    getWorkflowsByIds: async (ids) => {
+      const unread = ids.filter((id) => !reads.has(id));
+      if (unread.length > 0) {
+        const byId = lookup
+          .getWorkflowsByIds(unread)
+          .then((workflows) => new Map(workflows.map((workflow) => [workflow.id, workflow])));
+        unread.forEach((id) =>
+          reads.set(
+            id,
+            byId.then((workflows) => workflows.get(id))
+          )
+        );
+      }
+      const workflows = await Promise.all(ids.map((id) => reads.get(id)));
+      return workflows.filter((workflow): workflow is WorkflowLookupItem => workflow !== undefined);
+    },
+  };
+};
+
 /** Grades the workflows that run a workflow, and the ones it runs, against its draft. */
 export const analyzeWorkflowDependentsImpact = async ({
   workflowId,
@@ -121,10 +131,11 @@ export const analyzeWorkflowDependentsImpact = async ({
   managed?: boolean;
   lookup: WorkflowDependentsLookup;
 }): Promise<WorkflowDependentsImpactResponse> => {
+  const sharedLookup = withSharedWorkflowReads(lookup);
   const [callers, calledWorkflows, calledBySaved] = await Promise.all([
     collectCallers([workflowId], lookup),
-    collectCalledWorkflows(workflowId, draftDefinition, lookup),
-    collectCalledWorkflows(workflowId, savedDefinition, lookup),
+    collectCalledWorkflows(workflowId, draftDefinition, sharedLookup),
+    collectCalledWorkflows(workflowId, savedDefinition, sharedLookup),
   ]);
   const getRunFailure = (definition: unknown, called: readonly WorkflowLookupItem[]) =>
     findRunFailure(
@@ -157,29 +168,3 @@ export const analyzeWorkflowRemovalImpact = async (
   lookup: WorkflowDependentsLookup
 ): Promise<RemovalImpact> =>
   analyzeRemovalImpact(workflowIds, await collectCallers(workflowIds, lookup));
-
-// What decides whether every run fails, apart from the inputs and outputs.
-const getRunDependencies = (definition: unknown) => ({
-  callSites: collectWorkflowCallSites(definition),
-  consts: isRecord(definition) ? definition.consts : undefined,
-  finalEndStep: getFinalEndStep(definition),
-});
-
-/**
- * True when going from `before` to `after` changes anything that callers rely on: the inputs and
- * outputs, or how it runs other workflows and returns its outputs, which can make every run fail.
- */
-export const hasCallerFacingChanges = (before: unknown, after: unknown): boolean =>
-  diffWorkflowContracts(extractWorkflowContract(before), extractWorkflowContract(after)).length >
-    0 || !isEqual(getRunDependencies(before), getRunDependencies(after));
-
-/** The callers a save breaks, as returned by the update workflow route. */
-export const summarizeSaveImpact = ({
-  dependents,
-  summary,
-}: DependentsAnalysis): WorkflowSaveDependentsImpact => ({
-  breaking: dependents
-    .filter(isBreakingRun)
-    .map(({ workflowId, workflowName }) => ({ id: workflowId, name: workflowName })),
-  indirectBreaking: summary.indirectBreaking,
-});

@@ -83,7 +83,7 @@ const enrich = workflow('enrich', [
 ]);
 
 const fanout = workflow('fanout', [
-  callStep('fire', { inputs: '{{ inputs.payload }}' }, 'workflow.executeAsync'),
+  callStep('fire', { inputs: '${{ inputs.payload }}' }, 'workflow.executeAsync'),
 ]);
 
 const alreadyBroken = workflow('already-broken', [callStep('ctx', { inputs: {} })]);
@@ -146,6 +146,42 @@ describe('collectWorkflowCallSites', () => {
       ['b', 'workflow.execute'],
       ['c', 'workflow.executeAsync'],
     ]);
+  });
+
+  it('knows which calls might not run, as the engine decides', () => {
+    const conditional = (steps: unknown[]) =>
+      Object.fromEntries(
+        collectWorkflowCallSites({ steps }).map(({ stepName, isConditional }) => [
+          stepName,
+          isConditional,
+        ])
+      );
+
+    expect(
+      conditional([
+        { ...callStep('empty-if', {}), if: '' },
+        { name: 'loop', type: 'while', condition: 'false', steps: [callStep('first-pass', {})] },
+        { name: 'm', type: 'merge', steps: [callStep('in-merge', {})] },
+        { name: 'early', type: 'workflow.output', if: 'inputs.skip : true', with: {} },
+        callStep('after-early-end', {}),
+      ])
+    ).toEqual({
+      'empty-if': false,
+      'first-pass': false,
+      'in-merge': true,
+      'after-early-end': true,
+    });
+  });
+
+  it('skips the malformed parts of a draft being typed', () => {
+    expect(
+      collectWorkflowCallSites({
+        steps: [
+          { name: 'half', type: 'switch' },
+          { name: 'sw', type: 'switch', cases: [null, { steps: [callStep('b', {})] }] },
+        ],
+      }).map(({ stepName }) => stepName)
+    ).toEqual(['b']);
   });
 
   it('knows which calls an on-failure continue covers', () => {
@@ -299,6 +335,22 @@ describe('findOutputUsages', () => {
         .map(({ field }) => field)
         .sort()
     ).toEqual(['', 'score', 'severity']);
+  });
+
+  it('finds reads in on-failure continue conditions', () => {
+    const definition = {
+      steps: [
+        { ...callStep('ctx', {}) },
+        {
+          name: 'next',
+          type: 'console',
+          with: { message: 'hi' },
+          'on-failure': { continue: 'steps.ctx.output.severity : "high"' },
+        },
+      ],
+    };
+
+    expect(findOutputUsages(definition, 'ctx').map(({ field }) => field)).toEqual(['severity']);
   });
 
   it('treats a read as covered only when every reference has a default filter', () => {
@@ -1097,6 +1149,84 @@ describe('analyzeCalledWorkflows', () => {
     expect(called.issues).toEqual([
       expect.objectContaining({ kind: 'missingRequiredInput', field: 'alert_id' }),
       expect.objectContaining({ kind: 'removedOutput', field: 'summary' }),
+    ]);
+  });
+
+  it('names the first failing step a run reaches', () => {
+    const disabled = { ...childItem, id: 'disabled', name: 'disabled', enabled: false };
+    const failure = findRunFailure(
+      workflow('parent', [
+        callStep('s1', { inputs: { alert_id: 'a' } }),
+        callStep('s2', {}, undefined, 'disabled'),
+        callStep('s3', { inputs: {} }),
+      ]),
+      [childItem, disabled]
+    );
+
+    expect(failure).toMatchObject({ stepName: 's2', issue: { kind: 'childDisabled' } });
+  });
+
+  it('fills in defaults for null values, as runs do', () => {
+    const [called] = analyzeParent([callStep('ctx', { inputs: { alert_id: null, depth: null } })]);
+
+    expect(called.issues).toEqual([
+      expect.objectContaining({ kind: 'inputTypeMismatch', field: 'alert_id', from: 'null' }),
+    ]);
+  });
+
+  it('checks an inputs block that is not an object as the inputs it sends', () => {
+    const issuesFor = (inputs: unknown) =>
+      kinds(analyzeParent([callStep('ctx', { inputs })])[0].issues);
+
+    expect(issuesFor('{{ inputs.payload }}')).toEqual(['missingRequiredInput:breaking']);
+    expect(issuesFor(['abc'])).toEqual(['unknownInput:warning', 'missingRequiredInput:breaking']);
+    expect(issuesFor('${{ inputs.payload }}')).toEqual([]);
+  });
+
+  it('treats a reference to a constant that does not exist as an omitted input', () => {
+    const [called] = analyzeCalledWorkflows({
+      workflowId: 'parent',
+      definition: {
+        name: 'Parent',
+        consts: { known: 'abc' },
+        steps: [callStep('ctx', { inputs: { alert_id: '${{ consts.unknown }}' } })],
+      },
+      workflows: [childItem],
+    });
+
+    expect(kinds(called.issues)).toEqual(['missingRequiredInput:breaking']);
+  });
+
+  it('flags a text template default on an input that does not accept text', () => {
+    const child = {
+      ...childItem,
+      definition: makeChild({
+        inputs: [{ name: 'depth', type: 'number', default: '{{ consts.depth }}' }],
+      }),
+    };
+
+    const [called] = analyzeParent([callStep('ctx', { inputs: {} })], [child]);
+
+    expect(called.issues).toEqual([
+      expect.objectContaining({ kind: 'defaultValueRejected', field: 'depth' }),
+    ]);
+  });
+
+  it('checks how many items a list sends even when the items are templates', () => {
+    const child = {
+      ...childItem,
+      definition: makeChild({
+        inputs: [{ name: 'ids', type: 'array', items: { type: 'string' }, minItems: 2 }],
+      }),
+    };
+
+    const [called] = analyzeParent(
+      [callStep('ctx', { inputs: { ids: ['{{ event.id }}'] } })],
+      [child]
+    );
+
+    expect(called.issues).toEqual([
+      expect.objectContaining({ kind: 'inputValueRejected', field: 'ids' }),
     ]);
   });
 

@@ -47,7 +47,8 @@ const renderFlyout = (props: Partial<WorkflowDependentsFlyoutProps> = {}) =>
         hasUnsavedChanges
         isLoading={false}
         isError={false}
-        initialTab="usedBy"
+        tab="usedBy"
+        onTabChange={jest.fn()}
         onRefresh={jest.fn()}
         onClose={jest.fn()}
         {...props}
@@ -108,7 +109,8 @@ describe('WorkflowDependentsFlyout', () => {
           hasUnsavedChanges
           isLoading={false}
           isError={false}
-          initialTab="usedBy"
+          tab="usedBy"
+          onTabChange={jest.fn()}
           onRefresh={jest.fn()}
           onClose={jest.fn()}
         />

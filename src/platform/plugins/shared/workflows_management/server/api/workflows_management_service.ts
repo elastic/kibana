@@ -37,6 +37,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -414,7 +415,12 @@ export class WorkflowsService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean; accessControlFilter?: estypes.QueryDslQueryContainer }
+    options?: {
+      includeDeleted?: boolean;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      managedFilter?: ManagedFilter;
+      allowPartialResults?: boolean;
+    }
   ): Promise<WorkflowPartialDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsSourceByIds(ids, spaceId, source, options);
@@ -532,12 +538,18 @@ export class WorkflowsService {
     return this.searchService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
   }
 
+  public async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    await this.ensureInitialized();
+    await this.crudService.indexCalledWorkflowIds(ids);
+  }
+
   public async findWorkflowsCalling(
     workflowIds: string[],
     spaceId: string,
     options: {
       accessControlFilter?: estypes.QueryDslQueryContainer;
       includeUnindexed?: boolean;
+      managedFilter?: ManagedFilter;
     }
   ): Promise<WorkflowLookupItem[]> {
     await this.ensureInitialized();

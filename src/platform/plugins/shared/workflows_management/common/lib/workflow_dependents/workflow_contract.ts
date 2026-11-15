@@ -22,13 +22,8 @@ import { collectWorkflowOutputBlocks } from './find_call_sites';
 import type { ContractChange, ContractField, WorkflowContract } from './types';
 import { alwaysReturnsWorkflowOutput, getReturnedOutputNames } from '../get_returned_output_names';
 
-const describeType = (property: JSONSchema7, schema: JsonModelSchemaType): string | undefined => {
-  const resolved = property.$ref ? resolveRef(property.$ref, schema) ?? property : property;
-  if (Array.isArray(resolved.type)) {
-    return resolved.type.join(' | ');
-  }
-  return resolved.type;
-};
+const describeType = (property: JSONSchema7): string | undefined =>
+  Array.isArray(property.type) ? property.type.join(' | ') : property.type;
 
 /** The values a run fills in for omitted inputs, including `$ref`, nested and empty-array defaults. */
 export const getRuntimeInputDefaults = (
@@ -45,10 +40,11 @@ const toFields = (
   }
   const required = new Set(schema.required ?? []);
   for (const [name, rawProperty] of Object.entries(schema.properties)) {
-    const property = (isRecord(rawProperty) ? rawProperty : {}) as JSONSchema7;
+    const declared = (isRecord(rawProperty) ? rawProperty : {}) as JSONSchema7;
+    const property = declared.$ref ? resolveRef(declared.$ref, schema) ?? declared : declared;
     fields[name] = {
       name,
-      type: describeType(property, schema),
+      type: describeType(property),
       required: required.has(name),
       hasDefault: defaults ? defaults[name] !== undefined : property.default !== undefined,
       enumValues: property.enum,
@@ -80,9 +76,16 @@ const getInputsSchema = (definition: unknown): JsonModelSchemaType | undefined =
   } as Partial<WorkflowYaml>);
 };
 
+/** Extracts the inputs a workflow declares, without the rest of its contract. */
+export const extractInputFields = (definition: unknown): Record<string, ContractField> => {
+  const inputsSchema = getInputsSchema(definition);
+  return toFields(inputsSchema, getRuntimeInputDefaults(inputsSchema));
+};
+
 /** Extracts the input/output contract a workflow exposes to the workflows that call it. */
 export const extractWorkflowContract = (definition: unknown): WorkflowContract => {
   const inputsSchema = getInputsSchema(definition);
+  const inputDefaults = getRuntimeInputDefaults(inputsSchema);
   const declaredOutputs = normalizeFieldsToJsonSchema(
     isRecord(definition) ? definition.outputs : undefined
   );
@@ -93,8 +96,8 @@ export const extractWorkflowContract = (definition: unknown): WorkflowContract =
     // A workflow saved with errors is stored without a definition (and turned off).
     valid: isRecord(definition),
     enabled: isRecord(definition) && definition.enabled !== false,
-    inputs: toFields(inputsSchema, getRuntimeInputDefaults(inputsSchema)),
-    hasDeclaredInputs: Boolean(inputsSchema?.properties),
+    inputs: toFields(inputsSchema, inputDefaults),
+    inputDefaults,
     inputsSchema: inputsSchema?.properties ? inputsSchema : undefined,
     rejectsUnknownInputs: inputsSchema?.additionalProperties === false,
     alwaysReturnsOutput: alwaysReturnsWorkflowOutput(definition),
@@ -229,7 +232,8 @@ const diffInputs = (saved: WorkflowContract, draft: WorkflowContract): ContractC
       changes.push({
         kind: 'inputRemoved',
         field: name,
-        // Undeclared inputs are dropped, unless the schema rejects them.
+        // Callers that still send it are no longer read, and fail only when the schema rejects
+        // undeclared inputs.
         severity: draft.rejectsUnknownInputs ? 'breaking' : 'warning',
       });
     }

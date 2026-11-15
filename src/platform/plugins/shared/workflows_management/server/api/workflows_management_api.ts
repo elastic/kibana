@@ -83,9 +83,7 @@ import type { WorkflowDependentsLookup } from './lib/workflow_dependents_impact'
 import {
   analyzeWorkflowDependentsImpact,
   analyzeWorkflowRemovalImpact,
-  hasCallerFacingChanges,
   parseDraftDefinition,
-  summarizeSaveImpact,
 } from './lib/workflow_dependents_impact';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -109,10 +107,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
-import type {
-  WorkflowDependentsImpactResponse,
-  WorkflowSaveDependentsImpact,
-} from '../../common/lib/workflow_dependents/api';
+import type { WorkflowDependentsImpactResponse } from '../../common/lib/workflow_dependents/api';
 import type { RemovalImpact } from '../../common/lib/workflow_dependents/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
 import {
@@ -359,6 +354,7 @@ export class WorkflowsManagementApi {
   private smlLogger: Logger | null = null;
   private readonly pendingSmlUpdates = new Map<string, Promise<void>>();
   private audit: WorkflowManagementAuditLog | null = null;
+  private isIndexingCalledWorkflowIds = false;
 
   constructor(
     private readonly workflowsService: WorkflowsService,
@@ -657,7 +653,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest,
     options?: { allowManagedWorkflowMutation?: boolean }
-  ): Promise<UpdatedWorkflowResponseDto & { dependentsImpact?: WorkflowSaveDependentsImpact }> {
+  ): Promise<UpdatedWorkflowResponseDto> {
     await this.assertWorkflowAccess(id, spaceId, 'edit', request);
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
@@ -673,11 +669,7 @@ export class WorkflowsManagementApi {
     }
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
     this.notifySml(id, spaceId, 'update', request);
-    if (workflow.yaml === undefined && workflow.enabled === undefined) {
-      return result;
-    }
-    const dependentsImpact = await this.getSaveDependentsImpact(originalWorkflow, spaceId, request);
-    return dependentsImpact ? { ...result, dependentsImpact } : result;
+    return result;
   }
 
   /** Grades the workflows that run a workflow, and the ones it runs, against draft YAML. */
@@ -685,10 +677,14 @@ export class WorkflowsManagementApi {
     id: string,
     spaceId: string,
     request: KibanaRequest,
-    yaml?: string
+    yaml: string | undefined,
+    { allowManagedWorkflowRead = false }: { allowManagedWorkflowRead?: boolean } = {}
   ): Promise<WorkflowDependentsImpactResponse> {
     const workflow = await this.getWorkflow(id, spaceId, request);
     if (!workflow) throw new WorkflowNotFoundError(id);
+    if (workflow.managed === true && !allowManagedWorkflowRead) {
+      throw new ManagedWorkflowReadForbiddenError();
+    }
     const savedDefinition = withEnabledState(workflow);
     const draft =
       yaml === undefined
@@ -700,7 +696,7 @@ export class WorkflowsManagementApi {
       draftDefinition: draft?.definition ?? savedDefinition,
       isDraftValid: draft?.isValid ?? true,
       managed: workflow.managed === true,
-      lookup: await this.getDependentsLookup(spaceId, request),
+      lookup: await this.getDependentsLookup(spaceId, request, allowManagedWorkflowRead),
     });
   }
 
@@ -726,69 +722,73 @@ export class WorkflowsManagementApi {
   public async getWorkflowRemovalImpact(
     ids: string[],
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    { allowManagedWorkflowRead = false }: { allowManagedWorkflowRead?: boolean } = {}
   ): Promise<RemovalImpact> {
-    return analyzeWorkflowRemovalImpact(ids, await this.getDependentsLookup(spaceId, request));
+    return analyzeWorkflowRemovalImpact(
+      ids,
+      await this.getDependentsLookup(spaceId, request, allowManagedWorkflowRead)
+    );
   }
 
+  // Workflows saved before saving stored the workflows they run are read and walked by every
+  // lookup until this stores it.
+  private indexCalledWorkflowIdsInBackground(ids: string[]): void {
+    if (ids.length === 0 || this.isIndexingCalledWorkflowIds) {
+      return;
+    }
+    this.isIndexingCalledWorkflowIds = true;
+    this.workflowsService
+      .indexCalledWorkflowIds(ids)
+      .catch((error) => {
+        this.logger.warn(`Failed to store the workflows that workflows run: ${error}`);
+      })
+      .finally(() => {
+        this.isIndexingCalledWorkflowIds = false;
+      });
+  }
+
+  // Workflows the user can't read, including managed ones without the managed read privilege,
+  // are left out of every lookup.
   private async getDependentsLookup(
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    allowManagedWorkflowRead: boolean
   ): Promise<WorkflowDependentsLookup> {
     const access = await this.workflowsService.getAccessControl();
     const accessControlFilter = await access.readFilter(request);
+    const managedFilter = allowManagedWorkflowRead ? 'all' : 'unmanaged';
     return {
       findIndexedCallers: (ids) =>
-        this.workflowsService.findWorkflowsCalling(ids, spaceId, { accessControlFilter }),
-      findUnindexedWorkflows: () =>
-        this.workflowsService.findWorkflowsCalling([], spaceId, {
+        this.workflowsService.findWorkflowsCalling(ids, spaceId, {
           accessControlFilter,
-          includeUnindexed: true,
+          managedFilter,
         }),
+      findUnindexedWorkflows: async () => {
+        const workflows = await this.workflowsService.findWorkflowsCalling([], spaceId, {
+          accessControlFilter,
+          managedFilter,
+          includeUnindexed: true,
+        });
+        this.indexCalledWorkflowIdsInBackground(workflows.map(({ id }) => id));
+        return workflows;
+      },
       getWorkflowsByIds: async (ids) => {
         const workflows = await this.workflowsService.getWorkflowsSourceByIds(
           ids,
           spaceId,
           ['name', 'enabled', 'definition', 'managed'],
-          { accessControlFilter }
+          { accessControlFilter, managedFilter, allowPartialResults: false }
         );
         return workflows.map((workflow) => ({
           id: workflow.id,
           name: workflow.name ?? workflow.id,
-          enabled: workflow.enabled ?? true,
+          enabled: workflow.enabled === true,
           definition: withEnabledState(workflow),
           managed: workflow.managed === true,
         }));
       },
     };
-  }
-
-  /** Lists the callers a completed save broke; never fails the save itself. */
-  private async getSaveDependentsImpact(
-    originalWorkflow: WorkflowDetailDto,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<WorkflowSaveDependentsImpact | undefined> {
-    try {
-      const updatedWorkflow = await this.workflowsService.getWorkflow(originalWorkflow.id, spaceId);
-      if (!updatedWorkflow) return undefined;
-      const savedDefinition = withEnabledState(originalWorkflow);
-      const draftDefinition = withEnabledState(updatedWorkflow);
-      if (!hasCallerFacingChanges(savedDefinition, draftDefinition)) return undefined;
-      const { analysis } = await analyzeWorkflowDependentsImpact({
-        workflowId: originalWorkflow.id,
-        savedDefinition,
-        draftDefinition,
-        managed: originalWorkflow.managed === true,
-        lookup: await this.getDependentsLookup(spaceId, request),
-      });
-      return summarizeSaveImpact(analysis);
-    } catch (error) {
-      this.logger.warn(
-        `Failed to analyze the workflows that run ${originalWorkflow.id}: ${error.message}`
-      );
-      return undefined;
-    }
   }
 
   public async restoreWorkflowVersion(

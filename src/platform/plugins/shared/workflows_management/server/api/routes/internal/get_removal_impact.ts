@@ -15,16 +15,20 @@ import {
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
+import {
+  canReadManagedWorkflows,
+  hasWorkflowReadPrivilege,
+  WORKFLOW_READ_WITH_MANAGED_SECURITY,
+} from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetRemovalImpactRoute(deps: RouteDependencies) {
-  const { router, api, spaces } = deps;
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: WORKFLOW_REMOVAL_IMPACT_ROUTE,
       access: 'internal',
-      security: WORKFLOW_READ_SECURITY,
+      security: WORKFLOW_READ_WITH_MANAGED_SECURITY,
       summary: 'List workflows that fail when workflows are turned off or deleted',
       description:
         'List the enabled workflows that run any of the given workflows, and so fail once those stop running.',
@@ -45,10 +49,20 @@ export function registerGetRemovalImpactRoute(deps: RouteDependencies) {
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
+          if (!hasWorkflowReadPrivilege(request)) {
+            return response.forbidden();
+          }
           const spaceId = spaces.getSpaceId(request);
-          const body = await api.getWorkflowRemovalImpact(request.body.ids, spaceId, request);
+          const body = await api.getWorkflowRemovalImpact(request.body.ids, spaceId, request, {
+            allowManagedWorkflowRead: canReadManagedWorkflows(request),
+          });
+          audit.logWorkflowMget(request, {
+            requestedCount: request.body.ids.length,
+            returnedCount: body.callers.length,
+          });
           return response.ok({ body });
         } catch (error) {
+          audit.logWorkflowMget(request, { error });
           return handleRouteError(response, error);
         }
       })
