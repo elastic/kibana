@@ -238,7 +238,11 @@ const decideStatuses = ({
     const continuesUnknownEvent =
       latest === undefined && input.event_id !== undefined && outcome !== 'breached';
     if (decision.write && !continuesUnknownEvent) {
-      stage.kept.push({ ...candidate, status: decision.status });
+      stage.kept.push({
+        ...candidate,
+        status: decision.status,
+        change: StatusChange.assessed(outcome),
+      });
       return;
     }
     if (latest === undefined && input.event_id !== undefined) {
@@ -404,13 +408,15 @@ const writeVersions = ({
     pendingWrites.map(({ candidate, document }) =>
       writeLimit(async (): Promise<WriteOutcome> => {
         try {
+          const origin = { actor: 'agent_tool' as const, change: candidate.change };
           if (candidate.latest === undefined) {
-            const { groupHash } = await eventSearchClient.createEvent({ event: document });
+            const { groupHash } = await eventSearchClient.createEvent({ event: document, origin });
             return { created: true, groupHash };
           }
           const written = await eventSearchClient.updateEvent({
             event: document,
             prior: candidate.latest,
+            origin,
           });
           return written.updated
             ? { created: false }

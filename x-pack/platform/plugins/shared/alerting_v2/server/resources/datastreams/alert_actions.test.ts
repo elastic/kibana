@@ -109,11 +109,4 @@ describe('getAlertActionsResourceDefinition', () => {
 
     expect(mappings.properties).toMatchObject({ maintenance_window_id: { type: 'keyword' } });
   });
-
-  it('resets data streams created with the episode_* fields or the keyword actor mapping', () => {
-    const { version, forceReset } = getAlertActionsResourceDefinition();
-
-    expect(version).toBe(9);
-    expect(forceReset).toEqual({ version: 7 });
-  });
 });

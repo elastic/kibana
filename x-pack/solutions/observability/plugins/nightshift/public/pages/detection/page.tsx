@@ -315,7 +315,7 @@ export const DetectionPage = ({
                       min-height: 0;
                     `}
                   >
-                    <EuiTabs size="s">
+                    <EuiTabs size="m">
                       {getVisibleDetectionTabs(isDeveloperMode).map((id) => (
                         <EuiTab
                           key={id}

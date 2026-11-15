@@ -2,6 +2,23 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Local development
+
+To run investigations on a local Kibana against the ORCA-bench telemetry cluster, with the shared
+eval sandbox, start Elasticsearch with EIS (`pnpm es snapshot --eis`) and Kibana (`pnpm start`),
+then run:
+
+```bash
+node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js
+```
+
+It needs only dev Vault access. It writes a managed block to `config/kibana.dev.yml`, binds the
+default space to the Nightshift service accounts, saves the ORCA connector on the investigator, and
+gives the space the ORCA evals' source code context with the `github.com` egress it needs.
+`--remove` undoes it. See the
+[`nightshift-local-dev` skill](.agents/skills/nightshift-local-dev/SKILL.md) for
+what it changes, running ORCA questions, troubleshooting and rotating the shared credential.
+
 ## Automation instructions
 
 After choosing a trigger, its panel shows an instructions field limited to 5,000 characters.
@@ -101,6 +118,27 @@ separate guarded investigation step. Alert publication opt-in and alert snapshot
 separate work. Existing saved schedules activate on their next valid save or enable action, with no
 automatic workflow rewrite at deployment.
 
+## Alert ingress telemetry
+
+The `nightshift-alert-entered-pipeline` EBT event is emitted when a new externally ingested
+Alerting v2 episode or an Elastic-configured Alerting v2 rule episode enters Nightshift. It contains
+only `alert_source`, the opaque `fingerprint`, `group_hash`, `space_id`, `source_kind`, and
+`sampling_probability`; it never includes alert titles, messages, tags, or customer alert data.
+`alert_source` is `internal` for Elastic-configured rules and otherwise the sender-provided
+integration identifier. Because an external writer may also send `internal`, `source_kind`
+distinguishes rule alerts from external alerts. Significant Events are excluded because they have
+separate ingress telemetry.
+
+`fingerprint` identifies the alert series across telemetry events and is
+`sha256(space_id:source:rule_id:group_hash)`, with an empty `rule_id` for external alerts. Rule
+alerts need the rule id because their `group_hash` is only unique within a rule. `group_hash` is
+the Alerting v2 series key as written, so the event can be joined back to `.rule-events`. Later
+events about the same alert must derive `fingerprint` with the exported `toAlertFingerprint`.
+
+Volume is bounded with deterministic 10% sampling by fingerprint. Every episode in the same alert
+series therefore makes the same sampling decision, and consumers can use `sampling_probability` to
+weight sampled counts.
+
 ## Requirements
 
 Nightshift investigations are being moved onto the shared `agenticInvestigations` plugin (an investigation is an Agent Builder conversation) and its proposed actions onto the `proposals` plugin. Both are optional dependencies and disabled by default:
@@ -199,7 +237,16 @@ An automation's workflow runs as the space's automations account (`settings.run_
 
 The workflows plugin requires `manage_security` for every create, update and delete of a workflow bound to a service account. Creating, changing (including enabling or disabling) and deleting automations therefore requires `manage_security` in addition to Nightshift manage, and the routes refuse other callers before writing anything. The Automations page shows the edit actions disabled for them, with a callout that says why. Creating or changing an automation also requires the space to be set up. `_enable` binds automations that already exist. When service accounts are off, automations keep running as their authors.
 
-### Agent Builder hooks
+#
+### Deleted automation workflows
+
+Generated automation workflows remain editable during TP. If one is deleted, open the automation
+flyout and choose **Repair** to recreate it from the saved configuration. Repair leaves the automation
+paused; enable it explicitly afterward. Previous runs no longer appear in its run history. Pause and
+Delete remain available without repair. This is a temporary workaround pending workflow lifecycle
+support; it does not preserve historical workflow associations.
+
+## Agent Builder hooks
 
 Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. The investigation agent and the decision-tree reinforcement agent therefore always name the space's bound hook entry points, so hooks run as the agent account:
 
@@ -231,7 +278,7 @@ If none match, the start claims the subjects for a new investigation id. That wa
 
 #### Daily investigation limits
 
-The global investigation quota is registered by Significant Events and set on the Nightshift settings page. It has three deployment-wide limits per UTC day, each of which can be turned off:
+The investigation quota is kept by this plugin in two hidden saved objects (the settings and a daily ledger) and set on the Nightshift settings page, through `GET` and `PUT /internal/nightshift/investigation_quotas`. Changing the limits takes the manage and configure privileges in all spaces. It has three deployment-wide limits per UTC day. A limit of `null` is unlimited, and one switch turns enforcement of all three off and on without losing their values (runs are still counted while it is off):
 
 - automatic investigations (`trigger_type: automatic`, all automations combined), default 5;
 - manual investigations (`trigger_type: manual`: the start API behind the homepage and the CLI, and Slack mentions), default 5;

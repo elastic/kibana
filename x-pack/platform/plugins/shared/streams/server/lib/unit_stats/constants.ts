@@ -15,7 +15,7 @@ import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
  */
 
 /** The stats queries and the existence probe both use the exact name. */
-export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
+export { UNIT_METRICS_STREAM } from '../../../common/constants';
 
 export const UNIT_STATS_DEFAULT_WINDOW_MS = 15 * 60 * 1000;
 
@@ -30,6 +30,11 @@ export const CONFIG_HASH_FIELD = 'resource.attributes.streams.config.hash';
 
 export const DIRECTION_FIELD = 'attributes.direction';
 export const OUTCOME_FIELD = 'attributes.outcome';
+/**
+ * The outcome of a document that an Elasticsearch destination redirected to the failure store. The
+ * exporter reports such a document twice, here and under its `failed_*` outcome.
+ */
+export const FAILURE_STORE_OUTCOME = 'failure_store';
 
 export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';

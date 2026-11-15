@@ -6,7 +6,16 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
-import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  Severity,
+  SignificantEventCloseReason,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
+import type {
+  StatusChange,
+  StatusOutcome,
+} from '../../significant_events/events/lifecycle/lifecycle_controller';
+import type { SIGNIFICANT_EVENT_ENTITY_TYPE } from './constants';
 
 interface WorkflowExecutionTelemetryProps {
   workflow_execution_id: string;
@@ -115,25 +124,52 @@ interface AgentToolEventStatusUpdateProps
   error_message?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps
-  extends ExistingAlertIdentityProps,
-    OptionalWorkflowExecutionTelemetryProps {
-  success: boolean;
-  /**
-   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
-   * events; new events populate `event_id` instead.
-   */
-  event_uuid?: string;
-  /** Stable event_id slug. Optional for rolling-deploy compatibility with pre-#1517 nodes. */
-  event_id?: string;
-  investigation_id: string;
-  error_message?: string;
+/** The entry point that wrote the version, not who was behind it. */
+type SignificantEventActor = 'agent_tool' | 'rest_api' | 'stale_event_cleanup';
+
+interface EventStatusChangedProps extends ExistingAlertIdentityProps {
+  entity_type: typeof SIGNIFICANT_EVENT_ENTITY_TYPE;
+  previous_status?: SignificantEventStatus;
+  status: SignificantEventStatus;
+  actor: SignificantEventActor;
+  change_kind?: StatusChange['kind'];
+  assessment_outcome?: StatusOutcome;
+  close_reason?: SignificantEventCloseReason;
+  severity: Severity;
+  confidence: number;
+  signal_count: number;
+  confirmed_signal_count: number;
+  source_ids: string[];
+  workflow_execution_id?: string;
 }
 
 interface DiscoveryTriggeredProps extends WorkflowExecutionTelemetryProps {
   /** @deprecated Use `workflow_execution_id`. */
   execution_id: string;
   space_id: string;
+}
+
+interface DiscoveryRunIdentityProps
+  extends WorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
+  space_id: string;
+  alert_source: string;
+}
+
+type DiscoveryStartedProps = DiscoveryRunIdentityProps;
+
+interface DiscoveryCompletedProps extends DiscoveryRunIdentityProps {
+  outcome: 'completed' | 'failed' | 'timed_out';
+  duration_ms?: number;
+  has_work?: boolean;
+  budget_denied?: boolean;
+  processed_count?: number;
+  skipped_count?: number;
+  held_back_count?: number;
+  needs_agent_count?: number;
+  written_rule_count?: number;
+  classifier_failed?: boolean;
+  error_message?: string;
 }
 
 interface DetectionScanProps extends OptionalWorkflowExecutionTelemetryProps {
@@ -207,12 +243,15 @@ export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,
-  type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
   type DetectionScanProps,
+  type DiscoveryCompletedProps,
+  type DiscoveryStartedProps,
   type DiscoveryTriggeredProps,
+  type EventStatusChangedProps,
+  type SignificantEventActor,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,

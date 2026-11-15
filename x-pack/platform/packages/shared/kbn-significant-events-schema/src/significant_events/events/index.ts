@@ -11,11 +11,7 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import { significantEventBaseSchema } from '../common_schemas';
-import {
-  MAX_TEXT_LENGTH,
-  ASSESSMENT_NOTE_ROLE_RULE,
-  NO_RAW_SENSITIVE_VALUES_RULE,
-} from '../constants';
+import { ASSESSMENT_NOTE_ROLE_RULE, NO_RAW_SENSITIVE_VALUES_RULE } from '../constants';
 
 /** Alerting v2 `deactivate` accepts a reason of 1 to 1024 characters. */
 export const MAX_DEACTIVATION_REASON_LENGTH = 1024;
@@ -68,6 +64,16 @@ export const significantEventManualStatusSchema = z
     `"${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure is confirmed or remains plausibly unverified; "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active (record the rationale in "assessment_note").`
   );
 
+export const significantEventCloseReasonSchema = lazySchema(() =>
+  z
+    .enum(['resolved', 'dismissed'])
+    .describe(
+      `Why the event is set to "${ALERT_EPISODE_STATUS.INACTIVE}": "resolved" = it was a real problem that is over; "dismissed" = it was noise or not worth surfacing. Ignored for "${ALERT_EPISODE_STATUS.ACTIVE}".`
+    )
+);
+
+export type SignificantEventCloseReason = z.infer<typeof significantEventCloseReasonSchema>;
+
 /**
  * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a
  * prior event for the same issue so successive write cycles dedup against it — a recovering event
@@ -86,7 +92,7 @@ export const significantEventSchema = lazySchema(() =>
     status: significantEventStatusSchema,
     assessment_note: z
       .string()
-      .max(MAX_TEXT_LENGTH)
+      .max(MAX_DEACTIVATION_REASON_LENGTH)
       .optional()
       .describe(
         dedent`
