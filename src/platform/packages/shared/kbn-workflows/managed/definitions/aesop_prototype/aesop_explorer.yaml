@@ -16,7 +16,7 @@ tags:
   - aesop_prototype
   - scheduled
 settings:
-  timeout: '45m'
+  timeout: '70m'
   concurrency:
     key: 'aesop-explorer-__MODE__'
     strategy: drop
@@ -84,7 +84,7 @@ steps:
     max-iterations:
       limit: 3
       on-limit: continue
-    timeout: '40m'
+    timeout: '65m'
     on-failure:
       continue: true
     steps:
@@ -95,7 +95,7 @@ steps:
         connector-id: '__CONNECTOR_ID__'
         create-conversation: false
         ephemeral: true
-        timeout: '12m'
+        timeout: '20m'
         on-failure:
           continue: true
         with:
