@@ -43,7 +43,7 @@ const bulkPurgePolicy = lazySchema(() =>
 const bulkPurgeRollupSchema = lazySchema(() =>
   z.object({
     body: z.object({
-      list: z.array(z.string()).describe('An array of slo ids'),
+      list: z.array(z.string()).describe('An array of SLO IDs'),
       purgePolicy: bulkPurgePolicy,
       force: z.boolean().optional(),
     }),
@@ -53,12 +53,12 @@ const bulkPurgeRollupSchema = lazySchema(() =>
 const bulkPurgeRollupResponseSchema = lazySchema(() =>
   z
     .object({
-      taskId: z.string().optional().describe('The task id of the purge operation'),
+      taskId: z.string().optional().describe('The task ID of the purge operation'),
     })
     .meta({
       id: 'SLOBulkPurgeRollupResponse',
       description:
-        'The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.',
+        'The bulk purge rollup data response returns a task ID from the elasticsearch deleteByQuery response.',
       additionalProperties: true,
     })
 );

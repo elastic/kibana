@@ -184,7 +184,7 @@ responses:
                     "path": [
                       "id"
                     ],
-                    "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                    "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                   },
                   {
                     "origin": "string",
@@ -194,7 +194,7 @@ responses:
                     "path": [
                       "id"
                     ],
-                    "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                    "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                   }
                 ]
           badRequestInstanceIdExample:

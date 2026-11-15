@@ -374,7 +374,7 @@ responses:
               error: Forbidden
               message: 'API [POST /api/observability/slos] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]'
   '409':
-    description: Conflict - The SLO id already exists
+    description: Conflict - The SLO ID already exists
     content:
       application/json:
         schema:

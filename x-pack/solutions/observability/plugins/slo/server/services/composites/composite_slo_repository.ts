@@ -118,7 +118,7 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     const result = compositeSloDefinitionSchema.safeParse(stored);
 
     if (!result.success) {
-      this.logger.debug(`Invalid stored composite SLO with id [${stored.id}]`);
+      this.logger.debug(`Invalid stored composite SLO with ID [${stored.id}]`);
       return undefined;
     }
 

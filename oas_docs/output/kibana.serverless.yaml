@@ -68033,7 +68033,7 @@ paths:
                   - message
                 title: Conflict
                 type: object
-          description: Conflict - The SLO id already exists
+          description: Conflict - The SLO ID already exists
         '503':
           content:
             application/json:
@@ -68102,7 +68102,7 @@ paths:
               type: object
               properties:
                 list:
-                  description: An array of SLO Definition id
+                  description: An array of SLO definition IDs
                   items:
                     description: The identifier of the SLO.
                     maxLength: 48
@@ -68252,7 +68252,7 @@ paths:
         Retrieve the status of the bulk deletion operation for SLOs. This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.<br/><br/>[Required authorization] Route required privileges: slo_write.
       operationId: bulkDeleteStatusOp
       parameters:
-        - description: The task id of the bulk delete operation
+        - description: The task ID of the bulk delete operation
           in: path
           name: taskId
           required: true
@@ -68411,7 +68411,7 @@ paths:
                 force:
                   type: boolean
                 list:
-                  description: An array of slo ids
+                  description: An array of SLO IDs
                   items:
                     type: string
                   type: array
@@ -69139,7 +69139,7 @@ paths:
               type: object
               properties:
                 list:
-                  description: An array of slo id and instance id
+                  description: An array of SLO ID and instance ID pairs
                   items:
                     type: object
                     properties:
@@ -69189,7 +69189,7 @@ paths:
                             0,
                             "sloId"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -69201,7 +69201,7 @@ paths:
                             0,
                             "sloId"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -69361,7 +69361,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -69371,7 +69371,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -69729,7 +69729,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -69739,7 +69739,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -70251,7 +70251,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -70261,7 +70261,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -70519,7 +70519,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -70529,7 +70529,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -70809,7 +70809,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -70819,7 +70819,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -71008,7 +71008,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -71018,7 +71018,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -71206,7 +71206,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         },
                         {
                           "origin": "string",
@@ -71216,7 +71216,7 @@ paths:
                           "path": [
                             "id"
                           ],
-                          "message": "Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
+                          "message": "Invalid SLO ID, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores"
                         }
                       ]
                     statusCode: 400
@@ -179616,7 +179616,7 @@ components:
             type: object
             properties:
               id:
-                description: Dashboard saved-object id
+                description: Dashboard saved-object ID
                 type: string
             required:
               - id
@@ -179709,11 +179709,11 @@ components:
         - timestamp
     Kibana_HTTP_APIs_SLOBulkPurgeRollupResponse:
       additionalProperties: true
-      description: The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
+      description: The bulk purge rollup data response returns a task ID from the elasticsearch deleteByQuery response.
       type: object
       properties:
         taskId:
-          description: The task id of the purge operation
+          description: The task ID of the purge operation
           type: string
     Kibana_HTTP_APIs_SLOCreateResponse:
       additionalProperties: true
@@ -180194,7 +180194,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             environment:
               anyOf:
@@ -180258,7 +180258,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             environment:
               anyOf:
@@ -180326,7 +180326,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -180376,7 +180376,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -180530,7 +180530,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -180670,7 +180670,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -180766,7 +180766,7 @@ components:
           type: object
           properties:
             dataViewId:
-              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              description: The kibana data view ID to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
               type: string
             filter:
               anyOf:
@@ -180918,10 +180918,10 @@ components:
           type: object
           properties:
             id:
-              description: The SLO definition id
+              description: The SLO definition ID
               type: string
             instanceId:
-              description: The SLO instance id. '*' represents the default (ungrouped) instance.
+              description: The SLO instance ID. '*' represents the default (ungrouped) instance.
               type: string
             summary:
               additionalProperties: true
@@ -180987,10 +180987,10 @@ components:
                 - statusCode
                 - message
             id:
-              description: The SLO definition id
+              description: The SLO definition ID
               type: string
             instanceId:
-              description: The SLO instance id. '*' represents the default (ungrouped) instance.
+              description: The SLO instance ID. '*' represents the default (ungrouped) instance.
               type: string
           required:
             - id

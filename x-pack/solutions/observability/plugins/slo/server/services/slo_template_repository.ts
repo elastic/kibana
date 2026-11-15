@@ -51,7 +51,7 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
       return this.toSloTemplate(response.id, response.attributes);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw new SLOTemplateNotFound(`SLO Template with id [${templateId}] not found`);
+        throw new SLOTemplateNotFound(`SLO Template with ID [${templateId}] not found`);
       }
       throw e;
     }

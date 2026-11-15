@@ -56,10 +56,10 @@ const snapshotSummarySchema = lazySchema(() =>
 
 const snapshotResultBaseSchema = lazySchema(() =>
   z.object({
-    id: z.string().describe('The SLO definition id'),
+    id: z.string().describe('The SLO definition ID'),
     instanceId: z
       .string()
-      .describe("The SLO instance id. '*' represents the default (ungrouped) instance."),
+      .describe("The SLO instance ID. '*' represents the default (ungrouped) instance."),
   })
 );
 

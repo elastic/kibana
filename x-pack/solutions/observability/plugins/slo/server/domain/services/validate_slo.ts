@@ -18,7 +18,7 @@ import type { SLODefinition } from '../models';
  */
 export function validateSLO(slo: SLODefinition) {
   if (!isValidId(slo.id)) {
-    throw new IllegalArgumentError('Invalid id');
+    throw new IllegalArgumentError('Invalid ID');
   }
 
   if (!isValidObjectiveTarget(slo.objective.target)) {

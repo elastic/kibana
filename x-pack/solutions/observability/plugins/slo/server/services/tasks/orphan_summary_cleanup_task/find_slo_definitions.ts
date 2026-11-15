@@ -51,7 +51,7 @@ export async function findSloDefinitionMap(
     fields: ['id', 'revision', 'enabled'],
   });
 
-  logger.debug(`Found ${response.total} matching SLO definitions for ${sloIds.length} SLO ids`);
+  logger.debug(`Found ${response.total} matching SLO definitions for ${sloIds.length} SLO IDs`);
 
   for (const { attributes } of response.saved_objects) {
     map.set(getKey({ id: attributes.id, revision: attributes.revision }), {

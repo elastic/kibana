@@ -182,7 +182,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
     });
 
     if (!result.success) {
-      this.logger.debug(`Invalid stored SLO with id [${storedSLO.id}]`);
+      this.logger.debug(`Invalid stored SLO with ID [${storedSLO.id}]`);
       return undefined;
     }
 
