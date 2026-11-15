@@ -246,7 +246,8 @@ fewer models, list it under `specModelGroups` in
 - A spec without an entry (or without `models`) runs against the whole `weeklyEisModelGroups` list.
 - Every model in `specModelGroups` must be in `weeklyEisModelGroups`, and every model there must
   be in the weekly step's `EVAL_MODEL_GROUPS` in `llm_evals.yml`. Both are checked in PR CI. The
-  weekly run requests `EVAL_MODEL_GROUPS`; EIS provisions every model it discovers.
+  weekly run requests `EVAL_MODEL_GROUPS`; CI provisions EIS connectors only for those models,
+  the shard judges, `EVAL_CONNECTOR_ID` and a fanout step's `EVAL_PROJECT`.
 - `shards` are unrelated. They decide which specs share a CI step, not which models run. A shard
   can also set `judge` to an evaluation connector id (for example `"judge": "eis-openai-gpt-5-4"`)
   to pin the judge for its steps only; shards without one keep the suite-wide judge.

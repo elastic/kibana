@@ -160,9 +160,18 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     echo "--- Discovering EIS models for eval connectors"
     node scripts/discover_eis_models.js
 
+    # Keep only the requested models, the judges and this step's project: the merged payload is one
+    # environment variable, and every discovered model would push it toward Linux's 128 KiB limit.
+    eis_include_ids="$(
+      printf '%s' "${EVAL_SUITE_INFO}" | jq -r '[.shards[]?.judge // empty] | join(",")' 2>/dev/null || true
+    )"
+    eis_include_ids="${eis_include_ids},${EVAL_CONNECTOR_ID:-},${EVAL_PROJECT:-}"
+
     echo "--- Generating EIS connectors"
     EIS_CONNECTORS_B64="$(
-      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js
+      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js \
+        --models "${EVAL_MODEL_GROUPS:-}" \
+        --include "${eis_include_ids}"
     )"
 
     export EIS_CONNECTORS_B64
