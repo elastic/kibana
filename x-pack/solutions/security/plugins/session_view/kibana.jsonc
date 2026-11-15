@@ -16,7 +16,8 @@
       "ruleRegistry"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaReact",
