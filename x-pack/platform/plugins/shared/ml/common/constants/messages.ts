@@ -33,6 +33,8 @@ export type JobValidationMessageId =
   | 'query_delay_valid'
   | 'frequency_valid'
   | 'frequency_invalid'
+  | 'scroll_size_valid'
+  | 'scroll_size_invalid'
   // because we have some spread around
   | string;
 

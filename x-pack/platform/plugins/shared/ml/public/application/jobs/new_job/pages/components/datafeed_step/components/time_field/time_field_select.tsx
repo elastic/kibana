@@ -19,6 +19,12 @@ interface Props {
   changeHandler(i: string): void;
   selectedField: string;
   timeFieldTitleId: string;
+  isInvalid: boolean;
+  onSearchChange(searchValue: string): void;
+  onFocusChange(hasFocus: boolean): void;
+  // Injected by the parent EuiFormRow so the error text is announced with the field.
+  id?: string;
+  'aria-describedby'?: string;
 }
 
 export const TimeFieldSelect: FC<Props> = ({
@@ -26,6 +32,11 @@ export const TimeFieldSelect: FC<Props> = ({
   changeHandler,
   selectedField,
   timeFieldTitleId,
+  isInvalid,
+  onSearchChange,
+  onFocusChange,
+  id,
+  'aria-describedby': ariaDescribedBy,
 }) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = createFieldOptions(
@@ -51,9 +62,15 @@ export const TimeFieldSelect: FC<Props> = ({
       options={options}
       selectedOptions={selection}
       onChange={onChange}
+      onSearchChange={onSearchChange}
+      onFocus={() => onFocusChange(true)}
+      onBlur={() => onFocusChange(false)}
       isClearable={false}
+      isInvalid={isInvalid}
       data-test-subj="mlTimeFieldNameSelect"
+      id={id}
       aria-labelledby={timeFieldTitleId}
+      aria-describedby={ariaDescribedBy}
     />
   );
 };
