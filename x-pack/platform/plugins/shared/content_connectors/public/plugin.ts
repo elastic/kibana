@@ -54,7 +54,7 @@ export class SearchConnectorsPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       order: 8,
-      keywords: ['content connectors', 'search'],
+      keywords: ['content crawlers', 'search'],
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStartDeps, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./app');

@@ -284,7 +284,7 @@ export const ConnectorDetail: React.FC = () => {
           back={{
             href: getContentConnectorsUrl(application?.getUrlForApp, CONNECTORS_PATH),
             label: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
-              defaultMessage: 'Content Connectors',
+              defaultMessage: 'Content Crawlers',
             }),
           }}
           tabs={headerTabs}

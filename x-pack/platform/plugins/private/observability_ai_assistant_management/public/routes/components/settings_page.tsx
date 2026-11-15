@@ -137,7 +137,7 @@ export function SettingsPage() {
       name: i18n.translate(
         'xpack.observabilityAiAssistantManagement.settingsPage.contentConnector',
         {
-          defaultMessage: 'Content Connectors',
+          defaultMessage: 'Content Crawlers',
         }
       ),
       content: <ContentConnectorTab />,

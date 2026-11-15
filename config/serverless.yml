@@ -311,7 +311,7 @@ xpack.dataUsage.enabled: true
 # This feature is disabled in Serverless until fully tested within a Serverless environment
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 
-## Content Connectors in stack management
+## Content Crawlers in stack management
 xpack.contentConnectors.enabled: true
 
 ## Enable Kibana Product Intercept

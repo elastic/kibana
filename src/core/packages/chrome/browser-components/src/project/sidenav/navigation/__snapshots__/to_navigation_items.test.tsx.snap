@@ -106,7 +106,7 @@ Array [
             "href": "/jom/app/management/data/content_connectors",
             "id": "management:content_connectors",
             "isExternal": false,
-            "label": "Content Connectors",
+            "label": "Content Crawlers",
           },
         ],
         "label": "Ingest and Integrations",
