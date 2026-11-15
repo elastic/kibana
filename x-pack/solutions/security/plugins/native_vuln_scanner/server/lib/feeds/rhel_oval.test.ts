@@ -192,6 +192,32 @@ describe('parseRhelOval', () => {
     ]);
   });
 
+  it('skips a package whose arch operation is unsupported instead of widening it to all arches', async () => {
+    const earlier = 'hivex is earlier than 0:1.3.15-7.el8';
+    const test = (id: string, state: string) =>
+      `<red-def:rpminfo_test id="${id}" comment="${earlier}"><red-def:state state_ref="${state}"/></red-def:rpminfo_test>`;
+    const doc = `<oval_definitions xmlns:red-def="urn:red-def"><definitions>
+      <definition class="patch" id="oval:x:def:1"><metadata><title>RHSA-1:1</title>
+        <reference ref_id="RHSA-1:1" source="RHSA"/><advisory><cve>CVE-1-1</cve></advisory></metadata>
+        <criteria operator="AND">
+          <criterion comment="Red Hat Enterprise Linux 8 is installed"/>
+          <criteria operator="OR">
+            <criterion comment="${earlier}" test_ref="t1"/>
+            <criterion comment="${earlier}" test_ref="t2"/>
+          </criteria>
+        </criteria>
+      </definition></definitions>
+      <tests>${test('t1', 's1')}${test('t2', 's2')}</tests>
+      <states><red-def:rpminfo_state id="s1"><red-def:arch operation="not equal">i686</red-def:arch></red-def:rpminfo_state>
+        <red-def:rpminfo_state id="s2"><red-def:arch operation="equals">x86_64</red-def:arch></red-def:rpminfo_state></states>
+    </oval_definitions>`;
+    const { records, skipped } = await parseRhelOval([doc], { major: '8' });
+    expect(records.map((r) => r.package)).toEqual([
+      { name: 'hivex', arch: { operation: 'equals', value: 'x86_64' } },
+    ]);
+    expect(skipped.unsupported_arch_operation).toBe(1);
+  });
+
   it('drops every row when the feed is for another major release', async () => {
     const other = await parseRhelOval([fixture], { major: '8' });
     expect(other.records).toEqual([]);

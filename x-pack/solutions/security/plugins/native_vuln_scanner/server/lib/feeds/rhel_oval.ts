@@ -186,6 +186,8 @@ export const parseRhelOval = async (
   const testStates = new Map<string, string>();
   const wantedStates = new Set<string>();
   const stateArch = new Map<string, ArchConstraint>();
+  // States whose arch operation we cannot evaluate; dropping the constraint would widen the record.
+  const unsupportedArchStates = new Set<string>();
 
   const onDefinition = (node: XmlNode): void => {
     if (node.attrs.class !== 'patch') return;
@@ -256,6 +258,8 @@ export const parseRhelOval = async (
         const operation = arch?.attrs.operation ?? 'equals';
         if (arch && (operation === 'equals' || operation === 'pattern match')) {
           stateArch.set(node.attrs.id, { operation, value: arch.text });
+        } else if (arch) {
+          unsupportedArchStates.add(node.attrs.id);
         }
       }
     },
@@ -264,7 +268,13 @@ export const parseRhelOval = async (
   const os = { family: 'rhel' as const, version: major };
   const records: AdvisoryRecord[] = [];
   for (const def of pending) {
-    for (const { leaf, arch, conditions } of mergeByArch(def.leaves, (testRef) => {
+    const supported = def.leaves.filter(({ leaf }) => {
+      const stateRef = leaf.testRef ? testStates.get(leaf.testRef) : undefined;
+      if (!stateRef || !unsupportedArchStates.has(stateRef)) return true;
+      countInto(skipped, 'unsupported_arch_operation');
+      return false;
+    });
+    for (const { leaf, arch, conditions } of mergeByArch(supported, (testRef) => {
       const stateRef = testStates.get(testRef);
       return stateRef ? stateArch.get(stateRef) : undefined;
     })) {
