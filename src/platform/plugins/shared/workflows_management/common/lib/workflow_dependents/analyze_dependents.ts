@@ -76,6 +76,8 @@ const INPUT_FAILURES = new Set<ImpactIssueKind>([
   'inputRendersAsText',
   'inputValueRejected',
 ]);
+// Kinds where the called workflow starts but fails every run; again only a waiting step fails.
+const CHILD_RUN_FAILURES = new Set<ImpactIssueKind>(['childFails', 'callCycle']);
 const OUTPUT_LOSSES = new Set<ImpactIssueKind>(['removedOutput', 'unreturnedOutput']);
 
 // A breaking issue about the step as a whole rather than one of its inputs or outputs.
@@ -482,28 +484,68 @@ const compareImpacts = (a: SortableImpact, b: SortableImpact): number =>
   STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
   (a.workflowName ?? a.workflowId).localeCompare(b.workflowName ?? b.workflowId);
 
+/** A step of a workflow that fails every run of it, and the issue that makes it fail. */
+export interface RunFailure {
+  stepName: string;
+  calledName: string;
+  issue: DraftIssue;
+}
+
+// A run that fails because it nests a loop of runs keeps reporting the loop further up.
+const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue => ({
+  ...stepIssue(failure.issue.kind === 'callCycle' ? 'callCycle' : 'childFails', stepName),
+  from: failure.stepName,
+  to: failure.calledName,
+});
+
+// A called workflow that is off or invalid already fails the step; its own calls don't matter then.
+const getRunFailureIssues = (
+  callSites: readonly WorkflowCallSite[],
+  contract: WorkflowContract,
+  failure: RunFailure | undefined
+): DraftIssue[] =>
+  failure && contract.enabled && contract.valid
+    ? callSites
+        .filter(({ stepType }) => stepType === 'workflow.execute')
+        .map(({ stepName }) => toChildFailsIssue(stepName, failure))
+    : [];
+
+interface ContractVersion {
+  contract: WorkflowContract;
+  runFailure?: RunFailure;
+}
+
 const analyzeDependent = (
   parent: WorkflowLookupItem,
   callSites: WorkflowCallSite[],
-  savedContract: WorkflowContract,
-  draftContract: WorkflowContract,
+  saved: ContractVersion,
+  draft: ContractVersion,
   contractChanges: ContractChange[]
 ): Omit<DependentImpact, 'upstream'> => {
   const savedSeverities = new Map<string, ImpactIssue['severity']>();
-  for (const callSite of callSites) {
-    for (const issue of evaluateCallSite(callSite, parent.definition, savedContract).issues) {
-      const key = issueKey(issue);
-      if (savedSeverities.get(key) !== 'breaking') {
-        savedSeverities.set(key, issue.severity);
-      }
+  const savedIssues = [
+    ...callSites.flatMap(
+      (callSite) => evaluateCallSite(callSite, parent.definition, saved.contract).issues
+    ),
+    ...getRunFailureIssues(callSites, saved.contract, saved.runFailure),
+  ];
+  for (const issue of savedIssues) {
+    const key = issueKey(issue);
+    if (savedSeverities.get(key) !== 'breaking') {
+      savedSeverities.set(key, issue.severity);
     }
   }
   const evaluations = callSites.map((callSite) =>
-    evaluateCallSite(callSite, parent.definition, draftContract, savedContract)
+    evaluateCallSite(callSite, parent.definition, draft.contract, saved.contract)
   );
-  const issues = evaluations.flatMap(({ issues: draftIssues }) =>
-    draftIssues.map((issue) => ({ ...issue, isNew: isNewIssue(issue, savedSeverities) }))
-  );
+  const draftIssues = [
+    ...evaluations.flatMap(({ issues: callIssues }) => callIssues),
+    ...getRunFailureIssues(callSites, draft.contract, draft.runFailure),
+  ];
+  const issues = draftIssues.map((issue) => ({
+    ...issue,
+    isNew: isNewIssue(issue, savedSeverities),
+  }));
   const impacts = evaluations.map(({ impact }) => impact);
   return {
     workflowId: parent.id,
@@ -534,7 +576,8 @@ interface CallerEdge {
 
 const stepFails = (kind: ImpactIssueKind, callSite: WorkflowCallSite): boolean =>
   PRE_RUN_FAILURES.has(kind) ||
-  (INPUT_FAILURES.has(kind) && callSite.stepType === 'workflow.execute');
+  ((INPUT_FAILURES.has(kind) || CHILD_RUN_FAILURES.has(kind)) &&
+    callSite.stepType === 'workflow.execute');
 
 const toEffect = (
   definition: unknown,
@@ -710,6 +753,10 @@ export interface AnalyzeDependentsParams {
   draftDefinition: unknown;
   /** False when saving the draft would store it invalid (and turned off), which fails every caller. */
   isDraftValid?: boolean;
+  /** The step that makes every run of the saved version fail, if any. */
+  savedRunFailure?: RunFailure;
+  /** The step that makes every run of the draft fail, if any. */
+  draftRunFailure?: RunFailure;
 }
 
 /** Grades how the draft definition of a workflow affects each workflow that calls it. */
@@ -718,6 +765,8 @@ export const analyzeDependents = ({
   savedDefinition,
   draftDefinition,
   isDraftValid = true,
+  savedRunFailure,
+  draftRunFailure,
 }: AnalyzeDependentsParams): DependentsAnalysis => {
   const savedContract = extractWorkflowContract(savedDefinition);
   const parsedDraftContract = extractWorkflowContract(
@@ -734,8 +783,8 @@ export const analyzeDependents = ({
       const dependent = analyzeDependent(
         parent,
         callSites,
-        savedContract,
-        draftContract,
+        { contract: savedContract, runFailure: savedRunFailure },
+        { contract: draftContract, runFailure: draftRunFailure },
         contractChanges
       );
       const upstream = isBreakingRun(dependent)
@@ -783,20 +832,6 @@ const stepIssues = (
 const getContract = (workflow: WorkflowLookupItem): WorkflowContract => ({
   ...extractWorkflowContract(workflow.definition),
   enabled: workflow.enabled && isRecord(workflow.definition),
-});
-
-/** A step of a workflow that fails every run of it, and the issue that makes it fail. */
-interface RunFailure {
-  stepName: string;
-  calledName: string;
-  issue: DraftIssue;
-}
-
-// A run that fails because it nests a loop of runs keeps reporting the loop further up.
-const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue => ({
-  ...stepIssue(failure.issue.kind === 'callCycle' ? 'callCycle' : 'childFails', stepName),
-  from: failure.stepName,
-  to: failure.calledName,
 });
 
 // Returned while resolving a workflow whose own resolution is still in progress.
@@ -884,6 +919,20 @@ const findRunFailures = (
   return failures;
 };
 
+/** Finds the step that makes every run of `workflow` fail, given the workflows it runs down the chain. */
+export const findRunFailure = (
+  workflow: WorkflowLookupItem,
+  calledWorkflows: readonly WorkflowLookupItem[]
+): RunFailure | undefined =>
+  findRunFailures(
+    new Map(
+      [...calledWorkflows.filter(({ id }) => id !== workflow.id), workflow].map((item) => [
+        item.id,
+        item,
+      ])
+    )
+  ).get(workflow.id);
+
 /** Lists what fails when `workflowIds` stop running (turned off or deleted), given their callers. */
 export const analyzeRemovalImpact = (
   workflowIds: readonly string[],
@@ -967,17 +1016,9 @@ export const analyzeCalledWorkflows = ({
       const evaluations = callSites.map((callSite) =>
         evaluateCallSite(callSite, definition, contract)
       );
-      // A child that is off or invalid already fails the step; its own calls don't matter then.
-      const downstream =
-        contract.enabled && contract.valid ? runFailures.get(workflowId) : undefined;
-      const downstreamIssues: DraftIssue[] = downstream
-        ? callSites
-            .filter(({ stepType }) => stepType === 'workflow.execute')
-            .map(({ stepName }) => toChildFailsIssue(stepName, downstream))
-        : [];
       const issues = toNewIssues([
         ...evaluations.flatMap(({ issues: callIssues }) => callIssues),
-        ...downstreamIssues,
+        ...getRunFailureIssues(callSites, contract, runFailures.get(workflowId)),
       ]);
       const impacts = evaluations.map(({ impact }) => impact);
       const isUnchecked = impacts.some(({ isDynamicInputs }) => isDynamicInputs);

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual } from 'lodash';
 import { parseDocument } from 'yaml';
-import { InvalidYamlSyntaxError } from '@kbn/workflows-yaml';
+import { InvalidYamlSyntaxError, isRecord } from '@kbn/workflows-yaml';
 import {
   analyzeCalledWorkflows,
   analyzeDependents,
   analyzeRemovalImpact,
   buildDependentsIndex,
+  findRunFailure,
   MAX_INDIRECT_DEPTH,
 } from '../../../common/lib/workflow_dependents/analyze_dependents';
 import { isBreakingRun } from '../../../common/lib/workflow_dependents/api';
@@ -21,7 +23,10 @@ import type {
   WorkflowDependentsImpactResponse,
   WorkflowSaveDependentsImpact,
 } from '../../../common/lib/workflow_dependents/api';
-import { getCalledWorkflowIds } from '../../../common/lib/workflow_dependents/find_call_sites';
+import {
+  collectWorkflowCallSites,
+  getCalledWorkflowIds,
+} from '../../../common/lib/workflow_dependents/find_call_sites';
 import type {
   DependentsAnalysis,
   RemovalImpact,
@@ -112,10 +117,13 @@ export const analyzeWorkflowDependentsImpact = async ({
   isDraftValid?: boolean;
   lookup: WorkflowDependentsLookup;
 }): Promise<WorkflowDependentsImpactResponse> => {
-  const [callers, calledWorkflows] = await Promise.all([
+  const [callers, calledWorkflows, calledBySaved] = await Promise.all([
     collectCallers([workflowId], lookup),
     collectCalledWorkflows(workflowId, draftDefinition, lookup),
+    collectCalledWorkflows(workflowId, savedDefinition, lookup),
   ]);
+  const getRunFailure = (definition: unknown, called: readonly WorkflowLookupItem[]) =>
+    findRunFailure({ id: workflowId, name: workflowId, enabled: true, definition }, called);
 
   return {
     analysis: analyzeDependents({
@@ -123,6 +131,8 @@ export const analyzeWorkflowDependentsImpact = async ({
       savedDefinition,
       draftDefinition,
       isDraftValid,
+      savedRunFailure: getRunFailure(savedDefinition, calledBySaved),
+      draftRunFailure: getRunFailure(draftDefinition, calledWorkflows),
     }),
     calledWorkflows: analyzeCalledWorkflows({
       workflowId,
@@ -139,9 +149,18 @@ export const analyzeWorkflowRemovalImpact = async (
 ): Promise<RemovalImpact> =>
   analyzeRemovalImpact(workflowIds, await collectCallers(workflowIds, lookup));
 
-/** True when going from `before` to `after` changes anything that callers rely on. */
+const getCalls = (definition: unknown) => ({
+  callSites: collectWorkflowCallSites(definition),
+  consts: isRecord(definition) ? definition.consts : undefined,
+});
+
+/**
+ * True when going from `before` to `after` changes anything that callers rely on: the inputs and
+ * outputs, or how it runs other workflows, which can make every run of it fail.
+ */
 export const hasCallerFacingChanges = (before: unknown, after: unknown): boolean =>
-  diffWorkflowContracts(extractWorkflowContract(before), extractWorkflowContract(after)).length > 0;
+  diffWorkflowContracts(extractWorkflowContract(before), extractWorkflowContract(after)).length >
+    0 || !isEqual(getCalls(before), getCalls(after));
 
 /** The callers a save breaks, as returned by the update workflow route. */
 export const summarizeSaveImpact = ({

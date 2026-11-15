@@ -195,6 +195,62 @@ describe('analyzeWorkflowDependentsImpact', () => {
       }),
     ]);
   });
+
+  describe('when the draft fails every run without changing its inputs or outputs', () => {
+    const childItem = { ...workflow('child', []), definition: savedChild };
+    const savedMiddle = { name: 'middle', steps: [runs('child')] };
+    const draftMiddle = { name: 'middle', steps: [runs('child', {})] };
+    const waiting = workflow('waiting', [runs('middle', {})]);
+    const background = workflow('background', [
+      { ...runs('middle', {}), type: 'workflow.executeAsync' },
+    ]);
+    const top = workflow('top', [runs('waiting', {})]);
+
+    it('breaks the callers that wait for it, and the ones further up', async () => {
+      const { analysis } = await analyzeWorkflowDependentsImpact({
+        workflowId: 'middle',
+        savedDefinition: savedMiddle,
+        draftDefinition: draftMiddle,
+        lookup: createLookup([waiting, background, top], [], [childItem]),
+      });
+
+      expect(analysis.contractChanges).toEqual([]);
+      expect(analysis.dependents).toEqual([
+        expect.objectContaining({
+          workflowId: 'waiting',
+          status: 'breaking',
+          issues: [
+            expect.objectContaining({
+              kind: 'childFails',
+              stepName: 'run-middle',
+              from: 'run-child',
+              to: 'child',
+              isNew: true,
+            }),
+          ],
+          upstream: [expect.objectContaining({ workflowId: 'top', effect: 'fails' })],
+        }),
+        expect.objectContaining({ workflowId: 'background', status: 'safe', issues: [] }),
+      ]);
+      expect(summarizeSaveImpact(analysis)).toEqual({
+        breaking: [{ id: 'waiting', name: 'waiting' }],
+        indirectBreaking: 1,
+      });
+    });
+
+    it('marks the callers as already broken when the saved version fails the same way', async () => {
+      const { analysis } = await analyzeWorkflowDependentsImpact({
+        workflowId: 'middle',
+        savedDefinition: draftMiddle,
+        draftDefinition: draftMiddle,
+        lookup: createLookup([waiting], [], [childItem]),
+      });
+
+      expect(analysis.dependents).toEqual([
+        expect.objectContaining({ workflowId: 'waiting', status: 'alreadyBroken' }),
+      ]);
+    });
+  });
 });
 
 describe('analyzeWorkflowRemovalImpact', () => {
@@ -220,6 +276,14 @@ describe('hasCallerFacingChanges', () => {
     expect(hasCallerFacingChanges(savedChild, { ...savedChild, enabled: false })).toBe(true);
     // Saving invalid YAML stores the workflow without a definition.
     expect(hasCallerFacingChanges(savedChild, null)).toBe(true);
+  });
+
+  it('counts changes to how it runs other workflows, which can make every run fail', () => {
+    const caller = { ...savedChild, consts: { id: 'a' }, steps: [runs('other')] };
+
+    expect(hasCallerFacingChanges(caller, { ...caller, steps: [runs('other', {})] })).toBe(true);
+    expect(hasCallerFacingChanges(caller, { ...caller, consts: { id: 'b' } })).toBe(true);
+    expect(hasCallerFacingChanges(caller, { ...caller, description: 'edited' })).toBe(false);
   });
 });
 
