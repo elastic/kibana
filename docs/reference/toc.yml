@@ -31,6 +31,10 @@ toc:
       - file: configuration-reference/telemetry-settings.md
       - file: configuration-reference/url-drilldown-settings.md
   - file: advanced-settings.md
+  - file: workflows.md
+    children:
+      - file: workflows/cases-steps.md
+      - file: workflows/cases-triggers.md
   - file: kibana-audit-events.md
   - file: user-activity.md
   - file: connectors-kibana.md
