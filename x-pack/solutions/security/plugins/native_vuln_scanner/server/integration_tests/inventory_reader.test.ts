@@ -123,10 +123,14 @@ describe('inventory reader', () => {
     esServer = await startES();
     admin = esServer.es.getClient();
     kibana = kibanaSystemClient(esServer);
-    await admin.bulk({
+    const bulk = await admin.bulk({
       refresh: 'wait_for',
       operations: DOCS.flatMap((doc) => [{ create: { _index: DATA_STREAM } }, doc]),
     });
+    const failed = bulk.items.find((item) => item.create?.error);
+    if (bulk.errors) {
+      throw new Error(`seeding bulk failed: ${JSON.stringify(failed?.create?.error)}`);
+    }
   });
 
   afterAll(async () => {
