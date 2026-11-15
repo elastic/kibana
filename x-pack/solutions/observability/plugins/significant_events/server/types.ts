@@ -42,6 +42,7 @@ import type {
   NightshiftSourcesServerSetup,
   NightshiftSourcesServerStart,
 } from '@kbn/nightshift-sources-plugin/server';
+import type { SeveritySync } from './lib/significant_events/events/severity';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -102,4 +103,6 @@ export interface SignificantEventsServer {
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
   /** Reads investigations (status of the ones a significant event lists). */
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+  /** Keeps an event's stored severity in step with its investigation. */
+  severitySync: SeveritySync;
 }

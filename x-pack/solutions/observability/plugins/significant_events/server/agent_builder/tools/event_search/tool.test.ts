@@ -171,6 +171,36 @@ describe('event_search tool', () => {
     );
   });
 
+  it('passes the rows to severitySync.reconcileRows', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (searchEventsToolHandler as jest.Mock).mockResolvedValue({
+      events: [],
+      view: 'compact',
+      page: 1,
+      total: 0,
+    });
+    const reconcileRows = jest.spyOn(readerServer.severitySync, 'reconcileRows');
+    const tool = createSearchEventsTool({
+      getScopedClients: jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn().mockReturnValue({}),
+        licensing: {},
+        uiSettingsClient: {},
+        sourcesClient: mockSourcesClient([]),
+      }) as unknown as GetScopedClients,
+      server: readerServer,
+      logger: loggingSystemMock.createLogger(),
+      telemetry: createMockTelemetry() as never,
+    });
+
+    await invokeHandler(tool as never, {}, createMockToolContext());
+    const [{ reconcileSeverities }] = (searchEventsToolHandler as jest.Mock).mock.calls[0];
+    await reconcileSeverities([]);
+
+    // `reconcileRows` is display-only: it has no write option, and `sync_severity.test.ts` covers
+    // that it never calls `syncSeverity`.
+    expect(reconcileRows).toHaveBeenCalledWith(expect.objectContaining({ rows: [] }));
+  });
+
   it('accepts searches that omit slugs', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({

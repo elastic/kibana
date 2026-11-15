@@ -36,6 +36,7 @@ into that package.
 - HTTP paths are unchanged on purpose. The KI and onboarding routes stay under `/internal/streams/{name}`, where `{name}` is a source id, and `/internal/significant_events/*` stays where it is.
 - Managed workflow ids keep their `system-streams-ki-*` names.
 - Legacy handling that stays: the `sigevents:stream:<name>` rule ownership tag (`LEGACY_RULE_STREAM_TAG_PREFIX`) and the maintenance reset sweep.
+- An event with a recorded investigation takes its severity from that investigation's outcome, and the stored severity is a copy kept in step by `severity/` (`createSeveritySync` on the server object): the investigation agent hook writes it right after the findings recorder's final pass, and Discovery's write keeps it. Reads never write: the events list, detail and attachment card return the stored severity, and only `event_search` shows the investigation's. A sync writes a version with its own assessment note and no workflow execution, and never writes a closed event, whose close time and closing note Discovery's reuse reads. `resolveInvestigationOutcomes` is the only place that decides which investigation governs an event.
 
 ## Pull request descriptions
 

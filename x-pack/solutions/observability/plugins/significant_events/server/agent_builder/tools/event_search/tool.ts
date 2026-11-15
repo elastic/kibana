@@ -273,8 +273,15 @@ export function createSearchEventsTool({
         const catalog = await loadSourceCatalog(sourcesClient);
         const filterSources = slugs ? resolveSourcesBySlugOrId(catalog, slugs) : [];
 
+        const eventSearchClient = await getEventSearchClient();
         const data = await searchEventsToolHandler({
-          eventSearchClient: await getEventSearchClient(),
+          eventSearchClient,
+          reconcileSeverities: (rows) =>
+            server.severitySync.reconcileRows({
+              rows,
+              request,
+              eventClient: eventSearchClient,
+            }),
           params: {
             ...searchParams,
             source_ids: slugs ? filterSources.map((source) => source.id) : undefined,

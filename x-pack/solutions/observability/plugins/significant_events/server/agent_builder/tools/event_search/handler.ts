@@ -8,6 +8,7 @@
 import {
   MAX_TEXT_LENGTH,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  type Severity,
   type SignificantEvent,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
@@ -273,9 +274,14 @@ const toEnvelope = (response: {
 export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
   eventSearchClient,
   params,
+  reconcileSeverities,
 }: {
   eventSearchClient: RuleEventsClient;
   params: EventSearchInput & { view?: V };
+  /** Gives the returned events the severity of their investigations, so they agree with the list. */
+  reconcileSeverities?: <T extends { event_id: string; severity: Severity }>(
+    hits: T[]
+  ) => Promise<T[]>;
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';
   if (view === 'full' && params.event_ids?.length !== 1) {
@@ -283,7 +289,7 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
   }
 
   const sharedParams = buildSearchParams(view, params);
-  const response = hasEventSearchFilters(params)
+  const found = hasEventSearchFilters(params)
     ? await eventSearchClient.findLatestByCurrentStatePaginated({
         ...sharedParams,
         status: toStatusFilter(params.status),
@@ -292,6 +298,10 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
         topologyFeatureIds: params.topology_feature_ids,
       })
     : await eventSearchClient.findLatestPaginated(sharedParams);
+  const response = {
+    ...found,
+    hits: reconcileSeverities ? await reconcileSeverities(found.hits) : found.hits,
+  };
 
   const envelope = toEnvelope(response);
 

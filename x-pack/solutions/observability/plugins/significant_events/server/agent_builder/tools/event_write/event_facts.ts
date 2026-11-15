@@ -182,9 +182,12 @@ export const loadHistory = async ({
 export const computeEventFacts = ({
   candidate,
   timestamp,
+  resolvedSeverity,
 }: {
   candidate: ResolvedWriteCandidate;
   timestamp: string;
+  /** The severity the event should have, which wins over the agent's and the status. */
+  resolvedSeverity?: Severity;
 }): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const { latest, priorDocs } = candidate;
@@ -209,7 +212,8 @@ export const computeEventFacts = ({
 
   const { status } = candidate;
 
-  const severity = decideSeverity({ proposed: candidate.input.severity, status, signals });
+  const severity =
+    resolvedSeverity ?? decideSeverity({ proposed: candidate.input.severity, status, signals });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:

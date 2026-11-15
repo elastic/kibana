@@ -460,12 +460,19 @@ export function createEventsWriteTool({
           logger
         );
 
+        const eventSearchClient = await getEventSearchClient();
         const data = await eventsWriteBulkHandler({
-          eventSearchClient: await getEventSearchClient(),
+          eventSearchClient,
           inputs: items,
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
+          resolveSeverities: (events) =>
+            server.severitySync.resolveSeverities({
+              request,
+              eventClient: eventSearchClient,
+              events,
+            }),
           logger,
         });
 
