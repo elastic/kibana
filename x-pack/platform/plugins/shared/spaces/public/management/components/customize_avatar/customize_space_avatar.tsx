@@ -17,7 +17,7 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { MAX_SPACE_INITIALS } from '../../../../common';
+import { getGraphemes, MAX_SPACE_INITIALS } from '../../../../common';
 import { encode, imageTypes } from '../../../../common/lib/dataurl';
 import type { SpaceValidator } from '../../lib';
 import type { CustomizeSpaceFormValues } from '../../types';
@@ -205,7 +205,9 @@ export class CustomizeSpaceAvatar extends Component<Props> {
   }
 
   public onInitialsChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const initials = (e.target.value || '').substring(0, MAX_SPACE_INITIALS);
+    const initials = getGraphemes(e.target.value || '')
+      .slice(0, MAX_SPACE_INITIALS)
+      .join('');
 
     this.props.onChange({
       ...this.props.space,

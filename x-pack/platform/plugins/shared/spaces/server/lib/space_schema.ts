@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { MAX_SPACE_INITIALS } from '../../common';
+import {
+  isValidSpaceInitials,
+  MAX_SPACE_INITIALS,
+  MAX_SPACE_INITIALS_CODE_UNITS,
+} from '../../common';
 
 export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;
 
@@ -34,7 +38,12 @@ const spaceSchema = schema.object({
   ),
   initials: schema.maybe(
     schema.string({
-      maxLength: MAX_SPACE_INITIALS,
+      maxLength: MAX_SPACE_INITIALS_CODE_UNITS,
+      validate: (value) => {
+        if (!isValidSpaceInitials(value)) {
+          return `must have at most ${MAX_SPACE_INITIALS} characters`;
+        }
+      },
       meta: {
         description:
           'One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.',

@@ -18,9 +18,15 @@ export { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 export const SPACE_SEARCH_COUNT_THRESHOLD = 8;
 
 /**
- * The maximum number of characters allowed in the Space Avatar's initials
+ * The maximum number of characters allowed in the Space Avatar's initials, counted as graphemes
  */
 export const MAX_SPACE_INITIALS = 2;
+
+/**
+ * Size cap for Space Avatar initials in UTF-16 code units. A single grapheme can carry any number of
+ * combining marks, so the grapheme limit alone does not bound the input.
+ */
+export const MAX_SPACE_INITIALS_CODE_UNITS = 64;
 
 /**
  * The path to enter a space.
