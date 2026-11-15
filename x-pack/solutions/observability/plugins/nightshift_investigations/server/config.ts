@@ -41,7 +41,7 @@ const learningConfigSchema = schema.object({
 });
 
 const findingsRecorderConfigSchema = schema.object({
-  // Governs the findings recorder: the cycle hook and the blocking final pass that write the
+  // Governs the findings recorder: the cycle hook and the final pass that write the
   // summary, severity, verdict, hypotheses and impact the investigator no longer records itself.
   // Turn it off to measure the investigator on its own, as the evals do.
   enabled: schema.boolean({ defaultValue: true }),

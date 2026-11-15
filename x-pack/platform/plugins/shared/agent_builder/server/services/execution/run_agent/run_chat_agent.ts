@@ -598,7 +598,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
     }
 
-    // Fire post-round hooks (nonBlocking — round is already streamed, hooks run fire-and-forget).
+    // Run post-round hooks. Blocking hooks are awaited here, so the run returns only after they
+    // finish; nonBlocking hooks are started and left to run in the background.
     // The try/catch is defensive; nonBlocking hooks should never throw to the runner.
     try {
       await context.hooks.run(HookLifecycle.afterExecution, {

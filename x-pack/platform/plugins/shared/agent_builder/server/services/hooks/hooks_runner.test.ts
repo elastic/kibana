@@ -12,6 +12,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { createWorkflowExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 import { createHooksRunner } from './hooks_runner';
 import type { CreateHooksRunnerDeps } from './hooks_runner';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
@@ -558,5 +559,82 @@ describe('createHooksRunner', () => {
 
     await run(HookLifecycle.beforeAgent, contextWithSignal);
     expect(receivedSignal).toBe(controller.signal);
+  });
+  describe('non-blocking hooks with a bound service account', () => {
+    const boundContext = {
+      ...baseContext,
+      agentId: 'agent-1',
+      runAs: 'sa-1',
+    };
+    const serviceAccountRequest = { id: 'service-account-request' } as unknown as KibanaRequest;
+    const nonBlockingHook = (handler: (ctx: BeforeAgentHookContext) => Promise<void>) =>
+      [
+        { id: 'nb', mode: HookExecutionMode.nonBlocking, handler },
+      ] as unknown as HookRegistration<HookLifecycle>[];
+
+    it('gives the hook a service-account request that lasts until the hook settles', async () => {
+      const seen: unknown[] = [];
+      let released = false;
+      const withAgentServiceAccountRequest = jest.fn(async (_params, fn) => {
+        try {
+          return await fn(serviceAccountRequest);
+        } finally {
+          released = true;
+        }
+      });
+      const { run } = createRunner({
+        withAgentServiceAccountRequest,
+        getHooksForLifecycle: () =>
+          nonBlockingHook(async (ctx) => {
+            await flushEventLoop();
+            seen.push(ctx.request, released);
+          }),
+      });
+
+      await run(HookLifecycle.beforeAgent, boundContext);
+      await flushEventLoop();
+      await flushEventLoop();
+
+      expect(withAgentServiceAccountRequest).toHaveBeenCalledWith(
+        { agentId: 'agent-1', runAs: 'sa-1', request: boundContext.request },
+        expect.any(Function)
+      );
+      expect(seen).toEqual([serviceAccountRequest, false]);
+      expect(released).toBe(true);
+    });
+
+    it('keeps the execution request when the execution did not run as a service account', async () => {
+      const seen: unknown[] = [];
+      const withAgentServiceAccountRequest = jest.fn();
+      const { run } = createRunner({
+        withAgentServiceAccountRequest,
+        getHooksForLifecycle: () =>
+          nonBlockingHook(async (ctx) => {
+            seen.push(ctx.request);
+          }),
+      });
+
+      await run(HookLifecycle.beforeAgent, baseContext);
+      await flushEventLoop();
+
+      expect(withAgentServiceAccountRequest).not.toHaveBeenCalled();
+      expect(seen).toEqual([baseContext.request]);
+    });
+
+    it('logs and does not throw when the service-account request cannot be minted', async () => {
+      const logger = loggingSystemMock.create().get('hooks');
+      const handler = jest.fn();
+      const { run } = createRunner({
+        logger,
+        withAgentServiceAccountRequest: jest.fn().mockRejectedValue(new Error('no binding')),
+        getHooksForLifecycle: () => nonBlockingHook(handler),
+      });
+
+      await expect(run(HookLifecycle.beforeAgent, boundContext)).resolves.toBeDefined();
+      await flushEventLoop();
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('no binding'));
+    });
   });
 });

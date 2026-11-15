@@ -26,7 +26,8 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
 const setup = (
   spaceId = 'default',
   connectorId = 'saved-slack',
-  params: Record<string, string> = { channel: '#alerts' }
+  params: Record<string, string> = { channel: '#alerts' },
+  waitForFindings?: (investigationId: string, signal: AbortSignal) => Promise<void>
 ) => {
   const request = httpServerMock.createKibanaRequest({ spaceId: brandSpaceId(spaceId) });
   const routing = createRoutingTestContext(spaceId);
@@ -79,6 +80,7 @@ const setup = (
     getActions: () => ({ getActionsClientWithRequestInSpace } as never),
     getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient,
+    waitForFindings,
   });
   const failureDefinition = handleInvestigationFailureStepDefinition({
     investigationLocator,
@@ -125,6 +127,53 @@ const setup = (
 };
 
 describe('nightshift.sendNotifications step', () => {
+  describe('waiting for the findings recorder', () => {
+    const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+    it('holds a terminal phase until the findings are recorded', async () => {
+      let release: () => void = () => {};
+      const waitForFindings = jest.fn(
+        () => new Promise<void>((resolve) => (release = () => resolve()))
+      );
+      const { definition, getInvestigationExecutionContext, execute, context, controller } = setup(
+        'default',
+        'saved-slack',
+        { channel: '#alerts' },
+        waitForFindings
+      );
+
+      await definition.handler(context('started'));
+      getInvestigationExecutionContext.mockClear();
+      execute.mockClear();
+
+      const handled = definition.handler(context('completed'));
+      await flush();
+      expect(waitForFindings).toHaveBeenCalledTimes(1);
+      expect(waitForFindings).toHaveBeenCalledWith('inv-1', controller.signal);
+      expect(getInvestigationExecutionContext).not.toHaveBeenCalled();
+      expect(execute).not.toHaveBeenCalled();
+
+      release();
+      await handled;
+      expect(getInvestigationExecutionContext).toHaveBeenCalledTimes(1);
+      expect(execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends the started phase without waiting', async () => {
+      const waitForFindings = jest.fn(() => new Promise<void>(() => {}));
+      const { definition, execute, context } = setup(
+        'default',
+        'saved-slack',
+        { channel: '#alerts' },
+        waitForFindings
+      );
+
+      await definition.handler(context('started'));
+      expect(waitForFindings).not.toHaveBeenCalled();
+      expect(execute).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it.each(['default', 'ops'])(
     'executes a saved connector in the %s space using workflow authentication',
     async (spaceId) => {

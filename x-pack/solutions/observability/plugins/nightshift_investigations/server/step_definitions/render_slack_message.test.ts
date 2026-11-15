@@ -18,7 +18,10 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
   createServerStepDefinition: jest.fn((definition) => definition),
 }));
 
-const setup = (spaceId = 'default') => {
+const setup = (
+  spaceId = 'default',
+  waitForFindings?: (investigationId: string, signal: AbortSignal) => Promise<void>
+) => {
   const request = httpServerMock.createKibanaRequest({ spaceId: brandSpaceId(spaceId) });
   const getNotifiableInvestigation = jest.fn(async () => ({
     investigation_id: 'inv-1',
@@ -31,6 +34,7 @@ const setup = (spaceId = 'default') => {
     investigationLocator: urlService.locators.create(new InvestigationLocatorDefinition()),
     getInvestigationsClient,
     getIsomerRuntime: getTestIsomerRuntime,
+    waitForFindings,
   });
   const context = (input: Record<string, unknown>) =>
     ({
@@ -77,6 +81,23 @@ describe('nightshift.renderSlackMessage step', () => {
       );
     }
   );
+
+  it('reads the investigation only after the findings are recorded', async () => {
+    let release: () => void = () => {};
+    const waitForFindings = jest.fn(
+      () => new Promise<void>((resolve) => (release = () => resolve()))
+    );
+    const { definition, getNotifiableInvestigation, context } = setup('default', waitForFindings);
+
+    const handled = definition.handler(context({ investigation_id: 'inv-1', phase: 'completed' }));
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(waitForFindings).toHaveBeenCalledWith('inv-1', expect.any(AbortSignal));
+    expect(getNotifiableInvestigation).not.toHaveBeenCalled();
+
+    release();
+    await handled;
+    expect(getNotifiableInvestigation).toHaveBeenCalledWith('inv-1');
+  });
 
   it('passes the failure reason through', async () => {
     const { definition, context } = setup();
