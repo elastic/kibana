@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiTitle, EuiTextColor } fro
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../../common/constants';
 

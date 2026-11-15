@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import { euiFontSize } from '@elastic/eui';
+import styled from '@emotion/styled';
 
 export const UnitCount = styled.span`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  border-right: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  padding-right: ${({ theme }) => theme.eui.euiSizeM};
+  font-size: ${({ theme }) => euiFontSize(theme, 'xs').fontSize};
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
+  border-right: ${({ theme }) => theme.euiTheme.border.thin};
+  margin-right: ${({ theme }) => theme.euiTheme.size.s};
+  padding-right: ${({ theme }) => theme.euiTheme.size.m};
 `;

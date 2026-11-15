@@ -2,7 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node", "react"]
+    "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
@@ -13,7 +13,6 @@
     "@kbn/securitysolution-ecs",
     "@kbn/safer-lodash-set",
     "@kbn/i18n",
-    "@kbn/ui-theme",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/i18n-react",

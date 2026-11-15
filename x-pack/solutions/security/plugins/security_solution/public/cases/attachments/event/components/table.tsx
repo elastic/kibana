@@ -9,7 +9,6 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridPaginationProps,
 } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import {
   addBuildingBlockStyle,
@@ -202,7 +201,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
           const rowData = data[pageRowIndex];
 
           if (rowData) {
-            addBuildingBlockStyle(rowData.ecs, euiTheme as unknown as EuiTheme, setCellProps);
+            addBuildingBlockStyle(rowData.ecs, euiTheme, setCellProps);
           } else {
             // disable the cell when it has no data
             setCellProps({ style: { display: 'none' } });

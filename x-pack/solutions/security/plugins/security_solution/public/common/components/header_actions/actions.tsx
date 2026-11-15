@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   makeSelectDocumentNotesBySavedObjectId,

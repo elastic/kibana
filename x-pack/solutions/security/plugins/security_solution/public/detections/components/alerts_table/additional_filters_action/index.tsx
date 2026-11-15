@@ -15,7 +15,7 @@ import {
   EuiNotificationBadge,
   EuiPopover,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import * as i18n from './translations';
 
@@ -24,11 +24,11 @@ const UtilityBarFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const AdditionalFiltersItem = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.euiSizeS};
+  padding: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 const BuildingBlockContainer = styled(AdditionalFiltersItem)`
-  background: ${({ theme }) => theme.eui.euiColorHighlight};
+  background: ${({ theme }) => theme.euiTheme.colors.highlight};
 `;
 
 const CenterText = styled.span`

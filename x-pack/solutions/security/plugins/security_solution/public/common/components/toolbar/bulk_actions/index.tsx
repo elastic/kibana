@@ -8,7 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import React, { useState, useCallback, useEffect } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EventsTableBulkActionMenu } from './events_table_bulk_action_menu';
 import type { BulkActionGroups } from './use_bulk_action_items';
 
