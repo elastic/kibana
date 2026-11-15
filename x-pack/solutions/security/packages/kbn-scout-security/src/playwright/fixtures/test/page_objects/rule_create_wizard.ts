@@ -145,6 +145,14 @@ export class RuleCreateWizardPage {
   }
 
   /**
+   * Closes any open toasts. The toast list overlays the bottom-right of the page, where the
+   * wizard's "Continue" buttons sit, and intercepts clicks on them.
+   */
+  private async dismissToasts(): Promise<void> {
+    await this.page.components.toast().closeAll();
+  }
+
+  /**
    * Clicks Define "Continue" until the About step is open and editable. The click races async
    * query validation and can be swallowed, so it is retried only while About is not shown yet.
    */
@@ -152,6 +160,7 @@ export class RuleCreateWizardPage {
     await expect(this.defineContinue).toBeEnabled({ timeout: STEP_VALIDATION_TIMEOUT_MS });
     await expect(async () => {
       if (!(await this.aboutRuleName.isVisible())) {
+        await this.dismissToasts();
         await this.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
       }
       await expect(this.aboutRuleName).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
@@ -166,6 +175,7 @@ export class RuleCreateWizardPage {
   async continueFromAboutStep(): Promise<void> {
     await expect(async () => {
       if (!(await this.scheduleContinue.isVisible())) {
+        await this.dismissToasts();
         await this.aboutContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
       }
       await expect(this.scheduleContinue).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
@@ -180,6 +190,7 @@ export class RuleCreateWizardPage {
   async continueFromDefineStepUntilQueryError(expectedError: string): Promise<void> {
     await expect(this.defineContinue).toBeEnabled({ timeout: STEP_VALIDATION_TIMEOUT_MS });
     await expect(async () => {
+      await this.dismissToasts();
       await this.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
       await expect(this.esqlQueryBar).toContainText(expectedError, {
         timeout: RETRY_ATTEMPT_TIMEOUT_MS,
