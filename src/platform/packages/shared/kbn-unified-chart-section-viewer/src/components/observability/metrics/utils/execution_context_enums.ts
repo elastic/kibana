@@ -17,4 +17,6 @@ export enum MetricsExecutionContextName {
   METRICS_INFO = 'metrics_info',
   HISTOGRAM_BOUNDS = 'histogram_bounds',
   EXEMPLARS = 'exemplars',
+  /** One grid-level query that checks whether the cluster accepts `SET exemplars`. */
+  EXEMPLARS_CLUSTER_SUPPORT = 'exemplars_cluster_support',
 }

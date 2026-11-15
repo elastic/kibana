@@ -8,56 +8,42 @@
  */
 
 import { esql } from '@elastic/esql';
-import { fieldConstants } from '@kbn/discover-utils';
-import { escapeStringValue } from '@kbn/esql-utils';
-import { EXEMPLARS_MAX_ROWS, EXEMPLARS_METRIC_NAME_FIELD } from '../../constants';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 import type { ParsedMetricItem } from '../../../types';
-
-const { TIMESTAMP_FIELD } = fieldConstants;
+import { createESQLQuery } from './create_esql_query';
 
 interface CreateExemplarsQueryParams {
   metricItem: ParsedMetricItem;
-  /** The metric's exemplars data stream, from `resolveExemplarsIndex`. */
-  exemplarsIndex: string;
   whereStatements?: string[];
-  maxRows?: number;
+  metadataFields?: string[];
+  originalSource?: string;
+  gridSettings?: MetricsGridSettings;
 }
 
 /**
- * Builds the ES|QL query that fetches OTel exemplars for one metric from `exemplarsIndex`, or
- * `''` when the metric has no name. Returns whole documents (no `KEEP`) so the inspect view can
- * show every field an exemplar carries. Takes no breakdown accessors on purpose: breaking the
- * chart down does not change which exemplars are fetched.
+ * Builds the exemplar query for one metric chart, or `''` when the chart has no time-series query.
+ * Uses the chart's `TS | STATS` query with no breakdown dimensions, so a grid split does not change
+ * which exemplars are fetched. Callers skip unsupported charts before calling this.
  */
 export function createExemplarsQuery({
   metricItem,
-  exemplarsIndex,
-  whereStatements = [],
-  maxRows = EXEMPLARS_MAX_ROWS,
+  whereStatements,
+  metadataFields,
+  originalSource,
+  gridSettings,
 }: CreateExemplarsQueryParams): string {
-  const { metricName } = metricItem;
+  const chartQuery = createESQLQuery({
+    metricItem,
+    splitAccessors: [],
+    whereStatements,
+    metadataFields,
+    originalSource,
+    gridSettings,
+  });
 
-  if (!metricName) {
+  if (!chartQuery) {
     return '';
   }
 
-  // Inherited `WHERE` clauses can reference metric fields that exist only in the metrics stream;
-  // the exemplars mapping is dynamic, so those are unmapped and would fail verification.
-  const query = esql.from(exemplarsIndex);
-  query.addSetCommand('unmapped_fields', 'NULLIFY');
-
-  const exemplarMetricName = escapeStringValue(metricName.replace(/^metrics\./, ''));
-  query.pipe(`WHERE ${EXEMPLARS_METRIC_NAME_FIELD} == ${exemplarMetricName}`);
-
-  for (const statement of whereStatements) {
-    const trimmed = statement.trim();
-    if (trimmed.length > 0) {
-      query.pipe(`WHERE ${trimmed}`);
-    }
-  }
-
-  query.pipe(`SORT ${TIMESTAMP_FIELD} DESC`);
-  query.pipe(`LIMIT ${maxRows}`);
-
-  return query.print('pipe-multiline');
+  return esql(chartQuery).addSetCommand('exemplars', true).print('pipe-multiline');
 }
