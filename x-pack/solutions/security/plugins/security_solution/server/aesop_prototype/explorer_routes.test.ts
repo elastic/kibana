@@ -19,6 +19,7 @@ import {
 } from '../../common/aesop_prototype';
 import { enableAesopExplorer, uninstallAesopExplorer } from './explorer_schedule';
 import { registerAesopExplorerRoutes } from './explorer_routes';
+import { installAesopExplorerAgent } from './explorer_agent';
 import {
   AesopExplorerDefaultError,
   resolveDefaultConnectorId,
@@ -33,6 +34,10 @@ jest.mock('./explorer_defaults', () => ({
   resolveDefaultInvestigationId: jest.fn(),
 }));
 
+jest.mock('./explorer_agent', () => ({
+  installAesopExplorerAgent: jest.fn(),
+}));
+
 jest.mock('./explorer_schedule', () => ({
   ...jest.requireActual('./explorer_schedule'),
   enableAesopExplorer: jest.fn(),
@@ -41,6 +46,9 @@ jest.mock('./explorer_schedule', () => ({
 
 const enableMock = enableAesopExplorer as jest.MockedFunction<typeof enableAesopExplorer>;
 const uninstallMock = uninstallAesopExplorer as jest.MockedFunction<typeof uninstallAesopExplorer>;
+const installAgentMock = installAesopExplorerAgent as jest.MockedFunction<
+  typeof installAesopExplorerAgent
+>;
 const resolveConnectorMock = resolveDefaultConnectorId as jest.MockedFunction<
   typeof resolveDefaultConnectorId
 >;
@@ -63,6 +71,7 @@ describe('registerAesopExplorerRoutes', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let hasAtLeast: jest.Mock;
   let spaceIdFor: jest.Mock;
+  const agentBuilder = { agents: { ensure: jest.fn() } };
 
   const createContext = (): SecuritySolutionRequestHandlerContext =>
     ({
@@ -103,18 +112,21 @@ describe('registerAesopExplorerRoutes', () => {
     resolveConnectorMock.mockResolvedValue('default-conn');
     resolveDatasetMock.mockResolvedValue('default-ds');
     resolveInvestigationMock.mockResolvedValue('default-inv');
+    installAgentMock.mockResolvedValue(undefined);
 
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(
       {} as Awaited<ReturnType<typeof workflowsExtensions.initManagedWorkflowsClient>>
     );
-    const getStartServices = jest
-      .fn()
-      .mockResolvedValue([
-        coreMock.createStart(),
-        { workflowsExtensions, spaces: { spacesService: { getSpaceId: spaceIdFor } } },
-        undefined,
-      ]);
+    const getStartServices = jest.fn().mockResolvedValue([
+      coreMock.createStart(),
+      {
+        workflowsExtensions,
+        agentBuilder,
+        spaces: { spacesService: { getSpaceId: spaceIdFor } },
+      },
+      undefined,
+    ]);
 
     registerAesopExplorerRoutes({
       router: router as unknown as SecuritySolutionPluginRouter,
@@ -167,6 +179,29 @@ describe('registerAesopExplorerRoutes', () => {
       })
     );
     expect(resolveDatasetMock).toHaveBeenCalledWith(expect.objectContaining({ spaceId: 'sec' }));
+  });
+
+  it('installs the explorer agent in the request space when it is the A/B agent', async () => {
+    await post({ ...validBody, ab_agent_id: AESOP_EXPLORER_AGENT_ID });
+
+    expect(installAgentMock).toHaveBeenCalledWith({ agentBuilder, spaceId: 'sec' });
+  });
+
+  it('does not install the explorer agent for a custom A/B agent', async () => {
+    await post({ ...validBody, ab_agent_id: 'agent-1' });
+
+    expect(installAgentMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a resolved default id that the body schema would refuse', async () => {
+    resolveConnectorMock.mockResolvedValue('{{ steps.x.output }}');
+
+    await post({ mode: 'discovery' });
+
+    expect(enableMock).not.toHaveBeenCalled();
+    expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      body: { message: expect.stringContaining('connectorId') },
+    });
   });
 
   it('accepts a body with only the mode', () => {

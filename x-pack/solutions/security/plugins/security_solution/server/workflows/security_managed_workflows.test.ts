@@ -297,7 +297,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(managed.uninstall).toHaveBeenCalledWith(AESOP_AB_COMPARE_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
-    // Only the drift-monitor instance is swept; other workflows are untouched.
+    // The per-skill drift-monitor and per-mode explorer instances are swept too.
     expect(managed.uninstall).toHaveBeenCalledWith(AESOP_DRIFT_MONITOR_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       workflowId: `${AESOP_DRIFT_MONITOR_WORKFLOW_ID}-skill-find-security-rules`,

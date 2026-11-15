@@ -14,7 +14,9 @@ import type { StartPlugins } from '../plugin';
  * Each resolver reuses what the space already has before creating anything.
  */
 
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+// Both sentinels mean "no default": the GenAI settings page writes the first, the
+// inference endpoints settings page the second.
+const NO_DEFAULT_SENTINELS: readonly string[] = ['NO_DEFAULT_CONNECTOR', 'NO_DEFAULT_MODEL'];
 
 export const AESOP_DEFAULT_DATASET_NAME = 'aesop-explorer-default';
 export const AESOP_DECISION_LOG_TITLE = 'AESOP Decision Log';
@@ -47,7 +49,7 @@ export const resolveDefaultConnectorId = async ({
 }: DefaultsDeps & { uiSettingsClient: IUiSettingsClient }): Promise<string> => {
   try {
     const setting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-    if (setting && setting !== NO_DEFAULT_CONNECTOR) {
+    if (setting && !NO_DEFAULT_SENTINELS.includes(setting)) {
       return setting;
     }
   } catch (error) {

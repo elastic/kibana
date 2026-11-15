@@ -73,8 +73,9 @@ export const registerAesopExplorerAgentType = (agentBuilder: AgentBuilderPluginS
 };
 
 /**
- * Installs the system-owned, user-editable explorer agent in the default
- * space. Idempotent — does not overwrite existing agents or later user edits.
+ * Installs the system-owned, user-editable explorer agent in a space (the default space at
+ * boot, the request's space from the explorer route). Idempotent — does not overwrite existing
+ * agents or later user edits.
  */
 export const installAesopExplorerAgent = async ({
   agentBuilder,

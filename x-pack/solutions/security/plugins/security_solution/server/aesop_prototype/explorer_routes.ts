@@ -24,6 +24,7 @@ import type {
   AesopDriftMonitorRequestDeps,
 } from './drift_monitor_schedule';
 import { enableAesopExplorer, uninstallAesopExplorer } from './explorer_schedule';
+import { installAesopExplorerAgent } from './explorer_agent';
 import {
   AesopExplorerDefaultError,
   resolveDefaultConnectorId,
@@ -134,6 +135,24 @@ export const registerAesopExplorerRoutes = ({
           const datasetId = body.dataset_id ?? (await resolveDefaultDatasetId(defaultsDeps));
           const investigationId =
             body.investigation_id ?? (await resolveDefaultInvestigationId(defaultsDeps));
+          // Resolved defaults come from settings and saved names, so they get the body's check.
+          const invalid = Object.entries({ connectorId, datasetId, investigationId }).find(
+            ([, id]) => validateSafeId(id) !== undefined
+          );
+          if (invalid) {
+            return response.badRequest({
+              body: {
+                message: `The resolved ${invalid[0]} "${invalid[1]}" ${validateSafeId(invalid[1])}`,
+              },
+            });
+          }
+          // The boot install only covers the default space.
+          if (body.ab_agent_id === AESOP_EXPLORER_AGENT_ID && pluginsStart.agentBuilder) {
+            await installAesopExplorerAgent({
+              agentBuilder: pluginsStart.agentBuilder,
+              spaceId: deps.spaceId,
+            });
+          }
           const { documentId } = await enableAesopExplorer(deps, {
             mode: body.mode,
             intervalMinutes: body.interval_minutes,

@@ -11,7 +11,6 @@ import type { StartPlugins } from '../plugin';
 import {
   AESOP_DECISION_LOG_TITLE,
   AESOP_DEFAULT_DATASET_NAME,
-  AesopExplorerDefaultError,
   resolveDefaultConnectorId,
   resolveDefaultDatasetId,
   resolveDefaultInvestigationId,
@@ -86,7 +85,7 @@ describe('AESOP explorer defaults', () => {
       expect(getDefaultConnector).not.toHaveBeenCalled();
     });
 
-    it.each([['NO_DEFAULT_CONNECTOR'], [undefined]])(
+    it.each([['NO_DEFAULT_CONNECTOR'], ['NO_DEFAULT_MODEL'], [undefined]])(
       'falls back to the inference default when the setting is %j',
       async (value) => {
         await expect(
@@ -148,7 +147,7 @@ describe('AESOP explorer defaults', () => {
     it('fails with a 400 when the evals plugin is absent', async () => {
       await expect(
         resolveDefaultDatasetId(deps(buildPlugins({ evals: false })))
-      ).rejects.toBeInstanceOf(AesopExplorerDefaultError);
+      ).rejects.toMatchObject({ name: 'AesopExplorerDefaultError', statusCode: 400 });
     });
   });
 
