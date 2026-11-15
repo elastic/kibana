@@ -2729,6 +2729,32 @@ describe('ManagedWorkflowsService', () => {
       expect(service.isPluginReady(PLUGIN_ID)).toBe(true);
     });
 
+    it('still fails ready() when a dynamic auto upgrade fails for a reason other than rendering', async () => {
+      const definition: TemplateManagedWorkflowDefinition = {
+        ...createTemplateDefinition({
+          management: { lifecycle: 'dynamic', versionStrategy: 'auto' },
+        }),
+        version: 2,
+      };
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+
+      const source = createWorkflowSource({
+        lifecycle: 'dynamic',
+        managedVersion: 1,
+        originManagedWorkflowId: definition.id,
+        managedTemplateValues: { recipient: 'World', enabled: true },
+      });
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        { id: WORKFLOW_ID, source },
+      ]);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(createVersionedDocument(source));
+      crudService.writeWorkflowDocumentWithOcc.mockRejectedValue(new Error('cluster unavailable'));
+
+      await expect(service.pluginReady(PLUGIN_ID)).rejects.toThrow('cluster unavailable');
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(false);
+    });
+
     it('preserves tracked static docs and would-be orphans when install pass is incomplete', async () => {
       const trackedDefinition = createDefinition({ id: 'system-tracked' });
       const orphanDefinition = createDefinition({ id: 'system-orphan' });

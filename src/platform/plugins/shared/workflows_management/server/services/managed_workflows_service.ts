@@ -74,6 +74,14 @@ const hasTemplateValues = (
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
+/** A definition's yamlTemplate threw for the values it was given. */
+class ManagedWorkflowRenderError extends Error {
+  constructor(cause: unknown) {
+    super(toError(cause).message, { cause });
+    this.name = 'ManagedWorkflowRenderError';
+  }
+}
+
 type ManagedInstallPlan =
   | { action: 'skip' }
   | {
@@ -1146,6 +1154,10 @@ export class ManagedWorkflowsService {
         );
       } catch (error) {
         // One instance whose stored values no longer render must not block upgrades of the rest.
+        // Anything else (Elasticsearch, write conflicts, permissions) still fails the pass.
+        if (!(error instanceof ManagedWorkflowRenderError)) {
+          throw error;
+        }
         this.logger.warn(
           `Managed workflows: dynamic auto upgrade of '${update.workflowId}' ` +
             `(definition '${update.definitionId}', space '${update.spaceId}') failed and was skipped`,
@@ -1517,7 +1529,12 @@ export class ManagedWorkflowsService {
           `Managed workflow '${definition.id}' uses yamlTemplate but no template values were provided and none are persisted`
         );
       }
-      const yaml = definition.yamlTemplate(templateValues);
+      let yaml: string;
+      try {
+        yaml = definition.yamlTemplate(templateValues);
+      } catch (error) {
+        throw new ManagedWorkflowRenderError(error);
+      }
       return {
         yaml,
         managedTemplateValues: templateValues,
