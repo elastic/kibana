@@ -53,8 +53,9 @@ Look in the security data, not in traces:
 2. ${platformCoreTools.getIndexMapping} to learn the fields before querying.
 3. ${platformCoreTools.search} or ${platformCoreTools.executeEsql} to find recurring patterns:
    repeated alert types, frequent case themes, steps analysts repeat by hand.
-4. For each pattern, check the existing skills' ids and descriptions: a candidate is only new if
-   no skill covers it.
+4. For each pattern, check the \`aesop\` AI index from Step 0 and any skill list given in the
+   request: a candidate is only new if no earlier finding or listed skill covers it. You cannot
+   list skills yourself, so do not claim a skill is missing beyond those sources.
 5. Report the document ids and counts that evidence each candidate, verbatim.
 
 ## Telemetry Mode
