@@ -9,10 +9,13 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
+import { createSignalEventInternalDataSchema } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEventSeverity,
   CreateAlertEventData,
   CreateAlertEventResponse,
+  CreateSignalEventData,
+  CreateSignalEventResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
@@ -63,11 +66,17 @@ export function getValueByDottedPath(obj: unknown, path: string): unknown {
  * Computes `group_hash` in priority order:
  *   1. Explicit `fingerprint`
  *   2. `fingerprint_fields` — keys/paths resolved only under `data` (missing → "")
- *   3. `rule_id` (schema guarantees one of the three)
+ *   3. `rule_id` (Create Alert's schema guarantees one of the three)
+ *   4. Neither of the above, which only a signal can send: one series per source
  *
  * Always includes `spaceId` and `source` so series keys cannot collide across spaces or sources.
  */
-export function getGroupHash(event: CreateAlertEventData, spaceId: string): string {
+export function getGroupHash(
+  event: Pick<CreateAlertEventData, 'source' | 'fingerprint' | 'fingerprint_fields' | 'data'> & {
+    rule_id?: string;
+  },
+  spaceId: string
+): string {
   const { source } = event;
 
   if (event.fingerprint) {
@@ -85,8 +94,11 @@ export function getGroupHash(event: CreateAlertEventData, spaceId: string): stri
     return sha256(`${spaceId}:${source}:${JSON.stringify(pairs)}`);
   }
 
-  // Schema requires fingerprint, fingerprint_fields, or rule_id.
-  return sha256(`${spaceId}:${source}:${event.rule_id}`);
+  if (event.rule_id) {
+    return sha256(`${spaceId}:${source}:${event.rule_id}`);
+  }
+
+  return sha256(`${spaceId}:${source}`);
 }
 
 interface ResolvedEpisode {
@@ -192,6 +204,56 @@ export class AlertEventsClient {
       group_hash: groupHash,
       alert_id: episodeId,
     };
+  }
+
+  /**
+   * Stores an observation-only `signal` event. A signal has no lifecycle, so there is no
+   * episode lookup, no `alert` object and no status change publish. It is stored as
+   * `breached` unless the caller sends a `status`, and `type: 'signal'` keeps it away from
+   * the dispatcher.
+   */
+  public async createSignalEvent(event: CreateSignalEventData): Promise<CreateSignalEventResponse> {
+    // Validate here as well as in the workflow step, so direct callers of the client
+    // cannot store a lifecycle status or a rule id. Any source is accepted, because only the
+    // workflow step, the external surface, reserves the `elastic` prefix.
+    const validation = createSignalEventInternalDataSchema.safeParse(event);
+    if (!validation.success) {
+      throw Boom.badRequest(`Invalid signal event: ${validation.error.message}`);
+    }
+
+    const groupHash = getGroupHash(event, this.spaceId);
+
+    const doc: AlertEventDocument = {
+      ...(event.timestamp != null ? { '@timestamp': event.timestamp } : {}),
+      scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
+      group_hash: groupHash,
+      data: event.data ?? {},
+      status: event.status ?? alertEventStatus.breached,
+      source: event.source,
+      type: alertEventType.signal,
+      space_id: this.spaceId,
+      ...(event.severity != null ? { severity: event.severity } : {}),
+    };
+
+    // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
+    await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
+
+    // No `refresh: 'wait_for'` as in Create Alert: that is there so the next episode lookup
+    // sees the write, and a signal has no lookup.
+    const { errors } = await this.storageService.bulkIndexDocs({
+      index: ALERT_EVENTS_DATA_STREAM,
+      docs: [doc],
+    });
+
+    if (errors.length > 0) {
+      const first = errors[0];
+      throw Boom.badData(`Failed to persist signal event: ${first.message}`, {
+        code: first.code,
+        details: first.details,
+      });
+    }
+
+    return { group_hash: groupHash };
   }
 
   /**

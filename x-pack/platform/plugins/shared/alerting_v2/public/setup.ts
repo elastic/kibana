@@ -23,6 +23,7 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
+import { registerCreateSignalEventStep } from './lib/workflow_extensions/register_create_signal_event_step';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
 import {
@@ -140,6 +141,7 @@ export const registerOnSetup =
   (): void => {
     registerTriggerDefinitions(workflowsExtensions);
     registerCreateAlertEventStep(workflowsExtensions);
+    registerCreateSignalEventStep(workflowsExtensions);
 
     // Register change-history telemetry event types once, lazily, to keep the
     // React UI out of the page-load bundle.
