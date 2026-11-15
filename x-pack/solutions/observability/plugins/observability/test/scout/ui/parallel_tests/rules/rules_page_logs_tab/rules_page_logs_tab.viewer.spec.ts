@@ -58,15 +58,8 @@ test.describe(
       // Navigate to logs tab
       await pageObjects.rulesPage.clickLogsTab();
 
-      // Wait for logs table to load
-      await pageObjects.rulesPage.waitForLogsTableToLoad();
-
       // Click on one of the rule links in the event logs
-      const ruleLinks = await pageObjects.rulesPage.getLogsTableRuleLinks(
-        RULE_NAMES.FIRST_RULE_TEST
-      );
-      expect(ruleLinks.length).toBeGreaterThan(0);
-      await pageObjects.rulesPage.clickOnRuleInEventLogs(ruleLinks[0]);
+      await pageObjects.rulesPage.clickOnRuleInEventLogs(RULE_NAMES.FIRST_RULE_TEST);
 
       // Verify we navigated to the rule details page
       await expect(pageObjects.rulesPage.ruleDetails).toBeVisible();
