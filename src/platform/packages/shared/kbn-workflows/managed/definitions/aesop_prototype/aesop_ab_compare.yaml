@@ -509,7 +509,7 @@ steps:
           **A/B matrix** (baseline, {% if variables.has_live_skill == true %}live skill, {% endif %}every variant that scored):
 
           ```json
-          ${{ steps.resolve_comparison.output.comparison_json }}
+          {{ steps.resolve_comparison.output.comparison_json }}
           ```
         impact: medium
         confidence: low
@@ -550,7 +550,7 @@ steps:
           **A/B matrix** (baseline, {% if variables.has_live_skill == true %}live skill, {% endif %}every variant that scored):
 
           ```json
-          ${{ steps.resolve_comparison.output.comparison_json }}
+          {{ steps.resolve_comparison.output.comparison_json }}
           ```
 
           **Winner content**
