@@ -49,7 +49,10 @@ import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchCapabilities,
+  ElasticsearchClient,
+} from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
@@ -80,6 +83,10 @@ export interface KibanaMigratorTestKitParams {
   kibanaVersion?: string;
   kibanaBranch?: string;
   nodeRoles?: NodeRoles;
+  /** Overrides the capabilities reported by Elasticsearch, e.g. to run the Serverless flavour of a migration. */
+  esCapabilities?: Partial<ElasticsearchCapabilities>;
+  /** Whether the migrator waits for another node to perform the migration. */
+  waitForMigrationCompletion?: boolean;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   removedTypes?: string[];
@@ -95,6 +102,10 @@ export interface KibanaMigratorTestKit {
   client: ElasticsearchClient;
   migrator: IKibanaMigrator;
   runMigrations: () => Promise<MigrationResult[]>;
+  /** Creates the indices with the v3 algorithm or, if they exist, updates their mappings and aliases. */
+  initialize: (params?: { client?: ElasticsearchClient }) => Promise<MigrationResult[]>;
+  /** Fully migrates the indices with the v3 algorithm, on demand. Can be called multiple times. */
+  migrate: (params?: { client?: ElasticsearchClient }) => Promise<MigrationResult[]>;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsRepository: ISavedObjectsRepository;
 }
@@ -151,6 +162,8 @@ export const getKibanaMigratorTestKit = async ({
   removedTypes = [],
   logFilePath = defaultLogFilePath,
   nodeRoles = defaultNodeRoles,
+  esCapabilities,
+  waitForMigrationCompletion,
   clientWrapperFactory,
   encryptionExtensionFactory,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
@@ -182,6 +195,8 @@ export const getKibanaMigratorTestKit = async ({
     kibanaVersion,
     kibanaBranch,
     nodeRoles,
+    esCapabilities,
+    waitForMigrationCompletion,
   });
 
   const runMigrations = async () => {
@@ -215,10 +230,17 @@ export const getKibanaMigratorTestKit = async ({
     }
   );
 
+  const initialize = ({ client: target = client }: { client?: ElasticsearchClient } = {}) =>
+    migrator.initialize({ client: target });
+  const migrate = ({ client: target = client }: { client?: ElasticsearchClient } = {}) =>
+    migrator.migrate({ client: target });
+
   return {
     client,
     migrator,
     runMigrations,
+    initialize,
+    migrate,
     typeRegistry,
     savedObjectsRepository,
   };
@@ -310,6 +332,8 @@ interface GetMigratorParams {
   kibanaBranch: string;
   buildFlavor?: BuildFlavor;
   nodeRoles: NodeRoles;
+  esCapabilities?: Partial<ElasticsearchCapabilities>;
+  waitForMigrationCompletion?: boolean;
   kibanaVersionCheck?: string;
 }
 
@@ -324,6 +348,8 @@ const getMigrator = async ({
   kibanaBranch,
   buildFlavor = 'traditional',
   nodeRoles,
+  esCapabilities: esCapabilitiesOverrides,
+  waitForMigrationCompletion = false, // ensure we have an active role in the migration
   kibanaVersionCheck = '8.18.0',
 }: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
@@ -339,7 +365,10 @@ const getMigrator = async ({
     links: getDocLinks({ kibanaBranch, buildFlavor }),
   };
 
-  const esCapabilities = await getCapabilitiesFromClient(client);
+  const esCapabilities = {
+    ...(await getCapabilitiesFromClient(client)),
+    ...esCapabilitiesOverrides,
+  };
 
   return new KibanaMigrator({
     client,
@@ -350,7 +379,7 @@ const getMigrator = async ({
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),
     docLinks,
-    waitForMigrationCompletion: false, // ensure we have an active role in the migration
+    waitForMigrationCompletion,
     nodeRoles,
     esCapabilities,
     kibanaVersionCheck,

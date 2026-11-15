@@ -10,6 +10,7 @@
 import fs from 'fs/promises';
 import { range, sortBy } from 'lodash';
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { MigrationAlgorithm } from '@kbn/core-saved-objects-base-server-internal';
 import '../../jest_matchers';
 import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import { parseLogFile } from '../../test_utils';
@@ -20,12 +21,17 @@ import {
   getSampleBType,
 } from '../../fixtures/zdt_base.fixtures';
 
+/** A raw saved object document: its attributes are stored under its type. */
+type StoredDocument = Partial<Record<string, Record<string, string | boolean>>>;
+
 export function createBasicDocumentsMigrationTest({
   startES,
   logFilePath,
+  migrationAlgorithm = 'zdt',
 }: {
   startES: EsRunner;
   logFilePath: string;
+  migrationAlgorithm?: MigrationAlgorithm;
 }) {
   let esServer: EsServer;
 
@@ -40,7 +46,7 @@ export function createBasicDocumentsMigrationTest({
 
   const createBaseline = async () => {
     const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
+      ...getBaseMigratorParams({ migrationAlgorithm }),
       types: [getSampleAType(), getSampleBType()],
     });
     await runMigrations();
@@ -139,8 +145,8 @@ export function createBasicDocumentsMigrationTest({
       },
     };
 
-    const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
+    const { runMigrations, client } = await getKibanaMigratorTestKit({
+      ...getBaseMigratorParams({ migrationAlgorithm }),
       logFilePath,
       types: [typeA, typeB],
     });
@@ -166,17 +172,26 @@ export function createBasicDocumentsMigrationTest({
       sample_b: '10.3.0',
     });
 
-    const { saved_objects: sampleADocs } = await savedObjectsRepository.find({ type: 'sample_a' });
-    const { saved_objects: sampleBDocs } = await savedObjectsRepository.find({ type: 'sample_b' });
+    // the stored documents: the repository can't prove they were converted, it migrates them on read
+    const getStoredObjects = async (type: string) => {
+      const { hits } = await client.search<StoredDocument>({
+        index: '.kibana',
+        query: { term: { type } },
+        size: 100,
+      });
+      return hits.hits.map(({ _id = '', _source }) => ({
+        id: _id.replace(`${type}:`, ''),
+        type,
+        attributes: _source?.[type],
+      }));
+    };
+    const sampleADocs = await getStoredObjects('sample_a');
+    const sampleBDocs = await getStoredObjects('sample_b');
 
     expect(sampleADocs).toHaveLength(5);
     expect(sampleBDocs).toHaveLength(5);
 
-    const sampleAData = sortBy(sampleADocs, 'id').map((object) => ({
-      id: object.id,
-      type: object.type,
-      attributes: object.attributes,
-    }));
+    const sampleAData = sortBy(sampleADocs, 'id');
 
     expect(sampleAData).toEqual([
       {
@@ -206,11 +221,7 @@ export function createBasicDocumentsMigrationTest({
       },
     ]);
 
-    const sampleBData = sortBy(sampleBDocs, 'id').map((object) => ({
-      id: object.id,
-      type: object.type,
-      attributes: object.attributes,
-    }));
+    const sampleBData = sortBy(sampleBDocs, 'id');
 
     expect(sampleBData).toEqual([
       {
