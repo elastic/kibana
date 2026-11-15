@@ -37,6 +37,7 @@ process.stdout.write(
     stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
     scoutHook: suite.scoutHook,
     vaultSecret: suite.vaultSecret,
+    pinnedBaseline: suite.pinnedBaseline === true,
     scoutArch: suite.scoutArch,
     scoutDomain: suite.scoutDomain,
     // The Scout server config set (plugin flags the suite's stack needs). run_suite.sh
