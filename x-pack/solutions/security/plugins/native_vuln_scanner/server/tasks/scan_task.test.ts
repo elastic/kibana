@@ -359,6 +359,62 @@ describe('registerScanTask', () => {
     expect(() => stateSchemaByVersion[1].schema.validate(result?.state)).not.toThrow();
   });
 
+  describe('when Task Manager aborts the run at its timeout', () => {
+    const runAborted = async (
+      load: (os: FeedOs, controller: AbortController) => Promise<LoadFeedResult>
+    ) => {
+      const controller = new AbortController();
+      const taskManager = taskManagerMock.createSetup();
+      const { deps } = setup([rhelAgent('a1', '9'), ubuntuAgent('u1')], (os) =>
+        load(os, controller)
+      );
+      registerScanTask(taskManager, async () => deps);
+      const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][SCAN_TASK_TYPE];
+      const runner = definition.createTaskRunner({
+        taskInstance: { id: SCAN_TASK_ID } as ConcreteTaskInstance,
+        signal: controller.signal,
+        executionUuid: 'exec-1',
+      } as Parameters<typeof definition.createTaskRunner>[0]);
+      return runner.run();
+    };
+
+    const expectAbortedRun = (result: Awaited<ReturnType<typeof runAborted>>) => {
+      expect(result).not.toHaveProperty('error');
+      expect(result?.state.lastRun).not.toHaveProperty('error');
+      expect(result?.state.lastRun).toMatchObject({
+        runId: 'exec-1',
+        status: 'aborted',
+        hosts: 2,
+        releases: { 'rhel:9': 'matched' },
+      });
+      const { lastRun } = result?.state as { lastRun: { findings: number } };
+      expect(lastRun.findings).toBeGreaterThan(0);
+      expect(() => stateSchemaByVersion[1].schema.validate(result?.state)).not.toThrow();
+    };
+
+    it('records an abort between releases as aborted and keeps the partial result', async () => {
+      const result = await runAborted(async (os, controller) => {
+        if (os.family !== 'rhel') throw new Error('the aborted scan must not load another release');
+        const feed = await rhel9Feed();
+        controller.abort();
+        return feed;
+      });
+
+      expectAbortedRun(result);
+      expect(writeMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('records an AbortError thrown inside a release as aborted, not failed', async () => {
+      const result = await runAborted(async (os, controller) => {
+        if (os.family === 'rhel') return rhel9Feed();
+        controller.abort();
+        throw Object.assign(new Error('This operation was aborted'), { name: 'AbortError' });
+      });
+
+      expectAbortedRun(result);
+    });
+  });
+
   it('records a run without the inventory pack as no_pack', async () => {
     const taskManager = taskManagerMock.createSetup();
     const { deps } = setup([]);
