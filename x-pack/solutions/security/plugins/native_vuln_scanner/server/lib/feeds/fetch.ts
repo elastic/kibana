@@ -15,11 +15,7 @@ export type FeedOs = FeedParseResult['os'];
 /** The largest compressed feed we accept; the biggest today (Ubuntu noble) is about 12 MB. */
 export const MAX_FEED_BYTES = 64 * 1024 * 1024;
 
-/**
- * The largest decompressed feed we accept. bzip2 expands up to ~1.4 GB per block, so the
- * 64 MiB cap on the download bounds nothing once decompression starts. It is checked between
- * blocks; a single block is capped separately by `MAX_BLOCK_BYTES` while it decodes.
- */
+/** The download cap does not bound decompression; this is checked between bzip2 blocks, `MAX_BLOCK_BYTES` within one. */
 export const MAX_DECOMPRESSED_FEED_BYTES = 512 * 1024 * 1024;
 
 const UBUNTU_CODENAME = /^[a-z]+$/;
