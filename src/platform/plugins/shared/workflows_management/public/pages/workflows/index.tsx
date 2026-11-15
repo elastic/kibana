@@ -134,7 +134,7 @@ export function WorkflowsPage() {
     application.navigateToApp(PLUGIN_ID, { path: '/create' });
   }, [application]);
 
-  const { data: workflows } = useWorkflows(search);
+  const { data: workflows, isLoading: isLoadingWorkflows } = useWorkflows(search);
   useWorkflowsBreadcrumbs();
 
   /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
@@ -169,20 +169,30 @@ export function WorkflowsPage() {
     }
 
     return {
-      primaryActionItem: canCreateWorkflow
-        ? {
-            id: 'createWorkflow',
-            label: i18n.translate('workflows.createWorkflowButton', {
-              defaultMessage: 'Create workflow',
-            }),
-            iconType: 'plus',
-            run: navigateToCreateWorkflow,
-            testId: 'createWorkflowButton',
-          }
-        : undefined,
+      // The empty state already offers its own creation entry points, so the header
+      // action would only duplicate them. Wait for the first load so it doesn't flash in.
+      primaryActionItem:
+        canCreateWorkflow && !isLoadingWorkflows && !shouldShowEmptyState
+          ? {
+              id: 'createWorkflow',
+              label: i18n.translate('workflows.createWorkflowButton', {
+                defaultMessage: 'Create workflow',
+              }),
+              iconType: 'plus',
+              run: navigateToCreateWorkflow,
+              testId: 'createWorkflowButton',
+            }
+          : undefined,
       items,
     };
-  }, [addConnectorsMenuItem, canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]);
+  }, [
+    addConnectorsMenuItem,
+    canCreateWorkflow,
+    canImportWorkflows,
+    isLoadingWorkflows,
+    navigateToCreateWorkflow,
+    shouldShowEmptyState,
+  ]);
 
   return (
     <EuiPageTemplate
