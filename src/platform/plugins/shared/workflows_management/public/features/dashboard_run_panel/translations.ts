@@ -80,6 +80,12 @@ export const RUN_MESSAGES = {
   viewExecution: i18n.translate('workflows.dashboardRunPanel.viewExecution', {
     defaultMessage: 'View execution',
   }),
+  openLastRun: i18n.translate('workflows.dashboardRunPanel.openLastRun', {
+    defaultMessage: 'Open the last run of this workflow',
+  }),
+  running: i18n.translate('workflows.dashboardRunPanel.running', {
+    defaultMessage: 'Running…',
+  }),
   startedToastTitle: (name: string) =>
     i18n.translate('workflows.dashboardRunPanel.startedToastTitle', {
       defaultMessage: '{name} started',
@@ -90,47 +96,29 @@ export const RUN_MESSAGES = {
       defaultMessage: 'Could not run {name}',
       values: { name },
     }),
-  yourRun: i18n.translate('workflows.dashboardRunPanel.yourRun', {
-    defaultMessage: 'Your run',
-  }),
 };
 
 export const CONFIRM_MESSAGES = {
-  title: (name: string) =>
-    i18n.translate('workflows.dashboardRunPanel.confirm.title', {
-      defaultMessage: 'Run {name}?',
-      values: { name },
+  fromDashboard: (inputs: string) =>
+    i18n.translate('workflows.dashboardRunPanel.confirm.fromDashboard', {
+      defaultMessage:
+        'Prefilled from the dashboard: {inputs}. The workflow runs with your privileges.',
+      values: { inputs },
     }),
-  fromDashboard: i18n.translate('workflows.dashboardRunPanel.confirm.fromDashboard', {
-    defaultMessage: 'From the dashboard',
-  }),
-  yourInput: i18n.translate('workflows.dashboardRunPanel.confirm.yourInput', {
-    defaultMessage: 'Inputs',
-  }),
-  noInputs: i18n.translate('workflows.dashboardRunPanel.confirm.noInputs', {
-    defaultMessage: 'This workflow takes no inputs.',
-  }),
-  runAs: i18n.translate('workflows.dashboardRunPanel.confirm.runAs', {
+  toFill: (inputs: string) =>
+    i18n.translate('workflows.dashboardRunPanel.confirm.toFill', {
+      defaultMessage: 'Fill in before running: {inputs}.',
+      values: { inputs },
+    }),
+  runsAs: i18n.translate('workflows.dashboardRunPanel.confirm.runsAs', {
     defaultMessage: 'The workflow runs with your privileges.',
   }),
-  run: i18n.translate('workflows.dashboardRunPanel.confirm.run', { defaultMessage: 'Run' }),
-  cancel: i18n.translate('workflows.dashboardRunPanel.confirm.cancel', {
-    defaultMessage: 'Cancel',
-  }),
-  invalidTitle: i18n.translate('workflows.dashboardRunPanel.confirm.invalidTitle', {
-    defaultMessage: 'Some inputs are not valid',
+  issuesTitle: i18n.translate('workflows.dashboardRunPanel.confirm.issuesTitle', {
+    defaultMessage: 'Some values could not be read from the dashboard',
   }),
   invalidJson: i18n.translate('workflows.dashboardRunPanel.confirm.invalidJson', {
     defaultMessage: 'Enter valid JSON',
   }),
-  required: i18n.translate('workflows.dashboardRunPanel.confirm.required', {
-    defaultMessage: 'Required',
-  }),
-  filtersCount: (count: number) =>
-    i18n.translate('workflows.dashboardRunPanel.confirm.filtersCount', {
-      defaultMessage: '+{count, plural, one {# filter} other {# filters}}',
-      values: { count },
-    }),
 };
 
 export const SOURCE_LABELS = {
@@ -155,11 +143,6 @@ export const SOURCE_LABELS = {
   timeTo: i18n.translate('workflows.dashboardRunPanel.source.timeTo', {
     defaultMessage: 'End',
   }),
-  controlNamed: (label: string) =>
-    i18n.translate('workflows.dashboardRunPanel.source.controlNamed', {
-      defaultMessage: 'Control: {label}',
-      values: { label },
-    }),
 };
 
 export const CONFIG_MESSAGES = {

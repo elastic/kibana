@@ -7,11 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTip,
+  formatDate,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { ExecutionStatus } from '@kbn/workflows';
-import { StatusBadge } from '../../../shared/ui/status_badge';
+import { getStatusLabel } from '../../../shared/translations';
+import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
+import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import type { WorkflowRunPanelStatus } from '../lib/get_panel_status';
 import { PRIVILEGE_LABELS, RUN_MESSAGES, STATUS_MESSAGES } from '../translations';
 
@@ -64,43 +75,48 @@ interface ShownRun {
   finishedAt: string;
 }
 
-interface LastRunLineProps {
+interface LastRunStatusProps {
   run: ShownRun | undefined;
-  isOwnRun: boolean;
   isLoading: boolean;
   getHref: (executionId: string) => string;
 }
 
-/** The status of the viewer's own run, or else the workflow's most recent run, with a link to it. */
-export const LastRunLine = ({
+/** The workflow's most recent run as a status icon and relative time that links to the execution. */
+export const LastRunStatus = ({
   run,
-  isOwnRun,
   isLoading,
   getHref,
-}: LastRunLineProps): React.JSX.Element => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">
-        {isOwnRun ? RUN_MESSAGES.yourRun : RUN_MESSAGES.lastRun}
-      </EuiText>
-    </EuiFlexItem>
-    {run ? (
-      <>
-        <EuiFlexItem grow={false} data-test-subj="workflowRunPanelLastRunStatus">
-          <StatusBadge status={run.status} date={run.finishedAt || run.startedAt} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink href={getHref(run.id)} data-test-subj="workflowRunPanelLastRunLink">
-            <EuiText size="xs">{RUN_MESSAGES.viewExecution}</EuiText>
-          </EuiLink>
-        </EuiFlexItem>
-      </>
+}: LastRunStatusProps): React.JSX.Element => {
+  const { euiTheme } = useEuiTheme();
+  if (!run) {
+    return isLoading ? (
+      <EuiLoadingSpinner size="s" />
     ) : (
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {isLoading ? <EuiLoadingSpinner size="s" /> : RUN_MESSAGES.neverRun}
-        </EuiText>
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+      <EuiText size="xs" color="subdued" data-test-subj="workflowRunPanelNeverRun">
+        {RUN_MESSAGES.neverRun}
+      </EuiText>
+    );
+  }
+  const date = run.finishedAt || run.startedAt;
+  const statusLabel = getStatusLabel(run.status);
+  return (
+    <EuiToolTip content={`${statusLabel} · ${formatDate(date)}`}>
+      <EuiLink
+        href={getHref(run.id)}
+        aria-label={`${RUN_MESSAGES.openLastRun}: ${statusLabel}`}
+        data-test-subj="workflowRunPanelLastRunLink"
+      >
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false} data-test-subj="workflowRunPanelLastRunStatus">
+            {getExecutionStatusIcon(euiTheme, run.status)}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              {RUN_MESSAGES.lastRun} <FormattedRelativeEnhanced value={date} style="narrow" />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiLink>
+    </EuiToolTip>
+  );
+};

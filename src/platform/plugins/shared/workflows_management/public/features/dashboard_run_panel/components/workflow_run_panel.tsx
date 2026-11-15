@@ -22,17 +22,19 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
-import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { LastRunLine, PanelStatusCallout } from './panel_status';
-import { RunConfirmModal } from './run_confirm_modal';
+import { getWorkflowsCapabilities, RunWorkflowInputsModal } from '@kbn/workflows-ui';
+import { LastRunStatus, PanelStatusCallout } from './panel_status';
+import { RunNotice } from './run_notice';
+import { WorkflowGraphBackground } from './workflow_graph_background';
 import { PLUGIN_ID } from '../../../../common';
 import type { WorkflowRunInputMapping } from '../../../../server/dashboard_run_panel/schema';
 import {
   isNotFoundError,
-  useLastExecution,
-  useOwnExecution,
+  useExecutionWithSteps,
+  useLastExecutionId,
   useRunWorkflowFromPanel,
   useWorkflowApi,
   useWorkflowDetail,
@@ -41,10 +43,7 @@ import { getDashboardControls } from '../lib/dashboard_controls';
 import { describeWorkflowInputs } from '../lib/describe_workflow_inputs';
 import type { WorkflowRunPanelStatus } from '../lib/get_panel_status';
 import { getPanelStatus } from '../lib/get_panel_status';
-import type {
-  DashboardControlSnapshot,
-  ResolvedWorkflowInputs,
-} from '../lib/resolve_workflow_inputs';
+import type { ResolvedWorkflowInputs } from '../lib/resolve_workflow_inputs';
 import { resolveWorkflowInputs } from '../lib/resolve_workflow_inputs';
 import { DEFAULT_BUTTON_LABEL, RUN_MESSAGES, STATUS_MESSAGES } from '../translations';
 
@@ -58,11 +57,6 @@ export interface WorkflowRunPanelProps {
   fetchContext: FetchContext;
 }
 
-interface PendingRun {
-  resolved: ResolvedWorkflowInputs;
-  controls: DashboardControlSnapshot[];
-}
-
 const BLOCKED_REASONS: Partial<Record<WorkflowRunPanelStatus['type'], string>> = {
   not_runnable_by_user: STATUS_MESSAGES.notRunnableByUser,
   disabled: STATUS_MESSAGES.disabled,
@@ -74,6 +68,74 @@ const getEffectiveTimeRange = ({ timeRange, timeslice }: FetchContext): TimeRang
   timeslice
     ? { from: new Date(timeslice[0]).toISOString(), to: new Date(timeslice[1]).toISOString() }
     : timeRange;
+
+const getRunMetadata = (panelId: string, parentApi: unknown): Record<string, string> => {
+  const dashboardId = apiPublishesSavedObjectId(parentApi)
+    ? parentApi.savedObjectId$.value
+    : undefined;
+  return { source: 'dashboard', panelId, ...(dashboardId ? { dashboardId } : {}) };
+};
+
+const isStartedRunActive = (
+  startedExecutionId: string | undefined,
+  shownRun: Pick<WorkflowExecutionDto, 'id' | 'status'> | undefined
+): boolean =>
+  startedExecutionId !== undefined &&
+  !(shownRun?.id === startedExecutionId && TerminalExecutionStatuses.includes(shownRun.status));
+
+const toError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error));
+
+interface RunPanelFooterProps {
+  lastRun: React.ReactNode;
+  buttonLabel: string | undefined;
+  isBlocked: boolean;
+  isBusy: boolean;
+  onRun: () => void;
+}
+
+const RunPanelFooter = ({
+  lastRun,
+  buttonLabel,
+  isBlocked,
+  isBusy,
+  onRun,
+}: RunPanelFooterProps): React.JSX.Element => {
+  const { euiTheme } = useEuiTheme();
+  const footerCss = css`
+    flex-grow: 0;
+    padding: ${euiTheme.size.s};
+    background: ${euiTheme.colors.backgroundBasePlain};
+    border-top: ${euiTheme.border.thin};
+  `;
+  return (
+    <EuiFlexGroup
+      css={footerCss}
+      alignItems="center"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+      wrap={false}
+    >
+      <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+        {lastRun}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill
+          size="s"
+          iconType="play"
+          onClick={onRun}
+          isDisabled={isBlocked || isBusy}
+          isLoading={isBusy}
+          data-test-subj="workflowRunPanelButton"
+        >
+          {isBusy ? RUN_MESSAGES.running : buttonLabel || DEFAULT_BUTTON_LABEL}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const WorkflowRunPanel = ({
   core,
@@ -100,16 +162,17 @@ export const WorkflowRunPanel = ({
     isNotFound: isNotFoundError(workflowQuery.error),
   });
   const canQuery = status.type !== 'missing_privileges' && status.type !== 'not_found';
-  const lastRunQuery = useLastExecution(api, workflowId, canQuery && Boolean(workflowQuery.data));
+  const lastRunIdQuery = useLastExecutionId(
+    api,
+    workflowId,
+    canQuery && Boolean(workflowQuery.data)
+  );
+  const lastRun = useExecutionWithSteps(api, lastRunIdQuery.data ?? undefined);
 
-  const [ownExecutionId, setOwnExecutionId] = useState<string>();
-  const ownExecution = useOwnExecution(api, ownExecutionId);
-  const isOwnRunActive =
-    Boolean(ownExecutionId) &&
-    !(ownExecution.data && TerminalExecutionStatuses.includes(ownExecution.data.status));
+  const [startedExecutionId, setStartedExecutionId] = useState<string>();
 
   const runMutation = useRunWorkflowFromPanel(api, workflowId);
-  const [pendingRun, setPendingRun] = useState<PendingRun>();
+  const [pendingRun, setPendingRun] = useState<ResolvedWorkflowInputs>();
 
   const workflow = 'workflow' in status ? status.workflow : undefined;
   const inputs = useMemo(
@@ -126,40 +189,14 @@ export const WorkflowRunPanel = ({
     [core.application, workflowId]
   );
 
-  const openConfirm = () => {
-    const controls = getDashboardControls(parentApi);
-    const resolved = resolveWorkflowInputs(
-      descriptors,
-      mappings,
-      {
-        timeRange: getEffectiveTimeRange(fetchContext),
-        query: fetchContext.query,
-        filters: fetchContext.filters ?? [],
-        controls,
-      },
-      { now: new Date(), esQueryConfig: getEsQueryConfig(core.uiSettings) }
-    );
-    setPendingRun({ resolved, controls });
-  };
-
   const run = (runInputs: Record<string, unknown>) => {
     if (!workflow || runMutation.isLoading) return;
-    const dashboardId = apiPublishesSavedObjectId(parentApi)
-      ? parentApi.savedObjectId$.value
-      : undefined;
     runMutation.mutate(
-      {
-        inputs: runInputs,
-        metadata: {
-          source: 'dashboard',
-          panelId: uuid,
-          ...(dashboardId ? { dashboardId } : {}),
-        },
-      },
+      { inputs: runInputs, metadata: getRunMetadata(uuid, parentApi) },
       {
         onSuccess: ({ workflowExecutionId }) => {
           setPendingRun(undefined);
-          setOwnExecutionId(workflowExecutionId);
+          setStartedExecutionId(workflowExecutionId);
           core.notifications.toasts.addSuccess({
             title: RUN_MESSAGES.startedToastTitle(workflow.name),
             actionProps: {
@@ -171,18 +208,52 @@ export const WorkflowRunPanel = ({
           });
         },
         onError: (error) => {
-          core.notifications.toasts.addError(
-            error instanceof Error ? error : new Error(String(error)),
-            { title: RUN_MESSAGES.runFailedToastTitle(workflow.name) }
-          );
+          core.notifications.toasts.addError(toError(error), {
+            title: RUN_MESSAGES.runFailedToastTitle(workflow.name),
+          });
         },
       }
     );
   };
 
+  const onRunClick = () => {
+    if (!inputs || descriptors.length === 0) {
+      run({});
+      return;
+    }
+    setPendingRun(
+      resolveWorkflowInputs(
+        descriptors,
+        mappings,
+        {
+          timeRange: getEffectiveTimeRange(fetchContext),
+          query: fetchContext.query,
+          filters: fetchContext.filters ?? [],
+          controls: getDashboardControls(parentApi),
+        },
+        { now: new Date(), esQueryConfig: getEsQueryConfig(core.uiSettings) }
+      )
+    );
+  };
+
   const containerCss = css`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     height: 100%;
+    overflow: hidden;
+  `;
+  const graphAreaCss = css`
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  `;
+  const blockedCss = css`
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
     padding: ${euiTheme.size.s};
+    background: ${euiTheme.colors.backgroundBasePlain};
   `;
 
   if (status.type === 'loading') {
@@ -204,54 +275,50 @@ export const WorkflowRunPanel = ({
   const blockedReason = BLOCKED_REASONS[status.type];
 
   return (
-    <EuiFlexGroup
-      css={containerCss}
-      direction="column"
-      gutterSize="s"
-      justifyContent="center"
-      data-test-subj="workflowRunPanel"
-    >
-      {blockedReason && (
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" data-test-subj="workflowRunPanelBlocked">
+    <div css={containerCss} data-test-subj="workflowRunPanel">
+      <div css={graphAreaCss}>
+        {workflow?.definition && (
+          <WorkflowGraphBackground
+            workflow={workflow.definition}
+            isYamlValid={workflow.valid}
+            stepExecutions={lastRun.data?.stepExecutions}
+          />
+        )}
+        {blockedReason && (
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={blockedCss}
+            data-test-subj="workflowRunPanelBlocked"
+          >
             {blockedReason}
           </EuiText>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          iconType="play"
-          onClick={openConfirm}
-          isDisabled={Boolean(blockedReason) || isOwnRunActive}
-          isLoading={runMutation.isLoading || isOwnRunActive}
-          data-test-subj="workflowRunPanelButton"
-        >
-          {buttonLabel || DEFAULT_BUTTON_LABEL}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <LastRunLine
-          run={ownExecution.data ?? lastRunQuery.data ?? undefined}
-          isOwnRun={Boolean(ownExecution.data)}
-          isLoading={lastRunQuery.isLoading}
-          getHref={executionHref}
-        />
-      </EuiFlexItem>
+        )}
+      </div>
+      <RunPanelFooter
+        lastRun={
+          <LastRunStatus
+            run={lastRun.data}
+            isLoading={lastRunIdQuery.isLoading || lastRun.isInitialLoading}
+            getHref={executionHref}
+          />
+        }
+        buttonLabel={buttonLabel}
+        isBlocked={Boolean(blockedReason)}
+        isBusy={runMutation.isLoading || isStartedRunActive(startedExecutionId, lastRun.data)}
+        onRun={onRunClick}
+      />
 
-      {pendingRun && workflow && (
-        <RunConfirmModal
+      {pendingRun && workflow && inputs && (
+        <RunWorkflowInputsModal
           workflowName={workflow.name}
           inputs={inputs}
-          descriptors={descriptors}
-          mappings={mappings}
-          resolved={pendingRun.resolved}
-          controls={pendingRun.controls}
-          isRunning={runMutation.isLoading}
+          initialValues={pendingRun.values}
+          notice={<RunNotice descriptors={descriptors} resolved={pendingRun} />}
+          onSubmit={run}
           onCancel={() => setPendingRun(undefined)}
-          onConfirm={run}
         />
       )}
-    </EuiFlexGroup>
+    </div>
   );
 };

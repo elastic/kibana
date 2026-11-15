@@ -10,7 +10,7 @@
 import type { JSONSchema7 } from 'json-schema';
 import React, { useMemo } from 'react';
 import type { StepContext } from '@kbn/workflows';
-import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { getProvideInputsResumeMessage } from './translations';
 import { generateSampleFromJsonSchema } from '../../lib/generate_sample_from_json_schema';
@@ -21,30 +21,40 @@ export interface RunWorkflowInputsModalProps {
   workflowName: string;
   /** Normalised JSON Schema for the workflow's manual trigger inputs, used to seed the editor and validate submissions. */
   inputs: JsonModelSchemaType;
+  /** Values that replace the generated sample for the same inputs when the editor opens. */
+  initialValues?: Record<string, unknown>;
+  /** Optional content rendered above the editor, e.g. a callout about the prefilled values. */
+  notice?: React.ReactNode;
   /** Called with the parsed input values when the user confirms the form. */
   onSubmit: (values: Record<string, unknown>) => void;
   /** Called when the user dismisses the modal without submitting. */
   onCancel: () => void;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 export const RunWorkflowInputsModal = ({
   workflowName,
   inputs,
+  initialValues,
+  notice,
   onSubmit,
   onCancel,
 }: RunWorkflowInputsModalProps) => {
   const contextOverride = useMemo(() => {
     try {
-      const jsonSchema = inputs as JSONSchema7;
+      const sample = generateSampleFromJsonSchema(inputs as JSONSchema7, inputs);
+      const stepContext = isRecord(sample) ? { ...sample, ...initialValues } : sample;
       return {
-        schema: convertJsonSchemaToZod(jsonSchema),
-        stepContext: generateSampleFromJsonSchema(jsonSchema) as Partial<StepContext>,
+        schema: buildFieldsZodValidator(inputs),
+        stepContext: stepContext as Partial<StepContext>,
         rawJsonSchema: inputs,
       };
     } catch {
       return undefined;
     }
-  }, [inputs]);
+  }, [inputs, initialValues]);
 
   return (
     <ResumeExecutionModal
@@ -53,6 +63,7 @@ export const RunWorkflowInputsModal = ({
       onSubmit={({ stepInputs }) => onSubmit(stepInputs)}
       onClose={onCancel}
       useRunButton
+      notice={notice}
     />
   );
 };

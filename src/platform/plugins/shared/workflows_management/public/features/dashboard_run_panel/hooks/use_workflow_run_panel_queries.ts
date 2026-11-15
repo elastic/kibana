@@ -10,7 +10,6 @@
 import { useMemo } from 'react';
 import type { HttpStart } from '@kbn/core/public';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
-import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
 
@@ -27,9 +26,6 @@ export const isNotFoundError = (error: unknown): boolean => {
   return response?.status === 404 || body?.statusCode === 404;
 };
 
-const isTerminal = (execution: WorkflowExecutionListItemDto | undefined): boolean =>
-  !execution || TerminalExecutionStatuses.includes(execution.status);
-
 export const useWorkflowApi = (http: HttpStart): WorkflowApi =>
   useMemo(() => new WorkflowApi(http), [http]);
 
@@ -42,8 +38,8 @@ export const useWorkflowDetail = (api: WorkflowApi, workflowId: string | undefin
     refetchOnWindowFocus: false,
   });
 
-/** The most recent execution of the workflow by anyone, polled while it is still running. */
-export const useLastExecution = (api: WorkflowApi, workflowId: string, enabled: boolean) =>
+/** The id of the workflow's most recent execution by anyone. */
+export const useLastExecutionId = (api: WorkflowApi, workflowId: string, enabled: boolean) =>
   useQuery({
     queryKey: lastRunKey(workflowId),
     queryFn: async () => {
@@ -53,19 +49,19 @@ export const useLastExecution = (api: WorkflowApi, workflowId: string, enabled: 
         sortOrder: 'desc',
         omitStepRuns: true,
       });
-      return results[0] ?? null;
+      return results[0]?.id ?? null;
     },
     enabled,
     retry: false,
     refetchOnWindowFocus: false,
-    refetchInterval: (execution) => (isTerminal(execution ?? undefined) ? false : POLL_INTERVAL_MS),
   });
 
-/** Status of a run this viewer started, polled until it finishes. */
-export const useOwnExecution = (api: WorkflowApi, executionId: string | undefined) =>
+/** An execution with its step statuses (without step inputs or outputs), polled until it finishes. */
+export const useExecutionWithSteps = (api: WorkflowApi, executionId: string | undefined) =>
   useQuery({
     queryKey: ['dashboardRunPanel', 'execution', executionId ?? ''],
-    queryFn: () => api.getExecution(executionId ?? '', { omitStepExecutions: true }),
+    queryFn: () =>
+      api.getExecution(executionId ?? '', { includeInput: false, includeOutput: false }),
     enabled: Boolean(executionId),
     retry: false,
     refetchOnWindowFocus: false,
@@ -83,6 +79,8 @@ export const useRunWorkflowFromPanel = (api: WorkflowApi, workflowId: string) =>
   return useMutation({
     mutationFn: ({ inputs, metadata }: RunWorkflowVariables) =>
       api.runWorkflow(workflowId, { inputs, metadata }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: lastRunKey(workflowId) }),
+    // Seeded from the response because the executions list may not include the new run until the index refreshes.
+    onSuccess: ({ workflowExecutionId }) =>
+      queryClient.setQueryData(lastRunKey(workflowId), workflowExecutionId),
   });
 };
