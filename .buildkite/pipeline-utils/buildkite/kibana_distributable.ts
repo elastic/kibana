@@ -10,7 +10,9 @@
 import { BuildkiteClient } from './client.ts';
 import type { Build } from './types/build.ts';
 
-export const KIBANA_DISTRIBUTABLE_ARTIFACT = 'kibana-default.tar.zst';
+export const KIBANA_DISTRIBUTABLE_ARTIFACT = 'kibana-<version>-SNAPSHOT-linux-<arch>.tar.zst';
+const KIBANA_DISTRIBUTABLE_PATTERN =
+  /(^|\/)kibana-[^/]+-SNAPSHOT-linux-(x86_64|aarch64)\.tar\.zst$/;
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
@@ -31,7 +33,7 @@ export const buildHasKibanaDistributable = async (
   pipelineSlug: string,
   buildNumber: number
 ): Promise<boolean> => {
-  // First page only: kibana-default.tar.zst is uploaded with the distro and
+  // First page only: the distributable is uploaded with the distro and
   // appears early. Avoid getArtifacts() — it drains up to 50 pages of junit
   // noise per candidate (30+ pages on a typical kibana-on-merge build).
   const { data: artifacts } = await client.http.get<Array<{ filename: string; path?: string }>>(
@@ -41,8 +43,8 @@ export const buildHasKibanaDistributable = async (
 
   return (artifacts ?? []).some(
     (artifact) =>
-      artifact.filename === KIBANA_DISTRIBUTABLE_ARTIFACT ||
-      (artifact.path ?? '').endsWith(KIBANA_DISTRIBUTABLE_ARTIFACT)
+      KIBANA_DISTRIBUTABLE_PATTERN.test(artifact.filename) ||
+      KIBANA_DISTRIBUTABLE_PATTERN.test(artifact.path ?? '')
   );
 };
 
