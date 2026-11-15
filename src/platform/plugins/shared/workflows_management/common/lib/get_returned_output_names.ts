@@ -48,12 +48,19 @@ const alwaysEndsRun = (steps: unknown): boolean =>
   );
 
 /**
+ * Whether every run of a workflow ends in a `workflow.output` or `workflow.fail` step. Otherwise a
+ * run can complete without one, and callers get its last step's output.
+ */
+export const alwaysReturnsWorkflowOutput = (definition: unknown): boolean =>
+  isRecord(definition) && alwaysEndsRun(definition.steps);
+
+/**
  * Returns the output names a workflow's completing `workflow.output` steps set, including those in
  * its `on-failure` fallback. Undefined when a run can complete without one (callers then get its
  * last step's output), or when one of them sets a computed value.
  */
 export const getReturnedOutputNames = (definition: unknown): string[] | undefined => {
-  if (!isRecord(definition) || !alwaysEndsRun(definition.steps)) {
+  if (!isRecord(definition) || !alwaysReturnsWorkflowOutput(definition)) {
     return undefined;
   }
   const names = new Set<string>();

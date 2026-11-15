@@ -57,9 +57,15 @@ export interface WorkflowContract {
   outputsSource: OutputsSource;
   /** Declared outputs that no `workflow.output` step sets, so callers always get nothing for them. */
   unreturnedOutputs: readonly string[];
-  /** Without a `workflow.output` step, callers get the output of the workflow's last step instead. */
-  hasOutputStep: boolean;
-  /** Names the `workflow.output` steps set; undefined when there are none or they are computed. */
+  /**
+   * Whether every run ends in a `workflow.output` (or `workflow.fail`) step. Otherwise a run can
+   * complete without one, and callers get the output of the workflow's last step instead.
+   */
+  alwaysReturnsOutput: boolean;
+  /**
+   * Names the `workflow.output` steps set; undefined when a run can complete without one or one
+   * of them is computed.
+   */
   returnedOutputs?: readonly string[];
 }
 
@@ -79,7 +85,7 @@ export type ContractChangeKind =
   | 'outputAdded'
   | 'outputRemoved'
   | 'outputNoLongerReturned'
-  /** No `workflow.output` step is left, so callers get the last step's output instead. */
+  /** A run can now finish without a `workflow.output` step, so callers can get the last step's output instead. */
   | 'outputStepRemoved'
   | 'outputTypeChanged'
   | 'outputSchemaChanged';

@@ -439,6 +439,47 @@ describe('analyzeDependents', () => {
     ]);
   });
 
+  it('warns instead of breaking when a run can finish without the workflow.output step', () => {
+    const analysis = analyze({
+      ...makeChild(),
+      steps: [
+        {
+          name: 'maybe',
+          type: 'if',
+          condition: 'inputs.depth > 1',
+          steps: [{ name: 'emit', type: 'workflow.output', with: { score: 9 } }],
+        },
+      ],
+    });
+
+    expect(analysis.contractChanges).toEqual([
+      expect.objectContaining({ kind: 'outputStepRemoved', severity: 'warning' }),
+    ]);
+    expect(statusById(analysis).triage).toBe('warning');
+    expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual(['outputFromLastStep:warning']);
+  });
+
+  it('still checks returned outputs when the other branch fails the run', () => {
+    const analysis = analyze({
+      ...makeChild(),
+      steps: [
+        {
+          name: 'maybe',
+          type: 'if',
+          condition: 'inputs.depth > 1',
+          steps: [{ name: 'emit', type: 'workflow.output', with: { score: 9 } }],
+          else: [{ name: 'stop', type: 'workflow.fail', with: { message: 'too shallow' } }],
+        },
+      ],
+    });
+
+    expect(analysis.contractChanges).toEqual([
+      expect.objectContaining({ kind: 'outputNoLongerReturned', field: 'severity' }),
+    ]);
+    expect(statusById(analysis).triage).toBe('breaking');
+    expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual(['unreturnedOutput:breaking']);
+  });
+
   it('only warns when the removed output is read with a default value', () => {
     const reader = workflow('reader', [
       callStep('ctx', { inputs: { alert_id: 'a' } }),

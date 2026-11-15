@@ -17,12 +17,9 @@ import {
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { isRecord } from '@kbn/workflows-yaml';
-import {
-  collectReturnedOutputNames,
-  collectWorkflowOutputBlocks,
-  hasWorkflowOutputStep,
-} from './find_call_sites';
+import { collectWorkflowOutputBlocks } from './find_call_sites';
 import type { ContractChange, ContractField, WorkflowContract } from './types';
+import { alwaysReturnsWorkflowOutput, getReturnedOutputNames } from '../get_returned_output_names';
 
 const describeType = (property: JSONSchema7, schema: JsonModelSchemaType): string | undefined => {
   const resolved = property.$ref ? resolveRef(property.$ref, schema) ?? property : property;
@@ -70,7 +67,8 @@ export const extractWorkflowContract = (definition: unknown): WorkflowContract =
   const declaredOutputs = normalizeFieldsToJsonSchema(
     isRecord(definition) ? definition.outputs : undefined
   );
-  const returnedNames = collectReturnedOutputNames(definition);
+  const returnedOutputs = getReturnedOutputNames(definition);
+  const returnedNames = returnedOutputs ? new Set(returnedOutputs) : undefined;
 
   const base = {
     // A workflow saved with errors is stored without a definition (and turned off).
@@ -80,8 +78,8 @@ export const extractWorkflowContract = (definition: unknown): WorkflowContract =
     hasDeclaredInputs: Boolean(inputsSchema?.properties),
     inputsSchema: inputsSchema?.properties ? inputsSchema : undefined,
     rejectsUnknownInputs: inputsSchema?.additionalProperties === false,
-    hasOutputStep: hasWorkflowOutputStep(definition),
-    returnedOutputs: returnedNames ? [...returnedNames] : undefined,
+    alwaysReturnsOutput: alwaysReturnsWorkflowOutput(definition),
+    returnedOutputs,
   };
 
   if (declaredOutputs?.properties) {
@@ -255,7 +253,11 @@ const diffOutputs = (saved: WorkflowContract, draft: WorkflowContract): Contract
       });
     }
   }
-  if (saved.hasOutputStep && !draft.hasOutputStep && Object.keys(saved.outputs).length > 0) {
+  if (
+    saved.alwaysReturnsOutput &&
+    !draft.alwaysReturnsOutput &&
+    Object.keys(saved.outputs).length > 0
+  ) {
     changes.push({ kind: 'outputStepRemoved', field: '', severity: 'warning' });
   }
   return changes;

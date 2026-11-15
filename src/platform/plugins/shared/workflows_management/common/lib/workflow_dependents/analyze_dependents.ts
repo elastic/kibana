@@ -379,7 +379,7 @@ const evaluateOutputs = (
     const contractField = field ? contract.outputs[field] : undefined;
     // A `| default:` filter replaces a missing value, so the caller keeps working.
     const lossSeverity = hasFallback ? 'warning' : 'breaking';
-    if (field && !contract.hasOutputStep) {
+    if (field && !contract.alwaysReturnsOutput) {
       // The caller gets whatever the child's last step returns, which may or may not hold `field`.
       issue = { kind: 'outputFromLastStep', severity: 'warning', stepName, field };
     } else if (field && contract.outputsSource === 'none') {

@@ -171,7 +171,7 @@ describe('getCalledCardContent', () => {
     },
     outputsSource: 'declared',
     unreturnedOutputs: ['score'],
-    hasOutputStep: true,
+    alwaysReturnsOutput: true,
     returnedOutputs: ['severity'],
   };
 

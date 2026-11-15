@@ -177,7 +177,7 @@ export const getIssueMessage = (
     case 'outputFromLastStep':
       return i18n.translate('workflows.dependents.issue.outputFromLastStep', {
         defaultMessage:
-          'Uses the output "{field}", but {childName} has no workflow.output step, so it gets the output of its last step instead, which might not include "{field}"',
+          'Uses the output "{field}", but {childName} can finish without running a workflow.output step, so it gets the output of its last step instead, which might not include "{field}"',
         values: { childName, field },
       });
     case 'outputTypeChanged':

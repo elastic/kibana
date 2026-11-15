@@ -156,36 +156,6 @@ export const collectWorkflowOutputBlocks = (
   return blocks;
 };
 
-export const hasWorkflowOutputStep = (definition: unknown): boolean => {
-  let found = false;
-  walkDefinitionSteps(definition, (step) => {
-    found = found || isCompletingOutputStep(step);
-  });
-  return found;
-};
-
-/**
- * Returns the output names set by the workflow's completing `workflow.output` steps, or undefined
- * when that can't be known statically (no such step, or one whose `with` is a template expression).
- */
-export const collectReturnedOutputNames = (definition: unknown): Set<string> | undefined => {
-  const names = new Set<string>();
-  let isKnown = false;
-  let hasDynamicBlock = false;
-  walkDefinitionSteps(definition, (step) => {
-    if (!isCompletingOutputStep(step)) {
-      return;
-    }
-    isKnown = true;
-    if (!isRecord(step.with)) {
-      hasDynamicBlock = true;
-      return;
-    }
-    Object.keys(step.with).forEach((name) => names.add(name));
-  });
-  return isKnown && !hasDynamicBlock ? names : undefined;
-};
-
 export interface OutputUsage {
   /** Top-level output field; empty string when the whole output object is referenced. */
   field: string;
