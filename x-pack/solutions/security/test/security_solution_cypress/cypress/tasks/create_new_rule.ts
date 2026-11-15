@@ -15,7 +15,6 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   EqlRuleCreateProps,
-  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -660,26 +659,6 @@ export const fillEsqlQueryBar = (query: string) => {
   cy.get(ESQL_QUERY_BAR).contains(query);
 };
 
-export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
-  cy.get(ESQL_QUERY_BAR).contains('ES|QL query');
-  fillEsqlQueryBar(rule.query);
-
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
-};
-
-/**
- * fills only required(name, description) and specific to ES|QL(rule name override) fields on about page
- */
-export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
-  fillRuleName(rule.name);
-  fillDescription(rule.description);
-
-  expandAdvancedSettings();
-  // this field defined to be returned in rule query
-  fillOverrideEsqlRuleName(rule.rule_name_override ?? '');
-  getAboutContinueButton().click();
-};
-
 /**
  * Fills in the indicator match rows for tests by giving it an optional rowNumber,
  * a indexField, a indicatorIndexField, and an optional validRows which indicates
@@ -755,7 +734,7 @@ export const getIndicatorDeleteButton = (row = 1) =>
 export const getIndicatorAndButton = () => cy.get(THREAT_MATCH_AND_BUTTON);
 
 /** Returns the continue button on the step of about */
-export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
+const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
