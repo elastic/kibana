@@ -117,25 +117,30 @@ describe('readAgentInventories', () => {
       readAgentInventories(es, { scheduleIds: SCHEDULES, pageSize: 3, since: 'now-1d' })
     );
 
-    const [first, second] = es.search.mock.calls.map(([req]) => req);
-    expect(first).toMatchObject({ pit: { id: 'pit-0' }, size: 3, search_after: undefined });
-    expect(second).toMatchObject({ pit: { id: 'pit-0' }, search_after: ['a1', 200, 2] });
-    expect(first?.sort).toEqual([
+    const requests = es.search.mock.calls.map(([req]) => req);
+    expect(requests).toHaveLength(4);
+    expect(requests[0]).toMatchObject({ pit: { id: 'pit-0' }, size: 3, search_after: undefined });
+    expect(requests[1]).toMatchObject({ pit: { id: 'pit-0' }, search_after: ['a1', 200, 2] });
+
+    const sort = [
       { 'agent.id': { order: 'asc' } },
       { 'osquery_meta.unix_time': { order: 'desc', unmapped_type: 'long' } },
-    ]);
-    expect(first?.query).toEqual({
+    ];
+    const query = {
       bool: {
         filter: [
-          {
-            terms: { schedule_id: ['deb-new', 'pack_inventory_deb', 'os', 'kernel'] },
-          },
+          { terms: { schedule_id: ['deb-new', 'pack_inventory_deb', 'os', 'kernel'] } },
           { range: { '@timestamp': { gte: 'now-1d' } } },
           { exists: { field: 'agent.id' } },
         ],
         must_not: [{ terms: { 'osquery_meta.action': ['added', 'removed'] } }],
       },
-    });
+    };
+    for (const request of requests) {
+      expect(request?.size).toBe(3);
+      expect(request?.sort).toEqual(sort);
+      expect(request?.query).toEqual(query);
+    }
   });
 
   it('closes the point in time when the search fails', async () => {
