@@ -8,6 +8,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
@@ -379,7 +380,9 @@ describe('registerScanTask', () => {
 describe('scheduleScanTask', () => {
   it('schedules a daily scan when none exists', async () => {
     const taskManager = taskManagerMock.createStart();
-    taskManager.get.mockRejectedValue(new Error('Not found'));
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', SCAN_TASK_ID)
+    );
     await scheduleScanTask(taskManager);
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith({
       id: SCAN_TASK_ID,
@@ -390,9 +393,18 @@ describe('scheduleScanTask', () => {
     });
   });
 
+  it('rethrows a lookup error that is not a not-found and schedules nothing', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockRejectedValue(new Error('cluster unavailable'));
+    await expect(scheduleScanTask(taskManager)).rejects.toThrow('cluster unavailable');
+    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+  });
+
   it('does not ask for an immediate scan for a task it just created', async () => {
     const taskManager = taskManagerMock.createStart();
-    taskManager.get.mockRejectedValue(new Error('Not found'));
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', SCAN_TASK_ID)
+    );
     await expect(scheduleScanTask(taskManager)).resolves.toBe(false);
   });
 

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -287,7 +288,10 @@ export const scheduleScanTask = async (
   taskManager: TaskManagerStartContract,
   now: number = Date.now()
 ): Promise<boolean> => {
-  const existing = await taskManager.get(SCAN_TASK_ID).catch(() => undefined);
+  const existing = await taskManager.get(SCAN_TASK_ID).catch((error: Error) => {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) return undefined;
+    throw error;
+  });
   await taskManager.ensureScheduled({
     id: SCAN_TASK_ID,
     taskType: SCAN_TASK_TYPE,
