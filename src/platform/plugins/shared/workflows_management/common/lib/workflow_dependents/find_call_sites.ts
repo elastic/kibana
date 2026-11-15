@@ -150,19 +150,32 @@ const NO_WORKFLOW_ON_FAILURE_STEP_TYPES = new Set([
   'wait',
 ]);
 
-/** The `on-failure` the engine applies to a step: its own, which replaces the workflow-level one. */
+// Whether the engine wraps the step in the workflow-level `on-failure` (outside fallbacks). Its own
+// `on-failure` replaces the workflow-level one.
+const getsWorkflowOnFailure = (step: Record<string, unknown>): boolean =>
+  !step['on-failure'] &&
+  !(typeof step.type === 'string' && NO_WORKFLOW_ON_FAILURE_STEP_TYPES.has(step.type));
+
+/** The `on-failure` the engine applies to a step: its own, or the workflow-level one. */
 export const getStepOnFailure = (
   step: Record<string, unknown>,
   workflowOnFailure: unknown
-): unknown => {
-  const onFailure = step['on-failure'];
-  if (onFailure) {
-    return onFailure;
-  }
-  return typeof step.type === 'string' && NO_WORKFLOW_ON_FAILURE_STEP_TYPES.has(step.type)
-    ? undefined
-    : workflowOnFailure;
-};
+): unknown => (getsWorkflowOnFailure(step) ? workflowOnFailure : step['on-failure']);
+
+/**
+ * Whether the workflow-level `on-failure` applies to one of `steps` or a step nested in them, as
+ * in the engine: not to steps with their own handler, flow control, `wait`, or fallbacks.
+ */
+export const usesWorkflowOnFailure = (steps: readonly unknown[]): boolean =>
+  steps.filter(isWorkflowStep).some((step) => {
+    if (getsWorkflowOnFailure(step)) {
+      return true;
+    }
+    return getNestedStepGroups(step).some(
+      ({ pathSuffix, steps: nested }) =>
+        !pathSuffix.endsWith('.fallback') && Array.isArray(nested) && usesWorkflowOnFailure(nested)
+    );
+  });
 
 const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: WalkContext): void => {
   if (!Array.isArray(steps)) {

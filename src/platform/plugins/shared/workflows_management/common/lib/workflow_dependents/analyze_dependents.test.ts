@@ -1418,6 +1418,38 @@ describe('analyzeCalledWorkflows', () => {
         steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }, rejected],
       })
     ).toBeUndefined();
+    expect(
+      failureOf({
+        settings: { 'on-failure': { fallback: [completes] } },
+        steps: [
+          { name: 'if', type: 'if', condition: 'true', steps: [{ name: 'log', type: 'console' }] },
+          failed,
+        ],
+      })
+    ).toBeUndefined();
+    // Steps before it that never run the workflow-level fallback, or one that can't succeed.
+    expect(
+      failureOf({
+        settings: { 'on-failure': { fallback: [completes] } },
+        steps: [{ name: 'pause', type: 'wait', with: { duration: '1s' } }, failed],
+      })
+    ).toBe('runEndsUnsuccessfully');
+    expect(
+      failureOf({
+        settings: { 'on-failure': { fallback: [completes] } },
+        steps: [
+          { name: 'log', type: 'console', 'on-failure': { retry: { 'max-attempts': 2 } } },
+          failed,
+        ],
+      })
+    ).toBe('runEndsUnsuccessfully');
+    expect(
+      failureOf({
+        outputs,
+        settings: { 'on-failure': { fallback: [{ ...completes, with: { score: 'high' } }] } },
+        steps: [{ name: 'log', type: 'console' }, failed],
+      })
+    ).toBe('runEndsUnsuccessfully');
   });
 
   it('does not count failing calls a completed run never reaches as failing every run', () => {
@@ -1618,6 +1650,32 @@ describe('analyzeRemovalImpact', () => {
     const top = workflow('top', [callStep('run', {}, undefined, 'strict-step')]);
 
     expect(analyzeRemovalImpact([CHILD_ID], [strictStep, top]).indirect).toBe(1);
+  });
+
+  it('fails callers further up when a fallback that would complete the run fails itself', () => {
+    const outputs = [{ name: 'score', type: 'number', required: true }];
+    const rejected = { name: 'emit', type: 'workflow.output', with: { score: 'high' } };
+    const parent = workflow(
+      'parent',
+      [
+        {
+          ...callStep('ctx', { inputs: { alert_id: 'a' } }),
+          'on-failure': { fallback: [rejected] },
+        },
+        { name: 'done', type: 'workflow.output', with: { score: 1 } },
+      ],
+      { outputs }
+    );
+    const grandparent = workflow('grandparent', [callStep('run', {}, undefined, 'parent')]);
+    const saveIndex = buildDependentsIndex(CHILD_ID, [parent, grandparent, childItem]);
+    const saved = analyzeDependents({
+      index: saveIndex,
+      savedDefinition: makeChild(),
+      draftDefinition: { ...makeChild(), enabled: false },
+    });
+
+    expect(analyzeRemovalImpact([CHILD_ID], [parent, grandparent]).indirect).toBe(1);
+    expect(saved.summary.indirectBreaking).toBe(1);
   });
 
   it('ignores calls between workflows that are removed together', () => {
