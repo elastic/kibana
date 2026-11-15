@@ -61,7 +61,9 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       const client = getClient({ includedHiddenTypes });
       const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: typesToInclude,
-        ...(searchString ? { search: `${searchString}*`, searchFields: ['title'] } : {}),
+        ...(searchString
+          ? { search: `${searchString}*`, searchFields: ['title'], defaultSearchOperator: 'AND' }
+          : {}),
         ...(references ? { hasReference: references, hasReferenceOperator: 'OR' } : {}),
       };
 
