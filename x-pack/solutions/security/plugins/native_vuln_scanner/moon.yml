@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-defend-workflows'
   sourceRoot: x-pack/solutions/security/plugins/native_vuln_scanner
 dependsOn:
+  - '@kbn/cloud-security-posture-common'
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-test-helpers-kbn-server'
