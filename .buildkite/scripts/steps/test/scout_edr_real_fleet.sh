@@ -26,12 +26,20 @@ esac
 source .buildkite/scripts/steps/functional/common.sh
 source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
 
-# UI project drives the browser. API project enrolls a host and talks to Kibana over HTTP.
-# Each config boots its own stack and VM. Keep both out of default Scout (excluded_configs).
+# shared_host UI drives the browser and shared_host API talks to Kibana over HTTP; both run
+# on every target. tamper_protection API runs on stateful only: its specs have no serverless
+# tag, so a serverless run would find no tests. Each config boots its own stack and VM.
+# Keep all of them out of default Scout (excluded_configs).
 CONFIGS=(
   "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/playwright.config.ts"
   "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/playwright.config.ts"
 )
+STATEFUL_ONLY_CONFIGS=(
+  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/tamper_protection/api/playwright.config.ts"
+)
+if [[ "$TARGET" == "stateful" ]]; then
+  CONFIGS+=("${STATEFUL_ONLY_CONFIGS[@]}")
+fi
 
 upload_events_if_available() {
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then

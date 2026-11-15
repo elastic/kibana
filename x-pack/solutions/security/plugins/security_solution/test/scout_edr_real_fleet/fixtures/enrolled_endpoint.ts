@@ -38,6 +38,135 @@ export interface EnrolledEndpoint {
   packagePolicyId: string;
 }
 
+export interface EnrolledHost {
+  agentId: string;
+  hostname: string;
+}
+
+/**
+ * Installs Fleet and the Endpoint package and starts Fleet Server when needed.
+ * Teardown stops Fleet Server and deletes its policy only when this call created it.
+ */
+export const withFleetServerForEndpoint = async (
+  { kbnClient, log }: { kbnClient: KbnClient; log: ScoutLogger },
+  use: () => Promise<void>
+): Promise<void> => {
+  let fleetServer: Awaited<ReturnType<typeof startFleetServerIfNecessary>> | undefined;
+  let deleteFleetServerPolicy = false;
+
+  try {
+    log.info('[edr_real_fleet] installing Fleet + Endpoint package');
+    await setupFleetForEndpoint(kbnClient, log);
+
+    log.info('[edr_real_fleet] starting Fleet Server if needed');
+    const hadFleetServerPolicy = await hasExistingFleetServerPolicy(kbnClient).catch((error) => {
+      log.warning(`[edr_real_fleet] Fleet Server policy lookup failed: ${error}`);
+      return true;
+    });
+    fleetServer = await startFleetServerIfNecessary({
+      kbnClient,
+      logger: log,
+    });
+    deleteFleetServerPolicy = Boolean(fleetServer) && !hadFleetServerPolicy;
+
+    await use();
+  } finally {
+    if (fleetServer) {
+      await stopAndDeleteFleetServer(kbnClient, log, fleetServer, {
+        deletePolicy: deleteFleetServerPolicy,
+      }).catch((error) => {
+        log.warning(`[edr_real_fleet] stopAndDeleteFleetServer failed: ${error}`);
+      });
+    }
+  }
+};
+
+/**
+ * Creates a VM, enrolls it on `agentPolicyId` and waits for Endpoint data, retrying
+ * once on a new VM. Teardown destroys the host and deletes its Endpoint data.
+ */
+export const withEnrolledHost = async (
+  {
+    kbnClient,
+    esClient,
+    log,
+    agentPolicyId,
+    hostnamePrefix,
+  }: {
+    kbnClient: KbnClient;
+    esClient: EsClient;
+    log: ScoutLogger;
+    agentPolicyId: string;
+    hostnamePrefix: string;
+  },
+  use: (host: EnrolledHost) => Promise<void>
+): Promise<void> => {
+  const destroyHost = async (hostToDestroy: CreateAndEnrollEndpointHostResponse) => {
+    await destroyEndpointHost(kbnClient, hostToDestroy).catch((destroyError) => {
+      log.warning(`[edr_real_fleet] destroyEndpointHost failed: ${destroyError}`);
+    });
+    await deleteEndpointDataAndTestSuperuser(esClient, log, [hostToDestroy.agentId]).catch(
+      (deleteError) => {
+        log.warning(`[edr_real_fleet] deleteEndpointDataAndTestSuperuser failed: ${deleteError}`);
+      }
+    );
+  };
+
+  const nextHostname = (): string =>
+    `${hostnamePrefix}${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+
+  const enrollHost = async (hostname: string): Promise<CreateAndEnrollEndpointHostResponse> => {
+    log.info(
+      `[edr_real_fleet] creating and enrolling Endpoint host ${hostname} on policy ${agentPolicyId}`
+    );
+    const enrolled = await createAndEnrollEndpointHost({
+      kbnClient,
+      log,
+      agentPolicyId,
+      hostname,
+      useClosestVersionMatch: true,
+    });
+
+    try {
+      log.info(`[edr_real_fleet] waiting for agent ${enrolled.agentId} to stream data`);
+      await waitForEndpointToStreamData(kbnClient, enrolled.agentId, ENDPOINT_STREAM_TIMEOUT_MS);
+      return enrolled;
+    } catch (streamError) {
+      await destroyHost(enrolled);
+      throw streamError;
+    }
+  };
+
+  const enrollOrDestroyVm = async (
+    hostname: string
+  ): Promise<CreateAndEnrollEndpointHostResponse> => {
+    try {
+      return await enrollHost(hostname);
+    } catch (enrollError) {
+      await deleteMultipassVm(hostname).catch((destroyError) => {
+        log.warning(
+          `[edr_real_fleet] destroy VM ${hostname} after failed enroll failed: ${destroyError}`
+        );
+      });
+      throw enrollError;
+    }
+  };
+
+  let host: CreateAndEnrollEndpointHostResponse;
+  try {
+    host = await enrollOrDestroyVm(nextHostname());
+  } catch (error) {
+    log.warning(`[edr_real_fleet] host setup failed, retrying once: ${error}`);
+    host = await enrollOrDestroyVm(nextHostname());
+  }
+
+  try {
+    await use({ agentId: host.agentId, hostname: host.hostname });
+  } finally {
+    await destroyHost(host);
+  }
+};
+
 /**
  * Starts Fleet Server when needed, creates one Endpoint policy, and enrolls a
  * live host. Shared by the real Fleet UI and API Playwright projects.
@@ -54,132 +183,33 @@ export const withEnrolledEndpoint = async (
   },
   use: (endpoint: EnrolledEndpoint) => Promise<void>
 ): Promise<void> => {
-  const created: {
-    fleetServer?: Awaited<ReturnType<typeof startFleetServerIfNecessary>>;
-    deleteFleetServerPolicy?: boolean;
-    indexedPolicy?: IndexedFleetEndpointPolicyResponse;
-    host?: CreateAndEnrollEndpointHostResponse;
-  } = {};
+  await withFleetServerForEndpoint({ kbnClient, log }, async () => {
+    let indexedPolicy: IndexedFleetEndpointPolicyResponse | undefined;
 
-  try {
-    log.info('[edr_real_fleet] installing Fleet + Endpoint package');
-    await setupFleetForEndpoint(kbnClient, log);
-
-    log.info('[edr_real_fleet] starting Fleet Server if needed');
-    const hadFleetServerPolicy = await hasExistingFleetServerPolicy(kbnClient).catch((error) => {
-      log.warning(`[edr_real_fleet] Fleet Server policy lookup failed: ${error}`);
-      return true;
-    });
-    created.fleetServer = await startFleetServerIfNecessary({
-      kbnClient,
-      logger: log,
-    });
-    created.deleteFleetServerPolicy = Boolean(created.fleetServer) && !hadFleetServerPolicy;
-
-    created.indexedPolicy = await createEndpointPolicy(
-      kbnClient,
-      log,
-      `automated-response-actions-${Date.now()}`
-    );
-    const policy = getCreatedPackagePolicy(created.indexedPolicy);
-    await enableAllPolicyProtections(kbnClient, policy.id);
-
-    const agentPolicyId = policy.policy_ids[0];
-    if (!agentPolicyId) {
-      throw new Error('Endpoint package policy has no agent policy id');
-    }
-
-    const destroyHost = async (hostToDestroy: CreateAndEnrollEndpointHostResponse) => {
-      await destroyEndpointHost(kbnClient, hostToDestroy).catch((destroyError) => {
-        log.warning(`[edr_real_fleet] destroyEndpointHost failed: ${destroyError}`);
-      });
-      await deleteEndpointDataAndTestSuperuser(esClient, log, [hostToDestroy.agentId]).catch(
-        (deleteError) => {
-          log.warning(`[edr_real_fleet] deleteEndpointDataAndTestSuperuser failed: ${deleteError}`);
-        }
-      );
-    };
-
-    const nextHostname = (): string =>
-      `test-host-ara-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-
-    const enrollHost = async (hostname: string): Promise<CreateAndEnrollEndpointHostResponse> => {
-      log.info(
-        `[edr_real_fleet] creating and enrolling Endpoint host ${hostname} on policy ${agentPolicyId}`
-      );
-      const enrolled = await createAndEnrollEndpointHost({
+    try {
+      indexedPolicy = await createEndpointPolicy(
         kbnClient,
         log,
-        agentPolicyId,
-        hostname,
-        useClosestVersionMatch: true,
-      });
-
-      try {
-        log.info(`[edr_real_fleet] waiting for agent ${enrolled.agentId} to stream data`);
-        await waitForEndpointToStreamData(kbnClient, enrolled.agentId, ENDPOINT_STREAM_TIMEOUT_MS);
-        return enrolled;
-      } catch (streamError) {
-        await destroyHost(enrolled);
-        throw streamError;
-      }
-    };
-
-    const enrollOrDestroyVm = async (
-      hostname: string
-    ): Promise<CreateAndEnrollEndpointHostResponse> => {
-      try {
-        return await enrollHost(hostname);
-      } catch (enrollError) {
-        await deleteMultipassVm(hostname).catch((destroyError) => {
-          log.warning(
-            `[edr_real_fleet] destroy VM ${hostname} after failed enroll failed: ${destroyError}`
-          );
-        });
-        throw enrollError;
-      }
-    };
-
-    const firstHostname = nextHostname();
-    let host: CreateAndEnrollEndpointHostResponse;
-    try {
-      host = await enrollOrDestroyVm(firstHostname);
-    } catch (error) {
-      log.warning(`[edr_real_fleet] host setup failed, retrying once: ${error}`);
-      host = await enrollOrDestroyVm(nextHostname());
-    }
-
-    created.host = host;
-
-    await use({
-      agentId: host.agentId,
-      hostname: host.hostname,
-      packagePolicyId: policy.id,
-    });
-  } finally {
-    if (created.host) {
-      await destroyEndpointHost(kbnClient, created.host).catch((error) => {
-        log.warning(`[edr_real_fleet] destroyEndpointHost failed: ${error}`);
-      });
-      await deleteEndpointDataAndTestSuperuser(esClient, log, [created.host.agentId]).catch(
-        (error) => {
-          log.warning(`[edr_real_fleet] deleteEndpointDataAndTestSuperuser failed: ${error}`);
-        }
+        `automated-response-actions-${Date.now()}`
       );
-    }
+      const policy = getCreatedPackagePolicy(indexedPolicy);
+      await enableAllPolicyProtections(kbnClient, policy.id);
 
-    if (created.indexedPolicy) {
-      await deleteEndpointPolicy(kbnClient, created.indexedPolicy).catch((error) => {
-        log.warning(`[edr_real_fleet] deleteEndpointPolicy failed: ${error}`);
-      });
-    }
+      const agentPolicyId = policy.policy_ids[0];
+      if (!agentPolicyId) {
+        throw new Error('Endpoint package policy has no agent policy id');
+      }
 
-    if (created.fleetServer) {
-      await stopAndDeleteFleetServer(kbnClient, log, created.fleetServer, {
-        deletePolicy: Boolean(created.deleteFleetServerPolicy),
-      }).catch((error) => {
-        log.warning(`[edr_real_fleet] stopAndDeleteFleetServer failed: ${error}`);
-      });
+      await withEnrolledHost(
+        { kbnClient, esClient, log, agentPolicyId, hostnamePrefix: 'test-host-ara-' },
+        ({ agentId, hostname }) => use({ agentId, hostname, packagePolicyId: policy.id })
+      );
+    } finally {
+      if (indexedPolicy) {
+        await deleteEndpointPolicy(kbnClient, indexedPolicy).catch((error) => {
+          log.warning(`[edr_real_fleet] deleteEndpointPolicy failed: ${error}`);
+        });
+      }
     }
-  }
+  });
 };
