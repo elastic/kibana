@@ -682,13 +682,13 @@ export class RulesClient {
 
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
-    const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
+    const { id, ...data } = this.parseRuleData(createRuleDataSchema, params.data, 'create');
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const prepared = this.prepareRuleForCreate({
-      data: parsed,
-      id: params.options?.id,
+      data,
+      id,
       enabled: params.options?.enabled ?? true,
       actor,
       nowIso,
@@ -1956,7 +1956,7 @@ export class RulesClient {
 
     if (!exists) {
       const { enabled, ...createData } = parsed;
-      const rule = await this.createRule({ data: createData, options: { id, enabled } });
+      const rule = await this.createRule({ data: { ...createData, id }, options: { enabled } });
       return { rule, created: true };
     }
 

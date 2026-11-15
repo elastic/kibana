@@ -685,6 +685,13 @@ describe('rule template create-rule schema coupling', () => {
                 },
               ],
             },
+            "id": Object {
+              "description": "Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails with HTTP 409 and the existing rule is not changed. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.",
+              "maxLength": 150,
+              "minLength": 1,
+              "pattern": "^[a-zA-Z0-9_-]+$",
+              "type": "string",
+            },
             "kind": Object {
               "anyOf": Array [
                 Object {
