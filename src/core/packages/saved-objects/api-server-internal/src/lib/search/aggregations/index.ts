@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { validateAndConvertAggregations } from './validation';
+export {
+  validateAndConvertAggregations,
+  AGGREGATION_CONTAINER_KEYS,
+  FIELD_PATH_VALUE_KEYS,
+  FIELD_PATH_MAP_KEYS,
+} from './validation';

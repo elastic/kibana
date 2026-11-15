@@ -9,4 +9,5 @@
 
 export { SavedObjectsClient } from './saved_objects_client';
 export { SavedObjectsClientProvider, SavedObjectsRepository, PointInTimeFinder } from './lib';
+export { AGGREGATION_CONTAINER_KEYS, FIELD_PATH_VALUE_KEYS, FIELD_PATH_MAP_KEYS } from './lib';
 export type { ISavedObjectsClientProvider } from './lib';

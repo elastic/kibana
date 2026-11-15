@@ -21,7 +21,8 @@ import {
 } from './validation_utils';
 import { aggregationSchemas } from './aggs_types';
 
-const aggregationKeys = ['aggs', 'aggregations'];
+// keys holding the nested aggregations of an aggregation container
+export const AGGREGATION_CONTAINER_KEYS = ['aggs', 'aggregations'];
 
 interface ValidationContext {
   allowedTypes: string[];
@@ -99,7 +100,7 @@ const validateAggregationContainer = (
 ) => {
   return Object.entries(container).reduce<estypes.AggregationsAggregationContainer>(
     (memo, [aggName, aggregation]) => {
-      if (!aggregationKeys.includes(aggName)) {
+      if (!AGGREGATION_CONTAINER_KEYS.includes(aggName)) {
         (memo as Record<string, unknown>)[aggName] = validateAggregationType(
           aggName,
           aggregation,
@@ -151,7 +152,7 @@ const validateAggregationStructure = (
  * },
  * ```
  */
-const attributeFields = ['field', 'path'];
+export const FIELD_PATH_VALUE_KEYS = ['field', 'path'];
 /**
  * List of fields that have a Record<attribute path, value> as value
  *
@@ -164,7 +165,7 @@ const attributeFields = ['field', 'path'];
  * },
  * ```
  */
-const attributeMaps = ['term'];
+export const FIELD_PATH_MAP_KEYS = ['term'];
 
 const validateAndRewriteFieldAttributes = (
   aggregation: Record<string, any>,
@@ -218,13 +219,13 @@ const lastParent = (parents: string[]) => {
 const isAttributeKey = (parents: string[]) => {
   const last = lastParent(parents);
   if (last) {
-    return attributeMaps.includes(last);
+    return FIELD_PATH_MAP_KEYS.includes(last);
   }
   return false;
 };
 
 const isAttributeValue = (fieldName: string, fieldValue: unknown): boolean => {
-  return attributeFields.includes(fieldName) && typeof fieldValue === 'string';
+  return FIELD_PATH_VALUE_KEYS.includes(fieldName) && typeof fieldValue === 'string';
 };
 
 const isRootField = (fieldName: string): boolean => {
