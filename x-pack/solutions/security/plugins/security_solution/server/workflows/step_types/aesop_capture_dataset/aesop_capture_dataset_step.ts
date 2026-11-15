@@ -67,8 +67,11 @@ const listMatchingConversations = async ({
   return matches.slice(0, limit);
 };
 
+const DEFAULT_DESCRIPTION = 'Captured by AESOP';
+
 interface ExistingDataset {
   id: string;
+  description?: string;
   examples: CapturedExample[];
 }
 
@@ -90,12 +93,17 @@ const loadExistingDataset = async (
       query: { name },
       headers: INTERNAL_VERSION_HEADERS,
     });
-    const dataset = await callKibanaApi<{ id: string; examples: CapturedExample[] }>({
+    const dataset = await callKibanaApi<{
+      id: string;
+      description?: string;
+      examples: CapturedExample[];
+    }>({
       method: 'GET',
       path: `${DATASETS_PATH}/${encodeURIComponent(resolved.body.id)}`,
       headers: INTERNAL_VERSION_HEADERS,
     });
-    return { id: dataset.body.id, examples: dataset.body.examples.map(pickExample) };
+    const { id, description, examples } = dataset.body;
+    return { id, description, examples: examples.map(pickExample) };
   } catch (error) {
     if (error instanceof KibanaApiCallError && error.status === 404) return undefined;
     throw error;
@@ -166,7 +174,8 @@ export const aesopCaptureDatasetStepDefinition = createServerStepDefinition({
         headers: INTERNAL_VERSION_HEADERS,
         body: {
           name: input.dataset_name,
-          description: input.dataset_description,
+          description: input.dataset_description ?? existing?.description ?? DEFAULT_DESCRIPTION,
+          // Upsert leaves tags untouched when they are undefined.
           tags: input.tags,
           examples: [...(existing?.examples ?? []), ...kept],
         },

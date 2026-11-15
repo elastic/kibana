@@ -14,7 +14,7 @@ interface ApiCall {
   path: string;
   query?: Record<string, unknown>;
   headers?: Record<string, string>;
-  body?: { examples?: unknown[] };
+  body?: { examples?: unknown[]; description?: string; tags?: string[] };
 }
 
 const upsertCall = (callKibanaApi: jest.Mock<unknown, [ApiCall]>) =>
@@ -193,6 +193,45 @@ describe('aesopCaptureDatasetStepDefinition', () => {
       { input: { message: 'why open' }, output: { message: 'old' } },
       expect.objectContaining({ input: { message: 'list rules' } }),
     ]);
+  });
+
+  it("keeps an existing dataset's description and tags when the input omits them", async () => {
+    const callKibanaApi = jest.fn(async ({ method, path }: ApiCall) => {
+      if (isList(path)) return listed('c1');
+      if (path === '/api/agent_builder/conversations/c1')
+        return { body: conversation('c1', 'list rules') };
+      if (path.endsWith('/_resolve')) return { body: { id: 'ds-1' } };
+      if (path.endsWith('/ds-1')) {
+        return { body: { id: 'ds-1', description: 'hand-written', examples: [] } };
+      }
+      if (method === 'POST') {
+        return { body: { dataset_id: 'ds-1', added: 1, removed: 0, unchanged: 0 } };
+      }
+      throw new Error(`unexpected ${method} ${path}`);
+    });
+
+    await run(callKibanaApi, {});
+
+    const body = upsertCall(callKibanaApi)?.body;
+    expect(body?.description).toBe('hand-written');
+    expect(body?.tags).toBeUndefined();
+  });
+
+  it('uses the default description for a new dataset', async () => {
+    const callKibanaApi = jest.fn(async ({ method, path }: ApiCall) => {
+      if (isList(path)) return listed('c1');
+      if (path === '/api/agent_builder/conversations/c1')
+        return { body: conversation('c1', 'list rules') };
+      if (path.endsWith('/_resolve')) throw notFound();
+      if (method === 'POST') {
+        return { body: { dataset_id: 'ds-1', added: 1, removed: 0, unchanged: 0 } };
+      }
+      throw new Error(`unexpected ${method} ${path}`);
+    });
+
+    await run(callKibanaApi, {});
+
+    expect(upsertCall(callKibanaApi)?.body?.description).toBe('Captured by AESOP');
   });
 
   it('does not upsert when every captured example is a duplicate', async () => {
