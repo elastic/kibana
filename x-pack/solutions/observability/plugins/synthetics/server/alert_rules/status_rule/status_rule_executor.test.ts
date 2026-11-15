@@ -23,6 +23,7 @@ import type {
 import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 
 // Mock the step information functions
 jest.mock('./queries/get_step_information', () => ({
@@ -325,6 +326,71 @@ describe('StatusRuleExecutor', () => {
           },
         },
       });
+    });
+  });
+
+  describe('KQL filter scope', () => {
+    const spies: jest.SpyInstance[] = [];
+
+    afterEach(() => {
+      spies.splice(0).forEach((spy) => spy.mockRestore());
+    });
+
+    it('keeps alerting monitors in scope when the KQL filter does not match them', async () => {
+      const filterMonitorsModule = await import('./queries/filter_monitors');
+      spies.push(
+        jest.spyOn(filterMonitorsModule, 'queryFilterMonitors').mockResolvedValue(['kql-id'])
+      );
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      spies.push(spy);
+      statusRule.params = { kqlQuery: 'labels.env: prod' };
+
+      await statusRule.getMonitors(['alerting-id']);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      const { filter } = spy.mock.calls[0][0] as { filter: string };
+      expect(filter).toContain('kql-id');
+      expect(filter).toContain('alerting-id');
+    });
+
+    it('still loads alerting monitors when the KQL filter matches nothing', async () => {
+      const filterMonitorsModule = await import('./queries/filter_monitors');
+      spies.push(jest.spyOn(filterMonitorsModule, 'queryFilterMonitors').mockResolvedValue([]));
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      spies.push(spy);
+      statusRule.params = { kqlQuery: 'labels.env: prod' };
+
+      await statusRule.getMonitors(['alerting-id']);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect((spy.mock.calls[0][0] as { filter: string }).filter).toContain('alerting-id');
+    });
+
+    it('loads no monitors when the KQL filter matches nothing and nothing is alerting', async () => {
+      const filterMonitorsModule = await import('./queries/filter_monitors');
+      spies.push(jest.spyOn(filterMonitorsModule, 'queryFilterMonitors').mockResolvedValue([]));
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      spies.push(spy);
+      statusRule.params = { kqlQuery: 'labels.env: prod' };
+
+      const { enabledMonitorQueryIds } = await statusRule.getMonitors([]);
+
+      expect(spy).not.toHaveBeenCalled();
+      expect(enabledMonitorQueryIds).toEqual([]);
+    });
+
+    it('passes previously down and pending monitors to getMonitors', async () => {
+      const spy = jest.spyOn(statusRule, 'getMonitors').mockResolvedValue(processMonitors([]));
+      spies.push(spy);
+
+      await statusRule.getConfigs({
+        prevDownConfigs: { 'down-id-loc': { configId: 'down-id' } as AlertStatusMetaData },
+        prevPendingConfigs: {
+          'pending-id-loc': { configId: 'pending-id' } as AlertPendingStatusMetaData,
+        },
+      });
+
+      expect(spy).toHaveBeenCalledWith(['down-id', 'pending-id']);
     });
   });
 
