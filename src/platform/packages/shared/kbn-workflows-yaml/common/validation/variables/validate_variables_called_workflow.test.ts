@@ -54,10 +54,17 @@ const calledWorkflows: Record<string, CalledWorkflowOutputs> = {
           properties: { id: { type: 'string' } },
           additionalProperties: false,
         },
+        rules: {
+          type: 'object',
+          additionalProperties: { type: 'object', properties: { id: { type: 'string' } } },
+        },
+        maybe: {
+          anyOf: [{ type: 'object', properties: { id: { type: 'string' } } }, { type: 'null' }],
+        },
       },
       additionalProperties: false,
     },
-    returnedOutputNames: ['suggestions', 'details', 'declared', 'closed'],
+    returnedOutputNames: ['suggestions', 'details', 'declared', 'closed', 'rules', 'maybe'],
   },
   'open-root': {
     name: 'Open',
@@ -170,7 +177,7 @@ describe('validateVariables called workflow outputs', () => {
       validate(
         callerYaml(
           'suggestions',
-          '{{ steps.ctx.output.suggestions[0].title }} {{ steps.ctx.output.details.id }} {{ steps.ctx.output.declared.extra }}'
+          '{{ steps.ctx.output.suggestions[0].title }} {{ steps.ctx.output.details.id }} {{ steps.ctx.output.declared.extra }} {{ steps.ctx.output.rules.r1.extra }} {{ steps.ctx.output.maybe.extra }}'
         )
       )
     ).toEqual([]);
@@ -182,7 +189,7 @@ describe('validateVariables called workflow outputs', () => {
         )
       ).map(({ message }) => message)
     ).toEqual([
-      'Workflow "Suggestions" doesn’t return an output named "suggestion". It returns: suggestions, details, declared, closed',
+      'Workflow "Suggestions" doesn’t return an output named "suggestion". It returns: suggestions, details, declared, closed, rules, maybe',
       'Variable steps.ctx.output.closed.extra is invalid',
       'Variable steps.ctx.output.declared.meta.extra is invalid',
     ]);

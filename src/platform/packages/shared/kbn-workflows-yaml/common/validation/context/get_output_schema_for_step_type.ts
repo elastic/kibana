@@ -74,7 +74,16 @@ const openNestedObjects = (schema: Record<string, unknown>): Record<string, unkn
 // Zod wrappers whose inner schema `getSchemaAtPath` walks into.
 const getChildSchemas = (schema: z.ZodType): z.ZodType[] => {
   if (schema instanceof z.ZodObject) {
-    return Object.values(schema.shape as Record<string, z.ZodType>);
+    const { catchall } = schema.def;
+    const isTypedCatchall =
+      catchall !== undefined &&
+      !(catchall instanceof z.ZodNever) &&
+      !(catchall instanceof z.ZodUnknown) &&
+      !(catchall instanceof z.ZodAny);
+    return [
+      ...Object.values(schema.shape as Record<string, z.ZodType>),
+      ...(isTypedCatchall ? [catchall as z.ZodType] : []),
+    ];
   }
   if (schema instanceof z.ZodArray) {
     return [schema.element as z.ZodType];
@@ -92,8 +101,19 @@ const getChildSchemas = (schema: z.ZodType): z.ZodType[] => {
   return [];
 };
 
-// An object that accepts fields it doesn't declare: no catchall, or an untyped one.
+// An object that accepts fields it doesn't declare: no catchall, or an untyped one. A union does
+// when one of its options does, since a path that no option resolves stops at the union.
 const acceptsUndeclaredFields = (schema: z.ZodType): boolean => {
+  if (schema instanceof z.ZodUnion) {
+    return (schema.options as readonly z.ZodType[]).some(acceptsUndeclaredFields);
+  }
+  if (
+    schema instanceof z.ZodOptional ||
+    schema instanceof z.ZodNullable ||
+    schema instanceof z.ZodDefault
+  ) {
+    return acceptsUndeclaredFields(schema.unwrap() as z.ZodType);
+  }
   if (!(schema instanceof z.ZodObject)) {
     return false;
   }
