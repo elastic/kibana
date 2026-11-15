@@ -111,6 +111,19 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
     expect(screen.getByText(alertsIndex)).toBeInTheDocument();
   });
 
+  it('renders nothing when the alerts index has read but lacks the privileges the page does not use', () => {
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), undefined, undefined, {
+      '.alerts-security.alerts-default': {
+        read: true,
+        view_index_metadata: false,
+        write: false,
+        maintenance: false,
+      },
+    });
+
+    expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument();
+  });
+
   it('shows callout when entity store index is missing read privilege', () => {
     const entityPrivileges = makeEntityEnginePrivileges({
       [ENTITY_ENGINE_PRIVILEGE]: { read: false, view_index_metadata: false },
