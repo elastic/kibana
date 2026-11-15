@@ -93,7 +93,10 @@ describe('materializeMemory', () => {
   const createStore = (pages: MemoryPage[]): MemoryPageStore =>
     ({
       list: jest.fn(),
-      retrieve: jest.fn().mockResolvedValue(pages),
+      retrieve: jest.fn(async ({ query }: { query?: string } = {}) => ({
+        pages,
+        mode: query ? 'hybrid' : 'browse',
+      })),
       get: jest.fn().mockResolvedValue(undefined),
       getVersioned: jest.fn(),
       getByName: jest.fn(),
@@ -182,8 +185,29 @@ describe('materializeMemory', () => {
     expect(recalledIds).toEqual(['memory_a', 'memory_b', 'memory_c']);
   });
 
+  // A search that fell back to keyword matching must be visible to callers, not only in logs.
+  it('records which retriever produced the candidates', async () => {
+    const store = createStore(candidates);
+    store.retrieve = jest.fn().mockResolvedValue({ pages: candidates, mode: 'bm25' });
+
+    const { summary } = await materializeMemory({
+      session: createSession() as never,
+      store,
+      logger: loggerMock.create(),
+      query: 'checkout lag',
+      keepCount: 2,
+    });
+
+    expect(summary).toEqual(
+      expect.objectContaining({ retrievalMode: 'search', retriever: 'bm25', searchFallback: false })
+    );
+  });
+
   it('falls back to browse when the prompt matches no memories', async () => {
-    const retrieve = jest.fn().mockResolvedValueOnce([]).mockResolvedValueOnce(candidates);
+    const retrieve = jest
+      .fn()
+      .mockResolvedValueOnce({ pages: [], mode: 'hybrid' })
+      .mockResolvedValueOnce({ pages: candidates, mode: 'browse' });
     const store = createStore([]);
     store.retrieve = retrieve;
     const session = createSession();
@@ -312,6 +336,7 @@ describe('materializeMemory', () => {
     expect(notification).not.toContain('/a.md');
     expect(summary).toEqual({
       retrievalMode: 'browse',
+      retriever: 'browse',
       searchFallback: false,
       candidateCount: 2,
       recalledCount: 2,
