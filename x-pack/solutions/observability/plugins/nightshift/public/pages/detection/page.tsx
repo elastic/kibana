@@ -28,6 +28,7 @@ import React, {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type UIEvent,
@@ -47,6 +48,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import type { DetectionTabId } from './detection_tabs';
 import { DETECTION_TAB_LABELS, getVisibleDetectionTabs } from './detection_tabs';
+import { getStatusFromSearch } from './events/use_events_url_state';
 import { DetectionOverview } from './overview/detection_overview';
 import { EntitiesPanel } from './entities/entities_panel';
 import { PAGE_QUERY_PARAM } from './constants';
@@ -106,7 +108,9 @@ export const DetectionPage = ({
   const maintenanceStatus = useMaintenanceStatus();
   const { isDeveloperMode } = useDeveloperMode();
   const { timeRange, setTimeRange } = useDetectionTimeRange();
-  const overview = useDetectionOverview(timeRange);
+  // The tile counts the same statuses the events list shows, so the two never disagree.
+  const status = useMemo(() => getStatusFromSearch(location.search), [location.search]);
+  const overview = useDetectionOverview({ ...timeRange, status });
   const { view, onCreationStateChange, retryHistoryLookup } = useDetectionOnboardingState();
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
   const selection = useEntitySelection();
