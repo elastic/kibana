@@ -87,27 +87,32 @@ describe('TableGrid', () => {
   });
 
   it('renders custom cell value renderer if provided', () => {
-    const customRenderCellValue = jest.fn(() => <span>CustomCell</span>);
-    render(<TableGrid {...defaultProps} customRenderCellValue={customRenderCellValue} />);
+    const renderCell = jest.fn(() => <span>CustomCell</span>);
+    render(<TableGrid {...defaultProps} renderCell={renderCell} />);
     expect(screen.getAllByText('CustomCell').length).toBeGreaterThan(0);
+    expect(renderCell).toHaveBeenCalledWith(
+      expect.objectContaining({ row: mockRows[0], rowId: 'fieldA', columnId: 'name' })
+    );
   });
 
   it('renders custom cell popover renderer if provided', async () => {
-    const customRenderCellPopover = jest.fn(() => <span>CustomPopover</span>);
-    render(<TableGrid {...defaultProps} customRenderCellPopover={customRenderCellPopover} />);
-    const tableCell = screen.getByText('fieldA');
-    await userEvent.hover(tableCell);
-    const expandPopoverButton = screen.getByTestId('euiDataGridCellExpandButton');
-    await userEvent.click(expandPopoverButton);
+    const renderCellDetails = jest.fn(() => <span>CustomPopover</span>);
+    render(<TableGrid {...defaultProps} renderCellDetails={renderCellDetails} />);
+    const tableCell = screen.getByRole('gridcell', { name: 'Unknown field fieldA' });
+    tableCell.focus();
+    await userEvent.keyboard('{Enter}');
 
     expect(screen.getAllByText('CustomPopover').length).toBeGreaterThan(0);
+    expect(renderCellDetails).toHaveBeenCalledWith(
+      expect.objectContaining({ row: mockRows[0], rowId: 'fieldA', columnId: 'name' })
+    );
   });
 
-  it('applies custom gridStyle from props', () => {
+  it('applies custom appearance from props', () => {
     render(
       <TableGrid
         {...defaultProps}
-        gridStyle={{ stripes: false, rowHover: 'none', border: 'none' }}
+        appearance={{ stripes: false, rowHover: 'none', border: 'none' }}
       />
     );
     const grid = screen.getByTestId('UnifiedDocViewerTableGrid');

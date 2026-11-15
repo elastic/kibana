@@ -17,8 +17,7 @@ import { getUnifiedDocViewerServices } from '../../plugin';
 
 interface TableCellProps {
   searchTerm: string;
-  rows: FieldRow[];
-  rowIndex: number;
+  row: FieldRow;
   columnId: string;
   isDetails: boolean;
   isESQLMode: boolean;
@@ -26,13 +25,11 @@ interface TableCellProps {
 }
 
 export const TableCell: React.FC<TableCellProps> = React.memo(
-  ({ searchTerm, rows, rowIndex, columnId, isDetails, isESQLMode, onFindSearchTermMatch }) => {
+  ({ searchTerm, row, columnId, isDetails, isESQLMode, onFindSearchTermMatch }) => {
     const { fieldsMetadata } = getUnifiedDocViewerServices();
 
-    const row = rows[rowIndex];
-
     const searchTermMatch = useMemo(() => {
-      if (row && onFindSearchTermMatch && searchTerm?.trim()) {
+      if (onFindSearchTermMatch && searchTerm?.trim()) {
         return onFindSearchTermMatch(row, searchTerm);
       }
       return null;
@@ -40,15 +37,11 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
 
     const nameHighlight = useMemo(
       () =>
-        row && searchTermMatch && [TermMatch.name, TermMatch.both].includes(searchTermMatch)
+        searchTermMatch && [TermMatch.name, TermMatch.both].includes(searchTermMatch)
           ? getFieldSearchMatchingHighlight(row.dataViewField?.displayName || row.name, searchTerm)
           : undefined,
       [searchTerm, searchTermMatch, row]
     );
-
-    if (!row) {
-      return null;
-    }
 
     const { flattenedValue, name, displayNameOverride, dataViewField, ignoredReason, fieldType } =
       row;

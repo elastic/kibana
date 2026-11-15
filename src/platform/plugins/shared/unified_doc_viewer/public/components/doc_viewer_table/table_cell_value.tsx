@@ -100,7 +100,7 @@ interface TableFieldValueProps {
   formattedValue: ReactNode;
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
-  isDetails?: boolean; // true when inside EuiDataGrid cell popover
+  isDetails?: boolean; // true when inside the cell details surface
   isHighlighted?: boolean; // whether it's matching a search term
 }
 
@@ -186,6 +186,7 @@ export const TableFieldValue = ({
             className="kbnDocViewer__value"
             css={[
               styles.docViewerValue,
+              isDetails && styles.docViewerValueDetails,
               isHighlighted && !isDetails && styles.docViewerValueHighlighted,
               shouldTruncate && styles.docViewerValueTruncated,
             ]}
@@ -203,7 +204,6 @@ export const TableFieldValue = ({
 const componentStyles = {
   docViewerValue: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
-    const { fontSize } = euiFontSize(themeContext, 's');
 
     return css({
       wordBreak: 'break-all',
@@ -211,12 +211,12 @@ const componentStyles = {
       whiteSpace: 'pre-wrap',
       lineHeight: euiTheme.font.lineHeightMultiplier,
       verticalAlign: 'top',
-
-      '.euiDataGridRowCell__popover &': {
-        fontSize,
-      },
     });
   },
+  docViewerValueDetails: (themeContext: UseEuiTheme) =>
+    css({
+      fontSize: euiFontSize(themeContext, 's').fontSize,
+    }),
   docViewerValueHighlighted: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: euiTheme.font.weight.bold,

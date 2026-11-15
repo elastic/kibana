@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { FieldRow } from './field_row';
 import { getPinColumnControl } from './get_pin_control';
 import { buildFieldRowMock } from './field_row.mocks';
@@ -25,44 +24,48 @@ const setup = () => {
   const user = userEvent.setup();
 
   const onTogglePinned = jest.fn();
-  const control = getPinColumnControl({ rows, onTogglePinned });
-  const Cell = control.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
+  const requestFocus = jest.fn();
+  const control = getPinColumnControl({ onTogglePinned });
   render(
-    <Cell
-      rowIndex={0}
-      columnId="test"
-      setCellProps={jest.fn()}
-      colIndex={0}
-      isDetails={false}
-      isExpanded={false}
-      isExpandable={false}
-    />
+    <>
+      {control.renderCell({
+        row: rows[0],
+        rowId: rows[0].name,
+        columnId: control.id,
+        requestFocus,
+      })}
+    </>
   );
 
-  return { user, onTogglePinned };
+  return { user, onTogglePinned, requestFocus };
 };
 
 describe('getPinControl', () => {
   describe('when the pin is clicked', () => {
-    it('should call onTogglePinned with keyboard event as false', async () => {
-      const { onTogglePinned, user } = setup();
+    it('toggles the field without requesting focus for pointer activation', async () => {
+      const { onTogglePinned, requestFocus, user } = setup();
 
       await user.click(screen.getByRole('button', { name: 'Pin field' }));
 
-      expect(onTogglePinned).toHaveBeenCalledWith('message', { isKeyboardEvent: false });
+      expect(onTogglePinned).toHaveBeenCalledWith('message');
+      expect(requestFocus).not.toHaveBeenCalled();
     });
   });
 
   describe('when the pin is focused', () => {
     describe('and Enter is pressed', () => {
-      it('should call onTogglePinned with keyboard event as true', async () => {
-        const { onTogglePinned, user } = setup();
+      it('toggles the field and requests focus by stable cell identity', async () => {
+        const { onTogglePinned, requestFocus, user } = setup();
 
         const button = screen.getByRole('button', { name: 'Pin field' });
         button.focus();
         await user.keyboard('{enter}');
 
-        expect(onTogglePinned).toHaveBeenCalledWith('message', { isKeyboardEvent: true });
+        expect(onTogglePinned).toHaveBeenCalledWith('message');
+        expect(requestFocus).toHaveBeenCalledWith({
+          rowId: 'message',
+          columnId: 'pin_field',
+        });
       });
     });
 

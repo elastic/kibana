@@ -8,82 +8,86 @@
  */
 
 import React from 'react';
-import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiIconTip, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { FieldRow } from './field_row';
+import type { TableGridCellAddress, TableGridControlColumn } from './table_grid/model';
 
 interface PinControlCellProps {
   row: FieldRow;
-  onTogglePinned: (fieldName: string, params: { isKeyboardEvent: boolean }) => void;
+  columnId: string;
+  onTogglePinned: (fieldName: string) => void;
+  requestFocus: (address: TableGridCellAddress) => void;
 }
 
-const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onTogglePinned }) => {
-  const { euiTheme } = useEuiTheme();
+const PinControlCell: React.FC<PinControlCellProps> = React.memo(
+  ({ row, columnId, onTogglePinned, requestFocus }) => {
+    const { euiTheme } = useEuiTheme();
 
-  const fieldName = row.name;
-  const isPinned = row.isPinned;
-  const label = isPinned
-    ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
-        defaultMessage: 'Unpin field',
-      })
-    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
-        defaultMessage: 'Pin field',
-      });
+    const fieldName = row.name;
+    const isPinned = row.isPinned;
+    const label = isPinned
+      ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
+          defaultMessage: 'Unpin field',
+        })
+      : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
+          defaultMessage: 'Pin field',
+        });
 
-  return (
-    <div
-      data-test-subj={`unifiedDocViewer_pinControl_${fieldName}`}
-      className={!isPinned ? 'kbnDocViewer__fieldsGrid__pinAction' : undefined}
-      css={css`
-        margin-left: ${isPinned ? '-1px' : 0}; // to align filled/unfilled pin icons better
-        width: ${euiTheme.size.l};
-        height: ${euiTheme.size.l};
-        overflow: hidden;
-      `}
-    >
-      <EuiToolTip content={label} disableScreenReaderOutput>
-        <EuiButtonIcon
-          data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
-          iconSize="m"
-          iconType={isPinned ? 'pinFill' : 'pin'}
-          color="text"
-          aria-label={label}
-          onClick={(e: { detail: number }) => {
-            const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
-            onTogglePinned(fieldName, { isKeyboardEvent });
-          }}
-        />
-      </EuiToolTip>
-    </div>
-  );
-});
+    return (
+      <div
+        data-test-subj={`unifiedDocViewer_pinControl_${fieldName}`}
+        className={!isPinned ? 'kbnDocViewer__fieldsGrid__pinAction' : undefined}
+        css={css`
+          margin-left: ${isPinned ? '-1px' : 0}; // to align filled/unfilled pin icons better
+          width: ${euiTheme.size.l};
+          height: ${euiTheme.size.l};
+          overflow: hidden;
+        `}
+      >
+        <EuiToolTip content={label} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
+            iconSize="m"
+            iconType={isPinned ? 'pinFill' : 'pin'}
+            color="text"
+            aria-label={label}
+            onClick={(event: { detail: number }) => {
+              onTogglePinned(fieldName);
+              if (event.detail === 0) {
+                requestFocus({ rowId: row.name, columnId });
+              }
+            }}
+          />
+        </EuiToolTip>
+      </div>
+    );
+  }
+);
 
 export const getPinColumnControl = ({
-  rows,
   onTogglePinned,
 }: {
-  rows: FieldRow[];
-  onTogglePinned: (fieldName: string, params: { isKeyboardEvent: boolean }) => void;
-}): EuiDataGridControlColumn => {
+  onTogglePinned: (fieldName: string) => void;
+}): TableGridControlColumn<FieldRow> => {
   const pinColumnHeader = i18n.translate('unifiedDocViewer.fieldsTable.pinControlColumnHeader', {
     defaultMessage: 'Pin field column',
   });
 
   return {
     id: 'pin_field',
+    label: pinColumnHeader,
     width: 32,
-    headerCellRender: () => (
-      <EuiIconTip aria-label={pinColumnHeader} type="info" content={pinColumnHeader} />
-    ),
-    rowCellRender: ({ rowIndex }) => {
-      const row = rows[rowIndex];
-      if (!row) {
-        return null;
-      }
+    renderCell: ({ row, columnId, requestFocus }) => {
       return (
-        <PinControlCell key={`control-${row.name}`} row={row} onTogglePinned={onTogglePinned} />
+        <PinControlCell
+          key={`control-${row.name}`}
+          row={row}
+          columnId={columnId}
+          onTogglePinned={onTogglePinned}
+          requestFocus={requestFocus}
+        />
       );
     },
   };
