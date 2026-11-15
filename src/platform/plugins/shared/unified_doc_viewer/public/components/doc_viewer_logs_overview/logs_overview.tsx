@@ -72,6 +72,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       hit,
       decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
       filter,
+      onFindSimilarValues,
       onAddColumn,
       onRemoveColumn,
       renderAIAssistant,
@@ -124,6 +125,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         filter={filter}
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
+        dataView={dataView}
+        onFindSimilarValues={onFindSimilarValues}
       >
         <div
           ref={setContainerRef}
