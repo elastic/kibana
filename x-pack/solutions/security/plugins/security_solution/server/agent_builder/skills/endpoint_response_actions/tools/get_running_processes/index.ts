@@ -108,13 +108,18 @@ export const getRunningProcessesTool = (
         // (almost always `pending` — the endpoint agent hasn't checked in
         // yet). Poll until Elastic Defend reports completion so the chat
         // response reflects the actual process list, not just "dispatched".
-        const actionDetails = await waitForActionCompletion(
-          endpointAppContextService,
-          spaceId,
-          dispatchedAction.id,
-          logger,
-          dispatchedAction
-        );
+        // An offline endpoint cannot answer within the poll window, so return
+        // the queued action at once, as isolate and scan do.
+        const isOffline = target.endpoint.status === 'offline';
+        const actionDetails = isOffline
+          ? dispatchedAction
+          : await waitForActionCompletion(
+              endpointAppContextService,
+              spaceId,
+              dispatchedAction.id,
+              logger,
+              dispatchedAction
+            );
 
         return {
           results: [
@@ -129,9 +134,15 @@ export const getRunningProcessesTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                // Why a failed action failed (bounded); without it the model
-                // sees only `status: failed`.
-                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
+                ...(isOffline
+                  ? {
+                      queued: true,
+                      message:
+                        'The action is queued and will execute when the endpoint reconnects.',
+                    }
+                  : // Why a failed action failed (bounded); without it the model
+                    // sees only `status: failed`.
+                    summarizeActionErrors(actionDetails.errors) ?? {}),
                 // Bounded: `outputs` carries one entry per running process, each
                 // with its full command line, so a busy host would otherwise blow
                 // the result budget and have generic truncation discard process

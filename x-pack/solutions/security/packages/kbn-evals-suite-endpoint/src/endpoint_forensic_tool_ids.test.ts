@@ -10,8 +10,8 @@ import {
   ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
 } from './endpoint_forensic_tool_ids';
 
-// Pins the mirrored contract to the securityTool() names registered by
-// endpoint_forensic_analysis_skill.ts.
+// Pins the mirrored ids to the literals that endpoint_forensic_analysis_skill.test.ts
+// also asserts for the registered securityTool() names; a rename fails that test.
 describe('endpoint forensic tool id contract', () => {
   it('mirrors the security-namespaced ids registered by the skill', () => {
     expect(ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID).toBe(

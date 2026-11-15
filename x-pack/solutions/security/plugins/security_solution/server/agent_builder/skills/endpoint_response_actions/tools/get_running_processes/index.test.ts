@@ -172,6 +172,43 @@ describe('getRunningProcessesTool', () => {
     expect(mockResponseActionsClient.runningProcesses).toHaveBeenCalledTimes(1);
   });
 
+  it('returns an offline request as queued without polling for completion', async () => {
+    const runningProcesses = jest.fn().mockResolvedValue({
+      id: 'action-rp-offline',
+      status: 'pending',
+      wasSuccessful: undefined,
+      hosts: { 'agent-offline': { name: 'offline-host' } },
+      outputs: {},
+    });
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-offline', status: 'offline', packages: ['endpoint'] }],
+        }),
+      },
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    service.getInternalResponseActionsClient = jest.fn(
+      () => ({ runningProcesses } as never)
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const result = await getRunningProcessesTool(service).handler(
+      { hostName: 'offline-host' },
+      mockContext
+    );
+    const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+    expect(data).toMatchObject({
+      hostName: 'offline-host',
+      actionId: 'action-rp-offline',
+      status: 'pending',
+      queued: true,
+      message: 'The action is queued and will execute when the endpoint reconnects.',
+    });
+    expect(runningProcesses).toHaveBeenCalledTimes(1);
+    expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+  });
+
   it('returns insufficient_privileges and does not dispatch when caller lacks canGetRunningProcesses', async () => {
     service.getEndpointAuthz = jest
       .fn()

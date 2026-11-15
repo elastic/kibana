@@ -54,8 +54,9 @@ skill.
 The response actions available are isolate, release (unisolate), scan, and
 running processes; each runs solely through this skill's tools (\`isolate_host\`,
 \`unisolate_host\`, \`scan_host\`, \`get_running_processes\`). Isolate, release and scan pause for
-the analyst's confirmation; running processes only reads, so it runs without
-one. Never improvise one with another
+the analyst's confirmation; running processes changes nothing on the host, so it
+runs without one, but it still enqueues a real action, so call it only on an
+explicit request. Never improvise one with another
 tool, such as a raw API call. Other response actions (execute, kill-process,
 suspend-process, get-file, upload, runscript, memory-dump) are not available
 from chat: say so and point the analyst to the Response Actions UI.
