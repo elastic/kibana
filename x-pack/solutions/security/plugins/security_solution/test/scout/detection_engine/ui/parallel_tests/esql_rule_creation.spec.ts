@@ -22,6 +22,9 @@ const QUERY_ERROR_RETRY_TIMEOUT_MS = 30_000;
 const ASYNC_VALIDATION_TIMEOUT_MS = 60_000;
 // One attempt inside a toPass retry loop: short, so a click that raced validation is retried.
 const RETRY_ATTEMPT_TIMEOUT_MS = 5_000;
+// The first load of the create page and the save-then-redirect to rule details both outlast the
+// default 10 s expect timeout on a cold serverless project.
+const PAGE_TRANSITION_TIMEOUT_MS = 60_000;
 
 // Each space gets its own source index: global setup loads no auditbeat data and one shared index
 // name would race across parallel workers. Mappings alone are enough for ES|QL validation and
@@ -39,7 +42,7 @@ const openEsqlWizard = async (
   ruleCreateWizard: RuleCreateWizard
 ) => {
   await page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
-  await expect(ruleCreateWizard.defineStep).toBeVisible();
+  await expect(ruleCreateWizard.defineStep).toBeVisible({ timeout: PAGE_TRANSITION_TIMEOUT_MS });
   await ruleCreateWizard.selectEsqlRuleType();
 };
 
@@ -229,7 +232,7 @@ spaceTest.describe(
       'shows confirmation modal about existing non-blocking validation errors',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
         testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
-        const { ruleCreateWizard, ruleEditPage } = pageObjects;
+        const { ruleCreateWizard, ruleEditPage, ruleDetailsPage } = pageObjects;
         const { saveWithWarningsModal } = ruleEditPage;
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
@@ -247,6 +250,11 @@ spaceTest.describe(
 
         await ruleEditPage.saveWithWarningsConfirmButton.click();
         await expect(saveWithWarningsModal).toBeHidden();
+        // The save is still in flight while the disabled button stays mounted; the rule details
+        // page is the signal that the rule was created despite the warning.
+        await expect(ruleDetailsPage.header).toContainText(RULE_NAME, {
+          timeout: PAGE_TRANSITION_TIMEOUT_MS,
+        });
         await expect(ruleCreateWizard.createAndEnable).toBeHidden();
       }
     );
