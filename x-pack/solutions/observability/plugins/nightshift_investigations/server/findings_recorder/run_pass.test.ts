@@ -995,6 +995,8 @@ describe('runFindingsPass with workspace files', () => {
       expect(prompt).toContain('**Tested:**');
       expect(prompt).toContain('**Result:**');
       expect(prompt).toContain('never "I checked..."');
+      expect(prompt).toContain('candidate wording character-for-character');
+      expect(prompt).toContain('only restates that the alert fired, flapped or repeated');
     }
     expect(final).toContain('At most 70 words of Markdown');
     expect(final).toContain('Cause not confirmed:');
