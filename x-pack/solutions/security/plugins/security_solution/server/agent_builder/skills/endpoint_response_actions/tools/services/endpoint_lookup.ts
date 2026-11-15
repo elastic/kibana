@@ -581,9 +581,7 @@ export function createEndpointLookupService(
     // collision set, so a linked-project host sharing the IP is ambiguity.
     const [origin, scopedMetadata] = await Promise.all([
       listMetadataCandidates('ip', value, dispatchMode ? undefined : scoped),
-      dispatchMode && scoped?.isCpsRead()
-        ? listMetadataCandidates('ip', value, scoped)
-        : undefined,
+      dispatchMode && scoped?.isCpsRead() ? listMetadataCandidates('ip', value, scoped) : undefined,
     ]);
     const metadata = {
       candidates: [...origin.candidates, ...(scopedMetadata?.candidates ?? [])],
