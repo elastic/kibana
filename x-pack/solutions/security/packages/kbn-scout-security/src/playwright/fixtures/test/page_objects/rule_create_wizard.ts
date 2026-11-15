@@ -13,6 +13,14 @@ import { expect } from '../../../../../ui';
 
 export type MitreFramework = 'enterprise' | 'atlas';
 
+// Query validation and field loading are async; "Continue" stays disabled until they settle,
+// which can take tens of seconds on a cold project.
+const STEP_VALIDATION_TIMEOUT_MS = 60_000;
+// A validation error appears client-side, so a retried click shows it well within this budget.
+const QUERY_ERROR_TIMEOUT_MS = 30_000;
+// One attempt inside a toPass retry loop: short, so a click that raced validation is retried.
+const RETRY_ATTEMPT_TIMEOUT_MS = 5_000;
+
 /**
  * Custom query rule create wizard: Define → About → Schedule → Actions.
  */
@@ -134,6 +142,49 @@ export class RuleCreateWizardPage {
       .getByTestId('ESQLEditor')
       .getByTestId('kibanaCodeEditor')
       .waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
+  /**
+   * Clicks Define "Continue" until the About step is open and editable. The click races async
+   * query validation and can be swallowed, so it is retried only while About is not shown yet.
+   */
+  async continueFromDefineStep(): Promise<void> {
+    await expect(this.defineContinue).toBeEnabled({ timeout: STEP_VALIDATION_TIMEOUT_MS });
+    await expect(async () => {
+      if (!(await this.aboutRuleName.isVisible())) {
+        await this.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      }
+      await expect(this.aboutRuleName).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      await expect(this.aboutRuleName).toBeEditable({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+    }).toPass({ timeout: STEP_VALIDATION_TIMEOUT_MS });
+  }
+
+  /**
+   * Clicks About "Continue" until the Schedule step is open. The click races About-step
+   * validation and can be swallowed, so it is retried only while Schedule is not shown yet.
+   */
+  async continueFromAboutStep(): Promise<void> {
+    await expect(async () => {
+      if (!(await this.scheduleContinue.isVisible())) {
+        await this.aboutContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      }
+      await expect(this.scheduleContinue).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      await expect(this.scheduleContinue).toBeEnabled({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+    }).toPass({ timeout: STEP_VALIDATION_TIMEOUT_MS });
+  }
+
+  /**
+   * Clicks Define "Continue" until the ES|QL query bar shows `expectedError`. A pending
+   * validation can swallow the first click, so the click is retried.
+   */
+  async continueFromDefineStepUntilQueryError(expectedError: string): Promise<void> {
+    await expect(this.defineContinue).toBeEnabled({ timeout: STEP_VALIDATION_TIMEOUT_MS });
+    await expect(async () => {
+      await this.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      await expect(this.esqlQueryBar).toContainText(expectedError, {
+        timeout: RETRY_ATTEMPT_TIMEOUT_MS,
+      });
+    }).toPass({ timeout: QUERY_ERROR_TIMEOUT_MS });
   }
 
   /** Replaces the query in the ES|QL query bar of the Define step. */
@@ -265,16 +316,13 @@ export class RuleCreateWizardPage {
     await this.queryInput.pressSequentially(query);
     await this.page.keyboard.press('Enter');
 
-    await this.defineContinue.click();
-    await this.aboutRuleName.waitFor({ state: 'visible' });
+    await this.continueFromDefineStep();
     await this.aboutRuleName.fill(name);
     await this.aboutRuleDescription.fill(description);
     if (onAboutStep) {
       await onAboutStep();
     }
-    await this.aboutContinue.click();
-
-    await this.scheduleContinue.waitFor({ state: 'visible' });
+    await this.continueFromAboutStep();
     await this.scheduleContinue.click();
 
     await this.createWithoutEnabling.waitFor({ state: 'visible' });
