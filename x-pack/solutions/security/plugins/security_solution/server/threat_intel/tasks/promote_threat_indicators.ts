@@ -20,6 +20,7 @@ import {
 import {
   GLOBAL_SPACE_ID,
   INDICATOR_REFERENCE_PREFIX,
+  INDICATOR_ECS_EVENT,
   IOC_TYPES,
   type IocType,
   THREAT_INTEL_INDICATORS_INDEX,
@@ -257,6 +258,10 @@ if (!alreadyPresent) {
 }
 if (ctx._source.threat == null) { ctx._source.threat = ['indicator': [:]]; }
 if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; }
+if (ctx._source.event == null) {
+  ctx._source.event = ['kind': '${INDICATOR_ECS_EVENT.kind}', 'category': ['${INDICATOR_ECS_EVENT.category[0]}'], 'type': ['${INDICATOR_ECS_EVENT.type[0]}']];
+}
+if (ctx._source.threat.feed == null) { ctx._source.threat.feed = ['name': params.provider]; }
 ctx._source.threat.indicator.last_seen = params.now;
 ctx._source['@timestamp'] = params.now;
 if (params.severity != null) {
@@ -440,7 +445,13 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
         _id: id,
         upsert: {
           '@timestamp': now,
+          event: {
+            kind: INDICATOR_ECS_EVENT.kind,
+            category: [...INDICATOR_ECS_EVENT.category],
+            type: [...INDICATOR_ECS_EVENT.type],
+          },
           threat: {
+            feed: { name: provider },
             indicator: {
               ...ecsIndicatorPayload(ioc.type, ioc.value),
               provider,
