@@ -79,6 +79,8 @@ export const createMockMonacoEditor = (
     getModel: jest.fn(() => model),
     getOption: jest.fn(),
     onMouseDown: jest.fn(() => ({ dispose: jest.fn() })),
+    onMouseMove: jest.fn(() => ({ dispose: jest.fn() })),
+    onMouseLeave: jest.fn(() => ({ dispose: jest.fn() })),
     onDidChangeConfiguration: jest.fn(() => ({ dispose: jest.fn() })),
     onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
     onDidChangeModelContent: jest.fn(() => ({ dispose: jest.fn() })),

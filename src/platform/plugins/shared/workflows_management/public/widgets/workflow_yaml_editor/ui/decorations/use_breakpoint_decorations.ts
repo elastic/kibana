@@ -9,9 +9,10 @@
 
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { monaco } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import { BuiltInStepTypes } from '@kbn/workflows';
 import {
   selectBreakpoints,
@@ -30,6 +31,15 @@ export const isBreakpointSupportedStepType = (stepType: string | undefined): boo
   stepType.length > 0 &&
   (stepType === 'data.set' || !(BuiltInStepTypes as readonly string[]).includes(stepType));
 
+/**
+ * Marks the tooltip so the global hover overrides can size it compactly. Monaco's markdown
+ * sanitizer strips `class`, so an allowed attribute (`data-code`, only read on `div`) is used.
+ */
+const toBreakpointTooltip = (text: string): monaco.IMarkdownString => ({
+  value: `<span data-code="step-breakpoint-tooltip">${text}</span>`,
+  supportHtml: true,
+});
+
 export const useBreakpointDecorations = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   isEditorMounted: boolean
@@ -42,6 +52,7 @@ export const useBreakpointDecorations = (
   workflowLookupRef.current = workflowLookup;
   const isExecutionsTabRef = useRef(isExecutionsTab);
   isExecutionsTabRef.current = isExecutionsTab;
+  const [hoveredLineNumber, setHoveredLineNumber] = useState<number | null>(null);
 
   const decorationsCollection = useMemo(() => {
     if (!editor) {
@@ -57,6 +68,16 @@ export const useBreakpointDecorations = (
       return;
     }
 
+    const setBreakpointHoverMessage = toBreakpointTooltip(
+      i18n.translate('workflows.workflowDetail.yamlEditor.setBreakpointTooltip', {
+        defaultMessage: 'Set breakpoint',
+      })
+    );
+    const removeBreakpointHoverMessage = toBreakpointTooltip(
+      i18n.translate('workflows.workflowDetail.yamlEditor.removeBreakpointTooltip', {
+        defaultMessage: 'Remove breakpoint',
+      })
+    );
     const breakpointSet = new Set(breakpoints);
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
     for (const [stepId, stepInfo] of Object.entries(workflowLookup.steps)) {
@@ -68,20 +89,33 @@ export const useBreakpointDecorations = (
           endColumn: 1,
         };
         if (breakpointSet.has(stepId)) {
-          decorations.push({
-            range,
-            options: {
-              isWholeLine: true,
-              className: 'step-breakpoint-line',
-              marginClassName: 'step-breakpoint-margin',
-              glyphMarginClassName: 'step-breakpoint-glyph',
+          // Glyph is a separate non-whole-line decoration so it renders once on wrapped lines.
+          decorations.push(
+            {
+              range,
+              options: {
+                glyphMarginClassName: 'step-breakpoint-glyph',
+                glyphMarginHoverMessage: removeBreakpointHoverMessage,
+              },
             },
-          });
+            {
+              range,
+              options: {
+                isWholeLine: true,
+                className: 'step-breakpoint-line',
+                marginClassName: 'step-breakpoint-margin',
+              },
+            }
+          );
         } else {
+          const isLineHovered = stepInfo.lineStart === hoveredLineNumber;
           decorations.push({
             range,
             options: {
-              glyphMarginClassName: 'step-breakpoint-hover-target',
+              glyphMarginClassName: isLineHovered
+                ? 'step-breakpoint-hover-target step-breakpoint-hover-active'
+                : 'step-breakpoint-hover-target',
+              glyphMarginHoverMessage: setBreakpointHoverMessage,
             },
           });
         }
@@ -89,7 +123,23 @@ export const useBreakpointDecorations = (
     }
 
     decorationsCollection?.set(decorations);
-  }, [isExecutionsTab, breakpoints, workflowLookup, decorationsCollection]);
+  }, [isExecutionsTab, breakpoints, workflowLookup, decorationsCollection, hoveredLineNumber]);
+
+  useEffect(() => {
+    if (!editor || !isEditorMounted) {
+      return;
+    }
+
+    const mouseMoveDisposable = editor.onMouseMove((event) => {
+      setHoveredLineNumber(event.target.position?.lineNumber ?? null);
+    });
+    const mouseLeaveDisposable = editor.onMouseLeave(() => setHoveredLineNumber(null));
+
+    return () => {
+      mouseMoveDisposable.dispose();
+      mouseLeaveDisposable.dispose();
+    };
+  }, [editor, isEditorMounted]);
 
   useEffect(() => {
     if (!editor || !isEditorMounted) {
@@ -127,11 +177,11 @@ export const useBreakpointDecorations = (
     () =>
       css({
         '.step-breakpoint-line': {
-          backgroundColor: transparentize(colors.danger, 0.1),
-          boxShadow: `inset 2px 0 0 0 ${colors.danger}`,
+          backgroundColor: transparentize(colors.warning, 0.1),
+          boxShadow: `inset 2px 0 0 0 ${colors.warning}`,
         },
         '.step-breakpoint-margin': {
-          backgroundColor: transparentize(colors.danger, 0.1),
+          backgroundColor: transparentize(colors.warning, 0.1),
         },
         '.step-breakpoint-glyph, .step-breakpoint-hover-target': {
           cursor: 'pointer',
@@ -145,16 +195,16 @@ export const useBreakpointDecorations = (
           width: '9px',
           height: '9px',
           borderRadius: '50%',
-          backgroundColor: colors.danger,
-          boxShadow: `0 0 0 2px ${transparentize(colors.danger, 0.25)}`,
+          backgroundColor: colors.warning,
+          boxShadow: `0 0 0 2px ${transparentize(colors.warning, 0.25)}`,
         },
-        '.step-breakpoint-hover-target:hover:before': {
+        '.step-breakpoint-hover-target:hover:before, .step-breakpoint-hover-active:before': {
           content: '""',
           display: 'block',
           width: '9px',
           height: '9px',
           borderRadius: '50%',
-          backgroundColor: transparentize(colors.danger, 0.4),
+          backgroundColor: transparentize(colors.warning, 0.4),
         },
       }),
     [colors]

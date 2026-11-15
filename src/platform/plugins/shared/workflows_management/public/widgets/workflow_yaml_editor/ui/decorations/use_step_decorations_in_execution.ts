@@ -107,8 +107,8 @@ export const useStepDecorationsInExecution = (
           backgroundColor: transparentize(colors.backgroundLightWarning, 0.5),
         },
         '.step-execution-breakpoint_paused': {
-          backgroundColor: transparentize(colors.danger, 0.12),
-          boxShadow: `inset 3px 0 0 0 ${colors.danger}`,
+          backgroundColor: transparentize(colors.warning, 0.12),
+          boxShadow: `inset 3px 0 0 0 ${colors.warning}`,
         },
         '.step-execution-running': {
           backgroundColor: transparentize(colors.backgroundLightPrimary, 0.5),
@@ -135,8 +135,8 @@ export const useStepDecorationsInExecution = (
         '.step-execution-breakpoint_paused-glyph:before': {
           width: '9px',
           height: '9px',
-          backgroundColor: colors.danger,
-          boxShadow: `0 0 0 2px ${transparentize(colors.danger, 0.3)}`,
+          backgroundColor: colors.warning,
+          boxShadow: `0 0 0 2px ${transparentize(colors.warning, 0.3)}`,
         },
         '.step-execution-running-glyph:before': {
           backgroundColor: colors.backgroundFilledPrimary,

@@ -230,7 +230,8 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
         <EuiButton
           onClick={handleSubmit}
           disabled={!isResumePayloadValid}
-          color={useRunButton ? 'success' : 'warning'}
+          color={useRunButton ? 'success' : 'primary'}
+          fill={!useRunButton}
           iconType={useRunButton ? 'play' : 'check'}
           size="s"
           data-test-subj="workflowSubmitResume"
