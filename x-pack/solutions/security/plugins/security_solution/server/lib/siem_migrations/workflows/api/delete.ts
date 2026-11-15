@@ -10,6 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { SIEM_WORKFLOW_MIGRATION_PATH } from '../../../../../common/siem_migrations/workflows/constants';
 import { DeleteWorkflowMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { withLicense } from '../../common/api/util/with_license';
 import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 import { authz } from './util/authz';
@@ -34,9 +35,24 @@ export const registerSiemWorkflowMigrationsDeleteRoute = (
         },
       },
       withLicense(
-        withExistingMigration(async (_context, req, res): Promise<IKibanaResponse> => {
-          logger.debug(`Workflow migration delete is not implemented (${req.params.migration_id})`);
-          return res.ok();
+        withExistingMigration(async (context, req, res): Promise<IKibanaResponse> => {
+          const { migration_id: migrationId } = req.params;
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'workflows'
+          );
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const workflowsMigrationsClient =
+              ctx.securitySolution.siemMigrations.getWorkflowsClient();
+            await siemMigrationAuditLogger.logDeleteMigration({ migrationId });
+            await workflowsMigrationsClient.data.deleteMigration(migrationId);
+            return res.ok();
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logDeleteMigration({ migrationId, error });
+            return res.customError({ statusCode: 500, body: error });
+          }
         })
       )
     );

@@ -30,6 +30,7 @@ import {
 } from '../components/app_header';
 import { useKibana } from '../hooks/use_kibana';
 import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useIntroBannerDismissal } from '../components/use_intro_banner_dismissal';
 import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
 import { useOnboardingVisibility } from '../pages/landing/onboarding/use_onboarding_visibility';
 import {
@@ -270,8 +271,10 @@ export function NightshiftPage(): React.ReactElement | null {
   const onboardingFinishedThisLoad =
     onboardingFinishedSpace === spaceBasePath ||
     onboardingFinishedSpacesThisLoad.has(spaceBasePath);
-  // Before the first investigation the page is only about onboarding, as in the design.
-  const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
+  const introBannerDismissal = useIntroBannerDismissal();
+  const [introBannerVisible, setIntroBannerVisible] = useState<boolean | undefined>();
+  // All five onboarding steps replace the usual header actions, including First automation.
+  const hidesHeaderActions = isOnboarding || onboarding.isLoading;
 
   // The landing page owns the start investigation modal so the header's primary action can toggle it.
   const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
@@ -296,6 +299,10 @@ export function NightshiftPage(): React.ReactElement | null {
   const isSetupPending = requiresSetup && serviceAccount.isLoading;
   const needsSetup =
     requiresSetup && serviceAccount.isSuccess && !isNightshiftSetUp(serviceAccount.data);
+  const showExploreLiveExample =
+    !isSetupPending &&
+    (needsSetup || (isOnboarding && !onboarding.isLoading)) &&
+    introBannerVisible === false;
   useBreadcrumbs(
     [
       {
@@ -367,15 +374,18 @@ export function NightshiftPage(): React.ReactElement | null {
         restrictWidth={false}
         pageSectionProps={{ paddingSize: 'none' }}
       >
-        {/* Nothing behind the header actions works before setup, so the header carries none. */}
-        <NightshiftAppHeader page="landing" />
+        <NightshiftAppHeader page="landing" showExploreLiveExample={showExploreLiveExample} />
         <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
           {isSetupPending ? (
             <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftSetupLoading">
               <EuiLoadingSpinner size="xl" />
             </EuiFlexGroup>
           ) : (
-            <SetupNightshiftOnboarding onFinish={finishOnboarding} />
+            <SetupNightshiftOnboarding
+              onFinish={finishOnboarding}
+              introBannerDismissal={introBannerDismissal}
+              onIntroBannerVisibilityChange={setIntroBannerVisible}
+            />
           )}
         </EuiPageTemplate.Section>
       </ObservabilityPageTemplate>
@@ -477,6 +487,7 @@ export function NightshiftPage(): React.ReactElement | null {
         <>
           <NightshiftAppHeader
             page={canUseAutomationsPage ? 'automations' : 'landing'}
+            showExploreLiveExample={showExploreLiveExample}
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
             onSettingsClick={
@@ -531,13 +542,21 @@ export function NightshiftPage(): React.ReactElement | null {
                 latestInvestigation={onboarding.latestInvestigation}
                 automationsHref={canUseAutomations ? automationsHref : undefined}
                 onFinish={finishOnboarding}
+                introBannerDismissal={introBannerDismissal}
+                onIntroBannerVisibilityChange={setIntroBannerVisible}
               />
             ) : onboarding.isLoading ? (
               <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftOnboardingLoading">
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp hideDetectionSetupBanner={onboardingFinishedThisLoad} />
+              <NightshiftApp
+                hideDetectionSetupBanner={onboardingFinishedThisLoad}
+                onStartInvestigation={canStartInvestigation ? toggleStartInvestigation : undefined}
+                onCreateAutomation={
+                  canUseAutomations && canManage ? navigateToAutomations : undefined
+                }
+              />
             )}
           </EuiPageTemplate.Section>
         </>

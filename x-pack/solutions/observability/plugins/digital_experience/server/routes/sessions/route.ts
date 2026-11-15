@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { conflict, forbidden, internal, notFound } from '@hapi/boom';
+import { forbidden, internal, notFound } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
@@ -27,9 +27,7 @@ import {
 } from '../../../common/sessions';
 import { getSession } from '../../sessions/get_session';
 import { listSessions } from '../../sessions/list_sessions';
-import { enableSessionsForUser, getApiKeyStatus } from '../../sessions/sessions_auto_update';
-import { getSessionsStatus } from '../../sessions/sessions_setup';
-import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
+import { enableSessions, getSessionsStatus } from '../../sessions/sessions_setup';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
 import { describeError } from '../../lib/helpers/errors';
@@ -90,69 +88,23 @@ const toEnableError = (error: unknown, logger: Logger) => {
       reason: error.reason,
     });
   }
-  if (error instanceof SessionsNewerVersionError) {
-    return conflict(error.message, {
-      installedVersion: error.installedVersion,
-      currentVersion: error.currentVersion,
-    });
-  }
   logger.error(`Could not enable sessions: ${describeError(error)}`);
   return internal(ENABLE_FAILED_MESSAGE);
 };
 
-/** Status without who enabled sessions or whose access the transforms run with. */
-const withoutEnabler = (status: SessionsStatus): SessionsStatus => ({
-  ...status,
-  enabledBy: null,
-  enabledAt: null,
-  authorization: null,
-  transforms: status.transforms.map((transform) => ({
-    ...transform,
-    enabledBy: null,
-    enabledAt: null,
-    authorization: null,
-  })),
-});
-
 const statusRoute = createDigitalExperienceServerRoute({
   endpoint: SESSIONS_STATUS_ENDPOINT,
   options: { access: 'internal' },
-  security: {
-    authz: {
-      requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read],
-      // Only users who can set sessions up also see who did, and whose access the transforms use.
-      extendedPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
-    },
-  },
-  handler: async ({
-    context,
-    request,
-    sessionsSettings,
-    sessionsApiKeys,
-    getSessionsAutoUpdateState,
-    logger,
-  }): Promise<SessionsStatus> => {
+  security: { authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] } },
+  handler: async ({ context, logger }): Promise<SessionsStatus> => {
     const { elasticsearch } = await context.core;
-    const canManage =
-      request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
-    let status: SessionsStatus;
     try {
-      // Transform metadata only; no session data is read with the internal user.
-      status = await getSessionsStatus(elasticsearch.client.asInternalUser, {
-        settings: sessionsSettings,
-      });
+      // Index metadata only; no session data is read with the internal user.
+      return await getSessionsStatus(elasticsearch.client.asInternalUser);
     } catch (error) {
       logger.error(`Could not read the sessions status: ${describeError(error)}`);
       throw internal(LOAD_FAILED_MESSAGE);
     }
-    // Only users who can grant a new key act on a deleted one, so only they pay for checking it;
-    // the others see what the health task found.
-    const { status: withKey } = await getApiKeyStatus(status, sessionsApiKeys, {
-      checkKey: canManage,
-      logger,
-      getAutoUpdateState: getSessionsAutoUpdateState,
-    });
-    return canManage ? withKey : withoutEnabler(withKey);
   },
 });
 
@@ -162,23 +114,14 @@ const enableRoute = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
   },
-  handler: async ({
-    context,
-    request,
-    sessionsSettings,
-    sessionsApiKeys,
-    isServerless,
-    logger,
-  }): Promise<SessionsStatus> => {
+  handler: async ({ context, isServerless, logger }): Promise<SessionsStatus> => {
     const { elasticsearch, security } = await context.core;
     const enabledBy = security.authc.getCurrentUser()?.username ?? null;
-    const audit = (outcome: 'success' | 'failure', error?: Error, apiKeyRef?: string) =>
+    const audit = (outcome: 'success' | 'failure', error?: Error) =>
       security.audit.logger.log({
         message:
           outcome === 'success'
-            ? `User [${enabledBy}] enabled Digital Experience sessions${
-                apiKeyRef ? ` with a new API key ${apiKeyRef}` : ''
-              }`
+            ? `User [${enabledBy}] enabled Digital Experience sessions`
             : `Failed attempt by user [${enabledBy}] to enable Digital Experience sessions`,
         event: {
           action: 'digital_experience_sessions_enable',
@@ -189,36 +132,16 @@ const enableRoute = createDigitalExperienceServerRoute({
         ...(error ? { error: { code: error.name, message: error.message } } : {}),
       });
 
-    let apiKeyRef: string | undefined;
     try {
-      const apiKey = await enableSessionsForUser({
-        esClient: elasticsearch.client,
-        apiKeys: sessionsApiKeys,
-        request,
-        logger,
-        settings: sessionsSettings,
-        enabledBy,
-        isServerless,
-      });
-      // Every key has the same name, so the id tells them apart.
-      apiKeyRef = apiKey ? `[${apiKey.name}] (${apiKey.id})` : undefined;
+      await enableSessions({ esClient: elasticsearch.client, isServerless });
     } catch (error) {
       audit('failure', error);
       throw toEnableError(error, logger);
     }
-    audit('success', undefined, apiKeyRef);
-    logger.info(
-      `Sessions enabled by [${enabledBy}]${apiKeyRef ? ` with API key ${apiKeyRef}` : ''}`
-    );
+    audit('success');
+    logger.info(`Sessions enabled by [${enabledBy}]`);
     try {
-      const { status } = await getApiKeyStatus(
-        await getSessionsStatus(elasticsearch.client.asInternalUser, {
-          settings: sessionsSettings,
-        }),
-        sessionsApiKeys,
-        { checkKey: true, logger }
-      );
-      return status;
+      return await getSessionsStatus(elasticsearch.client.asInternalUser);
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');
     }

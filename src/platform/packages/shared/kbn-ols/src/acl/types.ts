@@ -8,7 +8,7 @@
  */
 
 import type { EntryLevel, GeneralAccessLevel } from '../levels';
-import type { Principal } from '../principals';
+import type { Principal, StoredPrincipal } from '../principals';
 
 /**
  * Well-formed ACL, the only shape Kibana writes to an object's `acl` field.
@@ -28,11 +28,18 @@ export interface Acl {
 }
 
 /**
- * Entry of an {@link Acl}: a grant of one level to one named principal.
+ * A grant of one level to one named principal, without the time it was added. A caller asks for
+ * grants in this shape, and every kind of ACL entry extends it.
  */
-export interface AclEntry extends Principal {
-  /** The granted level. */
+export interface AclGrant extends Principal {
+  /** The granted level. It has to be a level the object's type allows for entries. */
   access: EntryLevel;
+}
+
+/**
+ * Entry of an {@link Acl}: a grant with the time it was added.
+ */
+export interface AclEntry extends AclGrant {
   /** When the grant was added, as an ISO 8601 timestamp. */
   added_at: string;
 }
@@ -54,11 +61,11 @@ export interface StoredAcl {
    */
   version: unknown[];
   /**
-   * Every stored owner kind and ID. Unknown kinds are ignored, and the ACL is damaged unless
-   * exactly one known kind and at least one ID remain. Each ID then owns the object: the package
-   * README explains why several IDs all count.
+   * The stored owner. The ACL is damaged unless it names a principal: exactly one known kind and
+   * at least one ID. Each ID then owns the object: the package README explains why several IDs all
+   * count.
    */
-  owner: { type: string[]; id: string[] };
+  owner: StoredPrincipal;
   /**
    * Every stored general access value. The ACL is damaged unless at least one value is a level
    * that general access can take. The lowest value the type allows then applies, or `none` when
@@ -71,15 +78,10 @@ export interface StoredAcl {
 
 /**
  * Entry of a {@link StoredAcl}. Like every other field of a stored ACL, each field is an array.
+ * An entry that names no principal grants nothing, and the rest of the ACL still applies. An entry
+ * that names one grants its level to each of its IDs.
  */
-export interface StoredAclEntry {
-  /**
-   * Every stored principal kind. Unknown kinds are ignored, and the entry grants nothing unless
-   * exactly one known kind remains. The rest of the ACL still applies.
-   */
-  type: string[];
-  /** Every stored principal ID. The entry grants its level to each of them. */
-  id: string[];
+export interface StoredAclEntry extends StoredPrincipal {
   /** Every stored level. The lowest one the type allows for entries applies, else nothing. */
   access: string[];
   /** Every stored timestamp. It doesn't affect access. */

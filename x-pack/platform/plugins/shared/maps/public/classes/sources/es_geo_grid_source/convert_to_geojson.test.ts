@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { RENDER_AS } from '../../../../common/constants';
 
