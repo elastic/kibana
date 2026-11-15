@@ -8,13 +8,18 @@
  */
 
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
-import { type DataView } from '@kbn/data-views-plugin/public';
-import { Builder, isFunctionExpression, mutate } from '@elastic/esql';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
+import { Builder, isColumn, isFunctionExpression, mutate } from '@elastic/esql';
 import type { EsqlQuery } from '@elastic/esql';
-import type { ESQLFunction, ESQLCommand, ESQLLiteral } from '@elastic/esql/types';
+import type {
+  ESQLAstExpression,
+  ESQLFunction,
+  ESQLCommand,
+  ESQLLiteral,
+} from '@elastic/esql/types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { getFieldDefinitionFromArg, type Terminal } from '../esql_fields_utils';
+import { getFieldDefinitionFromArg, getFieldTerminals, type Terminal } from '../esql_fields_utils';
 import { getQuerySummaryPerCommandType, getSummaryPerCommand } from '../get_query_summary';
 import { PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from '../append_to_query/utils';
 
@@ -193,3 +198,187 @@ export function getStatsGroupFieldType<
   const definition = getFieldDefinitionFromArg(groupByFields.arg);
   return (definition.type === 'function' ? definition.name : definition.type) as R;
 }
+
+/**
+ * Values displayed for the aggregates of the cascade row that's being operated on,
+ * keyed by the aggregate identifier as it is displayed in the UI.
+ */
+export type NodeAggregatedValues = Record<string, number | Array<string | number> | undefined>;
+
+const VALUES_FUNCTION_NAME = 'values';
+
+/**
+ * Kibana field types for which an exact phrase match is the appropriate document level predicate
+ */
+const MATCH_PHRASE_FIELD_TYPES = ['string'];
+
+/**
+ * Remaining Kibana field types that VALUES supports and that the MATCH function can target,
+ * spatial types are intentionally absent because no full text predicate exists for them.
+ * {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-values | here}
+ */
+const MATCH_FIELD_TYPES = ['boolean', 'date', 'date_nanos', 'ip', 'number', 'version'];
+
+/**
+ * Returns the full text function that can be used to filter documents on the provided field,
+ * or undefined when no document level predicate can be expressed for the field.
+ */
+const getAggregateValueMatchFunction = (
+  fieldName: string,
+  dataViewFields: DataView['fields']
+): 'match_phrase' | 'match' | undefined => {
+  let dataViewField: DataViewField | undefined = dataViewFields.getByName(fieldName);
+
+  const multiSubtype = dataViewField && getDataViewFieldSubtypeMulti(dataViewField);
+
+  if (multiSubtype) {
+    // the parent field holds the type information we care about for multi fields
+    dataViewField = dataViewFields.getByName(multiSubtype.multi.parent) ?? dataViewField;
+  }
+
+  // full text functions require the field to be searchable,
+  // so when we can't resolve the field or it isn't searchable we don't attempt to filter on it
+  if (!dataViewField || dataViewField.searchable === false) {
+    return undefined;
+  }
+
+  if (MATCH_PHRASE_FIELD_TYPES.includes(dataViewField.type)) {
+    return 'match_phrase';
+  }
+
+  if (MATCH_FIELD_TYPES.includes(dataViewField.type)) {
+    return 'match';
+  }
+
+  return undefined;
+};
+
+const buildAggregateValueLiteral = (value: string | number) => {
+  if (typeof value === 'number') {
+    return Number.isInteger(value)
+      ? Builder.expression.literal.integer(value)
+      : Builder.expression.literal.decimal(value);
+  }
+
+  return Builder.expression.literal.string(value);
+};
+
+export interface ValuesAggregateFilterArgs {
+  /**
+   * summary of the stats command that declares the aggregates displayed for the cascade row
+   */
+  statsSummary: StatsCommandSummary;
+  /**
+   * values displayed for the aggregates of the cascade row that's being operated on
+   */
+  nodeAggregatedValues: NodeAggregatedValues | undefined;
+  dataViewFields: DataView['fields'];
+  esqlVariables: ESQLControlVariable[] | undefined;
+}
+
+/**
+ * Builds the document level predicates that constrain the documents fetched for a cascade row
+ * to those that contributed the VALUES aggregates displayed for said row.
+ *
+ * This is only relevant for cascade queries that omit the STATS command, because such queries
+ * would otherwise return every document of the group, including documents holding values
+ * that the row the user expanded never displayed.
+ *
+ * Full text functions are used rather than comparison operators on purpose, VALUES columns are
+ * frequently multivalued and ES|QL comparison operators evaluate to null for multivalued fields,
+ * which would drop the very documents we are trying to surface.
+ */
+export const buildValuesAggregateFilterExpressions = ({
+  statsSummary,
+  nodeAggregatedValues,
+  dataViewFields,
+  esqlVariables,
+}: ValuesAggregateFilterArgs): ESQLAstExpression[] => {
+  if (!nodeAggregatedValues || !Object.keys(nodeAggregatedValues).length) {
+    return [];
+  }
+
+  return Object.values(statsSummary.aggregates).reduce<ESQLAstExpression[]>(
+    (filters, aggregate) => {
+      const aggregateDefinition = getFieldDefinitionFromArg(aggregate.arg);
+
+      if (
+        !isFunctionExpression(aggregateDefinition) ||
+        aggregateDefinition.name !== VALUES_FUNCTION_NAME
+      ) {
+        // aggregates like COUNT or AVG have no per document equivalent we could filter on
+        return filters;
+      }
+
+      const [valuesArgument] = aggregateDefinition.args;
+
+      if (!isColumn(valuesArgument)) {
+        // we only support VALUES applied to a column,
+        // filtering on the result of an expression would require evaluating the expression per document
+        return filters;
+      }
+
+      let aggregatedColumnName = valuesArgument.name;
+
+      const aggregatedColumnNameParamValue = getFieldParamDefinition(
+        aggregatedColumnName,
+        getFieldTerminals(aggregate.arg),
+        esqlVariables
+      );
+
+      if (typeof aggregatedColumnNameParamValue === 'string') {
+        aggregatedColumnName = aggregatedColumnNameParamValue;
+      }
+
+      aggregatedColumnName = removeBackticks(aggregatedColumnName);
+
+      const displayedValues = nodeAggregatedValues[removeBackticks(aggregate.field)];
+
+      const aggregateValues = (Array.isArray(displayedValues) ? displayedValues : [displayedValues])
+        .filter((value): value is string | number => value !== undefined && value !== null)
+        .filter((value) => value !== '');
+
+      if (!aggregateValues.length) {
+        return filters;
+      }
+
+      const matchFunction = getAggregateValueMatchFunction(aggregatedColumnName, dataViewFields);
+
+      if (!matchFunction) {
+        return filters;
+      }
+
+      const valueExpressions = aggregateValues.map((value) =>
+        Builder.expression.func.call(matchFunction, [
+          Builder.identifier({ name: aggregatedColumnName }),
+          buildAggregateValueLiteral(value),
+        ])
+      );
+
+      filters.push(
+        // the row displays every value the aggregate holds, a document only needs to match one of them
+        valueExpressions.reduce((left, right) =>
+          Builder.expression.func.binary('or', [left, right])
+        )
+      );
+
+      return filters;
+    },
+    []
+  );
+};
+
+/**
+ * Combines the provided expressions into a single AND expression.
+ *
+ * The AST Builder is used instead of a synth template because the latter prints each expression
+ * on its own before glueing the result back together, which loses the grouping nested operands carried.
+ */
+export const combineFilterExpressionsWithAnd = (expressions: ESQLAstExpression[]) =>
+  expressions.reduce((left, right) => Builder.expression.func.binary('and', [left, right]));
+
+/**
+ * Returns true when the query being operated on sources its data from a TS (timeseries) command.
+ */
+export const isTimeseriesSourceQuery = (esqlQuery: EsqlQuery) =>
+  getESQLQueryDataSourceCommand(esqlQuery)?.name === 'ts';

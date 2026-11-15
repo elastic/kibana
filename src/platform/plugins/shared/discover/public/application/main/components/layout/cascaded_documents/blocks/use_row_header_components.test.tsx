@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import type { AggregateQuery } from '@kbn/es-query';
 import { copyToClipboard } from '@elastic/eui';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { DiscoverTestProvider } from '../../../../../../__mocks__/test_provider';
@@ -139,6 +140,7 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     updateESQLQuery,
     groupId = 'clientip',
     groupValue = '192.168.1.1',
+    aggregatedValues = {},
     esqlVariables,
   }: {
     editorQuery: AggregateQuery;
@@ -146,6 +148,7 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     updateESQLQuery: (...args: unknown[]) => void;
     groupId?: string;
     groupValue?: string;
+    aggregatedValues?: ESQLDataGroupNode['aggregatedValues'];
     esqlVariables?: ESQLControlVariable[];
   }) => {
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers({
@@ -159,7 +162,9 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
 
     return (
       <div>
-        <button onClick={togglePopover.bind({ groupId, groupValue })}>toggle row actions</button>
+        <button onClick={togglePopover.bind({ groupId, groupValue, aggregatedValues })}>
+          toggle row actions
+        </button>
         {renderRowActionPopover()}
       </div>
     );
@@ -287,6 +292,49 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
       appState: {
         query: {
           esql: 'FROM logstash-* | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})',
+        },
+      },
+    });
+  });
+
+  it('opens a new tab with the values displayed for the row when "Open in new tab" is clicked for a TS query', async () => {
+    const editorQuery: AggregateQuery = {
+      esql: 'TS logstash-* | STATS values(tags) BY clientip',
+    };
+    const updateESQLQuery = jest.fn();
+    const openInNewTab = jest.fn();
+
+    jest.spyOn(dataView.fields, 'getByName').mockImplementation(
+      (fieldName) =>
+        ({
+          name: fieldName,
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+          filterable: true,
+        } as unknown as DataViewField)
+    );
+
+    render(
+      <RowActionsTestComponent
+        editorQuery={editorQuery}
+        openInNewTab={openInNewTab}
+        updateESQLQuery={updateESQLQuery}
+        aggregatedValues={{ 'values(tags)': ['info'] }}
+      />,
+      { wrapper: TestProvider }
+    );
+
+    await openRowActionsMenu();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId('dscCascadeRowContextActionOpenInNewTab'));
+
+    expect(openInNewTab).toHaveBeenCalledWith({
+      appState: {
+        query: {
+          esql: 'FROM logstash-* | WHERE clientip == "192.168.1.1" AND MATCH_PHRASE(tags, "info")',
         },
       },
     });
