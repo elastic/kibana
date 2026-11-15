@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux-v7';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { State } from '../../../common/store';
 import { RowRendererValues } from '../../../../common/api/timeline';
@@ -34,7 +34,7 @@ import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 
 const StyledEuiModal = styled(EuiModal)`
-  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
+  ${({ theme }) => `margin-top: ${theme.euiTheme.size.xxl};`}
   max-width: 95vw;
   min-height: 90vh;
 

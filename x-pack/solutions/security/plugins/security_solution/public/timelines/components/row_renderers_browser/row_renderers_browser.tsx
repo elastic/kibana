@@ -8,7 +8,7 @@
 import { EuiCheckbox, EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import { xor } from 'lodash/fp';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { RowRendererId } from '../../../../common/api/timeline';
 import type { RowRendererOption } from './catalog';
@@ -23,7 +23,7 @@ interface RowRenderersBrowserProps {
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTable {
     tr:has(.isNotSelected) {
-      background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+      background-color: ${(props) => props.theme.euiTheme.colors.lightestShade};
     }
 
     tr > *:last-child {
