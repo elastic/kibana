@@ -280,10 +280,8 @@ const isScanDue = (task: ConcreteTaskInstance, now: number): boolean => {
 };
 
 /**
- * Schedules the daily scan, keeping a schedule an operator has already changed.
- * Resolves to true when a scan should be requested right away: the task already existed and has
- * not completed a scan within its interval. A new task runs on its own, and a recent scan is not
- * repeated on every Kibana restart.
+ * Schedules the daily scan, keeping a schedule an operator has already changed. Resolves to true
+ * when an existing task has not finished a scan within its interval; a new task runs on its own.
  */
 export const scheduleScanTask = async (
   taskManager: TaskManagerStartContract,
