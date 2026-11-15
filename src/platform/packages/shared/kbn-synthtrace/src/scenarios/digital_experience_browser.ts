@@ -97,6 +97,12 @@
  *   memory before it is written, and a `heavy` marathon session weighs 90 MB at the median and up to
  *   175 MB: use `light` or `typical` with long sessions, or fewer `--workers`. A session ends at the
  *   time it is generated for, so use a range longer than the session (`--from=now-3h` for marathon)
+ * - ongoingSessions (boolean, default: false): start every session at the time it is generated for
+ *   and write its events as they happen, instead of ending it there. With `--live`, a session then
+ *   grows minute by minute for as long as it runs, like real traffic, instead of showing up whole
+ *   when it ends. The run starts with the sessions in progress at `--from`: each run, and each
+ *   worker, first simulates the sessions started up to 2, 3 or 5 hours before it (`typical`, `long`
+ *   or `marathon`) to find them, and keeps the ones in progress in memory
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
@@ -108,6 +114,7 @@
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts edgeCases=true,scale=3
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts replayRate=0.3,errorReplayRate=0.5
  *   node scripts/synthtrace digital_experience_browser --from=now-3h --to=now --scenarioOpts replayRate=1,sessionLength=marathon,scale=0.05
+ *   node scripts/synthtrace digital_experience_browser --live --scenarioOpts sessionLength=long,ongoingSessions=true
  */
 
 import type { Scenario } from '../cli/scenario';
