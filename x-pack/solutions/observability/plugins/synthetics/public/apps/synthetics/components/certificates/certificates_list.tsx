@@ -17,6 +17,7 @@ import {
   EuiHorizontalRule,
   EuiI18nNumber,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -151,6 +152,11 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       render: dateFormatter,
     },
     {
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{labels.DETAILS_COL}</span>
+        </EuiScreenReaderOnly>
+      ),
       align: 'right' as const,
       width: '40px',
       isExpander: true,

@@ -215,6 +215,10 @@ export const EXPAND_CERT_DETAILS = i18n.translate('xpack.synthetics.certs.list.e
   defaultMessage: 'Expand certificate details',
 });
 
+export const DETAILS_COL = i18n.translate('xpack.synthetics.certs.list.detailsColumn', {
+  defaultMessage: 'Details',
+});
+
 export const COLLAPSE_CERT_DETAILS = i18n.translate('xpack.synthetics.certs.list.collapseDetails', {
   defaultMessage: 'Collapse certificate details',
 });
