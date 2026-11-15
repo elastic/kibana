@@ -320,6 +320,14 @@ describe('summarizeProfile', () => {
     });
   });
 
+  it('uses the path alone as the location when a call frame has no line number', () => {
+    const summary = summarizeProfile(buildProfile([[{ name: 'handler', lineNumber: -1 }]]), {
+      root: ROOT,
+    });
+    expect(summary.frames).toEqual([{ name: 'handler', location: 'src/handler.ts', percent: 100 }]);
+    expect(summary.topKibanaFrame).toEqual({ location: 'src/handler.ts', percent: 100 });
+  });
+
   it('omits topKibanaFrame when the profile has no Kibana call frames', () => {
     const summary = summarizeProfile(buildProfile([['zodInit'], ['zodParse']]), { root: ROOT });
     expect(summary.samples).toBe(2);

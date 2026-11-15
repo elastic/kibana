@@ -597,6 +597,24 @@ describe('runWatchdogWorker', () => {
       expect(profileMeta().topKibanaFrame).toBeUndefined();
     });
 
+    it('ends the message after the stop reason when the profile has no call frames', async () => {
+      // `(program)` is busy but not a call frame, so both frame lists are empty.
+      profile = {
+        nodes: [node(1, '(root)', { children: [2] }), node(2, '(program)')],
+        startTime: 0,
+        endTime: 1_000_000,
+        samples: [2],
+        timeDeltas: [500_000],
+      };
+      startProfiling();
+      await profiledBlock(1_500);
+      expect(profileLines()[0][0]).toMatch(
+        /^Event loop block profile #1: block ~1500ms \(profiled after ~1000ms, profiler start took ~\d+ms\), 1 samples; stopped: block_ended\.$/
+      );
+      expect(profileMeta()).toMatchObject({ samples: 1, frames: [], kibanaFrames: [] });
+      expect(profileMeta().topKibanaFrame).toBeUndefined();
+    });
+
     it('stops a capture at the maximum duration while the block goes on, counting every sample up to the stop', async () => {
       // Third sample is at 3_000_000 µs (endTime), busy in spin.
       profile = {
