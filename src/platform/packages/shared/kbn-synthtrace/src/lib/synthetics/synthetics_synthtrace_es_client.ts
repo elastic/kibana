@@ -16,6 +16,7 @@ import { SynthtraceEsClientBase } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import type { Logger } from '../utils/create_logger';
 import { getRoutingTransform } from '../shared/data_stream_get_routing_transform';
+import { getSyntheticsDedotTransform } from './get_synthetics_dedot_transform';
 
 export type SyntheticsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -34,12 +35,14 @@ export class SyntheticsSynthtraceEsClientImpl
   }
 }
 
-function syntheticsPipeline() {
+// The routing transform reads the flat data_stream fields, so it has to run before the dedot one.
+export function syntheticsPipeline() {
   return (base: Readable) => {
     return pipeline(
       base,
       getSerializeTransform<SyntheticsMonitorDocument>(),
       getRoutingTransform('synthetics'),
+      getSyntheticsDedotTransform(),
       (err: unknown) => {
         if (err) {
           throw err;

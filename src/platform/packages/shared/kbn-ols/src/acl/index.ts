@@ -8,4 +8,5 @@
  */
 
 export { ACL_FIELD, normalizeAclSource, toAclSource } from './acl_source';
-export type { Acl, AclEntry, AclState, StoredAcl, StoredAclEntry } from './types';
+export { getAclState } from './acl_state';
+export type { Acl, AclEntry, AclGrant, AclState, StoredAcl, StoredAclEntry } from './types';

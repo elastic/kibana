@@ -24,7 +24,6 @@ const mockedSessions = jest.mocked(getSessionsApplications);
 
 const NOW = Date.parse('2021-01-18T12:00:00.000Z');
 const DAY_MS = 24 * 60 * 60 * 1000;
-const SETTINGS = { frequency: '1m', partitions: 1 };
 
 const application = (serviceName: string) =>
   ({ serviceName, source: 'otel' } as SourceApplications['applications'][number]);
@@ -42,8 +41,10 @@ const FROM_RAW: SourceApplications = {
   sessionsOverTime: null,
 };
 
-const status = (overrides: Partial<SessionsStatus> = {}) =>
-  ({ installed: true, health: 'healthy', rebuilding: false, ...overrides } as SessionsStatus);
+const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
+  installed: true,
+  ...overrides,
+});
 
 const setup = ({ start = NOW - DAY_MS, signal }: { start?: number; signal?: AbortSignal } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -52,7 +53,6 @@ const setup = ({ start = NOW - DAY_MS, signal }: { start?: number; signal?: Abor
   const result = getOtelApplicationsFromBestSource({
     esClient,
     internalEsClient,
-    sessionsSettings: SETTINGS,
     logger,
     start,
     end: NOW,
@@ -75,19 +75,19 @@ describe('getOtelApplicationsFromBestSource', () => {
     jest.useRealTimers();
   });
 
-  it('reads the sessions index when sessions are set up, current and healthy', async () => {
+  it('reads the sessions index when sessions are set up', async () => {
     const { result } = setup();
 
     await expect(result).resolves.toBe(FROM_SESSIONS);
     expect(mockedRaw).not.toHaveBeenCalled();
   });
 
-  it('searches as the current user and checks the transforms with the internal user', async () => {
+  it('searches as the current user and checks the status with the internal user', async () => {
     const { signal } = new AbortController();
     const { result, esClient, internalEsClient } = setup({ signal });
     await result;
 
-    expect(mockedStatus).toHaveBeenCalledWith(internalEsClient, { settings: SETTINGS, signal });
+    expect(mockedStatus).toHaveBeenCalledWith(internalEsClient, { signal });
     expect(mockedSessions).toHaveBeenCalledWith({
       esClient,
       start: NOW - DAY_MS,
@@ -97,41 +97,35 @@ describe('getOtelApplicationsFromBestSource', () => {
     });
   });
 
-  it.each([
-    ['sessions are not set up', { installed: false, health: 'missing' }],
-    ['the transforms are outdated', { health: 'outdated' }],
-    ['the transforms lag', { health: 'lagging' }],
-    ['the transforms are degraded', { health: 'degraded' }],
-    ['the sessions index is being built', { rebuilding: true }],
-  ] as const)('reads the raw events when %s', async (_reason, overrides) => {
-    mockedStatus.mockResolvedValue(status(overrides));
+  it('reads the raw events when sessions are not set up', async () => {
+    mockedStatus.mockResolvedValue(status({ installed: false }));
 
     await expect(setup().result).resolves.toBe(FROM_RAW);
     expect(mockedSessions).not.toHaveBeenCalled();
   });
 
   describe('the time range', () => {
-    // The transform summarizes the events from the start of the day 30 days ago.
+    // The sessions summarize the events from the start of the day 30 days ago.
     const LOOKBACK_START = Date.parse('2020-12-19T00:00:00.000Z');
 
     it('reads the sessions from the start of the lookback on', async () => {
       await expect(setup({ start: LOOKBACK_START }).result).resolves.toBe(FROM_SESSIONS);
     });
 
-    it('reads the raw events, without checking the transforms, when it starts before', async () => {
+    it('reads the raw events, without checking the status, when it starts before', async () => {
       await expect(setup({ start: LOOKBACK_START - 1 }).result).resolves.toBe(FROM_RAW);
       expect(mockedStatus).not.toHaveBeenCalled();
       expect(mockedSessions).not.toHaveBeenCalled();
     });
   });
 
-  it('reads the raw events when the status of the transforms can not be read', async () => {
-    mockedStatus.mockRejectedValue(new Error('transform status failed'));
+  it('reads the raw events when the status can not be read', async () => {
+    mockedStatus.mockRejectedValue(new Error('status failed'));
     const { result, logger } = setup();
 
     await expect(result).resolves.toBe(FROM_RAW);
     expect(mockedSessions).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('transform status failed'));
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('status failed'));
   });
 
   it('reads the raw events quietly for a user without access to the sessions index', async () => {

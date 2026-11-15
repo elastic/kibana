@@ -39,6 +39,7 @@ export {
 } from './messages';
 export {
   toolToLangchain,
+  renderDynamicToolDefinition,
   INTENT_PARAM,
   toolIdentifierFromToolCall,
   sanitizeToolId,

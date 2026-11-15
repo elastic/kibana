@@ -13,7 +13,7 @@ import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-p
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { StartServices } from './hooks/use_kibana';
-import { createFixtureEntityInventoryApiClient } from './inventory_api/fixture_client';
+import { createFixtureEntityInventoryApiClient } from './__fixtures__/inventory_client';
 import type { EntityInventoryAppStartDependencies } from './types';
 
 const MockPageTemplate = ({ children }: { children?: React.ReactNode }) => (

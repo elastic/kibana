@@ -305,6 +305,7 @@ describe('At configuration troubleshooting envelope budget', () => {
       summaries: output?.summaries,
       population: output?.population,
       unauthorized: output?.unauthorized,
+      not_found_ids: output?.not_found_ids,
     };
 
     expect(estimateTokens(projection)).toBeLessThan(ENVELOPE_TOKEN_BUDGET);
