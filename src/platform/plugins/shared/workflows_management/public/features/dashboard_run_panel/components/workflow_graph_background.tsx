@@ -11,8 +11,10 @@ import { useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useNodesInitialized, useReactFlow } from '@xyflow/react';
 import React, { useEffect, useState } from 'react';
-import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { LayoutDirection, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { RenderStepIcon } from '@kbn/workflows-ui';
 import { ReactFlowProvider, WorkflowGraphCanvasWithoutProvider } from '@kbn/workflows-ui';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 
 const FIT_VIEW_OPTIONS = { padding: 0.15, minZoom: 0.05, maxZoom: 1 } as const;
 
@@ -24,6 +26,10 @@ const layerCss = css`
 `;
 
 const noop = () => {};
+
+const renderStepIcon: RenderStepIcon = ({ stepType, color }) => (
+  <StepIcon stepType={stepType} executionStatus={undefined} iconColor={color} />
+);
 
 const RefitOnResize = ({ width, height }: { width: number; height: number }) => {
   const { fitView } = useReactFlow();
@@ -48,16 +54,26 @@ export const WorkflowGraphBackground = ({
 }: WorkflowGraphBackgroundProps): React.JSX.Element => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { width, height } = useResizeObserver(container);
+  const direction: LayoutDirection = width > height ? 'LR' : 'TB';
 
   return (
-    <div ref={setContainer} css={layerCss} aria-hidden data-test-subj="workflowRunPanelGraph">
-      <ReactFlowProvider>
+    <div
+      ref={setContainer}
+      css={layerCss}
+      aria-hidden
+      data-test-subj="workflowRunPanelGraph"
+      data-direction={direction}
+    >
+      {/* Remounting on a direction change lets the new layout fit the panel again. */}
+      <ReactFlowProvider key={direction}>
         <WorkflowGraphCanvasWithoutProvider
           workflow={workflow}
           isYamlValid={isYamlValid}
           stepExecutions={stepExecutions}
           onStepSelect={noop}
           canRunSteps={false}
+          renderStepIcon={renderStepIcon}
+          direction={direction}
           fitView
           fitViewOptions={FIT_VIEW_OPTIONS}
           showMinimap={false}

@@ -17,15 +17,22 @@ import {
   WORKFLOW_RUN_EMBEDDABLE_TYPE,
   WORKFLOWS_DASHBOARD_RUN_PANEL_FLAG,
 } from '../../../common/dashboard_run_panel/constants';
+import type { WorkflowsPublicPluginStartDependencies } from '../../types';
 
 /** Registers the Run workflow panel so dashboards can render it. Call from plugin setup. */
-export const registerWorkflowRunPanel = (core: CoreSetup, embeddable: EmbeddableSetup): void => {
+export const registerWorkflowRunPanel = (
+  core: CoreSetup<WorkflowsPublicPluginStartDependencies>,
+  embeddable: EmbeddableSetup
+): void => {
   embeddable.registerEmbeddablePublicDefinition(WORKFLOW_RUN_EMBEDDABLE_TYPE, async () => {
-    const [[coreStart], { getWorkflowRunEmbeddableFactory }] = await Promise.all([
+    const [
+      [coreStart, { triggersActionsUi, workflowsExtensions }],
+      { getWorkflowRunEmbeddableFactory },
+    ] = await Promise.all([
       core.getStartServices(),
       import('./get_workflow_run_embeddable_factory'),
     ]);
-    return getWorkflowRunEmbeddableFactory(coreStart);
+    return getWorkflowRunEmbeddableFactory(coreStart, { triggersActionsUi, workflowsExtensions });
   });
 };
 

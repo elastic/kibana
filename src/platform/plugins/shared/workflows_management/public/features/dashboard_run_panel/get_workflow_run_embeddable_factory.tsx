@@ -31,14 +31,23 @@ import type {
   WorkflowRunInputMapping,
 } from '../../../server/dashboard_run_panel/schema';
 import { queryClient } from '../../shared/lib/query_client';
+import type { WorkflowsPublicPluginStartDependencies } from '../../types';
 
 const NO_MAPPINGS: readonly WorkflowRunInputMapping[] = [];
 
+/** Plugin services the panel's step icons read from the Kibana context. */
+export type WorkflowRunPanelPluginServices = Pick<
+  WorkflowsPublicPluginStartDependencies,
+  'triggersActionsUi' | 'workflowsExtensions'
+>;
+
 export const getWorkflowRunEmbeddableFactory = (
-  core: CoreStart
+  core: CoreStart,
+  pluginServices: WorkflowRunPanelPluginServices
 ): EmbeddablePublicDefinition<WorkflowRunEmbeddableState, WorkflowRunEmbeddableApi> => ({
   type: WORKFLOW_RUN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    const services = { ...core, ...pluginServices };
     const titleManager = initializeTitleManager(initialState);
     const workflowId$ = new BehaviorSubject(initialState.workflow_id);
     const buttonLabel$ = new BehaviorSubject(initialState.button_label);
@@ -109,7 +118,7 @@ export const getWorkflowRunEmbeddableFactory = (
         );
         const fetchContext = useFetchContext(api);
         return (
-          <KibanaContextProvider services={core}>
+          <KibanaContextProvider services={services}>
             <QueryClientProvider client={queryClient}>
               <WorkflowRunPanel
                 core={core}
