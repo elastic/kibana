@@ -162,6 +162,17 @@ describe('FieldsSelectorTable', () => {
     expect(hostIpCheckbox.checked).toBe(true);
   });
 
+  it('gives each checkbox an accessible name containing its field name', () => {
+    render(
+      <TestProviders>
+        <FieldsSelectorTable {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByRole('checkbox', { name: 'Toggle entity.name column' })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Toggle host.ip column' })).toBeInTheDocument();
+  });
+
   it('calls onAddColumn when an unchecked checkbox is checked', () => {
     render(
       <TestProviders>
