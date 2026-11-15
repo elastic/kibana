@@ -14,6 +14,7 @@ import {
   PERSONA_RUBRIC_MAX_SCORE,
   PERSONA_RUBRIC_MIN_SCORE,
   PersonaRubricPrompt,
+  resolvePersonaToolsRow,
 } from './persona_rubric_prompt';
 import { NO_TOOL_CALL_RUBRIC_CAP } from './rubric_cap_no_tool_call_evaluator';
 import { getAnswerText, getSteps, isRecord } from './task_output_helpers';
@@ -22,9 +23,6 @@ export const PERSONA_RUBRIC_EVALUATOR_NAME = 'PersonaRubric';
 
 /** Opt-in: the extra judge call per cell is off unless this is `1`. */
 export const PERSONA_RUBRIC_JUDGE_ENV = 'PERSONA_MATRIX_RUBRIC_JUDGE';
-
-/** Per-result characters the judge sees; the shared judge payload cap bounds the rest. */
-const MAX_RESULT_CHARS = 4000;
 
 export const isPersonaRubricJudgeEnabled = (env: NodeJS.ProcessEnv = process.env): boolean =>
   env[PERSONA_RUBRIC_JUDGE_ENV]?.trim() === '1';
@@ -35,15 +33,6 @@ const unavailable = (explanation: string): EvaluationResult => ({
   explanation,
 });
 
-const compact = (value: unknown): string => {
-  const serialized = JSON.stringify(value) ?? '';
-  return serialized.length > MAX_RESULT_CHARS
-    ? `${serialized.slice(0, MAX_RESULT_CHARS)}…[${
-        serialized.length - MAX_RESULT_CHARS
-      } more chars]`
-    : serialized;
-};
-
 const getToolCallsWithResults = (output: unknown) =>
   getSteps(output).flatMap((step) =>
     step.type === 'tool_call' && typeof step.tool_id === 'string'
@@ -51,7 +40,7 @@ const getToolCallsWithResults = (output: unknown) =>
           {
             tool_id: step.tool_id,
             params: isRecord(step.params) ? step.params : {},
-            results: step.results === undefined ? undefined : compact(step.results),
+            results: step.results,
           },
         ]
       : []
@@ -59,15 +48,10 @@ const getToolCallsWithResults = (output: unknown) =>
 
 const parseScore = (args: unknown): { score: number; explanation: string } | undefined => {
   if (!isRecord(args)) return undefined;
-  const { score, explanation } = args;
-  if (
-    typeof score !== 'number' ||
-    !Number.isInteger(score) ||
-    score < PERSONA_RUBRIC_MIN_SCORE ||
-    score > PERSONA_RUBRIC_MAX_SCORE
-  ) {
-    return undefined;
-  }
+  const { score: rawScore, explanation } = args;
+  if (typeof rawScore !== 'number' || !Number.isFinite(rawScore)) return undefined;
+  const score = Math.round(rawScore);
+  if (score < PERSONA_RUBRIC_MIN_SCORE || score > PERSONA_RUBRIC_MAX_SCORE) return undefined;
   return { score, explanation: typeof explanation === 'string' ? explanation : '' };
 };
 
@@ -78,14 +62,27 @@ const parseScore = (args: unknown): { score: number; explanation: string } | und
 export const runPersonaRubricJudge = async ({
   inferenceClient,
   category,
+  expectedTools,
+  question,
+  attachment,
   judgeOutput,
   log,
 }: {
   inferenceClient: BoundInferenceClient;
   category: string | undefined;
+  expectedTools?: readonly string[];
+  question?: string;
+  attachment?: string;
   judgeOutput: unknown;
   log?: ToolingLog;
 }): Promise<EvaluationResult> => {
+  if (!category || !resolvePersonaToolsRow(category)) {
+    const reason = `Example category ${
+      category ? `"${category}"` : '(missing)'
+    } has no persona rubric tools row.`;
+    log?.warning(`[persona-matrix] PersonaRubric skipped: ${reason}`);
+    return unavailable(reason);
+  }
   const toolCalls = getToolCallsWithResults(judgeOutput);
   try {
     const response = await executeUntilValid({
@@ -93,6 +90,9 @@ export const runPersonaRubricJudge = async ({
       inferenceClient,
       input: buildPersonaRubricInput({
         category,
+        expectedTools,
+        question,
+        attachment,
         answer: getAnswerText(judgeOutput),
         toolCalls,
       }),
@@ -118,7 +118,7 @@ export const runPersonaRubricJudge = async ({
         raw_score: verdict.score,
         capped_score: finalScore,
         capped,
-        category: category ?? 'unspecified',
+        category,
       },
     };
   } catch (error) {
@@ -129,10 +129,13 @@ export const runPersonaRubricJudge = async ({
 };
 
 /** Reads the verdict the task precomputed on the same judged submission. */
-export const createPersonaRubricEvaluator = (): Evaluator => ({
+export const createPersonaRubricEvaluator = ({
+  getModel,
+}: { getModel?: Evaluator['getModel'] } = {}): Evaluator => ({
   name: PERSONA_RUBRIC_EVALUATOR_NAME,
   kind: 'LLM',
   direction: 'maximize',
+  getModel,
   evaluate: async ({ output }) =>
     (output as { personaRubricAnalysis?: EvaluationResult } | undefined)?.personaRubricAnalysis ??
     unavailable('PersonaRubric judge did not produce a result for this example.'),

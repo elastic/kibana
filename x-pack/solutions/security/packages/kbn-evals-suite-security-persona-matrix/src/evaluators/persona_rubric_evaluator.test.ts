@@ -6,6 +6,7 @@
  */
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import {
   createPersonaRubricEvaluator,
@@ -21,6 +22,7 @@ import {
   PERSONA_RUBRIC_TOOLS_BY_CATEGORY,
 } from './persona_rubric_prompt';
 import { buildOutput, toolCall } from '../__fixtures__/task_output_builders';
+import { PERSONA_MATRIX_EXAMPLES } from '../datasets/persona_matrix_prompts';
 
 jest.mock('@kbn/inference-prompt-utils', () => ({
   ...jest.requireActual('@kbn/inference-prompt-utils'),
@@ -53,17 +55,49 @@ describe('PersonaRubric prompt assembly', () => {
     expect(new Set(rows).size).toBe(rows.length);
   });
 
-  it('falls back to the generic row for a missing or unknown category', () => {
-    const generic = formatPersonaToolsRow(undefined);
-    expect(formatPersonaToolsRow('not-a-category')).toBe(generic);
-    expect(
-      buildPersonaRubricInput({ category: undefined, answer: '', toolCalls: [] }).category
-    ).toBe('unspecified');
+  it('has a tools row for every category used by the dataset', () => {
+    const known = Object.keys(PERSONA_RUBRIC_TOOLS_BY_CATEGORY);
+    for (const example of PERSONA_MATRIX_EXAMPLES) {
+      expect(known).toContain(example.category);
+    }
+  });
+
+  it('has no row for a missing or unknown category', () => {
+    expect(formatPersonaToolsRow(undefined)).toBeUndefined();
+    expect(formatPersonaToolsRow('not-a-category')).toBeUndefined();
+    expect(() =>
+      buildPersonaRubricInput({ category: 'not-a-category', answer: '', toolCalls: [] })
+    ).toThrow();
+  });
+
+  it('passes per-example expected tools, the question and the attachment to the judge input', () => {
+    const input = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      expectedTools: ['tool.one', 'tool.two'],
+      question: 'What happened on host-1?',
+      attachment: 'attached alert body',
+      answer: 'a',
+      toolCalls: [],
+    });
+    expect(input.expectedTools).toContain('tool.one');
+    expect(input.expectedTools).toContain('tool.two');
+    expect(input.question).toContain('What happened on host-1?');
+    expect(input.attachment).toContain('attached alert body');
+  });
+
+  it('keeps a long tool result intact instead of truncating it', () => {
+    const results = `${'x'.repeat(9000)}END_MARKER`;
+    const { submission } = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      answer: 'a',
+      toolCalls: [{ tool_id: 'big.tool', params: {}, results }],
+    });
+    expect(submission).toContain(results);
   });
 
   it('lists ordered tool calls with params and results ahead of the answer', () => {
     const { submission } = buildPersonaRubricInput({
-      category: undefined,
+      category: 'alert-analysis',
       answer: 'final text',
       toolCalls: [
         { tool_id: 'first.tool', params: { a: 1 }, results: '{"hit":true}' },
@@ -78,7 +112,7 @@ describe('PersonaRubric prompt assembly', () => {
 
   it('marks an empty trace explicitly and ships a non-empty ground truth', () => {
     const { submission } = buildPersonaRubricInput({
-      category: undefined,
+      category: 'alert-analysis',
       answer: 'x',
       toolCalls: [],
     });
@@ -126,8 +160,12 @@ describe('runPersonaRubricJudge', () => {
     expect(call.input.category).toBe('alert-analysis');
   });
 
+  it('rounds a non-integer score to the nearest integer', async () => {
+    executeUntilValidMock.mockResolvedValue(verdict({ score: 7.5, explanation: 'x' }));
+    expect(await run(withTools)).toMatchObject({ score: 0.8, label: '8' });
+  });
+
   it.each([
-    ['a non-integer score', { score: 7.5, explanation: 'x' }],
     ['a score above range', { score: 11, explanation: 'x' }],
     ['a score below range', { score: 0, explanation: 'x' }],
     ['a string score', { score: '8', explanation: 'x' }],
@@ -136,6 +174,41 @@ describe('runPersonaRubricJudge', () => {
   ])('returns unavailable for %s', async (_name, args) => {
     executeUntilValidMock.mockResolvedValue(verdict(args));
     expect(await run(withTools)).toMatchObject({ score: null, label: 'unavailable' });
+  });
+
+  it.each([
+    ['unknown', 'not-a-category'],
+    ['missing', undefined],
+  ])('returns unavailable and warns for a %s category without calling the judge', async (_n, c) => {
+    const log = { warning: jest.fn() } as unknown as ToolingLog;
+    const result = await runPersonaRubricJudge({
+      inferenceClient,
+      category: c,
+      judgeOutput: withTools,
+      log,
+    });
+    expect(result).toMatchObject({ score: null, label: 'unavailable' });
+    expect(result.explanation).toContain('no persona rubric tools row');
+    expect(log.warning).toHaveBeenCalledTimes(1);
+    expect(executeUntilValidMock).not.toHaveBeenCalled();
+  });
+
+  it('forwards expected tools, question and attachment to the judge', async () => {
+    executeUntilValidMock.mockResolvedValue(verdict({ score: 5, explanation: '' }));
+    await runPersonaRubricJudge({
+      inferenceClient,
+      category: 'alert-analysis',
+      expectedTools: ['tool.one'],
+      question: 'Why?',
+      attachment: 'body',
+      judgeOutput: withTools,
+    });
+    const call = executeUntilValidMock.mock.calls[0][0] as {
+      input: { expectedTools: string; question: string; attachment: string };
+    };
+    expect(call.input.expectedTools).toContain('tool.one');
+    expect(call.input.question).toContain('Why?');
+    expect(call.input.attachment).toContain('body');
   });
 
   it('returns unavailable when the judge returns no tool call', async () => {
@@ -163,6 +236,11 @@ describe('createPersonaRubricEvaluator', () => {
   it('reads back the precomputed result', async () => {
     const personaRubricAnalysis = { score: 0.8, label: '8' };
     expect(await evaluate({ personaRubricAnalysis })).toEqual(personaRubricAnalysis);
+  });
+
+  it('forwards getModel', () => {
+    const getModel = jest.fn();
+    expect(createPersonaRubricEvaluator({ getModel }).getModel).toBe(getModel);
   });
 
   it('is unavailable when the task produced no result', async () => {

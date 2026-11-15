@@ -27,17 +27,38 @@ const unavailable = (explanation: string): EvaluationResult => ({
   explanation,
 });
 
-const isValidScore = (value: unknown): value is number =>
-  typeof value === 'number' &&
-  Number.isInteger(value) &&
-  value >= AD_AXES_MIN_SCORE &&
-  value <= AD_AXES_MAX_SCORE;
+/** Rounds a numeric score to the nearest integer; undefined when it is not a finite number in range. */
+const normalizeScore = (value: unknown): number | undefined => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
+  const rounded = Math.round(value);
+  return rounded >= AD_AXES_MIN_SCORE && rounded <= AD_AXES_MAX_SCORE ? rounded : undefined;
+};
 
-const toSubmission = (insights: unknown): string => {
-  const serialized = JSON.stringify({ attackDiscoveries: insights }, null, 2);
-  return serialized.length > AD_AXES_MAX_SUBMISSION_CHARS
-    ? serialized.slice(0, AD_AXES_MAX_SUBMISSION_CHARS)
-    : serialized;
+const serializeInsights = (insights: unknown[]): string =>
+  JSON.stringify({ attackDiscoveries: insights }, null, 2);
+
+/**
+ * Serializes the insights for the judge. When the JSON would exceed the cap,
+ * whole trailing insights are dropped (never a sliced JSON document) and the
+ * note tells the judge how many were omitted.
+ */
+export const toSubmission = (
+  insights: unknown[]
+): { submission: string; truncationNote: string } => {
+  let kept = insights;
+  let submission = serializeInsights(kept);
+  while (submission.length > AD_AXES_MAX_SUBMISSION_CHARS && kept.length > 0) {
+    kept = kept.slice(0, -1);
+    submission = serializeInsights(kept);
+  }
+  const omitted = insights.length - kept.length;
+  return {
+    submission,
+    truncationNote:
+      omitted > 0
+        ? `[truncated: ${omitted} of ${insights.length} discoveries omitted to fit the size limit; do not penalize the missing ones as absent from the model's output.]\n\n`
+        : '',
+  };
 };
 
 /**
@@ -47,13 +68,16 @@ const toSubmission = (insights: unknown): string => {
 export const createAdAxesRubricEvaluator = ({
   inferenceClient,
   log,
+  getModel,
 }: {
   inferenceClient: BoundInferenceClient;
   log?: ToolingLog;
+  getModel?: Evaluator['getModel'];
 }): Evaluator => ({
   name: AD_AXES_RUBRIC_EVALUATOR_NAME,
   kind: 'LLM',
   direction: 'maximize',
+  getModel,
   evaluate: async ({ output }) => {
     const insights = isRecord(output) ? output.insights : undefined;
     if (!Array.isArray(insights)) {
@@ -64,7 +88,7 @@ export const createAdAxesRubricEvaluator = ({
       const response = await executeUntilValid({
         prompt: AdAxesRubricPrompt,
         inferenceClient,
-        input: { submission: toSubmission(insights) },
+        input: toSubmission(insights),
         finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
         maxRetries: 3,
         toolCallbacks: {
@@ -73,25 +97,28 @@ export const createAdAxesRubricEvaluator = ({
       });
 
       const args = response.toolCalls[0]?.function.arguments;
+      if (!isRecord(args)) {
+        return unavailable('Judge did not return a grade.');
+      }
+      const overall = normalizeScore(args.overall);
+      const [coverage, accuracy, correlation, actionability] = AXES.map((axis) =>
+        normalizeScore(args[axis])
+      );
       if (
-        !isRecord(args) ||
-        !isValidScore(args.overall) ||
-        !AXES.every((a) => isValidScore(args[a]))
+        overall === undefined ||
+        coverage === undefined ||
+        accuracy === undefined ||
+        correlation === undefined ||
+        actionability === undefined
       ) {
         return unavailable('Judge returned a missing or out-of-range axis score.');
       }
 
       return {
-        score: args.overall / AD_AXES_MAX_SCORE,
-        label: String(args.overall),
+        score: overall / AD_AXES_MAX_SCORE,
+        label: String(overall),
         explanation: typeof args.explanation === 'string' ? args.explanation : '',
-        metadata: {
-          coverage: args.coverage,
-          accuracy: args.accuracy,
-          correlation: args.correlation,
-          actionability: args.actionability,
-          overall: args.overall,
-        },
+        metadata: { coverage, accuracy, correlation, actionability, overall },
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

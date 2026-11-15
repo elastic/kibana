@@ -14,7 +14,16 @@ export const PERSONA_RUBRIC_MAX_SCORE = 10;
 
 const MAX_CATEGORY_CHARS = 100;
 const MAX_TOOLS_ROW_CHARS = 4000;
-const MAX_SUBMISSION_CHARS = 2_000_000;
+const MAX_EXPECTED_TOOLS_CHARS = 4000;
+const MAX_QUESTION_CHARS = 20_000;
+const MAX_ATTACHMENT_CHARS = 20_000;
+const TRUNCATION_MARKER = '…[truncated]';
+
+/** Hard bound on the submission text; the shared judge payload cap normally trims well before this. */
+export const PERSONA_RUBRIC_MAX_SUBMISSION_CHARS = 400_000;
+
+const truncate = (text: string, max: number): string =>
+  text.length > max ? `${text.slice(0, max - TRUNCATION_MARKER.length)}${TRUNCATION_MARKER}` : text;
 
 /** Facts every persona prompt is built around; the judge grades accuracy against them. */
 export const PERSONA_RUBRIC_GROUND_TRUTH = [
@@ -23,11 +32,22 @@ export const PERSONA_RUBRIC_GROUND_TRUTH = [
   'MITRE ATT&CK: DLL side-loading, T1574.002 (sub-technique of Hijack Execution Flow). Naming the ID is best; describing DLL side-loading or search-order hijacking correctly is acceptable without it.',
   'Loader SHA-256: `275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f`. It is a known-malicious loader. A correct verdict is "malicious", ideally with a non-trivial detection count and a family name. Reporting it as clean, benign or not found, or asserting a verdict without ever looking the hash up, is wrong.',
   'Expected hunt artifacts: `BluetoothService.exe` execution, suspicious `log.dll` loads, and C2 network or DNS activity.',
-  'Disposition: this is a true positive and a real threat. "Benign" or "safe to ignore" is incorrect for alert analysis and multi-step prompts; the correct behaviour is to escalate and continue.',
+  'Disposition: this is a true positive and a real threat. "Benign" or "safe to ignore" is incorrect for alert analysis and multi-step prompts. Some multi-step prompts say not to escalate if the finding is benign; they test judgment, and because the scenario is a true positive the correct behaviour is to escalate and proceed with the remaining steps.',
 ].join('\n');
 
 const WORKFLOW_CONNECTOR_NOTE =
-  'An authored workflow must contain an `http` step on the existing Slack connector with id `d7306385-cbe6-4541-9726-49afdff59ba5`, calling `POST /chat.postMessage`. Defer to the workflow validation result in the submission when present; it is objective.';
+  'An authored workflow must contain an `http` step on the existing Slack connector with id `d7306385-cbe6-4541-9726-49afdff59ba5`, calling `POST /chat.postMessage`.';
+
+/**
+ * The category rows below name tools by their reference ids. The suite seeds
+ * differently named tools for some of them; this maps one to the other so a
+ * correct call is not penalised for its name.
+ */
+export const PERSONA_RUBRIC_TOOL_ALIASES = [
+  'Tool id aliases (reference id → tool id seeded in this suite): `vt.hash.lookup` → `virustotal_lookup`; `check.on.call.schedule` → `on_call_lookup`; `create.case` → `platform.core.cases.manage`; `platform.workflows.workflow_set_yaml` → `platform.core.generate_workflow`.',
+  'There is no seeded suite tool for `create.channel`; the Slack channel step is scored through the reference, so do not penalise the absence of a channel-creation tool call.',
+  'When the example lists its own expected tools, those take precedence over the category row.',
+].join(' ');
 
 interface ToolsRow {
   tools: string;
@@ -75,19 +95,16 @@ export const PERSONA_RUBRIC_TOOLS_BY_CATEGORY: Readonly<Record<string, ToolsRow>
   },
 };
 
-const GENERIC_TOOLS_ROW: ToolsRow = {
-  tools:
-    'Whatever capabilities the task needs: the tool should be one the prompt asks for or one that produces the evidence the answer relies on.',
-  redFlags: 'Claims in prose that no tool call in the trace supports.',
-};
+/** The row for a known category; undefined for a missing or unknown one. */
+export const resolvePersonaToolsRow = (category: string | undefined): ToolsRow | undefined =>
+  category && Object.hasOwn(PERSONA_RUBRIC_TOOLS_BY_CATEGORY, category)
+    ? PERSONA_RUBRIC_TOOLS_BY_CATEGORY[category]
+    : undefined;
 
-export const resolvePersonaToolsRow = (category: string | undefined): ToolsRow =>
-  (category && PERSONA_RUBRIC_TOOLS_BY_CATEGORY[category]) || GENERIC_TOOLS_ROW;
-
-/** The category-specific block the prompt interpolates. */
-export const formatPersonaToolsRow = (category: string | undefined): string => {
-  const { tools, redFlags } = resolvePersonaToolsRow(category);
-  return `Appropriate tools: ${tools}\nRed flags: ${redFlags}`;
+/** The category-specific block the prompt interpolates; undefined when the category has no row. */
+export const formatPersonaToolsRow = (category: string | undefined): string | undefined => {
+  const row = resolvePersonaToolsRow(category);
+  return row ? `Appropriate tools: ${row.tools}\nRed flags: ${row.redFlags}` : undefined;
 };
 
 export const PERSONA_RUBRIC_ANCHORS = [
@@ -121,11 +138,21 @@ ${PERSONA_RUBRIC_GROUND_TRUTH}
 [BEGIN task category]
 {{{category}}}
 {{{toolsRow}}}
+${PERSONA_RUBRIC_TOOL_ALIASES}
 [END task category]
+
+[BEGIN expected tools for this prompt]
+{{{expectedTools}}}
+[END expected tools for this prompt]
 
 [BEGIN scoring anchors]
 ${PERSONA_RUBRIC_ANCHORS}
 [END scoring anchors]
+
+[BEGIN prompt given to the agent]
+{{{question}}}
+{{{attachment}}}
+[END prompt given to the agent]
 
 [BEGIN submission]
 {{{submission}}}
@@ -138,7 +165,10 @@ export const PersonaRubricPrompt = createPrompt({
     z.object({
       category: z.string().max(MAX_CATEGORY_CHARS),
       toolsRow: z.string().max(MAX_TOOLS_ROW_CHARS),
-      submission: z.string().max(MAX_SUBMISSION_CHARS),
+      expectedTools: z.string().max(MAX_EXPECTED_TOOLS_CHARS),
+      question: z.string().max(MAX_QUESTION_CHARS),
+      attachment: z.string().max(MAX_ATTACHMENT_CHARS + 100),
+      submission: z.string().max(PERSONA_RUBRIC_MAX_SUBMISSION_CHARS),
     })
   ),
 })
@@ -168,13 +198,26 @@ export const PersonaRubricPrompt = createPrompt({
 /** Input for the rubric prompt: the answer and ordered tool calls the judge sees. */
 export const buildPersonaRubricInput = ({
   category,
+  expectedTools,
+  question,
+  attachment,
   answer,
   toolCalls,
 }: {
-  category: string | undefined;
+  category: string;
+  expectedTools?: readonly string[];
+  question?: string;
+  attachment?: string;
   answer: string;
   toolCalls: Array<{ tool_id: string; params: Record<string, unknown>; results?: unknown }>;
-}): { category: string; toolsRow: string; submission: string } => {
+}): {
+  category: string;
+  toolsRow: string;
+  expectedTools: string;
+  question: string;
+  attachment: string;
+  submission: string;
+} => {
   const trace = toolCalls.length
     ? toolCalls
         .map(({ tool_id: toolId, params, results }, index) =>
@@ -188,9 +231,23 @@ export const buildPersonaRubricInput = ({
         )
         .join('\n')
     : '(no tool calls)';
+  const toolsRow = formatPersonaToolsRow(category);
+  if (!toolsRow) {
+    throw new Error(`No persona rubric tools row for category "${category}"`);
+  }
   return {
-    category: category ?? 'unspecified',
-    toolsRow: formatPersonaToolsRow(category),
-    submission: `Tool calls, in order:\n${trace}\n\nFinal answer:\n${answer || '(empty)'}`,
+    category,
+    toolsRow,
+    expectedTools: expectedTools?.length
+      ? truncate(expectedTools.map((tool) => `\`${tool}\``).join(', '), MAX_EXPECTED_TOOLS_CHARS)
+      : '(none listed; use the category row)',
+    question: truncate(question || '(not provided)', MAX_QUESTION_CHARS),
+    attachment: attachment
+      ? `Attachment supplied with the prompt:\n${truncate(attachment, MAX_ATTACHMENT_CHARS)}`
+      : '',
+    submission: truncate(
+      `Tool calls, in order:\n${trace}\n\nFinal answer:\n${answer || '(empty)'}`,
+      PERSONA_RUBRIC_MAX_SUBMISSION_CHARS
+    ),
   };
 };

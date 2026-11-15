@@ -10,18 +10,60 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const AD_AXES_MIN_SCORE = 1;
 export const AD_AXES_MAX_SCORE = 10;
-export const AD_AXES_MAX_SUBMISSION_CHARS = 2_000_000;
+export const AD_AXES_MAX_SUBMISSION_CHARS = 400_000;
 
-/** One entry per true intrusion in the 95-alert corpus; `-PRIV` hosts fold into their parent chain. */
+/** The 8-intrusion answer key, including the `-PRIV` twin rule and how to apply it. */
 export const AD_AXES_ANSWER_KEY = [
-  '1. SRVMAC08 (macOS): an untrusted app bundle runs, shows a fake system credential prompt through osascript, drops and runs a helper that reads the login keychain. T1204.002, T1056.002, T1555.001.',
-  '2. SRVWIN07 (Windows): a Word document drops a VBScript run by wscript, a one-minute scheduled task is created for persistence, then obfuscated PowerShell runs a dropped script. T1566.001, T1059.005, T1053.005, T1059.001.',
-  '3. SRVWIN06 (Windows), Bumblebee loader: msiexec proxy-executes PowerShell, which injects shellcode in memory and beacons out. T1218.007, T1055, T1071.',
-  '4. SRVWIN04 (Windows), Qbot: a OneNote file launches mshta on an HTA, curl fetches a payload from 77.75.230.128, rundll32 loads a fake image DLL that injects into AtBroker.exe, Run-key persistence. T1218.005, T1105, T1218.011, T1055, T1547.001.',
-  '5. SRVNIX05 (Linux), BPFDoor: an archive is unpacked, the binary is copied to /dev/shm, made executable and started with --init, then deletes itself; the user is root. T1059.004, T1564, T1070.004.',
-  '6. SRVWIN03 (Windows), Emotet, the largest alert cluster: an Excel macro spawns several regsvr32 loads of a DLL, the Emotet signature fires in memory, DLL copies land in system paths, Run-key persistence. T1218.010, T1547.001, T1055.',
-  '7. SRVWIN02 (Windows), Sodinokibi (REvil) ransomware: an executable with an expired certificate drops mpsvc.dll, which MsMpEng.exe side-loads; shellcode injects, ransom notes appear, so encryption is active. T1574.002, T1055, T1486, T1553.002.',
-  '8. SRVWIN01 (Windows), Excel certutil loader: an Excel macro runs certutil -decode on a staged text file into an executable, which loads cdnver.dll through rundll32 and persists in the registry. T1140, T1218.011, T1547.001.',
+  '**The 95 alerts contain exactly 8 distinct intrusions, one per host.** A top-tier model therefore produces **8 discoveries** — one coherent attack chain per host. This "8" is the single most important number in this evaluation: it is the count of real attacks in the data.',
+  '',
+  'Use this answer key to grade accuracy. Each row is one true intrusion:',
+  '',
+  '| # | Host | Malware / family | Kill chain (how it unfolds) | Key MITRE techniques |',
+  '|---|------|------------------|------------------------------|----------------------|',
+  '| 1 | **SRVMAC08** (macOS) | Credential phishing + keychain theft | `My Go Application.app` (untrusted/AppTranslocation) executes → spawns `osascript` showing a fake "System Preferences" credential prompt → drops `unix1`, `chmod 777` → `unix1` dumps the login keychain (`login.keychain-db`) for user `james` | T1204.002 (User Execution), T1056.002 (GUI Input Capture), T1555.001 (Keychain), T1222.002 |',
+  '| 2 | **SRVWIN07** (Windows) | Office macro → persistence | `WINWORD.EXE` opens malicious `.doc` → drops `AppPool.vbs` → `wscript.exe` runs it → `schtasks` creates a 1-minute scheduled task for persistence → obfuscated `powershell.exe -exec bypass` runs `AppPool.ps1` | T1566.001, T1059.005 (VBScript), T1053.005 (Scheduled Task), T1059.001 (PowerShell) |',
+  '| 3 | **SRVWIN06** (Windows) | **Bumblebee** loader | `msiexec.exe` proxy-executes `powershell.exe` running `chch.ps1` → shellcode injection in PowerShell (PID 6228) → `Windows.Trojan.Bumblebee` in memory → outbound C2 | T1218.007 (Msiexec), T1055 (Process Injection), T1071 (C2) |',
+  '| 4 | **SRVWIN04** (Windows) | **Qbot** (Qakbot) | `ONENOTE.EXE` opens `ApplicationReject_68390(Jan31).one` → spawns `mshta.exe` on `attachment.hta` → `curl.exe` downloads `19825.dat` from `77.75.230.128` → `rundll32.exe` loads `121.png` → injects `AtBroker.exe` → `Windows.Trojan.Qbot` → Registry Run Key persistence | T1218.005 (Mshta), T1105 (Ingress Tool Transfer), T1218.011 (Rundll32), T1055, T1547.001 |',
+  '| 5 | **SRVNIX05** (Linux) | **BPFDoor** backdoor | `unzip 9415656314.zip` extracts trojan → copied to `/dev/shm/kdmtmpflush` → `chmod 755` → executed `--init` → self-deletes; `Linux.Trojan.BPFDoor` by memory signature; user `root` | T1059.004, T1564 (Hide Artifacts / tmpfs), T1070.004 (File Deletion) |',
+  '| 6 | **SRVWIN03** (Windows) | **Emotet** (largest alert cluster) | `EXCEL.EXE` macro spawns multiple `regsvr32.exe` loading `oxnv1..4.ooccxx` → DLL `bb444759…df36` loaded → `Windows.Trojan.Emotet` in memory → DLL copied to System32 paths → Registry Run Key persistence | T1218.010 (Regsvr32), T1547.001, T1055 |',
+  '| 7 | **SRVWIN02** (Windows) | **Sodinokibi / REvil** ransomware | `explorer.exe` launches `d55f983c…9f1e.exe` (expired cert "PB03 TRANSPORT LTD.") → drops `mpsvc.dll` to `C:\\Windows\\` → **DLL side-loaded** by legitimate `MsMpEng.exe` → shellcode injection → `Windows.Ransomware.Sodinokibi` → canary/ransom-note files (`hd3vuk19y-readme.txt`) = active encryption | T1574.002 (DLL Side-Loading), T1055, T1486 (Data Encrypted for Impact), T1553.002 |',
+  '| 8 | **SRVWIN01** (Windows) | Excel → certutil loader | `EXCEL.EXE` macro spawns `certutil.exe -decode C:\\Programdata\\B1Z8U2N9.txt … Q3C7N1V8.exe` → decoded `Q3C7N1V8.exe` runs → drops/loads `cdnver.dll` via `rundll32` → registry persistence | T1140 (Deobfuscate/Decode), T1218.011 (Rundll32), T1547.001 |',
+  '',
+  '**On `-PRIV` host twins:** Several attacks also fired a *prevention*-side alert on a paired host name (e.g., `SRVWIN07-PRIV`, `SRVWIN03-PRIV`). These are the prevented twin of the *same* intrusion, not a 9th/10th separate attack. **Folding the `-PRIV` twin into its parent chain is correct.** Spinning each `-PRIV` host into its own separate discovery is over-splitting and should cost Correlation points.',
+  '',
+  '**How to use the answer key:**',
+  '- A model that produces **8 discoveries, each mapping cleanly to one row above with the right host + family + technique**, is the gold standard.',
+  '- A model that produces fewer than 8 has **merged** distinct intrusions (e.g., lumped two hosts together) or **missed** threats — dock Coverage.',
+  '- A model that produces more than 8 has likely **over-split** one intrusion into several thin chains — dock Correlation.',
+  '- A model that names the wrong malware family, wrong host, or invents indicators not in this key/alert data — dock Accuracy.',
+].join('\n');
+
+/** Per-axis grading guidance with the 10 / 1-2 anchors. */
+export const AD_AXES_AXIS_GUIDE = [
+  '### Axis 1 — Coverage',
+  'How completely did the model account for the **8 true intrusions**?',
+  '- Did it surface all 8 hosts/attacks (ideally as 8 distinct discoveries)?',
+  '- Penalize **missing** threats (e.g., dropped the Linux BPFDoor or macOS keychain chain) and penalize **merging** that hides a distinct attack.',
+  '- 10 = all 8 intrusions represented and distinguishable; 1–2 = found one or none.',
+  '',
+  '### Axis 2 — Accuracy',
+  'How factually correct is each chain vs. the answer key and the alert evidence?',
+  '- Correct **host**, correct **malware family** (Emotet/Qbot/Bumblebee/Sodinokibi/BPFDoor), correct **kill chain**, correct **MITRE techniques**.',
+  '- Penalize **fabrication** hard: invented hashes, IPs, families, or technique IDs not supported by the alerts; a confidently wrong malware family; wrong host attribution.',
+  '- 10 = attributions and techniques are correct across the board with no fabrication; low scores for confident-but-wrong narration.',
+  '',
+  '### Axis 3 — Correlation quality',
+  'Did the model group the **right alerts into the right chain**?',
+  '- No **merging** two distinct intrusions into one discovery.',
+  '- No **over-splitting** one intrusion into several (including treating `-PRIV` twins as separate attacks).',
+  '- The alert-count per discovery and the number of discoveries should reflect the true structure (8 chains).',
+  '- 10 = clean one-chain-per-intrusion grouping; penalize both noisy >8 thin output and collapsed <8 output.',
+  '',
+  '### Axis 4 — Actionability',
+  'Could a SOC analyst act on this output as-is?',
+  '- Clear, specific **titles** and **summaries**; correct **entity summary** (host/user); appropriate **MITRE tactics**; sensible **risk prioritization** (the ransomware and largest infections should rank high).',
+  '- Penalize vague titles, generic narration, or risk scores that bury the worst incident.',
+  '- 10 = immediately usable incident write-ups; low scores for vague or misleading output.',
 ].join('\n');
 
 export const AD_AXES_ANCHORS = [
@@ -39,25 +81,25 @@ const SYSTEM_TEMPLATE = [
   'Respond by invoking the grade tool.',
 ].join(' ');
 
-const USER_TEMPLATE = `A model was given the same 95 security alerts and asked to group them into attack discoveries. The alerts contain exactly 8 distinct intrusions, one per host, listed in the answer key. The model had only the alert context and no external tools, so any family, hash, IP or technique it states must be derivable from the alerts; unsupported ones are fabrications.
+const USER_TEMPLATE = `A model was given the same 95 security alerts and asked to group them into attack discoveries. The model had only the alert context and no external tools, so any family, hash, IP or technique it states must be derivable from the alerts; unsupported ones are fabrications.
 
-Score the submission with an integer from ${AD_AXES_MIN_SCORE} to ${AD_AXES_MAX_SCORE} on each axis, then give an overall score:
-- coverage: how completely the 8 intrusions are represented as distinguishable discoveries. Missed or hidden-by-merging intrusions lower it.
-- accuracy: correct host, malware family, kill chain and techniques against the key. Fabrication and confidently wrong attribution lower it sharply.
-- correlation: the right alerts in the right chain. Merging two intrusions, or splitting one into thin chains (including treating a "-PRIV" twin host as a separate attack), lowers it. The discovery count should be near 8.
-- actionability: specific titles and summaries, correct entities, fitting tactics, and risk ranking that surfaces the ransomware and the largest infections.
-- overall: holistic. A clean, accurate 8 beats a noisy 12; do not reward a high discovery count.
+Score the submission with an integer from ${AD_AXES_MIN_SCORE} to ${AD_AXES_MAX_SCORE} on each axis, then give an overall score. Latency is not part of the quality axes.
 
 [BEGIN answer key]
 ${AD_AXES_ANSWER_KEY}
-Alerts on a "-PRIV" host are the prevented twin of the same intrusion; folding them into the parent chain is correct.
 [END answer key]
+
+[BEGIN axis guide]
+${AD_AXES_AXIS_GUIDE}
+[END axis guide]
 
 [BEGIN overall anchors]
 ${AD_AXES_ANCHORS}
+Anchor overall near the mean of the axes but weight egregious failures (fabricated core facts, a missed ransomware chain) more heavily than a plain average would.
+A clean, accurate 8 beats a noisy 12; do not reward a high discovery count by itself.
 [END overall anchors]
 
-[BEGIN submission]
+{{{truncationNote}}}[BEGIN submission]
 {{{submission}}}
 [END submission]`;
 
@@ -73,6 +115,7 @@ export const AdAxesRubricPrompt = createPrompt({
   input: lazySchema(() =>
     z.object({
       submission: z.string().max(AD_AXES_MAX_SUBMISSION_CHARS),
+      truncationNote: z.string().max(500),
     })
   ),
 })

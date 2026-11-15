@@ -21,6 +21,7 @@ import { CHAIN_COVERAGE_EVALUATOR_NAME } from './evaluators/chain_coverage_evalu
 
 const traceStub = (name: string) => ({ name, kind: 'CODE', evaluate: jest.fn() });
 
+const judgeGetModel = jest.fn();
 const evaluators = {
   traceBasedEvaluators: {
     inputTokens: traceStub('Input Tokens'),
@@ -29,7 +30,7 @@ const evaluators = {
     toolCalls: traceStub('Tool Calls'),
     latency: traceStub('Latency'),
   },
-  criteria: jest.fn(),
+  criteria: jest.fn(() => ({ getModel: judgeGetModel })),
 } as unknown as DefaultEvaluators;
 const log = { info: jest.fn() } as unknown as ToolingLog;
 const evaluationInferenceClient = {} as Parameters<
@@ -102,6 +103,16 @@ describe('Chrysalis AD experiment', () => {
     it('registers the axes judge last when the flag is on', () => {
       const names = namesWithFlag('1');
       expect(names[names.length - 1]).toBe(AD_AXES_RUBRIC_EVALUATOR_NAME);
+    });
+
+    it('reports the shared judge model through getModel', () => {
+      process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+      const axes = createChrysalisAdExperimentEvaluators({
+        evaluators,
+        evaluationInferenceClient,
+        log,
+      }).find(({ name }) => name === AD_AXES_RUBRIC_EVALUATOR_NAME);
+      expect(axes?.getModel).toBe(judgeGetModel);
     });
   });
 });

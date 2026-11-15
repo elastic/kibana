@@ -31,6 +31,9 @@ type EvaluationInferenceClient = Parameters<
  */
 export const CHRYSALIS_AD_DATASET_NAME = 'Attack Discovery Chrysalis kill-chains (generate API)';
 
+/** `criteria()` is the only handle on the shared judge model; this criterion is never scored. */
+const AD_AXES_MODEL_PROBE_CRITERION = 'Accuracy: The output is technically correct.';
+
 /**
  * Mirrors the attack-discovery suite's own experiment configuration
  * (`configureExperiment` in its `evaluate_dataset.ts`) so the original evaluator
@@ -61,7 +64,14 @@ export const createChrysalisAdExperimentEvaluators = ({
     createChainCoverageEvaluator(),
     createAdFailureClassEvaluator(),
     ...(isPersonaRubricJudgeEnabled()
-      ? [createAdAxesRubricEvaluator({ inferenceClient: evaluationInferenceClient, log })]
+      ? [
+          createAdAxesRubricEvaluator({
+            inferenceClient: evaluationInferenceClient,
+            log,
+            // Report the judge's model the same way the criteria judge does.
+            getModel: evaluators.criteria([AD_AXES_MODEL_PROBE_CRITERION]).getModel,
+          }),
+        ]
       : []),
   ];
 };
