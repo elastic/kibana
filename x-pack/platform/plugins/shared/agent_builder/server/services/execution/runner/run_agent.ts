@@ -200,12 +200,14 @@ export const runAgent = async ({
   ]);
   const providerName = getConnectorProvider(chatModel.getConnector());
 
+  const rootExecutionId = parentManager.deps.rootExecutionId ?? executionId;
   const forkedContext = forkContextForAgentRun({
     parentContext: parentManager.context,
     agentId,
     agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
+    rootExecutionId,
     origin: resolveTelemetryOrigin({
       conversation: agentParams.conversation,
       requestOrigin: agentParams.origin?.type,
@@ -218,6 +220,7 @@ export const runAgent = async ({
     approvals: agent.configuration.approvals,
   });
   const manager = parentManager.createChild(forkedContext, {
+    rootExecutionId,
     agentConfiguration: effectiveConfiguration,
     interactivity,
     subAgentExecutor: createSubAgentExecutor({
@@ -226,6 +229,7 @@ export const runAgent = async ({
       projectRouting: parentManager.deps.projectRouting,
       interactivity,
       workflowExecutionId: parentManager.deps.workflowExecutionId,
+      rootExecutionId,
     }),
   });
 

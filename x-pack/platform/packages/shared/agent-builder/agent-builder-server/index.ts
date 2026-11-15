@@ -81,6 +81,7 @@ export {
   createOtherResult,
   isToolResultId,
   isToolHandlerStandardReturn,
+  getToolRunContext,
 } from './tools';
 export type {
   AgentHandlerParams,

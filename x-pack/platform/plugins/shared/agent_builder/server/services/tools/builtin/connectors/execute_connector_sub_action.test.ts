@@ -68,6 +68,7 @@ const mockContext = {
     toolCallId: 'call-1',
     callSource: 'agent',
   },
+  runContext: { runId: 'run-1', stack: [] },
   prompts: {
     checkConfirmationStatus: jest.fn(),
     checkAuthorizationStatus: mockCheckAuthorizationStatus,
@@ -303,6 +304,39 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
     expect(((result as ToolHandlerStandardReturn).results[0] as OtherResult).data).toEqual({
       messages: [{ text: 'hello' }],
+    });
+  });
+
+  it('passes the run ids from the server context on the action source', async () => {
+    mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    await tool.handler(
+      {
+        connectorId: 'conn-123',
+        subAction: 'listChannels',
+        params: { execution_id: 'forged' },
+      },
+      {
+        ...mockContext,
+        runContext: {
+          runId: 'run-1',
+          stack: [
+            {
+              type: 'agent',
+              agentId: 'agent-1',
+              executionId: 'exec-1',
+              rootExecutionId: 'exec-1',
+              conversationId: 'conv-1',
+            },
+          ],
+        },
+      } as unknown as ToolHandlerContext
+    );
+
+    expect(mockExecute.mock.calls[0][0].source.source.runContext).toEqual({
+      conversationId: 'conv-1',
+      executionId: 'exec-1',
     });
   });
 

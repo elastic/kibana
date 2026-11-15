@@ -54,6 +54,7 @@ export const forkContextForAgentRun = ({
   agentName?: string;
   conversationId?: string;
   executionId?: string;
+  rootExecutionId?: string;
   origin?: ConversationOriginType;
   parentContext: RunContext;
 }): RunContext => {

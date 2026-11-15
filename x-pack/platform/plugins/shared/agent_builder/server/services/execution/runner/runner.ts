@@ -161,6 +161,8 @@ export interface CreateScopedRunnerDeps {
    * rebuilt for an agent run (see `runAgent`) still passes it on to the sub-agents it spawns.
    */
   workflowExecutionId?: string;
+  /** Root execution inherited from the parent run, passed on like `workflowExecutionId`. */
+  rootExecutionId?: string;
   /** Lazy getter for the execution service. */
   getExecutionService: () => AgentExecutionService;
   /** Experimental features enabled for this runner context. */
@@ -195,6 +197,7 @@ export type CreateRunnerDeps = Omit<
   | 'toolManager'
   | 'subAgentExecutor'
   | 'workflowExecutionId'
+  | 'rootExecutionId'
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
@@ -307,6 +310,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     parentExecutionId,
     conversationAccess = 'readWrite',
     workflowExecutionId,
+    rootExecutionId,
   }: {
     request: KibanaRequest;
     owner?: UserIdAndName;
@@ -328,6 +332,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     conversationAccess?: ExecutionConversationAccess;
     /** Passed on to the sub-agents this run spawns, so their rounds join to the workflow run. */
     workflowExecutionId?: string;
+    rootExecutionId?: string;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -354,6 +359,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       projectRouting,
       interactivity,
       workflowExecutionId,
+      rootExecutionId,
     });
 
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
@@ -424,6 +430,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       conversationAccess,
       subAgentExecutor,
       workflowExecutionId,
+      rootExecutionId,
       experimentalFeatures,
       ...(deductive ? { deductive } : {}),
     };
@@ -475,6 +482,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         parentExecutionId,
         conversationAccess = 'readWrite',
         workflowExecutionId,
+        rootExecutionId,
         ...otherParams
       } = params;
       const { agentId } = params;
@@ -498,6 +506,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         parentExecutionId,
         conversationAccess,
         workflowExecutionId,
+        rootExecutionId,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

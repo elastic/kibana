@@ -21,6 +21,7 @@ export const createSubAgentExecutor = ({
   projectRouting,
   interactivity,
   workflowExecutionId,
+  rootExecutionId,
 }: {
   request: KibanaRequest;
   getExecutionService: () => AgentExecutionService;
@@ -33,6 +34,8 @@ export const createSubAgentExecutor = ({
    * LLM calls carry it as their `interactionId` (see `buildExecutionTelemetryMetadata`).
    */
   workflowExecutionId?: string;
+  /** The parent run's root execution. Every sub-agent inherits it. */
+  rootExecutionId?: string;
 }): SubAgentExecutor => {
   const inheritedApis = interactivity.auto_approved_apis;
   const subAgentInteractivity = createNonInteractiveConfig(inheritedApis);
@@ -64,6 +67,7 @@ export const createSubAgentExecutor = ({
           projectRouting,
           // Standalone runs report no round events; it's passed on to the sub-agents they spawn.
           ...(workflowExecutionId ? { workflowExecutionId } : {}),
+          ...(rootExecutionId ? { rootExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });
@@ -93,6 +97,7 @@ export const createSubAgentExecutor = ({
             subagentPurpose: params.subagentPurpose,
           },
           ...(workflowExecutionId ? { workflowExecutionId } : {}),
+          ...(rootExecutionId ? { rootExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });
@@ -117,6 +122,7 @@ export const createSubAgentExecutor = ({
           autoCreateConversationWithId: false,
           nextInput: { message: params.prompt },
           ...(workflowExecutionId ? { workflowExecutionId } : {}),
+          ...(rootExecutionId ? { rootExecutionId } : {}),
         },
         abortSignal: params.abortSignal,
       });

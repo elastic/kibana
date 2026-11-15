@@ -634,6 +634,52 @@ describe('RelayClient', () => {
     });
   });
 
+  describe('withRunContext', () => {
+    const readBody = { channel: { id: 'C123', name: 'alerts' }, messages: [], truncated: false };
+
+    const messagesUrl = 'https://relay.test/v1/slack/tenants/team-A/channels/C123/messages';
+
+    it('sends the conversation id on every request, sends the execution id on reads, and leaves the parent client unscoped', async () => {
+      requestMock
+        .mockResolvedValueOnce({ status: 200, data: readBody } as never)
+        .mockResolvedValueOnce({
+          status: 202,
+          data: { ref: '1700000000.000100', channel: 'C123' },
+        } as never)
+        .mockResolvedValueOnce({ status: 200, data: readBody } as never);
+      const client = createClient();
+      const scoped = client.withRunContext({
+        conversationId: 'conv-1',
+        executionId: 'exec-1',
+      });
+
+      await scoped.readMessages({ tenantKey: 'team-A', channelId: 'C123', limit: 10 });
+      await scoped.trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' });
+      await client.readMessages({ tenantKey: 'team-A', channelId: 'C123' });
+
+      const [[read], [post], [unscoped]] = requestMock.mock.calls;
+      expect(read.url).toBe(`${messagesUrl}?execution_id=exec-1&limit=10`);
+      expect(read.headers).toEqual({
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer essu_kibana-token',
+        'x-elastic-conversation-id': 'conv-1',
+      });
+      expect(post.headers).toHaveProperty('x-elastic-conversation-id', 'conv-1');
+      expect(unscoped.url).toBe(messagesUrl);
+      expect(unscoped.headers).not.toHaveProperty('x-elastic-conversation-id');
+    });
+
+    it('reads without an execution id when the run has none', async () => {
+      requestMock.mockResolvedValueOnce({ status: 200, data: readBody } as never);
+
+      await createClient()
+        .withRunContext({ conversationId: 'conv-1' })
+        .readMessages({ tenantKey: 'team-A', channelId: 'C123' });
+
+      expect(requestMock.mock.calls[0][0].url).toBe(messagesUrl);
+    });
+  });
+
   describe('trigger', () => {
     it('posts the snake_case outbound body with the Relay SSL overrides', async () => {
       requestMock.mockResolvedValue({

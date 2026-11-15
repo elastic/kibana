@@ -195,6 +195,7 @@ const handleConversationExecution = async ({
     configurationOverrides,
     telemetryMetadata,
     workflowExecutionId,
+    rootExecutionId,
     maxContentLength,
     reasoningLevel,
     subagentCreation,
@@ -308,6 +309,7 @@ const handleConversationExecution = async ({
       parentExecutionId: execution.parentExecutionId,
       projectRouting,
       workflowExecutionId,
+      rootExecutionId,
       roundId,
       conversationAccess,
     });
@@ -676,6 +678,7 @@ const handleStandaloneExecution = async ({
     structuredOutput,
     outputSchema,
     workflowExecutionId,
+    rootExecutionId,
   } = execution.agentParams;
 
   // See the matching comment in handleConversationExecution: captured once, ahead of the first
@@ -718,6 +721,7 @@ const handleStandaloneExecution = async ({
     executionMode: AgentExecutionMode.standalone,
     interactivity,
     workflowExecutionId,
+    rootExecutionId,
     parentExecutionId: execution.parentExecutionId,
   });
 

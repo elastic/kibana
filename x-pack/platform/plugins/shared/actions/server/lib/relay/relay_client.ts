@@ -10,6 +10,7 @@ import type { AxiosResponse } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { SystemIdentity } from '@kbn/security-plugin-types-server';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
+import type { AgentBuilderRunContext } from '../action_execution_source';
 import { request } from '../axios_utils';
 import { RelayRequestError } from './relay_error';
 import type {
@@ -50,7 +51,10 @@ export interface RelayClientOptions {
    * derived from. Either is a misconfiguration when `useSystemIdentity` is on.
    */
   getSystemIdentity: () => SystemIdentity | undefined;
+  runContext?: AgentBuilderRunContext;
 }
+
+const CONVERSATION_ID_HEADER = 'x-elastic-conversation-id';
 
 /** Largest page size the Relay accepts on its cursor-paginated list endpoints. */
 const RELAY_MAX_PAGE_LIMIT = 200;
@@ -118,24 +122,28 @@ export class RelayClient implements RelayClientContract {
   private readonly logger: Logger;
   private readonly useSystemIdentity: boolean;
   private readonly getSystemIdentity: RelayClientOptions['getSystemIdentity'];
+  private readonly options: RelayClientOptions;
+  private readonly runContext?: AgentBuilderRunContext;
 
   /** `xpack.actions.relay.uiam.enabled`. */
   public get uiamEnabled(): boolean {
     return this.useSystemIdentity;
   }
 
-  constructor({
-    baseUrl,
-    configurationUtilities,
-    logger,
-    useSystemIdentity,
-    getSystemIdentity,
-  }: RelayClientOptions) {
+  constructor(options: RelayClientOptions) {
+    const { baseUrl, configurationUtilities, logger, useSystemIdentity, getSystemIdentity } =
+      options;
+    this.options = options;
     this.baseUrl = new URL(baseUrl);
     this.configurationUtilities = configurationUtilities;
     this.logger = logger;
     this.useSystemIdentity = useSystemIdentity;
     this.getSystemIdentity = getSystemIdentity;
+    this.runContext = options.runContext;
+  }
+
+  withRunContext(runContext: AgentBuilderRunContext): RelayClient {
+    return new RelayClient({ ...this.options, runContext });
   }
 
   async startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse> {
@@ -318,7 +326,9 @@ export class RelayClient implements RelayClientContract {
     path: string,
     { oldest, latest, limit }: RelayReadMessagesInput
   ): Promise<RelayReadResponse> {
+    const executionId = this.runContext?.executionId;
     const query = new URLSearchParams();
+    if (executionId) query.set('execution_id', executionId);
     if (oldest) query.set('oldest', oldest);
     if (latest) query.set('latest', latest);
     if (limit !== undefined) query.set('limit', String(limit));
@@ -440,6 +450,9 @@ export class RelayClient implements RelayClientContract {
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(this.runContext?.conversationId
+          ? { [CONVERSATION_ID_HEADER]: this.runContext.conversationId }
+          : {}),
       },
       configurationUtilities: this.configurationUtilities,
       sslOverrides: this.configurationUtilities.getRelaySSLSettings(),

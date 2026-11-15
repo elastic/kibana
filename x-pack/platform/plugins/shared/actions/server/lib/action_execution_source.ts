@@ -30,8 +30,13 @@ export interface BackgroundTaskSource {
   taskType: string;
 }
 export type BackgroundTaskExecutionSource = ActionExecutionSource<BackgroundTaskSource>;
+export interface AgentBuilderRunContext {
+  conversationId?: string;
+  executionId?: string;
+}
 export interface AgentBuilderSource {
   toolId: string;
+  runContext?: AgentBuilderRunContext;
 }
 export type AgentBuilderExecutionSource = ActionExecutionSource<AgentBuilderSource>;
 export interface NotificationSource {
@@ -106,6 +111,12 @@ export function isNotificationExecutionSource(
   executionSource?: ActionExecutionSource<unknown>
 ): executionSource is NotificationExecutionSource {
   return executionSource?.type === ActionExecutionSourceType.NOTIFICATION;
+}
+
+export function isAgentBuilderExecutionSource(
+  executionSource?: ActionExecutionSource<unknown>
+): executionSource is AgentBuilderExecutionSource {
+  return executionSource?.type === ActionExecutionSourceType.AGENT_BUILDER;
 }
 
 export function isBackgroundTaskExecutionSource(

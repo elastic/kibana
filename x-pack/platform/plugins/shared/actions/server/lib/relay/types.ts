@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AgentBuilderRunContext } from '../action_execution_source';
+
 interface RelayInstallRequestBase {
   kibana_url: string;
   kibana_version: string;
@@ -202,4 +204,9 @@ export interface RelayClientContract {
   readThread(input: RelayReadThreadInput): Promise<RelayReadResponse>;
   isRelayOrigin(url: string): boolean;
   postCallback(url: string, body: unknown, signal: AbortSignal): Promise<RelayCallbackResponse>;
+  /**
+   * A client scoped to one run: every request carries its conversation id, and reads carry its
+   * execution id.
+   */
+  withRunContext(runContext: AgentBuilderRunContext): RelayClientContract;
 }

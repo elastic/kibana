@@ -121,6 +121,23 @@ describe('runAgent', () => {
     );
   });
 
+  it('records its own execution as the root when it has no parent', async () => {
+    const createChild = jest.spyOn(runnerManager, 'createChild');
+
+    await runAgent({
+      agentExecutionParams: {
+        agentId: 'test-agent',
+        executionId: 'exec-1',
+        agentParams: { nextInput: { message: 'bar' } },
+      },
+      parentManager: runnerManager,
+    });
+
+    const childManager = createChild.mock.results[0].value as RunnerManager;
+    expect(getAgentFromRunContext(childManager.context)?.rootExecutionId).toBe('exec-1');
+    expect(childManager.deps.rootExecutionId).toBe('exec-1');
+  });
+
   describe('origin on the run context stack', () => {
     const runAndReadAgentEntry = async (agentParams: ScopedRunnerRunAgentParams['agentParams']) => {
       const createChild = jest.spyOn(runnerManager, 'createChild');
@@ -384,7 +401,7 @@ describe('runAgent', () => {
       );
     });
 
-    it("passes the parent's workflow run on to the sub-agents of the rebuilt executor", async () => {
+    it("passes the parent's workflow run and root execution on to the sub-agents of the rebuilt executor", async () => {
       agent = createMockedInternalAgent({
         configuration: { tools: [], approvals: storedApprovals },
       });
@@ -394,6 +411,7 @@ describe('runAgent', () => {
         getExecutionService: () => executionService,
         interactivity: { enabled: false, auto_approved_apis: [callerGrant] },
         workflowExecutionId: 'workflow-run-1',
+        rootExecutionId: 'root-exec',
       });
       const createChild = jest.spyOn(parentManager, 'createChild');
       await runAgent({
@@ -417,9 +435,13 @@ describe('runAgent', () => {
 
       expect(executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({
-          params: expect.objectContaining({ workflowExecutionId: 'workflow-run-1' }),
+          params: expect.objectContaining({
+            workflowExecutionId: 'workflow-run-1',
+            rootExecutionId: 'root-exec',
+          }),
         })
       );
+      expect(getAgentFromRunContext(childManager.context)?.rootExecutionId).toBe('root-exec');
     });
 
     it('passes the effective configuration to the child run without mutating the parent deps', async () => {

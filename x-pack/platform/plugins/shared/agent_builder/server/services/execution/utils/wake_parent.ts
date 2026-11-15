@@ -188,6 +188,7 @@ export const wakeParent = async ({
         // The agent that spawned the child, which may not be the one the conversation was created with.
         agentId: parent.agentId,
         ...inheritedRunSettings(parent.agentParams),
+        rootExecutionId: parent.agentParams.rootExecutionId ?? parent.executionId,
         conversationId,
         nextInput: { message: describeFinishedChild(child) },
         actor: { type: EventActorType.agent, id: child.agentId, username: child.agentId },
