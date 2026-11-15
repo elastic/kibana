@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { AlertTimelineSeries } from './types';
+import type { AlertTimelineEventRow, AlertTimelineSeries } from './types';
 import { deriveAlertTimelineDataFromEvents } from './derive_alert_timeline_events';
 
 export interface EpisodeAlertTimelineData {
@@ -17,7 +16,7 @@ export interface EpisodeAlertTimelineData {
 }
 
 interface ParsedEpisodeEvent {
-  row: EpisodeEventRow;
+  row: AlertTimelineEventRow;
   timestampMs: number;
 }
 
@@ -30,7 +29,7 @@ const EMPTY_SUMMARY = {
 
 /** Adapts one episode's raw events to the shared alert-timeline series model. */
 export const deriveEpisodeAlertTimelineData = (
-  eventRows: EpisodeEventRow[],
+  eventRows: AlertTimelineEventRow[],
   currentTimeMs: number
 ): EpisodeAlertTimelineData | undefined => {
   const events: ParsedEpisodeEvent[] = eventRows
