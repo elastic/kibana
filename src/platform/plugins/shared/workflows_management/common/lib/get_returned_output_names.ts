@@ -57,10 +57,10 @@ const alwaysEndsRun = (steps: unknown): boolean =>
 export const alwaysReturnsWorkflowOutput = (definition: unknown): boolean =>
   isRecord(definition) && alwaysEndsRun(definition.steps);
 
-/** Whether a step, or one nested in it, might complete the run, so the steps after it might not run. */
-export const containsCompletingOutputStep = (step: Record<string, unknown>): boolean => {
+/** Whether a step or list of steps (or one nested in them) might complete the run. */
+export const containsCompletingOutputStep = (steps: unknown): boolean => {
   let found = false;
-  visitSteps(step, (child) => {
+  visitSteps(steps, (child) => {
     found = found || isCompletingOutputStep(child);
   });
   return found;

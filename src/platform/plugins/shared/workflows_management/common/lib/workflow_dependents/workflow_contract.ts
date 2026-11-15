@@ -30,6 +30,11 @@ export const getRuntimeInputDefaults = (
   inputsSchema: JsonModelSchemaType | undefined
 ): Record<string, unknown> => applyInputDefaults(undefined, inputsSchema) ?? {};
 
+const resolveProperty = (rawProperty: unknown, schema: JsonModelSchemaType): JSONSchema7 => {
+  const declared = (isRecord(rawProperty) ? rawProperty : {}) as JSONSchema7;
+  return declared.$ref ? resolveRef(declared.$ref, schema) ?? declared : declared;
+};
+
 const toFields = (
   schema: JsonModelSchemaType | undefined,
   defaults?: Readonly<Record<string, unknown>>
@@ -40,8 +45,7 @@ const toFields = (
   }
   const required = new Set(schema.required ?? []);
   for (const [name, rawProperty] of Object.entries(schema.properties)) {
-    const declared = (isRecord(rawProperty) ? rawProperty : {}) as JSONSchema7;
-    const property = declared.$ref ? resolveRef(declared.$ref, schema) ?? declared : declared;
+    const property = resolveProperty(rawProperty, schema);
     fields[name] = {
       name,
       type: describeType(property),
@@ -52,6 +56,24 @@ const toFields = (
     };
   }
   return fields;
+};
+
+const toAdditionalInputsField = (
+  schema: JsonModelSchemaType | undefined
+): ContractField | undefined => {
+  const additional = schema?.additionalProperties;
+  if (!schema || !isRecord(additional)) {
+    return undefined;
+  }
+  const property = resolveProperty(additional, schema);
+  return {
+    name: '',
+    type: describeType(property),
+    required: false,
+    hasDefault: false,
+    enumValues: property.enum,
+    schema: property,
+  };
 };
 
 const inferOutputFields = (definition: unknown): Record<string, ContractField> => {
@@ -86,6 +108,7 @@ export const extractInputFields = (definition: unknown): Record<string, Contract
 export const extractWorkflowContract = (definition: unknown): WorkflowContract => {
   const inputsSchema = getInputsSchema(definition);
   const inputDefaults = getRuntimeInputDefaults(inputsSchema);
+  const additionalInputs = toAdditionalInputsField(inputsSchema);
   const declaredOutputs = normalizeFieldsToJsonSchema(
     isRecord(definition) ? definition.outputs : undefined
   );
@@ -98,8 +121,9 @@ export const extractWorkflowContract = (definition: unknown): WorkflowContract =
     enabled: isRecord(definition) && definition.enabled !== false,
     inputs: toFields(inputsSchema, inputDefaults),
     inputDefaults,
-    inputsSchema: inputsSchema?.properties ? inputsSchema : undefined,
+    inputsSchema: inputsSchema?.properties || additionalInputs ? inputsSchema : undefined,
     rejectsUnknownInputs: inputsSchema?.additionalProperties === false,
+    additionalInputs,
     alwaysReturnsOutput: alwaysReturnsWorkflowOutput(definition),
     returnedOutputs,
   };
@@ -240,6 +264,14 @@ const diffInputs = (saved: WorkflowContract, draft: WorkflowContract): ContractC
   }
   if (!saved.rejectsUnknownInputs && draft.rejectsUnknownInputs) {
     changes.push({ kind: 'unknownInputsRejected', field: '', severity: 'warning' });
+  }
+  const { additionalInputs: savedAdditional } = saved;
+  const { additionalInputs: draftAdditional } = draft;
+  if (savedAdditional && draftAdditional) {
+    changes.push(...diffInputField(savedAdditional, draftAdditional));
+  } else if (draftAdditional && !saved.rejectsUnknownInputs) {
+    // Undeclared inputs were accepted as they were, and are now checked against a schema.
+    changes.push({ kind: 'inputSchemaChanged', field: '', severity: 'warning' });
   }
   return changes;
 };

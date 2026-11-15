@@ -234,6 +234,10 @@ export function extractNormalizedInputsFromYaml(
   return undefined;
 }
 
+// Boolean schemas, and the `null` a half-written draft can declare, set no defaults.
+const isSchemaObject = (schema: unknown): schema is JSONSchema7 =>
+  typeof schema === 'object' && schema !== null;
+
 /**
  * Applies defaults to a nested object property
  * @param prop - The property schema
@@ -246,6 +250,9 @@ function applyDefaultToObjectProperty(
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
   renderInputValue?: RenderInputValue
 ): unknown {
+  if (!isSchemaObject(prop)) {
+    return currentValue;
+  }
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
       return renderValue(prop.default, renderInputValue, 'default');
@@ -304,6 +311,9 @@ export function hasDefaultsRecursive(
   schema: JSONSchema7,
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
 ): boolean {
+  if (!isSchemaObject(schema)) {
+    return false;
+  }
   // Resolve $ref if present
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
@@ -414,6 +424,9 @@ function applyDefaultFromSchema(
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
   renderInputValue?: RenderInputValue
 ): unknown {
+  if (!isSchemaObject(schema)) {
+    return value;
+  }
   // Resolve $ref if present
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);

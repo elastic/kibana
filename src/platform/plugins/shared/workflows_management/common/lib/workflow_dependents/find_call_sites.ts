@@ -49,6 +49,14 @@ const continuesOnFailure = (onFailure: unknown): boolean => {
   );
 };
 
+/**
+ * Whether an `on-failure` handler keeps a failure from failing the run: it continues, or its
+ * fallback might complete the run with a `workflow.output` step before the failure is re-raised.
+ */
+export const absorbsFailure = (onFailure: unknown): boolean =>
+  continuesOnFailure(onFailure) ||
+  (isRecord(onFailure) && containsCompletingOutputStep(onFailure.fallback));
+
 // The engine sends no inputs for a value that isn't an object, and a list's items by index.
 const toCheckedInputs = (inputs: unknown): Record<string, unknown> | undefined => {
   if (isRecord(inputs)) {
@@ -83,15 +91,15 @@ const toCallSite = (
 };
 
 interface StepContext {
-  /** True when an `on-failure: continue` on the step or an enclosing one absorbs its failure. */
+  /** True when an `on-failure` handler on the step or an enclosing one absorbs its failure. */
   isContained: boolean;
   /** True when the step might not run: it has an `if`, or sits in a branch, loop or fallback. */
   isConditional: boolean;
 }
 
 interface WalkContext extends StepContext {
-  /** True when the workflow-level `on-failure` continues, and applies to steps here (not in fallbacks). */
-  workflowContinues: boolean;
+  /** The workflow-level `on-failure`, when it applies to steps here (not in fallbacks). */
+  workflowOnFailure: unknown;
 }
 
 type StepVisitor = (step: Record<string, unknown>, context: StepContext) => void;
@@ -128,13 +136,18 @@ const NO_WORKFLOW_ON_FAILURE_STEP_TYPES = new Set([
   'wait',
 ]);
 
-// A step's own `on-failure` replaces the workflow-level one, as in the execution engine.
-const stepContinuesOnFailure = (step: WorkflowStep, workflowContinues: boolean): boolean => {
-  const onFailure = (step as Record<string, unknown>)['on-failure'];
+/** The `on-failure` the engine applies to a step: its own, which replaces the workflow-level one. */
+export const getStepOnFailure = (
+  step: Record<string, unknown>,
+  workflowOnFailure: unknown
+): unknown => {
+  const onFailure = step['on-failure'];
   if (onFailure) {
-    return continuesOnFailure(onFailure);
+    return onFailure;
   }
-  return workflowContinues && !NO_WORKFLOW_ON_FAILURE_STEP_TYPES.has(step.type);
+  return typeof step.type === 'string' && NO_WORKFLOW_ON_FAILURE_STEP_TYPES.has(step.type)
+    ? undefined
+    : workflowOnFailure;
 };
 
 const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: WalkContext): void => {
@@ -145,25 +158,29 @@ const walkSteps = (steps: unknown, visit: StepVisitor, parentContext: WalkContex
   let mayHaveEndedRun = false;
   for (const step of steps.filter(isWorkflowStep)) {
     const record: Record<string, unknown> = step;
+    const onFailure = getStepOnFailure(record, parentContext.workflowOnFailure);
     const context: StepContext = {
-      isContained:
-        parentContext.isContained || stepContinuesOnFailure(step, parentContext.workflowContinues),
+      isContained: parentContext.isContained || absorbsFailure(onFailure),
       isConditional: parentContext.isConditional || mayHaveEndedRun || hasCondition(record),
     };
     visit(record, context);
     const isContainedInside = context.isContained || containsNestedFailures(step);
     for (const { pathSuffix, steps: nestedSteps } of getNestedStepGroups(step)) {
+      const isFallback = pathSuffix.endsWith('.fallback');
       walkSteps(nestedSteps, visit, {
-        isContained: isContainedInside,
+        // A failing fallback re-raises the step's failure, which only a `continue` absorbs then.
+        isContained: isFallback
+          ? parentContext.isContained || continuesOnFailure(onFailure)
+          : isContainedInside,
         isConditional: context.isConditional || !alwaysRunsNestedSteps(step, pathSuffix),
-        workflowContinues: parentContext.workflowContinues && !pathSuffix.endsWith('.fallback'),
+        workflowOnFailure: isFallback ? undefined : parentContext.workflowOnFailure,
       });
     }
     mayHaveEndedRun = mayHaveEndedRun || containsCompletingOutputStep(record);
   }
 };
 
-const getWorkflowOnFailure = (definition: unknown): unknown =>
+export const getWorkflowOnFailure = (definition: unknown): unknown =>
   isRecord(definition) && isRecord(definition.settings)
     ? definition.settings['on-failure']
     : undefined;
@@ -171,17 +188,16 @@ const getWorkflowOnFailure = (definition: unknown): unknown =>
 // The workflow's steps, then the fallback steps its `settings.on-failure` runs when it fails.
 const walkDefinitionSteps = (definition: unknown, visit: StepVisitor): void => {
   const onFailure = getWorkflowOnFailure(definition);
-  const workflowContinues = continuesOnFailure(onFailure);
   walkSteps(getSteps(definition), visit, {
     isContained: false,
     isConditional: false,
-    workflowContinues,
+    workflowOnFailure: onFailure,
   });
   // The workflow-level handler runs its fallback for the failed step, and its `continue` covers it.
   walkSteps(isRecord(onFailure) ? onFailure.fallback : undefined, visit, {
-    isContained: workflowContinues,
+    isContained: continuesOnFailure(onFailure),
     isConditional: true,
-    workflowContinues: false,
+    workflowOnFailure: undefined,
   });
 };
 

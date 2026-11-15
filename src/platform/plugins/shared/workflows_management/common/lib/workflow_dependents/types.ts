@@ -54,6 +54,8 @@ export interface WorkflowContract {
   inputsSchema?: JsonModelSchemaType;
   /** True when the inputs schema rejects inputs it doesn't declare (`additionalProperties: false`). */
   rejectsUnknownInputs: boolean;
+  /** What inputs it doesn't declare are checked against, when `additionalProperties` is a schema. */
+  additionalInputs?: ContractField;
   outputs: Readonly<Record<string, ContractField>>;
   outputsSource: OutputsSource;
   /** Declared outputs that no `workflow.output` step sets, so callers always get nothing for them. */

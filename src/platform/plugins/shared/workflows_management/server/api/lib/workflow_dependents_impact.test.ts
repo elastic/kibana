@@ -171,6 +171,30 @@ describe('analyzeWorkflowDependentsImpact', () => {
     ]);
   });
 
+  it('grades a half-written draft whose inputs declare a property as null', async () => {
+    const draft = {
+      name: 'child',
+      triggers: [{ type: 'manual', inputs: { properties: { bad: null } } }],
+      steps: [runs('leaf', {})],
+    };
+
+    const { analysis, calledWorkflows } = await analyzeWorkflowDependentsImpact({
+      workflowId: 'child',
+      savedDefinition: savedChild,
+      draftDefinition: draft,
+      isDraftValid: false,
+      lookup: createLookup([workflow('direct', [runs('child')])], [], [workflow('leaf', [])]),
+    });
+
+    expect(analysis.dependents).toEqual([
+      expect.objectContaining({
+        status: 'breaking',
+        issues: [expect.objectContaining({ kind: 'childInvalid' })],
+      }),
+    ]);
+    expect(calledWorkflows).toEqual([expect.objectContaining({ workflowId: 'leaf' })]);
+  });
+
   it('leaves callers that are turned off out of the breaking count', async () => {
     const { analysis } = await analyzeWorkflowDependentsImpact({
       workflowId: 'child',

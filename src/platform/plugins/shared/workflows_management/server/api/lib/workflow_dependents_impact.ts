@@ -150,7 +150,8 @@ export const analyzeWorkflowDependentsImpact = async ({
       draftDefinition,
       isDraftValid,
       savedRunFailure: getRunFailure(savedDefinition, calledBySaved),
-      draftRunFailure: getRunFailure(draftDefinition, calledWorkflows),
+      // An invalid draft is stored without a definition, so it never runs.
+      draftRunFailure: isDraftValid ? getRunFailure(draftDefinition, calledWorkflows) : undefined,
       managed,
     }),
     calledWorkflows: analyzeCalledWorkflows({

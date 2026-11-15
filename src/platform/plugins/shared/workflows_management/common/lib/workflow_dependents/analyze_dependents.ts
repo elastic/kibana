@@ -15,9 +15,12 @@ import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conve
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import { isBreakingRun } from './api';
 import {
+  absorbsFailure,
   collectWorkflowCallSites,
   findOutputsPassingThrough,
   findOutputUsages,
+  getStepOnFailure,
+  getWorkflowOnFailure,
   isTemplatedValue,
   isTextTemplate,
 } from './find_call_sites';
@@ -51,7 +54,7 @@ import {
   isTypeWithin,
   typesOverlap,
 } from './workflow_contract';
-import { getFinalEndStep } from '../get_returned_output_names';
+import { containsCompletingOutputStep, getFinalEndStep } from '../get_returned_output_names';
 
 /**
  * How many levels of callers-of-callers the analysis follows. Runs nest up to the configurable
@@ -361,6 +364,18 @@ const getNarrowingWarning = (
 
 const toRowStatus = (issue?: DraftIssue): RowStatus => issue?.severity ?? 'ok';
 
+// A declared input, or an undeclared one when `additionalProperties` gives the schema it's checked against.
+const getInputField = (
+  contract: WorkflowContract | undefined,
+  name: string
+): ContractField | undefined => {
+  const declared = contract?.inputs[name];
+  if (declared) {
+    return declared;
+  }
+  return contract?.additionalInputs ? { ...contract.additionalInputs, name } : undefined;
+};
+
 const evaluateInputs = (
   callSite: WorkflowCallSite,
   contract: WorkflowContract,
@@ -378,7 +393,7 @@ const evaluateInputs = (
   const provided = callSite.inputs ?? {};
   const defaults = contract.inputDefaults;
   for (const [name, value] of Object.entries(provided)) {
-    const field = contract.inputs[name];
+    const field = getInputField(contract, name);
     let issue: DraftIssue | undefined;
     if (!field) {
       if (contract.inputsSchema) {
@@ -400,7 +415,7 @@ const evaluateInputs = (
       issue =
         check.issue ??
         (check.isUnknown
-          ? getNarrowingWarning(stepName, field, previousContract?.inputs[name])
+          ? getNarrowingWarning(stepName, field, getInputField(previousContract, name))
           : undefined);
     }
     if (issue) issues.push(issue);
@@ -588,7 +603,14 @@ const getEndStatus = (step: Record<string, unknown>): unknown =>
  */
 const findEndStepFailure = (definition: unknown): RunFailure | undefined => {
   const step = getFinalEndStep(definition);
-  if (!step) {
+  const workflowOnFailure = getWorkflowOnFailure(definition);
+  // A workflow-level fallback that completes the run makes any earlier failure a success, so the
+  // end step isn't reached every time.
+  if (
+    !step ||
+    absorbsFailure(getStepOnFailure(step, workflowOnFailure)) ||
+    (isRecord(workflowOnFailure) && containsCompletingOutputStep(workflowOnFailure.fallback))
+  ) {
     return undefined;
   }
   const stepName = typeof step.name === 'string' ? step.name : '';
