@@ -93,7 +93,7 @@ export const registerAesopDriftMonitorRoutes = ({
       workflowsManagement: getEnablementApi(),
       logger,
       request,
-      // Concrete space: scheduling global workflows is unsupported (security-team#17380),
+      // Concrete space: scheduling global workflows is unsupported,
       // so the monitor must live where its scheduled runs will be stamped.
       spaceId: pluginsStart.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
     };

@@ -29,7 +29,7 @@ import {
  * registers the schedule under an API key minted from this request.
  *
  * Instances live in the request's concrete space: scheduling global workflows
- * is unsupported (elastic/security-team#17380).
+ * is unsupported.
  */
 
 /** The one workflows management call this module makes, declared structurally rather than imported:

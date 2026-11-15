@@ -15,7 +15,7 @@ import type { AesopDriftMonitorRequestDeps } from './drift_monitor_schedule';
 /**
  * One explorer instance per mode in the request's space. Install writes it disabled; enabling it
  * registers the schedule under an API key minted from this request. Instances live in the
- * request's concrete space: scheduling global workflows is unsupported (elastic/security-team#17380).
+ * request's concrete space: scheduling global workflows is unsupported.
  */
 
 export type AesopExplorerRequestDeps = AesopDriftMonitorRequestDeps;
