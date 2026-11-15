@@ -26,7 +26,7 @@ import { useEntityFlyoutOverrides } from '../../../shared/hooks/use_entity_flyou
 import {
   AttackHostInsightsRow,
   AttackUserInsightsRow,
-} from '../../../../flyout/attack_details/left/components/attack_entity_insight_rows';
+} from './components/attack_entity_insight_rows';
 import { useAttackEntitiesLists } from './hooks/use_attack_entities_lists';
 import {
   ATTACK_ENTITIES_TOOL_ERROR_TEST_ID,

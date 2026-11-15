@@ -8,10 +8,10 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
+import { useAttackDetails } from './hooks/use_attack_details';
 import { AttackFlyoutWrapper } from './attack_flyout_wrapper';
 
-jest.mock('../../../flyout/attack_details/hooks/use_attack_details');
+jest.mock('./hooks/use_attack_details');
 
 const mockAttackFlyout = jest.fn((props: { onAttackUpdated?: () => void }) => (
   <button

@@ -22,25 +22,25 @@ jest.mock('@kbn/elastic-assistant-common', () => {
   };
 });
 
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: () => ({ dataView: { getRuntimeMappings: () => ({}) } }),
 }));
 
-jest.mock('../../../data_view_manager/hooks/use_browser_fields', () => ({
+jest.mock('../../../../data_view_manager/hooks/use_browser_fields', () => ({
   useBrowserFields: () => ({}),
 }));
 
-jest.mock('../../../timelines/containers/details', () => ({
+jest.mock('../../../../timelines/containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
 
-jest.mock('../../document_details/shared/hooks/use_get_fields_data', () => ({
+jest.mock('../../../../flyout/document_details/shared/hooks/use_get_fields_data', () => ({
   useGetFieldsData: () => ({ getFieldsData: () => null }),
 }));
 
 const mockTransformDocumentToApi = transformAttackDiscoveryAlertDocumentToApi as jest.Mock;
 const mockTransformFromApi = transformAttackDiscoveryAlertFromApi as jest.Mock;
-const useTimelineEventsDetails = jest.requireMock('../../../timelines/containers/details')
+const useTimelineEventsDetails = jest.requireMock('../../../../timelines/containers/details')
   .useTimelineEventsDetails as jest.Mock;
 
 const mockRefetch = jest.fn();

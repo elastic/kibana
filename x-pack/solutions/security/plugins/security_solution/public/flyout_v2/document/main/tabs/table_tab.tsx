@@ -19,10 +19,7 @@ import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import {
-  TABLE_TAB_CONTENT_TEST_ID,
-  TABLE_TAB_SEARCH_INPUT_TEST_ID,
-} from '../../../../flyout/document_details/right/tabs/test_ids';
+import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
