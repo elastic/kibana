@@ -15,7 +15,7 @@ import type {
 import type { NativeVulnScannerConfig } from './config';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
-import { registerScanTask, scheduleScanTask } from './tasks/scan_task';
+import { registerScanTask, SCAN_TASK_ID, scheduleScanTask } from './tasks/scan_task';
 import type {
   NativeVulnScannerServerSetup,
   NativeVulnScannerServerStart,
@@ -67,10 +67,19 @@ export class NativeVulnScannerPlugin
     ensureFindingsIndex(core.elasticsearch.client.asInternalUser).catch((error: Error) => {
       this.logger.error(`Failed to set up the vulnerability findings index: ${error.message}`);
     });
-    scheduleScanTask(taskManager).catch((error: Error) => {
+    this.scheduleAndRun(taskManager).catch((error: Error) => {
       this.logger.error(`Failed to schedule the vulnerability scan task: ${error.message}`);
     });
     return {};
+  }
+
+  /** Runs a scan right after (re)scheduling, so a new install does not wait a full interval. */
+  private async scheduleAndRun(taskManager: NativeVulnScannerStartDeps['taskManager']) {
+    await scheduleScanTask(taskManager);
+    await taskManager.runSoon(SCAN_TASK_ID).catch((error: Error) => {
+      // e.g. the task is already running; the regular schedule still applies.
+      this.logger.warn(`Could not run the vulnerability scan at startup: ${error.message}`);
+    });
   }
 
   public stop(): void {}

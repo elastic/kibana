@@ -11,10 +11,11 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { NativeVulnScannerPlugin } from './plugin';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
-import { registerScanTask, scheduleScanTask } from './tasks/scan_task';
+import { registerScanTask, SCAN_TASK_ID, scheduleScanTask } from './tasks/scan_task';
 
 jest.mock('./lib/findings', () => ({ ensureFindingsIndex: jest.fn() }));
 jest.mock('./tasks/scan_task', () => ({
+  SCAN_TASK_ID: 'native-vuln-scanner:scan',
   registerScanTask: jest.fn(),
   scheduleScanTask: jest.fn(),
 }));
@@ -92,5 +93,31 @@ describe('NativeVulnScannerPlugin', () => {
     scheduleMock.mockRejectedValue(new Error('no task store'));
     const { logger } = await startPlugin(true);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('no task store'));
+  });
+
+  it('runs the scan as soon as it has been scheduled', async () => {
+    const { taskManagerStart } = await startPlugin(true);
+    expect(taskManagerStart.runSoon).toHaveBeenCalledWith(SCAN_TASK_ID);
+  });
+
+  it('does not run the scan when scheduling failed', async () => {
+    scheduleMock.mockRejectedValue(new Error('no task store'));
+    const { taskManagerStart } = await startPlugin(true);
+    expect(taskManagerStart.runSoon).not.toHaveBeenCalled();
+  });
+
+  it('logs and carries on when the startup run is rejected', async () => {
+    const taskManagerStart = taskManagerMock.createStart();
+    taskManagerStart.runSoon.mockRejectedValue(new Error('already running'));
+    const context = coreMock.createPluginInitializerContext({ enabled: true });
+    const plugin = new NativeVulnScannerPlugin(context);
+    plugin.setup(coreMock.createSetup(), { taskManager: taskManagerMock.createSetup() });
+    expect(() =>
+      plugin.start(coreMock.createStart(), { taskManager: taskManagerStart })
+    ).not.toThrow();
+    await new Promise(process.nextTick);
+    const logger = context.logger.get() as ReturnType<typeof loggingSystemMock.createLogger>;
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already running'));
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });

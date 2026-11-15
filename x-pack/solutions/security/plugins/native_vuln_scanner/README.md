@@ -37,14 +37,15 @@ testing, a pack with `interval: 86400` returned no snapshot results within ~8 mi
 assigned to an agent, while `interval: 60` returned results right away. Expect the first
 inventory to take up to one `interval` after the agent receives the pack.
 
-The scan task has its own schedule, independent of osquery. It runs once when Kibana starts and
-then every day (`1d`), so a scan that runs before the first inventory arrives finds nothing and
-the findings only appear at the next scan. To see a first result quickly:
+The scan task has its own schedule, independent of osquery. It is scheduled every day (`1d`) and
+Kibana asks Task Manager to run it as soon as possible each time it starts (`runSoon`). If that
+request fails, for example because a scan is already running, Kibana logs a warning and the
+regular schedule still applies. A scan that runs before the first inventory arrives finds nothing,
+and the findings only appear at the next scan. To see a first result quickly:
 
 1. Create the pack with a short interval (for example `60`) and assign it to the agent policy.
-2. Wait for the agent to report results, then run the scan again by restarting Kibana or by
-   lowering the interval of the `native-vuln-scanner:scan` task (Stack Management → Task
-   Manager, or `PUT` on the task saved object through the Kibana task-manager tooling).
+2. Wait for the agent to report results, then run the scan again by restarting Kibana, which
+   triggers a scan on start.
 3. Raise the pack interval back to `86400` once the first findings show up.
 
 To check what the last scan did, look for the `Vulnerability scan <run id>: {...}` line in the
