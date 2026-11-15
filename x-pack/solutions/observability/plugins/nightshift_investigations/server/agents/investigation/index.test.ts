@@ -249,6 +249,24 @@ describe('Nightshift investigation agent type', () => {
     }
   });
 
+  it('tells the agent how to shape and write its reply', async () => {
+    const { instructions } = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: true })
+    );
+
+    // A request to investigate, a question and a request for more each get their own shape.
+    expect(instructions).toContain('**The first message, or a later request to investigate:**');
+    expect(instructions).toContain('**A question**');
+    expect(instructions).toContain('**A request for more**');
+    expect(instructions).toContain('**First sentence: 20 words or fewer**');
+    expect(instructions).toContain('**Keep the names, explain the mechanics.**');
+    expect(instructions).toContain('**When a table says it better, use one**');
+    // A last check before sending, which the length rules depend on.
+    expect(instructions).toContain('**Before you send**');
+    // A long table goes in an attachment the reply shows inline.
+    expect(instructions).toContain('`<render_attachment id="<attachment_id>"/>`');
+  });
+
   it("runs its hooks through the space's bound hook entry points", async () => {
     const base = await baseFor(
       getInvestigationAgentType({
