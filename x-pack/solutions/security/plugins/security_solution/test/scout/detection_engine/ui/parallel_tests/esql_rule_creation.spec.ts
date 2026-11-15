@@ -16,12 +16,12 @@ const INVESTIGATION_FIELD = '_custom_agent_name';
 // Full wizard flows chain several helper waits of up to 60 s each (Continue enabled after
 // ES|QL validation, step navigation retries), which can exceed the default per-test budget.
 const LONG_FLOW_EXTRA_TIMEOUT_MS = 120_000;
-const QUERY_ERROR_RETRY_TIMEOUT_MS = 30_000;
-// ES|QL validation and field-list loading are async; Continue stays disabled and combo-box
-// options stay empty until they settle, which can take tens of seconds on a cold worker.
-const ASYNC_VALIDATION_TIMEOUT_MS = 60_000;
-// One attempt inside a toPass retry loop: short, so a click that raced validation is retried.
-const RETRY_ATTEMPT_TIMEOUT_MS = 5_000;
+// Query-error flows never pass the About step, but the editor mount and the Continue retry
+// loops (up to 60 s each) can still exceed the default per-test budget on a cold project.
+const DEFINE_STEP_EXTRA_TIMEOUT_MS = 60_000;
+// ES|QL field-list loading is async; combo-box options stay empty until it settles, which can
+// take tens of seconds on a cold worker.
+const FIELD_OPTIONS_TIMEOUT_MS = 60_000;
 // The first load of the create page and the save-then-redirect to rule details both outlast the
 // default 10 s expect timeout on a cold serverless project.
 const PAGE_TRANSITION_TIMEOUT_MS = 60_000;
@@ -34,7 +34,6 @@ const sourceIndexName = (spaceId: string): string =>
 
 type RuleCreateWizard = SecurityPageObjects['ruleCreateWizard'];
 
-/** Opens the create wizard in the worker space and switches the rule type to ES|QL. */
 const openEsqlWizard = async (
   page: ScoutPage,
   kbnUrl: KibanaUrl,
@@ -46,56 +45,10 @@ const openEsqlWizard = async (
   await ruleCreateWizard.selectEsqlRuleType();
 };
 
-/**
- * Clicks "Continue" until the About step is open. The click races async query validation: it can
- * be swallowed, so click only while About is not visible and gate on visible AND editable.
- */
-const continueDefineStep = async (ruleCreateWizard: RuleCreateWizard) => {
-  const { defineContinue, aboutRuleName } = ruleCreateWizard;
-  await expect(defineContinue).toBeEnabled({ timeout: ASYNC_VALIDATION_TIMEOUT_MS });
-  await expect(async () => {
-    if (!(await aboutRuleName.isVisible())) {
-      await defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
-    }
-    await expect(aboutRuleName).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
-    await expect(aboutRuleName).toBeEditable({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
-  }).toPass({ timeout: ASYNC_VALIDATION_TIMEOUT_MS });
-};
-
-/**
- * Clicks "Continue" on the About step and waits for the Schedule step. The click races
- * About-step validation: it can be swallowed, so click only while Schedule is not visible.
- */
-const continueAboutStep = async (ruleCreateWizard: RuleCreateWizard) => {
-  const { aboutContinue, scheduleContinue } = ruleCreateWizard;
-  await expect(async () => {
-    if (!(await scheduleContinue.isVisible())) {
-      await aboutContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
-    }
-    await expect(scheduleContinue).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
-    await expect(scheduleContinue).toBeEnabled({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
-  }).toPass({ timeout: ASYNC_VALIDATION_TIMEOUT_MS });
-};
-
-/** Clicks "Continue" with a pending validation possibly swallowing the first click. */
-const expectQueryBarErrorOnContinue = async (
-  ruleCreateWizard: RuleCreateWizard,
-  expectedError: string
-) => {
-  await expect(ruleCreateWizard.defineContinue).toBeEnabled({
-    timeout: ASYNC_VALIDATION_TIMEOUT_MS,
-  });
-  await expect(async () => {
-    await ruleCreateWizard.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
-    await expect(ruleCreateWizard.esqlQueryBar).toContainText(expectedError, {
-      timeout: RETRY_ATTEMPT_TIMEOUT_MS,
-    });
-  }).toPass({ timeout: QUERY_ERROR_RETRY_TIMEOUT_MS });
-};
-
 spaceTest.describe(
   'Detection ES|QL rules - Rule Creation',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  // The Cypress source skipped serverless MKI (@skipInServerlessMKI); keep that until it is run there.
+  { tag: [...tags.stateful.classic, '@local-serverless-security_complete'] },
   () => {
     spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
       const index = sourceIndexName(scoutSpace.id);
@@ -116,8 +69,16 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
-      await apiServices.detectionRule.deleteAll();
-      await apiServices.detectionAlerts.deleteAll();
+      const results = await Promise.allSettled([
+        apiServices.detectionRule.deleteAll(),
+        apiServices.detectionAlerts.deleteAll(),
+      ]);
+      const failures = results.flatMap((result) =>
+        result.status === 'rejected' ? [result.reason] : []
+      );
+      if (failures.length > 0) {
+        throw new AggregateError(failures, 'ES|QL rule creation cleanup failed');
+      }
     });
 
     spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
@@ -138,11 +99,11 @@ spaceTest.describe(
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
         await ruleCreateWizard.setEsqlQuery(query);
-        await continueDefineStep(ruleCreateWizard);
+        await ruleCreateWizard.continueFromDefineStep();
 
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
         await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
-        await continueAboutStep(ruleCreateWizard);
+        await ruleCreateWizard.continueFromAboutStep();
         await ruleCreateWizard.scheduleContinue.click();
         await ruleCreateWizard.createWithoutEnablingRule();
 
@@ -168,13 +129,13 @@ spaceTest.describe(
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
         await ruleCreateWizard.setEsqlQuery(query);
-        await continueDefineStep(ruleCreateWizard);
+        await ruleCreateWizard.continueFromDefineStep();
 
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
         await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
         await ruleCreateWizard.expandAdvancedSettings();
-        await ruleCreateWizard.setRuleNameOverride(RULE_NAME_OVERRIDE, ASYNC_VALIDATION_TIMEOUT_MS);
-        await continueAboutStep(ruleCreateWizard);
+        await ruleCreateWizard.setRuleNameOverride(RULE_NAME_OVERRIDE, FIELD_OPTIONS_TIMEOUT_MS);
+        await ruleCreateWizard.continueFromAboutStep();
         await ruleCreateWizard.scheduleContinue.click();
         await ruleCreateWizard.createWithoutEnablingRule();
 
@@ -189,19 +150,20 @@ spaceTest.describe(
     spaceTest(
       'shows error when ES|QL query is empty and proceeds once the query is fixed',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
-        testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
+        testInfo.setTimeout(testInfo.timeout + DEFINE_STEP_EXTRA_TIMEOUT_MS);
         const { ruleCreateWizard } = pageObjects;
         const query = `from ${sourceIndexName(scoutSpace.id)} metadata _id, _version, _index`;
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
 
         await spaceTest.step('shows the required error for an empty query', async () => {
-          await expectQueryBarErrorOnContinue(ruleCreateWizard, 'ES|QL query is required');
+          await ruleCreateWizard.continueFromDefineStepUntilQueryError('ES|QL query is required');
+          await expect(ruleCreateWizard.aboutRuleName).toBeHidden();
         });
 
         await spaceTest.step('moves on to About once the query is valid', async () => {
           await ruleCreateWizard.setEsqlQuery(query);
-          await continueDefineStep(ruleCreateWizard);
+          await ruleCreateWizard.continueFromDefineStep();
           await expect(ruleCreateWizard.esqlQueryBar).toBeHidden();
         });
       }
@@ -213,7 +175,7 @@ spaceTest.describe(
     spaceTest(
       'shows error when ES|QL query is invalid',
       async ({ page, kbnUrl, scoutSpace, pageObjects }, testInfo) => {
-        testInfo.setTimeout(testInfo.timeout + LONG_FLOW_EXTRA_TIMEOUT_MS);
+        testInfo.setTimeout(testInfo.timeout + DEFINE_STEP_EXTRA_TIMEOUT_MS);
         const { ruleCreateWizard } = pageObjects;
         const index = sourceIndexName(scoutSpace.id);
 
@@ -222,7 +184,8 @@ spaceTest.describe(
           `from ${index} metadata _id, _version, _index | not_existing_operator`
         );
 
-        await expectQueryBarErrorOnContinue(ruleCreateWizard, 'Error validating ES|QL');
+        await ruleCreateWizard.continueFromDefineStepUntilQueryError('Error validating ES|QL');
+        await expect(ruleCreateWizard.aboutRuleName).toBeHidden();
       }
     );
 
@@ -237,11 +200,11 @@ spaceTest.describe(
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
         await ruleCreateWizard.setEsqlQuery('from fake metadata _id, _version, _index | limit 5');
-        await continueDefineStep(ruleCreateWizard);
+        await ruleCreateWizard.continueFromDefineStep();
 
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
         await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
-        await continueAboutStep(ruleCreateWizard);
+        await ruleCreateWizard.continueFromAboutStep();
         await ruleCreateWizard.scheduleContinue.click();
         await ruleCreateWizard.createAndEnable.click();
 
@@ -272,16 +235,16 @@ spaceTest.describe(
 
         await openEsqlWizard(page, kbnUrl, scoutSpace.id, ruleCreateWizard);
         await ruleCreateWizard.setEsqlQuery(query);
-        await continueDefineStep(ruleCreateWizard);
+        await ruleCreateWizard.continueFromDefineStep();
 
         await ruleCreateWizard.aboutRuleName.fill(RULE_NAME);
         await ruleCreateWizard.aboutRuleDescription.fill(RULE_DESCRIPTION);
         await ruleCreateWizard.expandAdvancedSettings();
         await ruleCreateWizard.setInvestigationFields(
           [INVESTIGATION_FIELD],
-          ASYNC_VALIDATION_TIMEOUT_MS
+          FIELD_OPTIONS_TIMEOUT_MS
         );
-        await continueAboutStep(ruleCreateWizard);
+        await ruleCreateWizard.continueFromAboutStep();
         await ruleCreateWizard.scheduleContinue.click();
         await ruleCreateWizard.createWithoutEnablingRule();
 
