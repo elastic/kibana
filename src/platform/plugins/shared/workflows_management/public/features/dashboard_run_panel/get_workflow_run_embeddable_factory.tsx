@@ -52,11 +52,13 @@ export const getWorkflowRunEmbeddableFactory = (
     const workflowId$ = new BehaviorSubject(initialState.workflow_id);
     const buttonLabel$ = new BehaviorSubject(initialState.button_label);
     const inputMappings$ = new BehaviorSubject(initialState.input_mappings);
+    const graphLayout$ = new BehaviorSubject(initialState.graph_layout);
 
     const applyConfig = (config: WorkflowRunPanelConfig) => {
       workflowId$.next(config.workflow_id);
       buttonLabel$.next(config.button_label);
       inputMappings$.next(config.input_mappings);
+      graphLayout$.next(config.graph_layout);
     };
 
     const toChange = map(() => undefined);
@@ -68,18 +70,21 @@ export const getWorkflowRunEmbeddableFactory = (
         workflow_id: workflowId$.getValue(),
         button_label: buttonLabel$.getValue(),
         input_mappings: inputMappings$.getValue(),
+        graph_layout: graphLayout$.getValue(),
       }),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         workflowId$.pipe(skip(1), toChange),
         buttonLabel$.pipe(skip(1), toChange),
-        inputMappings$.pipe(skip(1), toChange)
+        inputMappings$.pipe(skip(1), toChange),
+        graphLayout$.pipe(skip(1), toChange)
       ),
       getComparators: () => ({
         ...titleComparators,
         workflow_id: 'referenceEquality',
         button_label: 'referenceEquality',
         input_mappings: 'deepEquality',
+        graph_layout: 'referenceEquality',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
@@ -99,6 +104,7 @@ export const getWorkflowRunEmbeddableFactory = (
             workflow_id: workflowId$.getValue(),
             button_label: buttonLabel$.getValue(),
             input_mappings: inputMappings$.getValue(),
+            graph_layout: graphLayout$.getValue(),
           },
           onSave: applyConfig,
         });
@@ -111,10 +117,11 @@ export const getWorkflowRunEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const [workflowId, buttonLabel, inputMappings] = useBatchedPublishingSubjects(
+        const [workflowId, buttonLabel, inputMappings, graphLayout] = useBatchedPublishingSubjects(
           workflowId$,
           buttonLabel$,
-          inputMappings$
+          inputMappings$,
+          graphLayout$
         );
         const fetchContext = useFetchContext(api);
         return (
@@ -127,6 +134,7 @@ export const getWorkflowRunEmbeddableFactory = (
                 workflowId={workflowId}
                 buttonLabel={buttonLabel}
                 mappings={inputMappings ?? NO_MAPPINGS}
+                graphLayout={graphLayout}
                 fetchContext={fetchContext}
               />
             </QueryClientProvider>

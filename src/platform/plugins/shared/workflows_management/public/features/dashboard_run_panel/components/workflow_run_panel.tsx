@@ -30,7 +30,10 @@ import { LastRunStatus, PanelStatusCallout } from './panel_status';
 import { RunNotice } from './run_notice';
 import { WorkflowGraphBackground } from './workflow_graph_background';
 import { PLUGIN_ID } from '../../../../common';
-import type { WorkflowRunInputMapping } from '../../../../server/dashboard_run_panel/schema';
+import type {
+  WorkflowRunGraphLayout,
+  WorkflowRunInputMapping,
+} from '../../../../server/dashboard_run_panel/schema';
 import {
   isNotFoundError,
   useExecutionWithSteps,
@@ -54,6 +57,7 @@ export interface WorkflowRunPanelProps {
   workflowId: string;
   buttonLabel: string | undefined;
   mappings: readonly WorkflowRunInputMapping[];
+  graphLayout: WorkflowRunGraphLayout | undefined;
   fetchContext: FetchContext;
 }
 
@@ -144,6 +148,7 @@ export const WorkflowRunPanel = ({
   workflowId,
   buttonLabel,
   mappings,
+  graphLayout,
   fetchContext,
 }: WorkflowRunPanelProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -282,6 +287,7 @@ export const WorkflowRunPanel = ({
             workflow={workflow.definition}
             isYamlValid={workflow.valid}
             stepExecutions={lastRun.data?.stepExecutions}
+            layout={graphLayout}
           />
         )}
         {blockedReason && (

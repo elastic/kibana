@@ -28,6 +28,18 @@ describe('workflowRunEmbeddableSchema', () => {
     expect(workflowRunEmbeddableSchema.parse(state)).toEqual(state);
   });
 
+  it('accepts the graph layouts and rejects others', () => {
+    for (const graphLayout of ['auto', 'horizontal', 'vertical']) {
+      expect(
+        workflowRunEmbeddableSchema.safeParse({ workflow_id: 'w', graph_layout: graphLayout })
+          .success
+      ).toBe(true);
+    }
+    expect(
+      workflowRunEmbeddableSchema.safeParse({ workflow_id: 'w', graph_layout: 'diagonal' }).success
+    ).toBe(false);
+  });
+
   it('requires a workflow', () => {
     expect(workflowRunEmbeddableSchema.safeParse({ title: 'x' }).success).toBe(false);
     expect(workflowRunEmbeddableSchema.safeParse({ workflow_id: '' }).success).toBe(false);

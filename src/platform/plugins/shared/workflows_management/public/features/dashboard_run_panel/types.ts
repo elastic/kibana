@@ -13,7 +13,7 @@ import type { WorkflowRunEmbeddableState } from '../../../server/dashboard_run_p
 
 export type WorkflowRunPanelConfig = Pick<
   WorkflowRunEmbeddableState,
-  'workflow_id' | 'button_label' | 'input_mappings'
+  'workflow_id' | 'button_label' | 'input_mappings' | 'graph_layout'
 >;
 
 export type WorkflowRunEmbeddableApi = DefaultEmbeddableApi<WorkflowRunEmbeddableState> &

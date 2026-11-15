@@ -88,6 +88,8 @@ export const workflowRunInputMappingSchema = lazySchema(() =>
   ])
 );
 
+const workflowRunGraphLayoutSchema = lazySchema(() => z.enum(['auto', 'horizontal', 'vertical']));
+
 export const workflowRunEmbeddableSchema = lazySchema(() =>
   z
     .object({
@@ -110,6 +112,10 @@ export const workflowRunEmbeddableSchema = lazySchema(() =>
           description:
             'Where each workflow input gets its value when a viewer runs the workflow. Inputs without a mapping are asked for in the confirmation dialog.',
         }),
+      graph_layout: workflowRunGraphLayoutSchema.optional().meta({
+        description:
+          'Direction of the workflow graph drawn in the panel. `auto` (the default) lays it out horizontally in a wide panel and vertically in a tall one.',
+      }),
     })
     .strict()
     .meta({ description: 'Run workflow panel schema' })
@@ -118,3 +124,4 @@ export const workflowRunEmbeddableSchema = lazySchema(() =>
 export type WorkflowRunInputMapping = z.output<typeof workflowRunInputMappingSchema>;
 export type WorkflowRunConstantValue = z.output<typeof constantValueSchema>;
 export type WorkflowRunEmbeddableState = z.output<typeof workflowRunEmbeddableSchema>;
+export type WorkflowRunGraphLayout = z.output<typeof workflowRunGraphLayoutSchema>;

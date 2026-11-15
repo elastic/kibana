@@ -161,6 +161,23 @@ export const CONFIG_MESSAGES = {
   buttonLabel: i18n.translate('workflows.dashboardRunPanel.config.buttonLabel', {
     defaultMessage: 'Button label',
   }),
+  graphLayout: i18n.translate('workflows.dashboardRunPanel.config.graphLayout', {
+    defaultMessage: 'Graph layout',
+  }),
+  graphLayoutHelp: i18n.translate('workflows.dashboardRunPanel.config.graphLayoutHelp', {
+    defaultMessage:
+      'Direction of the workflow graph shown in the panel. Auto follows the panel shape.',
+  }),
+  graphLayoutAuto: i18n.translate('workflows.dashboardRunPanel.config.graphLayoutAuto', {
+    defaultMessage: 'Auto',
+  }),
+  graphLayoutHorizontal: i18n.translate(
+    'workflows.dashboardRunPanel.config.graphLayoutHorizontal',
+    { defaultMessage: 'Horizontal' }
+  ),
+  graphLayoutVertical: i18n.translate('workflows.dashboardRunPanel.config.graphLayoutVertical', {
+    defaultMessage: 'Vertical',
+  }),
   inputsTitle: i18n.translate('workflows.dashboardRunPanel.config.inputsTitle', {
     defaultMessage: 'Inputs',
   }),

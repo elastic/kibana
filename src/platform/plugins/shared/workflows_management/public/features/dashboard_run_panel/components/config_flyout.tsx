@@ -10,6 +10,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,6 +35,7 @@ import { WorkflowSelector } from '@kbn/workflows-ui';
 import { WorkflowInputField } from './workflow_input_field';
 import type {
   WorkflowRunConstantValue,
+  WorkflowRunGraphLayout,
   WorkflowRunInputMapping,
 } from '../../../../server/dashboard_run_panel/schema';
 import { useWorkflowApi, useWorkflowDetail } from '../hooks/use_workflow_run_panel_queries';
@@ -267,6 +269,15 @@ const MappingRow = ({ descriptor, draft, controls, onChange }: MappingRowProps) 
 };
 
 /** Flyout for choosing the workflow a panel runs and where each of its inputs comes from. */
+const GRAPH_LAYOUT_OPTIONS: Array<{ id: WorkflowRunGraphLayout; label: string }> = [
+  { id: 'auto', label: CONFIG_MESSAGES.graphLayoutAuto },
+  { id: 'horizontal', label: CONFIG_MESSAGES.graphLayoutHorizontal },
+  { id: 'vertical', label: CONFIG_MESSAGES.graphLayoutVertical },
+];
+
+const toGraphLayout = (id: string): WorkflowRunGraphLayout =>
+  GRAPH_LAYOUT_OPTIONS.find((option) => option.id === id)?.id ?? 'auto';
+
 export const ConfigFlyout = ({
   http,
   ariaLabelledBy,
@@ -278,6 +289,9 @@ export const ConfigFlyout = ({
   const api = useWorkflowApi(http);
   const [workflowId, setWorkflowId] = useState(initialConfig?.workflow_id);
   const [buttonLabel, setButtonLabel] = useState(initialConfig?.button_label ?? '');
+  const [graphLayout, setGraphLayout] = useState<WorkflowRunGraphLayout>(
+    initialConfig?.graph_layout ?? 'auto'
+  );
   const [drafts, setDrafts] = useState<Record<string, MappingDraft> | undefined>(() =>
     initialConfig?.input_mappings
       ? Object.fromEntries(
@@ -307,6 +321,7 @@ export const ConfigFlyout = ({
         workflow_id: workflowId,
         button_label: buttonLabel.trim() || undefined,
         input_mappings: inputMappings,
+        graph_layout: graphLayout === 'auto' ? undefined : graphLayout,
       },
       workflowQuery.data?.name
     );
@@ -341,6 +356,22 @@ export const ConfigFlyout = ({
             value={buttonLabel}
             onChange={(event) => setButtonLabel(event.target.value)}
             data-test-subj="workflowRunPanelButtonLabel"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={CONFIG_MESSAGES.graphLayout}
+          helpText={CONFIG_MESSAGES.graphLayoutHelp}
+          hasChildLabel={false}
+          fullWidth
+        >
+          <EuiButtonGroup
+            legend={CONFIG_MESSAGES.graphLayout}
+            options={GRAPH_LAYOUT_OPTIONS}
+            idSelected={graphLayout}
+            onChange={(id) => setGraphLayout(toGraphLayout(id))}
+            buttonSize="compressed"
+            data-test-subj="workflowRunPanelGraphLayout"
           />
         </EuiFormRow>
 

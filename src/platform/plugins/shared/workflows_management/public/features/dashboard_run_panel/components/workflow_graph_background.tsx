@@ -11,10 +11,12 @@ import { useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useNodesInitialized, useReactFlow } from '@xyflow/react';
 import React, { useEffect, useState } from 'react';
-import type { LayoutDirection, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { RenderStepIcon } from '@kbn/workflows-ui';
 import { ReactFlowProvider, WorkflowGraphCanvasWithoutProvider } from '@kbn/workflows-ui';
+import type { WorkflowRunGraphLayout } from '../../../../server/dashboard_run_panel/schema';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { getGraphDirection } from '../lib/get_graph_direction';
 
 const FIT_VIEW_OPTIONS = { padding: 0.15, minZoom: 0.05, maxZoom: 1 } as const;
 
@@ -44,6 +46,7 @@ interface WorkflowGraphBackgroundProps {
   workflow: WorkflowYaml;
   isYamlValid: boolean;
   stepExecutions: WorkflowStepExecutionDto[] | undefined;
+  layout: WorkflowRunGraphLayout | undefined;
 }
 
 /** A non-interactive picture of the workflow graph, coloured by the step results of the shown run. */
@@ -51,10 +54,11 @@ export const WorkflowGraphBackground = ({
   workflow,
   isYamlValid,
   stepExecutions,
+  layout,
 }: WorkflowGraphBackgroundProps): React.JSX.Element => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { width, height } = useResizeObserver(container);
-  const direction: LayoutDirection = width > height ? 'LR' : 'TB';
+  const direction = getGraphDirection(layout, { width, height });
 
   return (
     <div
