@@ -390,6 +390,45 @@ describe('scheduleScanTask', () => {
     });
   });
 
+  it('does not ask for an immediate scan for a task it just created', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockRejectedValue(new Error('Not found'));
+    await expect(scheduleScanTask(taskManager)).resolves.toBe(false);
+  });
+
+  describe('immediate scan decision for an existing task', () => {
+    const now = Date.parse('2026-11-15T12:00:00.000Z');
+    const existing = (finishedAt?: string, interval = '1d') =>
+      ({
+        schedule: { interval },
+        state: finishedAt ? { lastRun: { finishedAt } } : {},
+      } as unknown as ConcreteTaskInstance);
+
+    it.each([
+      [
+        'skips when a scan finished within the interval',
+        existing('2026-11-15T06:00:00.000Z'),
+        false,
+      ],
+      [
+        'runs when the last scan is older than the interval',
+        existing('2026-11-13T12:00:00.000Z'),
+        true,
+      ],
+      ['runs when no scan ever finished', existing(undefined), true],
+      [
+        'runs when the last scan is older than a shortened interval',
+        existing('2026-11-15T09:00:00.000Z', '1h'),
+        true,
+      ],
+      ['runs when the finish time is unreadable', existing('garbage'), true],
+    ])('%s', async (_name, task, expected) => {
+      const taskManager = taskManagerMock.createStart();
+      taskManager.get.mockResolvedValue(task);
+      await expect(scheduleScanTask(taskManager, now)).resolves.toBe(expected);
+    });
+  });
+
   it('keeps a schedule that was already changed', async () => {
     const taskManager = taskManagerMock.createStart();
     taskManager.get.mockResolvedValue({

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type {
+  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -260,8 +261,36 @@ export const registerScanTask = (
   });
 };
 
-/** Schedules the daily scan, keeping a schedule an operator has already changed. */
-export const scheduleScanTask = async (taskManager: TaskManagerStartContract): Promise<void> => {
+const INTERVAL_UNIT_MS: Record<string, number> = {
+  s: 1000,
+  m: 60_000,
+  h: 3_600_000,
+  d: 86_400_000,
+};
+
+const intervalToMs = (interval: string): number | undefined => {
+  const match = /^(\d+)([smhd])$/.exec(interval);
+  return match ? Number(match[1]) * INTERVAL_UNIT_MS[match[2]] : undefined;
+};
+
+/** A scan is due when the task never finished one, or the last one is older than its interval. */
+const isScanDue = (task: ConcreteTaskInstance, now: number): boolean => {
+  const finishedAt = Date.parse(task.state?.lastRun?.finishedAt ?? '');
+  const intervalMs = intervalToMs(task.schedule?.interval ?? DEFAULT_INTERVAL);
+  if (Number.isNaN(finishedAt) || intervalMs === undefined) return true;
+  return now - finishedAt >= intervalMs;
+};
+
+/**
+ * Schedules the daily scan, keeping a schedule an operator has already changed.
+ * Resolves to true when a scan should be requested right away: the task already existed and has
+ * not completed a scan within its interval. A new task runs on its own, and a recent scan is not
+ * repeated on every Kibana restart.
+ */
+export const scheduleScanTask = async (
+  taskManager: TaskManagerStartContract,
+  now: number = Date.now()
+): Promise<boolean> => {
   const existing = await taskManager.get(SCAN_TASK_ID).catch(() => undefined);
   await taskManager.ensureScheduled({
     id: SCAN_TASK_ID,
@@ -270,4 +299,5 @@ export const scheduleScanTask = async (taskManager: TaskManagerStartContract): P
     params: {},
     state: emptyState,
   });
+  return existing !== undefined && isScanDue(existing, now);
 };

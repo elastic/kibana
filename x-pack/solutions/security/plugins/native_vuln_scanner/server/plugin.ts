@@ -73,12 +73,13 @@ export class NativeVulnScannerPlugin
     return {};
   }
 
-  /** Runs a scan right after (re)scheduling, so a new install does not wait a full interval. */
+  /** Requests a scan after (re)scheduling when none ran within the interval, so a restart does not repeat one. */
   private async scheduleAndRun(taskManager: NativeVulnScannerStartDeps['taskManager']) {
-    await scheduleScanTask(taskManager);
+    const runNow = await scheduleScanTask(taskManager);
+    if (!runNow) return;
     await taskManager.runSoon(SCAN_TASK_ID).catch((error: Error) => {
       // e.g. the task is already running; the regular schedule still applies.
-      this.logger.warn(`Could not run the vulnerability scan at startup: ${error.message}`);
+      this.logger.debug(`Could not run the vulnerability scan at startup: ${error.message}`);
     });
   }
 

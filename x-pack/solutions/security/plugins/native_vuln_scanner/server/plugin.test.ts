@@ -47,7 +47,7 @@ describe('NativeVulnScannerPlugin', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     ensureMock.mockResolvedValue();
-    scheduleMock.mockResolvedValue();
+    scheduleMock.mockResolvedValue(true);
   });
 
   it('sets up the findings index as the internal user when enabled', async () => {
@@ -95,9 +95,15 @@ describe('NativeVulnScannerPlugin', () => {
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('no task store'));
   });
 
-  it('runs the scan as soon as it has been scheduled', async () => {
+  it('runs the scan right away when none ran within the interval', async () => {
     const { taskManagerStart } = await startPlugin(true);
     expect(taskManagerStart.runSoon).toHaveBeenCalledWith(SCAN_TASK_ID);
+  });
+
+  it('does not repeat a scan that ran within the interval', async () => {
+    scheduleMock.mockResolvedValue(false);
+    const { taskManagerStart } = await startPlugin(true);
+    expect(taskManagerStart.runSoon).not.toHaveBeenCalled();
   });
 
   it('does not run the scan when scheduling failed', async () => {
@@ -117,7 +123,8 @@ describe('NativeVulnScannerPlugin', () => {
     ).not.toThrow();
     await new Promise(process.nextTick);
     const logger = context.logger.get() as ReturnType<typeof loggingSystemMock.createLogger>;
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already running'));
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('already running'));
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
 });
