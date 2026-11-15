@@ -170,6 +170,7 @@ export const importPluginOverrides: OxlintOverride[] = [
     files: inDirs([
       'x-pack/solutions/security/packages/test-api-clients',
       'x-pack/solutions/security/packages/kbn-security-evals-matrix',
+      'x-pack/solutions/security/packages/kbn-evals-suite-alertzero-hunt-watch',
     ]),
     rules: {
       'import/no-nodejs-modules': 'off',

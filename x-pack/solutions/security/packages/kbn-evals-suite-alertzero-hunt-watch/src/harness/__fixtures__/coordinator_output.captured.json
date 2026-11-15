@@ -1,0 +1,245 @@
+{
+ "run_id": "dada1beb-dc82-4dc9-bf3d-49de43b6542e",
+ "tier2": {
+  "has_hit": false,
+  "tier": 2,
+  "next_step": "Lower `llm_confidence_threshold` or fall back to IOC matching if the report is IOC-only.",
+  "report_id": "xwPUIKEBm_QFzRBX5PQx",
+  "behaviors": [],
+  "indexed_behaviors": [],
+  "message": "No behavioral candidates passed the LLM-confidence threshold. The report may be IOC-only or describe known/already-covered techniques.",
+  "status": "no_behaviors_found"
+ },
+ "sse": [
+  {
+   "data": {
+    "severity": "high",
+    "run_id": "dada1beb-dc82-4dc9-bf3d-49de43b6542e",
+    "evaluation_record_ref": "eval:hunt:xwPUIKEBm_QFzRBX5PQx:dada1beb-dc82-4dc9-bf3d-49de43b6542e",
+    "confidence": 0.7,
+    "security_knowledge_indicators": [
+     {
+      "type": "ioc",
+      "ioc": {
+       "type": "domain",
+       "value": "malicious-c2.example.com"
+      },
+      "value": "malicious-c2.example.com"
+     }
+    ],
+    "evidence_for": [
+     "Tier 1 matched 1 event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split)."
+    ],
+    "source_watch": "system-security-hunt-continuous-threat-hunt",
+    "hypothesis_tested": "Hunt Watch evaluated report xwPUIKEBm_QFzRBX5PQx against the environment.",
+    "title": "Hunt confirmed for xwPUIKEBm_QFzRBX5PQx",
+    "hunt_result": {
+     "tier2": {
+      "behaviors": [],
+      "status": "no_behaviors_found"
+     },
+     "tier2_targets": [
+      "logs-endpoint.events.network-default*",
+      "logs-endpoint.events.file-default*"
+     ],
+     "time_range": {
+      "from": "2026-09-09T13:23:19.011Z",
+      "to": "2026-10-09T13:23:19.011Z"
+     },
+     "has_confirmed_hit": true,
+     "hit_sources": [
+      "tier1"
+     ],
+     "actionable_indices": [
+      "logs-endpoint.events.file-default*",
+      "logs-endpoint.events.network-default*"
+     ],
+     "tier1": {
+      "per_index": [
+       {
+        "index": ".ds-logs-endpoint.events.network-default-2026.10.09-000001",
+        "hit_count": 1,
+        "required": true
+       }
+      ],
+      "counts": {
+       "returned_hits": 1,
+       "total_hits": 1,
+       "affected_hosts": 1,
+       "affected_users": 1
+      },
+      "resolved_iocs": [
+       {
+        "type": "domain",
+        "value": "malicious-c2.example.com"
+       }
+      ],
+      "status": "environment_hits_found"
+     }
+    },
+    "alerts": [],
+    "maps_to_proposal": {
+     "manual_remediation": [
+      "Review wks-alice-01 for encoded PowerShell execution (e.g., -EncodedCommand / -enc arguments) and decode the command lines to identify the payload and any contacted infrastructure.",
+      "Pivot on user alice.chen's logon sessions and authentication activity around the hit time to determine whether the encoded PowerShell ran interactively or under a different context.",
+      "Check wks-alice-01 for persistence mechanisms (scheduled tasks, run keys, services) that may have been created alongside the encoded PowerShell activity.",
+      "Look for lateral movement from wks-alice-01 to other internal hosts using the same credentials or remote PowerShell sessions.",
+      "Reset alice.chen's credentials and revoke active sessions if the encoded PowerShell activity is confirmed malicious, and review the account's recent privilege and group membership changes.",
+      "Isolate wks-alice-01 from the network while triage is in progress if the decoded command shows active command-and-control or payload download behavior.",
+      "Collect and preserve wks-alice-01 process, PowerShell script block, and network logs for the hunt window before any remediation changes the state of the host.",
+      "Compare the encoded PowerShell activity against the threat report 'Encoded Powershell infrastructure activity' to match any listed indicators and confirm whether this hit is part of the reported campaign."
+     ]
+    },
+    "capability": "continuous_threat_hunt",
+    "entities": [
+     {
+      "field": "host.name",
+      "value": "wks-alice-01"
+     },
+     {
+      "field": "user.name",
+      "value": "alice.chen"
+     }
+    ],
+    "report_id": "xwPUIKEBm_QFzRBX5PQx",
+    "evidence_against": [],
+    "timeline": [
+     {
+      "at": "2026-10-09T13:21:01.964Z",
+      "what": "Event custom-t#0#positive in .ds-logs-endpoint.events.network-default-2026.10.09-000001"
+     }
+    ],
+    "events": [
+     {
+      "event_id": "custom-t#0#positive",
+      "matched": {
+       "field": "dns.question.name",
+       "ioc": {
+        "type": "domain",
+        "value": "malicious-c2.example.com"
+       }
+      },
+      "source_index": ".ds-logs-endpoint.events.network-default-2026.10.09-000001",
+      "timestamp": "2026-10-09T13:21:01.964Z"
+     }
+    ],
+    "status": "open"
+   },
+   "attachment_id": "sse-c928b14c60b4527ea250c63eec0b561d49581e8704a51291dd0f3c465592cabe"
+  }
+ ],
+ "impacted_entities": [
+  {
+   "name": "wks-alice-01",
+   "id": "host:wks-alice-01",
+   "type": "host"
+  },
+  {
+   "name": "alice.chen",
+   "id": "user:alice.chen",
+   "type": "user"
+  }
+ ],
+ "completed_successfully": true,
+ "narrative": "### Hunt Watch confirmed a hit\n\nHunt Watch confirmed a hit for threat report **\"Threat report: Encoded Powershell infrastructure activity\"** (`xwPUIKEBm_QFzRBX5PQx`): Tier 1 matched the report's indicators in the environment. Tier 2 derived no executable behaviors from the report text.\n\n**What was searched**\n- **Window:** 2026-09-09T13:23:19.011Z to 2026-10-09T13:23:19.011Z\n- **Indices:** `apm-*-transaction*`, `auditbeat-*`, `endgame-*`, `filebeat-*`, `logs-*`, `packetbeat-*` and 3 more\n- **Tier 2 targets:** `logs-endpoint.events.network-default*` and `logs-endpoint.events.file-default*` (from Tier 1 hits and process telemetry)\n- **Indicators (1):** domain `malicious-c2.example.com`\n- **ATT&CK techniques:** none\n\n**Tier 1: indicator and technique search**\nTier 1 matched 1 document across 1 index, which confirms the hit.\n- `.ds-logs-endpoint.events.network-default-2026.10.09-000001`: 1\n- **Indicators seen in the sample:** `malicious-c2.example.com`\n- **Affected hosts:** `wks-alice-01` (1)\n- **Affected users:** `alice.chen` (1)\n\n**Tier 2: behavior hunts derived from the report**\nTier 2 read the report text and derived no behaviors to hunt.\n\n_Hunt run `dada1beb-dc82-4dc9-bf3d-49de43b6542e`._",
+ "has_confirmed_hit": true,
+ "index_patterns": [
+  "apm-*-transaction*",
+  "auditbeat-*",
+  "endgame-*",
+  "filebeat-*",
+  "logs-*",
+  "packetbeat-*",
+  "traces-apm*",
+  "winlogbeat-*",
+  "-*elastic-cloud-logs-*"
+ ],
+ "completeness": "complete",
+ "message": "Tier 1: environment_hits_found. Tier 2: no_behaviors_found (0 proposed).",
+ "recommendations": [
+  "Review wks-alice-01 for encoded PowerShell execution (e.g., -EncodedCommand / -enc arguments) and decode the command lines to identify the payload and any contacted infrastructure.",
+  "Pivot on user alice.chen's logon sessions and authentication activity around the hit time to determine whether the encoded PowerShell ran interactively or under a different context.",
+  "Check wks-alice-01 for persistence mechanisms (scheduled tasks, run keys, services) that may have been created alongside the encoded PowerShell activity.",
+  "Look for lateral movement from wks-alice-01 to other internal hosts using the same credentials or remote PowerShell sessions.",
+  "Reset alice.chen's credentials and revoke active sessions if the encoded PowerShell activity is confirmed malicious, and review the account's recent privilege and group membership changes.",
+  "Isolate wks-alice-01 from the network while triage is in progress if the decoded command shows active command-and-control or payload download behavior.",
+  "Collect and preserve wks-alice-01 process, PowerShell script block, and network logs for the hunt window before any remediation changes the state of the host.",
+  "Compare the encoded PowerShell activity against the threat report 'Encoded Powershell infrastructure activity' to match any listed indicators and confirm whether this hit is part of the reported campaign."
+ ],
+ "tier2_targets": [
+  "logs-endpoint.events.network-default*",
+  "logs-endpoint.events.file-default*"
+ ],
+ "next_step": "No behavioral candidates survived catalog validation.",
+ "report_id": "xwPUIKEBm_QFzRBX5PQx",
+ "tier2_target_sources": [
+  "tier1_hits",
+  "actionable"
+ ],
+ "actionable_indices": [
+  "logs-endpoint.events.file-default*",
+  "logs-endpoint.events.network-default*"
+ ],
+ "tier1": {
+  "hits": [
+   {
+    "index": ".ds-logs-endpoint.events.network-default-2026.10.09-000001",
+    "matched": {
+     "field": "dns.question.name",
+     "ioc": {
+      "type": "domain",
+      "value": "malicious-c2.example.com"
+     }
+    },
+    "id": "custom-t#0#positive",
+    "timestamp": "2026-10-09T13:21:01.964Z"
+   }
+  ],
+  "affected_assets": {
+   "hosts": [
+    {
+     "name": "wks-alice-01",
+     "hit_count": 1
+    }
+   ],
+   "services": [],
+   "users": [
+    {
+     "name": "alice.chen",
+     "hit_count": 1
+    }
+   ]
+  },
+  "tier": 1,
+  "time_range": {
+   "from": "2026-09-09T13:23:19.011Z",
+   "to": "2026-10-09T13:23:19.011Z"
+  },
+  "per_index": [
+   {
+    "index": ".ds-logs-endpoint.events.network-default-2026.10.09-000001",
+    "hit_count": 1,
+    "required": true
+   }
+  ],
+  "counts": {
+   "returned_hits": 1,
+   "total_hits": 1,
+   "affected_hosts": 1,
+   "affected_users": 1
+  },
+  "has_confirmed_hit": true,
+  "searched_iocs": 1,
+  "resolved_techniques": [],
+  "searched_techniques": 0,
+  "resolved_iocs": [
+   {
+    "type": "domain",
+    "value": "malicious-c2.example.com"
+   }
+  ],
+  "status": "environment_hits_found"
+ },
+ "headline": "confirmed hit: Tier 1 matched 1 document; Tier 2 derived no behaviors",
+ "status": "tier1_and_tier2"
+}

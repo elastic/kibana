@@ -1,0 +1,91 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306"
+  },
+  "chain": "bits-mshta",
+  "step": "Defend detect-only alert promotion (credential access); also the Endpoint Analysis observable",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.alerts",
+        "at": -120,
+        "doc": {
+          "event": {
+            "kind": "alert",
+            "module": "endpoint",
+            "category": [
+              "malware",
+              "intrusion_detection"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "memory_signature",
+            "code": "memory_signature"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park"
+          },
+          "process": {
+            "name": "rundll32.exe",
+            "executable": "C:\\Windows\\System32\\rundll32.exe",
+            "entity_id": "azqa-rd-lsass"
+          },
+          "rule": {
+            "name": "Windows.Credential.LSASS Memory Dump"
+          },
+          "message": "Malicious Behavior Detection Alert: LSASS Memory Dump"
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Endpoint document is event.kind=event, not an alert",
+    "docs": [
+      {
+        "stream": "logs-endpoint.alerts",
+        "at": -120,
+        "doc": {
+          "event": {
+            "kind": "event",
+            "module": "endpoint",
+            "category": [
+              "process"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "heartbeat"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park"
+          },
+          "process": {
+            "name": "rundll32.exe",
+            "executable": "C:\\Windows\\System32\\rundll32.exe",
+            "entity_id": "azqa-rd-lsass"
+          }
+        }
+      }
+    ]
+  }
+}

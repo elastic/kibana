@@ -1,0 +1,117 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "f5778acd-80e3-4ca0-a32a-6259386dfb20"
+  },
+  "chain": "aws-cloud",
+  "step": "jordan.park console login without MFA",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-aws.cloudtrail",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "ConsoleLogin",
+            "provider": "signin.amazonaws.com",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "aws",
+            "account": {
+              "id": "123456789012"
+            },
+            "region": "us-east-1"
+          },
+          "user": {
+            "name": "jordan.park",
+            "id": "AIDAQAZQAJORDAN002"
+          },
+          "source": {
+            "ip": "198.51.100.77"
+          },
+          "user_agent": {
+            "original": "Mozilla/5.0"
+          },
+          "aws": {
+            "cloudtrail": {
+              "user_identity": {
+                "type": "IAMUser",
+                "access_key_id": "",
+                "arn": "arn:aws:iam::123456789012:user/jordan.park"
+              },
+              "event_version": "1.08",
+              "console_login": {
+                "additional_eventdata": {
+                  "mfa_used": false
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Console login used MFA",
+    "docs": [
+      {
+        "stream": "logs-aws.cloudtrail",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "ConsoleLogin",
+            "provider": "signin.amazonaws.com",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "aws",
+            "account": {
+              "id": "123456789012"
+            },
+            "region": "us-east-1"
+          },
+          "user": {
+            "name": "jordan.park",
+            "id": "AIDAQAZQAJORDAN002"
+          },
+          "source": {
+            "ip": "198.51.100.77"
+          },
+          "user_agent": {
+            "original": "Mozilla/5.0"
+          },
+          "aws": {
+            "cloudtrail": {
+              "user_identity": {
+                "type": "IAMUser",
+                "access_key_id": "",
+                "arn": "arn:aws:iam::123456789012:user/jordan.park"
+              },
+              "event_version": "1.08",
+              "console_login": {
+                "additional_eventdata": {
+                  "mfa_used": true
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

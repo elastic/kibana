@@ -1,0 +1,114 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "9ccf3ce0-0057-440a-91f5-870c6ad39093"
+  },
+  "chain": "wmi-lateral",
+  "step": "msiexec/rundll32 scriptlet -> command shell",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "cmd.exe",
+            "executable": "C:\\Windows\\System32\\cmd.exe",
+            "command_line": "cmd.exe /c whoami",
+            "args": [
+              "cmd.exe",
+              "/c",
+              "whoami"
+            ],
+            "entity_id": "azqa-cmd.exe-102099",
+            "parent": {
+              "name": "rundll32.exe",
+              "executable": "C:\\Windows\\System32\\rundll32.exe",
+              "entity_id": "azqa-rundll32.exe-402104",
+              "command_line": "rundll32.exe javascript:\"\\..\\mshtml,RunHTMLApplication\"",
+              "args": [
+                "rundll32.exe",
+                "javascript:\"\\..\\mshtml,RunHTMLApplication\""
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Command shell is spawned by explorer.exe, not rundll32",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "cmd.exe",
+            "executable": "C:\\Windows\\System32\\cmd.exe",
+            "command_line": "cmd.exe /c whoami",
+            "args": [
+              "cmd.exe",
+              "/c",
+              "whoami"
+            ],
+            "entity_id": "azqa-cmd.exe-102099",
+            "parent": {
+              "name": "explorer.exe",
+              "executable": "C:\\Windows\\System32\\explorer.exe",
+              "entity_id": "azqa-explorer.exe-916603"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

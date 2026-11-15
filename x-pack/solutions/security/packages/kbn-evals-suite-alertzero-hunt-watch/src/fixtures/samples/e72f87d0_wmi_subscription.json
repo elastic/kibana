@@ -1,0 +1,145 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "e72f87d0-a70e-4f8d-8443-a6407bc34643"
+  },
+  "chain": "wmi-lateral",
+  "step": "WMI event subscription persistence",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-windows.sysmon_operational",
+        "at": -300,
+        "doc": {
+          "event": {
+            "code": "1",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "process": {
+            "name": "svchost.exe"
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.api",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "api"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "api_call",
+            "kind": "event",
+            "provider": "Microsoft-Windows-WMI-Activity"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "entity_id": "azqa-ps-wmi",
+            "Ext": {
+              "api": {
+                "name": "IWbemServices::PutInstance",
+                "parameters": {
+                  "consumer_type": "CommandLineEventConsumer"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "WMI consumer is NTEventLogEventConsumer (not Command/ActiveScript)",
+    "docs": [
+      {
+        "stream": "logs-windows.sysmon_operational",
+        "at": -300,
+        "doc": {
+          "event": {
+            "code": "1",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "process": {
+            "name": "svchost.exe"
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.api",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "api"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "api_call",
+            "kind": "event",
+            "provider": "Microsoft-Windows-WMI-Activity"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "entity_id": "azqa-ps-wmi",
+            "Ext": {
+              "api": {
+                "name": "IWbemServices::PutInstance",
+                "parameters": {
+                  "consumer_type": "NTEventLogEventConsumer"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
