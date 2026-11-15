@@ -53,7 +53,10 @@ const ruleTuning: ScanFailureWorker = {
   lastFailedAt: AFTER_FAILURE,
 };
 
-const renderCallout = (props: ComponentProps<typeof ScanFailureCallout> = {}) => {
+const renderCallout = ({
+  surface = 'queue',
+  wrapper,
+}: Partial<ComponentProps<typeof ScanFailureCallout>> = {}) => {
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockImplementation(
     (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
@@ -65,15 +68,17 @@ const renderCallout = (props: ComponentProps<typeof ScanFailureCallout> = {}) =>
     workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
   };
 
-  render(
+  const tree = () => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={core}>
-          <ScanFailureCallout {...props} />
+          <ScanFailureCallout surface={surface} wrapper={wrapper} />
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+  const { rerender } = render(tree());
+  return { reportEvent: core.analytics.reportEvent as jest.Mock, rerender: () => rerender(tree()) };
 };
 
 describe('ScanFailureCallout', () => {
@@ -280,6 +285,38 @@ describe('ScanFailureCallout', () => {
       renderCallout({ wrapper });
 
       expect(screen.queryByTestId('calloutWrapper')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('telemetry', () => {
+    const mockFailures = (data: ScanFailuresResponse) =>
+      useScanFailuresMock.mockReturnValue(queryResult({ data, isLoading: false, error: null }));
+
+    it('reports the callout once, as a Worker scan failure on its surface', () => {
+      mockFailures({ workers: [], unknown: true, lastFailedAt: FAILED_AT });
+
+      const { reportEvent, rerender } = renderCallout({ surface: 'onboarding' });
+      rerender();
+
+      expect(reportEvent.mock.calls).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'worker_scan_failed', surface: 'onboarding' }],
+      ]);
+    });
+
+    it('reports nothing when nothing failed, the failures could not be read, or they were dismissed', () => {
+      useScanFailuresMock.mockReturnValue(
+        queryResult({ data: undefined, isLoading: false, error: new Error('unavailable') })
+      );
+      const unreadable = renderCallout();
+      mockFailures({ workers: [], unknown: false, lastFailedAt: null });
+      const clean = renderCallout();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(AFTER_FAILURE));
+      mockFailures({ workers: [attackDiscovery], unknown: false, lastFailedAt: FAILED_AT });
+      const dismissed = renderCallout();
+
+      expect(
+        [unreadable, clean, dismissed].map(({ reportEvent }) => reportEvent.mock.calls)
+      ).toEqual([[], [], []]);
     });
   });
 });

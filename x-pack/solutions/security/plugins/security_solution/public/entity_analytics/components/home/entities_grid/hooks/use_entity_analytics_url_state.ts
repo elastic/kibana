@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { encode, safeDecode } from '@kbn/rison';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../../../common/entity_analytics/utils';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
@@ -22,6 +23,7 @@ import {
 } from '../common';
 import type { EntityFilters, RowsMode, SortDir, TimeRange } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
+import { ENTITY_GROUPING_OPTIONS, MAX_GROUPING_LEVELS } from '../../entities_table/constants';
 import { isSignalCardId, type SignalCardId } from '../../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
@@ -34,6 +36,7 @@ const PARAM = {
   SORT_FIELD: 'eaSortField',
   SORT_DIR: 'eaSortDir',
   EXPANDED: 'eaExpanded',
+  GROUP_BY: 'eaGroupBy',
   ACTIVE_TILE: 'eaActiveTile',
   ENTITY_TYPES: 'eaEntityTypes',
   RISK_LEVELS: 'eaRiskLevels',
@@ -61,11 +64,13 @@ const DEFAULTS = {
   rowsMode: 'resolved',
   sortField: RISK_SCORE_NORM_FIELD,
   sortDirection: 'desc',
+  groupsSelected: [ENTITY_GROUPING_OPTIONS.NONE],
 } as const satisfies {
   timeRange: TimeRange;
   rowsMode: RowsMode;
   sortField: string;
   sortDirection: SortDir;
+  groupsSelected: readonly string[];
 };
 
 // ── validators ────────────────────────────────────────────────────────────────
@@ -89,13 +94,21 @@ const isCriticality = (v: string): boolean => VALID_CRITICALITY.has(v);
 
 const getParamValues = (raw: string) => raw.split(',').filter(Boolean);
 
-/** Expanded ids, one `eaExpanded` param each: ids can contain commas. */
-const getExpandedIds = (params: URLSearchParams): string[] =>
-  params.getAll(PARAM.EXPANDED).filter(Boolean).slice(-MAX_EXPANDED_ENTITY_IDS);
+/**
+ * Expanded ids as one rison list: the app's URL sync joins repeated params with commas, and ids can
+ * contain commas.
+ */
+const getExpandedIds = (params: URLSearchParams): string[] => {
+  const ids = safeDecode(params.get(PARAM.EXPANDED) ?? '');
+  if (!Array.isArray(ids)) return [];
+  return ids
+    .filter((id): id is string => typeof id === 'string' && id !== '')
+    .slice(-MAX_EXPANDED_ENTITY_IDS);
+};
 
 const setExpandedIds = (params: URLSearchParams, ids: string[]) => {
-  params.delete(PARAM.EXPANDED);
-  for (const id of ids.slice(-MAX_EXPANDED_ENTITY_IDS)) params.append(PARAM.EXPANDED, id);
+  if (ids.length === 0) params.delete(PARAM.EXPANDED);
+  else params.set(PARAM.EXPANDED, encode(ids.slice(-MAX_EXPANDED_ENTITY_IDS)));
 };
 
 // ── types ─────────────────────────────────────────────────────────────────────
@@ -106,6 +119,8 @@ export interface EntityAnalyticsUrlState {
   sortField: string;
   sortDirection: SortDir;
   entityFilters: EntityFilters;
+  /** Fields the grid is grouped by, outermost first; `['none']` for the flat grid. */
+  groupsSelected: string[];
   /** Entity ids with expanded child rows (persisted across filter/pagination). */
   expandedIds: string[];
   /** Selected needs-attention tile; omitted from the URL when none. */
@@ -117,6 +132,7 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   setRowsMode: (val: RowsMode) => void;
   setSort: (field: string, direction: SortDir) => void;
   setEntityFilters: (filters: EntityFilters) => void;
+  setGroupsSelected: (fields: string[]) => void;
   /** Pass null to clear. */
   setActiveTile: (tile: SignalCardId | null) => void;
   /** Clears entity filters, active tile, and sort (computed column sorts can yield 0 rows). */
@@ -170,6 +186,15 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     [rawEntityTypes, rawRiskLevels, rawAssetCriticality, rawWatchlists, rawDataSources]
   );
 
+  // Resolution groups only exist for individual rows; resolved rows already are the groups.
+  const rawGroupBy = p.get(PARAM.GROUP_BY) ?? '';
+  const groupsSelected = useMemo(() => {
+    const fields = getParamValues(rawGroupBy)
+      .filter((field) => rowsMode !== 'resolved' || field !== ENTITY_GROUPING_OPTIONS.RESOLUTION)
+      .slice(0, MAX_GROUPING_LEVELS);
+    return fields.length ? fields : [...DEFAULTS.groupsSelected];
+  }, [rawGroupBy, rowsMode]);
+
   const expandedIds = useMemo(() => getExpandedIds(p), [p]);
 
   const rawActiveTile = p.get(PARAM.ACTIVE_TILE);
@@ -203,6 +228,13 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       update((params) => {
         params.set(PARAM.ROWS_MODE, val);
         params.delete(PARAM.EXPANDED);
+        if (val === 'resolved') {
+          const remaining = getParamValues(params.get(PARAM.GROUP_BY) ?? '').filter(
+            (field) => field !== ENTITY_GROUPING_OPTIONS.RESOLUTION
+          );
+          if (remaining.length) params.set(PARAM.GROUP_BY, remaining.join(','));
+          else params.delete(PARAM.GROUP_BY);
+        }
         // A sort the new rows mode can't use (Records in individual rows) resets to the default.
         const currentSortField = params.get(PARAM.SORT_FIELD);
         if (currentSortField != null && !isValidSortField(currentSortField, val)) {
@@ -228,6 +260,15 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
           if (values.length) params.set(param, values.join(','));
           else params.delete(param);
         }
+      }),
+    [update]
+  );
+  const setGroupsSelected = useCallback(
+    (fields: string[]) =>
+      update((params) => {
+        const grouped = fields.filter((field) => field !== ENTITY_GROUPING_OPTIONS.NONE);
+        if (grouped.length) params.set(PARAM.GROUP_BY, grouped.join(','));
+        else params.delete(PARAM.GROUP_BY);
       }),
     [update]
   );
@@ -271,12 +312,14 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     sortField,
     sortDirection,
     entityFilters,
+    groupsSelected,
     expandedIds,
     activeTile,
     setTimeRange,
     setRowsMode,
     setSort,
     setEntityFilters,
+    setGroupsSelected,
     setActiveTile,
     resetGridQuery,
     toggleExpandedId,

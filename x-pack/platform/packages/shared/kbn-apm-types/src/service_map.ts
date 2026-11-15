@@ -60,10 +60,23 @@ export interface ServiceMapRawResponse {
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
 
+/** Stats of a service's main transaction type. */
+export interface ServiceMapServiceStats {
+  transactionType: string;
+  throughput: number;
+  /** `null` when none of the main type's transactions has a known outcome */
+  failedTransactionRate: number | null;
+  /** In microseconds */
+  latency: number | null;
+  requestCount: number;
+}
+
 export interface ServicesResponse {
   [SERVICE_NAME]: string;
   [AGENT_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
+  /** Only set when service map grouping is enabled and the service has transactions */
+  stats?: ServiceMapServiceStats;
 }
 
 export interface ServiceConnectionNode extends ServicesResponse {
@@ -184,6 +197,13 @@ export interface ServiceNodeData extends BaseNodeData {
   alertsByStatus?: Partial<Record<AlertStatus, number>>;
   sloStatus?: SloStatus | 'noSLOs';
   sloCount?: number;
+  /**
+   * Set when the service's throughput is far below the map's median (idle). The map draws it
+   * faded so busy and failing services stand out.
+   */
+  isIdle?: boolean;
+  /** Only set when service map grouping is enabled and the service has transactions */
+  stats?: ServiceMapServiceStats;
 }
 
 export interface DependencyNodeData extends BaseNodeData {
@@ -237,6 +257,8 @@ export interface ServiceMapEdgeData extends Record<string, unknown> {
   sourceLabel?: string;
   targetLabel?: string;
   resources?: string[];
+  /** The resources behind a grouped edge (edge to a "N resources" node). */
+  groupedConnections?: GroupedConnectionInfo[];
 }
 
 export interface ServiceMapEdge extends Edge<ServiceMapEdgeData> {

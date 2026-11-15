@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import {
   dataMapStepCommonDefinition,
   DEFAULT_INDEX_BINDING,
@@ -166,15 +167,22 @@ export const dataMapStepDefinition = createServerStepDefinition({
         context.contextManager.createTemplateRenderer?.() ??
         ((value, additionalContext) =>
           context.contextManager.renderInputTemplate(value, additionalContext));
-      const mappedItems = itemsArray.map((currentItem, currentIndex) =>
-        processFields(rawFields, {
-          renderTemplate,
-          bindings: {
-            [DEFAULT_ITEM_BINDING]: currentItem,
-            [DEFAULT_INDEX_BINDING]: currentIndex,
-          },
-        })
-      );
+      const mappedItems: Array<Record<string, unknown>> = [];
+      for (const [currentIndex, currentItem] of itemsArray.entries()) {
+        await yieldToEventLoop();
+        if (context.abortSignal.aborted) {
+          return { error: new Error('Operation was aborted') };
+        }
+        mappedItems.push(
+          processFields(rawFields, {
+            renderTemplate,
+            bindings: {
+              [DEFAULT_ITEM_BINDING]: currentItem,
+              [DEFAULT_INDEX_BINDING]: currentIndex,
+            },
+          })
+        );
+      }
 
       context.logger.debug(`Successfully mapped ${mappedItems.length} item(s)`);
 

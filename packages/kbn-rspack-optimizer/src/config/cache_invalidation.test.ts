@@ -88,6 +88,15 @@ describe('RSPack cache invalidation configuration', () => {
     it('should reference chunk_preload_manifest_plugin', () => {
       expect(configSource).toContain('chunk_preload_manifest_plugin');
     });
+
+    it('tracks the DLL manifest as a compile-time build dependency', () => {
+      expect(configSource).toContain('extraBuildDependencies: [dllManifestPath]');
+      const cacheFiles = configSource.slice(
+        configSource.indexOf('const CACHE_CONFIG_FILES'),
+        configSource.indexOf('];')
+      );
+      expect(cacheFiles).not.toContain('dllManifest');
+    });
   });
 
   describe('create_external_plugin_config.ts references required files', () => {

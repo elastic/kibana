@@ -1,0 +1,208 @@
+{
+  "components": {
+    "schemas": {
+      "CloudError": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorResponse"
+          }
+        }
+      },
+      "ErrorAdditionalInfo": {
+        "properties": {
+          "info": {
+            "readOnly": true,
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "additionalInfo": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorAdditionalInfo"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "code": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "message": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "target": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "title": "Error Response",
+        "type": "object"
+      },
+      "ResourceGroup": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "managedBy": {
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/ResourceGroupProperties"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      },
+      "ResourceGroupListResult": {
+        "properties": {
+          "nextLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceGroup"
+            },
+            "type": "array"
+          }
+        }
+      },
+      "ResourceGroupProperties": {
+        "properties": {
+          "provisioningState": {
+            "readOnly": true,
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "ResourceManagementClient"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/resourcegroups": {
+      "get": {
+        "operationId": "ResourceGroups_List",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$top",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceGroupListResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

@@ -11,16 +11,22 @@ import type { CoreStart } from '@kbn/core/public';
 import { ALERTZERO_APP_ID } from '../../../common/constants';
 import { SELECTED_CONVERSATION_ID_PARAM } from './conversations_url_params';
 import { copyLink } from './copy_link';
+import type { UiErrorSurface } from '../../telemetry';
+import { useReportToastError } from '../../telemetry';
 
 /**
  * Copies an app link that opens the given conversation's details flyout, and returns whether it
  * worked. Shared by the card menu and the flyout's trailing action, so both build the link
- * identically; each confirms success its own way.
+ * identically; each confirms success its own way. `surface` names the control in telemetry when
+ * the copy fails.
  */
-export const useCopyInvestigationLink = (): ((conversationId: string) => boolean) => {
+export const useCopyInvestigationLink = (
+  surface: Extract<UiErrorSurface, 'queue' | 'flyout'>
+): ((conversationId: string) => boolean) => {
   const {
     services: { application, notifications },
   } = useKibana<CoreStart>();
+  const reportShown = useReportToastError(surface);
 
   return useCallback(
     (conversationId: string) => {
@@ -28,8 +34,8 @@ export const useCopyInvestigationLink = (): ((conversationId: string) => boolean
         path: `?${SELECTED_CONVERSATION_ID_PARAM}=${encodeURIComponent(conversationId)}`,
         absolute: true,
       });
-      return copyLink(notifications?.toasts, link);
+      return copyLink(notifications?.toasts, link, () => reportShown('clipboard'));
     },
-    [application, notifications]
+    [application, notifications, reportShown]
   );
 };

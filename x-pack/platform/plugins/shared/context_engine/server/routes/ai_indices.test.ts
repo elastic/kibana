@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+jest.mock('../ai_indices/ki_write');
+
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -17,6 +19,9 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
+import { KiConflictError, KiDeletedError, KiNotFoundError } from '../ai_indices/errors';
+import type { ContextEngineAnalyticsService } from '../telemetry';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
   MAX_AI_INDEX_QUERY_LENGTH,
@@ -29,10 +34,12 @@ import {
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
+  MAX_KI_SEARCH_QUERY_LENGTH,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
   AI_INDEX_QUERY_PATH,
@@ -52,7 +59,6 @@ import {
   AiIndexAlreadyExistsError,
   AiIndexQueryResponseTooLargeError,
   InvalidAiIndexQueryError,
-  KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
@@ -146,6 +152,7 @@ describe('ai indices routes', () => {
   let getSpaces: jest.Mock;
   let getAgentBuilder: jest.Mock;
   let esResolveIndex: jest.Mock;
+  let analyticsService: jest.Mocked<Pick<ContextEngineAnalyticsService, 'reportKiWrite'>>;
   const logger = loggerMock.create();
   const defaultSpaceId = 'default';
 
@@ -230,6 +237,14 @@ describe('ai indices routes', () => {
     improvementsSpaceIds = [];
     getSpaces = jest.fn().mockResolvedValue(spacesStart);
     getAgentBuilder = jest.fn().mockResolvedValue(undefined);
+    analyticsService = { reportKiWrite: jest.fn() };
+    jest.mocked(updateKi).mockResolvedValue({ id: 'ki-1', result: 'updated' });
+    jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+    jest.mocked(restoreKi).mockResolvedValue({ id: 'ki-1' });
+    jest.mocked(buildKiApiWriter).mockReturnValue({
+      uri: 'api://context_engine.ki.update',
+      metadata: { space_id: defaultSpaceId },
+    });
     scheduleService = {
       reconcile: jest.fn().mockResolvedValue(undefined),
       remove: jest.fn().mockResolvedValue(undefined),
@@ -255,6 +270,7 @@ describe('ai indices routes', () => {
         get: jest.fn(createVersionedRoute('GET')),
         post: jest.fn(createVersionedRoute('POST')),
         put: jest.fn(createVersionedRoute('PUT')),
+        patch: jest.fn(createVersionedRoute('PATCH')),
         delete: jest.fn(createVersionedRoute('DELETE')),
       },
     } as unknown as IRouter;
@@ -262,6 +278,7 @@ describe('ai indices routes', () => {
     registerAiIndexRoutes({
       router,
       logger,
+      analyticsService: analyticsService as unknown as ContextEngineAnalyticsService,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       getAiIndexDataReadService: (params) => {
         readServiceParams.push(params);
@@ -318,6 +335,16 @@ describe('ai indices routes', () => {
       params: { aiIndexId: 'a', kiId: 'ki-1' },
       query: { index: kiBackingIndex },
     });
+    await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
+      params: { aiIndexId: 'a', kiId: 'ki-1' },
+      body: { ki: { content: 'Updated' } },
+    });
+    await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
+      params: { aiIndexId: 'a', kiId: 'ki-1' },
+    });
+    await callRoute('POST', AI_INDEX_KI_RESTORE_PATH, {
+      params: { aiIndexId: 'a', kiId: 'ki-1' },
+    });
     await callRoute('GET', AI_INDEX_PATH, {});
     await callRoute('POST', AI_INDEX_QUERY_PATH, { body: { query: 'FROM ai-index-idx-a' } });
     await callRoute('GET', AI_INDEX_DESCRIBE_PATH, { params: { aiIndexId: 'a' } });
@@ -328,7 +355,7 @@ describe('ai indices routes', () => {
     });
 
     expect(response.notFound.mock.calls).toEqual(
-      Array(10).fill([{ body: { message: 'Not Found' } }])
+      Array(13).fill([{ body: { message: 'Not Found' } }])
     );
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
@@ -360,6 +387,18 @@ describe('ai indices routes', () => {
     expect(getRoute('GET', AI_INDEX_KI_BY_ID_PATH).config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+    });
+    expect(getRoute('PATCH', AI_INDEX_KI_BY_ID_PATH).config).toMatchObject({
+      access: 'internal',
+      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+    });
+    expect(getRoute('DELETE', AI_INDEX_KI_BY_ID_PATH).config).toMatchObject({
+      access: 'internal',
+      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+    });
+    expect(getRoute('POST', AI_INDEX_KI_RESTORE_PATH).config).toMatchObject({
+      access: 'internal',
+      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
     });
     expect(getRoute('GET', AI_INDEX_PATH).config).toMatchObject({
       access: 'public',
@@ -1146,6 +1185,46 @@ describe('ai indices routes', () => {
       });
     });
 
+    it('passes search query to Elasticsearch', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(rows([]))
+        .mockResolvedValueOnce(totals(0))
+        .mockResolvedValueOnce(buckets([]));
+
+      await callRoute('GET', AI_INDEX_KI_LIST_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { size: 25, query: 'refund policy' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining(
+          'MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2})'
+        ),
+        params: [{ searchQuery: 'refund policy' }],
+      });
+    });
+
+    describe('query validation', () => {
+      const validateQuery = (queryParams: unknown) => {
+        const { validate } = getRoute('GET', AI_INDEX_KI_LIST_PATH);
+        if (validate === false || !validate.request?.query) {
+          throw new Error('expected a query schema');
+        }
+        return validate.request.query.validate(queryParams);
+      };
+
+      it('accepts a bounded search query', () => {
+        expect(() =>
+          validateQuery({ query: 'a'.repeat(MAX_KI_SEARCH_QUERY_LENGTH) })
+        ).not.toThrow();
+        expect(() =>
+          validateQuery({ query: 'a'.repeat(MAX_KI_SEARCH_QUERY_LENGTH + 1) })
+        ).toThrow();
+      });
+    });
+
     it('returns 404 when the AI Index does not exist', async () => {
       aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
@@ -1257,14 +1336,13 @@ describe('ai indices routes', () => {
       expect(esSearch).toHaveBeenCalledWith(
         expect.objectContaining({
           index: aiIndexItem.dest.value,
-          query: {
-            bool: {
-              filter: [kiIdQuery('ki-1')],
-            },
-          },
+          query: kiIdQuery('ki-1'),
           // A data stream dest fetches the tie window of newest revisions.
           size: 10,
-        })
+          seq_no_primary_term: true,
+          _source: true,
+        }),
+        { signal: undefined }
       );
       expect(response.ok).toHaveBeenCalledWith({
         body: {
@@ -1382,6 +1460,283 @@ describe('ai indices routes', () => {
       });
 
       expect(response.notFound).toHaveBeenCalled();
+    });
+  });
+
+  describe('PATCH /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
+    it('updates a Knowledge Indicator', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(updateKi).mockResolvedValue({ id: 'ki-1', result: 'updated' });
+
+      await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        body: { ki: { content: 'Updated content' } },
+      });
+
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
+      expect(buildKiApiWriter).toHaveBeenCalledWith('update', defaultSpaceId);
+      expect(updateKi).toHaveBeenCalledWith(
+        expect.objectContaining({ search: esSearch }),
+        expect.objectContaining({
+          aiIndexId: 'customer_support',
+          dest: aiIndexItem.dest,
+          kiId: 'ki-1',
+          ki: { content: 'Updated content' },
+        })
+      );
+      expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'update',
+          aiIndexId: 'customer_support',
+          outcome: 'success',
+        })
+      );
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'ki_update',
+            outcome: 'success',
+          }),
+          kibana: { saved_object: { type: 'ki', id: 'ki-1' } },
+        })
+      );
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { id: 'ki-1', status: 'updated' },
+      });
+    });
+
+    it('rejects a body that updates fields other than content', () => {
+      const { validate } = getRoute('PATCH', AI_INDEX_KI_BY_ID_PATH);
+      if (validate === false || !validate.request?.body) {
+        throw new Error('expected a body schema');
+      }
+      const bodySchema = validate.request.body;
+      expect(() => bodySchema.validate({ ki: { title: 'Updated title' } })).toThrow();
+      expect(() =>
+        bodySchema.validate({ ki: { content: 'Updated content', title: 'Updated title' } })
+      ).toThrow();
+    });
+
+    it('passes the index query param as backingIndex to updateKi', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(updateKi).mockResolvedValue({ id: 'ki-1', result: 'updated' });
+
+      await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        query: { index: kiBackingIndex },
+        body: { ki: { content: 'Updated content' } },
+      });
+
+      expect(updateKi).toHaveBeenCalledWith(
+        expect.objectContaining({ search: esSearch }),
+        expect.objectContaining({
+          aiIndexId: 'customer_support',
+          dest: aiIndexItem.dest,
+          kiId: 'ki-1',
+          backingIndex: kiBackingIndex,
+        })
+      );
+    });
+
+    it('returns 404 when the KI does not exist', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(updateKi).mockRejectedValue(new KiNotFoundError('customer_support', 'missing'));
+
+      await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'missing' },
+        body: { ki: { content: 'Updated content' } },
+      });
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: new KiNotFoundError('customer_support', 'missing').message },
+      });
+      expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'failure', errorType: 'NotFoundError' })
+      );
+    });
+
+    it('returns 409 when the KI is soft-deleted', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(updateKi).mockRejectedValue(new KiDeletedError('customer_support', 'ki-1'));
+
+      await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        body: { ki: { content: 'Updated content' } },
+      });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: new KiDeletedError('customer_support', 'ki-1').message },
+      });
+      expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'failure', errorType: 'ConflictError' })
+      );
+    });
+  });
+
+  describe('DELETE /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
+    it('soft-deletes a Knowledge Indicator', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+      jest.mocked(buildKiApiWriter).mockReturnValue({
+        uri: 'api://context_engine.ki.delete',
+        metadata: { space_id: defaultSpaceId },
+      });
+
+      await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+      });
+
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
+      expect(buildKiApiWriter).toHaveBeenCalledWith('delete', defaultSpaceId);
+      expect(softDeleteKi).toHaveBeenCalledWith(
+        expect.objectContaining({ search: esSearch }),
+        expect.objectContaining({
+          aiIndexId: 'customer_support',
+          dest: aiIndexItem.dest,
+          kiId: 'ki-1',
+        })
+      );
+      expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'delete',
+          aiIndexId: 'customer_support',
+          outcome: 'success',
+        })
+      );
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'ki_delete',
+            outcome: 'success',
+          }),
+          kibana: { saved_object: { type: 'ki', id: 'ki-1' } },
+        })
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { id: 'ki-1' } });
+    });
+
+    it('passes the index query param as backingIndex to softDeleteKi', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+
+      await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        query: { index: kiBackingIndex },
+      });
+
+      expect(softDeleteKi).toHaveBeenCalledWith(
+        expect.objectContaining({ search: esSearch }),
+        expect.objectContaining({
+          aiIndexId: 'customer_support',
+          dest: aiIndexItem.dest,
+          kiId: 'ki-1',
+          backingIndex: kiBackingIndex,
+        })
+      );
+    });
+
+    it('returns 404 when the KI does not exist', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest
+        .mocked(softDeleteKi)
+        .mockRejectedValue(new KiNotFoundError('customer_support', 'missing'));
+
+      await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'missing' },
+      });
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: new KiNotFoundError('customer_support', 'missing').message },
+      });
+    });
+
+    it('returns 409 on concurrent modification', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(softDeleteKi).mockRejectedValue(new KiConflictError('customer_support', 'ki-1'));
+
+      await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+      });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: new KiConflictError('customer_support', 'ki-1').message },
+      });
+    });
+  });
+
+  describe('POST /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}/_restore', () => {
+    it('restores a Knowledge Indicator', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(restoreKi).mockResolvedValue({ id: 'ki-1' });
+      jest.mocked(buildKiApiWriter).mockReturnValue({
+        uri: 'api://context_engine.ki.restore',
+        metadata: { space_id: defaultSpaceId },
+      });
+
+      await callRoute('POST', AI_INDEX_KI_RESTORE_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+      });
+
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
+      expect(buildKiApiWriter).toHaveBeenCalledWith('restore', defaultSpaceId);
+      expect(restoreKi).toHaveBeenCalledWith(
+        expect.objectContaining({ search: esSearch }),
+        expect.objectContaining({
+          aiIndexId: 'customer_support',
+          dest: aiIndexItem.dest,
+          kiId: 'ki-1',
+        })
+      );
+      expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'restore',
+          aiIndexId: 'customer_support',
+          outcome: 'success',
+        })
+      );
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'ki_restore',
+            outcome: 'success',
+          }),
+          kibana: { saved_object: { type: 'ki', id: 'ki-1' } },
+        })
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { id: 'ki-1' } });
+    });
+
+    it('passes the index query param as backingIndex to restoreKi', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(restoreKi).mockResolvedValue({ id: 'ki-1' });
+
+      await callRoute('POST', AI_INDEX_KI_RESTORE_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        query: { index: kiBackingIndex },
+      });
+
+      expect(restoreKi).toHaveBeenCalledWith(
+        expect.objectContaining({ search: esSearch }),
+        expect.objectContaining({
+          aiIndexId: 'customer_support',
+          dest: aiIndexItem.dest,
+          kiId: 'ki-1',
+          backingIndex: kiBackingIndex,
+        })
+      );
+    });
+
+    it('returns 404 when the KI does not exist', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest.mocked(restoreKi).mockRejectedValue(new KiNotFoundError('customer_support', 'missing'));
+
+      await callRoute('POST', AI_INDEX_KI_RESTORE_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'missing' },
+      });
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: new KiNotFoundError('customer_support', 'missing').message },
+      });
     });
   });
 
@@ -1687,6 +2042,7 @@ describe('ai indices routes', () => {
               get: jest.fn(() => ({ addVersion: jest.fn() })),
               post: jest.fn(() => ({ addVersion: jest.fn() })),
               put: jest.fn(() => ({ addVersion: jest.fn() })),
+              patch: jest.fn(() => ({ addVersion: jest.fn() })),
               delete: jest.fn((config) => ({
                 addVersion: (
                   versionConfig: RegisteredRoute['validate'],
@@ -1698,6 +2054,7 @@ describe('ai indices routes', () => {
             },
           } as unknown as IRouter,
           logger,
+          analyticsService: analyticsService as unknown as ContextEngineAnalyticsService,
           getAiIndexService: () => aiIndexService as unknown as AiIndexService,
           getAiIndexDataReadService: () => readService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,

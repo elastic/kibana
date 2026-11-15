@@ -173,7 +173,9 @@ export function TransactionDetailFlyout({
         isFiltersPending={isFiltersPending}
       />
       {fullTraceFlyout ? (
+        // Keyed by trace so switching samples behind the non-modal waterfall drops its doc state.
         <TraceWaterfallFlyout
+          key={fullTraceFlyout.traceId}
           traceId={fullTraceFlyout.traceId}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}

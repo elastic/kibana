@@ -1,0 +1,9 @@
+{
+  "request": {
+    "input": {
+      "method": "GET",
+      "path": "/api/v1/applications",
+      "query": {}
+    }
+  }
+}

@@ -42,7 +42,7 @@ export function registerInstallTemplateRoute(
       path: '/internal/workflows/library/templates/{slug}/install',
       access: 'internal',
       security: WORKFLOW_CREATE_SECURITY,
-      summary: 'Install a Workflow Template Library template',
+      summary: 'Install a Workflow Template library template',
       description:
         'Renders a template with the submitted install-form values and creates a workflow from the result.',
     })

@@ -129,7 +129,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
         title: '<Measure> over time',
         axis: { x: { scale: 'temporal', ...hiddenAxisTitle }, y: hiddenAxisTitle },
         legend: listLegend,
-        styling: { areas: { fill: 'gradient' } },
         layers: [
           {
             type: 'area',
@@ -152,7 +151,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
           visibility: 'visible',
           statistics: ['avg', 'min', 'max'],
         },
-        styling: { areas: { fill: 'gradient' } },
         layers: [
           {
             type: 'area',
@@ -219,7 +217,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
         title: '<Measure> over time',
         axis: { x: { scale: 'temporal', ...hiddenAxisTitle }, y: hiddenAxisTitle },
         legend: listLegend,
-        styling: { areas: { fill: 'gradient' } },
         layers: [
           {
             type: 'area',

@@ -1,5 +1,5 @@
 {
-  "sha1": "f0a0caf6495d454dd98a88e32187b04202ec8857",
+  "sha1": "f55ec5a411f1c207a915001af55d59a2bbc4dd57",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -65,6 +65,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/discover_lighthouse.spec.ts",
         "line": 26,
         "column": 20
+      }
+    },
+    {
+      "id": "955a41c98b46cc0-dc59d06f5b87d96",
+      "title": "Discover managed content requires a copy when saving a managed session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/managed_content.spec.ts",
+        "line": 29,
+        "column": 28
       }
     },
     {

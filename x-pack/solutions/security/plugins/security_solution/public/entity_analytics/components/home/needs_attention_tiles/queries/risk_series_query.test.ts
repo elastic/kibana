@@ -18,22 +18,34 @@ const INDEX = '.entities-v1';
 describe('risk tiles series query', () => {
   it('counts a mover when the score rose by 10 points, and ignores a missing score', () => {
     expect(buildRiskTilesSeriesQuery('default', INDEX, '24h')).toContain(
-      `mover_flag_0 = CASE(score_at_0 - score_at_24 >= ${RISK_MOVER_MIN_SCORE_CHANGE}, 1, null)`
+      `mover_flag_0 = CASE(score_at_0 - score_at_6 >= ${RISK_MOVER_MIN_SCORE_CHANGE}, 1, null)`
     );
   });
 
-  it('reads back 332 hours for 7d and keeps only the docs in the two hours before a moment a dot needs', () => {
+  it('reads back 310 hours for 7d and keeps only the docs in the two hours before a moment a dot needs', () => {
     const query = buildRiskTilesSeriesQuery('default', INDEX, '7d');
-    expect(query).toContain('| WHERE @timestamp >= NOW() - 332h');
-    expect(query).toContain('| WHERE hours_back % 6 < 2');
+    expect(query).toContain('| WHERE @timestamp >= NOW() - 310h');
+    expect(query).not.toContain('hours_back %');
   });
 
-  it('puts a doc in every moment whose two-hour window holds it', () => {
-    const overlapping = buildRiskTilesSeriesQuery('default', INDEX, '24h');
-    expect(overlapping).toContain(
-      '| EVAL slot = MV_DEDUPE(MV_APPEND(hours_back / 1, (hours_back - 1) / 1))'
+  it('reads only the two-hour window of each moment, as plain time ranges before any EVAL', () => {
+    const query = buildRiskTilesSeriesQuery('default', INDEX, '7d');
+    const windows = query.match(
+      /\(@timestamp > NOW\(\) - \d+h AND @timestamp <= NOW\(\) - \d+h\)/g
     );
-    expect(overlapping).toContain('| WHERE slot >= 0 AND hours_back <= slot * 1 + 1');
+    // One window per moment: the end and the start of each of the 6 dots.
+    expect(windows).toHaveLength(12);
+    expect(windows?.[0]).toBe('(@timestamp > NOW() - 2h AND @timestamp <= NOW() - 0h)');
+    expect(windows?.[11]).toBe('(@timestamp > NOW() - 310h AND @timestamp <= NOW() - 308h)');
+    expect(query.indexOf(windows?.[0] ?? '')).toBeLessThan(query.indexOf('| EVAL'));
+  });
+
+  it('puts a doc in the moment whose two-hour window holds it', () => {
+    const query = buildRiskTilesSeriesQuery('default', INDEX, '24h');
+    expect(query).toContain(
+      '| EVAL slot = MV_DEDUPE(MV_APPEND(hours_back / 4, (hours_back - 1) / 4))'
+    );
+    expect(query).toContain('| WHERE slot >= 0 AND hours_back <= slot * 4 + 1');
   });
 
   it('scans the risk index once for both tiles', () => {

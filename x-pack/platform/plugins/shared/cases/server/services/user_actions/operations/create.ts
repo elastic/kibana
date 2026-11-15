@@ -21,17 +21,18 @@ import type {
 } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
-import { UserActionPersistedAttributesRt } from '../../../common/types/user_actions';
+import { UserActionPersistedAttributesSchema } from '../../../common/types/user_actions';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import { BuilderFactory } from '../builder_factory';
 import type {
   AddSyncedAlertsCountToUserActionsParams,
   BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
+  BulkCreateAttachmentBulkDeletionUserAction,
   BulkCreateBulkUpdateCaseUserActions,
   CommonUserActionArgs,
   CreatePayloadFunction,
@@ -519,6 +520,66 @@ export class UserActionPersister {
     });
   }
 
+  /**
+   * Records one `bulkAttachments` user action per attachment type. Each deleted attachment still
+   * gets its own audit event, keyed on its saved object id.
+   */
+  public async bulkCreateAttachmentBulkDeletion({
+    caseId,
+    owner,
+    deletions,
+    user,
+    refresh,
+  }: BulkCreateAttachmentBulkDeletionUserAction): Promise<void> {
+    const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.bulkAttachments);
+    if (userActionBuilder == null) {
+      return;
+    }
+
+    const recorded = deletions.flatMap(({ attachmentType, count, attachments }) => {
+      if (count === 0) {
+        return [];
+      }
+
+      const userAction = userActionBuilder.build({
+        caseId,
+        user,
+        owner,
+        payload: { bulkAttachments: { attachmentType, count } },
+      });
+
+      return userAction == null ? [] : [{ userAction, attachments }];
+    });
+
+    const createdUserActions = await this.bulkCreate({
+      actions: recorded.map(({ userAction }) => userAction),
+      refresh,
+    });
+
+    createdUserActions?.saved_objects.forEach((savedObject, i) => {
+      if (savedObject == null || isSavedObjectErrorResult(savedObject)) {
+        return;
+      }
+
+      const { userAction, attachments } = recorded[i];
+      this.auditLogger.log(userAction.eventDetails, savedObject.id);
+
+      for (const { id, savedObjectType } of attachments) {
+        this.auditLogger.log(
+          {
+            getMessage: (userActionId) =>
+              `User deleted comment id: ${id} for case id: ${caseId} - user action id: ${userActionId}`,
+            action: UserActionActions.delete,
+            descriptiveAction: 'case_user_action_delete_comment',
+            savedObjectId: id,
+            savedObjectType,
+          },
+          savedObject.id
+        );
+      }
+    });
+  }
+
   private async bulkCreateAttachment({
     caseId,
     attachments,
@@ -600,9 +661,9 @@ export class UserActionPersister {
       const response =
         await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
           actions.map((action) => {
-            const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
+            const decodedAttributes = decodeOrThrowZod(UserActionPersistedAttributesSchema)(
               this.withActionSource(action.parameters.attributes)
-            );
+            ) as UserActionPersistedAttributes;
 
             return {
               type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -746,9 +807,9 @@ export class UserActionPersister {
     try {
       this.context.log.debug(`Attempting to POST a new case user action`);
 
-      const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
+      const decodedAttributes = decodeOrThrowZod(UserActionPersistedAttributesSchema)(
         this.withActionSource(attributes)
-      );
+      ) as UserActionPersistedAttributes;
 
       const res = await this.context.unsecuredSavedObjectsClient.create<T>(
         CASE_USER_ACTION_SAVED_OBJECT,

@@ -1220,6 +1220,10 @@ export interface SuggestionRequest<T = unknown> {
    * Visualizations can use it to tailor suggestions (e.g. prefer line for time series).
    */
   query?: AggregateQuery;
+  /**
+   * Caller-provided defaults (from `defaultVisualizationOverrides`), used only when there is no current `state`.
+   */
+  defaultOverrides?: Partial<T>;
 }
 
 /**

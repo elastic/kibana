@@ -12,6 +12,7 @@ import type {
   ManagedWorkflowId,
   ManagedWorkflowTemplateValues,
   ManagedWorkflowTemplateValuesForId,
+  TemplatedManagedWorkflowId,
 } from '../managed';
 
 interface ManagedWorkflowOperationBaseOptions {
@@ -51,6 +52,34 @@ export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseO
     values?: ManagedWorkflowTemplateValues;
   };
 
+/**
+ * One static workflow in an `installMany` batch. Templated workflows are not supported here yet;
+ * install them with `install()`. It's a typing limit, not a runtime one: one array can't type each
+ * item's `values` by its own id. A generic helper function that builds one item per call would
+ * solve it.
+ */
+export type ManagedWorkflowInstallManyItem = ManagedWorkflowOperationBaseOptions & {
+  id: Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>;
+};
+
+export type ManagedWorkflowServiceInstallManyItem = ManagedWorkflowOperationBaseOptions & {
+  id: ManagedWorkflowId;
+  values?: ManagedWorkflowTemplateValues;
+};
+
+export interface ManagedWorkflowInstallFailure {
+  /** Managed workflow definition id. */
+  id: ManagedWorkflowId;
+  /** Workflow document id, when the item resolved to one. */
+  workflowId?: string;
+  spaceId: string;
+  error: Error;
+}
+
+export interface ManagedWorkflowInstallManyResult {
+  failed: ManagedWorkflowInstallFailure[];
+}
+
 export type ExecuteManagedWorkflowOptions = ManagedWorkflowOperationOptions & {
   inputs?: Record<string, unknown>;
   triggeredBy?: string;
@@ -77,7 +106,8 @@ export interface ManagedWorkflowStatusReport {
   storedVersion: number | null;
   registryVersion: number;
   storedHash: string | null;
-  registryHash: string;
+  /** Hash of the YAML the document should hold now; `null` for a template it cannot render. */
+  registryHash: string | null;
 }
 
 /** Persisted state exposed only to the plugin that owns the managed workflow. */
@@ -124,10 +154,34 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     id: TId,
     options: ManagedWorkflowInstallOptions<TId>
   ) => Promise<void>;
+  /**
+   * Install or update this plugin's static managed workflows in one pass: one read, then `_bulk`
+   * writes in bounded chunks with one refresh each. Use it for the static set a plugin installs at
+   * start-up; `install()` keeps writing one workflow at a time.
+   *
+   * A failed item (unknown or dynamic definition, a `settings.run_as` binding, a user workflow
+   * with the same id, a write error) is reported in `failed` and does not stop the others. Rejects
+   * only when the whole pass fails, such as the initial read. Best-effort like `install()`: may
+   * resolve without persisting when Workflows is unavailable, Kibana is stopping, or ES is not
+   * ready for managed writes. Templated workflows are not accepted yet; see
+   * {@link ManagedWorkflowInstallManyItem}.
+   */
+  installMany: (
+    items: ReadonlyArray<ManagedWorkflowInstallManyItem>
+  ) => Promise<ManagedWorkflowInstallManyResult>;
   uninstall: <TId extends ManagedWorkflowId>(
     id: TId,
     options: ManagedWorkflowOperationOptions
   ) => Promise<void>;
+  /**
+   * Switch off this plugin's managed workflow without a request, including one bound to a
+   * service account. Resolves `false` when nothing was switched off (missing, not managed,
+   * already off, or Workflows unavailable); throws when the caller does not own the workflow.
+   */
+  disable: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: ManagedWorkflowOperationOptions
+  ) => Promise<boolean>;
   /**
    * Signal that the plugin has finished installing all its static managed workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
@@ -214,9 +268,25 @@ export interface PluginScopedManagedWorkflowsApi
  * This is the public interface for workflows operations that can be used by any plugin.
  * It is registered to the `workflows` API request context, and exposed by `workflowsExtensions` plugin in its start contract.
  */
+export interface ResumeExternalHitlParams {
+  token: string;
+  executionId: string;
+  stepId: string;
+  spaceId: string;
+  input: Record<string, unknown>;
+}
+
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
-  emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+  emitEvent: (
+    triggerId: string,
+    payload: Record<string, unknown>,
+    options?: { authenticatedUser?: string }
+  ) => Promise<void>;
+  /**
+   * Resume a paused HITL wait step using the external resume token (e.g. Slack interactivity).
+   */
+  resumeExternalHitl: (params: ResumeExternalHitlParams) => Promise<void>;
   managedWorkflows: ManagedWorkflowsApi;
 }
 

@@ -65,7 +65,7 @@ local profile.
 Preferred one-shot flow (starts EDOT + Scout + EIS CCM, then runs Playwright):
 
 ```bash
-# Full suite
+# Full suite (if --judge is not passed, the default judge model is used)
 node scripts/evals start --suite alerting-v2 --judge eis-google-gemini-3-1-pro
 
 # Filter by Playwright test title

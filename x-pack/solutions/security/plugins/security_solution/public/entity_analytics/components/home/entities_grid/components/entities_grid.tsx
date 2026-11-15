@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiDataGrid,
   EuiProgress,
@@ -19,8 +19,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useIsFetching } from '@kbn/react-query';
-import { APP_ID } from '../../../../../../common/constants';
-import { useKibana } from '../../../../../common/lib/kibana';
 import {
   ENTITY_GRID_CHILDREN_QUERY_KEY,
   MAX_LOADED_ROWS,
@@ -40,11 +38,15 @@ import { getEntityGridToolbarVisibility } from './entities_grid_toolbar';
 import { EntityGridBodyContext, useEntityGridView } from './entities_grid_view_context';
 import type { EntityGridView } from './entities_grid_view_context';
 import { DataViewContext } from '../../entities_table';
-import { isGridColumnId } from '../grid_columns';
+import { COLUMN_ACTIONS, getReadableColumns, isGridColumnId } from '../grid_columns';
+import type { ReadAccess } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
+import { useGridLoadTelemetry } from '../hooks/use_grid_load_telemetry';
+import { RISK_SCORE_NORM_FIELD } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 
 const gridContainerCss = css`
+  block-size: 100%;
   padding-block-start: 12px;
   position: relative;
 `;
@@ -73,12 +75,13 @@ const EntityGridActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) =
   const { rows, rowActions } = useEntityGridView();
   const row = rows[rowIndex];
   if (!row || !rowActions) return null;
-  const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat } = rowActions;
+  const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat, onAddToCase } = rowActions;
   return (
     <RowActionsCell
-      onInvestigateInTimeline={() => onInvestigateInTimeline(row)}
+      onInvestigateInTimeline={onInvestigateInTimeline && (() => onInvestigateInTimeline(row))}
       onOpenEntityGraph={() => onOpenEntityGraph(row)}
       onAddToChat={onAddToChat && (() => onAddToChat(row))}
+      onAddToCase={onAddToCase && (() => onAddToCase(row))}
     />
   );
 };
@@ -106,11 +109,28 @@ export interface EntitiesGridProps {
   onSortChange: (field: string, direction: SortDir) => void;
   searchExpression?: string;
   entityExpression?: string;
+  isSearchOverridesPending?: boolean;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
+  /** Columns of a source the user can't read are left out, so their queries never run. */
+  readAccess: ReadAccess;
   /** Without them the grid has no toolbar, as inside a group. */
   toolbarControls?: React.ReactNode;
   onFullScreenChange?: (isFullScreen: boolean) => void;
+  /**
+   * Set when the active tile has more entities than the table is filtered by: the toolbar then
+   * says how many of the tile's entities the table shows.
+   */
+  cappedTile?: { total: number; limit: number };
+  /** Only the page's own grid reports its loads; the grids inside groups don't pass it. */
+  loadTelemetry?: {
+    /** What the user asked for: a new key is a new load. */
+    runKey: string;
+    /** The search overrides or the tile's entity ids are still resolving for this load. */
+    isFilterPending: boolean;
+    hasTileFilter: boolean;
+    hasEntityFilters: boolean;
+  };
 }
 
 export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
@@ -123,20 +143,28 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   onSortChange,
   searchExpression,
   entityExpression,
+  isSearchOverridesPending,
   cellHandlers,
   rowActions,
+  readAccess,
   toolbarControls,
   onFullScreenChange,
+  cappedTile,
+  loadTelemetry,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { dataView } = useContext(DataViewContext);
-  const { cases } = useKibana().services;
-  const canReadCases = cases.helpers.canUseCases([APP_ID]).read;
-  // Users who can't read Security cases get no case counts: no Cases column, not zeros.
+  // EUI doesn't report leaving full screen when the grid unmounts (grouping, browser Back).
+  useEffect(() => () => onFullScreenChange?.(false), [onFullScreenChange]);
   const columns = useMemo(
-    () => rowsColumns.filter(({ id }) => canReadCases || id !== 'case_count'),
-    [rowsColumns, canReadCases]
+    () => getReadableColumns(rowsColumns, readAccess),
+    [rowsColumns, readAccess]
   );
+  const columnIds = useMemo(() => columns.map(({ id }) => id), [columns]);
+  // A sort from the URL on a column the user can't read would still query its source.
+  const isSortReadable = !isGridColumnId(sortField) || columnIds.includes(sortField);
+  const readableSortField = isSortReadable ? sortField : RISK_SCORE_NORM_FIELD;
+  const readableSortDirection = isSortReadable ? sortDirection : 'desc';
   const isIndividualRows = rowsMode === 'individual';
 
   const { expandedIds: expandedIdList, toggleExpandedId } = useEntityAnalyticsUrlState();
@@ -179,21 +207,40 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     updatedAt,
     isFetching,
     isAtLoadLimit,
+    loadState,
     prefetch,
     onRowsInViewChange,
   } = useEntityGridData(
     {
-      sortField,
-      sortDirection,
+      sortField: readableSortField,
+      sortDirection: readableSortDirection,
       pageSize: MAX_LOADED_ROWS,
       searchExpression,
       entityExpression,
+      isSearchOverridesPending,
       timeRange,
       rowsMode,
       keepFields,
+      columnIds,
     },
     { enrichRowsInView: true }
   );
+
+  useGridLoadTelemetry({
+    skip: !loadTelemetry,
+    runKey: loadTelemetry?.runKey ?? '',
+    isFilterPending: !!loadTelemetry?.isFilterPending,
+    loadState,
+    isFetching,
+    meta: {
+      rowsMode,
+      sortField: readableSortField,
+      timeRange,
+      hasTileFilter: !!loadTelemetry?.hasTileFilter,
+      hasEntityFilters: !!loadTelemetry?.hasEntityFilters,
+      isAtLoadLimit,
+    },
+  });
 
   const onAddColumn = useCallback(
     (columnId: string) =>
@@ -208,29 +255,31 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   const sorting = useMemo(
     () => ({
-      columns: [{ id: sortField, direction: sortDirection }],
+      columns: [{ id: readableSortField, direction: readableSortDirection }],
       onSort: (cols: Array<{ id: string; direction: SortDir }>) => {
+        // Unsort removes the active column from EUI's list; fall back to the grid default.
+        if (cols.length === 0) {
+          onSortChange(RISK_SCORE_NORM_FIELD, 'desc');
+          return;
+        }
         // EUI passes every sorted column; the one the user just picked isn't the current sort.
-        const col = cols.find((c) => c.id !== sortField) ?? cols[0];
+        const col = cols.find((c) => c.id !== readableSortField) ?? cols[0];
         if (!col) return;
         onSortChange(col.id, col.direction);
       },
     }),
-    [sortField, sortDirection, onSortChange]
+    [readableSortField, readableSortDirection, onSortChange]
   );
 
   // Expanded groups on this page read their records; the URL can hold more expanded ids.
   const isChildrenFetching = useIsFetching({ queryKey: ENTITY_GRID_CHILDREN_QUERY_KEY }) > 0;
-  const prefetchChildren = useCallback(
-    (entityId: string) => prefetch(getGroupRecordsOptions(entityId, timeRange, keepFields)),
-    [prefetch, timeRange, keepFields]
-  );
 
   const extraColumns = useMemo(
     (): EuiDataGridColumn[] =>
       keepFields.map((id) => ({
         id,
         displayAsText: dataView?.getFieldByName(id)?.customLabel || id,
+        actions: COLUMN_ACTIONS,
         initialWidth: 160,
         isSortable: false,
         isExpandable: false,
@@ -241,15 +290,44 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   const gridColumns = useMemo(() => [...columns, ...extraColumns], [columns, extraColumns]);
 
+  const prefetchChildren = useCallback(
+    (entityId: string) => {
+      const { mainEntity, aliases } = getGroupRecordsOptions(
+        entityId,
+        timeRange,
+        keepFields,
+        gridColumns
+      );
+      prefetch(mainEntity);
+      prefetch(aliases);
+    },
+    [prefetch, timeRange, keepFields, gridColumns]
+  );
+
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
 
-  const shown = isAtLoadLimit ? rows.length : undefined;
+  // The table is only filtered by the first entities of a tile that has more: say how many of the
+  // tile's entities it shows. The numbers wait for the table's own total, like the plain one.
+  const toolbarTotal = total == null ? undefined : cappedTile?.total ?? total;
+  const shown = cappedTile ? total : isAtLoadLimit ? rows.length : undefined;
+  const limitNote = useMemo(
+    () =>
+      cappedTile
+        ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.tileLimitNote', {
+            defaultMessage:
+              'The table is limited to {limit} entities. Narrow the time range or filters to see a smaller set.',
+            values: { limit: cappedTile.limit.toLocaleString() },
+          })
+        : undefined,
+    [cappedTile]
+  );
   const toolbarVisibility = useMemo(
     () =>
       toolbarControls
         ? getEntityGridToolbarVisibility({
-            total,
+            total: toolbarTotal,
             shown,
+            limitNote,
             isIndividualRows,
             visibleColumns,
             onAddColumn,
@@ -260,8 +338,9 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
           })
         : false,
     [
-      total,
+      toolbarTotal,
       shown,
+      limitNote,
       isIndividualRows,
       visibleColumns,
       onAddColumn,
@@ -328,6 +407,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         <EntityGridRowsContext.Provider value={rowsContext}>
           <EuiDataGrid
             aria-label={GRID_ARIA_LABEL}
+            data-test-subj="entityAnalyticsEntitiesGrid"
             leadingControlColumns={
               isIndividualRows
                 ? INDIVIDUAL_LEADING_CONTROL_COLUMNS

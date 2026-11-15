@@ -5,41 +5,34 @@
  * 2.0.
  */
 
-import type * as rt from 'io-ts';
 import { badRequest } from '@hapi/boom';
-import { fold } from 'fp-ts/Either';
-import { identity } from 'fp-ts/function';
-import { pipe } from 'fp-ts/pipeable';
-
-import { exactCheck } from '@kbn/securitysolution-io-ts-utils/src/exact_check';
-import { formatErrors } from '@kbn/securitysolution-io-ts-utils/src/format_errors';
-import { throwErrors } from '../../common/api';
+import type { ZodType } from '@kbn/zod/v4';
+import { DeepStrict, stringifyZodError } from '@kbn/zod-helpers';
 
 type ErrorFactory = (message: string) => Error;
 
 export const createPlainError = (message: string) => new Error(message);
 
-export const throwBadRequestError = (errors: rt.Errors) => {
-  throw badRequest(formatErrors(errors).join());
-};
+/**
+ * Parses `value` with `schema` and throws `createError` when it fails. Unknown keys are stripped;
+ * use `decodeWithExcessOrThrowZod` to reject them.
+ */
+export const decodeOrThrowZod =
+  <T>(schema: ZodType<T>, createError: ErrorFactory = createPlainError) =>
+  (value: unknown): T => {
+    const result = schema.safeParse(value);
+    if (result.success) return result.data;
+    throw createError(stringifyZodError(result.error));
+  };
 
 /**
- * This function will throw if a required field is missing or an excess field is present.
- * NOTE: This will only throw for an excess field if the type passed in leverages exact from io-ts.
+ * Parses `value` with `schema` and throws a 400 when it fails or has unknown keys at any depth.
+ * Use it for request bodies and query strings.
  */
-export const decodeWithExcessOrThrow =
-  <A, O, I>(runtimeType: rt.Type<A, O, I>) =>
-  (inputValue: I): A =>
-    pipe(
-      runtimeType.decode(inputValue),
-      (decoded) => exactCheck(inputValue, decoded),
-      fold(throwBadRequestError, identity)
-    );
-
-/**
- * This function will throw if a required field is missing.
- */
-export const decodeOrThrow =
-  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
-  (inputValue: I) =>
-    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export const decodeWithExcessOrThrowZod =
+  <T>(schema: ZodType<T>) =>
+  (value: unknown): T => {
+    const result = DeepStrict(schema).safeParse(value);
+    if (result.success) return result.data as T;
+    throw badRequest(stringifyZodError(result.error));
+  };

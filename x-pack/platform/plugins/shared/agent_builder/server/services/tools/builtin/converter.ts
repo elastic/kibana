@@ -8,9 +8,11 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
   McpToolAnnotations,
   StaticToolRegistration,
   InternalToolDefinition,
+  ToolSchemaContext,
 } from '@kbn/agent-builder-server/tools';
 import type {
   ToolTypeDefinition,
@@ -24,14 +26,18 @@ export const convertTool = ({
   tool,
   definition,
   context,
+  getSchemaContext,
   cache,
 }: {
   tool: StaticToolRegistration;
   definition: ToolTypeDefinition | BuiltinToolTypeDefinition;
   context: ToolDynamicPropsContext;
+  /** Required to convert built-in tools with a dynamic schema. */
+  getSchemaContext?: () => ToolSchemaContext;
   cache: ToolAvailabilityCache;
 }): InternalToolDefinition => {
   if (isBuiltinToolRegistration(tool)) {
+    const getSchema = getBuiltinSchemaResolver(tool, getSchemaContext);
     return {
       id: tool.id,
       type: ToolType.builtin,
@@ -48,7 +54,7 @@ export const convertTool = ({
           return { status: 'available' };
         }
       },
-      getSchema: () => tool.schema,
+      getSchema,
       getHandler: () => tool.handler,
       summarizeToolReturn: tool.summarizeToolReturn,
       maxResultTokens: tool.maxResultTokens,
@@ -105,8 +111,28 @@ export const convertTool = ({
 
 export const isBuiltinToolRegistration = (
   tool: StaticToolRegistration
-): tool is BuiltinToolDefinition => {
+): tool is BuiltinToolDefinition | DynamicSchemaBuiltinToolDefinition => {
   return tool.type === ToolType.builtin;
+};
+
+const isDynamicSchemaBuiltinTool = (
+  tool: BuiltinToolDefinition | DynamicSchemaBuiltinToolDefinition
+): tool is DynamicSchemaBuiltinToolDefinition => {
+  return 'getSchema' in tool;
+};
+
+const getBuiltinSchemaResolver = (
+  tool: BuiltinToolDefinition | DynamicSchemaBuiltinToolDefinition,
+  getSchemaContext: (() => ToolSchemaContext) | undefined
+): InternalToolDefinition['getSchema'] => {
+  if (!isDynamicSchemaBuiltinTool(tool)) {
+    const { schema } = tool;
+    return () => schema;
+  }
+  if (!getSchemaContext) {
+    throw new Error(`Built-in tool '${tool.id}' has a dynamic schema but no schema context is set`);
+  }
+  return () => tool.getSchema(getSchemaContext());
 };
 
 const READ_ONLY_DEFAULTS: Omit<McpToolAnnotations, 'title'> = {

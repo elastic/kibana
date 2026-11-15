@@ -15,41 +15,58 @@ import { useListKiPanel } from './use_list_ki_panel';
 
 interface ListKiPanelProps {
   aiIndex: GetAiIndexResponse;
+  discoverHref?: string;
 }
 
-export const ListKiPanel = ({ aiIndex }: ListKiPanelProps) => {
+export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
   const {
     aiIndexId,
     typeFilter,
-    typeFilterOptions,
+    summary,
     onTypeFilterChange,
+    statusFilter,
+    onStatusFilterChange,
+    searchText,
+    submittedQuery,
+    onSearchTextChange,
+    onSearchSubmit,
     kis,
     total,
     size,
     isLoading,
     isFetching,
     error,
-    discoverHref,
-    indexManagementHref,
-    destValue,
     loadMore,
+    onSearchSubmitClick,
   } = useListKiPanel(aiIndex);
+
+  const isRefetching = isFetching && !isLoading;
 
   return (
     <div data-test-subj="contextListKiPanel">
       <ListKiHeader
-        total={total}
-        destValue={destValue}
-        indexManagementHref={indexManagementHref}
-        discoverHref={discoverHref}
+        searchText={searchText}
+        submittedQuery={submittedQuery}
+        isSearchLoading={isRefetching}
+        onSearchTextChange={onSearchTextChange}
+        onSearchSubmit={onSearchSubmit}
         typeFilter={typeFilter}
-        typeFilterOptions={typeFilterOptions}
+        summary={summary}
         onTypeFilterChange={onTypeFilterChange}
+        statusFilter={statusFilter}
+        onStatusFilterChange={onStatusFilterChange}
+        onSearchSubmitClick={onSearchSubmitClick}
       />
 
       <EuiSpacer size="l" />
 
-      <ListKiBody aiIndexId={aiIndexId} kis={kis} isLoading={isLoading} error={error} />
+      <ListKiBody
+        aiIndexId={aiIndexId}
+        kis={kis}
+        isLoading={isLoading}
+        isRefetching={isRefetching}
+        error={error}
+      />
 
       <ListKiFooter
         loadedCount={kis.length}

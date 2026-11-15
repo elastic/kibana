@@ -58,5 +58,55 @@ describe('createTimerange(interval, aggType, timeframe)', () => {
       );
       expect(subject.end - subject.start).toEqual(60000);
     });
+    it('should extend the range to the lastPeriodEnd when the schedule is more than 3x the execution window', () => {
+      const subject = createTimerange(
+        60000,
+        timeframe,
+        end.clone().subtract(5, 'minutes').valueOf(),
+        false,
+        5 * 60000
+      );
+      expect(subject.end - subject.start).toEqual(6 * 60000);
+    });
+    it('should not extend the range when the lastPeriodEnd is more than 3x the schedule interval', () => {
+      const subject = createTimerange(
+        60000,
+        timeframe,
+        end.clone().subtract(20, 'minutes').valueOf(),
+        false,
+        5 * 60000
+      );
+      expect(subject.end - subject.start).toEqual(60000);
+    });
+    it('should measure the look-back cutoff from the start of the window (end - interval - 3x schedule), so a lastPeriodEnd just inside it extends the range', () => {
+      const subject = createTimerange(
+        60000,
+        timeframe,
+        end.clone().subtract(15.5, 'minutes').valueOf(),
+        false,
+        5 * 60000
+      );
+      expect(subject.end - subject.start).toEqual(16.5 * 60000);
+    });
+    it('should not extend the range when the lastPeriodEnd is just outside the cutoff measured from the start of the window', () => {
+      const subject = createTimerange(
+        60000,
+        timeframe,
+        end.clone().subtract(16.5, 'minutes').valueOf(),
+        false,
+        5 * 60000
+      );
+      expect(subject.end - subject.start).toEqual(60000);
+    });
+    it('should extend the range to the lastPeriodEnd for rate aggregations when the schedule is more than 3x the execution window', () => {
+      const subject = createTimerange(
+        60000,
+        timeframe,
+        end.clone().subtract(10, 'minutes').valueOf(),
+        true,
+        10 * 60000
+      );
+      expect(subject.end - subject.start).toEqual(12 * 60000);
+    });
   });
 });

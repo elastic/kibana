@@ -9,7 +9,7 @@
 
 import { RuleTester } from 'eslint';
 import dedent from 'dedent';
-import { NoGroupCrossingManifestsRule } from './no_group_crossing_manifests';
+import { rules } from '../..';
 import { formatSuggestions } from '../helpers/report';
 import type { ModuleId } from '@kbn/repo-source-classifier/src/module_id';
 import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
@@ -220,7 +220,7 @@ const babelTester = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/imports/no_group_crossing_manifests', NoGroupCrossingManifestsRule, {
+    tester.run('@kbn/imports/no_group_crossing_manifests', rules.no_group_crossing_manifests, {
       valid: [
         makePlugin('path/to/search/plugins/searchPlugin1/server/index.ts'),
         makePlugin('path/to/security/plugins/securityPlugin1/server/index.ts'),

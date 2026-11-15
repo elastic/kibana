@@ -9,10 +9,12 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   HasTypeDisplayName,
   HasEditCapabilities,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesDataLoading,
   PublishesEsql,
   PublishesWritableTimeRange,
@@ -52,14 +54,15 @@ import {
 } from 'rxjs';
 import {
   isExecutionTerminalEvent,
+  isToolCallEvent,
   isToolUiEvent,
   type ToolUiEvent,
 } from '@kbn/agent-builder-common';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  readEsqlQuery,
-  toEsqlQueryState,
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
 } from '@kbn/custom-content-common';
 import {
   CustomContentComponent,
@@ -69,6 +72,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import { getServices } from './services';
+import { readContextQueries } from '../common/panel_context_queries';
 import { getTelemetry } from './telemetry';
 import { MAX_PREVIEW_HEIGHT } from '../common/panel_context_attachment';
 import {
@@ -81,6 +85,18 @@ import {
 } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import type { CustomContentEmbeddableState } from '../server';
+
+const isToolCallForPanel = (event: BrowserChatEvent, panelId: string): boolean => {
+  if (!isToolCallEvent(event)) return false;
+  const { tool_id: toolId, params } = event.data;
+  if (toolId === CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID) return params.embeddable_id === panelId;
+  if (toolId !== CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID || !Array.isArray(params.panels))
+    return false;
+  return params.panels.some(
+    (panel: unknown) =>
+      typeof panel === 'object' && panel !== null && 'id' in panel && panel.id === panelId
+  );
+};
 
 const isCustomContentUpdatedUiEvent = (
   event: BrowserChatEvent
@@ -97,10 +113,11 @@ const panelMeasureCss = css({
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
   HasEditCapabilities &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesDataLoading &
   PublishesEsql &
-  PublishesWritableTimeRange;
+  PublishesWritableTimeRange &
+  HasInspectorAdapters;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
@@ -133,15 +150,41 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
-    const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
+    // The other queries extend the first, so a panel with no first query, or an empty one, has none.
+    const keepIfMainQuery = (queries: readonly string[]): string[] =>
+      queries[0] ? [...queries] : [];
+    // The panel's queries, the first of which is `rows` in its template. Only a hand-edited panel has
+    // more than one, and the editor changes only the first.
+    const esqlQueries$ = new BehaviorSubject<string[]>(
+      keepIfMainQuery(initialState.esql_query ?? [])
+    );
+    // Sets the queries only when they change, so an update that leaves them as they are neither fires
+    // a state change nor hands subscribers a new list.
+    const setEsqlQueries = (queries: readonly string[]) => {
+      const next = keepIfMainQuery(queries);
+      const current = esqlQueries$.getValue();
+      const isSame =
+        current.length === next.length && current.every((query, index) => query === next[index]);
+      if (!isSame) esqlQueries$.next(next);
+    };
+    const replaceMainQuery = (queries: readonly string[], mainQuery: string | undefined) =>
+      mainQuery ? [mainQuery, ...queries.slice(1)] : [];
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
+    const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const isGenerating$ = new BehaviorSubject<boolean>(false);
-    const chatGeneratingCallbacks = {
-      onSubmit: () => isGenerating$.next(true),
-      onClose: () => {
-        if (isGenerating$.getValue()) isGenerating$.next(false);
-      },
+    const createChatGeneratingCallbacks = () => {
+      let hasSubmitted = false;
+      return {
+        onSubmit: () => {
+          if (hasSubmitted) return;
+          hasSubmitted = true;
+          isGenerating$.next(true);
+        },
+        onClose: () => {
+          if (isGenerating$.getValue()) isGenerating$.next(false);
+        },
+      };
     };
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -158,7 +201,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           ? parentApi.timeRange$.getValue() ?? undefined
           : undefined)
     );
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -166,12 +209,23 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
-      esql_query: toEsqlQueryState(esqlQuery$.getValue()),
+      esql_query: esqlQueries$.getValue().length ? [...esqlQueries$.getValue()] : undefined,
       template: template$.getValue(),
     });
 
+    const applyAttachmentData = (
+      data: Parameters<typeof readContextQueries>[0] & {
+        panel_template: string;
+      }
+    ) => {
+      template$.next(data.panel_template);
+      setEsqlQueries(readContextQueries(data));
+    };
+
     const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
-      if ('esqlQuery' in update) esqlQuery$.next(update.esqlQuery);
+      if ('esqlQuery' in update) {
+        setEsqlQueries(replaceMainQuery(esqlQueries$.getValue(), update.esqlQuery));
+      }
       if ('template' in update) template$.next(update.template);
     };
 
@@ -182,7 +236,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
-        esqlQuery$.pipe(
+        esqlQueries$.pipe(
           skip(1),
           map(() => undefined)
         ),
@@ -200,7 +254,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved ?? {});
-        esqlQuery$.next(lastSaved ? readEsqlQuery(lastSaved) : undefined);
+        setEsqlQueries(lastSaved?.esql_query ?? []);
         template$.next(lastSaved?.template);
       },
     });
@@ -212,8 +266,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       esql$,
       approximationApplied$,
-      dataViews$,
+      dataSources$,
       dataLoading$,
+      // A static panel makes no request, so it offers no Inspect entry.
+      getInspectorAdapters: () =>
+        esqlQueries$.getValue().length ? { requests: requestAdapter } : undefined,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom panel',
@@ -222,7 +279,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         getTelemetry().trackEditFlyoutOpened({
           isNewPanel,
           hasTemplate: Boolean(template$.getValue()),
-          hasEsqlQuery: Boolean(esqlQuery$.getValue()),
+          hasEsqlQuery: esqlQueries$.getValue().length > 0,
         });
         let hasSaved = false;
         const flyoutRef = openLazyFlyout({
@@ -256,11 +313,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               closeFlyout();
               agentBuilder.openChat({
                 newConversation: true,
-                ...chatGeneratingCallbacks,
+                ...createChatGeneratingCallbacks(),
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
-                    esqlQuery: draftEsqlQuery,
+                    // The editor does not change the other queries yet, so the chat gets the panel's own.
+                    esqlQueries: replaceMainQuery(esqlQueries$.getValue(), draftEsqlQuery),
                     embeddableId: uuid,
                     panelTitle: titleManager.api.title$.getValue() ?? undefined,
                     panelHeight: measurePanelHeight(),
@@ -294,7 +352,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               return (
                 <EditCustomContentFlyout
-                  esqlQuery={esqlQuery$.getValue()}
+                  esqlQueries={esqlQueries$.getValue()}
                   template={template$.getValue()}
                   timeRange={timeRange}
                   isApproximate={isApproximate}
@@ -339,30 +397,56 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       isEditingEnabled: () => true,
     });
 
-    const esqlUsageSubscription = esqlQuery$
-      .pipe(
-        map((q) => (q ? [{ esql: q }] : [])),
-        distinctUntilChanged((a, b) => a.length === b.length && a[0]?.esql === b[0]?.esql)
-      )
+    // Lets an ES|QL control find the panels whose queries use its variable, whichever query that is.
+    const esqlUsageSubscription = esqlQueries$
+      .pipe(map((queries) => queries.map((query) => ({ esql: query }))))
       .subscribe(esql$);
 
-    // Important for unified search support — KQL bar and filter builder suggestions.
-    const dataViewsSubscription = combineLatest([esqlQuery$, projectRouting$])
+    // Important for unified search support: KQL bar and filter builder suggestions, and whether the
+    // dashboard offers its time picker. Every query counts, since every query is fetched with the
+    // dashboard's time range, so a data view is published for each one.
+    const dataViewsSubscription = combineLatest([esqlQueries$, projectRouting$])
       .pipe(
-        distinctUntilChanged(([q1, r1], [q2, r2]) => q1 === q2 && r1 === r2),
-        switchMap(([esqlQueryValue, routingValue]) => {
-          if (!esqlQueryValue) return of(undefined);
+        map(([queries, routingValue]) => ({ queries, routingValue })),
+        distinctUntilChanged(
+          (a, b) => a.routingValue === b.routingValue && a.queries === b.queries
+        ),
+        switchMap(({ queries, routingValue }) => {
+          if (queries.length === 0) return of(undefined);
           return from(
-            getESQLAdHocDataview({
-              dataViewsService: dataViews,
-              query: esqlQueryValue,
-              http: core.http,
-              projectRouting: routingValue,
-            })
-          ).pipe(catchError(() => of(undefined)));
+            Promise.all(
+              queries.map(async (query) => {
+                // One query that cannot be resolved must not hide the data views of the others, or
+                // end the subscription.
+                try {
+                  return await getESQLAdHocDataview({
+                    dataViewsService: dataViews,
+                    query,
+                    http: core.http,
+                    projectRouting: routingValue,
+                  });
+                } catch {
+                  return undefined;
+                }
+              })
+            )
+          );
         })
       )
-      .subscribe((dataView) => dataViews$.next(dataView ? [dataView] : undefined));
+      .subscribe((resolved) => {
+        // Queries that resolve to the same data view publish it once. The identity is the whole
+        // ad-hoc data view (index pattern, project routing and time field), not just the index:
+        // two queries on one index can resolve different time fields, and the one that has a time
+        // field is what makes the dashboard offer its time picker.
+        const byIdentity = new Map<string, DataView>();
+        (resolved ?? []).forEach((dataView) => {
+          if (!dataView) return;
+          const identity =
+            dataView.id ?? `${dataView.getIndexPattern()}|${dataView.timeFieldName ?? ''}`;
+          if (!byIdentity.has(identity)) byIdentity.set(identity, dataView);
+        });
+        dataSources$.next(byIdentity.size ? Array.from(byIdentity.values()) : undefined);
+      });
 
     const fetchSubscription = fetch$(api).subscribe((ctx) => {
       isApproximate$.next(ctx.isApproximate);
@@ -382,7 +466,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       api,
       Component: function CustomContentEmbeddableComponent() {
         const [
-          esqlQuery,
+          esqlQueries,
           savedTemplate,
           panelTitle,
           isApproximate,
@@ -395,7 +479,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isGenerating,
           viewMode,
         ] = useBatchedPublishingSubjects(
-          esqlQuery$,
+          esqlQueries$,
           template$,
           titleManager.api.title$,
           isApproximate$,
@@ -424,14 +508,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
-        useEffect(
-          () =>
-            registerPanelPreviewHandler(uuid, (data) => {
-              template$.next(data.panel_template);
-              esqlQuery$.next(data.esql_query);
-            }),
-          []
-        );
+        useEffect(() => registerPanelPreviewHandler(uuid, applyAttachmentData), []);
 
         useEffect(() => {
           if (!agentBuilder) return;
@@ -459,6 +536,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 return;
               }
 
+              if (isToolCallForPanel(event, uuid)) {
+                isGenerating$.next(true);
+                return;
+              }
+
               if (!isCustomContentUpdatedUiEvent(event)) return;
 
               const {
@@ -466,8 +548,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               } = event.data;
               if (data.embeddable_id !== uuid) return;
 
-              template$.next(data.panel_template);
-              esqlQuery$.next(data.esql_query);
+              applyAttachmentData(data);
               if (isGenerating$.getValue()) isGenerating$.next(false);
               getTelemetry().trackAgentUpdateApplied({
                 hasEsqlQuery: Boolean(data.esql_query),
@@ -498,7 +579,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             newConversation: true,
-            ...chatGeneratingCallbacks,
+            ...createChatGeneratingCallbacks(),
             attachments: [
               buildCustomContentContextAttachment({
                 template: '',
@@ -521,7 +602,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             <CustomContentComponent
               services={rendererServices}
               embeddableId={uuid}
-              esqlQuery={esqlQuery}
+              esqlQueries={esqlQueries}
               timeRange={timeRange}
               generationVersion={generationVersion}
               savedTemplate={savedTemplate}
@@ -534,6 +615,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}
               isInteractive={viewMode !== 'non-interactive'}
+              minHeight={0}
+              requestAdapter={requestAdapter}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

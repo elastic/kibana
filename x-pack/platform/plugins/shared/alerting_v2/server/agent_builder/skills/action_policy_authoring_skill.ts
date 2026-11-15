@@ -5,15 +5,24 @@
  * 2.0.
  */
 
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_API_IDS,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
+import { attachActionPolicyTool } from '../tools/attach_action_policy';
+import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
+import {
+  ACTION_POLICY_AUTHORING_SKILL_BASE_PATH,
+  WORKFLOW_DISPATCH_PAYLOAD_REFERENCE,
+  WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF,
+} from './action_policy_management_references';
 import {
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
@@ -27,15 +36,22 @@ import {
   generateMultiRuleActionPolicyDoc,
 } from './schema_to_skill_docs';
 
-type ActionPolicyAuthoringSkillDeps = ManageActionPolicyToolDeps & {
-  availability: AvailabilityConfig;
+export {
+  ACTION_POLICY_AUTHORING_SKILL_BASE_PATH,
+  WORKFLOW_DISPATCH_PAYLOAD_REFERENCE,
+  WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF,
 };
+
+type ActionPolicyAuthoringSkillDeps = ManageActionPolicyToolDeps &
+  AttachActionPolicyToolDeps & {
+    availability: AvailabilityConfig;
+  };
 
 export const createActionPolicyAuthoringSkill = (deps: ActionPolicyAuthoringSkillDeps) =>
   defineSkillType({
     id: ACTION_POLICY_AUTHORING_SKILL_ID,
     name: ACTION_POLICY_AUTHORING_SKILL_ID,
-    basePath: 'skills/platform/alerting',
+    basePath: ACTION_POLICY_AUTHORING_SKILL_BASE_PATH,
     description:
       'Compose, discover, and modify universal alerting action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-authoring skill.',
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
@@ -72,8 +88,7 @@ export const createActionPolicyAuthoringSkill = (deps: ActionPolicyAuthoringSkil
         content: generateDispatchFlowDoc(),
       },
       {
-        name: 'workflow-dispatch-payload',
-        relativePath: './references',
+        ...WORKFLOW_DISPATCH_PAYLOAD_REFERENCE,
         content: generateActionPolicyWorkflowPayloadDoc(),
       },
       {
@@ -111,10 +126,19 @@ An action policy is a **space-scoped saved object** that controls how alerts are
 
 ## Action Policy Discovery
 
-When a user asks about existing action policies:
-- Search with \`platform.core.sml_search\`, using keywords like the policy name, matcher, or destination.
-- Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
-- To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`entry_id\`.
+When a user asks about existing action policies, read them with the Kibana API tools:
+- To list or search, call ${internalTools.describeApi} for \`${
+      ALERTING_API_IDS.listActionPolicies
+    }\` to confirm its params, then call ${internalTools.executeApi} with \`target: "kibana"\`.
+- Use \`search\` with keywords from the user's request; it matches the policy name and description only. For exact conditions use \`filter\` (KQL on \`id\`, \`name\`, \`description\`, \`enabled\`). For a broad listing, omit both. Page with \`page\` and \`per_page\`, and keep \`per_page\` small: the API returns full policy objects.
+- To read a single policy, call ${internalTools.executeApi} for \`${
+      ALERTING_API_IDS.getActionPolicy
+    }\` with the policy \`id\`.
+- Summarize matches in plain language: name, enabled/disabled, destination count, matcher snippet, grouping mode.
+- Do **not** attach policies by default when only listing or comparing.
+- To inspect or edit a saved policy, attach it with ${
+      ALERTING_TOOL_IDS.attachActionPolicy
+    } using the policy \`id\`.
 - After attaching, use the returned \`attachment_id\` for subsequent ${
       ALERTING_TOOL_IDS.manageActionPolicy
     } calls.
@@ -242,5 +266,5 @@ When the user asks how a notification gets from a rule firing to email/Slack, co
 
 ### Workflow Dispatch Payload
 When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
-    getInlineTools: () => [manageActionPolicyTool(deps)],
+    getInlineTools: () => [manageActionPolicyTool(deps), attachActionPolicyTool(deps)],
   });

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import rison from '@kbn/rison';
 import { generateShortId, log as logDoc, timerange } from '@kbn/synthtrace-client';
 
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 import {
   ANOTHER_1024_CHARS,
   CONSISTENT_TAGS,
@@ -118,29 +116,6 @@ const FLYOUT = {
     'datasetQualityDetailsDegradedFlyoutNewLimitSetCheckComponentTemplate',
   newLimitErrorCallout: 'datasetQualityDetailsNewFieldLimitErrorCallout',
 } as const;
-
-/**
- * Opens the details page with a quality issue already expanded from URL state.
- *
- * TODO(https://github.com/elastic/kibana/issues/287030): collapse onto
- * `pageObjects.datasetQualityDetails.goto`, which already models this state.
- */
-const gotoDetails = async (
-  page: ScoutPage,
-  { dataStream, field }: { dataStream: string; field: string }
-): Promise<void> => {
-  const state = {
-    v: 2,
-    dataStream,
-    timeRange: TIME_RANGE,
-    expandedQualityIssue: { name: field, type: 'degraded' },
-  };
-
-  await page.gotoApp(testData.DATA_QUALITY_DETAILS_APP_PATH, {
-    params: { [testData.DATA_QUALITY_URL_STATE_KEY]: rison.encode(state) },
-  });
-  await page.testSubj.locator('datasetDetailsContainer').waitFor({ state: 'visible' });
-};
 
 /** Every degraded document carries an over-long `log.level` and `test_field`. */
 const degradedDocs = (dataset: string, extraFields: Record<string, unknown> = {}) =>
@@ -267,6 +242,8 @@ test.describe(
       ]);
     });
 
+    // Admin: the last test raises the field limit from the UI, which edits the integration's
+    // `@custom` component template.
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
@@ -297,12 +274,15 @@ test.describe(
     });
 
     test('reports an exceeded field limit as the root cause of a past issue', async ({
-      page,
       pageObjects,
     }) => {
       const { datasetQualityDetails } = pageObjects;
 
-      await gotoDetails(page, { dataStream: SYNTH_DATA_STREAM, field: 'cloud' });
+      await datasetQualityDetails.goto({
+        dataStream: SYNTH_DATA_STREAM,
+        timeRange: TIME_RANGE,
+        expandedQualityIssue: { name: 'cloud', type: 'degraded' },
+      });
 
       await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.cause)).toContainText(
         'Field limit exceeded'
@@ -319,15 +299,15 @@ test.describe(
     });
 
     test('offers increasing the field limit only where the assets can be edited', async ({
-      page,
       pageObjects,
     }) => {
       const { datasetQualityDetails } = pageObjects;
 
       await test.step('for an integration', async () => {
-        await gotoDetails(page, {
+        await datasetQualityDetails.goto({
           dataStream: NGINX_DATA_STREAM,
-          field: 'cloud.project.id',
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: 'cloud.project.id', type: 'degraded' },
         });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
@@ -344,7 +324,11 @@ test.describe(
       });
 
       await test.step('for a special package such as the APM app', async () => {
-        await gotoDetails(page, { dataStream: APM_DATA_STREAM, field: 'cloud.project' });
+        await datasetQualityDetails.goto({
+          dataStream: APM_DATA_STREAM,
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: 'cloud.project', type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         await expect(
@@ -360,7 +344,11 @@ test.describe(
       });
 
       await test.step('but not for a data set of no integration', async () => {
-        await gotoDetails(page, { dataStream: SYNTH_DATA_STREAM, field: 'cloud.project' });
+        await datasetQualityDetails.goto({
+          dataStream: SYNTH_DATA_STREAM,
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: 'cloud.project', type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         await expect(
@@ -378,10 +366,14 @@ test.describe(
       });
     });
 
-    test('offers integration specific manual mitigations', async ({ page, pageObjects }) => {
+    test('offers integration specific manual mitigations', async ({ pageObjects }) => {
       const { datasetQualityDetails } = pageObjects;
 
-      await gotoDetails(page, { dataStream: NGINX_DATA_STREAM, field: 'test_field' });
+      await datasetQualityDetails.goto({
+        dataStream: NGINX_DATA_STREAM,
+        timeRange: TIME_RANGE,
+        expandedQualityIssue: { name: 'test_field', type: 'degraded' },
+      });
       await datasetQualityDetails.waitUntilMitigationsLoaded();
 
       await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.mitigationTitle)).toBeVisible();
@@ -425,14 +417,17 @@ test.describe(
     // other tests share; the fresh context of each test makes restoring it unnecessary.
     test('shows an error callout when the field limit cannot be raised', async ({
       browserAuth,
-      page,
       pageObjects,
     }) => {
       const { datasetQualityDetails } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
 
-      await gotoDetails(page, { dataStream: NGINX_DATA_STREAM, field: 'cloud.project.id' });
+      await datasetQualityDetails.goto({
+        dataStream: NGINX_DATA_STREAM,
+        timeRange: TIME_RANGE,
+        expandedQualityIssue: { name: 'cloud.project.id', type: 'degraded' },
+      });
       await datasetQualityDetails.waitUntilMitigationsLoaded();
 
       await datasetQualityDetails.getFlyoutSection(FLYOUT.applyLimitButton).click();
@@ -444,11 +439,15 @@ test.describe(
 
     // Runs last: applying the new limit edits the nginx `@custom` component template,
     // which every assertion above on the current limit depends on.
-    test('lets the user raise the field limit of an integration', async ({ page, pageObjects }) => {
+    test('lets the user raise the field limit of an integration', async ({ pageObjects }) => {
       const { datasetQualityDetails } = pageObjects;
 
       await test.step('proposes a limit 30% above the current one', async () => {
-        await gotoDetails(page, { dataStream: NGINX_DATA_STREAM, field: 'cloud.project.id' });
+        await datasetQualityDetails.goto({
+          dataStream: NGINX_DATA_STREAM,
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: 'cloud.project.id', type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         const currentLimit = datasetQualityDetails.getFlyoutSection(FLYOUT.currentLimitInput);
@@ -473,7 +472,11 @@ test.describe(
 
       await test.step('applies the proposed limit to the component template', async () => {
         // Reload so the rejected value above is replaced by the proposed one again.
-        await gotoDetails(page, { dataStream: NGINX_DATA_STREAM, field: 'cloud.project.id' });
+        await datasetQualityDetails.goto({
+          dataStream: NGINX_DATA_STREAM,
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: 'cloud.project.id', type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         await datasetQualityDetails.getFlyoutSection(FLYOUT.applyLimitButton).click();
@@ -498,7 +501,11 @@ test.describe(
 
         // Re-navigating refetches the details page data, which is what the FTR suite
         // used its time range refresh for.
-        await gotoDetails(page, { dataStream: NGINX_DATA_STREAM, field: 'cloud.project.id' });
+        await datasetQualityDetails.goto({
+          dataStream: NGINX_DATA_STREAM,
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: 'cloud.project.id', type: 'degraded' },
+        });
 
         await expect(
           datasetQualityDetails.getFlyoutSection(FLYOUT.issueDoesNotExist)

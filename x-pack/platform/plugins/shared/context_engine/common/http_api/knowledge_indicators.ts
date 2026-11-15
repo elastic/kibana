@@ -74,3 +74,22 @@ export interface GetKiResponse {
   id: string;
   document: KiDocument;
 }
+
+export interface UpdateKiBody {
+  ki: {
+    content: string;
+  };
+}
+
+export interface UpdateKiResponse {
+  id: string;
+  status: 'updated' | 'noop';
+}
+
+export interface DeleteKiResponse {
+  id: string;
+}
+
+export interface RestoreKiResponse {
+  id: string;
+}

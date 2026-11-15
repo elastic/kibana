@@ -23,7 +23,7 @@ import {
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
-import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
+import { prepareDispatch } from '../services/dispatch_action';
 
 const getRunningProcessesSchema = z
   .object({
@@ -40,7 +40,7 @@ const getRunningProcessesSchema = z
 /**
  * Inspection action: retrieves the list of running processes from an enrolled
  * Elastic Defend host. It enqueues a real `running-processes` response action
- * on the endpoint, so every dispatch is gated by an analyst confirmation.
+ * on the endpoint. It only reads from the host, so it runs without a confirmation.
  */
 export const getRunningProcessesTool = (
   endpointAppContextService: EndpointAppContextService
@@ -48,35 +48,9 @@ export const getRunningProcessesTool = (
   return {
     id: RUNNING_PROCESSES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the list of running processes from a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in.`,
+    description: `Retrieves the list of running processes from a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in. Call it only when the analyst explicitly asks for the process list, not for open-ended questions about a host.`,
     schema: getRunningProcessesSchema,
     maxResultTokens: RUNNING_PROCESSES_MAX_RESULT_TOKENS,
-    // HITL gate enforced by the framework, not skill prose: the runner prompts
-    // the analyst for confirmation before every dispatch.
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: async ({ toolParams, context }) =>
-        buildDispatchConfirmation(
-          {
-            action: 'running-processes',
-            params: {
-              hostName: toolParams.hostName as string | undefined,
-              ip: toolParams.ip as string | undefined,
-              agentId: toolParams.agentId as string | undefined,
-            },
-            context,
-            endpointAppContextService,
-            requiredPrivilege: 'canGetRunningProcesses',
-          },
-          {
-            title: 'List running processes?',
-            color: 'primary',
-            confirmText: 'List processes',
-            comment: toolParams.comment as string | undefined,
-            describe: (host) => `This will request the list of running processes from ${host}.`,
-          }
-        ),
-    },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
       // Set just before the client call: from there on a throw does not mean
@@ -91,6 +65,7 @@ export const getRunningProcessesTool = (
         const prepared = await prepareDispatch({
           action: 'running-processes',
           params: { hostName: requestedHostName, ip: requestedIp, agentId: requestedAgentId },
+          args: { comment },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canGetRunningProcesses',
@@ -111,7 +86,8 @@ export const getRunningProcessesTool = (
           // Analyst-initiated via chat, not a system/rule-triggered action —
           // RESPONSE_ACTIONS_SUPPORT_MAP gates `running-processes` per agent
           // type/action-type combination (see is_response_action_supported.ts);
-          // `manual` is what a human confirming in chat maps to.
+          // `manual` is what an analyst-requested chat action maps to, even
+          // though this read runs without a confirmation prompt.
           isAutomated: false,
         });
 

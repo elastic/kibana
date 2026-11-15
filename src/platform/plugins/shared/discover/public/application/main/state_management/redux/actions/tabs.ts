@@ -478,7 +478,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const { draftSessionTitle, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
+    const { outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
       tabsStorageManager.loadLocally({
         userId,
         spaceId,
@@ -517,7 +517,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
       replace: true,
     });
 
-    dispatch(internalStateSlice.actions.setDraftSessionTitle(draftSessionTitle));
     dispatch(setTabs(initialTabsState));
 
     if (hasNewSavedVersion) {

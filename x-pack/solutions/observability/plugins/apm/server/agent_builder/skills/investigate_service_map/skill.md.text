@@ -75,10 +75,13 @@ Create an `observability.service-map` attachment from the Step 3 result and rend
     "nodeMetadata": <nodeMetadata object from get_service_topology result>,
     "serviceName": "<focal service>",
     "title": "Service Map — <focal service>",
-    "timeRange": { "start": "<context timeRange.from>", "end": "<context timeRange.to>" }
+    "timeRange": { "start": "<context timeRange.from>", "end": "<context timeRange.to>" },
+    "environment": "<context environment>"
   }
 }
 ```
+
+Set `serviceName` to the focal service: it is what makes the map the interactive contextual map (focused on the focal service's direct connections, expandable, with service details and dependency metrics on click, and an "Explore in Service map" link). Omit `environment` when the context has none. Do NOT set `view`.
 
 Then render the returned id inline:
 

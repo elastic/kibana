@@ -23,6 +23,7 @@ interface UseNavigateToServiceDetailsParams {
   isRiskScoreExist: boolean;
   identityFields: IdentityFields;
   isPreviewMode: boolean;
+  hasNonClosedAlerts?: boolean;
   entityStoreEntityId?: string;
 }
 
@@ -34,6 +35,7 @@ export const useNavigateToServiceDetails = ({
   isRiskScoreExist,
   identityFields,
   isPreviewMode,
+  hasNonClosedAlerts,
   entityStoreEntityId,
 }: UseNavigateToServiceDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
@@ -53,6 +55,7 @@ export const useNavigateToServiceDetails = ({
           scopeId,
           entityId,
           serviceName,
+          hasNonClosedAlerts,
           entityStoreEntityId,
           path,
         },
@@ -85,6 +88,7 @@ export const useNavigateToServiceDetails = ({
       serviceName,
       contextID,
       isPreviewMode,
+      hasNonClosedAlerts,
       entityStoreEntityId,
       telemetry,
     ]

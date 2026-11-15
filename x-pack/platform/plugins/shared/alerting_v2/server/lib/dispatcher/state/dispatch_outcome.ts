@@ -64,10 +64,6 @@ export class DispatchOutcome {
       ? group.destinations.filter((destination) => !failed.has(destination.id))
       : group.destinations;
   }
-
-  public hasFailures(): boolean {
-    return this.failures.length > 0;
-  }
 }
 
 function indexFailedWorkflows(

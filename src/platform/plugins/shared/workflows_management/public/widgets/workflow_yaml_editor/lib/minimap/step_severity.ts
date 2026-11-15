@@ -16,10 +16,11 @@ export interface StepSeverityInfo {
   /** Highest-severity marker in this step's range (own or inherited from descendants). */
   severity: StepSeverity;
   /**
-   * True when at least one marker falls in the step's *own* line range
-   * (`lineStart` to `effectiveLineEnd`, where `effectiveLineEnd` is trimmed to
-   * just before the first direct child). False means all markers are inherited
-   * from descendants whose lines fall beyond `effectiveLineEnd`.
+   * True when at least one marker of the reported `severity` falls in the step's
+   * *own* line range (`lineStart` to `effectiveLineEnd`, where `effectiveLineEnd`
+   * is trimmed to just before the first direct child). False means the reported
+   * severity comes from descendants whose lines fall beyond `effectiveLineEnd`
+   * (a lower-severity own marker, e.g. a warning under an inherited error, doesn't count).
    *
    * Used only to drive screen-reader text — the visual dot is identical in both cases.
    */
@@ -108,7 +109,7 @@ export const buildStepSeverityMap = (
         ? 'warning'
         : null;
 
-    result.set(stepId, { severity, isOwn: ownWorst !== null });
+    result.set(stepId, { severity, isOwn: ownWorst !== null && ownWorst === severity });
   }
 
   return result;

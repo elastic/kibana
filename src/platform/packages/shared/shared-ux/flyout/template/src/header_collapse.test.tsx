@@ -10,7 +10,6 @@
 import React from 'react';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
-import { FLYOUT_HEADER_CLASS_NAME } from './use_header_collapse';
 
 const noop = () => {};
 
@@ -97,7 +96,11 @@ describe('FlyoutTemplate header collapse on scroll', () => {
   const renderCollapsibleFlyout = () =>
     render(
       <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Long title" description="A timestamp" />
+        <FlyoutTemplate.Header
+          title="Long title"
+          description="A timestamp"
+          data-test-subj="collapsibleHeader"
+        />
         <FlyoutTemplate.Body>
           <span>content</span>
         </FlyoutTemplate.Body>
@@ -171,6 +174,63 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     collapseByScroll(overflowEl);
 
     expect(closeButton).toHaveFocus();
+  });
+
+  it('collapses while an expanded control only controls content inside the region', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Long title" description="A timestamp">
+          <FlyoutTemplate.Header.InfoBlock title="Status">
+            <button type="button" aria-expanded="true" aria-controls="inner-panel">
+              Open
+            </button>
+            <div id="inner-panel">details</div>
+          </FlyoutTemplate.Header.InfoBlock>
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+
+    collapseByScroll(overflowEl);
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+  });
+
+  it('stays expanded while a control in the collapsible region is expanded', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Long title" description="A timestamp">
+          <FlyoutTemplate.Header.InfoBlock title="Status">
+            <button type="button" aria-expanded="true" aria-controls="outer-panel">
+              Open
+            </button>
+          </FlyoutTemplate.Header.InfoBlock>
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+    const panel = document.createElement('div');
+    panel.id = 'outer-panel';
+    document.body.appendChild(panel);
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+    const region = screen.getByTestId('flyoutHeaderCollapsibleRegion');
+
+    collapseByScroll(overflowEl);
+    expect(region).not.toHaveAttribute('aria-hidden');
+
+    screen.getByRole('button', { name: 'Open' }).setAttribute('aria-expanded', 'false');
+    act(() => {
+      fireEvent.scroll(overflowEl);
+    });
+    expect(region).toHaveAttribute('aria-hidden', 'true');
+    panel.remove();
   });
 
   it('keeps the title heading visible with its id in collapsed state', () => {
@@ -372,7 +432,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
   ) => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
-    const headerEl = document.querySelector(`.${FLYOUT_HEADER_CLASS_NAME}`) as HTMLElement;
+    const headerEl = screen.getByTestId('collapsibleHeader');
     const scrollBy = jest.fn();
     Object.defineProperty(overflowEl, 'scrollBy', { value: scrollBy, configurable: true });
     // Page mode derives its pixel delta from the viewport height.

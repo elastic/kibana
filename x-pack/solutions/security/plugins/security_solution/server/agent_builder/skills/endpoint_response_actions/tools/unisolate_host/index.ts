@@ -6,6 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -20,7 +21,7 @@ import {
   waitForActionCompletion,
 } from '../types';
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
-import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
+import { prepareDispatch } from '../services/dispatch_action';
 
 const unisolateHostSchema = z
   .object({
@@ -42,32 +43,6 @@ export const unisolateHostTool = (
     type: ToolType.builtin,
     description: `Un-isolates a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
-    // HITL gate enforced by the framework, not skill prose: the runner prompts
-    // the analyst for confirmation before every dispatch.
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: async ({ toolParams, context }) =>
-        buildDispatchConfirmation(
-          {
-            action: 'unisolate',
-            params: {
-              hostName: toolParams.hostName as string | undefined,
-              ip: toolParams.ip as string | undefined,
-              agentId: toolParams.agentId as string | undefined,
-            },
-            context,
-            endpointAppContextService,
-            requiredPrivilege: 'canUnIsolateHost',
-          },
-          {
-            title: 'Release host from isolation?',
-            color: 'warning',
-            confirmText: 'Release host',
-            comment: toolParams.comment as string | undefined,
-            describe: (host) => `This will reconnect ${host} to the network.`,
-          }
-        ),
-    },
     handler: async (params, context) => {
       const { logger, request, runContext, spaceId } = context;
       // Set just before the client call: from there on a throw does not mean
@@ -82,9 +57,34 @@ export const unisolateHostTool = (
         const prepared = await prepareDispatch({
           action: 'unisolate',
           params: { hostName: requestedHostName, ip: requestedIp, agentId: requestedAgentId },
+          args: { comment },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canUnIsolateHost',
+          confirmation: {
+            title: i18n.translate(
+              'xpack.securitySolution.endpointResponseActionsSkill.confirmation.unisolate.title',
+              {
+                defaultMessage: 'Release host from isolation?',
+              }
+            ),
+            color: 'warning',
+            confirmText: i18n.translate(
+              'xpack.securitySolution.endpointResponseActionsSkill.confirmation.unisolate.confirmText',
+              {
+                defaultMessage: 'Release host',
+              }
+            ),
+            comment: params.comment as string | undefined,
+            describe: (host) =>
+              i18n.translate(
+                'xpack.securitySolution.endpointResponseActionsSkill.confirmation.unisolate.message',
+                {
+                  defaultMessage: 'This will reconnect {host} to the network.',
+                  values: { host },
+                }
+              ),
+          },
         });
         if (prepared.kind === 'result') {
           return prepared.result;

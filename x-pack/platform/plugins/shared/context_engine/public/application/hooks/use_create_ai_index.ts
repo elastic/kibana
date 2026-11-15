@@ -12,7 +12,6 @@ import { DEFAULT_AI_INDEX_TYPE } from '../../../common/constants';
 import type { AiIndexProperties } from '../../../common/http_api/ai_indices';
 import { createAiIndex as createAiIndexRequest } from '../api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
-import type { EditableAiIndexTrace } from '../components/trace_selector';
 import { getAiIndexDest } from '../utils/ai_index_dest';
 import { getErrorMessage } from '../utils/get_error_message';
 import { toAiIndexSources } from '../utils/sources';
@@ -28,7 +27,6 @@ export interface CreateAiIndexArgs {
   description: string;
   memoryEnabled?: boolean;
   sources: SelectedSource[];
-  trace?: EditableAiIndexTrace;
 }
 
 export const useCreateAiIndex = () => {
@@ -38,14 +36,14 @@ export const useCreateAiIndex = () => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, CreateAiIndexArgs>({
-    mutationFn: async ({ id, description, memoryEnabled, sources, trace }) => {
+    mutationFn: async ({ id, description, memoryEnabled, sources }) => {
       const properties: AiIndexProperties = {
         description: description.trim() || undefined,
         memory_enabled: memoryEnabled,
         dest: getAiIndexDest(DEFAULT_AI_INDEX_TYPE, id),
         automations: [],
         sources: toAiIndexSources(sources),
-        traces: trace ? [trace] : [],
+        traces: [],
       };
 
       await createAiIndexRequest(http, { aiIndexId: id, properties });

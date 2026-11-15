@@ -8,6 +8,8 @@
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { getConfigurationTroubleshootingSkillName } from '../configuration_troubleshooting_skill_name';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   isolateHostTool,
@@ -34,7 +36,9 @@ export const RUNNING_PROCESSES_TOOL_ID = toolName('get_running_processes');
 export const SCAN_TOOL_ID = toolName('scan_host');
 export const GET_RESPONSE_ACTION_STATUS_TOOL_ID = toolName('get_response_action_status');
 
-const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
+const getSystemInstructions = (
+  troubleshootingSkillName: string
+) => `# Endpoint Response Actions Skill
 
 ## When to Use This Skill
 
@@ -44,32 +48,36 @@ inactive, unenrolled; unknown when not yet reported — isolated or not), isolat
 or release (unisolate) a host, list a host's running processes, run a malware
 scan on a host path, or look up a previously dispatched response action by its
 action ID. Not for diagnosing why a host is unhealthy, offline, or missing, or
-why an isolation or other response action failed — that routes to the elastic-defend-configuration-troubleshooting
+why an isolation or other response action failed — that routes to the ${troubleshootingSkillName}
 skill.
 
 The response actions available are isolate, release (unisolate), scan, and
 running processes; each runs solely through this skill's tools (\`isolate_host\`,
-\`unisolate_host\`, \`scan_host\`, \`get_running_processes\`), and all four pause for
-the analyst's confirmation. Never improvise one with another
+\`unisolate_host\`, \`scan_host\`, \`get_running_processes\`). Isolate, release and scan pause for
+the analyst's confirmation; running processes only reads, so it runs without
+one. Never improvise one with another
 tool, such as a raw API call. Other response actions (execute, kill-process,
 suspend-process, get-file, upload, runscript, memory-dump) are not available
 from chat: say so and point the analyst to the Response Actions UI.
 
 ## Process
 
-0. If the question asks WHY a host is unhealthy, offline, or missing, or WHY a response action (e.g. isolation) failed, stop: do not call this skill's tools; load elastic-defend-configuration-troubleshooting and follow it.
+0. If the question asks WHY a host is unhealthy, offline, or missing, or WHY a response action (e.g. isolation) failed, stop: do not call this skill's tools; load ${troubleshootingSkillName} and follow it.
 
 1. **Route intent to the right tool**
    - list / available hosts → \`list_endpoints\`
    - isolate / quarantine / contain → \`isolate_host\` (write, platform-confirmed)
    - release / unisolate / reconnect → \`unisolate_host\` (write, platform-confirmed)
    - status / is isolated → \`get_endpoint_status\`
-   - running processes → \`get_running_processes\` (write, platform-confirmed)
+   - running processes → \`get_running_processes\` (no confirmation) — only
+     when the analyst explicitly asks for the process list
    - scan path → \`scan_host\` (write, platform-confirmed)
    - prior action status / action ID → \`get_response_action_status\`
 
-2. **Write tools** — call directly; Agent Builder shows the confirmation card.
-   Do not ask for chat confirmation first. If declined, report cancelled.
+2. **Isolate, release and scan** — call directly; Agent Builder shows the
+   confirmation card. Do not ask for chat confirmation first. If declined,
+   report cancelled. \`get_running_processes\` shows no card: call it directly
+   and report the result.
 
 3. **Report** — always include action ID, status, and output. For pending actions,
    offer \`get_response_action_status\` follow-up. See \`./reference\` for error
@@ -80,12 +88,16 @@ from chat: say so and point the analyst to the Response Actions UI.
 - For status and response action lookups, use the tools above instead of
   \`platform.core.search\` or raw Elasticsearch queries. This does not restrict
   diagnostic queries made by other loaded skills.
+- Open-ended questions about a host ("what do you see on it?", "does it look
+  compromised?") get \`get_endpoint_status\` only. Do not call
+  \`get_running_processes\` for them: it enqueues a real action on the host, so
+  it needs an explicit request for the process list. Offer it instead.
 - Never claim an endpoint was isolated, released, or scanned, or that its
-  process list was retrieved, until the tool result reports it. A write tool pauses for the analyst's confirmation first;
-  until then say the action is awaiting confirmation, and if declined report it
-  as cancelled.
-- Call a write tool directly with the hostname the analyst gave. The tool
-  resolves the host itself and returns \`reason: endpoint_not_found\` or
+  process list was retrieved, until the tool result reports it. Isolate, release
+  and scan pause for the analyst's confirmation first; until then say the action
+  is awaiting confirmation, and if declined report it as cancelled.
+- Call the isolate, release, scan or running-processes tool directly with the
+  hostname the analyst gave. The tool resolves the host itself and returns \`reason: endpoint_not_found\` or
   \`reason: ambiguous_hostname\` or \`reason: ambiguous_ip\` instead of acting on a guess, so no
   \`get_endpoint_status\` pre-check is needed. On either ambiguity result, ask which
   agent ID is meant, then call the same tool again with that \`agentId\`; never
@@ -95,19 +107,33 @@ from chat: say so and point the analyst to the Response Actions UI.
   (and \`reason: ambiguous_hostname\` / \`reason: ambiguous_ip\` when several endpoints share the supplied identity);
   \`error: invalid_argument\` means the request itself was out of range (narrow
   filters instead of paging further), while \`error: insufficient_privileges\`
-  and \`error: unknown_error\` mean the lookup itself could not run. Details in
-  \`./reference\`.`;
+  and \`error: unknown_error\` mean the lookup itself could not run, and
+  \`error: license_tier_required\` means the deployment's license tier does not
+  include the capability — report the \`requiredLicenseTier\` it returns, do not
+  suggest a role grant or the Security UI (the same limit applies there), and
+  do not re-offer that action this conversation. \`error: license_unavailable\`
+  means the license itself expired or could not be read — tell the analyst to
+  renew or restore it, not to change tier, and do not re-offer the action until
+  it is restored. \`error: product_feature_disabled\` means the deployment's
+  product configuration excludes response actions entirely — report that as a
+  property of the project (serverless: requires the Endpoint Complete tier),
+  do not suggest a role grant, a license upgrade, or the Security UI, and do
+  not re-offer that action this conversation. License tier or product tier can
+  also make an action unavailable before you call it, so do not promise isolate,
+  scan, or running-processes will succeed until the tool result confirms.
+  Details in \`./reference\`.`;
 
 export const createEndpointResponseActionsSkill = (
-  endpointAppContextService: EndpointAppContextService
+  endpointAppContextService: EndpointAppContextService,
+  experimentalFeatures: Pick<ExperimentalFeatures, 'automaticTroubleshootingUniversalSkill'>
 ): SkillDefinition<typeof NAME, typeof BASE_PATH> => {
+  const troubleshootingSkillName = getConfigurationTroubleshootingSkillName(experimentalFeatures);
   return defineSkillType({
     id: ID,
     name: NAME,
     basePath: BASE_PATH,
-    description:
-      'List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, and look up a previously dispatched response action by ID. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use elastic-defend-configuration-troubleshooting.',
-    content: SYSTEM_INSTRUCTIONS,
+    description: `List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, and look up a previously dispatched response action by ID. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use ${troubleshootingSkillName}.`,
+    content: getSystemInstructions(troubleshootingSkillName),
     referencedContent: [
       {
         relativePath: '.',

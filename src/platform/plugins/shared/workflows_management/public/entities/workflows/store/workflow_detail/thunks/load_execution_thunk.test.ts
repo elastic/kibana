@@ -298,7 +298,40 @@ describe('loadExecutionThunk', () => {
       title: 'Failed to load execution',
     });
     expect(result.type).toBe('detail/loadExecutionThunk/rejected');
-    expect(result.payload).toBe('Execution not found');
+    expect(result.payload).toEqual({ message: 'Execution not found', isNotFound: false });
+  });
+
+  it('flags a 404 as not found with a friendly message', async () => {
+    const error = Object.assign(new Error('Not Found'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 404 },
+    });
+    mockGetExecution.mockRejectedValue(error);
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    const message = "This execution doesn't exist or has been deleted.";
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(message, {
+      title: 'Failed to load execution',
+    });
+    expect(result.payload).toEqual({ message, isNotFound: true });
+    expect(store.getState().detail.executionError).toEqual({
+      id: 'exec-1',
+      message,
+      isNotFound: true,
+      failureCount: 1,
+    });
+  });
+
+  it('toasts once per failure streak and counts consecutive failures', async () => {
+    mockGetExecution.mockRejectedValue({ message: 'Network Error' });
+
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledTimes(1);
+    expect(store.getState().detail.executionError?.failureCount).toBe(2);
   });
 
   it('should handle HTTP error without body message', async () => {
@@ -314,7 +347,7 @@ describe('loadExecutionThunk', () => {
       title: 'Failed to load execution',
     });
     expect(result.type).toBe('detail/loadExecutionThunk/rejected');
-    expect(result.payload).toBe('Network Error');
+    expect(result.payload).toEqual({ message: 'Network Error', isNotFound: false });
   });
 
   it('should handle error without message', async () => {
@@ -331,7 +364,7 @@ describe('loadExecutionThunk', () => {
       }
     );
     expect(result.type).toBe('detail/loadExecutionThunk/rejected');
-    expect(result.payload).toBe('Failed to load execution');
+    expect(result.payload).toEqual({ message: 'Failed to load execution', isNotFound: false });
   });
 
   describe('request ordering', () => {

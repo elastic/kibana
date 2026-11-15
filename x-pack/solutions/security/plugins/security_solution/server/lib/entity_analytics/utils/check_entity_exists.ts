@@ -7,9 +7,13 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
-  buildEntityIdFilter,
+  buildAliasesFilter,
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
   RESOLVED_MODE_MAX_RECORDS,
   type EntityViewMode,
 } from '../../../../common/entity_analytics/entity_store/resolution_group';
@@ -24,6 +28,7 @@ interface CheckEntityExistsParams {
 type ListEntityRecordsParams = Pick<CheckEntityExistsParams, 'crudClient' | 'esClient'> & {
   filter: QueryDslQueryContainer[];
   size: number;
+  sort?: SortCombinations[];
 };
 
 interface GetEntityRecordsParams extends CheckEntityExistsParams {
@@ -37,7 +42,7 @@ export class EntityStoreAccessError extends Error {
 }
 
 /**
- * Lists entity store records using the provided `filter` and `size`,
+ * Lists entity store records using the provided `filter`, `size` and optional `sort`.
  *
  * For hidden indices, ES silently returns empty results when the user lacks
  * read access (rather than 403), so we check index privileges explicitly
@@ -48,6 +53,7 @@ const listEntityRecords = async ({
   esClient,
   filter,
   size,
+  sort,
 }: ListEntityRecordsParams): Promise<Entity[]> => {
   const latestIndex = await crudClient.latestIndexName();
   const { has_all_requested: hasRead } = await esClient.security.hasPrivileges({
@@ -58,7 +64,7 @@ const listEntityRecords = async ({
   }
 
   try {
-    const { entities } = await crudClient.listEntities({ filter, size });
+    const { entities } = await crudClient.listEntities({ filter, size, sort });
     return entities;
   } catch (err) {
     if (err?.statusCode === 403) {
@@ -94,8 +100,9 @@ export const checkEntityExists = async ({
 
 /**
  * Entity records the given EUID covers in `mode`: the target record first, followed (in `resolved`
- * mode) by every record resolved to it, i.e. its resolution group. Empty when the target itself is
- * missing — aliases never stand in for the target.
+ * mode) by the records resolved to it, i.e. its resolution group, riskiest first and capped at
+ * `RESOLVED_MODE_MAX_RECORDS` members. Empty when the target itself is missing — aliases never
+ * stand in for the target.
  */
 export const getEntityRecords = async ({
   crudClient,
@@ -112,15 +119,13 @@ export const getEntityRecords = async ({
     return [target];
   }
 
-  // Get any entities that resolve to this entity
-  const resolvedEntities = await listEntityRecords({
+  // The riskiest aliases of this entity; the target takes one of the member slots.
+  const aliases = await listEntityRecords({
     crudClient,
     esClient,
-    filter: [
-      buildEntityIdFilter(entityId, 'resolved'),
-      { term: { 'entity.EngineMetadata.Type': entityType } },
-    ],
-    size: RESOLVED_MODE_MAX_RECORDS,
+    filter: [buildAliasesFilter(entityId), { term: { 'entity.EngineMetadata.Type': entityType } }],
+    size: RESOLVED_MODE_MAX_RECORDS - 1,
+    sort: [{ [RESOLUTION_GROUP_RISK_SORT_FIELD]: 'desc' }],
   });
-  return [target, ...resolvedEntities.filter((entity) => entity.entity?.id !== entityId)];
+  return [target, ...aliases.filter((entity) => entity.entity?.id !== entityId)];
 };

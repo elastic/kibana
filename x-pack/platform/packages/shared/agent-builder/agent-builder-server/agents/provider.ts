@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
+  ChatTriggerMode,
   Conversation,
   ConversationRound,
   ConversationRoundAuthor,
@@ -41,7 +42,6 @@ import type {
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
-  TodoStateManager,
   IFilesystemService,
   IBashService,
   ConversationTemplatesService,
@@ -101,11 +101,19 @@ export interface SubAgentExecutionResult {
   events$: Observable<ChatEvent>;
 }
 
+/** Options of a sub-agent run as its own task, outliving the run that spawned it. */
+export interface SubAgentBackgroundOptions {
+  /** How the parent gets the result; unset, the result waits for the parent's next run. */
+  parentTriggerMode?: ChatTriggerMode;
+}
+
 /** Parameters for a one-shot standalone sub-agent execution. */
 export interface ExecuteSubAgentParams {
   agentId: string;
   parentExecutionId: string;
   prompt: string;
+  /** Set to run the sub-agent in the background. */
+  background?: SubAgentBackgroundOptions;
   connectorId?: string;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
@@ -116,6 +124,8 @@ export interface CreateSubAgentParams {
   agentId: string;
   parentConversationId: string;
   parentExecutionId: string;
+  /** Set to run the sub-agent in the background. */
+  background?: SubAgentBackgroundOptions;
   subagentName: string;
   subagentPurpose?: string;
   /** Pre-allocated id for the child conversation (assigned by the caller). */
@@ -133,6 +143,7 @@ export interface SendToSubAgentParams {
   /** Existing child conversation id */
   conversationId: string;
   prompt: string;
+  background?: SubAgentBackgroundOptions;
   connectorId?: string;
   abortSignal?: AbortSignal;
 }
@@ -167,16 +178,23 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
-  /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
+  /** Whether AI index instructions are enabled by the Context Engine setting */
   aiIndices: boolean;
+  /** Whether SML is available, which follows the Agent Builder experimental setting */
+  sml: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the todo list tool and task-management prompt are enabled */
-  todos: boolean;
+  /** Whether a finished background sub-agent wakes its parent; follows the Agent Builder experimental setting */
+  backgroundWake: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */
   apiDiscovery: boolean;
+  /**
+   * Whether dynamically loaded tools (skill and attachment-bound tools) are exposed through the
+   * `execute_dynamic_tool` meta-tool instead of being added to the native tool list.
+   */
+  dynamicTools: boolean;
 }
 
 /**
@@ -236,6 +254,10 @@ export interface AgentHandlerContext {
    * Id of the space associated with the request
    */
   spaceId: string;
+  /**
+   * Service account the execution runs as; see `GetAgentOptions.runAs`.
+   */
+  runAs?: string;
   /**
    * Information about the deployment (environment, version, license...) the agent runs in.
    */
@@ -322,10 +344,6 @@ export interface AgentHandlerContext {
    * Attachment state manager to manage conversation attachments during execution.
    */
   attachmentStateManager: AttachmentStateManager;
-  /**
-   * Manages the active todo list for this conversation execution.
-   */
-  todoStateManager: TodoStateManager;
   /**
    * Used to manage interruptions.
    */
@@ -452,6 +470,8 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
+  /** The actor that posted the input, when it is an agent (a sub-agent's report) rather than the requesting user. */
+  actor?: EventActor;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.

@@ -132,7 +132,10 @@ apiTest.describe(
 
     // TS on a plain index fails at LIMIT 0, so use a pattern that matches nothing yet: a source
     // whose indices do not exist is accepted by design.
-    apiTest('accepts TS over a pattern with no indices yet', async ({ apiClient }) => {
+    // Skipped: ES now rejects a view that starts with TS and has no STATS after it
+    // (elastic/elasticsearch#162011), and a source query cannot contain STATS,
+    // see https://github.com/elastic/kibana/issues/299153
+    apiTest.fixme('accepts TS over a pattern with no indices yet', async ({ apiClient }) => {
       const response = await createSource(apiClient, manager.cookieHeader, {
         title: `${TITLE_PREFIX}-${suffix}-ts`,
         esql: `TS ${index}-none-*`,

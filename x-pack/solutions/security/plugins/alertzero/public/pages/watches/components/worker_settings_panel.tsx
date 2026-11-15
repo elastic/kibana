@@ -12,6 +12,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
@@ -41,6 +42,8 @@ import { SettingRow } from './setting_row';
 import { FeatureSettingsLink } from './feature_settings_link';
 import { ViewExecutionsLink } from '../../../components/view_executions_link/view_executions_link';
 import { ThreatIntelSupplySection } from './threat_intel_supply_section';
+import { HuntIndexCoverageCallout } from './hunt_index_coverage_callout';
+import { useHuntWorkerIndexCoverage } from '../../../hooks/hunt/use_hunt_worker_index_coverage';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -96,7 +99,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 }: WorkerSettingsPanelProps) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application },
+    services: { application, docLinks },
   } = useKibana<CoreStart & AlertZeroStartDependencies>();
   const name = workerName(worker.id, worker.name);
   const description = workerDescription(worker.id);
@@ -107,6 +110,11 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
   const isHuntWorker = worker.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
+  const docsHref = isHuntWorker
+    ? docLinks.links.securitySolution.alertZero.continuousThreatHunt
+    : undefined;
+  // The accordion body is always mounted, so `enabled` keeps the route idle while collapsed.
+  const { data: indexCoverage } = useHuntWorkerIndexCoverage(isHuntWorker && isExpanded);
   // Start locked until supply status says the hard-gate is ok. Already-on workers can
   // still turn off because cannotEnable requires !enabled.
   const [hardGateOk, setHardGateOk] = useState(false);
@@ -272,7 +280,24 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         </EuiFlexGroup>
         {description ? (
           <EuiText size="s" color="subdued" css={bandContentStyles.description}>
-            <p css={{ margin: 0 }}>{description}</p>
+            <p css={{ margin: 0 }}>
+              {description}
+              {docsHref ? (
+                <>
+                  {' '}
+                  {/* The band is the accordion's click target; following the link must not collapse it. */}
+                  <EuiLink
+                    href={docsHref}
+                    target="_blank"
+                    external
+                    onClick={stopAccordionToggle}
+                    data-test-subj={`alertZeroWorkerDocsLink-${worker.id}`}
+                  >
+                    {settingsI18n.WORKER_DOCS_LINK_LABEL}
+                  </EuiLink>
+                </>
+              ) : null}
+            </p>
           </EuiText>
         ) : null}
       </div>
@@ -321,6 +346,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           </EuiText>
         </>
       ) : null}
+      {isHuntWorker ? <HuntIndexCoverageCallout coverage={indexCoverage} /> : null}
       {isHuntWorker ? (
         <ThreatIntelSupplySection
           canWrite={canWrite}
@@ -370,7 +396,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           <p>
             <FormattedMessage
               id="xpack.alertzero.watches.settings.models.description"
-              defaultMessage="This Worker uses models configured in {featureSettingsLink}."
+              defaultMessage="This Worker uses the models configured in {featureSettingsLink}."
               values={{
                 featureSettingsLink: (
                   <FeatureSettingsLink data-test-subj={`alertZeroModelsLink-${worker.id}`} />

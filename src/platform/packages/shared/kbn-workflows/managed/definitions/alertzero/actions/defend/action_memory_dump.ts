@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ACTION_MEMORY_DUMP_YAML from './action_memory_dump.yaml';
 import type { ManagedWorkflowDefinition } from '../../../../types';
+import { readManagedWorkflowYaml } from '../../../read_managed_workflow_yaml';
 import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
@@ -21,6 +21,8 @@ export const ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW = {
   id: ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yaml: ACTION_MEMORY_DUMP_YAML,
+  version: 3,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'action_memory_dump.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

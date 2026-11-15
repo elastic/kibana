@@ -11,6 +11,7 @@ import type { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { parseSealedBlob } from '../unit_config/seal_credentials';
 import type { StoredUnitCredential } from '../unit_config/types';
+import type { UnitApiKey } from '../unit_config/unit_api_keys';
 import {
   STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
   STREAMS_UI_METADATA_SAVED_OBJECT_TYPE,
@@ -51,6 +52,21 @@ export const streamsConfigurationSavedObjectAttributesV1 = schema.object({
       { maxSize: 500 }
     )
   ),
+  // Server-only registry of API keys created for this unit's components, so any user with
+  // V2 manage can revoke them as the internal user. Never sent to the distributor.
+  api_keys: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        key_id: schema.string({ maxLength: 256 }),
+        component_type: schema.oneOf([schema.literal('source'), schema.literal('destination')]),
+        component_id: schema.string({ maxLength: 256 }),
+        created_at: schema.string({ maxLength: 64 }),
+      }),
+      { maxSize: 10_000 }
+    )
+  ),
+  // Set on documents that only hold `api_keys` for a unit that has not been saved.
+  key_only: schema.maybe(schema.boolean()),
 });
 
 export const streamsConfigurationEncryptedType: EncryptedSavedObjectTypeRegistration = {
@@ -65,6 +81,8 @@ export type StreamsConfigurationSavedObjectAttributes =
   StreamsUnit.ConfigurationSavedObjectAttributes & {
     /** Blobs from the last save, reused while kid, target and value are unchanged. */
     sealed_credentials?: StoredUnitCredential[];
+    api_keys?: UnitApiKey[];
+    key_only?: boolean;
   };
 
 export const streamsUiMetadataSavedObjectAttributesV1 = schema.object({

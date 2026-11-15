@@ -11,11 +11,11 @@ import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { TabsProvider } from '../../application/tabs_context';
+import { V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY } from '../../hooks/use_v2_rules_tab_new_badge';
 import { RulesListHeader } from './rules_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
 let mockCanReadV1Rules = true;
-let mockExperimentalFeaturesEnabled = true;
 let mockAreAgentBuilderSkillsAvailable = true;
 let mockAgentBuilderSkillsRequirements = {
   hasAgentBuilderCapability: true,
@@ -66,10 +66,6 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
-  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-}));
-
 jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
   useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
@@ -78,7 +74,6 @@ jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
 const onCreateRule = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onBuildSequence = jest.fn();
 
 const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeader>>) =>
   render(
@@ -88,7 +83,6 @@ const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeade
         onCreateRule={onCreateRule}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onBuildSequence={onBuildSequence}
         {...props}
       />
     </ListPageTestProviders>
@@ -97,9 +91,9 @@ const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeade
 describe('RulesListHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.removeItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY);
     mockPhase = 'populated';
     mockCanReadV1Rules = true;
-    mockExperimentalFeaturesEnabled = true;
     mockAreAgentBuilderSkillsAvailable = true;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: true,
@@ -117,6 +111,19 @@ describe('RulesListHeader', () => {
     expect(v1Tab).toHaveTextContent('Classic');
     expect(v2Tab).toHaveTextContent('Universal');
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
+  });
+
+  it('shows a primary new-dot on Universal until it has been visited', async () => {
+    const { unmount } = renderHeader();
+
+    const v2Tab = await screen.findByTestId('v2RulesTab');
+    expect(v2Tab.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
+
+    unmount();
+    localStorage.setItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY, JSON.stringify(true));
+    renderHeader();
+
+    expect(screen.getByTestId('v2RulesTab').querySelector('[data-euiicon-type="dot"]')).toBeNull();
   });
 
   it('orders the Universal tab before the Classic tab', async () => {
@@ -187,7 +194,6 @@ describe('RulesListHeader', () => {
             onCreateRule={onCreateRule}
             onCreateEsqlRule={onCreateEsqlRule}
             onCreateWithAgent={onCreateWithAgent}
-            onBuildSequence={onBuildSequence}
           />
         </TabsProvider>
       </ListPageTestProviders>

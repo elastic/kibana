@@ -5,18 +5,31 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { escapeQuotes } from '@kbn/es-query';
 import { FLEET_ENDPOINT_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   ToolHandlerContext,
+  ToolHandlerReturn,
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
-import { responseActionErrorResult, insufficientPrivilegesResult } from '../types';
+import {
+  formatForConfirmationCard,
+  licenseLimitOf,
+  licenseTierRequiredResult,
+  licenseUnavailableResult,
+  productFeatureDisabledResult,
+  responseActionErrorResult,
+  responseActionsProductFeatureEnabled,
+  insufficientPrivilegesResult,
+} from '../types';
 import { createEndpointLookupService, type ResolvedEndpoint } from './endpoint_lookup';
 import {
   resolveDispatchTarget,
@@ -46,28 +59,76 @@ export type DispatchPrivilege = Extract<
   'canIsolateHost' | 'canUnIsolateHost' | 'canWriteScanOperations' | 'canGetRunningProcesses'
 >;
 
+/**
+ * The license tier `calculateEndpointAuthz` conjunctions each dispatch
+ * privilege with (`authz.ts`: `canIsolateHost: ... && isPlatinumPlusLicense`,
+ * `canWriteScanOperations` / `canGetRunningProcesses`: `... &&
+ * isEnterpriseLicense`). `canUnIsolateHost` is deliberately ungated there — a
+ * license lapse must never leave a host isolated with no way to release it —
+ * so it maps to no tier.
+ *
+ * When `authz[privilege]` is false on a deployment already at the required
+ * tier, the role is what is missing; below it, the license is. Only the second
+ * case is reported as `license_tier_required`.
+ */
+export const DISPATCH_PRIVILEGE_LICENSE_TIERS: Record<
+  DispatchPrivilege,
+  'platinum' | 'enterprise' | undefined
+> = {
+  canIsolateHost: 'platinum',
+  canUnIsolateHost: undefined,
+  canWriteScanOperations: 'enterprise',
+  canGetRunningProcesses: 'enterprise',
+};
+
+/** Actions that only read from the host and so dispatch without a confirmation. */
+const UNCONFIRMED_ACTIONS: readonly DispatchActionName[] = ['running-processes'];
+
 export interface DispatchRequest {
   action: DispatchActionName;
   params: { hostName?: string; ip?: string; agentId?: string };
+  /**
+   * Model-facing arguments beyond the target that the confirmation card
+   * displays and the dispatch uses (scan `path`; every tool's `comment`).
+   * Recorded verbatim while the card is built and re-checked by the handler:
+   * a resumed call replaying a confirmed tool-call ID with different
+   * arguments (e.g. path `/B` after `/A` was approved) must not inherit the
+   * approval, so the analyst is shown a fresh card instead.
+   */
+  args?: DispatchConfirmationArgs;
   context: ToolHandlerContext;
   endpointAppContextService: EndpointAppContextService;
   /** Endpoint privilege the equivalent HTTP route requires for this action. */
   requiredPrivilege: DispatchPrivilege;
+  /**
+   * The card the analyst confirms the resolved host with, after every refusal
+   * check has passed. Required for every action except `running-processes`,
+   * which only reads: a write action without one is refused, not dispatched.
+   */
+  confirmation?: DispatchConfirmationCard;
 }
 
 export type DispatchTarget = Extract<ResolvedDispatchTarget, { kind: 'found' }>;
 
 export type DispatchPreparation =
   | { kind: 'ready'; target: DispatchTarget }
-  | { kind: 'result'; result: ToolHandlerStandardReturn };
+  | { kind: 'result'; result: ToolHandlerReturn };
 
 /**
- * What the analyst-facing confirmation card should say about the host the tool
- * will act on. Built from the *resolved* Fleet record, never from the model's
- * raw tool parameters: the card is the only human gate on a write action, so a
- * prompt-injected `{ hostName: 'web-01', agentId: <db-01's id> }` must not be
- * able to render one host and isolate another.
+ * The analyst-facing confirmation card of a write action. Absent for an
+ * inspection action that dispatches without a prompt.
  */
+export interface DispatchConfirmationCard {
+  title: string;
+  color: 'danger' | 'warning' | 'primary';
+  confirmText: string;
+  /** Sentence naming the action; `host` is the already-formatted resolved host. */
+  describe: (host: string) => string;
+  /** The model-written comment, shown verbatim because it is logged under the analyst. */
+  comment?: string;
+}
+
+/** A hostname that disagrees with every hostname the supplied agent id is known by. */
 export interface HostNameMismatch {
   providedHostName: string;
   /**
@@ -77,67 +138,143 @@ export interface HostNameMismatch {
   knownHostNames: string[];
 }
 
-export type ConfirmationTarget =
-  | {
-      kind: 'resolved';
-      /** Fleet hostname when known, else the agent id. */
-      hostLabel: string;
-      endpoint: ResolvedEndpoint;
-      /**
-       * Set when both a hostname and an agent id were supplied and the hostname
-       * is none of the names that agent is known by (Fleet's or Defend's). The
-       * handler refuses the call, so the card says so instead of naming a host
-       * that will not be acted on.
-       */
-      mismatch?: HostNameMismatch;
-    }
-  | { kind: 'blocked'; message: string };
+/**
+ * The model-authored arguments a confirmation card displays, keyed by name.
+ * Values are compared verbatim between the card build and the handler; an
+ * `undefined` value is the same as an absent key (a tool with no `comment`).
+ */
+export type DispatchConfirmationArgs = Record<string, string | undefined>;
+
+/** Order-independent comparison key for recorded vs. supplied arguments. */
+const stableArgsKey = (args: DispatchConfirmationArgs | undefined): string =>
+  JSON.stringify(
+    Object.entries(args ?? {})
+      .filter(([, value]) => value !== undefined)
+      .sort(([a], [b]) => a.localeCompare(b))
+  );
 
 /**
- * What the analyst was shown and approved, recorded while the confirmation card
- * is built and read back by the handler after the click.
+ * The argument names whose defined values differ between the confirmed card
+ * and this call — what the model needs to correct, without echoing argument
+ * values into the error.
+ */
+const differingArgNames = (
+  confirmed: DispatchConfirmationArgs | undefined,
+  supplied: DispatchConfirmationArgs | undefined
+): string[] => {
+  const names = new Set([...Object.keys(confirmed ?? {}), ...Object.keys(supplied ?? {})]);
+  return [...names].filter(
+    (name) => (confirmed?.[name] ?? undefined) !== (supplied?.[name] ?? undefined)
+  );
+};
+
+/**
+ * Snapshot of the confirmation card, taken when it is built and read back by
+ * the handler after the analyst clicks. It binds the approval to what the
+ * card showed — the resolved agent id and the displayed arguments — so a
+ * later call replaying the confirmed tool call with a different target or
+ * different arguments does not inherit it. The record is stored on the tool
+ * call (`stateManager` is scoped to it), so it survives the prompt round.
+ */
+export interface DispatchConfirmationState {
+  /** The card named the verified target: dispatch only to this agent id. */
+  kind: 'confirmed';
+  action: DispatchActionName;
+  agentId: string;
+  /** The arguments the card displayed (`path`, `comment`); the dispatch is held to them. */
+  args?: DispatchConfirmationArgs;
+}
+
+/**
+ * A lookup that can only resolve Elastic Defend agents, and only on origin
+ * sources — but which still LOOKS at the request-scoped candidate set under
+ * CPS so a same-named endpoint in a linked project surfaces as ambiguity
+ * instead of the origin host being offered on a confirmation card. Both the
+ * hostname walk and the agent-id lookup honour the agent-type scope, so
+ * neither path can hand a non-Defend agent to a vendor response-actions
+ * client.
  *
- * The handler re-resolves the target once the call is confirmed, so without this
- * record the card and the dispatch are independent evaluations of the same
- * request: a transient Fleet/authz failure renders a "this action will be
- * refused" card, and the handler dispatches to whatever it resolves after the
- * service recovers — a target the card never showed. The record is stored on the
- * tool call (`stateManager` is scoped to it), so it survives the prompt round.
+ * `scoped` is request-bound and the confirmation card can be built without a
+ * request identity (e.g. a synthetic context in tests), so it is resolved
+ * defensively: a missing request degrades to the origin-only behaviour
+ * rather than failing the card.
  */
-export type DispatchConfirmationState =
-  | {
-      /** The card named the verified target: dispatch only to this agent id. */
-      kind: 'confirmed';
-      action: DispatchActionName;
-      agentId: string;
-    }
-  | {
-      /** The card said the action would be refused: never dispatch. */
-      kind: 'refused';
-      action: DispatchActionName;
-      /** The refusal the analyst was shown, echoed to the caller. */
-      reason: string;
-    };
-
-/**
- * A lookup that can only resolve Elastic Defend agents. Both the hostname walk
- * and the agent-id lookup honour it, so neither path can hand a non-Defend
- * agent to a vendor response-actions client.
- */
-export const createDispatchLookup = (
+export const createDispatchLookup = async (
   endpointAppContextService: EndpointAppContextService,
-  spaceId: string
-) =>
-  createEndpointLookupService(endpointAppContextService, spaceId, undefined, {
-    agentTypes: [...DISPATCH_AGENT_TYPES],
-  });
+  spaceId: string,
+  request?: KibanaRequest
+) => {
+  const scoped = request ? await endpointAppContextService.asScoped(request) : undefined;
 
-const resolveTarget = (request: DispatchRequest): Promise<ResolvedDispatchTarget> =>
+  return createEndpointLookupService(endpointAppContextService, spaceId, scoped, {
+    agentTypes: [...DISPATCH_AGENT_TYPES],
+    resolutionMode: 'dispatch',
+  });
+};
+
+const resolveTarget = async (request: DispatchRequest): Promise<ResolvedDispatchTarget> =>
   resolveDispatchTarget(
-    createDispatchLookup(request.endpointAppContextService, request.context.spaceId),
+    await createDispatchLookup(
+      request.endpointAppContextService,
+      request.context.spaceId,
+      request.context.request
+    ),
     request.action,
     request.params
   );
+
+/**
+ * Distinguishes a missing role privilege from a license limit — and from a
+ * product-configuration refusal — when `authz[privilege]` is false, without
+ * re-deriving `calculateEndpointAuthz`'s conjunctions here: the privilege flag
+ * already folds all three in, so the license and product-features services are
+ * only consulted when the flag is false to decide which of the refusal shapes
+ * to return. `undefined` in `DISPATCH_PRIVILEGE_LICENSE_TIERS` means the
+ * privilege has no license conjunction, so the license is never the
+ * explanation.
+ *
+ * A license refusal itself has two causes (see `licenseLimitOf`): the active
+ * license is honestly below the required tier, or the license has expired /
+ * could not be read — in which case no tier comparison is meaningful and the
+ * answer is renewal or restoration, not an upgrade.
+ *
+ * On serverless, response-action privileges also derive from product features
+ * (see `PRIVILEGE_PRODUCT_FEATURES`), and the license is always Enterprise —
+ * so when the license raises no objection
+ * but none of the privilege's features is enabled, the deployment's product
+ * tier is the honest explanation, not a role grant or a license upgrade.
+ */
+const privilegeRefusal = (
+  endpointAppContextService: EndpointAppContextService,
+  privilege: DispatchPrivilege | 'canReadSecuritySolution'
+):
+  | { kind: 'privilege'; privilege: string }
+  | { kind: 'license'; privilege: DispatchPrivilege; tier: 'platinum' | 'enterprise' }
+  | { kind: 'license_state'; privilege: DispatchPrivilege; expired: boolean }
+  | { kind: 'product_feature'; privilege: DispatchPrivilege } => {
+  if (privilege !== 'canReadSecuritySolution') {
+    const requiredTier = DISPATCH_PRIVILEGE_LICENSE_TIERS[privilege];
+    if (requiredTier) {
+      const limit = licenseLimitOf(endpointAppContextService.getLicenseService(), requiredTier);
+      if (limit?.kind === 'tier') {
+        return { kind: 'license', privilege, tier: limit.tier };
+      }
+      if (limit?.kind === 'state') {
+        return { kind: 'license_state', privilege, expired: limit.expired };
+      }
+    }
+    if (
+      responseActionsProductFeatureEnabled(
+        endpointAppContextService.getProductFeaturesService(),
+        privilege
+      ) === false
+    ) {
+      return { kind: 'product_feature', privilege };
+    }
+  }
+
+  return { kind: 'privilege', privilege };
+};
 
 /**
  * A hostname that disagrees with every hostname the supplied agent id is known
@@ -186,57 +323,54 @@ const mismatchResult = (mismatch: HostNameMismatch) =>
     )}), so the target is ambiguous. Call the tool again with the agentId alone (or with one of those hostnames).`
   );
 
-/** Sentence both the refusal card and the recorded confirmation use. */
-const hostNameMismatchRefusal = (mismatch: HostNameMismatch, agentId: string): string =>
-  `The requested hostname '${
-    mismatch.providedHostName
-  }' is not a hostname of agent ID ${agentId} (known: ${quotedNames(mismatch.knownHostNames)}).`;
+/**
+ * The model-facing arguments worth binding an approval to: only the ones with
+ * a defined value (a tool with no `comment` records no `args` at all), so the
+ * recorded state stays minimal and comparisons ignore absent keys.
+ */
+const confirmationArgsOf = (
+  args: DispatchConfirmationArgs | undefined
+): DispatchConfirmationArgs | undefined => {
+  const defined = Object.fromEntries(
+    Object.entries(args ?? {}).filter(([, value]) => value !== undefined)
+  );
+  return Object.keys(defined).length ? defined : undefined;
+};
 
 /**
  * Records what the card tells the analyst, so the handler can hold the dispatch
- * to it. A refused card (failed preflight, missing privilege, hostname/agent-id
- * mismatch) is recorded as a refusal: approving it must never dispatch.
+ * to it once the analyst clicks.
  */
-const recordConfirmation = (request: DispatchRequest, target: ConfirmationTarget): void => {
-  const { action, context } = request;
-
-  if (target.kind === 'blocked') {
-    context.stateManager.setState<DispatchConfirmationState>({
-      kind: 'refused',
-      action,
-      reason: target.message,
-    });
-    return;
-  }
-
-  if (target.mismatch) {
-    context.stateManager.setState<DispatchConfirmationState>({
-      kind: 'refused',
-      action,
-      reason: hostNameMismatchRefusal(target.mismatch, target.endpoint.agentId),
-    });
-    return;
-  }
-
-  context.stateManager.setState<DispatchConfirmationState>({
+const recordConfirmation = (request: DispatchRequest, target: DispatchTarget): void => {
+  request.context.stateManager.setState<DispatchConfirmationState>({
     kind: 'confirmed',
-    action,
+    action: request.action,
     agentId: target.endpoint.agentId,
+    ...(request.args ? { args: confirmationArgsOf(request.args) } : {}),
   });
 };
 
 /**
- * A dispatch reaching the handler without a verification of the target the card
- * named — the analyst approved a refusal, or the tool call was resumed with no
- * confirmation record at all. Nothing is dispatched; re-running the tool is what
- * produces a fresh card naming the host that will be acted on.
+ * A dispatch reaching the handler after an approval with no record of the
+ * target the card named. Nothing is dispatched; re-running the tool produces a
+ * fresh card naming the host that will be acted on.
  */
-const unconfirmedDispatchResult = (state: DispatchConfirmationState | undefined) =>
+const unconfirmedDispatchResult = () =>
   responseActionErrorResult(
     'invalid_argument',
-    state?.kind === 'refused'
-      ? `The confirmation shown for this call reported that the action would be refused (${state.reason}), so nothing was dispatched. Resolve that and call the tool again, so the analyst is shown a new confirmation card naming the verified host.`
-      : `The target of this call is not covered by a confirmation, so nothing was dispatched. Call the tool again, so the analyst is asked to confirm the resolved host.`
+    `The target of this call is not covered by a confirmation, so nothing was dispatched. Call the tool again, so the analyst is asked to confirm the resolved host.`
+  );
+
+const missingConfirmationResult = (action: DispatchActionName) =>
+  responseActionErrorResult(
+    'invalid_argument',
+    `The '${action}' tool has no analyst confirmation configured, so nothing was dispatched.`
+  );
+
+const cancelledResult = (action: DispatchActionName) =>
+  responseActionErrorResult(
+    'invalid_argument',
+    `The analyst declined the '${action}' confirmation, so nothing was dispatched.`
   );
 
 /** The host resolved for the call is not the one the analyst confirmed. */
@@ -272,7 +406,7 @@ const isolationNoOpResult = (
   ],
 });
 
-/** Host isolation refusal shared by the confirmation and dispatch gates. */
+/** Refusal for a Linux endpoint whose policy disallows host isolation. */
 const hostIsolationDisabledMessage = (hostLabel: string): string =>
   `Host isolation is disabled by the endpoint policy assigned to ${hostLabel}, so the endpoint will refuse this action. Enable linux.advanced.host_isolation.allowed in that policy before trying again.`;
 
@@ -323,66 +457,20 @@ const getIsolationState = async (
 };
 
 /**
- * Resolves the target for the confirmation card. Never throws and never
- * dispatches: an unresolvable host, a missing privilege, or a Fleet/metadata
- * read that fails while building the card is reported in the card text so the
- * analyst is not asked to approve an action that the handler will refuse.
- *
- * The catch is load-bearing: this phase runs before the tool handler
- * (`run_tool.ts` awaits `confirmation.getConfirmation` outside its own error
- * handling), so letting a service read reject here would fail tool execution
- * with neither a card nor the handler's structured error result.
+ * The arguments of this call are not the ones the analyst confirmed. The card
+ * is the human gate on the whole request — the scan path and the comment it
+ * displays are part of what was approved — so a call that resumes a confirmed
+ * tool call with different arguments (a replaced `path`, an edited `comment`)
+ * must not inherit the approval. Only argument NAMES are echoed, never their
+ * values: a rejected value was never approved, and the model already has it.
  */
-export const describeDispatchTargetForConfirmation = async (
-  request: DispatchRequest
-): Promise<ConfirmationTarget> => {
-  const { context, endpointAppContextService, requiredPrivilege } = request;
-
-  try {
-    const authz = await endpointAppContextService.getEndpointAuthz(context.request);
-    // The HTTP routes require the `securitySolution` feature privilege on top
-    // of the endpoint sub-feature privilege; a sub-feature alone does not
-    // grant it, so assert both layers (see `get_response_action_status`).
-    if (!authz.canReadSecuritySolution) {
-      return {
-        kind: 'blocked',
-        message: `You do not have the 'canReadSecuritySolution' privilege (Security feature access), so this action will be refused. Ask an administrator to grant it, or perform the action from the Security UI.`,
-      };
-    }
-    if (!authz[requiredPrivilege]) {
-      return {
-        kind: 'blocked',
-        message: `You do not have the '${requiredPrivilege}' endpoint privilege, so this action will be refused. Ask an administrator to grant it, or perform the action from the Security UI.`,
-      };
-    }
-
-    const target = await resolveTarget(request);
-
-    if (target.kind === 'respond') {
-      return { kind: 'blocked', message: target.data.message };
-    }
-
-    const mismatch = findHostNameMismatch(request.params.hostName, target.endpoint);
-
-    if (!mismatch && (await isHostIsolationDisabled(request, target))) {
-      return { kind: 'blocked', message: hostIsolationDisabledMessage(target.hostLabel) };
-    }
-
-    return {
-      kind: 'resolved',
-      hostLabel: target.hostLabel,
-      endpoint: target.endpoint,
-      ...(mismatch ? { mismatch } : {}),
-    };
-  } catch (error) {
-    return {
-      kind: 'blocked',
-      message: `The target host could not be verified (${
-        error instanceof Error ? error.message : String(error)
-      }), so this action cannot be dispatched yet. Retry once Fleet and the Endpoint services are reachable, or perform the action from the Security UI.`,
-    };
-  }
-};
+const changedArgsResult = (differing: string[]) =>
+  responseActionErrorResult(
+    'invalid_argument',
+    `The arguments of this call differ from the ones the analyst confirmed (differing: ${differing.join(
+      ', '
+    )}), so nothing was dispatched. Call the tool again, so the analyst is shown the actual arguments on a new confirmation card.`
+  );
 
 /**
  * Shared preparation for every dispatching tool handler, so the
@@ -395,13 +483,18 @@ export const describeDispatchTargetForConfirmation = async (
 export const prepareDispatch = async (request: DispatchRequest): Promise<DispatchPreparation> => {
   const { context, endpointAppContextService, requiredPrivilege, params } = request;
 
-  // The runner only prompts for confirmation when the call comes from the agent
-  // (`source === 'agent'` in run_tool.ts); a `user`/`mcp` call reaches the
-  // handler unprompted. Refuse anything that did not come through the agent so
-  // the HITL card cannot be bypassed — same guard as the policy-management
+  // Refuse anything that did not come through the agent so the analyst's
+  // confirmation cannot be bypassed — same guard as the policy-management
   // skill's writes.
   if (context.callContext?.callSource !== 'agent') {
     return { kind: 'result', result: nonAgentCallSourceResult(context) };
+  }
+
+  // Only the read-only action may skip the prompt; a write action whose tool
+  // forgot its card must not dispatch unconfirmed.
+  const { confirmation } = request;
+  if (!confirmation && !UNCONFIRMED_ACTIONS.includes(request.action)) {
+    return { kind: 'result', result: missingConfirmationResult(request.action) };
   }
 
   const authz = await endpointAppContextService.getEndpointAuthz(context.request);
@@ -411,7 +504,20 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'result', result: insufficientPrivilegesResult('canReadSecuritySolution') };
   }
   if (!authz[requiredPrivilege]) {
-    return { kind: 'result', result: insufficientPrivilegesResult(requiredPrivilege) };
+    const refusal = privilegeRefusal(endpointAppContextService, requiredPrivilege);
+    if (refusal.kind === 'license') {
+      return { kind: 'result', result: licenseTierRequiredResult(refusal.privilege, refusal.tier) };
+    }
+    if (refusal.kind === 'license_state') {
+      return {
+        kind: 'result',
+        result: licenseUnavailableResult(refusal.privilege, refusal.expired),
+      };
+    }
+    if (refusal.kind === 'product_feature') {
+      return { kind: 'result', result: productFeatureDisabledResult(refusal.privilege) };
+    }
+    return { kind: 'result', result: insufficientPrivilegesResult(refusal.privilege) };
   }
 
   const target = await resolveTarget(request);
@@ -432,23 +538,9 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'result', result: mismatchResult(mismatch) };
   }
 
-  // The card is the human gate, and the handler re-resolves after the click, so
-  // the dispatch is held to what the card showed: the agent id recorded when the
-  // card was built. A card that reported a refusal records no verified target
-  // and can therefore never dispatch here, however the lookup behaves now.
-  const approved = context.stateManager.getState<DispatchConfirmationState>();
-
-  if (approved?.kind !== 'confirmed' || approved.action !== request.action) {
-    return { kind: 'result', result: unconfirmedDispatchResult(approved) };
-  }
-
-  if (approved.agentId !== target.endpoint.agentId) {
-    return {
-      kind: 'result',
-      result: changedTargetResult(approved.agentId, target.endpoint.agentId),
-    };
-  }
-
+  // Both checks run before the card, so the analyst is never asked to approve
+  // an isolation the endpoint will refuse or one that would change nothing.
+  // A confirmed call re-enters here too, so the state is re-read at dispatch.
   if (await isHostIsolationDisabled(request, target)) {
     return {
       kind: 'result',
@@ -469,6 +561,61 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     }
   }
 
+  if (!confirmation) {
+    return { kind: 'ready', target };
+  }
+
+  // The confirmation is asked here, after every refusal check above, so an
+  // analyst is never shown an approve button for a call that cannot succeed.
+  // The dispatch is held to what the card showed: the agent id and arguments
+  // recorded when it was built.
+  const promptId = `${request.action}.confirm.${context.callContext.toolCallId}`;
+  const { status } = context.prompts.checkConfirmationStatus(promptId);
+
+  if (status === ConfirmationStatus.unprompted) {
+    recordConfirmation(request, target);
+    return {
+      kind: 'result',
+      result: context.prompts.askForConfirmation({
+        id: promptId,
+        title: confirmation.title,
+        message: `${confirmation.describe(
+          `**${target.hostLabel} (agent ID ${target.endpoint.agentId})**`
+        )}${analystCommentNote(confirmation.comment)}`,
+        confirm_text: confirmation.confirmText,
+        cancel_text: i18n.translate(
+          'xpack.securitySolution.endpointResponseActionsSkill.confirmation.cancel',
+          { defaultMessage: 'Cancel' }
+        ),
+        color: confirmation.color,
+      }),
+    };
+  }
+
+  if (status === ConfirmationStatus.rejected) {
+    return { kind: 'result', result: cancelledResult(request.action) };
+  }
+
+  const approved = context.stateManager.getState<DispatchConfirmationState>();
+
+  if (approved?.kind !== 'confirmed' || approved.action !== request.action) {
+    return { kind: 'result', result: unconfirmedDispatchResult() };
+  }
+
+  if (approved.agentId !== target.endpoint.agentId) {
+    return {
+      kind: 'result',
+      result: changedTargetResult(approved.agentId, target.endpoint.agentId),
+    };
+  }
+
+  if (stableArgsKey(approved.args) !== stableArgsKey(request.args)) {
+    return {
+      kind: 'result',
+      result: changedArgsResult(differingArgNames(approved.args, request.args)),
+    };
+  }
+
   return { kind: 'ready', target };
 };
 
@@ -476,72 +623,17 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
  * Renders the analyst-supplied `comment` on the confirmation card. The comment
  * is model-authored, is recorded in the Response Actions audit log under the
  * *analyst's* username, and used to be invisible at the moment of confirming —
- * so the card shows the exact text it will be attributed to them.
+ * so the card shows the exact text it will be attributed to them. Shown as a
+ * code span with invisible characters escaped: a raw newline would let a
+ * crafted comment forge extra lines on the card (see
+ * `formatForConfirmationCard`).
  */
 export const analystCommentNote = (comment: string | undefined): string =>
   comment
-    ? `\n\nThe response action log will record this comment under your username: "${comment}"`
+    ? `\n\nThe response action log will record this comment under your username: \`${formatForConfirmationCard(
+        comment
+      )}\``
     : '';
-
-interface ConfirmationCardOptions {
-  title: string;
-  color: 'danger' | 'warning' | 'primary';
-  confirmText: string;
-  /** Sentence naming the action; `host` is the already-formatted resolved host. */
-  describe: (host: string) => string;
-  /** The model-written comment, shown verbatim because it is logged under the analyst. */
-  comment?: string;
-}
-
-/**
- * Builds the confirmation card from the host the handler will really act on
- * (Fleet hostname + agent id), the analyst's endpoint privilege, and the exact
- * comment that will be logged under their name. When the call cannot succeed
- * (no privilege, unknown host, ambiguous hostname, hostname/agent-id
- * mismatch) the card says so rather than presenting an approvable action.
- */
-export const buildDispatchConfirmation = async (
-  request: DispatchRequest,
-  options: ConfirmationCardOptions
-) => {
-  const target = await describeDispatchTargetForConfirmation(request);
-  // Record what the card is about to tell the analyst before it is returned: the
-  // state is snapshotted with the prompt and read back by the handler after the
-  // click, which is what keeps a refused card from authorizing a later dispatch.
-  recordConfirmation(request, target);
-
-  const base = {
-    title: options.title,
-    color: options.color,
-    confirm_text: options.confirmText,
-  };
-
-  if (target.kind === 'blocked') {
-    return {
-      ...base,
-      color: 'warning' as const,
-      message: `**This action will be refused.** ${target.message}`,
-    };
-  }
-
-  if (target.mismatch) {
-    return {
-      ...base,
-      color: 'warning' as const,
-      message: `**This action will be refused.** ${hostNameMismatchRefusal(
-        target.mismatch,
-        target.endpoint.agentId
-      )}`,
-    };
-  }
-
-  const host = `${target.hostLabel} (agent ID ${target.endpoint.agentId})`;
-
-  return {
-    ...base,
-    message: `${options.describe(`**${host}**`)}${analystCommentNote(options.comment)}`,
-  };
-};
 
 export const nonAgentCallSourceMessage = (context: ToolHandlerContext): string =>
   `This tool dispatches endpoint response actions only from an agent conversation, where each action is confirmed by the analyst first (this call came from '${context.callContext?.callSource}'). Ask through the assistant instead.`;

@@ -6,8 +6,24 @@
   "nightshift": {
     "telemetry": {
       "url": "https://REPLACE_ME",
+      "apiKey": "REPLACE_ME"
+    }
+  },
+  "nightshiftOrcaEs": {
+    "url": "https://REPLACE_ME:443",
+    "username": "nightshift-orcabench-eval",
+    "password": "REPLACE_ME"
+  },
+  "nightshiftKnowledge": {
+    "default": {
+      "url": "https://REPLACE_ME:443",
       "apiKey": "REPLACE_ME",
-      "readableIndices": "REPLACE_ME"
+      "spaceId": "default"
+    },
+    "orcabench": {
+      "url": "https://REPLACE_ME:443",
+      "apiKey": "REPLACE_ME",
+      "spaceId": "default"
     }
   }
 }

@@ -83,7 +83,7 @@ export const YourConnector: ConnectorSpec = {
   metadata: {
     id: '.your_connector',           // MUST start with a dot
     displayName: 'Your Connector',
-    description: i18n.translate('core.kibanaConnectorSpecs.yourConnector.metadata.description', {
+    description: i18n.translate('connectorSpecs.yourConnector.metadata.description', {
       defaultMessage: 'Search items, list collections, and retrieve details from Your Service',
     }),
     minimumLicense: 'enterprise',

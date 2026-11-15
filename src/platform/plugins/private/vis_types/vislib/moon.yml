@@ -61,6 +61,4 @@ fileGroups:
     - public/fixtures/dispatch_heatmap_config.json
     - public/fixtures/dispatch_heatmap_data_point.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

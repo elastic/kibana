@@ -126,18 +126,7 @@ describe('<ComponentTemplateCreate />', () => {
   });
 
   describe('Step: Review and submit', () => {
-    test('should render the review content', async () => {
-      const componentTemplate: ComponentTemplateDeserialized = {
-        name: 'comp-1',
-        template: {
-          settings: { number_of_shards: 1 },
-          aliases: { my_alias: {} },
-          mappings: { properties: { boolean_datatype: { type: 'boolean' } } },
-          lifecycle: serializeAsESLifecycle({ enabled: true, value: 2, unit: 'd' }),
-        },
-        _kbnMeta: { usedBy: [], isManaged: false },
-      };
-
+    const renderStepReview = (componentTemplate: ComponentTemplateDeserialized) =>
       render(
         <I18nProvider>
           <AppContextProvider
@@ -151,6 +140,39 @@ describe('<ComponentTemplateCreate />', () => {
           </AppContextProvider>
         </I18nProvider>
       );
+
+    test('should only summarize the data lifecycle when the request includes one', () => {
+      const { unmount } = renderStepReview({
+        name: 'comp-1',
+        template: {},
+        _kbnMeta: { usedBy: [], isManaged: false },
+      });
+
+      expect(screen.queryByTestId('dataLifecycleTitle')).not.toBeInTheDocument();
+      unmount();
+
+      renderStepReview({
+        name: 'comp-1',
+        template: { lifecycle: { enabled: true, data_retention: '2d' } },
+        _kbnMeta: { usedBy: [], isManaged: false },
+      });
+
+      expect(screen.getByTestId('dataLifecycleTitle')).toBeInTheDocument();
+    });
+
+    test('should render the review content', async () => {
+      const componentTemplate: ComponentTemplateDeserialized = {
+        name: 'comp-1',
+        template: {
+          settings: { number_of_shards: 1 },
+          aliases: { my_alias: {} },
+          mappings: { properties: { boolean_datatype: { type: 'boolean' } } },
+          lifecycle: serializeAsESLifecycle({ enabled: true, value: 2, unit: 'd' }),
+        },
+        _kbnMeta: { usedBy: [], isManaged: false },
+      };
+
+      renderStepReview(componentTemplate);
 
       expect(screen.getByTestId('stepReview')).toBeInTheDocument();
       expect(screen.getByTestId('stepReview')).toHaveTextContent(`Review details for 'comp-1'`);

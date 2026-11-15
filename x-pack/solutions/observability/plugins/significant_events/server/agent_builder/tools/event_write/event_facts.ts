@@ -7,12 +7,13 @@
 
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   type Severity,
   type SignalEntry,
+  type SignalVerdict,
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
-import type { CompactBulkError } from '../bulk_write';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -21,7 +22,6 @@ import {
   mergeSignalsLatestPerRule,
   preserveStableNarrative,
 } from './episode_context';
-import { lockSeverityForCompletedInvestigation, type EventsWriteSource } from './severity_lock';
 import type {
   BulkResults,
   EventsWriteInput,
@@ -29,6 +29,7 @@ import type {
   LoadedCandidate,
   ResolvedWriteCandidate,
   WriteCandidate,
+  WriteOutcome,
 } from './types';
 
 const isLiveStatus = (status: SignificantEvent['status'] | undefined): boolean =>
@@ -47,7 +48,7 @@ interface EventFacts
  * reopened event does not inherit rule history from the episode it closed. A closed event keeps its
  * full history, since it can only be unchanged against what it already stored.
  */
-const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] => {
+export const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] => {
   const latest = history.at(-1);
   if (!isLiveStatus(latest?.status)) return history;
   const lastClosedIndex = history.map((version) => !isLiveStatus(version.status)).lastIndexOf(true);
@@ -57,8 +58,7 @@ const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] => {
 /**
  * Returns true when the latest stored version for this event_id has the same severity and status
  * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
- * would produce a pure-churn duplicate. `severity` is the tier this write would store, after the
- * investigation lock.
+ * would produce a pure-churn duplicate. `severity` is the tier this write would store.
  */
 export const shouldSkipAsNoOp = ({
   candidate,
@@ -70,7 +70,7 @@ export const shouldSkipAsNoOp = ({
   const { latest, priorDocs } = candidate;
   if (latest === undefined) return false;
 
-  const history = episodeHistory([...priorDocs, latest]);
+  const history = episodeHistory(priorDocs);
   const knownRuleUuids = extractRuleUuidsFromEvents(history);
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
 
@@ -106,10 +106,32 @@ const changesMemberVerdict = (
   );
 };
 
+const ruleOf = (signal: SignalEntry): string | undefined => signal.metadata?.rule_uuid;
+
+/** Does this write confirm a rule the stored event did not hold as confirmed? */
+const escalatesStoredVerdict = ({
+  submitted,
+  latest,
+}: {
+  submitted: SignificantEvent['signals'];
+  latest: SignificantEvent | undefined;
+}): boolean => {
+  const stored = new Map((latest?.signals ?? []).map((signal) => [ruleOf(signal), signal.verdict]));
+  return (submitted ?? []).some(
+    (signal) => signal.verdict === 'confirms' && stored.get(ruleOf(signal)) !== 'confirms'
+  );
+};
+
+/** A confirming signal, or an off-topic row with its own observed error: both are rated on what they show. */
+export const hasEventWorthySignal = (
+  signals: ReadonlyArray<{ verdict: SignalVerdict }> | undefined
+): boolean =>
+  (signals ?? []).some(({ verdict }) => verdict === 'confirms' || verdict === 'off_topic');
+
 /**
  * The agent decides the tier under the `severity` field contract; the writer stores it. An inactive
- * event is `low`, and a signal-less write (chat create) keeps its explicit severity, or `low` when
- * it gave none.
+ * event is `low`, so is one where no signal confirms anything, and a signal-less write (chat
+ * create) keeps its explicit severity, or `low` when it gave none.
  */
 const decideSeverity = ({
   proposed,
@@ -125,6 +147,9 @@ const decideSeverity = ({
   }
   if ((signals ?? []).length === 0) {
     return proposed ?? 'low';
+  }
+  if (!hasEventWorthySignal(signals)) {
+    return 'low';
   }
   if (proposed === undefined) {
     throw new Error('events_write: an event with signals needs a proposed severity.');
@@ -152,57 +177,55 @@ export const loadHistory = async ({
 
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
- * takes the agent's proposed severity, floors an inactive event to low and applies the
- * investigation lock — the facts shared by the no-op check and the final document, derived once per
- * candidate so the two cannot disagree.
+ * takes the agent's proposed severity and floors an inactive event to low — the facts shared by
+ * the no-op check and the final document, derived once per candidate so the two cannot disagree.
  */
 export const computeEventFacts = ({
   candidate,
   timestamp,
-  source,
 }: {
   candidate: ResolvedWriteCandidate;
   timestamp: string;
-  source: EventsWriteSource | undefined;
 }): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const { latest, priorDocs } = candidate;
   const isContinuation = candidate.input.event_id !== undefined;
+  const currentEpisode = episodeHistory(priorDocs);
 
   // A closed series that reopens starts a new episode: its stored signals belong to the closed one.
   const reopens = isContinuation && !isLiveStatus(latest?.status) && isLiveStatus(candidate.status);
   const signals =
     isContinuation && !reopens
-      ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
+      ? mergeSignalsLatestPerRule(currentEpisode, candidate.input.signals ?? [], timestamp)
       : candidate.input.signals ?? [];
 
-  const episodeContext = isContinuation
-    ? mergeEpisodeContext(priorDocs, rest, timestamp)
-    : {
-        sourceIds: rest.source_ids,
-        causalFeatures: rest.causal_features ?? [],
-        blastRadius: rest.blast_radius ?? [],
-        confidence: rest.confidence ?? 0,
-      };
+  const episodeContext =
+    isContinuation && !reopens
+      ? mergeEpisodeContext(currentEpisode, rest, timestamp)
+      : {
+          sourceIds: rest.source_ids,
+          causalFeatures: rest.causal_features ?? [],
+          blastRadius: rest.blast_radius ?? [],
+          confidence: rest.confidence ?? 0,
+        };
 
   const { status } = candidate;
 
-  const severity = lockSeverityForCompletedInvestigation({
-    source,
-    latestEvent: latest,
-    proposedSeverity: decideSeverity({ proposed: candidate.input.severity, status, signals }),
-    proposedStatus: status,
-    proposedSignals: candidate.input.signals,
-  });
+  const severity = decideSeverity({ proposed: candidate.input.severity, status, signals });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
-  const frozenNarrative = isContinuation
-    ? preserveStableNarrative(
-        extractRuleUuids(candidate.input.signals),
-        latest,
-        extractRuleUuidsFromEvents([...priorDocs, latest])
-      )
-    : undefined;
+  // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
+  // its title and hypothesis must be free to say so.
+  const frozenNarrative =
+    isContinuation &&
+    !reopens &&
+    !escalatesStoredVerdict({ submitted: candidate.input.signals, latest })
+      ? preserveStableNarrative(
+          extractRuleUuids(candidate.input.signals),
+          latest,
+          extractRuleUuidsFromEvents(currentEpisode)
+        )
+      : undefined;
 
   return {
     candidate,
@@ -212,7 +235,11 @@ export const computeEventFacts = ({
     status,
     severity,
     frozenNarrative,
-    confidence: episodeContext.confidence,
+    // Nothing confirmed, so nothing to be confident about; a signal-less write keeps its own.
+    confidence:
+      signals.length === 0 || hasEventWorthySignal(signals)
+        ? episodeContext.confidence
+        : Math.min(episodeContext.confidence, UNCONFIRMED_EVENT_MAX_CONFIDENCE),
   };
 };
 
@@ -252,7 +279,6 @@ export const buildPendingWrite = ({
         : {}),
       '@timestamp': timestamp,
       event_id: candidate.eventId,
-      investigations: candidate.latest?.investigations,
       signals,
       source_ids: episodeContext.sourceIds,
       causal_features: episodeContext.causalFeatures,
@@ -267,23 +293,26 @@ export const buildPendingWrite = ({
 /** Writes `error ? bulk_error (or superseded) : written` into `results` for each pending write, by index. */
 export const applyWriteOutcomes = ({
   pendingWrites,
-  errors,
+  outcomes,
   results,
 }: {
   pendingWrites: Array<ReturnType<typeof buildPendingWrite>>;
-  errors: Array<CompactBulkError | undefined>;
+  outcomes: WriteOutcome[];
   results: BulkResults;
 }): void => {
   pendingWrites.forEach(({ candidate, status, narrativePreserved, severity }, responseIndex) => {
-    const error = errors[responseIndex];
-    if (error) {
+    const outcome = outcomes[responseIndex];
+    if (outcome.error) {
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
+        ...('reopensSeries' in candidate && candidate.reopensSeries
+          ? { existing_event_id: candidate.eventId }
+          : {}),
         status,
         written: false,
-        reason: error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
-        error,
+        reason: outcome.error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
+        error: outcome.error,
       };
       return;
     }
@@ -293,10 +322,9 @@ export const applyWriteOutcomes = ({
       status,
       written: true,
       severity,
+      ...(narrativePreserved ? { narrative_preserved: true } : {}),
+      ...(outcome.created ? { created: true, group_hash: outcome.groupHash } : { created: false }),
     };
-    if (narrativePreserved) {
-      result.narrative_preserved = true;
-    }
     results[candidate.index] = result;
   });
 };

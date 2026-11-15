@@ -19,7 +19,7 @@ export const count = (overrides: Partial<EsqlConversionColumn> = {}): EsqlConver
 });
 
 export const metric = (
-  operationType: 'average' | 'max' | 'median' | 'sum' | 'min',
+  operationType: 'average' | 'max' | 'median' | 'sum' | 'min' | 'standard_deviation',
   sourceField: string,
   overrides: Partial<EsqlConversionColumn> = {}
 ): EsqlConversionColumn => ({

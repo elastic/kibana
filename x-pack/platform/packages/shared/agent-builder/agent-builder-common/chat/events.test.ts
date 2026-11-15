@@ -10,7 +10,6 @@ import {
   isConversationCreatedEvent,
   isApiStateChangedEvent,
   API_STATE_CHANGED_UI_EVENT,
-  TODOS_UPDATED_UI_EVENT,
   ChatEventType,
 } from './events';
 import type { MessageChunkEvent, ToolUiEvent } from './events';
@@ -103,7 +102,7 @@ describe('Chat events', () => {
     });
 
     it('should return false for another tool UI event', () => {
-      expect(isApiStateChangedEvent(toolUiEvent(TODOS_UPDATED_UI_EVENT))).toBe(false);
+      expect(isApiStateChangedEvent(toolUiEvent('some_other_ui_event'))).toBe(false);
     });
 
     it('should return false for a non tool UI event', () => {

@@ -33,6 +33,15 @@ export const GetFileRouteRequestBody = lazySchema(() =>
           .min(1)
           .max(4096)
           .describe('The full file path to retrieve from the endpoint.'),
+        /**
+         * Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+         */
+        force: z
+          .boolean()
+          .optional()
+          .describe(
+            'Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.'
+          ),
       }),
     })
   )
