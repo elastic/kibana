@@ -17,7 +17,10 @@ import {
   type MonitorHealthStatus,
   type MonitorsHealthResponse,
 } from '../../common/runtime_types';
-import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
+import {
+  SyntheticsPrivateLocation,
+  type PolicyIdConfig,
+} from '../synthetics_service/private_location/synthetics_private_location';
 import { PackagePolicyService } from '../synthetics_service/private_location/package_policy_service';
 import { getPrivateLocationsForNamespaces } from '../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
@@ -55,15 +58,18 @@ export class MonitorIntegrationHealthApi {
   ) {}
 
   /**
-   * Returns the monitor id used to look up Fleet package policies for this monitor.
-   * Prefers `MONITOR_QUERY_ID` when present; otherwise falls back to the saved object id.
+   * Returns what the Fleet package policy IDs of this monitor are derived from: the heartbeat id
+   * (`MONITOR_QUERY_ID`, falling back to the saved object id) and the saved object id itself.
    * Project monitors store a journey-based id in `MONITOR_QUERY_ID` (e.g. `journey-project-namespace`),
-   * which differs from `so.id`.
+   * which differs from `so.id`. Policies created before UUID-based ids sit under the first one, new
+   * policies under the second.
    *
    * @param so Saved object for the synthetics monitor.
    */
-  private static getMonitorPolicyId(so: SavedObject<EncryptedSyntheticsMonitorAttributes>): string {
-    return so.attributes[ConfigKey.MONITOR_QUERY_ID] || so.id;
+  private static getPolicyIdConfig(
+    so: SavedObject<EncryptedSyntheticsMonitorAttributes>
+  ): PolicyIdConfig {
+    return { id: so.attributes[ConfigKey.MONITOR_QUERY_ID] || so.id, config_id: so.id };
   }
 
   async getHealth(monitorIds: string[]): Promise<MonitorsHealthResponse> {
@@ -148,11 +154,7 @@ export class MonitorIntegrationHealthApi {
     const monitors: MonitorHealthStatus[] = foundMonitors.map(({ so }) => {
       const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
       const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
-      const monitorPolicyId = MonitorIntegrationHealthApi.getMonitorPolicyId(so);
-      const policyConfig = {
-        origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE],
-        id: monitorPolicyId,
-      };
+      const policyConfig = MonitorIntegrationHealthApi.getPolicyIdConfig(so);
 
       // Status checks are ordered by root-cause severity (most fundamental first).
       // Only the first matching status is returned per location — downstream issues
@@ -182,9 +184,9 @@ export class MonitorIntegrationHealthApi {
           );
         }
 
-        const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
+        const { policyId, hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
           privateLocationAPI.getPolicyIdFormatInfo(
-            { id: monitorPolicyId },
+            policyConfig,
             loc.id,
             existingPoliciesArray,
             allSpaces
@@ -200,7 +202,7 @@ export class MonitorIntegrationHealthApi {
           );
         }
 
-        const resolvedPolicyId = hasNewFormatPolicyId ? newFormatPolicyId : legacyPolicyIds[0];
+        const resolvedPolicyId = hasNewFormatPolicyId ? policyId : legacyPolicyIds[0];
         const expectedAgentPolicyId = existingPrivateLocation.agentPolicyId;
 
         const agentStatus = agentStatusMap.get(expectedAgentPolicyId);
@@ -289,20 +291,15 @@ export class MonitorIntegrationHealthApi {
     for (const { so } of foundMonitors) {
       const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
       const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
-      const monitorPolicyId = MonitorIntegrationHealthApi.getMonitorPolicyId(so);
-      const policyConfig = {
-        origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE],
-        id: monitorPolicyId,
-      };
+      const policyConfig = MonitorIntegrationHealthApi.getPolicyIdConfig(so);
 
       for (const loc of privateLocations) {
-        ids.add(privateLocationAPI.getPolicyId(policyConfig, loc.id));
-        for (const legacyId of privateLocationAPI.getLegacyPolicyIdsForAllSpaces(
-          so.id,
+        for (const candidateId of privateLocationAPI.getPolicyIdCandidates(
+          policyConfig,
           loc.id,
           allSpaces
         )) {
-          ids.add(legacyId);
+          ids.add(candidateId);
         }
       }
     }

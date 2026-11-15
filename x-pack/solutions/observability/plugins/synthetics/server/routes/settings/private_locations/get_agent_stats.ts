@@ -223,16 +223,23 @@ const getVisibleMonitorSpacesByLocation = async (
   const configIdsByLocation = new Map<string, Map<string, Set<string>>>();
 
   for (const { id, attributes, namespaces } of monitors) {
-    const configId = attributes[ConfigKey.MONITOR_QUERY_ID] || attributes.config_id || id;
+    // Package policy ids carry the saved-object id, or the heartbeat id when they were created
+    // before policy ids were built from it.
+    const configIds = new Set([attributes[ConfigKey.MONITOR_QUERY_ID], attributes.config_id, id]);
     const visibleSpaces = namespaces?.length ? namespaces : [DEFAULT_SPACE_ID];
     for (const { id: locationId } of attributes[ConfigKey.LOCATIONS] ?? []) {
       if (!requestedLocationIds.has(locationId)) {
         continue;
       }
       const spacesByConfigId = configIdsByLocation.get(locationId) ?? new Map();
-      const spaces = spacesByConfigId.get(configId) ?? new Set<string>();
-      visibleSpaces.forEach((spaceId) => spaces.add(spaceId));
-      spacesByConfigId.set(configId, spaces);
+      for (const configId of configIds) {
+        if (!configId) {
+          continue;
+        }
+        const spaces = spacesByConfigId.get(configId) ?? new Set<string>();
+        visibleSpaces.forEach((spaceId) => spaces.add(spaceId));
+        spacesByConfigId.set(configId, spaces);
+      }
       configIdsByLocation.set(locationId, spacesByConfigId);
     }
   }

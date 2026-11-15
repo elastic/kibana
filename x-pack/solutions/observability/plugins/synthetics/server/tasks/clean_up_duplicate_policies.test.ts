@@ -192,17 +192,70 @@ describe('findLeftoverPackagePolicies', () => {
     expect(leftoverIds).toEqual(['m1-loc1-default', 'm1-loc1-stores']);
   });
 
-  it('builds project monitor policy ids from the monitor id attribute', async () => {
-    const { server, soClient } = makeServer({
-      policyIdPages: [['journey-project-loc1']],
-      monitorPages: [
-        [monitor('saved-object-id', ['loc1'], { origin: 'project', queryId: 'journey-project' })],
-      ],
+  describe('project monitors whose heartbeat id differs from the saved-object id', () => {
+    const projectMonitor = monitor('saved-object-id', ['loc1'], {
+      origin: 'project',
+      queryId: 'journey-project',
     });
 
-    await expect(findLeftoverPackagePolicies(server, soClient)).resolves.toEqual({
-      leftoverIds: [],
-      missingLocationIds: [],
+    it('keeps a policy created under the heartbeat id, so it is not deleted and recreated', async () => {
+      const { server, soClient } = makeServer({
+        policyIdPages: [['journey-project-loc1']],
+        monitorPages: [[projectMonitor]],
+      });
+
+      await expect(findLeftoverPackagePolicies(server, soClient)).resolves.toEqual({
+        leftoverIds: [],
+        missingLocationIds: [],
+      });
+    });
+
+    it('keeps a policy created under the saved-object id', async () => {
+      const { server, soClient } = makeServer({
+        policyIdPages: [['saved-object-id-loc1']],
+        monitorPages: [[projectMonitor]],
+      });
+
+      await expect(findLeftoverPackagePolicies(server, soClient)).resolves.toEqual({
+        leftoverIds: [],
+        missingLocationIds: [],
+      });
+    });
+
+    it('reports the heartbeat-based policy as a leftover when the saved-object id one exists', async () => {
+      const { server, soClient } = makeServer({
+        policyIdPages: [['journey-project-loc1', 'saved-object-id-loc1']],
+        monitorPages: [[projectMonitor]],
+      });
+
+      await expect(findLeftoverPackagePolicies(server, soClient)).resolves.toEqual({
+        leftoverIds: ['journey-project-loc1'],
+        missingLocationIds: [],
+      });
+    });
+
+    it('reports the location as missing when the monitor has no policy under either id', async () => {
+      const { server, soClient } = makeServer({
+        policyIdPages: [['journey-project-loc2']],
+        monitorPages: [[projectMonitor]],
+      });
+
+      await expect(findLeftoverPackagePolicies(server, soClient)).resolves.toEqual({
+        leftoverIds: ['journey-project-loc2'],
+        missingLocationIds: ['loc1'],
+      });
+    });
+
+    it('reports a space-suffixed policy as a leftover next to the one under the heartbeat id', async () => {
+      const { server, soClient } = makeServer({
+        policyIdPages: [['journey-project-loc1', 'journey-project-loc1-default']],
+        monitorPages: [[projectMonitor]],
+      });
+
+      await expect(findLeftoverPackagePolicies(server, soClient)).resolves.toEqual({
+        leftoverIds: ['journey-project-loc1-default'],
+        missingLocationIds: [],
+      });
     });
   });
 

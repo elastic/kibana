@@ -241,60 +241,79 @@ describe('getMonitorAgentAssignment route', () => {
     );
   });
 
-  it('looks up package policies by MONITOR_QUERY_ID when it differs from the saved-object id', async () => {
-    mockGetLocations.mockResolvedValue({
-      locations: [{ id: 'loc-1', label: 'Location 1', agentPolicyId: 'policy-1' }],
-      agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
-    });
-    mockGetByIds.mockResolvedValue([
-      { id: 'journey-project-default-loc-1', condition: agentIdCondition('agent-2') },
-    ]);
-    const getMonitor = jest.fn().mockResolvedValue({
-      attributes: {
-        id: 'journey-project-default',
-        locations: [{ id: 'loc-1', isServiceManaged: false }],
-      },
-    });
-    const listAgents = jest.fn().mockResolvedValue({
-      agents: [
-        agent({
-          id: 'agent-2',
-          local_metadata: { host: { name: 'host-b' }, elastic: { agent: { version: '9.5.0' } } },
-        }),
-      ],
-      total: 1,
-    });
-    const { routeContext } = makeContext({
-      monitorId: 'so-uuid',
-      listAgentsImpl: listAgents,
-      getMonitorImpl: getMonitor,
-      hasEnterprise: true,
+  describe('when MONITOR_QUERY_ID differs from the saved-object id', () => {
+    const setup = (packagePolicies: Array<{ id: string; condition: string }>) => {
+      mockGetLocations.mockResolvedValue({
+        locations: [{ id: 'loc-1', label: 'Location 1', agentPolicyId: 'policy-1' }],
+        agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
+      });
+      mockGetByIds.mockResolvedValue(packagePolicies);
+      const getMonitor = jest.fn().mockResolvedValue({
+        attributes: {
+          id: 'journey-project-default',
+          locations: [{ id: 'loc-1', isServiceManaged: false }],
+        },
+      });
+      const listAgents = jest.fn().mockResolvedValue({
+        agents: [
+          agent({
+            id: 'agent-2',
+            local_metadata: { host: { name: 'host-b' }, elastic: { agent: { version: '9.5.0' } } },
+          }),
+        ],
+        total: 1,
+      });
+      return makeContext({
+        monitorId: 'so-uuid',
+        listAgentsImpl: listAgents,
+        getMonitorImpl: getMonitor,
+        hasEnterprise: true,
+      });
+    };
+
+    const assignedAgent = {
+      agentId: 'agent-2',
+      host: 'host-b',
+      healthy: true,
+      agentVersion: '9.5.0',
+      enrolled: true,
+    };
+
+    it('looks up package policies by both the heartbeat id and the saved-object id', async () => {
+      const { routeContext } = setup([]);
+
+      await run(routeContext);
+
+      expect(mockGetByIds).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packagePolicyIds: expect.arrayContaining([
+            'so-uuid-loc-1',
+            'journey-project-default-loc-1',
+            'journey-project-default-loc-1-default',
+          ]),
+        })
+      );
     });
 
-    const result = (await run(routeContext)) as MonitorLocationAssignment[];
+    it('finds the pin of a policy created under the heartbeat id', async () => {
+      const { routeContext } = setup([
+        { id: 'journey-project-default-loc-1', condition: agentIdCondition('agent-2') },
+      ]);
 
-    expect(mockGetByIds).toHaveBeenCalledWith(
-      expect.objectContaining({
-        packagePolicyIds: expect.arrayContaining([
-          'journey-project-default-loc-1',
-          'journey-project-default-loc-1-default',
-        ]),
-      })
-    );
-    expect(mockGetByIds).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        packagePolicyIds: expect.arrayContaining(['so-uuid-loc-1']),
-      })
-    );
-    expect(result[0].agents).toEqual([
-      {
-        agentId: 'agent-2',
-        host: 'host-b',
-        healthy: true,
-        agentVersion: '9.5.0',
-        enrolled: true,
-      },
-    ]);
+      const result = (await run(routeContext)) as MonitorLocationAssignment[];
+
+      expect(result[0].agents).toEqual([assignedAgent]);
+    });
+
+    it('finds the pin of a policy created under the saved-object id', async () => {
+      const { routeContext } = setup([
+        { id: 'so-uuid-loc-1', condition: agentIdCondition('agent-2') },
+      ]);
+
+      const result = (await run(routeContext)) as MonitorLocationAssignment[];
+
+      expect(result[0].agents).toEqual([assignedAgent]);
+    });
   });
 
   it('returns no agents when a sharded monitor is still unassigned', async () => {

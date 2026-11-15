@@ -37,8 +37,18 @@ const MockedPackagePolicyService = PackagePolicyService as jest.MockedClass<
   typeof PackagePolicyService
 >;
 
+const { SyntheticsPrivateLocation: ActualSyntheticsPrivateLocation } = jest.requireActual<
+  typeof import('../synthetics_service/private_location/synthetics_private_location')
+>('../synthetics_service/private_location/synthetics_private_location');
+
 const SPACE_ID = 'default';
 const INTERNAL_REPOSITORY = { __internalRepository: true };
+
+/** Package policy id resolution is the real one; only the lookup of spaces with monitors is stubbed. */
+const createPrivateLocationApiMock = (spacesWithMonitors: string[] = [SPACE_ID]) =>
+  Object.assign(new ActualSyntheticsPrivateLocation({} as SyntheticsServerSetup), {
+    getAllSpacesWithMonitors: jest.fn().mockResolvedValue(spacesWithMonitors),
+  }) as unknown as SyntheticsPrivateLocation;
 
 const createMonitorSO = (
   id: string,
@@ -157,43 +167,7 @@ describe('MonitorIntegrationHealthApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    MockedSyntheticsPrivateLocation.mockImplementation(
-      () =>
-        ({
-          getPolicyId: jest.fn(
-            (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
-          ),
-          getLegacyPolicyIdsForAllSpaces: jest.fn(
-            (configId: string, locId: string, spaces: Set<string>) =>
-              [...spaces].map((s) => `${configId}-${locId}-${s}`)
-          ),
-          getAllSpacesWithMonitors: jest.fn().mockResolvedValue([SPACE_ID]),
-          getPolicyIdFormatInfo: jest.fn(
-            (
-              config: { id: string },
-              locId: string,
-              existingPolicies: Array<{ id: string }> | undefined,
-              spaces: Set<string>
-            ) => {
-              const newId = `${config.id}-${locId}`;
-              const hasNewFormatPolicyId = existingPolicies?.some((p) => p.id === newId) ?? false;
-              const legacyPrefix = `${config.id}-${locId}-`;
-              const legacyPolicyIds =
-                existingPolicies
-                  ?.filter(
-                    (p) =>
-                      p.id.startsWith(legacyPrefix) && spaces.has(p.id.slice(legacyPrefix.length))
-                  )
-                  .map((p) => p.id) ?? [];
-              return {
-                hasNewFormatPolicyId,
-                hasAnyLegacyPolicyId: legacyPolicyIds.length > 0,
-                legacyPolicyIds,
-              };
-            }
-          ),
-        } as any)
-    );
+    MockedSyntheticsPrivateLocation.mockImplementation(() => createPrivateLocationApiMock());
 
     mockedGetPrivateLocationsForNamespaces.mockResolvedValue([]);
   });
@@ -541,43 +515,88 @@ describe('MonitorIntegrationHealthApi', () => {
       expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(expectedPolicyId);
     });
 
-    it('uses MONITOR_QUERY_ID when it differs from the saved object id', async () => {
-      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+    describe('when MONITOR_QUERY_ID differs from the saved object id', () => {
       const monitorQueryId = 'journey-project-default';
-      const so = createMonitorSO('so-uuid', {
-        origin: SourceType.PROJECT,
-        monitorQueryId,
-        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      const heartbeatPolicyId = `${monitorQueryId}-priv-loc-1`;
+      const newPolicyId = 'so-uuid-priv-loc-1';
+
+      const setup = (existingPolicyIds: string[]) => {
+        mockedGetPrivateLocationsForNamespaces.mockResolvedValue([
+          createPrivateLocation('priv-loc-1', 'agent-policy-1'),
+        ]);
+        const so = createMonitorSO('so-uuid', {
+          origin: SourceType.PROJECT,
+          monitorQueryId,
+          locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+        });
+        const packagePolicyServiceGetByIds = jest
+          .fn()
+          .mockResolvedValue(
+            existingPolicyIds.map((id) => createPackagePolicy(id, ['agent-policy-1']))
+          );
+        const api = buildApi({
+          monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+          packagePolicyServiceGetByIds,
+        });
+        return { api, packagePolicyServiceGetByIds };
+      };
+
+      it('looks for the policy under the saved-object id and the heartbeat id', async () => {
+        const { api, packagePolicyServiceGetByIds } = setup([]);
+
+        await api.getHealth(['so-uuid']);
+
+        expect(packagePolicyServiceGetByIds).toHaveBeenCalledWith(
+          expect.objectContaining({
+            packagePolicyIds: expect.arrayContaining([
+              newPolicyId,
+              heartbeatPolicyId,
+              `${heartbeatPolicyId}-default`,
+            ]),
+          })
+        );
       });
 
-      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+      it('reports a policy created under the heartbeat id as healthy', async () => {
+        const { api } = setup([heartbeatPolicyId]);
 
-      const expectedPolicyId = `${monitorQueryId}-priv-loc-1`;
-      const wrongPolicyId = `so-uuid-priv-loc-1`;
-      const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
-      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
+        const result = await api.getHealth(['so-uuid']);
 
-      const api = buildApi({
-        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
-        packagePolicyServiceGetByIds,
+        expect(result.monitors[0].privateLocations[0].status).toBe(
+          PrivateLocationHealthStatusValue.Healthy
+        );
+        expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(heartbeatPolicyId);
       });
 
-      const result = await api.getHealth(['so-uuid']);
+      it('reports a policy created under the saved-object id as healthy', async () => {
+        const { api } = setup([newPolicyId]);
 
-      expect(packagePolicyServiceGetByIds).toHaveBeenCalledWith(
-        expect.objectContaining({
-          packagePolicyIds: expect.arrayContaining([expectedPolicyId]),
-        })
-      );
-      expect(packagePolicyServiceGetByIds).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          packagePolicyIds: expect.arrayContaining([wrongPolicyId]),
-        })
-      );
-      expect(result.monitors[0].privateLocations[0].status).toBe(
-        PrivateLocationHealthStatusValue.Healthy
-      );
-      expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(expectedPolicyId);
+        const result = await api.getHealth(['so-uuid']);
+
+        expect(result.monitors[0].privateLocations[0].status).toBe(
+          PrivateLocationHealthStatusValue.Healthy
+        );
+        expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(newPolicyId);
+      });
+
+      it('prefers the saved-object id when the policy exists under both', async () => {
+        const { api } = setup([heartbeatPolicyId, newPolicyId]);
+
+        const result = await api.getHealth(['so-uuid']);
+
+        expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(newPolicyId);
+      });
+
+      it('expects the saved-object id when no policy exists, so a reset creates it under that id', async () => {
+        const { api } = setup([]);
+
+        const result = await api.getHealth(['so-uuid']);
+
+        expect(result.monitors[0].privateLocations[0].status).toBe(
+          PrivateLocationHealthStatusValue.MissingPackagePolicy
+        );
+        expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(newPolicyId);
+      });
     });
   });
 
@@ -816,20 +835,8 @@ describe('MonitorIntegrationHealthApi', () => {
 
   describe('cross-space lookups (issue #270477)', () => {
     it('passes every space that has monitors to monitorConfigRepository.getAcrossSpaces', async () => {
-      MockedSyntheticsPrivateLocation.mockImplementation(
-        () =>
-          ({
-            getPolicyId: jest.fn(
-              (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
-            ),
-            getLegacyPolicyIdsForAllSpaces: jest.fn(() => []),
-            getAllSpacesWithMonitors: jest.fn().mockResolvedValue(['space-two', 'space-three']),
-            getPolicyIdFormatInfo: jest.fn(() => ({
-              hasNewFormatPolicyId: false,
-              hasAnyLegacyPolicyId: false,
-              legacyPolicyIds: [],
-            })),
-          } as any)
+      MockedSyntheticsPrivateLocation.mockImplementation(() =>
+        createPrivateLocationApiMock(['space-two', 'space-three'])
       );
 
       const so = createMonitorSO('mon-1');
@@ -849,32 +856,10 @@ describe('MonitorIntegrationHealthApi', () => {
     });
 
     it('passes additional spaces (excluding the request space) to PackagePolicyService.getByIds', async () => {
-      MockedSyntheticsPrivateLocation.mockImplementation(
-        () =>
-          ({
-            getPolicyId: jest.fn(
-              (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
-            ),
-            getLegacyPolicyIdsForAllSpaces: jest.fn(() => []),
-            // Reproduces the bug scenario in #270477: caller is in `default`,
-            // monitors live in `space-two`.
-            getAllSpacesWithMonitors: jest.fn().mockResolvedValue(['space-two']),
-            getPolicyIdFormatInfo: jest.fn(
-              (
-                config: { id: string },
-                locId: string,
-                existingPolicies: Array<{ id: string }> | undefined
-              ) => {
-                const newId = `${config.id}-${locId}`;
-                const hasNewFormatPolicyId = existingPolicies?.some((p) => p.id === newId) ?? false;
-                return {
-                  hasNewFormatPolicyId,
-                  hasAnyLegacyPolicyId: false,
-                  legacyPolicyIds: [],
-                };
-              }
-            ),
-          } as any)
+      // Reproduces the bug scenario in #270477: caller is in `default`,
+      // monitors live in `space-two`.
+      MockedSyntheticsPrivateLocation.mockImplementation(() =>
+        createPrivateLocationApiMock(['space-two'])
       );
 
       const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
@@ -986,27 +971,8 @@ describe('MonitorIntegrationHealthApi', () => {
 
       // Override so getAllSpacesWithMonitors returns CUSTOM_SPACE, causing allSpaces
       // to include it. The health API then passes allSpaces to getPrivateLocationsForNamespaces.
-      MockedSyntheticsPrivateLocation.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyId: jest.fn(
-              (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
-            ),
-            getLegacyPolicyIdsForAllSpaces: jest.fn(() => []),
-            getAllSpacesWithMonitors: jest.fn().mockResolvedValue([CUSTOM_SPACE]),
-            getPolicyIdFormatInfo: jest.fn(
-              (
-                config: { id: string },
-                locId: string,
-                existingPolicies: Array<{ id: string }> | undefined
-              ) => ({
-                hasNewFormatPolicyId:
-                  existingPolicies?.some((p) => p.id === `${config.id}-${locId}`) ?? false,
-                hasAnyLegacyPolicyId: false,
-                legacyPolicyIds: [],
-              })
-            ),
-          } as any)
+      MockedSyntheticsPrivateLocation.mockImplementationOnce(() =>
+        createPrivateLocationApiMock([CUSTOM_SPACE])
       );
 
       mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
@@ -1042,13 +1008,8 @@ describe('MonitorIntegrationHealthApi', () => {
     // Resolving `*` through getUnsafeInternalClient() makes its spaces extension
     // call `_has_privileges` without credentials; the 401 logs the user out.
     beforeEach(() => {
-      const defaultImplementation = MockedSyntheticsPrivateLocation.getMockImplementation();
-      MockedSyntheticsPrivateLocation.mockImplementation(
-        (...args) =>
-          ({
-            ...defaultImplementation?.(...args),
-            getAllSpacesWithMonitors: jest.fn().mockResolvedValue([SPACE_ID, ALL_SPACES_ID]),
-          } as unknown as SyntheticsPrivateLocation)
+      MockedSyntheticsPrivateLocation.mockImplementation(() =>
+        createPrivateLocationApiMock([SPACE_ID, ALL_SPACES_ID])
       );
       mockedGetPrivateLocationsForNamespaces.mockResolvedValue([
         createPrivateLocation('priv-loc-1', 'agent-policy-1'),
