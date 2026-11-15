@@ -272,6 +272,10 @@ Then, beneath the report, emit the insights JSON in a single fenced code block. 
 
 **LIMIT** \`detailsMarkdown\` to 2750 characters and \`summaryMarkdown\` to 200 characters.
 
+#### 6. Final-message check (insights JSON contract)
+
+Your **final assistant message** is the only message the user and the persistence layer read. Whenever the pipeline returned one or more discoveries, that final message must contain, in this order: the full Attack Discovery Report, then exactly one fenced code block that opens with \`\`\`json and holds an object with a top-level \`"insights"\` array with one entry per returned discovery. Do not put the JSON in a tool call, in an earlier message, or in a non-\`json\` fence. A short prose summary, a table, or a discovery ID **does not** replace the report or the JSON block. Uncertainty about the chain (simulated data, missing raw-log corroboration) goes in the narrative; it never removes the JSON block. Before you end your turn, check: discoveries > 0 → the \`\`\`json block with \`"insights"\` is present. If it is not, add it before you finish.
+
 If the source returned no discoveries, do not fabricate any. Report that no attack chains met the validation standard and explain what evidence was insufficient.
 
 ### In-progress branch (Mode A slow path; Mode B with \`status: running\`)

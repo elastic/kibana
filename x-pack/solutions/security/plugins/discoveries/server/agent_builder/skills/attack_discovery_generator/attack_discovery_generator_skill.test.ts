@@ -155,6 +155,11 @@ describe('attackDiscoveryGeneratorSkill', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('"insights"');
     });
 
+    it('requires the insights JSON block in the final message whenever discoveries exist', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('Final-message check');
+      expect(attackDiscoveryGeneratorSkill.content).toContain('discoveries > 0');
+    });
+
     it('limits detailsMarkdown to 2750 characters', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('2750');
     });
