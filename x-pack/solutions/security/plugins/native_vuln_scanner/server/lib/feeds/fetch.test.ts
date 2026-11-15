@@ -7,7 +7,13 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { bunzip2Blocks } from './bzip2';
 import { feedUrl, loadFeed, MAX_FEED_BYTES } from './fetch';
+
+jest.mock('./bzip2', () => {
+  const actual = jest.requireActual('./bzip2');
+  return { ...actual, bunzip2Blocks: jest.fn(actual.bunzip2Blocks) };
+});
 
 const rhelBz2 = readFileSync(join(__dirname, '__fixtures__', 'rhel_9_trimmed.oval.xml.bz2'));
 
@@ -143,8 +149,26 @@ describe('loadFeed', () => {
 
   it('stops decompressing when the signal aborts mid-parse', async () => {
     const controller = new AbortController();
+    const xml = readFileSync(join(__dirname, '__fixtures__', 'rhel_9_trimmed.oval.xml'));
+    const third = Math.ceil(xml.length / 3);
+    const decoded: number[] = [];
+    // The signal aborts while block 1 is being produced, after block 0 was already parsed.
+    (bunzip2Blocks as jest.Mock).mockImplementationOnce(function* blocks() {
+      for (const i of [0, 1, 2]) {
+        decoded.push(i);
+        if (i === 1) controller.abort();
+        yield xml.subarray(i * third, (i + 1) * third);
+      }
+    });
+    await expect(
+      loadFeed(rhel9, { signal: controller.signal, fetchImpl: respond(rhelBz2) })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+    expect(decoded).toEqual([0, 1]);
+  });
+
+  it('rejects when the signal is already aborted before the first block', async () => {
+    const controller = new AbortController();
     const fetchImpl = jest.fn(async () => {
-      // Abort after the download, before the parse consumes any block.
       controller.abort();
       return fakeResponse(rhelBz2);
     }) as unknown as typeof fetch;
