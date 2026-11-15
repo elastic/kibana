@@ -29,6 +29,7 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
+import { workflowRunEmbeddableSchema } from './dashboard_run_panel/schema';
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
@@ -41,6 +42,7 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
+import { WORKFLOW_RUN_EMBEDDABLE_TYPE } from '../common/dashboard_run_panel/constants';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -77,6 +79,11 @@ export class WorkflowsPlugin
     registerUISettings(core, plugins);
 
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
+
+    plugins.embeddable.registerEmbeddableServerDefinition(WORKFLOW_RUN_EMBEDDABLE_TYPE, {
+      title: 'Run workflow',
+      getSchema: () => workflowRunEmbeddableSchema,
+    });
 
     this.logger.debug('Workflows Management: Creating workflows service');
 

@@ -20,6 +20,7 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
@@ -67,6 +68,7 @@ describe('WorkflowsPlugin', () => {
     const coreSetup = coreMock.createSetup();
 
     plugin.setup(coreSetup, {
+      embeddable: createEmbeddableSetupMock(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
@@ -97,6 +99,7 @@ describe('WorkflowsPlugin', () => {
 
     const plugin = new WorkflowsPlugin(initializerContext);
     plugin.setup(coreMock.createSetup(), {
+      embeddable: createEmbeddableSetupMock(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
@@ -141,6 +144,7 @@ describe('WorkflowsPlugin', () => {
       .mockImplementation();
 
     plugin.setup(coreSetup, {
+      embeddable: createEmbeddableSetupMock(),
       spaces: spaces as never,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
@@ -186,6 +190,7 @@ describe('WorkflowsPlugin', () => {
 
     plugin.setup(coreMock.createSetup(), {
       actions,
+      embeddable: createEmbeddableSetupMock(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
     });
@@ -215,6 +220,7 @@ describe('WorkflowsPlugin', () => {
 
     plugin.setup(coreMock.createSetup(), {
       actions,
+      embeddable: createEmbeddableSetupMock(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
     });

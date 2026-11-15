@@ -11,8 +11,10 @@ import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import {
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
@@ -66,12 +68,14 @@ describe('WorkflowsPlugin', () => {
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let setupDeps: {
     actions: { isInboundEventsEnabled: boolean };
+    embeddable: ReturnType<typeof embeddablePluginMock.createSetupContract>;
     triggersActionsUi: { actionTypeRegistry: { register: jest.Mock } };
     workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createSetup>;
   };
   let startDeps: {
     workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createStart>;
     licensing: ReturnType<typeof licensingMock.createStart>;
+    uiActions: ReturnType<typeof uiActionsPluginMock.createStartContract>;
   };
 
   beforeEach(() => {
@@ -82,12 +86,17 @@ describe('WorkflowsPlugin', () => {
     coreSetup.plugins.onStart.mockReturnValue(Promise.resolve({ found: false }));
     setupDeps = {
       actions: { isInboundEventsEnabled: false },
+      embeddable: {
+        ...embeddablePluginMock.createSetupContract(),
+        registerEmbeddablePublicDefinition: jest.fn(),
+      },
       triggersActionsUi: { actionTypeRegistry: { register: jest.fn() } },
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     };
     startDeps = {
       workflowsExtensions: workflowsExtensionsMock.createStart(),
       licensing: licensingMock.createStart(),
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
   });
 
@@ -108,6 +117,7 @@ describe('WorkflowsPlugin', () => {
           isEarsEnabled: false,
           isEarsExperimentalEnabled: false,
         },
+        embeddable: setupDeps.embeddable,
         triggersActionsUi: dependencies.triggersActionsUi,
         workflowsExtensions: setupDeps.workflowsExtensions,
       });

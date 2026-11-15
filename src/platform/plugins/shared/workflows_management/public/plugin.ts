@@ -33,6 +33,10 @@ import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
+import {
+  registerAddWorkflowRunPanelAction,
+  registerWorkflowRunPanel,
+} from './features/dashboard_run_panel/register';
 import { triggerSchemas } from './trigger_schemas';
 import { registerConnectorEventTriggersPublic } from './triggers/register_connector_event_triggers';
 import type {
@@ -69,6 +73,8 @@ export class WorkflowsPlugin
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
   private readonly pagesEnabled: boolean;
+  private isWorkflowRunPanelRegistered = false;
+  private runPanelFlagSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementPublicConfig>) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
@@ -102,6 +108,9 @@ export class WorkflowsPlugin
     };
 
     registerConnectorType();
+
+    registerWorkflowRunPanel(core, plugins.embeddable);
+    this.isWorkflowRunPanelRegistered = true;
 
     registerConnectorEventTriggersPublic({
       inboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
@@ -145,6 +154,10 @@ export class WorkflowsPlugin
 
     this.subscribeToWorkflowsSettingChange(core);
 
+    if (this.isWorkflowRunPanelRegistered) {
+      this.runPanelFlagSubscription = registerAddWorkflowRunPanelAction(core, plugins.uiActions);
+    }
+
     // Availability service: set license and subscribe to availability for app visibility changes
     this.availabilityService.setLicense$(plugins.licensing.license$);
 
@@ -171,6 +184,7 @@ export class WorkflowsPlugin
   public stop() {
     this.settingsSubscription?.unsubscribe();
     this.appVisibilitySubscription?.unsubscribe();
+    this.runPanelFlagSubscription?.unsubscribe();
     this.availabilityService.stop();
   }
 

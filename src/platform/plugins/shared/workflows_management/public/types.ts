@@ -13,6 +13,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
@@ -44,6 +45,7 @@ export interface WorkflowsPublicPluginSetup {}
 
 export interface WorkflowsPublicPluginSetupDependencies {
   actions: ActionsPublicPluginSetup;
+  embeddable: EmbeddableSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }

@@ -19,6 +19,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
@@ -49,6 +50,7 @@ export interface WorkflowsServerPluginSetup {
 export interface WorkflowsServerPluginStart {}
 
 export interface WorkflowsServerPluginSetupDeps {
+  embeddable: EmbeddableSetup;
   features?: FeaturesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   actions?: ActionsPluginSetupContract;

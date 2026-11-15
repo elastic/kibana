@@ -140,6 +140,9 @@
     "@kbn/core-security-common",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-spaces-common",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/presentation-util",
   ],
   "exclude": ["target/**/*"]
 }
