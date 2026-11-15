@@ -195,6 +195,76 @@ describe('analyzeWorkflowDependentsImpact', () => {
     expect(calledWorkflows).toEqual([expect.objectContaining({ workflowId: 'leaf' })]);
   });
 
+  describe('grades drafts being typed without throwing', () => {
+    const call = runs('leaf', { a: 1 });
+    const withInputs = (inputs: unknown) => ({
+      triggers: [{ type: 'manual', inputs }],
+      steps: [call],
+    });
+    const output = (extra: Record<string, unknown>) => ({
+      name: 'o',
+      type: 'workflow.output',
+      ...extra,
+    });
+    const drafts: Record<string, unknown> = {
+      'required that is not a list': withInputs({ properties: { a: {} }, required: 5 }),
+      'properties that are not a map': withInputs({ properties: 5 }),
+      'a list of properties': withInputs({ properties: [1, null] }),
+      'additionalProperties that is not a schema': withInputs({ additionalProperties: 5 }),
+      'nested properties and required that are malformed': withInputs({
+        properties: { o: { type: 'object', properties: { x: null }, required: 5 } },
+        required: ['o'],
+      }),
+      'type, enum and default of the wrong kind': withInputs({
+        properties: { a: { type: 5, enum: 5, default: null } },
+      }),
+      'a $ref that is not a string': withInputs({ properties: { a: { $ref: 5 } }, $defs: null }),
+      'inputs that are not a list or schema': withInputs(5),
+      'a list of malformed inputs': withInputs([null, 5, { name: 5 }]),
+      'triggers that are not a list': { triggers: 5, steps: [call] },
+      'steps that are not a list': { steps: 5 },
+      'malformed steps': { steps: [null, 5, { type: 5 }, call] },
+      'malformed outputs': {
+        outputs: [null, { name: 5 }, { name: 'x', type: 5 }],
+        steps: [call, output({ with: 5 })],
+      },
+      'outputs as a malformed schema': {
+        outputs: { properties: { x: null }, required: 5 },
+        steps: [call, output({ with: { x: 1 } })],
+      },
+      'a malformed workflow-level on-failure': {
+        settings: { 'on-failure': { fallback: [null, output({ with: 5 })], continue: 5 } },
+        steps: [call],
+      },
+      'a malformed step-level fallback': {
+        steps: [{ ...call, 'on-failure': { fallback: [null, 5, output({})] } }],
+      },
+      'malformed containers': {
+        steps: [
+          { name: 'l', type: 'while', steps: 5 },
+          { name: 'f', type: 'foreach', foreach: 5, steps: [null, call] },
+          { name: 'p', type: 'parallel', branches: 5 },
+          { name: 'i', type: 'if', condition: 5, steps: [call], else: 5 },
+        ],
+      },
+      'a draft that is not an object': [1, 2],
+    };
+
+    it.each(Object.entries(drafts))('with %s', async (_, draft) => {
+      for (const isDraftValid of [true, false]) {
+        await expect(
+          analyzeWorkflowDependentsImpact({
+            workflowId: 'child',
+            savedDefinition: savedChild,
+            draftDefinition: draft,
+            isDraftValid,
+            lookup: createLookup([workflow('direct', [runs('child')])], [], [workflow('leaf', [])]),
+          })
+        ).resolves.toBeDefined();
+      }
+    });
+  });
+
   it('leaves callers that are turned off out of the breaking count', async () => {
     const { analysis } = await analyzeWorkflowDependentsImpact({
       workflowId: 'child',

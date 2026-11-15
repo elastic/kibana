@@ -354,7 +354,7 @@ function createObjectWithDefaults(
   const result: Record<string, unknown> = {};
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
     const prop = propSchema as JSONSchema7;
-    const isRequired = schema.required?.includes(key) ?? false;
+    const isRequired = Array.isArray(schema.required) && schema.required.includes(key);
 
     // Include property if:
     // 1. It's required, OR
@@ -382,8 +382,8 @@ export function resolveRef(
   ref: string,
   inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>
 ): JSONSchema7 | null {
-  if (!ref.startsWith('#/')) {
-    // External references not supported yet
+  // A draft being typed can hold any value here; external references are not supported yet.
+  if (typeof ref !== 'string' || !ref.startsWith('#/')) {
     return null;
   }
 

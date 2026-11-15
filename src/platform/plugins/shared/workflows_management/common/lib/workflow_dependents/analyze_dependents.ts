@@ -15,11 +15,9 @@ import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conve
 import { isDynamicValue, isRecord } from '@kbn/workflows-yaml';
 import { isBreakingRun } from './api';
 import {
-  absorbsFailure,
   collectWorkflowCallSites,
   findOutputsPassingThrough,
   findOutputUsages,
-  getStepOnFailure,
   getWorkflowOnFailure,
   isTemplatedValue,
   isTextTemplate,
@@ -235,18 +233,20 @@ const checkReferencedInput = (
   if (!callerField?.type) {
     return { isUnknown: true };
   }
-  // The caller can be run without its input, and then sends nothing for a required one.
-  if (field.required && !callerField.required && !callerField.hasDefault) {
-    return { isUnknown: true };
-  }
+  // The caller can be run without its input, and then sends nothing, which fails a required input
+  // without a default.
+  const mayBeOmitted = !callerField.required && !callerField.hasDefault;
+  const omissionFails = field.required && !field.hasDefault;
   if (isTypeWithin(callerField.type, field.type)) {
     // The caller's own input only guarantees the type; anything stricter is checked while running.
-    return { isUnknown: hasConstraintsBeyondType(field) };
+    return { isUnknown: (mayBeOmitted && omissionFails) || hasConstraintsBeyondType(field) };
   }
+  const alwaysFails =
+    !typesOverlap(callerField.type, field.type) && (!mayBeOmitted || omissionFails);
   return {
     issue: {
       kind: 'inputTypeMismatch',
-      severity: typesOverlap(callerField.type, field.type) ? 'warning' : 'breaking',
+      severity: alwaysFails ? 'breaking' : 'warning',
       stepName,
       field: name,
       from: callerField.type,
@@ -593,6 +593,21 @@ const toChildFailsIssue = (stepName: string, failure: RunFailure): DraftIssue =>
   };
 };
 
+const getOutputs = (definition: unknown): unknown =>
+  isRecord(definition) ? definition.outputs : undefined;
+
+// The end step sets the run's status itself, so no `on-failure` handler recovers its failure. But
+// when a step before it fails, a workflow-level fallback that completes the run ends it first.
+const mayEndSuccessfullyBefore = (definition: unknown, endStep: unknown): boolean => {
+  const workflowOnFailure = getWorkflowOnFailure(definition);
+  const steps = isRecord(definition) && Array.isArray(definition.steps) ? definition.steps : [];
+  return (
+    isRecord(workflowOnFailure) &&
+    containsCompletingOutputStep(workflowOnFailure.fallback) &&
+    steps.indexOf(endStep) > 0
+  );
+};
+
 // The status a `workflow.output` or `workflow.fail` step ends the run with.
 const getEndStatus = (step: Record<string, unknown>): unknown =>
   step.type === 'workflow.fail' ? 'failed' : step.status ?? 'completed';
@@ -603,14 +618,7 @@ const getEndStatus = (step: Record<string, unknown>): unknown =>
  */
 const findEndStepFailure = (definition: unknown): RunFailure | undefined => {
   const step = getFinalEndStep(definition);
-  const workflowOnFailure = getWorkflowOnFailure(definition);
-  // A workflow-level fallback that completes the run makes any earlier failure a success, so the
-  // end step isn't reached every time.
-  if (
-    !step ||
-    absorbsFailure(getStepOnFailure(step, workflowOnFailure)) ||
-    (isRecord(workflowOnFailure) && containsCompletingOutputStep(workflowOnFailure.fallback))
-  ) {
+  if (!step || mayEndSuccessfullyBefore(definition, step)) {
     return undefined;
   }
   const stepName = typeof step.name === 'string' ? step.name : '';
@@ -618,9 +626,7 @@ const findEndStepFailure = (definition: unknown): RunFailure | undefined => {
   if (status === 'failed' || status === 'cancelled') {
     return { stepName, issue: stepIssue('runEndsUnsuccessfully', stepName, status) };
   }
-  const outputsSchema = normalizeFieldsToJsonSchema(
-    isRecord(definition) ? definition.outputs : undefined
-  );
+  const outputsSchema = normalizeFieldsToJsonSchema(getOutputs(definition));
   if (!outputsSchema?.properties || Object.keys(outputsSchema.properties).length === 0) {
     return undefined;
   }
@@ -1070,29 +1076,42 @@ const findRunFailures = (workflows: ReadonlyMap<string, WorkflowLookupItem>): Ru
       return undefined;
     }
     inProgress.add(workflowId);
-    let failure = findEndStepFailure(workflow.definition);
-    // In step order, so that the failure is the first one a run reaches.
-    for (const callSite of collectWorkflowCallSites(workflow.definition)) {
-      if (failure) {
-        break;
-      }
-      // Only a step that runs every time, and stops the run when it fails, fails every run.
-      if (!callSite.continuesOnFailure && !callSite.isConditional) {
-        const { workflowId: calledId } = callSite;
-        const called = workflows.get(calledId);
-        const issue = getCallFailure(callSite, workflow, calledId, called, (id) =>
-          resolve(id, depth + 1)
-        );
-        const calledName = called?.name ?? calledId;
-        failure = issue ? { stepName: callSite.stepName, calledName, issue } : undefined;
-        const isUnchecked = called
-          ? callSite.stepType === 'workflow.execute' && unchecked.has(calledId)
-          : calledId !== workflowId;
-        if (!issue && isUnchecked && !unchecked.has(workflowId)) {
-          unchecked.set(workflowId, { from: callSite.stepName, to: calledName });
+    const findFailure = (definition: unknown, trackUnchecked: boolean): RunFailure | undefined => {
+      let failure = findEndStepFailure(definition);
+      // In step order, so that the failure is the first one a run reaches.
+      for (const callSite of collectWorkflowCallSites(definition)) {
+        if (failure) {
+          break;
+        }
+        // Only a step that runs every time, and stops the run when it fails, fails every run. A
+        // fallback that completes the run absorbs the failure, unless it fails every time itself.
+        const { recoveryFallbacks = [] } = callSite;
+        const failsRun =
+          !callSite.isConditional &&
+          (!callSite.continuesOnFailure ||
+            (recoveryFallbacks.length > 0 &&
+              recoveryFallbacks.every((steps) =>
+                findFailure({ steps, outputs: getOutputs(workflow.definition) }, false)
+              )));
+        if (failsRun) {
+          const { workflowId: calledId } = callSite;
+          const called = workflows.get(calledId);
+          const issue = getCallFailure(callSite, workflow, calledId, called, (id) =>
+            resolve(id, depth + 1)
+          );
+          const calledName = called?.name ?? calledId;
+          failure = issue ? { stepName: callSite.stepName, calledName, issue } : undefined;
+          const isUnchecked = called
+            ? callSite.stepType === 'workflow.execute' && unchecked.has(calledId)
+            : calledId !== workflowId;
+          if (trackUnchecked && !issue && isUnchecked && !unchecked.has(workflowId)) {
+            unchecked.set(workflowId, { from: callSite.stepName, to: calledName });
+          }
         }
       }
-    }
+      return failure;
+    };
+    const failure = findFailure(workflow.definition, true);
     inProgress.delete(workflowId);
     failures.set(workflowId, failure);
     if (failure) {

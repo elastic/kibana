@@ -22,8 +22,12 @@ import { collectWorkflowOutputBlocks } from './find_call_sites';
 import type { ContractChange, ContractField, WorkflowContract } from './types';
 import { alwaysReturnsWorkflowOutput, getReturnedOutputNames } from '../get_returned_output_names';
 
-const describeType = (property: JSONSchema7): string | undefined =>
-  Array.isArray(property.type) ? property.type.join(' | ') : property.type;
+const describeType = ({ type }: JSONSchema7): string | undefined => {
+  if (Array.isArray(type)) {
+    return type.every((item) => typeof item === 'string') ? type.join(' | ') : undefined;
+  }
+  return typeof type === 'string' ? type : undefined;
+};
 
 /** The values a run fills in for omitted inputs, including `$ref`, nested and empty-array defaults. */
 export const getRuntimeInputDefaults = (
@@ -43,7 +47,8 @@ const toFields = (
   if (!schema?.properties) {
     return fields;
   }
-  const required = new Set(schema.required ?? []);
+  // A draft being typed can hold anything here.
+  const required = new Set(Array.isArray(schema.required) ? schema.required : []);
   for (const [name, rawProperty] of Object.entries(schema.properties)) {
     const property = resolveProperty(rawProperty, schema);
     fields[name] = {

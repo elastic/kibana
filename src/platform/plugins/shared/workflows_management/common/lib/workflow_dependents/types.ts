@@ -21,10 +21,16 @@ export interface WorkflowCallSite {
   /** True when `with.inputs` is a single template expression that cannot be inspected statically. */
   isDynamicInputs: boolean;
   /**
-   * True when an `on-failure: continue` on the step, an enclosing step or the workflow settings
-   * keeps the caller running after this step fails.
+   * True when an `on-failure` handler on the step, an enclosing step or the workflow settings
+   * might keep the run from failing when this step fails: it continues, or one of
+   * `recoveryFallbacks` completes the run.
    */
   continuesOnFailure: boolean;
+  /**
+   * When no `continue` covers the step, the fallbacks that might complete the run when it fails.
+   * They only absorb the failure when they can succeed.
+   */
+  recoveryFallbacks?: readonly unknown[];
   /** True when the step might not run: it has an `if`, or sits in a branch, loop or fallback. */
   isConditional: boolean;
 }
