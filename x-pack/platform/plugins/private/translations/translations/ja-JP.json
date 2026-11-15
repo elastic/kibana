@@ -38139,7 +38139,6 @@
     "xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfo": "このビューは、Kubernetes統合からのデータをサポートします。",
     "xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfoAlerting": "このアラートルールは、Kubernetes統合からのデータをサポートします。",
     "xpack.infra.supportedDataTooltipLink.label": "どのデータがサポートされていますか？",
-    "xpack.infra.table.collapseRowLabel": "縮小",
     "xpack.infra.table.expandRowLabel": "拡張",
     "xpack.infra.tableView.columnName.avg": "平均",
     "xpack.infra.tableView.columnName.last1m": "過去1分間",

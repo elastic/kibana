@@ -674,6 +674,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
               data-test-subj="infraExpressionRowButton"
               iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={toggle}
+              aria-expanded={isExpanded}
               aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
                 defaultMessage: 'Expand row.',
               })}

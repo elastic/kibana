@@ -38046,7 +38046,6 @@
     "xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfo": "Diese Ansicht unterstützt Daten aus der Kubernetes-Integration.",
     "xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfoAlerting": "Diese Alert-Regel unterstützt Daten aus der Kubernetes-Integration.",
     "xpack.infra.supportedDataTooltipLink.label": "Welche Daten werden unterstützt?",
-    "xpack.infra.table.collapseRowLabel": "Minimieren",
     "xpack.infra.table.expandRowLabel": "Erweitern",
     "xpack.infra.tableView.columnName.avg": "Durchschn.",
     "xpack.infra.tableView.columnName.last1m": "Letzte 1 Min.",

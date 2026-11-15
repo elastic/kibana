@@ -221,6 +221,7 @@ export const ExpressionRow = ({
             <EuiButtonIcon
               iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={toggle}
+              aria-expanded={isExpanded}
               data-test-subj="expandRow"
               aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
                 defaultMessage: 'Expand row.',
