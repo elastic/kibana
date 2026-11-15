@@ -25,9 +25,10 @@ export const trimVersion = (raw: string): string =>
   raw.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '');
 
 /**
- * Optional sign then leading ASCII digits, else 0. Does not saturate, so huge epochs still order
- * correctly; the painless twin stops accumulating, which is harmless as keys reject epochs above
- * {@link MAX_EPOCH} on both sides. `-0` yields 0.
+ * Optional sign then leading ASCII digits, else 0. Does not saturate, but a double is only exact
+ * up to 2^53, so epochs beyond that lose precision. That is harmless for matching: keys reject
+ * epochs above {@link MAX_EPOCH} on both sides (the painless twin stops accumulating at that cap),
+ * so only the ordering of in-range epochs is ever relied on. `-0` yields 0.
  */
 export const parseEpoch = (s: string): number => {
   let i = 0;
