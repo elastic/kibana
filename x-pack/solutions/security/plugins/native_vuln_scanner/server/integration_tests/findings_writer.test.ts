@@ -15,6 +15,8 @@ import {
   ensureFindingsIndex,
   FINDINGS_ALIAS,
   FINDINGS_INDEX,
+  findingId,
+  toFindingDoc,
   writeFindings,
 } from '../lib/findings';
 
@@ -186,5 +188,34 @@ describe('findings writer', () => {
     const docs = await byCve(FINDINGS_INDEX);
     expect(docs.get('CVE-2026-9')?.native_vuln_scanner.state).toBe('new');
     expect(docs.get('CVE-2026-1')?.native_vuln_scanner.state).toBe('fixed');
+  });
+
+  it('upserts onto a stored finding that has no event object', async () => {
+    const other: HostMeta = { ...HOST, id: 'h3' };
+    const stored = finding('CVE-2026-20');
+    const legacy = toFindingDoc({ ...stored, hostId: other.id }, other, {
+      now: at(7),
+      runId: 'run-7',
+    });
+    const { event, ...withoutEvent } = legacy;
+    await admin.index({
+      index: FINDINGS_INDEX,
+      id: event.id,
+      document: withoutEvent,
+      refresh: true,
+    });
+    expect(event.id).toBe(findingId({ ...stored, hostId: other.id }));
+
+    const result = await writeFindings(kibana, {
+      hosts: [other],
+      findings: [{ ...stored, hostId: other.id }],
+      now: at(8),
+      runId: 'run-8',
+    });
+
+    expect(result).toEqual({ written: 1, fixed: 0, fixSkipped: 0, failures: {} });
+    const doc = (await byCve(FINDINGS_INDEX)).get('CVE-2026-20');
+    expect(doc?.event.created).toBe(at(8));
+    expect(doc?.native_vuln_scanner).toMatchObject({ state: 'active', first_seen: at(7) });
   });
 });
