@@ -279,6 +279,89 @@ describe('executeGenerationWorkflow', () => {
     );
   });
 
+  it('reads anonymization fields with the internal user, not the caller-scoped client', async () => {
+    const mockEventLogger: jest.Mocked<IEventLogger> = {
+      logEvent: jest.fn(),
+    } as unknown as jest.Mocked<IEventLogger>;
+
+    const internalEsClient = { search: jest.fn() };
+    const scopedEsClient = {
+      indices: {
+        refresh: jest.fn().mockResolvedValue(undefined),
+      },
+      security: {
+        authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
+      },
+    };
+
+    const coreStartMock: CoreStart = {
+      elasticsearch: {
+        client: {
+          asInternalUser: internalEsClient,
+          asScoped: () => ({
+            asCurrentUser: scopedEsClient,
+          }),
+        },
+      },
+      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+    } as unknown as CoreStart;
+
+    const pluginsStartMock: Record<string, unknown> = {};
+
+    const mockGetStartServices: GetStartServices = async () => ({
+      coreStart: coreStartMock,
+      pluginsStart: pluginsStartMock,
+    });
+
+    await executeGenerationWorkflow({
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector-id',
+        model: 'gpt-4',
+      },
+      authz: createAuthorizedAuthzMock(),
+      executionUuid: 'test-execution-uuid',
+      getEventLogIndex: async () => '.kibana-event-log-test',
+      getEventLogger: async () => mockEventLogger,
+      getStartServices: mockGetStartServices,
+      logger: {
+        debug: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+      } as unknown as Logger,
+      request: {} as unknown as KibanaRequest,
+      type: 'attack_discovery',
+      workflowConfig: {
+        alert_retrieval_workflow_ids: [],
+        alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflows_enabled: false,
+        default_retrieval_enabled: true,
+        skill_enabled: true,
+        validation_workflow_id: 'default',
+      },
+      workflowsManagementApi: {
+        createWorkflow: jest.fn(),
+        getWorkflow: jest.fn(),
+        getWorkflowExecution: jest.fn(),
+        getWorkflows: jest.fn(),
+        runWorkflow: jest.fn(),
+      } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+    });
+
+    expect(mockFetchAnonymizationFields).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esClient: internalEsClient,
+        spaceId: 'default',
+      })
+    );
+
+    expect(mockFetchAnonymizationFields).not.toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: scopedEsClient })
+    );
+  });
+
   describe('telemetryMetadata forwarding to runManualOrchestration', () => {
     const runWithTelemetry = async (telemetryMetadata?: {
       pluginId: string;

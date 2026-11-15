@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import {
   getAttackDiscoveryMarkdownFields,
@@ -44,6 +44,11 @@ import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_
 import { updateAlertsWithAttackIds } from './update_alerts_with_attack_ids';
 
 export interface AttackDiscoveryScheduleExecutorParams {
+  /**
+   * Returns the internal user client, used to read Kibana-owned configuration such as the
+   * anonymization fields, which the rule's own (scoped) client may not have index privileges on.
+   */
+  getInternalEsClient: () => Promise<ElasticsearchClient>;
   getInference: () => InferenceServerStart | undefined;
   getWorkflowExecutorFactory: () => AttackDiscoveryWorkflowExecutorFactory | undefined;
   options: AttackDiscoveryExecutorOptions;
@@ -53,6 +58,7 @@ export interface AttackDiscoveryScheduleExecutorParams {
 }
 
 export const attackDiscoveryScheduleExecutor = async ({
+  getInternalEsClient,
   getInference,
   getWorkflowExecutorFactory,
   options,
@@ -110,8 +116,11 @@ export const attackDiscoveryScheduleExecutor = async ({
 
   const resourceName = getResourceName(ANONYMIZATION_FIELDS_RESOURCE);
   const index = getIndexTemplateAndPattern(resourceName, spaceId).alias;
+  // The anonymization fields index is Kibana-owned configuration, so it is read with the internal
+  // user, as the AI Assistant `_find` route does. The rule's scoped client would require the
+  // schedule's owner to hold index privileges on it.
   const result = await findDocuments<EsAnonymizationFieldsSchema>({
-    esClient,
+    esClient: await getInternalEsClient(),
     page: 1,
     perPage: 1000,
     index,
