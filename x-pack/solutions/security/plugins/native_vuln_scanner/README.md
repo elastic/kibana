@@ -89,3 +89,10 @@ plain byte order equals the distro's order. That lets Elasticsearch compare
 
 The tests check both the comparators and the keys against pairs labelled by the real `dpkg` and
 `rpm` tools.
+
+### Known limitation: per-account trend
+
+The vulnerability dashboard trend includes native findings in the overall severity totals. The
+per-cloud-account trend buckets are keyed on `cloud.account.id`, which native findings do not have,
+so they are not counted there. The trend is written by a task that runs only when the Cloud
+Security Posture integration is installed.

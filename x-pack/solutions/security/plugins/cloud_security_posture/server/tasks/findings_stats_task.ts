@@ -400,6 +400,7 @@ export const getVulnStatsTrendQuery = (): SearchRequest => ({
     low: {
       filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.LOW } },
     },
+    // Native scanner findings carry no cloud.account, so they count in the totals above but not here.
     vulnerabilities_stats_by_cloud_account: {
       terms: {
         field: 'cloud.account.id',
