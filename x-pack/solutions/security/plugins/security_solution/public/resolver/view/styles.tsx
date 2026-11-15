@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { NodeSubMenuComponents } from './submenu';
 
 /**
@@ -83,10 +83,11 @@ const VISUALIZE_BUTTON_GROUP_HEIGHT = '32px';
 const EUI_SPACER_HEIGHT = '16px';
 
 /**
- * The top level DOM element for Resolver
- * NB: `styled-components` may be used to wrap this.
+ * The top level DOM element for Resolver.
  */
-export const StyledMapContainer = styled.div<{ backgroundColor: string; windowHeight: number }>`
+export const StyledMapContainer = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'backgroundColor' && prop !== 'windowHeight',
+})<{ backgroundColor: string; windowHeight: number }>`
   /**
    * Take up all availble space
    */

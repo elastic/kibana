@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiSpacer } from '@elastic/eui';
 import { Breadcrumbs } from './breadcrumbs';
 import { useLinkProps } from '../use_link_props';

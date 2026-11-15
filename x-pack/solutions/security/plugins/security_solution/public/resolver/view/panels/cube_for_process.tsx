@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { i18n } from '@kbn/i18n';
 
@@ -86,6 +86,8 @@ export const CubeForProcess = memo(function ({
   );
 });
 
-const StyledSVG = styled.svg<StyledSVGCube>`
+const StyledSVG = styled('svg', {
+  shouldForwardProp: (prop) => prop !== 'isOrigin',
+})<StyledSVGCube>`
   margin-right: ${(props) => (props.isOrigin ? '0.15em' : 0)};
 `;
