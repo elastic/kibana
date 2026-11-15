@@ -685,7 +685,7 @@ describe('parseRecords', () => {
       v4: jest.fn(),
     }));
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { v4: uuidv4 } = require('uuid');
     const mockUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>;
 

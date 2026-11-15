@@ -23,7 +23,7 @@
  */
 
 // Import the list from babel-preset (CommonJS module)
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
 export { USES_STYLED_COMPONENTS };

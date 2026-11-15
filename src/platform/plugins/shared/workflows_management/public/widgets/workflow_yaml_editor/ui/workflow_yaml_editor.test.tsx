@@ -44,9 +44,9 @@ let mockYamlEditorOptions: { scrollbar?: { vertical?: string } } | undefined;
 // viewport-tracking code path is exercised without needing the real Monaco environment.
 jest.mock('../../../shared/ui/yaml_editor', () => {
   // require() is mandatory here: jest.mock factories run before ES-import transforms.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { createElement } = require('react');
   return {
     YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {

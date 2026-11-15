@@ -64,7 +64,7 @@ jest.mock('../tests_discovery/search_configs', () => ({
 
 jest.mock('@kbn/scout-reporting/src/registry', () => {
   // Access the module-level store
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const testModule = require('./config_discovery.test');
   return {
     ...jest.requireActual('@kbn/scout-reporting/src/registry'),

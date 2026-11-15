@@ -38,10 +38,10 @@ export function getElasticsearchConnectors(): InternalConnectorContract[] {
   // Lazy load the large generated files to keep them out of the main bundle
   const {
     GENERATED_ELASTICSEARCH_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   } = require('./generated');
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { ELASTICSEARCH_OVERRIDES } = require('./overrides');
 
   const connectors: InternalConnectorContract[] = [];

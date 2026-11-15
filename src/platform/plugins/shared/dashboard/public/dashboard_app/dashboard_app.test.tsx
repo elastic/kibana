@@ -242,10 +242,10 @@ describe('Dashboard App', () => {
     const mockIsDashboardAppInNoDataState = jest.fn();
 
     beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('./no_data/dashboard_app_no_data').isDashboardAppInNoDataState =
         mockIsDashboardAppInNoDataState;
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       require('./no_data/dashboard_app_no_data').DashboardAppNoDataPage = () => (
         <div>Mock no data page</div>
       );

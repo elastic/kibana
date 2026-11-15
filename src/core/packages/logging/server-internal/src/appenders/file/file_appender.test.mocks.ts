@@ -8,7 +8,7 @@
  */
 
 jest.mock('../../layouts/layouts', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { schema } = require('@kbn/config-schema');
   return {
     Layouts: {

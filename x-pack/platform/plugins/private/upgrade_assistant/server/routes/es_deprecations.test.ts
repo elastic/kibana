@@ -17,7 +17,7 @@ jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
 }));
 
 // Need to require to get mock on named export to work.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const ESUpgradeStatusApis = require('../lib/es_deprecations_status');
 ESUpgradeStatusApis.getESUpgradeStatus = jest.fn();
 

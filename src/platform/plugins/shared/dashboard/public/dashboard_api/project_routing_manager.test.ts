@@ -14,7 +14,7 @@ import { initializeProjectRoutingManager } from './project_routing_manager';
 import { cpsService } from '../services/kibana_services';
 
 jest.mock('../services/kibana_services', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { cpsServiceMock } = require('@kbn/cps/public/__mocks__');
   return {
     cpsService: cpsServiceMock,
@@ -41,7 +41,7 @@ describe('projectRouting', () => {
 
   beforeEach(() => {
     // Reset the project routing subject before each test
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { resetCpsMock } = require('@kbn/cps/public/__mocks__');
     resetCpsMock();
   });

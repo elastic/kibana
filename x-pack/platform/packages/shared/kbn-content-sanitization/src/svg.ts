@@ -44,11 +44,11 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
 
     // Create a DOM environment - both packages are loaded lazily to avoid paying
     // the ~494 CJS module startup cost in processes that never sanitize SVGs.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { JSDOM } = require('jsdom') as typeof import('jsdom');
     // dompurify's CJS bundle uses `module.exports = purify` (no `default` key),
     // while its ESM bundle exposes the factory as `default`. Handle both shapes.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const dompurifyModule = require('dompurify') as
       | typeof import('dompurify')
       | typeof import('dompurify')['default'];

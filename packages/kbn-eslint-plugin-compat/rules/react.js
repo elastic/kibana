@@ -9,9 +9,12 @@
 
 const { rules } = require('eslint-plugin-react');
 
-// eslint-plugin-react rules that oxlint doesn't implement.
+// eslint-plugin-react rules that oxlint doesn't implement, or implements differently
+// (`display-name` with `ignoreTranspilerName` also flags `React.memo(Component)` when `Component`
+// already sets `displayName`).
 module.exports = {
   'react-boolean-prop-naming': rules['boolean-prop-naming'],
+  'react-display-name': rules['display-name'],
   'react-jsx-no-bind': rules['jsx-no-bind'],
   'react-no-deprecated': rules['no-deprecated'],
   'react-no-typos': rules['no-typos'],

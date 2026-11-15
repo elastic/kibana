@@ -24,7 +24,7 @@ jest.mock('./amazon_s3_api', () => ({
 }));
 
 // Load the module under test after mocks are in place
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { AmazonS3 } = require('./amazon_s3');
 
 describe('AmazonS3', () => {

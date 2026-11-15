@@ -239,7 +239,7 @@ class StandaloneSpecDefinitionsService {
       // Load the JS spec loaders
       // Dynamic require is necessary here because the path is determined at runtime based on version directories
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const loadedModule: unknown = require(jsIndexPath);
       const jsSpecLoaders = isRecord(loadedModule) ? loadedModule.jsSpecLoaders : undefined;
 

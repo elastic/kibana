@@ -64,9 +64,9 @@ describe('workflowExecutionLoop', () => {
     const params = createParams();
     await workflowExecutionLoop(params as any);
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { executionFlowLoop } = require('./execution_flow_loop');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { persistenceLoop, flushState } = require('./persistence_loop');
 
     expect(executionFlowLoop).toHaveBeenCalledWith(params);
@@ -84,7 +84,7 @@ describe('workflowExecutionLoop', () => {
     const params = createParams();
     const testError = new Error('execution failed');
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { executionFlowLoop } = require('./execution_flow_loop');
     (executionFlowLoop as jest.Mock).mockRejectedValueOnce(testError);
 
@@ -114,7 +114,7 @@ describe('workflowExecutionLoop', () => {
   it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {
     const params = createParams();
     const abortController = new AbortController();
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { flushState } = require('./persistence_loop');
     const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
     abortController.abort(new WorkflowTaskManagerAbortError());

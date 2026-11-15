@@ -27,7 +27,7 @@ export default defineConfig({
 
 ## `@kbn/compat`
 
-Oxlint reserves the names of the plugins it implements natively (`react`, `typescript`/`@typescript-eslint`, `import`, `eslint`, ...), so it can't load an ESLint rule from those plugins under its original name. Rules oxlint doesn't implement natively are re-exported as the `@kbn/compat` plugin instead, prefixed with the plugin they come from (`react/no-typos` becomes `@kbn/compat/react-no-typos`). `eslint-disable` comments use the new names.
+Oxlint reserves the names of the plugins it implements natively (`react`, `typescript`/`@typescript-eslint`, `import`, `eslint`, ...), so it can't load an ESLint rule from those plugins under its original name. Rules oxlint doesn't implement natively, or implements differently from the upstream rule (`react/display-name` with `ignoreTranspilerName`, `@typescript-eslint/no-var-requires`), are re-exported as the `@kbn/compat` plugin instead, prefixed with the plugin they come from (`react/no-typos` becomes `@kbn/compat/react-no-typos`). `eslint-disable` comments use the new names.
 
 - `rules/*.js` map the new names to the upstream rules.
 - `oxlint_plugin.js` wraps them for Oxlint; `.oxlint/index.mts` loads it as `@kbn/compat`.

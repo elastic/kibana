@@ -14,7 +14,7 @@ import { AddToLibraryAction } from './library_add_action';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('@kbn/saved-objects-plugin/public', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { render } = require('@testing-library/react');
   const MockSavedObjectSaveModal = ({
     onSave,

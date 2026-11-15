@@ -13,7 +13,7 @@ const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 const loadProfile = (profile: 'minimal' | 'parity') => {
   jest.resetModules();
   process.env.SEED_PROFILE = profile;
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   return require('./chrysalis_seed') as typeof import('./chrysalis_seed');
 };
 
@@ -40,7 +40,7 @@ describe('chrysalis_seed', () => {
       delete process.env.SEED_PROFILE;
       let unset: typeof import('./chrysalis_seed');
       jest.isolateModules(() => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
         unset = require('./chrysalis_seed');
       });
       expect(unset!.seedProfile).toBe('minimal');
@@ -48,7 +48,7 @@ describe('chrysalis_seed', () => {
       process.env.SEED_PROFILE = '';
       let empty: typeof import('./chrysalis_seed');
       jest.isolateModules(() => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
         empty = require('./chrysalis_seed');
       });
       expect(empty!.seedProfile).toBe('minimal');
@@ -63,7 +63,7 @@ describe('chrysalis_seed', () => {
       process.env.SEED_PROFILE = 'enriched';
       expect(() => {
         jest.isolateModules(() => {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
           require('./chrysalis_seed');
         });
       }).toThrow(/enriched.*minimal.*parity|Unknown SEED_PROFILE 'enriched'/s);
@@ -73,7 +73,7 @@ describe('chrysalis_seed', () => {
       process.env.SEED_PROFILE = 'Parity';
       expect(() => {
         jest.isolateModules(() => {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
           require('./chrysalis_seed');
         });
       }).toThrow(/Unknown SEED_PROFILE 'Parity'/);
@@ -106,7 +106,7 @@ describe('chrysalis_seed', () => {
     it('shifts nested first_seen by the same offset as @timestamp', async () => {
       const { seedChrysalisAlerts } = loadProfile('parity');
       const { PARITY_DOCS } =
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
         require('./chrysalis_parity_docs') as typeof import('./chrysalis_parity_docs');
       const client = createClient();
 

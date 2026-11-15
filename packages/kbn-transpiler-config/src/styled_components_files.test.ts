@@ -33,7 +33,7 @@ describe('USES_STYLED_COMPONENTS', () => {
   });
 
   it('is reference-equal to babel-preset styled_components_files export', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const babelPresetExport = require('@kbn/babel-preset/styled_components_files');
     expect(USES_STYLED_COMPONENTS).toBe(babelPresetExport.USES_STYLED_COMPONENTS);
   });

@@ -17,7 +17,7 @@ jest.mock('./hooks/use_synthetics_rules', () => ({
   useSyntheticsRules: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const useSyntheticsRulesModule = require('./hooks/use_synthetics_rules');
 const mockUseSyntheticsRules = useSyntheticsRulesModule.useSyntheticsRules as jest.MockedFunction<
   typeof useSyntheticsRulesModule.useSyntheticsRules
