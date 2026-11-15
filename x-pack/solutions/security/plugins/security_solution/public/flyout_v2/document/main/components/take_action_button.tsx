@@ -38,7 +38,9 @@ import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils
 import { useKibana } from '../../../../common/lib/kibana';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
-import { ADD_NOTE_ACTION_ID } from '../../../../common/constants/action_ids';
+import { ADD_NOTE_ACTION_ID, DETONATE_ACTION_ID } from '../../../../common/constants/action_ids';
+import { useFlyoutApi } from '../../../use_flyout_api';
+import { DETONATE_ACTION } from '../../../detonation/translations';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { ActionMenu, getActionGroups } from './action_menu';
 
@@ -200,9 +202,30 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
-    const endpointResponseActionsConsoleItems = useResponderActionItem(
+    const responderActionItems = useResponderActionItem(
       dataFormattedForFieldBrowser,
       closePopoverHandler
+    );
+
+    // Prototype: "Detonate" opens a fake detonation report flyout on top of this one.
+    const { openDetonationFlyoutAsChild } = useFlyoutApi();
+    const detonateItems = useMemo(
+      () => [
+        {
+          'data-test-subj': DETONATE_ACTION_ID,
+          key: DETONATE_ACTION_ID,
+          name: DETONATE_ACTION,
+          onClick: () => {
+            closePopoverHandler();
+            openDetonationFlyoutAsChild();
+          },
+        },
+      ],
+      [closePopoverHandler, openDetonationFlyoutAsChild]
+    );
+    const endpointResponseActionsConsoleItems = useMemo(
+      () => [...responderActionItems, ...detonateItems],
+      [responderActionItems, detonateItems]
     );
 
     const [osqueryAgentId, setOsqueryAgentId] = useState<string | null>(null);

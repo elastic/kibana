@@ -10,6 +10,8 @@ import type { AttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
 import type { CspFlyoutApi } from './csp/use_csp_flyout_api';
 import { useCspFlyoutApi } from './csp/use_csp_flyout_api';
+import type { DetonationFlyoutApi } from './detonation/use_detonation_flyout_api';
+import { useDetonationFlyoutApi } from './detonation/use_detonation_flyout_api';
 import type { DocumentFlyoutApi } from './document/use_document_flyout_api';
 import { useDocumentFlyoutApi } from './document/use_document_flyout_api';
 import type { EntityFlyoutApi } from './entity/use_entity_flyout_api';
@@ -39,7 +41,8 @@ import { useSharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_
  *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
-export type FlyoutApi = DocumentFlyoutApi &
+export type FlyoutApi = DetonationFlyoutApi &
+  DocumentFlyoutApi &
   AttackFlyoutApi &
   CspFlyoutApi &
   EntityFlyoutApi &
@@ -49,6 +52,7 @@ export type FlyoutApi = DocumentFlyoutApi &
   SharedToolsFlyoutApi;
 
 export const useFlyoutApi = (): FlyoutApi => {
+  const detonation = useDetonationFlyoutApi();
   const documentApi = useDocumentFlyoutApi();
   const attack = useAttackFlyoutApi();
   const csp = useCspFlyoutApi();
@@ -60,6 +64,7 @@ export const useFlyoutApi = (): FlyoutApi => {
 
   return useMemo(
     () => ({
+      ...detonation,
       ...documentApi,
       ...attack,
       ...csp,
@@ -69,6 +74,6 @@ export const useFlyoutApi = (): FlyoutApi => {
       ...rule,
       ...sharedTools,
     }),
-    [documentApi, attack, csp, entity, ioc, network, rule, sharedTools]
+    [detonation, documentApi, attack, csp, entity, ioc, network, rule, sharedTools]
   );
 };

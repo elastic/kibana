@@ -102,6 +102,8 @@ export const RISK_INPUT_ACTION_IDS = {
 
 export const RUN_ALERT_WORKFLOW_ACTION_ID = 'run-workflow-action' as const;
 
+export const DETONATE_ACTION_ID = 'detonate-action' as const;
+
 export const RUN_ATTACK_WORKFLOW_ACTION_ID = 'run-attack-workflow-action' as const;
 
 export const RUN_DOCUMENT_WORKFLOW_ACTION_ID = 'run-document-workflow-action' as const;
