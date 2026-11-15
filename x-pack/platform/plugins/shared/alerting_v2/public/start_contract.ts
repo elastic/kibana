@@ -87,5 +87,12 @@ export const createStartContract = (container: Container): AlertingV2PublicStart
       })),
     container
   ),
+  ImportsPage: lazyPageWithContainer(
+    () =>
+      import('./application/composable_pages').then((m) => ({
+        default: m.AlertingV2ImportsPage,
+      })),
+    container
+  ),
   createAlertingV2HostApp,
 });

@@ -33,6 +33,7 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_IMPORTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -120,6 +121,12 @@ const mockAlertingVTwo = {
   ExecutionHistoryPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
     <Placeholder
       name={`executionHistoryPage:${hostApp?.executionHistory?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
+  ),
+  ImportsPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`importsPage:${hostApp?.rules?.app ?? 'none'}`}
       privilegeCheck={privilegeCheck}
     />
   ),
@@ -458,6 +465,11 @@ describe('ObservabilityAlertingApp', () => {
       path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
       testId: `executionHistoryPage:${OBSERVABILITY_ALERTING_APP_ID}`,
       hasPrivilegeCheck: 'false',
+    },
+    {
+      path: OBSERVABILITY_ALERTING_IMPORTS_PATH,
+      testId: `importsPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+      hasPrivilegeCheck: 'true',
     },
   ])(
     'sets privilegeCheck=$hasPrivilegeCheck on $testId at $path',

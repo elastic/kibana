@@ -7,7 +7,9 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { coreMock } from '@kbn/core/public/mocks';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import {
+  areAlertingV2ImportsEnabled,
   canAccessAlertingV2Rules,
   hasAlertingV2Capability,
   isAlertingV2AvailableInSolution,
@@ -264,5 +266,51 @@ describe('canAccessAlertingV2Rules', () => {
     core.settings.globalClient.get = <T>(_key: string) => false as T;
 
     expect(canAccessAlertingV2Rules(core)).toBe(false);
+  });
+});
+
+describe('areAlertingV2ImportsEnabled', () => {
+  let core: CoreStart;
+
+  const setExperimentalFeatures = (value: boolean | undefined) => {
+    core.settings.client.get = <T>(key: string, defaultOverride?: T) =>
+      (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID && value !== undefined
+        ? value
+        : defaultOverride) as T;
+  };
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    setExperimentalFeatures(true);
+  });
+
+  it('returns true while alerting v2 and experimental features are on', () => {
+    expect(areAlertingV2ImportsEnabled(core.settings)).toBe(true);
+  });
+
+  it('returns false while experimental features are off', () => {
+    setExperimentalFeatures(false);
+
+    expect(areAlertingV2ImportsEnabled(core.settings)).toBe(false);
+  });
+
+  it('returns false when experimental features are not set', () => {
+    setExperimentalFeatures(undefined);
+
+    expect(areAlertingV2ImportsEnabled(core.settings)).toBe(false);
+  });
+
+  it('returns false while alerting v2 is disabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+
+    expect(areAlertingV2ImportsEnabled(core.settings)).toBe(false);
+  });
+
+  it('returns false when the alerting v2 setting is not declared', () => {
+    core.settings.globalClient.isDeclared = () => false;
+
+    expect(areAlertingV2ImportsEnabled(core.settings)).toBe(false);
   });
 });
