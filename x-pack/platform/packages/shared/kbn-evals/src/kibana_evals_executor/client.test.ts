@@ -858,4 +858,152 @@ describe('KibanaEvalsClient', () => {
       expect(exp.evaluationRuns).toHaveLength(4);
     });
   });
+
+  describe('failure isolation', () => {
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [
+        { id: 'ex-0', input: { q: 0 } },
+        { id: 'ex-1', input: { q: 1 } },
+        { id: 'ex-2', input: { q: 2 } },
+      ],
+    };
+
+    const countEvaluator = (
+      evaluate: Evaluator['evaluate'] = async () => ({ score: 1 })
+    ): Evaluator => ({
+      name: 'Count',
+      kind: 'CODE',
+      direction: 'maximize',
+      evaluate,
+    });
+
+    it('does not reject the experiment when a task throws and still scores the other examples', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ onEvaluationComplete });
+      const evaluate = jest.fn(async () => ({ score: 1 }));
+
+      const [exp] = await client.runExperiment(
+        {
+          datasets: [dataset],
+          task: async (example) => {
+            if (example.input?.q === 1) {
+              throw new Error('task exploded');
+            }
+            return { value: example.input?.q };
+          },
+        },
+        [countEvaluator(evaluate)]
+      );
+
+      expect(Object.values(exp.runs)).toHaveLength(3);
+      expect(exp.evaluationRuns).toHaveLength(3);
+
+      const failedRun = Object.values(exp.runs).find((run) => run.exampleIndex === 1);
+      expect(failedRun).toEqual(
+        expect.objectContaining({ output: null, taskError: { message: 'task exploded' } })
+      );
+
+      // Healthy examples are evaluated normally; the failed one is not run through evaluators.
+      expect(evaluate).toHaveBeenCalledTimes(2);
+      const failedRunKey = Object.keys(exp.runs).find((key) => exp.runs[key] === failedRun);
+      const failedEval = exp.evaluationRuns.find((r) => r.experimentRunId === failedRunKey);
+      expect(failedEval?.result).toEqual(
+        expect.objectContaining({ score: null, label: 'error', explanation: 'task exploded' })
+      );
+      const scored = exp.evaluationRuns.filter((r) => r.result?.score === 1);
+      expect(scored).toHaveLength(2);
+
+      expect(onEvaluationComplete).toHaveBeenCalledTimes(3);
+      expect(mockLog.error).toHaveBeenCalledWith(
+        expect.stringContaining('exampleIndex=1, repetition=0')
+      );
+    });
+
+    it('emits an error-labelled null score for every evaluator of a failed task run', async () => {
+      const client = createClient();
+      const evaluators = [
+        { ...countEvaluator(), name: 'A' },
+        { ...countEvaluator(), name: 'B' },
+      ];
+
+      const [exp] = await client.runExperiment(
+        {
+          datasets: [{ ...dataset, examples: [dataset.examples[0]] }],
+          task: async () => {
+            throw new Error('boom');
+          },
+        },
+        evaluators
+      );
+
+      expect(exp.evaluationRuns.map((r) => [r.name, r.result?.score, r.result?.label])).toEqual([
+        ['A', null, 'error'],
+        ['B', null, 'error'],
+      ]);
+    });
+
+    it('turns an evaluator that throws into a null/error score for that evaluator only', async () => {
+      const client = createClient();
+
+      const [exp] = await client.runExperiment(
+        { datasets: [dataset], task: async () => ({ value: 1 }) },
+        [
+          { ...countEvaluator(), name: 'Healthy' },
+          {
+            ...countEvaluator(async () => {
+              throw new Error('judge unavailable');
+            }),
+            name: 'Broken',
+          },
+        ]
+      );
+
+      expect(exp.evaluationRuns).toHaveLength(6);
+      const broken = exp.evaluationRuns.filter((r) => r.name === 'Broken');
+      const healthy = exp.evaluationRuns.filter((r) => r.name === 'Healthy');
+      expect(broken).toHaveLength(3);
+      broken.forEach((r) =>
+        expect(r.result).toEqual(
+          expect.objectContaining({
+            score: null,
+            label: 'error',
+            explanation: 'judge unavailable',
+          })
+        )
+      );
+      healthy.forEach((r) => expect(r.result?.score).toBe(1));
+      expect(mockLog.error).toHaveBeenCalledWith(expect.stringContaining('Broken'));
+    });
+
+    it.each([
+      ['a failed task', async () => Promise.reject(new Error('boom')), async () => ({ score: 1 })],
+      [
+        'an evaluator that throws',
+        async () => ({ value: 1 }),
+        async (): Promise<{ score: number }> => {
+          throw new Error('judge unavailable');
+        },
+      ],
+      ['a successful evaluator', async () => ({ value: 1 }), async () => ({ score: 1 })],
+    ])(
+      'completes the experiment when the model and version getters throw after %s',
+      async (_, task, evaluate) => {
+        const client = createClient();
+        const throwing = () => {
+          throw new Error('getter exploded');
+        };
+
+        const [exp] = await client.runExperiment(
+          { datasets: [{ ...dataset, examples: [dataset.examples[0]] }], task },
+          [{ ...countEvaluator(evaluate), getModel: throwing, getVersion: throwing }]
+        );
+
+        expect(exp.evaluationRuns).toHaveLength(1);
+        expect(exp.evaluationRuns[0].model).toBeUndefined();
+        expect(exp.evaluationRuns[0].version).toBeUndefined();
+      }
+    );
+  });
 });

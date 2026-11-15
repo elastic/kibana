@@ -34,7 +34,7 @@ const CLAIM_FACTUAL_SCORE_MAP: ClaimScoreMap = {
  * ensuring that a single critically incorrect claim (such as a contradicted central claim
  * with a score of 0.0) will result in an overall factual score of 0.0.
  */
-export function calculateFactualScore(correctnessEvaluation: CorrectnessAnalysis): number {
+export function calculateFactualScore(correctnessEvaluation: CorrectnessAnalysis): number | null {
   return geometricMeanClaimScore(
     correctnessEvaluation?.analysis,
     CLAIM_FACTUAL_SCORE_MAP,
@@ -48,9 +48,12 @@ export function calculateFactualScore(correctnessEvaluation: CorrectnessAnalysis
  * This function measures how effectively the response addresses the user's core query
  * by calculating the proportion of claims that are classified as 'central' compared to the total number of claims.
  */
-export function calculateRelevanceScore(correctnessEvaluation: CorrectnessAnalysis): number {
+export function calculateRelevanceScore(correctnessEvaluation: CorrectnessAnalysis): number | null {
   const analysis = correctnessEvaluation?.analysis;
-  if (!analysis || !Array.isArray(analysis) || analysis.length === 0) {
+  if (!Array.isArray(analysis)) {
+    return null;
+  }
+  if (analysis.length === 0) {
     return 0.0;
   }
 
@@ -69,7 +72,7 @@ export function calculateRelevanceScore(correctnessEvaluation: CorrectnessAnalys
  */
 export function calculateProceduralFidelityScore(
   correctnessEvaluation: CorrectnessAnalysis
-): number {
+): number | null {
   const summary = correctnessEvaluation?.summary;
   const analysis = correctnessEvaluation?.analysis;
 
@@ -78,8 +81,9 @@ export function calculateProceduralFidelityScore(
     return 1.0;
   }
 
-  if (!analysis || !Array.isArray(analysis)) {
-    return 1.0;
+  // Not an analysis we can order, so there is nothing to call perfect.
+  if (!Array.isArray(analysis)) {
+    return null;
   }
 
   const centralClaims = analysis.filter((claim) => claim.centrality === 'central');

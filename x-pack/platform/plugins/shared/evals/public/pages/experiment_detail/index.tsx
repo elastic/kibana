@@ -55,6 +55,66 @@ import { SaveAsWorkflowButton } from '../../components/save_as_workflow_button';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
+/** Scores and errored scores both count as ingested; errors carry no score so `count` omits them. */
+export const sumScoresIngested = (stats: EvaluatorStats[]): number =>
+  stats.reduce((sum, stat) => sum + (stat.stats.count ?? 0) + (stat.stats.error_count ?? 0), 0);
+
+const NO_SCORES_PLACEHOLDER = '-';
+
+/**
+ * An evaluator whose runs all errored has no scores, and its aggregated stats default to 0.
+ * Showing that 0 would read as "judged completely wrong", so show a placeholder instead.
+ */
+export const formatStat = (value: number, count: number): string =>
+  count === 0 ? NO_SCORES_PLACEHOLDER : value.toFixed(2);
+
+export const MeanWithErrors: React.FC<{ mean: number; count: number; errorCount?: number }> = ({
+  mean,
+  count,
+  errorCount,
+}) => (
+  <>
+    {formatStat(mean, count)}
+    {errorCount ? (
+      <EuiTextColor color="danger" data-test-subj="evalsExperimentDetailMeanErrorCount">
+        {' '}
+        ({i18n.getMeanErrorCountLabel(errorCount)})
+      </EuiTextColor>
+    ) : null}
+  </>
+);
+
+export const statValueColumns: Array<EuiBasicTableColumn<EvaluatorStats>> = [
+  {
+    field: 'stats.mean',
+    name: i18n.COLUMN_MEAN,
+    sortable: true,
+    render: (value: number, item: EvaluatorStats) => (
+      <MeanWithErrors mean={value} count={item.stats.count} errorCount={item.stats.error_count} />
+    ),
+  },
+  {
+    field: 'stats.median',
+    name: i18n.COLUMN_MEDIAN,
+    render: (value: number, item: EvaluatorStats) => formatStat(value, item.stats.count),
+  },
+  {
+    field: 'stats.std_dev',
+    name: i18n.COLUMN_STD_DEV,
+    render: (value: number, item: EvaluatorStats) => formatStat(value, item.stats.count),
+  },
+  {
+    field: 'stats.min',
+    name: i18n.COLUMN_MIN,
+    render: (value: number, item: EvaluatorStats) => formatStat(value, item.stats.count),
+  },
+  {
+    field: 'stats.max',
+    name: i18n.COLUMN_MAX,
+    render: (value: number, item: EvaluatorStats) => formatStat(value, item.stats.count),
+  },
+];
+
 interface DatasetStatsGroup {
   datasetId: string;
   datasetName: string;
@@ -415,7 +475,7 @@ export const ExperimentDetailPage: React.FC = () => {
     if (!stats || stats.length === 0) {
       return undefined;
     }
-    const esScoresIngested = stats.reduce((sum, stat) => sum + (stat.stats.count ?? 0), 0);
+    const esScoresIngested = sumScoresIngested(stats);
     const exampleCountByDataset = new Map<string, number>();
     for (const stat of stats) {
       if (!exampleCountByDataset.has(stat.dataset_id)) {
@@ -455,32 +515,7 @@ export const ExperimentDetailPage: React.FC = () => {
             </EuiToolTip>
           ),
       },
-      {
-        field: 'stats.mean',
-        name: i18n.COLUMN_MEAN,
-        sortable: true,
-        render: (value: number) => value.toFixed(2),
-      },
-      {
-        field: 'stats.median',
-        name: i18n.COLUMN_MEDIAN,
-        render: (value: number) => value.toFixed(2),
-      },
-      {
-        field: 'stats.std_dev',
-        name: i18n.COLUMN_STD_DEV,
-        render: (value: number) => value.toFixed(2),
-      },
-      {
-        field: 'stats.min',
-        name: i18n.COLUMN_MIN,
-        render: (value: number) => value.toFixed(2),
-      },
-      {
-        field: 'stats.max',
-        name: i18n.COLUMN_MAX,
-        render: (value: number) => value.toFixed(2),
-      },
+      ...statValueColumns,
     ],
     []
   );

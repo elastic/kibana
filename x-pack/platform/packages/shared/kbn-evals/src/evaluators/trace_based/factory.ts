@@ -80,7 +80,7 @@ export function createTraceBasedEvaluator({
       if (!traceId) {
         return {
           score: null,
-          label: 'unavailable',
+          label: 'skipped',
           explanation: `No traceId available for ${name} evaluation`,
           metadata: undefined,
         };
@@ -185,7 +185,7 @@ export function createTraceBasedEvaluator({
         if (score === NOT_REPORTED) {
           return {
             score: null,
-            label: 'unavailable',
+            label: 'skipped',
             explanation: `${name} was not reported for trace ${traceId}`,
             ...description,
           };
@@ -218,6 +218,7 @@ export function createTraceBasedEvaluator({
 
         log.error(`Failed to evaluate ${name} for trace ${traceId}: ${errorMessage}`);
         return {
+          score: null,
           label: 'error',
           explanation: `Failed to retrieve ${name}: ${errorMessage}`,
         };

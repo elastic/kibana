@@ -26,8 +26,13 @@ export const geometricMeanClaimScore = (
   claims: ClaimWithVerdict[] | undefined,
   scoreMap: ClaimScoreMap,
   defaultVerdict: string
-): number => {
-  if (!claims || !Array.isArray(claims) || claims.length === 0) {
+): number | null => {
+  // No analysis array means the judge output could not be scored (null); an empty array is a
+  // judged answer with no claims (0).
+  if (!Array.isArray(claims)) {
+    return null;
+  }
+  if (claims.length === 0) {
     return 0.0;
   }
 

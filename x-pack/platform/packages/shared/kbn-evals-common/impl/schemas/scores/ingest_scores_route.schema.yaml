@@ -115,6 +115,16 @@ paths:
                           output:
                             type: object
                             additionalProperties: true
+                          error:
+                            type: object
+                            description: >-
+                              Why the task produced no output. Present only when the task threw.
+                            properties:
+                              message:
+                                type: string
+                                maxLength: 1024
+                            required:
+                              - message
                         required:
                           - repetition_index
                       evaluator:

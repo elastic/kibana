@@ -119,13 +119,6 @@ export function createCriteriaEvaluator({
         toScores(toolCall.function.arguments.criteria)
       );
 
-      function normalize(val: number) {
-        if (!isFinite(val)) {
-          return 0;
-        }
-        return val;
-      }
-
       const maxScore = sumBy(structuredCriteria, (criterion) => criterion.score);
 
       const successful = results.filter(({ evaluation }) => evaluation.result === 'PASS');
@@ -136,6 +129,16 @@ export function createCriteriaEvaluator({
         successful.concat(notApplicable),
         ({ criterion }) => criterion.score
       );
+
+      const normalizedScore = totalScore / maxScore;
+
+      if (!isFinite(normalizedScore)) {
+        return {
+          score: null,
+          label: 'error',
+          explanation: `Could not compute a score: criteria weights sum to ${maxScore}`,
+        };
+      }
 
       return {
         explanation: results
@@ -155,7 +158,7 @@ export function createCriteriaEvaluator({
             weight: criterion.score,
           })),
         },
-        score: normalize(totalScore / maxScore),
+        score: normalizedScore,
       };
     },
     kind: 'LLM',

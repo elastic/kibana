@@ -122,4 +122,16 @@ describe('createCriteriaEvaluator', () => {
 
     await expect(runEvaluation()).rejects.toThrow('Missing scores for fail-me');
   });
+
+  it('returns a null error score when the criteria weights cannot produce a finite score', async () => {
+    mockScoreWith([{ id: 'only', result: 'PASS' }]);
+
+    const result = await createCriteriaEvaluator({
+      inferenceClient,
+      criteria: [{ id: 'only', text: 'Zero weight', score: 0 }],
+      log,
+    }).evaluate({ input: {}, output: {}, expected: {}, metadata: null });
+
+    expect(result).toMatchObject({ score: null, label: 'error' });
+  });
 });
