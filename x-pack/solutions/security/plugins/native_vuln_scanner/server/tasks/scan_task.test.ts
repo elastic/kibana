@@ -414,6 +414,30 @@ describe('registerScanTask', () => {
       expectAbortedRun(result);
     });
 
+    it('keeps the earlier release failure and the partial summary in the aborted run', async () => {
+      const result = await runAborted(async (os, controller) => {
+        if (os.family === 'rhel') throw new Error('x'.repeat(MAX_STATE_MESSAGE_LENGTH + 50));
+        controller.abort();
+        throw Object.assign(new Error('This operation was aborted'), { name: 'AbortError' });
+      });
+
+      expect(result).not.toHaveProperty('error');
+      expect(result?.state.lastRun).not.toHaveProperty('error');
+      expect(result?.state.lastRun).toMatchObject({
+        runId: 'exec-1',
+        status: 'aborted',
+        hosts: 2,
+        findings: 0,
+        releases: { 'rhel:9': 'failed' },
+      });
+      const { failures } = (result?.state as { lastRun: { failures: Record<string, string> } })
+        .lastRun;
+      expect(Object.keys(failures)).toEqual(['rhel:9']);
+      expect(failures['rhel:9']).toHaveLength(MAX_STATE_MESSAGE_LENGTH);
+      expect(() => stateSchemaByVersion[1].schema.validate(result?.state)).not.toThrow();
+      expect(writeMock).not.toHaveBeenCalled();
+    });
+
     describe('before the release loop', () => {
       const runInventoryRead = async (abortSignal: boolean) => {
         const controller = new AbortController();
