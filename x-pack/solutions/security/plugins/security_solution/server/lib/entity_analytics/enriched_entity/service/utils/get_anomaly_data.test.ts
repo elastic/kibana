@@ -194,7 +194,11 @@ describe('getAnomalyData', () => {
     it('forwards mitreDataClient to getEntityAnomalies when provided', async () => {
       jest.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [], total: 0 });
 
-      const mockMitreDataClient: MitreAttackDataClient = { list: jest.fn(), getById: jest.fn() };
+      const mockMitreDataClient: MitreAttackDataClient = {
+        list: jest.fn(),
+        getById: jest.fn(),
+        getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+      };
 
       await getAnomalyData({
         ...baseOptions,

@@ -1130,9 +1130,13 @@ const huntCoordinatorCore = async (
   // retired (seen live). If even one behavior grounded and executed, the text does hold
   // usable literals and the remaining ungrounded ones keep their retry.
   const nothingGroundable = tier1Raw.status === 'no_searchable_terms' && !tier2Executed;
-  // Extraction ran unless the managed ATT&CK catalog was missing, which leaves one report-level
-  // gap and no technique to judge. Then the recorded pending list is neither consumed nor replaced.
-  const extractionRan = !tier2Gaps.some(({ reason }) => reason === 'catalog_unavailable');
+  // Extraction did not run only when the managed ATT&CK catalog was missing or disabled, which leaves
+  // one report-level gap (no technique_id); per-technique catalog gaps mean it ran. Then the recorded
+  // pending list is neither consumed nor replaced.
+  const extractionRan = !tier2Gaps.some(
+    ({ reason, technique_id: techniqueId }) =>
+      !techniqueId && (reason === 'catalog_unavailable' || reason === 'catalog_disabled')
+  );
   // A technique an earlier run left pending gets exactly one more run. When this run's extraction
   // did not return it, nothing can search it (only extracted techniques are searched), so it is
   // given up on: its gap is still reported, but it no longer keeps the report eligible, and it is

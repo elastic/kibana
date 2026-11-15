@@ -12,6 +12,7 @@ export type MitreAttackDataClientMock = jest.Mocked<MitreAttackDataClient>;
 const createMitreAttackDataClientMock = (): MitreAttackDataClientMock => ({
   getById: jest.fn(),
   list: jest.fn(),
+  getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
 });
 
 export const mitreAttackDataClientMock: {

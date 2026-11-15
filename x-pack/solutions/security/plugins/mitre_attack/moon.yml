@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/security-mitre-attack-server'
   - '@kbn/zod-helpers'
   - '@kbn/logging-mocks'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

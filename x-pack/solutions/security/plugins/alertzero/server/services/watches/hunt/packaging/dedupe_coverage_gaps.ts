@@ -26,6 +26,7 @@ export const GAP_REASON_PHRASES: Record<HuntIncompleteReason, string> = {
   quote_ungrounded: 'quote not grounded in the report',
   unknown_technique_id: 'unknown technique id',
   catalog_unavailable: 'ATT&CK catalog unavailable',
+  catalog_disabled: 'ATT&CK catalog disabled',
   rows_unclassifiable: 'rows could not be classified',
   refs_unavailable: 'references unavailable',
   nothing_searched: 'nothing searchable',
