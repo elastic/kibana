@@ -66,6 +66,9 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/core-spaces-common'
   - '@kbn/core-notifications-browser-mocks'
+  - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-observability'
 tags:
   - plugin
   - prod
@@ -79,6 +82,4 @@ fileGroups:
     - public/**/*
     - common/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

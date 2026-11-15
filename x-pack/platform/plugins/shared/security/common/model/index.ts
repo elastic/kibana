@@ -19,6 +19,7 @@ export type { BuiltinESPrivileges } from './builtin_es_privileges';
 export {
   copyRole,
   isRoleDeprecated,
+  isRoleHiddenOnServerless,
   isRoleReadOnly,
   isRoleReserved,
   isRoleSystem,

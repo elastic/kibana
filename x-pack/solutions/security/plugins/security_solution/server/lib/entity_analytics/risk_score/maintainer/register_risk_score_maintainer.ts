@@ -7,6 +7,7 @@
 
 import type { EntityStoreSetupContract } from '@kbn/entity-store/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import { RISK_SCORE_MAINTAINER_ID } from '../../../../../common/entity_analytics/risk_score/constants';
 import { INTERVAL } from '../tasks/constants';
 import {
   createRiskScoreMaintainer,
@@ -39,7 +40,7 @@ export const registerRiskScoreMaintainer = ({
   const maintainer = createRiskScoreMaintainer(deps);
 
   entityStore.registerEntityMaintainer({
-    id: 'risk-score',
+    id: RISK_SCORE_MAINTAINER_ID,
     description: 'Entity Analytics Risk Score Maintainer',
     interval: INTERVAL,
     timeout: '45m',

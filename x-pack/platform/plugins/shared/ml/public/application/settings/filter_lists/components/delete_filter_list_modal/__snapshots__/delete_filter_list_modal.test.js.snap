@@ -3,7 +3,7 @@
 exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabled delete button 1`] = `
 <div>
   <button
-    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
+    class="euiButton emotion-euiButtonDisplay-m-isDisabled-base-disabled"
     data-test-subj="mlFilterListsDeleteButton"
     disabled=""
     type="button"
@@ -24,7 +24,7 @@ exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabl
 exports[`DeleteFilterListModal renders as disabled delete button when no lists selected 1`] = `
 <div>
   <button
-    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
+    class="euiButton emotion-euiButtonDisplay-m-isDisabled-base-disabled"
     data-test-subj="mlFilterListsDeleteButton"
     disabled=""
     type="button"
@@ -45,7 +45,7 @@ exports[`DeleteFilterListModal renders as disabled delete button when no lists s
 exports[`DeleteFilterListModal renders as enabled delete button when a list is selected 1`] = `
 <div>
   <button
-    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-danger"
+    class="euiButton emotion-euiButtonDisplay-m-base-danger"
     data-test-subj="mlFilterListsDeleteButton"
     type="button"
   >

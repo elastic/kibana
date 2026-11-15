@@ -71,5 +71,5 @@ Questions are defined per application in `@kbn/feedback-registry`. See [Register
 See [Development](index.md#kbn-ui-development) for how to run the shared Storybook and preview these docs. Run this package's tests with:
 
 ```bash
-yarn test:jest src/platform/kbn-ui/feedback
+pnpm test:jest src/platform/kbn-ui/feedback
 ```

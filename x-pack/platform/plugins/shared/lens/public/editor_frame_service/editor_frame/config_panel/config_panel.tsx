@@ -21,6 +21,7 @@ import {
   removeDimension,
 } from '../../../state_management/lens_slice';
 import { LayerPanel } from './layer_panel';
+import { getVisibleLayerIds } from './get_visible_layer_ids';
 import { generateId } from '../../../id_generator';
 import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';
 import {
@@ -85,13 +86,11 @@ export function ConfigPanel(
       return { isOnlyLayer: true, selectedLayerId: layerIds[0] };
     }
 
-    const visibleLayerIds = layerIds.filter((id) => {
-      const config = activeVisualization.getConfiguration({
-        layerId: id,
-        frame: props.framePublicAPI,
-        state: visualization.state,
-      });
-      return !config.hidden;
+    const visibleLayerIds = getVisibleLayerIds({
+      activeVisualization,
+      visualizationState: visualization.state,
+      framePublicAPI: props.framePublicAPI,
+      layerIds,
     });
 
     const isOnlyVisibleLayer = visibleLayerIds.length === 1;
@@ -363,11 +362,13 @@ export function ConfigPanel(
         addLayer={addLayer}
         isOnlyLayer={isOnlyLayer}
         onEmptyDimensionAdd={(columnId, { groupId }) => {
+          // the layer's datasource can differ from the active one on mixed panels
+          // (e.g. a form-based reference line layer on an ES|QL chart)
+          const layerDatasourceId =
+            props.framePublicAPI.datasourceLayers?.[selectedLayerId]?.datasourceId ??
+            activeDatasourceId;
           // avoid state update if the datasource does not support initializeDimension
-          if (
-            activeDatasourceId != null &&
-            datasourceMap[activeDatasourceId]?.initializeDimension
-          ) {
+          if (layerDatasourceId != null && datasourceMap[layerDatasourceId]?.initializeDimension) {
             dispatchLens(
               setLayerDefaultDimension({
                 layerId: selectedLayerId,

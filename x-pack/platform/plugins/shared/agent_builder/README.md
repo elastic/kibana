@@ -80,6 +80,15 @@ Tools can come from multiple sources:
 - workflow: A tool that executes a workflow.
 - mcp: A tool provided by an external MCP (Model Context Protocol) server.
 
+### HTTP API tools
+
+Agents reach the Elasticsearch and Kibana HTTP APIs through a set of internal tools:
+
+- `describe_api`: the parameter schema, method, and path of one operation.
+- `describe_api_type`: the full definition of a shared type `describe_api` only stubbed.
+- `execute_api`: the call itself, on behalf of the current user.
+- `discover_apis` (gated by `agentBuilder:apiDiscovery`): a searchable listing of every operation a target exposes.
+
 ### Registering a tool
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
@@ -115,7 +124,7 @@ const { result } = await agentBuilder.tools.execute({
   toolParams: { someNumber: 9000 },
   request,
   approvals: {
-    autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }],
+    autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.put_mapping' }],
   },
 });
 ```
@@ -137,12 +146,21 @@ input of the step:
 {
   "approvals": {
     "auto_approved_apis": {
-      "elasticsearch": ["indices.create", "indices.update_aliases"],
+      "elasticsearch": ["indices.put_mapping", "indices.update_aliases"],
       "kibana": ["alerting.delete-alerting-rule-id"]
     }
   }
 }
 ```
+
+In a conversation, the grant can widen when a delegating agent requests destructive APIs for a
+sub-agent through `run_subagent`, and the user is asked once to approve them before it starts. That
+approval covers only the delegated execution, so a sub-agent can hold access the parent run was not
+configured with, though never more than the delegating user could exercise themselves.
+
+An agent can also store the grant as a default in `configuration.approvals`, either via API, from the
+auto-approved APIs section of the agent editor, or in a built-in agent's definition. Every run of the
+agent, including as a sub-agent, adds the stored defaults to the grant supplied by the caller.
 
 ### Error handling
 
@@ -307,12 +325,12 @@ MCP clients can authenticate with an OAuth 2.1 access token instead of an API ke
 
    `server.publicBaseUrl` determines the resource metadata URL that Kibana advertises in the `WWW-Authenticate` header when an MCP request is rejected with a 401. Without it, Kibana falls back to the incoming request URL, which is not necessarily reachable by the client.
 
-   > **Note:** `xpack.security.mcp` is only accepted in serverless. While these keys are in `kibana.dev.yml`, a non-serverless Kibana refuses to start with `[config validation of [xpack.security].mcp]: a value wasn't expected to be present`, so comment them out before going back to `yarn start`.
+   > **Note:** `xpack.security.mcp` is only accepted in serverless. While these keys are in `kibana.dev.yml`, a non-serverless Kibana refuses to start with `[config validation of [xpack.security].mcp]: a value wasn't expected to be present`, so comment them out before going back to `pnpm start`.
 
 2. Start Elasticsearch with the UIAM OAuth authorization server by passing `--uiam-oauth`. For example:
 
    ```bash
-   yarn es serverless --projectType elasticsearch --uiam-oauth
+   pnpm es serverless --projectType elasticsearch --uiam-oauth
    ```
 
    That flag defaults to `false` even though `--uiam` defaults to `true`, so it has to be passed explicitly. It starts an additional `uiam-oauth` container that serves the authorization server on `https://localhost:8444`, alongside the UIAM service itself on `https://localhost:8443`. Leave UIAM itself enabled: the MCP client management UI used in step 4 is hidden when it is off.
@@ -320,7 +338,7 @@ MCP clients can authenticate with an OAuth 2.1 access token instead of an API ke
 3. Run Kibana in serverless mode, for example:
 
    ```bash
-   yarn serverless-es
+   pnpm serverless-es
    ```
 
 4. Register an OAuth client from **Agents > Tools > Manage all tools > Manage MCP > Manage MCP clients (OAuth) > Add MCP client**. The dialog shown after creation has the client ID and MCP server URL that your client needs. Redirect URIs are client-specific, and the authorization server accepts any localhost port but matches the path exactly, so refer to [Create an OAuth client in Elastic Agent Builder](https://www.elastic.co/docs/deploy-manage/app-connections/create-oauth-client) for the value your client expects.

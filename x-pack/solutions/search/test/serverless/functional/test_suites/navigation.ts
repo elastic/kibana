@@ -52,6 +52,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       const sideNavCases: Array<{
         link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
         pageTestSubject: string;
+        allowHidden?: boolean;
       }> = [
         {
           link: { deepLinkId: 'searchHomepage' },
@@ -63,7 +64,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           link: { deepLinkId: 'discover' },
-          pageTestSubject: 'queryInput',
+          pageTestSubject: 'discoverSavedSearchTitle',
+          allowHidden: true,
         },
         {
           link: { deepLinkId: 'dashboards' },
@@ -82,7 +84,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       for (const testCase of sideNavCases) {
         await solutionNavigation.sidenav.clickLink(testCase.link);
         await solutionNavigation.sidenav.expectLinkActive(testCase.link);
-        await testSubjects.existOrFail(testCase.pageTestSubject);
+        await testSubjects.existOrFail(testCase.pageTestSubject, {
+          allowHidden: testCase.allowHidden,
+        });
       }
 
       // navigate back to serverless search overview
@@ -173,8 +177,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('opens panel on legacy management landing page', async () => {
       await common.navigateToApp('management');
-      await testSubjects.exists('cards-navigation-page');
-      await solutionNavigation.sidenav.expectPanelExists('admin_and_settings');
+      await testSubjects.existOrFail('cards-navigation-page', { timeout: 5000 });
+      await retry.tryForTime(5000, async () => {
+        await solutionNavigation.sidenav.expectPanelExists('admin_and_settings');
+      });
     });
   });
 }

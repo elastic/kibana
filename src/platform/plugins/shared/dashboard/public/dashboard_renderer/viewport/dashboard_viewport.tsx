@@ -83,6 +83,7 @@ export const DashboardViewport = () => {
         data-title={dashboardTitle}
         data-description={description}
         data-shared-items-count={visiblePanelCount}
+        data-view-mode={viewMode}
         data-test-subj={'dshDashboardViewport'}
       >
         {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
@@ -97,9 +98,9 @@ const dashboardViewportStyles = {
     display: 'flex',
     flexDirection: 'column' as 'column',
     width: '100%',
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    backgroundColor: euiTheme.colors.backgroundBaseRecessed,
     '&.dshDashboardViewportWrapper--defaultBg': {
-      backgroundColor: euiTheme.colors.emptyShade,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
     '.dshDashboardViewport-controls': {
       margin: `0 ${euiTheme.size.s}`,

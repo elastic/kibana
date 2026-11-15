@@ -84,6 +84,8 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/es-errors'
   - '@kbn/app-header'
+  - '@kbn/app-menu'
+  - '@kbn/security-solution-features'
 tags:
   - plugin
   - prod
@@ -100,6 +102,4 @@ fileGroups:
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

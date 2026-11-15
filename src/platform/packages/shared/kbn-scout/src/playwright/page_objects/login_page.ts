@@ -28,6 +28,14 @@ export class LoginPage {
 
   async goto(): Promise<void> {
     await this.page.goto(this.kbnUrl.get('/login'));
+    // Multi-provider deployments (e.g. Elastic Cloud) render a provider
+    // selector before the credentials form, so select the basic-auth card to
+    // switch to the form that mounts `loginSubmit`.
+    const basicLoginCard = this.page.locator('[data-test-subj^="loginCard-basic/"]');
+    await this.submitButton.or(basicLoginCard).waitFor({ state: 'visible' });
+    if (await basicLoginCard.isVisible()) {
+      await basicLoginCard.click();
+    }
     await this.submitButton.waitFor({ state: 'visible' });
   }
 

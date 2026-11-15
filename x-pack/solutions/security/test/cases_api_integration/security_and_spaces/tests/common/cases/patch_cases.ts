@@ -24,6 +24,7 @@ import {
   postCaseReq,
   postCaseResp,
   postCommentUserReq,
+  userActionSourceUser,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -156,6 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
           payload: { status: CaseStatuses.closed },
           comment_id: null,
           owner: 'securitySolutionFixture',
+          source: userActionSourceUser,
         });
       });
 
@@ -192,6 +194,7 @@ export default ({ getService }: FtrProviderContext): void => {
           payload: { status: CaseStatuses['in-progress'] },
           comment_id: null,
           owner: 'securitySolutionFixture',
+          source: userActionSourceUser,
         });
       });
 

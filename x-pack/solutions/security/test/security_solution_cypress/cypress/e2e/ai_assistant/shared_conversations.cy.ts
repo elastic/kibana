@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MessageRole } from '@kbn/elastic-assistant-common';
+import type { Message, MessageRole } from '@kbn/elastic-assistant-common';
 import { closeToast } from '../../tasks/common/toast';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import {
@@ -44,25 +44,28 @@ import {
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
-import { login, loginWithUser } from '../../tasks/login';
+import { getFullname, getUsername } from '../../tasks/common';
+import { login } from '../../tasks/login';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
-// TODO: Skipped due to https://github.com/elastic/kibana/issues/235416
-describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
+describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
-  const primaryUser = isServerless ? 'elastic_admin' : 'system_indices_superuser';
-  const secondaryUser = isServerless ? 'elastic_serverless' : 'elastic';
-  const mockConvo1 = {
+  // The secondary identity comes from the same authentication mechanism as the primary one: a
+  // mock IdP SAML session in serverless, basic auth in ESS. Both roles hold every Kibana
+  // application privilege, which the share modal requires of the users it suggests.
+  const secondaryRole = isServerless ? 'system_indices_superuser' : 'elastic';
+  let primaryUser: string;
+  let secondaryUser: string;
+  let secondaryUserFullName: string;
+  const mockConvo1: { id: string; title: string; messages: Message[] } = {
     id: 'spooky',
     title: 'Spooky convo',
     messages: [
       {
         timestamp: '2025-08-14T21:08:24.923Z',
         content: 'Hi spooky robot',
-        user: {
-          name: primaryUser,
-        },
         role: userRole,
       },
       {
@@ -72,16 +75,13 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
       },
     ],
   };
-  const mockConvo2 = {
+  const mockConvo2: { id: string; title: string; messages: Message[] } = {
     id: 'silly',
     title: 'Silly convo',
     messages: [
       {
         timestamp: '2025-08-14T21:08:24.923Z',
         content: 'Hi silly robot',
-        user: {
-          name: primaryUser,
-        },
         role: userRole,
       },
       {
@@ -91,20 +91,39 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
       },
     ],
   };
+  const seedConversation = (conversation: typeof mockConvo1) =>
+    waitForConversation({
+      ...conversation,
+      messages: conversation.messages.map((message) =>
+        message.role === userRole ? { ...message, user: { name: primaryUser } } : message
+      ),
+    });
   before(() => {
-    loginSecondaryUser(isServerless, secondaryUser);
+    getUsername('admin').then((username) => {
+      primaryUser = username as string;
+    });
+    // Signing the secondary user in once activates their Kibana user profile, without which
+    // they cannot be suggested by, nor shared a conversation with, the share modal.
+    login(secondaryRole);
+    getSecondaryUsername(isServerless, secondaryRole).then((username) => {
+      secondaryUser = username as string;
+    });
+    getSecondaryFullName(isServerless, secondaryRole).then((fullName) => {
+      secondaryUserFullName = fullName as string;
+    });
     cy.clearCookies();
   });
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();
     login(isServerless ? 'admin' : undefined);
+    setPreferredChatExperienceToClassic();
     createAzureConnector();
-    waitForConversation(mockConvo1);
-    waitForConversation(mockConvo2);
-    visitGetStartedPage();
+    seedConversation(mockConvo1);
+    seedConversation(mockConvo2);
   });
   it('Share modal works to not share, share globally, and share selected', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -164,6 +183,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     assertSharedConversationIcon(mockConvo2.title);
   });
   it('Shared conversations appear for the user they were shared with', () => {
+    visitGetStartedPage();
     shareConversations([
       {
         title: mockConvo1.title,
@@ -177,8 +197,8 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     // First logout admin user
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as the secondary user who should have access to shared conversations
+    login(secondaryRole);
     visitGetStartedPage();
     openAssistant();
 
@@ -199,6 +219,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     assertMessageSent(mockConvo1.messages[0].content);
   });
   it('Dismissed callout remains dismissed when conversation is unselected and selected again', () => {
+    visitGetStartedPage();
     shareConversations([
       {
         title: mockConvo1.title,
@@ -211,7 +232,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     ]);
     cy.clearCookies();
 
-    loginSecondaryUser(isServerless, secondaryUser);
+    login(secondaryRole);
     visitGetStartedPage();
     openAssistant();
 
@@ -226,6 +247,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     assertNoSharedCallout();
   });
   it('Duplicate conversation allows user to continue a shared conversation', () => {
+    visitGetStartedPage();
     shareConversations([
       {
         title: mockConvo1.title,
@@ -235,7 +257,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
 
     cy.clearCookies();
 
-    loginSecondaryUser(isServerless, secondaryUser);
+    login(secondaryRole);
     visitGetStartedPage();
     openAssistant();
 
@@ -244,24 +266,26 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     assertCalloutState('private');
     typeAndSendMessage('goodbye');
     assertMessageUser(primaryUser, 0);
-    assertMessageUser(secondaryUser, 2);
+    assertMessageUser(secondaryUserFullName, 2);
   });
 
   it('Duplicate conversation from conversation menu creates a duplicate', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     duplicateFromMenu(mockConvo1.title);
   });
 
   it('Duplicate conversation from conversation side menu creates a duplicate and secondary user cannot access', () => {
+    visitGetStartedPage();
     openAssistant();
     toggleConversationSideMenu();
     duplicateFromConversationSideContextMenu(mockConvo2.title);
 
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as the secondary user who should have access to shared conversations
+    login(secondaryRole);
     visitGetStartedPage();
     openAssistant();
 
@@ -272,6 +296,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
   });
 
   it('Copy URL copies the proper url from conversation menu', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -279,6 +304,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     // Cypress paste (doc.execCommand('paste')) is flaky, so skipping that assertion
   });
   it('Copy URL copies the proper url from conversation side menu', () => {
+    visitGetStartedPage();
     openAssistant();
     toggleConversationSideMenu();
     copyUrlFromConversationSideContextMenu();
@@ -286,6 +312,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
   });
 
   it('Copy URL copies the proper url from share modal', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -294,6 +321,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
   });
 
   it('Visiting a URL with the assistant param opens the assistant to the proper conversation', () => {
+    visitGetStartedPage();
     cy.location('origin').then((origin) => {
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
     });
@@ -303,8 +331,9 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
   it('Visiting a URL with the assistant param shows access error when user does not have access to the conversation', () => {
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as the secondary user, who has not been given access to the conversation
+    login(secondaryRole);
+    visitGetStartedPage();
 
     cy.location('origin').then((origin) => {
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
@@ -319,10 +348,11 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
   });
 });
 
-const loginSecondaryUser = (isServerless: boolean, username: string) => {
-  if (isServerless) {
-    loginWithUser({ username, password: 'changeme' });
-  } else {
-    login(username);
-  }
-};
+// In ESS the secondary user logs in with basic auth, where the user name is the role name
+// itself. In serverless the mock IdP derives both the user name and the full name from the role,
+// and the user name is a hash rather than the role name.
+const getSecondaryUsername = (isServerless: boolean, role: string) =>
+  isServerless ? getUsername(role) : cy.wrap(role);
+
+const getSecondaryFullName = (isServerless: boolean, role: string) =>
+  isServerless ? getFullname(role) : cy.wrap(role);

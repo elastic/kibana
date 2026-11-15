@@ -25,10 +25,7 @@ import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
 
-export {
-  MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
-  MAXIMUM_RULE_IDENTIFIER_LENGTH,
-} from '../../../endpoint/lib/custom_yara_signatures';
+export { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '../../../endpoint/lib/custom_yara_signatures';
 
 const YaraEntrySchema = schema.object({
   field: schema.literal(CUSTOM_YARA_SIGNATURE_FIELD_TYPE),

@@ -12,6 +12,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { fn } from '@storybook/test';
 
+import moment from 'moment-timezone';
 import {
   DateRangePicker,
   type DateRangePickerProps,
@@ -22,6 +23,15 @@ import type { DateRangePickerSettings, TimeRangeBoundsOption } from './types';
 const meta: Meta<DateRangePickerProps> = {
   title: 'Date Time/DateRangePicker',
   component: DateRangePicker,
+  // Kibana keeps moment's global zone in sync with `timeZone` via core's
+  // MomentService; Storybook has no core, so mirror it here or selected days
+  // render in the browser's zone instead of the configured one.
+  decorators: [
+    (Story, { args }) => {
+      moment.tz.setDefault(args.timeZone === 'Browser' ? undefined : args.timeZone);
+      return <Story />;
+    },
+  ],
   args: {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),
@@ -31,7 +41,7 @@ const meta: Meta<DateRangePickerProps> = {
   argTypes: {
     locale: {
       control: 'select',
-      options: ['en', 'de-DE', 'fr-FR', 'ja-JP', 'zh-CN'],
+      options: ['en', 'de-DE', 'fr-FR', 'ja-JP', 'zh-CN', 'pt-BR'],
       description: 'English input always parses, whichever locale is active.',
     },
   },
@@ -89,6 +99,11 @@ const LOCALIZED_PRESETS: Record<string, TimeRangeBoundsOption[]> = {
     { start: 'now-15m', end: 'now', label: '最近 15 分钟' },
     { start: 'now-7d', end: 'now', label: '最近 7 天' },
     { start: 'now/d', end: 'now/d', label: '今天' },
+  ],
+  'pt-BR': [
+    { start: 'now-15m', end: 'now', label: 'Últimos 15 minutos' },
+    { start: 'now-7d', end: 'now', label: 'Últimos 7 dias' },
+    { start: 'now/d', end: 'now/d', label: 'Hoje' },
   ],
 };
 

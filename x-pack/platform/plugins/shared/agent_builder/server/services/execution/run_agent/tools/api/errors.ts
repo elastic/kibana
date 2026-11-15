@@ -17,6 +17,7 @@ export interface ApiFailureContext {
   target: ApiTarget;
   api: string;
   logger: Logger;
+  discoveryEnabled: boolean;
 }
 
 const toMessage = (error: unknown): string =>
@@ -48,7 +49,7 @@ export const registryUnavailableErrorResult = (
  */
 export const apiFailureToErrorResult = (
   failure: PrepareApiRequestFailure,
-  { toolId, target, api, logger }: ApiFailureContext
+  { toolId, target, api, logger, discoveryEnabled }: ApiFailureContext
 ): ErrorResult => {
   const metadata = { target, api };
 
@@ -58,9 +59,14 @@ export const apiFailureToErrorResult = (
 
     case 'unknown_api':
       return createErrorResult({
-        message:
-          `Unknown API identifier: "${api}". Use the ${internalTools.discoverApis} tool to ` +
-          `find valid identifiers.`,
+        message: discoveryEnabled
+          ? `Unknown API identifier: "${api}". Use the ${internalTools.discoverApis} tool to ` +
+            `find valid identifiers.`
+          : `The ${target} target exposes no API named "${api}". Do not retry with another ` +
+            `identifier unless a skill or the user gave it to you. ` +
+            `Otherwise, stop using ${internalTools.describeApi} and ${internalTools.executeApi} ` +
+            `for this operation. Do the task with your other tools instead, or tell the user ` +
+            `the operation is not available.`,
       });
 
     case 'load_failed':

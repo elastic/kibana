@@ -27,7 +27,7 @@ export const buildNewSignificantEventChatOptions = (
   }),
   attachments: [
     {
-      id: event.event_uuid,
+      id: event.event_id,
       type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
       origin: event.event_id,
       description: formatChatAttachmentDescription('Significant Event', event.title),

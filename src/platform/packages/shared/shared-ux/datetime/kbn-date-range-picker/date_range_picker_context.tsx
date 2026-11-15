@@ -123,6 +123,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   width: NonNullable<DateRangePickerProps['width']>;
   /** Whether the picker is disabled. */
   disabled: boolean;
+  /** Tooltip shown on the control and time window buttons while disabled. */
+  disabledTooltip?: React.ReactNode;
   /** Whether the picker shows its value but can't be edited. */
   readOnly: boolean;
   /** Whether a loading spinner is shown inside the form control. */
@@ -135,7 +137,7 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   onSettingsChange: (settings: DateRangePickerSettings) => void;
   /**
    * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
-   * Displayed informally in the panel footer.
+   * Used for calendar day boundaries and displayed in the panel footer.
    */
   timeZone?: string;
   /** Seconds until the next auto-refresh. While paused, this value is frozen at the last countdown value. `null` when auto-refresh is disabled or the interval is invalid. */
@@ -176,6 +178,7 @@ export function DateRangePickerProvider({
   locale,
   isInvalid = false,
   disabled = false,
+  disabledTooltip,
   readOnly = false,
   isLoading = false,
   compressed = true,
@@ -366,6 +369,7 @@ export function DateRangePickerProvider({
       onInputChange,
       width,
       disabled,
+      disabledTooltip,
       readOnly,
       isLoading,
       calendarOptions,
@@ -401,6 +405,7 @@ export function DateRangePickerProvider({
       onInputChange,
       width,
       disabled,
+      disabledTooltip,
       readOnly,
       isLoading,
       calendarOptions,

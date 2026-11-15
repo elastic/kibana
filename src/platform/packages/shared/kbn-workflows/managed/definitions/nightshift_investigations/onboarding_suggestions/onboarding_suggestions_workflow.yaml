@@ -1,0 +1,120 @@
+version: '1'
+name: Nightshift Onboarding Suggestions
+description: >
+  Runs the Nightshift investigation agent once to explore what a new user's space can see from
+  its sandbox (cluster telemetry, plus any tools reachable with the space's sandbox secrets) and
+  to suggest their first investigations. The execution is the onboarding state: its output carries
+  the suggestions.
+enabled: true
+settings:
+  timeout: '20m'
+  concurrency:
+    key: 'nightshift-onboarding-suggestions-{{ workflow.spaceId }}'
+    strategy: cancel-in-progress
+    max: 1
+tags:
+  - observability
+  - nightshift
+  - onboarding
+
+triggers:
+  - type: manual
+
+outputs:
+  properties:
+    suggestions:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
+  additionalProperties: false
+
+steps:
+  - name: resolve_model
+    type: nightshift.resolveModel
+    with:
+      step: investigation
+
+  # The investigation agent is a per-space document; the same idempotent step as investigations.
+  - name: ensure_investigation_agent
+    type: nightshift.ensureInvestigationAgent
+    with:
+      agent_id: nightshift.investigation
+
+  - name: suggest
+    type: ai.agent
+    agent-id: nightshift.investigation
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
+    plugin-id: 'nightshift_onboarding'
+    aggregate-by: 'nightshift'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
+    create-conversation: true
+    timeout: 900s
+    with:
+      metadata:
+        workflow_execution_id: '{{ execution.id }}'
+      message: |
+        This is not an investigation. A user just set up Nightshift and is waiting for you to
+        suggest their first investigations. Explore quickly and broadly, do not dig into any single
+        problem, and do not report investigation progress.
+
+        1. Read /workspace/elastic.md and /workspace/connectors.md. They say how to query the
+           cluster's telemetry and which sandbox secrets you may request (for example a GitHub
+           token or the URL and API key of another Elastic deployment).
+        2. Look at the cluster, skipping what does not exist:
+           - Active alerts in ".alerts-*" in the last 24 hours, by rule name and severity.
+           - Which telemetry exists: "logs-*", "traces-*" and "metrics-*".
+           - Error spikes in logs: errors in the last hour against the previous 23 hours, by service.
+           - Trace errors and latency by service.
+        3. For every sandbox secret that names a tool, take a quick look with it: for example open
+           bug-like issues and pull requests merged or releases published in the last day on
+           GitHub, or the same alert and error queries on another Elastic deployment. Stay
+           read-only: only GET requests and searches.
+        4. If the user described their system (critical services, where data lives, who owns
+           what), use that to pick where to look first and how to rank what you find, and say so
+           in the rationale (for example "checkout is business critical (your hint); 5xx up 4x in
+           the last hour"). Never suggest something only because a hint mentions it.
+
+        Speed matters: run independent commands in one script, prefer ES|QL STATS over raw
+        documents, bound every query to the last 24 hours with a LIMIT, and never retry a failing
+        command more than once. Base every suggestion on data you actually observed.
+
+        Then return 3 to 6 suggestions, most valuable first. Each suggestion is one investigation:
+        - title: short headline (max 80 characters) naming the concrete entity and symptom.
+        - prompt: one self-contained question for the investigation agent, written as the user
+          would ask it. Name the concrete services, rules, indices, repositories and time window
+          you saw. Max 400 characters.
+        - rationale: what you saw that makes it worth investigating, with numbers and where it came
+          from (max 160 characters).
+        - source: alert, slo, case, error_spike, latency, code_change, discussion or other.
+        If there is little data, still return at least 3 suggestions, for example about the
+        noisiest services or log sources you found.
+      schema:
+        type: object
+        properties:
+          suggestions:
+            type: array
+            maxItems: 6
+            items:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 120
+                prompt:
+                  type: string
+                  maxLength: 1000
+                rationale:
+                  type: string
+                  maxLength: 300
+                source:
+                  type: string
+                  enum: [alert, slo, case, error_spike, latency, code_change, discussion, other]
+              required: [title, prompt, rationale, source]
+        required: [suggestions]
+
+  - name: output_suggestions
+    type: workflow.output
+    with:
+      suggestions: '${{ steps.suggest.output.structured_output.suggestions }}'

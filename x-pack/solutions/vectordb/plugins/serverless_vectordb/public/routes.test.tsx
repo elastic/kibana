@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, type MemoryHistory } from 'history';
-import { GETTING_STARTED_PATH, hasSeenOnboarding } from '@kbn/vectordb-onboarding';
+import { hasSeenOnboarding } from '@kbn/vectordb-onboarding';
+import { GETTING_STARTED_PATH } from '../common/constants';
 import { AppRoutes } from './routes';
 
 jest.mock('@kbn/vectordb-onboarding', () => ({
@@ -20,7 +21,7 @@ jest.mock('@kbn/vectordb-onboarding', () => ({
   SearchStep: () => <div data-test-subj="searchStep" />,
 }));
 
-jest.mock('./home/home_page', () => ({
+jest.mock('./home_page', () => ({
   HomePage: () => <div data-test-subj="homePage" />,
 }));
 

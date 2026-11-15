@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import {
-  MAX_ALERTS_PER_CASE,
   MAX_ATTACHMENT_ID_LENGTH,
   MAX_COMMENT_LENGTH,
+  MAX_IDS_PER_ATTACHMENT,
   MAX_ISO_DATE_LENGTH,
   MAX_OWNER_LENGTH,
   MAX_ATTACHMENT_TYPE_LENGTH,
@@ -26,8 +26,9 @@ import {
 
 // Bounds reuse existing cases conventions where they exist. `attachmentId`
 // (string): 512 = ES `_id` upper bound, covering every current producer
-// (alert/event ES ids, foreign SO UUIDs). `attachmentId` (array): reuses
-// MAX_ALERTS_PER_CASE. `username`: matches Kibana security plugin routes.
+// (alert/event ES ids, foreign SO UUIDs). `attachmentId` (array):
+// MAX_IDS_PER_ATTACHMENT. This model version is released, so its value must not
+// change. `username`: matches Kibana security plugin routes.
 
 const userSchema = schema.object(
   {
@@ -50,7 +51,7 @@ const createSchema = schema.object(
       schema.oneOf([
         schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
         schema.arrayOf(schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }), {
-          maxSize: MAX_ALERTS_PER_CASE,
+          maxSize: MAX_IDS_PER_ATTACHMENT,
         }),
       ])
     ),

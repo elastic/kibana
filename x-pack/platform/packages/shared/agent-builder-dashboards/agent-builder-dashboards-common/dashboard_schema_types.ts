@@ -167,6 +167,7 @@ export const dashboardAttachmentDataSchema = z.object({
   pinned_panels: pinnedPanelsSchema.optional(),
   access_control: accessControlSchema.optional(),
   project_routing: z.string().optional(),
+  esql_approximation: z.boolean().optional(),
 });
 
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;

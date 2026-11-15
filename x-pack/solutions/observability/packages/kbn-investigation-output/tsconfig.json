@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "react", "@testing-library/jest-dom"]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-http-browser",
+    "@kbn/agentic-investigations-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/charts-theme",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/kibana-react-plugin",
+    "@kbn/visualization-utils"
+  ]
+}

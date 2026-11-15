@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
+import { SLACK_CONNECTOR_TYPE_ID } from './constants';
+import { slackEvents } from './events';
 import { slackRelay } from './relay';
 import {
   SlackCreateConversationInputSchema,
@@ -26,6 +28,7 @@ import {
   SlackResolveChannelIdInputSchema,
   SlackSearchMessagesInputSchema,
   SlackSendMessageInputSchema,
+  SlackUpdateMessageInputSchema,
   SlackWhoAmIInputSchema,
   SLACK_SEARCH_DEFAULT_COUNT,
   type SlackAssistantSearchContextResponse,
@@ -50,6 +53,7 @@ import {
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
   type SlackSendMessageInput,
+  type SlackUpdateMessageInput,
   type SlackWhoAmIInput,
 } from './types';
 
@@ -184,7 +188,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * Required Slack App scopes:
  * - channels:read, groups:read, im:read, mpim:read - list public channels, private channels, DMs, and group DMs
  * - channels:history, groups:history, im:history, mpim:history - read message history from each conversation type
- * - chat:write - send messages
+ * - chat:write - send messages and edit the messages it sent
  * - groups:write - create private channels and invite users
  * - search:read.public, search:read.private, search:read.im, search:read.mpim, search:read.files - search messages and files
  * - files:read - look up file metadata (getFileInfo, listFiles) and file references on messages
@@ -195,11 +199,11 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  */
 export const Slack: ConnectorSpec = {
   metadata: {
-    id: '.slack2',
+    id: SLACK_CONNECTOR_TYPE_ID,
     displayName: 'Slack (v2)',
-    description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
+    description: i18n.translate('connectorSpecs.slack.metadata.description', {
       defaultMessage:
-        'Search messages, list channels and users, read conversation history, list and look up files, look up users by email, and send messages in Slack',
+        'Search messages, list channels and users, read conversation history, list and look up files, look up users by email, and send and edit messages in Slack',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -239,22 +243,19 @@ export const Slack: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.slack.auth.bearer.label', {
             defaultMessage: 'Bot Token',
           }),
           meta: {
             token: {
               sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.slack.auth.bearer.token.label', {
                 defaultMessage: 'Slack Bot Token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.slack.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Slack bot token starting with xoxb-. Create one at api.slack.com/apps.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.slack.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Slack bot token starting with xoxb-. Create one at api.slack.com/apps.',
+              }),
             },
           },
         },
@@ -263,7 +264,7 @@ export const Slack: ConnectorSpec = {
         type: 'relay',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.relay.label', {
+          label: i18n.translate('connectorSpecs.slack.auth.relay.label', {
             defaultMessage: 'Elastic Slack app (Bot Token)',
           }),
         },
@@ -287,7 +288,7 @@ export const Slack: ConnectorSpec = {
 
         if (ctx.secrets?.authType === 'bearer') {
           throw new Error(
-            i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
+            i18n.translate('connectorSpecs.slack.searchMessages.botTokenError', {
               defaultMessage:
                 'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.',
             })
@@ -987,7 +988,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/conversations.create
     createConversation: {
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description:
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
@@ -1042,7 +1043,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/conversations.invite
     inviteToConversation: {
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
@@ -1099,7 +1100,7 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
+        'Send a message to a Slack channel or DM. Accepts a conversation ID, or a connected channel name (e.g. "#general") on the Elastic Slack app. Use listChannels to discover channels, or resolveChannelId when you know the name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
@@ -1112,6 +1113,7 @@ export const Slack: ConnectorSpec = {
         const payload: Record<string, unknown> = {
           channel: typedInput.channel,
           text: typedInput.text,
+          ...(typedInput.blocks?.length ? { blocks: typedInput.blocks } : {}),
         };
 
         if (typedInput.threadTs) {
@@ -1160,10 +1162,71 @@ export const Slack: ConnectorSpec = {
         }
       },
     },
+
+    // https://api.slack.com/methods/chat.update
+    updateMessage: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Edit a message this app posted earlier, replacing its text (at most 4,000 characters). Identify it by channel and the ts that sendMessage returned (messageTs). The channel must be a conversation ID, not a name, except on the Elastic Slack app. This overwrites the existing message; without blocks, Slack removes any blocks it had, so a Block Kit or richly formatted message comes back as plain text. Confirm with the user before editing unless they have already made their intent explicit. To add to a conversation instead, use sendMessage.',
+      input: SlackUpdateMessageInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackUpdateMessageInput = SlackUpdateMessageInputSchema.parse(input);
+
+        const relayConnection = slackRelay.getConnection(ctx);
+        if (relayConnection) {
+          return slackRelay.actions.updateMessage(relayConnection, ctx, typedInput);
+        }
+
+        const payload = {
+          channel: typedInput.channel,
+          ts: typedInput.messageTs,
+          text: typedInput.text,
+          ...(typedInput.blocks?.length ? { blocks: typedInput.blocks } : {}),
+        };
+
+        try {
+          ctx.log.debug(`Slack updateMessage request: channel=${typedInput.channel}`);
+          const response = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'updateMessage',
+            maxRetries: SLACK_MAX_RETRIES,
+            request: () =>
+              ctx.client.post(`${SLACK_API_BASE}/chat.update`, payload, {
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                },
+              }),
+          });
+
+          if (!response.data.ok) {
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'updateMessage',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
+          }
+
+          return response.data;
+        } catch (error) {
+          const err = error as AxiosError<unknown>;
+          ctx.log.error(
+            `Slack updateMessage failed: ${err.message}, Status: ${
+              err.response?.status
+            }, Data: ${JSON.stringify(err.response?.data)}`
+          );
+          throw error;
+        }
+      },
+    },
   },
 
+  events: slackEvents,
+
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.slack.test.description', {
+    description: i18n.translate('connectorSpecs.slack.test.description', {
       defaultMessage: 'Verifies Slack connection by checking API access',
     }),
     handler: async (ctx) => {
@@ -1195,6 +1258,7 @@ export const Slack: ConnectorSpec = {
     'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
+    'sendMessage always posts a new message. To change a message this app already posted, call updateMessage with its channel ID and the ts sendMessage returned as messageTs; it overwrites the text (at most 4,000 characters) and, unless new blocks are passed, removes any blocks, so confirm with the user first.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
     'To read messages from a channel or DM, use getConversationHistory with a channel ID. Returns messages newest-first; pass nextCursor from the previous response (or use oldest/latest timestamps) to walk further back in time.',
     'getConversationInfo returns metadata (name, privacy, topic, purpose) for a single channel/DM by ID. Prefer it over listChannels when you already have the ID and only need that conversation’s details.',

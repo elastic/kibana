@@ -8,6 +8,7 @@
  */
 
 import { createHash } from 'node:crypto';
+import pMap from 'p-map';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
@@ -30,6 +31,7 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import type { ManagedWorkflowOrphan } from './workflow_occ_types';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
 import { applyWorkflowVersion } from '../lib/workflow_version';
@@ -38,6 +40,7 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
+const ORPHAN_DELETE_CONCURRENCY = 10;
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -159,22 +162,7 @@ export class ManagedWorkflowsService {
           `Managed workflows: removing ${orphanWorkflows.length} hard-orphaned workflow(s) in space '${spaceId}' ` +
             `(unregistered owner or removed definition)`
         );
-        await this.deps.crudService.deleteWorkflows(
-          orphanWorkflows.map(({ id }) => id),
-          spaceId,
-          { force: true }
-        );
-        for (const { id: workflowId, source } of orphanWorkflows) {
-          this.deps.audit?.logWorkflowDeleted(undefined, {
-            id: workflowId,
-            force: true,
-            managed: true,
-            originalWorkflowId: source.originManagedWorkflowId,
-            ownerPlugin: source.managedBy,
-            spaceId,
-            reason: 'orphan_cleanup',
-          });
-        }
+        await this.forceDeleteOrphans(orphanWorkflows, spaceId, 'orphan_cleanup');
       }
     }
   }
@@ -182,11 +170,12 @@ export class ManagedWorkflowsService {
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowServiceInstallOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     for (let attempt = 0; attempt <= MAX_MANAGED_INSTALL_RETRIES; attempt++) {
       try {
-        await this.installManagedWorkflowOnce(id, options, registeredPluginId);
+        await this.installManagedWorkflowOnce(id, options, registeredPluginId, request);
         return;
       } catch (error) {
         if (!isRetryableWorkflowWriteConflict(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
@@ -203,7 +192,8 @@ export class ManagedWorkflowsService {
   private async installManagedWorkflowOnce(
     id: ManagedWorkflowId,
     options: ManagedWorkflowServiceInstallOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
     if (!definition) {
@@ -231,6 +221,17 @@ export class ManagedWorkflowsService {
       spaceId
     );
     const existing = existingDocument?.source;
+    if (
+      options.expectedDocumentVersion !== undefined &&
+      (existing == null || (existing.version ?? null) !== options.expectedDocumentVersion)
+    ) {
+      this.logger.debug(
+        `Managed workflows: skipping install for '${id}' because document version ${
+          existing == null ? 'missing' : String(existing.version ?? null)
+        } does not match expected ${String(options.expectedDocumentVersion)}`
+      );
+      return;
+    }
     const { yaml, managedTemplateValues } = this.resolveManagedWorkflowYaml({
       definition,
       values: options.values,
@@ -263,7 +264,8 @@ export class ManagedWorkflowsService {
       const savedDocument = await this.deps.crudService.createWorkflowDocument(
         workflowDocumentId,
         spaceId,
-        documentWithVersion
+        documentWithVersion,
+        request
       );
       await this.deps.crudService.logWorkflowChangesAfterWrite({
         workflows: [{ id: workflowDocumentId, document: savedDocument }],
@@ -271,7 +273,7 @@ export class ManagedWorkflowsService {
         spaceId,
         timestamp: now,
       });
-      this.deps.audit?.logWorkflowCreated(undefined, {
+      this.deps.audit?.logWorkflowCreated(request, {
         id: workflowDocumentId,
         managed: true,
         originalWorkflowId: definition.id,
@@ -327,6 +329,19 @@ export class ManagedWorkflowsService {
       spaceId,
       {
         document: documentWithVersion,
+        request,
+        // Only registered code upgrades may reuse an existing delegation without a user request.
+        ...(!request &&
+        definition.management.versionStrategy === 'auto' &&
+        existing.definition?.settings?.run_as &&
+        this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)
+          ? {
+              managedWorkflowUpgrade: {
+                pluginId: registeredPluginId,
+                definitionId: definition.id,
+              },
+            }
+          : {}),
         ifSeqNo: existingDocument.seqNo,
         ifPrimaryTerm: existingDocument.primaryTerm,
       }
@@ -339,7 +354,7 @@ export class ManagedWorkflowsService {
         timestamp: now,
       });
     }
-    this.deps.audit?.logWorkflowUpdated(undefined, {
+    this.deps.audit?.logWorkflowUpdated(request, {
       id: workflowDocumentId,
       managed: true,
       originalWorkflowId: definition.id,
@@ -352,7 +367,8 @@ export class ManagedWorkflowsService {
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
     if (!definition) {
@@ -373,8 +389,13 @@ export class ManagedWorkflowsService {
       return;
     }
 
-    await this.deps.crudService.deleteWorkflows([workflowDocumentId], spaceId, { force: true });
-    this.deps.audit?.logWorkflowDeleted(undefined, {
+    await this.deps.crudService.deleteWorkflows(
+      [workflowDocumentId],
+      spaceId,
+      { force: true },
+      request
+    );
+    this.deps.audit?.logWorkflowDeleted(request, {
       id: workflowDocumentId,
       force: true,
       managed: true,
@@ -607,22 +628,7 @@ export class ManagedWorkflowsService {
           `Managed workflows: removing ${orphanWorkflows.length} orphaned static workflow(s) ` +
             `for plugin '${pluginId}' in space '${spaceId}'`
         );
-        await this.deps.crudService.deleteWorkflows(
-          orphanWorkflows.map(({ id }) => id),
-          spaceId,
-          { force: true }
-        );
-        for (const { id: workflowId, source } of orphanWorkflows) {
-          this.deps.audit?.logWorkflowDeleted(undefined, {
-            id: workflowId,
-            force: true,
-            managed: true,
-            originalWorkflowId: source.originManagedWorkflowId,
-            ownerPlugin: source.managedBy,
-            spaceId,
-            reason: 'ready_reconciliation',
-          });
-        }
+        await this.forceDeleteOrphans(orphanWorkflows, spaceId, 'ready_reconciliation');
       }
     }
 
@@ -664,6 +670,69 @@ export class ManagedWorkflowsService {
             `Consider using lifecycle: 'dynamic' or installing during start().`
         );
       }
+    }
+  }
+
+  private async forceDeleteOrphans(
+    orphanWorkflows: Array<{ id: string; source: WorkflowProperties }>,
+    spaceId: string,
+    reason: 'orphan_cleanup' | 'ready_reconciliation'
+  ): Promise<void> {
+    await pMap(
+      orphanWorkflows,
+      ({ id: workflowId, source }) => this.forceDeleteOrphan(workflowId, source, spaceId, reason),
+      { concurrency: ORPHAN_DELETE_CONCURRENCY }
+    );
+  }
+
+  private async forceDeleteOrphan(
+    workflowId: string,
+    source: WorkflowProperties,
+    spaceId: string,
+    reason: 'orphan_cleanup' | 'ready_reconciliation'
+  ): Promise<void> {
+    const orphan: ManagedWorkflowOrphan = {
+      managedBy: source.managedBy ?? null,
+      definitionId: source.originManagedWorkflowId ?? null,
+    };
+    let deleted = false;
+    try {
+      deleted = await this.deps.crudService.deleteManagedOrphan(workflowId, spaceId, orphan);
+    } catch (error) {
+      this.logger.error(
+        `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
+        { error }
+      );
+    }
+
+    if (deleted) {
+      this.deps.audit?.logWorkflowDeleted(undefined, {
+        id: workflowId,
+        force: true,
+        managed: true,
+        originalWorkflowId: source.originManagedWorkflowId,
+        ownerPlugin: source.managedBy,
+        spaceId,
+        reason,
+      });
+    } else {
+      await this.disableUndeletedOrphan(workflowId, spaceId, orphan);
+    }
+  }
+
+  /** Stops new runs of an orphan that could not be deleted, so a later sweep can remove it. */
+  private async disableUndeletedOrphan(
+    workflowId: string,
+    spaceId: string,
+    orphan: ManagedWorkflowOrphan
+  ): Promise<void> {
+    try {
+      await this.deps.crudService.disableManagedOrphan(workflowId, spaceId, orphan);
+    } catch (error) {
+      this.logger.error(
+        `Managed workflows: failed to disable orphaned workflow '${workflowId}' in space '${spaceId}'`,
+        { error }
+      );
     }
   }
 

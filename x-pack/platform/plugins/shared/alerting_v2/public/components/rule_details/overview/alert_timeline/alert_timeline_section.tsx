@@ -29,7 +29,7 @@ import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline
 import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
-import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
+import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_alert';
 import { useAlertingLocators } from '../../../../application/locator_context';
 import { AlertTimelineChart } from './alert_timeline_chart';
 import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
@@ -202,7 +202,7 @@ export const AlertTimelineSection: React.FC = () => {
             title={
               <h4>
                 {i18n.translate('xpack.alertingV2.alertTimeline.errorTitle', {
-                  defaultMessage: 'Could not load episodes',
+                  defaultMessage: 'Could not load alerts',
                 })}
               </h4>
             }
@@ -226,14 +226,14 @@ export const AlertTimelineSection: React.FC = () => {
             title={
               <h4>
                 {i18n.translate('xpack.alertingV2.alertTimeline.emptyTitle', {
-                  defaultMessage: 'No episodes in this window',
+                  defaultMessage: 'No alerts in this window',
                 })}
               </h4>
             }
             body={
               <EuiText size="s">
                 {i18n.translate('xpack.alertingV2.alertTimeline.emptyBody', {
-                  defaultMessage: 'Episodes appear here once the rule fires.',
+                  defaultMessage: 'Alerts appear here once the rule fires.',
                 })}
               </EuiText>
             }

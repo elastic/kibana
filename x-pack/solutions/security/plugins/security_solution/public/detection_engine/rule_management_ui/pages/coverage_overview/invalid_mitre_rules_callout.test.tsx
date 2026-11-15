@@ -10,8 +10,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
-import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mitre/mitre_version';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
 
 jest.mock('./coverage_overview_dashboard_context');
@@ -21,20 +21,22 @@ const emptyInvalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules
   disabledRules: [],
 };
 
-const mockContextWithInvalidRules = (
-  invalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules']
-) => {
-  (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
-    state: { data: { invalidlyMappedRules } },
-  });
-};
-
 const renderCallout = ({
   invalidlyMappedRules,
+  framework = 'enterprise',
+  frameworkVersion = '16.1',
 }: {
   invalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules'];
+  framework?: MitreFramework;
+  frameworkVersion?: string | null;
 }) => {
-  mockContextWithInvalidRules(invalidlyMappedRules);
+  (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
+    state: {
+      data: { invalidlyMappedRules },
+      framework,
+      frameworkVersion: frameworkVersion ?? undefined,
+    },
+  });
 
   return render(
     <TestProviders>
@@ -49,6 +51,18 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('renders nothing when the MITRE framework version is not yet resolved', () => {
+    renderCallout({
+      frameworkVersion: null,
+      invalidlyMappedRules: {
+        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        disabledRules: [],
+      },
+    });
+
+    expect(screen.queryByTestId('coverageOverviewInvalidMitreRulesCallout')).toBeNull();
+  });
+
   it('renders the callout with singular description when there is one invalid rule', () => {
     renderCallout({
       invalidlyMappedRules: {
@@ -59,14 +73,27 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
 
     const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
     expect(callout).toBeInTheDocument();
-    expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK® IDs');
-    expect(callout.textContent).toContain(`currently supported version (${MITRE_ATTACK_VERSION})`);
+    expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK IDs');
+    expect(callout.textContent).toContain('currently supported version (v16.1)');
     expect(callout.textContent).toContain('Elastic prebuilt rule mappings were updated');
     expect(
       screen.getByTestId('coverageOverviewInvalidMitreRulesLearnMoreLink')
     ).toBeInTheDocument();
     expect(screen.getByTestId('coverageOverviewInvalidMitreRulesViewButton')).toBeInTheDocument();
     expect(screen.queryByTestId('coverageOverviewInvalidMitreRulesModal')).not.toBeInTheDocument();
+  });
+
+  it('displays the managed framework version when available', () => {
+    renderCallout({
+      invalidlyMappedRules: {
+        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        disabledRules: [],
+      },
+    });
+
+    const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
+    // The context holds the version without the leading 'v'; the component re-adds it.
+    expect(callout.textContent).toContain('currently supported version (v16.1)');
   });
 
   it('uses plural description when there are multiple invalid rules', () => {
@@ -78,7 +105,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     });
 
     const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
-    expect(callout.textContent).toContain('You have 2 rules that reference MITRE ATT&CK® IDs');
+    expect(callout.textContent).toContain('You have 2 rules that reference MITRE ATT&CK IDs');
   });
 
   it('renders the outdated-mappings warning title', () => {
@@ -89,7 +116,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
       },
     });
 
-    expect(screen.getByText(/Some rules have outdated MITRE ATT&CK® mappings/)).toBeInTheDocument();
+    expect(screen.getByText(/Some rules have outdated MITRE ATT&CK mappings/)).toBeInTheDocument();
   });
 
   it('opens the modal with all invalid rules grouped by status', async () => {
@@ -170,5 +197,49 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
 
     await user.click(screen.getByTestId('coverageOverviewInvalidMitreRulesModalCloseButton'));
     expect(screen.queryByTestId('coverageOverviewInvalidMitreRulesModal')).not.toBeInTheDocument();
+  });
+
+  describe('per-framework filtering', () => {
+    const mixedRule = { id: 'mixed', name: 'Mixed rule', invalidMitreIds: ['T9999', 'AML.T9999'] };
+    const atlasOnlyRule = { id: 'atlas', name: 'Atlas rule', invalidMitreIds: ['AML.T9999'] };
+
+    it('counts a rule with IDs from both frameworks on enterprise', () => {
+      renderCallout({
+        framework: 'enterprise',
+        invalidlyMappedRules: { enabledRules: [mixedRule], disabledRules: [] },
+      });
+
+      const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
+      expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK IDs');
+    });
+
+    it('counts a rule with IDs from both frameworks on atlas', () => {
+      renderCallout({
+        framework: 'atlas',
+        invalidlyMappedRules: { enabledRules: [mixedRule], disabledRules: [] },
+      });
+
+      const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
+      expect(callout.textContent).toContain('You have 1 rule that references MITRE ATLAS IDs');
+      expect(screen.getByText(/Some rules have outdated MITRE ATLAS mappings/)).toBeInTheDocument();
+    });
+
+    it('shows an atlas-only rule on atlas', () => {
+      renderCallout({
+        framework: 'atlas',
+        invalidlyMappedRules: { enabledRules: [atlasOnlyRule], disabledRules: [] },
+      });
+
+      expect(screen.getByTestId('coverageOverviewInvalidMitreRulesCallout')).toBeInTheDocument();
+    });
+
+    it('renders nothing on enterprise for an atlas-only rule', () => {
+      const { container } = renderCallout({
+        framework: 'enterprise',
+        invalidlyMappedRules: { enabledRules: [atlasOnlyRule], disabledRules: [] },
+      });
+
+      expect(container).toBeEmptyDOMElement();
+    });
   });
 });

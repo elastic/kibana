@@ -61,6 +61,11 @@ const PIN_ACTION_CSS = css`
       opacity: 1;
     }
   }
+  /* the pin action is hidden with opacity, which keeps it in the tab order:
+     reveal it on keyboard focus so it has a visible focus indicator */
+  .flyout_table__pinAction:focus-visible {
+    opacity: 1;
+  }
 `;
 
 export interface TableTabState {
@@ -176,21 +181,31 @@ export const TableTab = memo(
 
     const euidApi = useEntityStoreEuidApi();
     const hostDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('host'),
+          hit.flattened
+        ) ?? null,
+      [euidApi, hit.flattened]
     );
     const userDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('user'),
+          hit.flattened
+        ) ?? null,
+      [euidApi, hit.flattened]
     );
     const isHostEntity = hostDocumentIdentityFields != null;
     const hostEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('host', hit.flattened),
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('host'), hit.flattened),
+      [euidApi, hit.flattened]
     );
     const userEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('user', hit.flattened),
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('user'), hit.flattened),
+      [euidApi, hit.flattened]
     );
     const hostEntityFromStore = useEntityFromStore({
       entityId: hostEuidFromDocument,

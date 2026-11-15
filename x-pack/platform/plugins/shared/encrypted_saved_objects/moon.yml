@@ -17,7 +17,6 @@ project:
   owner: '@elastic/kibana-security'
   sourceRoot: x-pack/platform/plugins/shared/encrypted_saved_objects
 dependsOn:
-  - '@kbn/security-plugin'
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/utility-types'
@@ -44,6 +43,4 @@ fileGroups:
     - server/**/*
     - integration_tests/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

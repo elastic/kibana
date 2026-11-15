@@ -1,5 +1,5 @@
 {
-  "sha1": "680119ee494b57c9a0ebc66968be8339221b6b1b",
+  "sha1": "d1620f144389d4bfb8061d3edd72290707f3741d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -107,12 +107,13 @@
       "title": "Sample data install/uninstall installs and uninstalls sample data via UI",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data_install.spec.ts",
         "line": 46,
-        "column": 18
+        "column": 13
       }
     },
     {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
-import { focusManager } from '@kbn/react-query';
-
-import { createFleetTestRendererMock } from '../../mock';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { focusManager, QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { sendRequestForRq } from './use_request';
 import { useUpgradeAgentlessPoliciesDryRunQuery } from './agentless_policy';
@@ -22,18 +22,22 @@ jest.mock('./use_request', () => ({
 // behaves as a point-in-time read: exactly one request per (ids, version) pair, with none of the
 // default refetch triggers (window focus, remount, list reorder) silently repeating the POST.
 describe('useUpgradeAgentlessPoliciesDryRunQuery', () => {
+  let wrapper: FC<PropsWithChildren>;
+
   beforeEach(() => {
     jest.mocked(sendRequestForRq).mockClear();
     jest.mocked(sendRequestForRq).mockResolvedValue([{ id: 'agentless-1', hasErrors: false }]);
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    wrapper = ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
   });
 
-  // NOTE: the Fleet test renderer shares one QueryClient across tests in this file, so each test
-  // uses a distinct policy-id set to get its own cache entry.
-
   it('fires the dry run once and does not refetch it on window focus', async () => {
-    const renderer = createFleetTestRendererMock();
-    const { result } = renderer.renderHook(() =>
-      useUpgradeAgentlessPoliciesDryRunQuery(['focus-1', 'focus-2'], '2.0.0')
+    const { result } = renderHook(
+      () => useUpgradeAgentlessPoliciesDryRunQuery(['focus-1', 'focus-2'], '2.0.0'),
+      { wrapper }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -55,9 +59,9 @@ describe('useUpgradeAgentlessPoliciesDryRunQuery', () => {
 
   it('does not treat a reordered id list as a new dry run', async () => {
     let policyIds = ['reorder-b', 'reorder-a'];
-    const renderer = createFleetTestRendererMock();
-    const { result, rerender } = renderer.renderHook(() =>
-      useUpgradeAgentlessPoliciesDryRunQuery(policyIds, '2.0.0')
+    const { result, rerender } = renderHook(
+      () => useUpgradeAgentlessPoliciesDryRunQuery(policyIds, '2.0.0'),
+      { wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -70,8 +74,7 @@ describe('useUpgradeAgentlessPoliciesDryRunQuery', () => {
   });
 
   it('defaults to disabled when there are no policy ids', async () => {
-    const renderer = createFleetTestRendererMock();
-    renderer.renderHook(() => useUpgradeAgentlessPoliciesDryRunQuery([]));
+    renderHook(() => useUpgradeAgentlessPoliciesDryRunQuery([]), { wrapper });
 
     await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
 

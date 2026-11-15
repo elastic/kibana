@@ -23,3 +23,5 @@ export type {
   BulkScheduleWorkflowItem,
   WorkflowsManagementApi,
 } from './api/workflows_management_api';
+
+export type { WorkflowsManagementClient } from './api/workflows_management_client';

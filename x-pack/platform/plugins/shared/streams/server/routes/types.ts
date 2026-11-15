@@ -9,20 +9,22 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InferenceClient } from '@kbn/inference-common';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { StreamsClient } from '../lib/streams/client';
+import type { UnitStatsClient } from '../lib/unit_stats/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
 import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
+import type { UnitConfigHooks } from '../lib/unit_config/types';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -32,9 +34,11 @@ export type GetScopedClients = (params: {
 export interface RouteHandlerScopedClients {
   scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  canEncrypt: boolean;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
-  getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
+  unitStatsClient: UnitStatsClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   licensing: LicensingPluginStart;
@@ -52,6 +56,7 @@ export interface RouteDependencies {
   processorSuggestions: ProcessorSuggestionsService;
   patternExtractionService: IPatternExtractionService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
+  unitConfigHooks: UnitConfigHooks;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

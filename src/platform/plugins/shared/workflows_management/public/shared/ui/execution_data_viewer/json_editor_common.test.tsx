@@ -12,19 +12,24 @@ import React from 'react';
 import { JsonCodeEditorCommon, JSONCodeEditorCommonMemoized } from './json_editor_common';
 
 // Mock CodeEditor
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: (props: any) => (
-    <div
-      data-test-subj="mocked-code-editor"
-      data-value={props.value}
-      data-readonly={String(props.options?.readOnly ?? false)}
-      data-language={props.languageId}
-      aria-label={props['aria-label']}
-    >
-      {props.value}
-    </div>
-  ),
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: (props: any) => (
+      <div
+        data-test-subj="mocked-code-editor"
+        data-value={props.value}
+        data-readonly={String(props.options?.readOnly ?? false)}
+        data-language={props.languageId}
+        aria-label={props['aria-label']}
+      >
+        {props.value}
+      </div>
+    ),
+  };
+});
 
 // Mock useMemoCss
 jest.mock('@kbn/css-utils/public/use_memo_css', () => ({

@@ -8,6 +8,7 @@
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { readRolesDescriptorsFromResource } from '@kbn/es';
 
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { HostOptions } from '@kbn/test-saml-auth';
@@ -15,8 +16,6 @@ import { SamlSessionManager } from '@kbn/test-saml-auth';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import axios from 'axios';
-import fs from 'fs';
-import yaml from 'yaml';
 import { MOCK_IDP_UIAM_ORGANIZATION_ID } from '@kbn/mock-idp-utils';
 import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
 
@@ -52,13 +51,8 @@ export const samlAuthentication = async (
     'x-elastic-internal-origin': 'security-solution',
   };
 
-  const getYamlData = (filePath: string): any => {
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    return yaml.parse(fileContents);
-  };
-
   const getRoleConfiguration = (role: string, filePath: string): any => {
-    const data = getYamlData(filePath);
+    const data = readRolesDescriptorsFromResource(filePath) as Record<string, unknown>;
     if (data[role]) {
       return data[role];
     } else {

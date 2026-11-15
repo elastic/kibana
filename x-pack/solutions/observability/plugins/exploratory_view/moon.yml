@@ -59,6 +59,8 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/chart-expressions-common'
   - '@kbn/scout-oblt'
+  - '@kbn/app-header'
+  - '@kbn/event-annotation-common'
 tags:
   - plugin
   - prod
@@ -73,6 +75,4 @@ fileGroups:
     - public/**/*.json
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

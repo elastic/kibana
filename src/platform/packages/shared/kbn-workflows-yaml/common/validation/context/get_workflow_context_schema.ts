@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Document } from 'yaml';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { DynamicWorkflowContextSchema, EventTimestampSchema, isTriggerType } from '@kbn/workflows';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import {
+  extractNormalizedInputsFromYaml,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
+import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
+import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
+import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { z } from '@kbn/zod/v4';
+import { inferZodType } from '../../zod/infer_zod_type';
+import type { WorkflowContextRegistry } from './registry';
+
+function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
+  return schema instanceof z.ZodObject;
+}
+
+/**
+ * Build event schema from workflow triggers: base (spaceId) + alert props when present + custom trigger event schemas.
+ * Uses shape spread instead of deprecated Zod v4 .merge().
+ */
+function buildEventSchemaFromTriggers(
+  registry: WorkflowContextRegistry,
+  triggers: Array<{ type?: string }>,
+  inputsZodSchema: z.ZodType<Record<string, unknown>>
+): z.ZodType {
+  const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
+  let eventSchema: z.ZodType = hasAlertTrigger
+    ? z.object({
+        ...(AlertEventSchema as z.ZodObject<z.ZodRawShape>).shape,
+      })
+    : BaseEventSchema;
+
+  for (const trigger of triggers) {
+    const type = trigger?.type;
+    if (typeof type === 'string' && isZodObject(eventSchema)) {
+      if (
+        isManualTrigger(trigger) &&
+        isZodObject(inputsZodSchema) &&
+        Object.keys(inputsZodSchema.shape).length > 0
+      ) {
+        eventSchema = z.object({
+          ...eventSchema.shape,
+          inputs: inputsZodSchema,
+        });
+      } else if (!isTriggerType(type)) {
+        const def = registry.getTriggerDefinition(type);
+        if (def?.eventSchema && isZodObject(def.eventSchema)) {
+          eventSchema = z.object({
+            ...eventSchema.shape,
+            ...def.eventSchema.shape,
+            ...(EventTimestampSchema as z.ZodObject<z.ZodRawShape>).shape,
+          });
+        }
+      }
+    }
+  }
+
+  return eventSchema.optional();
+}
+
+/**
+ * Extracts a field value from the definition, falling back to the YAML document if not present.
+ */
+function extractFieldFromYaml<T>(
+  definitionValue: T | undefined,
+  yamlDocument: Document | null | undefined,
+  fieldName: string
+): T | undefined {
+  if (definitionValue !== undefined) {
+    return definitionValue;
+  }
+  if (!yamlDocument) {
+    return undefined;
+  }
+  try {
+    const yamlJson = yamlDocument.toJSON();
+    if (yamlJson && typeof yamlJson === 'object' && fieldName in yamlJson) {
+      return (yamlJson as Record<string, unknown>)[fieldName] as T;
+    }
+  } catch {
+    // Ignore errors when extracting from YAML
+  }
+  return undefined;
+}
+
+export function getWorkflowContextSchema(
+  registry: WorkflowContextRegistry,
+  definition: WorkflowYaml,
+  yamlDocument?: Document | null
+): typeof DynamicWorkflowContextSchema {
+  const triggers = extractFieldFromYaml(definition.triggers, yamlDocument, 'triggers');
+  const inputs = extractNormalizedInputsFromYaml(definition, yamlDocument);
+
+  const outputs = extractFieldFromYaml(definition.outputs, yamlDocument, 'outputs');
+
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
+  const inputsZodSchema: z.ZodType<Record<string, unknown>> =
+    buildFieldsZodValidator(normalizedInputs);
+  const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
+
+  const eventSchema = buildEventSchemaFromTriggers(registry, triggers ?? [], inputsZodSchema);
+
+  return DynamicWorkflowContextSchema.extend({
+    inputs: inputsZodSchema,
+    output: buildFieldsZodValidator(normalizedOutputs),
+    consts: z.object({
+      ...Object.fromEntries(
+        Object.entries(definition.consts ?? {}).map(([key, value]) => [
+          key,
+          inferZodType(value, { isConst: true }),
+        ])
+      ),
+    }),
+    event: eventSchema,
+  }) as typeof DynamicWorkflowContextSchema;
+}

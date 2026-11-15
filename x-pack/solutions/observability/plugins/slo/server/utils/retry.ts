@@ -6,6 +6,7 @@
  */
 
 import { setTimeout } from 'timers/promises';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 
@@ -38,4 +39,36 @@ export const retryTransientEsErrors = async <T>(
 
     throw e;
   }
+};
+
+// Failures where the request may have reached Elasticsearch and been applied.
+const AMBIGUOUS_STATUS_CODES = [408, 502, 504];
+
+const isAmbiguousFailure = (err: Error): boolean =>
+  err instanceof EsErrors.TimeoutError ||
+  err instanceof EsErrors.ConnectionError ||
+  (err instanceof EsErrors.ResponseError && AMBIGUOUS_STATUS_CODES.includes(err.statusCode ?? 0));
+
+/**
+ * Treats "already exists" as success only once a previous attempt failed in a way that may have created the resource.
+ */
+export const ignoreAlreadyExistsAfterAmbiguousFailure = <T>(
+  esCall: () => Promise<T>
+): (() => Promise<T | undefined>) => {
+  let mayHaveBeenCreated = false;
+
+  return async () => {
+    try {
+      return await esCall();
+    } catch (err) {
+      if (
+        mayHaveBeenCreated &&
+        err.meta?.body?.error?.type === 'resource_already_exists_exception'
+      ) {
+        return undefined;
+      }
+      mayHaveBeenCreated = mayHaveBeenCreated || isAmbiguousFailure(err);
+      throw err;
+    }
+  };
 };

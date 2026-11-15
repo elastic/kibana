@@ -9,7 +9,11 @@ applies_to:
 
 # Google Cloud Monitoring connector [google-cloud-monitoring-action-type]
 
-The Google Cloud Monitoring connector wraps the [Cloud Monitoring API v3](https://cloud.google.com/monitoring/api/ref_v3/rest) so that AI agents and workflows can locate the alerting policy behind a firing alert, silence or reactivate it, suppress alerts for a maintenance window, and enrich the alert with metric, Uptime check, and Service Level Objective (SLO) data. Cloud Monitoring has no incidents REST resource, so this connector drives alert suppression through the policy's `enabled` flag and through Snoozes rather than an acknowledge-incident call.
+The Google Cloud Monitoring connector wraps the [Cloud Monitoring API v3](https://cloud.google.com/monitoring/api/ref_v3/rest) so that AI agents can locate the alerting policy behind a firing alert, silence or reactivate it, suppress alerts for a maintenance window, and enrich the alert with metric, Uptime check, and Service Level Objective (SLO) data. Cloud Monitoring has no incidents REST resource, so this connector drives alert suppression through the policy's `enabled` flag and through Snoozes rather than an acknowledge-incident call.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Create connectors in {{kib}} [define-google-cloud-monitoring-ui]
 

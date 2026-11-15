@@ -86,6 +86,9 @@ describe('score_base_entities', () => {
       entities: [],
       nextSearchAfter: undefined,
     });
+    // Some alerts lack a stamped EUID, so pages come from the runtime mapping unless a test says
+    // otherwise.
+    (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
   });
 
   it('terminates after a single page when the composite agg has no after_key', async () => {
@@ -110,6 +113,7 @@ describe('score_base_entities', () => {
     const compositeCall = (esClient.search as jest.Mock).mock.calls[0][0];
     expect(compositeCall.index).toBe(baseParams.alertsIndex);
     expect(compositeCall.aggs.by_entity_id.composite.size).toBe(baseParams.pageSize);
+    expect(compositeCall.ignore_unavailable).toBe(true);
 
     const esqlQuery = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
     expect(esqlQuery).toContain('entity_id <= "user:a@okta"');
@@ -212,6 +216,150 @@ describe('score_base_entities', () => {
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  describe('when every alert has a stamped EUID', () => {
+    beforeEach(() => {
+      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
+    });
+
+    const run = () =>
+      collectPages(
+        calculateBaseEntityScores({
+          esClient,
+          crudClient,
+          logger,
+          createMissingEntities: false,
+          ...baseParams,
+        })
+      );
+
+    it('checks for unstamped alerts of the type being scored', async () => {
+      mockCompositeAggPage(esClient, []);
+
+      await run();
+
+      const countCall = (esClient.count as jest.Mock).mock.calls[0][0];
+      expect(countCall.index).toBe(baseParams.alertsIndex);
+      expect(countCall.ignore_unavailable).toBe(true);
+      expect(countCall.query.bool.must_not).toEqual([
+        { prefix: { 'kibana.alert.entity.id': 'user:' } },
+      ]);
+    });
+
+    it('pages through the stamped field without a runtime mapping, starting at the type prefix', async () => {
+      mockCompositeAggPage(esClient, ['user:a@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:a@okta')],
+      });
+
+      await run();
+
+      const compositeCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(compositeCall.runtime_mappings).toBeUndefined();
+      expect(compositeCall.ignore_unavailable).toBe(true);
+      expect(compositeCall.aggs.by_entity_id.composite.sources).toEqual([
+        { entity_id: { terms: { field: 'kibana.alert.entity.id' } } },
+      ]);
+      expect(compositeCall.aggs.by_entity_id.composite.after).toEqual({ entity_id: 'user:' });
+      expect(compositeCall.query.bool.filter).toContainEqual({
+        prefix: { 'kibana.alert.entity.id': 'user:' },
+      });
+    });
+
+    it("limits each scoring query to its page's stamped EUIDs", async () => {
+      mockCompositeAggPage(esClient, ['user:001@okta', 'user:002@okta'], {
+        entity_id: 'user:002@okta',
+      });
+      mockCompositeAggPage(esClient, ['user:003@okta']);
+      (esClient.esql.query as jest.Mock)
+        .mockResolvedValueOnce({ values: [esqlRow('user:001@okta')] })
+        .mockResolvedValueOnce({ values: [esqlRow('user:003@okta')] });
+
+      await run();
+
+      const [firstFilter, secondFilter] = (esClient.esql.query as jest.Mock).mock.calls.map(
+        ([request]) => request.filter.bool.filter
+      );
+      // The first page starts at the type prefix so other types' EUIDs that sort before it are
+      // left out.
+      expect(firstFilter).toContainEqual({
+        range: { 'kibana.alert.entity.id': { gte: 'user:', lte: 'user:002@okta' } },
+      });
+      expect(secondFilter).toContainEqual({
+        range: { 'kibana.alert.entity.id': { gt: 'user:002@okta', lte: 'user:003@okta' } },
+      });
+      // The computed EUID range stays in the query, so the filter only narrows what it reads.
+      const secondQuery = (esClient.esql.query as jest.Mock).mock.calls[1][0].query as string;
+      expect(secondQuery).toContain('entity_id > "user:002@okta"');
+    });
+
+    it("stops at the first EUID of another type, since the stamp holds every type's EUID", async () => {
+      // Host alerts often carry a user EUID too, and user EUIDs sort after host ones.
+      mockCompositeAggPage(esClient, ['host:a', 'host:b', 'user:x@okta'], {
+        entity_id: 'user:x@okta',
+      });
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('host:a'), esqlRow('host:b')],
+      });
+
+      await collectPages(
+        calculateBaseEntityScores({
+          esClient,
+          crudClient,
+          logger,
+          createMissingEntities: false,
+          ...baseParams,
+          entityType: EntityType.host,
+        })
+      );
+
+      expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
+      expect(esClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
+      const query = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+      expect(query).toContain('entity_id <= "host:b"');
+    });
+
+    it('scores nothing when the first stamped EUID belongs to another type', async () => {
+      mockCompositeAggPage(esClient, ['user:x@okta']);
+
+      await collectPages(
+        calculateBaseEntityScores({
+          esClient,
+          crudClient,
+          logger,
+          createMissingEntities: false,
+          ...baseParams,
+          entityType: EntityType.host,
+        })
+      );
+
+      expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when some alerts have no stamped EUID', () => {
+    it('derives EUIDs with the runtime mapping and reads every alert in range', async () => {
+      mockCompositeAggPage(esClient, ['user:a@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:a@okta')],
+      });
+
+      await collectPages(
+        calculateBaseEntityScores({
+          esClient,
+          crudClient,
+          logger,
+          createMissingEntities: false,
+          ...baseParams,
+        })
+      );
+
+      const compositeCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(compositeCall.runtime_mappings.entity_id).toBeDefined();
+      const [{ filter }] = (esClient.esql.query as jest.Mock).mock.calls[0];
+      expect(filter).toEqual({ bool: { filter: baseParams.alertFilters } });
+    });
   });
 
   describe('scoreBaseEntities not_in_store filter', () => {

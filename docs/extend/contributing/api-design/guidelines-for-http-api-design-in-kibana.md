@@ -421,6 +421,10 @@ Refer to [Terraform](./guidelines-for-terraform-friendly-http-apis.md#return-as-
 
 If you are in doubt, rather go with stricter validation. Making a requirement more lax if needed is never a breaking change!
 
+**Prefer the built-in string helpers over hand-picked lengths**
+
+`@kbn/config-schema` and `@kbn/zod` ship semantic helpers (`savedObjectId`, `displayName`, `description`, ...) that carry shared default bounds, plus a reporting mode for measuring an existing route before enforcing one. Refer to [Bounded string schemas](../../key-concepts/security/bounded-string-schemas.md).
+
 ### Headers
 
 **Should not be used to specify behavior**
@@ -636,6 +640,8 @@ Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.
 See our current reference documentation for [Kibana](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
 
 See [this tutorial](../../tutorials/generating-oas-for-http-apis.md) about the code-first approach to generating OpenAPI spec available in Kibana.
+
+On public routes, set an explicit `operationId` instead of relying on the name derived from the method and path. See [Set an operation ID](../../tutorials/generating-oas-for-http-apis.md#set-an-operation-id).
 
 If a public REST API is undocumented, you should either document it, or make it internal.
 

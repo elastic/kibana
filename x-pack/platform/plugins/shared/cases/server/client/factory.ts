@@ -55,17 +55,16 @@ import { AuthorizationAuditLogger } from '../authorization';
 import type { CasesClient } from '.';
 import { createCasesClient } from '.';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
-import type { CasesServices, CasesClientSource } from './types';
+import type { CasesClientArgs, CasesServices, CasesClientSource } from './types';
+import type { ActionSource } from '../../common/types/domain';
+import { getDefaultActionSource } from '../common/get_default_action_source';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
-import type {
-  EnsureAuthorizedToRunWorkflowParams,
-  WorkflowRunAuthorizationDeps,
-} from '../workflows/execution/authorize_workflow_run';
-import { ensureAuthorizedToRunWorkflow } from '../workflows/execution/authorize_workflow_run';
+import type { CasesWorkflowRunContext } from './workflows/operations';
+import { createCasesWorkflowOperations } from './workflows/operations';
 import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2DataViewRefresher,
@@ -123,6 +122,14 @@ interface CasesClientFactoryArgs {
   analyticsV2DataViewRefresher: CasesAnalyticsV2DataViewRefresher;
 }
 
+interface CreateCasesClientParams {
+  request: KibanaRequest;
+  savedObjectsService: SavedObjectsServiceStart;
+  scopedClusterClient: ElasticsearchClient;
+  clientSource: CasesClientSource;
+  actionSource?: ActionSource;
+}
+
 /**
  * This class handles the logic for creating a CasesClient. We need this because some of the member variables
  * can't be initialized until a plugin's start() method but we need to register the case context in the setup() method.
@@ -154,17 +161,28 @@ export class CasesClientFactory {
    * Creates a cases client for the current request. This request will be used to authorize the operations done through
    * the client.
    */
-  public async create({
+  public async create(params: CreateCasesClientParams): Promise<CasesClient> {
+    return createCasesClient(await this.createClientArgs(params));
+  }
+
+  public async createWorkflowRunContext(
+    params: CreateCasesClientParams
+  ): Promise<CasesWorkflowRunContext> {
+    const clientArgs = await this.createClientArgs(params);
+
+    return {
+      casesClient: createCasesClient(clientArgs),
+      workflowOperations: createCasesWorkflowOperations(clientArgs),
+    };
+  }
+
+  private async createClientArgs({
     request,
     scopedClusterClient,
     savedObjectsService,
     clientSource,
-  }: {
-    request: KibanaRequest;
-    savedObjectsService: SavedObjectsServiceStart;
-    scopedClusterClient: ElasticsearchClient;
-    clientSource: CasesClientSource;
-  }): Promise<CasesClient> {
+    actionSource,
+  }: CreateCasesClientParams): Promise<CasesClientArgs> {
     this.validateInitialization();
 
     const auditLogger = this.options.securityPluginSetup.audit.asScoped(request);
@@ -185,6 +203,7 @@ export class CasesClientFactory {
       auditLogger,
       alertsClient,
       auth,
+      actionSource: actionSource ?? getDefaultActionSource(request),
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -197,7 +216,7 @@ export class CasesClientFactory {
       ? (closeReason: string, owner: string) => closeReasonValidator(closeReason, owner, request)
       : undefined;
 
-    return createCasesClient({
+    return {
       services,
       unsecuredSavedObjectsClient,
       user: userInfo,
@@ -217,36 +236,6 @@ export class CasesClientFactory {
       request,
       closeReasonValidator: boundCloseReasonValidator,
       clientSource,
-    });
-  }
-
-  /**
-   * Creates a request-scoped authorizer for the workflow-run entry point.
-   */
-  public async createWorkflowRunAuthorizer({
-    request,
-    savedObjectsService,
-  }: {
-    request: KibanaRequest;
-    savedObjectsService: SavedObjectsServiceStart;
-  }): Promise<{
-    ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) => Promise<void>;
-  }> {
-    this.validateInitialization();
-
-    const authorization = await this.createAuthorization(request);
-    const unsecuredSavedObjectsClient = this.getUnsecuredSavedObjectsClient(
-      request,
-      savedObjectsService
-    );
-    const caseService = this.createCaseService(
-      unsecuredSavedObjectsClient,
-      this.createAttachmentService(unsecuredSavedObjectsClient)
-    );
-
-    const deps: WorkflowRunAuthorizationDeps = { authorization, caseService, logger: this.logger };
-    return {
-      ensureAuthorizedToRunWorkflow: (params) => ensureAuthorizedToRunWorkflow(params, deps),
     };
   }
 
@@ -317,6 +306,7 @@ export class CasesClientFactory {
     auditLogger,
     alertsClient,
     auth,
+    actionSource,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
@@ -325,6 +315,7 @@ export class CasesClientFactory {
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
     auth: PublicMethodsOf<Authorization>;
+    actionSource?: ActionSource;
   }): CasesServices {
     this.validateInitialization();
 
@@ -402,6 +393,7 @@ export class CasesClientFactory {
         savedObjectsSerializer,
         auditLogger,
         analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
+        actionSource,
       }),
       attachmentService,
       licensingService,

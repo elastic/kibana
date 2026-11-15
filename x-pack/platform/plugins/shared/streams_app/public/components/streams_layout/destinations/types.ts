@@ -5,47 +5,119 @@
  * 2.0.
  */
 
-import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
-import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import type { IngestStreamEffectiveLifecycle, Streams } from '@kbn/streams-schema';
+import type { StreamsV2 } from '@kbn/streams-schema';
+import type { DestinationNameValidationError } from './destination_helpers';
 
 /**
- * Destination types targeted by V1. Only `elasticsearch` is backed by real
- * data today; `s3` and `remote_elasticsearch` land with the destinations
- * backend (see https://github.com/elastic/ingest-dev/issues/8131 and /8340).
+ * Destination storage choices shown in the create form.
+ * Only `local_elasticsearch` is persisted today. Add a kind here, a fields
+ * component, and a registry entry to introduce another type.
  */
-export type DestinationType = 'elasticsearch' | 's3' | 'remote_elasticsearch';
+export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
 
-/**
- * View model for a row of the Destinations table, decoupled from
- * `ListStreamDetail` so the fetch actor and mapper are the only places to
- * update once the destinations CRUD API replaces the streams list endpoint.
- */
-export interface Destination {
+/** Unit destination types the UI can list and create. */
+export type DestinationType = 'elasticsearch' | 's3';
+
+export type DestinationSignal = StreamsV2.OtlpSignal;
+
+/** Default write-role globs for auto destinations, one per ingest signal. */
+export const AUTO_INDEX_PATTERNS: readonly string[] = ['logs-*-*', 'metrics-*-*', 'traces-*-*'];
+
+/** How an Elasticsearch destination chooses its indices. */
+export type DestinationIndexMode = 'static' | 'auto';
+
+export type StaticIndexValidationError =
+  | 'template'
+  | 'invalidName'
+  | 'uppercase'
+  | 'invalidCharacter'
+  | 'signalPattern';
+
+export type AutoWritePatternValidationError =
+  | 'required'
+  | 'uppercase'
+  | 'invalidCharacter'
+  | 'signalPattern';
+
+interface DestinationViewModelBase {
+  id: string;
   name: string;
-  type: DestinationType;
-  description: string;
-  tags: string[];
-  isManaged: boolean;
-  isInternal: boolean;
-  hasDataStream: boolean;
-  canReadFailureStore: boolean;
-  /** Undefined when the destination has no meaningful retention. */
-  retention: IngestStreamEffectiveLifecycle | undefined;
-  /**
-   * Numeric retention used for sorting; Infinity for indefinite retention and
-   * undefined when it cannot be determined (ILM, unparseable duration).
-   */
-  retentionMs: number | undefined;
-  /** Backing stream definition, powering stream-based actions like Discover. */
-  streamDefinition: Streams.ClassicStream.Definition;
-  indexMode: IndicesIndexMode;
+  signals: DestinationSignal[];
 }
 
-/** Destination enriched with the metrics the sortable columns need. */
-export type DestinationRow = Destination & {
-  documentsCount: number;
-  ingestionRate: number;
-  storageBytes: number;
-  dataQuality?: QualityIndicators;
+export interface ElasticsearchDestinationViewModel extends DestinationViewModelBase {
+  type: 'elasticsearch';
+  mode: DestinationIndexMode;
+  index?: string;
+  /** User-defined write-role globs stored as unit `index_patterns`. */
+  indexPatterns?: string[];
+}
+
+/** Access keys are never read into the view model, only their presence is shown. */
+export interface S3DestinationViewModel extends DestinationViewModelBase {
+  type: 's3';
+  bucket: string;
+  region: string;
+  prefix?: string;
+}
+
+export type DestinationViewModel = ElasticsearchDestinationViewModel | S3DestinationViewModel;
+
+/** Per-type form state. Each destination type owns its own slice. */
+export interface ElasticsearchDestinationFormData {
+  /** When true, omit `index` so ES composes names from document metadata. */
+  auto: boolean;
+  /** Static index, or auto write-target glob, for logs. Empty in auto = no user pattern. */
+  logsIndex: string;
+  metricsIndex: string;
+  tracesIndex: string;
+}
+
+export interface S3DestinationFormData {
+  region: string;
+  bucket: string;
+  prefix: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+}
+
+export interface DestinationCreationFormData {
+  storageKind: DestinationStorageKind;
+  destinationName: string;
+  elasticsearch: ElasticsearchDestinationFormData;
+  s3: S3DestinationFormData;
+}
+
+export type S3BucketValidationError = 'required' | 'invalid';
+
+export interface DestinationCreationFormErrors {
+  destinationName?: DestinationNameValidationError;
+  staticIndexes?: 'required';
+  logsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  metricsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  region?: 'required';
+  bucket?: S3BucketValidationError;
+  accessKeyId?: 'required';
+  secretAccessKey?: 'required';
+}
+
+export type S3FieldsErrors = Pick<
+  DestinationCreationFormErrors,
+  'region' | 'bucket' | 'accessKeyId' | 'secretAccessKey'
+>;
+
+export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormData = {
+  auto: true,
+  logsIndex: '',
+  metricsIndex: '',
+  tracesIndex: '',
+};
+
+export const EMPTY_S3_DESTINATION_FORM: S3DestinationFormData = {
+  region: '',
+  bucket: '',
+  prefix: '',
+  accessKeyId: '',
+  secretAccessKey: '',
 };

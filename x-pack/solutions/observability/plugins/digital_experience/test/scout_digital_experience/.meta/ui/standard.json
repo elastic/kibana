@@ -1,0 +1,153 @@
+{
+  "sha1": "a2a0b0bb87d1468b66f2417fd06bfae72fb72e60",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "f31d06c20f4558f-52448a51bc04f3a",
+      "title": "Ingest RUM test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "847c12f34f1b365-6a7f79dd8555e95",
+      "title": "Digital Experience access without the apm privilege does not open the app by URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/app_access_without_apm.spec.ts",
+        "line": 16,
+        "column": 10
+      }
+    },
+    {
+      "id": "97fe3f93d5285bc-56384dd2a79f300",
+      "title": "Digital Experience access without the digital_experience privilege does not open the app by URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/app_access_without_privilege.spec.ts",
+        "line": 16,
+        "column": 10
+      }
+    },
+    {
+      "id": "ebb432c56ccbc3b-6d9e924b8977545",
+      "title": "Digital Experience access opens the app for a user with the read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/app_access.spec.ts",
+        "line": 13,
+        "column": 8
+      }
+    },
+    {
+      "id": "1d69dfa1eb90431-4229d9a71e1aee6",
+      "title": "Digital Experience application overview renders the Classic RUM dashboard of the application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
+        "line": 22,
+        "column": 10
+      }
+    },
+    {
+      "id": "1d69dfa1eb90431-4d0d0da51705c7d",
+      "title": "Digital Experience application overview leaves the Overview for another app without leaving its search session open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
+        "line": 27,
+        "column": 22
+      }
+    },
+    {
+      "id": "1d69dfa1eb90431-497efd244349546",
+      "title": "Digital Experience application overview keeps the time range in sync between the dashboard and the page URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "0afdd6ddaf5ba24-5010b35c887a477",
+      "title": "Digital Experience applications list opens an application from the list, keeping the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/applications_list.spec.ts",
+        "line": 20,
+        "column": 10
+      }
+    },
+    {
+      "id": "31dd9801ed2b71b-2e7df00a88267ae",
+      "title": "Digital Experience navigation without the digital_experience privilege keeps the legacy User Experience navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/navigation_without_privilege.spec.ts",
+        "line": 16,
+        "column": 10
+      }
+    },
+    {
+      "id": "f4a80f3d7bc8445-de3963020279186",
+      "title": "Digital Experience navigation replaces the legacy User Experience entry in the classic navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/navigation.spec.ts",
+        "line": 13,
+        "column": 8
+      }
+    },
+    {
+      "id": "b97a75be98dc303-3a24edeb4e90798",
+      "title": "Digital Experience on serverless shows in the project nav without requesting Classic RUM data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/serverless.spec.ts",
+        "line": 18,
+        "column": 10
+      }
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentAccessControl,
   AgentAccessControlMode,
+  AgentApprovals,
   ToolSelection,
 } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -39,8 +40,12 @@ const storageSettings = {
           entries: types.nested({
             properties: {
               type: types.keyword({}),
+              // Stable user id; absent on legacy entries.
+              id: types.keyword({}),
+              // Legacy username; only present on entries written before `id` existed.
               name: types.keyword({}),
               role: types.keyword({}),
+              added_at: types.date({}),
             },
           }),
         },
@@ -54,6 +59,7 @@ const storageSettings = {
           skill_ids: types.keyword({}),
           connector_ids: types.keyword({}),
           ai_indices: types.keyword({}),
+          subagent_ids: types.keyword({}),
         },
         dynamic: false,
       }),
@@ -96,6 +102,8 @@ export interface AgentConfigurationProperties {
   plugin_ids?: string[];
   connector_ids?: string[];
   ai_indices?: string[];
+  subagent_ids?: string[];
+  approvals?: AgentApprovals;
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;

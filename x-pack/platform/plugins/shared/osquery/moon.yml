@@ -110,6 +110,4 @@ fileGroups:
     - test/scout/**/*
     - common/schemas/*/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -33,4 +33,13 @@ describe('FileAttachmentEvent', () => {
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
   });
+
+  it('renders the name as plain text when the file attachment is deleted', async () => {
+    renderWithTestingProviders(
+      <FileAttachmentEvent file={basicFileMock as unknown as DownloadableFile} isDeleted />
+    );
+
+    expect(await screen.findByTestId('cases-files-name-text')).toBeInTheDocument();
+    expect(screen.queryByTestId('cases-files-name-link')).not.toBeInTheDocument();
+  });
 });

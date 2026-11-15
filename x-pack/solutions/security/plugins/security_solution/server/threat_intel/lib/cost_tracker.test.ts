@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { CostTraceBuilder, extractUsageFromMetadata } from './cost_tracker';
+import { CostTraceBuilder, extractUsageFromMetadata, logStageUsage } from './cost_tracker';
 
 const anthropicUsage = (input: number, output: number) => ({
   usage: { input_tokens: input, output_tokens: output },
@@ -116,5 +116,17 @@ describe('CostTraceBuilder', () => {
     addStage(builder, '.anthropic-claude-4.6-opus-chat_completion');
 
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+});
+
+describe('logStageUsage', () => {
+  it('logs token counts and wall-clock latency for a call', () => {
+    const logger = loggingSystemMock.createLogger();
+
+    logStageUsage(logger, 'assess_relevance', '.endpoint', anthropicUsage(100, 20), 321);
+
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('total_tokens=120 wall_ms=321')
+    );
   });
 });

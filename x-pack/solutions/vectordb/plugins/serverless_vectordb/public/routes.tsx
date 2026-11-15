@@ -15,7 +15,7 @@ import {
   OnboardingLandingPage,
   SearchStep,
 } from '@kbn/vectordb-onboarding';
-import { HomePage } from './home/home_page';
+import { HomePage } from './home_page';
 
 const OnboardingRoutes = () => {
   return (

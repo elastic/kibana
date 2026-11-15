@@ -22,6 +22,8 @@ import { ProfilingDependenciesContextProvider } from './profiling_dependencies_c
 import { profilingRouter } from '../../../routing';
 import { TimeRangeContextProvider } from '../time_range_context';
 import { getServices } from '../../../services';
+import type { ProfilingSchemaContextValue } from '../profiling_schema/profiling_schema_context';
+import { ProfilingSchemaContext } from '../profiling_schema/profiling_schema_context';
 
 const urlService = new UrlService({
   navigate: async () => {},
@@ -83,11 +85,14 @@ export function MockProfilingDependenciesStorybook({
   profilingContext,
   routePath,
   mockServices = {},
+  profilingSchemaContext,
 }: {
   children?: ReactNode;
   profilingContext?: Partial<ProfilingDependencies['start']>;
   mockServices?: Partial<ProfilingDependencies['services']>;
   routePath?: string;
+  /** Provides the profiling schema like the page template does, for stories of views that read it. */
+  profilingSchemaContext?: ProfilingSchemaContextValue;
 }) {
   const contextMock = merge({}, mockProfilingDependenciesContext, profilingContext);
 
@@ -115,7 +120,13 @@ export function MockProfilingDependenciesStorybook({
                   services: merge({}, services, mockServices),
                 }}
               >
-                {children}
+                {profilingSchemaContext ? (
+                  <ProfilingSchemaContext.Provider value={profilingSchemaContext}>
+                    {children}
+                  </ProfilingSchemaContext.Provider>
+                ) : (
+                  children
+                )}
               </ProfilingDependenciesContextProvider>
             </TimeRangeContextProvider>
           </PerformanceContextProvider>

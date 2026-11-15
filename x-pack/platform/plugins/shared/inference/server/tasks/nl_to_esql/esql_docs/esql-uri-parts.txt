@@ -1,0 +1,43 @@
+# URI-PARTS
+
+The `URI_PARTS` processing command parses a Uniform Resource Identifier (URI) string and extracts its components into new columns prefixed with the specified `prefix`.
+
+## Syntax
+
+`URI_PARTS prefix = expression`
+
+### Parameters
+
+#### `prefix`
+
+The prefix for the output columns. The extracted components are available as `prefix.component`.
+
+#### `expression`
+
+The string expression containing the URI to parse.
+
+## Examples
+
+Parse a URI and extract its domain, fragment, path, extension, port, query, scheme, user information, username, and password:
+
+```esql
+ROW uri = "http://myusername:mypassword@www.example.com:80/foo.gif?key1=val1&key2=val2#fragment"
+| URI_PARTS parts = uri
+| KEEP parts.*
+```
+
+parts.domain:keyword | parts.fragment:keyword | parts.path:keyword | parts.extension:keyword | parts.port:integer | parts.query:keyword | parts.scheme:keyword | parts.user_info:keyword | parts.username:keyword | parts.password:keyword
+www.example.com | fragment | /foo.gif | gif | 80 | key1=val1&key2=val2 | http | myusername:mypassword | myusername | mypassword
+
+Filter web logs by parsed URI domain and count requests by path:
+
+```esql
+FROM web_logs
+| URI_PARTS p = uri
+| WHERE p.domain == "www.example.com"
+| STATS COUNT(*) BY p.path
+```
+
+## Limitations
+
+`URI_PARTS` doesn't support multi-value inputs.

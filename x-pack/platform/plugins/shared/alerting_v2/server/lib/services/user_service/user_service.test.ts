@@ -10,6 +10,7 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0.
  */
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { createUserService } from './user_service.mock';
 
 describe('UserService', () => {
@@ -32,5 +33,31 @@ describe('UserService', () => {
     userProfileService.getCurrentProfileId.mockResolvedValue(null);
 
     await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
+  });
+
+  it('returns the current actor carrying the profile uid', async () => {
+    const { userService } = createUserService();
+
+    await expect(userService.getCurrentActor()).resolves.toEqual({
+      profile_uid: 'elastic_profile_uid',
+    });
+  });
+
+  it('returns an actor without a profile uid when the user has no resolvable profile', async () => {
+    const { userService, userProfileService, securityService } = createUserService();
+    userProfileService.getCurrentProfileId.mockResolvedValue(null);
+    securityService.authc.getCurrentUser.mockReturnValue(
+      securityServiceMock.createMockAuthenticatedUser()
+    );
+
+    await expect(userService.getCurrentActor()).resolves.toEqual({ profile_uid: null });
+  });
+
+  it('returns a null actor when there is no user behind the request', async () => {
+    const { userService, userProfileService, securityService } = createUserService();
+    userProfileService.getCurrentProfileId.mockResolvedValue(null);
+    securityService.authc.getCurrentUser.mockReturnValue(null);
+
+    await expect(userService.getCurrentActor()).resolves.toBeNull();
   });
 });

@@ -68,6 +68,7 @@ export const aws_securityhubEvaluations = {
       AND resource.type != "AWS::EC2::Instance"
       AND resource.type != "AWS::Lambda::Function"
       AND resource.type != "AWS::IAM::User", resource.id,
+    data_stream.dataset == "aws_securityhub.finding" AND resource.type == "AWS::Lambda::Function" AND resource.id IS NOT NULL, resource.id,
     null
   ),
   entity.target.type = CASE(

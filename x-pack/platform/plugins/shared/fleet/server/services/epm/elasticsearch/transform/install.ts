@@ -32,7 +32,7 @@ import {
 import { isFields } from '../../fields/field';
 import { getESAssetMetadata } from '../meta';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import { getAssetFromAssetsMap } from '../../archive';
 import {
   ElasticsearchAssetType,
   type PackageInstallContext,
@@ -44,8 +44,11 @@ import type {
   IndexTemplate,
   RegistryElasticsearch,
   AssetsMap,
+  InstallSource,
 } from '../../../../../common/types/models';
+import { FleetUnauthorizedError } from '../../../../errors';
 import { getInstallation } from '../../packages';
+import { isTrustedInstallSource } from '../../packages/install_source';
 import { retryTransientEsErrors } from '../retry';
 import { isUserSettingsTemplate } from '../template/utils';
 
@@ -53,13 +56,13 @@ import {
   MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
 } from '../../../../constants';
+import { appContextService } from '../../../app_context';
 
 import { deleteTransforms } from './remove';
 import { reconcileTransforms } from './reconcile';
-import { getDestinationIndexAliases } from './transform_utils';
+import { getDestinationIndexAliases, isTransform } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
 import { removeRemoteClusterSourceIndicesOnServerless } from './ccs_transform_source';
-import { appContextService } from '../../../app_context';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -84,6 +87,40 @@ interface TransformInstallation extends TransformModuleBase {
   runAsKibanaSystem?: boolean;
 }
 
+const untrustedTransformAuthErrorMessage = (installSource: InstallSource) =>
+  `Cannot install transforms from a ${installSource} package: they must run with the installing user's Elasticsearch privileges, but no secondary authorization API key could be granted. That needs Elasticsearch security enabled and an authenticated user request — a reinstall triggered by a background task carries no request.`;
+
+/**
+ * Whether the transforms being replaced may be deleted together with their destination indices.
+ * Elasticsearch authorizes `delete_dest_index` against the identity stored on each transform, not
+ * against the calling client. The incoming install source says nothing about that identity: an
+ * uploaded package upgraded from the registry still leaves transforms bound to the uploader's API
+ * key, which typically has no `delete_index` privilege, so the delete would 403 after the
+ * transform was already stopped. Destination indices are therefore only dropped when the incoming
+ * source is trusted and none of the previous transforms is bound to an API key.
+ */
+const canDeleteDestinationIndices = async (
+  esClient: ElasticsearchClient,
+  transformIds: string[],
+  installSource: InstallSource
+): Promise<boolean> => {
+  if (!isTrustedInstallSource(installSource)) {
+    return false;
+  }
+
+  const results = await Promise.all(
+    transformIds.map((transformId) =>
+      esClient.transform.getTransform({ transform_id: transformId }, { ignore: [404] })
+    )
+  );
+
+  return !results.some(({ transforms }) =>
+    (transforms ?? []).some(
+      (transform) => (transform as { authorization?: { api_key?: unknown } }).authorization?.api_key
+    )
+  );
+};
+
 const installLegacyTransformsAssets = async (
   packageInstallContext: PackageInstallContext,
   installNameSuffix: string,
@@ -92,13 +129,48 @@ const installLegacyTransformsAssets = async (
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
   esReferences: EsAssetReference[] = [],
-  previousInstalledTransformEsAssets: EsAssetReference[] = []
+  previousInstalledTransformEsAssets: EsAssetReference[] = [],
+  installSource: InstallSource,
+  request?: KibanaRequest
 ) => {
+  // Legacy (JSON) transform specs have no `_meta.run_as_kibana_system` switch, so they were
+  // always created with Kibana's internal identity. That is only acceptable for Elastic-authored
+  // packages; caller-authored archives must be bound to the uploader's own Elasticsearch
+  // privileges via a secondary authorization API key.
+  // Only bind when this version actually installs transforms, mirroring the yml path: a version
+  // that ships none leaves the stale-transform cleanup below on the internal client, so dropping
+  // transforms from a package can never be blocked by the installer's own privileges.
+  const isTrustedSource = isTrustedInstallSource(installSource);
+  const secondaryAuth =
+    !isTrustedSource && transformPaths.length > 0
+      ? await generateTransformSecondaryAuthHeaders({
+          request,
+          logger,
+          pkgName: packageInstallContext.packageInfo.name,
+          pkgVersion: packageInstallContext.packageInfo.version,
+        })
+      : undefined;
+
+  // Without a secondary authorization header, handleTransformInstall silently falls back to the
+  // internal client. Refuse to install rather than grant kibana_system to caller-authored assets.
+  if (!isTrustedSource && transformPaths.length > 0 && !secondaryAuth) {
+    throw new FleetUnauthorizedError(untrustedTransformAuthErrorMessage(installSource));
+  }
+
+  // Deletion is caller-bound too, matching the yml path.
+  //
+  // Legacy deletes normally pass delete_dest_index, but see canDeleteDestinationIndices: it is
+  // skipped whenever the incoming source is untrusted or a previous transform is bound to an API
+  // key. The new version writes into the kept index anyway, and Fleet must not drop a
+  // caller-named index with its own privileges. See `deletePrerequisiteAssets` in
+  // packages/remove.ts for the same decision.
+  const previousTransformIds = previousInstalledTransformEsAssets.map((asset) => asset.id);
   await deleteTransforms(
     esClient,
-    previousInstalledTransformEsAssets.map((asset) => asset.id),
+    previousTransformIds,
     // For legacy transforms, delete destination indices upon deleting transforms
-    true
+    await canDeleteDestinationIndices(esClient, previousTransformIds, installSource),
+    secondaryAuth
   );
 
   let installedTransforms: EsAssetReference[] = [];
@@ -167,7 +239,7 @@ const installLegacyTransformsAssets = async (
     });
 
     const installationPromises = transforms.map(async (transform) => {
-      return handleTransformInstall({ esClient, logger, transform });
+      return handleTransformInstall({ esClient, logger, transform, secondaryAuth });
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -191,10 +263,12 @@ const processTransformAssetsPerModule = async (
   installNameSuffix: string,
   transformPaths: string[],
   previousInstalledTransformEsAssets: EsAssetReference[] = [],
+  installSource: InstallSource,
   force?: boolean,
   username?: string
 ) => {
   const { packageInfo: installablePackage } = packageInstallContext;
+  const isTrustedSource = isTrustedInstallSource(installSource);
   const transformsSpecifications = new Map();
   const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
   const transforms: TransformInstallation[] = [];
@@ -277,8 +351,12 @@ const processTransformAssetsPerModule = async (
       });
 
       // If run_as_kibana_system is not set, or is set to true, then run as kibana_system user
-      // else, run with user's secondary credentials
-      const runAsKibanaSystem = content._meta?.run_as_kibana_system !== false;
+      // else, run with user's secondary credentials.
+      // The internal identity is only available to Elastic-authored packages delivered over a
+      // trusted channel (registry/bundled). A caller-authored archive could otherwise point a
+      // transform at a restricted index such as `.fleet-policies` and have Kibana create it with
+      // `kibana_system`, escaping both the caller's Elasticsearch privileges and their Spaces.
+      const runAsKibanaSystem = isTrustedSource && content._meta?.run_as_kibana_system !== false;
 
       transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
       transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', aliases);
@@ -470,6 +548,7 @@ const installTransformsAssets = async (
   logger: Logger,
   esReferences: EsAssetReference[] = [],
   previousInstalledTransformEsAssets: EsAssetReference[] = [],
+  installSource: InstallSource,
   force?: boolean,
   request?: KibanaRequest
 ) => {
@@ -495,6 +574,7 @@ const installTransformsAssets = async (
       installNameSuffix,
       transformPaths,
       previousInstalledTransformEsAssets,
+      installSource,
       force,
       username
     );
@@ -503,7 +583,9 @@ const installTransformsAssets = async (
     // so we set runAsKibanaSystem: true by default (e.g. when run_as_kibana_system set to true/not defined in yml file).
     // If package should be installed as the logged in user, set run_as_kibana_system: false,
     // generate api key, and pass es-secondary-authorization in header when creating the transforms.
-    const secondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false)
+    // Transforms from an untrusted install source are always caller-bound regardless of `_meta`.
+    const needsSecondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false);
+    const secondaryAuth = needsSecondaryAuth
       ? await generateTransformSecondaryAuthHeaders({
           request,
           logger,
@@ -513,13 +595,30 @@ const installTransformsAssets = async (
         })
       : // No need to generate api key/secondary auth if all transforms are run as kibana_system user
         undefined;
+
+    // handleTransformInstall falls back to the internal client when no secondary authorization
+    // header is available. For an Elastic-authored package that opted into `run_as_kibana_system:
+    // false` that fallback is a tolerable degradation, but for a caller-authored package it would
+    // reintroduce the privilege escalation this binding exists to prevent — so fail the install.
+    if (needsSecondaryAuth && !secondaryAuth && !isTrustedInstallSource(installSource)) {
+      throw new FleetUnauthorizedError(untrustedTransformAuthErrorMessage(installSource));
+    }
     // delete all previous transform
+    const transformIdsToRemoveWithDestIndex = transformsToRemoveWithDestIndex.map(
+      (asset) => asset.id
+    );
     await Promise.all([
       deleteTransforms(
         esClient,
-        transformsToRemoveWithDestIndex.map((asset) => asset.id),
-        // Delete destination indices if specified or if from old json schema
-        true,
+        transformIdsToRemoveWithDestIndex,
+        // Delete destination indices if specified or if from old json schema. See
+        // canDeleteDestinationIndices: Elasticsearch checks delete_dest_index against the
+        // identity stored on the previous transforms, which may be an uploader's API key.
+        await canDeleteDestinationIndices(
+          esClient,
+          transformIdsToRemoveWithDestIndex,
+          installSource
+        ),
         secondaryAuth
       ),
       deleteTransforms(
@@ -710,6 +809,13 @@ interface InstallTransformsParams {
    * to pass in secondary authorization info to transform
    */
   request?: KibanaRequest;
+  /**
+   * Where the package archive came from. Only Elastic-authored sources (`registry`, `bundled`)
+   * may install transforms with Kibana's internal Elasticsearch identity; everything else is
+   * bound to the installing user's privileges. Required so that a new caller cannot silently
+   * inherit either behaviour by omission.
+   */
+  installSource: InstallSource;
 }
 export const installTransforms = async ({
   packageInstallContext,
@@ -719,6 +825,7 @@ export const installTransforms = async ({
   force,
   esReferences,
   request,
+  installSource,
 }: InstallTransformsParams) => {
   const { paths, packageInfo } = packageInstallContext;
   const transformPaths = paths.filter((path) => isTransform(path));
@@ -755,7 +862,9 @@ export const installTransforms = async ({
       savedObjectsClient,
       logger,
       esReferences,
-      previousInstalledTransformEsAssets
+      previousInstalledTransformEsAssets,
+      installSource,
+      request
     );
   }
 
@@ -769,14 +878,10 @@ export const installTransforms = async ({
     logger,
     esReferences,
     previousInstalledTransformEsAssets,
+    installSource,
     force,
     request
   );
-};
-
-export const isTransform = (path: string) => {
-  const pathParts = getPathParts(path);
-  return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 
 interface TransformEsAssetReference extends EsAssetReference {

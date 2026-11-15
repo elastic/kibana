@@ -35,6 +35,11 @@ import {
   reportWorkflowSuccess,
 } from '../../lib/telemetry/report_workflow_telemetry';
 import type { MisconfigurationType } from '../../lib/telemetry/event_based_telemetry';
+import {
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  getAttackDiscoveryTemplateAlertLimit,
+} from '../graphs/template_completion';
 import { getSpaceId } from '../../lib/helpers/get_space_id';
 import { isWorkflowsEnabled } from '../../lib/helpers/is_workflows_enabled';
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
@@ -42,13 +47,16 @@ import { assertAttackDiscoveryType } from './assert_attack_discovery_type';
 import { assertAuthorizedToExecuteWorkflows } from './assert_authorized_to_execute_workflows';
 import { buildResolveConnector } from './build_resolve_connector';
 import { createAuthenticatedUserForEventLogging } from './create_authenticated_user_for_event_logging';
+import { createPipelineRequest } from './create_pipeline_request';
 import { fetchAnonymizationFields } from './fetch_anonymization_fields';
 import { getParsedApiConfig } from './get_parsed_api_config';
 import { getWorkflowLoadingMessage } from './get_workflow_loading_message';
+import { invalidatePipelineApiKey } from './invalidate_pipeline_api_key';
 import { refreshEventLogIndex } from './refresh_event_log_index';
 import { resolveDefaultWorkflowIds } from './resolve_default_workflow_ids';
 import { validatePreExecution } from './validate_pre_execution';
 import { verifyWorkflowIntegrity } from './verify_workflow_integrity';
+import { scheduleSubWorkflows } from './schedule_sub_workflows';
 import { type WorkflowsManagementApi } from './invoke_alert_retrieval_workflow';
 import {
   PipelineStepError,
@@ -521,6 +529,9 @@ export async function executeGenerationWorkflow({
   let preExecutionResult: { issues: PreExecutionIssue[]; valid: boolean } | undefined;
   let spaceId: string | undefined;
   let generationWorkflowId: string | undefined;
+  // Credential the pipeline runs under, and the id of the API key backing it.
+  let pipelineRequest: KibanaRequest | undefined;
+  let apiKeyId: string | undefined;
   const pipelineStartTime = new Date();
 
   try {
@@ -552,7 +563,37 @@ export async function executeGenerationWorkflow({
     // the catch below routes through handleGenerationFailure.
     await assertAuthorizedToExecuteWorkflows({ authz, request, spaceId });
 
-    parsedApiConfig = getParsedApiConfig(apiConfig);
+    const resolvedApiConfig = getParsedApiConfig(apiConfig);
+    parsedApiConfig = resolvedApiConfig;
+
+    const inference = (
+      pluginsStart as {
+        inference?: {
+          getConnectorById: (id: string, request: KibanaRequest) => Promise<unknown>;
+        };
+      }
+    ).inference;
+    const templateAlertLimit =
+      inference?.getConnectorById != null
+        ? await getAttackDiscoveryTemplateAlertLimit(() =>
+            inference.getConnectorById(resolvedApiConfig.connector_id, request)
+          )
+        : undefined;
+    let retrievalSize = size;
+    const cappedRetrievalSize = capAttackDiscoveryTemplateCount(
+      templateAlertLimit != null ? retrievalSize : undefined
+    );
+    if (
+      templateAlertLimit != null &&
+      retrievalSize != null &&
+      cappedRetrievalSize != null &&
+      cappedRetrievalSize < retrievalSize
+    ) {
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(retrievalSize - cappedRetrievalSize, retrievalSize)
+      );
+      retrievalSize = cappedRetrievalSize;
+    }
 
     assertAttackDiscoveryType({ type });
 
@@ -564,7 +605,7 @@ export async function executeGenerationWorkflow({
         end,
         esql_query: workflowConfig.esql_query,
         filter,
-        size,
+        size: retrievalSize,
         space_id: spaceId,
         start,
         validation_workflow_id: workflowConfig.validation_workflow_id,
@@ -574,8 +615,24 @@ export async function executeGenerationWorkflow({
     eventLogger = await getEventLogger();
     eventLogIndex = await getEventLogIndex();
 
+    // Orchestration spans minutes of LLM work, so every step below runs under a
+    // credential whose lifetime is tied to this run rather than to the caller's
+    // session. `request` is still what the authorization guard above evaluated,
+    // and remains the source of truth for the space and the base path.
+    const granted = await createPipelineRequest({
+      coreStart,
+      executionUuid,
+      logger,
+      request,
+      spaceId,
+    });
+
+    apiKeyId = granted.apiKeyId;
+    pipelineRequest = granted.request;
+
     esClient =
-      preAuthenticatedEsClient ?? coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+      preAuthenticatedEsClient ??
+      coreStart.elasticsearch.client.asScoped(pipelineRequest).asCurrentUser;
 
     const authenticationInfo = await esClient.security.authenticate();
 
@@ -617,7 +674,7 @@ export async function executeGenerationWorkflow({
     const resolveConnector = buildResolveConnector({
       connectorId,
       getStartServices,
-      request,
+      request: pipelineRequest,
     });
 
     preExecutionResult = await validatePreExecution({
@@ -687,11 +744,22 @@ export async function executeGenerationWorkflow({
       esClient,
       eventLogIndex,
       logger,
-      request,
+      request: pipelineRequest,
     });
 
     /** Manual workflow invocation: runs bundled workflows sequentially. */
-    const workflowsApi = workflowsManagementApi as WorkflowsManagementApi;
+    //
+    // The platform runs a sub-workflow inline when the request it is given is a fake
+    // request, so `runWorkflow` would not resolve (and the run id would not be known)
+    // until that sub-workflow finished. Each phase writes its tracking event only
+    // after it has the run id, so the flyout would have nothing to render while the
+    // pipeline is in progress. Scheduling each sub-workflow instead returns its id
+    // immediately, before the workflow starts running.
+    const workflowsApi = (
+      pipelineRequest?.isFakeRequest === true
+        ? scheduleSubWorkflows(workflowsManagementApi)
+        : workflowsManagementApi
+    ) as WorkflowsManagementApi;
     const basePath = coreStart.http.basePath.get(request);
     const orchestrationOutcome = await runManualOrchestration({
       alerts,
@@ -710,9 +778,10 @@ export async function executeGenerationWorkflow({
       executionUuid,
       filter,
       logger,
-      request,
-      size,
+      request: pipelineRequest,
+      size: retrievalSize,
       source,
+      templateAlertLimit,
       sourceMetadata,
       spaceId,
       start,
@@ -777,7 +846,7 @@ export async function executeGenerationWorkflow({
       parsedApiConfig,
       pipelineStartTime,
       preExecutionResult,
-      request,
+      request: pipelineRequest ?? request,
       scheduleInfo,
       source,
       sourceMetadata,
@@ -786,5 +855,9 @@ export async function executeGenerationWorkflow({
     });
 
     throw err;
+  } finally {
+    // Every Task Manager clone of this credential is already created by the time
+    // orchestration returns, so the key can be retired with the run.
+    await invalidatePipelineApiKey({ apiKeyId, coreStart, logger });
   }
 }

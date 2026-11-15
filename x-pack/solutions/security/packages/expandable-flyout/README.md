@@ -10,7 +10,7 @@ The flyout is composed of 3 sections:
 - a left wider section to show more details
 - a preview section, that overlays the right section. This preview section can display multiple panels one after the other and displays a `Back` button
 
-> Run `yarn storybook expandable_flyout` to take a quick look at the expandable flyout in action
+> Run `pnpm storybook expandable_flyout` to take a quick look at the expandable flyout in action
 
 ## Design decisions
 

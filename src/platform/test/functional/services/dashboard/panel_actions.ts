@@ -8,6 +8,7 @@
  */
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import expect from '@kbn/expect';
 import { asyncMap } from '@kbn/std';
 import { FtrService } from '../../ftr_provider_context';
 
@@ -267,8 +268,11 @@ export class DashboardPanelActionsService extends FtrService {
   async saveToLibrary(newTitle = '', oldTitle = '') {
     this.log.debug(`saveToLibraryByTitle(${newTitle},${oldTitle})`);
     await this.clickPanelActionByTitle(SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
-    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
-      clearWithKeyboard: true,
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+        clearWithKeyboard: true,
+      });
+      expect(await this.testSubjects.getAttribute('savedObjectTitle', 'value')).to.be(newTitle);
     });
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
@@ -392,16 +396,18 @@ export class DashboardPanelActionsService extends FtrService {
     throw new Error(`No action matching text "${text}"`);
   }
 
-  async canConvertToLens(wrapper?: WebElementWrapper, { timeout = 500 } = {}) {
+  async canConvertToLens(wrapper?: WebElementWrapper) {
     this.log.debug('canConvertToLens');
     await this.openContextMenu(wrapper);
-    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout });
+    // The panel menu renders only after its compatible actions are computed, so once it is
+    // open the action list is final.
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
   }
 
-  async canConvertToLensByTitle(title = '', options?: { timeout?: number }) {
+  async canConvertToLensByTitle(title = '') {
     this.log.debug(`canConvertToLens(${title})`);
     const wrapper = await this.getPanelWrapper(title);
-    return await this.canConvertToLens(wrapper, options);
+    return await this.canConvertToLens(wrapper);
   }
 
   async convertToLens(wrapper?: WebElementWrapper) {

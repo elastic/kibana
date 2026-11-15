@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { DashboardPluginStart, DashboardState } from '@kbn/dashboard-plugin/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -200,20 +201,24 @@ describe('dashboardSmlType', () => {
 
     const result = await dashboardSmlType.toAttachment(
       {
-        id: 'chunk-1',
         type: 'dashboard',
         title: 'System Overview',
-        origin_id: 'dashboard-1',
-        origin: { uri: 'dashboard://dashboard-1' },
         content: '...',
-        created_at: '2025-01-01T00:00:00.000Z',
+        id: 'chunk-1',
+        '@timestamp': '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
+        references: [{ uri: 'dashboard://dashboard-1', relation: 'derived_from' }],
+        governance: {
+          provenance: {
+            created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+            updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+          },
+        },
         permissions: {
           kibana: {
             privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
           },
         },
-        ingestion_method: 'crawled',
       },
       {
         request: {} as never,
@@ -262,20 +267,24 @@ describe('dashboardSmlType', () => {
 
     const result = await dashboardSmlType.toAttachment(
       {
-        id: 'chunk-2',
         type: 'dashboard',
         title: 'API Lens Dashboard',
-        origin_id: 'dashboard-2',
-        origin: { uri: 'dashboard://dashboard-2' },
         content: '...',
-        created_at: '2025-01-01T00:00:00.000Z',
+        id: 'chunk-2',
+        '@timestamp': '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
+        references: [{ uri: 'dashboard://dashboard-2', relation: 'derived_from' }],
+        governance: {
+          provenance: {
+            created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+            updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+          },
+        },
         permissions: {
           kibana: {
             privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
           },
         },
-        ingestion_method: 'crawled',
       },
       {
         request: {} as never,

@@ -20,7 +20,7 @@ const smlAttachSchema = z.object({
     .min(1)
     .max(50)
     .describe(
-      'One or more entry_id values exactly as returned by sml_search, or the path after sml:// in a user @-mention link.'
+      'One or more entry_id values exactly as returned by sml_search, or the path after sml:// in a user # reference link.'
     ),
 });
 
@@ -35,7 +35,7 @@ export const createSmlAttachTool = ({
   type: ToolType.builtin,
   description:
     'Attach assets found by sml_search to the conversation. ' +
-    'When the user @-mentions an SML asset, their message contains a link like [@label](sml://ENTRY_ID); call this tool with that ENTRY_ID first so the asset is available as a conversation attachment before other work. ' +
+    'When the user references an SML asset with #, their message contains a link like [#label](sml://ENTRY_ID); call this tool with that ENTRY_ID first so the asset is available as a conversation attachment before other work. ' +
     'Pass one or more entry_id strings exactly as returned by sml_search or taken from those sml:// links. ' +
     'Entry id follows the format: attachment_type:origin_id:uuid and could be referenced by sml://{attachment_type}/{origin_id}. ' +
     'Each entry is resolved into a full conversation attachment (e.g. a Lens visualization). ' +

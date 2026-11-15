@@ -10,7 +10,11 @@ import type { Pagination } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ServerApiError } from '../../../../common/types';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
+import {
+  MANAGEMENT_DEFAULT_SORT_FIELD,
+  MANAGEMENT_DEFAULT_SORT_ORDER,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import type { ArtifactListPageUrlParams } from '../types';
@@ -39,12 +43,13 @@ type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
 
 export const useWithArtifactListData = (
   apiClient: ExceptionsListApiClient,
-  searchableFields: MaybeImmutable<string[]>
+  searchableFields: MaybeImmutable<string[]>,
+  sortableFields: MaybeImmutable<string[]> = []
 ): WithArtifactListDataInterface => {
   const isMounted = useIsMounted();
 
   const {
-    urlParams: { filter, includedPolicies },
+    urlParams: { filter, includedPolicies, sortField: sortFieldParam, sortOrder: sortOrderParam },
   } = useUrlParams<ArtifactListPageUrlParams>();
 
   const {
@@ -77,6 +82,16 @@ export const useWithArtifactListData = (
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
+  const requestedSortField = sortFieldParam || MANAGEMENT_DEFAULT_SORT_FIELD;
+  const sortField =
+    sortableFields.length > 0 && !sortableFields.includes(requestedSortField)
+      ? MANAGEMENT_DEFAULT_SORT_FIELD
+      : requestedSortField;
+  const sortOrder =
+    sortOrderParam && ['asc', 'desc'].includes(sortOrderParam)
+      ? sortOrderParam
+      : MANAGEMENT_DEFAULT_SORT_ORDER;
+
   const listDataRequest = useListArtifact(
     apiClient,
     {
@@ -84,6 +99,8 @@ export const useWithArtifactListData = (
       perPage: pageSize,
       filter,
       policies: includedPolicies ? includedPolicies.split(',') : [],
+      sortField,
+      sortOrder,
     },
     searchableFields
   );

@@ -29,6 +29,10 @@ import { MonitorListContainer } from './management/monitor_list_container';
 import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
+import { AutoRefreshButton } from '../common/components/auto_refresh_button';
+import { LastRefreshed } from '../common/components/last_refreshed';
+import { RefreshButton } from '../common/components/refresh_button';
+import { MonitorsListingPage, SyntheticsHeaderToolbar } from '../common/app_header';
 
 export const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });
@@ -59,8 +63,11 @@ export const MonitorManagementPage: React.FC = () => {
   // the overview-status request), so an empty result under a filter doesn't prove the
   // deployment is empty — see the same guard in `overview_page.tsx`. The date range is
   // excluded on purpose: it scopes status, not which monitors exist.
+  // `includeHeartbeatMonitors: false` empties ping-only overview results the same
+  // way a monitor filter does, and must not onboard away from Management.
   const hasActiveOverviewFilter = Boolean(
-    pageState.query ||
+    pageState.includeHeartbeatMonitors === false ||
+      pageState.query ||
       pageState.tags?.length ||
       pageState.locations?.length ||
       pageState.monitorTypes?.length ||
@@ -93,7 +100,16 @@ export const MonitorManagementPage: React.FC = () => {
   }
 
   return (
-    <>
+    <MonitorsListingPage
+      selectedTab="management"
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <LastRefreshed />
+          <RefreshButton />
+          <AutoRefreshButton />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <Loader
         loading={enablementLoading || locationsLoading}
         error={Boolean(enablementError)}
@@ -106,6 +122,6 @@ export const MonitorManagementPage: React.FC = () => {
         <MonitorListContainer isEnabled={isEnabled} monitorListProps={monitorListProps} />
       </Loader>
       {showEmptyState && <EnablementEmptyState />}
-    </>
+    </MonitorsListingPage>
   );
 };

@@ -29,6 +29,14 @@ export interface ReactContextTypeOptions {
   field?: { name: string };
   hit?: ReactContextTypeHit;
   skipFormattingInStringifiedJSON?: boolean;
+  /**
+   * Whether the rendering context allows user-driven navigation/interaction (e.g. clickable
+   * links). Formatters that render active controls (such as `UrlFormat`'s anchor) must honor
+   * `isInteractive: false` by rendering inert content instead, since callers embedding
+   * formatted output in a non-interactive surface rely on this to prevent navigation. Defaults
+   * to `true` when omitted, preserving existing behavior for callers that don't pass it.
+   */
+  isInteractive?: boolean;
 }
 
 /**

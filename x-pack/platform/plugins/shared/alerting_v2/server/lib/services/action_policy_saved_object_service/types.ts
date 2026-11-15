@@ -6,8 +6,10 @@
  */
 
 import type { SavedObjectError } from '@kbn/core/types';
-import type { KueryNode } from '@kbn/es-query';
-import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
+import type {
+  ActionPolicySavedObjectAttributes,
+  PartiallyUpdateableActionPolicyAttributes,
+} from '../../../saved_objects';
 
 export type ActionPolicySavedObjectBulkGetItem =
   | {
@@ -29,6 +31,14 @@ export type ActionPolicySavedObjectBulkDeleteItem =
   | { id: string }
   | { id: string; error: SavedObjectError };
 
+/** The subset of an action policy needed to attribute it to the routing tags it matches on. */
+export interface ActionPolicyRoutingTagSource {
+  id: string;
+  name: string;
+  enabled: boolean;
+  matcher?: ActionPolicySavedObjectAttributes['matcher'];
+}
+
 export interface ActionPolicySavedObjectServiceContract {
   create(params: {
     attrs: ActionPolicySavedObjectAttributes;
@@ -41,25 +51,38 @@ export interface ActionPolicySavedObjectServiceContract {
   bulkGetByIds(ids: string[], spaceId?: string): Promise<ActionPolicySavedObjectBulkGetItem[]>;
   update(params: {
     id: string;
-    attrs: Partial<ActionPolicySavedObjectAttributes>;
+    attrs: ActionPolicySavedObjectAttributes;
     version?: string;
+  }): Promise<{ id: string; version?: string }>;
+  /** Writes server-owned flat fields onto the stored document, preserving everything else. */
+  patchFields(params: {
+    id: string;
+    attrs: PartiallyUpdateableActionPolicyAttributes;
   }): Promise<{ id: string; version?: string }>;
   bulkUpdate(params: {
     objects: Array<{
       id: string;
-      attrs: Partial<ActionPolicySavedObjectAttributes>;
+      attrs: PartiallyUpdateableActionPolicyAttributes;
     }>;
   }): Promise<ActionPolicySavedObjectBulkUpdateItem[]>;
   findAllDecrypted(params?: {
     filter?: { enabled: boolean };
   }): Promise<ActionPolicySavedObjectBulkGetItem[]>;
+  /**
+   * Reads the current space's action policies, up to `maxPolicies`, fetching only the fields
+   * needed to group them by routing tag. `isTruncated` is true when more policies exist.
+   */
+  findRoutingTagSources(params: { maxPolicies: number }): Promise<{
+    policies: ActionPolicyRoutingTagSource[];
+    isTruncated: boolean;
+  }>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(params: { ids: string[] }): Promise<ActionPolicySavedObjectBulkDeleteItem[]>;
   find(params: {
     page: number;
     perPage: number;
     search?: string;
-    filter?: KueryNode;
+    filter?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{
@@ -70,5 +93,4 @@ export interface ActionPolicySavedObjectServiceContract {
     }>;
     total: number;
   }>;
-  findTags(params?: { search?: string }): Promise<string[]>;
 }

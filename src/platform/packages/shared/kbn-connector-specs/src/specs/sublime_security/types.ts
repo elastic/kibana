@@ -52,6 +52,9 @@ export const REPORT_LABELS = [
   'non-violation',
 ] as const;
 
+// The Sublime OpenAPI spec sets no maxItems on message_group_ids for bulk quarantine/trash/restore.
+const MAX_MESSAGE_GROUP_IDS = 10_000;
+
 const ISO_DATE_DESCRIPTION =
   'UTC datetime in ISO 8601 format, e.g. 2026-07-14T15:09:26Z. Relative dates are not supported.';
 
@@ -217,8 +220,10 @@ export const MessageGroupActionInputSchema = lazySchema(() =>
           .regex(/^[A-Za-z0-9_-]+$/, 'IDs contain only letters, numbers, hyphens, and underscores')
       )
       .min(1)
-      .max(500)
-      .describe('Canonical IDs of the message groups to act on (1-500 per call)'),
+      .max(MAX_MESSAGE_GROUP_IDS)
+      .describe(
+        `Canonical IDs of the message groups to act on (1-${MAX_MESSAGE_GROUP_IDS} per call)`
+      ),
     classification: z
       .enum(CLASSIFICATIONS)
       .optional()

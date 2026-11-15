@@ -32,7 +32,11 @@ export interface ModelSettingsForm {
 }
 
 const getEffectiveEndpoints = (
-  feature: { recommendedEndpoints: string[]; parentFeatureId?: string },
+  feature: {
+    recommendedEndpoints: string[];
+    parentFeatureId?: string;
+    ignoreGlobalDefault?: boolean;
+  },
   recommendedEndpointsById: Map<string, string[]>
 ): string[] => {
   if (feature.recommendedEndpoints.length > 0) {
@@ -43,6 +47,11 @@ const getEffectiveEndpoints = (
     if (parentEndpoints.length > 0) {
       return parentEndpoints;
     }
+  }
+  // A row that opts out of the global default, and has nothing of its own to recommend,
+  // stays empty. Substituting the Kibana default would show a model the workers do not use.
+  if (feature.ignoreGlobalDefault) {
+    return [];
   }
   return [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION];
 };

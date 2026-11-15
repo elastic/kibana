@@ -654,4 +654,112 @@ describe('WatchlistEntitySourceClient', () => {
       );
     });
   });
+
+  describe('list by ids', () => {
+    it('returns no sources when the id list is empty', async () => {
+      const result = await client.list({}, []);
+
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(result).toEqual({ sources: [], page: 1, per_page: 10, total: 0 });
+    });
+
+    it('loads the requested saved objects directly and skips missing ones', async () => {
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'src-1',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store', name: 'Entity Store' },
+          },
+          {
+            id: 'missing',
+            type: watchlistEntitySourceTypeName,
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+          },
+        ],
+      } as never);
+
+      const result = await client.list({}, ['src-1', 'missing']);
+
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: watchlistEntitySourceTypeName, id: 'src-1' },
+        { type: watchlistEntitySourceTypeName, id: 'missing' },
+      ]);
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(result.sources).toEqual([{ id: 'src-1', type: 'store', name: 'Entity Store' }]);
+      expect(result.total).toBe(1);
+    });
+
+    it('sorts the matched sources by sort_field/sort_order before paginating', async () => {
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'src-b',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store', name: 'Bravo' },
+          },
+          {
+            id: 'src-a',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store', name: 'Alpha' },
+          },
+          {
+            id: 'src-c',
+            type: watchlistEntitySourceTypeName,
+            references: [],
+            attributes: { type: 'store', name: 'Charlie' },
+          },
+        ],
+      } as never);
+
+      const result = await client.list({ sort_field: 'name', sort_order: 'asc' }, [
+        'src-b',
+        'src-a',
+        'src-c',
+      ]);
+
+      expect(result.sources.map((source) => source.name)).toEqual(['Alpha', 'Bravo', 'Charlie']);
+
+      const descResult = await client.list({ sort_field: 'name', sort_order: 'desc' }, [
+        'src-b',
+        'src-a',
+        'src-c',
+      ]);
+
+      expect(descResult.sources.map((source) => source.name)).toEqual([
+        'Charlie',
+        'Bravo',
+        'Alpha',
+      ]);
+    });
+
+    it('defaults to 10 per page', async () => {
+      const twelveSources = Array.from({ length: 12 }, (_, i) => ({
+        id: `src-${i}`,
+        type: watchlistEntitySourceTypeName,
+        references: [],
+        attributes: { type: 'store' as const, name: `Source ${i}` },
+      }));
+      soClient.bulkGet.mockResolvedValue({ saved_objects: twelveSources } as never);
+
+      const result = await client.list(
+        {},
+        twelveSources.map((s) => s.id)
+      );
+
+      expect(result.per_page).toBe(10);
+      expect(result.sources).toHaveLength(10);
+      expect(result.total).toBe(12);
+
+      const secondPage = await client.list(
+        { page: 2 },
+        twelveSources.map((s) => s.id)
+      );
+      expect(secondPage.sources).toHaveLength(2);
+    });
+  });
 });

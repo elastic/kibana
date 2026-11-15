@@ -10,7 +10,10 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
+import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  ACTION_SAVED_OBJECT_TYPE,
+} from '../constants/saved_objects';
 
 /**
  * Builds a space-scoped Saved Objects client without security extensions for
@@ -19,9 +22,11 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 export async function createUnsecuredInboundSavedObjectsClient({
   getStartServices,
   spaceId,
+  includedHiddenTypes = [ACTION_SAVED_OBJECT_TYPE, CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE],
 }: {
   getStartServices: CoreSetup['getStartServices'];
   spaceId: string;
+  includedHiddenTypes?: string[];
 }): Promise<SavedObjectsClientContract> {
   const [coreStart] = await getStartServices();
   const internalRequest = kibanaRequestFactory({
@@ -30,6 +35,6 @@ export async function createUnsecuredInboundSavedObjectsClient({
   });
   return coreStart.savedObjects.getScopedClient(internalRequest, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
+    includedHiddenTypes,
   });
 }

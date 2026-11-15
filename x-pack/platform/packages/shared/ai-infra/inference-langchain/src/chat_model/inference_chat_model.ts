@@ -15,6 +15,7 @@ import {
   type LangSmithParams,
 } from '@langchain/core/language_models/chat_models';
 import type { InteropZodType } from '@langchain/core/utils/types';
+import { interopSafeParseAsync, isInteropZodSchema } from '@langchain/core/utils/types';
 import type {
   BaseLanguageModelInput,
   StructuredOutputMethodOptions,
@@ -22,7 +23,6 @@ import type {
 } from '@langchain/core/language_models/base';
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { isInteropZodSchema } from '@langchain/core/utils/types';
 import type { ChatResult, ChatGeneration } from '@langchain/core/outputs';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { OutputParserException } from '@langchain/core/output_parsers';
@@ -89,6 +89,8 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
 
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
+ *
+ * Reasoning text (`additional_kwargs.reasoning_content`) is only included when streaming.
  *
  * @example
  * ```ts
@@ -284,7 +286,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           ? {
               tokenUsage: {
                 promptTokens: response.tokens.prompt,
-                completionTokens: response.tokens.completion,
+                completionTokens: response.tokens.completion + (response.tokens.thinking ?? 0),
                 totalTokens: response.tokens.total,
               },
             }
@@ -399,7 +401,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const llm = this.bindTools(tools, { tool_choice: functionName });
 
     const outputParser = RunnableLambda.from<AIMessageChunk, RunOutput>(
-      (input: AIMessageChunk): RunOutput => {
+      async (input: AIMessageChunk): Promise<RunOutput> => {
         if (!input.tool_calls || input.tool_calls.length === 0) {
           throw new Error('No tool calls found in the response.');
         }
@@ -407,7 +409,20 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         if (!toolCall) {
           throw new Error(`No tool call found with name ${functionName}.`);
         }
-        return toolCall.args as RunOutput;
+        if (!isInteropZodSchema(schema)) {
+          return toolCall.args as RunOutput;
+        }
+        const parsed = await interopSafeParseAsync(schema, toolCall.args);
+        if (parsed.success) {
+          return parsed.data;
+        }
+        const text = JSON.stringify(toolCall.args);
+        throw new OutputParserException(
+          `Failed to parse. Text: "${text}". Error: ${
+            parsed.error.issues ? JSON.stringify(parsed.error.issues) : String(parsed.error)
+          }`,
+          text
+        );
       }
     );
 

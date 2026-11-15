@@ -52,9 +52,9 @@ const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
   () => import('../field_library/pages/all_field_definitions_page')
 );
 
-const AllCasesLazy = lazy(() => import('../cases_redesign/all_cases'));
-const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../cases_redesign/case_view'));
-const ConfigureCasesLazy = lazy(() => import('../cases_redesign/configure_cases/configure_cases'));
+const AllCasesLazy = lazy(() => import('../all_cases'));
+const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
+const ConfigureCasesLazy = lazy(() => import('../configure_cases/configure_cases'));
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timelineIntegration }) => {
   const { basePath, permissions } = useCasesContext();

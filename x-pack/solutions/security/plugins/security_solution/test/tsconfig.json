@@ -1,0 +1,38 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node"]
+  },
+  "include": ["**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    // Scout tests reach into plugin internals via relative imports. The plugin project has to be
+    // referenced by path since this directory belongs to the same package as the plugin itself.
+    { "path": "../tsconfig.json", "force": true },
+    "@kbn/scout-security",
+    "@kbn/ai-assistant-common",
+    "@kbn/cases-components",
+    "@kbn/cases-plugin",
+    "@kbn/core-spaces-common",
+    "@kbn/entity-store",
+    "@kbn/es",
+    "@kbn/fleet-plugin",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/kbn-client",
+    "@kbn/management-settings-ids",
+    "@kbn/repo-info",
+    "@kbn/rule-data-utils",
+    "@kbn/security-mitre-attack-common",
+    "@kbn/security-solution-features",
+    "@kbn/securitysolution-exceptions-common",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/test-es-server",
+    "@kbn/tooling-log",
+    "@kbn/workflows",
+    "@kbn/agent-builder-common",
+    "@kbn/core",
+    "@kbn/alertzero-common"
+  ]
+}

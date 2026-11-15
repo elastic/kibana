@@ -29,8 +29,8 @@ const makeParams = (
         .fn()
         .mockImplementation(() => new Promise<void>((resolve) => setTimeout(resolve, flushDelay))),
     },
-    workflowLogger: {
-      flushEvents: jest.fn().mockResolvedValue(undefined),
+    eventQueue: {
+      flush: jest.fn().mockResolvedValue(undefined),
     },
     signal: new AbortController().signal,
   } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
@@ -72,7 +72,7 @@ describe('persistenceLoop', () => {
 
     const loopPromise = persistenceLoop(params, abortController.signal);
 
-    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
+    expect(params.eventQueue.flush).toHaveBeenCalledWith({
       signal: params.signal,
     });
 

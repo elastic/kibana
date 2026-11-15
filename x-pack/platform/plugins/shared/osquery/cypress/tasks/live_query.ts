@@ -151,8 +151,9 @@ export const loadRuleAlerts = (ruleName: string) => {
     });
 };
 
-// Pack results page header renders `AddToCaseButton` as a direct `EuiButtonEmpty`
-// with `aria-label="Add to Case"` — used for single-query results.
+// Single-query results pages (saved-query results, live query details) render the
+// page-level header, where `AddToCaseButton` is a direct `EuiButtonEmpty` with
+// `aria-label="Add to Case"`.
 const ADD_TO_CASE_HEADER_BUTTON = '[aria-label="Add to Case"]';
 // Per-row kebab menu (pack_queries_status_table and history details flyout)
 // renders `AddToCaseButton` as an `EuiContextMenuItem` inside a popover opened by the kebab.
@@ -179,7 +180,10 @@ export const addLiveQueryToCase = (actionId: string, caseId: string) => {
     cy.get('[aria-label="Details"]').click();
   });
   cy.getBySel('appHeaderBack');
-  addToCaseFromRowKebab(caseId);
+  // A single ad-hoc query renders the page-level query header (no results
+  // table), so `Add to Case` lives in the header actions rather than a row kebab.
+  cy.getBySel('query-details-header');
+  addToCaseFromResultsHeader(caseId);
 };
 
 const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/;

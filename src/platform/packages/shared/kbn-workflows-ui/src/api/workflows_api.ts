@@ -43,6 +43,7 @@ import type {
   GetCatalogResponse,
   GetExecutionLogsParams,
   GetExecutionParams,
+  GetExecutionStepsParams,
   GetLibraryHealthResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
@@ -274,6 +275,16 @@ export class WorkflowApi {
     });
   }
 
+  async getExecutionSteps(
+    executionId: string,
+    params?: GetExecutionStepsParams
+  ): Promise<WorkflowStepExecutionListDto> {
+    return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/steps`, {
+      query: params as HttpFetchQuery,
+      version: API_VERSION,
+    });
+  }
+
   async cancelExecution(executionId: string): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/cancel`, {
       version: API_VERSION,
@@ -347,7 +358,7 @@ export class WorkflowApi {
   }
 
   // ---------------------------------------------------------------------------
-  // Workflow Template Library
+  // Workflow Template library
   // ---------------------------------------------------------------------------
 
   async getCatalog(params: GetCatalogParams = {}): Promise<GetCatalogResponse> {

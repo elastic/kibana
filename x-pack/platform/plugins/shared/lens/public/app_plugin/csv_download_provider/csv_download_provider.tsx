@@ -20,6 +20,7 @@ export interface CSVSharingData {
   title: string;
   datatables: Datatable[];
   csvEnabled: boolean;
+  missingValueDisplay?: 'text' | 'table';
 }
 
 declare global {
@@ -37,10 +38,11 @@ async function downloadCSVs({
   datatables,
   formatFactory,
   uiSettings,
+  missingValueDisplay,
 }: {
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
-} & Pick<CSVSharingData, 'title' | 'datatables'>) {
+} & Pick<CSVSharingData, 'title' | 'datatables' | 'missingValueDisplay'>) {
   if (datatables.length === 0) {
     if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
       window.ELASTIC_LENS_CSV_CONTENT = undefined;
@@ -60,6 +62,7 @@ async function downloadCSVs({
             quoteValues: uiSettings.get('csv:quoteValues', true),
             formatFactory,
             escapeFormulaValues: false,
+            missingValueDisplay,
           }),
           type: exporters.CSV_MIME_TYPE,
         };
@@ -115,7 +118,8 @@ export const downloadCsvLensShareProvider = ({
     groupId: 'export',
     getShareIntegrationConfig: async ({ sharingData }) => {
       // TODO fix sharingData types
-      const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
+      const { title, datatables, csvEnabled, missingValueDisplay } =
+        sharingData as unknown as CSVSharingData;
 
       const panelTitle = i18n.translate(
         'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
@@ -130,6 +134,7 @@ export const downloadCsvLensShareProvider = ({
           formatFactory: formatFactoryFn(),
           datatables,
           uiSettings,
+          missingValueDisplay,
         });
 
       return {

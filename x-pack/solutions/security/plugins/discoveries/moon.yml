@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/discoveries'
   - '@kbn/security-plugin'
   - '@kbn/scout-security'
+  - '@kbn/security-solution-test-api-clients'
   - '@kbn/securitysolution-es-utils'
   - '@kbn/securitysolution-utils'
   - '@kbn/spaces-plugin'
@@ -41,6 +42,7 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows-yaml'
   - '@kbn/zod'
+  - '@kbn/std'
   - '@kbn/logging-mocks'
   - '@kbn/event-log-plugin'
   - '@kbn/inference-common'
@@ -59,6 +61,7 @@ dependsOn:
   - '@kbn/alerts-as-data-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/core-ui-settings-server'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
@@ -71,6 +74,4 @@ fileGroups:
     - '**/*.tsx'
     - '**/*.d.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

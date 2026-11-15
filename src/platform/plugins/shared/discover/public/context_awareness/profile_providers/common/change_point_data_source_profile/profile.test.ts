@@ -24,6 +24,7 @@ import {
 } from './change_point_context';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { createChangePointDataSourceProfileProvider } from './profile';
+import { createChangePointSummarySeriesCache } from './change_point_summary_series';
 
 const RESOLUTION_MISMATCH = { isMatch: false };
 
@@ -50,6 +51,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
         useChartsBaseTheme: () => ({}),
       },
     } as unknown as ChartsPluginStart,
+    data: { search: { esql: jest.fn() } },
   } as unknown as ProfileProviderServices;
 
   const provider = createChangePointDataSourceProfileProvider(mockServices);
@@ -60,6 +62,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
     typeColumnId: 'type',
     pvalueColumnId: 'pvalue',
     chartSectionProps$: new BehaviorSubject<ChangePointChartSectionSnapshot | undefined>(undefined),
+    summarySeriesCache: createChangePointSummarySeriesCache(),
     ...overrides,
   });
 
@@ -94,6 +97,9 @@ describe('createChangePointDataSourceProfileProvider', () => {
         });
         expect(context.chartSectionProps$).toBeInstanceOf(BehaviorSubject);
         expect((context.chartSectionProps$ as BehaviorSubject<unknown>).getValue()).toBeUndefined();
+        expect(context.summarySeriesCache).toEqual({
+          getSeries$: expect.any(Function),
+        });
       });
 
       it('picks up custom type and pvalue AS aliases', async () => {
@@ -107,6 +113,13 @@ describe('createChangePointDataSourceProfileProvider', () => {
           typeColumnId: 'change_type',
           pvalueColumnId: 'p_value',
         });
+      });
+
+      it('creates an isolated Summary series cache for each resolved context', async () => {
+        const firstContext = await resolveMatch();
+        const secondContext = await resolveMatch();
+
+        expect(firstContext.summarySeriesCache).not.toBe(secondContext.summarySeriesCache);
       });
     });
 
@@ -170,6 +183,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       });
       expect(getDefaultAppState({ dataView: {} as DataView })).toEqual({
         columns: [{ name: 'type' }, { name: SOURCE_COLUMN }, { name: 'pvalue' }],
+        rowHeight: 3,
       });
     });
 
@@ -180,6 +194,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       });
       expect(getDefaultAppState({ dataView: {} as DataView })).toEqual({
         columns: [{ name: 'change_type' }, { name: SOURCE_COLUMN }, { name: 'p_value' }],
+        rowHeight: 3,
       });
     });
   });

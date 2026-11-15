@@ -42,7 +42,7 @@ export function setupSavedObjects(
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
     management: {
-      icon: 'lensApp',
+      icon: 'productLens',
       defaultSearchField: 'title',
       importableAndExportable: true,
       getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,

@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/zod'
   - '@kbn/change-history'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

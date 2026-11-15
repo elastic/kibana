@@ -120,6 +120,7 @@ export const PageLayout = memo<PageLayoutProps>(
     return (
       <EuiPanelStyled
         hasShadow={false}
+        hasBorder={false}
         paddingSize={paddingSize}
         data-test-subj={dataTestSubj}
         className="full-height"

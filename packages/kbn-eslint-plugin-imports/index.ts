@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
+import { eslintCompatPlugin } from '@oxlint/plugins';
+
 export * from './src/get_import_resolver';
 import { NoUnresolvableImportsRule } from './src/rules/no_unresolvable_imports';
 import { UniformImportsRule } from './src/rules/uniform_imports';
@@ -21,21 +25,30 @@ import { NoDirectMonacoImportRule } from './src/rules/no_direct_monaco_import';
 import { NoUndeclaredPluginTargetRule } from './src/rules/no_undeclared_plugin_target';
 import { NoReduxToolkitV2ImportsRule } from './src/rules/no_redux_toolkit_v2_imports';
 
+const plugin = eslintCompatPlugin({
+  meta: { name: '@kbn/imports' },
+  rules: {
+    no_unresolvable_imports: NoUnresolvableImportsRule,
+    uniform_imports: UniformImportsRule,
+    exports_moved_packages: ExportsMovedPackagesRule,
+    no_unused_imports: NoUnusedImportsRule,
+    no_boundary_crossing: NoBoundaryCrossingRule,
+    no_group_crossing_imports: NoGroupCrossingImportsRule,
+    no_group_crossing_manifests: NoGroupCrossingManifestsRule,
+    require_import: RequireImportRule,
+    no_direct_handlebars_import: NoDirectHandlebarsImportRule,
+    no_direct_monaco_import: NoDirectMonacoImportRule,
+    no_undeclared_plugin_target: NoUndeclaredPluginTargetRule,
+    no_redux_toolkit_v2_imports: NoReduxToolkitV2ImportsRule,
+  },
+});
+
+export const { meta } = plugin;
+
 /**
- * Custom ESLint rules, add `'@kbn/eslint-plugin-imports'` to your eslint config to use them
+ * Custom rules run by Oxlint through `oxlint_plugin.js`. `eslintCompatPlugin` adds an ESLint
+ * `create` method next to each rule's `createOnce`, so ESLint still loads the plugin as
+ * `'@kbn/eslint-plugin-imports'` and runs the rules in its RuleTester.
  * @internal
  */
-export const rules = {
-  no_unresolvable_imports: NoUnresolvableImportsRule,
-  uniform_imports: UniformImportsRule,
-  exports_moved_packages: ExportsMovedPackagesRule,
-  no_unused_imports: NoUnusedImportsRule,
-  no_boundary_crossing: NoBoundaryCrossingRule,
-  no_group_crossing_imports: NoGroupCrossingImportsRule,
-  no_group_crossing_manifests: NoGroupCrossingManifestsRule,
-  require_import: RequireImportRule,
-  no_direct_handlebars_import: NoDirectHandlebarsImportRule,
-  no_direct_monaco_import: NoDirectMonacoImportRule,
-  no_undeclared_plugin_target: NoUndeclaredPluginTargetRule,
-  no_redux_toolkit_v2_imports: NoReduxToolkitV2ImportsRule,
-};
+export const rules = plugin.rules as Record<string, CreateOnceRule & Rule.RuleModule>;

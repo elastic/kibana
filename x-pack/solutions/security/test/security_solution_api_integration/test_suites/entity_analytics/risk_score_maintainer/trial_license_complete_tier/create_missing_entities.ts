@@ -23,12 +23,10 @@ import {
 } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-/** Runs the same missing-host scenario under both flag-off and flag-on FTR configs. */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const config = getService('config');
   const testLogsIndex = 'logs-testlogs-createmissing-default';
   const testLogsTemplate = 'logs-testlogs-createmissing-default-template';
 
@@ -41,13 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
   const indexListOfDocuments = indexListOfDocumentsFactory({ es, log, index: testLogsIndex });
 
-  const isCreateMissingEnabled = Boolean(
-    (config.get('kbnTestServer.serverArgs', []) as string[])
-      .find((arg) => arg.startsWith('--xpack.securitySolution.enableExperimental'))
-      ?.includes('riskScoreCreateMissingEntitiesEnabled')
-  );
-
-  describe('@ess Risk Score Maintainer create-if-missing entities', function () {
+  describe('@ess @serverless @serverlessQA Risk Score Maintainer create-if-missing entities', function () {
     this.tags(['esGate']);
 
     before(async () => {
@@ -86,11 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it(`${
-      isCreateMissingEnabled
-        ? 'creates the missing host entity from a representative alert and writes its score'
-        : 'drops the missing host score without creating an entity (flag off)'
-    }`, async () => {
+    it('creates the missing host entity from a representative alert and writes its score', async () => {
       const documentId = uuidv4();
       // `host.id` is required by the creation policy (`getEntityCreationCandidate`), and takes
       // priority over `host.name` in the identity ranking, so the EUID is derived from it.
@@ -137,21 +125,16 @@ export default ({ getService }: FtrProviderContext): void => {
       const scores = normalizeScores(await readRiskScores(es));
       const score = scores.find((s) => s.id_value === expectedEuid);
 
-      if (isCreateMissingEnabled) {
-        expect(entityDoc).to.not.be(undefined);
-        expect(entityDoc?.entity?.id).to.eql(expectedEuid);
-        expect(entityDoc?.entity?.created_by).to.eql('risk_score_maintainer');
-        expect(entityDoc?.entity?.type).to.eql('Host');
-        expect(entityDoc?.entity?.lifecycle?.first_seen).to.be.a('string');
-        expect(entityDoc?.entity?.risk).to.be.an('object');
-        expect(entityDoc?.entity?.risk?.calculated_score_norm).to.be.a('number');
+      expect(entityDoc).to.not.be(undefined);
+      expect(entityDoc?.entity?.id).to.eql(expectedEuid);
+      expect(entityDoc?.entity?.created_by).to.eql('risk_score_maintainer');
+      expect(entityDoc?.entity?.type).to.eql('Host');
+      expect(entityDoc?.entity?.lifecycle?.first_seen).to.be.a('string');
+      expect(entityDoc?.entity?.risk).to.be.an('object');
+      expect(entityDoc?.entity?.risk?.calculated_score_norm).to.be.a('number');
 
-        expect(score).to.not.be(undefined);
-        expect(score?.id_value).to.eql(expectedEuid);
-      } else {
-        expect(entityDoc).to.be(undefined);
-        expect(score).to.be(undefined);
-      }
+      expect(score).to.not.be(undefined);
+      expect(score?.id_value).to.eql(expectedEuid);
     });
   });
 };

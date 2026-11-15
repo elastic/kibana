@@ -19,5 +19,7 @@
     "@kbn/zod",
     "@kbn/core",
     "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/inference-common",
   ]
 }

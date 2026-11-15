@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const DeleteCaseUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.delete_case),
-  payload: rt.strict({}),
+export const DeleteCaseUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.delete_case),
+  payload: z.object({}),
 });

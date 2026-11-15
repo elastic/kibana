@@ -125,14 +125,44 @@ Artifact naming conventions:
 
 ## Run tests
 
-Set up test server
+### Unit tests
+
+Unit tests cover the artifact-builder processing pipeline (`processDocuments`) — no running
+Kibana or Elasticsearch required.
+
+```
+node scripts/jest x-pack/packages/ai-infra/product-doc-artifact-builder/src/tasks/process_documents.test.ts
+```
+
+### Functional tests
+
+Functional tests live in the `functional_gen_ai` inference suite. There are two suites:
+
+| Suite | `--grep` pattern | What it tests |
+|---|---|---|
+| Installation lifecycle | `product docs base` | install / update / uninstall flows for ELSER and Jina |
+| Search quality | `product docs search quality` | document counts + query relevance after install |
+
+The installation suite tests both ELSER (always available) and Jina via EIS (requires Cloud
+Connected Mode). The Jina tests read `KIBANA_EIS_CCM_API_KEY` from the environment — set by CI
+from Vault, or locally from your team's secret store. Without it, only the ELSER tests pass; the
+`Jina (via EIS)` describe block fails immediately.
+
+**Step 1 — start the test server** (terminal 1):
 
 ```
 node scripts/functional_tests_server.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts
 ```
 
-Run tests on different terminal
+**Step 2 — run a suite** (terminal 2):
 
 ```
-node scripts/functional_tests_server.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs base'
+# Installation lifecycle only
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs base'
+
+# Search quality only
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs search quality'
+
+# Both suites
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs'
 ```

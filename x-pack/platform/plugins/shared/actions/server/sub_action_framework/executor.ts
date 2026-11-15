@@ -39,6 +39,7 @@ export const buildExecutor = <
     services,
     request,
     connectorUsageCollector,
+    connectorVersion,
   }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
@@ -51,6 +52,7 @@ export const buildExecutor = <
       logger,
       services,
       request,
+      connectorVersion,
     });
 
     const subActions = service.getSubActions();

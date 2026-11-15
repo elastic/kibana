@@ -188,7 +188,6 @@ export const RestoreList: React.FunctionComponent = () => {
                   items={INTERVAL_OPTIONS.map((interval) => (
                     <EuiContextMenuItem
                       key={interval}
-                      icon="empty"
                       onClick={() => {
                         resendRequest();
                         setCurrentInterval(interval);

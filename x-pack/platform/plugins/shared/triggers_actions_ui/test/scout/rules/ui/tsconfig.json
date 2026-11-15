@@ -12,6 +12,7 @@
     // Merged `test` fixture, constants, and connector/rule helpers shared
     // across all triggers_actions_ui UI namespaces.
     { "path": "../../common/ui/tsconfig.json" },
-    "@kbn/app-header"
+    "@kbn/app-header",
+    "@kbn/rule-data-utils"
   ]
 }

@@ -43,6 +43,11 @@ import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timera
 interface SiemSearchBarProps {
   dataTestSubj?: string;
   dataView: DataView;
+  /**
+   * Data views from the current page, such as dashboard panels, used to resolve
+   * filters that target a data view other than `dataView`.
+   */
+  additionalDataViews?: DataView[];
   hideFilterBar?: boolean;
   hideQueryInput?: boolean;
   id: InputsModelId.global | InputsModelId.timeline;
@@ -56,12 +61,18 @@ interface SiemSearchBarProps {
    * KQL input and pinned filter bar remain visible.
    */
   hideDatePicker?: boolean;
+  /**
+   * Controls the search bar's padding and border. Use 'inPage' to align it with the page content.
+   */
+  displayStyle?: 'inPage' | 'detached' | 'withBorders';
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     dataTestSubj,
     dataView,
+    additionalDataViews,
+    displayStyle,
     end,
     filterQuery,
     fromStr,
@@ -296,11 +307,17 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, []);
 
     const dataViews: DataView[] | null = useMemo(() => {
-      if (dataView != null) {
-        return [dataView];
+      if (dataView == null) {
+        return null;
       }
-      return null;
-    }, [dataView]);
+      const extras = new Map<string, DataView>();
+      for (const view of additionalDataViews ?? []) {
+        if (view.id && view.id !== dataView.id && !extras.has(view.id)) {
+          extras.set(view.id, view);
+        }
+      }
+      return [dataView, ...extras.values()];
+    }, [additionalDataViews, dataView]);
 
     const onTimeRangeChange = useCallback(
       ({ dateRange }: { dateRange: TimeRange }) => {
@@ -338,6 +355,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showQueryMenu={!hideQueryMenu}
           allowSavingQueries
           dataTestSubj={dataTestSubj}
+          displayStyle={displayStyle}
         />
       </div>
     ) : null;
@@ -355,8 +373,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
+    prevProps.displayStyle === nextProps.displayStyle &&
     deepEqual(prevProps.queries, nextProps.queries) &&
-    deepEqual(prevProps.dataView, nextProps.dataView)
+    deepEqual(prevProps.dataView, nextProps.dataView) &&
+    deepEqual(prevProps.additionalDataViews, nextProps.additionalDataViews)
 );
 
 const makeMapStateToProps = () => {

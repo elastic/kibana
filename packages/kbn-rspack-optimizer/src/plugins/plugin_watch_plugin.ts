@@ -81,7 +81,7 @@ export class PluginWatchPlugin {
       }
 
       // Watch package-map.json to detect new/removed plugins
-      // (updated by `yarn kbn bootstrap` when plugins are added/removed)
+      // (updated by `pnpm kbn bootstrap` when plugins are added/removed)
       compilation.fileDependencies.add(getPackageMapPath());
     });
 
@@ -96,6 +96,7 @@ export class PluginWatchPlugin {
           repoRoot: this.options.repoRoot,
           examples: this.options.examples || false,
           testPlugins: this.options.testPlugins || false,
+          devOnly: this.options.devOnly,
           paths: this.options.pluginPaths,
           parentDirs: this.options.pluginScanDirs,
           allowlistPluginGroups: this.options.allowlistPluginGroups,

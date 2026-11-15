@@ -11,7 +11,7 @@ import {
   addEventsStepCommonDefinition,
   type AddEventsStepInput,
 } from '../../../common/workflows/steps/add_events';
-import type { AttachmentRequestV2 } from '../../../common/types/api';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
@@ -41,7 +41,7 @@ export const addEventsStepDefinition = (
     ...addEventsStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddEventsStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
-        const attachments: AttachmentRequestV2[] = [
+        const attachments: UnifiedAttachmentPayload[] = [
           ...groupEventsByIndex(input.events).values(),
         ].map((group) => ({
           type: toUnifiedAttachmentType(LEGACY_EVENT_TYPE, owner),

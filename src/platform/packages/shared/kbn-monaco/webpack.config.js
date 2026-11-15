@@ -12,24 +12,28 @@ const path = require('path');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 /**
- * @typedef {(import('./src/register_globals').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
+ * @typedef {(import('./src/languages/worker_factory').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
  */
 
+/**
+ * @param {WorkerType[number]} language
+ */
 const getWorkerEntry = (language) => {
   switch (language) {
-    case 'default':
-      return 'monaco-editor/esm/vs/editor/editor.worker.js';
+    case 'editorWorkerService':
+      return 'monaco-editor/editor/editor.worker.js';
     case 'json':
-      return 'monaco-editor/esm/vs/language/json/json.worker.js';
+      return 'monaco-editor/language/json/json.worker.js';
     default:
-      return path.resolve(
+      return path.resolve.apply(path, [
         __dirname,
         'src',
         'languages',
+        'definitions',
         language,
         'worker',
-        `${language}.worker.ts`
-      );
+        `${language}.worker.ts`,
+      ]);
   }
 };
 
@@ -43,12 +47,18 @@ const workerConfig = (languages) => ({
   entry: languages.reduce((entries, language) => {
     entries[language] = getWorkerEntry(language);
     return entries;
-  }, {}),
+  }, /** @type {Record<WorkerType[number], string>} */ ({})),
   devtool: process.env.NODE_ENV === 'production' ? false : 'cheap-source-map',
   target: 'web',
   output: {
     path: path.resolve(__dirname, 'target_workers'),
-    filename: ({ chunk }) => `${chunk.name}.editor.worker.js`,
+    filename: ({ chunk }) => {
+      if (!chunk) {
+        throw new Error('Chunk for worker is required, but was not provided');
+      }
+
+      return `${chunk.name}.editor.worker.js`;
+    },
   },
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
@@ -74,11 +84,27 @@ const workerConfig = (languages) => ({
         },
       },
       {
+        test: /(monaco-worker-manager|monaco-yaml)\/.*m?(t|j)sx?$/,
+        resolve: {
+          alias: {
+            // monaco-editor 0.56 added an "exports" map that remaps all subpaths relative to
+            // esm/vs/, so pre-0.56 deep specifiers like monaco-editor/esm/vs/... no longer resolve.
+            // Third-party deps (e.g. monaco-worker-manager, pulled in by monaco-yaml's
+            // worker) still import those old specifiers, so we add this an alias resolver to point these packages at the real directory.
+            'monaco-editor/esm/vs': path.resolve(
+              require.resolve('monaco-editor/editor/editor.api.js'),
+              '..',
+              '..'
+            ),
+          },
+        },
+      },
+      {
         /**
          * further process the modules exported by monaco-editor and monaco-yaml
          * because their exports leverage some none-standard language APIs at this time.
          */
-        test: /(monaco-editor\/esm\/vs\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
+        test: /(monaco-editor\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
         use: {
           loader: 'babel-loader',
           options: {
@@ -90,18 +116,13 @@ const workerConfig = (languages) => ({
       },
     ],
   },
-  optimization: {
-    minimizer: [
-      (compiler) => {
-        const TerserPlugin = require('terser-webpack-plugin');
-        new TerserPlugin({
-          // exclude this file from being processed by terser,
-          // because attempts at tree shaking actually botches up the file
-          exclude: /monaco-editor[\\/]esm[\\/]vs[\\/]base[\\/]common[\\/]map.js/,
-        }).apply(compiler);
-      },
-    ],
-  },
 });
 
-module.exports = workerConfig(['default', 'json', 'xjson', 'painless', 'yaml', 'console']);
+module.exports = workerConfig([
+  'editorWorkerService',
+  'json',
+  'xjson',
+  'painless',
+  'yaml',
+  'console',
+]);

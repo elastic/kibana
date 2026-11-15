@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/digital-experience-plugin",
+  "owner": ["@elastic/obs-signals-rum-team"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "digitalExperience",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "digital_experience"],
+    "requiredPlugins": ["features", "observabilityShared", "data", "unifiedSearch"],
+    "optionalPlugins": ["ux"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

@@ -19,6 +19,7 @@ jest.mock('@kbn/es-query', () => ({
 }));
 
 jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
   getESQLResults: jest.fn(),
   getESQLTimeField: jest.fn(),
 }));
@@ -28,6 +29,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { RequestAdapter, RequestStatus } from '@kbn/inspector-plugin/common';
 import { fetchEsqlData } from './fetch_esql_data';
 
 const mockBuildEsQuery = buildEsQuery as jest.MockedFunction<typeof buildEsQuery>;
@@ -275,6 +277,214 @@ describe('fetchEsqlData', () => {
 
       const call = mockGetESQLResults.mock.calls[0][0];
       expect(call).not.toHaveProperty('projectRouting');
+    });
+  });
+
+  describe('inspector request adapter', () => {
+    it('records a successful request with its hits, body and response', async () => {
+      const requestAdapter = new RequestAdapter();
+      const connectionParams = { method: 'POST', path: '/_query/async' };
+      mockGetESQLResults.mockResolvedValue({
+        response: { columns: [], values: [[1], [2]], all_columns: [], took: 12 },
+        params: connectionParams,
+      } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+
+      const [request] = requestAdapter.getRequests();
+      expect(requestAdapter.getRequests()).toHaveLength(1);
+      expect(request.status).toBe(RequestStatus.OK);
+      expect(request.json).toEqual({ query: esqlQuery });
+      expect(request.stats?.hits.value).toBe('2');
+      expect(request.stats?.queryTime.value).toBe('12ms');
+      expect(request.response?.json).toEqual({
+        rawResponse: expect.objectContaining({ took: 12 }),
+      });
+      expect(request.response?.requestParams).toEqual(connectionParams);
+    });
+
+    it('shows the filters and the time range filter that were sent in the request body', async () => {
+      const requestAdapter = new RequestAdapter();
+      const matchPhrase = { match_phrase: { 'host.name': 'web-01' } };
+      mockBuildEsQuery.mockReturnValue({
+        bool: { filter: [matchPhrase], must: [], must_not: [], should: [] },
+      } as ReturnType<typeof buildEsQuery>);
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
+
+      await fetchEsqlData(
+        mockSearch,
+        mockHttp,
+        esqlQuery,
+        { from: 'now-7d', to: 'now' },
+        mockSignal,
+        { requestAdapter }
+      );
+
+      expect(requestAdapter.getRequests()[0].json).toEqual({
+        query: esqlQuery,
+        filter: {
+          bool: expect.objectContaining({
+            filter: [
+              matchPhrase,
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2024-01-01T00:00:00.000Z',
+                    lt: '2024-01-08T00:00:00.000Z',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          }),
+        },
+      });
+    });
+
+    it('omits the query time when Elasticsearch did not report one', async () => {
+      const requestAdapter = new RequestAdapter();
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+
+      expect(requestAdapter.getRequests()[0].stats).not.toHaveProperty('queryTime');
+    });
+
+    it('keeps only the latest request, so refetches do not pile up', async () => {
+      const requestAdapter = new RequestAdapter();
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+
+      expect(requestAdapter.getRequests()).toHaveLength(1);
+    });
+
+    it('shows the request body built from the same parameters getESQLResults sends', async () => {
+      const requestAdapter = new RequestAdapter();
+      const variables = [{ key: 'host', value: 'a', type: ESQLVariableType.VALUES }];
+      const query = 'FROM logs | WHERE host == ?host';
+
+      await fetchEsqlData(mockSearch, mockHttp, query, undefined, mockSignal, {
+        requestAdapter,
+        esqlVariables: variables,
+        isApproximate: true,
+        projectRouting: 'my-project' as import('@kbn/es-query').ProjectRouting,
+      });
+
+      expect(requestAdapter.getRequests()[0].json).toEqual({
+        query,
+        params: [{ host: 'a' }],
+        approximation: true,
+        project_routing: 'my-project',
+      });
+    });
+
+    it('records a failed request with the error attributes and rethrows', async () => {
+      const requestAdapter = new RequestAdapter();
+      const error = Object.assign(new Error('boom'), { attributes: { type: 'parsing_exception' } });
+      mockGetESQLResults.mockRejectedValue(error);
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, { requestAdapter })
+      ).rejects.toBe(error);
+
+      const [request] = requestAdapter.getRequests();
+      expect(request.status).toBe(RequestStatus.ERROR);
+      expect(request.json).toMatchObject({ query: esqlQuery });
+      expect(request.response?.json).toEqual({ type: 'parsing_exception' });
+    });
+
+    it('falls back to the error message when the error has no attributes', async () => {
+      const requestAdapter = new RequestAdapter();
+      mockGetESQLResults.mockRejectedValue(new Error('network down'));
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, { requestAdapter })
+      ).rejects.toThrow('network down');
+
+      expect(requestAdapter.getRequests()[0].response?.json).toEqual({
+        message: 'network down',
+      });
+    });
+
+    it('records the message of a thrown value that is not an Error', async () => {
+      const requestAdapter = new RequestAdapter();
+      mockGetESQLResults.mockRejectedValue('plain string failure');
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, { requestAdapter })
+      ).rejects.toBe('plain string failure');
+
+      expect(requestAdapter.getRequests()[0].response?.json).toEqual({
+        message: 'plain string failure',
+      });
+    });
+
+    it('ignores error attributes that are not an object', async () => {
+      const requestAdapter = new RequestAdapter();
+      mockGetESQLResults.mockRejectedValue(
+        Object.assign(new Error('bad attributes'), { attributes: null })
+      );
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, { requestAdapter })
+      ).rejects.toThrow('bad attributes');
+
+      expect(requestAdapter.getRequests()[0].response?.json).toEqual({
+        message: 'bad attributes',
+      });
+    });
+
+    it('does not record a request that was aborted by a newer fetch', async () => {
+      const requestAdapter = new RequestAdapter();
+      const controller = new AbortController();
+      controller.abort();
+      mockGetESQLResults.mockRejectedValue(new DOMException('aborted', 'AbortError'));
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, controller.signal, {
+          requestAdapter,
+        })
+      ).rejects.toThrow();
+
+      expect(requestAdapter.getRequests()).toHaveLength(0);
+    });
+
+    it('does not record a response that arrives after the fetch was superseded', async () => {
+      const requestAdapter = new RequestAdapter();
+      const controller = new AbortController();
+      mockGetESQLResults.mockImplementation(async () => {
+        controller.abort();
+        return {
+          response: mockResponse,
+          params: { query: esqlQuery },
+        } as Awaited<ReturnType<typeof getESQLResults>>;
+      });
+
+      const result = await fetchEsqlData(
+        mockSearch,
+        mockHttp,
+        esqlQuery,
+        undefined,
+        controller.signal,
+        { requestAdapter }
+      );
+
+      expect(result).toBe(mockResponse);
+      expect(requestAdapter.getRequests()).toHaveLength(0);
+    });
+
+    it('works without an adapter and returns the same response', async () => {
+      const result = await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
+
+      expect(result).toBe(mockResponse);
     });
   });
 });

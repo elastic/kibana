@@ -9,19 +9,10 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { ElasticsearchOtlpExporter, EvalSpanProcessor } from '@kbn/tracing';
 import { initInferenceTracerProvider } from '@kbn/inference-tracing';
 import { coreMock } from '@kbn/core/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderConfig } from '../config';
 import { registerTracingExporter } from './register_tracing';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { DATA_STREAM_NAMESPACE_ATTR } from './agent_builder_context';
-
-jest.mock('@kbn/core/server', () => {
-  const actual = jest.requireActual('@kbn/core/server');
-  return {
-    ...actual,
-    SavedObjectsClient: jest.fn(() => ({})),
-  };
-});
 
 jest.mock('@kbn/inference-tracing', () => ({
   initInferenceTracerProvider: jest.fn(),
@@ -85,22 +76,12 @@ const MockedAgentBuilderProcessor = AgentBuilderSpanProcessor as jest.MockedClas
 const MockedEvalSpanProcessor = EvalSpanProcessor as jest.MockedClass<typeof EvalSpanProcessor>;
 
 describe('registerTracingExporter', () => {
-  const logger = loggerMock.create();
-
   function createCore() {
-    const core = coreMock.createStart();
-    const scopedUiSettings = jest.mocked(core.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
-    return core;
+    return coreMock.createStart();
   }
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   it('always initializes the tracing pipeline (ES exporter is always set up for uiSetting-based toggling)', async () => {
@@ -114,10 +95,8 @@ describe('registerTracingExporter', () => {
     const result = await registerTracingExporter({
       core: coreStart,
       tracingConfig,
-      logger,
     });
 
-    // Pipeline is always initialized so the uiSetting can toggle tracing without a restart.
     expect(result).toBeDefined();
     expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
       coreStart.elasticsearch.client.asInternalUser
@@ -141,14 +120,12 @@ describe('registerTracingExporter', () => {
     await registerTracingExporter({
       core: coreStart,
       tracingConfig,
-      logger,
     });
 
     expect(MockedOtlpExporter).toHaveBeenCalledWith({
       url: 'http://otel-collector:4318/v1/traces',
       headers: { Authorization: 'Bearer token' },
     });
-    // ES exporter is always created alongside external exporters.
     expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
       coreStart.elasticsearch.client.asInternalUser
     );
@@ -165,7 +142,6 @@ describe('registerTracingExporter', () => {
     await registerTracingExporter({
       core: coreStart,
       tracingConfig,
-      logger,
     });
 
     expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
@@ -184,11 +160,14 @@ describe('registerTracingExporter', () => {
     await registerTracingExporter({
       core: coreStart,
       tracingConfig,
-      logger,
     });
 
     expect(initInferenceTracerProvider).toHaveBeenCalledTimes(1);
     expect(MockedAgentBuilderProcessor).toHaveBeenCalledTimes(1);
+    expect(MockedAgentBuilderProcessor).toHaveBeenCalledWith({
+      exporter: expect.any(Object),
+      scheduledDelayMillis: 250,
+    });
     expect(MockedEvalSpanProcessor).toHaveBeenCalledWith([
       { baggageKey: 'execution.id.baggage.key' },
       { baggageKey: 'experiment.id.baggage.key' },
@@ -201,7 +180,8 @@ describe('registerTracingExporter', () => {
     expect(mockResource.waitForAsyncAttributes).toHaveBeenCalledTimes(1);
   });
 
-  it('createCachedTracingSettings returns enabled=true after registerTracingExporter resolves', async () => {
+  it('teardown shuts down processors', async () => {
+    const { shutdownInferenceTracerProvider } = jest.requireMock('@kbn/inference-tracing');
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
       exporters: [],
@@ -209,83 +189,11 @@ describe('registerTracingExporter', () => {
       opik_distributed_tracing: false,
     };
 
-    await registerTracingExporter({
-      core: coreStart,
-      tracingConfig,
-      logger,
-    });
-
-    const ctorOpts = MockedAgentBuilderProcessor.mock.calls[0][0];
-    const { getSettings } = ctorOpts;
-    expect(getSettings().enabled).toBe(true);
-  });
-
-  it('refreshes the cached value when the polling interval fires', async () => {
-    const coreStart = createCore();
-    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
-
-    const tracingConfig: TracingConfig = {
-      exporters: [],
-      scheduledDelay: 100,
-      opik_distributed_tracing: false,
-    };
-
-    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
-
-    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    expect(getSettings().enabled).toBe(true);
-
-    scopedUiSettings.get.mockResolvedValue(false);
-    jest.advanceTimersByTime(30_000);
-    await jest.advanceTimersByTimeAsync(0);
-
-    expect(getSettings().enabled).toBe(false);
-  });
-
-  it('logs error when polling refresh rejects', async () => {
-    const coreStart = createCore();
-    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
-
-    const tracingConfig: TracingConfig = {
-      exporters: [],
-      scheduledDelay: 100,
-      opik_distributed_tracing: false,
-    };
-
-    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
-
-    scopedUiSettings.get.mockRejectedValue(new Error('SO unavailable'));
-    jest.advanceTimersByTime(30_000);
-    await jest.advanceTimersByTimeAsync(0);
-
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to fetch tracing settings')
-    );
-  });
-
-  it('teardown stops polling and shuts down processors', async () => {
-    const coreStart = createCore();
-    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
-
-    const tracingConfig: TracingConfig = {
-      exporters: [],
-      scheduledDelay: 100,
-      opik_distributed_tracing: false,
-    };
-
-    const teardown = await registerTracingExporter({ core: coreStart, tracingConfig, logger });
+    const teardown = await registerTracingExporter({ core: coreStart, tracingConfig });
     expect(teardown).toBeDefined();
 
     await teardown!();
 
-    scopedUiSettings.get.mockResolvedValue(false);
-    jest.advanceTimersByTime(30_000);
-    await jest.advanceTimersByTimeAsync(0);
-
-    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    expect(getSettings().enabled).toBe(true);
+    expect(shutdownInferenceTracerProvider).toHaveBeenCalled();
   });
 });

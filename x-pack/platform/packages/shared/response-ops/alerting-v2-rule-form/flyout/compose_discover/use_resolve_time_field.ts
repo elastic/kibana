@@ -169,5 +169,6 @@ export const useResolveTimeField = ({
   return {
     timeFieldOptions,
     isTimeFieldResolved,
+    isResolvingTimeField: isLoadingResolution,
   };
 };

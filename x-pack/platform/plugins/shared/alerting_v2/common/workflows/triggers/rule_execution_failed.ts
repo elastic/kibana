@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ID_MAX_LENGTH, MAX_DESCRIPTION_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
@@ -20,40 +20,42 @@ export const RuleExecutionFailedTriggerId = 'alerting.ruleExecutionFailed' as co
  */
 export const RULE_EXECUTION_FAILED_ERROR_MAX_LENGTH = MAX_DESCRIPTION_LENGTH;
 
-export const ruleExecutionFailedEventSchema = z.object({
-  rule: z
-    .object({
-      id: z
-        .string()
-        .max(ID_MAX_LENGTH)
-        .describe(
-          i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.id', {
-            defaultMessage: 'Unique rule identifier.',
-          })
-        ),
-      spaceId: z
-        .string()
-        .max(ID_MAX_LENGTH)
-        .describe(
-          i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.spaceId', {
-            defaultMessage: 'Kibana space ID where the rule lives.',
-          })
-        ),
-    })
-    .describe(
-      i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.rule', {
-        defaultMessage: 'Rule whose execution failed.',
+export const ruleExecutionFailedEventSchema = lazySchema(() =>
+  z.object({
+    rule: z
+      .object({
+        id: z
+          .string()
+          .max(ID_MAX_LENGTH)
+          .describe(
+            i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.id', {
+              defaultMessage: 'Unique rule identifier.',
+            })
+          ),
+        spaceId: z
+          .string()
+          .max(ID_MAX_LENGTH)
+          .describe(
+            i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.spaceId', {
+              defaultMessage: 'Kibana space ID where the rule lives.',
+            })
+          ),
       })
-    ),
-  error: z
-    .string()
-    .max(RULE_EXECUTION_FAILED_ERROR_MAX_LENGTH)
-    .describe(
-      i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.error', {
-        defaultMessage: 'Error message describing why the execution failed.',
-      })
-    ),
-});
+      .describe(
+        i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.rule', {
+          defaultMessage: 'Rule whose execution failed.',
+        })
+      ),
+    error: z
+      .string()
+      .max(RULE_EXECUTION_FAILED_ERROR_MAX_LENGTH)
+      .describe(
+        i18n.translate('xpack.alertingV2.triggers.ruleExecutionFailed.schema.error', {
+          defaultMessage: 'Error message describing why the execution failed.',
+        })
+      ),
+  })
+);
 
 export type RuleExecutionFailedTriggerPayload = z.infer<typeof ruleExecutionFailedEventSchema>;
 

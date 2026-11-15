@@ -36,7 +36,6 @@ describe('FetchPoliciesStep', () => {
           enabled: true,
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           matcher: null,
-          groupBy: null,
           throttle: null,
           apiKey: 'decrypted-key',
           apiKeyOwner: 'elastic',
@@ -59,8 +58,7 @@ describe('FetchPoliciesStep', () => {
     expect(policy?.name).toBe('Policy 1');
     expect(policy?.apiKey).toBe('decrypted-key');
     expect(policy?.matcher).toBeUndefined();
-    expect(policy?.groupBy).toEqual([]);
-    expect(policy?.tags).toEqual([]);
+    expect(policy?.grouping).toEqual({ mode: 'per_alert' });
     expect(policy?.throttle).toBeUndefined();
     expect(policy?.snoozedUntil).toBeNull();
 

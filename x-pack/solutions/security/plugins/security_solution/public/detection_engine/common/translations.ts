@@ -39,7 +39,7 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
-    defaultMessage: 'Create new rule',
+    defaultMessage: 'Create rule',
   }
 );
 
@@ -640,7 +640,7 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
     defaultMessage:
-      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE ATT&CK™ tactic or technique (e.g., "Defense Evasion" or "TA0005")',
+      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE tactic or technique (e.g., "Defense Evasion", "TA0005" or "AML.T0044")',
   }
 );
 

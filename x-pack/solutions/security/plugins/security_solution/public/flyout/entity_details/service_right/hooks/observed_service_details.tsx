@@ -13,6 +13,15 @@ import type { InspectResponse } from '../../../../types';
 import { ServicesQueries } from '../../../../../common/search_strategy/security_solution/services';
 import type { ServiceItem } from '../../../../../common/search_strategy/security_solution/services/common';
 import { OBSERVED_SERVICE_QUERY_ID } from '../content';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const OBSERVED_SERVICE_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'service_observed_details'
+);
 
 export interface ServiceDetailsArgs {
   id: string;
@@ -55,6 +64,7 @@ export const useObservedServiceDetails = ({
       defaultMessage: `Failed to run search on service details`,
     }),
     abort: skip,
+    executionContext: OBSERVED_SERVICE_DETAILS_CONTEXT,
   });
 
   const serviceDetailsResponse = useMemo(

@@ -140,12 +140,14 @@ export async function upsertComment(
     commentBody: string;
     commentContext: string;
     clearPrevious: boolean;
+    // When false, only an existing comment is updated; nothing is posted if there is none.
+    createIfMissing?: boolean;
   },
   owner = process.env.GITHUB_PR_BASE_OWNER,
   repo = process.env.GITHUB_PR_BASE_REPO,
   prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
 ) {
-  const { commentBody, commentContext, clearPrevious } = messageOpts;
+  const { commentBody, commentContext, clearPrevious, createIfMissing = true } = messageOpts;
   if (!owner || !repo || !prNumber) {
     throw Error(
       "Couldn't retrieve Github PR info from environment variables in order to add a comment"
@@ -167,7 +169,7 @@ export async function upsertComment(
   ).find((comment) => comment.body?.includes(commentMarker));
 
   if (!existingComment) {
-    return addComment(body, owner, repo, prNumber);
+    return createIfMissing ? addComment(body, owner, repo, prNumber) : undefined;
   } else if (clearPrevious) {
     await github.issues.deleteComment({
       owner,

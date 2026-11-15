@@ -10,10 +10,11 @@
 // TODO: Remove the eslint-disable comments to use the proper types.
 
 import { useMemo } from 'react';
-import { getWorkflowJsonSchema } from '@kbn/workflows';
+import { getOrResolveObject, getWorkflowJsonSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import { useKibana } from '../../../hooks/use_kibana';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 const WorkflowSchemaUriStrict = 'file:///workflow-schema.json';
@@ -39,6 +40,7 @@ export const useWorkflowJsonSchema = ({
   loose = false,
 }: UseWorkflowJsonSchemaOptions = {}): UseWorkflowJsonSchemaResult => {
   const connectorsData = useAvailableConnectors();
+  const serviceAccountsEnabled = useKibana().services.security.serviceAccounts.isEnabled();
 
   // TODO: download from server instead of generating on client
 
@@ -58,6 +60,21 @@ export const useWorkflowJsonSchema = ({
         ? getWorkflowZodSchemaLoose(connectorTypes)
         : getWorkflowZodSchema(connectorTypes, registeredTriggers); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getWorkflowJsonSchema(zodSchema);
+      if (jsonSchema && !serviceAccountsEnabled) {
+        const workflowSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
+          jsonSchema,
+          jsonSchema
+        );
+        const settingsSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(
+          workflowSchema?.properties?.settings,
+          jsonSchema
+        );
+        const runAsSchema = settingsSchema?.properties?.run_as;
+        if (runAsSchema && typeof runAsSchema === 'object') {
+          // Hide completion without invalidating a saved workflow's execution identity.
+          runAsSchema.doNotSuggest = true;
+        }
+      }
 
       return {
         jsonSchema,
@@ -70,5 +87,5 @@ export const useWorkflowJsonSchema = ({
         uri: null,
       };
     }
-  }, [connectorsData, loose]);
+  }, [connectorsData, loose, serviceAccountsEnabled]);
 };

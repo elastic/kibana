@@ -21,6 +21,8 @@ import type { K8sNodeMetricsDocument } from './k8s_node';
 import { k8sNode } from './k8s_node';
 import type { SemconvHostMetricsDocument } from './semconv_host';
 import { semconvHost } from './semconv_host';
+import type { SemconvPodMetricsDocument } from './semconv_pod';
+import { semconvPod } from './semconv_pod';
 
 export type InfraDocument =
   | HostMetricsDocument
@@ -29,12 +31,14 @@ export type InfraDocument =
   | K8sContainerMetricsDocument
   | AWSRdsMetricsDocument
   | K8sNodeMetricsDocument
-  | SemconvHostMetricsDocument;
+  | SemconvHostMetricsDocument
+  | SemconvPodMetricsDocument;
 
 export const infra = {
   host,
   minimalHost,
   semconvHost,
+  semconvPod,
   pod,
   dockerContainer,
   k8sContainer,

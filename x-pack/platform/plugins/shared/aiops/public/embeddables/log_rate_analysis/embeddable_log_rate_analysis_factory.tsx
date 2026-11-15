@@ -144,7 +144,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
       );
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
-      const onRenderComplete = () => dataLoading$.next(false);
+      const onRenderComplete = () => {
+        dataLoading$.next(false);
+      };
       const onError = (error: Error) => blockingError$.next(error);
 
       return {
@@ -191,6 +193,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
               onError={onError}
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
+              parentApi={parentApi}
             />
           );
         },

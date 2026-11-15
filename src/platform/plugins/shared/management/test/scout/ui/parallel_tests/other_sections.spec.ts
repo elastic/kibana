@@ -42,7 +42,7 @@ test.describe('Stack Management — ingest, security, and stack sections', () =>
 
   // Pre-migration tag 'skipFIPS'
   test(
-    'manage_security sees only the security section with all four links',
+    'manage_security sees only the security section with all five links',
     { tag: tags.stateful.classic },
     async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.dashboard_read_and_manage_security);
@@ -57,7 +57,7 @@ test.describe('Stack Management — ingest, security, and stack sections', () =>
         expect(sections).toHaveLength(2);
         expect(sections[0]).toStrictEqual({
           sectionId: 'security',
-          sectionLinks: ['users', 'roles', 'api_keys', 'role_mappings'],
+          sectionLinks: ['users', 'roles', 'api_keys', 'service_accounts', 'role_mappings'],
         });
         expect(sections[1]).toStrictEqual({
           sectionId: 'kibana',

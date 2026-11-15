@@ -34,6 +34,7 @@ import type {
   ProfileProviderSharedServices,
 } from './profile_provider_services';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
+import { createSecurityDataSourceProfileProvider } from './security/security_data_source_profile';
 import { createMetricsDataSourceProfileProvider } from './common/metrics_data_source_profile';
 import { createSparklineDataSourceProfileProvider } from './common/sparkline_data_source_profile';
 
@@ -126,6 +127,7 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
   createMetricsDataSourceProfileProvider(),
   createDeprecationLogsDataSourceProfileProvider(),
   createSparklineDataSourceProfileProvider(providerServices),
+  createSecurityDataSourceProfileProvider(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
 ];

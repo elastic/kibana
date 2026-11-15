@@ -30,6 +30,21 @@ export const formatShortTime = (timestamp: string): string => {
   return parsed.format('HH:mm');
 };
 
+export const formatTimelineTime = (timestamp: string): string => {
+  const parsed = moment(timestamp);
+  const now = moment();
+  if (!parsed.isValid() || parsed.isSame(now, 'day')) {
+    return formatShortTime(timestamp);
+  }
+  if (parsed.isSame(now.clone().subtract(1, 'day'), 'day')) {
+    return i18n.translate('xpack.nightshift.timeline.yesterdayLabel', {
+      defaultMessage: 'Yesterday, {time}',
+      values: { time: formatShortTime(timestamp) },
+    });
+  }
+  return parsed.format(parsed.isSame(now, 'year') ? 'MMM D, HH:mm' : 'MMM D, YYYY, HH:mm');
+};
+
 export const useFormatTimestamp = (): ((timestamp: string) => string) => {
   const dateFormat = useUiSetting<string>('dateFormat');
 

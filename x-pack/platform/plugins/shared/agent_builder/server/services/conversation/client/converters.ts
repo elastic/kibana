@@ -8,18 +8,22 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
+  ConversationAttachmentSummary,
   ConversationWithoutRounds,
   CurrentUser,
-  RoundInput,
   ToolResult,
-  TimelineEvent,
   UserIdAndName,
   SerializedMetadataValue,
   ConversationParentRelation,
 } from '@kbn/agent-builder-common';
-import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import { isAttachmentActive } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   CONVERSATION_SCHEMA_VERSION,
@@ -61,13 +65,9 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import {
-  isRoundDerivedEventId,
-  parseExecutionId,
-  roundToEvents,
-  roundsToEvents,
-} from './rounds_to_events';
+import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
+import { reconcileEvents } from './round_writes';
 
 export type Document = Omit<
   Required<
@@ -87,62 +87,10 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
-/** True when a round's stored timeline spans more than one execution (a HITL resume). */
-const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
-  storedEvents.some((event) => {
-    const execution = event.execution_id ? parseExecutionId(event.execution_id) : undefined;
-    return execution?.roundId === roundId && execution.index > 0;
-  });
-
-/**
- * Rebuilds round-derived events on a rounds-path write, preserving resumed executions and additive
- * events. Only attachment refs are refreshed: the folded message belongs to the resume, not the
- * original user message. Undefined refs mean no update; an empty array explicitly clears them.
- */
-const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
-  const stored = merged.events ?? [];
-  const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
-
-  const roundDerived: TimelineEvent[] = [];
-  for (const round of merged.rounds) {
-    const storedForRound = stored.filter(
-      (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
-    );
-    if (hasResumeExecution(round.id, storedForRound)) {
-      const userMessageId = `${round.id}::user_message`;
-      roundDerived.push(
-        ...storedForRound.map((event) => {
-          if (event.id !== userMessageId || !round.input.attachment_refs) {
-            return event;
-          }
-          const data = event.data as RoundInput;
-          return {
-            ...event,
-            data: { ...data, attachment_refs: round.input.attachment_refs },
-          } as TimelineEvent;
-        })
-      );
-    } else {
-      roundDerived.push(...roundToEvents(round, merged));
-    }
-  }
-
-  const events = [...roundDerived];
-  for (const event of additive) {
-    const insertAt = events.findIndex((existing) => existing.created_at > event.created_at);
-    if (insertAt === -1) {
-      events.push(event);
-    } else {
-      events.splice(insertAt, 0, event);
-    }
-  }
-  return events;
-};
-
 export const fromEsWithoutRounds = (
   document: Document,
   user: CurrentUser
-): ConversationWithoutRounds => {
+): Omit<ConversationWithoutRounds, 'attachments'> => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -153,6 +101,7 @@ export const fromEsWithoutRounds = (
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
+      type: document._source.user_type,
     },
     title: document._source.title,
     created_at: document._source.created_at,
@@ -172,6 +121,7 @@ export const fromEsWithoutRounds = (
           },
         }
       : {}),
+    ...(document._source.feedback ? { feedback: document._source.feedback } : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
     ...(document._source.template_version !== undefined
@@ -252,6 +202,13 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
   });
 }
 
+type ConversationAttachmentSource = Pick<VersionedAttachment, 'id' | 'type' | 'active'>;
+
+export const toAttachmentSummaries = (
+  attachments: ConversationAttachmentSource[] | undefined
+): ConversationAttachmentSummary[] =>
+  (attachments ?? []).filter(isAttachmentActive).map(({ id, type }) => ({ id, type }));
+
 /**
  * Migrates legacy RoundState format.
  * v1 stored a single `node`; current format uses `nodes` (array).
@@ -324,7 +281,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
   };
 
   const events =
-    isEventsNative && storedEvents && storedEvents.length > 0
+    isEventsNative && storedEvents != null && storedEvents.length > 0
       ? storedEvents
       : roundsToEvents(conversation);
 
@@ -427,8 +384,12 @@ export const toResponseConversationWithoutRounds = ({
   user: CurrentUser;
   resolveTemplate: ConversationTemplateResolver;
 }): ConversationWithoutRoundsWithPermissions => {
+  const attachments = toAttachmentSummaries(document._source?.attachments);
   const conversation = withDeserializedMetadata(
-    fromEsWithoutRounds(document, user),
+    {
+      ...fromEsWithoutRounds(document, user),
+      ...(attachments.length > 0 ? { attachments } : {}),
+    },
     resolveTemplate
   );
 
@@ -445,6 +406,7 @@ export const toEs = (
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
+    user_type: conversation.user.type,
     space,
     title: conversation.title,
     created_at: conversation.created_at,
@@ -475,6 +437,9 @@ export const toEs = (
           events: conversation.events ?? [],
           schema_version: conversation.schema_version,
         }
+      : {}),
+    ...(conversation.feedback && Object.keys(conversation.feedback).length > 0
+      ? { feedback: conversation.feedback }
       : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
@@ -533,7 +498,8 @@ export const updateConversation = ({
   return {
     ...merged,
     schema_version: CONVERSATION_SCHEMA_VERSION,
-    events: reconcileEvents(merged),
+    // `conversation.rounds` are the document's rounds at write time: what the caller could see.
+    events: reconcileEvents(merged, conversation.rounds),
   };
 };
 
@@ -542,11 +508,13 @@ export const createRequestToEs = ({
   space,
   currentUser,
   creationDate,
+  leadingEvents = [],
 }: {
   conversation: ConversationCreateRequest;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;
+  leadingEvents?: ConversationEvent[];
 }): ConversationProperties => {
   // Honor conversation.user override if provided (used for persistent sub-agent
   // creations where ownership is snapshotted from the parent conversation).
@@ -556,22 +524,27 @@ export const createRequestToEs = ({
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
-    user: { id: effectiveUser.id, username: effectiveUser.username },
+    user: { id: effectiveUser.id, username: effectiveUser.username, type: effectiveUser.type },
     title: conversation.title,
     created_at: createdAt,
     updated_at: createdAt,
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events =
-    conversation.events && conversation.events.length > 0
+  // `leadingEvents` (the `conversation_created` activity) stay outside the caller-events-else-rounds
+  // choice, so a caller who sent none still gets the rounds projection.
+  const events = [
+    ...leadingEvents,
+    ...(conversation.events && conversation.events.length > 0
       ? conversation.events
-      : roundsToEvents(forEvents);
+      : roundsToEvents(forEvents)),
+  ];
 
   return {
     agent_id: conversation.agent_id,
     user_id: effectiveUser.id,
     user_name: effectiveUser.username,
+    user_type: effectiveUser.type,
     space,
     title: conversation.title,
     created_at: createdAt,

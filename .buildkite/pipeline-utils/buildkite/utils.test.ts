@@ -18,6 +18,8 @@ jest.mock('child_process', () => ({
 }));
 
 import { getPipeline, flushCancelOnGateFailureMetadata, _resetPendingCancelKeys } from './utils.ts';
+import { prBaseSteps } from '../step-library/steps/pull_request_base.ts';
+import { getStepKeys } from '../step-library/render.ts';
 
 const execFileSyncMock = execFileSync as jest.MockedFunction<typeof execFileSync>;
 
@@ -85,8 +87,37 @@ describe('getPipeline', () => {
     );
   });
 
-  it('verifies manually registered base.yml step keys exist', () => {
-    const repoRoot = path.resolve(__dirname, '../../..');
+  it('registers metadata for array-valued commands', () => {
+    const filename = writePipeline(`steps:
+    - command:
+        - echo one
+        - echo two
+      key: array_step
+  `);
+
+    getPipeline(filename, { cancelOnGateFailure: true });
+    flushCancelOnGateFailureMetadata();
+
+    expect(execFileSyncMock).toHaveBeenCalledWith(
+      'buildkite-agent',
+      ['meta-data', 'set', 'cancel_on_gate_failure_batch:pipeline'],
+      { input: JSON.stringify(['array_step']), stdio: ['pipe', 'inherit', 'inherit'] }
+    );
+  });
+
+  it('throws when an array-valued command step is missing a key', () => {
+    const filename = writePipeline(`steps:
+    - command:
+        - echo one
+        - echo two
+  `);
+
+    expect(() => getPipeline(filename, { cancelOnGateFailure: true })).toThrow(
+      'is missing a "key"'
+    );
+  });
+
+  it('verifies manually registered base step keys exist', () => {
     const pipelineSource = fs.readFileSync(
       path.resolve(__dirname, '../../scripts/pipelines/pull_request/pipeline.ts'),
       'utf8'
@@ -99,17 +130,7 @@ describe('getPipeline', () => {
     const manualKeys = [...manualKeysMatch![1].matchAll(/'([^']+)'/g)].map(([, key]) => key);
     expect(manualKeys.length).toBeGreaterThan(0);
 
-    // Parse base.yml and collect all step keys
-    const baseYml = fs.readFileSync(
-      path.resolve(repoRoot, '.buildkite/pipelines/pull_request/base.yml'),
-      'utf8'
-    );
-    const baseDoc = loadYaml(baseYml) as { steps: Array<{ key?: string }> };
-    const baseKeys = new Set(
-      baseDoc.steps
-        .filter((s: Record<string, unknown>) => typeof s.key === 'string')
-        .map((s: Record<string, unknown>) => s.key)
-    );
+    const baseKeys = new Set(getStepKeys(prBaseSteps()));
 
     for (const key of manualKeys) {
       expect(baseKeys).toContain(key);
@@ -138,7 +159,7 @@ describe('getPipeline', () => {
     }
   });
 
-  it('has no duplicate step keys across cancelable pipeline files and base.yml', () => {
+  it('has no duplicate step keys across cancelable pipeline files and the base steps', () => {
     const repoRoot = path.resolve(__dirname, '../../..');
     const pullRequestPipeline = path.resolve(
       __dirname,
@@ -155,28 +176,36 @@ describe('getPipeline', () => {
       ),
     ];
 
-    // Also include base.yml
-    cancelablePipelines.push(path.resolve(repoRoot, '.buildkite/pipelines/pull_request/base.yml'));
-
     // These pipeline pairs are in if/else branches in pipeline.ts and can never
     // both be uploaded in the same build, so shared keys are safe.
     const mutuallyExclusivePairs = new Set([
       'build_project.yml:deploy_project.yml',
       'deploy_project.yml:build_project.yml',
+      'build_cloud_image.yml:deploy_cloud.yml',
+      'deploy_cloud.yml:build_cloud_image.yml',
     ]);
 
     const allKeys = new Map<string, string>();
     const duplicates: string[] = [];
 
-    for (const filename of cancelablePipelines) {
-      const doc = loadYaml(fs.readFileSync(filename, 'utf8'));
-      if (!doc || !Array.isArray(doc.steps)) continue;
+    const sources = [
+      ...cancelablePipelines.map((filename) => ({
+        rel: path.relative(repoRoot, filename),
+        steps: loadYaml(fs.readFileSync(filename, 'utf8'))?.steps,
+      })),
+      {
+        rel: '.buildkite/pipeline-utils/step-library/steps/pull_request_base.ts',
+        steps: prBaseSteps(),
+      },
+    ];
+
+    for (const { rel, steps: sourceSteps } of sources) {
+      if (!Array.isArray(sourceSteps)) continue;
 
       const collectKeys = (steps: Array<Record<string, unknown>>) => {
         for (const step of steps) {
           if (typeof step !== 'object' || step === null) continue;
           if (typeof step.key === 'string') {
-            const rel = path.relative(repoRoot, filename);
             if (allKeys.has(step.key as string)) {
               const existingFile = allKeys.get(step.key as string)!;
               const pair = `${path.basename(existingFile)}:${path.basename(rel)}`;
@@ -193,7 +222,7 @@ describe('getPipeline', () => {
         }
       };
 
-      collectKeys(doc.steps);
+      collectKeys(sourceSteps);
     }
 
     expect(duplicates).toEqual([]);

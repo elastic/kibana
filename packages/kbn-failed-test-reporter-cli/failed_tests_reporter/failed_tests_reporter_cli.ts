@@ -13,11 +13,20 @@ import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  SCOUT_REPORTER_ES_API_KEY,
+  SCOUT_REPORTER_ES_URL,
+  SCOUT_REPORTER_ES_VERIFY_CERTS,
+} from '@kbn/scout-info';
+import { getValidatedESClient } from '@kbn/scout-reporting';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { globby } from 'globby';
 import normalize from 'normalize-path';
 import { getBuildkiteMetadata } from './buildkite_metadata';
+import { reportConsistentFailureIssues } from './consistent_failure_issues';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
+import type { TestFailure } from './get_failures';
 import { GithubApi } from './github_api';
 import { processJUnitReports } from './process_junit_reports';
 import type { ProcessReportsParams } from './process_reports_types';
@@ -26,6 +35,56 @@ import { processScoutReports } from './process_scout_reports';
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 const DISABLE_MISSING_TEST_REPORT_ERRORS =
   process.env.DISABLE_MISSING_TEST_REPORT_ERRORS === 'true';
+/** `owner/name`, as GitHub spells a repository. */
+const REPO_PATTERN = /^[\w.-]+\/[\w.-]+$/;
+
+/**
+ * Checks the job's failures for tests that fail every attempt build after build, by the Scout
+ * test events, and files a suite issue in `repo` for each file that does. Skipped, with a
+ * warning, outside Buildkite or without the test events cluster.
+ */
+async function checkConsistentFailures({
+  log,
+  failures,
+  repo,
+  dryRun,
+}: {
+  log: ToolingLog;
+  failures: TestFailure[];
+  repo: string;
+  dryRun: boolean;
+}) {
+  const { BUILDKITE_PIPELINE_SLUG: pipeline, BUILDKITE_BRANCH: branch } = process.env;
+  if (!pipeline || !branch) {
+    log.warning('Not in a Buildkite job, skipping the consistent failure check');
+    return;
+  }
+  if (!SCOUT_REPORTER_ES_URL || !SCOUT_REPORTER_ES_API_KEY) {
+    log.warning('SCOUT_REPORTER_ES_URL or API key not set, skipping the consistent failure check');
+    return;
+  }
+  const es = await getValidatedESClient(
+    {
+      node: SCOUT_REPORTER_ES_URL,
+      auth: { apiKey: SCOUT_REPORTER_ES_API_KEY },
+      tls: { rejectUnauthorized: SCOUT_REPORTER_ES_VERIFY_CERTS },
+    },
+    { log }
+  );
+  try {
+    await reportConsistentFailureIssues({
+      log,
+      failures,
+      es,
+      github: new GithubApi({ log, token: process.env.GITHUB_TOKEN, dryRun, repo }),
+      repo,
+      build: { pipeline, branch },
+      dryRun,
+    });
+  } finally {
+    await es.close();
+  }
+}
 
 export function runFailedTestsReporterCli() {
   run(
@@ -38,6 +97,15 @@ export function runFailedTestsReporterCli() {
         throw createFailError(
           'GITHUB_TOKEN environment variable must be set, otherwise use --no-github-update flag'
         );
+      }
+
+      const reportFailingSuites = Boolean(flags['report-failing-suites']);
+      const failingSuitesRepo = flags['failing-suites-repo'];
+      if (
+        reportFailingSuites &&
+        (typeof failingSuitesRepo !== 'string' || !REPO_PATTERN.test(failingSuitesRepo))
+      ) {
+        throw createFlagError('--failing-suites-repo must be of the form owner/name');
       }
 
       let branch: string = '';
@@ -115,13 +183,30 @@ export function runFailedTestsReporterCli() {
           };
 
           // Process FTR JUnit reports
-          await processJUnitReports(junitReports, processParams);
+          const junitFailures = await processJUnitReports(junitReports, processParams);
 
           // Process Scout reports
-          await processScoutReports(scoutReports, processParams);
+          const scoutFailures = await processScoutReports(scoutReports, processParams);
 
           // Generate Scout test failure artifacts after reports are updated (GH issue info, html reports, etc.)
           await generateScoutTestFailureArtifacts({ log, bkMeta });
+
+          if (reportFailingSuites && typeof failingSuitesRepo === 'string') {
+            log.info(
+              `Failing suite issues: on, filed in ${failingSuitesRepo} after the per-test issues`
+            );
+            // the per-test issues above are filed, the annotations still to come: never fail the job's reporting over this
+            try {
+              await checkConsistentFailures({
+                log,
+                failures: [...junitFailures, ...scoutFailures],
+                repo: failingSuitesRepo,
+                dryRun: !updateGithub,
+              });
+            } catch (error) {
+              log.error(`The consistent failure check failed: ${error}`);
+            }
+          }
         }
       } finally {
         await CiStatsReporter.fromEnv(log).metrics([
@@ -141,19 +226,29 @@ export function runFailedTestsReporterCli() {
     {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
-        boolean: ['github-update', 'report-update'],
-        string: ['build-url'],
+        boolean: ['github-update', 'report-update', 'report-failing-suites'],
+        string: ['build-url', 'failing-suites-repo'],
         default: {
           'github-update': true,
           'report-update': true,
           'index-errors': true,
           'build-url': process.env.BUILD_URL,
+          'report-failing-suites': process.env.REPORT_FAILING_SUITES === 'true',
+          'failing-suites-repo': process.env.FAILING_SUITES_REPO || 'elastic/kibana',
         },
         help: `
-        --no-github-update Execute the CLI without writing to Github
-        --no-report-update Execute the CLI without writing to the JUnit reports
-        --no-index-errors  Execute the CLI without indexing failures into Elasticsearch
-        --build-url        URL of the failed build, defaults to process.env.BUILD_URL
+        --no-github-update       Execute the CLI without writing to Github
+        --no-report-update       Execute the CLI without writing to the JUnit reports
+        --no-index-errors        Execute the CLI without indexing failures into Elasticsearch
+        --build-url              URL of the failed build, defaults to process.env.BUILD_URL
+
+        Failing suite issues, filed in addition to the per-test issues above. Off unless
+        process.env.REPORT_FAILING_SUITES is 'true'; writes follow --github-update.
+        --report-failing-suites  Also file one issue per test file whose tests failed every attempt of
+                                 the latest builds of this pipeline and branch after passing before,
+                                 by the Scout test events
+        --failing-suites-repo    owner/name of the repository those issues go to, defaults to
+                                 process.env.FAILING_SUITES_REPO, then elastic/kibana
       `,
       },
     }

@@ -10,6 +10,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import {
   apmServiceGroupMaxNumberOfServices,
+  apmMaxNumberOfServices,
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
   enableInspectEsQueries,
@@ -41,6 +42,7 @@ const FieldRow = withSuspense(LazyFieldRow);
 const SETTINGS_KEYS = [
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
+  apmMaxNumberOfServices,
   apmServiceGroupMaxNumberOfServices,
   enableInspectEsQueries,
   apmProgressiveLoading,

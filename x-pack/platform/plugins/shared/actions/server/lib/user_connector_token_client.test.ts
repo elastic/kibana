@@ -211,6 +211,174 @@ describe('UserConnectorTokenClient', () => {
     });
   });
 
+  describe('getUsableOAuthConnectorIds()', () => {
+    const PAST = '2020-12-31T12:00:00.000Z';
+    const FUTURE = '2021-01-02T12:00:00.000Z';
+
+    const mockTokens = (
+      tokens: Array<{ connectorId: string; expiresAt?: string; refreshTokenExpiresAt?: string }>
+    ) => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: tokens.length,
+        per_page: 10,
+        page: 1,
+        saved_objects: tokens.map(({ connectorId, ...rest }) => ({
+          id: `token-${connectorId}`,
+          type: 'user_connector_token',
+          attributes: {
+            profileUid: 'user-profile-123',
+            connectorId,
+            credentialType: 'oauth',
+            credentials: {},
+            createdAt: PAST,
+            updatedAt: PAST,
+            ...rest,
+          },
+          score: 1,
+          references: [],
+        })),
+      });
+    };
+
+    const mockDecryptedCredentials = (credentials: Record<string, unknown>) =>
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        id: 'token-id',
+        type: 'user_connector_token',
+        references: [],
+        attributes: { credentials },
+      });
+
+    const getUsable = (connectorIds: string[]) =>
+      userClient.getUsableOAuthConnectorIds({ profileUid: 'user-profile-123', connectorIds });
+
+    test('returns an empty set without querying when there are no connector ids', async () => {
+      expect(await getUsable([])).toEqual(new Set());
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
+    test('treats an unexpired access token as usable without decrypting', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: FUTURE }, { connectorId: 'b' }]);
+
+      expect(await getUsable(['a', 'b'])).toEqual(new Set(['a', 'b']));
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('treats an expired access token with a refresh token as usable', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: PAST }]);
+      mockDecryptedCredentials({ accessToken: 'at', refreshToken: 'rt' });
+
+      expect(await getUsable(['a'])).toEqual(new Set(['a']));
+    });
+
+    test('treats an expired access token without a refresh token as not usable', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: PAST }]);
+      mockDecryptedCredentials({ accessToken: 'at' });
+
+      expect(await getUsable(['a'])).toEqual(new Set());
+    });
+
+    test('treats an expired refresh token as not usable without decrypting', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: PAST, refreshTokenExpiresAt: PAST }]);
+
+      expect(await getUsable(['a'])).toEqual(new Set());
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('treats connectors without a token as not usable', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: FUTURE }]);
+
+      expect(await getUsable(['a', 'b'])).toEqual(new Set(['a']));
+    });
+
+    test('treats a token that fails to decrypt as not usable', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: PAST }]);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+        new Error('decrypt failed')
+      );
+
+      expect(await getUsable(['a'])).toEqual(new Set());
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    test('returns an empty set when the token lookup fails', async () => {
+      unsecuredSavedObjectsClient.find.mockRejectedValueOnce(new Error('find failed'));
+
+      expect(await getUsable(['a'])).toEqual(new Set());
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    test('pages through tokens so a connector with many tokens does not hide another', async () => {
+      const tokenSo = (connectorId: string, index: number) => ({
+        id: `token-${connectorId}-${index}`,
+        type: 'user_connector_token',
+        attributes: {
+          profileUid: 'user-profile-123',
+          connectorId,
+          credentialType: 'oauth',
+          credentials: {},
+          expiresAt: FUTURE,
+          createdAt: PAST,
+          updatedAt: PAST,
+        },
+        score: 1,
+        references: [],
+      });
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce({
+          total: 101,
+          per_page: 100,
+          page: 1,
+          saved_objects: Array.from({ length: 100 }, (_, index) => tokenSo('b', index)),
+        })
+        .mockResolvedValueOnce({
+          total: 101,
+          per_page: 100,
+          page: 2,
+          saved_objects: [tokenSo('a', 0)],
+        });
+
+      expect(await getUsable(['a', 'b'])).toEqual(new Set(['a', 'b']));
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ page: 2 })
+      );
+    });
+
+    test('caps concurrent decryption of tokens', async () => {
+      const connectorIds = Array.from({ length: 25 }, (_, index) => `connector-${index}`);
+      mockTokens(connectorIds.map((connectorId) => ({ connectorId, expiresAt: PAST })));
+
+      let inFlight = 0;
+      let maxInFlight = 0;
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(async () => {
+        inFlight++;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await Promise.resolve();
+        await Promise.resolve();
+        inFlight--;
+        return {
+          id: 'token-id',
+          type: 'user_connector_token',
+          references: [],
+          attributes: { credentials: { refreshToken: 'rt' } },
+        };
+      });
+
+      expect(await getUsable(connectorIds)).toEqual(new Set(connectorIds));
+      expect(maxInFlight).toBe(10);
+    });
+
+    test('only considers the most recent token per connector', async () => {
+      mockTokens([
+        { connectorId: 'a', expiresAt: FUTURE },
+        { connectorId: 'a', expiresAt: PAST, refreshTokenExpiresAt: PAST },
+      ]);
+
+      expect(await getUsable(['a'])).toEqual(new Set(['a']));
+    });
+  });
+
   describe('getOAuthPersonalToken()', () => {
     test('retrieves and parses OAuth credentials', async () => {
       const expiresAt = new Date().toISOString();

@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// Disable viewport-based culling so all nodes render in JSDOM (which has no real viewport)
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  ONLY_RENDER_VISIBLE_ELEMENTS: false,
+}));
+
 import React from 'react';
 import { ReactFlow } from '@xyflow/react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
@@ -39,7 +45,7 @@ describe('Minimap', () => {
     expect(minimap.firstChild?.firstChild?.childNodes).toHaveLength(2); // only <title> and <path> for mask
   });
 
-  it('should be at the bottom-left corner and have "backgroundBasePlain" viewport over a "backgroundBaseFormsControlDisabled" frame', async () => {
+  it('should be at the bottom-right corner and have "backgroundBasePlain" viewport over a "backgroundBaseFormsControlDisabled" frame', async () => {
     render(
       <ReactFlow>
         <Minimap />
@@ -51,7 +57,7 @@ describe('Minimap', () => {
       'background-color': '#FFFFFF',
       '--xy-minimap-mask-background-color-props': 'rgba(202,211,226,0.75)',
     });
-    expect(minimap.firstChild).toHaveClass('bottom left');
+    expect(minimap.firstChild).toHaveClass('bottom right');
   });
 });
 

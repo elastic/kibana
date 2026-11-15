@@ -11,6 +11,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
+import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
@@ -31,7 +32,15 @@ import { DashboardInternalContext } from '../dashboard_api/use_dashboard_interna
 // The top nav reads chrome via context hooks (`useChromeStyle`), so render inside
 // the chrome provider just like production. The mock defaults to classic chrome (legacy header mode).
 const renderWithChrome = (ui: React.ReactElement) =>
-  renderWithI18n(coreServices.chrome.withProvider(ui));
+  renderWithI18n(
+    coreServices.chrome.withProvider(
+      <ChangeHistoryModalContext.Provider
+        value={{ isOpen: false, openModal: jest.fn(), closeModal: jest.fn() }}
+      >
+        {ui}
+      </ChangeHistoryModalContext.Provider>
+    )
+  );
 
 describe('Internal dashboard top nav', () => {
   beforeEach(() => {
@@ -212,6 +221,74 @@ describe('Internal dashboard top nav', () => {
     );
   });
 
+  it('should disable the date picker when the only data view is an ES|QL view without a time field', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+        { type: 'esql', timeFieldName: undefined, isTimeBased: () => false } as DataView,
+      ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: true },
+      }),
+      {}
+    );
+  });
+
+  it('should keep the date picker enabled when an ES|QL view has a time field', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+        { type: 'esql', timeFieldName: '@timestamp', isTimeBased: () => false } as DataView,
+      ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: false },
+      }),
+      {}
+    );
+  });
+
   it('should keep the date picker enabled when at least one data view is time-based', async () => {
     const { api, internalApi } = buildMockDashboardApi();
     const dashboardApi: DashboardApi = {
@@ -339,11 +416,11 @@ describe('Internal dashboard top nav', () => {
       });
     });
 
-    it('should be enabled when a panel publishes usesEsql$ as true (e.g. a Vega panel using ES|QL)', async () => {
+    it('should be enabled when a panel publishes esql$ with queries (e.g. a Vega panel using ES|QL)', async () => {
       const { api, internalApi } = buildMockDashboardApi();
       api.registerChildApi({
         uuid: 'vega-panel',
-        usesEsql$: new BehaviorSubject(true),
+        esql$: new BehaviorSubject([{ esql: 'FROM logs | LIMIT 10' }]),
         approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
       } as unknown as Parameters<typeof api.registerChildApi>[0]);
 

@@ -11,7 +11,7 @@ node scripts/type_check.js --project x-pack/solutions/observability/plugins/apm/
 ### Prettier
 
 ```
-yarn prettier  "./x-pack/solutions/observability/plugins/apm/**/*.{tsx,ts,js}" --write
+pnpm prettier  "./x-pack/solutions/observability/plugins/apm/**/*.{tsx,ts,js}" --write
 ```
 
 ### ESLint

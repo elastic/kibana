@@ -243,6 +243,61 @@ describe('AlertAnalysisWorkflowPage', () => {
     expect(await screen.findByText('My Custom Agent')).toBeInTheDocument();
   });
 
+  describe('use a prompt instead of an agent', () => {
+    it('is off by default and leaves the agent controls enabled', async () => {
+      renderComponent();
+
+      expect(await screen.findByTestId('alertAnalysisWorkflowUsePrompt')).not.toBeChecked();
+      expect(screen.getByTestId('alertAnalysisWorkflowAgentSelector')).toBeEnabled();
+      expect(screen.getByTestId('alertAnalysisWorkflowCreateConversation')).toBeEnabled();
+    });
+
+    it('disables the agent controls but not the connector picker, and re-enables them when turned off', async () => {
+      renderComponent();
+
+      const usePromptSwitch = await screen.findByTestId('alertAnalysisWorkflowUsePrompt');
+      fireEvent.click(usePromptSwitch);
+
+      expect(screen.getByTestId('alertAnalysisWorkflowAgentSelector')).toBeDisabled();
+      expect(screen.getByTestId('alertAnalysisWorkflowCreateConversation')).toBeDisabled();
+      // The prompt is sent to the selected model, so the connector stays selectable.
+      expect(screen.getByTestId('connector-selector')).toBeEnabled();
+
+      fireEvent.click(usePromptSwitch);
+
+      expect(screen.getByTestId('alertAnalysisWorkflowAgentSelector')).toBeEnabled();
+      expect(screen.getByTestId('alertAnalysisWorkflowCreateConversation')).toBeEnabled();
+    });
+
+    it('keeps the agent and conversation values when the option is turned on, so they apply again when it is turned off', async () => {
+      renderComponent({
+        settingsRequest: jest.fn().mockResolvedValue(
+          settingsGetResponse({
+            ...defaultSettings,
+            agentId: 'my-custom-agent',
+            createConversation: true,
+          })
+        ),
+      });
+
+      fireEvent.click(await screen.findByTestId('alertAnalysisWorkflowUsePrompt'));
+      fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSaveButton'));
+
+      await waitFor(() => {
+        expect(coreStart.http.fetch).toHaveBeenCalledWith(ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE, {
+          method: 'PUT',
+          version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
+          body: JSON.stringify({
+            ...defaultSettings,
+            agentId: 'my-custom-agent',
+            createConversation: true,
+            usePrompt: true,
+          }),
+        });
+      });
+    });
+  });
+
   it('excludes readonly built-in agents from the agent selector', async () => {
     renderComponent();
 

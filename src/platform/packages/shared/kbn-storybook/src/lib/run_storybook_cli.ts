@@ -60,14 +60,7 @@ export async function buildStorybook({
     process.env.NODE_ENV = 'development';
   }
 
-  try {
-    // Some transitive deps of addon-docs are ESM and not loading properly
-    // See: https://github.com/storybookjs/storybook/issues/29467
-    require('fix-esm').require('react-docgen');
-    await build(config);
-  } finally {
-    require('fix-esm').unregister();
-  }
+  await build(config);
 }
 
 export function runStorybookCli({ configDir, name }: { configDir: string; name: string }) {

@@ -13,13 +13,30 @@ import {
   EuiIcon,
   EuiPageHeader,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibanaTimeZone } from '../../hooks/use_kibana_time_zone';
 
-const getAlertZeroGreeting = (): string => {
-  const hour = new Date().getHours();
+/**
+ * `timeZone` rather than `new Date().getHours()`: the OS timezone is not
+ * necessarily the one Kibana renders in, and greeting someone "good evening" at
+ * 10am is the visible cost of assuming it is.
+ *
+ * `hourCycle: 'h23'` rather than `hour12: false`: the two agree on every engine
+ * Kibana targets today, but ECMA-402 originally had `hour12: false` resolve to
+ * the 1–24 cycle for locales whose default is `h12` — `en-US` among them — so
+ * midnight formatted as `"24"` and fell past both branches into "Good evening".
+ * Naming the cycle is immune to that history.
+ */
+const getAlertZeroGreeting = (timeZone?: string): string => {
+  const hour = Number(
+    new Intl.DateTimeFormat('en-US', { hour: 'numeric', hourCycle: 'h23', timeZone }).format(
+      new Date()
+    )
+  );
 
   if (hour < 12) {
     return i18n.translate('xpack.alertzero.hero.morningGreetingDescription', {
@@ -41,17 +58,28 @@ const getAlertZeroGreeting = (): string => {
 const getAlertZeroHeroTitle = ({
   isQueueEmpty,
   isLoading,
+  hasError,
   hasNeedsAction,
   eventCount,
 }: {
   isQueueEmpty: boolean;
   isLoading: boolean;
+  hasError: boolean;
   hasNeedsAction: boolean;
   eventCount: number;
 }): string => {
   if (isLoading) {
     return i18n.translate('xpack.alertzero.hero.checkingTitle', {
       defaultMessage: 'Looking into your data...',
+    });
+  }
+
+  // Before every count-bearing branch. A failed count arrives as zero, which is
+  // indistinguishable from "nothing to do" — and claiming the queue is clear over
+  // a queue that is not is the worst thing this header can say.
+  if (hasError) {
+    return i18n.translate('xpack.alertzero.hero.countUnavailableTitle', {
+      defaultMessage: "Your action count couldn't be loaded",
     });
   }
 
@@ -78,7 +106,15 @@ const getAlertZeroHeroTitle = ({
 export interface AlertZeroPageHeaderProps {
   isQueueEmpty?: boolean;
   isLoading?: boolean;
+  /** The count could not be fetched, so `eventCount` says nothing about reality. */
+  hasError?: boolean;
   eventCount?: number;
+  /** Replaces the time-of-day greeting. */
+  greeting?: string;
+  /** Replaces the title derived from the queue state. */
+  title?: string;
+  /** Supporting line under the heading. */
+  subtitle?: string;
 }
 /**
  * Page header for AlertZero routes.
@@ -91,15 +127,23 @@ export interface AlertZeroPageHeaderProps {
 export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
   isQueueEmpty = false,
   isLoading = false,
+  hasError = false,
   eventCount = 0,
+  greeting,
+  title: titleOverride,
+  subtitle,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const title = getAlertZeroHeroTitle({
-    isQueueEmpty,
-    isLoading,
-    hasNeedsAction: eventCount > 0,
-    eventCount,
-  });
+  const timeZone = useKibanaTimeZone();
+  const title =
+    titleOverride ??
+    getAlertZeroHeroTitle({
+      isQueueEmpty,
+      isLoading,
+      hasError,
+      hasNeedsAction: eventCount > 0,
+      eventCount,
+    });
   return (
     <>
       <EuiPageHeader
@@ -155,14 +199,24 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
           <EuiFlexItem grow={false}>
             <EuiTitle size="m" css={{ fontWeight: 500 }}>
               <h1>
-                <span style={{ color: euiTheme.colors.mediumShade }}>{getAlertZeroGreeting()}</span>{' '}
+                <span style={{ color: euiTheme.colors.mediumShade }}>
+                  {greeting ?? getAlertZeroGreeting(timeZone)}
+                </span>{' '}
                 <span>{title}</span>
               </h1>
             </EuiTitle>
+            {subtitle && (
+              <EuiText size="s" color="subdued" data-test-subj="alertZeroPageHeaderSubtitle">
+                {subtitle}
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>
-      <EuiSpacer size="l" />
+      {/* Pages stack sections with a large column gap; the reference design adds only a small
+          inset under the greeting, so the content sits close to the title. Keep in step with
+          `EscalationsPageHeader`, which mirrors this header. */}
+      <EuiSpacer size="s" />
     </>
   );
 };

@@ -66,6 +66,89 @@ describe('RulesSavedObjectService', () => {
     ({ rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService());
   });
 
+  describe('bulkCreate', () => {
+    const attrs = { metadata: { name: 'rule-a' } } as never;
+
+    it('returns an empty array when given no items', async () => {
+      const result = await rulesSavedObjectService.bulkCreate([]);
+
+      expect(result).toEqual([]);
+      expect(mockSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('creates saved objects with overwrite false and maps successes', async () => {
+      mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+        ],
+      });
+
+      const result = await rulesSavedObjectService.bulkCreate([{ id: 'rule-1', attrs }]);
+
+      expect(mockSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            type: RULE_SAVED_OBJECT_TYPE,
+            id: 'rule-1',
+            attributes: attrs,
+          },
+        ],
+        { overwrite: false }
+      );
+      expect(result).toEqual([
+        {
+          id: 'rule-1',
+          attributes: attrs,
+          version: 'WzEsMV0=',
+          references: [],
+        },
+      ]);
+    });
+
+    it('maps mixed success and per-item saved object errors', async () => {
+      mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+          {
+            id: 'rule-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+          },
+        ],
+      } as never);
+
+      const result = await rulesSavedObjectService.bulkCreate([
+        { id: 'rule-1', attrs },
+        { id: 'rule-2', attrs },
+      ]);
+
+      expect(result).toEqual([
+        {
+          id: 'rule-1',
+          attributes: attrs,
+          version: 'WzEsMV0=',
+          references: [],
+        },
+        {
+          id: 'rule-2',
+          error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+        },
+      ]);
+    });
+  });
+
   describe('getTotalScheduledPerMinute', () => {
     it('aggregates enabled rules across all spaces and sums their per-minute frequency', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(
@@ -255,6 +338,23 @@ describe('RulesSavedObjectService', () => {
       );
     });
 
+    it('aggregates metadata.tags by default and metadata.routing_tags when asked', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([{ key: 'sre' }]));
+
+      await rulesSavedObjectService.findTags();
+      await rulesSavedObjectService.findTags({ field: 'routing_tags' });
+
+      const [defaultCall, routingCall] = mockSavedObjectsClient.find.mock.calls.map(
+        ([args]) => args
+      );
+      expect((defaultCall.aggs as any).tags.terms.field).toBe(
+        `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`
+      );
+      expect((routingCall.aggs as any).tags.terms.field).toBe(
+        `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.routing_tags`
+      );
+    });
+
     it('does not include an include pattern when search is absent', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
 
@@ -338,6 +438,80 @@ describe('RulesSavedObjectService', () => {
       expect((mockSavedObjectsClient.find.mock.calls[0][0].aggs as any).tags.terms.size).toBe(
         10000
       );
+    });
+  });
+
+  describe('countByTemplateIds', () => {
+    const mockTemplateCountsResponse = (buckets: Array<{ key: string; doc_count: number }>) =>
+      ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { template_counts: { buckets } },
+      } as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+
+    it('maps each bucket to its document count', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(
+        mockTemplateCountsResponse([
+          { key: 'template-1', doc_count: 3 },
+          { key: 'template-2', doc_count: 1 },
+        ])
+      );
+
+      const counts = await rulesSavedObjectService.countByTemplateIds(['template-1', 'template-2']);
+
+      expect(counts).toEqual({ 'template-1': 3, 'template-2': 1 });
+    });
+
+    it('omits templates without buckets', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(
+        mockTemplateCountsResponse([{ key: 'template-1', doc_count: 2 }])
+      );
+
+      const counts = await rulesSavedObjectService.countByTemplateIds(['template-1', 'template-2']);
+
+      expect(counts).toEqual({ 'template-1': 2 });
+    });
+
+    it('aggregates metadata.template.id limited to the exact requested ids', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTemplateCountsResponse([]));
+
+      await rulesSavedObjectService.countByTemplateIds(['template-1', 'a.b+c']);
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        aggs: {
+          template_counts: {
+            terms: {
+              field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
+              size: 2,
+              include: ['template-1', 'a.b+c'],
+            },
+          },
+        },
+      });
+    });
+
+    it('does not query when no ids are given', async () => {
+      const counts = await rulesSavedObjectService.countByTemplateIds([]);
+
+      expect(counts).toEqual({});
+      expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty object when aggregations are missing', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      } as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+
+      const counts = await rulesSavedObjectService.countByTemplateIds(['template-1']);
+
+      expect(counts).toEqual({});
     });
   });
 });

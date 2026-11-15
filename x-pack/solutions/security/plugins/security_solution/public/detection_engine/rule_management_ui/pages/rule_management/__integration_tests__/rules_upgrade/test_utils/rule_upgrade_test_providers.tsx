@@ -15,12 +15,13 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { MemoryRouter } from 'react-router-dom';
 import { MockDiscoverInTimelineContext } from '../../../../../../../common/components/discover_in_timeline/mocks/discover_in_timeline_provider';
 import { createKibanaContextProviderMock } from '../../../../../../../common/lib/kibana/kibana_react.mock';
 import { createMockStore } from '../../../../../../../common/mock';
 import { RouterSpyStateContext } from '../../../../../../../common/utils/route/helpers';
-import { AllRulesTabs } from '../../../../../components/rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../../../../../components/rules_table/constants';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { MlCapabilitiesProvider } from '../../../../../../../common/components/ml/permissions/ml_capabilities_provider';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
@@ -102,7 +103,9 @@ export function RuleUpgradeTestProviders({ children }: PropsWithChildren<{}>): J
                         <InitializationContext.Provider value={mockInitializationContextValue}>
                           <MockAssistantProviderComponent>
                             <MockDiscoverInTimelineContext>
-                              <EuiProvider highContrastMode={false}>{children}</EuiProvider>
+                              <EuiProvider highContrastMode={false}>
+                                <MockAppHeaderProvider>{children}</MockAppHeaderProvider>
+                              </EuiProvider>
                             </MockDiscoverInTimelineContext>
                           </MockAssistantProviderComponent>
                         </InitializationContext.Provider>

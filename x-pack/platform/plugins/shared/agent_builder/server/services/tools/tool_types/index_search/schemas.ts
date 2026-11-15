@@ -11,10 +11,12 @@ export const configurationSchema = schema.object({
   pattern: schema.string(),
   row_limit: schema.maybe(schema.number({ min: 1 })),
   custom_instructions: schema.maybe(schema.string()),
+  include_frozen: schema.maybe(schema.boolean()),
 });
 
 export const configurationUpdateSchema = schema.object({
   pattern: schema.maybe(schema.string()),
   row_limit: schema.maybe(schema.number({ min: 1 })),
   custom_instructions: schema.maybe(schema.string()),
+  include_frozen: schema.maybe(schema.boolean()),
 });

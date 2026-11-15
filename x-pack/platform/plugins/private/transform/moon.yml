@@ -79,7 +79,6 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/test-jest-helpers'
-  - '@kbn/monaco'
   - '@kbn/json-schemas'
   - '@kbn/ml-field-stats-flyout'
   - '@kbn/ml-validators'
@@ -115,6 +114,4 @@ fileGroups:
     - test/scout_cps_local/**/*
     - public/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

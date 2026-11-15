@@ -1,0 +1,158 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Nightshift bound hook 0 pins its version to the hook triggers 1`] = `
+Object {
+  "triggers": Array [
+    Object {
+      "inputs": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "agent_id": Object {
+            "description": "Agent id for this round. Memory materialize is skipped when it is absent.",
+            "type": "string",
+          },
+          "conversation_id": Object {
+            "description": "Conversation id that namespaces the sandbox. Absent for standalone runs.",
+            "type": "string",
+          },
+          "prompt": Object {
+            "description": "The user message for this round, forwarded by the agent's beforeAgent hook.",
+            "type": "string",
+          },
+          "round_execution_index": Object {
+            "default": 0,
+            "description": "Zero for the first execution, positive on HITL resume.",
+            "minimum": 0,
+            "type": "integer",
+          },
+        },
+      },
+      "type": "manual",
+    },
+  ],
+  "version": 1,
+}
+`;
+
+exports[`Nightshift bound hook 1 pins its version to the hook triggers 1`] = `
+Object {
+  "triggers": Array [
+    Object {
+      "inputs": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "agent_id": Object {
+            "description": "Supported agent policy selector; never a storage or Space boundary.",
+            "type": "string",
+          },
+          "connector_id": Object {
+            "description": "Optional strict model override for a direct workflow run.",
+            "maxLength": 500,
+            "type": "string",
+          },
+          "conversation_id": Object {
+            "description": "Conversation id for the completed round, when present.",
+            "type": "string",
+          },
+          "prompt": Object {
+            "description": "The user message that started this round.",
+            "type": "string",
+          },
+          "response": Object {
+            "description": "The assistant's final response for this round.",
+            "type": "string",
+          },
+          "round_connector_id": Object {
+            "description": "Inference connector the triggering agent used for this round.",
+            "maxLength": 500,
+            "type": "string",
+          },
+          "round_id": Object {
+            "description": "Id of the completed conversation round.",
+            "type": "string",
+          },
+          "tool_calls": Object {
+            "description": "Tool calls from the completed round (parameters). Shows the Cortex and Semantic Memory optimizers which services, indices, and integrations the investigator queried, and decision-tree reinforcement which decision-tree files the investigator actually opened.
+",
+            "items": Object {
+              "additionalProperties": true,
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "tool_results": Object {
+            "description": "Results of the completed round's tool calls, keyed by tool_call_id. Shows the Cortex and Semantic Memory optimizers what each query returned.
+",
+            "items": Object {
+              "additionalProperties": true,
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "workflow_context": Object {
+            "description": "Persisted non-model workflow state for the completed round.",
+            "properties": Object {
+              "nightshift.semantic_memory.recall": Object {
+                "properties": Object {
+                  "data": Object {
+                    "properties": Object {
+                      "recalled_ids": Object {
+                        "items": Object {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                    },
+                    "type": "object",
+                  },
+                  "version": Object {
+                    "type": "number",
+                  },
+                },
+                "type": "object",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+      "type": "manual",
+    },
+  ],
+  "version": 1,
+}
+`;
+
+exports[`Nightshift bound hook 2 pins its version to the hook triggers 1`] = `
+Object {
+  "triggers": Array [
+    Object {
+      "inputs": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "agent_id": Object {
+            "description": "Agent id forwarded by the beforeAgent hook. Unused by this workflow.",
+            "type": "string",
+          },
+          "conversation_id": Object {
+            "description": "Conversation id that namespaces the sandbox. Absent for standalone runs.",
+            "type": "string",
+          },
+          "prompt": Object {
+            "description": "The message for this round, forwarded by the agent's beforeAgent hook.",
+            "type": "string",
+          },
+          "round_execution_index": Object {
+            "default": 0,
+            "description": "Zero for the first execution, positive on HITL resume.",
+            "minimum": 0,
+            "type": "integer",
+          },
+        },
+      },
+      "type": "manual",
+    },
+  ],
+  "version": 1,
+}
+`;

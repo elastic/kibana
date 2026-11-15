@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { BoolQuery, Filter } from '@kbn/es-query';
@@ -23,6 +23,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
 import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
+import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { createUseRulesLink } from '../../hooks/create_use_rules_link';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
@@ -296,6 +297,18 @@ function InternalAlertsPage() {
     [authorizedToReadAnyRules, manageRulesHref]
   );
 
+  const titleBadges: AppHeaderBadge[] = isAlertingV2Enabled(kibanaServices)
+    ? [
+        {
+          label: i18n.translate('xpack.observability.alertsTitleClassicBadge', {
+            defaultMessage: 'Classic',
+          }),
+          color: 'hollow',
+          'data-test-subj': 'classicAlertsBadge',
+        },
+      ]
+    : [];
+
   return (
     <Provider value={alertSearchBarStateContainer}>
       <ObservabilityPageTemplate
@@ -304,6 +317,7 @@ function InternalAlertsPage() {
       >
         <AppHeader
           title={i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}
+          badges={titleBadges}
           menu={appMenu}
           docLink={docLinks.links.observability.createAlerts}
           spacing="standard"

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/private/data_usage
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/data-plugin'
@@ -43,6 +44,8 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/charts-theme'
   - '@kbn/react-query'
+  - '@kbn/scout'
+  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod
@@ -55,7 +58,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

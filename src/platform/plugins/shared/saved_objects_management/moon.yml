@@ -61,6 +61,4 @@ fileGroups:
     - test/scout*/**/*
     - '!target/**/*'
     - '!public/management_section/objects_table/saved_objects_table_pseudo.tsx'
-  jest-config:
-    - jest.config.js
 tasks: {}

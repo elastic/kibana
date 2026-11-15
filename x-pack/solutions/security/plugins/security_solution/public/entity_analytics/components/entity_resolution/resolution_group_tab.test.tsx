@@ -85,6 +85,52 @@ describe('ResolutionGroupTab', () => {
     expect(getByText('bob')).toBeInTheDocument();
   });
 
+  it('disables opening the current entity in single mode', () => {
+    mockUseResolutionGroup.mockReturnValue({ data: existingGroup, isLoading: false });
+    const onShowEntity = jest.fn();
+
+    const { getAllByLabelText } = render(
+      <TestProviders>
+        <ResolutionGroupTab
+          entityId="alice-id"
+          entityType="user"
+          scopeId="test-scope"
+          onShowEntity={onShowEntity}
+        />
+      </TestProviders>
+    );
+
+    const [targetExpandButton] = getAllByLabelText(/open entity details/i);
+    expect(targetExpandButton).toBeDisabled();
+  });
+
+  it('lets the target entity be opened as a single entity in resolved mode', () => {
+    mockUseResolutionGroup.mockReturnValue({ data: existingGroup, isLoading: false });
+    const onShowEntity = jest.fn();
+
+    const { getAllByLabelText } = render(
+      <TestProviders>
+        <ResolutionGroupTab
+          entityId="alice-id"
+          entityType="user"
+          scopeId="test-scope"
+          mode="resolved"
+          onShowEntity={onShowEntity}
+        />
+      </TestProviders>
+    );
+
+    const [targetExpandButton] = getAllByLabelText(/open entity details/i);
+    expect(targetExpandButton).toBeEnabled();
+    fireEvent.click(targetExpandButton);
+
+    expect(onShowEntity).toHaveBeenCalledWith({
+      engineType: 'user',
+      entityId: 'alice-id',
+      entityName: 'alice',
+    });
+  });
+
   it('adds entity to existing group — calls linkEntities directly', async () => {
     mockUseResolutionGroup.mockReturnValue({ data: existingGroup, isLoading: false });
     // Pre-flight: entity has no group

@@ -17,6 +17,7 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import type {
@@ -434,7 +435,7 @@ export function defineRoutes(
         await actionsClient.bulkEnqueueExecution([
           {
             id: req.params.id,
-            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : DEFAULT_SPACE_ID,
             executionId: uuidv4(),
             apiKey: createAPIKeyResult
               ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
@@ -877,6 +878,43 @@ export function defineRoutes(
         }
 
         return res.ok({ body: err.message });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/{id}/_test_get_sandbox_credentials',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string({ maxLength: 128 }),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [_, { actions }] = await core.getStartServices();
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.getSandboxCredentials({ id: req.params.id }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
       }
     }
   );

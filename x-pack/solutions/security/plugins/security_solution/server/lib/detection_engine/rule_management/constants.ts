@@ -103,8 +103,10 @@ export const FUNCTIONAL_FIELD_MAP: Record<AllKeys<RuleResponse>, boolean> = {
   immutable: false,
   updated_at: false,
   updated_by: false,
+  updated_by_profile_uid: false,
   created_at: false,
   created_by: false,
+  created_by_profile_uid: false,
 };
 
 // This constant is used in rule tags aggregations. It limits the maximum number of tags that can be returned by a "terms" aggregation.

@@ -76,8 +76,22 @@ export class ListingTableService extends FtrService {
     toggleButtonTestSubject: 'userFilterPopoverButton',
   });
 
+  /**
+   * Waits for either the legacy or the Content List variant of a control and
+   * returns whether the legacy one rendered.
+   */
+  private async isLegacyVariant(legacySubj: string, contentListSubj: string): Promise<boolean> {
+    const variant = await this.testSubjects.waitForFirst([legacySubj, contentListSubj], {
+      timeout: 5000,
+    });
+    if (!variant) {
+      throw new Error(`Neither ${legacySubj} nor ${contentListSubj} has rendered`);
+    }
+    return variant === legacySubj;
+  }
+
   private async getSearchFilter() {
-    if (await this.testSubjects.exists('tableListSearchBox', { timeout: 1000 })) {
+    if (await this.isLegacyVariant('tableListSearchBox', CONTENT_LIST_SEARCH_BOX)) {
       return this.testSubjects.find('tableListSearchBox');
     }
     return this.testSubjects.find(CONTENT_LIST_SEARCH_BOX);
@@ -137,12 +151,12 @@ export class ListingTableService extends FtrService {
     }
 
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('listingTable-isLoaded', { timeout: 1000 })) {
+      if (await this.testSubjects.exists('listingTable-isLoaded')) {
         return true;
       }
       // Content List keeps its table mounted behind a loading skeleton.
-      if (await this.testSubjects.exists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
-        if (!(await this.testSubjects.exists(CONTENT_LIST_TABLE_SKELETON, { timeout: 1000 }))) {
+      if (await this.testSubjects.exists(CONTENT_LIST_TABLE)) {
+        if (!(await this.testSubjects.exists(CONTENT_LIST_TABLE_SKELETON))) {
           return true;
         }
       }
@@ -194,7 +208,7 @@ export class ListingTableService extends FtrService {
 
   public async openTagPopover(): Promise<void> {
     this.log.debug('ListingTable.openTagPopover');
-    if (await this.testSubjects.exists('tagFilterPopoverButton', { timeout: 1000 })) {
+    if (await this.isLegacyVariant('tagFilterPopoverButton', CONTENT_LIST_TAGS_FILTER_BUTTON)) {
       await this.tagPopoverToggle.open();
       return;
     }
@@ -203,7 +217,7 @@ export class ListingTableService extends FtrService {
 
   public async closeTagPopover(): Promise<void> {
     this.log.debug('ListingTable.closeTagPopover');
-    if (await this.testSubjects.exists('tagFilterPopoverButton', { timeout: 1000 })) {
+    if (await this.isLegacyVariant('tagFilterPopoverButton', CONTENT_LIST_TAGS_FILTER_BUTTON)) {
       await this.tagPopoverToggle.close();
       return;
     }
@@ -249,8 +263,15 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickActionButton(actionSelector: string, index: number = 0) {
-    const buttons = await this.testSubjects.findAll(actionSelector);
-    await buttons[index].click();
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the buttons without an implicit wait.
+      const buttons = await this.testSubjects.findAll(actionSelector, 0);
+      const button = buttons[index];
+      if (!button) {
+        throw new Error(`Action ${actionSelector} is not available at index ${index}`);
+      }
+      await button.click();
+    });
   }
 
   /**
@@ -348,7 +369,7 @@ export class ListingTableService extends FtrService {
     await this.searchForItemWithName(name);
     await this.retry.try(async () => {
       let matches: number;
-      if (await this.testSubjects.exists(CONTENT_LIST_TABLE, { timeout: 1000 })) {
+      if (await this.testSubjects.exists(CONTENT_LIST_TABLE)) {
         // Content List item links carry no per-item subject; match on exact text.
         const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
         const texts = await Promise.all(links.map((link) => link.getVisibleText()));
@@ -364,7 +385,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickDeleteSelected() {
-    if (await this.testSubjects.exists('deleteSelectedItems', { timeout: 1000 })) {
+    if (await this.isLegacyVariant('deleteSelectedItems', CONTENT_LIST_SELECTION_BAR_DELETE)) {
       await this.testSubjects.click('deleteSelectedItems');
       return;
     }
@@ -400,19 +421,22 @@ export class ListingTableService extends FtrService {
    */
   public async clickItemLink(appName: AppName, name: string) {
     const legacySubj = `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`;
-    if (await this.testSubjects.exists(legacySubj, { timeout: 1000 })) {
-      await this.testSubjects.click(legacySubj);
-      return;
-    }
-    // Content List item links carry no per-item subject; match on exact text.
-    const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
-    for (const link of links) {
-      if ((await link.getVisibleText()).trim() === name) {
-        await link.click();
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.testSubjects.exists(legacySubj)) {
+        await this.testSubjects.click(legacySubj);
         return;
       }
-    }
-    throw new Error(`No listing row found with name "${name}".`);
+      // Content List item links carry no per-item subject; match on exact text.
+      // Probe without an implicit wait so a legacy table still gets re-checked.
+      const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK, 0);
+      for (const link of links) {
+        if ((await link.getVisibleText()).trim() === name) {
+          await link.click();
+          return;
+        }
+      }
+      throw new Error(`No listing row found with name "${name}".`);
+    });
   }
 
   /**
@@ -432,11 +456,11 @@ export class ListingTableService extends FtrService {
    */
   public async clickNewButton(): Promise<void> {
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('newItemButton', { timeout: 1000 })) {
+      if (await this.testSubjects.exists('newItemButton')) {
         await this.testSubjects.click('newItemButton');
         return;
       }
-      if (await this.testSubjects.exists('app-menu-overflow-button', { timeout: 1000 })) {
+      if (await this.testSubjects.exists('app-menu-overflow-button')) {
         await this.testSubjects.click('app-menu-overflow-button');
         await this.testSubjects.click('newItemButton');
         return;

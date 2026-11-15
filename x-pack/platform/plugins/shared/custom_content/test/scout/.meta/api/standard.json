@@ -1,0 +1,22 @@
+{
+  "sha1": "be9252d9986059c739ae5027c825d01ea638aec4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "51d4852b2d138a7-9b5b3bf84e5f5e4",
+      "title": "Custom content — Refine with chat tool UI events a tool UI event sent by custom_content_update_panel reaches the events-native stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/custom_content/test/scout/api/tests/custom_content_tool_ui_events.spec.ts",
+        "line": 127,
+        "column": 74
+      }
+    }
+  ]
+}

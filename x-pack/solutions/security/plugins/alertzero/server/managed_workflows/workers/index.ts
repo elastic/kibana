@@ -18,4 +18,4 @@ export const workerSettingsById: Record<RegisteredWorkerId, WorkerSettingsRegist
   ) as Record<RegisteredWorkerId, WorkerSettingsRegistration>;
 
 export { createWorkerSettingsRegistration } from './worker_settings';
-export type { WorkerSettingsPatch, WorkerSettingsRegistration } from './types';
+export type { WorkerSettingsRegistration } from './types';

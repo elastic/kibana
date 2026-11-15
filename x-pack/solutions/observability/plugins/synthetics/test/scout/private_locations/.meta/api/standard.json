@@ -1,5 +1,5 @@
 {
-  "sha1": "06f359c9d6a82e57506ad29d15938993b1b5a123",
+  "sha1": "6d0950fcf67523f26ff9c4ac7dcd86830b14e426",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -71,20 +71,6 @@
       }
     },
     {
-      "id": "22912baa484e96f-8f09e233a3b358a",
-      "title": "ClassicPrivateLocationNoCondition never stamps a condition on a classic private location, on create or edit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/classic_private_location_no_condition.spec.ts",
-        "line": 45,
-        "column": 25
-      }
-    },
-    {
       "id": "a5c3f83be276d2a-6771baf1db2b03d",
       "title": "CleanUpExtraPackagePolicies cleans up orphaned package policies",
       "expectedStatus": "passed",
@@ -108,22 +94,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 51
       }
     },
     {
-      "id": "a56530651b7f21f-596439d3ed034eb",
-      "title": "DisableScalablePrivateLocation disabling sharding clears a leftover agent pin before the location is persisted",
+      "id": "da272c25075079a-bff73455a14ecb2",
+      "title": "PrivateLocationCreateMonitor packages enabled NTLM auth into the Fleet policy as base64 JSON",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@local-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/disable_scalable_private_location.spec.ts",
-        "line": 45,
-        "column": 23
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
+        "line": 152,
+        "column": 17
       }
     },
     {
@@ -136,7 +122,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 106,
+        "line": 108,
         "column": 50
       }
     },
@@ -150,7 +136,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 110,
+        "line": 112,
         "column": 47
       }
     },
@@ -164,7 +150,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 142,
+        "line": 144,
         "column": 17
       }
     },
@@ -178,8 +164,50 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 156,
+        "line": 158,
         "column": 31
+      }
+    },
+    {
+      "id": "af9f3e8d40999e9-603b659f5da9af1",
+      "title": "EditPrivateLocationAPI changing the agent policy moves the monitor package policies in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
+        "line": 167,
+        "column": 25
+      }
+    },
+    {
+      "id": "af9f3e8d40999e9-c88fb147895c005",
+      "title": "EditPrivateLocationAPI rejects an unknown agent policy and leaves the location unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
+        "line": 195,
+        "column": 9
+      }
+    },
+    {
+      "id": "af9f3e8d40999e9-51ed71632c6999c",
+      "title": "EditPrivateLocationAPI changes the agent policy of a location with no monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
+        "line": 206,
+        "column": 21
       }
     },
     {
@@ -192,8 +220,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 165,
-        "column": 25
+        "line": 214,
+        "column": 11
       }
     },
     {
@@ -206,7 +234,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/get_private_location_monitors.spec.ts",
-        "line": 61,
+        "line": 62,
         "column": 7
       }
     },
@@ -220,7 +248,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/get_private_location_monitors.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 7
       }
     },
@@ -853,8 +881,34 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_monitor_crud.spec.ts",
-        "line": 59,
-        "column": 28
+        "line": 54,
+        "column": 25
+      }
+    },
+    {
+      "id": "90667665ddacd0b-cd6af572a976a8b",
+      "title": "ScalablePrivateLocationMaintenanceWindowSync redeploys an updated maintenance window and bumps the agent policy",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_mw_sync.spec.ts",
+        "line": 148,
+        "column": 42
+      }
+    },
+    {
+      "id": "90667665ddacd0b-abfaa12cb438db7",
+      "title": "ScalablePrivateLocationMaintenanceWindowSync removes a deleted maintenance window from the package policy and the monitor",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_mw_sync.spec.ts",
+        "line": 182,
+        "column": 19
       }
     },
     {
@@ -866,7 +920,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_placement.spec.ts",
-        "line": 81,
+        "line": 80,
         "column": 51
       }
     },
@@ -879,7 +933,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_rebalance.spec.ts",
-        "line": 80,
+        "line": 79,
         "column": 38
       }
     }

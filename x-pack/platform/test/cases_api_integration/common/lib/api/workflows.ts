@@ -59,7 +59,9 @@ export const deleteWorkflow = async ({
   auth?: { user: User; space: string | null } | null;
 }): Promise<void> => {
   const apiCall = st.delete(
-    `${getSpaceUrlPrefix(auth?.space)}/api/workflows/workflow/${workflowId}?force=true`
+    `${getSpaceUrlPrefix(
+      auth?.space
+    )}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`
   );
 
   void setupAuth({ apiCall, headers: {}, auth });

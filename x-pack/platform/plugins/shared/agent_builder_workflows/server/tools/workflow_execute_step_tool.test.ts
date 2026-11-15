@@ -16,6 +16,7 @@ import {
   isConfirmationPrompt,
 } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
   ToolHandlerPromptReturn,
   ToolHandlerStandardReturn,
@@ -178,6 +179,7 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
 
 describe('registerWorkflowExecuteStepTool', () => {
   let registeredTool: BuiltinToolDefinition;
+  const getSecurity = jest.fn<SecurityPluginStart | undefined, []>();
 
   const mockApi = {
     testStep: jest.fn(),
@@ -187,6 +189,7 @@ describe('registerWorkflowExecuteStepTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getSecurity.mockReturnValue(undefined);
     jest.useFakeTimers();
 
     const agentBuilder = {
@@ -197,7 +200,7 @@ describe('registerWorkflowExecuteStepTool', () => {
       },
     } as any;
 
-    registerWorkflowExecuteStepTool(agentBuilder, mockApi);
+    registerWorkflowExecuteStepTool(agentBuilder, mockApi, getSecurity);
   });
 
   afterEach(() => {
@@ -207,6 +210,37 @@ describe('registerWorkflowExecuteStepTool', () => {
   it('registers with correct id', () => {
     expect(registeredTool.id).toBe(WORKFLOW_EXECUTE_STEP_TOOL_ID);
   });
+
+  it.each([true, false])(
+    'does not execute a step without execute privilege (inline=%s)',
+    async (inline) => {
+      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: false });
+      getSecurity.mockReturnValue({
+        authz: {
+          actions: { api: { get: (action: string) => `api:${action}` } },
+          checkPrivilegesWithRequest: () => ({ atSpace }),
+        },
+      } as unknown as SecurityPluginStart);
+      const context = createMockContext(inline ? undefined : VALID_WORKFLOW_YAML);
+
+      const result = await invokeHandler(
+        registeredTool,
+        { stepName: 'log_step', ...(inline ? { yaml: VALID_WORKFLOW_YAML } : {}) },
+        context
+      );
+
+      expect(result.results[0].data).toEqual({
+        success: false,
+        error:
+          "Unauthorized to execute workflow step. The 'workflowsManagement' execute privilege is required.",
+      });
+      expect(atSpace).toHaveBeenCalledWith(context.spaceId, {
+        kibana: ['api:workflowsManagement:execute'],
+      });
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+      expect(mockApi.getWorkflowExecution).not.toHaveBeenCalled();
+    }
+  );
 
   it('returns error when no workflow.yaml attachment is present', async () => {
     const context = createMockContext();
@@ -254,6 +288,10 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(data.executionId).toBe('exec-123');
       expect(data.status).toBe(ExecutionStatus.COMPLETED);
       expect(data.duration).toBe(150);
+      expect(mockApi.getWorkflowExecution).toHaveBeenCalledWith('exec-123', 'default', {
+        includeOutput: true,
+        request: context.request,
+      });
       expect(mockApi.testStep).toHaveBeenCalledWith(
         VALID_WORKFLOW_YAML,
         'log_step',
@@ -944,7 +982,6 @@ describe('SAFE_STEP_TYPES policy', () => {
       'kibana.getCase': ['GET'],
       'kibana.streams.list': ['GET'],
       'kibana.streams.get': ['GET'],
-      'kibana.streams.getSignificantEvents': ['GET'],
     };
 
     const internalConnectors = new Map(

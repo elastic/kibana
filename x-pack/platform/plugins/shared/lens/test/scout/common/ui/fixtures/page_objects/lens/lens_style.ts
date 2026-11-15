@@ -12,8 +12,7 @@ import { normalizeComputedColor, WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_edi
  * Lens style flyout, palette details, gauge/heatmap settings, reference lines, and annotations.
  */
 export class LensStyle {
-  /** Style flyout title — Lens uses a DOM id, not a data-test-subj (FTR parity). */
-  private readonly dimensionContainerTitle;
+  private readonly styleSettingsFlyout;
   private readonly styleSettingsButton;
   private readonly flyoutBackButton;
   private readonly closeDimensionEditorButton;
@@ -29,7 +28,7 @@ export class LensStyle {
   readonly missingValuesSelect;
 
   constructor(private readonly page: ScoutPage) {
-    this.dimensionContainerTitle = this.page.locator('#lnsDimensionContainerTitle');
+    this.styleSettingsFlyout = this.page.testSubj.locator('lnsStyleSettingsFlyout');
     this.styleSettingsButton = this.page.locator('button[data-test-subj="style"]');
     this.flyoutBackButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
@@ -56,7 +55,7 @@ export class LensStyle {
    */
   async openStyleSettingsFlyout() {
     await this.styleSettingsButton.click();
-    await this.dimensionContainerTitle.waitFor({ state: 'visible' });
+    await this.styleSettingsFlyout.waitFor({ state: 'visible' });
   }
 
   /**
@@ -117,6 +116,7 @@ export class LensStyle {
     await this.openPalettePanelFlyout();
     const palettePicker = isLegacy ? this.legacyPalettePicker : this.colorMappingPalettePicker;
     await palettePicker.click();
+    // eslint-disable-next-line playwright/prefer-native-locators, playwright/no-raw-locators -- chained [role][aria-selected] is auto-fixed to an invalid getByRole string; a page-wide getByRole('option', { selected: true }) matches other comboboxes
     const selected = this.page.locator('[role=option][aria-selected=true]');
     await selected.waitFor({ state: 'visible' });
     const paletteId = await selected.getAttribute('id');
@@ -432,5 +432,23 @@ export class LensStyle {
    */
   async editMissingValues(label: string) {
     await this.missingValuesSuperSelect.selectOptionByLabel(label);
+  }
+
+  /**
+   * Sets value-label visibility in the open style flyout (`hide` or `inside`).
+   */
+  async setValueLabels(mode: 'hide' | 'inside') {
+    const button = this.page.testSubj.locator(`lns_valueLabels_${mode}`);
+    await button.click();
+    await button.and(this.page.locator('[aria-pressed="true"]')).waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Sets XY point visibility in the open style flyout (`auto`, `show`, or `hide`).
+   */
+  async setPointVisibility(mode: 'auto' | 'show' | 'hide') {
+    const button = this.page.testSubj.locator(`xy_point_visibility_${mode}`);
+    await button.click();
+    await button.and(this.page.locator('[aria-pressed="true"]')).waitFor({ state: 'visible' });
   }
 }

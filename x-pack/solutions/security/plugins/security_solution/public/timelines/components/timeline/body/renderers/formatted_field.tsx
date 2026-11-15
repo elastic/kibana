@@ -144,7 +144,12 @@ const FormattedFieldValueComponent: React.FC<{
     return <Duration fieldName={fieldName} value={`${value}`} />;
   } else if (fieldName === EntityTypeToIdentifierField.host) {
     const entityId =
-      data && euidApi?.euid ? euidApi.euid.getEuidFromTimelineNonEcsData('host', data) : undefined;
+      data && euidApi?.euid
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('host'),
+            data
+          )
+        : undefined;
     return (
       <HostName
         Component={Component}
@@ -158,7 +163,12 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === EntityTypeToIdentifierField.user) {
     const entityId =
-      data && euidApi?.euid ? euidApi.euid.getEuidFromTimelineNonEcsData('user', data) : undefined;
+      data && euidApi?.euid
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('user'),
+            data
+          )
+        : undefined;
     return (
       <UserName
         Component={Component}
@@ -173,7 +183,10 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === EntityTypeToIdentifierField.service) {
     const entityId =
       data && euidApi?.euid
-        ? euidApi.euid.getEuidFromTimelineNonEcsData('service', data)
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('service'),
+            data
+          )
         : undefined;
     return (
       <ServiceName

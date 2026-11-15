@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 
 export type StaticPage =
   | 'base'
@@ -164,11 +164,8 @@ export const pagePathGetters: {
     if (showDeprecated === true) {
       queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
     }
-    const queryString = queryParams.toString();
-    return [
-      INTEGRATIONS_BASE_PATH,
-      `/browse${categoryPath}${queryString ? `?${queryString}` : ''}`,
-    ];
+    const search = queryParams.toString();
+    return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${search ? `?${search}` : ''}`];
   },
   integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
     const categoryPath = category ? `/${category}` : ``;
@@ -188,7 +185,7 @@ export const pagePathGetters: {
   },
   integration_create: () => [INTEGRATIONS_BASE_PATH, `/create`],
   integration_details_overview: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/overview${qs ? `?${qs}` : ''}`];
   },
   integration_details_policies: ({
@@ -198,31 +195,31 @@ export const pagePathGetters: {
     returnAppId,
     returnPath,
   }) => {
-    const qs = stringify({ integration, addAgentToPolicyId, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, addAgentToPolicyId, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs}` : ''}`];
   },
   integration_details_assets: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
   },
   integration_details_alerting: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/alerting${qs ? `?${qs}` : ''}`];
   },
   integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/settings${qs ? `?${qs}` : ''}`];
   },
   integration_details_configs: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/configs${qs ? `?${qs}` : ''}`];
   },
   integration_details_custom: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/custom${qs ? `?${qs}` : ''}`];
   },
   integration_details_api_reference: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/api-reference${qs ? `?${qs}` : ''}`];
   },
   integration_policy_edit: ({ packagePolicyId }) => [
@@ -261,7 +258,7 @@ export const pagePathGetters: {
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
   add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease }) => {
-    const qs = stringify({
+    const qs = queryString.stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
       ...(prerelease ? { prerelease } : {}),
     });

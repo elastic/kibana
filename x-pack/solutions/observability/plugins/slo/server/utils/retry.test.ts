@@ -9,8 +9,9 @@ jest.mock('timers/promises');
 import { setTimeout } from 'timers/promises';
 import { loggerMock } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { retryTransientEsErrors } from './retry';
+import { ignoreAlreadyExistsAfterAmbiguousFailure, retryTransientEsErrors } from './retry';
 
 const setTimeoutMock = setTimeout as jest.Mock<
   ReturnType<typeof setTimeout>,
@@ -83,5 +84,94 @@ describe('retryTransientErrors', () => {
     const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
     await expect(retryTransientEsErrors(esCallMock)).rejects.toThrow(error);
     expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ignoreAlreadyExistsAfterAmbiguousFailure', () => {
+  const alreadyExistsError = new EsErrors.ResponseError(
+    elasticsearchClientMock.createApiResponse({
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'resource_already_exists_exception',
+          reason: 'Transform with id [slo-id-1] already exists',
+        },
+      },
+    })
+  );
+  const upgradingError = new EsErrors.ResponseError(
+    elasticsearchClientMock.createApiResponse({
+      statusCode: 409,
+      body: {
+        error: {
+          type: 'status_exception',
+          reason: 'Cannot create new Transform while the Transform feature is upgrading.',
+        },
+      },
+    })
+  );
+
+  it.each([
+    ['TimeoutError', new EsErrors.TimeoutError('timeout')],
+    ['ConnectionError', new EsErrors.ConnectionError('connection reset')],
+    [
+      '504 response',
+      new EsErrors.ResponseError({ statusCode: 504, meta: {} as any, warnings: [] }),
+    ],
+  ])('resolves when the resource already exists after a %s', async (_, ambiguousError) => {
+    const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(
+      jest.fn().mockRejectedValueOnce(ambiguousError).mockRejectedValueOnce(alreadyExistsError)
+    );
+
+    await expect(esCall()).rejects.toBe(ambiguousError);
+    await expect(esCall()).resolves.toBeUndefined();
+  });
+
+  it.each([
+    [
+      'NoLivingConnectionsError',
+      new EsErrors.NoLivingConnectionsError('no living connection', {
+        warnings: [],
+        meta: {} as any,
+      }),
+    ],
+    [
+      '429 response',
+      new EsErrors.ResponseError({ statusCode: 429, meta: {} as any, warnings: [] }),
+    ],
+  ])(
+    'rejects when the resource already exists after a %s, since it was never applied',
+    async (_, unappliedError) => {
+      const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(
+        jest.fn().mockRejectedValueOnce(unappliedError).mockRejectedValueOnce(alreadyExistsError)
+      );
+
+      await expect(esCall()).rejects.toBe(unappliedError);
+      await expect(esCall()).rejects.toBe(alreadyExistsError);
+    }
+  );
+
+  it('rejects when the resource already exists on the first attempt', async () => {
+    const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(
+      jest.fn().mockRejectedValue(alreadyExistsError)
+    );
+    await expect(esCall()).rejects.toBe(alreadyExistsError);
+  });
+
+  it('rejects other errors after an ambiguous failure', async () => {
+    const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(
+      jest
+        .fn()
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockRejectedValueOnce(upgradingError)
+    );
+
+    await expect(esCall()).rejects.toThrow('timeout');
+    await expect(esCall()).rejects.toBe(upgradingError);
+  });
+
+  it('resolves with the operation result on success', async () => {
+    const esCall = ignoreAlreadyExistsAfterAmbiguousFailure(jest.fn().mockResolvedValue('success'));
+    await expect(esCall()).resolves.toEqual('success');
   });
 });

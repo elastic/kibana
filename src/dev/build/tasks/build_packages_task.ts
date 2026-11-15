@@ -138,7 +138,7 @@ export const BuildPackages: Task = {
       try {
         // copy the built npm_module target dir into the build, package.json is updated to copy
         // the sources we actually end up using into the node_modules directory when we run
-        // yarn install
+        // pnpm install
         await scanCopy({
           source: pkgSrcPath,
           destination: pkgDistPath,
@@ -278,6 +278,20 @@ export const BuildPackages: Task = {
               'target_workers'
             ),
             destination: build.resolvePath(pkg.normalizedRepoRelativeDir, 'target_workers'),
+            permissions: distPerms,
+            filter: (rec) => rec.source.ext !== '.map',
+          });
+        }
+
+        if (pkg.manifest.id === '@kbn/vega-sandbox') {
+          await scanCopy({
+            source: config.resolveFromRepo(
+              'target',
+              'build',
+              pkg.normalizedRepoRelativeDir,
+              'target_vega_sandbox'
+            ),
+            destination: build.resolvePath(pkg.normalizedRepoRelativeDir, 'target_vega_sandbox'),
             permissions: distPerms,
             filter: (rec) => rec.source.ext !== '.map',
           });

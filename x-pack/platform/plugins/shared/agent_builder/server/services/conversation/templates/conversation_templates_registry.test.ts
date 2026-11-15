@@ -68,4 +68,19 @@ describe('ConversationTemplateRegistry', () => {
     };
     expect(() => registry.register(invalid)).toThrow(/invalid/i);
   });
+
+  it('throws when a non-SELECT field opts in to report_changes', async () => {
+    const registry = createConversationTemplateRegistry();
+    const invalid: ConversationTemplate = {
+      ...noteTemplate,
+      id: 'reports-free-text',
+      fields: {
+        summary: { input_type: 'TEXT', description: 'x', report_changes: true },
+      },
+    };
+    expect(() => registry.register(invalid)).toThrow(
+      'field "summary": "report_changes" is only valid for SELECT'
+    );
+    await expect(registry.has('reports-free-text')).resolves.toBe(false);
+  });
 });

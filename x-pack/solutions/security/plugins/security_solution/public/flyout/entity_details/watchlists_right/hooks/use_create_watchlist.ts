@@ -10,7 +10,16 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { getApiErrorMessage } from '../utils';
+
+const WATCHLIST_CREATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_create'
+);
 
 export interface UseCreateWatchlistOptions {
   watchlist: CreateWatchlistRequestBodyInput;
@@ -30,7 +39,7 @@ export const useCreateWatchlist = ({
   const { createWatchlist } = useEntityAnalyticsRoutes();
 
   return useMutation({
-    mutationFn: () => createWatchlist(watchlist),
+    mutationFn: () => createWatchlist(watchlist, WATCHLIST_CREATE_CONTEXT),
     onSuccess: async () => {
       toasts.addSuccess({
         title: i18n.translate(

@@ -108,6 +108,7 @@ export interface PackagePolicyReplaceDefineStepExtension {
   package: string;
   view: 'package-policy-replace-define-step';
   Component: LazyExoticComponent<PackagePolicyReplaceDefineStepExtensionComponent>;
+  useWidePageLayout?: boolean;
 }
 
 /** Extension point registration contract for Integration Policy Edit views */

@@ -50,12 +50,12 @@ spaceTest.describe(
 
     spaceTest('should only see expected primary sidenav items', async ({ pageObjects }) => {
       const { chrome } = pageObjects;
-      const isChromeNext = await chrome.isNextChrome();
+      const isProjectChrome = await chrome.isProjectChrome();
 
-      await expect(chrome.primaryNavigationItems).toHaveCount(Number(isChromeNext) + 1);
+      await expect(chrome.primaryNavigationItems).toHaveCount(Number(isProjectChrome) + 1);
       await expect(chrome.navItemInPrimaryById('data_management')).toBeVisible();
       await expect(chrome.navItemInPrimaryById('searchHomepage')).toBeVisible({
-        visible: isChromeNext,
+        visible: isProjectChrome,
       });
     });
   }

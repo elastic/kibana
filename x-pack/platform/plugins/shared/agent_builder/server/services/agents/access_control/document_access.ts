@@ -15,10 +15,12 @@ import type { AgentPermissions } from '../../../../common/http_api/agents';
 import type { AgentUpdateRequest } from '../../../../common/agents';
 import {
   canChangeAgentAccessControl,
+  canConfigureAgentApprovals,
   canDeleteAgent,
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
+  matchesAccessControlEntry,
 } from './authorization';
 import type { AgentProperties } from '../persisted/client/storage';
 
@@ -40,7 +42,7 @@ export const normalizeAccessControl = (
   entries: source.access_control?.entries ?? source.acl?.entries ?? [],
 });
 
-const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
+export const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_name !== undefined
     ? { id: source.created_by_id, username: source.created_by_name }
     : undefined;
@@ -111,6 +113,20 @@ export const hasManageAccessControlAccess = ({
     currentUser: user,
   });
 
+export const hasConfigureApprovalsAccess = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): boolean =>
+  canConfigureAgentApprovals({
+    agentId: source.id,
+    accessControl: normalizeAccessControl(source),
+    owner: sourceToOwner(source),
+    currentUser: user,
+  });
+
 export const getAgentPermissions = ({
   source,
   user,
@@ -120,6 +136,7 @@ export const getAgentPermissions = ({
 }): AgentPermissions => ({
   update_agent: hasWriteAccess({ source, user }),
   update_access_control: hasManageAccessControlAccess({ source, user }),
+  update_approvals: hasConfigureApprovalsAccess({ source, user }),
 });
 
 /**
@@ -147,8 +164,8 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
     ...definition,
     access_control: {
       ...definition.access_control,
-      entries: definition.access_control.entries.filter(
-        (entry) => entry.type === 'user' && user.username && entry.name === user.username
+      entries: definition.access_control.entries.filter((entry) =>
+        matchesAccessControlEntry(entry, user)
       ),
     },
   };

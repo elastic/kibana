@@ -60,6 +60,11 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   defaultMode = 'managed',
   isIntegrationFlow,
   installedPackagePolicy,
+  hideIncomingDataStep,
+  hideViewAgentsButton,
+  onAgentPolicyCreated,
+  defaultAgentPolicyName,
+  forceCreatePolicy,
 }) => {
   const authz = useAuthz();
 
@@ -235,8 +240,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             isIntegrationFlow={isIntegrationFlow}
             selectedApiKeyId={selectedApiKeyId}
             setSelectedAPIKeyId={setSelectedAPIKeyId}
-            onClickViewAgents={onClose}
+            onClickViewAgents={hideViewAgentsButton ? undefined : onClose}
             installedPackagePolicy={installedPackagePolicy}
+            hideIncomingDataStep={hideIncomingDataStep}
+            onAgentPolicyCreated={onAgentPolicyCreated}
+            defaultAgentPolicyName={defaultAgentPolicyName}
+            forceCreatePolicy={forceCreatePolicy}
           />
         )}
       </EuiFlyoutBody>

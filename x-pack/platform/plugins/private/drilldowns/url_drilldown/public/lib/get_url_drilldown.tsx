@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { getInheritedViewMode } from '@kbn/presentation-publishing';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ON_OPEN_PANEL_MENU,
@@ -26,6 +25,7 @@ import {
   ON_CLICK_VALUE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UrlDrilldownConfig, UrlDrilldownGlobalScope } from './types';
+import type { UrlTemplateEditorVariable } from './components/url_template_editor';
 import {
   DEFAULT_ENCODE_URL,
   DEFAULT_OPEN_IN_NEW_TAB,

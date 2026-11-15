@@ -5,27 +5,36 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '../definitions/registry';
 import { getEuidKqlFilterBasedOnDocument, conditionToKql } from './kql';
 
 const fieldMissingOrEmpty = (field: string) => `(NOT ${field}: * OR ${field}: "")`;
 
 describe('getEuidKqlFilterBasedOnDocument', () => {
   it('returns undefined when doc is falsy', () => {
-    expect(getEuidKqlFilterBasedOnDocument('host', null)).toBeUndefined();
-    expect(getEuidKqlFilterBasedOnDocument('generic', undefined)).toBeUndefined();
-    expect(getEuidKqlFilterBasedOnDocument('user', {})).toBeUndefined();
+    expect(
+      getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('host'), null)
+    ).toBeUndefined();
+    expect(
+      getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('generic'), undefined)
+    ).toBeUndefined();
+    expect(getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {})).toBeUndefined();
   });
 
   describe('generic', () => {
     it('returns KQL term on entity.id when present', () => {
-      expect(getEuidKqlFilterBasedOnDocument('generic', { entity: { id: 'e-123' } })).toBe(
-        'entity.id: "e-123"'
-      );
+      expect(
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('generic'), {
+          entity: { id: 'e-123' },
+        })
+      ).toBe('entity.id: "e-123"');
     });
 
     it('unwraps _source when doc is an Elasticsearch hit', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('generic', { _source: { entity: { id: 'e-123' } } })
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('generic'), {
+          _source: { entity: { id: 'e-123' } },
+        })
       ).toBe('entity.id: "e-123"');
     });
   });
@@ -33,7 +42,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
   describe('host', () => {
     it('returns clause with host.id when present', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('host', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
           host: { name: 'to-be-ignored', id: 'host-id-1' },
         })
       ).toBe('host.id: "host-id-1"');
@@ -41,20 +50,26 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('returns clause with host.id when present (flattened _source)', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('host', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
           _source: { 'host.name': 'to-be-ignored', 'host.id': 'host-id-1' },
         })
       ).toBe('host.id: "host-id-1"');
     });
 
     it('returns clause with host.name and missing-or-empty guard on host.id when host.id is missing', () => {
-      expect(getEuidKqlFilterBasedOnDocument('host', { host: { name: 'server1' } })).toBe(
-        `host.name: "server1" AND ${fieldMissingOrEmpty('host.id')}`
-      );
+      expect(
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
+          host: { name: 'server1' },
+        })
+      ).toBe(`host.name: "server1" AND ${fieldMissingOrEmpty('host.id')}`);
     });
 
     it('returns clause with host.hostname with guards on host.id and host.name when both are absent', () => {
-      expect(getEuidKqlFilterBasedOnDocument('host', { host: { hostname: 'node-1' } })).toBe(
+      expect(
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
+          host: { hostname: 'node-1' },
+        })
+      ).toBe(
         `host.hostname: "node-1" AND ${fieldMissingOrEmpty('host.id')} AND ${fieldMissingOrEmpty(
           'host.name'
         )}`
@@ -63,18 +78,26 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('precedence: uses host.id when both host.id and host.name are present', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('host', { host: { id: 'e1', name: 'myserver' } })
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
+          host: { id: 'e1', name: 'myserver' },
+        })
       ).toBe('host.id: "e1"');
     });
 
     it('returns undefined when no host identity fields are present', () => {
-      expect(getEuidKqlFilterBasedOnDocument('host', { host: { ip: '10.0.0.1' } })).toBeUndefined();
+      expect(
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
+          host: { ip: '10.0.0.1' },
+        })
+      ).toBeUndefined();
     });
 
     it('escapes double quotes in host.name', () => {
-      expect(getEuidKqlFilterBasedOnDocument('host', { host: { name: 'srv"evil' } })).toBe(
-        `host.name: "srv\\"evil" AND ${fieldMissingOrEmpty('host.id')}`
-      );
+      expect(
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
+          host: { name: 'srv"evil' },
+        })
+      ).toBe(`host.name: "srv\\"evil" AND ${fieldMissingOrEmpty('host.id')}`);
     });
   });
 
@@ -94,7 +117,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('returns clause with user.email and source clause (event.module whenClause expands to sourceMatchesAny)', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('user', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { email: 'alice@example.com' },
           event: { kind: 'asset', module: 'okta' },
         })
@@ -103,7 +126,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('returns clause with user.email and unknown source clause when no event.module or data_stream.dataset', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('user', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { email: 'alice@example.com' },
           event: { kind: 'asset' },
         })
@@ -112,7 +135,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('returns clause with user.name and source clause and must on higher-ranked fields missing-or-empty', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('user', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { name: 'alice' },
           event: { kind: 'asset', module: 'azure' },
         })
@@ -125,7 +148,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('user', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { id: 'user-id-42' },
           event: { module: 'o365' },
         })
@@ -133,12 +156,14 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
     });
 
     it('returns undefined when no user id fields are present', () => {
-      expect(getEuidKqlFilterBasedOnDocument('user', {})).toBeUndefined();
+      expect(
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {})
+      ).toBeUndefined();
     });
 
     it('precedence: uses user.email and source clause when both user.email and user.id are present', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('user', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { email: 'alice@example.com', id: 'user-42' },
           event: { kind: 'asset', module: 'entityanalytics_okta' },
         })
@@ -147,7 +172,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('returns clause with user.name and user.domain with source clause and must on higher-ranked fields missing-or-empty', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('user', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { name: 'jane', domain: 'corp.com' },
           event: { kind: 'asset', module: 'entityanalytics_ad' },
         })
@@ -160,7 +185,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
     });
 
     it('excludes all fieldEvaluation destinations (e.g. entity.namespace) from filter and must so the query can match stored documents', () => {
-      const result = getEuidKqlFilterBasedOnDocument('user', {
+      const result = getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { email: 'bob@example.com' },
         event: { kind: 'asset', module: 'okta' },
       });
@@ -168,7 +193,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
     });
 
     it('returns filter for user.name and host.id when fieldEvaluations set entity.namespace to local (non-IDP)', () => {
-      const result = getEuidKqlFilterBasedOnDocument('user', {
+      const result = getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { name: 'alice' },
         host: { id: 'host-1' },
         event: { kind: 'event', category: 'authentication' },
@@ -184,7 +209,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
     });
 
     it('escapes double quotes in user.email', () => {
-      const result = getEuidKqlFilterBasedOnDocument('user', {
+      const result = getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { email: 'a"b@example.com' },
         event: { kind: 'asset', module: 'okta' },
       });
@@ -193,7 +218,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('evaluates correctly for real non-IDP document', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('user', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           '@timestamp': '2026-04-22T12:55:59.638Z',
           data_stream: {
             dataset: ['endpoint.events.file', 'endpoint.events.process'],
@@ -245,8 +270,8 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
         cloud: { provider: 'gcp' },
       };
 
-      const awsFilter = getEuidKqlFilterBasedOnDocument('user', awsDoc);
-      const gcpFilter = getEuidKqlFilterBasedOnDocument('user', gcpDoc);
+      const awsFilter = getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), awsDoc);
+      const gcpFilter = getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), gcpDoc);
 
       expect(awsFilter).toBeDefined();
       expect(gcpFilter).toBeDefined();
@@ -266,7 +291,7 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
 
     it('does not include cloud.provider filter when event.module is not asset_discovery', () => {
       // Other integrations sending event.kind=asset must NOT be routed via cloud.provider.
-      const result = getEuidKqlFilterBasedOnDocument('user', {
+      const result = getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
         user: { name: 'alice' },
         event: { kind: 'asset', module: 'other_integration' },
         cloud: { provider: 'aws' },
@@ -282,21 +307,23 @@ describe('getEuidKqlFilterBasedOnDocument', () => {
   describe('service', () => {
     it('returns undefined when service.name is missing (single-field identity)', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('service', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('service'), {
           service: { entity: { id: 'svc-entity-1' } },
         })
       ).toBeUndefined();
     });
 
     it('returns clause with service.name (single-field identity)', () => {
-      expect(getEuidKqlFilterBasedOnDocument('service', { service: { name: 'api-gateway' } })).toBe(
-        'service.name: "api-gateway"'
-      );
+      expect(
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('service'), {
+          service: { name: 'api-gateway' },
+        })
+      ).toBe('service.name: "api-gateway"');
     });
 
     it('uses service.name when both service.entity.id and service.name are present', () => {
       expect(
-        getEuidKqlFilterBasedOnDocument('service', {
+        getEuidKqlFilterBasedOnDocument(getBuiltInEntityDefinition('service'), {
           service: { entity: { id: 'svc-e1' }, name: 'api-gateway' },
         })
       ).toBe('service.name: "api-gateway"');

@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
+import { isUserProfileId } from '@kbn/agent-builder-common';
 import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from './use_kibana';
 import { queryKeys } from '../query_keys';
@@ -22,7 +23,10 @@ export const useUserProfiles = ({
     services: { userProfile },
   } = useKibana();
 
-  const dedupedUids = useMemo(() => Array.from(new Set(uids)).sort(), [uids]);
+  const dedupedUids = useMemo(
+    () => Array.from(new Set(uids.filter(isUserProfileId))).sort(),
+    [uids]
+  );
 
   return useQuery({
     queryKey: queryKeys.security.userProfiles(dedupedUids),

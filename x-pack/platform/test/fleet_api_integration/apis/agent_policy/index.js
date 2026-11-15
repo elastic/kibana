@@ -17,6 +17,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./create_managed_otlp_api_key'));
     loadTestFile(require.resolve('./agent_policy_outputs'));
     loadTestFile(require.resolve('./cleanup_agent_policy_revisions'));
+    loadTestFile(require.resolve('./package_policies_summary'));
     loadTestFile(require.resolve('./version_specific_policies'));
     loadTestFile(require.resolve('./policy_base_id'));
     loadTestFile(require.resolve('./agent_policy_otel_routing'));

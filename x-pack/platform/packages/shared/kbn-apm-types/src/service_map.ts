@@ -237,6 +237,8 @@ export interface ServiceMapEdgeData extends Record<string, unknown> {
   sourceLabel?: string;
   targetLabel?: string;
   resources?: string[];
+  /** The resources behind a grouped edge (edge to a "N resources" node). */
+  groupedConnections?: GroupedConnectionInfo[];
 }
 
 export interface ServiceMapEdge extends Edge<ServiceMapEdgeData> {

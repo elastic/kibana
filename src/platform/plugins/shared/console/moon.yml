@@ -81,6 +81,4 @@ fileGroups:
     - test/**/*
     - server/lib/spec_definitions/kibana_api_doc_links/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

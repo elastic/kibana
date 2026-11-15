@@ -8,15 +8,18 @@
 import { useMemo } from 'react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import {
-  getImpactedServiceStreamNames,
+  getImpactedServiceSourceIds,
   resolveImpactedServices,
   type ResolvedImpactedService,
 } from '../common/impacted_services';
-import { useFetchStreamFeatures } from './use_fetch_stream_features';
+import { useFetchSourceFeatures } from './use_fetch_source_features';
 
 export interface ImpactedServicesResult {
   services: ResolvedImpactedService[];
   isInitialLoading: boolean;
+  failedSourceIds: string[];
+  isError: boolean;
+  refetch: () => void;
 }
 
 /**
@@ -24,9 +27,10 @@ export interface ImpactedServicesResult {
  * topology. Impacted services are event-level: every detection of an event shares this list.
  */
 export const useImpactedServices = (event: SignificantEvent): ImpactedServicesResult => {
-  const streamNames = useMemo(() => getImpactedServiceStreamNames([event]), [event]);
-  const { features, isInitialLoading } = useFetchStreamFeatures(streamNames);
+  const sourceIds = useMemo(() => getImpactedServiceSourceIds([event]), [event]);
+  const { features, failedSourceIds, isInitialLoading, isError, refetch } =
+    useFetchSourceFeatures(sourceIds);
   const services = useMemo(() => resolveImpactedServices(event, features), [event, features]);
 
-  return { services, isInitialLoading };
+  return { services, isInitialLoading, failedSourceIds, isError, refetch };
 };

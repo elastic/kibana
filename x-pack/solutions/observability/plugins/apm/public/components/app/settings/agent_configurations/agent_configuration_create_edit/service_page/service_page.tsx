@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
@@ -170,22 +170,18 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <EuiFlexGroup justifyContent="flexEnd">
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="apmAgentConfigurationCancelButton"
+          <EuiButtonEmpty
+            aria-label={i18n.translate('xpack.apm.servicePage.cancelButton.ariaLabel', {
+              defaultMessage: 'Cancel',
+            })}
+            data-test-subj="apmServicePageCancelButton"
+            color="primary"
             href={link('/settings/agent-configuration')}
           >
-            <EuiButtonEmpty
-              aria-label={i18n.translate('xpack.apm.servicePage.cancelButton.ariaLabel', {
-                defaultMessage: 'Cancel',
-              })}
-              data-test-subj="apmServicePageCancelButton"
-              color="primary"
-            >
-              {i18n.translate('xpack.apm.agentConfig.servicePage.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiLink>
+            {i18n.translate('xpack.apm.agentConfig.servicePage.cancelButton', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
 
         {/* Next button */}

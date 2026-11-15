@@ -198,12 +198,6 @@ export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.simil
   defaultMessage: 'Similar cases',
 });
 
-export const SEND_EMAIL_ARIA = (user: string) =>
-  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
-    values: { user },
-    defaultMessage: 'click to send an email to {user}',
-  });
-
 export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
   'xpack.cases.caseView.editAssigneesAriaLabel',
   {
@@ -306,3 +300,188 @@ export const RELOAD_PAGE = i18n.translate(
 export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.caseView.extendedFieldsTitle', {
   defaultMessage: 'Extended fields',
 });
+
+export const VIEWING_CASE = (caseId: string) =>
+  i18n.translate('xpack.cases.details.viewingCase', {
+    defaultMessage: 'Viewing case: {caseId}. This page is under construction.',
+    values: { caseId },
+  });
+
+export const SHOW_METRICS = i18n.translate('xpack.cases.details.showMetrics', {
+  defaultMessage: 'Show metrics',
+});
+
+export const TEMPLATE_NOT_FOUND = (name: string) =>
+  i18n.translate('xpack.cases.details.templateNotFound', {
+    defaultMessage: '{name} (not found)',
+    values: { name },
+  });
+
+export const TEMPLATE_NOT_FOUND_GENERIC = i18n.translate(
+  'xpack.cases.details.templateNotFoundGeneric',
+  {
+    defaultMessage: 'Template not found',
+  }
+);
+
+export const REPORTED_BY = (name: string) =>
+  i18n.translate('xpack.cases.details.reportedBy', {
+    defaultMessage: 'Reported by: {name}',
+    values: { name },
+  });
+
+export const CREATED_ON = (date: string) =>
+  i18n.translate('xpack.cases.details.createdOn', {
+    defaultMessage: 'on: {date}',
+    values: { date },
+  });
+
+export const UNKNOWN_REPORTER = i18n.translate('xpack.cases.details.unknownReporter', {
+  defaultMessage: 'Unknown',
+});
+
+export const EDIT_CASE_NAME_ARIA = i18n.translate('xpack.cases.details.editCaseNameAria', {
+  defaultMessage: 'Edit case name',
+});
+
+export const SHOW_FIELDS = i18n.translate('xpack.cases.details.showFields', {
+  defaultMessage: 'Show fields',
+});
+
+export const HIDE_FIELDS = i18n.translate('xpack.cases.details.hideFields', {
+  defaultMessage: 'Hide fields',
+});
+
+export const ATTRIBUTES_TITLE = i18n.translate('xpack.cases.details.attributesTitle', {
+  defaultMessage: 'Attributes',
+});
+
+export const CUSTOM_FIELDS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.details.customFieldsSectionTitle',
+  {
+    defaultMessage: 'Custom fields',
+  }
+);
+
+export const NO_TEMPLATE_APPLIED = i18n.translate('xpack.cases.details.noTemplateApplied', {
+  defaultMessage: 'No template applied',
+});
+
+export const APPLY_TEMPLATE_TO_SEE_FIELDS = i18n.translate(
+  'xpack.cases.details.applyTemplateToSeeFields',
+  {
+    defaultMessage: 'Apply a template to see its fields here.',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.details.changeTemplateModalTitle',
+  {
+    defaultMessage: 'Change template',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_CHANGE_BUTTON = i18n.translate(
+  'xpack.cases.details.changeTemplateModalChangeButtonLabel',
+  {
+    defaultMessage: 'Change',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_APPLY_BUTTON = i18n.translate(
+  'xpack.cases.details.changeTemplateModalApplyButtonLabel',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_REMOVE_BUTTON = i18n.translate(
+  'xpack.cases.details.changeTemplateModalRemoveButtonLabel',
+  {
+    defaultMessage: 'Remove',
+  }
+);
+
+export const TEMPLATE_FIELDS_TOOLTIP_ARIA = (templateName: string) =>
+  i18n.translate('xpack.cases.details.templateFieldsTooltipAriaLabel', {
+    defaultMessage: 'View fields included in the {templateName} template',
+    values: { templateName },
+  });
+
+export const CONNECTORS_TITLE = i18n.translate('xpack.cases.details.connectorsTitle', {
+  defaultMessage: 'Connectors',
+});
+
+export const SECTION_SETTINGS_ARIA = i18n.translate('xpack.cases.details.sectionSettingsAria', {
+  defaultMessage: 'Section settings',
+});
+
+export const ASSIGNED_TITLE = i18n.translate('xpack.cases.details.assignedTitle', {
+  defaultMessage: 'Assigned',
+});
+
+export const PARTICIPANTS_TITLE = i18n.translate('xpack.cases.details.participantsTitle', {
+  defaultMessage: 'Participants',
+});
+
+export const CLICK_TO_SEND_EMAIL = (email: string) =>
+  i18n.translate('xpack.cases.details.clickToSendEmail', {
+    defaultMessage: 'Click to send email to {email}',
+    values: { email },
+  });
+
+export const ADD_CONNECTOR = i18n.translate('xpack.cases.details.addConnector', {
+  defaultMessage: 'Add connector',
+});
+
+export const CONNECTOR_SETTINGS_ARIA_LABEL = i18n.translate(
+  'xpack.cases.details.connectorSettingsAriaLabel',
+  {
+    defaultMessage: 'Connector settings',
+  }
+);
+
+export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
+  'xpack.cases.details.legacyCustomFieldsTitle',
+  {
+    defaultMessage: 'Legacy custom fields',
+  }
+);
+
+export const RESIZE_SIDEBAR = i18n.translate('xpack.cases.details.resizeSidebar', {
+  defaultMessage: 'Resize the case details panel',
+});
+
+export const NO_VALUE = i18n.translate('xpack.cases.details.noValue', {
+  defaultMessage: 'No value',
+});
+
+export const UNSAVED_CHANGES_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.details.unsavedChangesCount', {
+    values: { count },
+    defaultMessage: '{count} unsaved',
+  });
+
+export const REVERT_FIELD = i18n.translate('xpack.cases.details.revertField', {
+  defaultMessage: 'Revert',
+});
+
+export const FIELD_MODIFIED = i18n.translate('xpack.cases.details.fieldModified', {
+  defaultMessage: 'Modified',
+});
+
+export const CHANGE_TEMPLATE = i18n.translate('xpack.cases.details.changeTemplate', {
+  defaultMessage: 'Change template',
+});
+
+export const CHANGE_TEMPLATE_HINT = i18n.translate('xpack.cases.details.changeTemplateHint', {
+  defaultMessage:
+    "The current template's fields will be hidden, but their saved values stay on the case. To remove the values, clear the fields before changing the template.",
+});
+
+export const CHANGE_TEMPLATE_HINT_ARIA = i18n.translate(
+  'xpack.cases.details.changeTemplateHintAriaLabel',
+  {
+    defaultMessage: 'What happens to saved values',
+  }
+);

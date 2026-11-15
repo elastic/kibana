@@ -19,13 +19,14 @@ import {
 } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
+import type { OpenAIChatCompletionChunkDelta } from '../openai/types';
 import { inferenceEndpointAdapter } from './inference_endpoint_adapter';
 
 function createOpenAIChunk({
   delta,
   usage,
 }: {
-  delta?: OpenAI.ChatCompletionChunk['choices'][number]['delta'];
+  delta?: OpenAIChatCompletionChunkDelta;
   usage?: OpenAI.ChatCompletionChunk['usage'];
 }): OpenAI.ChatCompletionChunk {
   return {
@@ -72,6 +73,37 @@ describe('inferenceEndpointAdapter', () => {
   };
 
   describe('when creating the request', () => {
+    it('sends a template and omits messages', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: { content: 'ok' },
+        })
+      );
+
+      executorMock.invoke.mockResolvedValue(observableIntoEventSourceStream(source$, logger));
+
+      const response$ = inferenceEndpointAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [{ role: MessageRole.User, content: 'should not be sent' }],
+        template: {
+          id: '.attack-discovery',
+          version: 1,
+          variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
+        },
+      });
+
+      await lastValueFrom(response$.pipe(toArray()));
+
+      const body = executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+      expect(body.template).toEqual({
+        id: '.attack-discovery',
+        version: 1,
+        variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
+      });
+      expect(body).not.toHaveProperty('messages');
+      expect(body).not.toHaveProperty('tools');
+    });
+
     it('emits chunk events', async () => {
       const source$ = of(
         createOpenAIChunk({
@@ -286,6 +318,68 @@ describe('inferenceEndpointAdapter', () => {
             completion: 5,
             prompt: 10,
             total: 15,
+          },
+          model: 'gpt-4o',
+        },
+      ]);
+    });
+
+    it('propagates reasoning chunks and reasoning token counts', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: { reasoning: 'Let me think' },
+        }),
+        createOpenAIChunk({
+          delta: { reasoning: ' about it.' },
+        }),
+        createOpenAIChunk({
+          delta: { content: 'Answer', reasoning: null },
+          usage: {
+            completion_tokens: 20,
+            prompt_tokens: 10,
+            total_tokens: 30,
+            completion_tokens_details: { reasoning_tokens: 12 },
+          },
+        })
+      );
+
+      executorMock.invoke.mockResolvedValue(observableIntoEventSourceStream(source$, logger));
+
+      const response$ = inferenceEndpointAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [{ role: MessageRole.User, content: 'Hello' }],
+      });
+
+      const events = await lastValueFrom(response$.pipe(toArray()));
+
+      expect(events.filter(isChatCompletionChunkEvent)).toEqual([
+        {
+          content: '',
+          reasoning: 'Let me think',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        {
+          content: '',
+          reasoning: ' about it.',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        {
+          content: 'Answer',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      ]);
+
+      expect(events.filter(isChatCompletionTokenCountEvent)).toEqual([
+        {
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
+          tokens: {
+            completion: 8,
+            prompt: 10,
+            total: 30,
+            thinking: 12,
           },
           model: 'gpt-4o',
         },

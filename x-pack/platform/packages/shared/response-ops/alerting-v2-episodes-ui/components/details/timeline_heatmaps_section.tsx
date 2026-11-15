@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
-import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
-const AlertEpisodeLifecycleHeatmap = React.lazy(() =>
-  import('./lifecycle_heatmap').then((m) => ({ default: m.AlertEpisodeLifecycleHeatmap }))
-);
-
-const AlertEpisodeSeverityHeatmap = React.lazy(() =>
-  import('./severity_heatmap').then((m) => ({ default: m.AlertEpisodeSeverityHeatmap }))
+const AlertEpisodeAlertTimeline = React.lazy(() =>
+  import('./episode_alert_timeline').then((m) => ({ default: m.AlertEpisodeAlertTimeline }))
 );
 
 /** Matches the loaded heatmap layout: an xxs title, a spacer, and a 20px-high chart. */
@@ -32,26 +27,24 @@ const HeatmapSkeleton = () => (
 export interface AlertEpisodeTimelineHeatmapsSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces'>;
+  /** Renders the timeline titles one step smaller, for narrow hosts like the details flyout. */
+  compressed?: boolean;
 }
 
 /**
- * Renders the episode (status) timeline and severity timeline inside a single
+ * Renders the episode alert timeline and severity timeline inside a single
  * shared bordered panel.
  */
 export const AlertEpisodeTimelineHeatmapsSection = ({
   episodeId,
   services,
+  compressed,
 }: AlertEpisodeTimelineHeatmapsSectionProps) => {
   const {
     data: eventRows,
     isLoading,
     isError,
   } = useFetchEpisodeEventsQuery({ episodeId, services });
-
-  const severityEventRows = useMemo(
-    () => (eventRows ?? []).filter((row) => isSupportedEpisodeSeverity(row.severity)),
-    [eventRows]
-  );
 
   if (isLoading) {
     return (
@@ -80,16 +73,8 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeTimelineHeatmapsSection">
       <React.Suspense fallback={<HeatmapSkeleton />}>
-        <AlertEpisodeLifecycleHeatmap eventRows={eventRows ?? []} />
+        <AlertEpisodeAlertTimeline eventRows={eventRows ?? []} compressed={compressed} />
       </React.Suspense>
-      {severityEventRows.length > 0 && (
-        <>
-          <EuiSpacer size="l" />
-          <React.Suspense fallback={<HeatmapSkeleton />}>
-            <AlertEpisodeSeverityHeatmap eventRows={severityEventRows} />
-          </React.Suspense>
-        </>
-      )}
     </EuiPanel>
   );
 };

@@ -29,6 +29,7 @@
     "@kbn/data-plugin",
     "@kbn/zod",
     "@kbn/change-history",
+    "@kbn/core-spaces-common",
   ],
   "exclude": [
     "target/**/*",

@@ -70,15 +70,18 @@ export const useWorkflowBulkActions = ({
 
   const isDisabled = selectedWorkflows.length === 0;
   const hasManagedWorkflows = selectedWorkflows.some((workflow) => workflow.managed === true);
-  const canDeleteSelectedWorkflows = canDeleteWorkflow && !hasManagedWorkflows;
+  const canEditSelection = selectedWorkflows.every(
+    (workflow) => workflow.permissions?.edit !== false
+  );
+  const canDeleteSelectedWorkflows = canDeleteWorkflow && !hasManagedWorkflows && canEditSelection;
 
   const handleDeleteWorkflows = useCallback(() => {
-    if (hasManagedWorkflows) {
+    if (!canDeleteSelectedWorkflows) {
       return;
     }
     onAction();
     setShowDeleteModal(true);
-  }, [hasManagedWorkflows, onAction]);
+  }, [canDeleteSelectedWorkflows, onAction]);
 
   const confirmDelete = useCallback(() => {
     const ids = selectedWorkflows
@@ -204,7 +207,7 @@ export const useWorkflowBulkActions = ({
     const hasDisabledWorkflows = selectedWorkflows.some((workflow) => !workflow.enabled);
     const hasEnabledWorkflows = selectedWorkflows.some((workflow) => workflow.enabled);
 
-    if (canUpdateWorkflow && hasDisabledWorkflows) {
+    if (canUpdateWorkflow && canEditSelection && hasDisabledWorkflows) {
       mainPanelItems.push({
         name: i18n.translate('workflows.bulkActions.enable', {
           defaultMessage: 'Enable',
@@ -217,7 +220,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (canUpdateWorkflow && hasEnabledWorkflows) {
+    if (canUpdateWorkflow && canEditSelection && hasEnabledWorkflows) {
       mainPanelItems.push({
         name: i18n.translate('workflows.bulkActions.disable', {
           defaultMessage: 'Disable',
@@ -281,6 +284,7 @@ export const useWorkflowBulkActions = ({
   }, [
     selectedWorkflows,
     canUpdateWorkflow,
+    canEditSelection,
     canDeleteSelectedWorkflows,
     canReadWorkflow,
     isDisabled,

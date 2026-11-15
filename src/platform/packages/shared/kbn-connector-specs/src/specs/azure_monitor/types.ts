@@ -531,93 +531,99 @@ export type ListActionGroupsInput = z.infer<typeof ListActionGroupsInputSchema>;
 // Alert processing rules
 // =============================================================================
 
-const AlertProcessingRuleConditionSchema = z.object({
-  field: z.enum(ALERT_PROCESSING_RULE_FIELD_VALUES).describe('Alert field to filter on.'),
-  operator: z.enum(ALERT_PROCESSING_RULE_OPERATOR_VALUES).describe('Comparison operator.'),
-  values: z
-    .array(z.string().max(500))
-    .min(1)
-    .max(50)
-    .describe(
-      'Values to compare the field against. The condition matches if the field matches any of these values.'
-    ),
-});
-
-const AlertProcessingRuleRecurrenceSchema = z
-  .object({
-    recurrenceType: z
-      .enum(['Daily', 'Weekly', 'Monthly'])
-      .describe('How often the recurrence repeats.'),
-    startTime: z
-      .string()
-      .max(20)
-      .describe('Start time of day the recurrence applies, format "HH:mm:ss", e.g. "22:00:00".'),
-    endTime: z
-      .string()
-      .max(20)
-      .describe('End time of day the recurrence applies, format "HH:mm:ss", e.g. "04:00:00".'),
-    daysOfWeek: z
-      .array(z.enum(DAYS_OF_WEEK_VALUES))
-      .max(7)
-      .optional()
+const AlertProcessingRuleConditionSchema = lazySchema(() =>
+  z.object({
+    field: z.enum(ALERT_PROCESSING_RULE_FIELD_VALUES).describe('Alert field to filter on.'),
+    operator: z.enum(ALERT_PROCESSING_RULE_OPERATOR_VALUES).describe('Comparison operator.'),
+    values: z
+      .array(z.string().max(500))
+      .min(1)
+      .max(50)
       .describe(
-        'Days the recurrence applies to. Required, and only used, when recurrenceType is "Weekly".'
-      ),
-    daysOfMonth: z
-      .array(z.number().int().min(1).max(31))
-      .max(31)
-      .optional()
-      .describe(
-        'Days of the month the recurrence applies to (1-31). Required, and only used, when recurrenceType is "Monthly".'
+        'Values to compare the field against. The condition matches if the field matches any of these values.'
       ),
   })
-  .refine((v) => v.recurrenceType !== 'Weekly' || (v.daysOfWeek && v.daysOfWeek.length > 0), {
-    message: 'daysOfWeek is required and must be non-empty when recurrenceType is "Weekly".',
-    path: ['daysOfWeek'],
-  })
-  .refine((v) => v.recurrenceType !== 'Monthly' || (v.daysOfMonth && v.daysOfMonth.length > 0), {
-    message: 'daysOfMonth is required and must be non-empty when recurrenceType is "Monthly".',
-    path: ['daysOfMonth'],
-  });
+);
 
-const AlertProcessingRuleScheduleSchema = z.object({
-  effectiveFrom: z
-    .string()
-    .max(30)
-    .regex(
-      ISO_DATETIME_NO_TZ_REGEX,
-      'Must be ISO-8601 date-time without a timezone suffix, e.g. "2024-01-15T18:00:00".'
-    )
-    .optional()
-    .describe(
-      'Start of a one-off maintenance window (local time in timeZone), ISO-8601 without a timezone suffix.'
-    ),
-  effectiveUntil: z
-    .string()
-    .max(30)
-    .regex(
-      ISO_DATETIME_NO_TZ_REGEX,
-      'Must be ISO-8601 date-time without a timezone suffix, e.g. "2024-01-15T22:00:00".'
-    )
-    .optional()
-    .describe(
-      'End of a one-off maintenance window (local time in timeZone), ISO-8601 without a timezone suffix.'
-    ),
-  timeZone: z
-    .string()
-    .max(100)
-    .optional()
-    .describe(
-      'Windows time zone name the schedule times are interpreted in, e.g. "Pacific Standard Time", "India Standard Time". Defaults to UTC if omitted.'
-    ),
-  recurrences: z
-    .array(AlertProcessingRuleRecurrenceSchema)
-    .max(10)
-    .optional()
-    .describe(
-      'Recurring schedule windows (e.g. every weekend, or outside business hours). Combine with effectiveFrom/effectiveUntil to bound how long the recurrence applies.'
-    ),
-});
+const AlertProcessingRuleRecurrenceSchema = lazySchema(() =>
+  z
+    .object({
+      recurrenceType: z
+        .enum(['Daily', 'Weekly', 'Monthly'])
+        .describe('How often the recurrence repeats.'),
+      startTime: z
+        .string()
+        .max(20)
+        .describe('Start time of day the recurrence applies, format "HH:mm:ss", e.g. "22:00:00".'),
+      endTime: z
+        .string()
+        .max(20)
+        .describe('End time of day the recurrence applies, format "HH:mm:ss", e.g. "04:00:00".'),
+      daysOfWeek: z
+        .array(z.enum(DAYS_OF_WEEK_VALUES))
+        .max(7)
+        .optional()
+        .describe(
+          'Days the recurrence applies to. Required, and only used, when recurrenceType is "Weekly".'
+        ),
+      daysOfMonth: z
+        .array(z.number().int().min(1).max(31))
+        .max(31)
+        .optional()
+        .describe(
+          'Days of the month the recurrence applies to (1-31). Required, and only used, when recurrenceType is "Monthly".'
+        ),
+    })
+    .refine((v) => v.recurrenceType !== 'Weekly' || (v.daysOfWeek && v.daysOfWeek.length > 0), {
+      message: 'daysOfWeek is required and must be non-empty when recurrenceType is "Weekly".',
+      path: ['daysOfWeek'],
+    })
+    .refine((v) => v.recurrenceType !== 'Monthly' || (v.daysOfMonth && v.daysOfMonth.length > 0), {
+      message: 'daysOfMonth is required and must be non-empty when recurrenceType is "Monthly".',
+      path: ['daysOfMonth'],
+    })
+);
+
+const AlertProcessingRuleScheduleSchema = lazySchema(() =>
+  z.object({
+    effectiveFrom: z
+      .string()
+      .max(30)
+      .regex(
+        ISO_DATETIME_NO_TZ_REGEX,
+        'Must be ISO-8601 date-time without a timezone suffix, e.g. "2024-01-15T18:00:00".'
+      )
+      .optional()
+      .describe(
+        'Start of a one-off maintenance window (local time in timeZone), ISO-8601 without a timezone suffix.'
+      ),
+    effectiveUntil: z
+      .string()
+      .max(30)
+      .regex(
+        ISO_DATETIME_NO_TZ_REGEX,
+        'Must be ISO-8601 date-time without a timezone suffix, e.g. "2024-01-15T22:00:00".'
+      )
+      .optional()
+      .describe(
+        'End of a one-off maintenance window (local time in timeZone), ISO-8601 without a timezone suffix.'
+      ),
+    timeZone: z
+      .string()
+      .max(100)
+      .optional()
+      .describe(
+        'Windows time zone name the schedule times are interpreted in, e.g. "Pacific Standard Time", "India Standard Time". Defaults to UTC if omitted.'
+      ),
+    recurrences: z
+      .array(AlertProcessingRuleRecurrenceSchema)
+      .max(10)
+      .optional()
+      .describe(
+        'Recurring schedule windows (e.g. every weekend, or outside business hours). Combine with effectiveFrom/effectiveUntil to bound how long the recurrence applies.'
+      ),
+  })
+);
 
 export const CreateOrUpdateAlertProcessingRuleInputSchema = lazySchema(() =>
   z

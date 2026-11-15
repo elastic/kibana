@@ -84,7 +84,7 @@ const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEdi
       lineHeight: LINE_HEIGHT,
       padding: { top: 24, bottom: 24 },
       lineDecorationsWidth: 24,
-      lightbulb: { enabled: false },
+      lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
       contextmenu: false,
       domReadOnly: true,
       renderIndicators: true,

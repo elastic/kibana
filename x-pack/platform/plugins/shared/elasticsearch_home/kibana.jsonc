@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/elasticsearch-home",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Shared Elasticsearch home page. Hosting plugins render it and supply their own product identity.",
+  "plugin": {
+    "id": "elasticsearchHome",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "elasticsearchHome"
+    ],
+    "requiredPlugins": [
+      "features",
+      "share",
+      "agentBuilder"
+    ],
+    "optionalPlugins": [
+      "cloud"
+    ]
+  }
+}

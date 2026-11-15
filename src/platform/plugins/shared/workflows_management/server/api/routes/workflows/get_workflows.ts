@@ -115,6 +115,7 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
             request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
           return response.ok({
             body: await api.getWorkflows(params, spaceId, {
+              request,
               includeExecutionHistory,
               includeManagedExecutionHistory: canReadManagedWorkflowExecutions(request),
             }),

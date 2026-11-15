@@ -6,137 +6,173 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { WORKER_SCHEDULE_UNITS, type WorkerScheduleUnit } from '@kbn/alertzero-common';
+import { css } from '@emotion/react';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import * as i18n from '../settings_translations';
 
-interface ScheduleIntervalFieldProps {
-  current: string;
-  isDisabled?: boolean;
-  onChange: (scheduleInterval: string) => void;
-}
+/** Pluralized against the visible amount so the select agrees with the header band's badge. */
+const unitOptionsFor = (amount: number) => [
+  { value: 'm' as const, text: i18n.scheduleUnitMinutes(amount) },
+  { value: 'h' as const, text: i18n.scheduleUnitHours(amount) },
+  { value: 'd' as const, text: i18n.scheduleUnitDays(amount) },
+];
 
-interface ParsedInterval {
-  value: number;
-  unit: WorkerScheduleUnit;
-}
+type ScheduleUnit = ReturnType<typeof unitOptionsFor>[number]['value'];
 
-const DEFAULT_PARSED_INTERVAL: ParsedInterval = { value: 24, unit: 'h' };
-const INTERVAL_PATTERN = /^([1-9][0-9]*)([mhd])$/;
-
-const parseInterval = (interval: string): ParsedInterval | undefined => {
-  const match = INTERVAL_PATTERN.exec(interval);
-  return match ? { value: Number(match[1]), unit: match[2] as WorkerScheduleUnit } : undefined;
+const parseInterval = (interval: string | undefined): { amount: number; unit: ScheduleUnit } => {
+  const match = /^(\d+)([mhd])$/.exec(interval ?? '');
+  if (!match) return { amount: 1, unit: 'h' };
+  return { amount: Number(match[1]), unit: match[2] as ScheduleUnit };
 };
 
+const formatInterval = (amount: number, unit: ScheduleUnit): string => `${amount}${unit}`;
+
+/** `WorkerScheduleInterval` caps the stored string at 6 chars, so the amount is at most 5 digits. */
+const MAX_SCHEDULE_AMOUNT = 99999;
+
+const isCommittableAmount = (amount: number): boolean =>
+  Number.isInteger(amount) && amount >= 1 && amount <= MAX_SCHEDULE_AMOUNT;
+
+interface ScheduleIntervalFieldProps {
+  workerId: string;
+  current: string;
+  isDisabled?: boolean;
+  onChange: (interval: string) => void;
+  /**
+   * Reports an uncommittable amount. The draft never reaches settings state, so without this Save
+   * would persist the last valid cadence while an invalid field is on screen.
+   */
+  onValidityChange?: (isValid: boolean) => void;
+  /**
+   * Changes when the page discards its draft. An invalid amount survives blur, so Discard must
+   * clear it or the flagged value keeps Save blocked.
+   */
+  resetKey?: number;
+}
+
 /**
- * Interval control for a schedule-driven Worker, mirroring the Attack Discovery schedule form's
- * number + unit pairing.
- *
- * EuiFieldNumber fires onChange per keystroke, so the value is persisted on blur (and immediately
- * on a unit change) — otherwise typing "30" would save "3h" and then "30h", rewriting the workflow
- * and re-registering its Task Manager schedule twice.
+ * "Every N unit" trigger row. Commits on change; an amount that is not a whole number of units
+ * stays on screen flagged instead of being floored into a different cadence.
  */
 export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
+  workerId,
   current,
   isDisabled,
   onChange,
+  onValidityChange,
+  resetKey,
 }) => {
-  const parsedCurrent = parseInterval(current) ?? DEFAULT_PARSED_INTERVAL;
-  const [draft, setDraft] = useState<ParsedInterval>(parsedCurrent);
-  const draftRef = useRef<ParsedInterval>(parsedCurrent);
-  const lastPersistedRef = useRef(current);
-  const onChangeRef = useRef(onChange);
+  const { amount, unit } = useMemo(() => parseInterval(current), [current]);
+  const [amountDraft, setAmountDraft] = useState<string | null>(null);
 
-  onChangeRef.current = onChange;
-
-  // Re-sync when the server echoes a different value than the one typed — the mutation is
-  // optimistic and rolls back on a settings conflict.
-  useEffect(() => {
-    lastPersistedRef.current = current;
-    const next = parseInterval(current);
-    if (!next) {
-      return;
-    }
-    draftRef.current = next;
-    setDraft(next);
-  }, [current]);
-
-  const persist = useCallback(({ value, unit }: ParsedInterval) => {
-    const interval = `${value}${unit}`;
-    if (interval === lastPersistedRef.current) {
-      return;
-    }
-    lastPersistedRef.current = interval;
-    onChangeRef.current(interval);
-  }, []);
-
-  const onValueChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = event.target.value.trim();
-    if (!/^[1-9][0-9]*$/.test(raw)) {
-      return;
-    }
-    const next = { ...draftRef.current, value: Number(raw) };
-    draftRef.current = next;
-    setDraft(next);
-  }, []);
-
-  const onUnitChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const unit = event.target.value as WorkerScheduleUnit;
-      const next = { ...draftRef.current, unit };
-      draftRef.current = next;
-      setDraft(next);
-      persist(next);
+  const commit = useCallback(
+    (nextAmount: number, nextUnit: ScheduleUnit, rawDraft?: string) => {
+      // Flooring 1.9 or 0 would silently save a different cadence; keep it flagged instead.
+      if (!isCommittableAmount(nextAmount)) {
+        setAmountDraft(rawDraft ?? String(nextAmount));
+        return;
+      }
+      setAmountDraft(null);
+      onChange(formatInterval(nextAmount, nextUnit));
     },
-    [persist]
+    [onChange]
   );
 
-  const onValueBlur = useCallback(() => {
-    persist(draftRef.current);
-  }, [persist]);
+  const amountValue = amountDraft ?? String(amount);
+  const amountInvalid = amountDraft != null && !isCommittableAmount(Number(amountDraft));
 
-  const unitOptions = useMemo(
-    () =>
-      WORKER_SCHEDULE_UNITS.map((unit) => ({
-        value: unit,
-        text: i18n.scheduleUnitLabel(unit, draft.value),
-      })),
-    [draft.value]
-  );
+  useEffect(() => {
+    onValidityChange?.(!amountInvalid);
+  }, [amountInvalid, onValidityChange]);
+
+  // Discard clears the flagged draft; skipped on mount so it does not fight the initial value.
+  const isFirstResetRef = useRef(true);
+  useEffect(() => {
+    if (isFirstResetRef.current) {
+      isFirstResetRef.current = false;
+      return;
+    }
+    setAmountDraft(null);
+  }, [resetKey]);
+
+  // Report the control valid again if it unmounts while flagged (e.g. the Worker's trigger row
+  // stops rendering), so a removed control cannot leave the page's Save permanently blocked.
+  // Held in a ref so this runs on real unmount only, not whenever the parent passes a new callback.
+  const onValidityChangeRef = useRef(onValidityChange);
+  onValidityChangeRef.current = onValidityChange;
+  useEffect(() => () => onValidityChangeRef.current?.(true), []);
 
   return (
-    <EuiFormRow
-      label={i18n.SCHEDULE_INTERVAL_LABEL}
-      helpText={i18n.SCHEDULE_INTERVAL_HELP_TEXT}
-      fullWidth
-      data-test-subj="alertZeroScheduleIntervalField"
+    <EuiFlexGroup
+      gutterSize="s"
+      responsive={false}
+      alignItems="center"
+      wrap
+      data-test-subj={`alertZeroTriggerField-${workerId}`}
     >
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={2}>
-          <EuiFieldNumber
-            fullWidth
-            min={1}
-            value={draft.value}
-            disabled={isDisabled}
-            onChange={onValueChange}
-            onBlur={onValueBlur}
-            aria-label={i18n.SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL}
-            data-test-subj="alertZeroScheduleIntervalValue"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <EuiSelect
-            fullWidth
-            value={draft.unit}
-            options={unitOptions}
-            disabled={isDisabled}
-            onChange={onUnitChange}
-            aria-label={i18n.SCHEDULE_INTERVAL_UNIT_ARIA_LABEL}
-            data-test-subj="alertZeroScheduleIntervalUnit"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" aria-hidden="true">
+          <span>{i18n.TRIGGER_EVERY}</span>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: 88px;
+          flex: 0 0 88px;
+        `}
+      >
+        <EuiFieldNumber
+          value={amountValue}
+          compressed
+          fullWidth
+          min={1}
+          step={1}
+          isInvalid={amountInvalid}
+          disabled={isDisabled}
+          aria-label={i18n.TRIGGER_AMOUNT_ARIA_LABEL}
+          data-test-subj={`alertZeroTriggerAmount-${workerId}`}
+          onChange={(event) => {
+            const raw = event.target.value;
+            if (raw === '') {
+              setAmountDraft('');
+              return;
+            }
+            const next = Number(raw);
+            if (Number.isFinite(next)) {
+              commit(next, unit, raw);
+            }
+          }}
+          onBlur={() => {
+            // Only drop the draft once it is committable. Clearing an invalid draft here would
+            // snap the field back to the persisted cadence and hide the problem, which is how an
+            // invalid entry used to slip past Save.
+            if (!amountInvalid) {
+              setAmountDraft(null);
+            }
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: 120px;
+          flex: 0 0 120px;
+        `}
+      >
+        <EuiSelect
+          options={unitOptionsFor(Number(amountValue))}
+          value={unit}
+          compressed
+          fullWidth
+          disabled={isDisabled}
+          aria-label={i18n.TRIGGER_UNIT_ARIA_LABEL}
+          data-test-subj={`alertZeroTriggerUnit-${workerId}`}
+          onChange={(event) =>
+            commit(Number(amountValue), event.target.value as ScheduleUnit, amountValue)
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

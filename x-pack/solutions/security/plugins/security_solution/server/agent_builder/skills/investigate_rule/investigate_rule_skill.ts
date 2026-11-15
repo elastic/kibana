@@ -10,7 +10,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -48,18 +48,20 @@ const ALERTS_BY_IDS_FIELDS = [
   'destination.port',
 ] as const;
 
-const alertsByIdsSchema = z.object({
-  alert_ids: z
-    .array(z.string().max(512))
-    .min(1)
-    .max(ALERTS_BY_IDS_MAX)
-    .describe('Alert document ids (_id) to retrieve'),
-  additional_fields: z
-    .array(z.string().max(256))
-    .max(50)
-    .optional()
-    .describe('Extra field names to return, e.g. the rule investigation_fields'),
-});
+const alertsByIdsSchema = lazySchema(() =>
+  z.object({
+    alert_ids: z
+      .array(z.string().max(512))
+      .min(1)
+      .max(ALERTS_BY_IDS_MAX)
+      .describe('Alert document ids (_id) to retrieve'),
+    additional_fields: z
+      .array(z.string().max(256))
+      .max(50)
+      .optional()
+      .describe('Extra field names to return, e.g. the rule investigation_fields'),
+  })
+);
 
 const SKILL_CONTENT = `# investigate-rule Skill
 
@@ -366,6 +368,10 @@ Use the five \`##\` sections from Step 4 (Alert volume, Confirmed dispositions, 
 Recommended remediation, Confidence boundary). Within each section, **prose, bullets, or
 tables are all fine** — use whatever reads best for the data. (Read-only: never apply or
 offer to apply a change.)
+
+When the caller asks for structured output, fill every field of the requested schema from
+the investigation above. Skip the five-section prose and the offer to apply changes — the
+calling workflow owns the actions and gates them with its own approval steps.
 
 ---
 

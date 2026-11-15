@@ -37,6 +37,14 @@ describe('mergeConnectors', () => {
       expect(result.every((c) => c.isRecommended === undefined)).toBe(true);
     });
 
+    it('keeps declared parameters on SO-configured connectors', () => {
+      const soA = { ...inferenceConnector('so-a'), parameters: { temperature: 0 } };
+
+      const result = mergeConnectors([soA], [inferenceConnector('so-a')], true);
+
+      expect(result).toEqual([soA]);
+    });
+
     it('returns an empty array when SO explicitly lists no endpoints', () => {
       const all = [inferenceConnector('a'), inferenceConnector('b')];
 
@@ -60,6 +68,16 @@ describe('mergeConnectors', () => {
       expect(result[1].isRecommended).toBe(true);
       expect(result[2].isRecommended).toBeUndefined();
       expect(result[3].isRecommended).toBeUndefined();
+    });
+
+    it('keeps declared parameters on recommended endpoints', () => {
+      const parameters = { reasoning: { effort: 'low' as const }, temperature: 0.5 };
+      const recommended = { ...inferenceConnector('rec'), parameters };
+      const other = inferenceConnector('other');
+
+      const result = mergeConnectors([recommended], [inferenceConnector('rec'), other], false);
+
+      expect(result).toEqual([{ ...recommended, isRecommended: true }, other]);
     });
 
     it('preserves server order within the recommended list and within the trailing catalog', () => {

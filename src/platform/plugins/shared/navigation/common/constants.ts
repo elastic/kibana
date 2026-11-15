@@ -21,6 +21,5 @@ export const DEFAULT_ROUTES = {
   oblt: '/app/observability/landing',
   observability: '/app/observability/landing',
   security: '/app/security/get_started',
-  workplaceai: '/app/workplace_ai',
   vectordb: '/app/vectordb',
 };

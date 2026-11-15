@@ -20,12 +20,21 @@ export const TestSingleFileConnector: ConnectorSpec = {
   auth: {
     types: [
       'none',
-      'basic',
+      {
+        type: 'basic',
+        supportsSandbox: true,
+        defaults: {},
+      },
       {
         type: 'api_key_header',
         defaults: {
           headerField: 'Key',
         },
+      },
+      {
+        type: 'oauth_authorization_code',
+        supportsSandbox: true,
+        defaults: {},
       },
     ],
     headers: {

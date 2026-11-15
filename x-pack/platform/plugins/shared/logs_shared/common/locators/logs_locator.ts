@@ -44,6 +44,11 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     const discoverAppLocator =
       this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
+    // Respect a caller-provided data view (e.g. onboarding wired streams).
+    if (params.dataViewId || params.dataViewSpec) {
+      return discoverAppLocator.getLocation(params);
+    }
+
     const isEsqlDefault = await this.deps.getIsEsqlDefault();
 
     if (isEsqlDefault && !params.query) {
@@ -53,11 +58,6 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
         ...params,
         query: { esql: `FROM ${flattenedLogSources}` },
       });
-    }
-
-    // Respect a caller-provided data view (e.g. onboarding wired streams).
-    if (params.dataViewId || params.dataViewSpec) {
-      return discoverAppLocator.getLocation(params);
     }
 
     const flattenedLogSources = await this.getFlattenedLogSources();

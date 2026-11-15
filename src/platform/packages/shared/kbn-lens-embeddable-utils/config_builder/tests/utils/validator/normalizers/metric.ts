@@ -13,9 +13,10 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
+  type DataType,
   type MetricVisualizationState,
 } from '@kbn/lens-common';
-
 import type { LensAttributes } from '../../../../types';
 import {
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
@@ -128,7 +129,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       }
     }
 
-    // Icons with no API mapping (e.g. legacy `empty`/`popout`) are dropped by the transform.
+    // Icons with no API mapping (e.g. legacy `empty`) are dropped by the transform.
     if (viz.icon && iconCompat.toAPI(viz.icon) === undefined) {
       delete viz.icon;
     }
@@ -251,13 +252,6 @@ const alignMetricColumns: NormalizerConfig<MetricAttributes> = {
     }
     return attributes;
   },
-  ignore: [
-    // ES|QL column display format (`params`) is not preserved through the API round-trip,
-    // consistent with the already-ignored `meta` / `inMetricDimension` text-based fields.
-    'state.datasourceStates.textBased.layers.*.columns.*.params',
-    // Runtime-only ES|QL fields not produced by the transform.
-    'state.datasourceStates.textBased.initialContext',
-  ],
 };
 
 /**
@@ -475,6 +469,27 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
   },
 };
 
+function inferColumnDataType(
+  newColumnId: string,
+  { isTextBased }: { isTextBased: boolean }
+): DataType | undefined {
+  if (!isTextBased) {
+    return;
+  }
+  if (
+    newColumnId === 'metric_accessor_breakdown' ||
+    newColumnId === `${ACCESSOR}_breakdown_trendline`
+  ) {
+    return 'string';
+  }
+  if (newColumnId === 'x_date_histogram') {
+    return 'date';
+  }
+  if (canonicalMetricColumns.has(newColumnId)) {
+    return 'number';
+  }
+}
+
 export const normalizeMetric = mergeNormalizers([
   getCommonNormalizer<MetricAttributes>(({ state: { visualization } }) => ({
     layerRemapping: [
@@ -482,8 +497,13 @@ export const normalizeMetric = mergeNormalizers([
       [visualization.trendlineLayerId, TRENDLINE_LAYER_ID],
     ],
     columnRemapping: getColumnRemapping(visualization),
+    inferColumnDataType,
   })),
-  getPaletteNormalizer<MetricAttributes>('state.visualization.palette', isSingleValueMetric),
+  getPaletteNormalizer<MetricAttributes>(
+    'state.visualization.palette',
+    LENS_METRIC_DEFAULT_COLOR_STEPS,
+    isSingleValueMetric
+  ),
   alignIds,
   alignStaticValueMax,
   alignEmptyLinkedLayers,

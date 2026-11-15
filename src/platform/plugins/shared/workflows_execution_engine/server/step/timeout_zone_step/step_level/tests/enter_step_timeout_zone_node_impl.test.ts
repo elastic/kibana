@@ -10,6 +10,8 @@
 // Mock parseDuration function
 jest.mock('../../../../utils', () => ({
   parseDuration: jest.fn(),
+  renderDuration: jest.requireActual('../../../../utils/render_duration/render_duration')
+    .renderDuration,
 }));
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
@@ -59,8 +61,12 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
 
     stepExecutionRuntimeMock = {
       startStep: jest.fn().mockResolvedValue(undefined),
+      setCurrentStepState: jest.fn(),
       stepExecutionId: 'step-exec-123',
       stepExecution: mockStepExecution,
+      contextManager: {
+        renderValueAccordingToContext: jest.fn((value: unknown) => value),
+      },
     } as unknown as StepExecutionRuntime;
 
     wfExecutionRuntimeManagerMock = {
@@ -110,6 +116,39 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       await impl.run();
 
       expect(callOrder).toEqual(['startStep', 'navigateToNextNode']);
+    });
+
+    it('should freeze a static timeout on step state', async () => {
+      await impl.run();
+      expect(stepExecutionRuntimeMock.setCurrentStepState).toHaveBeenCalledWith({
+        resolvedTimeout: '30s',
+      });
+    });
+
+    it('should render a Liquid timeout and freeze the result on step state', async () => {
+      node.timeout = '{{ inputs.stepTimeout }}';
+      (
+        stepExecutionRuntimeMock.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValue(' 2m ');
+
+      await impl.run();
+
+      expect(
+        stepExecutionRuntimeMock.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith('{{ inputs.stepTimeout }}');
+      expect(stepExecutionRuntimeMock.setCurrentStepState).toHaveBeenCalledWith(
+        expect.objectContaining({ resolvedTimeout: '2m' })
+      );
+    });
+
+    it('should throw and not navigate when the timeout renders to an invalid duration', async () => {
+      node.timeout = '{{ inputs.stepTimeout }}';
+      (
+        stepExecutionRuntimeMock.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValue('soon');
+
+      await expect(impl.run()).rejects.toThrow('Invalid duration format: soon');
+      expect(wfExecutionRuntimeManagerMock.navigateToNextNode).not.toHaveBeenCalled();
     });
   });
 
@@ -198,6 +237,21 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
 
       // The implementation uses stepExecutionRuntime.stepExecution directly
       expect(stepExecutionRuntimeMock.stepExecution).toBeDefined();
+    });
+
+    it('should measure against the timeout frozen on step state', () => {
+      node.timeout = '{{ inputs.stepTimeout }}';
+      const startTime = new Date().getTime() - 40000;
+      mockParseDuration.mockReturnValue(30000);
+      (stepExecutionRuntimeMock as any).stepExecution = {
+        startedAt: new Date(startTime).toISOString(),
+        state: { resolvedTimeout: '30s' },
+      };
+
+      expect(() => impl.monitor(monitoredContextMock)).toThrow(
+        'Step execution exceeded the configured timeout of 30s.'
+      );
+      expect(mockParseDuration).toHaveBeenCalledWith('30s');
     });
 
     it('should handle missing step execution', () => {

@@ -377,7 +377,7 @@ export function ExecutionListFilters({
                 {i18n.translate(
                   'workflows.workflowExecutionList.filterIconButton.executedByLabel',
                   {
-                    defaultMessage: 'Executed by',
+                    defaultMessage: 'Triggered by',
                   }
                 )}
               </strong>

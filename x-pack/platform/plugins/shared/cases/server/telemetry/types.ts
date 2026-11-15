@@ -307,6 +307,49 @@ export type CasesTelemetryConnectorKeys =
   | 'thehive'
   | 'caseswebhook';
 
+/** Workflow runs per origin type, keyed without the `cases.` prefix. */
+export interface WorkflowOriginTypeCounts {
+  case: number;
+  observable: number;
+  observables: number;
+  attachment: number;
+  attachments: number;
+  /** Runs with no origin (cases-list bulk runs). */
+  unattributed: number;
+}
+
+export interface WorkflowsSolutionTelemetry {
+  /** Total and time-bucketed workflow run counts (one per case per execution). */
+  runs: Count;
+  /** Number of distinct cases that have had at least one workflow run. */
+  totalCasesWithRuns: number;
+  /** Cardinality of distinct usernames that have triggered a workflow from a case. */
+  totalUniqueUsers: number;
+  /** Runs by origin type (e.g. `cases.observable` is reported as `observable`). */
+  byOriginType: WorkflowOriginTypeCounts;
+  /**
+   * Attachment-origin runs keyed by sanitized attachment type (e.g. `security.alert` becomes
+   * `security_alert`). Only types that have been run against appear.
+   */
+  byAttachmentType: Record<string, number>;
+  /** Number of case configurations that have at least one workflow tag set. */
+  configurationsWithWorkflowTags: number;
+}
+
+/**
+ * Cumulative user action count for one `source.type` and user action `type` pair. Only pairs
+ * with at least 1 user action appear; user actions without a source are reported as `unknown`.
+ */
+export interface UserActionsBySourceRow {
+  source: string;
+  type: string;
+  total: number;
+}
+
+export interface UserActionsSourceTelemetry {
+  bySource: UserActionsBySourceRow[];
+}
+
 export interface CasesTelemetry {
   cases: {
     all: Count &
@@ -330,7 +373,12 @@ export interface CasesTelemetry {
     obs: SolutionTelemetry;
     main: SolutionTelemetry;
   };
-  userActions: { all: Count & { maxOnACase: number } };
+  userActions: {
+    all: Count & { maxOnACase: number } & UserActionsSourceTelemetry;
+    sec: UserActionsSourceTelemetry;
+    obs: UserActionsSourceTelemetry;
+    main: UserActionsSourceTelemetry;
+  };
   comments: { all: Count & { maxOnACase: number } };
   alerts: {
     all: Count & { maxOnACase: number };
@@ -365,6 +413,12 @@ export interface CasesTelemetry {
   };
   templates: TemplatesTelemetry;
   fieldLibrary: FieldLibraryTelemetry;
+  workflows: {
+    all: WorkflowsSolutionTelemetry;
+    sec: WorkflowsSolutionTelemetry;
+    obs: WorkflowsSolutionTelemetry;
+    main: WorkflowsSolutionTelemetry;
+  };
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
@@ -379,3 +433,5 @@ export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;
 export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
 export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;
+export type WorkflowsSolutionTelemetrySchema = MakeSchemaFrom<WorkflowsSolutionTelemetry>;
+export type UserActionsSourceTelemetrySchema = MakeSchemaFrom<UserActionsSourceTelemetry>;

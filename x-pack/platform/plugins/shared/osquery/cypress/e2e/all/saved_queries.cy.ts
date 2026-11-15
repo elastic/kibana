@@ -279,7 +279,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('User ID').should('exist');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();
-      cy.contains('Differential (Ignore removals)').click();
+      cy.contains('Differential (ignore removals)').click();
 
       cy.get(`[aria-labelledby="flyoutTitle"]`).within(() => {
         cy.getBySel('ECSMappingEditorForm')
@@ -300,7 +300,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('SELECT * FROM users;where name=1');
       cy.contains('Unique identifier of the us.').should('not.exist');
       cy.contains('User ID').should('not.exist');
-      cy.contains('Differential (Ignore removals)').should('exist');
+      cy.contains('Differential (ignore removals)').should('exist');
       cy.get(`[aria-labelledby="flyoutTitle"]`).contains('Cancel').click();
     });
   });

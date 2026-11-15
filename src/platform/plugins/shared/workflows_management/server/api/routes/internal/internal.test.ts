@@ -242,6 +242,7 @@ describe('Internal Routes', () => {
     expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
       page: 1,
       perPage: 20,
+      request,
     });
     expect(response.ok).toHaveBeenCalledWith({ body: history });
   });
@@ -264,6 +265,7 @@ describe('Internal Routes', () => {
     expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
       page: 2,
       perPage: 5,
+      request,
     });
   });
 
@@ -311,6 +313,7 @@ describe('Internal Routes', () => {
     expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
       page: 101,
       perPage: 100,
+      request,
     });
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {

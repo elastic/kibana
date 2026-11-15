@@ -10,6 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import { execFileSync } from 'child_process';
+import { runInNewContext } from 'vm';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -126,6 +127,49 @@ function createEmotionFixturePlugin(tmpDir: string): { pluginDir: string; plugin
   return { pluginDir, pluginId };
 }
 
+/**
+ * Fixture whose browser code imports an in-repo plugin and which also ships a
+ * `common` target declared via `extraPublicDirs`. `requiredPlugins` controls
+ * whether the cross-plugin import is declared in the manifest.
+ */
+function createDependentFixturePlugin(
+  tmpDir: string,
+  { requiredPlugins }: { requiredPlugins: string[] }
+): { pluginDir: string; pluginId: string } {
+  const pluginId = 'dependentFixturePlugin';
+  const pluginDir = Path.join(tmpDir, 'dependent_fixture_plugin');
+
+  Fs.mkdirSync(Path.join(pluginDir, 'public'), { recursive: true });
+  Fs.mkdirSync(Path.join(pluginDir, 'common'), { recursive: true });
+
+  Fs.writeFileSync(
+    Path.join(pluginDir, 'kibana.jsonc'),
+    JSON.stringify({
+      type: 'plugin',
+      id: '@kbn/dependent-fixture-plugin',
+      owner: { name: 'test', githubTeam: 'test' },
+      plugin: {
+        id: pluginId,
+        browser: true,
+        requiredPlugins,
+        extraPublicDirs: ['common'],
+      },
+    })
+  );
+
+  Fs.writeFileSync(Path.join(pluginDir, 'common', 'index.ts'), `export const SHARED = 'shared';\n`);
+
+  Fs.writeFileSync(
+    Path.join(pluginDir, 'public', 'index.ts'),
+    [
+      `import { NavigationPublicPlugin } from '@kbn/navigation-plugin/public';`,
+      `export const plugin = () => ({ setup: () => NavigationPublicPlugin, start: () => {} });`,
+    ].join('\n') + '\n'
+  );
+
+  return { pluginDir, pluginId };
+}
+
 describe('rspack compile integration', () => {
   describe('createSingleCompileConfig', () => {
     it('produces a valid rspack config with entry, output, plugins, and module rules', async () => {
@@ -138,8 +182,9 @@ describe('rspack compile integration', () => {
         testPlugins: false,
       };
 
-      const config = await createSingleCompileConfig(options);
+      const { config, bundleCount } = await createSingleCompileConfig(options);
 
+      expect(bundleCount).toBeGreaterThan(1);
       expect(config.name).toBe('kibana');
       expect(config.mode).toBe('development');
       expect(config.entry).toBeDefined();
@@ -166,7 +211,7 @@ describe('rspack compile integration', () => {
     });
 
     it('sets production mode and minimizer when dist is true', async () => {
-      const config = await createSingleCompileConfig({
+      const { config } = await createSingleCompileConfig({
         repoRoot: REPO_ROOT,
         dist: true,
         watch: false,
@@ -224,6 +269,81 @@ describe('rspack compile integration', () => {
       expect(bundleContent).toMatch(/plugin/);
       expect(bundleContent).toMatch(/MY_CONSTANT/);
       expect(bundleContent).toMatch(/SomeComponent/);
+    }, 120_000);
+
+    it.each([
+      { dist: false, mode: 'development' },
+      { dist: true, mode: 'production' },
+    ])(
+      'preserves raw CSS imports as source text in $mode mode',
+      ({ dist }) => {
+        const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
+        const outputDir = Path.join(tmpDir, 'output');
+        const css = '.animation-probe { animation-duration: 0s !important; }\n';
+
+        Fs.writeFileSync(Path.join(pluginDir, 'public', 'styles.css'), css);
+        Fs.writeFileSync(
+          Path.join(pluginDir, 'public', 'index.ts'),
+          "export { default as rawCss } from './styles.css?raw';\n"
+        );
+
+        const result = compileInWorker({ pluginDir, pluginId, outputDir, dist });
+        expect(result.errors).toEqual([]);
+        expect(result.success).toBe(true);
+
+        let rawCss: string | undefined;
+        const bundle = Fs.readFileSync(Path.join(outputDir, `${pluginId}.plugin.js`), 'utf-8');
+        // a minimal bundle registry lets us read the plugin's exports without starting kibana
+        runInNewContext(
+          bundle,
+          {
+            __kbnBundles__: {
+              define: (id: string, getExports: () => { rawCss: string }) => {
+                if (id === `plugin/${pluginId}/public`) {
+                  rawCss = getExports().rawCss;
+                }
+              },
+            },
+          },
+          { timeout: 1_000 }
+        );
+
+        // catch the regression where ?raw returns javascript for injecting styles instead of css
+        expect(rawCss).toBe(css);
+      },
+      120_000
+    );
+
+    it('fails when browser code imports a plugin not declared in the manifest', () => {
+      const { pluginDir, pluginId } = createDependentFixturePlugin(tmpDir, {
+        requiredPlugins: [],
+      });
+      const outputDir = Path.join(tmpDir, 'output-undeclared');
+
+      const result = compileInWorker({ pluginDir, pluginId, outputDir, dist: false });
+
+      expect(result.success).toBe(false);
+      expect(result.errors.join('\n')).toContain(
+        'import [@kbn/navigation-plugin/public] references a public export of the [navigation] bundle, ' +
+          'but that bundle is not in the "requiredPlugins" or "requiredBundles" list in the plugin manifest'
+      );
+    }, 120_000);
+
+    it('externalizes a declared cross-plugin import and registers extraPublicDirs targets', () => {
+      const { pluginDir, pluginId } = createDependentFixturePlugin(tmpDir, {
+        requiredPlugins: ['navigation'],
+      });
+      const outputDir = Path.join(tmpDir, 'output-declared');
+
+      const result = compileInWorker({ pluginDir, pluginId, outputDir, dist: false });
+
+      expect(result.errors).toEqual([]);
+      expect(result.success).toBe(true);
+
+      const bundleContent = Fs.readFileSync(Path.join(outputDir, `${pluginId}.plugin.js`), 'utf-8');
+      expect(bundleContent).toContain(`__kbnBundles__.get('plugin/navigation/public')`);
+      expect(bundleContent).toContain(`plugin/${pluginId}/public`);
+      expect(bundleContent).toContain(`plugin/${pluginId}/common`);
     }, 120_000);
 
     it.each([

@@ -172,7 +172,9 @@ x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-gen
 │   ├── output-formats.md                           # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout, per-scenario Execution status block, token usage marker
 │   └── security-test-directories.md                # Map of existing test locations in the repo
 └── scripts/
-    └── publish_test_plan.sh                        # Deterministic publish step (invoked in Step 4)
+    ├── publish_test_plan.sh                        # Deterministic publish step (invoked in Step 4)
+    ├── resolve_verbosity.sh                        # Verbosity values for update mode (invoked in mode-update.md Step 1)
+    └── test_scripts.py                             # Unit tests for both scripts (python3 -m unittest)
 ```
 
 > **Why a skill and not a Cursor rule?** Skills are the current standard for extending AI agents in Kibana, agreed by Kibana tech leads and the AI guild. They are more efficient than rules (loaded on demand, not on every agent session), portable across agents, and version-controlled like any other code.
@@ -221,6 +223,81 @@ Or with a full URL:
 /test-plan-generator create a test plan for https://github.com/elastic/kibana/issues/1234
 ```
 
+### Choosing a verbosity level (optional)
+
+Every command accepts an optional verbosity keyword — `lean`, `standard`, or `detailed` — that controls **prose density and per-scenario metadata only**. It never changes which scenarios are written, their priorities, or which `⚠️` entries appear in *Known Limitations*.
+
+```
+/test-plan-generator generate a lean test plan for issue #1234
+/test-plan-generator generate a detailed test plan for issue #1234
+```
+
+If you omit the keyword, the agent uses `standard` (the current default). The chosen level is persisted as a hidden `<!-- verbosity: … -->` marker in the published comment, so `update` runs preserve it automatically. To flip the level later, just include the keyword in the update invocation — the agent re-renders `Overview`, `Feature Background`, `Assumptions`, and the per-scenario metadata lines at the new level (scenario titles and Gherkin stay as they are) and announces the change in its post-save message. Moving from `lean` to a higher level, or to `detailed` from any level, re-reads every linked PR (a `lean` plan does not keep test names, and only a `detailed` plan keeps the PR details), so that update takes longer. If the issue has no linked PR, moving up from `lean` searches the code for existing tests instead. Plans published before this marker existed are treated as `standard`: the first `update` only adds the marker, unless you pass a different level keyword.
+
+**When to reach for `lean`** — small, well-understood changes; issues where the reviewer already knows the domain; drafts you plan to skim.
+
+**When to reach for `detailed`** — cross-team handovers; issues that will be read by people unfamiliar with the feature; drafts that need per-scenario traceability. `detailed` adds a `**Source:**` line that cites the scenario's origin from one of four categories: a consolidated AC (`AC1 (#1234)`), a PR artifact (endpoint / component / saved-object type / etc.), an always-evaluated coverage trigger (upgrade / CRUD per persisted object / dependency data lifecycle), or a code-derived fact discovered outside issue and PR bodies.
+
+#### Before / after — the `Overview` and per-scenario blocks under each level
+
+`standard`:
+
+````markdown
+## Overview
+
+This test plan covers the automated escalation policy feature introduced in #1234, which allows security engineers to define time-based escalation rules for security alerts. It validates end-to-end behaviour across rule creation, alert routing, and downstream notification, and confirms that the feature meets the acceptance criteria stated in the epic and the linked PR.
+
+...
+
+#### Scenario: Editor can create a new escalation rule
+
+**Priority:** P0
+
+**Automation coverage**: 2 unit tests (`escalation_rule_form.test.tsx` — "renders create form", "submits valid payload"), 1 e2e test (`escalation_rules.cy.ts` — "creates rule from empty state")
+
+```gherkin
+...
+```
+````
+
+`lean`:
+
+````markdown
+## Overview
+
+Validates the automated escalation policy feature from #1234 end-to-end (rule creation, alert routing, notifications).
+
+...
+
+#### Scenario: Editor can create a new escalation rule
+
+**Priority:** P0
+
+**Automation coverage**: 🤖 automated (3 tests)
+
+```gherkin
+...
+```
+````
+
+`detailed` (adds `**Source:**` between `**Priority:**` and `**Automation coverage**` — everything else identical to `standard`):
+
+````markdown
+#### Scenario: Editor can create a new escalation rule
+
+**Priority:** P0
+
+**Source:** AC1 (#1234); PR #5678 (endpoint `POST /rules`); PR #5678 (component `EscalationRuleForm`)
+
+**Automation coverage**: 2 unit tests (`escalation_rule_form.test.tsx` — "renders create form", "submits valid payload"), 1 e2e test (`escalation_rules.cy.ts` — "creates rule from empty state")
+
+```gherkin
+...
+```
+````
+
+The `Assumptions` section shrinks similarly under `lean` — only bullets whose value was **confirmed from a concrete source** (issue body, PR, Figma, sub-issue) are rendered as a compact `; `-separated line, and unconfirmed bullets remain in *Known Limitations* with their `⚠️` unchanged. The agent never invents defaults just to fill the section — that would violate the skill's core "never assume, always ask" rule. If nothing was confirmed, the section renders `See _Known Limitations_ for open assumptions.` and points there.
+
 ### Updating an existing test plan
 
 If the issue changes and you need to update the plan:
@@ -240,7 +317,7 @@ If you want to force a full re-read of all linked PRs regardless of activity:
 /test-plan-generator publish test plan for issue #1234
 ```
 
-The agent uses the `gh` CLI as the primary method, invoking `scripts/publish_test_plan.sh` for a deterministic publish — it detects any existing test plan comment, decides between PATCH and POST, posts the content, and deletes the local draft. If `gh` is not available, the agent falls back to the GitHub MCP and performs the same flow manually. Either way, the comment is posted (or updated) on the issue and the local draft is deleted.
+The agent uses the `gh` CLI as the primary method, invoking `scripts/publish_test_plan.sh` for a deterministic publish — it writes the hidden markers at the top in a fixed order, detects any existing test plan comment, decides between PATCH and POST, posts the content, and deletes the local draft. If `gh` is not available, the agent falls back to the GitHub MCP: it runs the script with `--dry-run` (which does not need `gh`) to get the comment body, then posts it through the MCP. Either way, the comment is posted (or updated) on the issue and the local draft is deleted.
 
 ---
 
@@ -294,7 +371,7 @@ When publishing, the agent runs `scripts/publish_test_plan.sh`. If the script fa
 
 | Exit code | Meaning | Fix |
 |---|---|---|
-| 65 | The draft does not start with `<!-- test-plan-generated -->` | The agent should have prepended the marker. If you see this, the draft was edited externally — open `.agents/tmp/test-plan-#<issue>.md` and make sure the first two lines are the marker and `generated-by:` lines. |
+| 65 | The draft's top markers are wrong: no model identifier (no `--model` and no `generated-by:` line), or a duplicated or invalid `verbosity:` / `tokens:` marker | The script writes the top markers itself, so this usually means the draft was edited externally, or an `update` draft kept the old markers from the published comment. Open `.agents/tmp/test-plan-#<issue>.md`, fix or remove the marker lines at the top, and publish again. |
 | 66 | Draft file does not exist | Run `generate test plan for issue #<n>` first to create the draft. |
 | 69 | `gh` CLI is not installed | Run `brew install gh` (Step 4). |
 | 70 | Unexpected response from GitHub API (could not resolve comment id, or API returned no URL) | Usually a transient API issue. Re-run the publish command. If it persists, check `gh api /repos/<owner>/<repo>/issues/<n>/comments` manually to confirm the comment is reachable. |
@@ -350,7 +427,7 @@ The skill files live in the repository under `x-pack/solutions/security/plugins/
 
 **How does the agent self-review the draft before saving?**
 Three layers, all run during Step 3 just before the draft is written, in this order:
-1. The *Red flags — STOP and ask* table at the top of `SKILL.md` (right below the Core rule). It is a 9-row table mapping the most common "I'll just rationalise this" thoughts (e.g. *"the image fetch failed, I'll describe it from alt text"*, *"the total scenarios count looks close enough — I'll round"*, *"the issue is thin but the PR fills the gaps"*, *"I found a PR that obviously implements this scope, but no issue cross-references it — I'll add it to the corpus"*) to the correct alternative behaviour. If the agent catches itself in any of those, it stops and asks instead of inventing.
+1. The *Red flags — STOP and ask* table at the top of `SKILL.md` (right below the Core rule). It maps the most common "I'll just rationalise this" thoughts (e.g. *"the image fetch failed, I'll describe it from alt text"*, *"the total scenarios count looks close enough — I'll round"*, *"the issue is thin but the PR fills the gaps"*, *"I found a PR that obviously implements this scope, but no issue cross-references it — I'll add it to the corpus"*) to the correct alternative behaviour. If the agent catches itself in any of those, it stops and asks instead of inventing.
 2. The expanded `references/common-mistakes.md` file. 8 frequent quality issues (hallucinated scenarios, duplicated sub-issue coverage, speculative optional sections, UI-step Gherkin, overlooked sub-issue ACs, overlooked PR artifacts, inconsistent Known Limitations, ignoring the Core rule) — each entry has a one-paragraph description, a concrete ❌ Bad example (most sourced from observed agent runs), and a ✅ Good alternative. On top of that, the Gherkin self-review in `references/output-formats.md` includes three mechanical sum-checks on the Test Coverage Summary table to catch undercounts and a structural check on the Issue Clarity Assessment block.
 3. The *draft coherence review* in `references/draft-coherence-review.md` — a holistic end-to-end re-read of the assembled draft against the gathered context corpus. The previous two layers are itemised (per-scenario rules, per-category mistakes, sum-checks); this layer compares sections of the draft against each other and against the issue / PR / Figma sources gathered in Step 1. It is split into two short tables: *Document-as-whole coherence* (D1–D9: e.g. *Overview* matches what scenarios actually test, *Scope* bullets map to scenarios bidirectionally, *Known Limitations* claims match the document, voice and detail level consistent across scenarios) and *Source fidelity* (S1–S8: e.g. ACs verbatim from the issue, *Feature Background* motivation traceable to source, UI element names / error strings / feature-flag names matching their origin tag). Each row is graded Consistent / Drift / Incoherent — Drift and Incoherent findings are fixed on the draft before saving, or recorded as a `⚠️` entry in *Known Limitations* if unresolvable. This layer is not published — its only externally visible effects are draft edits and new `⚠️` entries.
 

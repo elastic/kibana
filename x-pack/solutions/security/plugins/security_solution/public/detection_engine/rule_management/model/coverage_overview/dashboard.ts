@@ -9,7 +9,7 @@ import type { CoverageOverviewMitreTactic } from './mitre_tactic';
 import type { CoverageOverviewRule } from './rule';
 
 /**
- * A rule whose MITRE ATT&CK™ mappings contain at least one invalid
+ * A rule whose MITRE mappings contain at least one invalid
  * (e.g. removed or deprecated) tactic/technique/subtechnique ID.
  */
 export interface CoverageOverviewRuleWithInvalidMitre extends CoverageOverviewRule {
@@ -25,7 +25,7 @@ export interface CoverageOverviewDashboard {
    */
   mitreTactics: CoverageOverviewMitreTactic[];
   /**
-   * Rules with no MITRE ATT&CK™ threat mapping at all
+   * Rules with no MITRE threat mapping at all
    */
   unmappedRules: {
     enabledRules: CoverageOverviewRule[];
@@ -34,7 +34,7 @@ export interface CoverageOverviewDashboard {
   };
   /**
    * Rules that have at least one tactic, technique, or subtechnique ID that is
-   * not found in the currently bundled MITRE ATT&CK™ dataset
+   * not found in the currently bundled MITRE dataset
    */
   invalidlyMappedRules: {
     enabledRules: CoverageOverviewRuleWithInvalidMitre[];

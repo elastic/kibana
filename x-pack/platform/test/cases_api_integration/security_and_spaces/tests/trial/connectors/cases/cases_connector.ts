@@ -1067,11 +1067,11 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
 
-          it('sets rule info to null when `internallyManagedAlerts` is `true`', async () => {
+          it('sets rule info to null when `source` is `attack`', async () => {
             await executeConnectorAndVerifyCorrectness({
               supertest,
               connectorId,
-              req: getRequest({ groupingBy: ['host.name'], internallyManagedAlerts: true }),
+              req: getRequest({ groupingBy: ['host.name'], source: 'attack' }),
             });
 
             const cases = await findCases({ supertest });
@@ -1242,7 +1242,7 @@ export default ({ getService }: FtrProviderContext): void => {
             grouping: { field_name_1: 'field_value_3' },
           },
         ];
-        const req = getRequest({ groupedAlerts, internallyManagedAlerts: true });
+        const req = getRequest({ groupedAlerts, source: 'attack' });
 
         describe('Oracle', () => {
           it('should create the oracle records correctly with grouping', async () => {
@@ -1553,7 +1553,7 @@ export default ({ getService }: FtrProviderContext): void => {
               connectorId,
               req: getRequest({
                 groupedAlerts: totalGroupedAlerts,
-                internallyManagedAlerts: true,
+                source: 'attack',
               }),
             });
 
@@ -1774,7 +1774,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       maximumCasesToOpen: 5,
       templateId: null,
       templateVersion: null,
-      internallyManagedAlerts: null,
+      source: 'rule',
       autoPushCase: null,
       ...params,
     },

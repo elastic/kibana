@@ -13,6 +13,7 @@ import type {
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
   WorkflowRepository,
+  WorkflowRunAsMode,
 } from '@kbn/workflows';
 import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
@@ -69,16 +70,25 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     );
   }
 
-  private getInput(): { workflowId: string; inputs: Record<string, unknown> } {
+  private getInput(): {
+    workflowId: string;
+    inputs: Record<string, unknown>;
+    runAsMode: WorkflowRunAsMode;
+  } {
     const step = this.init.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
     const renderedWith =
       this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
         step.with || {}
       ) as Record<string, unknown>;
+    const runAsMode = step.with['run-as-mode'] ?? 'default';
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
-    return { workflowId: String(workflowId ?? ''), inputs: mappedInputs };
+    return {
+      workflowId: String(workflowId ?? ''),
+      inputs: mappedInputs,
+      runAsMode,
+    };
   }
 
   private assertValidWorkflowId(workflowId: string): void {
@@ -127,15 +137,20 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     // First iteration only: start step and run validation
     stepExecutionRuntime.startStep();
 
-    const { workflowId, inputs } = this.getInput();
-
-    // Persist resolved inputs for observability in the execution UI
-    stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
-
-    // Select executor based on step type
-    const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
-
     try {
+      const { workflowId, inputs, runAsMode } = this.getInput();
+      const inheritParentIdentity = runAsMode !== 'default';
+
+      // Persist resolved inputs for observability in the execution UI
+      stepExecutionRuntime.setInput({
+        'workflow-id': workflowId,
+        inputs,
+        ...(inheritParentIdentity ? { 'run-as-mode': runAsMode } : {}),
+      });
+
+      // Select executor based on step type
+      const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
+
       this.assertValidWorkflowId(workflowId);
 
       const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
@@ -173,7 +188,9 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         inputs,
         this.init.spaceId,
         this.init.request,
-        currentDepth
+        currentDepth,
+        inheritParentIdentity,
+        node.configuration.name
       );
 
       this.handleResult(result);

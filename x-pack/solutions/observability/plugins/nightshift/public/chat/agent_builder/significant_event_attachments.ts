@@ -26,7 +26,7 @@ const significantEventDetectionAttachmentDefinition: AttachmentUIDefinition<Sign
     getHeader: () => ({
       icon: 'bell',
       subtitle: i18n.translate('xpack.nightshift.detectionAttachment.subtitle', {
-        defaultMessage: 'Significant Events detection',
+        defaultMessage: 'Significant events detection',
       }),
     }),
   };

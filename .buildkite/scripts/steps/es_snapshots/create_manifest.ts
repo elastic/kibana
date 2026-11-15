@@ -104,11 +104,12 @@ interface ManifestEntry {
       set -euo pipefail
 
       echo '--- Upload files to GCS'
-      .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
+      # Archive upload can outlive the 60-minute shared token; impersonation refreshes it.
+      .buildkite/scripts/common/activate_service_account.sh --auto-refresh ${BASE_BUCKET_DAILY}
       cd "${destination}"
-      gsutil -m cp -r *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
+      gcloud storage cp --recursive *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
 
       buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/${BASE_BUCKET_DAILY}/${DESTINATION}/manifest.json'
       buildkite-agent meta-data set ES_SNAPSHOT_VERSION '${VERSION}'

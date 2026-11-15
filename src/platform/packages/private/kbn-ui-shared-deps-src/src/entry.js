@@ -18,9 +18,6 @@ if (window.__kbnHardenPrototypes__) {
   require('@kbn/security-hardening/prototype');
 }
 
-export const Jquery = require('jquery');
-window.$ = window.jQuery = Jquery;
-
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');
 export const KbnI18n = require('@kbn/i18n');

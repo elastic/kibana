@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+import { DESTINATION_NODE_TYPE, PROCESSING_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
 /**
  * Background dot grid spacing (px). Column/row gaps are multiples of this so
@@ -50,17 +50,20 @@ export const PAN_MARGIN = 500;
 /** Fixed card widths (px) for each node kind; the single source of truth used
  * by both the node components and the pan-bound estimate below. */
 export const SOURCE_NODE_WIDTH = 246;
-export const DESTINATION_NODE_WIDTH = 184;
+export const DESTINATION_NODE_WIDTH = 220;
+export const PROCESSING_NODE_WIDTH = 140;
 
 /**
  * Revisit whenever a card gains or loses a content row.
  */
 export const SOURCE_NODE_HEIGHT = 74;
-export const DESTINATION_NODE_HEIGHT = 50;
+export const DESTINATION_NODE_HEIGHT = 78;
+export const PROCESSING_NODE_HEIGHT = 44;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
   [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,
   [DESTINATION_NODE_TYPE]: DESTINATION_NODE_HEIGHT,
+  [PROCESSING_NODE_TYPE]: PROCESSING_NODE_HEIGHT,
 };
 
 /**

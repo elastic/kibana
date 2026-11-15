@@ -19,7 +19,11 @@ import { MockedMonacoEditor, mockedEditorInstance } from '@kbn/code-editor-mock/
 import { CodeEditor } from './code_editor';
 
 jest.mock('./react_monaco_editor', () => {
-  return { MonacoEditor: MockedMonacoEditor };
+  const original = jest.requireActual('./react_monaco_editor');
+  return {
+    ...original,
+    MonacoEditor: MockedMonacoEditor,
+  };
 });
 
 // Mock the htmlIdGenerator to generate predictable ids for snapshot tests

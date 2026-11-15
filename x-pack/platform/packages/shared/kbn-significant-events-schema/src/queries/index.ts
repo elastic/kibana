@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
@@ -25,9 +25,11 @@ export interface EsqlQuery {
   query: string;
 }
 
-export const esqlQuerySchema: z.Schema<EsqlQuery> = z.object({
-  query: z.string().max(MAX_TEXT_LENGTH),
-});
+export const esqlQuerySchema: z.Schema<EsqlQuery> = lazySchema(() =>
+  z.object({
+    query: z.string().max(MAX_TEXT_LENGTH),
+  })
+);
 
 interface StreamQueryBase {
   id: string;
@@ -39,6 +41,24 @@ export const QUERY_TYPE_MATCH = 'match' as const;
 export const QUERY_TYPE_STATS = 'stats' as const;
 
 export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
+
+export const SIGNIFICANT_EVENT_TYPE_OPERATIONAL = 'operational' as const;
+export const SIGNIFICANT_EVENT_TYPE_CONFIGURATION = 'configuration' as const;
+export const SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH = 'resource_health' as const;
+export const SIGNIFICANT_EVENT_TYPE_ERROR = 'error' as const;
+export const SIGNIFICANT_EVENT_TYPE_SECURITY = 'security' as const;
+
+export const SIGNIFICANT_EVENT_TYPES = [
+  SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
+  SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
+  SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
+  SIGNIFICANT_EVENT_TYPE_ERROR,
+  SIGNIFICANT_EVENT_TYPE_SECURITY,
+] as const;
+
+export type SignificantEventType = (typeof SIGNIFICANT_EVENT_TYPES)[number];
+
+export const significantEventTypeSchema = lazySchema(() => z.enum(SIGNIFICANT_EVENT_TYPES));
 
 /**
  * Minimum severity score for auto-creating backing rules.
@@ -53,18 +73,21 @@ export const HIGH_SEVERITY_THRESHOLD = 60;
  */
 export const CRITICAL_SEVERITY_THRESHOLD = 80;
 
-export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
+export const queryTypeSchema = lazySchema(() => z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]));
 
-export const queryFeatureSchema = z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  run_id: z.string().max(MAX_ID_LENGTH).optional(),
-});
+export const queryFeatureSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    run_id: z.string().max(MAX_ID_LENGTH).optional(),
+  })
+);
 
 export type QueryFeature = z.infer<typeof queryFeatureSchema>;
 
 export interface StreamQuery extends StreamQueryBase {
   type: QueryType;
   esql: EsqlQuery;
+  category?: SignificantEventType;
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
@@ -77,23 +100,27 @@ export interface StreamQuery extends StreamQueryBase {
  * omitted — the server derives it from the ES|QL content via `deriveQueryType`
  * on every write, so client-supplied values would be ignored.
  */
-export const upsertStreamQueryRequestSchema = z.object({
-  title: NonEmptyString,
-  esql: esqlQuerySchema,
-  severity_score: z.number().optional(),
-  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
-  description: z.string().max(MAX_TEXT_LENGTH).default(''),
-  expires_at: z.iso.datetime().optional(),
-});
+export const upsertStreamQueryRequestSchema = lazySchema(() =>
+  z.object({
+    title: NonEmptyString,
+    esql: esqlQuerySchema,
+    severity_score: z.number().optional(),
+    evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+    description: z.string().max(MAX_TEXT_LENGTH).default(''),
+    expires_at: isoDateTime().optional(),
+  })
+);
 
 /**
  * Wire schema for the bulk endpoint index operations.
  * Same as {@link upsertStreamQueryRequestSchema} but with `id` included,
  * and `type` intentionally omitted — derived server-side.
  */
-export const bulkStreamQueryInputSchema = upsertStreamQueryRequestSchema.extend({
-  id: NonEmptyString,
-});
+export const bulkStreamQueryInputSchema = lazySchema(() =>
+  upsertStreamQueryRequestSchema.extend({
+    id: NonEmptyString,
+  })
+);
 
 export interface QueriesGetResponse {
   queries: QueryWithOccurrences[];
@@ -109,7 +136,7 @@ export interface QueriesOccurrencesGetResponse {
 
 export interface QueryLink {
   query: StreamQuery;
-  stream_name: string;
+  source_id: string;
   /** Whether a Kibana rule exists for this query. */
   rule_backed: boolean;
   /** The deterministic ID of the Kibana rule associated with this query. */

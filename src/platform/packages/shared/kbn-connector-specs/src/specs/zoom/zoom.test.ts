@@ -516,6 +516,27 @@ describe('Zoom', () => {
       expect(result.truncated).toBe(false);
     });
 
+    it('should download from a zoom.us subdomain', async () => {
+      mockClient.get.mockResolvedValue({ data: Buffer.from('ok'), headers: {} });
+      const downloadUrl = 'https://us06web.zoom.us/rec/download/transcript.vtt';
+
+      await Zoom.actions.downloadRecordingFile.handler(mockContext, { downloadUrl });
+
+      expect(mockClient.get).toHaveBeenCalledWith(downloadUrl, { responseType: 'arraybuffer' });
+    });
+
+    it.each([
+      'https://attacker.example.com/collect',
+      'https://zoom.us.attacker.example.com/rec/download/file',
+      'https://evilzoom.us/rec/download/file',
+      'http://zoom.us/rec/download/file',
+    ])('should refuse to send the Zoom token to %s', async (downloadUrl) => {
+      await expect(
+        Zoom.actions.downloadRecordingFile.handler(mockContext, { downloadUrl })
+      ).rejects.toThrow('downloadRecordingFile only downloads from https://zoom.us');
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
     it('should propagate download errors', async () => {
       mockClient.get.mockRejectedValue(new Error('Forbidden'));
 

@@ -10,13 +10,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useFormContext } from 'react-hook-form';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_INTERNAL_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import type { RuleFormMeta } from '../contexts';
 import type { FormValues } from '../types';
 import { TagsField, validateTags } from './tags_field';
 import { createFormWrapper, createMockServices } from '../../test_utils';
 
-const TAGS_PATH = `${ALERTING_V2_RULE_API_PATH}/tags`;
+const TAGS_PATH = `${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`;
 
 const formWithTags = (tags: string[]): Partial<FormValues> => ({
   metadata: { name: 'Test Rule', enabled: true, tags },

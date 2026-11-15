@@ -6,7 +6,7 @@
  */
 
 export type * from './histogram';
-export * from './ping';
+export type * from './ping';
 export * from './synthetics';
-export * from './error_groups';
-export * from './error_stats';
+export type * from './error_groups';
+export type * from './error_stats';

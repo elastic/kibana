@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 
 import { PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { triggers } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  apiHasDisableTriggers,
+  useStateFromPublishingSubject,
+  type EmbeddableApiContext,
+} from '@kbn/presentation-publishing';
 import { uiActions } from '../../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
-
-interface PanelBadgeExtension {
-  color?: EuiBadgeProps['color'];
-}
 
 export const useBadges = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
@@ -30,7 +29,15 @@ export const useBadges = <
   api: ApiType,
   getActions: PresentationPanelProps['getActions']
 ) => {
-  const [badges, setBadges] = useState<Action<EmbeddableApiContext, PanelBadgeExtension>[]>([]);
+  const [badges, setBadges] = useState<Action<EmbeddableApiContext>[]>([]);
+  const disableTriggersSubject = useMemo(
+    () =>
+      apiHasDisableTriggers(api.parentApi)
+        ? api.parentApi.disableTriggers$
+        : new BehaviorSubject<boolean>(false),
+    [api.parentApi]
+  );
+  const disableTriggers = useStateFromPublishingSubject(disableTriggersSubject);
 
   /**
    * Get all actions once on mount of the panel. Any actions that are Frequent Compatibility
@@ -58,7 +65,7 @@ export const useBadges = <
 
     const handleActionCompatibilityChange = (
       isCompatible: boolean,
-      action: Action<EmbeddableApiContext, PanelBadgeExtension>
+      action: Action<EmbeddableApiContext>
     ) => {
       if (canceled) return;
       setBadges((currentActions) => {
@@ -69,9 +76,13 @@ export const useBadges = <
     };
 
     (async () => {
+      if (disableTriggers) {
+        setBadges([]);
+        return;
+      }
       const initialBadges = await getActionsForTrigger(PANEL_BADGE_TRIGGER);
       if (canceled) return;
-      setBadges(initialBadges as Action<EmbeddableApiContext, PanelBadgeExtension>[]);
+      setBadges(initialBadges as Action<EmbeddableApiContext>[]);
 
       const apiContext = { embeddable: api };
 
@@ -93,10 +104,7 @@ export const useBadges = <
             })
           )
           .subscribe(async (isCompatible) => {
-            handleActionCompatibilityChange(
-              isCompatible,
-              badge as Action<EmbeddableApiContext, PanelBadgeExtension>
-            );
+            handleActionCompatibilityChange(isCompatible, badge as Action<EmbeddableApiContext>);
           });
         subscriptions.add(compatibilitySubject);
       }
@@ -106,10 +114,20 @@ export const useBadges = <
       canceled = true;
       subscriptions.unsubscribe();
     };
-  }, [showBadges, api, getActions]);
+  }, [showBadges, api, getActions, disableTriggers]);
 
   return useMemo(() => {
     return badges?.map((badge) => {
+      const context = { embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] };
+
+      if (badge.MenuItem) {
+        return React.createElement(badge.MenuItem, {
+          key: badge.id,
+          context,
+          dataTestSubj: `embeddablePanelBadge-${badge.id}`,
+        });
+      }
+
       const tooltipText = badge.getDisplayNameTooltip?.({
         embeddable: api,
         trigger: triggers[PANEL_BADGE_TRIGGER],
@@ -117,7 +135,6 @@ export const useBadges = <
       const badgeElement = (
         <EuiBadge
           key={badge.id}
-          {...(badge.extension?.color && { color: badge.extension.color })}
           iconType={badge.getIconType({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
           onClick={() => badge.execute({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
           onClickAriaLabel={badge.getDisplayName({
@@ -127,14 +144,7 @@ export const useBadges = <
           data-test-subj={`embeddablePanelBadge-${badge.id}`}
           {...(tooltipText ? { 'aria-label': tooltipText } : {})}
         >
-          {badge.MenuItem
-            ? React.createElement(badge.MenuItem, {
-                context: {
-                  embeddable: api,
-                  trigger: triggers[PANEL_BADGE_TRIGGER],
-                },
-              })
-            : badge.getDisplayName({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
+          {badge.getDisplayName({ embeddable: api, trigger: triggers[PANEL_BADGE_TRIGGER] })}
         </EuiBadge>
       );
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "f71d071e6c10d8f7c00d67f7dcee1e413a874004",
+  "sha1": "d20643699fde7ffb0d8196a806ecea92909b8151",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -44,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -58,8 +58,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -72,8 +72,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -86,8 +86,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "eefa919b3aad535-2c759207a1dba6b",
+      "title": "AddMonitor creates, edits, and deletes api monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
+        "line": 39,
+        "column": 10
       }
     },
     {

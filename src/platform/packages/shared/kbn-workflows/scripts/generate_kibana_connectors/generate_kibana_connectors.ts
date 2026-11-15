@@ -21,6 +21,7 @@ import {
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
 import { INCLUDED_OPERATIONS, OPERATION_TYPE_OVERRIDES } from './included_operations';
+import { postProcessOpenapiZodGen } from './post_process_openapi_zod_gen';
 import { isHttpMethod } from '../..';
 import type { HttpMethod } from '../../types/latest';
 import {
@@ -216,13 +217,8 @@ async function generateZodSchemas(contracts: ContractMeta[]) {
       `${OPENAPI_TS_OUTPUT_FILENAME}.gen.ts`
     );
 
-    // replace zod imports with @kbn/zod
     const zodSchemas = fs.readFileSync(zodPath, 'utf8');
-    fs.writeFileSync(
-      zodPath,
-      zodSchemas.replace(/import { z } from 'zod\/v4';/, "import { z } from '@kbn/zod/v4';"),
-      'utf8'
-    );
+    fs.writeFileSync(zodPath, postProcessOpenapiZodGen(zodSchemas), 'utf8');
     console.log(
       `- Zod imports replaced in ${formatDuration(replaceZodImportsStartedAt, performance.now())}`
     );

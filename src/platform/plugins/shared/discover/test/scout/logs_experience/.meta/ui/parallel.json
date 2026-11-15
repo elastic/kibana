@@ -1,5 +1,5 @@
 {
-  "sha1": "7db8260678c039969deb7d226a2cca4bce1c938e",
+  "sha1": "754ef7d223d807f7f8ab3e6a54db521d05980d28",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -88,8 +88,8 @@
       }
     },
     {
-      "id": "b964c7b3772cdca-68eefa20ac72341",
-      "title": "Logs profile - Doc viewer should open a section from a leading control inside a dashboard panel",
+      "id": "b964c7b3772cdca-32745c19b7c4340",
+      "title": "Logs profile - Doc viewer should open on the Table tab and hide Log overview when the log has no message",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -106,6 +106,42 @@
       }
     },
     {
+      "id": "b964c7b3772cdca-6771660e19f5fb7",
+      "title": "Logs profile - Doc viewer should open on the Log overview tab when the log has a message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 176,
+        "column": 30
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-68eefa20ac72341",
+      "title": "Logs profile - Doc viewer should open a section from a leading control inside a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 183,
+        "column": 24
+      }
+    },
+    {
       "id": "b964c7b3772cdca-684763565ca4062",
       "title": "Logs profile - Doc viewer should return to the Log overview tab from another tab inside a dashboard panel",
       "expectedStatus": "passed",
@@ -119,8 +155,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
-        "line": 179,
-        "column": 64
+        "line": 216,
+        "column": 7
       }
     },
     {

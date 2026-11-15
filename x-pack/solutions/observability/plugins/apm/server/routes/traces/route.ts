@@ -88,7 +88,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
       createLogsClient(resources),
     ]);
 
-    const { params, config } = resources;
+    const { params, config, logger } = resources;
     const { traceId } = params.path;
     const { start, end, serviceName, entryTransactionId, ecsOnly } = params.query;
     const maxTraceItems = config.ui.maxTraceItems;
@@ -98,6 +98,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
         getUnifiedTraceItems({
           apmEventClient,
           logsClient,
+          logger,
           traceId,
           start,
           end,
@@ -138,7 +139,7 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
       createLogsClient(resources),
     ]);
 
-    const { params, config } = resources;
+    const { params, config, logger } = resources;
     const { traceId } = params.path;
     const { start, end, docId } = params.query;
 
@@ -148,6 +149,7 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
       getUnifiedTraceItems({
         apmEventClient,
         logsClient,
+        logger,
         traceId,
         start,
         end,
@@ -178,24 +180,24 @@ const unifiedTracesByIdErrorsRoute = createApmServerRoute({
       createLogsClient(resources),
     ]);
 
-    const { params } = resources;
+    const { params, logger } = resources;
     const { traceId } = params.path;
     const { start, end, docId } = params.query;
 
     const { apmErrors, unprocessedOtelErrors } = await getUnifiedTraceErrors({
       apmEventClient,
       logsClient,
+      logger,
       docId,
       traceId,
       start,
       end,
     });
 
-    if (apmErrors.length > 0) {
-      return { traceErrors: apmErrors, source: 'apm' };
-    }
-
-    return { traceErrors: unprocessedOtelErrors, source: 'unprocessedOtel' };
+    const traceErrors = [...apmErrors, ...unprocessedOtelErrors].sort(
+      (a, b): number => b.timestamp.us - a.timestamp.us
+    );
+    return { traceErrors };
   },
 });
 

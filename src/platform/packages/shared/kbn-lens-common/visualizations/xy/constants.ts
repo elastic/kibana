@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisIconType } from '@kbn/chart-icons';
+
 export const YAxisModes = {
   AUTO: 'auto',
   LEFT: 'left',
@@ -47,4 +49,4 @@ export const AvailableReferenceLineIcons = {
   STAR_FILLED: 'starFilled',
   TAG: 'tag',
   TRIANGLE: 'triangle',
-} as const;
+} as const satisfies Record<string, VisIconType>;

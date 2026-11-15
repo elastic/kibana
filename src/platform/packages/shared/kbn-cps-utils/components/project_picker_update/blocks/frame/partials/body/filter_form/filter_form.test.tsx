@@ -49,8 +49,15 @@ const envStagingExpression = {
   tagValue: 'staging',
 } as const;
 
+const envOneOfProdExpression: FilterExpressionValue = {
+  operator: FilterOperator.ONE_OF,
+  tagName: 'env',
+  tagValue: ['prod'],
+};
+
 const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
 const envStagingKey = getFilterExpressionLookupKey(envStagingExpression);
+const envOneOfProdKey = getFilterExpressionLookupKey(envOneOfProdExpression);
 
 const mockUseProjectPickerState = jest.fn();
 const mockUseProjectPickerActions = jest.fn();
@@ -444,16 +451,10 @@ describe('ProjectPickerFilterForm', () => {
 
   it('appends a custom value when using a one-of operator', async () => {
     const user = userEvent.setup();
-    renderForm();
-
-    await user.click(screen.getByRole('button', { name: 'Select a tag' }));
-    await selectOption(user, 'env');
-
-    await user.click(screen.getByRole('button', { name: 'is' }));
-    await selectOption(user, 'is one of');
-
-    await user.click(screen.getByTestId('comboBoxInput'));
-    await selectOption(user, 'prod');
+    renderForm(
+      { filterExpressions: createFilterExpressions([[envOneOfProdExpression]]) },
+      { filterId: envOneOfProdKey }
+    );
 
     const comboInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
     await user.type(comboInput, 'staging{enter}');

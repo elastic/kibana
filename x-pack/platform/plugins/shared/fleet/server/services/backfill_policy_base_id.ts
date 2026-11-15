@@ -11,15 +11,16 @@ import {
   AGENT_POLICY_INDEX,
   AGENTS_INDEX,
   AGENT_POLICY_VERSION_SEPARATOR,
+  AGENT_POLICY_SENTINEL_VERSION,
 } from '../../common/constants';
 
 import { appContextService } from '.';
 
 // Painless: strip version suffix from policy_id and store as policy_base_id.
 // Mirrors removeVersionSuffixFromPolicyId: only strips when the segment after the last
-// separator looks like a version (digits.digits). Painless regex is off by default so
+// separator looks like a version (digits.digits) or is the sentinel. Painless regex is off by default so
 // we use a plain digit walk instead. Skips docs that already have policy_base_id (idempotent).
-const BACKFILL_SCRIPT = `
+export const BACKFILL_SCRIPT = `
   if (ctx._source.policy_id == null ||
       (ctx._source.containsKey('policy_base_id') && ctx._source.policy_base_id != null)) {
     ctx.op = 'noop';
@@ -31,7 +32,9 @@ const BACKFILL_SCRIPT = `
     String suffix = pid.substring(sepIdx + 1);
     int dotIdx = suffix.indexOf('.');
     boolean isVersion = dotIdx > 0 && suffix.length() > dotIdx + 1;
-    if (isVersion) {
+    if (suffix == params.sentinelVersion) {
+      isVersion = true;
+    } else if (isVersion) {
       for (int i = 0; i < suffix.length(); i++) {
         if (i != dotIdx && !Character.isDigit(suffix.charAt(i))) { isVersion = false; break; }
       }
@@ -52,7 +55,10 @@ async function runBackfill(esClient: ElasticsearchClient, index: string, label: 
       script: {
         lang: 'painless',
         source: BACKFILL_SCRIPT,
-        params: { separator: AGENT_POLICY_VERSION_SEPARATOR },
+        params: {
+          separator: AGENT_POLICY_VERSION_SEPARATOR,
+          sentinelVersion: AGENT_POLICY_SENTINEL_VERSION,
+        },
       },
       query: {
         bool: {

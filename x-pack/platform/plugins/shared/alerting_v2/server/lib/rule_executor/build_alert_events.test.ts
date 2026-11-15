@@ -14,6 +14,7 @@ import {
   buildContinuedBreachAlertEvents,
   buildNoDataAlertEvents,
   resolveAlertEventType,
+  UNGROUPED_GROUP_HASH,
 } from './build_alert_events';
 import type { BuildAlertEventsBaseOpts } from './build_alert_events';
 
@@ -90,7 +91,7 @@ describe('createAlertEventsBatchBuilder', () => {
     const doc1 = docs[0];
     const doc2 = docs[1];
 
-    expect(doc1['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
+    expect(doc1).not.toHaveProperty('@timestamp');
     expect(doc1.scheduled_timestamp).toBe('2024-12-31T23:59:00.000Z');
     expect(doc1.rule).toEqual({ id: 'rule-123', version: 1 });
     expect(doc1.group_hash).toEqual(expect.any(String));
@@ -107,7 +108,7 @@ describe('createAlertEventsBatchBuilder', () => {
     expect(doc1.group_hash).not.toEqual(doc2.group_hash);
   });
 
-  it('stamps @timestamp per batch, not once per run', () => {
+  it('leaves @timestamp unset so the ingest pipeline sets it at index time', () => {
     const { buildBatch } = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',
       ruleVersion: 1,
@@ -124,9 +125,8 @@ describe('createAlertEventsBatchBuilder', () => {
 
     const [secondBatchDoc] = buildBatch([{ 'host.name': 'host-b' }]);
 
-    expect(firstBatchDoc['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
-    expect(secondBatchDoc['@timestamp']).toBe('2025-01-01T00:00:30.000Z');
-    expect(secondBatchDoc['@timestamp'] > firstBatchDoc['@timestamp']).toBe(true);
+    expect(firstBatchDoc).not.toHaveProperty('@timestamp');
+    expect(secondBatchDoc).not.toHaveProperty('@timestamp');
   });
 
   it('sets space_id on breached alert events from the provided spaceId', () => {
@@ -272,7 +272,6 @@ describe('createAlertEventsBatchBuilder', () => {
         buildGroupHash({
           rowDoc: { 'host.name': host },
           groupKeyFields,
-          fallbackSeed: 'unused',
         });
 
       const builder = createAlertEventsBatchBuilder({
@@ -311,9 +310,9 @@ describe('createAlertEventsBatchBuilder', () => {
     });
 
     it('does not apply the cap when the rule has no grouping fields', () => {
-      // Without `grouping.fields` every row is its own fallback "group", so the
-      // cap would collide with `alerts.max` (which already bounds rows upstream)
-      // and silently truncate ungrouped results. The cap must be skipped here.
+      // Without `grouping.fields` the whole run is a single series (one group), so
+      // the cap can never collide with `alerts.max` (which already bounds rows
+      // upstream). Every row still becomes a rule event; nothing is dropped.
       const builder = createAlertEventsBatchBuilder({
         ruleId: 'rule-123',
         ruleVersion: 1,
@@ -358,9 +357,67 @@ describe('createAlertEventsBatchBuilder', () => {
       ]);
 
       // The first (kept) row must hash identically whether or not later rows
-      // were dropped, i.e. the fallback seed index is stable per row.
+      // were dropped: a grouped hash depends only on the group field values.
       expect(cappedDocs).toHaveLength(1);
       expect(cappedDocs[0].group_hash).toBe(uncappedDocs[0].group_hash);
+    });
+  });
+
+  describe('ungrouped rules (single series)', () => {
+    const buildUngrouped = (
+      rows: Array<Record<string, unknown>>,
+      overrides: Partial<BuildAlertEventsBaseOpts> = {}
+    ) =>
+      createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: undefined },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert',
+        maxGroupsPerExecution: 10000,
+        ...overrides,
+      }).buildBatch(rows);
+
+    it('emits one rule event per row, all sharing UNGROUPED_GROUP_HASH', () => {
+      const docs = buildUngrouped([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-c' },
+      ]);
+
+      expect(docs).toHaveLength(3);
+      expect(docs.map((doc) => doc.group_hash)).toEqual([
+        UNGROUPED_GROUP_HASH,
+        UNGROUPED_GROUP_HASH,
+        UNGROUPED_GROUP_HASH,
+      ]);
+      // Each row keeps its own data even though the group is shared.
+      expect(docs.map((doc) => doc.data)).toEqual([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-c' },
+      ]);
+    });
+
+    it('produces a hash that is stable across runs (scheduledTimestamp independent)', () => {
+      const [run1] = buildUngrouped([{ foo: 'bar' }], {
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      });
+      const [run2] = buildUngrouped([{ foo: 'bar' }], {
+        scheduledTimestamp: '2025-01-01T00:05:00.000Z',
+      });
+
+      expect(run1.group_hash).toBe(UNGROUPED_GROUP_HASH);
+      expect(run2.group_hash).toBe(UNGROUPED_GROUP_HASH);
+    });
+
+    it('treats an empty grouping.fields array the same as no grouping', () => {
+      const [doc] = buildUngrouped([{ foo: 'bar' }], {
+        ruleAttributes: { grouping: { fields: [] } },
+      });
+
+      expect(doc.group_hash).toBe(UNGROUPED_GROUP_HASH);
     });
   });
 });
@@ -388,7 +445,6 @@ describe('buildRecoveryAlertEvents', () => {
 
     expect(events).toHaveLength(1);
     expect(events[0]).toEqual({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-b',
@@ -522,7 +578,6 @@ describe('buildContinuedBreachAlertEvents', () => {
 
     expect(events).toHaveLength(2);
     expect(events[0]).toEqual({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-a',
@@ -571,7 +626,6 @@ describe('buildNoDataAlertEvents', () => {
 
     expect(events).toHaveLength(2);
     expect(events[0]).toEqual({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: 'hash-a',
@@ -662,7 +716,6 @@ describe('buildQueryRecoveryAlertEvents', () => {
 
     expect(events).toHaveLength(1);
     expect(events[0]).toEqual({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: activeGroupHash,
@@ -819,5 +872,30 @@ describe('buildQueryRecoveryAlertEvents', () => {
 
     expect(events).toHaveLength(1);
     expect(events[0].space_id).toBe('custom-space');
+  });
+
+  it('recovers the single ungrouped series from recovery-query rows', () => {
+    // An ungrouped rule's recovery rows collapse to UNGROUPED_GROUP_HASH, which
+    // matches the same single active group the breach path produced — so the one
+    // series recovers regardless of each row's content.
+    const events = buildQueryRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: undefined },
+      activeGroupHashes: [{ group_hash: UNGROUPED_GROUP_HASH }],
+      breachedGroupHashes: new Set(),
+      esqlResponse: {
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [['host-a'], ['host-b']],
+      },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'alert',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].group_hash).toBe(UNGROUPED_GROUP_HASH);
+    // Keeps the first matching row's data for the single series.
+    expect(events[0].data).toEqual({ 'host.name': 'host-a' });
   });
 });

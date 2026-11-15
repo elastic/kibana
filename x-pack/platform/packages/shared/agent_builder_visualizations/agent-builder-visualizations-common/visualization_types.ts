@@ -38,7 +38,7 @@ export interface ChartVisualizationAttachmentData extends VisualizationAttachmen
  * on `renderer` before touching `visualization` — unlike the chart members this is markup,
  * not a config, and it is only safe in the renderer that sanitizes and sandboxes it.
  */
-export interface CustomContentVisualizationAttachmentData extends VisualizationAttachmentDataBase {
+interface CustomContentVisualizationAttachmentData extends VisualizationAttachmentDataBase {
   renderer: 'custom_content';
   /** The model's own estimate of the content height; see `CUSTOM_CONTENT_DEFAULT_HEIGHT`. */
   visualization: { template: string; title?: string; height?: number };

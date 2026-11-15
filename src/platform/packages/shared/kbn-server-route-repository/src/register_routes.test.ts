@@ -188,37 +188,12 @@ describe('registerRoutes', () => {
     expect(bodyDoesNotAllowExcessKeys).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_union\\",
-          \\"errors\\": [
-            [
-              {
-                \\"code\\": \\"unrecognized_keys\\",
-                \\"keys\\": [
-                  \\"unexpectedKey\\"
-                ],
-                \\"path\\": [],
-                \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
-              }
-            ],
-            [
-              {
-                \\"expected\\": \\"null\\",
-                \\"code\\": \\"invalid_type\\",
-                \\"path\\": [],
-                \\"message\\": \\"Invalid input: expected null, received object\\"
-              }
-            ],
-            [
-              {
-                \\"expected\\": \\"undefined\\",
-                \\"code\\": \\"invalid_type\\",
-                \\"path\\": [],
-                \\"message\\": \\"Invalid input: expected undefined, received object\\"
-              }
-            ]
+          \\"code\\": \\"unrecognized_keys\\",
+          \\"keys\\": [
+            \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Invalid input\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);

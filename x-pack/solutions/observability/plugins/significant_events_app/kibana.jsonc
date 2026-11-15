@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/significant-events-app-plugin",
+  "owner": "@elastic/nightshift",
+  "description": "Significant Events UI",
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "significantEventsApp",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "nightshiftSources",
+      "share",
+      "significantEvents",
+      "unifiedSearch",
+    ],
+    "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces"],
+    "requiredBundles": ["kibanaReact"],
+    "extraPublicDirs": ["common"],
+  },
+}

@@ -1,0 +1,121 @@
+# METRICS-INFO
+
+The `METRICS_INFO` processing command retrieves information about the metrics available in time series data streams, along with their applicable dimensions and other metadata.
+
+Use `METRICS_INFO` to discover which metrics exist, what types and units they have, and which dimensions apply to them without inspecting index mappings or relying on the field capabilities API. Any `WHERE` filters that precede `METRICS_INFO` narrow the set of time series considered, so only metrics with matching data are returned.
+
+`METRICS_INFO` produces one row per distinct metric signature: each unique combination of metric name and its properties across backing indices. When the same metric is defined with different properties, such as different units, in different data streams, separate rows are returned for each variant.
+
+The output contains these `keyword` columns: `metric_name`, `data_stream`, `unit`, `metric_type`, `field_type`, and `dimension_fields`.
+
+## Syntax
+
+`METRICS_INFO`
+
+### Parameters
+
+`METRICS_INFO` takes no parameters.
+
+## Examples
+
+List every metric available in the targeted time series data stream, sorted by metric name:
+
+```esql
+TS k8s
+| METRICS_INFO
+| SORT metric_name
+```
+
+metric_name:keyword | data_stream:keyword | unit:keyword | metric_type:keyword | field_type:keyword | dimension_fields:keyword
+network.eth0.rx | k8s | packets | gauge | integer | [cluster, pod, region]
+network.eth0.tx | k8s | packets | gauge | integer | [cluster, pod, region]
+network.total_bytes_in | k8s | bytes | counter | long | [cluster, pod, region]
+network.total_cost | k8s | usd | counter | double | [cluster, pod, region]
+
+Discover metrics with data matching a `cluster` filter:
+
+```esql
+TS k8s
+| WHERE cluster == "prod"
+| METRICS_INFO
+| SORT metric_name
+```
+
+metric_name:keyword | data_stream:keyword | unit:keyword | metric_type:keyword | field_type:keyword | dimension_fields:keyword
+network.eth0.rx | k8s | packets | gauge | integer | [cluster, pod, region]
+network.eth0.tx | k8s | packets | gauge | integer | [cluster, pod, region]
+network.total_bytes_in | k8s | bytes | counter | long | [cluster, pod, region]
+network.total_cost | k8s | usd | counter | double | [cluster, pod, region]
+
+Return only metric names and metric types:
+
+```esql
+TS k8s
+| WHERE cluster == "prod"
+| METRICS_INFO
+| KEEP metric_name, metric_type
+| SORT metric_name
+```
+
+metric_name:keyword | metric_type:keyword
+network.eth0.rx | gauge
+network.eth0.tx | gauge
+network.total_bytes_in | counter
+network.total_cost | counter
+
+Filter metadata rows to counter metrics:
+
+```esql
+TS k8s
+| METRICS_INFO
+| WHERE metric_type == "counter"
+| SORT metric_name
+```
+
+metric_name:keyword | data_stream:keyword | unit:keyword | metric_type:keyword | field_type:keyword | dimension_fields:keyword
+network.total_bytes_in | k8s | bytes | counter | long | [cluster, pod, region]
+network.total_cost | k8s | usd | counter | double | [cluster, pod, region]
+
+Find metrics whose names match a `network.eth0*` pattern:
+
+```esql
+TS k8s
+| METRICS_INFO
+| WHERE metric_name LIKE "network.eth0*"
+| SORT metric_name
+```
+
+metric_name:keyword | data_stream:keyword | unit:keyword | metric_type:keyword | field_type:keyword | dimension_fields:keyword
+network.eth0.rx | k8s | packets | gauge | integer | [cluster, pod, region]
+network.eth0.tx | k8s | packets | gauge | integer | [cluster, pod, region]
+
+Count distinct metrics whose names match a pattern:
+
+```esql
+TS k8s
+| METRICS_INFO
+| WHERE metric_name LIKE "network.total*"
+| STATS matching_metrics = COUNT_DISTINCT(metric_name)
+```
+
+matching_metrics:long
+2
+
+Count metrics grouped by metric type:
+
+```esql
+TS k8s
+| METRICS_INFO
+| STATS metric_count = COUNT(*) BY metric_type
+| SORT metric_type
+```
+
+metric_count:long | metric_type:keyword
+2 | counter
+2 | gauge
+
+## Limitations
+
+- `METRICS_INFO` can only be used after a `TS` source command. Using it after `FROM` or other source commands produces an error.
+- `METRICS_INFO` must appear before pipeline-breaking commands such as `STATS`, `SORT`, or `LIMIT`.
+- The output replaces the original table. Downstream commands operate on the metadata rows, not the raw time series documents.

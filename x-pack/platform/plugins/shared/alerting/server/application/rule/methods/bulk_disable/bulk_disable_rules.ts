@@ -160,6 +160,7 @@ const bulkDisableRulesWithOCC = async (
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
 
   await withSpan(
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
@@ -188,6 +189,7 @@ const bulkDisableRulesWithOCC = async (
                   ? rule.attributes.scheduledTaskId
                   : null,
               updatedBy: username,
+              updatedByProfileUid: profileUid,
               updatedAt: new Date().toISOString(),
               ...(castedAttributes.lastRun
                 ? { lastRun: migrateLegacyLastRunOutcomeMsg(castedAttributes.lastRun) }

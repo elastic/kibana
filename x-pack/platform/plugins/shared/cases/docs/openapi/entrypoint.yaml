@@ -33,6 +33,10 @@ paths:
     $ref: 'paths/api@cases@templates.yaml'
   '/api/cases/templates/{template_id}':
     $ref: 'paths/api@cases@templates@{templateid}.yaml'
+  '/api/cases/field_definitions':
+    $ref: 'paths/api@cases@field_definitions.yaml'
+  '/api/cases/field_definitions/{field_definition_id}':
+    $ref: 'paths/api@cases@field_definitions@{fielddefinitionid}.yaml'
   '/api/cases/fields':
     $ref: 'paths/api@cases@fields.yaml'
   '/api/cases/{caseId}':

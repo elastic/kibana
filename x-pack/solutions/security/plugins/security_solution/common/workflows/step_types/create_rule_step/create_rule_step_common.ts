@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import {
 
 export const CreateRuleStepId = 'security.createRule' as const;
 
-export const createRuleInputSchema = z.object({ rule: RuleCreateProps });
+export const createRuleInputSchema = lazySchema(() => z.object({ rule: RuleCreateProps }));
 
 export const createRuleOutputSchema = RuleResponse;
 

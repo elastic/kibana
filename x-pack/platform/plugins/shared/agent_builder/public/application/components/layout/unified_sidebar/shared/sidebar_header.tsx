@@ -67,6 +67,10 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
     flex-grow: 0;
   `;
 
+  const headingColorStyles = css`
+    color: ${euiTheme.colors.textHeading};
+  `;
+
   const condensedHeaderStyles = css`
     padding: ${euiTheme.size.base} 0;
     flex-grow: 0;
@@ -88,6 +92,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               aria-label={labels.toggleSidebar}
               aria-expanded={false}
               color="text"
+              css={headingColorStyles}
               size="s"
               onClick={onToggleCondensed}
               {...getEbtProps({
@@ -137,6 +142,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               size="s"
               flush="both"
               color="text"
+              css={headingColorStyles}
               onClick={() => {
                 history.push(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}
@@ -158,6 +164,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 aria-label={labels.toggleSidebar}
                 aria-expanded={true}
                 color="text"
+                css={headingColorStyles}
                 size="s"
                 onClick={onToggleCondensed}
                 {...getEbtProps({

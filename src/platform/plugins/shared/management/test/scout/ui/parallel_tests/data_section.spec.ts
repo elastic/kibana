@@ -109,7 +109,7 @@ test.describe('Stack Management — data section', () => {
   );
 
   test(
-    'index_management_user sees index_management and transform in the data section',
+    'index_management_user sees index_management, esql_views, and transform in the data section',
     { tag: tags.stateful.classic },
     async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.dashboard_read_and_index_management);
@@ -123,7 +123,7 @@ test.describe('Stack Management — data section', () => {
         expect(sections).toHaveLength(2);
         expect(sections[0]).toStrictEqual({
           sectionId: 'data',
-          sectionLinks: ['index_management', 'transform'],
+          sectionLinks: ['index_management', 'esql_views', 'transform'],
         });
       });
     }

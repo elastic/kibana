@@ -46,6 +46,14 @@ import {
   HOST_SELECTOR_STEP_TITLE,
 } from './host_collection_method_options';
 
+// OTel `os.type` values, so ingest from another OS in the same cluster can't
+// complete or end an unrelated session.
+const OTEL_OS_TYPE: Readonly<Record<HostOs, string>> = {
+  linux: 'linux',
+  mac: 'darwin',
+  windows: 'windows',
+};
+
 export interface HostOtelPageProps {
   os: HostOs;
   routePath: string;
@@ -100,9 +108,11 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     }
   }, [onPageReady, setupData]);
 
+  const osType = OTEL_OS_TYPE[os];
+
   // has-data probe is namespaced per backend route (otel_host); analytics
   // stays on otel_logs so V1 and V2 dashboards remain continuous.
-  const hasPreExistingDataEarly = usePreExistingDataCheck({ flow: 'otel_host' });
+  const hasPreExistingDataEarly = usePreExistingDataCheck({ flow: 'otel_host', osType });
 
   const windowBlurred = useWindowBlurDataMonitoringTrigger({
     isActive: !!setupData,
@@ -119,13 +129,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
   }, [isMonitoringStepActive, sessionStartTime]);
 
   const onboardingId = setupData?.onboardingId;
-  // OTel semantic-convention `host.os.type` filter so cross-OS ingest in the
-  // same cluster can't complete an unrelated session.
-  const hostOsTypeFilter: Record<HostOs, string> = {
-    linux: 'linux',
-    mac: 'darwin',
-    windows: 'windows',
-  };
   const { hasData, hasPreExistingData, isTroubleshootingVisible } = useTimeWindowDataDetection({
     isMonitoringActive:
       isMonitoringStepActive && sessionStartTime !== null && onboardingId !== undefined,
@@ -135,7 +138,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     flowType: 'otel_logs',
     onboardingId: onboardingId ?? '',
     endpoint: '/internal/observability_onboarding/otel_host/has-data',
-    extraQueryParams: { osType: hostOsTypeFilter[os] },
+    extraQueryParams: { osType },
     keepExtraParamsOnFallback: true,
   });
 

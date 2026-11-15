@@ -25,8 +25,12 @@ dependsOn:
   - '@kbn/actions-utils'
   - '@kbn/i18n'
   - '@kbn/mcp-client'
+  - '@kbn/std'
   - '@kbn/logging-mocks'
   - '@kbn/repo-info'
+  - '@kbn/connector-emulate'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
 tags:
   - shared-common
   - package
@@ -39,6 +43,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

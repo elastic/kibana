@@ -33,7 +33,7 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 
 const mockedHostRiskScore = jest.fn().mockReturnValue(mockHostRiskScoreState);
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedHostRiskScore(),
+  useRiskScore: (params: unknown) => mockedHostRiskScore(params),
 }));
 
 const mockedUseEntityRiskScores = jest.fn();
@@ -99,6 +99,26 @@ describe('HostPanel', () => {
     expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
     expect(queryByTestId('host-preview-footer')).not.toBeInTheDocument();
+  });
+
+  it('labels the risk score request with the entity details flyout execution context', () => {
+    render(
+      <TestProviders>
+        <HostPanel {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedHostRiskScore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'host_risk_score',
+          },
+        },
+      })
+    );
   });
 
   it('renders loading state when observed host is loading', () => {

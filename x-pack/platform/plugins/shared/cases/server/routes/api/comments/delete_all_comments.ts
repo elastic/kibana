@@ -19,7 +19,8 @@ export const deleteAllCommentsRoute = createCasesRoute({
     access: 'public',
     summary: `Delete all case comments and alerts`,
     tags: ['oas-tag:cases'],
-    description: 'Deletes all comments and alerts from a case.',
+    description:
+      'Deletes all comments and alerts from a case. The files of any file attachments are also deleted.',
     // You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
   },
   params: {

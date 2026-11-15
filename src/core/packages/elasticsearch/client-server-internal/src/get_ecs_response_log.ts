@@ -19,6 +19,8 @@ const FORBIDDEN_HEADERS = [
   'set-cookie',
   'x-elastic-app-auth',
   'es-client-authentication',
+  'x-client-authentication',
+  'es-secondary-x-client-authentication',
 ];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 

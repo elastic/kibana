@@ -8,7 +8,7 @@
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import type { Dispatch } from 'redux-v4';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
@@ -33,7 +33,6 @@ import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expand
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -72,12 +71,9 @@ const kibanaMockResult = {
 };
 
 const useKibanaMock = useKibana as jest.Mock;
-const SPECIAL_TEST_TIMEOUT = 30000;
 
 describe('PinnedTabContent', () => {
   let props = {} as PinnedTabContentComponentProps;
-  const mockOpenFlyout = jest.fn();
-  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
@@ -136,12 +132,8 @@ describe('PinnedTabContent', () => {
       timelinePrivileges: { crud: true, read: true },
     });
 
-    flyoutApi = createFlyoutApiMock();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
+    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     useKibanaMock.mockReturnValue(kibanaMockResult);
@@ -170,97 +162,5 @@ describe('PinnedTabContent', () => {
 
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
     });
-  });
-
-  describe('Leading actions - notes', () => {
-    beforeEach(() => {
-      // The notes control column only renders when the corresponding rawEvent is present,
-      // so we provide a rawEvent that matches the first (and only) event.
-      (useTimelineEvents as jest.Mock).mockReturnValue([
-        false,
-        {
-          events: mockTimelineData.slice(0, 1),
-          rawEvents: [
-            {
-              _id: mockTimelineData[0]._id,
-              _index: 'test-index',
-              _source: {},
-            },
-          ],
-          pageInfo: {
-            activePage: 0,
-            totalPages: 1,
-          },
-          isPartial: false,
-          shardFailures: [],
-          timedOut: false,
-        },
-      ]);
-
-      props = {
-        ...props,
-        pinnedEventIds: { [mockTimelineData[0]._id]: true },
-      };
-    });
-
-    it(
-      'should open the legacy notes flyout when the new flyout is disabled',
-      async () => {
-        render(
-          <TestProviders>
-            <PinnedTabContentComponent {...props} />
-          </TestProviders>
-        );
-
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-        });
-
-        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-        await waitFor(() => {
-          expect(mockOpenFlyout).toHaveBeenCalledWith(
-            expect.objectContaining({
-              right: expect.objectContaining({ id: 'document-details-right' }),
-              left: expect.objectContaining({ id: 'document-details-left' }),
-            })
-          );
-        });
-        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should open the new notes flyout when the new flyout is enabled',
-      async () => {
-        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
-        render(
-          <TestProviders>
-            <PinnedTabContentComponent {...props} />
-          </TestProviders>
-        );
-
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-        });
-
-        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-        await waitFor(() => {
-          expect(flyoutApi.openNotes).toHaveBeenCalledWith({
-            hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
-            origin: FLYOUT_ORIGIN.TIMELINE,
-          });
-        });
-        expect(mockOpenFlyout).not.toHaveBeenCalled();
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
   });
 });

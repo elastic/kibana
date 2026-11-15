@@ -14,7 +14,7 @@ import { DiscoverSessionSaveDashboardModal } from './discover_session_save_dashb
 import { DiscoverSessionSaveModalContainer } from './save_discover_session_modal_container';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { DiscoverSessionService } from '../../../../../session';
 import type { DiscoverServices } from '../../../../../build_services';
 import {
   fromTabStateToSavedObjectTab,
@@ -70,6 +70,7 @@ const getOnSaveProps = (
 const setup = async ({
   additionalPersistedTabs,
   dataViewsList,
+  initialTitle,
   initialCopyOnSave,
   initialTabDataView,
   isEmbedded = false,
@@ -86,10 +87,11 @@ const setup = async ({
 }: {
   additionalPersistedTabs?: DiscoverSessionTab[];
   dataViewsList?: DataView[];
+  initialTitle?: string;
   initialCopyOnSave?: boolean;
   initialTabDataView?: DataView;
   isEmbedded?: boolean;
-  mockSaveDiscoverSession?: SavedSearchPublicPluginStart['saveDiscoverSession'];
+  mockSaveDiscoverSession?: DiscoverSessionService['save'];
   onSaveCb?: () => void;
   persistedDiscoverSession?: DiscoverSession | false;
   services?: DiscoverServices;
@@ -124,9 +126,7 @@ const setup = async ({
     persistedDataViews: uniqueDataViews,
   });
 
-  jest
-    .spyOn(services.savedSearch, 'saveDiscoverSession')
-    .mockImplementation(mockSaveDiscoverSession);
+  jest.spyOn(services.discoverSessionService, 'save').mockImplementation(mockSaveDiscoverSession);
 
   await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
@@ -157,6 +157,7 @@ const setup = async ({
     <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSessionSaveModalContainer
         initialCopyOnSave={initialCopyOnSave}
+        initialTitle={initialTitle}
         onClose={onClose}
         onSaveCb={onSaveCb}
         services={services}
@@ -327,6 +328,15 @@ describe('DiscoverSessionSaveModalContainer', () => {
         sessionId: undefined,
         title: '',
       });
+    });
+
+    it('should prefill the title with the initial title of a new session', async () => {
+      const { modalProps } = await setup({
+        persistedDiscoverSession: false,
+        initialTitle: 'My draft',
+      });
+
+      expect(modalProps?.title).toBe('My draft');
     });
 
     it('should set sessionId to undefined for Save As and new sessions', async () => {
@@ -659,6 +669,36 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
     });
 
+    it('should close the modal only after navigating to a new Discover session', async () => {
+      const services = createDiscoverServicesMock();
+      let finishNavigation: () => void = () => {};
+      jest.spyOn(services.locator, 'navigate').mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            finishNavigation = resolve;
+          })
+      );
+      const { modalProps, onClose } = await setup({
+        persistedDiscoverSession: false,
+        services,
+      });
+
+      let savePromise: Promise<void> | undefined;
+      await act(async () => {
+        savePromise = modalProps?.onSave(getOnSaveProps());
+      });
+
+      expect(services.locator.navigate).toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+
+      await act(async () => {
+        finishNavigation();
+        await savePromise;
+      });
+
+      expect(onClose).toHaveBeenCalled();
+    });
+
     it('should include the resolved profile state when navigating to a newly saved session', async () => {
       const services = createDiscoverServicesMock();
       services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
@@ -792,12 +832,18 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
     });
 
-    it('should show a danger toast on error', async () => {
+    it.each([
+      { format: 'plain text', message: 'Unable to update Discover sessions' },
+      {
+        format: 'multiline validation',
+        message: '✖ Expected string\n  → at title\n✖ At least one tab is required\n  → at tabs',
+      },
+    ])('should show $format unchanged in one toast', async ({ message }) => {
       const services = createDiscoverServicesMock();
-      const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
-      const { modalProps } = await setup({
+      const error = new Error(message);
+      const { modalProps, onClose } = await setup({
         isEmbedded: true,
-        mockSaveDiscoverSession: () => Promise.reject(new Error('Save error')),
+        mockSaveDiscoverSession: () => Promise.reject(error),
         services,
       });
 
@@ -805,10 +851,14 @@ describe('DiscoverSessionSaveModalContainer', () => {
         await modalProps?.onSave(getOnSaveProps());
       });
 
-      expect(dangerSpy).toHaveBeenCalledWith({
-        text: 'Save error',
+      expect(services.toastNotifications.addDanger).toHaveBeenCalledTimes(1);
+      expect(services.toastNotifications.addDanger).toHaveBeenCalledWith({
         title: "Discover session 'title' was not saved",
+        text: message,
       });
+      expect(services.toastNotifications.addError).not.toHaveBeenCalled();
+      expect(services.toastNotifications.addSuccess).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
     });
 
     it('should not close modal when navigating to dashboard', async () => {

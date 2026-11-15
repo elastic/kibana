@@ -159,7 +159,7 @@ There are two plugins (`locator_examples` and `locator_explorer`) provided in th
 `/examples` folder. You can run the example plugins using the following command:
 
 ```
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
 To view the `locator_explorer` example plugin in Kibana navigate to: __Analytics__ 👉 

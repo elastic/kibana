@@ -112,6 +112,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
             sampleDocuments={documentsSampleData?.results ?? []}
             isDocumentsLoading={isDocumentsSampleLoading}
             documentsError={documentsSampleError}
+            onRefreshDocuments={resendDocumentsSampleRequest}
           />
         ),
         order: 10,
@@ -135,6 +136,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     documentsSampleData,
     isDocumentsSampleLoading,
     documentsSampleError,
+    resendDocumentsSampleRequest,
     enableIndexStats,
     extensionsService.indexDetailsTabs,
     index,
@@ -219,7 +221,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
             label: i18n.translate('xpack.idxMgmt.indexDetails.openInDiscoverMenuLabel', {
               defaultMessage: 'Open in Discover',
             }),
-            iconType: 'discoverApp' as const,
+            iconType: 'productDiscover' as const,
             run: () => {
               discoverLocator.navigate({ dataViewSpec: { title: index.name } });
             },

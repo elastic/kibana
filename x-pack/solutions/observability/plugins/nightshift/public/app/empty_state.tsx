@@ -21,7 +21,7 @@ const processingSteps = [
   {
     icon: 'productStreamsWired',
     label: i18n.translate('xpack.nightshift.emptyState.streamsStepLabel', {
-      defaultMessage: 'Streams',
+      defaultMessage: 'Sources',
     }),
   },
   {
@@ -116,10 +116,10 @@ export function NightshiftEmptyState({
         aria-label={
           isProcessing
             ? i18n.translate('xpack.nightshift.emptyState.processingStepsAriaLabel', {
-                defaultMessage: 'Checking streams, entities, and detections',
+                defaultMessage: 'Checking sources, entities, and detections',
               })
             : i18n.translate('xpack.nightshift.emptyState.completedStepsAriaLabel', {
-                defaultMessage: 'Streams, entities, and detections checked',
+                defaultMessage: 'Sources, entities, and detections checked',
               })
         }
         role="group"

@@ -44,6 +44,7 @@ const heightStyles = css`
 const resetStyles = (id: string) => css`
   &#${CSS.escape(id)} {
     outline-style: none;
+    white-space: pre-wrap;
   }
 `;
 const disabledStyles = css`
@@ -169,7 +170,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       <div
         ref={ref}
         id={editorId}
-        contentEditable={disabled ? 'false' : 'true'}
+        contentEditable={disabled ? 'false' : 'plaintext-only'}
         role="textbox"
         aria-multiline="true"
         aria-label={ariaLabel ?? editorAriaLabel}

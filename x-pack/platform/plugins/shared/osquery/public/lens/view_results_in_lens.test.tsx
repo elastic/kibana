@@ -135,11 +135,39 @@ describe('ViewResultsInLensAction', () => {
           time_range: expect.objectContaining({
             from: '2025-06-15T10:00:00.000Z',
             to: '2025-06-15T11:00:00.000Z',
+            mode: 'absolute',
           }),
           attributes: expect.objectContaining({
             visualizationType: 'lnsPie',
             title: 'Action test-action-123 results',
           }),
+        }),
+        { openInNewTab: true, skipAppLeave: true }
+      );
+    });
+
+    it('should forward mode: relative with an open now end for live windows', () => {
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            actionId="test-action-123"
+            buttonType={ViewResultsActionButtonType.button}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="now"
+            mode="relative"
+          />
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('View in Lens'));
+
+      expect(mockNavigateToPrefilledEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          time_range: {
+            from: '2025-06-15T10:00:00.000Z',
+            to: 'now',
+            mode: 'relative',
+          },
         }),
         { openInNewTab: true, skipAppLeave: true }
       );
@@ -213,6 +241,79 @@ describe('ViewResultsInLensAction', () => {
       );
 
       expect(screen.getByText('View in Lens').closest('button')).toBeDisabled();
+    });
+  });
+
+  describe('menuItem variant', () => {
+    it('should render as context menu item and call navigateToPrefilledEditor on click', () => {
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            actionId="test-action-id"
+            buttonType={ViewResultsActionButtonType.menuItem}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="2025-06-15T11:00:00.000Z"
+          />
+        </TestProvidersWithServices>
+      );
+
+      const item = screen.getByText('View in Lens');
+      expect(item).toBeInTheDocument();
+
+      fireEvent.click(item);
+
+      expect(mockNavigateToPrefilledEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '',
+          time_range: expect.objectContaining({
+            from: '2025-06-15T10:00:00.000Z',
+            to: '2025-06-15T11:00:00.000Z',
+            mode: 'absolute',
+          }),
+          attributes: expect.objectContaining({
+            visualizationType: 'lnsPie',
+            title: 'Action test-action-id results',
+          }),
+        }),
+        { openInNewTab: true, skipAppLeave: true }
+      );
+    });
+
+    it('menuItem should use same navigateToPrefilledEditor config as button for identical props', () => {
+      const sharedProps = {
+        actionId: 'test-action-parity',
+        startDate: '2025-06-15T10:00:00.000Z',
+        endDate: 'now',
+        mode: 'relative' as const,
+      };
+
+      const { unmount } = render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            {...sharedProps}
+            buttonType={ViewResultsActionButtonType.button}
+          />
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('View in Lens'));
+      const buttonArgs = mockNavigateToPrefilledEditor.mock.calls[0];
+
+      unmount();
+      jest.clearAllMocks();
+
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInLensAction
+            {...sharedProps}
+            buttonType={ViewResultsActionButtonType.menuItem}
+          />
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('View in Lens'));
+
+      expect(mockNavigateToPrefilledEditor.mock.calls[0]).toEqual(buttonArgs);
     });
   });
 });

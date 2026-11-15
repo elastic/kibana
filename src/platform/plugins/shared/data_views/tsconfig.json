@@ -14,6 +14,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/data-views-types",
     "@kbn/data-view-validation",
     "@kbn/usage-collection-plugin",
     "@kbn/kibana-utils-plugin",
@@ -42,6 +43,7 @@
     "@kbn/core-deprecations-common",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/as-code-data-views-schema",
   ],
   "exclude": [
     "target/**/*",

@@ -11,8 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { parseDocument } from 'yaml';
-import type { monaco } from '@kbn/code-editor';
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, monaco } from '@kbn/code-editor';
 import { isTriggerType } from '@kbn/workflows';
 import { getTypeIconDataUrl } from './get_type_icon_data_url';
 import { computeTypeDecorations, INLINE_HIGHLIGHT_CLASS, type UsedType } from './type_decorations';
@@ -45,7 +44,7 @@ const READ_ONLY_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   guides: { indentation: true },
   wordWrap: 'on',
   wrappingIndent: 'indent',
-  lightbulb: { enabled: false },
+  lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
   quickSuggestions: false,
   suggestOnTriggerCharacters: false,
   padding: { top: 16, bottom: 16 },

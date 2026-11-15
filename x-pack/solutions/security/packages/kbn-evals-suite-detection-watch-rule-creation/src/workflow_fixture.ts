@@ -11,14 +11,14 @@
  * 2.0.
  */
 
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import { getInferenceEndpointId, inferenceEndpointExists, type EvalConnector } from '@kbn/evals';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   RULE_CREATION_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
   DRAFT_STEP_ID,
-  REVIEW_STEP_ID,
+  PROPOSE_STEP_ID,
 } from './constants';
 
 // The model connector (used by the workflow's ai.agent step) is not checked here — if it is
@@ -30,18 +30,28 @@ export const ensureJudgeConnectorAccessible = async ({
   log,
 }: {
   fetch: HttpHandler;
-  connector: AvailableConnectorWithId;
+  connector: EvalConnector;
   log: ToolingLog;
 }): Promise<void> => {
-  log.info(`Verifying AI connector: ${connector.name} (${connector.id})`);
+  const inferenceId = getInferenceEndpointId(connector);
+  if (!inferenceId) {
+    throw new Error(
+      `AI connector "${connector.name}" (${connector.id}) is not an inference endpoint. This suite only supports inference endpoints`
+    );
+  }
+
+  log.info(
+    `Verifying inference endpoint ${inferenceId} for AI connector: ${connector.name} (${connector.id})`
+  );
   try {
-    await fetch(`/api/actions/connector/${encodeURIComponent(connector.id)}`, { method: 'GET' });
+    const exists = await inferenceEndpointExists({ fetch, inferenceId });
+    if (!exists) {
+      throw new Error(`inference endpoint ${inferenceId} does not exist`);
+    }
     log.info('AI connector is accessible — proceeding with eval run');
   } catch (err) {
     throw new Error(
-      `AI connector "${connector.name}" (${connector.id}) is not accessible. ` +
-        `Ensure it is configured and enabled in Stack Management > Connectors ` +
-        `before running this eval suite. ` +
+      `Inference endpoint [${inferenceId}] for AI connector "${connector.name}" (${connector.id}) is not accessible. ` +
         `Original error: ${err instanceof Error ? err.message : String(err)}`
     );
   }
@@ -57,7 +67,7 @@ export const ensureJudgeConnectorAccessible = async ({
  * behaviour contract is present, not the exact wording (the wording itself is pinned by
  * workflow_contract.test.ts against the checked-in definition).
  */
-export const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, REVIEW_STEP_ID] as const;
+export const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, PROPOSE_STEP_ID] as const;
 
 /**
  * Parses the installed workflow's step names out of its yaml without a yaml dependency:
@@ -129,7 +139,7 @@ export const assertWorkflowInstalled = async ({
     throw new Error(
       `Managed workflow "${RULE_CREATION_WORKFLOW_ID}" no longer declares step(s) ` +
         `${missing.join(', ')} (found: ${stepNames.join(', ')}). The eval client and evaluators ` +
-        `address steps by id — update DRAFT_STEP_ID / REVIEW_STEP_ID in src/constants.ts when ` +
+        `address steps by id — update DRAFT_STEP_ID / PROPOSE_STEP_ID in src/constants.ts when ` +
         `the managed yaml renames them.`
     );
   }

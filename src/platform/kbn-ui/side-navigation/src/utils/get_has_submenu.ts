@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MenuItem } from '../../types';
+import type { MenuItem, SecondaryMenuSection } from '../../types';
 
 /**
- * Utility function for checking whether the menu item has a submenu.
- *
- * @param item - the menu item to check.
- * @returns `true` if the menu item has a submenu, `false` otherwise.
+ * Sections shown in the hover popover. `popoverSections` wins; otherwise `sections`.
+ */
+export const getPopoverSections = (item: MenuItem): SecondaryMenuSection[] | undefined =>
+  item.popoverSections ?? item.sections;
+
+/**
+ * Whether the hover popover has content. `popoverSections` wins; otherwise `sections`.
  */
 export const getHasSubmenu = (item: MenuItem): boolean => {
-  return !!item.sections && item.sections.length > 0;
+  return (getPopoverSections(item)?.length ?? 0) > 0;
 };
+
+/**
+ * Nested submenu in More. Tree `sections` only — hover `popoverSections` stay out.
+ */
+export const getHasMoreSubmenu = (item: MenuItem): boolean => (item.sections?.length ?? 0) > 0;

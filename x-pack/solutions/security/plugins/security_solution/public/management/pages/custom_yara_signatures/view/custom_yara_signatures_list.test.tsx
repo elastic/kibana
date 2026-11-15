@@ -65,10 +65,10 @@ describe('When on the custom YARA signatures page', () => {
 
   it('should search using expected exception item fields', async () => {
     const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
-    const { getAllByTestId } = render();
+    const { getByTestId } = render();
 
-    await waitFor(async () => {
-      expect(getAllByTestId('customYaraSignaturesList-card')).toHaveLength(10);
+    await waitFor(() => {
+      expect(getByTestId('customYaraSignaturesList-simpleTable')).toBeInTheDocument();
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();

@@ -148,6 +148,55 @@ describe('useOutputs', () => {
     // Should return empty array since all outputs are internal
     expect(result.current.allowedOutputs).toHaveLength(0);
   });
+
+  describe('inheritedOutputName', () => {
+    const renderUseOutputs = (agentPolicies?: Array<{ data_output_id?: string | null }>) => {
+      const testRenderer = createFleetTestRendererMock();
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: () => true,
+      } as unknown as LicenseService);
+      mockApiCallsWithOutputs(testRenderer.startServices.http);
+
+      return testRenderer.renderHook(() =>
+        useOutputs(packagePolicy, 'test-package', agentPolicies)
+      );
+    };
+
+    it('should resolve to the default output when no agent policy is known yet', async () => {
+      const { result } = renderUseOutputs();
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.inheritedOutputName).toEqual('Output 1');
+    });
+
+    it('should resolve to the default output when the agent policy sets no data output', async () => {
+      const { result } = renderUseOutputs([{ data_output_id: null }]);
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.inheritedOutputName).toEqual('Output 1');
+    });
+
+    it("should resolve to the agent policy's data output when it sets one", async () => {
+      const { result } = renderUseOutputs([{ data_output_id: 'output2' }]);
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.inheritedOutputName).toEqual('Output 2');
+    });
+
+    it('should be undefined when the parent agent policies use different outputs', async () => {
+      const { result } = renderUseOutputs([
+        { data_output_id: 'output2' },
+        { data_output_id: null },
+      ]);
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.inheritedOutputName).toBeUndefined();
+    });
+  });
 });
 
 const mockVarGroups: RegistryVarGroup[] = [

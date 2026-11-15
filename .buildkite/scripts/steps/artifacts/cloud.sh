@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Release artifacts must not hydrate the shared webpack bundles from the remote cache
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 source "$(dirname "$0")/../../common/util.sh"
@@ -29,7 +32,7 @@ esac
 echo "--- Push docker image"
 mkdir -p target
 
-download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "$BUILDKITE_BUILD_ID"
 docker load < "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 rm -f "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 

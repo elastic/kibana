@@ -1,0 +1,17 @@
+<figure class="chart">
+  <figcaption><span class="label">{{caption}}</span><span>{{change}}</span></figcaption>
+  {{#chart}}
+  <svg viewBox="0 0 {{width}} {{height}}" width="100%" role="img" aria-label="{{ariaLabel}}">
+    {{#bands}}
+    <line x1="{{left}}" x2="{{right}}" y1="{{y}}" y2="{{y}}"/>
+    <text x="{{labelX}}" y="{{labelY}}">{{label}}</text>
+    {{/bands}}
+    <polygon points="{{area}}"/>
+    <polyline points="{{path}}"/>
+    {{#dots}}<circle cx="{{x}}" cy="{{y}}" r="3"/>{{/dots}}
+    <text x="{{first.x}}" y="{{first.y}}" text-anchor="middle">{{first.text}}</text>
+    <text class="strong" x="{{last.x}}" y="{{last.y}}" text-anchor="end">{{last.text}}</text>
+    {{#ticks}}<text x="{{x}}" y="{{y}}" text-anchor="middle">{{text}}</text>{{/ticks}}
+  </svg>
+  {{/chart}}
+</figure>

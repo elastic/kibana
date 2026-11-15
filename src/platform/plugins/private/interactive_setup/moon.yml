@@ -51,6 +51,4 @@ fileGroups:
     - test/**/*
     - '!target/**/*'
     - '!test/plugins/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

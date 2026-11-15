@@ -89,6 +89,11 @@ export interface WorkflowConfig {
   default_retrieval_enabled: boolean;
   /** Toggle 2 sub-field: ES|QL query (required when `alert_retrieval_mode` is `'esql'`). */
   esql_query?: string;
+  /**
+   * Whether the generation-phase ground-truth gate runs; omitted means it does. The
+   * run step sets `false` for callers that own the false-positive decision later.
+   */
+  ground_truth_gate_enabled?: boolean;
   /** Toggle 1: whether the attack discovery skill performs its own additional alert retrieval. */
   skill_enabled: boolean;
   /** ID of the validation workflow to use (or `'default'` for built-in). */

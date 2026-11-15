@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/discover-enhanced-plugin",
   "owner": [
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "private",

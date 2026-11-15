@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/test'
   - '@kbn/security-solution-plugin'
+  - '@kbn/fleet-plugin'
 tags:
   - functional-tests
   - package
@@ -34,6 +35,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

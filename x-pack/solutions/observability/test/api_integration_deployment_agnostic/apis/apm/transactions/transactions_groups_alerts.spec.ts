@@ -222,18 +222,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
-
-          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
-            name,
-            alertsCount,
-          }));
-
-          expect(expected).to.eql([
-            { name: 'GET /api/failed/request', alertsCount: 0 },
-            { name: 'GET /api/request/p95', alertsCount: 0 },
-            { name: 'GET /api/request/p99', alertsCount: 0 },
-            { name: 'GET /api/request/avg', alertsCount: 1 },
-          ]);
+          expect(alertsCountByName(txGroupsTypeRequest)).to.eql({
+            'GET /api/failed/request': 0,
+            'GET /api/request/avg': 1,
+            'GET /api/request/p95': 0,
+            'GET /api/request/p99': 0,
+          });
         });
       });
 
@@ -309,18 +303,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
-
-          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
-            name,
-            alertsCount,
-          }));
-
-          expect(expected).to.eql([
-            { name: 'GET /api/failed/request', alertsCount: 0 },
-            { name: 'GET /api/request/avg', alertsCount: 0 },
-            { name: 'GET /api/request/p95', alertsCount: 0 },
-            { name: 'GET /api/request/p99', alertsCount: 1 },
-          ]);
+          expect(alertsCountByName(txGroupsTypeRequest)).to.eql({
+            'GET /api/failed/request': 0,
+            'GET /api/request/avg': 0,
+            'GET /api/request/p95': 0,
+            'GET /api/request/p99': 1,
+          });
         });
       });
 
@@ -394,19 +382,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           });
 
-          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
-            name,
-            alertsCount,
-          }));
-
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
-
-          expect(expected).to.eql([
-            { name: 'GET /api/request/avg', alertsCount: 0 },
-            { name: 'GET /api/request/p95', alertsCount: 0 },
-            { name: 'GET /api/request/p99', alertsCount: 0 },
-            { name: 'GET /api/failed/request', alertsCount: 1 },
-          ]);
+          expect(alertsCountByName(txGroupsTypeRequest)).to.eql({
+            'GET /api/failed/request': 1,
+            'GET /api/request/avg': 0,
+            'GET /api/request/p95': 0,
+            'GET /api/request/p99': 0,
+          });
         });
       });
 
@@ -416,16 +398,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: { transactionType: 'task' },
           });
 
-          const expected = txGroupsTypeTask.transactionGroups.map(({ name, alertsCount }) => ({
-            name,
-            alertsCount,
-          }));
-
           expect(txGroupsTypeTask.hasActiveAlerts).to.be.equal(false);
-
-          expect(expected).to.eql([{ name: 'GET /api/task/avg', alertsCount: 0 }]);
+          expect(alertsCountByName(txGroupsTypeTask)).to.eql({
+            'GET /api/task/avg': 0,
+          });
         });
       });
     });
   });
+}
+
+/** Order-independent name → alertsCount map (stats order is not part of the contract). */
+function alertsCountByName(
+  response: TransactionsGroupsMainStatistics
+): Record<string, number | undefined> {
+  return Object.fromEntries(
+    response.transactionGroups.map(({ name, alertsCount }) => [name, alertsCount])
+  );
 }

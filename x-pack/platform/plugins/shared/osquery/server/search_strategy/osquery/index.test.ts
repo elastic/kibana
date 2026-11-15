@@ -8,7 +8,19 @@
 import { of, lastValueFrom } from 'rxjs';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
-import type { StrategyRequestType } from '../../../common/search_strategy/osquery';
+
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
+import type {
+  FactoryQueryTypes,
+  StrategyRequestType,
+} from '../../../common/search_strategy/osquery';
 import { Direction } from '../../../common/search_strategy';
 import type { ActionResultsStrategyResponse } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -19,7 +31,7 @@ import {
 } from '../../../common/constants';
 import { OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR } from '../constants';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
-import { osquerySearchStrategyProvider } from '.';
+import { ID_BOUND_FACTORY_QUERY_TYPES, osquerySearchStrategyProvider } from '.';
 
 jest.mock('@kbn/data-plugin/server', () => ({
   shimHitsTotal: (rawResponse: unknown) => rawResponse,
@@ -48,6 +60,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     actionsIndexExists = false,
     newDataStreamIndexExists = false,
     cpsActive = false,
+    actionMetadataFound = true,
   }: {
     authorizedPrivileges?: string[];
     useRbac?: boolean;
@@ -55,6 +68,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     actionsIndexExists?: boolean;
     newDataStreamIndexExists?: boolean;
     cpsActive?: boolean;
+    actionMetadataFound?: boolean;
   } = {}) => {
     const searchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
     const authorizedActions = new Set(authorizedPrivileges.map((privilege) => `api:${privilege}`));
@@ -91,10 +105,21 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       )
     );
 
+    const metadataResponse = {
+      hits: { hits: actionMetadataFound ? [{ _id: 'action-doc' }] : [] },
+    };
+    const internalMetadataSearch = jest.fn().mockResolvedValue(metadataResponse);
+    const scopedMetadataSearch = jest.fn().mockResolvedValue(metadataResponse);
+    const asScoped = jest.fn().mockReturnValue({
+      asCurrentUser: { search: scopedMetadataSearch },
+    });
+
     const esClient = {
       asInternalUser: {
         indices: { exists: indicesExists },
+        search: internalMetadataSearch,
       },
+      asScoped,
     } as any;
 
     const osqueryContext = {
@@ -112,21 +137,25 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     const provider = osquerySearchStrategyProvider(data, esClient, osqueryContext);
 
     return {
+      asScoped,
       checkPrivileges,
       checkPrivilegesDynamicallyWithRequest,
       getActiveSpace,
       getApiAction,
       getSearchStrategy,
+      internalMetadataSearch,
       provider,
+      scopedMetadataSearch,
       searchMock,
     };
   };
 
+  // Action-bound, as the live-query results route sends it. A `scheduleId` /
+  // `executionCount` pair would select a different branch of `buildResultsQuery`
+  // and withhold the action_data fallback; that case is covered separately below.
   const resultsRequest = {
     factoryQueryType: OsqueryQueries.results,
     actionId: 'action-1',
-    scheduleId: 'sched-1',
-    executionCount: 1,
     kuery: '',
     pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
     sort: [{ field: '@timestamp', direction: Direction.desc }],
@@ -218,19 +247,42 @@ describe('osquerySearchStrategyProvider space scoping', () => {
   it('injects a named-space term filter into the ES params', async () => {
     const filter = await runResultsSearch('my-space');
 
-    expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
-    // Named space must NOT include the default-space missing-field fallback.
-    expect(JSON.stringify(filter)).not.toContain('exists');
+    // `results` is id-bound, so it also matches the agent-carried
+    // action_data.space_id (see ID_BOUND_FACTORY_QUERY_TYPES).
+    expect(filter).toContainEqual({
+      bool: {
+        should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+      },
+    });
+    // Named space must not admit unstamped documents: the only `must_not` here is
+    // the fallback's own guard, paired with a required action_data term.
+    const shouldClauses = filter.flatMap(
+      (clause) => (clause as { bool?: { should?: unknown[] } })?.bool?.should ?? []
+    );
+
+    expect(shouldClauses).not.toContainEqual({
+      bool: { must_not: { exists: { field: 'space_id' } } },
+    });
   });
 
   it('injects the default-space clause (term OR missing field) when spaceId is "default"', async () => {
     const filter = await runResultsSearch('default');
 
+    // The missing-field allowance also excludes action_data.space_id: a document
+    // carrying it belongs to a known space, so the default space must not read it.
     expect(filter).toContainEqual({
       bool: {
         should: [
           { term: { space_id: 'default' } },
-          { bool: { must_not: { exists: { field: 'space_id' } } } },
+          {
+            bool: {
+              must_not: [
+                { exists: { field: 'space_id' } },
+                { exists: { field: 'action_data.space_id' } },
+              ],
+            },
+          },
+          actionDataFallback('default'),
         ],
       },
     });
@@ -239,7 +291,11 @@ describe('osquerySearchStrategyProvider space scoping', () => {
   it('uses the active space when the request includes a spaceId', async () => {
     const filter = await runResultsSearch('active-space', 'request-space');
 
-    expect(filter).toContainEqual({ term: { space_id: 'active-space' } });
+    expect(filter).toContainEqual({
+      bool: {
+        should: [{ term: { space_id: 'active-space' } }, actionDataFallback('active-space')],
+      },
+    });
     expect(JSON.stringify(filter)).not.toContain('request-space');
   });
 
@@ -252,7 +308,15 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       bool: {
         should: [
           { term: { space_id: 'default' } },
-          { bool: { must_not: { exists: { field: 'space_id' } } } },
+          {
+            bool: {
+              must_not: [
+                { exists: { field: 'space_id' } },
+                { exists: { field: 'action_data.space_id' } },
+              ],
+            },
+          },
+          actionDataFallback('default'),
         ],
       },
     });
@@ -467,6 +531,628 @@ describe('osquerySearchStrategyProvider space scoping', () => {
 
       expect(searchMock).toHaveBeenCalledTimes(1);
       expect(response.edges).toEqual([{ _id: 'legacy' }]);
+    });
+  });
+
+  describe('action_data.space_id enablement is driven by the provider', () => {
+    const namedSpaceActionDataFilter = {
+      bool: {
+        should: [{ term: { space_id: 'my-space' } }, actionDataFallback('my-space')],
+      },
+    };
+
+    const factoryRequest = (
+      factoryQueryType: FactoryQueryTypes
+    ): StrategyRequestType<FactoryQueryTypes> => {
+      const common = { factoryQueryType };
+
+      switch (factoryQueryType) {
+        case OsqueryQueries.actions:
+          return {
+            ...common,
+            kuery: '',
+            pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
+            sort: { field: '@timestamp', direction: Direction.desc },
+          } as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.actionDetails:
+          return {
+            ...common,
+            actionId: 'action-1',
+            kuery: '',
+          } as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.actionResults:
+          return {
+            ...common,
+            actionId: 'action-1',
+            kuery: '',
+            startDate: '',
+            agentIds: [],
+            sort: { field: '@timestamp', direction: Direction.desc },
+            pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
+            spaceId: 'my-space',
+          } as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.results:
+          return resultsRequest as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.scheduledActionResults:
+          return {
+            ...common,
+            scheduleId: 'schedule-1',
+            executionCount: 1,
+            pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
+            sort: { field: '@timestamp', direction: Direction.desc },
+          } as StrategyRequestType<FactoryQueryTypes>;
+        case OsqueryQueries.exportResults:
+          return {
+            ...common,
+            baseFilter: 'action_id: "action-1"',
+            size: 1000,
+          } as StrategyRequestType<FactoryQueryTypes>;
+        default:
+          return ((_exhaustive: never) => {
+            throw new Error(`Unhandled factory query type: ${factoryQueryType}`);
+          })(factoryQueryType);
+      }
+    };
+
+    const collectGlobalAggs = (
+      node: unknown,
+      found: Array<Record<string, unknown>> = []
+    ): Array<Record<string, unknown>> => {
+      if (node == null || typeof node !== 'object') {
+        return found;
+      }
+
+      const record = node as Record<string, unknown>;
+      if ('global' in record) {
+        found.push(record);
+      }
+
+      for (const value of Object.values(record)) {
+        collectGlobalAggs(value, found);
+      }
+
+      return found;
+    };
+
+    const globalAggMustClauses = (globalAgg: Record<string, unknown>): unknown[] => {
+      const innerAggs = globalAgg.aggs;
+      if (innerAggs == null || typeof innerAggs !== 'object') {
+        return [];
+      }
+
+      return Object.values(innerAggs as Record<string, unknown>).flatMap((agg) => {
+        if (agg == null || typeof agg !== 'object') {
+          return [];
+        }
+
+        const must = (agg as { filter?: { bool?: { must?: unknown } } }).filter?.bool?.must;
+
+        return Array.isArray(must) ? must : must != null ? [must] : [];
+      });
+    };
+
+    const searchViaProvider = async (factoryQueryType: FactoryQueryTypes) => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'my-space' });
+
+      await lastValueFrom(
+        provider.search(factoryRequest(factoryQueryType), {} as never, { request: {} } as never)
+      );
+
+      return searchMock.mock.calls[0][0].params;
+    };
+
+    it.each(Object.values(OsqueryQueries))(
+      'applies the action_data.space_id fallback to "%s" only when it is id-bound',
+      async (factoryQueryType) => {
+        const params = await searchViaProvider(factoryQueryType);
+        const filter = params.query.bool.filter as unknown[];
+
+        if (ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType)) {
+          expect(filter).toContainEqual(namedSpaceActionDataFilter);
+        } else {
+          expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+          expect(filter).not.toContainEqual(namedSpaceActionDataFilter);
+        }
+      }
+    );
+
+    it.each([OsqueryQueries.actionResults])(
+      'applies the same action_data.space_id decision to "%s" hits and global aggregations',
+      async (factoryQueryType) => {
+        const params = await searchViaProvider(factoryQueryType);
+        const filter = params.query.bool.filter as unknown[];
+
+        expect(filter).toContainEqual(namedSpaceActionDataFilter);
+
+        const globalAggs = collectGlobalAggs(params.aggs);
+        expect(globalAggs.length).toBeGreaterThan(0);
+
+        for (const globalAgg of globalAggs) {
+          expect(globalAggMustClauses(globalAgg)).toContainEqual(namedSpaceActionDataFilter);
+        }
+      }
+    );
+
+    // Allowlist membership is necessary but not sufficient: `results` also serves
+    // the scheduled route, which supplies a scheduleId/executionCount pair. Those
+    // documents come from the agent policy and carry no `action_data`, so the
+    // fallback must be withheld even though the factory type is allowlisted.
+    it('withholds the fallback from an allowlisted type on a schedule-bound request', async () => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'my-space' });
+
+      await lastValueFrom(
+        provider.search(
+          {
+            ...resultsRequest,
+            actionId: 'schedule-1',
+            scheduleId: 'schedule-1',
+            executionCount: 1,
+          } as StrategyRequestType<OsqueryQueries.results>,
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const filter = searchMock.mock.calls[0][0].params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(filter).not.toContainEqual(namedSpaceActionDataFilter);
+      expect(JSON.stringify(filter)).not.toContain('action_data');
+    });
+
+    // Scheduled executions come from the agent policy, not a Fleet action, so their
+    // responses have no `action_data` and already carry the top-level `space_id`.
+    // Both scopes must stay on the trusted field only.
+    it('keeps scheduledActionResults hits and global aggregations off action_data.space_id', async () => {
+      const params = await searchViaProvider(OsqueryQueries.scheduledActionResults);
+      const filter = params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+
+      const globalAggs = collectGlobalAggs(params.aggs);
+      expect(globalAggs.length).toBeGreaterThan(0);
+
+      for (const globalAgg of globalAggs) {
+        expect(globalAggMustClauses(globalAgg)).toContainEqual({
+          term: { space_id: 'my-space' },
+        });
+      }
+
+      expect(JSON.stringify(params)).not.toContain('action_data');
+    });
+
+    it('applies action_data.space_id to both actionResults dual-index searches', async () => {
+      // Dual-index selection runs a second enforceSpaceScope on the data-stream
+      // DSL. Inspecting only calls[0] would miss a regression that omitted
+      // spaceScopeOptions on that second search.
+      const { provider, searchMock } = setup({
+        activeSpaceId: 'my-space',
+        newDataStreamIndexExists: true,
+      });
+
+      await lastValueFrom(
+        provider.search(
+          factoryRequest(OsqueryQueries.actionResults),
+          {} as never,
+          {
+            request: {},
+          } as never
+        )
+      );
+
+      expect(searchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
+
+      for (const [searchRequest] of searchMock.mock.calls) {
+        const filter = searchRequest.params.query.bool.filter as unknown[];
+
+        expect(filter).toContainEqual(namedSpaceActionDataFilter);
+      }
+    });
+
+    it('still matches action_data.space_id on id-bound reads when matchMissingSpaceId is false', async () => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'default' });
+
+      await lastValueFrom(
+        provider.search(
+          { ...resultsRequest, matchMissingSpaceId: false },
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const filter = searchMock.mock.calls[0][0].params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual({
+        bool: {
+          should: [{ term: { space_id: 'default' } }, actionDataFallback('default')],
+        },
+      });
+    });
+
+    it('ignores a client-supplied matchActionDataSpaceId on enumerating types', async () => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'my-space' });
+
+      await lastValueFrom(
+        provider.search(
+          {
+            ...factoryRequest(OsqueryQueries.actions),
+            matchActionDataSpaceId: true,
+          } as unknown as StrategyRequestType<FactoryQueryTypes>,
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const filter = searchMock.mock.calls[0][0].params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual({ term: { space_id: 'my-space' } });
+      expect(filter).not.toContainEqual(namedSpaceActionDataFilter);
+    });
+
+    it('ignores a client-supplied matchActionDataSpaceId: false on id-bound types', async () => {
+      const { provider, searchMock } = setup({ activeSpaceId: 'my-space' });
+
+      await lastValueFrom(
+        provider.search(
+          {
+            ...factoryRequest(OsqueryQueries.results),
+            matchActionDataSpaceId: false,
+          } as unknown as StrategyRequestType<FactoryQueryTypes>,
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const filter = searchMock.mock.calls[0][0].params.query.bool.filter as unknown[];
+
+      expect(filter).toContainEqual(namedSpaceActionDataFilter);
+    });
+  });
+
+  describe('action document gate', () => {
+    const actionResultsRequest = {
+      factoryQueryType: OsqueryQueries.actionResults,
+      actionId: 'action-1',
+      kuery: '',
+      startDate: '',
+      agentIds: [],
+      sort: { field: '@timestamp', direction: Direction.desc },
+      pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
+      spaceId: 'my-space',
+    } as StrategyRequestType<OsqueryQueries.actionResults>;
+
+    const exportRequest = {
+      factoryQueryType: OsqueryQueries.exportResults,
+      baseFilter: 'action_id: "action-1"',
+      pit: { id: 'pit-abc', keep_alive: '30s' },
+      size: 100,
+      kuery: '',
+    } as StrategyRequestType<OsqueryQueries.exportResults>;
+
+    const runSearch = (
+      provider: ReturnType<typeof osquerySearchStrategyProvider>,
+      request: StrategyRequestType<FactoryQueryTypes>,
+      depsRequest: object = {}
+    ) => lastValueFrom(provider.search(request, {} as never, { request: depsRequest } as never));
+
+    const queryOf = (searchCall: unknown[]) =>
+      (searchCall[0] as { params: { query: unknown } }).params.query;
+
+    it('looks up the action document in the active space on the actions index only', async () => {
+      const { provider, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+
+      await runSearch(provider, resultsRequest);
+
+      expect(internalMetadataSearch).toHaveBeenCalledTimes(1);
+      const [metadataRequest] = internalMetadataSearch.mock.calls[0];
+      expect(metadataRequest.index).toEqual(`${ACTIONS_INDEX}*`);
+      expect(JSON.stringify(metadataRequest)).not.toContain(AGENT_ACTIONS_INDEX);
+      expect(metadataRequest.query.bool.filter).toContainEqual({
+        term: { space_id: 'my-space' },
+      });
+      expect(metadataRequest.query.bool.should).toEqual([
+        { term: { action_id: 'action-1' } },
+        { term: { 'queries.action_id': 'action-1' } },
+      ]);
+    });
+
+    it('omits the data-document space filter on results after a same-space hit', async () => {
+      const { provider, searchMock } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+
+      await runSearch(provider, resultsRequest);
+
+      const query = queryOf(searchMock.mock.calls[0]) as { bool: { filter: unknown[] } };
+      expect(query.bool.filter).toContainEqual({ term: { action_id: 'action-1' } });
+      expect(JSON.stringify(query)).not.toContain('space_id');
+    });
+
+    it('omits the space filter from actionResults hits and global aggregations on both indices', async () => {
+      const { provider, searchMock } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+        newDataStreamIndexExists: true,
+      });
+
+      await runSearch(provider, actionResultsRequest);
+
+      expect(searchMock).toHaveBeenCalledTimes(2);
+
+      for (const [searchRequest] of searchMock.mock.calls) {
+        const { query, aggs } = searchRequest.params;
+
+        expect(query.bool.filter).toContainEqual({ term: { action_id: 'action-1' } });
+        expect(JSON.stringify(query)).not.toContain('space_id');
+        expect(JSON.stringify(aggs)).toContain('"action_id":"action-1"');
+        expect(JSON.stringify(aggs)).not.toContain('space_id');
+      }
+    });
+
+    it.each([
+      ['results', resultsRequest],
+      ['actionResults', actionResultsRequest],
+    ])(
+      'responds 404 and never searches the data streams when the %s action document is missing',
+      async (_label, request) => {
+        const { provider, searchMock } = setup({
+          activeSpaceId: 'my-space',
+          actionsIndexExists: true,
+          actionMetadataFound: false,
+        });
+
+        await expect(
+          runSearch(provider, request as StrategyRequestType<FactoryQueryTypes>)
+        ).rejects.toMatchObject({ statusCode: 404, message: 'Action not found' });
+        expect(searchMock).not.toHaveBeenCalled();
+      }
+    );
+
+    it('does not trust a skipSpaceFilter flag on the incoming request', async () => {
+      const forgedRequest = {
+        ...resultsRequest,
+        skipSpaceFilter: true,
+      } as unknown as StrategyRequestType<FactoryQueryTypes>;
+
+      const missing = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+        actionMetadataFound: false,
+      });
+      await expect(runSearch(missing.provider, forgedRequest)).rejects.toMatchObject({
+        statusCode: 404,
+      });
+      expect(missing.searchMock).not.toHaveBeenCalled();
+
+      // Without an actions index the gate does not run, so the flag must not skip either.
+      const legacy = setup({ activeSpaceId: 'my-space' });
+      await runSearch(legacy.provider, forgedRequest);
+      expect(JSON.stringify(queryOf(legacy.searchMock.mock.calls[0]))).toContain(
+        '"space_id":"my-space"'
+      );
+    });
+
+    it('keeps the space filter and skips the lookup when there is no actions index and no CPS', async () => {
+      const { provider, searchMock, internalMetadataSearch, scopedMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+      });
+
+      await runSearch(provider, resultsRequest);
+
+      expect(internalMetadataSearch).not.toHaveBeenCalled();
+      expect(scopedMetadataSearch).not.toHaveBeenCalled();
+      expect(JSON.stringify(queryOf(searchMock.mock.calls[0]))).toContain('"space_id":"my-space"');
+    });
+
+    it('uses the request-scoped client with space project routing under CPS', async () => {
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const {
+        provider,
+        asScoped,
+        internalMetadataSearch,
+        scopedMetadataSearch,
+        getSearchStrategy,
+      } = setup({ activeSpaceId: 'my-space', cpsActive: true });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+      const depsRequest = {};
+
+      await runSearch(provider, resultsRequest, depsRequest);
+
+      expect(asScoped).toHaveBeenCalledWith(depsRequest, { projectRouting: 'space' });
+      expect(internalMetadataSearch).not.toHaveBeenCalled();
+      // No local actions index: the lookup must tolerate it so fan-out can reach the origin.
+      expect(scopedMetadataSearch).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_no_indices: true, ignore_unavailable: true })
+      );
+      expect(JSON.stringify(queryOf(enhancedSearchMock.mock.calls[0]))).not.toContain('space_id');
+    });
+
+    it('responds 404 under CPS when the fanned-out lookup finds no same-space action', async () => {
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const { provider, getSearchStrategy } = setup({
+        activeSpaceId: 'my-space',
+        cpsActive: true,
+        actionMetadataFound: false,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await expect(runSearch(provider, resultsRequest)).rejects.toMatchObject({
+        statusCode: 404,
+      });
+      expect(enhancedSearchMock).not.toHaveBeenCalled();
+    });
+
+    it('never gates schedule-bound results and keeps them space-scoped', async () => {
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+
+      await runSearch(provider, {
+        ...resultsRequest,
+        actionId: 'schedule-1',
+        scheduleId: 'schedule-1',
+        executionCount: 1,
+      } as StrategyRequestType<FactoryQueryTypes>);
+
+      expect(internalMetadataSearch).not.toHaveBeenCalled();
+      expect(queryOf(searchMock.mock.calls[0])).toEqual(
+        expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([{ term: { space_id: 'my-space' } }]),
+          }),
+        })
+      );
+    });
+
+    it.each([
+      [
+        OsqueryQueries.scheduledActionResults,
+        {
+          factoryQueryType: OsqueryQueries.scheduledActionResults,
+          scheduleId: 'schedule-1',
+          executionCount: 1,
+          pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
+          sort: { field: '@timestamp', direction: Direction.desc },
+        },
+      ],
+      [
+        OsqueryQueries.actionDetails,
+        { factoryQueryType: OsqueryQueries.actionDetails, actionId: 'action-1', kuery: '' },
+      ],
+      [
+        OsqueryQueries.actions,
+        {
+          factoryQueryType: OsqueryQueries.actions,
+          kuery: '',
+          pagination: { activePage: 0, cursorStart: 0, querySize: 10 },
+          sort: { field: '@timestamp', direction: Direction.desc },
+        },
+      ],
+    ])('does not gate "%s" and keeps it space-scoped', async (_type, request) => {
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+
+      await runSearch(provider, request as StrategyRequestType<FactoryQueryTypes>);
+
+      expect(internalMetadataSearch).not.toHaveBeenCalled();
+      expect(
+        (queryOf(searchMock.mock.calls[0]) as { bool: { filter: unknown[] } }).bool.filter
+      ).toContainEqual({ term: { space_id: 'my-space' } });
+    });
+
+    it('binds a live export to the verified actionId and omits the space filter', async () => {
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+
+      await runSearch(provider, {
+        ...exportRequest,
+        actionId: 'action-1',
+      } as StrategyRequestType<FactoryQueryTypes>);
+
+      expect(internalMetadataSearch).toHaveBeenCalledTimes(1);
+      const query = queryOf(searchMock.mock.calls[0]) as { bool: { filter: unknown[] } };
+      expect(query.bool.filter).toContainEqual({ term: { action_id: 'action-1' } });
+      expect(JSON.stringify(query)).not.toContain('space_id');
+    });
+
+    it('responds 404 for a live export whose actionId has no same-space action document', async () => {
+      const { provider, searchMock } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+        actionMetadataFound: false,
+      });
+
+      await expect(
+        runSearch(provider, {
+          ...exportRequest,
+          actionId: 'action-1',
+        } as StrategyRequestType<FactoryQueryTypes>)
+      ).rejects.toMatchObject({ statusCode: 404 });
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
+    it('keeps an export without actionId (scheduled export) space-scoped', async () => {
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+
+      await runSearch(provider, exportRequest as StrategyRequestType<FactoryQueryTypes>);
+
+      expect(internalMetadataSearch).not.toHaveBeenCalled();
+      expect(
+        (queryOf(searchMock.mock.calls[0]) as { bool: { filter: unknown[] } }).bool.filter
+      ).toContainEqual({ term: { space_id: 'my-space' } });
+    });
+
+    it('fails closed when the lookup errors, issuing no data search', async () => {
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+      internalMetadataSearch.mockRejectedValueOnce(
+        Object.assign(new Error('security_exception'), { statusCode: 403 })
+      );
+
+      await expect(runSearch(provider, resultsRequest)).rejects.toMatchObject({
+        statusCode: 403,
+      });
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
+    it('reuses a verified lookup for later searches within the same request', async () => {
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+      const depsRequest = {};
+
+      await runSearch(provider, resultsRequest, depsRequest);
+      await runSearch(provider, actionResultsRequest, depsRequest);
+
+      expect(internalMetadataSearch).toHaveBeenCalledTimes(1);
+      expect(searchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the CCS lookup on the local actions index while data reads reach remotes', async () => {
+      (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+
+      await runSearch(provider, resultsRequest);
+
+      expect(internalMetadataSearch.mock.calls[0][0].index).toEqual(`${ACTIONS_INDEX}*`);
+      expect(searchMock.mock.calls[0][0].params.index).toEqual([
+        `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+        `*:logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+      ]);
+    });
+
+    it('drops CCS remote patterns from data reads when CPS fans them out', async () => {
+      (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const { provider, getSearchStrategy } = setup({
+        activeSpaceId: 'my-space',
+        cpsActive: true,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await runSearch(provider, resultsRequest);
+
+      expect(enhancedSearchMock.mock.calls[0][0].params.index).toEqual([
+        `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+      ]);
     });
   });
 });

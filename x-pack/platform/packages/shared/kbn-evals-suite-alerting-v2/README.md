@@ -1,12 +1,12 @@
 # @kbn/evals-suite-alerting-v2
 
 Evaluation suite for Alerting V2 agent skills, built on top of
-[`@kbn/evals`](../kbn-evals/README.md). The first specs target the **rule-management**
+[`@kbn/evals`](../kbn-evals/README.md). The first specs target the **rule-authoring**
 skill; additional Alerting V2 skills can be added under `evals/`.
 
 ## Overview
 
-The rule-management skill lets users compose, discover, and modify Alerting V2 rules and
+The rule-authoring skill lets users compose, discover, and modify Alerting V2 rules and
 action policies (notification policies) from within an Agent Builder conversation. It is
 backed by two tools:
 
@@ -25,7 +25,7 @@ For the shared evals CLI, profiles, and CI labels, see the main
 - **Docker** running (the evals CLI starts an EDOT collector container).
 - **Vault CLI** with OIDC access to `https://secrets.elastic.co:8200` (needed for EIS model
   discovery and EIS Cloud Connected Mode / CCM).
-- Repo bootstrapped (`yarn kbn bootstrap`) in a Kibana checkout.
+- Repo bootstrapped (`pnpm kbn bootstrap`) in a Kibana checkout.
 - Agent Builder + Alerting V2 enabled for the Scout server config set `evals_alerting_v2`
   (the suite registration wires this; you do not need to hand-edit `kibana.dev.yml` for the
   standard `evals start` flow).
@@ -97,8 +97,8 @@ node scripts/jest x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2
 
 ## Spec layout
 
-- `evals/rule_management/rule_management.spec.ts` — skill routing + rule composition
-- `evals/rule_management/action_policy.spec.ts` — notification / action-policy flow
+- `evals/rule_authoring/rule_authoring.spec.ts` — skill routing + rule composition
+- `evals/rule_authoring/action_policy.spec.ts` — notification / action-policy flow
 
 Example ground truth lives entirely under `output` (skills, tools, attachments, criteria).
 Evaluators receive that object as `expected`. Omit a field to skip the matching scorer.

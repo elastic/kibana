@@ -5,18 +5,54 @@
  * 2.0.
  */
 
-import deepMerge from 'deepmerge';
 import { bytePartition } from '@kbn/std';
 import { isEmpty } from 'lodash';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 
 interface MeteringStatsResponse {
-  indices: Array<{
+  indices?: Array<{
     name: string;
     num_docs: number;
     size_in_bytes: number;
   }>;
+}
+
+// The list endpoints only read these fields. The full response is about 7x larger.
+export const DATA_STREAM_INDEX_NAMES_FILTER_PATH = [
+  'data_streams.name',
+  'data_streams.indices.index_name',
+  'data_streams.failure_store.indices.index_name',
+];
+
+/**
+ * Fetches data streams with only their names and backing index names, for one stream or all of them.
+ */
+export async function getDataStreamsWithIndexNames({
+  esClient,
+  streamName,
+}: {
+  esClient: ElasticsearchClient;
+  streamName?: string;
+}): Promise<IndicesGetDataStreamResponse['data_streams']> {
+  const request = streamName
+    ? esClient.indices.getDataStream({
+        name: streamName,
+        filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+      })
+    : esClient.indices.getDataStream({ filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH });
+
+  try {
+    // filter_path drops `data_streams` entirely when nothing matches.
+    const { data_streams: dataStreams = [] } = await request;
+    return dataStreams;
+  } catch (error) {
+    if (streamName && isNotFoundError(error)) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 /**
@@ -101,23 +137,18 @@ export async function getDataStreamsMeteringStats({
       }),
   });
 
-  if (!chunkResults.length) {
-    return {};
+  // Mutate one record so the cost stays linear in the number of entries. Projects can have
+  // thousands of backing indices, and this runs on the request path.
+  const statsByName: Record<string, { size?: string; sizeBytes: number; totalDocs: number }> = {};
+
+  for (const { indices } of chunkResults) {
+    if (!indices) {
+      continue;
+    }
+    for (const { name, size_in_bytes: sizeBytes, num_docs: totalDocs } of indices) {
+      statsByName[name] = { sizeBytes, totalDocs };
+    }
   }
 
-  const { indices } = chunkResults.reduce((result, chunkResult) => deepMerge(result, chunkResult));
-
-  return indices.reduce(
-    (
-      acc: Record<string, { sizeBytes: number; totalDocs: number }>,
-      index: { name: string; size_in_bytes: number; num_docs: number }
-    ) => ({
-      ...acc,
-      [index.name]: {
-        sizeBytes: index.size_in_bytes,
-        totalDocs: index.num_docs,
-      },
-    }),
-    {} as Record<string, { size?: string; sizeBytes: number; totalDocs: number }>
-  );
+  return statsByName;
 }

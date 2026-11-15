@@ -145,10 +145,12 @@ Good descriptions make typed actions discoverable and usable by LLMs. Apply desc
 
 2. **Param-level `.describe()`**: Add `.describe()` to every Zod field in the input schema. This tells the LLM what each parameter means and what values are valid.
    ```typescript
-   const SearchInputSchema = z.object({
-     query: z.string().describe('GitHub search query using GitHub search syntax (e.g., "repo:elastic/kibana is:open label:bug")'),
-     type: z.enum(['repositories', 'code', 'issues', 'users']).describe('The type of GitHub content to search'),
-   });
+   const SearchInputSchema = lazySchema(() =>
+     z.object({
+       query: z.string().max(1000).describe('GitHub search query using GitHub search syntax (e.g., "repo:elastic/kibana is:open label:bug")'),
+       type: z.enum(['repositories', 'code', 'issues', 'users']).describe('The type of GitHub content to search'),
+     })
+   );
    ```
 
 3. **`skill` property** (optional): Provide a `skill` string on the connector spec to give the LLM high-level guidance on multi-step patterns and gotchas. Use the `[...].join('\n')` pattern:

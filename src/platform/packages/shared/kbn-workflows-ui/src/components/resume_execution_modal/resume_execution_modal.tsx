@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepContext } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -141,7 +141,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
 
       try {
         const currentModel = editor.getModel();
-        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        jsonDefaults.setDiagnosticsOptions({
           validate: true,
           allowComments: false,
           enableSchemaRequest: false,
@@ -182,14 +182,14 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
               <FormattedMessage
-                id="workflowsManagement.resumeExecutionModal.title"
+                id="workflowsUi.resumeExecutionModal.title"
                 defaultMessage="Provide action"
               />
             </EuiFlexItem>
             <EuiFlexItem css={descriptionStyle}>
               {resumeMessage ?? (
                 <FormattedMessage
-                  id="workflowsManagement.resumeExecutionModal.description"
+                  id="workflowsUi.resumeExecutionModal.description"
                   defaultMessage="Provide input to resume the workflow."
                 />
               )}
@@ -225,7 +225,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
             wordWrap: 'on',
             wrappingIndent: 'indent',
             hover: {
-              enabled: true,
+              enabled: 'on',
             },
           }}
         />
@@ -240,13 +240,10 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           data-test-subj="workflowSubmitResume"
         >
           {useRunButton ? (
-            <FormattedMessage
-              id="workflowsManagement.resumeExecutionModal.runBtn"
-              defaultMessage="Run"
-            />
+            <FormattedMessage id="workflowsUi.resumeExecutionModal.runBtn" defaultMessage="Run" />
           ) : (
             <FormattedMessage
-              id="workflowsManagement.resumeExecutionModal.resumeBtn"
+              id="workflowsUi.resumeExecutionModal.resumeBtn"
               defaultMessage="Resume"
             />
           )}

@@ -142,6 +142,196 @@ describe('connectorType', () => {
   });
 });
 
+describe('sandbox credentials', () => {
+  const secrets = { user: 'elastic', password: 'changeme' };
+  const basicHeader = {
+    Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
+  };
+  const oauthConfig = {
+    accessTokenUrl: 'https://example.com/oauth/token',
+    clientId: 'client-id',
+    scope: 'read',
+  };
+  const oauthSecrets = { clientSecret: 'client-secret', user: 'elastic', password: 'changeme' };
+  const bearerHeader = { Authorization: 'Bearer my-access-token' };
+
+  const getHeaders = (config: Record<string, unknown>, testSecrets: Record<string, unknown>) =>
+    connectorType.getSandboxAuthHeaders?.({
+      config,
+      secrets: testSecrets,
+      connectorId: 'connector-1',
+      connectorTokenClient: undefined,
+      configurationUtilities,
+      logger: mockedLogger,
+    });
+
+  beforeEach(() => {
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockReset();
+    (getOAuthPasswordAccessToken as jest.Mock).mockReset();
+  });
+
+  test.each([
+    ['basic auth', { hasAuth: true, authType: AuthType.Basic }, true],
+    ['missing authType', { hasAuth: true, authType: null }, true],
+    ['hasAuth false', { hasAuth: false, authType: null }, true],
+    ['ssl', { hasAuth: true, authType: AuthType.SSL }, false],
+    [
+      'oauth2 client credentials',
+      { hasAuth: true, authType: AuthType.OAuth2ClientCredentials },
+      true,
+    ],
+    ['oauth2 password', { hasAuth: true, authType: AuthType.OAuth2Password }, true],
+  ])('isSandboxCapable: %s', (_name, config, expected) => {
+    expect(connectorType.isSandboxCapable?.({ config, secrets: {} })).toBe(expected);
+  });
+
+  test.each([
+    ['basic auth', { hasAuth: true, authType: AuthType.Basic }, secrets, basicHeader],
+    ['missing authType', { hasAuth: true, authType: null }, secrets, basicHeader],
+    ['hasAuth false', { hasAuth: false, authType: null }, secrets, {}],
+    ['ssl', { hasAuth: true, authType: AuthType.SSL }, secrets, {}],
+    ['missing password', { hasAuth: true, authType: AuthType.Basic }, { user: 'elastic' }, {}],
+  ])('getSandboxAuthHeaders: %s', async (_name, config, testSecrets, expected) => {
+    expect(await getHeaders(config, testSecrets)).toEqual(expected);
+  });
+
+  test('isSandboxCapable: true when secretQueryParams is set', () => {
+    expect(
+      connectorType.isSandboxCapable?.({
+        config: { hasAuth: true, authType: AuthType.Basic },
+        secrets: { secretQueryParams: { key: 'abc' } },
+      })
+    ).toBe(true);
+  });
+
+  test.each([
+    ['empty object', { secretQueryParams: {} }],
+    ['null', { secretQueryParams: null }],
+    ['undefined', { secretQueryParams: undefined }],
+  ])('isSandboxCapable: true for secretQueryParams as %s', (_name, testSecrets) => {
+    expect(
+      connectorType.isSandboxCapable?.({
+        config: { hasAuth: true, authType: AuthType.Basic },
+        secrets: testSecrets,
+      })
+    ).toBe(true);
+  });
+
+  test('getSandboxAuthHeaders: secretHeaders object merges on top of basic auth', async () => {
+    expect(
+      await getHeaders(
+        { hasAuth: true, authType: AuthType.Basic },
+        { ...secrets, secretHeaders: { 'X-Extra': 'value' } }
+      )
+    ).toEqual({ ...basicHeader, 'X-Extra': 'value' });
+  });
+
+  test('getSandboxAuthHeaders: secretHeaders JSON string merges', async () => {
+    expect(
+      await getHeaders(
+        { hasAuth: true, authType: AuthType.Basic },
+        { ...secrets, secretHeaders: JSON.stringify({ 'X-Extra': 'value' }) }
+      )
+    ).toEqual({ ...basicHeader, 'X-Extra': 'value' });
+  });
+
+  test('getSandboxAuthHeaders: secretHeaders Authorization wins over basic Authorization', async () => {
+    expect(
+      await getHeaders(
+        { hasAuth: true, authType: AuthType.Basic },
+        { ...secrets, secretHeaders: { Authorization: 'ApiKey abc' } }
+      )
+    ).toEqual({ Authorization: 'ApiKey abc' });
+  });
+
+  test('getSandboxAuthHeaders: hasAuth false returns only secretHeaders', async () => {
+    expect(
+      await getHeaders(
+        { hasAuth: false, authType: null },
+        { secretHeaders: { Authorization: 'ApiKey abc' } }
+      )
+    ).toEqual({ Authorization: 'ApiKey abc' });
+  });
+
+  test('getSandboxAuthHeaders: ignores secretQueryParams and returns auth and secretHeaders', async () => {
+    expect(
+      await getHeaders(
+        { hasAuth: true, authType: AuthType.Basic },
+        {
+          ...secrets,
+          secretQueryParams: { key: 'abc' },
+          secretHeaders: { 'X-Extra': 'value' },
+        }
+      )
+    ).toEqual({ ...basicHeader, 'X-Extra': 'value' });
+  });
+
+  test('getSandboxAuthHeaders: oauth2 client credentials returns the token as the Authorization header', async () => {
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(
+      bearerHeader.Authorization
+    );
+
+    const headers = await getHeaders(
+      { hasAuth: true, authType: AuthType.OAuth2ClientCredentials, ...oauthConfig },
+      oauthSecrets
+    );
+
+    expect(headers).toEqual(bearerHeader);
+    expect(getOAuthClientCredentialsAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'connector-1',
+        tokenUrl: oauthConfig.accessTokenUrl,
+        oAuthScope: oauthConfig.scope,
+        credentials: {
+          type: 'client_secret',
+          secrets: { clientSecret: 'client-secret' },
+          config: { clientId: 'client-id' },
+        },
+      })
+    );
+    expect(getOAuthPasswordAccessToken).not.toHaveBeenCalled();
+  });
+
+  test('getSandboxAuthHeaders: oauth2 password returns the token as the Authorization header', async () => {
+    (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValueOnce(bearerHeader.Authorization);
+
+    const headers = await getHeaders(
+      { hasAuth: true, authType: AuthType.OAuth2Password, ...oauthConfig },
+      oauthSecrets
+    );
+
+    expect(headers).toEqual(bearerHeader);
+    expect(getOAuthPasswordAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'connector-1',
+        username: 'elastic',
+        password: 'changeme',
+        tokenUrl: oauthConfig.accessTokenUrl,
+      })
+    );
+    expect(getOAuthClientCredentialsAccessToken).not.toHaveBeenCalled();
+  });
+
+  test('getSandboxAuthHeaders: oauth2 throws when no token is returned', async () => {
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(null);
+
+    await expect(
+      getHeaders(
+        { hasAuth: true, authType: AuthType.OAuth2ClientCredentials, ...oauthConfig },
+        oauthSecrets
+      )
+    ).rejects.toThrow('Unable to retrieve new access token');
+  });
+
+  test('getSandboxAuthHeaders: oauth2 wraps token fetch errors', async () => {
+    (getOAuthPasswordAccessToken as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+
+    await expect(
+      getHeaders({ hasAuth: true, authType: AuthType.OAuth2Password, ...oauthConfig }, oauthSecrets)
+    ).rejects.toThrow('Unable to retrieve/refresh the access token: boom');
+  });
+});
+
 describe('secrets validation', () => {
   test('succeeds when secrets is valid', () => {
     const secrets: ConnectorTypeSecretsType = {

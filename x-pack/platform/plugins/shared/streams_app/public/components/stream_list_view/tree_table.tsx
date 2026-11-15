@@ -36,6 +36,7 @@ import {
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
@@ -95,6 +96,8 @@ import {
   TechnicalPreviewBadge,
 } from '../stream_badges';
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 export function StreamsTreeTable({
   loading,
   streams = [],
@@ -115,7 +118,9 @@ export function StreamsTreeTable({
   const { timeState } = useTimefilter();
   const { getStepPropsByStepId } = useStreamsTour();
 
-  const [searchText, setSearchText] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  // Filtering re-renders up to 25 rows and each new row starts a histogram search.
+  const searchText = useDebouncedValue(searchInput, SEARCH_DEBOUNCE_MS);
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   // Collapsed state: Set of collapsed node names
@@ -141,13 +146,15 @@ export function StreamsTreeTable({
     );
   }, [streams]);
 
-  const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
-    groupTotalCountByTimestamp: true,
-    getCanReadFailureStore: (streamName: string | undefined) =>
-      streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
-    numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
-    fetchIngestionDocCounts: true,
-  });
+  const { getStreamDocCounts, getStreamHistogram, retainStreamHistogram } = useStreamDocCountsFetch(
+    {
+      groupTotalCountByTimestamp: true,
+      getCanReadFailureStore: (streamName: string | undefined) =>
+        streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
+      numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+      fetchIngestionDocCounts: true,
+    }
+  );
 
   const docCountsFetch = getStreamDocCounts();
 
@@ -420,8 +427,8 @@ export function StreamsTreeTable({
               compressed
               incremental
               aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -635,6 +642,7 @@ export function StreamsTreeTable({
                   <DocumentsColumn
                     indexPattern={item.stream.name}
                     histogramQueryFetch={getStreamHistogram(item.stream.name)}
+                    retainHistogramQueryFetch={retainStreamHistogram}
                     timeState={timeState}
                     numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
                   />

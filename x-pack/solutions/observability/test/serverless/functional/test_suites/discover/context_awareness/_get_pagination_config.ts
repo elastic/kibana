@@ -72,9 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       it('should render default pagination with page numbers', async () => {
         const defaultPageLimit = 500;
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
         await dataViews.switchTo('my-example-logs,logstash*');
         await PageObjects.discover.waitUntilSearchingHasFinished();
 

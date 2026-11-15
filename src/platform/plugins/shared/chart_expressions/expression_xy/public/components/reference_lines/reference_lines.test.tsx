@@ -543,6 +543,62 @@ describe('ReferenceLines', () => {
     );
   });
 
+  it('prefers the shared y axis formatter over a reference column formatter', () => {
+    const wrapper = shallow(
+      <ReferenceLines
+        xAxisFormatter={{ convertToText: (value: unknown) => String(value) } as FieldFormat}
+        isHorizontal={false}
+        paddingMap={{}}
+        yAxesMap={{ left: undefined, right: undefined }}
+        axesConfiguration={[
+          {
+            groupId: 'left',
+            position: 'left',
+            series: [],
+            formatter: {
+              convertToText: (value: unknown) => `axis-${value}`,
+            } as unknown as FieldFormat,
+          },
+        ]}
+        formatters={{
+          yAccessorLeftFirstId: {
+            convertToText: (value: unknown) => `column-${value}`,
+          } as unknown as FieldFormat,
+        }}
+        layers={createLayers(
+          [
+            {
+              forAccessor: 'yAccessorLeftFirstId',
+              position: 'left',
+              lineStyle: 'solid',
+              type: 'referenceLineDecorationConfig',
+            },
+          ],
+          {
+            type: 'datatable',
+            rows: [row],
+            columns: Object.keys(row).map((id) => ({
+              id,
+              name: id,
+              meta: { type: 'number' },
+            })),
+          }
+        )}
+      />
+    );
+
+    expect(
+      wrapper
+        .find(ReferenceLineLayer)
+        .dive()
+        .find(ReferenceLineAnnotations)
+        .first()
+        .dive()
+        .find(LineAnnotation)
+        .prop('dataValues')
+    ).toEqual(expect.arrayContaining([{ dataValue: 5, details: 'axis-5', header: undefined }]));
+  });
+
   describe('referenceLines', () => {
     let defaultProps: Omit<ReferenceLinesProps, 'data' | 'layers'>;
 

@@ -33,6 +33,8 @@ export const DISPATCH_FAILURE_REASONS = {
   WORKFLOW_DISABLED: 'workflow_disabled',
   /** Scheduling the workflow execution threw (e.g. Task Manager error). */
   SCHEDULE_ERROR: 'schedule_error',
+  /** The cluster license does not allow action policies, so workflows are not scheduled. */
+  LICENSE_NOT_SUPPORTED: 'license_not_supported',
 } as const satisfies Record<string, SchemaDispatchFailureReason>;
 
 export type DispatchFailureReason = SchemaDispatchFailureReason;

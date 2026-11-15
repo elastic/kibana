@@ -60,6 +60,14 @@ export class WorkflowRunFixture {
   public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);
 
   constructor() {
+    jest
+      .mocked(this.dependencies.coreStart.elasticsearch.client.asInternalUser.search)
+      .mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+      });
     // Mock repository constructors to return our mock instances
     const workflowRepoModule = jest.requireMock(
       '../server/repositories/workflow_execution_repository'
@@ -131,6 +139,17 @@ export class WorkflowRunFixture {
       workflowExecutionRepository: this.workflowExecutionRepository,
       stepExecutionRepository: this.stepExecutionRepository,
     });
+  }
+
+  public async resumeWorkflowAtScheduledTime() {
+    const resumeTask = this.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
+    if (!resumeTask?.runAt) throw new Error('Expected a scheduled wait deadline');
+    jest.useFakeTimers({ now: new Date(resumeTask.runAt) });
+    try {
+      return await this.resumeWorkflow();
+    } finally {
+      jest.useRealTimers();
+    }
   }
 
   public resumeWorkflow() {

@@ -23,10 +23,7 @@ import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { ValidateCustomYaraSignatureResponse } from '@kbn/security-solution-plugin/common/api/endpoint/custom_yara_signatures';
-import {
-  MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
-  MAXIMUM_RULE_IDENTIFIER_LENGTH,
-} from '@kbn/security-solution-plugin/server/endpoint/lib/custom_yara_signatures';
+import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '@kbn/security-solution-plugin/server/endpoint/lib/custom_yara_signatures';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -300,9 +297,56 @@ export default function ({ getService }: FtrProviderContext) {
                     )
                   );
               });
+
+              describe('maximum number of rules', () => {
+                // Kept in sync with MAX_RULES in validate_yara.c. Over-limit sources are rejected
+                // before rules are collected, so later rules are not silently skipped.
+                const maxNumberOfRulesPerEntry = 256;
+
+                const generateNumberOfRules = (count: number) =>
+                  Array.from({ length: count }, (_, i) => `rule r${i}{condition:true}`).join('');
+
+                it(`accepts ${maxNumberOfRulesPerEntry} rules`, async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        generateNumberOfRules(maxNumberOfRulesPerEntry)
+                      )
+                    )
+                    .expect(200);
+                });
+
+                it(`rejects more than ${maxNumberOfRulesPerEntry} rules`, async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        generateNumberOfRules(maxNumberOfRulesPerEntry + 1)
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        new RegExp(
+                          `Invalid YARA rules \\(libyara [0-9.]+\\), 1 error found: YARA source contains ${
+                            maxNumberOfRulesPerEntry + 1
+                          } rules; maximum is ${maxNumberOfRulesPerEntry}`
+                        )
+                      )
+                    );
+                });
+              });
             });
 
             describe('Rule identifiers', () => {
+              const MAXIMUM_RULE_IDENTIFIER_LENGTH = 128;
+
               it('accepts multiple rules with unique identifiers', async () => {
                 await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                   customYaraSignatureApiCall.path
@@ -360,66 +404,11 @@ export default function ({ getService }: FtrProviderContext) {
                   )
                   .expect(400)
                   .expect(anEndpointArtifactError)
+                  .expect(anErrorMessageWith(/2 errors found:/))
+                  .expect(anErrorMessageWith(/\[line 3\] identifier too long/))
                   .expect(
                     anErrorMessageWith(
-                      new RegExp(
-                        `1 error found: \\[line 3\\] Too long rule identifier "${'a'.repeat(
-                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
-                        )}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`
-                      )
-                    )
-                  );
-              });
-
-              it('returns "too long identifier" error for multiple rules with too long identifiers', async () => {
-                await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-                  customYaraSignatureApiCall.path
-                )
-                  .set('kbn-xsrf', 'true')
-                  .send(
-                    customYaraSignatureApiCall.getBody(`
-                      rule rule1 { condition: true }
-
-                      // all identifiers are only 'a's to make sure the correct line number is reported on whole words
-                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 3)} { condition: true }
-                      rule rule2 { condition: true }
-
-                      // no space after the identifier intentionally
-                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 2)}{ condition: true }
-                      rule rule3 { condition: true }
-
-                      // line break after identifier intentionally
-                      rule ${'a'.repeat(MAXIMUM_RULE_IDENTIFIER_LENGTH + 1)}
-                      { condition: true }`)
-                  )
-                  .expect(400)
-                  .expect(anEndpointArtifactError)
-                  .expect(anErrorMessageWith(/3 errors found:/))
-                  .expect(
-                    anErrorMessageWith(
-                      new RegExp(
-                        `\\[line 5\\] Too long rule identifier "${'a'.repeat(
-                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 3
-                        )}"`
-                      )
-                    )
-                  )
-                  .expect(
-                    anErrorMessageWith(
-                      new RegExp(
-                        `\\[line 9\\] Too long rule identifier "${'a'.repeat(
-                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 2
-                        )}"`
-                      )
-                    )
-                  )
-                  .expect(
-                    anErrorMessageWith(
-                      new RegExp(
-                        `\\[line 13\\] Too long rule identifier "${'a'.repeat(
-                          MAXIMUM_RULE_IDENTIFIER_LENGTH + 1
-                        )}"`
-                      )
+                      /\[line 3\] syntax error, unexpected end of file, expecting identifier/
                     )
                   );
               });
@@ -427,26 +416,30 @@ export default function ({ getService }: FtrProviderContext) {
 
             describe('Meta fields', () => {
               describe('meta.arch', () => {
-                it('accepts rules with meta.arch set to "x86" and/or "arm64"', async () => {
-                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
-                    customYaraSignatureApiCall.path
-                  )
-                    .set('kbn-xsrf', 'true')
-                    .send(
-                      customYaraSignatureApiCall.getBody(`
-                      rule rule1 { meta: arch = "x86" condition: true }
-                      rule rule2 { meta: arch = "arm64" condition: true }
+                const validArchValues = [
+                  'x86',
+                  'arm64',
+                  'x86,arm64',
+                  'x86, arm64',
+                  'arm64,x86',
+                  'arm64, x86',
+                ];
 
-                      // zero or one space after comma is accepted
-                      rule rule3 { meta: arch = "x86,arm64" condition: true }
-                      rule rule4 { meta: arch = "x86, arm64" condition: true }
-
-                      rule rule5 { meta: arch = "arm64,x86" condition: true }
-                      rule rule6 { meta: arch = "arm64, x86" condition: true }
-                      `)
+                for (const arch of validArchValues) {
+                  it(`accepts rules with meta.arch set to "${arch}"`, async () => {
+                    await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                      customYaraSignatureApiCall.path
                     )
-                    .expect(200);
-                });
+                      .set('kbn-xsrf', 'true')
+                      .send(
+                        customYaraSignatureApiCall.getBody(`
+                        rule rule1 { meta: arch = "${arch}" condition: true }
+                        rule rule2 { meta: arch = "${arch}" condition: false }
+                        `)
+                      )
+                      .expect(200);
+                  });
+                }
 
                 it('rejects rules with meta.arch containing invalid values', async () => {
                   await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
@@ -464,7 +457,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 4 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 7 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -485,6 +478,21 @@ export default function ({ getService }: FtrProviderContext) {
                       anErrorMessageWith(
                         /\[line 5\] Invalid "meta.arch" value "" on rule "rule4", only "x86" and\/or "arm64" are allowed in a comma separated list/
                       )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found "random value" on rule "rule1" and "arm64 x86" on rule "rule2"/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found "random value" on rule "rule1" and "cheese, x86" on rule "rule3"/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 5\] Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found "random value" on rule "rule1" and "" on rule "rule4"/
+                      )
                     );
                 });
 
@@ -503,7 +511,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 5 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -518,6 +526,16 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 4\] Invalid "meta.arch" value " arm64, x86" on rule "rule3", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found " x86, arm64" on rule "rule1" and "arm64, x86 " on rule "rule2"/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found " x86, arm64" on rule "rule1" and " arm64, x86" on rule "rule3"/
                       )
                     );
                 });
@@ -536,7 +554,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -546,6 +564,11 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 3\] Invalid "meta.arch" value "arm64, arm64" on rule "rule2", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found "x86, x86" on rule "rule1" and "arm64, arm64" on rule "rule2"/
                       )
                     );
                 });
@@ -574,6 +597,31 @@ export default function ({ getService }: FtrProviderContext) {
                     );
                 });
 
+                it('rejects duplicated meta.arch without reporting it as omitted', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            arch = "x86"
+                            arch = "arm64"
+                          condition: true
+                         }
+                         rule rule2 { meta: arch = "x86" condition: true }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.arch" fields set on rule "rule1", only one is allowed/
+                      )
+                    );
+                });
+
                 it('truncates meta.arch value to 30 characters in error response', async () => {
                   await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                     customYaraSignatureApiCall.path
@@ -588,7 +636,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -598,6 +646,67 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 3\] Invalid "meta.arch" value "x86, arm64                    \.\.\." on rule "rule2", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Inconsistent "meta.arch" across rules in this entry/
+                      )
+                    );
+                });
+
+                it('accepts rules when meta.arch uses the same values with a different string', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "x86,arm64" condition: true }
+                      rule rule2 { meta: arch = "x86, arm64" condition: true }
+                      rule rule3 { meta: arch = "arm64,x86" condition: true }
+                      rule rule4 { meta: arch = "arm64, x86" condition: true }
+                      `)
+                    )
+                    .expect(200);
+                });
+
+                it('rejects rules when meta.arch values differ', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "x86" condition: true }
+                      rule rule2 { meta: arch = "arm64" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found "x86" on rule "rule1" and "arm64" on rule "rule2"/
+                      )
+                    );
+                });
+
+                it('rejects rules when meta.arch is set on some rules and omitted on others', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "x86" condition: true }
+                      rule rule2 { condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found "x86" on rule "rule1" and omitted on rule "rule2"/
                       )
                     );
                 });
@@ -612,6 +721,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .send(
                       customYaraSignatureApiCall.getBody(`
                       rule rule1 { meta: scan_type = "Memory" condition: true }
+                      rule rule2 { meta: scan_type = "Memory" condition: false }
                       `)
                     )
                     .expect(200);
@@ -632,7 +742,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 5 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -647,6 +757,16 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 4\] Invalid "meta.scan_type" value "" on rule "rule3", only "Memory" is allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Inconsistent "meta.scan_type" across rules in this entry. All rules must omit "meta.scan_type" or use the same value; found "invalid" on rule "rule1" and "memory" on rule "rule2"/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Inconsistent "meta.scan_type" across rules in this entry. All rules must omit "meta.scan_type" or use the same value; found "invalid" on rule "rule1" and "" on rule "rule3"/
                       )
                     );
                 });
@@ -665,7 +785,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -675,6 +795,11 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 3\] Invalid "meta.scan_type" value " Memory" on rule "rule2", only "Memory" is allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Inconsistent "meta.scan_type" across rules in this entry. All rules must omit "meta.scan_type" or use the same value; found "Memory " on rule "rule1" and " Memory" on rule "rule2"/
                       )
                     );
                 });
@@ -693,7 +818,7 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(400)
                     .expect(anEndpointArtifactError)
                     .expect(
-                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
                     )
                     .expect(
                       anErrorMessageWith(
@@ -703,6 +828,36 @@ export default function ({ getService }: FtrProviderContext) {
                     .expect(
                       anErrorMessageWith(
                         /\[line 3\] Invalid "meta.scan_type" value "Memory                        \.\.\." on rule "rule2", only "Memory" is allowed/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Inconsistent "meta.scan_type" across rules in this entry/
+                      )
+                    );
+                });
+
+                it('rejects duplicated meta.scan_type without reporting it as omitted', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `rule rule1 {
+                          meta:
+                            scan_type = "Memory"
+                            scan_type = "Whatever"
+                          condition: true
+                         }
+                         rule rule2 { meta: scan_type = "Memory" condition: true }`
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Multiple "meta.scan_type" fields set on rule "rule1", only one is allowed/
                       )
                     );
                 });
@@ -730,66 +885,79 @@ export default function ({ getService }: FtrProviderContext) {
                       )
                     );
                 });
+
+                it('rejects rules when meta.scan_type is set on some rules and omitted on others', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: scan_type = "Memory" condition: true }
+                      rule rule2 { condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(
+                        /Invalid YARA rules \(libyara [0-9.]+\), 1 error found: \[line 3\] Inconsistent "meta.scan_type" across rules in this entry. All rules must omit "meta.scan_type" or use the same value; found "Memory" on rule "rule1" and omitted on rule "rule2"/
+                      )
+                    );
+                });
               });
 
               describe('meta.os', () => {
-                const matchingRulesAndOsTypes: { rules: string; osTypes: OsTypeArray }[] = [
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Windows" condition: true }
-                      rule rule2 { meta: os = "Windows" condition: false }
-                      `,
-                    osTypes: ['windows'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Linux" condition: true }
-                      rule rule2 { meta: os = "Linux" condition: false }
-                      `,
-                    osTypes: ['linux'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "MacOS" condition: true }
-                      rule rule2 { meta: os = "MacOS" condition: false }
-                      `,
-                    osTypes: ['macos'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Windows,Linux" condition: true }
-                      rule rule2 { meta: os = "Linux, Windows" condition: false }
-                      `,
-                    osTypes: ['windows', 'linux'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "MacOS, Windows" condition: true }
-                      rule rule2 { meta: os = "Windows,MacOS" condition: false }
-                      `,
-                    osTypes: ['windows', 'macos'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Linux,Windows,MacOS" condition: true }
-                      rule rule2 { meta: os = "Windows, Linux, MacOS" condition: false }
-                      `,
-                    osTypes: ['windows', 'linux', 'macos'],
-                  },
+                const matchingRulesAndOsTypes: { osMeta: string; osTypes: OsTypeArray }[] = [
+                  { osMeta: 'Windows', osTypes: ['windows'] },
+                  { osMeta: 'Linux', osTypes: ['linux'] },
+                  { osMeta: 'MacOS', osTypes: ['macos'] },
+                  { osMeta: 'Windows,Linux', osTypes: ['windows', 'linux'] },
+                  { osMeta: 'Linux, Windows', osTypes: ['windows', 'linux'] },
+                  { osMeta: 'MacOS, Windows', osTypes: ['windows', 'macos'] },
+                  { osMeta: 'Windows,MacOS', osTypes: ['windows', 'macos'] },
+                  { osMeta: 'Linux,Windows,MacOS', osTypes: ['windows', 'linux', 'macos'] },
+                  { osMeta: 'Windows, Linux, MacOS', osTypes: ['windows', 'linux', 'macos'] },
                 ];
 
-                for (const { rules, osTypes } of matchingRulesAndOsTypes) {
-                  it(`accepts rules with valid meta.os as long as it matches the os_types set to ${osTypes.join(
+                for (const { osMeta, osTypes } of matchingRulesAndOsTypes) {
+                  it(`accepts rules with meta.os set to "${osMeta}" matching os_types ${osTypes.join(
                     ', '
                   )}`, async () => {
                     await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                       customYaraSignatureApiCall.path
                     )
                       .set('kbn-xsrf', 'true')
-                      .send(customYaraSignatureApiCall.getBody(rules, osTypes))
+                      .send(
+                        customYaraSignatureApiCall.getBody(
+                          `
+                          rule rule1 { meta: os = "${osMeta}" condition: true }
+                          rule rule2 { meta: os = "${osMeta}" condition: false }
+                          `,
+                          osTypes
+                        )
+                      )
                       .expect(200);
                   });
                 }
+
+                it('accepts rules when meta.os uses the same values with a different string', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `
+                        rule rule1 { meta: os = "Windows,Linux" condition: true }
+                        rule rule2 { meta: os = "Linux, Windows" condition: false }
+                        rule rule3 { meta: os = "Linux,Windows" condition: true }
+                        `,
+                        ['windows', 'linux']
+                      )
+                    )
+                    .expect(200);
+                });
 
                 it('rejects rules with meta.os containing invalid values', async () => {
                   await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
@@ -951,77 +1119,43 @@ export default function ({ getService }: FtrProviderContext) {
                     );
                 });
 
-                const nonMatchingRulesAndOsTypes: { rules: string; osTypes: OsTypeArray }[] = [
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Linux, Windows" condition: true }
-                      rule rule2 { meta: os = "MacOS" condition: false }
-                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
-                      `,
-                    osTypes: ['windows'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Windows" condition: true }
-                      rule rule2 { meta: os = "MacOS" condition: false }
-                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
-                      `,
-                    osTypes: ['linux'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Linux" condition: true }
-                      rule rule2 { meta: os = "Windows" condition: false }
-                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
-                      `,
-                    osTypes: ['macos'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Windows" condition: true }
-                      rule rule2 { meta: os = "Linux" condition: false }
-                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
-                      `,
-                    osTypes: ['windows', 'linux'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Linux,Windows" condition: true }
-                      rule rule2 { meta: os = "Windows" condition: false }
-                      rule rule3 { meta: os = "Windows, Linux, MacOS" condition: false }
-                      `,
-                    osTypes: ['windows', 'macos'],
-                  },
-                  {
-                    rules: `
-                      rule rule1 { meta: os = "Linux,MacOS" condition: true }
-                      rule rule2 { meta: os = "Windows, MacOS" condition: false }
-                      rule rule3 { meta: os = "Windows, Linux" condition: false }
-                      `,
-                    osTypes: ['windows', 'linux', 'macos'],
-                  },
+                const nonMatchingRulesAndOsTypes: { osMeta: string; osTypes: OsTypeArray }[] = [
+                  { osMeta: 'Linux', osTypes: ['windows'] },
+                  { osMeta: 'Windows', osTypes: ['linux'] },
+                  { osMeta: 'Linux', osTypes: ['macos'] },
+                  { osMeta: 'Windows', osTypes: ['windows', 'linux'] },
+                  { osMeta: 'Linux,Windows', osTypes: ['windows', 'macos'] },
+                  { osMeta: 'Linux,MacOS', osTypes: ['windows', 'linux', 'macos'] },
                 ];
 
-                for (const { rules, osTypes } of nonMatchingRulesAndOsTypes) {
-                  it(`rejects rules with meta.os set to a different value as os_types (${osTypes.join(
+                for (const { osMeta, osTypes } of nonMatchingRulesAndOsTypes) {
+                  it(`rejects rules with meta.os "${osMeta}" different from os_types (${osTypes.join(
                     ', '
                   )})`, async () => {
                     await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                       customYaraSignatureApiCall.path
                     )
                       .set('kbn-xsrf', 'true')
-                      .send(customYaraSignatureApiCall.getBody(rules, osTypes))
+                      .send(
+                        customYaraSignatureApiCall.getBody(
+                          `
+                          rule rule1 { meta: os = "${osMeta}" condition: true }
+                          rule rule2 { meta: os = "${osMeta}" condition: false }
+                          `,
+                          osTypes
+                        )
+                      )
                       .expect(400)
                       .expect(anEndpointArtifactError)
                       .expect(
                         anErrorMessageWith(
-                          /Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/
+                          /Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/
                         )
                       )
                       .expect(
                         anErrorMessageWith(
                           new RegExp(
-                            `\\[line 2\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
+                            `\\[line 2\\] "meta.os" value "${osMeta}" is different from "os_types" value "${osTypes.join(
                               ', '
                             )}" on rule "rule1". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
                           )
@@ -1030,23 +1164,57 @@ export default function ({ getService }: FtrProviderContext) {
                       .expect(
                         anErrorMessageWith(
                           new RegExp(
-                            `\\[line 3\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
+                            `\\[line 3\\] "meta.os" value "${osMeta}" is different from "os_types" value "${osTypes.join(
                               ', '
                             )}" on rule "rule2". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
-                          )
-                        )
-                      )
-                      .expect(
-                        anErrorMessageWith(
-                          new RegExp(
-                            `\\[line 4\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
-                              ', '
-                            )}" on rule "rule3". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
                           )
                         )
                       );
                   });
                 }
+
+                it('rejects rules when meta.os values differ', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `
+                      rule rule1 { meta: os = "Windows" condition: true }
+                      rule rule2 { meta: os = "Linux" condition: true }
+                      `,
+                        ['windows']
+                      )
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 1 error found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] "meta.os" value "Linux" is different from "os_types" value "windows" on rule "rule2"/
+                      )
+                    );
+                });
+
+                it('accepts rules when meta.os is set on some rules and omitted on others', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(
+                        `
+                      rule rule1 { meta: os = "Windows" condition: true }
+                      rule rule2 { condition: true }
+                      `,
+                        ['windows']
+                      )
+                    )
+                    .expect(200);
+                });
               });
             });
 
@@ -1533,6 +1701,34 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200)
             .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
               expect(res.body).to.eql(oversizeDiagnostic(Buffer.byteLength(yaraRule, 'utf8')));
+            });
+        });
+      });
+
+      describe('meta field consistency', () => {
+        it('should return 200 with an error when meta.arch differs across rules', async () => {
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: `
+            rule rule1 { meta: arch = "x86" condition: true }
+            rule rule2 { meta: arch = "arm64" condition: true }
+            `,
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql({
+                errors: [
+                  {
+                    severity: 'error',
+                    line: 3,
+                    message:
+                      'Inconsistent "meta.arch" across rules in this entry. All rules must omit "meta.arch" or use the same value; found "x86" on rule "rule1" and "arm64" on rule "rule2"',
+                  },
+                ],
+                error_count: 1,
+                warnings: [],
+                warning_count: 0,
+              });
             });
         });
       });

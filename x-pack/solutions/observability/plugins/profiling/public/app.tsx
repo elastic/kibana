@@ -10,13 +10,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { CheckSetup } from './components/check_setup';
+import { CheckStatus } from './components/check_status';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
 import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
 import { TimeRangeContextProvider } from './components/contexts/time_range_context';
@@ -24,10 +21,9 @@ import { RedirectWithDefaultDateRange } from './components/redirect_with_default
 import { profilingRouter } from './routing';
 import type { Services } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
-import { ProfilingHeaderActionMenu } from './components/profiling_header_action_menu';
 import { RouterErrorBoundary } from './routing/router_error_boundary';
 import { LicenseProvider } from './components/contexts/license/license_context';
-import { ProfilingSetupStatusContextProvider } from './components/contexts/profiling_setup_status/profiling_setup_status_context';
+import { ProfilingStatusContextProvider } from './components/contexts/profiling_status/profiling_status_context';
 
 interface Props {
   profilingFetchServices: Services;
@@ -35,30 +31,10 @@ interface Props {
   coreSetup: CoreSetup;
   pluginsStart: ProfilingPluginPublicStartDeps;
   pluginsSetup: ProfilingPluginPublicSetupDeps;
-  theme$: AppMountParameters['theme$'];
   history: AppMountParameters['history'];
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 const storage = new Storage(localStorage);
-
-function MountProfilingActionMenu({
-  theme$,
-  setHeaderActionMenu,
-}: {
-  theme$: AppMountParameters['theme$'];
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-}) {
-  return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>
-          <ProfilingHeaderActionMenu />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </HeaderMenuPortal>
-  );
-}
 
 function App({
   coreStart,
@@ -66,9 +42,7 @@ function App({
   pluginsStart,
   pluginsSetup,
   profilingFetchServices,
-  theme$,
   history,
-  setHeaderActionMenu,
 }: Props) {
   const i18nCore = coreStart.i18n;
 
@@ -90,35 +64,27 @@ function App({
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <i18nCore.Context>
-          <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
-            <RouterProvider router={profilingRouter as any} history={history}>
-              <PerformanceContextProvider>
-                <RouterErrorBoundary>
-                  <TimeRangeContextProvider>
-                    <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                      <ProfilingSetupStatusContextProvider>
-                        <LicenseProvider>
-                          <>
-                            <CheckSetup>
-                              <RedirectWithDefaultDateRange>
-                                <RouteBreadcrumbsContextProvider>
-                                  <RouteRenderer />
-                                </RouteBreadcrumbsContextProvider>
-                              </RedirectWithDefaultDateRange>
-                            </CheckSetup>
-                            <MountProfilingActionMenu
-                              setHeaderActionMenu={setHeaderActionMenu}
-                              theme$={theme$}
-                            />
-                          </>
-                        </LicenseProvider>
-                      </ProfilingSetupStatusContextProvider>
-                    </ProfilingDependenciesContextProvider>
-                  </TimeRangeContextProvider>
-                </RouterErrorBoundary>
-              </PerformanceContextProvider>
-            </RouterProvider>
-          </RedirectAppLinks>
+          <RouterProvider router={profilingRouter as any} history={history}>
+            <PerformanceContextProvider>
+              <RouterErrorBoundary>
+                <TimeRangeContextProvider>
+                  <ProfilingDependenciesContextProvider value={profilingDependencies}>
+                    <ProfilingStatusContextProvider>
+                      <LicenseProvider>
+                        <CheckStatus>
+                          <RedirectWithDefaultDateRange>
+                            <RouteBreadcrumbsContextProvider>
+                              <RouteRenderer />
+                            </RouteBreadcrumbsContextProvider>
+                          </RedirectWithDefaultDateRange>
+                        </CheckStatus>
+                      </LicenseProvider>
+                    </ProfilingStatusContextProvider>
+                  </ProfilingDependenciesContextProvider>
+                </TimeRangeContextProvider>
+              </RouterErrorBoundary>
+            </PerformanceContextProvider>
+          </RouterProvider>
         </i18nCore.Context>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

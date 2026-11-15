@@ -13,6 +13,7 @@ import type {
   EvalsSkillsPluginSetup,
   EvalsSkillsPluginStart,
 } from './types';
+import { createEvalDatasetManagementSkill } from './skills/eval_dataset_management/skill';
 import { createEvalExperimentsSkill } from './skills/eval_experiments/skill';
 import type { EvalExperimentsToolDeps } from './skills/eval_experiments/tools/deps';
 
@@ -48,15 +49,23 @@ export class EvalsSkillsPlugin
       return {};
     }
 
+    const getStartDependencies = () =>
+      coreSetup.getStartServices().then(([, startDependencies]) => startDependencies);
+
     const toolDeps: EvalExperimentsToolDeps = {
       workflowsApi: workflowsManagement.management,
       serverBasePath: coreSetup.http.basePath.serverBasePath,
       logger: this.logger,
-      getStartDependencies: () =>
-        coreSetup.getStartServices().then(([, startDependencies]) => startDependencies),
+      getStartDependencies,
     };
 
     agentBuilder.skills.register(createEvalExperimentsSkill(toolDeps));
+    agentBuilder.skills.register(
+      createEvalDatasetManagementSkill({
+        logger: this.logger,
+        getStartDependencies,
+      })
+    );
     this.logger.debug('Registered evals Agent Builder skill(s).');
 
     return {};

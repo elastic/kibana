@@ -1,0 +1,71 @@
+openapi: 3.0.0
+info:
+  title: AlertZero write hunt evidence route
+  version: '1'
+paths:
+  /internal/alertzero/hunt/write_hunt_evidence:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: WriteHuntEvidence
+      description: >-
+        Stamps the space's hunt-once gate (`last_hunted_at` and siblings) on a
+        report, called only after `run_hunt_coordinator` reports
+        `completed_successfully`. Kept as its own route rather than folded
+        into the coordinator's response path, so a coordinator call the
+        engine times out or truncates never reaches this write -- a failed
+        hunt must never consume the hunt-once gate.
+      summary: Write the hunt-once evidence stamp for a report
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reportId, runId, hasConfirmedHit, completeness, totalHits]
+              additionalProperties: false
+              properties:
+                reportId:
+                  type: string
+                  minLength: 1
+                  maxLength: 256
+                  description: Threat report id to stamp as hunted.
+                runId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                hasConfirmedHit:
+                  type: boolean
+                completeness:
+                  $ref: '../components/hunt.schema.yaml#/components/schemas/HuntCompleteness'
+                totalHits:
+                  type: integer
+                  minimum: 0
+                  description: Tier 1's total-hits count for this run.
+            examples:
+              WriteHuntEvidenceRequestExample:
+                summary: Stamp a clean run as hunted.
+                value:
+                  reportId: report-2f9e1c
+                  runId: run-3b2e1f9a
+                  hasConfirmedHit: false
+                  completeness: complete
+                  totalHits: 0
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [acknowledged]
+                properties:
+                  acknowledged:
+                    type: boolean
+              examples:
+                WriteHuntEvidenceResponse200Example:
+                  summary: Evidence written.
+                  value:
+                    acknowledged: true

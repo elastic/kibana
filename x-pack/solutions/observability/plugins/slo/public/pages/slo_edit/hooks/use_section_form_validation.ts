@@ -7,6 +7,7 @@
 
 import type { MetricCustomIndicator, TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
+  is,
   metricCustomBasicMetric,
   metricCustomDocCountMetric,
   timesliceMetricBasicMetricWithField,
@@ -39,11 +40,11 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (metricCustomDocCountMetric.is(metric)) {
+            if (is(metricCustomDocCountMetric, metric)) {
               return true;
             }
 
-            if (metricCustomBasicMetric.is(metric) && !isEmpty(metric.field)) {
+            if (is(metricCustomBasicMetric, metric) && !isEmpty(metric.field)) {
               return true;
             }
             return false;
@@ -59,10 +60,10 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (metricCustomDocCountMetric.is(metric)) {
+            if (is(metricCustomDocCountMetric, metric)) {
               return true;
             }
-            if (metricCustomBasicMetric.is(metric) && !isEmpty(metric.field)) {
+            if (is(metricCustomBasicMetric, metric) && !isEmpty(metric.field)) {
               return true;
             }
             return false;
@@ -93,10 +94,10 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (timesliceMetricBasicMetricWithField.is(metric)) {
+            if (is(timesliceMetricBasicMetricWithField, metric)) {
               return Boolean(metric.field);
             }
-            if (timesliceMetricPercentileMetric.is(metric)) {
+            if (is(timesliceMetricPercentileMetric, metric)) {
               return Boolean(metric.field) && Boolean(metric.percentile);
             }
             return true;

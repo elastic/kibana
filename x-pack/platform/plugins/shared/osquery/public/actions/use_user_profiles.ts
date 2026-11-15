@@ -9,9 +9,12 @@ import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from '../common/lib/kibana';
-import type { LiveHistoryRow } from '../../common/api/unified_history/types';
 
-const extractUids = (items: LiveHistoryRow[]): string[] => {
+interface UserProfileUidItem {
+  userProfileUid?: string;
+}
+
+const extractUids = (items: UserProfileUidItem[]): string[] => {
   const uidSet = new Set<string>();
 
   for (const item of items) {
@@ -23,7 +26,7 @@ const extractUids = (items: LiveHistoryRow[]): string[] => {
   return Array.from(uidSet).sort();
 };
 
-export const useBulkGetUserProfiles = (actionItems: LiveHistoryRow[]) => {
+export const useBulkGetUserProfiles = (actionItems: UserProfileUidItem[]) => {
   const { userProfile } = useKibana().services;
 
   const uidList = useMemo(() => extractUids(actionItems), [actionItems]);

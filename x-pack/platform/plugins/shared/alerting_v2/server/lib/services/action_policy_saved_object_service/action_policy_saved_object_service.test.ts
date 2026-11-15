@@ -20,8 +20,8 @@ const mockAttrs: ActionPolicySavedObjectAttributes = {
   apiKey: 'test-api-key',
   apiKeyOwner: 'test-user',
   apiKeyCreatedByUser: false,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };
@@ -140,7 +140,31 @@ describe('ActionPolicySavedObjectService', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      mockSoClient.update.mockResolvedValue({
+        id: 'policy-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: mockAttrs,
+        references: [],
+        version: 'v2',
+      });
+    });
+
     it('updates the saved object and returns id and version', async () => {
+      const result = await service.update({ id: 'policy-1', attrs: mockAttrs, version: 'v1' });
+
+      expect(result).toEqual({ id: 'policy-1', version: 'v2' });
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-1',
+        mockAttrs,
+        { version: 'v1', mergeAttributes: false }
+      );
+    });
+  });
+
+  describe('patchFields', () => {
+    it('merges server-owned fields onto the stored document', async () => {
       mockSoClient.update.mockResolvedValue({
         id: 'policy-1',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -149,14 +173,13 @@ describe('ActionPolicySavedObjectService', () => {
         version: 'v2',
       });
 
-      const result = await service.update({ id: 'policy-1', attrs: mockAttrs, version: 'v1' });
+      const result = await service.patchFields({ id: 'policy-1', attrs: { enabled: false } });
 
       expect(result).toEqual({ id: 'policy-1', version: 'v2' });
       expect(mockSoClient.update).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
         'policy-1',
-        mockAttrs,
-        { version: 'v1' }
+        { enabled: false }
       );
     });
   });
@@ -437,6 +460,7 @@ describe('ActionPolicySavedObjectService', () => {
       await service.find({
         page: 2,
         perPage: 5,
+        filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
         sortField: 'createdAt',
         sortOrder: 'desc',
       });
@@ -445,6 +469,7 @@ describe('ActionPolicySavedObjectService', () => {
         expect.objectContaining({
           page: 2,
           perPage: 5,
+          filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
           sortField: 'createdAt',
           sortOrder: 'desc',
         })
@@ -462,98 +487,6 @@ describe('ActionPolicySavedObjectService', () => {
           sortOrder: 'asc',
         })
       );
-    });
-  });
-
-  describe('findTags', () => {
-    const makeTagsAggResponse = (
-      buckets: Array<{ key: string }>,
-      opts?: { omitAggregations?: boolean }
-    ) => {
-      const base = { saved_objects: [], total: 0, per_page: 0, page: 1 };
-      if (opts?.omitAggregations) return base;
-      return { ...base, aggregations: { tags: { buckets } } };
-    };
-
-    it('returns tags from aggregation buckets', async () => {
-      mockSoClient.find.mockResolvedValue(
-        makeTagsAggResponse([{ key: 'production' }, { key: 'critical' }, { key: 'staging' }])
-      );
-
-      const result = await service.findTags();
-
-      expect(result).toEqual(['production', 'critical', 'staging']);
-      expect(mockSoClient.find).toHaveBeenCalledWith({
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        perPage: 0,
-        aggs: {
-          tags: {
-            terms: {
-              field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-              size: 20,
-              order: { _count: 'desc' },
-            },
-          },
-        },
-      });
-    });
-
-    it('passes include prefix pattern when search is provided', async () => {
-      mockSoClient.find.mockResolvedValue(makeTagsAggResponse([{ key: 'production' }]));
-
-      const result = await service.findTags({ search: 'prod' });
-
-      expect(result).toEqual(['production']);
-      expect(mockSoClient.find).toHaveBeenCalledWith({
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        perPage: 0,
-        aggs: {
-          tags: {
-            terms: {
-              field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-              size: 20,
-              order: { _count: 'desc' },
-              include: 'prod.*',
-            },
-          },
-        },
-      });
-    });
-
-    it('escapes special regex characters in search', async () => {
-      mockSoClient.find.mockResolvedValue(makeTagsAggResponse([]));
-
-      await service.findTags({ search: 'test[foo' });
-
-      expect(mockSoClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          aggs: {
-            tags: {
-              terms: expect.objectContaining({
-                include: 'test\\[foo.*',
-              }),
-            },
-          },
-        })
-      );
-    });
-
-    it('returns empty array when aggregations are missing', async () => {
-      mockSoClient.find.mockResolvedValue(makeTagsAggResponse([], { omitAggregations: true }));
-
-      const result = await service.findTags();
-
-      expect(result).toEqual([]);
-    });
-
-    it('filters out empty bucket keys', async () => {
-      mockSoClient.find.mockResolvedValue(
-        makeTagsAggResponse([{ key: 'production' }, { key: '' }, { key: 'staging' }])
-      );
-
-      const result = await service.findTags();
-
-      expect(result).toEqual(['production', 'staging']);
     });
   });
 
@@ -631,6 +564,143 @@ describe('ActionPolicySavedObjectService', () => {
       const result = await service.findAllDecrypted();
 
       expect(result).toEqual([{ id: 'p1', error: soError }]);
+    });
+  });
+
+  describe('findRoutingTagSources', () => {
+    const mockClose = jest.fn();
+
+    const savedObject = (id: string, attributes: Partial<ActionPolicySavedObjectAttributes>) => ({
+      id,
+      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+      attributes,
+      references: [],
+      score: 0,
+    });
+
+    const mockFinder = (pages: Array<{ ids: string[]; total: number }>) => {
+      mockSoClient.createPointInTimeFinder.mockReturnValue({
+        async *find() {
+          for (const { ids, total } of pages) {
+            yield {
+              saved_objects: ids.map((id) =>
+                savedObject(id, {
+                  name: `Policy ${id}`,
+                  enabled: true,
+                  matcher: { tags: ['rna'] },
+                })
+              ),
+              total,
+              page: 1,
+              per_page: 1000,
+            };
+          }
+        },
+        close: mockClose,
+      } as any);
+    };
+
+    beforeEach(() => {
+      mockClose.mockClear();
+    });
+
+    it('reads only the fields needed, in pages of 1000, for the current space', async () => {
+      mockFinder([]);
+
+      await service.findRoutingTagSources({ maxPolicies: 10_000 });
+
+      expect(mockSoClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        perPage: 1000,
+        fields: ['name', 'enabled', 'matcher'],
+      });
+    });
+
+    it('returns the id, name, enabled and matcher of every policy', async () => {
+      mockSoClient.createPointInTimeFinder.mockReturnValue({
+        async *find() {
+          yield {
+            saved_objects: [
+              savedObject('p1', { name: 'One', enabled: true, matcher: { tags: ['rna'] } }),
+              savedObject('p2', { name: 'Two', enabled: false }),
+            ],
+            total: 2,
+            page: 1,
+            per_page: 1000,
+          };
+        },
+        close: mockClose,
+      } as any);
+
+      const result = await service.findRoutingTagSources({ maxPolicies: 10_000 });
+
+      expect(result).toEqual({
+        policies: [
+          { id: 'p1', name: 'One', enabled: true, matcher: { tags: ['rna'] } },
+          { id: 'p2', name: 'Two', enabled: false, matcher: undefined },
+        ],
+        isTruncated: false,
+      });
+      expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads every page', async () => {
+      mockFinder([
+        { ids: ['p1', 'p2'], total: 3 },
+        { ids: ['p3'], total: 3 },
+      ]);
+
+      const { policies, isTruncated } = await service.findRoutingTagSources({ maxPolicies: 10 });
+
+      expect(policies.map(({ id }) => id)).toEqual(['p1', 'p2', 'p3']);
+      expect(isTruncated).toBe(false);
+    });
+
+    it('stops at the ceiling and reports truncation when more policies exist', async () => {
+      mockFinder([
+        { ids: ['p1', 'p2'], total: 5 },
+        { ids: ['p3', 'p4'], total: 5 },
+        { ids: ['p5'], total: 5 },
+      ]);
+
+      const { policies, isTruncated } = await service.findRoutingTagSources({ maxPolicies: 4 });
+
+      expect(policies.map(({ id }) => id)).toEqual(['p1', 'p2', 'p3', 'p4']);
+      expect(isTruncated).toBe(true);
+      expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report truncation when the space holds exactly the ceiling', async () => {
+      mockFinder([
+        { ids: ['p1', 'p2'], total: 4 },
+        { ids: ['p3', 'p4'], total: 4 },
+      ]);
+
+      const { policies, isTruncated } = await service.findRoutingTagSources({ maxPolicies: 4 });
+
+      expect(policies).toHaveLength(4);
+      expect(isTruncated).toBe(false);
+    });
+
+    it('drops policies past the ceiling within the last page', async () => {
+      mockFinder([{ ids: ['p1', 'p2', 'p3'], total: 3 }]);
+
+      const { policies, isTruncated } = await service.findRoutingTagSources({ maxPolicies: 2 });
+
+      expect(policies.map(({ id }) => id)).toEqual(['p1', 'p2']);
+      expect(isTruncated).toBe(true);
+    });
+
+    it('closes the finder when reading fails', async () => {
+      mockSoClient.createPointInTimeFinder.mockReturnValue({
+        find: () => ({
+          [Symbol.asyncIterator]: () => ({ next: () => Promise.reject(new Error('boom')) }),
+        }),
+        close: mockClose,
+      } as any);
+
+      await expect(service.findRoutingTagSources({ maxPolicies: 10 })).rejects.toThrow('boom');
+      expect(mockClose).toHaveBeenCalledTimes(1);
     });
   });
 });

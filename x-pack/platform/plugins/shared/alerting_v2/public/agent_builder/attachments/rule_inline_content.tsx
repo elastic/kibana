@@ -6,71 +6,112 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import { formatDuration } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { BadgeList } from '../../components/action_policy/badge_list';
+import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
+import { AttachmentInfoBar } from './attachment_info_bar';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({
   attachment,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { data, origin: savedObjectId } = attachment;
   const isDraft = !savedObjectId;
   const isEnabled = data.enabled ?? true;
   const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
+  const { description, tags } = data.metadata;
+
+  const containerCss = css`
+    padding: ${euiTheme.size.m};
+  `;
 
   return (
-    <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={containerCss}>
+      {(description || (tags && tags.length > 0)) && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={statusColor}>{status}</EuiBadge>
+              <EuiTitle size="xxs">
+                <h5>
+                  {i18n.translate('xpack.alertingV2.ruleAttachment.description', {
+                    defaultMessage: 'Description',
+                  })}
+                </h5>
+              </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{data.kind}</EuiBadge>
-            </EuiFlexItem>
+            {description && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{description}</EuiText>
+              </EuiFlexItem>
+            )}
+            {tags && tags.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <BadgeList items={tags} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
+      )}
 
-        {data.schedule?.every && (
-          <EuiFlexItem>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.alertingV2.ruleAttachment.scheduleEvery', {
-                defaultMessage: 'Every {interval}',
-                values: { interval: data.schedule.every },
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        )}
-
-        {data.metadata.description && (
-          <EuiFlexItem>
-            <EuiText size="s">{data.metadata.description}</EuiText>
-          </EuiFlexItem>
-        )}
-
-        {data.metadata.tags && data.metadata.tags.length > 0 && (
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs" wrap>
-              {data.metadata.tags.map((tag: string) => (
-                <EuiFlexItem key={tag} grow={false}>
-                  <EuiBadge color="default">{tag}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
+      <EuiFlexItem grow={false}>
+        <AttachmentInfoBar
+          items={[
+            {
+              title: i18n.translate('xpack.alertingV2.ruleAttachment.outcome', {
+                defaultMessage: 'Outcome',
+              }),
+              content: <RuleKindBadge kind={data.kind} />,
+              'data-test-subj': 'ruleInlineOutcome',
+            },
+            {
+              title: i18n.translate('xpack.alertingV2.ruleAttachment.status', {
+                defaultMessage: 'Status',
+              }),
+              content: <EuiBadge color={statusColor}>{status}</EuiBadge>,
+              'data-test-subj': 'ruleInlineStatus',
+            },
+            {
+              title: i18n.translate('xpack.alertingV2.ruleAttachment.schedule', {
+                defaultMessage: 'Schedule',
+              }),
+              content: data.schedule?.every ? (
+                <EuiText size="xs">
+                  <strong>
+                    {i18n.translate('xpack.alertingV2.ruleAttachment.scheduleEvery', {
+                      defaultMessage: 'Every {interval}',
+                      values: { interval: formatScheduleInterval(data.schedule.every) },
+                    })}
+                  </strong>
+                </EuiText>
+              ) : null,
+              'data-test-subj': 'ruleInlineSchedule',
+            },
+          ]}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
+};
+
+// `formatDuration` throws on units it does not handle (e.g. `ms`, `w`); fall back to the raw value.
+const formatScheduleInterval = (interval: string): string => {
+  try {
+    return formatDuration(interval);
+  } catch {
+    return interval;
+  }
 };
 
 const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
   if (isDraft)
     return {
       label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDraft', {
-        defaultMessage: 'draft',
+        defaultMessage: 'Draft',
       }),
       color: 'default',
     };
@@ -78,14 +119,14 @@ const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
   if (isEnabled)
     return {
       label: i18n.translate('xpack.alertingV2.ruleAttachment.statusEnabled', {
-        defaultMessage: 'enabled',
+        defaultMessage: 'Enabled',
       }),
       color: 'success',
     };
 
   return {
     label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDisabled', {
-      defaultMessage: 'disabled',
+      defaultMessage: 'Disabled',
     }),
     color: 'warning',
   };

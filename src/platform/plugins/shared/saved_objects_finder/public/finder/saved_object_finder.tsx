@@ -365,6 +365,7 @@ class SavedObjectFinderUiClass extends React.Component<
       onChange: ({ query }) => {
         this.setState({ query: query ?? Query.parse('') }, this.fetchItems);
       },
+      compressed: true,
       box: {
         incremental: true,
         'data-test-subj': 'savedObjectFinderSearchInput',

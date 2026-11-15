@@ -8,11 +8,11 @@
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
 import type { JsonObject } from '@kbn/utility-types';
-import type { Logger } from '@kbn/core/server';
 import type { RawMonitoringStats, RawMonitoredStat } from './monitoring_stats_stream';
 import { HealthStatus } from './monitoring_stats_stream';
 import type { AveragedStat } from './task_run_calculators';
 import type { TaskPersistenceTypes } from './task_run_statistics';
+import type { HealthStatusLogger } from '../lib/health_status_logger';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, map } from '../lib/result_type';
 
@@ -47,7 +47,7 @@ function isCapacityEstimationParams(
 }
 
 export function estimateCapacity(
-  logger: Logger,
+  logger: HealthStatusLogger,
   capacityStats: CapacityEstimationParams,
   assumedKibanaInstances: number
 ): RawMonitoredStat<CapacityEstimationStat> {
@@ -241,7 +241,7 @@ interface GetHealthStatusParams {
 }
 
 function getHealthStatus(
-  logger: Logger,
+  logger: HealthStatusLogger,
   params: GetHealthStatusParams
 ): { status: HealthStatus; reason?: string } {
   const {
@@ -251,23 +251,23 @@ function getHealthStatus(
   } = params;
   if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
     const reason = `Task Manager is healthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-    logger.debug(reason);
+    logger.healthy(reason);
     return { status: HealthStatus.OK, reason };
   }
 
   if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana > capacityPerMinutePerKibana) {
     const reason = `Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) > capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-    logger.warn(reason);
+    logger.unhealthy(reason);
     return { status: HealthStatus.OK, reason };
   }
 
   const reason = `Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-  logger.warn(reason);
+  logger.unhealthy(reason);
   return { status: HealthStatus.OK, reason };
 }
 
 export function withCapacityEstimate(
-  logger: Logger,
+  logger: HealthStatusLogger,
   monitoredStats: RawMonitoringStats['stats'],
   assumedKibanaInstances: number
 ): RawMonitoringStats['stats'] {

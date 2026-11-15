@@ -15,11 +15,14 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
-  IWorkflowEventLoggerService,
+  IWorkflowLogsQueryService,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
+  WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
@@ -37,6 +40,9 @@ export interface WorkflowStorageDeps {
 
 /** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
+  authz?: { checkPrivilegesWithRequest: CheckPrivilegesWithRequest };
+  getSpaceId: (request: KibanaRequest) => string;
+  getServiceAccountBindings: () => WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getTaskScheduler: () => WorkflowTaskScheduler | null;
@@ -60,12 +66,16 @@ export interface WorkflowExecutionQueryDeps {
   esClient: ElasticsearchClient;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
-  workflowEventLoggerService: IWorkflowEventLoggerService;
+  workflowEventLoggerService: IWorkflowLogsQueryService;
 }
 
 /** Deps for WorkflowValidationService. */
 export interface WorkflowValidationDeps {
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
+  /** Required plugin dependency, so it is always present once start has run. */
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
+  getCoreStart: () => CoreStart;
+  licensing: LicensingPluginStart;
+  logger: Logger;
 }

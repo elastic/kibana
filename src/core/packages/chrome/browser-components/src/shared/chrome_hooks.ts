@@ -259,6 +259,16 @@ export function useProjectPicker(): ReactNode {
   return useObservable(content$, null);
 }
 
+/**
+ * Returns the current subscription badge content set via
+ * `chrome.controls.subscriptionBadge.set()`, or null if not set.
+ */
+export function useSubscriptionBadge(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.controls.subscriptionBadge.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
 /** Whether an inline `AppHeader` is currently mounted by the active app. */
 export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();

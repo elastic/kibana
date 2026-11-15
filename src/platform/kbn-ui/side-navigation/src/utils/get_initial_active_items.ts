@@ -29,7 +29,7 @@ export const getActiveItems = (
     return { primaryItem: null, secondaryItem: null };
   }
 
-  // Search the secondary menu items using their IDs (prioritize children over parents)
+  // Search expanded-panel secondary items only. Popover-only rows do not own active state.
   for (const primary of [...items.primaryItems, ...(items.overflowItems ?? [])]) {
     if (!primary.sections) continue;
 

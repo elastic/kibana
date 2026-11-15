@@ -12,7 +12,12 @@ import type { ZodType } from '@kbn/zod/v4';
 import type { BaseGraphState, GraphInsightTypes } from '../../../../types';
 import { discardPreviousRefinements } from './helpers/discard_previous_refinements';
 import { extractJson } from '../helpers/extract_json';
+import { getAnonymizedDocsFromState } from '../generate/helpers/get_anonymized_docs_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
+import {
+  attackDiscoveryRefineTemplateRequest,
+  type AttackDiscoveryTemplateCompletion,
+} from '../../../../../attack_discovery/graphs/template_completion';
 import { getCombined } from '../helpers/get_combined';
 import { getCombinedRefinePrompt } from './helpers/get_combined_refine_prompt';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
@@ -26,11 +31,13 @@ export const getRefineNode = <T extends GraphInsightTypes>({
   logger,
   responseIsHallucinated,
   generationSchema,
+  completeWithTemplate,
 }: {
   llm: BaseLLM;
   logger?: Logger;
   responseIsHallucinated: (response: string) => boolean;
   generationSchema: ZodType<{ insights: T[] }>;
+  completeWithTemplate?: AttackDiscoveryTemplateCompletion;
 }): ((state: BaseGraphState<T>) => Promise<BaseGraphState<T>>) => {
   const refine = async (state: BaseGraphState<T>): Promise<BaseGraphState<T>> => {
     logger?.debug(() => '---REFINE---');
@@ -72,10 +79,18 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       );
 
       // LOCAL MUTATION:
-      rawResponse = (await chain.invoke({
-        format_instructions: formatInstructions,
-        query,
-      })) as unknown as string;
+      rawResponse = completeWithTemplate
+        ? await completeWithTemplate(
+            attackDiscoveryRefineTemplateRequest({
+              alerts: getAnonymizedDocsFromState(state),
+              combinedRefinements,
+              unrefinedResults,
+            })
+          )
+        : ((await chain.invoke({
+            format_instructions: formatInstructions,
+            query,
+          })) as unknown as string);
 
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```

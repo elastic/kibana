@@ -12,7 +12,7 @@ import type { ISessionsClient } from './sessions_client';
 import type { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 import type { SessionMeta } from './search_session_state';
-import type { PersistedSearchSessionSavedObjectAttributes } from './sessions_mgmt/types';
+import type { PersistedSearchSessionSavedObjectAttributes } from './types';
 import type { ISearchSessionEBTManager } from './ebt_manager';
 
 export function getSessionsClientMock(

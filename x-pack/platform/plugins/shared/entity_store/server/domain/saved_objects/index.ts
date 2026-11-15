@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { applyOverrides } from './apply_overrides';
 export * from './engine_descriptor/constants';
 export * from './engine_descriptor/types';
 export * from './engine_descriptor';

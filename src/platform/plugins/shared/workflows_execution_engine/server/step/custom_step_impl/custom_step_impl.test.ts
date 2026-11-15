@@ -283,7 +283,7 @@ describe('CustomStepImpl', () => {
           with: { message: 'hello' },
           'max-step-size': undefined,
           'agent-id': '{{ consts.agent_id }}',
-          'connector-id': '{{ inputs.connector_id }}',
+          'connector-id': '{{ steps.resolve_model.output.connector_id }}',
           'create-conversation': true,
           name: 'custom-step',
           type: 'ai.agent',
@@ -298,7 +298,7 @@ describe('CustomStepImpl', () => {
         mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext
       ).toHaveBeenCalledWith({
         'agent-id': '{{ consts.agent_id }}',
-        'connector-id': '{{ inputs.connector_id }}',
+        'connector-id': '{{ steps.resolve_model.output.connector_id }}',
         'create-conversation': true,
       });
       expect(mockOneShotRun).toHaveBeenCalledWith(

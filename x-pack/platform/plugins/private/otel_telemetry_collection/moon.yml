@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/otel-telemetry-collection-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/observability-bi'
+  defaultOwner: '@elastic/obs-bi-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/otel-telemetry-collection-plugin'
   description: Moon project for @kbn/otel-telemetry-collection-plugin
   channel: ''
-  owner: '@elastic/observability-bi'
+  owner: '@elastic/obs-bi-team'
   sourceRoot: x-pack/platform/plugins/private/otel_telemetry_collection
 dependsOn:
   - '@kbn/core'
@@ -31,6 +31,4 @@ fileGroups:
   src:
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

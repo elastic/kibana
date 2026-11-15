@@ -1,0 +1,50 @@
+{
+  "sha1": "329fa38aeecc771e99542fd4d2d9df29bb1a6171",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "65cdab1141a771b-503470e3a1c5be6",
+      "title": "Service account UI with the feature flag disabled omits run_as from settings autocomplete and inserted snippets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts_disabled/ui/parallel_tests/service_accounts_disabled.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "65cdab1141a771b-6d3fd990e830902",
+      "title": "Service account UI with the feature flag disabled keeps a typed run_as ID without resolving names or showing account suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts_disabled/ui/parallel_tests/service_accounts_disabled.spec.ts",
+        "line": 82,
+        "column": 20
+      }
+    },
+    {
+      "id": "65cdab1141a771b-12e39ee89151417",
+      "title": "Service account UI with the feature flag disabled shows historical raw identity without name badges or directory calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts_disabled/ui/parallel_tests/service_accounts_disabled.spec.ts",
+        "line": 109,
+        "column": 20
+      }
+    }
+  ]
+}

@@ -36,6 +36,8 @@ const createEvent = (
   isRedoing: false,
   isFlush: false,
   isEolChange: false,
+  // provide an unknown reason for our mock changes for testing purposes
+  detailedReasonsChangeLengths: changes.map(() => monaco.editor.CursorChangeReason.NotSet),
 });
 
 const createRange = (): monaco.IRange => ({
@@ -105,15 +107,6 @@ describe('react monaco editor', () => {
   afterEach(() => {
     cleanupMonaco?.();
     cleanupMonaco = undefined;
-  });
-
-  beforeAll(() => {
-    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
-      (contextId, options) =>
-        ({
-          webkitBackingStorePixelRatio: 1,
-        } as unknown as RenderingContext)
-    );
   });
 
   afterAll(() => {

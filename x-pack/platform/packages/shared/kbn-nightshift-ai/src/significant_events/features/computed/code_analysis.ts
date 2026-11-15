@@ -16,7 +16,7 @@ export const CODE_ANALYSIS_PROVIDER_KEY = CODE_ANALYSIS_FEATURE_TYPE;
 
 /**
  * Computed feature that grounds significant-events query generation in the
- * stream's source code.
+ * source's application code.
  *
  * This generator only carries metadata (so its `llmInstructions` flow into the
  * generation prompt). The actual computation — selecting the producing
@@ -33,9 +33,9 @@ export const codeAnalysisGenerator: ComputedFeatureGenerator = {
   type: CODE_ANALYSIS_FEATURE_TYPE,
 
   description:
-    'Log/error message strings, error types, and dependency calls extracted from the source code that produces this stream, verified against values actually present in the logs',
+    'Log/error message strings, error types, and dependency calls extracted from the code of the application behind this source, verified against values actually present in the logs',
 
-  llmInstructions: `Contains source code evidence from the repository that produces this stream, in two parts.
+  llmInstructions: `Contains source code evidence from the repository of the application behind this source, in two parts.
 \`properties.verified_strings\` and \`properties.evidence\` are confirmed: each string appears in both the source code and the observed logs. Use \`verified_strings\` verbatim when wording detection queries and when choosing \`MATCH_PHRASE\` vs \`:\`. \`properties.evidence\` entries (\`code: <file>:<line> <snippet>\`) can be copied directly into a query's \`evidence\`.
 \`properties.code_context\` entries are broader: code snippets from the same repository surfaced by semantic search that may contain log/error strings the service can emit but that have not yet appeared in the lookback window. Use these as proactive hints for detection queries — the same way \`technology\` and \`infrastructure\` features work.
 Treat all entries as hints that refine queries already anchored in \`dataset_analysis\`, never as a replacement for it.`,

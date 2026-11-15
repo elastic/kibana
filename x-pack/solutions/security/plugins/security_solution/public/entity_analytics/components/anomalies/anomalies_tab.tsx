@@ -26,13 +26,19 @@ import {
 import type { SeverityOption } from '@kbn/ml-plugin/public';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-range-picker/types';
-import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import {
+  DateRangePicker,
+  type DateRangePickerOnChangeProps,
+  type FirstDayOfWeek,
+} from '@kbn/date-range-picker';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
 
 import { useAnomalyOverview } from '../../api/hooks/use_anomaly_overview';
+import { getScopeFlyoutTimeRange } from '../../common/scope_time_ranges';
 import {
   ENTITY_ANOMALIES_TAB_MANAGE_ML_JOBS,
   ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE,
@@ -67,6 +73,7 @@ import {
 import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
 import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
 import { AnomaliesErrorPrompt } from './anomalies_error_prompt';
+import type { EntityToAttach } from '../../../cases/attachments/entity';
 
 const TIME_RANGE_PRESETS: TimeRangeBoundsOption[] = [
   { start: 'now-15m', end: 'now', label: ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES },
@@ -86,15 +93,34 @@ const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
   timePrecision: 's',
 };
 
+/** Picker label for a window: the matching preset's label, else the raw bounds. */
+const getDatePickerValue = (timeRange: { from: string; to: string }): string =>
+  TIME_RANGE_PRESETS.find(({ start, end }) => start === timeRange.from && end === timeRange.to)
+    ?.label ?? `${timeRange.from} → ${timeRange.to}`;
+
 interface AnomaliesTabProps {
   entityId: string;
+  entityName: string;
   entityType: EntityType;
+  mode?: EntityViewMode;
+  /** Scope the tab was opened from; a scope that pins a time range sets the initial window. */
+  scopeId?: string;
 }
 
-export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType }) => {
-  const [datePickerValue, setDatePickerValue] = useState<string>(DEFAULT_DATE_PICKER_VALUE);
-  const [start, setStart] = useState<string>(DEFAULT_TIME_RANGE.from);
-  const [end, setEnd] = useState<string>(DEFAULT_TIME_RANGE.to);
+export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
+  entityId,
+  entityName,
+  entityType,
+  mode,
+  scopeId,
+}) => {
+  // Open on the opener's time range when its scope pins one; the user can still change it.
+  const flyoutTimeRange = getScopeFlyoutTimeRange(scopeId);
+  const [datePickerValue, setDatePickerValue] = useState<string>(() =>
+    flyoutTimeRange ? getDatePickerValue(flyoutTimeRange) : DEFAULT_DATE_PICKER_VALUE
+  );
+  const [start, setStart] = useState<string>(flyoutTimeRange?.from ?? DEFAULT_TIME_RANGE.from);
+  const [end, setEnd] = useState<string>(flyoutTimeRange?.to ?? DEFAULT_TIME_RANGE.to);
   const [datePickerSettings, setDatePickerSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_PICKER_SETTINGS
   );
@@ -164,6 +190,10 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     useState<TableSortDirection>(DEFAULT_SORT_DIRECTION);
 
   const [selectedTactic, setSelectedTactic] = useState<string | null>(null);
+  const entityToAttach = useMemo<EntityToAttach>(
+    () => ({ id: entityId, name: entityName, type: entityType }),
+    [entityId, entityName, entityType]
+  );
   const handleSelectTactic = useCallback(
     (tactic: string) => {
       setSelectedTactic((current) => (current === tactic ? null : tactic));
@@ -188,6 +218,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   const anomalyOverview = useAnomalyOverview({
     entityId,
     entityType,
+    mode,
     from: timeRangeMs.from,
     to: timeRangeMs.to,
     threatTactics: selectedTactic ? [selectedTactic] : undefined,
@@ -208,6 +239,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   const anomalySummary = useAnomalySummary({
     entityId,
     entityType,
+    mode,
     body: {
       from: timeRangeMs.from,
       to: timeRangeMs.to,
@@ -265,8 +297,16 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   const hasError = (anomalyOverview.isError || anomalySummary.isError) && !isDateRangeTooOld;
 
   const {
-    services: { ml },
+    services: { ml, uiSettings },
   } = useKibana();
+  const timeZone: string = uiSettings.get('dateFormat:tz');
+  const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
+  const calendarOptions = useMemo(
+    () => ({
+      firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+    }),
+    [dayOfWeekSetting]
+  );
   const manageJobsHref = useMlManagementHref(ml, {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   });
@@ -291,6 +331,8 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
                 recent={recentTimeRanges}
                 width="auto"
                 compressed
+                calendarOptions={calendarOptions}
+                timeZone={timeZone}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -375,6 +417,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
           <EuiSpacer size="l" />
           <AnomalyTabTableSection
             anomalies={anomalySummaryAnomalies}
+            entityToAttach={entityToAttach}
             entityType={entityType}
             onTableChange={handleTableChange}
             page={anomalySummary.data?.page ?? tablePageIndex + 1}

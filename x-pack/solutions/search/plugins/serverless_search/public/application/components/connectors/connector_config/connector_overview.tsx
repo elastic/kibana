@@ -31,7 +31,9 @@ export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({
   const { queryKey } = useConnector(connector.id);
   const { data, isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async () => {
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
+      await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/sync`
+      );
     },
     onSuccess: () => {
       queryClient.setQueryData(queryKey, { connector: { ...connector, index_name: data } });

@@ -31,6 +31,8 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /\.mock\.[jt]sx?$/,
   /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
   /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
+  // Scout specs, fixtures, page objects, and configs are outside the browser bundle.
+  /[\\/]test[\\/]scout(?:_[^\\/]+)?(?:[\\/]|$)/,
   // Scout/Playwright output (test artifacts, reports, server configs) written
   // into plugin dirs during test runs; must not trigger watch rebuilds.
   /[\\/]\.scout[\\/]/,
@@ -44,6 +46,8 @@ export interface BuildOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Include `devOnly` plugins */
+  devOnly?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
   /** Directories scanned for plugins */
@@ -71,7 +75,8 @@ export interface BuildResult {
   errors?: string[];
   warnings?: string[];
   duration?: number;
-  entryCount?: number;
+  /** Number of discovered bundles (core + plugins) included in the compilation */
+  bundleCount?: number;
   totalSize?: number;
   /** Function to close the watcher (only set in watch mode) */
   close?: () => Promise<void>;
@@ -98,6 +103,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
+    devOnly = false,
     pluginPaths,
     pluginScanDirs,
     allowlistPluginGroups,
@@ -130,7 +136,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     log?.info('Creating single-compilation RSPack config...');
 
-    const config = await createSingleCompileConfig({
+    const { config, bundleCount } = await createSingleCompileConfig({
       repoRoot,
       outputRoot,
       dist,
@@ -138,6 +144,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cache,
       examples,
       testPlugins,
+      devOnly,
       pluginPaths,
       pluginScanDirs,
       allowlistPluginGroups,
@@ -156,12 +163,14 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const compiler = rspack(config) as Compiler;
 
     if (watch) {
-      return runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
-    } else {
-      // HMR is not used outside watch mode; clean up if somehow started
-      await hmrServer?.close();
-      return runProductionBuild(compiler, log, startTime, repoRoot);
+      const result = await runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
+      return { ...result, bundleCount };
     }
+
+    // HMR is not used outside watch mode; clean up if somehow started
+    await hmrServer?.close();
+    const result = await runProductionBuild(compiler, log, startTime, repoRoot);
+    return { ...result, bundleCount };
   } catch (error: any) {
     await hmrServer?.close();
     log?.error(`Build failed: ${error.message}`);
@@ -440,7 +449,6 @@ async function runWatchBuild(
 
 interface ProcessStatsResult extends BuildResult {
   entryCount?: number;
-  totalSize?: number;
   compilationTime?: number;
   assets?: Array<{ name: string; size: number }>;
 }

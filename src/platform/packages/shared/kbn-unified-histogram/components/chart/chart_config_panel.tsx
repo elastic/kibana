@@ -16,6 +16,7 @@ import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import type { DataSource } from '@kbn/data-source';
 import { deriveLensSuggestionFromLensAttributes } from '../../utils/external_vis_context';
 
 import type {
@@ -34,7 +35,7 @@ export function ChartConfigPanel({
   currentSuggestionContext,
   isFlyoutVisible,
   setIsFlyoutVisible,
-  isPlainRecord,
+  dataSource,
   query,
   onSuggestionContextEdit,
   isApproximate,
@@ -46,7 +47,7 @@ export function ChartConfigPanel({
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   dataLoading$?: LensEmbeddableOutput['dataLoading$'];
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
-  isPlainRecord?: boolean;
+  dataSource: DataSource;
   query?: Query | AggregateQuery;
   onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
   isApproximate?: boolean;
@@ -135,7 +136,7 @@ export function ChartConfigPanel({
     // rerender the component if the data has changed or flyout becomes visible
     // Note: when suggestion/chart type changes while flyout is visible, it flows through
     // visContext.attributes props instead of recreating the component (which would reset state)
-    if (isPlainRecord && (dataHasChanged || !isFlyoutVisible)) {
+    if (dataSource.kind === 'esql' && (dataHasChanged || !isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
@@ -143,7 +144,7 @@ export function ChartConfigPanel({
     services.lens,
     updatePanelState,
     updateSuggestion,
-    isPlainRecord,
+    dataSource,
     query,
     isFlyoutVisible,
     setIsFlyoutVisible,
@@ -152,7 +153,7 @@ export function ChartConfigPanel({
     currentSuggestionType,
   ]);
 
-  const flyoutElement = isPlainRecord ? editLensConfigPanel : null;
+  const flyoutElement = dataSource.kind === 'esql' ? editLensConfigPanel : null;
 
   useEffect(() => {
     if (flyoutElement) {

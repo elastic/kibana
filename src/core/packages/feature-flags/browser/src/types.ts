@@ -122,36 +122,23 @@ export interface FeatureFlagsStart {
   appendContext(contextToAppend: EvaluationContext): Promise<void>;
 
   /**
-   * Evaluates a boolean flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   */
-  getBooleanValue(flagName: string, fallbackValue: boolean): boolean;
-
-  /**
-   * Evaluates a string flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   */
-  getStringValue<Value extends string>(flagName: string, fallbackValue: Value): Value;
-
-  /**
-   * Evaluates a number flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   */
-  getNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Value;
-
-  /**
    * Returns an observable of a boolean flag
    * @param flagName The flag ID to evaluate
    * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
    * @public
    */
   getBooleanValue$(flagName: string, fallbackValue: boolean): Observable<boolean>;
+
+  /**
+   * React hook that subscribes to a boolean flag.
+   * The render uses the synchronous evaluation for the current flag and fallback, then the value updates when the flag or the evaluation context changes.
+   *
+   * Call it during render. `getBooleanValue$` builds a new observable on every call, and this hook memoizes that subscription.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   * @public
+   */
+  useBooleanValue(flagName: string, fallbackValue: boolean): boolean;
 
   /**
    * Returns an observable of a string flag
@@ -162,10 +149,32 @@ export interface FeatureFlagsStart {
   getStringValue$<Value extends string>(flagName: string, fallbackValue: Value): Observable<Value>;
 
   /**
+   * React hook that subscribes to a string flag.
+   * The render uses the synchronous evaluation for the current flag and fallback, then the value updates when the flag or the evaluation context changes.
+   *
+   * Call it during render. `getStringValue$` builds a new observable on every call, and this hook memoizes that subscription.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   * @public
+   */
+  useStringValue<Value extends string>(flagName: string, fallbackValue: Value): Value;
+
+  /**
    * Returns an observable of a number flag
    * @param flagName The flag ID to evaluate
    * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
    * @public
    */
   getNumberValue$<Value extends number>(flagName: string, fallbackValue: Value): Observable<Value>;
+
+  /**
+   * React hook that subscribes to a number flag.
+   * The render uses the synchronous evaluation for the current flag and fallback, then the value updates when the flag or the evaluation context changes.
+   *
+   * Call it during render. `getNumberValue$` builds a new observable on every call, and this hook memoizes that subscription.
+   * @param flagName The flag ID to evaluate
+   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
+   * @public
+   */
+  useNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Value;
 }

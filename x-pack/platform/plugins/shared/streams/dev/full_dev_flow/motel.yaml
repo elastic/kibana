@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: motel-ingest-collector
+---
+# CN must be motel-ingest-collector: the controller grants that principal write ACLs.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: motel-kafka-client
+  namespace: motel-ingest-collector
+spec:
+  secretName: motel-kafka-client
+  commonName: motel-ingest-collector
+  usages: [client auth]
+  issuerRef:
+    kind: ClusterIssuer
+    name: ecp-issuer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: motel-ingest-collector
+  namespace: motel-ingest-collector
+data:
+  config.yaml: |
+    extensions:
+      ecproutingmiddleware:
+        url_format: https://%s.es.svc.cluster.local:9200
+      compressedotlpencoding:
+        encoding_enabled: true
+        protocol: otlp_proto
+        compression: zstd
+      ingress:
+        http:
+          endpoint: :8443
+          scheme: http
+          input_routes:
+            namespace: inputs
+          targets:
+            # UI-generated managed OTLP source: {managed_otlp.url}/inputs/otlp/{sourceId}/v1/{signal}
+            - path: /inputs/otlp/{source_id}/v1/logs
+              backend_path: /v1/logs
+              endpoint: :4318
+            - path: /inputs/otlp/{source_id}/v1/metrics
+              backend_path: /v1/metrics
+              endpoint: :4318
+            - path: /inputs/otlp/{source_id}/v1/traces
+              backend_path: /v1/traces
+              endpoint: :4318
+    receivers:
+      otlp:
+        protocols:
+          http:
+            endpoint: :4318
+            include_metadata: true
+            middlewares:
+              - id: ecproutingmiddleware
+    processors:
+      errorsanitizationprocessor: {}
+      elasticapm:
+        skip_enrichment: true
+        service_name_in_datastream_dataset: true
+        host_ip_enabled: true
+        resource:
+          override_host_name:
+            enabled: false
+      kafkatopicprocessor:
+        prefix: motel.events
+        source_metadata_key: x-elastic-target-id
+        target_metadata_key: kafka_topic
+        conditionals:
+          - metadata_keys: [x-elastic-source-id, x-elastic-unit-id]
+            prefix: mi.raw
+            source_metadata_keys: [x-elastic-target-id, x-elastic-unit-id]
+        preserve_metadata_keys:
+          - x-elastic-input-type
+          - x-elastic-mapping-mode
+          - x-elastic-source-id
+          - x-elastic-target-id
+          - x-elastic-target-type
+          - x-elastic-unit-id
+    exporters:
+      kafka:
+        brokers: [warpstream.warpstream:9092]
+        logs:
+          topic_from_metadata_key: kafka_topic
+          encoding: compressedotlpencoding
+        sending_queue:
+          enabled: false
+        include_metadata_keys:
+          - x-elastic-input-type
+          - x-elastic-mapping-mode
+          - x-elastic-source-id
+          - x-elastic-target-id
+          - x-elastic-target-type
+          - x-elastic-unit-id
+        tls:
+          ca_file: /secrets/kafka/ca.crt
+          cert_file: /secrets/kafka/tls.crt
+          key_file: /secrets/kafka/tls.key
+          server_name_override: warpstream.warpstream.svc.cluster.local
+    service:
+      extensions: [ingress, ecproutingmiddleware, compressedotlpencoding]
+      pipelines:
+        logs:
+          receivers: [otlp]
+          processors: [errorsanitizationprocessor, elasticapm, kafkatopicprocessor]
+          exporters: [kafka]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: motel-ingest-collector
+  namespace: motel-ingest-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: motel-ingest-collector}
+  template:
+    metadata:
+      labels: {app: motel-ingest-collector}
+    spec:
+      imagePullSecrets:
+        - name: elastic-docker-registry
+      containers:
+        - name: collector
+          image: docker.elastic.co/observability-ci/hosted-otel-collector:__COLLECTOR_TAG__
+          args: [--config=/conf/config.yaml]
+          ports:
+            - containerPort: 8443
+          volumeMounts:
+            - {name: conf, mountPath: /conf}
+            - {name: kafka, mountPath: /secrets/kafka, readOnly: true}
+      volumes:
+        - name: conf
+          configMap: {name: motel-ingest-collector}
+        - name: kafka
+          secret: {secretName: motel-kafka-client}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: motel-ingest-collector
+  namespace: motel-ingest-collector
+spec:
+  selector: {app: motel-ingest-collector}
+  ports:
+    - {name: http, port: 8443}

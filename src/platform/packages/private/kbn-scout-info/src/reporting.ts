@@ -38,3 +38,11 @@ export enum ScoutTestRunConfigCategory {
   UNIT_INTEGRATION_TEST = 'unit-integration-test',
   UNKNOWN = 'unknown',
 }
+
+/**
+ * Why the current process's test run was started, as declared via SCOUT_TEST_RUN_SCOPE
+ * (e.g. `pull-request`, `batch-daily-ipv6`); `unknown` when undeclared.
+ *
+ * Reporting metadata only: it must never influence which tests run or how.
+ */
+export const SCOUT_TEST_RUN_SCOPE = process.env.SCOUT_TEST_RUN_SCOPE?.trim() || 'unknown';

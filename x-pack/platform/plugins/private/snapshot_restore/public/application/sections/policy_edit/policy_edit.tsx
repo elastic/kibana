@@ -6,10 +6,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { SlmPolicyPayload } from '../../../../common/types';
 import type { Error } from '../../../shared_imports';
@@ -18,9 +20,13 @@ import { useDecodedParams } from '../../lib';
 import { TIME_UNITS } from '../../../../common/constants';
 import { PageLoading, PolicyForm } from '../../components';
 import { BASE_PATH } from '../../constants';
-import { useServices } from '../../app_context';
-import { breadcrumbService, docTitleService } from '../../services/navigation';
+import { useCore, useServices } from '../../app_context';
+import { breadcrumbService, docTitleService, linkToPolicies } from '../../services/navigation';
 import { editPolicy, useLoadPolicy, useLoadIndices } from '../../services/http';
+
+const pageTitle = i18nLib.translate('xpack.snapshotRestore.editPolicyTitle', {
+  defaultMessage: 'Edit policy',
+});
 
 interface MatchParams {
   name: string;
@@ -32,12 +38,30 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
 }) => {
   const { name } = useDecodedParams<MatchParams>();
   const { i18n } = useServices();
+  const { docLinks } = useCore();
 
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('policyEdit');
     docTitleService.setTitle('policyEdit');
   }, []);
+
+  const header = (
+    <>
+      <AppHeader
+        title={pageTitle}
+        back={{
+          href: history.createHref({ pathname: linkToPolicies() }),
+          label: i18nLib.translate('xpack.snapshotRestore.home.policiesTabTitle', {
+            defaultMessage: 'Policies',
+          }),
+        }}
+        docLink={docLinks.links.snapshotRestore.guide}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+    </>
+  );
 
   // Policy state with default empty policy
   const [policy, setPolicy] = useState<SlmPolicyPayload>({
@@ -189,55 +213,56 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   };
 
   if (isLoadingPolicy || isLoadingIndices) {
-    return renderLoading();
+    return (
+      <>
+        {header}
+        {renderLoading()}
+      </>
+    );
   }
 
   if (errorLoadingPolicy || errorLoadingIndices) {
-    return renderError();
+    return (
+      <>
+        {header}
+        {renderError()}
+      </>
+    );
   }
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.snapshotRestore.editPolicyTitle"
-              defaultMessage="Edit policy"
+    <>
+      {header}
+      <EuiPageSection restrictWidth style={{ width: '100%' }}>
+        {policy.isManagedPolicy ? (
+          <>
+            <KbnWarningCallout
+              announceOnMount
+              size="m"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.editPolicy.managedPolicyWarningTitle"
+                  defaultMessage="This is a managed policy. Changing this policy might affect other systems that use it. Proceed with caution."
+                />
+              }
             />
-          </span>
-        }
-      />
-      <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
 
-      {policy.isManagedPolicy ? (
-        <>
-          <KbnWarningCallout
-            announceOnMount
-            size="m"
-            title={
-              <FormattedMessage
-                id="xpack.snapshotRestore.editPolicy.managedPolicyWarningTitle"
-                defaultMessage="This is a managed policy. Changing this policy might affect other systems that use it. Proceed with caution."
-              />
-            }
-          />
-          <EuiSpacer size="l" />
-        </>
-      ) : null}
-
-      <PolicyForm
-        policy={policy}
-        dataStreams={indicesData!.dataStreams}
-        indices={indicesData!.indices}
-        currentUrl={pathname}
-        isEditing={true}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-        onCancel={onCancel}
-      />
-    </EuiPageSection>
+        <PolicyForm
+          policy={policy}
+          dataStreams={indicesData!.dataStreams}
+          indices={indicesData!.indices}
+          currentUrl={pathname}
+          isEditing={true}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+          onCancel={onCancel}
+        />
+      </EuiPageSection>
+    </>
   );
 };

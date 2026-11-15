@@ -8,68 +8,69 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type {
-  BoundInferenceClient,
-  InferenceClient,
-  AnonymizationRule,
-  ChatCompleteAnonymizationTarget,
-  AnonymizationSettings,
-} from '@kbn/inference-common';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import {
+  aiAnonymizationSettings,
+  parseLegacyAnonymizationRules,
+  parseLegacyOnFailureMode,
+} from '@kbn/ai-anonymization-common';
+import type { AnonymizationFailureMode, AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
+import { RegexWorkerService, getAnonymizationUiSettings } from '@kbn/ai-anonymization-server';
 import {
   createClient as createInferenceClient,
   createClientWithoutRequest,
   createChatModel,
 } from './inference_client';
-import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import type {
+  FeatureEndpointResolver,
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
+  InferenceServerClient,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
+import { shouldStreamInferenceEndpoint } from './util/should_stream_inference_endpoint';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
 
-const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
-  let parsed: unknown = value;
-
-  if (typeof value === 'string') {
-    try {
-      parsed = JSON.parse(value);
-    } catch {
-      return [];
-    }
+/**
+ * Resolves the `onFailure` mode from the legacy `ai:anonymizationSettings` read. A failed read
+ * resolves to `block`: the rules promise built from the same read already fails the request, and
+ * this promise must not reject on its own when nothing awaits it.
+ */
+export const resolveOnFailureMode = async ({
+  anonymizationEnabled,
+  legacySettingsPromise,
+}: {
+  anonymizationEnabled: boolean;
+  legacySettingsPromise?: Promise<unknown>;
+}): Promise<AnonymizationFailureMode> => {
+  // The profile-based path doesn't define a failure-mode concept; keep the safe default.
+  if (anonymizationEnabled || !legacySettingsPromise) {
+    return 'block';
   }
-
-  if (
-    !parsed ||
-    typeof parsed !== 'object' ||
-    !Array.isArray((parsed as AnonymizationSettings).rules)
-  ) {
-    return [];
+  try {
+    return parseLegacyOnFailureMode(await legacySettingsPromise);
+  } catch {
+    return 'block';
   }
-
-  const allRules = (parsed as AnonymizationSettings).rules;
-  const enabledRules = allRules.filter((rule) => rule.enabled);
-  return enabledRules;
 };
 
 export const resolveReplacementsEncryptionKey = async ({
@@ -90,6 +91,34 @@ export const resolveReplacementsEncryptionKey = async ({
   return policyService.getReplacementsEncryptionKey(namespace);
 };
 
+/**
+ * Builds the per-request streaming resolver. The space setting is read with the request-scoped
+ * saved objects client so it reflects the request's space, while the service capability lookup
+ * (`GET _inference/_services`) uses the internal ES client because the user calling chat
+ * completion is not expected to hold inference management privileges.
+ */
+export const createInferenceStreamingResolver = ({
+  core,
+  logger,
+  request,
+}: {
+  core: Pick<CoreStart, 'elasticsearch' | 'savedObjects' | 'uiSettings'>;
+  logger: Logger;
+  request: KibanaRequest;
+}) => {
+  return (service?: string): Promise<boolean> =>
+    shouldStreamInferenceEndpoint({
+      service,
+      esClient: core.elasticsearch.client.asInternalUser,
+      isStreamingEnabled: async () => {
+        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+        return await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING);
+      },
+      logger,
+    });
+};
+
 export class InferencePlugin
   implements
     Plugin<
@@ -104,6 +133,7 @@ export class InferencePlugin
   private regexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
+  private featureEndpointResolver?: FeatureEndpointResolver;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -115,7 +145,12 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    coreSetup.uiSettings.register(getUiSettings());
+    coreSetup.uiSettings.register(getAnonymizationUiSettings());
+    // The settings page's pattern tester runs caller-supplied regexes, which is only safe on worker
+    // threads, so it follows whether this plugin runs anonymization on them.
+    pluginsSetup.aiAnonymizationSettings?.configurePatternTester({
+      enabled: this.config.workers.anonymization.enabled,
+    });
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -124,10 +159,25 @@ export class InferencePlugin
       logger: this.logger,
     });
 
-    return {};
+    return {
+      registerFeatureEndpointResolver: (resolver) => {
+        if (this.featureEndpointResolver) {
+          throw new Error('A feature endpoint resolver is already registered');
+        }
+        this.featureEndpointResolver = resolver;
+      },
+    };
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
+    // Two anonymization implementations coexist here:
+    //  - Legacy (live): rules from the `ai:anonymizationSettings` uiSetting, no persisted replacements.
+    //  - Policy-service (dormant): profiles, per-space salt and persistent replacements from the
+    //    `anonymization` plugin, awaiting removal. The pipeline no longer applies that plugin's
+    //    field policies, so re-activating it would NOT mask fields it is configured to mask.
+    // `anonymization.isEnabled()` is backed by the hard-coded `ANONYMIZATION_FEATURE_ACTIVE = false`,
+    // so this is always false and every `anonymizationEnabled` branch below is dead code. Treat the
+    // uiSetting path as the only real one.
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
     this.tokenUsageLogger.setEsClient(core.elasticsearch.client.asInternalUser);
@@ -159,18 +209,24 @@ export class InferencePlugin
       this.logger.get('regex_worker')
     );
 
-    const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
-      const namespace =
-        core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+    const readLegacyAnonymizationSettings = (request: KibanaRequest): Promise<unknown> => {
       const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
       const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+      return uiSettingsClient.get<unknown>(aiAnonymizationSettings);
+    };
+
+    const createAnonymizationRulesPromise = async (
+      request: KibanaRequest,
+      legacySettingsPromise?: Promise<unknown>
+    ) => {
+      const namespace =
+        core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
       const policyService = pluginsStart.anonymization?.getPolicyService();
 
-      const getLegacyRules = async (): Promise<AnonymizationRule[]> => {
-        const legacySettings = await uiSettingsClient.get<unknown>(aiAnonymizationSettings);
-        const parsedRules = parseLegacyAnonymizationRules(legacySettings);
-        return parsedRules;
-      };
+      const getLegacyRules = async (): Promise<AnonymizationRule[]> =>
+        parseLegacyAnonymizationRules(
+          await (legacySettingsPromise ?? readLegacyAnonymizationSettings(request))
+        );
 
       if (!anonymizationEnabled || !policyService) {
         return getLegacyRules();
@@ -207,9 +263,13 @@ export class InferencePlugin
         anonymizationEnabled,
         policyService,
       });
+      // One read of the setting feeds both the rules and the failure mode.
+      const legacySettingsPromise = anonymizationEnabled
+        ? undefined
+        : readLegacyAnonymizationSettings(request);
       return {
         namespace,
-        anonymizationRulesPromise: createAnonymizationRulesPromise(request),
+        anonymizationRulesPromise: createAnonymizationRulesPromise(request, legacySettingsPromise),
         regexWorker: (() => {
           if (!this.regexWorker) {
             this.logger.error(
@@ -221,15 +281,7 @@ export class InferencePlugin
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
           saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
-          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
-            if (!anonymizationEnabled || !policyService || !target) {
-              return undefined;
-            }
-            return policyService.resolveEffectivePolicy(namespace, {
-              type: target.targetType,
-              id: target.targetId,
-            });
-          },
+          onFailurePromise: resolveOnFailureMode({ anonymizationEnabled, legacySettingsPromise }),
           replacements: {
             esClient: core.elasticsearch.client.asInternalUser,
             encryptionKeyPromise: replacementsEncryptionKeyPromise,
@@ -266,6 +318,21 @@ export class InferencePlugin
       };
     };
 
+    // uses the internal ES client, like the default connector lookup, so that aliases resolve
+    // the same way regardless of whether the user can list inference endpoints
+    const createConnectorIdResolver = (request: KibanaRequest) => {
+      return async (connectorId: string) => {
+        const connector = await getConnectorById({
+          connectorId,
+          actions: pluginsStart.actions,
+          request,
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+        });
+        return connector.connectorId;
+      };
+    };
+
     const createTokenUsageTrackingEnabledCheck = (request: KibanaRequest) => {
       return async () => {
         try {
@@ -276,6 +343,14 @@ export class InferencePlugin
           return false;
         }
       };
+    };
+
+    const createStreamingResolver = (request: KibanaRequest) =>
+      createInferenceStreamingResolver({ core, logger: this.logger, request });
+
+    const createFeatureEndpointResolver = (request: KibanaRequest) => {
+      const resolver = this.featureEndpointResolver;
+      return resolver ? (featureId: string) => resolver(featureId, request) : undefined;
     };
 
     return {
@@ -291,7 +366,12 @@ export class InferencePlugin
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
-        }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+          resolveConnectorId: createConnectorIdResolver(options.request),
+          shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
+          resolveFeatureEndpoint: createFeatureEndpointResolver(options.request),
+        }) as T extends InferenceBoundClientCreateOptions
+          ? BoundInferenceClient
+          : InferenceServerClient;
       },
 
       getChatModel: async (options) => {
@@ -302,7 +382,6 @@ export class InferencePlugin
           callbacks: options.callbacks,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
-          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           endpointIdCache: this.endpointIdCache,
@@ -311,6 +390,8 @@ export class InferencePlugin
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
+          shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
         });
       },
 

@@ -167,6 +167,32 @@ describe('ViewResultsInDiscoverAction', () => {
       });
     });
 
+    it('should forward mode: relative with an open now end for live windows', async () => {
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            actionId="test-action-123"
+            buttonType={ViewResultsActionButtonType.button}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="now"
+            mode="relative"
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        expect(mockGetUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            timeRange: {
+              from: '2025-06-15T10:00:00.000Z',
+              to: 'now',
+              mode: 'relative',
+            },
+          })
+        );
+      });
+    });
+
     it('should call locator with schedule_id and execution_count filters for scheduled queries', async () => {
       render(
         <TestProvidersWithServices>
@@ -262,6 +288,71 @@ describe('ViewResultsInDiscoverAction', () => {
         const link = screen.getByText('View in Discover').closest('a');
         expect(link).toHaveAttribute('href', 'http://localhost:5601/app/discover#/resolved-url');
       });
+    });
+  });
+
+  describe('menuItem variant', () => {
+    it('should render as EuiContextMenuItem with same href as button variant', async () => {
+      mockGetUrl.mockResolvedValue('http://localhost:5601/app/discover#/menu-url');
+
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            actionId="test-action-id"
+            buttonType={ViewResultsActionButtonType.menuItem}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="2025-06-15T11:00:00.000Z"
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        const link = screen.getByText('View in Discover').closest('a');
+        expect(link).toHaveAttribute('href', 'http://localhost:5601/app/discover#/menu-url');
+        expect(link).toHaveAttribute('target', '_blank');
+      });
+    });
+
+    it('menuItem should build same URL as button for identical props', async () => {
+      const sharedProps = {
+        actionId: 'test-action-456',
+        startDate: '2025-06-15T10:00:00.000Z',
+        endDate: 'now',
+        mode: 'relative' as const,
+      };
+
+      const { unmount } = render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            {...sharedProps}
+            buttonType={ViewResultsActionButtonType.button}
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        expect(mockGetUrl).toHaveBeenCalled();
+      });
+      const buttonArgs = mockGetUrl.mock.calls[0][0];
+
+      unmount();
+      jest.clearAllMocks();
+      mockGetUrl.mockResolvedValue('http://localhost:5601/app/discover#/test-url');
+
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            {...sharedProps}
+            buttonType={ViewResultsActionButtonType.menuItem}
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        expect(mockGetUrl).toHaveBeenCalled();
+      });
+
+      expect(mockGetUrl.mock.calls[0][0]).toEqual(buttonArgs);
     });
   });
 });

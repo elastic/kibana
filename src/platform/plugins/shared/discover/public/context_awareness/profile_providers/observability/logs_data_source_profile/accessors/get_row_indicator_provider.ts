@@ -19,9 +19,13 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
 export const getRowIndicatorProvider: DataSourceProfileProvider['profile']['getRowIndicatorProvider'] =
 
     () =>
-    ({ dataView }) => {
-      // Check if the data view has any of the log level fields.
-      if (!LOG_LEVEL_FIELDS.some((field) => dataView.getFieldByName(field))) {
+    ({ dataView, dataSource }) => {
+      // ES|QL shims only expose a time field on the DataView — use the live source schema.
+      if (
+        !LOG_LEVEL_FIELDS.some(
+          (field) => dataSource?.getColumn(field) ?? dataView.getFieldByName(field)
+        )
+      ) {
         // Otherwise, don't set the row indicator color so the color indicator control column is not added to the grid at all.
         return undefined;
       }

@@ -1,0 +1,38 @@
+steps:
+  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh stateful
+    label: 'Scout EDR Real Fleet - ECH'
+    key: scout-edr-real-fleet-ech
+    agents:
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on:
+      - build
+    # UI stack, then API stack. Serverless is a separate step.
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh serverless
+    label: 'Scout EDR Real Fleet - Serverless'
+    key: scout-edr-real-fleet-serverless
+    agents:
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on:
+      - build
+    # UI stack, then API stack. ECH is a separate step.
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1

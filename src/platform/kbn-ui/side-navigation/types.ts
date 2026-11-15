@@ -59,6 +59,10 @@ export interface SecondaryMenuSection {
    * (optional) The label to display for the secondary menu section.
    */
   label?: string;
+  /**
+   * (optional) Page the items behind "Show more". For dynamic lists; static navigation shows all links.
+   */
+  isPaginated?: boolean;
 }
 
 /**
@@ -95,9 +99,15 @@ export interface MenuItem {
    */
   badgeType?: BadgeType;
   /**
-   * (optional) The secondary menu sections belonging to the menu item.
+   * (optional) Secondary menu sections shown in the expanded side panel.
+   * Also used as popover content when `popoverSections` is omitted.
    */
   sections?: SecondaryMenuSection[];
+  /**
+   * (optional) Secondary menu sections shown in the hover popover only.
+   * Does not open the expanded side panel. Not shown in More.
+   */
+  popoverSections?: SecondaryMenuSection[];
 }
 
 /**

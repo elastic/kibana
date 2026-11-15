@@ -34,12 +34,13 @@ import {
   MOCK_IDP_ROLE_MAPPING_NAME,
   MOCK_IDP_SP_BASE_URL,
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
-  MOCK_IDP_UIAM_PROJECT_TYPES,
+  MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
 import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
+import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -308,7 +309,6 @@ export const projectTypeToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  ['workplaceai', 'workplaceai'],
   ['vectordb', 'vectordb'],
 ]);
 
@@ -360,7 +360,6 @@ export async function createUiamSessionTokens({
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
-    roleId: 'cloud-role-id',
     projectType,
     applicationRoles: roles,
     email,
@@ -391,19 +390,12 @@ export async function createUiamSessionTokens({
 
       ras: {
         platform: [],
-        organization: [],
         user: [],
-        // One grant per project type so the session can reach cross-project (CPS) linked
-        // projects of any type, not just the type of the Kibana instance being logged in to.
-        project: [...new Set([projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
-          (grantedProjectType) => ({
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: grantedProjectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          })
-        ),
+        ...buildMockIdpUiamRoleAssignments({
+          organizationId,
+          projectType,
+          applicationRoles: roles,
+        }),
       },
 
       nbf: iat,
@@ -445,6 +437,9 @@ export async function createUiamSessionTokens({
   };
 }
 
+// The `kid` header UIAM stamps on the OAuth access and refresh tokens it issues.
+const UIAM_OAUTH_TOKEN_KID = 'ot';
+
 /**
  * Creates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.
  *
@@ -479,7 +474,6 @@ export async function createUiamOAuthAccessToken({
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
-    roleId: 'cloud-role-id',
     projectType,
     applicationRoles: roles,
     email,
@@ -510,19 +504,12 @@ export async function createUiamOAuthAccessToken({
 
       ras: {
         platform: [],
-        organization: [],
         user: [],
-        // One grant per project type so the session can reach cross-project (CPS) linked
-        // projects of any type, not just the type of the Kibana instance being logged in to.
-        project: [...new Set([projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
-          (grantedProjectType) => ({
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: grantedProjectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          })
-        ),
+        ...buildMockIdpUiamRoleAssignments({
+          organizationId,
+          projectType,
+          applicationRoles: roles,
+        }),
       },
 
       nbf: iat,
@@ -532,20 +519,24 @@ export async function createUiamOAuthAccessToken({
     })
   ).toString('base64url');
 
-  const tokenHeader = Buffer.from(JSON.stringify({ typ: 'JWT', alg: 'HS256' })).toString(
-    'base64url'
-  );
+  // UIAM verifies OAuth tokens with its OAuth key set, picked by the `kid` header.
+  const tokenHeader = Buffer.from(
+    JSON.stringify({ typ: 'JWT', alg: 'HS256', kid: UIAM_OAUTH_TOKEN_KID })
+  ).toString('base64url');
 
-  return prepareJwtForUiam(`${tokenHeader}.${accessTokenBody}`);
+  return prepareJwtForUiam(`${tokenHeader}.${accessTokenBody}`, MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET);
 }
 
-function prepareJwtForUiam(unsignedJwt: string): string {
-  const signedAccessToken = signJwt(unsignedJwt);
+function prepareJwtForUiam(
+  unsignedJwt: string,
+  signingSecret: string = MOCK_IDP_UIAM_SIGNING_SECRET
+): string {
+  const signedAccessToken = signJwt(unsignedJwt, signingSecret);
   return wrapSignedJwt(signedAccessToken);
 }
 
-function signJwt(unsignedJwt: string): string {
-  return `${unsignedJwt}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+function signJwt(unsignedJwt: string, signingSecret: string): string {
+  return `${unsignedJwt}.${createHmac('sha256', signingSecret)
     .update(unsignedJwt)
     .digest('base64url')}`;
 }

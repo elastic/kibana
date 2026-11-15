@@ -75,29 +75,118 @@ export function resolveFieldMeta(
   };
 }
 
+/** True when a draft/stored var holds at least one non-blank value (string or multi-value array). */
+function hasValue(value: string | string[] | boolean | undefined): boolean {
+  return Array.isArray(value)
+    ? value.some((v) => v.trim() !== '')
+    : typeof value === 'string' && value.trim() !== '';
+}
+
+/** Sources that only make sense when `collect_s3_logs` is on (collect from the bucket, not SQS). */
+const BUCKET_MODE_SOURCE_VARS = ['bucket_arn', 'access_point_arn'];
+
+/**
+ * `bucket_arn` / `access_point_arn` and `queue_url` are alternatives gated by `collect_s3_logs`: an
+ * S3 input given only a bucket or access-point ARN silently polls SQS unless the toggle is on.
+ * Returns true when the toggle should default to on: the input declares it, the user left it
+ * unset, and a bucket or access-point ARN is present.
+ * Not applied to ECF-scoped services, which never read the toggle.
+ */
+export function shouldDefaultCollectS3Logs(
+  service: AwsServiceMatrixEntry,
+  input: string,
+  vars: Record<string, string | string[] | boolean> | undefined
+): boolean {
+  if (service.settingsScope === 'ecf') return false;
+  if (!service.varDefsByInput?.[input]?.collect_s3_logs) return false;
+  if (vars?.collect_s3_logs !== undefined) return false;
+  return BUCKET_MODE_SOURCE_VARS.some((name) => hasValue(vars?.[name]));
+}
+
+/**
+ * Input types whose manifest marks every source var optional while documenting that at least one
+ * is mandatory (e.g. "Mandatory if the Collect logs via S3 Bucket switch is on"). Without one the
+ * input starts but can never collect anything. Keyed by input type; the manifest has no
+ * machinery to express "one of", so the groups live here (verified against aws@8.7.1).
+ */
+const SOURCE_VAR_GROUPS: Record<string, string[]> = {
+  'aws-s3': ['bucket_arn', 'access_point_arn', 'queue_url'],
+  'aws-cloudwatch': ['log_group_arn', 'log_group_name', 'log_group_name_prefix'],
+};
+
+/**
+ * Whether the "at least one source" rule applies to `service` right now: ECF-capable services
+ * shown in the agent-based view, where Step 2 first collected only the trigger ARN. Widening the
+ * rule to more services only needs a change here.
+ */
+function appliesSourceRule(service: AwsServiceMatrixEntry): boolean {
+  return !!service.ecfSettings && service.settingsScope !== 'ecf';
+}
+
+/**
+ * The source vars `input` still needs, or undefined when its source is complete. The flyout hint
+ * and the Step 2 / Step 3 gates both use this, so they cannot disagree.
+ *
+ * For S3 inputs that declare `collect_s3_logs` the source must match the collection mode: with the
+ * toggle on a bucket or access-point ARN is required, with it off a queue URL is. An unset toggle
+ * is derived the way `buildStreamVars` does (a bucket or access-point ARN means on, otherwise SQS),
+ * so either kind of source is accepted. Without that check a stored `true` (inferred from a
+ * since-replaced ARN) would let a queue-URL-only config through and deploy a bucket input with no
+ * bucket.
+ */
+export function getMissingSourceGroup(
+  service: AwsServiceMatrixEntry,
+  input: string,
+  vars: Record<string, string | string[] | boolean> | undefined
+): string[] | undefined {
+  if (!appliesSourceRule(service)) return undefined;
+  const defs = service.varDefsByInput?.[input];
+  const group = (SOURCE_VAR_GROUPS[input] ?? []).filter((name) => defs?.[name]);
+  if (group.length < 2) return undefined;
+
+  if (defs?.collect_s3_logs) {
+    const bucketModeVars = BUCKET_MODE_SOURCE_VARS.filter((name) => defs[name]);
+    const hasBucketSource = bucketModeVars.some((name) => hasValue(vars?.[name]));
+    const hasQueueUrl = hasValue(vars?.queue_url);
+    const toggle = vars?.collect_s3_logs;
+    if (toggle === undefined) {
+      return hasBucketSource || hasQueueUrl ? undefined : group;
+    }
+    const isBucketMode = toggle === true || toggle === 'true';
+    if (isBucketMode) return hasBucketSource ? undefined : bucketModeVars;
+    return hasQueueUrl ? undefined : ['queue_url'];
+  }
+
+  return group.some((name) => hasValue(vars?.[name])) ? undefined : group;
+}
+
 /**
  * Convert a string draft value to the typed value Fleet's component and buildStreamVars expect.
  * bool → boolean, multi → string[], otherwise string.
  */
 export function toTyped(
-  raw: string | string[] | undefined,
+  raw: string | string[] | boolean | undefined,
   meta: FieldMeta
 ): string | boolean | string[] {
   if (meta.isBool) {
+    if (typeof raw === 'boolean') return raw;
     const s = Array.isArray(raw) ? raw[0] : raw;
     return s === undefined ? meta.def.default === true : s === 'true';
   }
+  // Boolean raw values only occur for isBool fields (handled above); narrow for string branches.
+  const strRaw = typeof raw === 'boolean' ? undefined : raw;
   if (meta.multi) {
-    if (Array.isArray(raw)) return raw;
-    if (raw)
-      return raw
+    if (Array.isArray(strRaw)) return strRaw;
+    if (strRaw)
+      return strRaw
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean);
-    if (raw === undefined && Array.isArray(meta.def.default)) return meta.def.default as string[];
+    if (strRaw === undefined && Array.isArray(meta.def.default))
+      return meta.def.default as string[];
     return [];
   }
-  const s = Array.isArray(raw) ? raw.join(',') : raw;
+  const s = Array.isArray(strRaw) ? strRaw.join(',') : strRaw;
   // For unset fields, surface the manifest default (string or number/duration) so the flyout pre-fills.
   if (s === undefined && meta.def.default != null) return String(meta.def.default);
   return s ?? '';

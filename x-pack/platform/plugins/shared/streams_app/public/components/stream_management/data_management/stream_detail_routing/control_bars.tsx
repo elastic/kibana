@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiButtonEmptyProps, EuiToolTipProps } from '@elastic/eui';
+import type { EuiButtonEmptyProps, EuiButtonPropsForButton, EuiToolTipProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useState } from 'react';

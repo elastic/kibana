@@ -5,317 +5,357 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+
 import { allOrAnyString } from './common';
+import { MAX_KEYWORD_LENGTH } from './limits';
 
-const kqlQuerySchema = t.string;
+const kqlQuerySchema = z.string().describe('the KQL query to filter the documents with.');
 
-const filtersSchema = t.array(
-  t.intersection([
-    t.type({
-      meta: t.partial({
-        alias: t.union([t.string, t.null]),
-        disabled: t.boolean,
-        negate: t.boolean,
-        // controlledBy is there to identify who owns the filter
-        controlledBy: t.string,
-        // allows grouping of filters
-        group: t.string,
-        // index and type are optional only because when you create a new filter, there are no defaults
-        index: t.string,
-        isMultiIndex: t.boolean,
-        type: t.string,
-        key: t.string,
-        field: t.string,
-        params: t.any,
-        value: t.string,
-      }),
-      query: t.record(t.string, t.any),
-    }),
-    t.partial({
-      $state: t.any,
-    }),
-  ])
+const filterMetaSchema = z
+  .object({
+    alias: z.string().nullable().optional(),
+    disabled: z.boolean().optional(),
+    negate: z.boolean().optional(),
+    // controlledBy is there to identify who owns the filter
+    controlledBy: z.string().optional(),
+    // allows grouping of filters
+    group: z.string().optional(),
+    // index and type are optional only because when you create a new filter, there are no defaults
+    index: z.string().optional(),
+    isMultiIndex: z.boolean().optional(),
+    type: z.string().optional(),
+    key: z.string().optional(),
+    field: z.string().optional(),
+    params: z.any().optional(),
+    value: z.string().optional(),
+  })
+  .meta({ id: 'SLOFilterMeta', description: 'Defines properties for a filter' });
+
+const filtersSchema = z.array(
+  z
+    .object({
+      meta: filterMetaSchema,
+      query: z.record(z.string(), z.any()),
+      $state: z.any().optional(),
+    })
+    .meta({ id: 'SLOFilter', description: 'Defines properties for a filter' })
 );
 
-const kqlWithFiltersSchema = t.type({
-  kqlQuery: t.string,
-  filters: filtersSchema,
+const kqlWithFiltersSchema = z
+  .object({
+    kqlQuery: kqlQuerySchema,
+    filters: filtersSchema,
+  })
+  .meta({ id: 'SLOKqlWithFilters', description: 'Defines properties for a filter' });
+
+const querySchema = z.union([kqlQuerySchema, kqlWithFiltersSchema]);
+
+const indexSchema = z.string().describe('The index or index pattern to use');
+
+const dataViewIdSchema = z
+  .string()
+  .describe(
+    'The kibana data view id to use, primarily used to include data view runtime mappings. ' +
+      'Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.'
+  );
+
+const timestampFieldSchema = z.string().describe('The timestamp field used in the source indice.');
+
+const apmIndicatorBaseParams = z.object({
+  environment: allOrAnyString.describe('The APM service environment or "*"'),
+  service: allOrAnyString.describe('The APM service name'),
+  transactionType: allOrAnyString.describe('The APM transaction type or "*"'),
+  transactionName: allOrAnyString.describe('The APM transaction name or "*"'),
+  index: z.string().describe('The index used by APM metrics'),
+  filter: querySchema.describe('KQL query used for filtering the data').optional(),
+  dataViewId: dataViewIdSchema.optional(),
 });
 
-const querySchema = t.union([kqlQuerySchema, kqlWithFiltersSchema]);
+const apmTransactionDurationIndicatorTypeSchema = z.literal('sli.apm.transactionDuration');
+const apmTransactionDurationIndicatorSchema = z
+  .object({
+    type: apmTransactionDurationIndicatorTypeSchema.describe('The type of indicator.'),
+    params: apmIndicatorBaseParams
+      .extend({
+        threshold: z.number().describe('The latency threshold in milliseconds'),
+      })
+      .describe('An object containing the indicator parameters.'),
+  })
+  .meta({
+    id: 'SLOIndicatorPropertiesApmLatency',
+    description: 'Defines properties for the APM latency indicator type',
+  });
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transactionDuration');
-const apmTransactionDurationIndicatorSchema = t.type({
-  type: apmTransactionDurationIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      environment: allOrAnyString,
-      service: allOrAnyString,
-      transactionType: allOrAnyString,
-      transactionName: allOrAnyString,
-      threshold: t.number,
-      index: t.string,
-    }),
-    t.partial({
-      filter: querySchema,
-      dataViewId: t.string,
-    }),
-  ]),
-});
+const apmTransactionErrorRateIndicatorTypeSchema = z.literal('sli.apm.transactionErrorRate');
+const apmTransactionErrorRateIndicatorSchema = z
+  .object({
+    type: apmTransactionErrorRateIndicatorTypeSchema.describe('The type of indicator.'),
+    params: apmIndicatorBaseParams.describe('An object containing the indicator parameters.'),
+  })
+  .meta({
+    id: 'SLOIndicatorPropertiesApmAvailability',
+    description: 'Defines properties for the APM availability indicator type',
+  });
 
-const apmTransactionErrorRateIndicatorTypeSchema = t.literal('sli.apm.transactionErrorRate');
-const apmTransactionErrorRateIndicatorSchema = t.type({
-  type: apmTransactionErrorRateIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      environment: allOrAnyString,
-      service: allOrAnyString,
-      transactionType: allOrAnyString,
-      transactionName: allOrAnyString,
-      index: t.string,
-    }),
-    t.partial({
-      filter: querySchema,
-      dataViewId: t.string,
-    }),
-  ]),
-});
+const kqlCustomIndicatorTypeSchema = z.literal('sli.kql.custom');
+const kqlCustomIndicatorSchema = z
+  .object({
+    type: kqlCustomIndicatorTypeSchema.describe('The type of indicator.'),
+    params: z
+      .object({
+        index: indexSchema,
+        good: querySchema.describe(
+          'the KQL query used to define the good events, or an object defining the KQL query and filters.'
+        ),
+        total: querySchema.describe(
+          'the KQL query used to define all events, or an object defining the KQL query and filters.'
+        ),
+        timestampField: timestampFieldSchema,
+        filter: querySchema.describe('the KQL query to filter the documents with.').optional(),
+        dataViewId: dataViewIdSchema.optional(),
+      })
+      .describe('An object containing the indicator parameters.'),
+  })
+  .meta({
+    id: 'SLOIndicatorPropertiesCustomKql',
+    description: 'Defines properties for a custom query indicator type',
+  });
 
-const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
-const kqlCustomIndicatorSchema = t.type({
-  type: kqlCustomIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      index: t.string,
-      good: querySchema,
-      total: querySchema,
-      timestampField: t.string,
-    }),
-    t.partial({
-      filter: querySchema,
-      dataViewId: t.string,
-    }),
-  ]),
-});
+const timesliceMetricComparator = z
+  .enum(['GT', 'GTE', 'LT', 'LTE'])
+  .describe('The comparator to use to compare the equation to the threshold.');
 
 const timesliceMetricComparatorMapping = {
   GT: '>',
   GTE: '>=',
   LT: '<',
   LTE: '<=',
-};
+} as const satisfies Record<z.output<typeof timesliceMetricComparator>, string>;
 
-const timesliceMetricComparator = t.keyof(timesliceMetricComparatorMapping);
+const metricNameSchema = z.string().describe('The name of the metric. Only valid options are A-Z');
 
-const timesliceMetricBasicMetricWithField = t.intersection([
-  t.type({
-    name: t.string,
-    aggregation: t.keyof({
-      avg: true,
-      max: true,
-      min: true,
-      sum: true,
-      cardinality: true,
-      last_value: true,
-      std_deviation: true,
-    }),
-    field: t.string,
-  }),
-  t.partial({
-    filter: querySchema,
-  }),
-]);
+const metricFilterSchema = querySchema.describe('The filter to apply to the metric.');
 
-const timesliceMetricDocCountMetric = t.intersection([
-  t.type({
-    name: t.string,
-    aggregation: t.literal('doc_count'),
-  }),
-  t.partial({
-    filter: querySchema,
-  }),
-]);
+const metricFieldSchema = z.string().describe('The field of the metric.');
 
-const timesliceMetricPercentileMetric = t.intersection([
-  t.type({
-    name: t.string,
-    aggregation: t.literal('percentile'),
-    field: t.string,
-    percentile: t.number,
-  }),
-  t.partial({
-    filter: querySchema,
-  }),
-]);
+const timesliceMetricBasicMetricWithField = z
+  .object({
+    name: metricNameSchema,
+    aggregation: z
+      .enum(['avg', 'max', 'min', 'sum', 'cardinality', 'last_value', 'std_deviation'])
+      .describe('The aggregation type of the metric.'),
+    field: metricFieldSchema,
+    filter: metricFilterSchema.optional(),
+  })
+  .meta({ id: 'SLOTimesliceMetricBasicMetricWithField' });
 
-const timesliceMetricMetricDef = t.union([
+const timesliceMetricDocCountMetric = z
+  .object({
+    name: metricNameSchema,
+    aggregation: z
+      .literal('doc_count')
+      .describe('The aggregation type of the metric. Only valid option is "doc_count"'),
+    filter: metricFilterSchema.optional(),
+  })
+  .meta({ id: 'SLOTimesliceMetricDocCountMetric' });
+
+const timesliceMetricPercentileMetric = z
+  .object({
+    name: metricNameSchema,
+    aggregation: z
+      .literal('percentile')
+      .describe('The aggregation type of the metric. Only valid option is "percentile"'),
+    field: metricFieldSchema,
+    percentile: z.number().describe('The percentile value.'),
+    filter: metricFilterSchema.optional(),
+  })
+  .meta({ id: 'SLOTimesliceMetricPercentileMetric' });
+
+const timesliceMetricMetricDef = z.union([
   timesliceMetricBasicMetricWithField,
   timesliceMetricDocCountMetric,
   timesliceMetricPercentileMetric,
 ]);
 
-const timesliceMetricDef = t.type({
-  metrics: t.array(timesliceMetricMetricDef),
-  equation: t.string,
-  threshold: t.number,
+const timesliceMetricDef = z.object({
+  metrics: z
+    .array(timesliceMetricMetricDef)
+    .describe('List of metrics with their name, aggregation type, and field.'),
+  equation: z.string().describe('The equation to calculate the metric.'),
+  threshold: z
+    .number()
+    .describe('The threshold used to determine if the metric is a good slice or not.'),
   comparator: timesliceMetricComparator,
 });
-const timesliceMetricIndicatorTypeSchema = t.literal('sli.metric.timeslice');
-const timesliceMetricIndicatorSchema = t.type({
-  type: timesliceMetricIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      index: t.string,
-      metric: timesliceMetricDef,
-      timestampField: t.string,
-    }),
-    t.partial({
-      filter: querySchema,
-      dataViewId: t.string,
-    }),
-  ]),
+const timesliceMetricIndicatorTypeSchema = z.literal('sli.metric.timeslice');
+const timesliceMetricIndicatorSchema = z
+  .object({
+    type: timesliceMetricIndicatorTypeSchema.describe('The type of indicator.'),
+    params: z
+      .object({
+        index: indexSchema,
+        metric: timesliceMetricDef.describe(
+          "An object defining the metrics, equation, and threshold to determine if it's a good slice or not"
+        ),
+        timestampField: timestampFieldSchema,
+        filter: querySchema.describe('the KQL query to filter the documents with.').optional(),
+        dataViewId: dataViewIdSchema.optional(),
+      })
+      .describe('An object containing the indicator parameters.'),
+  })
+  .meta({
+    id: 'SLOIndicatorPropertiesTimesliceMetric',
+    description: 'Defines properties for a timeslice metric indicator type',
+  });
+
+const metricCustomDocCountMetric = z.object({
+  name: metricNameSchema,
+  aggregation: z.literal('doc_count').describe('The aggregation type of the metric.'),
+  filter: metricFilterSchema.optional(),
 });
 
-const metricCustomDocCountMetric = t.intersection([
-  t.type({
-    name: t.string,
-    aggregation: t.literal('doc_count'),
-  }),
-  t.partial({
-    filter: querySchema,
-  }),
-]);
-
-const metricCustomBasicMetric = t.intersection([
-  t.type({
-    name: t.string,
-    aggregation: t.literal('sum'),
-    field: t.string,
-  }),
-  t.partial({
-    filter: querySchema,
-  }),
-]);
-
-const metricCustomMetricDef = t.type({
-  metrics: t.array(t.union([metricCustomBasicMetric, metricCustomDocCountMetric])),
-  equation: t.string,
-});
-const metricCustomIndicatorTypeSchema = t.literal('sli.metric.custom');
-const metricCustomIndicatorSchema = t.type({
-  type: metricCustomIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      index: t.string,
-      good: metricCustomMetricDef,
-      total: metricCustomMetricDef,
-      timestampField: t.string,
-    }),
-    t.partial({
-      filter: querySchema,
-      dataViewId: t.string,
-    }),
-  ]),
+const metricCustomBasicMetric = z.object({
+  name: metricNameSchema,
+  aggregation: z.literal('sum').describe('The aggregation type of the metric.'),
+  field: z.string().describe('The field of the metric.'),
+  filter: metricFilterSchema.optional(),
 });
 
-const rangeHistogramMetricType = t.literal('range');
-const rangeBasedHistogramMetricDef = t.intersection([
-  t.type({
-    field: t.string,
-    aggregation: rangeHistogramMetricType,
-    from: t.number,
-    to: t.number,
-  }),
-  t.partial({
-    filter: querySchema,
-  }),
-]);
+const metricCustomMetricDef = z.object({
+  metrics: z
+    .array(z.union([metricCustomBasicMetric, metricCustomDocCountMetric]))
+    .describe('List of metrics with their name, aggregation type, and field.'),
+  equation: z.string().describe('The equation to calculate the metric.'),
+});
+const metricCustomIndicatorTypeSchema = z.literal('sli.metric.custom');
+const metricCustomIndicatorSchema = z
+  .object({
+    type: metricCustomIndicatorTypeSchema.describe('The type of indicator.'),
+    params: z
+      .object({
+        index: indexSchema,
+        good: metricCustomMetricDef.describe('An object defining the "good" metrics and equation'),
+        total: metricCustomMetricDef.describe(
+          'An object defining the "total" metrics and equation'
+        ),
+        timestampField: timestampFieldSchema,
+        filter: querySchema.describe('the KQL query to filter the documents with.').optional(),
+        dataViewId: dataViewIdSchema.optional(),
+      })
+      .describe('An object containing the indicator parameters.'),
+  })
+  .meta({
+    id: 'SLOIndicatorPropertiesCustomMetric',
+    description: 'Defines properties for a custom metric indicator type',
+  });
 
-const valueCountHistogramMetricType = t.literal('value_count');
-const valueCountBasedHistogramMetricDef = t.intersection([
-  t.type({
-    field: t.string,
-    aggregation: valueCountHistogramMetricType,
-  }),
-  t.partial({
-    filter: querySchema,
-  }),
-]);
+const rangeHistogramMetricType = z.literal('range');
+const rangeBasedHistogramMetricDef = z.object({
+  field: z.string().describe('The field use to aggregate the good events.'),
+  aggregation: rangeHistogramMetricType.describe('The type of aggregation to use.'),
+  from: z
+    .number()
+    .describe('The starting value of the range. Only required for "range" aggregations.'),
+  to: z.number().describe('The ending value of the range. Only required for "range" aggregations.'),
+  filter: querySchema.describe('The filter for events.').optional(),
+});
 
-const histogramMetricDef = t.union([
+const valueCountHistogramMetricType = z.literal('value_count');
+const valueCountBasedHistogramMetricDef = z.object({
+  field: z.string().describe('The field use to aggregate the good events.'),
+  aggregation: valueCountHistogramMetricType.describe('The type of aggregation to use.'),
+  filter: querySchema.describe('The filter for events.').optional(),
+});
+
+const histogramMetricDef = z.union([
   valueCountBasedHistogramMetricDef,
   rangeBasedHistogramMetricDef,
 ]);
 
-const histogramIndicatorTypeSchema = t.literal('sli.histogram.custom');
-const histogramIndicatorSchema = t.type({
-  type: histogramIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      index: t.string,
-      timestampField: t.string,
-      good: histogramMetricDef,
-      total: histogramMetricDef,
-    }),
-    t.partial({
-      filter: querySchema,
-      dataViewId: t.string,
-    }),
-  ]),
-});
+const histogramIndicatorTypeSchema = z.literal('sli.histogram.custom');
+const histogramIndicatorSchema = z
+  .object({
+    type: histogramIndicatorTypeSchema.describe('The type of indicator.'),
+    params: z
+      .object({
+        index: indexSchema,
+        timestampField: timestampFieldSchema,
+        good: histogramMetricDef.describe('An object defining the "good" events'),
+        total: histogramMetricDef.describe('An object defining the "total" events'),
+        filter: querySchema.describe('the KQL query to filter the documents with.').optional(),
+        dataViewId: dataViewIdSchema.optional(),
+      })
+      .describe('An object containing the indicator parameters.'),
+  })
+  .meta({
+    id: 'SLOIndicatorPropertiesHistogram',
+    description: 'Defines properties for a histogram indicator type',
+  });
 
-const syntheticsParamSchema = t.type({
+const syntheticsParamSchema = z.object({
   value: allOrAnyString,
   label: allOrAnyString,
 });
-const syntheticsAvailabilityIndicatorTypeSchema = t.literal('sli.synthetics.availability');
-const syntheticsAvailabilityIndicatorSchema = t.type({
-  type: syntheticsAvailabilityIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      monitorIds: t.array(syntheticsParamSchema),
-      index: t.string,
-    }),
-    t.partial({
-      tags: t.array(syntheticsParamSchema),
-      projects: t.array(syntheticsParamSchema),
-      filter: querySchema,
-      dataViewId: t.string,
-    }),
-  ]),
-});
+const syntheticsAvailabilityIndicatorTypeSchema = z.literal('sli.synthetics.availability');
+const syntheticsAvailabilityIndicatorSchema = z
+  .object({
+    type: syntheticsAvailabilityIndicatorTypeSchema.describe('The type of indicator.'),
+    params: z
+      .object({
+        monitorIds: z.array(syntheticsParamSchema).describe('The monitors to create the SLO from'),
+        index: indexSchema,
+        tags: z
+          .array(syntheticsParamSchema)
+          .describe('The tags to filter the monitors by')
+          .optional(),
+        projects: z
+          .array(syntheticsParamSchema)
+          .describe('The projects to filter the monitors by')
+          .optional(),
+        filter: querySchema.describe('the KQL query to filter the documents with.').optional(),
+        dataViewId: dataViewIdSchema.optional(),
+      })
+      .describe('An object containing the indicator parameters.'),
+  })
+  .meta({
+    id: 'SLOIndicatorPropertiesSyntheticsAvailability',
+    description: 'Defines properties for a synthetics availability indicator type',
+  });
 
-const indicatorTypesSchema = t.union([
-  apmTransactionDurationIndicatorTypeSchema,
-  apmTransactionErrorRateIndicatorTypeSchema,
-  syntheticsAvailabilityIndicatorTypeSchema,
-  kqlCustomIndicatorTypeSchema,
-  metricCustomIndicatorTypeSchema,
-  timesliceMetricIndicatorTypeSchema,
-  histogramIndicatorTypeSchema,
-]);
+const indicatorTypesSchema = z
+  .union([
+    apmTransactionDurationIndicatorTypeSchema,
+    apmTransactionErrorRateIndicatorTypeSchema,
+    syntheticsAvailabilityIndicatorTypeSchema,
+    kqlCustomIndicatorTypeSchema,
+    metricCustomIndicatorTypeSchema,
+    timesliceMetricIndicatorTypeSchema,
+    histogramIndicatorTypeSchema,
+  ])
+  .describe('The type of indicator.');
 
-// Validate that a string is a comma separated list of indicator types,
-// e.g. sli.kql.custom,sli.apm.transactionDuration
-// Transform to an array of indicator type
-const indicatorTypesArraySchema = new t.Type<string[], string, unknown>(
-  'indicatorTypesArray',
-  (input: unknown): input is string[] =>
-    Array.isArray(input) && input.every((i) => typeof i === 'string'),
-  (input: unknown, context: t.Context) => {
-    if (typeof input === 'string') {
-      const values = input.split(',');
-      if (values.every((value) => typeof value === 'string' && indicatorTypesSchema.is(value))) {
-        return t.success(values);
-      }
-    }
-    return t.failure(input, context);
-  },
-  (values: string[]): string => values.join(',')
+/**
+ * Codec between a comma separated list of indicator types
+ * (e.g. `sli.kql.custom,sli.apm.transactionDuration`) and an array of indicator types.
+ * `ArrayFromString` from @kbn/zod-helpers is decode-only (`z.preprocess`) and cannot
+ * express the encode direction, hence the hand-rolled codec.
+ */
+const indicatorTypesArraySchema = z.codec(
+  z
+    .string()
+    .max(MAX_KEYWORD_LENGTH)
+    .describe(
+      'A comma separated list of indicator types, for example sli.kql.custom,sli.apm.transactionDuration'
+    ),
+  z.array(indicatorTypesSchema),
+  {
+    decode: (value) => value.split(',') as Array<z.output<typeof indicatorTypesSchema>>,
+    encode: (values) => values.join(','),
+  }
 );
 
-const indicatorSchema = t.union([
+const indicatorUnion = z.discriminatedUnion('type', [
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   syntheticsAvailabilityIndicatorSchema,
@@ -324,6 +364,29 @@ const indicatorSchema = t.union([
   timesliceMetricIndicatorSchema,
   histogramIndicatorSchema,
 ]);
+
+// Derives the OAS discriminator mapping from the variants so each component
+// name stays defined exactly once, on the variant's `.meta({ id })`.
+const componentRef = (schema: z.ZodType): string => {
+  const id = schema.meta()?.id;
+  if (!id) {
+    throw new Error('every indicator schema must declare a .meta({ id }) for the OAS mapping');
+  }
+  return `#/components/schemas/${id}`;
+};
+
+const indicatorSchema = indicatorUnion.meta({
+  id: 'SLOIndicator',
+  description: 'The indicator to use to compute the SLI',
+  openapi: {
+    discriminator: {
+      propertyName: 'type',
+      mapping: Object.fromEntries(
+        indicatorUnion.options.map((variant) => [variant.shape.type.value, componentRef(variant)])
+      ),
+    },
+  },
+});
 
 export {
   kqlQuerySchema,
@@ -342,11 +405,11 @@ export {
   metricCustomIndicatorTypeSchema,
   metricCustomDocCountMetric,
   metricCustomBasicMetric,
-  timesliceMetricComparatorMapping,
   timesliceMetricIndicatorSchema,
   timesliceMetricIndicatorTypeSchema,
   timesliceMetricMetricDef,
   timesliceMetricBasicMetricWithField,
+  timesliceMetricComparatorMapping,
   timesliceMetricDocCountMetric,
   timesliceMetricPercentileMetric,
   histogramIndicatorTypeSchema,

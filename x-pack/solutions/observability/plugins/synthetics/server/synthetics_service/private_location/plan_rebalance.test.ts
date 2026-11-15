@@ -17,9 +17,14 @@ import {
 const NOW = 1_000_000;
 const POLICY = 'policy-1';
 
-const info = (lastCheckin: number, memoryMib: number | null = null): AgentInfo => ({
+const info = (
+  lastCheckin: number,
+  memoryMib: number | null = null,
+  complete = false
+): AgentInfo => ({
   lastCheckin,
   memoryMib,
+  complete,
 });
 
 const plan = (
@@ -50,6 +55,21 @@ describe('planLocationRebalance', () => {
       const { healthyAgentIds } = plan(agents);
 
       expect(healthyAgentIds.sort()).toEqual(['at-boundary', 'fresh']);
+    });
+  });
+
+  describe('browser-capable agents', () => {
+    it('lists only healthy elastic-agent-complete agents', () => {
+      const agents = new Map<string, AgentInfo>([
+        ['complete', info(NOW, null, true)],
+        ['basic', info(NOW)],
+        ['stale-complete', info(NOW - STALE_CHECKIN_MS - 1, null, true)],
+      ]);
+
+      const { healthyAgentIds, browserAgentIds } = plan(agents);
+
+      expect(healthyAgentIds).toEqual(['complete', 'basic']);
+      expect(browserAgentIds).toEqual(['complete']);
     });
   });
 

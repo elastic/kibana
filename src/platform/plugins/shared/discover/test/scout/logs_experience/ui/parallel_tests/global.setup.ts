@@ -62,6 +62,23 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   ]);
   log.debug('[setup:logs] synthtrace doc viewer data indexed');
 
+  // Logs without any message-like field, so the doc viewer has no Log overview tab for them.
+  await logsEsClient.index([
+    timerange(from, to)
+      .interval('10m')
+      .rate(1)
+      .generator((timestamp: number) =>
+        logDoc
+          .create()
+          .hostName(LOGS.SYNTH_LOGS_HOST)
+          .timestamp(timestamp)
+          .dataset(LOGS.SYNTH_NO_MESSAGE_DATASET)
+          .namespace(LOGS.SYNTH_LOGS_NAMESPACE)
+          .logLevel('info')
+      ),
+  ]);
+  log.debug('[setup:logs] synthtrace no-message data indexed');
+
   // Metric-shaped data for the negative cases: a data source that must NOT match the logs
   // profile. Indexed directly rather than via `infraEsClient`, whose `metrics-*` data streams
   // are TSDB and reject timestamps outside a moving window around now.

@@ -17,6 +17,7 @@ import {
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
+import { vegaFiltersSchema, vegaQuerySchema, vegaSpecSchema } from '../api/schema';
 
 export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return (
@@ -25,21 +26,15 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
         ...serializedTitlesSchema.shape,
         ...serializedTimeRangeSchema.shape,
         ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
-        spec: z
-          .discriminatedUnion('format', [
-            z.object({
-              format: z.literal('hjson'),
-              value: z.string().min(1),
-            }),
-            z.object({
-              format: z.literal('json'),
-              value: z.looseObject({}),
-            }),
-          ])
-          .meta({
-            description:
-              'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
-          }),
+        query: vegaQuerySchema.meta({
+          description:
+            'Panel-level KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
+        }),
+        filters: vegaFiltersSchema.meta({
+          description:
+            'Panel-level filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
+        }),
+        spec: vegaSpecSchema,
       })
       // Strip unknown keys for forward-compatible additive changes in this public contract.
       .strip()

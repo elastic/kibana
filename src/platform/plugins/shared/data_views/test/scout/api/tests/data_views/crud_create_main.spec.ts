@@ -260,6 +260,46 @@ apiTest.describe(
       createdIds.push(response.body[SERVICE_KEY].id);
     });
 
+    apiTest(
+      'can create a data view matching an index with a non-ASCII name',
+      async ({ apiClient, esClient }) => {
+        const index = `makelogs工程-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+        const title = `${index}*`;
+        await esClient.index({
+          index,
+          document: { '@timestamp': new Date().toISOString(), extension: 'jpg' },
+          refresh: 'wait_for',
+        });
+
+        try {
+          const response = await apiClient.post(DATA_VIEW_PATH, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+            body: {
+              [SERVICE_KEY]: {
+                title,
+                fields: {
+                  extension: {
+                    name: 'extension',
+                  },
+                },
+              },
+            },
+          });
+
+          expect(response.statusCode).toBe(200);
+          createdIds.push(response.body[SERVICE_KEY].id);
+          expect(response.body[SERVICE_KEY].title).toBe(title);
+          expect(response.body[SERVICE_KEY].fields.extension.type).toBe('string'); // picked up from index
+        } finally {
+          await esClient.indices.delete({ index }, { ignore: [404] });
+        }
+      }
+    );
+
     apiTest('can add runtime fields', async ({ apiClient }) => {
       const title = `basic_index*`;
       const response = await apiClient.post(DATA_VIEW_PATH, {

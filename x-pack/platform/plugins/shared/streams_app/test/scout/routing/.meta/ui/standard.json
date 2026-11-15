@@ -1,5 +1,5 @@
 {
-  "sha1": "d934b2373af58e3f51e883dc4c4b402090ebb756",
+  "sha1": "78f31b9bba3b14e22e0a2f1163c608b158aeca21",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -398,6 +398,22 @@
       }
     },
     {
+      "id": "be855e55bf78c3f-4d85923d39641b1",
+      "title": "Stream data routing - creating routing rules should only show the create button once AI connectors have loaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/create_routing_rules.spec.ts",
+        "line": 188,
+        "column": 25
+      }
+    },
+    {
       "id": "12b593442dbc69b-33d0da79e3f24c6",
       "title": "Stream data routing - editing routing rules should edit an existing routing rule",
       "expectedStatus": "passed",
@@ -601,8 +617,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 38,
-        "column": 28
+        "line": 42,
+        "column": 10
       }
     },
     {
@@ -617,8 +633,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 62,
-        "column": 47
+        "line": 66,
+        "column": 10
       }
     },
     {
@@ -633,8 +649,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 85,
-        "column": 7
+        "line": 74,
+        "column": 24
       }
     },
     {
@@ -649,8 +665,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 86,
-        "column": 24
+        "line": 110,
+        "column": 25
       }
     },
     {
@@ -665,8 +681,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 118,
-        "column": 68
+        "line": 122,
+        "column": 66
       }
     },
     {
@@ -681,8 +697,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/tests/reorder_routing_rules.spec.ts",
-        "line": 136,
-        "column": 11
+        "line": 139,
+        "column": 10
       }
     },
     {
