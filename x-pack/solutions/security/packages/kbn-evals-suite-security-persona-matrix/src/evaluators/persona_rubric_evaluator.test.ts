@@ -211,6 +211,19 @@ describe('runPersonaRubricJudge', () => {
     expect(call.input.attachment).toContain('body');
   });
 
+  it('ships a long tool result to the judge untruncated end to end', async () => {
+    executeUntilValidMock.mockResolvedValue(verdict({ score: 5, explanation: '' }));
+    const results = [{ text: `${'x'.repeat(9000)}END_MARKER` }];
+    const output = buildOutput({
+      steps: [{ ...toolCall('security.alerts'), results }],
+      answer: 'Found it.',
+    });
+    await run(output);
+    const call = executeUntilValidMock.mock.calls[0][0] as { input: { submission: string } };
+    expect(call.input.submission).toContain('END_MARKER');
+    expect(call.input.submission).toContain(JSON.stringify(results));
+  });
+
   it('returns unavailable when the judge returns no tool call', async () => {
     executeUntilValidMock.mockResolvedValue({ toolCalls: [] } as never);
     expect(await run(withTools)).toMatchObject({ score: null, label: 'unavailable' });

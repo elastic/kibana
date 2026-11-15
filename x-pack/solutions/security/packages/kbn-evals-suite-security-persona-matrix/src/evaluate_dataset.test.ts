@@ -1381,6 +1381,17 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
     });
   });
 
+  it('forwards the example expectedTools to the judge input when the flag is on', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    await runWith({ client });
+    expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
+    const { input } = executeUntilValidMock.mock.calls[0][0] as {
+      input: { expectedTools: string };
+    };
+    expect(input.expectedTools).toContain('security.alerts');
+    expect(input.expectedTools).not.toContain('(none listed');
+  });
+
   it('skips the judge when the flag is on but no client is available', async () => {
     process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
     const { evaluatorNames, taskResult } = await runWith({ client: undefined });
