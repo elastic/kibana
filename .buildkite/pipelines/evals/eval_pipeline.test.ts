@@ -292,7 +292,11 @@ describe('eval_pipeline', () => {
       const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
 
       expect(yaml).toContain('preemptible: true');
-      expect(yaml).toContain("exit_status: '-1'");
+      // Timeouts also exit -1 (signal reason `cancel`); only lost workers are retried.
+      expect(parseStep(yaml).steps[0].retry.automatic).toEqual([
+        { exit_status: '-1', signal_reason: 'none', limit: 3 },
+        { exit_status: '*', limit: 1 },
+      ]);
     });
 
     it('drops preemptible + the lost-worker retry when EVAL_PREEMPTIBLE=0', () => {
@@ -301,6 +305,7 @@ describe('eval_pipeline', () => {
 
       expect(yaml).not.toContain('preemptible: true');
       expect(yaml).not.toContain("exit_status: '-1'");
+      expect(yaml).not.toContain('signal_reason: none');
       // A single generic retry is still allowed.
       expect(yaml).toContain("exit_status: '*'");
     });

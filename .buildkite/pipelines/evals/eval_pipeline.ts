@@ -168,7 +168,7 @@ const EVAL_AGENT_DISK_SIZE_GB: number | undefined = undefined;
 
 /**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
- * PR evals set `EVAL_PREEMPTIBLE=0` so a lost worker/timeout doesn't silently re-run the suite.
+ * PR evals set `EVAL_PREEMPTIBLE=0` so a lost worker doesn't silently re-run the suite.
  */
 function isPreemptibleEnabled(): boolean {
   const raw = (process.env.EVAL_PREEMPTIBLE ?? '').trim().toLowerCase();
@@ -246,9 +246,16 @@ function buildEvalsYaml({
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,
-        // Preemptible only: retry lost workers (-1). Dropped otherwise so a lost
-        // worker/timeout doesn't silently re-run the whole suite.
-        ...(preemptible ? [`            - exit_status: '-1'`, `              limit: 3`] : []),
+        // Preemptible only: retry lost workers (-1 with no signal reason). Timeouts also exit
+        // with -1, but with signal reason `cancel`, so they aren't retried. Dropped otherwise so
+        // a lost worker doesn't silently re-run the whole suite.
+        ...(preemptible
+          ? [
+              `            - exit_status: '-1'`,
+              `              signal_reason: none`,
+              `              limit: 3`,
+            ]
+          : []),
         `            - exit_status: '*'`,
         `              limit: 1`,
       ].join('\n');
