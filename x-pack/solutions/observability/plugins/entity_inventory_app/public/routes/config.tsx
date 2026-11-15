@@ -7,28 +7,37 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { EuiText } from '@elastic/eui';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import type { PathsOf, RouteMap } from '@kbn/typed-react-router-config';
 import { EntityInventoryPageShell } from '../application/components/page_shell';
+import { EntityCategoryResults } from '../application/components/entity_category_results/entity_category_results';
 import { EntityInventoryPageFilterControls } from '../application/filters/page_filter_controls';
-import { ENTITY_LIST_PLACEHOLDER } from '../application/translations';
 import type { EntityInventoryEntityCategory } from '../types';
+
+// TODO: filter the `types` response by category once entity definitions carry one.
+const ENTITY_TYPE_ID_PREFIX_BY_CATEGORY: Readonly<
+  Partial<Record<EntityInventoryEntityCategory, string>>
+> = {
+  hosts: 'host',
+  kubernetes: 'k8s.',
+};
 
 const EntityInventoryPage = ({
   entityCategory,
 }: {
   entityCategory: EntityInventoryEntityCategory;
-}) => (
-  <EntityInventoryPageShell
-    entityCategory={entityCategory}
-    secondaryControls={<EntityInventoryPageFilterControls />}
-  >
-    <EuiText color="subdued" data-test-subj="entityInventoryPlaceholder">
-      <p>{ENTITY_LIST_PLACEHOLDER}</p>
-    </EuiText>
-  </EntityInventoryPageShell>
-);
+}) => {
+  return (
+    <EntityInventoryPageShell
+      entityCategory={entityCategory}
+      secondaryControls={<EntityInventoryPageFilterControls />}
+    >
+      <EntityCategoryResults
+        entityTypeIdPrefix={ENTITY_TYPE_ID_PREFIX_BY_CATEGORY[entityCategory]}
+      />
+    </EntityInventoryPageShell>
+  );
+};
 
 /**
  * The paths of the app are defined here. Each page of `ENTITY_INVENTORY_PAGES` points to one of them.

@@ -92,6 +92,13 @@ const parseJsonUpsert = (value: unknown): ParsedUnitPutBody => {
     throw new StatusError('Invalid Streams unit JSON.', 400);
   }
 
+  if ('api_keys' in value) {
+    throw new StatusError(
+      'Invalid Streams unit JSON: api_keys is managed by Kibana and cannot be set.',
+      400
+    );
+  }
+
   const parsed: ParsedUnitPutBody = {
     unit: value.unit as StreamsUnit.Configuration,
   };

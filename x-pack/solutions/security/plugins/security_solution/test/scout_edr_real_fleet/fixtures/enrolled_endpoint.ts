@@ -20,13 +20,13 @@ import {
   deleteEndpointDataAndTestSuperuser,
   hasExistingFleetServerPolicy,
   stopAndDeleteFleetServer,
-} from '../ui/fixtures/cleanup';
+} from '../shared_host/ui/fixtures/cleanup';
 import {
   createEndpointPolicy,
   deleteEndpointPolicy,
   enableAllPolicyProtections,
   getCreatedPackagePolicy,
-} from '../ui/fixtures/endpoint_policy';
+} from '../shared_host/ui/fixtures/endpoint_policy';
 
 const ENDPOINT_STREAM_TIMEOUT_MS = 180_000;
 

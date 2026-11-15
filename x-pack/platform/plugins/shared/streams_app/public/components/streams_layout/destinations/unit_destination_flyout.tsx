@@ -32,7 +32,10 @@ import { useDestinationIndexStats } from './destinations_context';
 import { RemoteElasticsearchDestinationDetails } from './remote_elasticsearch_destination_details';
 import { S3DestinationDetails } from './s3_destination_details';
 import type { DestinationDetailActorRef } from './state_machines/destination_detail_state_machine';
-import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
+import type {
+  ResolvedIndicesError,
+  ResolvedIndicesStatus,
+} from './state_machines/destinations_state_machine';
 import { REMOTE_ELASTICSEARCH_TYPE, type DestinationViewModel } from './types';
 
 const UNIT_DESTINATION_FLYOUT_MAX_WIDTH = 1125;
@@ -96,11 +99,12 @@ export const UnitDestinationFlyout = ({
   onDelete,
   onIndexClick,
   isDeleteDisabled = false,
+  readOnly = false,
 }: {
   destination: DestinationViewModel;
   indices: ResolvedDestinationIndex[];
   indicesStatus: ResolvedIndicesStatus;
-  indicesError?: string;
+  indicesError?: ResolvedIndicesError;
   destinationDetailRef?: DestinationDetailActorRef;
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
   onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
@@ -108,6 +112,8 @@ export const UnitDestinationFlyout = ({
   onDelete: () => void;
   onIndexClick: (indexName: string) => void;
   isDeleteDisabled?: boolean;
+  /** Hides deletion for users without the V2 manage privilege. */
+  readOnly?: boolean;
 }) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsUnitDestinationFlyoutTitle' });
 
@@ -213,13 +219,15 @@ export const UnitDestinationFlyout = ({
           </DeferredMount>
         )}
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <DestinationDeleteFooter
-          destinationName={destination.name}
-          isDisabled={isDeleteDisabled}
-          onDelete={onDelete}
-        />
-      </EuiFlyoutFooter>
+      {!readOnly && (
+        <EuiFlyoutFooter>
+          <DestinationDeleteFooter
+            destinationName={destination.name}
+            isDisabled={isDeleteDisabled}
+            onDelete={onDelete}
+          />
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 };

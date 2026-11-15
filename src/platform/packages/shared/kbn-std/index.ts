@@ -16,6 +16,8 @@ export { mapToObject } from './src/map_to_object';
 export { merge } from './src/merge';
 export { pick } from './src/pick';
 export { withTimeout, isPromise } from './src/promise';
+export { timeoutSignal } from './src/timeout_signal';
+export type { TimeoutAbortSignal } from './src/timeout_signal';
 export type { URLMeaningfulParts } from './src/url';
 export { isRelativeUrl, modifyUrl, getUrlOrigin } from './src/url';
 export { isInternalURL } from './src/is_internal_url';

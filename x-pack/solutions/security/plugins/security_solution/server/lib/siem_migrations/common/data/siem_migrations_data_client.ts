@@ -21,7 +21,7 @@ export abstract class SiemMigrationsDataClient<
 
   public abstract readonly migrations: SiemMigrationsDataMigrationClient<M>;
   public abstract readonly items: SiemMigrationsDataItemClient<I>;
-  public abstract readonly resources: SiemMigrationsDataResourcesClient;
+  public abstract readonly resources?: SiemMigrationsDataResourcesClient;
 
   constructor(
     public readonly esScopedClient: IScopedClusterClient,
@@ -39,7 +39,7 @@ export abstract class SiemMigrationsDataClient<
     ] = await Promise.all([
       this.migrations.prepareDelete(migrationId),
       this.items.prepareDelete(migrationId),
-      this.resources.prepareDelete(migrationId),
+      this.resources?.prepareDelete(migrationId),
     ]);
 
     return this.esClient
@@ -48,10 +48,14 @@ export abstract class SiemMigrationsDataClient<
         operations: [
           ...migrationDeleteOperations,
           ...migrationItemsDeleteOperations,
-          ...migrationResourcesDeleteOperations,
+          ...(migrationResourcesDeleteOperations ?? []),
         ],
       })
-      .then(() => {
+      .then((response) => {
+        if (response.errors) {
+          const reason = response.items.find((item) => item.delete?.error)?.delete?.error?.reason;
+          throw new Error(reason ?? 'Unknown error');
+        }
         this.logger.info(`Deleted migration ${migrationId}`);
       })
       .catch((error) => {

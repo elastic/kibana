@@ -84,12 +84,15 @@ const errorMessage = (error: unknown): string =>
 
 /**
  * `proposals.create`: an agent proposes an action without an action workflow, in the
- * conversation it runs in. Like any Worker, it starts the managed gate workflow
- * (`system-create-proposal`) as the caller rather than writing the proposal itself, because a
- * proposal's decision is only ever recorded behind its gate. The gate's create step indexes the
- * proposal and attaches its `platform.proposal` card through the public attachment client, which
- * needs the caller to own the conversation. The tool waits briefly for the proposal to exist.
- * Each call leaves one gate execution parked until the analyst decides or the proposal expires.
+ * conversation it runs in.
+ *
+ * A to-do (`category: 'todo'`) is written straight to the index and decided by the service, so
+ * the tool answers with the proposal itself and nothing stays parked. Every other category goes
+ * through the managed gate workflow (`system-create-proposal`) as the caller, because a decision
+ * that executes an action is only ever recorded behind its gate; the tool then waits briefly for
+ * the gate's create step to index the proposal, and one execution stays parked until the analyst
+ * decides or the proposal expires. Either path attaches the `platform.proposal` card through the
+ * public attachment client, which needs the caller to own the conversation.
  */
 export const createProposalTool = ({
   getProposalsService,
@@ -185,7 +188,10 @@ export const createProposalTool = ({
               proposal_id: proposal.id,
               title: proposal.title,
               status: proposal.status,
-              workflow_execution_id: workflowExecutionId,
+              // Absent for a to-do: no gate was started for it.
+              ...(workflowExecutionId !== undefined && {
+                workflow_execution_id: workflowExecutionId,
+              }),
             }),
           ],
         };
