@@ -11,6 +11,7 @@ describe('convertKqlToEsqlExpression', () => {
   it.each([
     ['alert.status: active', '`episode.status` == "active"'],
     ['alert.id: alert-1', '`episode.id` == "alert-1"'],
+    ['connector.id: "connector-1"', '`connector.id` == "connector-1"'],
     ['severity: critical', 'severity == "critical"'],
     ['data.host.name: web-01', 'JSON_EXTRACT(episode_data, "host.name") == "web-01"'],
     ['data.host.name: *', 'JSON_EXTRACT(episode_data, "host.name") IS NOT NULL'],
