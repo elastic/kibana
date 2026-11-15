@@ -13,16 +13,19 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
+  type MigrationAlgorithm,
   type MigrationResult,
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { KibanaMigrator, type KibanaMigratorOptions } from './kibana_migrator';
+import { MIGRATION_CLIENT_OPTIONS } from './kibana_migrator_constants';
 import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { lastValueFrom } from 'rxjs';
 import { runV2Migration } from './run_v2_migration';
 import { runZeroDowntimeMigration } from './zdt';
+import { runV3Migration } from './v3';
 
 const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   {
@@ -64,6 +67,19 @@ jest.mock('./zdt', () => {
   };
 });
 
+const V3_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
+  { status: 'patched', destIndex: '.my_index', elapsedMs: 12 },
+];
+
+jest.mock('./v3', () => {
+  return {
+    ...jest.requireActual('./v3'),
+    runV3Migration: jest.fn(
+      (): Promise<MigrationResult[]> => Promise.resolve(V3_SUCCESSFUL_MIGRATION_RESULT)
+    ),
+  };
+});
+
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
   types.forEach((type) =>
@@ -83,11 +99,13 @@ const mockRunV2Migration = runV2Migration as jest.MockedFunction<typeof runV2Mig
 const mockRunZeroDowntimeMigration = runZeroDowntimeMigration as jest.MockedFunction<
   typeof runZeroDowntimeMigration
 >;
+const mockRunV3Migration = runV3Migration as jest.MockedFunction<typeof runV3Migration>;
 
 describe('KibanaMigrator', () => {
   beforeEach(() => {
     mockRunV2Migration.mockClear();
     mockRunZeroDowntimeMigration.mockClear();
+    mockRunV3Migration.mockClear();
   });
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
@@ -173,6 +191,40 @@ describe('KibanaMigrator', () => {
       expect(res).toEqual(ZDT_SUCCESSFUL_MIGRATION_RESULT);
     });
 
+    it("runs the v3 migration with the classic profile when the migration algorithm is 'v3'", async () => {
+      const options = { ...mockOptions('v3'), kibanaVersionCheck: '8.18.0' };
+      const migrator = new KibanaMigrator(options);
+      const migratorStatus = lastValueFrom(migrator.getStatus$().pipe(take(3)));
+      migrator.prepareMigrations();
+
+      await expect(migrator.runMigrations()).resolves.toEqual(V3_SUCCESSFUL_MIGRATION_RESULT);
+      await expect(migratorStatus).resolves.toEqual({
+        status: 'completed',
+        result: V3_SUCCESSFUL_MIGRATION_RESULT,
+      });
+      expect(runV2Migration).not.toHaveBeenCalled();
+      expect(runZeroDowntimeMigration).not.toHaveBeenCalled();
+      expect(runV3Migration).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibanaIndexPrefix: '.my_index',
+          kibanaVersion: '8.2.3',
+          minimumPreviousVersion: '8.18.0',
+          elasticsearchClient: options.client,
+          inputs: expect.objectContaining({ allowDowngrade: false, migrateDocuments: true }),
+        })
+      );
+    });
+
+    it('skips the minimum previous version check when asked to', async () => {
+      const migrator = new KibanaMigrator({ ...mockOptions('v3'), kibanaVersionCheck: '8.18.0' });
+      migrator.prepareMigrations();
+      await migrator.runMigrations({ skipVersionCheck: true });
+
+      expect(runV3Migration).toHaveBeenCalledWith(
+        expect.objectContaining({ minimumPreviousVersion: undefined })
+      );
+    });
+
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
       const migrator = new KibanaMigrator(options);
@@ -219,7 +271,7 @@ describe('KibanaMigrator', () => {
       mockRunV2Migration.mockRejectedValueOnce(fatal);
 
       migrator.prepareMigrations();
-      expect(migrator.runMigrations()).rejects.toEqual(fatal);
+      await expect(migrator.runMigrations()).rejects.toEqual(fatal);
     });
 
     it('rejects when the zdt migrator algorithm rejects', async () => {
@@ -232,7 +284,7 @@ describe('KibanaMigrator', () => {
       mockRunZeroDowntimeMigration.mockRejectedValueOnce(fatal);
 
       migrator.prepareMigrations();
-      expect(migrator.runMigrations()).rejects.toEqual(fatal);
+      await expect(migrator.runMigrations()).rejects.toEqual(fatal);
     });
 
     it('does not log intermediate steps when `useCumulativeLogger: true`', async () => {
@@ -260,9 +312,105 @@ describe('KibanaMigrator', () => {
       expect(options.logger.info).toHaveBeenNthCalledWith(1, 'Running v2 migrations');
     });
   });
+
+  describe.each([
+    { method: 'initialize', migrateDocuments: false, pickupUpdatedMappings: false },
+    { method: 'migrate', migrateDocuments: true, pickupUpdatedMappings: true },
+  ] as const)('$method', ({ method, migrateDocuments, pickupUpdatedMappings }) => {
+    const createTenantClient = () => ({
+      tenantClient: elasticsearchClientMock.createElasticsearchClient(),
+    });
+
+    it('runs v3 against the given client with the migration client options, whatever the configured algorithm', async () => {
+      const migrator = new KibanaMigrator(mockOptions('v2'));
+      migrator.prepareMigrations();
+      const { tenantClient } = createTenantClient();
+
+      await expect(
+        migrator[method]({ client: tenantClient, esCapabilities: { serverless: true } })
+      ).resolves.toEqual(V3_SUCCESSFUL_MIGRATION_RESULT);
+      expect(runV2Migration).not.toHaveBeenCalled();
+      expect(tenantClient.child).toHaveBeenCalledWith(MIGRATION_CLIENT_OPTIONS);
+      const [{ value: migrationClient }] = tenantClient.child.mock.results;
+      expect(runV3Migration).toHaveBeenCalledWith(
+        expect.objectContaining({
+          elasticsearchClient: migrationClient,
+          esCapabilities: { serverless: true },
+          inputs: expect.objectContaining({
+            allowDowngrade: true,
+            migrateDocuments,
+            pickupUpdatedMappings,
+          }),
+        })
+      );
+    });
+
+    it('never waits for another instance, even on nodes that would wait at startup', async () => {
+      const migrator = new KibanaMigrator({
+        ...mockOptions('v3'),
+        waitForMigrationCompletion: true,
+      });
+      migrator.prepareMigrations();
+
+      await migrator[method]({ client: createTenantClient().tenantClient });
+
+      expect(runV3Migration).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputs: expect.objectContaining({ waitForMigrationCompletion: false, migrateDocuments }),
+        })
+      );
+    });
+
+    it('runs on every call, without updating the migrator status', async () => {
+      const migrator = new KibanaMigrator(mockOptions('v3'));
+      migrator.prepareMigrations();
+      const statuses: string[] = [];
+      migrator.getStatus$().subscribe(({ status }) => statuses.push(status));
+
+      const { tenantClient } = createTenantClient();
+      await migrator[method]({ client: tenantClient });
+      await migrator[method]({ client: tenantClient });
+
+      expect(runV3Migration).toHaveBeenCalledTimes(2);
+      expect(statuses).toEqual(['waiting_to_start']);
+    });
+
+    it('rejects when the migration fails', async () => {
+      const migrator = new KibanaMigrator(mockOptions('v3'));
+      migrator.prepareMigrations();
+      const fatal = new Error('Unable to complete saved object migrations');
+      mockRunV3Migration.mockRejectedValueOnce(fatal);
+
+      await expect(migrator[method]({ client: createTenantClient().tenantClient })).rejects.toBe(
+        fatal
+      );
+    });
+
+    it('only logs the intermediate steps on failures, when `useCumulativeLogger: true`', async () => {
+      const options = mockOptions('v3');
+      (options.soMigrationsConfig.useCumulativeLogger as boolean) = true; // casting because soMigrationsConfig are readonly
+      const migrator = new KibanaMigrator(options);
+      migrator.prepareMigrations();
+      const { tenantClient } = createTenantClient();
+      mockRunV3Migration.mockImplementationOnce(async ({ logger }) => {
+        logger.info('Migrating the tenant indices');
+        return V3_SUCCESSFUL_MIGRATION_RESULT;
+      });
+
+      await migrator[method]({ client: tenantClient });
+      expect(options.logger.info).not.toHaveBeenCalled();
+
+      mockRunV3Migration.mockImplementationOnce(async ({ logger }) => {
+        logger.info('Migrating the tenant indices');
+        throw new Error('Unable to complete saved object migrations');
+      });
+      await expect(migrator[method]({ client: tenantClient })).rejects.toThrow();
+      expect(options.logger.info).toHaveBeenCalledWith('Migrating the tenant indices');
+    });
+  });
 });
 
-const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
+const mockOptions = (algorithm: MigrationAlgorithm = 'v2'): KibanaMigratorOptions => {
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 

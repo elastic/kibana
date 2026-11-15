@@ -14,7 +14,7 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import buffer from 'buffer';
 
 const migrationSchema = schema.object({
-  algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt')], {
+  algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt'), schema.literal('v3')], {
     defaultValue: 'v2',
   }),
   batchSize: schema.number({ defaultValue: 1_000 }),
@@ -50,6 +50,7 @@ const migrationSchema = schema.object({
     metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 5 }),
     /**
      * The document migration phase will be run from instances with any of the specified roles.
+     * Also applies to the `v3` algorithm on serverless, where it replaces the `zdt` algorithm.
      *
      * This is mostly used for testing environments and integration tests were
      * we have full control over a single node Kibana deployment.
@@ -80,6 +81,8 @@ const migrationSchema = schema.object({
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
+
+export type MigrationAlgorithm = SavedObjectsMigrationConfigType['algorithm'];
 
 export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> =
   {
