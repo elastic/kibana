@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', cookie)
           .send({
-            avatar: { initials: `some-initials-${userPrefix}` },
+            avatar: { initials: userPrefix.slice(0, 2) },
           })
           .expect(200);
 
@@ -102,7 +102,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `testEndpointsUserProfilesAppUserProfile_user_${userPrefix}`
           );
           expect(userProfileText).to.equal(
-            `user_${userPrefix}:{"avatar":{"color":null,"initials":"some-initials-${userPrefix}","imageUrl":null}}`
+            `user_${userPrefix}:{"avatar":{"color":null,"initials":"${userPrefix.slice(
+              0,
+              2
+            )}","imageUrl":null}}`
           );
         }
       });

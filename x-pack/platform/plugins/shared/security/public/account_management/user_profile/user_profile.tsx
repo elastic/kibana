@@ -57,6 +57,7 @@ import {
   type DarkModeValue,
   getUserAvatarColor,
   getUserAvatarInitials,
+  isValidUserProfileAvatarInitials,
   type LocaleValue,
   UserAvatar,
   type UserProfileData,
@@ -72,6 +73,21 @@ import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
+
+/** Validates avatar initials by grapheme, so an emoji with a skin tone counts as one character. */
+export const validateAvatarInitials = (value: string): string | undefined => {
+  if (!value) {
+    return i18n.translate('xpack.security.accountManagement.userProfile.initialsRequiredError', {
+      defaultMessage: 'Add initials',
+    });
+  }
+
+  if (!isValidUserProfileAvatarInitials(value)) {
+    return i18n.translate('xpack.security.accountManagement.userProfile.initialsMaxLengthError', {
+      defaultMessage: 'Enter no more than 2 characters.',
+    });
+  }
+};
 
 const formRowCSS = css`
   .euiFormRow__label {
@@ -529,24 +545,7 @@ function UserAvatarEditor({
               }
               fullWidth
             >
-              <FormField
-                name="data.avatar.initials"
-                maxLength={2}
-                validate={{
-                  required: i18n.translate(
-                    'xpack.security.accountManagement.userProfile.initialsRequiredError',
-                    { defaultMessage: 'Add initials' }
-                  ),
-                  maxLength: {
-                    value: 2,
-                    message: i18n.translate(
-                      'xpack.security.accountManagement.userProfile.initialsMaxLengthError',
-                      { defaultMessage: 'Enter no more than 2 characters.' }
-                    ),
-                  },
-                }}
-                fullWidth
-              />
+              <FormField name="data.avatar.initials" validate={validateAvatarInitials} fullWidth />
             </FormRow>
           </EuiFlexItem>
           <EuiFlexItem>
