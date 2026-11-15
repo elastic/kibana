@@ -716,10 +716,27 @@ const TIME_FIELD_DESCRIPTION =
  */
 const timeFieldSchema = lazySchema(() => z.string().min(1).max(MAX_FIELD_NAME_LENGTH));
 
-export const createRuleDataBaseSchema = lazySchema(() =>
+const ENABLED_DESCRIPTIONS = {
+  create:
+    'Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.',
+  put: 'Whether the rule is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the rule it defaults to `true`. When the request replaces an existing rule, omitting it keeps the current state and supplying it enables or disables the rule, the same as `_enable` or `_disable`. A disabled rule is saved but does not run until you enable it.',
+} as const;
+
+type RuleWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
+
+/**
+ * Optional with no default because the meaning of "omitted"
+ * differs by outcome: on create it defaults to `true`, on replace it preserves
+ * the existing stored value.
+ */
+const enabledSchema = (api: RuleWriteApi) =>
+  z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
+
+const buildRuleDataBaseSchema = (api: RuleWriteApi) =>
   z
     .object({
       kind: ruleKindSchema,
+      enabled: enabledSchema(api),
       metadata: metadataSchema,
       time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
       schedule: scheduleSchema,
@@ -730,8 +747,9 @@ export const createRuleDataBaseSchema = lazySchema(() =>
       grouping: groupingSchema.optional(),
       artifacts: artifactsSchema.optional(),
     })
-    .strict()
-);
+    .strict();
+
+export const createRuleDataBaseSchema = lazySchema(() => buildRuleDataBaseSchema('create'));
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
@@ -918,22 +936,20 @@ export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
- * Request body schema for `PUT /api/alerting/v2/rules/{id}`. Adds an optional
- * `enabled` on top of the create-rule data. Left as a plain optional (no
- * schema-level default) because the meaning of "omitted" differs by outcome:
- * on create it defaults to `true`, on replace it preserves the existing
- * stored value — both handled in application code, not here.
+ * Request body schema for `PUT /api/alerting/v2/rules/{id}`: the create-rule
+ * data.
+ *
+ * `enabled` is deliberately the only field on PUT that is kept when omitted.
+ * Every other field follows replace semantics and is cleared when absent.
+ * It is lifecycle state, not definition: on create it defaults to `true`, on
+ * replace omitting it keeps the stored value and supplying it applies the same
+ * transition as `_enable` / `_disable`. The default lives in the client, not
+ * here, because "omitted" means different things on create and replace.
+ * PATCH does not accept it.
  */
-export const putRuleDataSchema = applyCreateRuleRefinements(
-  createRuleDataBaseSchema.extend({
-    enabled: z
-      .boolean()
-      .optional()
-      .describe(
-        'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.'
-      ),
-  })
-).meta({ id: 'alerting_put_rule' });
+export const putRuleDataSchema = applyCreateRuleRefinements(buildRuleDataBaseSchema('put')).meta({
+  id: 'alerting_put_rule',
+});
 
 export type PutRuleData = z.infer<typeof putRuleDataSchema>;
 
@@ -1164,8 +1180,8 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 
 /**
  * A single item in a bulk-create request: the create-rule body plus optional
- * client-supplied `id` and `enabled` (default true). Disabled rules are saved
- * and do not run until enabled.
+ * client-supplied `id`. `enabled` is the same optional field as on a single
+ * create; disabled rules are saved and do not run until enabled.
  */
 export const bulkCreateRuleItemSchema = lazySchema(() =>
   applyCreateRuleRefinements(
@@ -1174,12 +1190,6 @@ export const bulkCreateRuleItemSchema = lazySchema(() =>
         .optional()
         .describe(
           'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
-        ),
-      enabled: z
-        .boolean()
-        .default(true)
-        .describe(
-          'If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.'
         ),
     })
   ).meta({ id: 'alerting_bulk_create_rule_item' })

@@ -678,6 +678,10 @@ describe('rule template create-rule schema coupling', () => {
               "minItems": 1,
               "type": "array",
             },
+            "enabled": Object {
+              "description": "Whether the rule is enabled. Defaults to \`true\` when omitted. A disabled rule is saved but does not run until you enable it.",
+              "type": "boolean",
+            },
             "grouping": Object {
               "allOf": Array [
                 Object {

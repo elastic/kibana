@@ -353,14 +353,26 @@ describe('putActionPolicyDataSchema', () => {
     expect(putActionPolicyDataSchema.parse(base)).toEqual(base);
   });
 
-  // Lifecycle state belongs to `_enable`/`_disable`, so a write body may not carry it.
-  it('rejects enabled', () => {
-    expect(putActionPolicyDataSchema.safeParse({ ...base, enabled: true }).success).toBe(false);
-    expect(putActionPolicyDataSchema.safeParse({ ...base, enabled: false }).success).toBe(false);
+  it('leaves enabled undefined when omitted', () => {
+    expect(putActionPolicyDataSchema.parse(base).enabled).toBeUndefined();
   });
 
-  it('rejects enabled on createActionPolicyDataSchema too', () => {
-    expect(createActionPolicyDataSchema.safeParse({ ...base, enabled: true }).success).toBe(false);
+  it.each([true, false])('accepts enabled: %s', (enabled) => {
+    expect(putActionPolicyDataSchema.parse({ ...base, enabled }).enabled).toBe(enabled);
+  });
+
+  it('rejects a non-boolean enabled', () => {
+    expect(putActionPolicyDataSchema.safeParse({ ...base, enabled: 'true' }).success).toBe(false);
+  });
+
+  it('accepts enabled on createActionPolicyDataSchema', () => {
+    expect(createActionPolicyDataSchema.parse(base).enabled).toBeUndefined();
+    expect(createActionPolicyDataSchema.parse({ ...base, enabled: false }).enabled).toBe(false);
+    expect(createActionPolicyDataSchema.safeParse({ ...base, enabled: 'no' }).success).toBe(false);
+  });
+
+  it('still rejects enabled on updateActionPolicyDataSchema', () => {
+    expect(updateActionPolicyDataSchema.safeParse({ enabled: true }).success).toBe(false);
   });
 
   it('rejects snoozed_until', () => {

@@ -300,7 +300,21 @@ const actionPolicyDescriptionSchema = lazySchema(() =>
     .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION)
 );
 
-const createActionPolicyDataBaseSchema = lazySchema(() =>
+const ENABLED_DESCRIPTIONS = {
+  create:
+    'Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.',
+  put: 'Whether the action policy is enabled. Unlike the other fields in this body, omitting it does not clear it. When the request creates the policy it defaults to `true`. When the request replaces an existing policy, omitting it keeps the current state and supplying it enables or disables the policy, the same as `_enable` or `_disable`. A disabled policy is saved but is not applied to alerts until you enable it.',
+} as const;
+
+type ActionPolicyWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
+
+/**
+ * Optional with no default because "omitted" means `true` on create and the stored value on replace.
+ */
+const enabledSchema = (api: ActionPolicyWriteApi) =>
+  z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
+
+const buildActionPolicyDataBaseSchema = (api: ActionPolicyWriteApi) =>
   z
     .object({
       name: actionPolicyNameSchema,
@@ -309,12 +323,12 @@ const createActionPolicyDataBaseSchema = lazySchema(() =>
       matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
       grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
       throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
+      enabled: enabledSchema(api),
     })
-    .strict()
-);
+    .strict();
 
 export const createActionPolicyDataSchema = lazySchema(() =>
-  createActionPolicyDataBaseSchema
+  buildActionPolicyDataBaseSchema('create')
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_new_action_policy' })
 );
@@ -324,11 +338,16 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
 
 /**
  * Request body schema for `PUT /api/alerting/v2/action_policies/{id}`: the create-action-policy
- * data, unchanged. Lifecycle state is not part of any write body — a replace creates the policy
- * enabled and otherwise preserves the stored value, and `_enable`/`_disable` own the transition.
+ * data.
+ *
+ * `enabled` is deliberately the only field on PUT that is kept when omitted. Every other field
+ * follows replace semantics and is cleared when absent. It is lifecycle state, not definition: on
+ * create it defaults to `true`, on replace omitting it keeps the stored value and supplying it
+ * applies the same transition as `_enable` / `_disable`. The default lives in the client, not here,
+ * because "omitted" means different things on create and replace. PATCH does not accept it.
  */
 export const putActionPolicyDataSchema = lazySchema(() =>
-  createActionPolicyDataBaseSchema
+  buildActionPolicyDataBaseSchema('put')
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_put_action_policy' })
 );
