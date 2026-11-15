@@ -375,7 +375,7 @@ describe('isolateHostTool', () => {
       const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
 
       expect(card).toMatchObject({ color: 'danger' });
-      expect(card.message).toContain('ip-host');
+      expect(mockAskForConfirmation.mock.calls[0][0].message).toContain('ip-host');
       expect(data).toMatchObject({ error: 'invalid_argument' });
       expect(data.message).toContain('disabled by the endpoint policy');
       expect(listPackagePolicies).toHaveBeenCalledTimes(2);
@@ -420,7 +420,7 @@ describe('isolateHostTool', () => {
       const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
 
       expect(card).toMatchObject({ color: 'danger' });
-      expect(card.message).toContain('windows-host');
+      expect(mockAskForConfirmation.mock.calls[0][0].message).toContain('windows-host');
       expect(data).toMatchObject({ actionId: 'action-windows' });
       expect(listPackagePolicies).not.toHaveBeenCalled();
       expect(isolate).toHaveBeenCalledWith(expect.anything(), {
