@@ -148,6 +148,7 @@ export type CspAdditionalConfig = Pick<
   | 'font_src'
   | 'frame_src'
   | 'img_src'
+  | 'media_src'
   | 'script_src'
   | 'style_src'
   | 'worker_src'

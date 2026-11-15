@@ -210,8 +210,9 @@ groups:
         datatype: array of strings
         applies_to:
           stack: ga
-          ech: unavailable
+          ech: ga
           self: ga
+        note: "From 9.6.1, Kibana allows fonts from `'self'` and `data:` by default and blocks fonts from any other source. If you load fonts from another host, add it here. The sources you list are added to the defaults."
 
       - setting: csp.frame_src
         description: |
@@ -228,8 +229,9 @@ groups:
         datatype: array of strings
         applies_to:
           stack: ga
-          ech: unavailable
+          ech: ga
           self: ga
+        note: "From 9.6.1, Kibana allows images from `'self'`, `data:`, `blob:`, `https:` and `http:` by default. If you set `csp.img_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` and `blob:` in your list if you need them."
 
       - setting: csp.object_src
         description: |
@@ -245,9 +247,10 @@ groups:
           Add sources for the [Content Security Policy `media-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/media-src).
         datatype: array of strings
         applies_to:
-          - "stack: ga 9.6"
-          - "ech: unavailable"
-          - "self: ga"
+          stack: ga 9.6
+          ech: ga 9.6.1
+          self: ga
+        note: "From 9.6.1, Kibana allows media from `'self'` and `kibana.estccdn.com` by default and blocks media from any other source. If you play audio or video from another host, add it here. The sources you list are added to the defaults."
 
       - setting: csp.frame_ancestors
         description: |

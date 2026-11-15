@@ -11,8 +11,10 @@ import type {
   UsageCollectionSetup,
   UsageCollectorOptions,
 } from '@kbn/usage-collection-plugin/server';
-import type { HttpServiceSetup } from '@kbn/core/server';
+import type { HttpServiceSetup, PackageInfo } from '@kbn/core/server';
 import { CspConfig } from '@kbn/core/server';
+
+type BuildFlavor = PackageInfo['buildFlavor'];
 
 interface Usage {
   strict: boolean;
@@ -20,7 +22,11 @@ interface Usage {
   rulesChangedFromDefault: boolean;
 }
 
-export function createCspCollector(http: HttpServiceSetup): UsageCollectorOptions<Usage> {
+export function createCspCollector(
+  http: HttpServiceSetup,
+  buildFlavor: BuildFlavor
+): UsageCollectorOptions<Usage> {
+  const defaultHeader = CspConfig.forBuildFlavor(buildFlavor).header;
   return {
     type: 'csp',
     isReady: () => true,
@@ -33,7 +39,7 @@ export function createCspCollector(http: HttpServiceSetup): UsageCollectorOption
         // It's important that we do not send the value of csp.header here as it
         // can be customized with values that can be identifiable to given
         // installs, such as URLs
-        rulesChangedFromDefault: header !== CspConfig.DEFAULT.header,
+        rulesChangedFromDefault: header !== defaultHeader,
       };
     },
     schema: {
@@ -55,9 +61,10 @@ export function createCspCollector(http: HttpServiceSetup): UsageCollectorOption
 
 export function registerCspCollector(
   usageCollection: UsageCollectionSetup,
-  http: HttpServiceSetup
+  http: HttpServiceSetup,
+  buildFlavor: BuildFlavor
 ): void {
-  const collectorOptions = createCspCollector(http);
+  const collectorOptions = createCspCollector(http, buildFlavor);
   const collector = usageCollection.makeUsageCollector<Usage>(collectorOptions);
   usageCollection.registerCollector(collector);
 }
