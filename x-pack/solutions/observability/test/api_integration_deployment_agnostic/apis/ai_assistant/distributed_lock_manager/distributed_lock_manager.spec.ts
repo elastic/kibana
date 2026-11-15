@@ -809,7 +809,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const reindexedIndexName = `${LOCKS_CONCRETE_INDEX_NAME}-reindexed-for-10`;
 
         before(async () => {
-          await deleteLockIndexAssets(es, log);
+          await setupLockManagerIndex(es, logger);
 
           // Create the actual index with correct mappings but different name
           await es.indices.create({
@@ -830,10 +830,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           });
 
-          // Add alias pointing LOCKS_CONCRETE_INDEX_NAME to the reindexed index
-          await es.indices.putAlias({
-            index: reindexedIndexName,
-            name: LOCKS_CONCRETE_INDEX_NAME,
+          // Swapping index for same-named alias in one cluster state update leaves no window for the live Kibana to auto-create the index
+          await es.indices.updateAliases({
+            actions: [
+              { remove_index: { index: LOCKS_CONCRETE_INDEX_NAME } },
+              { add: { index: reindexedIndexName, alias: LOCKS_CONCRETE_INDEX_NAME } },
+            ],
           });
         });
 
