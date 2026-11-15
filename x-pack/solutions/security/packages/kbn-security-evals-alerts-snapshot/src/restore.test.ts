@@ -78,7 +78,7 @@ describe('restoreAlertsSnapshot', () => {
     await expect(run(esClient)).resolves.toBeUndefined();
 
     expect(mockRestoreSnapshot).toHaveBeenCalledTimes(2);
-    // once before the first restore, once before the retry (per index pattern)
+    // one de-duplicated delete before the first restore, one before the retry
     expect(indices.delete).toHaveBeenCalledTimes(2);
     expect(indices.refresh).toHaveBeenCalledWith({ index: '_all' });
   });
