@@ -115,6 +115,22 @@ describe('test getDataStateContainer', () => {
       });
     });
 
+    test('starts a fresh session without reading or registering replay data when the flag is disabled', async () => {
+      const { toolkit, tabId, query } = await setup();
+      const { discoverFeatureFlags, data } = toolkit.services;
+      jest.mocked(discoverFeatureFlags.getReplayCacheEnabled).mockReturnValue(false);
+
+      await toolkit.initializeSingleTab({ tabId });
+
+      expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+        searchSessionId: 'new-session',
+        timeRangeAbsolute: query.timefilter.timefilter.getAbsoluteTime(),
+        replayCacheLastFetched: undefined,
+      });
+      expect(data.replayCache.get).not.toHaveBeenCalled();
+      expect(data.replayCache.set).not.toHaveBeenCalled();
+    });
+
     test('refresh after a replay starts a new session with the current time range', async () => {
       const { toolkit, tabId, query } = await setup();
       const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });

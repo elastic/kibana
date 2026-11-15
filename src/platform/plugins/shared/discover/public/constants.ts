@@ -13,5 +13,6 @@ export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
 export const CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY = 'discover.cascadeLayoutEnabled';
 export const SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY = 'discover.sessionHttpApiEnabled';
+export const REPLAY_CACHE_ENABLED_FEATURE_FLAG_KEY = 'discover.replayCacheEnabled';
 
 export { IS_ESQL_DEFAULT_FEATURE_FLAG_KEY } from '@kbn/discover-utils';

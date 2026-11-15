@@ -18,7 +18,12 @@ import { LOGSTASH_FUNCTIONAL_ARCHIVE } from '@kbn/data-plugin/test/scout_search_
 globalSetupHook(
   'Ingest ES data for Background Search UI tests',
   { tag: '@local-stateful-classic' },
-  async ({ esArchiver }) => {
+  async ({ esArchiver, apiServices }) => {
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'discover.replayCacheEnabled': true,
+      },
+    });
   }
 );

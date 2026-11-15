@@ -335,6 +335,10 @@ export function getDataStateContainer({
             searchSessionId = dataRequestParams.searchSessionId;
             isSearchSessionRestored = dataRequestParams.isSearchSessionRestored;
             timeRangeAbsolute = dataRequestParams.timeRangeAbsolute;
+          } else if (!services.discoverFeatureFlags.getReplayCacheEnabled()) {
+            ({ searchSessionId, isSearchSessionRestored } =
+              searchSessionManager.getNextSearchSessionId());
+            timeRangeAbsolute = timefilter.getAbsoluteTime();
           } else {
             const contextKey = getReplayCacheContextKey({
               timeRange: timefilter.getTime(),
