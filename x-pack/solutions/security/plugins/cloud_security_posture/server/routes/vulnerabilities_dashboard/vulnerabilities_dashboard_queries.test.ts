@@ -7,8 +7,8 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
+  CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-  CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';
@@ -33,7 +33,7 @@ describe('vulnerabilities dashboard queries', () => {
   ] as const;
 
   it.each(cases)(
-    '%s searches third-party and native latest indices and tolerates a missing index',
+    '%s searches CNVM and the native scanner alias only, and tolerates a missing index',
     async (_name, run) => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.search.mockResolvedValue(emptySearchResponse);
@@ -41,8 +41,11 @@ describe('vulnerabilities dashboard queries', () => {
       await run(esClient);
 
       const [request] = esClient.search.mock.calls[0];
-      expect(request?.index).toContain(CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN);
-      expect(request?.index).toContain(CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
+      expect(request?.index).toBe(
+        `${CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`
+      );
+      expect(request?.index).not.toContain('security_solution-*');
+      expect(request?.index).not.toContain('security_solution-wiz.vulnerability_latest');
       expect(request?.ignore_unavailable).toBe(true);
       expect(request?.allow_no_indices).toBe(true);
     }

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+
 /**
- * Read alias. It matches the CNVM UI pattern `security_solution-*.vulnerability_latest`, so
- * findings show up in the existing vulnerabilities page without UI changes.
+ * Read alias, shared with the CNVM dashboard and detection-rule builders so they cannot drift.
+ * It matches the CNVM UI pattern `security_solution-*.vulnerability_latest`.
  */
-export const FINDINGS_ALIAS = 'security_solution-native.vulnerability_latest';
+export const FINDINGS_ALIAS = CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN;
 
 export const FINDINGS_INDEX_VERSION = 1;
 
