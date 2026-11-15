@@ -8,6 +8,7 @@
  */
 
 import { networkInterfaces } from 'os';
+import { getPortFromEnv } from '../../utils/common';
 
 /**
  * Advertise addresses a Fleet Server container and an Endpoint VM can reach.
@@ -41,4 +42,5 @@ export const getEdrRealFleetHostIp = (): string => {
 };
 
 export const EDR_REAL_FLEET_SERVER_PORT = 8220;
-export const EDR_REAL_FLEET_ES_PORT = 9220;
+// Same env override as the default server configs this set extends.
+export const EDR_REAL_FLEET_ES_PORT = getPortFromEnv('TEST_ES_PORT', 9220);

@@ -31,7 +31,7 @@ const hostIp = getEdrRealFleetHostIp();
 
 if (hostIp === '0.0.0.0') {
   throw new Error(
-    'EDR real-Fleet serverless needs a routable host IP. 0.0.0.0 makes Docker publish both 127.0.0.1:9220 and 0.0.0.0:9220, which fails with "address already in use". Set KIBANA_LOCALHOST_REAL_IP to a non-loopback IPv4 address.'
+    `EDR real-Fleet serverless needs a routable host IP. 0.0.0.0 makes Docker publish both 127.0.0.1:${EDR_REAL_FLEET_ES_PORT} and 0.0.0.0:${EDR_REAL_FLEET_ES_PORT}, which fails with "address already in use". Set KIBANA_LOCALHOST_REAL_IP to a non-loopback IPv4 address.`
   );
 }
 
