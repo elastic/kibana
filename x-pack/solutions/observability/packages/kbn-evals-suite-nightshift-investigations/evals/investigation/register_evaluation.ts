@@ -14,6 +14,7 @@ import { evaluate } from '../../src/evaluate';
 import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
+import { getDatasetSandboxAllowlist, replaceSandboxAllowlist } from './sandbox_allowlist';
 import {
   ORCABENCH_ES_CONNECTOR_ID,
   saveConnectorSetOnInvestigator,
@@ -160,6 +161,7 @@ export const registerInvestigationEvaluation = ({
           connectorId: connector.id,
         });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
+        await replaceSandboxAllowlist(fetch, getDatasetSandboxAllowlist(dataset));
         const knowledgeMetadata = await restoreKnowledge({ esClient, log });
         const runExperiment = ({
           runConcurrency,

@@ -289,7 +289,8 @@ evaluations cluster changes nothing until the entry is updated. Scores are attri
 dataset name, so each cut is its own series in the dashboards.
 
 Golden cuts must carry the `customer0` tag (`requiredTags`), which applies the Customer-0 custom
-context and the retrospective guardrail. A dataset without it fails the run before any
+context, the retrospective guardrail and the [sandbox egress rules](#sandbox-egress) for cloning
+Elastic's repositories. A dataset without it fails the run before any
 investigation starts.
 
 ### Running a new golden cut in CI
@@ -383,6 +384,21 @@ completed investigation or placeholder score alone does not prove connectivity.
 Leave the Elasticsearch settings unset for the bundled synthetic examples; they need no connector. The
 former `remote` selection and `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file
 workflow.
+
+### Sandbox egress
+
+The sandbox reaches only its connectors' hosts and the space's sandbox egress rules (Nightshift
+settings, `PUT /internal/nightshift/sandbox_allowlist`). Next to its custom context, the eval
+replaces the default space's rules with the ones the dataset needs
+([`sandbox_allowlist.ts`](evals/investigation/sandbox_allowlist.ts)): git smart HTTP to the
+repositories that context points at, `elastic/kibana` and `elastic/elasticsearch` for Customer-0
+and `open-telemetry/opentelemetry-demo` for ORCA. Only `git clone` and `git fetch` get through,
+so the rest of github.com, including issues and pull requests, stays blocked. Other datasets run
+with no rules. The reinforcement micro-eval restores the previous rules when it ends.
+
+Every investigation records `sandbox_egress_denied`, the number of sandbox commands the firewall
+refused (`CONNECT tunnel failed, response 403`, or a `sandbox_egress_denied` response). Above zero,
+the agent needed a host the rules leave out.
 
 ## Reinforcement micro-eval
 
@@ -688,7 +704,8 @@ one custom context snippet (`ORCA_CUSTOM_CONTEXT` in
 `github.com/open-telemetry/opentelemetry-demo` at commit `fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733`,
 the commit the paper's environment is built on. The paper's agents find that checkout at
 `/app/opentelemetry-demo`; ours clone it in the sandbox, as the customer0 space points at Elastic's
-repositories. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+repositories. The space's [sandbox egress rules](#sandbox-egress) allow that clone. ORCA runs before
+they did, up to 11 November 2026, had no source code: every clone was refused. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
 as a benchmark result again only after its windows end at detection time.
 

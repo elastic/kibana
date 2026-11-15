@@ -40,21 +40,33 @@ export const ORCA_CUSTOM_CONTEXT: readonly string[] = [
   `Source code: the system is the OpenTelemetry Astronomy Shop demo, and its source is public: github.com/open-telemetry/opentelemetry-demo at commit ${ORCA_DEMO_COMMIT} (blobless clone in the sandbox with \`git clone --filter=blob:none\`, then \`git checkout ${ORCA_DEMO_COMMIT}\`; find files with \`git ls-tree\`/\`git grep\`, don't guess paths).`,
 ];
 
-/**
- * The custom context snippets an investigation dataset runs with. Stored datasets are not named
- * `nightshift/customer0…`, so they are recognized by their `customer0` tag.
- */
-export const getDatasetCustomContext = ({
-  name,
-  tags = [],
-}: {
+export interface DatasetIdentity {
   name: string;
   tags?: readonly string[];
-}): readonly string[] => {
-  if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) {
-    return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
+}
+
+/**
+ * Which deployment's space an investigation dataset reproduces, if any. Stored datasets are not
+ * named `nightshift/customer0…`, so they are recognized by their `customer0` tag.
+ */
+export const getDatasetEnvironment = ({
+  name,
+  tags = [],
+}: DatasetIdentity): 'customer0' | 'orca' | undefined => {
+  if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) return 'customer0';
+  return name.startsWith('nightshift/orca-') ? 'orca' : undefined;
+};
+
+/** The custom context snippets an investigation dataset runs with. */
+export const getDatasetCustomContext = (dataset: DatasetIdentity): readonly string[] => {
+  switch (getDatasetEnvironment(dataset)) {
+    case 'customer0':
+      return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
+    case 'orca':
+      return ORCA_CUSTOM_CONTEXT;
+    default:
+      return [];
   }
-  return name.startsWith('nightshift/orca-') ? ORCA_CUSTOM_CONTEXT : [];
 };
 
 /** The space's current custom context snippets, in stored order. */

@@ -18,6 +18,11 @@ import {
   readCustomContext,
   replaceCustomContext,
 } from '../investigation/custom_context';
+import {
+  getDatasetSandboxAllowlist,
+  readSandboxAllowlist,
+  replaceSandboxAllowlist,
+} from '../investigation/sandbox_allowlist';
 import { enableNightshiftSpace } from '../investigation/space_setup';
 import {
   TRACES_FILE_DATASET_NAME,
@@ -221,8 +226,10 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
       await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
       await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: false });
       const previousCustomContext = await readCustomContext(fetch);
+      const previousSandboxAllowlist = await readSandboxAllowlist(fetch);
       try {
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
+        await replaceSandboxAllowlist(fetch, getDatasetSandboxAllowlist(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
             name: 'Nightshift reinforcement micro-eval',
@@ -248,6 +255,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
         });
       } finally {
         await replaceCustomContext(fetch, previousCustomContext);
+        await replaceSandboxAllowlist(fetch, previousSandboxAllowlist);
       }
     }
   );

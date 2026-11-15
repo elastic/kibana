@@ -84,5 +84,7 @@ export interface InvestigationTaskOutput {
   tool_call_trajectory?: TrajectoryStep[];
   /** Counted before `tool_call_trajectory` is bounded, so it can exceed that list's length. */
   tool_call_count?: number;
+  /** Sandbox commands the egress firewall refused, counted over the whole conversation. */
+  sandbox_egress_denied_count?: number;
   usage?: InvestigationUsage;
 }
