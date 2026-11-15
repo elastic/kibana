@@ -25,8 +25,8 @@ import { buildAdvisoryIndex, matchHost } from '../lib/matcher';
 import { ensureFindingsIndex, writeFindings } from '../lib/findings';
 import {
   emptyState,
-  MAX_STATE_MESSAGE_LENGTH,
   stateSchemaByVersion,
+  truncate,
   type LatestTaskStateSchema,
 } from './task_state';
 
@@ -75,8 +75,6 @@ export class ScanFailedError extends Error {
     this.name = 'ScanFailedError';
   }
 }
-
-const truncate = (text: string): string => text.slice(0, MAX_STATE_MESSAGE_LENGTH);
 
 const releaseKey = ({ family, version }: FeedOs): string => `${family}:${version}`;
 

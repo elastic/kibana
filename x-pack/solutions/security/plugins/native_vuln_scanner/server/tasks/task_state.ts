@@ -12,6 +12,14 @@ export const MAX_STATE_ENTRIES = 500;
 export const MAX_STATE_KEY_LENGTH = 128;
 export const MAX_STATE_MESSAGE_LENGTH = 2048;
 
+/** Cuts text to the state bound without splitting a surrogate pair. */
+export const truncate = (text: string, max: number = MAX_STATE_MESSAGE_LENGTH): string => {
+  if (text.length <= max) return text;
+  const lastCode = text.charCodeAt(max - 1);
+  const isHighSurrogate = lastCode >= 0xd800 && lastCode <= 0xdbff;
+  return text.slice(0, isHighSurrogate ? max - 1 : max);
+};
+
 const validateEntryCount = (value: Record<string, unknown>): string | undefined =>
   Object.keys(value).length > MAX_STATE_ENTRIES
     ? `expected at most ${MAX_STATE_ENTRIES} entries`
@@ -54,7 +62,30 @@ const lastRunSchema = schema.object({
  */
 export const stateSchemaByVersion = {
   1: {
-    up: (state: Record<string, unknown>) => ({ lastRun: state.lastRun }),
+    up: (state: Record<string, unknown>) => {
+      const lastRun = state.lastRun as
+        | { error?: unknown; failures?: Record<string, unknown> }
+        | undefined;
+      // States written before the bounds existed must still validate once loaded.
+      if (!lastRun || typeof lastRun !== 'object') return { lastRun };
+      const { error, failures } = lastRun;
+      return {
+        lastRun: {
+          ...lastRun,
+          ...(typeof error === 'string' ? { error: truncate(error) } : {}),
+          ...(failures && typeof failures === 'object'
+            ? {
+                failures: Object.fromEntries(
+                  Object.entries(failures).map(([key, message]) => [
+                    key,
+                    typeof message === 'string' ? truncate(message) : message,
+                  ])
+                ),
+              }
+            : {}),
+        },
+      };
+    },
     schema: schema.object({ lastRun: schema.maybe(lastRunSchema) }),
   },
 };

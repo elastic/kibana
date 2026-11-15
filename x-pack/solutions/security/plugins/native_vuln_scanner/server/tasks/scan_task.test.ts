@@ -18,7 +18,7 @@ import type { AgentInventoryRows } from '../lib/inventory';
 import { findInventoryScheduleIds, readAgentInventories } from '../lib/inventory';
 import { ensureFindingsIndex, writeFindings } from '../lib/findings';
 import type { ScanDeps } from './scan_task';
-import { MAX_STATE_MESSAGE_LENGTH, stateSchemaByVersion } from './task_state';
+import { MAX_STATE_MESSAGE_LENGTH, stateSchemaByVersion, truncate } from './task_state';
 import {
   registerScanTask,
   runScan,
@@ -467,6 +467,25 @@ describe('task state schema', () => {
     expect(() => schema.validate(up({ unrelated: 1 }))).not.toThrow();
   });
 
+  it('truncates oversized messages of a state written before the bounds existed', () => {
+    const long = 'x'.repeat(MAX_STATE_MESSAGE_LENGTH * 2);
+    const migrated = up({
+      lastRun: {
+        runId: 'r1',
+        finishedAt: '2026-11-13T00:00:00.000Z',
+        status: 'failed',
+        hosts: 1,
+        findings: 0,
+        releases: { 'rhel:9': 'failed' },
+        failures: { 'rhel:9': long },
+        error: long,
+      },
+    });
+    expect(() => schema.validate(migrated)).not.toThrow();
+    expect(migrated.lastRun?.error).toHaveLength(MAX_STATE_MESSAGE_LENGTH);
+    expect(migrated.lastRun?.failures?.['rhel:9']).toHaveLength(MAX_STATE_MESSAGE_LENGTH);
+  });
+
   it('rejects unbounded messages and maps', () => {
     const lastRun = {
       runId: 'r1',
@@ -487,5 +506,21 @@ describe('task state schema', () => {
         },
       })
     ).toThrow();
+  });
+});
+
+describe('truncate', () => {
+  it('leaves text within the bound alone', () => {
+    expect(truncate('abc', 3)).toBe('abc');
+  });
+
+  it('cuts at the bound', () => {
+    expect(truncate('abcdef', 3)).toBe('abc');
+  });
+
+  it('does not split a surrogate pair at the cut', () => {
+    // '😀' is two UTF-16 code units; a cut after the first would leave a lone surrogate.
+    expect(truncate('ab😀cd', 3)).toBe('ab');
+    expect(truncate('ab😀cd', 4)).toBe('ab😀');
   });
 });
