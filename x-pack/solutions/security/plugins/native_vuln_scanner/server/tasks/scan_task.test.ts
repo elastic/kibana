@@ -444,9 +444,7 @@ describe('task state schema', () => {
       schema.validate({
         lastRun: {
           ...lastRun,
-          releases: Object.fromEntries(
-            Array.from({ length: 501 }, (_, i) => [`r${i}`, 'matched'])
-          ),
+          releases: Object.fromEntries(Array.from({ length: 501 }, (_, i) => [`r${i}`, 'matched'])),
         },
       })
     ).toThrow();

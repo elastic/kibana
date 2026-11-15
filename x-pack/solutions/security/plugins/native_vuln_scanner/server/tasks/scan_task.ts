@@ -235,7 +235,10 @@ export const registerScanTask = (
             const failures =
               failed instanceof ScanFailedError
                 ? Object.fromEntries(
-                    Object.entries(failed.failures).map(([key, message]) => [key, truncate(message)])
+                    Object.entries(failed.failures).map(([key, message]) => [
+                      key,
+                      truncate(message),
+                    ])
                   )
                 : undefined;
             const partial = failed instanceof ScanFailedError ? failed.summary : undefined;
