@@ -24,6 +24,10 @@ import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
 } from '../../../lib/significant_events/events/cleanup_stale_events';
+import {
+  DEFAULT_STALE_RECOVERING_AFTER_HOURS,
+  MAX_STALE_RECOVERING_AFTER_HOURS,
+} from '../../../lib/significant_events/events/constants';
 import type { DetectionClient } from '../../../lib/significant_events/detections';
 import {
   attachInvestigationState,
@@ -437,20 +441,28 @@ const cleanupStaleEventsRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Close stale significant events',
-    description: 'Closes open significant events when none of their backing rules still exist.',
+    description: `Closes open significant events when none of their backing rules still exist, and closes events left recovering with no new version for longer than staleRecoveringAfterHours (${DEFAULT_STALE_RECOVERING_AFTER_HOURS} by default, 1 to ${MAX_STALE_RECOVERING_AFTER_HOURS}). The daily cleanup workflow calls it, so a timed-out event closes on its next run.`,
   },
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z
-      .object({
-        candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
-      })
-      .nullish(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z
+        .object({
+          candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
+          staleRecoveringAfterHours: z
+            .number()
+            .int()
+            .min(1)
+            .max(MAX_STALE_RECOVERING_AFTER_HOURS)
+            .optional(),
+        })
+        .nullish(),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -470,6 +482,8 @@ const cleanupStaleEventsRoute = createServerRoute({
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
       workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
+      staleRecoveringAfterHours:
+        params?.body?.staleRecoveringAfterHours ?? DEFAULT_STALE_RECOVERING_AFTER_HOURS,
     });
   },
 });

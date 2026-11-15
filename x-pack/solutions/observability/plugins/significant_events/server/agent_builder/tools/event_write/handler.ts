@@ -17,6 +17,7 @@ import {
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
 } from '../bulk_write';
+import { RECOVERY_TIMEOUT_ASSESSMENT_NOTE } from '../../../lib/significant_events/events/cleanup_stale_events';
 import { assessMembers } from '../../../lib/significant_events/events/event_members';
 import {
   decideLifecycle,
@@ -292,7 +293,8 @@ const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is R
  * when there is one; a deactivate without a reason is not held, because that close only copies the
  * agent's last note. With no such action, the note on the closing version is read, but only when
  * the deactivation lookup succeeded. A write that carries `reopen_deactivated` has read it and goes
- * through, and so does one with no note to read (blank or the standard no-reason note). Only a
+ * through, and so does one with no note to read (blank, the standard no-reason note, or the note of
+ * the automatic close after a recovery timeout, which no operator wrote). Only a
  * new-event batch that a closed series covers can be held: an item that names a closed event itself
  * has no series head to look up.
  */
@@ -336,8 +338,13 @@ const holdDeactivatedReopens = async ({
     const fullNote = (action ? action.reason : lookupFailed ? '' : closingNote ?? '').trim();
     const note = fullNote.slice(0, MAX_HELD_NOTE_LENGTH);
     const truncated = fullNote.length > MAX_HELD_NOTE_LENGTH;
-    // A close that says nothing gives the agent nothing to read.
-    if (note === '' || note === operatorFallbackAssessmentNote('inactive')) {
+    // A close that says nothing gives the agent nothing to read, and neither does the automatic close
+    // after a recovery timeout: no operator decided it.
+    if (
+      note === '' ||
+      note === operatorFallbackAssessmentNote('inactive') ||
+      note === RECOVERY_TIMEOUT_ASSESSMENT_NOTE
+    ) {
       stage.kept.push(candidate);
       return;
     }

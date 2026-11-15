@@ -71,13 +71,12 @@ const listHandlerParams = ({
 };
 
 describe('POST /internal/significant_events/events/_cleanup', () => {
-  it('runs cleanup with manage-scoped event and rule clients', async () => {
-    mockCleanupStaleEvents.mockResolvedValue({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
-    const eventClient = {};
-    const rulesClient = {};
+  const eventClient = {};
+  const rulesClient = {};
 
-    const result = await cleanupRoute.handler({
-      params: { body: { candidateRuleIds: ['rule-1'] } },
+  const runCleanup = (params: unknown) =>
+    cleanupRoute.handler({
+      params,
       request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
@@ -89,12 +88,66 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       logger,
     } as never);
 
+  beforeEach(() => {
+    mockCleanupStaleEvents.mockReset();
+    mockCleanupStaleEvents.mockResolvedValue({
+      scanned: 1,
+      closed: 1,
+      timedOut: 0,
+      kept: 0,
+      skipped: 0,
+      failed: 0,
+    });
+  });
+
+  it('runs cleanup with manage-scoped event and rule clients, applying the default timeout', async () => {
+    const result = await runCleanup({ body: { candidateRuleIds: ['rule-1'] } });
+
     expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
       eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-1'],
+      staleRecoveringAfterHours: 48,
     });
-    expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
+    expect(result).toEqual({ scanned: 1, closed: 1, timedOut: 0, kept: 0, skipped: 0, failed: 0 });
+  });
+
+  it.each([
+    ['no body', {}],
+    ['a null body', { body: null }],
+  ])('applies the default timeout with %s', async (_label, params) => {
+    await runCleanup(params);
+
+    expect(mockCleanupStaleEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ staleRecoveringAfterHours: 48 })
+    );
+  });
+
+  it('passes the timeout the body sets', async () => {
+    await runCleanup({ body: { staleRecoveringAfterHours: 24 } });
+
+    expect(mockCleanupStaleEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ staleRecoveringAfterHours: 24 })
+    );
+  });
+
+  it.each([
+    ['no body', {}],
+    ['a null body', { body: null }],
+    ['the largest timeout', { body: { staleRecoveringAfterHours: 720 } }],
+    ['the smallest timeout', { body: { staleRecoveringAfterHours: 1 } }],
+  ])('accepts %s', (_label, input) => {
+    expect(cleanupRoute.params.safeParse(input).success).toBe(true);
+  });
+
+  it.each([
+    ['zero', 0],
+    ['more than the maximum', 721],
+    ['a fraction', 1.5],
+  ])('rejects a timeout of %s', (_label, staleRecoveringAfterHours) => {
+    expect(cleanupRoute.params.safeParse({ body: { staleRecoveringAfterHours } }).success).toBe(
+      false
+    );
   });
 });
 

@@ -14,6 +14,7 @@ import type {
   CausalFeature,
 } from '@kbn/significant-events-schema';
 import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
+import { RECOVERY_TIMEOUT_ASSESSMENT_NOTE } from '../../../lib/significant_events/events/cleanup_stale_events';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
@@ -1366,6 +1367,39 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       findByEventId: jest.fn().mockResolvedValue({ hits: [closed] }),
     });
 
+  it('reopens a series that closed while recovering, which stores only refuted verdicts', async () => {
+    const [recoveringResult] = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({
+          hits: [
+            makeStoredEvent(closedEventId, {
+              status: 'active',
+              signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+            }),
+          ],
+        }),
+      }),
+      inputs: [
+        {
+          ...baseInput,
+          event_id: closedEventId,
+          status: undefined,
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'refutes' })],
+        },
+      ],
+    });
+    expect(recoveringResult).toMatchObject({ written: true, status: 'recovering' });
+    const [recoveringVersion] = writtenDocs();
+    alertEventsClient.createAlertEvent.mockClear();
+
+    const [reopened] = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries({ ...recoveringVersion, status: 'inactive' }),
+      inputs: [reopeningBreachFor('rule-a')],
+    });
+
+    expect(reopened).toMatchObject({ written: true, event_id: closedEventId, status: 'active' });
+  });
+
   it('holds the reopen of a closed series and returns the note that closed it', async () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: clientWithClosedSeries(
@@ -1559,6 +1593,7 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     it.each([
       ['blank', ''],
       ['the standard no-reason note', operatorFallbackAssessmentNote('inactive')],
+      ['the automatic close after a recovery timeout', RECOVERY_TIMEOUT_ASSESSMENT_NOTE],
     ])('does not hold a close whose only note is %s', async (_label, note) => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(

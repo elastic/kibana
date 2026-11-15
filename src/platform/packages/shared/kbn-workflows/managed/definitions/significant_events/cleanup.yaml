@@ -2,7 +2,10 @@
 #
 # One instance is installed per Kibana space on the first discovery execution
 # in that space. It then runs daily to close open events whose backing rules no
-# longer exist.
+# longer exist, and events left `recovering` with no new version for longer
+# than the default timeout (48h). It posts no body, so the route applies that
+# default; a timed-out event closes on the first run after the timeout, up to
+# 24h later because the workflow runs daily.
 
 version: '1'
 name: 'Significant Events Cleanup'
