@@ -418,6 +418,9 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   // To clear focus
   cy.get('body').type('{esc}');
+  // `click()` doesn't move the real mouse, so it can still be on the cell from a previous action.
+  // Move it away so the hover below triggers the cell's `:hover` state again.
+  cy.get('body').realHover({ position: 'topLeft', scrollBehavior: false });
   cy.get(propertySelector).eq(rowIndex).should('be.visible');
   cy.get(propertySelector).eq(rowIndex).realHover();
   cy.get(actionSelector).first().should('be.visible');

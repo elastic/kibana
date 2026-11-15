@@ -10,7 +10,7 @@ import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import numeral from '@elastic/numeral';
@@ -46,7 +46,7 @@ import { useVisualizationResponse } from '../../../../common/components/visualiz
 export const DETECTIONS_HISTOGRAM_ID = 'detections-histogram';
 
 const ViewAlertsFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeL};
+  margin-left: ${({ theme }) => theme.euiTheme.size.l};
 `;
 
 const CHART_HEIGHT = 155; // px

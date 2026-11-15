@@ -10,7 +10,7 @@ import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { i18n } from '@kbn/i18n';
 import { useThemes } from '../../../../../common/components/charts/common';
@@ -45,7 +45,7 @@ export interface Props {
 }
 
 const LegendContainer = styled.div`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+  margin-left: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 const ChartFlexItem = styled(EuiFlexItem)<{ $minChartHeight: number }>`
