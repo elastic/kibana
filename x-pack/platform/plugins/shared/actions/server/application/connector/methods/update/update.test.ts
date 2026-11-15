@@ -1402,7 +1402,7 @@ describe('update()', () => {
       ]);
     });
 
-    test('rejects the flag on a non-dual type', async () => {
+    test('rejects the flag on a type without inbound events', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValue({
         ...dualExisting,
         attributes: {
@@ -1428,9 +1428,7 @@ describe('update()', () => {
           id: 'connector-id',
           action: { name: 'renamed', config: {}, secrets: {}, isInboundEventsEnabled: true },
         })
-      ).rejects.toThrow(
-        'Inbound events can only be turned on for connectors that both send and receive.'
-      );
+      ).rejects.toThrow('Inbound events can only be turned on for connectors that receive events.');
       expect(preSaveHook).not.toHaveBeenCalled();
     });
   });

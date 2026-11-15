@@ -15306,7 +15306,6 @@
     "xpack.actions.serverSideErrors.connectorEventIdentityUiamUnsupported": "不能使用云 API 密钥保存此入站连接器。云 API 密钥仅支持无服务器环境；请改用项目级 Elasticsearch API 密钥。",
     "xpack.actions.serverSideErrors.connectorIdConflict": "已有连接器正在使用此 ID：{id}。选择不同的 ID。",
     "xpack.actions.serverSideErrors.expirerdLicenseErrorMessage": "操作类型 {actionTypeId} 已禁用，因为您的{licenseType}许可证已过期。",
-    "xpack.actions.serverSideErrors.inboundEventsToggleNotDual": "入站事件只能针对同时具备发送和接收功能的连接器启用。",
     "xpack.actions.serverSideErrors.invalidLicenseErrorMessage": "操作类型 {actionTypeId} 已禁用，因为您的{licenseType}许可证不支持。请升级您的许可证。",
     "xpack.actions.serverSideErrors.kibanaManagedAuthTypeForbidden": "身份验证类型 {authTypeId} 由 {kibana} 设置，无法在连接器上进行配置。操作类型：{actionTypeId}。",
     "xpack.actions.serverSideErrors.noConnectorSigningKey": "此连接器没有签名密钥。创建新连接器以获取密钥。",

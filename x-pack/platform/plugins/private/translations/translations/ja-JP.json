@@ -15313,7 +15313,6 @@
     "xpack.actions.serverSideErrors.connectorEventIdentityUiamUnsupported": "この受信コネクターを保存するためにCloud APIキーを使用することはできません。Cloud APIキーはサーバーレス環境でのみサポートされています。代わりにプロジェクトスコープのElasticsearch APIキーを使用してください。",
     "xpack.actions.serverSideErrors.connectorIdConflict": "コネクタが既にこのIDを使用しています: {id}。別のIDを選択してください。",
     "xpack.actions.serverSideErrors.expirerdLicenseErrorMessage": "{licenseType} ライセンスの期限が切れたのでアクションタイプ {actionTypeId} は無効です。",
-    "xpack.actions.serverSideErrors.inboundEventsToggleNotDual": "送信と受信の両方を行うコネクタでのみ、インバウンドイベントを有効にできます。",
     "xpack.actions.serverSideErrors.invalidLicenseErrorMessage": "{licenseType}ライセンスの期限が切れたのでアクションタイプ{actionTypeId}はサポートされていません。ライセンスをアップグレードしてください。",
     "xpack.actions.serverSideErrors.kibanaManagedAuthTypeForbidden": "認証タイプ {authTypeId} は {kibana} によって設定されており、コネクターでは構成できません。アクションタイプ：{actionTypeId}。",
     "xpack.actions.serverSideErrors.noConnectorSigningKey": "このコネクターには署名キーがありません。キーを取得するには、新しいコネクターを作成してください。",

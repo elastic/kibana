@@ -15334,7 +15334,6 @@
     "xpack.actions.serverSideErrors.connectorEventIdentityUiamUnsupported": "Não é possível usar uma chave de API da nuvem para salvar este conector de entrada. As chaves de API da nuvem são compatíveis apenas com ambientes serverless; em vez disso, use uma chave de API do Elasticsearch com escopo de projeto.",
     "xpack.actions.serverSideErrors.connectorIdConflict": "Um conector já está usando este ID: {id}. Escolha um ID diferente.",
     "xpack.actions.serverSideErrors.expirerdLicenseErrorMessage": "O tipo de ação {actionTypeId} está desativado porque sua licença de {licenseType} expirou.",
-    "xpack.actions.serverSideErrors.inboundEventsToggleNotDual": "Os eventos de entrada só podem ser ativados para conectores que enviam e recebem.",
     "xpack.actions.serverSideErrors.invalidLicenseErrorMessage": "O tipo de ação {actionTypeId} está desativado porque sua licença {licenseType} não oferece suporte. Atualize sua licença.",
     "xpack.actions.serverSideErrors.kibanaManagedAuthTypeForbidden": "O tipo de autenticação {authTypeId} é definido por {kibana} e não pode ser configurado em um conector. Tipo de ação: {actionTypeId}.",
     "xpack.actions.serverSideErrors.noConnectorSigningKey": "Este conector não possui uma chave de assinatura. Crie um novo conector para obter uma chave.",

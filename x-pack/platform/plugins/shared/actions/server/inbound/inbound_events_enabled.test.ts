@@ -28,9 +28,22 @@ jest.mock('@kbn/connector-specs', () => {
 });
 
 describe('resolveInboundEventsEnabled', () => {
-  it('is always true for inbound-only types', () => {
+  it('follows last-saver identity for inbound-only types', () => {
+    expect(
+      resolveInboundEventsEnabled({ actionTypeId: '.inboundWebhook', hasIdentity: true })
+    ).toBe(true);
     expect(
       resolveInboundEventsEnabled({ actionTypeId: '.inboundWebhook', hasIdentity: false })
+    ).toBe(false);
+  });
+
+  it('is true for inbound-only types that have events enabled without last-saver identity', () => {
+    expect(
+      resolveInboundEventsEnabled({
+        actionTypeId: '.inboundWebhook',
+        hasIdentity: false,
+        eventsEnabled: true,
+      })
     ).toBe(true);
   });
 
@@ -58,10 +71,13 @@ describe('resolveInboundEventsEnabled', () => {
 });
 
 describe('shouldMintInboundIdentity', () => {
-  it('is true for inbound-only regardless of the flag', () => {
+  it('is true for inbound-only only when enabled', () => {
+    expect(
+      shouldMintInboundIdentity({ actionTypeId: '.inboundWebhook', isInboundEventsEnabled: true })
+    ).toBe(true);
     expect(
       shouldMintInboundIdentity({ actionTypeId: '.inboundWebhook', isInboundEventsEnabled: false })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('is true for dual only when enabled', () => {
@@ -96,16 +112,16 @@ describe('assertInboundEventsToggleAllowed', () => {
   it('rejects an explicit flag on outbound-only types', () => {
     expect(() =>
       assertInboundEventsToggleAllowed({ actionTypeId: '.slack', requestedEnabled: true })
-    ).toThrow('Inbound events can only be turned on for connectors that both send and receive.');
+    ).toThrow('Inbound events can only be turned on for connectors that receive events.');
   });
 
-  it('rejects an explicit flag on inbound-only types', () => {
+  it('allows an explicit flag on inbound-only types', () => {
     expect(() =>
       assertInboundEventsToggleAllowed({
         actionTypeId: '.inboundWebhook',
         requestedEnabled: false,
       })
-    ).toThrow('Inbound events can only be turned on for connectors that both send and receive.');
+    ).not.toThrow();
   });
 });
 
@@ -122,13 +138,28 @@ describe('resolveCreateInboundEventsEnabled', () => {
     ).toBe(true);
   });
 
-  it('keeps inbound-only on', () => {
+  it('defaults inbound-only to on when the flag is omitted', () => {
+    expect(
+      resolveCreateInboundEventsEnabled({
+        actionTypeId: '.inboundWebhook',
+        requestedEnabled: undefined,
+      })
+    ).toBe(true);
+  });
+
+  it('creates inbound-only off when the flag is false', () => {
     expect(
       resolveCreateInboundEventsEnabled({
         actionTypeId: '.inboundWebhook',
         requestedEnabled: false,
       })
-    ).toBe(true);
+    ).toBe(false);
+  });
+
+  it('is off for outbound-only types', () => {
+    expect(
+      resolveCreateInboundEventsEnabled({ actionTypeId: '.slack', requestedEnabled: undefined })
+    ).toBe(false);
   });
 });
 
@@ -144,6 +175,33 @@ describe('resolveUpdateInboundEventsEnabled', () => {
     expect(
       resolveUpdateInboundEventsEnabled({
         actionTypeId: '.dual',
+        requestedEnabled: undefined,
+        previouslyEnabled: false,
+      })
+    ).toBe(false);
+  });
+
+  it('turns inbound-only off and on with an explicit flag', () => {
+    expect(
+      resolveUpdateInboundEventsEnabled({
+        actionTypeId: '.inboundWebhook',
+        requestedEnabled: false,
+        previouslyEnabled: true,
+      })
+    ).toBe(false);
+    expect(
+      resolveUpdateInboundEventsEnabled({
+        actionTypeId: '.inboundWebhook',
+        requestedEnabled: true,
+        previouslyEnabled: false,
+      })
+    ).toBe(true);
+  });
+
+  it('keeps the previous inbound-only state when the flag is omitted', () => {
+    expect(
+      resolveUpdateInboundEventsEnabled({
+        actionTypeId: '.inboundWebhook',
         requestedEnabled: undefined,
         previouslyEnabled: false,
       })

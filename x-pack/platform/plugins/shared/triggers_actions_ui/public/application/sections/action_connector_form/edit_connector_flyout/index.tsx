@@ -29,7 +29,7 @@ import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
-import { connectorTypeIsDual } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -284,20 +284,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
   const inboundSettingsContent = useMemo(() => {
     const inboundConnector = revealedInboundConnector ?? formConnector ?? connector;
-    if (
-      isClusterInboundEventsEnabled &&
-      isInboundIngressConnector(inboundConnector) &&
-      !connectorTypeIsDual(inboundConnector.actionTypeId)
-    ) {
-      return (
-        <InboundIngressCredentials
-          connector={inboundConnector}
-          allowRotate={canSave && !inboundConnector.isPreconfigured}
-          onIngestTokenRotated={onIngestTokenRotated}
-        />
-      );
-    }
-    if (connectorTypeIsDual(inboundConnector.actionTypeId) && isClusterInboundEventsEnabled) {
+    if (isClusterInboundEventsEnabled && isInboundIngressConnector(inboundConnector)) {
       if (inboundConnector.isInboundEventsEnabled === true) {
         return (
           <InboundIngressCredentials
@@ -438,7 +425,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         const previousEnabled =
           (heldConnector ?? formConnector ?? connector).isInboundEventsEnabled === true;
         const enablingNow =
-          connectorTypeIsDual(connector.actionTypeId) &&
+          connectorTypeHasInboundEvents(connector.actionTypeId) &&
           isInboundEventsEnabled === true &&
           !previousEnabled;
 

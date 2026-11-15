@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  connectorTypeHasInboundEvents,
-  connectorTypeIsDual,
-  connectorTypeIsInboundOnly,
-} from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents, connectorTypeIsInboundOnly } from '@kbn/connector-specs';
 import type { ActionConnector } from '../../types';
 
 /**
@@ -41,19 +37,19 @@ export const getInboundIngestToken = (connector: ActionConnector): string | unde
 export const isInboundIngressConnector = (connector: ActionConnector): boolean =>
   connectorTypeHasInboundEvents(connector.actionTypeId);
 
-/** Dual create/update send the flag only when the cluster switch is on. Otherwise the key is unknown and the route returns 400. */
+/** Create/update send the flag only when the cluster switch is on. Otherwise the key is unknown and the route returns 400. */
 export const isInboundEventsEnabledPayload = (
   actionTypeId: string,
   isInboundEventsEnabled: boolean | undefined,
   isClusterInboundEventsEnabled: boolean
 ): { isInboundEventsEnabled?: boolean } => {
-  if (isClusterInboundEventsEnabled && connectorTypeIsDual(actionTypeId)) {
+  if (isClusterInboundEventsEnabled && connectorTypeHasInboundEvents(actionTypeId)) {
     return { isInboundEventsEnabled: isInboundEventsEnabled === true };
   }
   return {};
 };
 
-/** Create stays open and rotates when inbound events are enabled for the cluster and the connector is inbound-only, or dual with inbound turned on. */
+/** Create stays open and rotates when inbound events are enabled for the cluster and turned on for the connector. */
 export const shouldRotateInboundAfterSave = (
   connector: Pick<ActionConnector, 'actionTypeId'> & { isInboundEventsEnabled?: boolean },
   isClusterInboundEventsEnabled: boolean
@@ -61,8 +57,16 @@ export const shouldRotateInboundAfterSave = (
   if (!isClusterInboundEventsEnabled) {
     return false;
   }
-  if (connectorTypeIsInboundOnly(connector.actionTypeId)) {
-    return true;
-  }
-  return connectorTypeIsDual(connector.actionTypeId) && connector.isInboundEventsEnabled === true;
+  return (
+    connectorTypeHasInboundEvents(connector.actionTypeId) &&
+    connector.isInboundEventsEnabled === true
+  );
 };
+
+/** Default for the Receive events switch: on for types that only receive, off for dual types. */
+export const getDefaultInboundEventsEnabled = (
+  actionTypeId: string
+): { isInboundEventsEnabled?: boolean } =>
+  connectorTypeHasInboundEvents(actionTypeId)
+    ? { isInboundEventsEnabled: connectorTypeIsInboundOnly(actionTypeId) }
+    : {};
