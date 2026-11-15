@@ -10,3 +10,4 @@
 export const ACTION_CREATE_CONTROL = 'createControl';
 export const ACTION_CREATE_ESQL_CONTROL = 'createEsqlControl';
 export const ACTION_CREATE_TIME_SLIDER = 'createTimeSlider';
+export const ACTION_CREATE_ESQL_CONTROL_FROM_VALUE_CLICK = 'createEsqlControlFromValueClick';

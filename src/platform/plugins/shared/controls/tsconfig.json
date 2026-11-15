@@ -31,6 +31,8 @@
     "@kbn/field-formats-plugin",
     "@kbn/std",
     "@kbn/esql-types",
+    "@kbn/chart-expressions-common",
+    "@kbn/expressions-plugin",
     "@kbn/css-utils",
     "@kbn/esql-utils",
     "@kbn/esql-controls-utils",
