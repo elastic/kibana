@@ -244,7 +244,14 @@ export const DependentsMap = ({
       {linkNodes.map(renderLinkNode)}
       <g transform={`translate(${centerNode.x}, ${centerNode.y})`}>
         <title>{centerNode.title}</title>
-        <rect width={NODE_WIDTH} height={NODE_HEIGHT} rx={6} fill={euiTheme.colors.primary} />
+        <rect
+          width={NODE_WIDTH}
+          height={NODE_HEIGHT}
+          rx={6}
+          fill={euiTheme.colors.backgroundBaseSubdued}
+          stroke={euiTheme.colors.textParagraph}
+          strokeWidth={2}
+        />
         <text
           x={NODE_WIDTH / 2}
           y={NODE_HEIGHT / 2}
@@ -252,7 +259,7 @@ export const DependentsMap = ({
           textAnchor="middle"
           fontSize={12}
           fontWeight={600}
-          fill={euiTheme.colors.textInverse}
+          fill={euiTheme.colors.textHeading}
         >
           {centerNode.label}
         </text>
