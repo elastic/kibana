@@ -19,6 +19,19 @@ import {
 } from '../../common/aesop_prototype';
 import { enableAesopExplorer, uninstallAesopExplorer } from './explorer_schedule';
 import { registerAesopExplorerRoutes } from './explorer_routes';
+import {
+  AesopExplorerDefaultError,
+  resolveDefaultConnectorId,
+  resolveDefaultDatasetId,
+  resolveDefaultInvestigationId,
+} from './explorer_defaults';
+
+jest.mock('./explorer_defaults', () => ({
+  ...jest.requireActual('./explorer_defaults'),
+  resolveDefaultConnectorId: jest.fn(),
+  resolveDefaultDatasetId: jest.fn(),
+  resolveDefaultInvestigationId: jest.fn(),
+}));
 
 jest.mock('./explorer_schedule', () => ({
   ...jest.requireActual('./explorer_schedule'),
@@ -28,6 +41,15 @@ jest.mock('./explorer_schedule', () => ({
 
 const enableMock = enableAesopExplorer as jest.MockedFunction<typeof enableAesopExplorer>;
 const uninstallMock = uninstallAesopExplorer as jest.MockedFunction<typeof uninstallAesopExplorer>;
+const resolveConnectorMock = resolveDefaultConnectorId as jest.MockedFunction<
+  typeof resolveDefaultConnectorId
+>;
+const resolveDatasetMock = resolveDefaultDatasetId as jest.MockedFunction<
+  typeof resolveDefaultDatasetId
+>;
+const resolveInvestigationMock = resolveDefaultInvestigationId as jest.MockedFunction<
+  typeof resolveDefaultInvestigationId
+>;
 
 const validBody = {
   mode: 'discovery',
@@ -45,6 +67,7 @@ describe('registerAesopExplorerRoutes', () => {
   const createContext = (): SecuritySolutionRequestHandlerContext =>
     ({
       licensing: Promise.resolve({ license: { hasAtLeast } }),
+      core: Promise.resolve({ uiSettings: { client: {} } }),
     } as unknown as SecuritySolutionRequestHandlerContext);
 
   const handler = (method: 'post' | 'delete', path: string) =>
@@ -77,6 +100,9 @@ describe('registerAesopExplorerRoutes', () => {
     spaceIdFor = jest.fn().mockReturnValue('sec');
     enableMock.mockResolvedValue({ documentId: 'doc-1' });
     uninstallMock.mockResolvedValue(undefined);
+    resolveConnectorMock.mockResolvedValue('default-conn');
+    resolveDatasetMock.mockResolvedValue('default-ds');
+    resolveInvestigationMock.mockResolvedValue('default-inv');
 
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(
@@ -116,7 +142,49 @@ describe('registerAesopExplorerRoutes', () => {
       abAgentId: 'agent-1',
       investigationId: 'inv-1',
     });
-    expect(mockResponse.ok).toHaveBeenCalledWith({ body: { document_id: 'doc-1' } });
+    expect(mockResponse.ok).toHaveBeenCalledWith({
+      body: {
+        document_id: 'doc-1',
+        connector_id: 'connector-1',
+        dataset_id: 'dataset-1',
+        investigation_id: 'inv-1',
+      },
+    });
+    expect(resolveConnectorMock).not.toHaveBeenCalled();
+    expect(resolveDatasetMock).not.toHaveBeenCalled();
+    expect(resolveInvestigationMock).not.toHaveBeenCalled();
+  });
+
+  it('resolves omitted ids from the space defaults', async () => {
+    await post({ mode: 'discovery' });
+
+    expect(enableMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        connectorId: 'default-conn',
+        datasetId: 'default-ds',
+        investigationId: 'default-inv',
+      })
+    );
+    expect(resolveDatasetMock).toHaveBeenCalledWith(expect.objectContaining({ spaceId: 'sec' }));
+  });
+
+  it('accepts a body with only the mode', () => {
+    expect(
+      validate('post', AESOP_EXPLORER_ROUTE_PATH, 'body', { mode: 'discovery' })
+    ).toHaveProperty('value');
+  });
+
+  it('returns the status of a defaults failure without enabling', async () => {
+    resolveDatasetMock.mockRejectedValue(new AesopExplorerDefaultError('needs manage_evals', 403));
+
+    await post({ mode: 'discovery' });
+
+    expect(enableMock).not.toHaveBeenCalled();
+    expect(mockResponse.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'needs manage_evals' },
+    });
   });
 
   it('defaults the cadence and the agent', () => {
@@ -179,7 +247,6 @@ describe('registerAesopExplorerRoutes', () => {
 
   it.each([
     ['an unknown mode', { mode: 'other' }],
-    ['a missing connector', { connector_id: undefined }],
     ['an empty dataset id', { dataset_id: '' }],
     ['an oversized investigation id', { investigation_id: 'a'.repeat(513) }],
     ['a template expression as the connector id', { connector_id: '{{ steps.x.output }}' }],

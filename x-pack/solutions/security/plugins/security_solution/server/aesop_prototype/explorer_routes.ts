@@ -24,6 +24,12 @@ import type {
   AesopDriftMonitorRequestDeps,
 } from './drift_monitor_schedule';
 import { enableAesopExplorer, uninstallAesopExplorer } from './explorer_schedule';
+import {
+  AesopExplorerDefaultError,
+  resolveDefaultConnectorId,
+  resolveDefaultDatasetId,
+  resolveDefaultInvestigationId,
+} from './explorer_defaults';
 
 /**
  * AESOP prototype: internal routes that install and enable the explorer in the request's space.
@@ -58,15 +64,16 @@ const bodySchema = schema.object({
     max: 10080,
     defaultValue: AESOP_EXPLORER_INTERVAL_MINUTES,
   }),
-  connector_id: idSchema,
-  dataset_id: idSchema,
+  // Omitted ids are resolved from the space: see explorer_defaults.ts.
+  connector_id: schema.maybe(idSchema),
+  dataset_id: schema.maybe(idSchema),
   ab_agent_id: schema.string({
     minLength: 1,
     maxLength: 512,
     validate: validateSafeId,
     defaultValue: AESOP_EXPLORER_AGENT_ID,
   }),
-  investigation_id: idSchema,
+  investigation_id: schema.maybe(idSchema),
 });
 
 export const registerAesopExplorerRoutes = ({
@@ -114,16 +121,42 @@ export const registerAesopExplorerRoutes = ({
           return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
         }
         try {
-          const { documentId } = await enableAesopExplorer(await resolveDeps(request), {
-            mode: request.body.mode,
-            intervalMinutes: request.body.interval_minutes,
-            connectorId: request.body.connector_id,
-            datasetId: request.body.dataset_id,
-            abAgentId: request.body.ab_agent_id,
-            investigationId: request.body.investigation_id,
+          const deps = await resolveDeps(request);
+          const [, pluginsStart] = await getStartServices();
+          const { body } = request;
+          const defaultsDeps = { pluginsStart, request, spaceId: deps.spaceId, logger };
+          const connectorId =
+            body.connector_id ??
+            (await resolveDefaultConnectorId({
+              ...defaultsDeps,
+              uiSettingsClient: (await context.core).uiSettings.client,
+            }));
+          const datasetId = body.dataset_id ?? (await resolveDefaultDatasetId(defaultsDeps));
+          const investigationId =
+            body.investigation_id ?? (await resolveDefaultInvestigationId(defaultsDeps));
+          const { documentId } = await enableAesopExplorer(deps, {
+            mode: body.mode,
+            intervalMinutes: body.interval_minutes,
+            connectorId,
+            datasetId,
+            abAgentId: body.ab_agent_id,
+            investigationId,
           });
-          return response.ok({ body: { document_id: documentId } });
+          return response.ok({
+            body: {
+              document_id: documentId,
+              connector_id: connectorId,
+              dataset_id: datasetId,
+              investigation_id: investigationId,
+            },
+          });
         } catch (error) {
+          if (error instanceof AesopExplorerDefaultError) {
+            return response.customError({
+              statusCode: error.statusCode,
+              body: { message: error.message },
+            });
+          }
           logger.warn('Failed to enable the AESOP explorer', { error });
           return response.customError({
             statusCode: 500,

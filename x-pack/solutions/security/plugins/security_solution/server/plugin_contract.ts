@@ -64,7 +64,7 @@ import type {
 } from '@kbn/search-inference-endpoints/server';
 import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
-import type { EvalsPluginSetup } from '@kbn/evals-plugin/server';
+import type { EvalsPluginSetup, EvalsPluginStart } from '@kbn/evals-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -128,6 +128,8 @@ export interface SecuritySolutionPluginStartDependencies {
   anonymization: AnonymizationPluginStart;
   llmTasks?: LlmTasksPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Optional. Present when the evals plugin is enabled; the AESOP explorer route reads datasets here. */
+  evals?: EvalsPluginStart;
   mitreAttack?: MitreAttackServerStart;
   workflowsManagement?: WorkflowsServerPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
