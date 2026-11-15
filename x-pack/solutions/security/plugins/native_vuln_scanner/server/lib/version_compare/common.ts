@@ -17,7 +17,7 @@ export const isAlpha = (c: string | undefined): boolean =>
 
 export const sign = (n: number): Ordering => (n < 0 ? -1 : n > 0 ? 1 : 0);
 
-/** Largest epoch the keys encode; larger ones lose precision in JS and overflow in painless. */
+/** Largest epoch the keys encode; both key builders reject anything above it. */
 export const MAX_EPOCH = 999_999_999;
 
 /** Java's String.trim(): strips chars <= U+0020 only, so painless sees the same string. */
