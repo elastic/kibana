@@ -1588,13 +1588,17 @@ describe('UiamService', () => {
 
   describe('#createServiceAccount', () => {
     const roleAssignments = {
-      organization: [
-        {
-          role_id: 'organization-application-only',
-          organization_id: 'organization-id',
-          application_roles: ['viewer'],
-        },
-      ],
+      project: {
+        security: [
+          {
+            role_id: 'security-application-only',
+            organization_id: 'organization-id',
+            all: false,
+            project_ids: ['project-id'],
+            application_roles: ['viewer'],
+          },
+        ],
+      },
     };
     const body = {
       organization_id: 'organization-id',
