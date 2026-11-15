@@ -107,6 +107,29 @@ describe('annotation click helpers', () => {
     ]);
   });
 
+  it('maps the rect ids the chart builds from the annotation id, and not those of other annotations', () => {
+    const range = (id: string) => ({
+      id,
+      time: '2022-03-18T08:25:17.140Z',
+      endTime: '2022-03-31T08:25:17.140Z',
+      type: 'range' as const,
+      label: 'Range',
+    });
+    const rect = (id: string) => ({
+      id,
+      datum: { coordinates: { x0: 1, x1: 2, y0: null, y1: null }, details: 'Range' },
+    });
+
+    const annotations = mapAnnotationClickEvents({
+      lines: [],
+      rects: [rect('range-1______1__2__Range__0'), rect('range-10-extended______1__2__Range__0')],
+      groupedLineAnnotations: [],
+      rangeAnnotations: [range('range-1'), range('range-10')],
+    });
+
+    expect(annotations.map(({ id }) => id)).toEqual(['range-1']);
+  });
+
   it('expands grouped line markers into every source row', () => {
     const rows = [
       pointRow({ id: 'event1', time: '2022-03-18T08:25:00.000Z', label: 'Event 1' }),

@@ -120,6 +120,7 @@ import { SplitChart } from './split_chart';
 import {
   Annotations,
   getAnnotationsGroupedByInterval,
+  isFullyTransparent,
   isRangeAnnotation,
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
@@ -317,6 +318,27 @@ export function XYChart({
 
   const [showLegend, setShowLegend] = useState<boolean>(() => getShowLegendDefault());
 
+  // Memoized, as the annotation tooltips are remounted, and lose the hover, when the range annotations change
+  const [rangeAnnotations, lineAnnotations] = useMemo(
+    () => (isTimeVis ? partition(annotations?.datatable.rows, isRangeAnnotation) : [[], []]),
+    [isTimeVis, annotations?.datatable.rows]
+  );
+
+  // Kept here, outside the chart's children, which the chart doesn't render again when they change their own state
+  const [hoveredRangeAnnotationId, setHoveredRangeAnnotationId] = useState<string>();
+  const onRangeAnnotationHoverChange = useCallback((id: string, isHovered: boolean) => {
+    // Moving to another annotation shows its tooltip before the previous one is removed
+    setHoveredRangeAnnotationId((current) => {
+      if (isHovered) return id;
+      return current === id ? undefined : current;
+    });
+  }, []);
+  // Clicking a visible range annotation can be handled, but the chart only shows a pointer cursor inside the plot area
+  const isClickableRangeAnnotationHovered = rangeAnnotations.some(
+    ({ id, color }) =>
+      id === hoveredRangeAnnotationId && color !== undefined && !isFullyTransparent(color)
+  );
+
   useEffect(() => {
     const legendShow = getShowLegendDefault();
     setShowLegend(legendShow);
@@ -499,9 +521,6 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const [rangeAnnotations, lineAnnotations] = isTimeVis
-    ? partition(annotations?.datatable.rows, isRangeAnnotation)
-    : [[], []];
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     lineAnnotations as PointEventAnnotationRow[],
@@ -838,6 +857,11 @@ export function XYChart({
       ? getAccessorByDimension(splitRowAccessor, splitTable?.columns)
       : undefined;
 
+  // TEMPORARY: the chart sets its cursor inline, so only !important overrides it, from outside its public API
+  const clickableRangeAnnotationStyle = css({
+    '.echChartPointerContainer': { cursor: 'pointer !important' },
+  });
+
   const chartContainerStyle = css({
     width: '100%',
     height: '100%',
@@ -863,7 +887,12 @@ export function XYChart({
   return (
     <>
       <GlobalXYChartStyles />
-      <div css={chartContainerStyle}>
+      <div
+        css={[
+          chartContainerStyle,
+          isClickableRangeAnnotationHovered && clickableRangeAnnotationStyle,
+        ]}
+      >
         {interactive && showLegend !== undefined && uiState && (
           <LegendToggle
             onClick={toggleLegend}
@@ -1151,6 +1180,8 @@ export function XYChart({
             {(rangeAnnotations.length || lineAnnotations.length) && isTimeVis ? (
               <Annotations
                 rangeAnnotations={rangeAnnotations}
+                isRangeAnnotationsHovered={hoveredRangeAnnotationId !== undefined}
+                onRangeAnnotationHoverChange={onRangeAnnotationHoverChange}
                 groupedLineAnnotations={groupedLineAnnotations}
                 timeFormat={timeFormat}
                 isHorizontal={shouldRotate}

@@ -30,7 +30,7 @@ import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { CPSServerSetup } from '@kbn/cps/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { RouteGuard } from './lib/route_guard';
 import type { MlLicense } from '../common/license';
 import type { MlFeatures } from '../common/constants/app';
@@ -81,6 +81,7 @@ export interface PluginsStart {
   spaces?: SpacesPluginStart;
   taskManager: TaskManagerStartContract;
   licensing: LicensingPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface RouteInitialization {

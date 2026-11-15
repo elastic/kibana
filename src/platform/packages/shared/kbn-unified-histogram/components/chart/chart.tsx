@@ -9,8 +9,17 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import type { EuiIconProps } from '@elastic/eui';
+import {
+  EuiDelayRender,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiProgress,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
@@ -47,9 +56,13 @@ import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { ChartConfigPanel } from './chart_config_panel';
 import { useEditVisualization } from './hooks/use_edit_visualization';
+import { useDiscoverAdManagement } from './hooks/use_discover_ad_management';
 import type { LensVisService } from '../../services/lens_vis_service';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
+import { useAnomalyRanges } from './hooks/use_anomaly_ranges';
+import { useAnomalyClick } from './hooks/use_anomaly_click';
+import { addAnomalyOverlayToAttributes } from '../../utils/anomaly_overlay';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 
@@ -81,6 +94,36 @@ export interface UnifiedHistogramChartProps {
   lensActionsOptions?: UnifiedHistogramLensActionsOptions;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
+
+// The buttons of the toolbar all look the same, so the icon fills the button with the background
+const AnomaliesShownIcon = (props: Omit<EuiIconProps, 'type'>) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiIcon
+      {...props}
+      type="machineLearningApp"
+      css={{
+        boxSizing: 'content-box',
+        padding: euiTheme.size.xs,
+        borderRadius: euiTheme.border.radius.small,
+        backgroundColor: euiTheme.colors.backgroundLightPrimary,
+        color: euiTheme.colors.textPrimary,
+      }}
+    />
+  );
+};
+
+const suggestAdJobsLabel = i18n.translate('unifiedHistogram.suggestAdJobsButtonLabel', {
+  defaultMessage: 'Anomaly detection',
+});
+
+const showAnomaliesLabel = i18n.translate('unifiedHistogram.showAnomaliesButtonLabel', {
+  defaultMessage: 'Show anomalies',
+});
+
+const hideAnomaliesLabel = i18n.translate('unifiedHistogram.hideAnomaliesButtonLabel', {
+  defaultMessage: 'Hide anomalies',
+});
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
 const HistogramMemoized = memo(Histogram);
@@ -223,10 +266,35 @@ export function UnifiedHistogramChart({
     }
   );
 
-  const lensPropsContext = useLensProps({
+  const baseLensPropsContext = useLensProps({
     fetch$,
     onLoad,
   });
+
+  const { overlay: anomalyOverlay, jobSelection: anomalyJobSelection } = useAnomalyRanges({
+    services,
+    dataSource,
+    fetch$,
+  });
+  const lensPropsContext = useMemo(
+    () =>
+      baseLensPropsContext && anomalyOverlay?.ranges.length
+        ? {
+            ...baseLensPropsContext,
+            lensProps: {
+              ...baseLensPropsContext.lensProps,
+              attributes: addAnomalyOverlayToAttributes(
+                baseLensPropsContext.lensProps.attributes,
+                anomalyOverlay.ranges,
+                anomalyOverlay.timeRange
+              ),
+            },
+          }
+        : baseLensPropsContext,
+    [baseLensPropsContext, anomalyOverlay]
+  );
+
+  const onAnnotationClick = useAnomalyClick({ services, ranges: anomalyOverlay?.ranges });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
@@ -254,6 +322,8 @@ export function UnifiedHistogramChart({
     lensAttributes: visContext?.attributes,
     lensEditorOptions: lensActionsOptions?.navigation,
   });
+
+  const onSuggestAdJobs = useDiscoverAdManagement({ services, dataSource });
 
   const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
 
@@ -345,6 +415,40 @@ export function UnifiedHistogramChart({
     });
   }
 
+  // Anomaly detection has a group of its own, left of the other actions, with a switch to show the anomalies
+  // of the selected job
+  const anomalyDetectionButtons: IconButtonGroupProps['buttons'] = [];
+  if (anomalyJobSelection?.jobId) {
+    const { showAnomalies, setShowAnomalies } = anomalyJobSelection;
+    const toggleLabel = showAnomalies ? hideAnomaliesLabel : showAnomaliesLabel;
+    anomalyDetectionButtons.push({
+      label: toggleLabel,
+      toolTipContent: toggleLabel,
+      iconType: showAnomalies ? 'eye' : 'eyeSlash',
+      'data-test-subj': 'unifiedHistogramShowAnomalies',
+      onClick: () => setShowAnomalies(!showAnomalies),
+    });
+  }
+  if (onSuggestAdJobs) {
+    anomalyDetectionButtons.push({
+      label: suggestAdJobsLabel,
+      toolTipContent: suggestAdJobsLabel,
+      // Light blue while the chart shows anomalies
+      iconType: anomalyOverlay?.ranges.length ? AnomaliesShownIcon : 'machineLearningApp',
+      'data-test-subj': 'unifiedHistogramSuggestAdJobs',
+      onClick: onSuggestAdJobs,
+    });
+  }
+
+  const anomalyDetectionControls =
+    chartVisible && onSuggestAdJobs ? (
+      <IconButtonGroup
+        legend={suggestAdJobsLabel}
+        buttonSize="s"
+        buttons={anomalyDetectionButtons}
+      />
+    ) : null;
+
   return (
     <>
       <ChartSectionTemplate
@@ -356,12 +460,21 @@ export function UnifiedHistogramChart({
           rightSide: chartVisible ? actions : [],
           additionalControls: {
             prependRight: (
-              <span style={{ marginRight: 4 }}>
-                <ApproximationBadge
-                  isApproximationApplied={chartVisible && isApproximationApplied}
-                  data-test-subj="unifiedHistogramApproximationApplied"
-                />
-              </span>
+              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <span style={{ marginRight: 4 }}>
+                    <ApproximationBadge
+                      isApproximationApplied={chartVisible && isApproximationApplied}
+                      data-test-subj="unifiedHistogramApproximationApplied"
+                    />
+                  </span>
+                </EuiFlexItem>
+                {anomalyDetectionControls ? (
+                  <EuiFlexItem grow={false} css={{ marginRight: 8 }}>
+                    {anomalyDetectionControls}
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
             ),
           },
         }}
@@ -397,6 +510,7 @@ export function UnifiedHistogramChart({
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
+                  onAnnotationClick={onAnnotationClick}
                   onApiAvailable={onApiAvailable}
                 />
               )}

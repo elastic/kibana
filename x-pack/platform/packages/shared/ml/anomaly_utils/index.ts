@@ -119,3 +119,4 @@ export type {
 } from './types';
 
 export { validateCustomFilterFields } from './alerting/custom_filter_validation';
+export { getThemeResolvedSeverityColor } from './use_severity_color';

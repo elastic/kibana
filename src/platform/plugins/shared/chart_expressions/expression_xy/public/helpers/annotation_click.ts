@@ -18,6 +18,11 @@ import type { MergedAnnotation } from '../../common';
 
 const EXTRA_FIELD_PREFIX = 'field:';
 
+// The chart identifies a rect annotation with its spec id followed by `__` and details of the datum
+const RECT_ID_SEPARATOR = '__';
+const isRectOfAnnotation = (rectId: string, annotationId: string): boolean =>
+  rectId === annotationId || rectId.startsWith(`${annotationId}${RECT_ID_SEPARATOR}`);
+
 export const getLineAnnotationChartId = (configId: string, time: string): string =>
   snakeCase(`${configId}-${time}`);
 
@@ -69,7 +74,7 @@ export const mapAnnotationClickEvents = ({
   }
 
   for (const rect of rects) {
-    const range = rangeAnnotations.find((annotation) => annotation.id === rect.id);
+    const range = rangeAnnotations.find((annotation) => isRectOfAnnotation(rect.id, annotation.id));
     if (range) {
       clicked.push(toAnnotationClickDatum(range));
     }

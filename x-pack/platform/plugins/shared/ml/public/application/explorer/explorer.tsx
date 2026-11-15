@@ -623,6 +623,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                 timeBuckets,
                 onSelectEntity: applyFilter,
                 chartsService,
+                colorSelectedIntervalBySeverity: true,
               }}
             />
           ) : null}

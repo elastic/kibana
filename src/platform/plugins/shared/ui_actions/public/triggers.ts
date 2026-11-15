@@ -40,6 +40,10 @@ import {
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER,
+  SUGGEST_AD_JOBS_TRIGGER,
+  DISCOVER_AD_MANAGEMENT_TRIGGER,
+  DISCOVER_AD_ANOMALIES_TRIGGER,
+  DISCOVER_AD_ANOMALY_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
@@ -308,6 +312,44 @@ export const triggers: { [key: string]: Trigger } = {
           'Update project routing for anomaly detection jobs to use cross-project search.',
       }
     ),
+  },
+  [SUGGEST_AD_JOBS_TRIGGER]: {
+    id: SUGGEST_AD_JOBS_TRIGGER,
+    title: i18n.translate('uiActions.triggers.ml.actions.suggestADJobs.title', {
+      defaultMessage: 'Suggest anomaly detection jobs',
+    }),
+    description: i18n.translate('uiActions.triggers.ml.actions.suggestADJobs.description', {
+      defaultMessage: 'Suggest anomaly detection jobs which suit the data in an index.',
+    }),
+  },
+  [DISCOVER_AD_ANOMALIES_TRIGGER]: {
+    id: DISCOVER_AD_ANOMALIES_TRIGGER,
+    title: i18n.translate('uiActions.triggers.ml.actions.discoverADAnomalies.title', {
+      defaultMessage: 'Show anomalies on the Discover chart',
+    }),
+    description: i18n.translate('uiActions.triggers.ml.actions.discoverADAnomalies.description', {
+      defaultMessage:
+        'Provide the time ranges in which anomaly detection jobs found anomalies in an index, to overlay on the chart.',
+    }),
+  },
+  [DISCOVER_AD_ANOMALY_TRIGGER]: {
+    id: DISCOVER_AD_ANOMALY_TRIGGER,
+    title: i18n.translate('uiActions.triggers.ml.actions.discoverADAnomaly.title', {
+      defaultMessage: 'Show an anomaly from the Discover chart',
+    }),
+    description: i18n.translate('uiActions.triggers.ml.actions.discoverADAnomaly.description', {
+      defaultMessage: 'Show the details of an anomaly which was selected on the chart.',
+    }),
+  },
+  [DISCOVER_AD_MANAGEMENT_TRIGGER]: {
+    id: DISCOVER_AD_MANAGEMENT_TRIGGER,
+    title: i18n.translate('uiActions.triggers.ml.actions.discoverADManagement.title', {
+      defaultMessage: 'Manage anomaly detection from Discover',
+    }),
+    description: i18n.translate('uiActions.triggers.ml.actions.discoverADManagement.description', {
+      defaultMessage:
+        'Suggest anomaly detection jobs which suit the data in an index, then create and start the chosen jobs.',
+    }),
   },
   [SWIM_LANE_SELECTION_TRIGGER]: {
     id: SWIM_LANE_SELECTION_TRIGGER,

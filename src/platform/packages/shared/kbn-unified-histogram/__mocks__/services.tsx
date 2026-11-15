@@ -38,6 +38,7 @@ export const unifiedHistogramServicesMock = {
   fieldFormats: fieldFormatsMock,
   uiActions: {
     getTriggerCompatibleActions: jest.fn(() => Promise.resolve([])),
+    executeTriggerActions: jest.fn(() => Promise.resolve()),
   },
   uiSettings: {
     get: jest.fn(),
