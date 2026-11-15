@@ -232,8 +232,10 @@ export const registerScanTask = (
             // task is rescheduled on its interval either way. Marking it unrecoverable would
             // delete the task instead.
             const failed = error instanceof Error ? error : new Error(String(error));
-            // A Task Manager timeout can land before the release loop (index setup, inventory
-            // read); whatever that throws is the abort surfacing, not a scan failure.
+            // Task Manager cancels a run by aborting its signal. An abort before the release loop
+            // surfaces as whatever the index setup or inventory read throws, so the signal decides.
+            // Task Manager keeps this state for a cancel such as an operator pause; on a timeout it
+            // drops the returned state and lastRun keeps the previous run.
             const aborted = signal.aborted;
             const failures =
               failed instanceof ScanFailedError

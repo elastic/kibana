@@ -53,7 +53,12 @@ and the findings only appear at the next scan. To see a first result quickly:
 To check what the last scan did, look for the `Vulnerability scan <run id>: {...}` line in the
 Kibana log (`hosts`, `findings` and per-release `releases` status) and for the `lastRun` object
 in the task state (`native-vuln-scanner:scan` in the `.kibana_task_manager` index). A missing
-pack, a release with no vendor feed and a failed feed download are logged as warnings.
+pack, a release with no vendor feed and a failed feed download are logged as warnings. A run that
+exceeds the task timeout (30 minutes) is cancelled by Task Manager, which drops the state that run
+returns, so `lastRun` keeps the previous run. Such a run shows up only in the Kibana log: Task
+Manager's `Cancelling task ... as it expired` warning, plus the `Vulnerability scan` summary line
+(with `aborted: true`) when the timeout lands while the releases are being processed; a timeout
+during the index setup or the inventory read logs no summary line.
 
 ## Agent runtime requirement
 

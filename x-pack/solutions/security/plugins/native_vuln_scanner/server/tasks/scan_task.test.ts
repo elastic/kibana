@@ -359,7 +359,7 @@ describe('registerScanTask', () => {
     expect(() => stateSchemaByVersion[1].schema.validate(result?.state)).not.toThrow();
   });
 
-  describe('when Task Manager aborts the run at its timeout', () => {
+  describe('when the run is cancelled', () => {
     const runAborted = async (
       load: (os: FeedOs, controller: AbortController) => Promise<LoadFeedResult>
     ) => {
