@@ -10,7 +10,9 @@ The package currently provides:
 - required stable row identity;
 - a fixed header and contained vertical scroll owner;
 - bounded row virtualization with dynamic measurement support;
-- grid markup styled with EUI design tokens.
+- grid markup styled with EUI design tokens;
+- stable logical cell focus, a single composite tab stop, and baseline grid keyboard navigation;
+- semantic focus and scroll commands addressed by row and column ID.
 
 TanStack Table and TanStack Virtual are private implementation details. Consumers must not depend on
 their table, row, column, cell, state, or virtualizer objects.
@@ -32,12 +34,14 @@ const columns = [
     id: 'name',
     header: 'Name',
     getValue: (row) => row.name,
+    getTextValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
   columnHelper.accessor({
     id: 'value',
     header: 'Value',
     getValue: (row) => row.value,
+    getTextValue: ({ value }) => value,
     renderCell: ({ value }) => value,
   }),
 ];
@@ -70,6 +74,29 @@ Text headers provide their own accessible name. Set a column's optional `ariaLab
 rendered header needs a different accessible name, such as an icon-only or abbreviated header.
 Row virtualization is enabled by default. Its estimated height and overscan can be tuned through
 `virtualization.rows`; omitting those options uses the package defaults.
+
+Each column must provide a `getTextValue` callback. It returns the canonical plain-text cell value
+used as the default accessible name and focused-cell clipboard value. It should match the visible
+data semantically and is deliberately separate from `renderCell`, so visual React content never has
+to be inspected or converted back into text.
+
+## Keyboard and focus behavior
+
+The first body cell is the initial tab stop. The last surviving logical cell is restored on later
+entry, and an empty grid uses the named grid itself as its tab stop. Static headers are semantic but
+are not part of the keyboard navigation plane.
+
+- Arrow keys move one cell without wrapping.
+- Home and End move to the first and last cell in the current row.
+- Ctrl/Cmd+Home and Ctrl/Cmd+End move to the first and last body cell.
+- The browser's copy command copies the column-provided text value unless the user has an explicit
+  text selection. Multi-cell text selections are copied as tab-separated columns and
+  newline-separated rows, matching EUIDataGrid.
+
+Consumers that need semantic control can pass `apiRef` and call `focusCell` or `scrollToCell` with a
+stable `{ rowId, columnId }` address. Commands return explicit completed, failed, or cancelled
+results; they never fall back to an unrelated cell when an address is missing, and scrolling
+failures preserve the current active cell and focus.
 
 ## Intentional initial limits
 
