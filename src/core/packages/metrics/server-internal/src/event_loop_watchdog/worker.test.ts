@@ -823,7 +823,7 @@ describe('runWatchdogWorker', () => {
       block(1_500);
       await settle();
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to process an event loop block profile: corrupt profile',
+        'Failed to summarise an event loop block profile: corrupt profile',
         { tags: ['event-loop-watchdog'] }
       );
       expect(sessions[0].disconnect).toHaveBeenCalled();

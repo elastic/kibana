@@ -289,7 +289,7 @@ export const runWatchdogWorker = (
       summary = summarizeProfile(profile, { root, inBlockUntilUs });
     } catch (error) {
       counts.captureFailed++;
-      logger.error(`Failed to process an event loop block profile: ${errorMessage(error)}`, {
+      logger.error(`Failed to summarise an event loop block profile: ${errorMessage(error)}`, {
         tags: ['event-loop-watchdog'],
       });
       return;
