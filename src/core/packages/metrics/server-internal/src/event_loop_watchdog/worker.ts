@@ -43,7 +43,7 @@ export interface WatchdogWorkerDeps {
   nowUs?: () => number;
   heapUsed?: () => number;
   createSession?: () => InspectorSession;
-  /** `workerData` is for startup values that may vary between runs; the worker can determine `REPO_ROOT` itself. */
+  /** Repo root that profile locations are made relative to; defaults to `REPO_ROOT`. Not in `workerData`: the worker resolves `REPO_ROOT` itself. */
   root?: string;
 }
 

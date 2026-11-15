@@ -10,14 +10,7 @@
 import type { LogMeta } from '@kbn/logging';
 import type { WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
 import type { BlockStatsSnapshot } from './block_stats';
-import type {
-  FrameSummary,
-  KibanaFrameSummary,
-  ProfileSummary,
-  TopKibanaFrame,
-} from './profile_summary';
-
-export type { FrameSummary, KibanaFrameSummary, ProfileSummary, TopKibanaFrame };
+import type { ProfileSummary } from './profile_summary';
 
 /** Startup is noisier than steady state, so blocks are counted per phase. */
 export type Phase = 'starting' | 'running';
@@ -78,8 +71,6 @@ export interface ProfileLogMeta extends LogMeta {
         coverage: number;
         /** Time from the request until the profile reached the worker. */
         captureDurationMs: number;
-        /** Number of busy (non-idle) CPU samples within the block. */
-        samples: number;
         /** Number of distinct call-stack frames in the profile. */
         nodes: number;
         /** The worker's heap in bytes after the profile is summarised. */
