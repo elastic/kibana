@@ -37,10 +37,10 @@ import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { getDocumentIdentity } from './get_document_identity';
 import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 import { PaginatedDocumentFlyout } from '../../../flyout_v2/document/pagination/paginated_document_flyout';
 import { usePaginatedFlyout } from '../../../flyout_v2/document/pagination/use_paginated_flyout';
-import type { ScopedPaginationSlice } from '../../../flyout_v2/document/pagination/types';
 import { createCellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -690,10 +690,5 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     </FullWidthFlexGroupTable>
   );
 };
-
-const getDocumentIdentity = (alert: Alert): Partial<ScopedPaginationSlice> => ({
-  flyoutDocumentId: alert._id,
-  flyoutDocumentIndexName: alert._index,
-});
 
 export const AlertsTable = memo(AlertsTableComponent);

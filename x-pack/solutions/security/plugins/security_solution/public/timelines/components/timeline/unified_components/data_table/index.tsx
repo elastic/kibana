@@ -9,6 +9,8 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { RowControlColumn } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
@@ -24,6 +26,7 @@ import {
   SECURITY_CELL_ACTIONS_DEFAULT,
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { getDocumentHistoryTitle } from '../../../../../flyout_v2/document/main/utils/get_header_title';
 import { createCellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
@@ -239,6 +242,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           // search altogether, leaving the flyout on its loading state forever.
           flyoutDocumentIndexName: targetRow.raw._index ?? null,
           totalDocumentCount: tableRows.length,
+          // Only derive the title when the row carries `event.kind`; otherwise an alert would be
+          // mislabelled as an event. The flyout opens with the generic title until it resolves.
+          ...(getFieldValue(targetRow, EVENT_KIND)
+            ? { flyoutHistoryTitle: getDocumentHistoryTitle(targetRow) }
+            : {}),
         };
       },
       [tableRows, openAttackFlyout, refetch]

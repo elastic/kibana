@@ -27,7 +27,11 @@ describe('openConversationDetailsFlyout', () => {
     const onClosed = new Promise<void>((resolve) => {
       resolveClosed = resolve;
     });
-    core.overlays.openSystemFlyout.mockReturnValue({ close, onClose: onClosed });
+    core.overlays.openSystemFlyout.mockReturnValue({
+      close,
+      onClose: onClosed,
+      setTitle: jest.fn(),
+    });
 
     const open = ({
       onClose,

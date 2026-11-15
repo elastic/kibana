@@ -9,8 +9,10 @@ import type { ReactNode } from 'react';
 import React, { Suspense, useCallback } from 'react';
 import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type {
+  OverlaySystemFlyoutOpenOptions,
+  OverlaySystemFlyoutRef,
+} from '@kbn/core-overlays-browser';
 import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../components/flyout_provider';
 import { FlyoutLoading } from '../components/flyout_loading';
@@ -42,7 +44,7 @@ export type OpenFlyout = (
   meta?: FlyoutTelemetryMeta,
   sessionOverride?: MainFlyoutSession,
   options?: OpenFlyoutOptions
-) => OverlayRef;
+) => OverlaySystemFlyoutRef;
 
 /**
  * Shared, instrumented replacement for the `overlays.openSystemFlyout(flyoutProviders({...}),

@@ -15,6 +15,7 @@ import {
   FLYOUT_TYPE,
 } from '../../../common/lib/telemetry';
 import { useOpenFlyout } from '../../shared/hooks/use_open_flyout';
+import { getAlertHistoryTitle } from '../main/utils/get_header_title';
 
 // ---------------------------------------------------------------------------
 // Module mocks
@@ -81,7 +82,8 @@ const openedFlyoutId = (openFlyoutMock: jest.Mock): string =>
 
 describe('usePaginatedFlyout', () => {
   const close = jest.fn();
-  const openFlyout = jest.fn().mockReturnValue({ close });
+  const setTitle = jest.fn();
+  const openFlyout = jest.fn().mockReturnValue({ close, setTitle });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -216,6 +218,77 @@ describe('usePaginatedFlyout', () => {
     expect(resolveDocument).toHaveBeenCalledWith(5);
     expect(result.current.slice.flyoutDocumentIndex).toBeNull();
     expect(openFlyout).not.toHaveBeenCalled();
+  });
+
+  describe('history title', () => {
+    it('opens with the generic title while the document title is unknown', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+
+      act(() => {
+        result.current.openPaginatedFlyout(0);
+      });
+
+      expect(openFlyout.mock.calls[0][1].title).toBe(getAlertHistoryTitle());
+      expect(setTitle).not.toHaveBeenCalled();
+    });
+
+    it('opens with the title the resolver derived from the row', () => {
+      const resolveDocument = jest.fn().mockReturnValue({
+        flyoutDocumentId: 'doc-1',
+        flyoutDocumentIndexName: 'idx',
+        flyoutHistoryTitle: 'Alert: rule A',
+      });
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions({ resolveDocument })));
+
+      act(() => {
+        result.current.openPaginatedFlyout(0);
+      });
+
+      expect(openFlyout.mock.calls[0][1].title).toBe('Alert: rule A');
+    });
+
+    it('retitles the open flyout when the displayed document title changes', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+      act(() => {
+        result.current.openPaginatedFlyout(0);
+      });
+      mockFlyoutManagerSessions([
+        {
+          mainFlyoutId: openedFlyoutId(openFlyout),
+          childFlyoutId: null,
+          historyKey: TEST_HISTORY_KEY,
+        },
+      ]);
+
+      act(() => {
+        result.current.setState({ flyoutHistoryTitle: 'Alert: rule B' });
+      });
+
+      expect(setTitle).toHaveBeenCalledWith('Alert: rule B');
+    });
+  });
+
+  describe('history title with stacked sessions', () => {
+    it('does not retitle while an earlier session shares the history group', () => {
+      const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
+      act(() => {
+        result.current.openPaginatedFlyout(0);
+      });
+      mockFlyoutManagerSessions([
+        { mainFlyoutId: 'rule-flyout', childFlyoutId: null, historyKey: TEST_HISTORY_KEY },
+        {
+          mainFlyoutId: openedFlyoutId(openFlyout),
+          childFlyoutId: null,
+          historyKey: TEST_HISTORY_KEY,
+        },
+      ]);
+
+      act(() => {
+        result.current.setState({ flyoutHistoryTitle: 'Alert: rule B' });
+      });
+
+      expect(setTitle).not.toHaveBeenCalled();
+    });
   });
 
   describe('system flyout lifecycle', () => {

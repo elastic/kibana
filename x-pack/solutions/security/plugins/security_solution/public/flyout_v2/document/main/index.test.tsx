@@ -358,7 +358,11 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('opens the ancestor document in a new flyout when a source event value is clicked', () => {
-      const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
+      const openSystemFlyout = jest.fn(() => ({
+        onClose: Promise.resolve(),
+        close: jest.fn(),
+        setTitle: jest.fn(),
+      }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
       const renderFlyoutLink = renderAndGetRenderFlyoutLink({
         'kibana.alert.ancestors': [{ id: 'ancestor-1', index: '.ds-logs-source-1' }],
@@ -383,7 +387,11 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('opens the ancestor document for the legacy signal.ancestors.id field', () => {
-      const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
+      const openSystemFlyout = jest.fn(() => ({
+        onClose: Promise.resolve(),
+        close: jest.fn(),
+        setTitle: jest.fn(),
+      }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
       const renderFlyoutLink = renderAndGetRenderFlyoutLink({
         'signal.ancestors': [{ id: 'ancestor-1', index: '.ds-logs-source-1' }],
@@ -408,7 +416,11 @@ describe('<DocumentFlyout />', () => {
     });
 
     it('aligns each ancestor value with its own index', () => {
-      const openSystemFlyout = jest.fn(() => ({ onClose: Promise.resolve(), close: jest.fn() }));
+      const openSystemFlyout = jest.fn(() => ({
+        onClose: Promise.resolve(),
+        close: jest.fn(),
+        setTitle: jest.fn(),
+      }));
       startServices.overlays = { ...startServices.overlays, openSystemFlyout };
       const renderFlyoutLink = renderAndGetRenderFlyoutLink({
         'kibana.alert.ancestors': [
