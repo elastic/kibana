@@ -13,7 +13,6 @@ import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { type CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
-import { useCaseObservables } from './use_case_observables';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { resolveUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
@@ -34,10 +33,13 @@ export const ATTACHMENT_TAB_ALIASES: ReadonlySet<string> = new Set([
 export const SimilarCasesBadge = ({
   activeTab,
   count,
+  isMinimum = false,
   euiTheme,
 }: {
   activeTab: string;
   count?: number;
+  /** More cases are similar than the count, which then reads as "count+". */
+  isMinimum?: boolean;
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <EuiNotificationBadge
@@ -50,6 +52,7 @@ export const SimilarCasesBadge = ({
     color={activeTab === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ? 'accent' : 'subdued'}
   >
     {count ?? 0}
+    {isMinimum ? '+' : null}
   </EuiNotificationBadge>
 );
 SimilarCasesBadge.displayName = 'SimilarCasesBadge';
@@ -86,7 +89,6 @@ AttachmentsBadge.displayName = 'AttachmentsBadge';
 export const useCaseAttachmentsTotal = ({ caseData }: { caseData: CaseUI }): number => {
   const { unifiedAttachmentTypeRegistry } = useCasesContext();
   const { data: fileStatsData } = useGetCaseFileStats({ caseId: caseData.id });
-  const { observables } = useCaseObservables(caseData);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 
@@ -111,7 +113,7 @@ export const useCaseAttachmentsTotal = ({ caseData }: { caseData: CaseUI }): num
     return (
       registryTotal +
       Number(fileStatsData?.total ?? 0) +
-      (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0)
+      (canShowObservableTabs && isObservablesFeatureEnabled ? caseData.totalObservables ?? 0 : 0)
     );
   }, [
     caseData.owner,
@@ -120,6 +122,6 @@ export const useCaseAttachmentsTotal = ({ caseData }: { caseData: CaseUI }): num
     fileStatsData?.total,
     canShowObservableTabs,
     isObservablesFeatureEnabled,
-    observables.length,
+    caseData.totalObservables,
   ]);
 };

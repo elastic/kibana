@@ -7,22 +7,19 @@
 
 import React from 'react';
 import { z } from '@kbn/zod/v4';
-import { renderHook } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { basicCase, alertComment } from '../../containers/mock';
 import type { CaseUI } from '../../../common';
 import { TestProviders } from '../../common/mock';
-import { useCaseAttachmentsTotal } from './use_case_attachment_tabs';
+import { SimilarCasesBadge, useCaseAttachmentsTotal } from './use_case_attachment_tabs';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
-import { useCaseObservables } from './use_case_observables';
 import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 jest.mock('../../containers/use_get_case_file_stats');
-jest.mock('./use_case_observables');
 
 const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
-const useCaseObservablesMock = useCaseObservables as jest.Mock;
 
 const platinumLicense = licensingMock.createLicense({ license: { type: 'platinum' } });
 const basicLicense = licensingMock.createLicense({ license: { type: 'basic' } });
@@ -57,7 +54,6 @@ const buildRegistry = () => {
 describe('useCaseAttachmentsTotal', () => {
   beforeEach(() => {
     useGetCaseFileStatsMock.mockReturnValue({ data: { total: 3 } });
-    useCaseObservablesMock.mockReturnValue({ observables: [], isLoading: false });
   });
 
   afterEach(() => {
@@ -119,21 +115,19 @@ describe('useCaseAttachmentsTotal', () => {
 
   it('adds observables when the feature is enabled and license is platinum', () => {
     const unifiedAttachmentTypeRegistry = buildRegistry();
-    useCaseObservablesMock.mockReturnValue({
-      observables: [{ id: '1' }, { id: '2' }],
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useCaseAttachmentsTotal({ caseData: basicCase }), {
-      wrapper: ({ children }) => (
-        <TestProviders
-          license={platinumLicense}
-          unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
-        >
-          {children}
-        </TestProviders>
-      ),
-    });
+    const { result } = renderHook(
+      () => useCaseAttachmentsTotal({ caseData: { ...basicCase, totalObservables: 2 } }),
+      {
+        wrapper: ({ children }) => (
+          <TestProviders
+            license={platinumLicense}
+            unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
+          >
+            {children}
+          </TestProviders>
+        ),
+      }
+    );
 
     // 0 from comments + 3 files + 2 observables = 5
     expect(result.current).toBe(5);
@@ -141,22 +135,36 @@ describe('useCaseAttachmentsTotal', () => {
 
   it('excludes observables when the license is not platinum', () => {
     const unifiedAttachmentTypeRegistry = buildRegistry();
-    useCaseObservablesMock.mockReturnValue({
-      observables: [{ id: '1' }, { id: '2' }],
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useCaseAttachmentsTotal({ caseData: basicCase }), {
-      wrapper: ({ children }) => (
-        <TestProviders
-          license={basicLicense}
-          unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
-        >
-          {children}
-        </TestProviders>
-      ),
-    });
+    const { result } = renderHook(
+      () => useCaseAttachmentsTotal({ caseData: { ...basicCase, totalObservables: 2 } }),
+      {
+        wrapper: ({ children }) => (
+          <TestProviders
+            license={basicLicense}
+            unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
+          >
+            {children}
+          </TestProviders>
+        ),
+      }
+    );
 
     expect(result.current).toBe(3);
+  });
+});
+
+describe('SimilarCasesBadge', () => {
+  const euiTheme = { size: { xs: '4px' } } as Parameters<typeof SimilarCasesBadge>[0]['euiTheme'];
+
+  it('shows the count', () => {
+    render(<SimilarCasesBadge activeTab="activity" euiTheme={euiTheme} count={12} />);
+
+    expect(screen.getByTestId('case-view-similar-cases-badge')).toHaveTextContent(/^12$/);
+  });
+
+  it('marks a count that is a minimum', () => {
+    render(<SimilarCasesBadge activeTab="activity" euiTheme={euiTheme} count={10000} isMinimum />);
+
+    expect(screen.getByTestId('case-view-similar-cases-badge')).toHaveTextContent('10000+');
   });
 });

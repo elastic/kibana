@@ -6,20 +6,54 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 
-import { EuiInMemoryTable, EuiSkeletonText, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiComboBox,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelect,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
+import type { FindObservablesRequest } from '../../../common/types/api';
 import type { Observable, ObservableType } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui';
 import * as i18n from './translations';
 import { AddObservable } from './add_observable';
 import { ObservableActionsPopoverButton } from './observable_actions_popover_button';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useFindObservables } from '../../containers/use_find_observables';
 import { ObservablesUtilityBar } from './observables_utility_bar';
+import { ObservablesLimitCallout } from './observables_limit_callout';
 import { useCanRunCaseWorkflow } from '../workflows/use_run_case_workflow';
 import { useCasesContext } from '../cases_context/use_cases_context';
+
+type ObservableSortField = NonNullable<FindObservablesRequest['sortField']>;
+
+interface ObservablesSort {
+  field: ObservableSortField;
+  direction: 'asc' | 'desc';
+}
+
+// Up to 50, so a selected page fits the bulk delete and workflow limits of 50 observables.
+const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
+const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_SORT: ObservablesSort = { field: 'createdAt', direction: 'asc' };
+const SORT_FIELDS: ReadonlySet<string> = new Set<ObservableSortField>([
+  'createdAt',
+  'value',
+  'typeKey',
+]);
+
+const isSortField = (field: string): field is ObservableSortField => SORT_FIELDS.has(field);
 
 const getColumns = (
   caseData: CaseUI,
@@ -29,11 +63,13 @@ const getColumns = (
   {
     name: i18n.OBSERVABLE_VALUE,
     field: 'value',
+    sortable: true,
     'data-test-subj': 'cases-observables-table-value',
   },
   {
     name: i18n.OBSERVABLE_TYPE,
     field: 'typeKey',
+    sortable: true,
     'data-test-subj': 'cases-observables-table-type',
     render: (typeKey: string) =>
       observableTypes.find((observableType) => observableType.key === typeKey)?.label || '-',
@@ -46,6 +82,7 @@ const getColumns = (
   {
     name: i18n.DATE_ADDED,
     field: 'createdAt',
+    sortable: true,
     'data-test-subj': 'cases-observables-table-date-added',
     dataType: 'date',
   },
@@ -85,37 +122,108 @@ EmptyObservablesTable.displayName = 'EmptyObservablesTable';
 export interface ObservablesTableProps {
   caseData: CaseUI;
   isLoading: boolean;
+  searchTerm?: string;
   onExtractObservablesChanged: (isOn: boolean) => void;
 }
 
+/**
+ * A case can hold up to 10,000 observables, so the table reads one page at a time from the
+ * server. Pages move with a cursor (previous / next), and sorting, the type filter and the search
+ * by the start of the value run on the server too. Without a type filter it asks for the
+ * configured types, so observables of a deleted type stay hidden as before.
+ */
 export const ObservablesTable = ({
   caseData,
   isLoading,
+  searchTerm,
   onExtractObservablesChanged,
 }: ObservablesTableProps) => {
   const canRunWorkflow = useCanRunCaseWorkflow();
   const { permissions } = useCasesContext();
   const canSelectObservables = canRunWorkflow || permissions.update;
 
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+  const [sort, setSort] = useState<ObservablesSort>(DEFAULT_SORT);
+  // cursors[i] fetches page i; the first page needs none.
+  const [cursors, setCursors] = useState<Array<string | undefined>>([undefined]);
+  const pageIndex = cursors.length - 1;
+  const cursor = cursors[pageIndex];
+
+  const [selectedTypeKeys, setSelectedTypeKeys] = useState<string[]>([]);
+
+  useEffect(() => {
+    setCursors([undefined]);
+  }, [searchTerm]);
+
+  const { data: currentConfiguration, isLoading: loadingCaseConfigure } = useGetCaseConfiguration();
+
+  const observableTypes = useMemo(
+    () => [...OBSERVABLE_TYPES_BUILTIN, ...currentConfiguration.observableTypes],
+    [currentConfiguration.observableTypes]
+  );
+
+  const typeKeys = useMemo(
+    () => (selectedTypeKeys.length > 0 ? selectedTypeKeys : observableTypes.map(({ key }) => key)),
+    [observableTypes, selectedTypeKeys]
+  );
+
+  const {
+    data,
+    isFetching,
+    isError,
+    isLoading: isLoadingObservables,
+  } = useFindObservables(
+    caseData.id,
+    {
+      perPage: pageSize,
+      sortField: sort.field,
+      sortOrder: sort.direction,
+      typeKeys,
+      ...(cursor != null && { cursor }),
+      ...(searchTerm && { search: searchTerm }),
+    },
+    { enabled: !loadingCaseConfigure }
+  );
+
+  const typeOptions = useMemo(
+    () => observableTypes.map(({ key, label }) => ({ value: key, label })),
+    [observableTypes]
+  );
+  const selectedTypeOptions = useMemo(
+    () => typeOptions.filter(({ value }) => selectedTypeKeys.includes(value)),
+    [selectedTypeKeys, typeOptions]
+  );
+  const onTypeFilterChange = useCallback((options: Array<{ value?: string }>) => {
+    setSelectedTypeKeys(options.flatMap(({ value }) => (value != null ? [value] : [])));
+    setCursors([undefined]);
+  }, []);
+
+  const items = useMemo(() => data?.observables ?? [], [data?.observables]);
+  const total = data?.total ?? 0;
+  const firstItem = pageIndex * pageSize + 1;
+  const lastItem = pageIndex * pageSize + items.length;
+  const nextCursor = data?.cursor;
+  const hasNextPage = nextCursor != null && lastItem < total;
+
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
 
-  // `caseData.observables` is the search-filtered list. Drop ids that leave it so a hidden
-  // observable does not come back selected, and become a bulk target, when the search is cleared.
+  // Only the current page can be selected. Drop ids that leave it, so an observable that is no
+  // longer shown does not stay a bulk target.
   useEffect(() => {
     setSelectedIds((previous) => {
-      const displayedIds = new Set(caseData.observables.map(({ id }) => id));
+      const displayedIds = new Set(items.map(({ id }) => id));
       const next = new Set([...previous].filter((id) => displayedIds.has(id)));
       return next.size === previous.size ? previous : next;
     });
-  }, [caseData.observables]);
+  }, [items]);
 
   const selected = useMemo(
-    () => caseData.observables.filter(({ id }) => selectedIds.has(id)),
-    [caseData.observables, selectedIds]
+    () => items.filter(({ id }) => selectedIds.has(id)),
+    [items, selectedIds]
   );
 
   const onSelectionChange = useCallback(
-    (items: Observable[]) => setSelectedIds(new Set(items.map(({ id }) => id))),
+    (selectedItems: Observable[]) => setSelectedIds(new Set(selectedItems.map(({ id }) => id))),
     []
   );
 
@@ -126,6 +234,30 @@ export const ObservablesTable = ({
     [canSelectObservables, onSelectionChange, selected]
   );
 
+  const onTableChange = useCallback(({ sort: nextSort }: Criteria<Observable>) => {
+    if (nextSort == null || !isSortField(nextSort.field)) {
+      return;
+    }
+    setSort({ field: nextSort.field, direction: nextSort.direction });
+    setCursors([undefined]);
+  }, []);
+
+  const onPageSizeChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    setPageSize(Number(event.target.value));
+    setCursors([undefined]);
+  }, []);
+
+  const goToPreviousPage = useCallback(
+    () => setCursors((previous) => (previous.length > 1 ? previous.slice(0, -1) : previous)),
+    []
+  );
+
+  const goToNextPage = useCallback(() => {
+    if (nextCursor != null) {
+      setCursors((previous) => [...previous, nextCursor]);
+    }
+  }, [nextCursor]);
+
   const filesTableRowProps = useCallback(
     (observable: Observable) => ({
       'data-test-subj': `cases-observables-table-row-${observable.id}`,
@@ -133,26 +265,27 @@ export const ObservablesTable = ({
     []
   );
 
-  const { data: currentConfiguration, isLoading: loadingCaseConfigure } = useGetCaseConfiguration();
-
-  const observableTypes = useMemo(
-    () => [...OBSERVABLE_TYPES_BUILTIN, ...currentConfiguration.observableTypes],
-    [currentConfiguration.observableTypes]
-  );
   const columns = useMemo(
     () => getColumns(caseData, observableTypes, canRunWorkflow),
     [caseData, observableTypes, canRunWorkflow]
   );
 
-  return isLoading || loadingCaseConfigure ? (
+  const pageSizeOptions = useMemo(
+    () => PAGE_SIZE_OPTIONS.map((size) => ({ value: size, text: `${size}` })),
+    []
+  );
+
+  return isLoading || loadingCaseConfigure || isLoadingObservables ? (
     <>
       <EuiSpacer size="l" />
       <EuiSkeletonText data-test-subj="cases-observables-table-loading" lines={10} />
     </>
   ) : (
     <>
+      <ObservablesLimitCallout totalObservables={caseData.totalObservables ?? 0} />
       <ObservablesUtilityBar
         caseData={caseData}
+        totalObservables={total}
         isLoading={isLoading}
         onExtractObservablesChanged={onExtractObservablesChanged}
         selectedObservables={selected}
@@ -160,17 +293,88 @@ export const ObservablesTable = ({
         onBulkActionSuccess={onBulkActionSuccess}
       />
       <EuiSpacer size="xs" />
-      <EuiInMemoryTable
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={false} css={{ minWidth: 280 }}>
+          <EuiComboBox
+            compressed
+            fullWidth
+            placeholder={i18n.FILTER_OBSERVABLES_BY_TYPE}
+            aria-label={i18n.FILTER_OBSERVABLES_BY_TYPE}
+            options={typeOptions}
+            selectedOptions={selectedTypeOptions}
+            onChange={onTypeFilterChange}
+            isClearable
+            data-test-subj="cases-observables-table-type-filter"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiBasicTable
         tableCaption={i18n.OBSERVABLES_TABLE}
-        items={caseData.observables}
+        items={items}
         itemId="id"
         rowHeader="id"
         columns={columns}
+        loading={isFetching}
+        sorting={{ sort }}
+        onChange={onTableChange}
         data-test-subj="cases-observables-table"
+        error={isError ? i18n.OBSERVABLES_LOAD_ERROR : undefined}
         noItemsMessage={<EmptyObservablesTable caseData={caseData} />}
         rowProps={filesTableRowProps}
         selection={selection}
       />
+      {total > 0 && (
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="cases-observables-table-pagination"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiSelect
+              compressed
+              prepend={i18n.OBSERVABLES_ROWS_PER_PAGE}
+              aria-label={i18n.OBSERVABLES_ROWS_PER_PAGE}
+              options={pageSizeOptions}
+              value={pageSize}
+              onChange={onPageSizeChange}
+              data-test-subj="cases-observables-table-page-size"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" data-test-subj="cases-observables-table-page-range">
+                  {i18n.OBSERVABLES_PAGE_RANGE(firstItem, lastItem, total)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.OBSERVABLES_PREVIOUS_PAGE} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="chevronSingleLeft"
+                    aria-label={i18n.OBSERVABLES_PREVIOUS_PAGE}
+                    isDisabled={pageIndex === 0 || isFetching}
+                    onClick={goToPreviousPage}
+                    data-test-subj="cases-observables-table-previous-page"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.OBSERVABLES_NEXT_PAGE} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="chevronSingleRight"
+                    aria-label={i18n.OBSERVABLES_NEXT_PAGE}
+                    isDisabled={!hasNextPage || isFetching}
+                    onClick={goToNextPage}
+                    data-test-subj="cases-observables-table-next-page"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </>
   );
 };

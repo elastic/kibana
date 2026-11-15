@@ -7,7 +7,11 @@
 
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { type Case, type Observable } from '../../../common/types/domain';
-import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  MAX_OBSERVABLE_VALUE_LENGTH,
+  OBSERVABLE_TYPE_IPV4,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
   COMMENT_ATTACHMENT_TYPE,
@@ -256,12 +260,16 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
+      expect(clientArgs.services.observableService.bulkCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          caseId: caseSO.id,
+          observables: [expect.objectContaining({ value: '1.2.3.4' })],
+        })
+      );
       expect(caseService.patchCase).toHaveBeenCalledWith(
         expect.objectContaining({
           caseId: caseSO.id,
-          updatedAttributes: expect.objectContaining({
-            observables: expect.arrayContaining([expect.objectContaining({ value: '1.2.3.4' })]),
-          }),
+          updatedAttributes: expect.objectContaining({ total_observables: expect.any(Number) }),
         })
       );
 
@@ -280,12 +288,15 @@ describe('extractAndAddObservables', () => {
       expect(payload).not.toHaveProperty('observables');
     });
 
-    it('returns the patched case with the new observables and version', async () => {
+    it('returns the patched case with the new total and version', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
       caseService.getCase.mockResolvedValue(caseSO);
+      clientArgs.services.observableService.countForCase
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(1);
       caseService.patchCase.mockImplementation(async ({ updatedAttributes }) => ({
         id: caseSO.id,
         type: caseSO.type,
@@ -302,10 +313,63 @@ describe('extractAndAddObservables', () => {
       );
 
       expect(res?.version).toBe('patched-version');
-      expect(res?.attributes.observables).toEqual([
-        expect.objectContaining({ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '1.2.3.4' }),
-      ]);
-      expect(res?.attributes.total_observables).toBe(1);
+      // The case field is untouched; the new observable is a cases-observables object.
+      expect(res?.attributes.observables).toEqual(caseSO.attributes.observables);
+      expect(res?.attributes.total_observables).toBe(
+        (caseSO.attributes.observables ?? []).length + 1
+      );
+    });
+
+    it('skips an over-length value, persists the rest, and logs only the count', async () => {
+      const overLengthValue = 'h'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1);
+      licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      alertsService.getAlerts.mockResolvedValue({
+        docs: [makeEcsDoc({ 'source.ip': '1.2.3.4', 'host.name': overLengthValue })],
+      });
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
+
+      await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
+
+      const [[{ observables }]] = clientArgs.services.observableService.bulkCreate.mock.calls;
+      expect(observables).toEqual([expect.objectContaining({ value: '1.2.3.4' })]);
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        '[extractAndAddObservables] Skipped 1 observable(s) for case case-1: the value or description exceeds the maximum length'
+      );
+      expect(JSON.stringify((clientArgs.logger.warn as jest.Mock).mock.calls)).not.toContain(
+        overLengthValue
+      );
+    });
+
+    it('keeps a value of exactly the maximum length', async () => {
+      const maxLengthValue = 'h'.repeat(MAX_OBSERVABLE_VALUE_LENGTH);
+      licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      alertsService.getAlerts.mockResolvedValue({
+        docs: [makeEcsDoc({ 'host.name': maxLengthValue })],
+      });
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
+
+      await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
+
+      const [[{ observables }]] = clientArgs.services.observableService.bulkCreate.mock.calls;
+      expect(observables).toEqual([expect.objectContaining({ value: maxLengthValue })]);
+      expect(clientArgs.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not read or write the case when every extracted value is over-length', async () => {
+      licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      alertsService.getAlerts.mockResolvedValue({
+        docs: [makeEcsDoc({ 'host.name': 'h'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1) })],
+      });
+
+      await extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs);
+
+      expect(caseService.getCase).not.toHaveBeenCalled();
+      expect(caseService.patchCase).not.toHaveBeenCalled();
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Skipped 1 observable(s)')
+      );
     });
 
     it('skips patchCase when extracted observables array is empty (no matching ECS fields)', async () => {

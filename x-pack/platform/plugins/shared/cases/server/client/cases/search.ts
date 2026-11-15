@@ -30,6 +30,11 @@ import {
 } from '../../services/cases/extended_field_search_utils';
 import { enrichCasesWithFieldLabels } from './utils';
 import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
+import { withObservablesPreview } from '../../common/observables_preview';
+import {
+  CASE_OBSERVABLE_VALUE_SEARCH_FIELD,
+  MAX_CASES_BY_OBSERVABLE_VALUE,
+} from '../../services/cases/utils';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -42,7 +47,13 @@ export const search = async (
   casesClient: CasesClient
 ): Promise<CasesSearchResponse> => {
   const {
-    services: { caseService, licensingService, templatesService, fieldDefinitionsService },
+    services: {
+      caseService,
+      licensingService,
+      templatesService,
+      fieldDefinitionsService,
+      observableService,
+    },
     authorization,
     logger,
     spaceId,
@@ -173,13 +184,24 @@ export const search = async (
       : [];
     const resolvedFieldLabelFilters = fieldLabelResults.length > 0 ? fieldLabelResults : undefined;
 
+    const searchFields = asArray(paramArgs.searchFields);
+    const caseIdsByObservableValue =
+      paramArgs.search && searchFields.some((field) => field === CASE_OBSERVABLE_VALUE_SEARCH_FIELD)
+        ? await observableService.findCaseIdsByValuePrefix({
+            prefix: paramArgs.search,
+            owners: asArray(paramArgs.owner),
+            size: MAX_CASES_BY_OBSERVABLE_VALUE,
+          })
+        : [];
+
     const cases = await caseService.searchCasesGroupedByID({
       caseOptions: {
         ...paramArgs,
         ...caseQueryOptions,
-        searchFields: asArray(paramArgs.searchFields),
+        searchFields,
       },
       namespaces,
+      caseIdsByObservableValue,
       extendedFieldFilters: resolvedExtendedFieldFilters,
       fieldLabelFilters: resolvedFieldLabelFilters,
       // Status counts and MTTR are computed with the full search query (free-text search,
@@ -208,7 +230,11 @@ export const search = async (
       mttr: cases.searchStats?.mttr ?? null,
     });
 
-    res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs, globalFields);
+    res.cases = enrichCasesWithFieldLabels(
+      await withObservablesPreview(res.cases, observableService),
+      templateSOs,
+      globalFields
+    );
 
     return decodeOrThrowZod(CasesSearchResponseSchema)(res);
   } catch (error) {

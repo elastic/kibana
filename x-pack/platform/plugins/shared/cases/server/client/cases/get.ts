@@ -73,6 +73,7 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseSchema, CaseStatusSchema } from '../../../common/types/domain';
+import { withCaseObservablesPreview } from '../../common/observables_preview';
 
 export const CasesByAttachmentIDsRequestSchema = z.object({
   /**
@@ -419,7 +420,7 @@ export const get = async (
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
-    services: { caseService, attachmentService },
+    services: { caseService, attachmentService, observableService },
     logger,
     authorization,
   } = clientArgs;
@@ -449,7 +450,10 @@ export const get = async (
           : {}),
       });
       return decodeOrThrowZod(CaseSchema)(
-        await enrichCaseWithFieldLabels(flattenedCase, clientArgs)
+        await enrichCaseWithFieldLabels(
+          await withCaseObservablesPreview(flattenedCase, observableService),
+          clientArgs
+        )
       );
     }
 
@@ -469,7 +473,12 @@ export const get = async (
       totalEvents: countEventsForID({ comments: theComments }),
     });
 
-    return decodeOrThrowZod(CaseSchema)(await enrichCaseWithFieldLabels(res, clientArgs));
+    return decodeOrThrowZod(CaseSchema)(
+      await enrichCaseWithFieldLabels(
+        await withCaseObservablesPreview(res, observableService),
+        clientArgs
+      )
+    );
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -485,7 +494,7 @@ export const resolve = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, observableService },
     logger,
     authorization,
   } = clientArgs;
@@ -516,7 +525,10 @@ export const resolve = async (
       const flattenedCase = flattenCaseSavedObject({ savedObject: resolvedSavedObject });
       return decodeOrThrowZod(CaseResolveResponseSchema)({
         ...resolveData,
-        case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
+        case: await enrichCaseWithFieldLabels(
+          await withCaseObservablesPreview(flattenedCase, observableService),
+          clientArgs
+        ),
       });
     }
 
@@ -538,7 +550,10 @@ export const resolve = async (
 
     const res = {
       ...resolveData,
-      case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
+      case: await enrichCaseWithFieldLabels(
+        await withCaseObservablesPreview(flattenedCase, observableService),
+        clientArgs
+      ),
     };
 
     return decodeOrThrowZod(CaseResolveResponseSchema)(res);

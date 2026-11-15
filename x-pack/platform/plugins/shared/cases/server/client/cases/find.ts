@@ -27,6 +27,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
+import { withObservablesPreview } from '../../common/observables_preview';
 
 /**
  * Retrieves a case and optionally its comments via saved objects find.
@@ -39,7 +40,7 @@ export const find = async (
   casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, observableService },
     authorization,
     logger,
     savedObjectsSerializer,
@@ -149,6 +150,8 @@ export const find = async (
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
     });
+
+    res.cases = await withObservablesPreview(res.cases, observableService);
 
     return decodeOrThrowZod(CasesFindResponseSchema)(res);
   } catch (error) {

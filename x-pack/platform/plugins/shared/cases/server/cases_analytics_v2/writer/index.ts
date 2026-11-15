@@ -8,7 +8,9 @@
 import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CASE_INDEX_NAME } from '../constants';
+import type { Observable } from '../../../common/types/domain';
 import { buildCaseDoc } from './case_doc_builder';
+import { fetchObservablesPreviews } from './observables_preview';
 import { withRetry } from './retry';
 
 /**
@@ -148,8 +150,28 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
 
   // ----- Private "do" methods. Throw on failure so the retry wrapper can see. -----
 
+  /**
+   * The oldest `cases-observables` objects of the cases, so the analytics doc carries the same
+   * observables as case responses. A failed read falls back to the case field alone; the next
+   * write or reconciliation fills them in.
+   */
+  private async getObservablesPreviews(
+    sos: Array<SavedObject<CasePersistedAttributes>>
+  ): Promise<Map<string, Observable[]>> {
+    try {
+      return await fetchObservablesPreviews(this.esClient, sos);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.warn(
+        `cases-analyticsV2: failed to read observables for ${sos.length} case(s); writing the case field only: ${message}`
+      );
+      return new Map();
+    }
+  }
+
   private async doUpsertCase(so: SavedObject<CasePersistedAttributes>): Promise<void> {
-    const doc = buildCaseDoc(so);
+    const previews = await this.getObservablesPreviews([so]);
+    const doc = buildCaseDoc(so, previews.get(so.id));
     await this.esClient.index({
       index: CASE_INDEX_NAME,
       id: so.id,
@@ -188,10 +210,11 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
     // headers and document bodies. `operations` accepts arbitrary header
     // shapes; plain object literals avoid pulling in estypes for one line
     // each.
+    const previews = await this.getObservablesPreviews(sos);
     const operations: object[] = [];
     for (const so of sos) {
       operations.push({ index: { _index: CASE_INDEX_NAME, _id: so.id } });
-      operations.push(buildCaseDoc(so));
+      operations.push(buildCaseDoc(so, previews.get(so.id)));
     }
     const response = await this.esClient.bulk({ operations });
     if (!response.errors) return;

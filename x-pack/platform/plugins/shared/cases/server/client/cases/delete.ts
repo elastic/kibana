@@ -32,7 +32,13 @@ export async function deleteCases(
   clientArgs: CasesClientArgs
 ): Promise<void> {
   const {
-    services: { caseService, attachmentService, userActionService, alertsService },
+    services: {
+      caseService,
+      attachmentService,
+      userActionService,
+      alertsService,
+      observableService,
+    },
     logger,
     authorization,
     fileService,
@@ -83,6 +89,9 @@ export async function deleteCases(
       }),
       alertsService.removeCaseIdsFromAllAlerts({ caseIds: ids }),
     ]);
+
+    // A case can hold 10,000 observables, so they are deleted after the case, in the background.
+    await observableService.deleteForCases(ids);
 
     await userActionService.creator.bulkAuditLogCaseDeletion(
       cases.saved_objects.map((caseInfo) => caseInfo.id)

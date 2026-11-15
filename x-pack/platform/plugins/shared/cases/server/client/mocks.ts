@@ -56,6 +56,7 @@ import {
   createNotificationServiceMock,
   createTemplatesServiceMock,
   createFieldDefinitionsServiceMock,
+  createObservableServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
 import {
@@ -108,6 +109,9 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
     bulkAddObservables: jest.fn(),
+    bulkCreateObservables: jest.fn(),
+    findObservables: jest.fn(),
+    getObservablesByIds: jest.fn().mockResolvedValue([]),
     bulkDeleteObservables: jest.fn(),
     getApplicableFields: jest.fn(),
   });
@@ -280,6 +284,7 @@ export const createCasesClientMockArgs = () => {
       notificationService: createNotificationServiceMock(),
       templatesService: createTemplatesServiceMock(),
       fieldDefinitionsService: createFieldDefinitionsServiceMock(),
+      observableService: createObservableServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),

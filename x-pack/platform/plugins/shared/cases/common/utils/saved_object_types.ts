@@ -14,6 +14,7 @@ import {
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_OBSERVABLE_SAVED_OBJECT,
 } from '../constants';
 
 interface CasesConfigType {
@@ -34,6 +35,7 @@ export const getSavedObjectsTypes = (config?: Partial<CasesConfigType>): string[
     CASE_CONFIGURE_SAVED_OBJECT,
     CASE_ATTACHMENT_SAVED_OBJECT,
     CASE_FIELD_DEFINITION_SAVED_OBJECT,
+    CASE_OBSERVABLE_SAVED_OBJECT,
   ];
 
   const experimentalSOs: string[] = [];

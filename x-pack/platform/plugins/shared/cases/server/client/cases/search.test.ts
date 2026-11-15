@@ -91,6 +91,38 @@ describe('search', () => {
       expect(call.namespaces).toEqual(['space1']);
     });
 
+    it('joins the cases whose cases-observables objects start with the search', async () => {
+      clientArgs.services.observableService.findCaseIdsByValuePrefix.mockResolvedValueOnce([
+        'case-with-observable',
+      ]);
+      const searchRequest = createCasesClientMockSearchRequest({
+        search: '10.0.0',
+        searchFields: ['cases.observables.value'],
+        owner: ['securitySolution'],
+      });
+
+      await search(searchRequest, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.observableService.findCaseIdsByValuePrefix).toHaveBeenCalledWith({
+        prefix: '10.0.0',
+        owners: ['securitySolution'],
+        size: 1000,
+      });
+      const call = clientArgs.services.caseService.searchCasesGroupedByID.mock.calls[0][0];
+      expect(call.caseIdsByObservableValue).toEqual(['case-with-observable']);
+    });
+
+    it('does not search cases-observables when observable values are not searched', async () => {
+      const searchRequest = createCasesClientMockSearchRequest({
+        search: 'foobar',
+        searchFields: ['cases.title'],
+      });
+
+      await search(searchRequest, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.observableService.findCaseIdsByValuePrefix).not.toHaveBeenCalled();
+    });
+
     it('requests stats alongside the search and returns them in the response', async () => {
       const searchRequest = createCasesClientMockSearchRequest({ search: 'foobar' });
       const res = await search(searchRequest, clientArgs, casesClientMock);

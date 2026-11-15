@@ -47,6 +47,7 @@ export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
+export const CASE_OBSERVABLE_SAVED_OBJECT = 'cases-observables' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -130,6 +131,9 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_delete` as const;
+export const INTERNAL_CASE_OBSERVABLES_FIND_URL = `${INTERNAL_CASE_OBSERVABLES_URL}/_find` as const;
+export const INTERNAL_CASE_OBSERVABLES_BULK_CREATE_URL =
+  `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_create` as const;
 export const INTERNAL_CASE_WORKFLOW_RUN_URL =
   `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
@@ -416,7 +420,36 @@ export const MAX_ASSIGNEES_PER_CASE = 10;
 export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 export const NO_ACTION_SOURCE_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
+/**
+ * Bounds request arrays of observables (bulk delete, workflow steps and triggers) and sizes the
+ * observables preview that case responses carry.
+ */
 export const MAX_OBSERVABLES_PER_CASE = 50;
+/** Safety limit on the observables a case holds across the case field and `cases-observables`. */
+export const MAX_STORED_OBSERVABLES_PER_CASE = 10_000;
+/** Most observables one bulk create request accepts. */
+export const MAX_BULK_CREATE_OBSERVABLES = 1_000;
+/**
+ * Most cases a search for the cases holding a set of observables keeps from `cases-observables`:
+ * those sharing the most observables, then those with the newest match. Past it, the total is a
+ * lower bound.
+ */
+export const MAX_CASES_BY_OBSERVABLES_CANDIDATES = 10_000;
+/** Most observables one search counts holding cases for. */
+export const MAX_OBSERVABLES_PER_CASES_COUNT = 1_000;
+/**
+ * Similar cases skips a source observable that more cases than this hold, such as a public DNS
+ * server: it makes nearly every case a candidate and carries no signal.
+ */
+export const MAX_SIMILAR_OBSERVABLE_CASES = 1_000;
+/** Most source observables similar cases matches on, the ones the fewest cases hold first. */
+export const MAX_SIMILAR_SOURCE_OBSERVABLES = 1_000;
+/** Largest page the observables list route returns. */
+export const MAX_OBSERVABLES_PER_PAGE = 100;
+/** Default page size of the observables list route. */
+export const DEFAULT_OBSERVABLES_PER_PAGE = 20;
+/** Longest cursor the observables list route accepts. */
+export const MAX_OBSERVABLES_CURSOR_LENGTH = 4096;
 
 /**
  * Delays
@@ -501,6 +534,16 @@ export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
 
 /** v4 UUID — 8-4-4-4-12 hex + 4 hyphens */
 export const OBSERVABLE_ID_MAX_LENGTH = 36;
+
+export const MAX_OBSERVABLE_VALUE_LENGTH = 1024;
+
+export const MAX_OBSERVABLE_DESCRIPTION_LENGTH = 2048;
+
+/**
+ * Lucene's maximum term length in bytes. The case field maps observable values and descriptions as
+ * keywords without `ignore_above`, so no stored one is longer, in bytes or in characters.
+ */
+export const MAX_STORED_OBSERVABLE_FIELD_LENGTH = 32766;
 
 export const MIN_BULK_DELETE_OBSERVABLE_IDS = 1;
 

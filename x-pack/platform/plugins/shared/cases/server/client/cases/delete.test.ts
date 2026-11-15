@@ -96,6 +96,21 @@ describe('delete', () => {
       });
     });
 
+    describe('observables', () => {
+      it('deletes the observables of the cases after the cases', async () => {
+        const caseIds = ['mock-id-1', 'mock-id-2'];
+
+        await deleteCases(caseIds, clientArgs);
+
+        expect(clientArgs.services.observableService.deleteForCases).toHaveBeenCalledWith(caseIds);
+        expect(
+          clientArgs.services.caseService.bulkDeleteCaseEntities.mock.invocationCallOrder[0]
+        ).toBeLessThan(
+          clientArgs.services.observableService.deleteForCases.mock.invocationCallOrder[0]
+        );
+      });
+    });
+
     describe('errors', () => {
       it(`throws 400 when trying to delete more than ${MAX_DELETE_IDS_LENGTH} cases at a time`, async () => {
         const caseIds = new Array(MAX_DELETE_IDS_LENGTH + 1).fill('id');

@@ -24,26 +24,35 @@ import {
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_OBSERVABLE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
   MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../common/constants';
 import { defaultSortField } from '../../common/utils';
 import { stripLegacyKeyForExport } from '../../common/utils/field_definitions';
 import type { CasePersistedAttributes } from '../../common/types/case';
+import type { ObservablePersistedAttributes } from '../../common/types/observable';
 
+/**
+ * The attachments, user actions and `cases-observables` objects of the exported cases. Import
+ * remaps their case references, so they follow the case when its id changes.
+ */
 export async function getAttachmentsAndUserActionsForCases(
   savedObjectsClient: SavedObjectsClientContract,
   caseIds: string[]
 ): Promise<
   Array<
     SavedObject<
-      AttachmentAttributesWithoutRefs | AttachmentAttributesV2 | CaseUserActionWithoutReferenceIds
+      | AttachmentAttributesWithoutRefs
+      | AttachmentAttributesV2
+      | CaseUserActionWithoutReferenceIds
+      | ObservablePersistedAttributes
     >
   >
 > {
   const attachmentTypes = [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT];
 
-  const [attachments, userActions] = await Promise.all([
+  const [attachments, userActions, observables] = await Promise.all([
     getAssociatedObjects<AttachmentAttributesWithoutRefs | AttachmentAttributesV2>({
       savedObjectsClient,
       caseIds,
@@ -56,9 +65,15 @@ export async function getAttachmentsAndUserActionsForCases(
       sortField: defaultSortField,
       type: CASE_USER_ACTION_SAVED_OBJECT,
     }),
+    getAssociatedObjects<ObservablePersistedAttributes>({
+      savedObjectsClient,
+      caseIds,
+      sortField: defaultSortField,
+      type: CASE_OBSERVABLE_SAVED_OBJECT,
+    }),
   ]);
 
-  return [...attachments, ...userActions];
+  return [...attachments, ...userActions, ...observables];
 }
 
 async function getAssociatedObjects<T>({

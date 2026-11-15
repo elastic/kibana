@@ -19,18 +19,15 @@ import { useGetCase } from '../../containers/use_get_case';
 import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
-import { useCaseObservables } from './use_case_observables';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../../containers/use_get_case_file_stats');
-jest.mock('./use_case_observables');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
-const useGetCaseObservablesMock = useCaseObservables as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -66,7 +63,6 @@ describe('CaseViewTabs', () => {
   });
 
   beforeEach(() => {
-    useGetCaseObservablesMock.mockReturnValue({ isLoading: false, observables: [] });
     useGetCaseFileStatsMock.mockReturnValue({ data });
     mockGetCase();
   });

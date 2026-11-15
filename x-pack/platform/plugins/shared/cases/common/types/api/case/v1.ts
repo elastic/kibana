@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CASE_EXTENDED_FIELDS,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -503,12 +503,18 @@ export const CasesSearchResponseSchema = CasesFindResponseSchema.extend({
   mttr: z.number().nullable().optional(),
 });
 
-export const CasesSimilarResponseSchema = z.object({
-  cases: z.array(SimilarCaseSchema),
-  page: z.number(),
-  per_page: z.number(),
-  total: z.number(),
-});
+export const CasesSimilarResponseSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(SimilarCaseSchema),
+    page: z.number(),
+    per_page: z.number(),
+    total: z.number(),
+    /** `gte` when more cases are similar than the search kept, so `total` is a minimum. */
+    total_relation: z.enum(['eq', 'gte']).optional(),
+    /** Source observables left out of the match because too many cases hold them. */
+    skipped_common_observables: z.number().optional(),
+  })
+);
 
 /**
  * Delete cases

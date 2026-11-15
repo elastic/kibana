@@ -62,6 +62,17 @@ describe('emitObservablesAddedEvent', () => {
     });
   });
 
+  it('carries the first 50 observables of a larger add, because the trigger accepts 50', () => {
+    const clientArgs = createCasesClientMockArgs();
+    const observables = Array.from({ length: 120 }, (_, i) => makeObservable({ id: `obs-${i}` }));
+
+    emitObservablesAddedEvent(clientArgs, makeCase(), observables);
+
+    const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock.calls;
+    expect(payload.observableIds).toEqual(observables.slice(0, 50).map(({ id }) => id));
+    expect(payload.observableTypeKeys).toHaveLength(50);
+  });
+
   it('does not include value or description in the payload', () => {
     const clientArgs = createCasesClientMockArgs();
     const theCase = makeCase();
