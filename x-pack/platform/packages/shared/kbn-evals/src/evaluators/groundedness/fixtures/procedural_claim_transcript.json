@@ -1,0 +1,88 @@
+{
+  "_source": "Weekly entity-analytics-v2 groundedness cells (build 01a14b73, commit 8f4c1fcc6a51990c4c22bbfcc1adb7a7e23dc11a): 122 GROUNDED-verdict cells scored 0.85-0.998 because the judge charged the agent's own procedural sentences to PARTIALLY_SUPPORTED, and that claim entered the score product.",
+  "user_query": "What are the riskiest high-impact hosts?",
+  "tool_call_history": [
+    {
+      "type": "tool_call",
+      "tool_call_id": "call_01a14bc4-6224-7202-98ac-9e7ca97c73c2",
+      "tool_id": "load_skill",
+      "params": { "skill": "entity-analytics" },
+      "result": "{\"skill\":\"entity-analytics\",\"loaded_tools\":[\"security.search_entities\"],\"content\":\"**By criticality filter** (\\\"high-impact hosts\\\"): `security.search_entities` with `entityTypes: ['host']`, `criticalityLevels: ['high_impact', 'extreme_impact']`.\"}"
+    },
+    {
+      "type": "tool_call",
+      "tool_call_id": "call_search_entities_001",
+      "tool_id": "security.search_entities",
+      "params": {
+        "entityTypes": ["host"],
+        "criticalityLevels": ["high_impact", "extreme_impact"],
+        "maxResults": 10
+      },
+      "result": "{\"entities\":[{\"name\":\"db-prod-01\",\"risk\":{\"calculated_score\":97.4}}]}"
+    }
+  ],
+  "agent_response": "I will search for high-impact hosts using the entity-analytics guidance. maxResults: 10 is an appropriate parameter for this search. The riskiest high-impact host is db-prod-01 with a risk score of 97.4.",
+  "judge_reply": {
+    "summary_verdict": "GROUNDED",
+    "analysis": [
+      {
+        "claim": "The riskiest high-impact host is db-prod-01 with a risk score of 97.4.",
+        "centrality": "central",
+        "centrality_reason": "This is the direct answer to the user's question.",
+        "verdict": "FULLY_SUPPORTED",
+        "evidence": {
+          "tool_call_id": "call_search_entities_001",
+          "tool_id": "security.search_entities",
+          "evidence_snippet": "{\"entities\":[{\"name\":\"db-prod-01\",\"risk\":{\"calculated_score\":97.4}}]}"
+        },
+        "explanation": "The entity name and its score are stated verbatim in the tool result."
+      },
+      {
+        "claim": "I will search for high-impact hosts using the entity-analytics guidance.",
+        "centrality": "peripheral",
+        "centrality_reason": "This is the agent's own narration of what it is about to do.",
+        "verdict": "NON_FACTUAL",
+        "evidence": null,
+        "explanation": "The sentence describes the agent's own plan, not the environment; no tool result can confirm or contradict it."
+      },
+      {
+        "claim": "maxResults: 10 is an appropriate parameter for this search.",
+        "centrality": "peripheral",
+        "centrality_reason": "This is a detail of the agent's own tool call.",
+        "verdict": "NON_FACTUAL",
+        "evidence": null,
+        "explanation": "10 is the agent's own parameter choice and no tool result prescribes it, so it is not a claim about the environment."
+      }
+    ]
+  },
+  "judge_reply_charging_procedural_text": {
+    "_source": "The reply the pre-fix prompt produced for the same transcript, recorded verbatim in the weekly run: the parameter choice charged to PARTIALLY_SUPPORTED peripheral.",
+    "summary_verdict": "GROUNDED",
+    "analysis": [
+      {
+        "claim": "The riskiest high-impact host is db-prod-01 with a risk score of 97.4.",
+        "centrality": "central",
+        "centrality_reason": "This is the direct answer to the user's question.",
+        "verdict": "FULLY_SUPPORTED",
+        "evidence": {
+          "tool_call_id": "call_search_entities_001",
+          "tool_id": "security.search_entities",
+          "evidence_snippet": "{\"entities\":[{\"name\":\"db-prod-01\",\"risk\":{\"calculated_score\":97.4}}]}"
+        },
+        "explanation": "The entity name and its score are stated verbatim in the tool result."
+      },
+      {
+        "claim": "maxResults: 10 is an appropriate parameter for this search.",
+        "centrality": "peripheral",
+        "centrality_reason": "This is a detail of the agent's own tool call.",
+        "verdict": "PARTIALLY_SUPPORTED",
+        "evidence": {
+          "tool_call_id": "call_01a14bc4-6224-7202-98ac-9e7ca97c73c2",
+          "tool_id": "load_skill",
+          "evidence_snippet": "`security.search_entities` with `entityTypes: ['host']`, `criticalityLevels: ['high_impact', 'extreme_impact']`."
+        },
+        "explanation": "The skill documentation does not specify a particular maxResults value for this query type. The value of 10 is a reasonable procedural choice but is not explicitly prescribed by the tool results."
+      }
+    ]
+  }
+}
