@@ -35,7 +35,8 @@ export async function requestOAuthClientCredentialsToken(
   logger: Logger,
   params: ClientCredentialsOAuthRequestParams,
   configurationUtilities: ActionsConfigurationUtilities,
-  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic'
+  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic',
+  tokenType?: string
 ): Promise<OAuthTokenResponse> {
   if (tokenEndpointAuthMethod === 'client_secret_basic') {
     return await requestOAuthToken<
@@ -46,7 +47,8 @@ export async function requestOAuthClientCredentialsToken(
       configurationUtilities,
       logger,
       rewriteBodyRequest(params),
-      true
+      true,
+      { tokenType }
     );
   }
 
@@ -55,6 +57,8 @@ export async function requestOAuthClientCredentialsToken(
     OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
     configurationUtilities,
     logger,
-    rewriteBodyRequest(params)
+    rewriteBodyRequest(params),
+    false,
+    { tokenType }
   );
 }

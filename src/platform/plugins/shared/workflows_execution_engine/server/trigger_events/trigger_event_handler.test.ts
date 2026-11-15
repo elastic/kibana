@@ -12,7 +12,9 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution, WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowRepository } from '@kbn/workflows/server';
 import { TriggerEventHandler, type TriggerEventHandlerDeps } from './trigger_event_handler';
+import { buildWorkflowExecutionDocument } from '../lib/build_workflow_execution_document';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { buildChildEventChainContext } from '../step/workflow_execute_step/build_child_event_chain_context';
 
 const mockClassifyWorkflowTriggerMatch = jest.fn().mockReturnValue('matched');
 
@@ -358,7 +360,7 @@ describe('TriggerEventHandler', () => {
     await handler.handleEvent({
       triggerId: 'inboundWebhook.received',
       payload: { connectorId: 'webhook-1' },
-      request: mockRequest,
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
     });
 
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
@@ -455,6 +457,47 @@ describe('TriggerEventHandler', () => {
     );
   });
 
+  it('should not re-schedule an event-triggered parent from an event emitted by its child workflow', async () => {
+    const childExecution = buildWorkflowExecutionDocument({
+      workflow: { id: 'loop-child', name: 'loop-child', enabled: true, yaml: '', isTestRun: false },
+      spaceId: 'default',
+      context: {
+        parentWorkflowId: 'loop-parent',
+        ...buildChildEventChainContext({ workflowId: 'loop-parent', eventChainDepth: 1 }),
+      },
+      defaultTriggeredBy: 'workflow-step',
+      authenticatedUser: {
+        executedBy: 'user-1',
+        user: { name: 'user-1', username: 'user-1' },
+      },
+      now: new Date(),
+      maxEventChainDepth: 10,
+      getConcurrencyGroupKey: () => null,
+      getRunName: () => undefined,
+    });
+    mockGetEventChainContext.mockReturnValue(undefined);
+    mockGetEmitterWorkflowExecutionIdFromRequest.mockReturnValue(childExecution.id);
+    mockGetWorkflowExecutionById.mockResolvedValue(childExecution);
+
+    const scheduleWorkflow = jest.fn();
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow({ id: 'loop-parent' })]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { caseId: '1' },
+      request: mockRequest,
+    });
+
+    expect(scheduleWorkflow).not.toHaveBeenCalled();
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Event chain cycle guard skipped scheduling workflow loop-parent')
+    );
+  });
+
   it('should skip scheduling when on.workflowEvents is ignore and emit has workflow chain context', async () => {
     mockGetEventChainContext.mockReturnValue({ depth: 0, sourceExecutionId: 'exec-x' });
     const wf = createMockWorkflow({
@@ -524,7 +567,7 @@ describe('TriggerEventHandler', () => {
     await handler.handleEvent({
       triggerId: 'inboundWebhook.received',
       payload: { connectorId: 'webhook-2' },
-      request: mockRequest,
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
     });
 
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
@@ -605,6 +648,79 @@ describe('TriggerEventHandler', () => {
     expect(deps.logger.warn).not.toHaveBeenCalledWith(
       expect.stringMatching(/does not match persisted depth/)
     );
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips schedule for a connector-sourced event without Authorization', async () => {
+    const scheduleWorkflow = jest.fn();
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { connectorId: 'c1' },
+      request: { headers: {} } as KibanaRequest,
+    });
+
+    expect(scheduleWorkflow).not.toHaveBeenCalled();
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('request has no Authorization header')
+    );
+  });
+
+  it('schedules a connector-sourced event when Authorization is present', async () => {
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { connectorId: 'c1' },
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
+    });
+
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips schedule when connector-id does not match', async () => {
+    mockClassifyWorkflowTriggerMatch.mockReturnValueOnce('kql_false');
+    const scheduleWorkflow = jest.fn();
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { connectorId: 'inbound-b' },
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
+    });
+
+    expect(scheduleWorkflow).not.toHaveBeenCalled();
+    expect(mockClassifyWorkflowTriggerMatch).toHaveBeenCalled();
+  });
+
+  it('still schedules Manual Run events that have no Authorization header', async () => {
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { caseId: 'case-1' },
+      request: mockRequest,
+    });
+
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
   });
 });

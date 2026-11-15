@@ -1,0 +1,157 @@
+version: "1"
+name: Enable detection rule
+description: >
+  AlertZero action: turns on an existing detection rule. Executed by the
+  investigation proposal gate once an analyst approves, so the change is
+  attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Enable detection rule
+    description: Enables an installed detection rule that is currently turned off.
+    category: configure
+    impact: low
+    reversible: true
+    approvalPolicy: always-gate
+  journal_note: system-alertzero-journal-note
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Identity of the rule to enable. Every action workflow takes a single
+            `actionInput` object so the generic gate workflow never needs to know
+            an action's parameter names.
+          properties:
+            id:
+              type: string
+              minLength: 1
+              maxLength: 512
+              description: >-
+                Saved-object id of the rule, so the change lands on the exact rule
+                incarnation the proposal was built against.
+            expected_revision:
+              type: integer
+              minimum: 0
+              description: >-
+                The rule's revision when the proposal was created. If a disabled
+                rule has changed since, it is not enabled.
+            investigation_id:
+              type: string
+              minLength: 1
+              # Matches CONVERSATION_ID_MAX_LENGTH, which the journal note enforces.
+              maxLength: 256
+              description: >-
+                Conversation id of the Investigation the proposal belongs to. Gets a
+                note when the rule turns out to be enabled already.
+          required:
+            - id
+            - expected_revision
+            - investigation_id
+          additionalProperties: false
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: enabled
+    type: boolean
+  - name: already_enabled
+    type: boolean
+  - name: succeeded
+    type: number
+  - name: skipped
+    type: number
+  - name: failed
+    type: number
+steps:
+  - name: fetch_rule
+    type: kibana.request
+    with:
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.actionInput.id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  - name: fail_rule_deleted
+    type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil and steps.fetch_rule.error.message contains 'HTTP 404' }}"
+    with:
+      message: >-
+        The rule was deleted after this proposal was created, so it can't be enabled.
+        Approving again won't work, so decline it.
+
+  - name: fail_rule_read
+    type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil }}"
+    with:
+      message: "{{ steps.fetch_rule.error.message }}"
+
+  # Enabled by hand since the proposal: nothing to do, so say so in the chat. An edit
+  # means the running rule is not the one the coverage check matched.
+  - name: note_already_enabled
+    type: workflow.execute
+    if: "${{ steps.fetch_rule.output.enabled == true }}"
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ inputs.actionInput.investigation_id }}"
+        message: >-
+          Rule "{{ steps.fetch_rule.output.name }}" was already enabled when this
+          proposal was approved. No change was made.{% if steps.fetch_rule.output.revision != inputs.actionInput.expected_revision %}
+          It was also changed by "{{ steps.fetch_rule.output.updated_by }}" after this
+          proposal was created, so check that it still covers this gap.{% endif %}
+    on-failure:
+      continue: true
+
+  # A rule enabled by hand takes the note above even if it was also edited.
+  - name: fail_rule_changed
+    type: workflow.fail
+    if: >-
+      ${{ steps.fetch_rule.output.enabled != true
+        and steps.fetch_rule.output.revision != inputs.actionInput.expected_revision }}
+    with:
+      message: >-
+        The rule "{{ steps.fetch_rule.output.name }}" was changed by
+        "{{ steps.fetch_rule.output.updated_by }}" after this proposal was created,
+        so it can't be enabled. Approving again won't work, so decline it.
+
+  # The bulk API reports an already-enabled rule as succeeded, so the read above
+  # is the only way to tell that case apart.
+  - name: enable_rule
+    type: security.enableRule
+    if: "${{ steps.fetch_rule.output.enabled != true }}"
+    with:
+      ids:
+        - "{{ inputs.actionInput.id }}"
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      enabled: >-
+        ${{ steps.fetch_rule.output.enabled == true
+          or steps.enable_rule.output.succeeded > 0
+          or steps.enable_rule.output.skipped > 0 }}
+      already_enabled: "${{ steps.fetch_rule.output.enabled == true }}"
+      succeeded: "${{ steps.enable_rule.output.succeeded | default: 0 }}"
+      skipped: "${{ steps.enable_rule.output.skipped | default: 0 }}"
+      failed: "${{ steps.enable_rule.output.failed | default: 0 }}"

@@ -34,14 +34,14 @@ const nodes: NodeViewModel[] = [
     id: 'node1',
     label: 'Node 1',
     color: 'primary',
-    shape: 'ellipse',
+    kind: 'entity',
     icon: 'user',
   },
   {
     id: 'node2',
     label: 'Node 2',
     color: 'primary',
-    shape: 'hexagon',
+    kind: 'entity',
     icon: 'question',
   },
 ];
@@ -79,14 +79,14 @@ const App: React.FC = () => {
       id: 'node1',
       label: 'Node 1',
       color: 'primary',
-      shape: 'ellipse',
+      kind: 'entity',
       icon: 'user',
     },
     {
       id: 'node2',
       label: 'Node 2',
       color: 'primary',
-      shape: 'hexagon',
+      kind: 'entity',
       icon: 'question',
     },
   ];
@@ -122,7 +122,7 @@ Be sure to check out provided helpers
 ## Storybook
 
 General look of the component can be checked visually running the following storybook:
-`yarn storybook cloud_security_posture_graph`
+`pnpm storybook cloud_security_posture_graph`
 
 Note that all the interactions are mocked.
 

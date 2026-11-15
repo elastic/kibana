@@ -67,7 +67,6 @@ const renderCell = (
       fieldFormats={fieldFormats}
       setCellProps={() => {}}
       closePopover={() => {}}
-      columnsMeta={undefined}
     />
   );
 };

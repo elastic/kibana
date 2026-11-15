@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 
-export const networkOverviewSchema = requestBasicOptionsSchema.extend({
-  timerange,
-  factoryQueryType: z.literal(NetworkQueries.overview),
-});
+export const networkOverviewSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    timerange,
+    factoryQueryType: z.literal(NetworkQueries.overview),
+  })
+);
 
 export type NetworkOverviewRequestOptionsInput = z.input<typeof networkOverviewSchema>;
 

@@ -569,7 +569,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           )}
           {hasMappings && (
             <EuiFlexItem grow={false} css={mappingsListPanelStyles}>
-              <EuiPanel hasShadow={false} paddingSize="none">
+              <EuiPanel hasShadow={false} hasBorder={false} paddingSize="none">
                 {isJSONVisible ? jsonBlock : treeViewBlock}
               </EuiPanel>
             </EuiFlexItem>

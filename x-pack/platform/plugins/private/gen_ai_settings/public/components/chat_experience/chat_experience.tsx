@@ -95,7 +95,7 @@ export const ChatExperience: React.FC = () => {
   const description = useMemo(
     () => (
       <FormattedMessage
-        id="aiAssistantManagementSelection.preferredChatExperienceSettingDescription"
+        id="xpack.genAiSettings.preferredChatExperienceSettingDescription"
         defaultMessage="Choose which chat experience to use for everyone in this space. {learnMoreLink}"
         values={{
           learnMoreLink: (
@@ -105,7 +105,7 @@ export const ChatExperience: React.FC = () => {
               data-test-subj="aiAgentBuilderLearnMoreLink"
             >
               <FormattedMessage
-                id="aiAssistantManagementSelection.preferredChatExperienceSettingDescription.learnMoreLink"
+                id="xpack.genAiSettings.preferredChatExperienceSettingDescription.learnMoreLink"
                 defaultMessage="Learn more"
               />
             </EuiLink>

@@ -19,6 +19,7 @@ export const FLYOUT_SETTING_KEYS = [
   'counterAggregation',
   'gaugeAggregation',
   'histogramPercentile',
+  'histogramVisualization',
 ] as const satisfies ReadonlyArray<keyof MetricsGridSettings>;
 
 export const SIMPLE_AGGREGATION_OPTIONS = METRICS_GRID_SIMPLE_AGGREGATIONS;

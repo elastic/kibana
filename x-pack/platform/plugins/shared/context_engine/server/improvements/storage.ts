@@ -42,6 +42,7 @@ export const improvementsSchema = {
     previous_revision_id: types.keyword({}),
     latest: types.boolean({}),
     ai_index_id: types.keyword({}),
+    space: types.keyword({}),
     '@timestamp': types.date({}),
     status: types.keyword({}),
     suggested_at: types.date({}),

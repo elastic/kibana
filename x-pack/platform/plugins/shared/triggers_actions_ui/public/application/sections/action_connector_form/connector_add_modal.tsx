@@ -169,7 +169,13 @@ const ConnectorAddModal = ({
        */
 
       const { actionTypeId, name, config, secrets, id } = data;
-      const validConnector = { actionTypeId, name: name ?? '', config, secrets, id: id ?? '' };
+      const validConnector = {
+        actionTypeId,
+        name: name ?? '',
+        config,
+        secrets,
+        id: id ?? '',
+      };
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
@@ -317,6 +323,7 @@ const ConnectorAddModal = ({
                 isEdit={false}
                 onChange={setFormState}
                 setResetForm={setResetForm}
+                showInboundEvents={false}
               />
               {preSubmitValidationErrorMessage}
             </>

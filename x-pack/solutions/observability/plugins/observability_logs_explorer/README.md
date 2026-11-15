@@ -9,19 +9,19 @@ This plugin provides an app based on the `LogsExplorer` component from the `logs
 #### FTR Server
 
 ```
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts
+pnpm test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts
 ```
 
 #### FTR Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/index.ts
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/index.ts
 ```
 
 #### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/$1
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/$1
 ```
 
 ### Serverless
@@ -29,19 +29,19 @@ yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/a
 #### Server
 
 ```
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
+pnpm test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
 ```
 
 #### Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/observability_logs_explorer/index.ts
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/observability_logs_explorer/index.ts
 ```
 
 #### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/observability_logs_explorer/$1
+pnpm test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/observability_logs_explorer/$1
 ```
 
 ### Using dockerized package registry
@@ -95,5 +95,5 @@ node scripts/synthtrace logs_and_metrics.ts --clean [--live]
 The limit is done to protect us in case we add some dependency that heavily impacts the bundle size, so this is not to be intended as a fix, but as a conscious update after double-checking the bundle size increase and see if it can be reduced
 
 ```
-node scripts/build_kibana_platform_plugins --focus logsExplorer --update-limits
+node scripts/build_kibana_platform_plugins --update-limits
 ```

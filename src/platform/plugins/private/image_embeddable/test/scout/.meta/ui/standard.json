@@ -1,0 +1,21 @@
+{
+  "sha1": "01d87b305fdbb1b73878e1ed810b3fb1042c121e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1fe67376abbd8c7-aa43753c9f3342d",
+      "title": "Image embeddable image embeddable smoke test",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/image_embeddable/test/scout/ui/tests/image_embeddable.spec.ts",
+        "line": 31,
+        "column": 63
+      }
+    }
+  ]
+}

@@ -7,7 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SyntheticsPluginsSetupDependencies } from '../types';
-import { commonMonitorStateI18, commonStateTranslations } from './translations';
+import {
+  commonMonitorStateI18,
+  commonStateTranslations,
+  statusRuleCheckedAtVariable,
+  statusRuleTimestampVariable,
+} from './translations';
+
+export type SyntheticsAlertRuleType = 'monitorStatus' | 'tls';
 
 export const MESSAGE = 'message';
 export const ALERT_REASON_MSG = 'reason';
@@ -17,12 +24,27 @@ export const RECOVERY_REASON = 'recoveryReason';
 export const FAILED_STEP_INFO = 'failedStepInfo';
 export const FAILED_STEP_NAME = 'failedStepName';
 export const FAILED_STEP_NUMBER = 'failedStepNumber';
+export const PENDING_THRESHOLD = 'pendingThreshold';
 const GROUPING = 'grouping';
+
+const getMonitorContextVariables = (ruleType: SyntheticsAlertRuleType) => {
+  if (ruleType !== 'monitorStatus') {
+    return commonMonitorStateI18;
+  }
+
+  return commonMonitorStateI18.flatMap((variable) =>
+    variable.name === 'checkedAt'
+      ? [statusRuleCheckedAtVariable, statusRuleTimestampVariable]
+      : [variable]
+  );
+};
 
 export const getActionVariables = ({
   plugins,
+  ruleType,
 }: {
   plugins: SyntheticsPluginsSetupDependencies;
+  ruleType: SyntheticsAlertRuleType;
 }) => {
   return {
     context: [
@@ -36,8 +58,9 @@ export const getActionVariables = ({
       ACTION_VARIABLES[FAILED_STEP_INFO],
       ACTION_VARIABLES[FAILED_STEP_NAME],
       ACTION_VARIABLES[FAILED_STEP_NUMBER],
+      ACTION_VARIABLES[PENDING_THRESHOLD],
       ACTION_VARIABLES[GROUPING],
-      ...commonMonitorStateI18,
+      ...getMonitorContextVariables(ruleType),
     ],
     state: [...commonStateTranslations],
   };
@@ -115,6 +138,16 @@ export const ACTION_VARIABLES = {
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.failedStepNumber.description',
       {
         defaultMessage: 'The number/index of the failed step for browser monitors',
+      }
+    ),
+  },
+  [PENDING_THRESHOLD]: {
+    name: PENDING_THRESHOLD,
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.pendingThreshold.description',
+      {
+        defaultMessage:
+          'The number of consecutive pending evaluations required before a pending alert fires',
       }
     ),
   },

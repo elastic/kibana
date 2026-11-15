@@ -16,7 +16,7 @@ import {
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   getActiveOtelSpanId,
@@ -31,6 +31,7 @@ import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
@@ -40,7 +41,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: WorkflowRuntimeGraph;
   workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
@@ -76,11 +77,11 @@ export class WorkflowExecutionRuntimeManager {
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
-  private workflowGraph: WorkflowGraph;
+  private workflowGraph: WorkflowRuntimeGraph;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
-  private telemetryReported: boolean = false;
+  private terminalStateFinalized: boolean = false;
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
@@ -135,6 +136,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public navigateToAfterNode(nodeId: string): void {
     this.workflowExecutionCursor.navigateToAfterNode(nodeId);
+  }
+
+  public navigateToSynthetic(params: { stepId: string; stepType: string }): void {
+    this.workflowExecutionCursor.navigateToSynthetic(params);
   }
 
   public getCurrentNodeScope(): StackFrame[] {
@@ -520,14 +525,20 @@ export class WorkflowExecutionRuntimeManager {
       }
     }
 
+    // Terminal finalization runs once per run; later saves must not re-stamp finishedAt/duration,
+    // re-log completion or re-report telemetry.
     if (
-      (workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
-      isTerminalStatus(workflowExecution.status)
+      !this.terminalStateFinalized &&
+      ((workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
+        isTerminalStatus(workflowExecution.status))
     ) {
       const startedAt = new Date(workflowExecution.startedAt);
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
+      // Persist the stored context, not the Liquid render alias. Minting a
+      // typeless `event` here makes the execution tree label the trigger
+      // `document` instead of `manual`.
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,
@@ -558,8 +569,8 @@ export class WorkflowExecutionRuntimeManager {
         }
       }
 
-      // Report telemetry for terminal status (only once)
       this.reportTelemetryIfTerminal(workflowExecution, workflowExecutionUpdate);
+      this.terminalStateFinalized = true;
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
@@ -588,22 +599,23 @@ export class WorkflowExecutionRuntimeManager {
 
   /**
    * Reports telemetry for workflow execution when it reaches a terminal status.
-   * Only reports once per execution to avoid duplicate events.
+   * Called only from the once-per-run terminal block in saveState.
    */
   private reportTelemetryIfTerminal(
     workflowExecution: EsWorkflowExecution,
     workflowExecutionUpdate: Partial<EsWorkflowExecution>
   ): void {
     const finalStatus = workflowExecutionUpdate.status || workflowExecution.status;
-    if (!this.telemetryClient || this.telemetryReported || !isTerminalStatus(finalStatus)) {
+    if (!this.telemetryClient || !isTerminalStatus(finalStatus)) {
       return;
     }
 
-    this.telemetryReported = true;
     const stepExecutions = this.workflowExecutionState.getAllStepExecutions();
     const finalWorkflowExecution = {
       ...workflowExecution,
       ...workflowExecutionUpdate,
+      // The update's context is rebuilt without the raw parent* keys, so keep the stored ones.
+      context: { ...workflowExecution.context, ...workflowExecutionUpdate.context },
       status: finalStatus,
     } as EsWorkflowExecution;
 

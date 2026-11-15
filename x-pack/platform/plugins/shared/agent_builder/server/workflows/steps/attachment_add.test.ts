@@ -11,15 +11,11 @@ import {
   createWorkflowStepAttachmentClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
-
 describe('addAttachmentStepDefinition', () => {
   it('creates the expected step definition structure', () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock();
     const definition = addAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     expect(definition.id).toBe('ai.attachment.add');
@@ -45,7 +41,6 @@ describe('addAttachmentStepDefinition', () => {
 
     const definition = addAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     const result = await definition.handler(
@@ -66,30 +61,39 @@ describe('addAttachmentStepDefinition', () => {
       origin: undefined,
       description: undefined,
       hidden: undefined,
+      render_inline: undefined,
     });
     expect(result).toEqual({
       output: { attachment_id: 'att-1', type: 'text', current_version: 1 },
     });
   });
 
-  it('returns an error when experimental features are disabled', async () => {
-    const { getAttachmentClient } = createWorkflowStepAttachmentClientMock();
+  it('forwards render_inline to the client', async () => {
+    const { create, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
+      create: jest
+        .fn()
+        .mockResolvedValue({ id: 'att-1', type: 'text', current_version: 1, versions: [] }),
+    });
     const definition = addAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalDisabled,
     });
 
-    const result = await definition.handler(
+    expect(
+      definition.inputSchema.safeParse({
+        conversation_id: 'conv-1',
+        type: 'text',
+        data: {},
+        render_inline: true,
+      }).success
+    ).toBe(true);
+
+    await definition.handler(
       createStepHandlerContext({
-        input: { conversation_id: 'conv-1', type: 'text', data: { text: 'x' } },
+        input: { conversation_id: 'conv-1', type: 'text', data: {}, render_inline: true },
       })
     );
 
-    expect(result).toEqual({
-      error: expect.objectContaining({
-        message: expect.stringContaining('experimental features'),
-      }),
-    });
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ render_inline: true }));
   });
 
   it('returns an error when the client throws', async () => {
@@ -99,7 +103,6 @@ describe('addAttachmentStepDefinition', () => {
 
     const definition = addAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     const result = await definition.handler(
@@ -117,7 +120,6 @@ describe('addAttachmentStepDefinition', () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock();
     const definition = addAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     expect(definition.inputSchema.safeParse({ type: 'text', data: {} }).success).toBe(false);

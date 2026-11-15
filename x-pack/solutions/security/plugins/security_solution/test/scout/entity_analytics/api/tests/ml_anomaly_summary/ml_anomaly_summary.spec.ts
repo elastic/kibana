@@ -27,9 +27,15 @@ import {
 import {
   CAROL_EUID,
   DAVID_EUID,
+  DAVID_GEO_EVENT_IDS,
+  HENRY_EUID,
+  POPULATION_ANOMALY_ACTUAL,
+  POPULATION_ANOMALY_RECORD_ID,
+  POPULATION_ANOMALY_TYPICAL,
   WIN_APP01_EUID,
   NO_BEHAVIORS_EUID,
   OR_SEMANTICS_HOST_EUID,
+  davidGeoSourceTestData,
   sourceTestData,
   anomalyTestData,
   entityTestData,
@@ -133,129 +139,38 @@ apiTest.describe(
       });
       packagePolicyId = packagePolicyRes.body?.item?.id ?? '';
 
-      // The pad-ml module is registered asynchronously by the PAD integration install above, so it
-      // may not exist yet when we reach module setup. Rather than re-posting the setup *action* in a
-      // fixed window — which raced the install and gave up before it finished on real serverless
-      // projects — poll the module-registration read signal (`getModule`, the same module
-      // definitions `getSecurityMlJobIds` reads) until the module is present, then set it up once.
-      // security_auth is a built-in module and resolves on the first poll.
-      // NOTE: job/datafeed *creation* succeeding here is not sufficient — see
-      // `waitForDatafeedReady` below for why we still have to wait after this returns.
-      const waitForModuleRegistered = async (module: string): Promise<void> => {
-        const maxAttempts = 40;
+      // The pad-ml module registers asynchronously after the PAD integration install, so retry
+      // until it is recognized instead of firing a setup that fails silently before it exists.
+      const setupMlModuleWithRetry = async (
+        module: string,
+        body: Record<string, unknown>
+      ): Promise<void> => {
+        const maxAttempts = 10;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          const response = await apiClient.get(`/internal/ml/modules/get_module/${module}`, {
+          const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
             headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
             responseType: 'json',
+            body,
           });
-          if (response.statusCode === 200 && (response.body?.jobs?.length ?? 0) > 0) {
+          const jobs: Array<{ success?: boolean; error?: { status?: number } }> =
+            response.body?.jobs ?? [];
+          const succeeded =
+            response.statusCode === 200 &&
+            jobs.length > 0 &&
+            jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
+          if (succeeded) {
             return;
           }
           if (attempt < maxAttempts) {
             await setTimeoutAsync(3000);
           }
         }
-        throw new Error(`ML module "${module}" was not registered in time`);
-      };
-
-      const setupMlModule = async (
-        module: string,
-        body: Record<string, unknown>
-      ): Promise<{ jobIds: string[]; datafeedIds: string[] }> => {
-        await waitForModuleRegistered(module);
-        const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
-          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
-          responseType: 'json',
-          body,
-        });
-        const jobs: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
-          response.body?.jobs ?? [];
-        const datafeeds: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
-          response.body?.datafeeds ?? [];
-
-        const jobsCreated =
-          jobs.length > 0 && jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
-        const datafeedsCreated =
-          datafeeds.length > 0 &&
-          datafeeds.every((df) => df.success || (df.error?.status ?? 500) < 500);
-
-        if (response.statusCode !== 200 || !jobsCreated || !datafeedsCreated) {
-          throw new Error(
-            `Failed to set up ML module "${module}" (status ${
-              response.statusCode
-            }): ${JSON.stringify(response.body)}`
-          );
-        }
-        return {
-          jobIds: jobs.map((job) => job.id).filter((id): id is string => Boolean(id)),
-          datafeedIds: datafeeds.map((df) => df.id).filter((id): id is string => Boolean(id)),
-        };
-      };
-
-      // Job/datafeed *creation* succeeding (checked above) does not mean the datafeed is
-      // actually running. Elasticsearch can accept the start request while ML compute is
-      // still scaling up from zero — normal on a project without a currently-running ML
-      // node, which is exactly the state a serverless project's ML tier starts in (ML node
-      // autoscaling is always-on there; see
-      // https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection/anomaly-detection-scale).
-      // Until the datafeed is actually assigned, the job's live `datafeed_config` (what
-      // get_job_config.ts reads to build `sourceIndex` for baseline enrichment) stays empty,
-      // and enrichment silently returns the anomaly unenriched — no error, just
-      // `baselineValues: []`. Re-posting module setup doesn't help at that point (starting an
-      // already-started datafeed 409s), so poll the live job/datafeed state directly instead
-      // of trusting the setup response alone.
-      const waitForDatafeedReady = async (
-        jobIds: string[],
-        datafeedIds: string[]
-      ): Promise<void> => {
-        const maxAttempts = 30;
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          const jobsRes = await esClient.ml.getJobs({ job_id: jobIds.join(',') });
-          const jobsById = new Map((jobsRes.jobs ?? []).map((job) => [job.job_id, job]));
-          const notReady = jobIds.filter(
-            (id) => (jobsById.get(id)?.datafeed_config?.indices ?? []).length === 0
-          );
-
-          if (notReady.length === 0) {
-            return;
-          }
-
-          // DIAGNOSTIC: log the live datafeed state/assignment on every attempt, so a future
-          // MKI failure shows exactly what ML is doing instead of a bare
-          // `datafeed_config: undefined`.
-          try {
-            const statsRes = await esClient.ml.getDatafeedStats({
-              datafeed_id: datafeedIds.join(','),
-            });
-            log.info(
-              `Waiting for ML datafeed allocation (attempt ${attempt}/${maxAttempts}, ` +
-                `not ready: ${notReady.join(', ')}): ` +
-                `${JSON.stringify(
-                  (statsRes.datafeeds ?? []).map((df) => ({
-                    datafeed_id: df.datafeed_id,
-                    state: df.state,
-                    // Not populated on Elastic Cloud Serverless, but useful on stateful.
-                    node: df.node?.name,
-                    assignment_explanation: df.assignment_explanation,
-                  }))
-                )}`
-            );
-          } catch (err) {
-            log.debug(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
-          }
-
-          if (attempt < maxAttempts) {
-            await setTimeoutAsync(5000);
-          }
-        }
-        throw new Error(
-          `ML job(s) ${jobIds.join(', ')} did not receive an assigned datafeed_config in time`
-        );
+        throw new Error(`Failed to set up ML module "${module}" after ${maxAttempts} attempts`);
       };
 
       // Create PAD ML jobs
       log.debug(`Setting up PAD ML jobs...`);
-      const padSetup = await setupMlModule('pad-ml', {
+      await setupMlModuleWithRetry('pad-ml', {
         prefix: '',
         groups: ['security', 'ftr'],
         indexPatternName: 'logs-*',
@@ -263,46 +178,10 @@ apiTest.describe(
         startDatafeed: true,
         start: startMs,
       });
-      await waitForDatafeedReady(padSetup.jobIds, padSetup.datafeedIds);
-
-      // DIAGNOSTIC (theory 1): verify the PAD ML job was created with a non-empty config.
-      // `waitForDatafeedReady` above already guarantees `datafeed_config` is populated by
-      // this point — if this ever logs "missing entirely" or an empty `indices` again, the
-      // wait itself (not just this one-off check) has a gap worth investigating.
-      try {
-        const padJobRes = await esClient.ml.getJobs({
-          job_id: 'pad_windows_rare_region_name_by_user_ea',
-        });
-        const padJob = padJobRes.jobs?.[0];
-        if (!padJob) {
-          log.info(`[DIAG] PAD job not found — job config is missing entirely`);
-        } else {
-          const analysisConfig = padJob.analysis_config;
-          const detectorCount = analysisConfig?.detectors?.length ?? 0;
-          log.info(
-            `[DIAG] PAD job config: detectors=${detectorCount}, ` +
-              `analysisConfig=${JSON.stringify(analysisConfig)}`
-          );
-          if (detectorCount === 0) {
-            log.info(
-              `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
-            );
-          }
-          // Log the datafeed query so we can see exactly which events it includes.
-          // If the datafeed excludes event codes 4672/4673 (privilege events), the
-          // New York baseline events would not be found, producing baselineValues=[].
-          log.info(
-            `[DIAG] PAD datafeed: indices=${JSON.stringify(padJob.datafeed_config?.indices)}, ` +
-              `query=${JSON.stringify(padJob.datafeed_config?.query)}`
-          );
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to fetch PAD job config: ${err}`);
-      }
 
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
-      const authSetup = await setupMlModule('security_auth', {
+      await setupMlModuleWithRetry('security_auth', {
         prefix: '',
         groups: ['security', 'authentication', 'ftr'],
         indexPatternName: 'logs-*',
@@ -310,11 +189,10 @@ apiTest.describe(
         startDatafeed: true,
         start: startMs,
       });
-      await waitForDatafeedReady(authSetup.jobIds, authSetup.datafeedIds);
 
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);
-      const sourceData = sourceTestData();
+      const sourceData = [...sourceTestData(), ...davidGeoSourceTestData()];
       await esClient.bulk({
         operations: sourceData.flatMap((data) => [
           { create: { _index: SOURCE_EVENTS_INDEX } },
@@ -322,73 +200,6 @@ apiTest.describe(
         ]),
         refresh: true,
       });
-
-      // DIAGNOSTIC (theory 2): verify the source index mappings applied the right types for
-      // the fields the PAD rare detector queries.  If dynamic mapping mapped
-      // source.geo.region_name or user.name as non-keyword the baseline lookup will
-      // return nothing and baselineValues will be empty.
-      try {
-        const mappingRes = await esClient.indices.getMapping({ index: SOURCE_EVENTS_INDEX });
-        const indexNames = Object.keys(mappingRes);
-        for (const indexName of indexNames) {
-          const props = (mappingRes[indexName]?.mappings?.properties ?? {}) as Record<
-            string,
-            unknown
-          >;
-          const sourceGeo = (props.source as Record<string, unknown> | undefined)?.properties as
-            | Record<string, unknown>
-            | undefined;
-          const regionNameMapping = (sourceGeo?.geo as Record<string, unknown> | undefined)
-            ?.properties as Record<string, unknown> | undefined;
-          const regionNameType = (
-            regionNameMapping?.region_name as Record<string, unknown> | undefined
-          )?.type;
-          const userProps = (props.user as Record<string, unknown> | undefined)?.properties as
-            | Record<string, unknown>
-            | undefined;
-          const userNameType = (userProps?.name as Record<string, unknown> | undefined)?.type;
-          log.info(
-            `[DIAG] ${indexName} mappings: source.geo.region_name.type=${regionNameType}, user.name.type=${userNameType}`
-          );
-          if (regionNameType !== 'keyword' && regionNameType !== undefined) {
-            log.info(
-              `[DIAG] WARNING: source.geo.region_name mapped as "${regionNameType}" not keyword — theory 2 confirmed`
-            );
-          }
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to fetch source index mappings: ${err}`);
-      }
-
-      // DIAGNOSTIC (theory 2 continued): confirm the source events were actually indexed with
-      // the expected geo data so we can tell mapping issues apart from indexing failures.
-      try {
-        const searchRes = await esClient.search({
-          index: SOURCE_EVENTS_INDEX,
-          query: {
-            bool: {
-              must: [
-                { term: { 'user.name': 'carol.davis' } },
-                { exists: { field: 'source.geo.region_name' } },
-              ],
-            },
-          },
-          _source: ['user.name', 'source.geo.region_name', '@timestamp'],
-          size: 10,
-        });
-        const hits = searchRes.hits?.hits ?? [];
-        log.info(
-          `[DIAG] Source events for carol.davis with source.geo.region_name: count=${hits.length}, ` +
-            `docs=${JSON.stringify(hits.map((h) => h._source))}`
-        );
-        if (hits.length === 0) {
-          log.info(
-            `[DIAG] WARNING: no carol.davis source events with geo region found — baseline enrichment will return empty`
-          );
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to search source events: ${err}`);
-      }
 
       // Index anomaly records for the test entities.
       log.debug(`Indexing test anomaly records...`);
@@ -445,7 +256,9 @@ apiTest.describe(
       await esClient
         .deleteByQuery({
           index: SOURCE_EVENTS_INDEX,
-          query: { terms: { 'event.id': SOURCE_EVENT_IDS as unknown as string[] } },
+          query: {
+            terms: { 'event.id': [...SOURCE_EVENT_IDS, ...DAVID_GEO_EVENT_IDS] },
+          },
           refresh: true,
         })
         .catch(() => {});
@@ -483,6 +296,7 @@ apiTest.describe(
         expect(body.entity_id).toBe(CAROL_EUID);
         expect(Array.isArray(body.anomalies)).toBe(true);
         expect(body.anomalies).toHaveLength(2);
+        expect(body.anomalies.every((a) => a.entityId === CAROL_EUID)).toBe(true);
 
         const jobIds = body.anomalies.map((a) => a.jobId);
         expect(jobIds).toContain('auth_high_count_logon_events_ea');
@@ -529,11 +343,177 @@ apiTest.describe(
 
         const anomaly = body.anomalies[0];
         expect(anomaly.jobId).toBe('suspicious_login_activity_ea');
+        expect(anomaly.entityId).toBe(DAVID_EUID);
         expect(anomaly.jobName).toBe('Unusual Login Activity');
         expect(anomaly.threatTactics).toStrictEqual(['Credential Access']);
         expect(anomaly.threatTechniques).toStrictEqual(['Brute Force']);
       }
     );
+
+    apiTest(
+      'Anomaly summary API: mode=resolved returns the combined anomalies of the resolution group',
+      async ({ apiClient }) => {
+        // David's entity record resolves to Carol, so Carol's group covers both users.
+        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(CAROL_EUID);
+        expect(body.total).toBe(3);
+        // Each record is attributed to the group member it matched (the named query), not
+        // to the requested id.
+        expect(
+          body.anomalies.map((a) => [a.jobId, a.entityId]).sort(([a], [b]) => a.localeCompare(b))
+        ).toStrictEqual([
+          ['auth_high_count_logon_events_ea', CAROL_EUID],
+          ['pad_windows_rare_region_name_by_user_ea', CAROL_EUID],
+          ['suspicious_login_activity_ea', DAVID_EUID],
+        ]);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: mode=resolved for an alias returns only its own anomalies',
+      async ({ apiClient }) => {
+        // Only entities resolved *to* the requested id are included; an alias does not expand
+        // to its target's group.
+        const response = await apiClient.post(buildUrl(DAVID_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(DAVID_EUID);
+        expect(body.total).toBe(1);
+        expect(body.anomalies[0].jobId).toBe('suspicious_login_activity_ea');
+        expect(body.anomalies[0].entityId).toBe(DAVID_EUID);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: mode=resolved enriches baselines from the source events of every group member',
+      async ({ apiClient, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
+        const getRareAnomaly = async (body: Record<string, unknown>) => {
+          const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+            headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+            responseType: 'json',
+            body,
+          });
+          expect(response.statusCode).toBe(200);
+          return (response.body as AnomalySummaryResponse).anomalies.find(
+            (a) => a.jobId === 'pad_windows_rare_region_name_by_user_ea'
+          );
+        };
+
+        // Carol alone: 3 'New York' events, 1 'Crimea' event.
+        const single = await getRareAnomaly({ mode: 'single' });
+        expect(single?.baselineValues).toStrictEqual(['New York']);
+        expect(single?.anomalousValueCount).toBe(1);
+
+        // Carol's group also includes David: 4 'Texas' events outrank 'New York', and his
+        // 'Crimea' event adds to the anomalous value count.
+        const resolved = await getRareAnomaly({ mode: 'resolved' });
+        expect(resolved?.entityId).toBe(CAROL_EUID);
+        expect(resolved?.anomalousValue).toBe('Crimea');
+        expect(resolved?.baselineValues).toStrictEqual(['Texas', 'New York']);
+        expect(resolved?.anomalousValueCount).toBe(2);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: lists population-analysis records whose actual/typical live only in causes',
+      async ({ apiClient }) => {
+        // Henry's only anomaly comes from auth_rare_hour_for_a_user_ea, a population job
+        // (`over_field_name`). ML writes `actual` / `typical` / `by_field_value` on `causes[]` for
+        // such records, not at the top level. The page must contain every record the query counts
+        // in `total`, completed from Henry's cause, rather than reporting total=1 and an empty page.
+        const response = await apiClient.post(buildUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(HENRY_EUID);
+        expect(body.total).toBe(1);
+        expect(body.anomalies).toHaveLength(body.total);
+
+        const [anomaly] = body.anomalies;
+        expect(anomaly.recordId).toBe(POPULATION_ANOMALY_RECORD_ID);
+        expect(anomaly.jobId).toBe('auth_rare_hour_for_a_user_ea');
+        expect(anomaly.jobName).toBe('Unusual Hour for a User to Logon');
+        expect(anomaly.entityId).toBe(HENRY_EUID);
+        expect(anomaly.detectorFunction).toBe('time_of_day');
+        expect(anomaly.overFieldName).toBe('source.geo.region_iso_code');
+        expect(anomaly.overFieldValue).toBe('US-CA');
+        // Dimensions and values come from Henry's cause, not the first cause (olivia.perez).
+        expect(anomaly.byFieldName).toBe('user.name');
+        expect(anomaly.byFieldValue).toBe('henry.clark');
+        expect(anomaly.actual).toStrictEqual([POPULATION_ANOMALY_ACTUAL]);
+        expect(anomaly.typical).toStrictEqual([POPULATION_ANOMALY_TYPICAL]);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: derives baseline and anomalous value of population-analysis records from causes',
+      async ({ apiClient, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
+        const response = await apiClient.post(buildUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response.statusCode).toBe(200);
+        const [anomaly] = (response.body as AnomalySummaryResponse).anomalies;
+        // time_ detectors use the record's own typical/actual as baseline/anomalous value.
+        expect(anomaly.baselineValues).toStrictEqual([String(POPULATION_ANOMALY_TYPICAL)]);
+        expect(anomaly.anomalousValue).toBe(String(POPULATION_ANOMALY_ACTUAL));
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: counts and lists population-analysis records consistently with the summary',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.totalAnomaliesCount).toBe(1);
+        expect(body.recentAnomalies).toHaveLength(1);
+        expect(body.recentAnomalies[0].recordId).toBe(POPULATION_ANOMALY_RECORD_ID);
+        // time_of_day: `actual` (seconds since midnight, from causes[0]) formatted as HH:MM.
+        expect(body.recentAnomalies[0].anomalousValue).toBe('03:11');
+      }
+    );
+
+    apiTest('Anomaly summary API: returns 400 for an unknown mode', async ({ apiClient }) => {
+      const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+        responseType: 'json',
+        body: { mode: 'everything' },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
 
     apiTest(
       'Anomaly summary API: returns empty anomalies for entity with no anomaly records',
@@ -639,7 +619,11 @@ apiTest.describe(
 
     apiTest(
       'Anomaly summary API: enriches anomalies with baseline values from source index',
-      async ({ apiClient, log }) => {
+      async ({ apiClient, log, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
@@ -845,6 +829,40 @@ apiTest.describe(
         for (const count of Object.values(body.tacticCounts)) {
           expect(count).toBeGreaterThan(0);
         }
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: mode=resolved aggregates the anomalies of the resolution group',
+      async ({ apiClient }) => {
+        // Carol has 2 anomalies and her alias David has 1 (suspicious_login_activity_ea).
+        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.entityId).toBe(CAROL_EUID);
+        expect(body.totalAnomaliesCount).toBe(3);
+        expect(body.recentAnomalies.map((a) => a.jobId)).toContain('suspicious_login_activity_ea');
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: mode=single matches the default behaviour',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'single' },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.entityId).toBe(CAROL_EUID);
+        expect(body.totalAnomaliesCount).toBe(2);
       }
     );
 

@@ -21,11 +21,19 @@ import {
   WorkflowOutputStepSchema,
 } from '../../../spec/schema';
 
-export const GraphNodeSchema = z.object({
+export const BaseGraphNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
   stepId: z.string(),
   stepType: z.string(),
+});
+
+export const SyntheticGraphNodeSchema = BaseGraphNodeSchema.extend({
+  isSynthetic: z.boolean(),
+});
+export type SyntheticGraphNode = z.infer<typeof SyntheticGraphNodeSchema>;
+
+export const GraphNodeSchema = BaseGraphNodeSchema.extend({
   templateDependencies: z.array(z.unknown()).optional(),
 });
 

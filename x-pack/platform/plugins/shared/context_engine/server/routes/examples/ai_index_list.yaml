@@ -1,0 +1,54 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          listAiIndicesResponseExample:
+            summary: "AI Indices the caller can read"
+            description: "Example response listing the AI Indices the caller can read"
+            value:
+              ai_indices:
+                - id: customer_support
+                  description: Knowledge about customer support cases.
+                  managed: false
+                  dest:
+                    type: data_stream
+                    value: ai-index-ds-customer-support
+                  automations: []
+                  sources:
+                    - type: esql
+                      value: FROM support-cases | LIMIT 100
+                  traces: []
+                  date_created: "2026-09-22T12:00:00.000Z"
+                  date_modified: "2026-09-22T12:00:00.000Z"
+  403:
+    content:
+      application/json:
+        examples:
+          forbiddenExample:
+            summary: "No index read privileges"
+            description: "The caller has no read privilege on any index"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/msearch] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read,all]"
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "https://${KIBANA_URL}/api/context_engine/ai_index" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn:/api/context_engine/ai_index

@@ -43,6 +43,7 @@ describe('improvements storage', () => {
 
   it('indexes the fields the review UI filters and sorts on', () => {
     expect(props.ai_index_id.type).toBe('keyword');
+    expect(props.space.type).toBe('keyword');
     expect(props.status.type).toBe('keyword');
     expect(props.action.type).toBe('keyword');
     expect(props['@timestamp'].type).toBe('date');

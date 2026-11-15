@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import {
   QueryOrUndefined,
@@ -99,15 +99,11 @@ export const CreateLiveQueryResponse = lazySchema(() =>
       /**
        * The timestamp when the action was created.
        */
-      '@timestamp': z
-        .string()
-        .datetime()
-        .optional()
-        .describe('The timestamp when the action was created.'),
+      '@timestamp': isoDateTime().optional().describe('The timestamp when the action was created.'),
       /**
        * The expiration date of the action.
        */
-      expiration: z.string().datetime().optional().describe('The expiration date of the action.'),
+      expiration: isoDateTime().optional().describe('The expiration date of the action.'),
       /**
        * The action type.
        */

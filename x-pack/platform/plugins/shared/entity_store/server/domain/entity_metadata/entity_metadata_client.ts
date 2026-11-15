@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { resolveMetadataDataStreamName } from '../asset_manager/resolve_entity_store_indices';
 import { ensureMetadataDataStreamMappingsOnce } from '../asset_manager/ensure_metadata_mappings';
 import { runWithSpan } from '../../telemetry/traces';
@@ -111,9 +112,11 @@ export class EntityMetadataClient {
   public async getLatestByEntityId<TDoc extends object>({
     entityId,
     eventAction,
+    filter,
   }: {
     entityId: string;
     eventAction: string;
+    filter?: QueryDslQueryContainer[];
   }): Promise<TDoc | null> {
     return runWithSpan({
       name: 'entityStore.metadata.get_latest_by_entity_id',
@@ -127,6 +130,7 @@ export class EntityMetadataClient {
           index: await resolveMetadataDataStreamName(this.esClient, this.namespace),
           entityId,
           eventAction,
+          filter,
         }),
     });
   }

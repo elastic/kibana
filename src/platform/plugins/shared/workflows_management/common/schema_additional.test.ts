@@ -21,6 +21,7 @@ import {
   getAllConnectorsWithDynamic,
   getCachedAllConnectorsMap,
   getCachedDynamicConnectorTypes,
+  getCachedInferenceConnectorInstances,
   getDeprecatedStepMetadataMap,
   getWorkflowZodSchema,
 } from './schema';
@@ -488,6 +489,22 @@ describe('schema - additional coverage', () => {
       const secondMap = getCachedAllConnectorsMap();
 
       expect(firstMap).toBe(secondMap);
+    });
+
+    it('should refresh inference connector instances when types have not changed', () => {
+      const dynamicTypes = {
+        '.stable-inference-test': createMockConnectorTypeInfo({
+          actionTypeId: '.stable-inference-test',
+        }),
+      };
+      const inferenceConnectors = new Map([
+        ['feature-id', [createMockConnectorInstance({ id: 'inference-endpoint-id' })]],
+      ]);
+
+      addDynamicConnectorsToCache(dynamicTypes);
+      addDynamicConnectorsToCache(dynamicTypes, inferenceConnectors);
+
+      expect(getCachedInferenceConnectorInstances()).toBe(inferenceConnectors);
     });
 
     it('should rebuild cache when enabled flag changes', () => {

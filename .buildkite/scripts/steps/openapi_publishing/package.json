@@ -10,6 +10,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "bump-cli": "^2.8.4"
+    "bump-cli": "^2.11.0"
   }
 }

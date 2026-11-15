@@ -1,5 +1,5 @@
 {
-  "sha1": "b0b66f0dd511ef50ca20f710ecfe840b83c49fd8",
+  "sha1": "8724db5c3ab6f1c195d70512d34b1ae090411fb6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -114,22 +114,6 @@
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
         "line": 97,
         "column": 25
-      }
-    },
-    {
-      "id": "fbc74590a1185af-c3d465fbd81d999",
-      "title": "Host Onboarding navigating to /host/linux redirects to the V1 landing root when V2 is disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 108,
-        "column": 13
       }
     },
     {

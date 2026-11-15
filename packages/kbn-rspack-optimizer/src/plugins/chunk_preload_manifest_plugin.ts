@@ -14,12 +14,13 @@ import { CHUNK_MANIFEST_FILENAME } from '../paths';
 /**
  * Emits `chunk-manifest.json` with a single field:
  *
- * - `allChunks`: ALL async chunks (named shared + plugin entries + unnamed).
- *   Used by `bootstrap_renderer.ts` to populate the bootstrap `load()` array,
- *   enabling eager parallel download of every chunk via `<script async=false>`
- *   before `kibana.bundle.js`. Rspack's JSONP mechanism queues module factories
- *   so that dynamic imports resolve without network requests once the runtime
- *   drains the queue.
+ * - `allChunks`: async chunks to preload (named shared chunks + plugin entry
+ *   children). Cache groups with `name: false` are omitted so those chunks stay
+ *   on demand. Used by `bootstrap_renderer.ts` to populate the bootstrap `load()`
+ *   array, enabling eager parallel download via `<script async=false>` before
+ *   `kibana.bundle.js`. Rspack's JSONP mechanism queues module factories so that
+ *   dynamic imports resolve without network requests once the runtime drains
+ *   the queue.
  *
  * If CI or FTR shows ChunkLoadError / 404 on /bundles/chunks/, compare emitted assets to
  * chunk-manifest.json and validate script order vs Rspack chunk graph (alphabetical sort here
@@ -41,17 +42,21 @@ export class ChunkPreloadManifestPlugin {
               : undefined;
 
           const staticNameGroupKeys = new Set<string>();
+          const onDemandGroupKeys = new Set<string>();
           if (cacheGroups && typeof cacheGroups === 'object') {
             for (const [key, group] of Object.entries(cacheGroups)) {
-              if (group && typeof group === 'object' && typeof group.name === 'string') {
+              if (!group || typeof group !== 'object') continue;
+              if (typeof group.name === 'string') {
                 staticNameGroupKeys.add(key);
+              } else if (group.name === false) {
+                onDemandGroupKeys.add(key);
               }
             }
           }
 
-          const isNamedSharedChunk = (chunk: Chunk): boolean => {
+          const chunkHasHint = (chunk: Chunk, keys: Set<string>): boolean => {
             for (const hint of chunk.idNameHints) {
-              if (staticNameGroupKeys.has(hint)) return true;
+              if (keys.has(hint)) return true;
             }
             return false;
           };
@@ -64,13 +69,14 @@ export class ChunkPreloadManifestPlugin {
             }
           };
 
-          // Collect ALL async chunks for the load() array: named shared chunks
-          // first, then remaining entrypoint children (deduplicated).
+          // Named shared chunks first, then remaining entrypoint children.
+          // `name: false` groups (jqueryFlot) stay out of bootstrap even when
+          // splitChunks places them in an entrypoint child group.
           const allChunkFiles: string[] = [];
           const seen = new Set<Chunk>();
 
           for (const chunk of compilation.chunks) {
-            if (isNamedSharedChunk(chunk)) {
+            if (chunkHasHint(chunk, staticNameGroupKeys)) {
               collectJsFiles(chunk, allChunkFiles);
               seen.add(chunk);
             }
@@ -80,10 +86,9 @@ export class ChunkPreloadManifestPlugin {
           if (entrypoint) {
             for (const childGroup of entrypoint.childrenIterable) {
               for (const chunk of childGroup.chunks) {
-                if (!seen.has(chunk)) {
-                  collectJsFiles(chunk, allChunkFiles);
-                  seen.add(chunk);
-                }
+                if (seen.has(chunk) || chunkHasHint(chunk, onDemandGroupKeys)) continue;
+                collectJsFiles(chunk, allChunkFiles);
+                seen.add(chunk);
               }
             }
           }

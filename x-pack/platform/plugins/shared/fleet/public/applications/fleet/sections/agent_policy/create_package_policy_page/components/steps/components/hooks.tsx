@@ -9,7 +9,7 @@ import { useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
-import type { NewPackagePolicy } from '../../../../../../../../../common/types';
+import type { AgentPolicy, NewPackagePolicy } from '../../../../../../../../../common/types';
 import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { inferVarGroupSelections } from '../../../../../../../../../common/services';
@@ -34,12 +34,16 @@ export function useOutputs(
   packagePolicy: Pick<NewPackagePolicy, 'supports_agentless'> & {
     inputs?: Array<{ type: string; enabled: boolean }>;
   },
-  packageName: string
+  packageName: string,
+  agentPolicies?: Array<Pick<AgentPolicy, 'data_output_id'>>
 ) {
   const licenseService = useLicense();
   const canUseOutputPerIntegration =
     licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION) &&
     !packagePolicy.supports_agentless;
+  // `hasAtLeast` is also falsy while the license is not known (not received yet, or the licensing
+  // request failed), so a falsy `canUseOutputPerIntegration` alone does not mean the license is too low.
+  const isLicenseKnown = !!licenseService.getLicenseInformation()?.isAvailable;
   const { data: outputsData, isLoading } = useGetOutputs();
   const allowedOutputTypes = getAllowedOutputTypesForPackagePolicy(packagePolicy);
   const allowedOutputs = useMemo(() => {
@@ -50,10 +54,33 @@ export function useOutputs(
       (output) => allowedOutputTypes.includes(output.type) && !output.is_internal
     );
   }, [allowedOutputTypes, canUseOutputPerIntegration, outputsData]);
+
+  // Name of the output the integration uses when it defines no override of its own: the
+  // parent agent policy's data output, or the Fleet default output when that is unset.
+  // Undefined when the parent policies disagree, since no single name would be accurate.
+  const inheritedOutputName = useMemo(() => {
+    if (!outputsData) {
+      return undefined;
+    }
+    const defaultOutputId = outputsData.items.find((output) => output.is_default)?.id;
+    const inheritedIds = new Set(
+      (agentPolicies ?? []).map((policy) => policy.data_output_id ?? defaultOutputId)
+    );
+    if (inheritedIds.size > 1) {
+      return undefined;
+    }
+    // No agent policy yet (create flow): a new policy inherits the Fleet default output.
+    const inheritedId = inheritedIds.size === 1 ? [...inheritedIds][0] : defaultOutputId;
+
+    return outputsData.items.find((output) => output.id === inheritedId)?.name;
+  }, [agentPolicies, outputsData]);
+
   return {
     isLoading,
     canUseOutputPerIntegration,
+    isLicenseKnown,
     allowedOutputs,
+    inheritedOutputName,
   };
 }
 
@@ -135,15 +162,22 @@ export function useVarGroupSelections({
     return deriveSelections();
   }, [savedSelections, deriveSelections]);
 
-  // Initialize on mount if not already set
+  // Initialize on mount if not already set. The default selection must apply the
+  // same policy effects as a user selection: a required var_group makes the selected
+  // option's vars required, and the support flag var (e.g. supports_identity_federation)
+  // is only ever populated by those effects. Without them a fresh agentless policy
+  // fails validation until the user toggles the selector away and back.
   useEffect(() => {
     if (varGroups && varGroups.length > 0 && !savedSelections) {
       const derived = deriveSelections();
       if (Object.keys(derived).length > 0) {
-        onSelectionsChange({ var_group_selections: derived });
+        const policyEffects = packagePolicy
+          ? buildVarGroupPolicyUpdates(packagePolicy, derived, varGroups)
+          : null;
+        onSelectionsChange({ var_group_selections: derived, ...(policyEffects || {}) });
       }
     }
-  }, [varGroups, savedSelections, onSelectionsChange, deriveSelections]);
+  }, [varGroups, savedSelections, onSelectionsChange, deriveSelections, packagePolicy]);
 
   // Handle selection change with policy effects computation
   const handleSelectionChange = useCallback(

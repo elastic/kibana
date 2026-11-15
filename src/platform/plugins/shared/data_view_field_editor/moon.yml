@@ -37,19 +37,21 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/field-formats-common'
   - '@kbn/ui-callout'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __jest__/**/*
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

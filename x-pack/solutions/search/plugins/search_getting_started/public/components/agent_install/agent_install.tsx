@@ -22,9 +22,11 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import { anthropicIcon, cursorIcon, visualStudioCodeIcon } from '@kbn/custom-icons';
 
+import { CliInstallModal } from '@kbn/shared-components';
+
 import { useKibana } from '../../hooks/use_kibana';
+import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { PromptModal } from './prompt_modal';
-import { CliInstallModal } from './cli_install_modal';
 import { buildPrompt } from './util';
 import { AgentBuilderPanelContainer, AgentInstallPanelContainer, brandIcon } from './styles';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
@@ -43,7 +45,7 @@ const AgentInstallPanel: React.FC<{
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" direction="column">
       <EuiFlexItem grow={false}>
-        <EuiPanel color="subdued" paddingSize="s" grow={false}>
+        <EuiPanel color="subdued" paddingSize="s" grow={false} hasBorder={false}>
           <EuiIcon color="subdued" size="m" type={icon} aria-hidden />
         </EuiPanel>
       </EuiFlexItem>
@@ -70,6 +72,7 @@ export const AgentInstallSection = () => {
   const [isCliModalOpen, setIsCliModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
   const usageTracker = useUsageTracker();
+  const elasticsearchUrl = useElasticsearchUrl();
 
   const closePromptModal = useCallback(() => setIsPromptModalOpen(false), []);
   const closeCliModal = useCallback(() => setIsCliModalOpen(false), []);
@@ -101,7 +104,7 @@ export const AgentInstallSection = () => {
       <EuiPanel color="plain" hasShadow={true} paddingSize="none">
         <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="row">
           <EuiFlexItem>
-            <EuiPanel color="transparent" paddingSize="l">
+            <EuiPanel color="transparent" hasBorder={false} paddingSize="l">
               <AgentInstallPanel
                 icon="code"
                 title={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.title', {
@@ -174,7 +177,7 @@ export const AgentInstallSection = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem css={AgentInstallPanelContainer}>
-            <EuiPanel color="transparent" paddingSize="l">
+            <EuiPanel color="transparent" hasBorder={false} paddingSize="l">
               <AgentInstallPanel
                 icon="commandLine"
                 title={
@@ -215,7 +218,7 @@ export const AgentInstallSection = () => {
 
           {services.agentBuilder ? (
             <EuiFlexItem css={AgentBuilderPanelContainer}>
-              <EuiPanel color="transparent" paddingSize="l">
+              <EuiPanel color="transparent" hasBorder={false} paddingSize="l">
                 <AgentInstallPanel
                   icon="productAgent"
                   title={i18n.translate(
@@ -247,7 +250,13 @@ export const AgentInstallSection = () => {
         </EuiFlexGroup>
       </EuiPanel>
       {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />}
-      {isCliModalOpen && <CliInstallModal onClose={closeCliModal} />}
+      {isCliModalOpen && (
+        <CliInstallModal
+          elasticsearchUrl={elasticsearchUrl}
+          onClose={closeCliModal}
+          telemetryIdPrefix="searchGettingStarted-agentInstall-cliModal"
+        />
+      )}
     </>
   );
 };

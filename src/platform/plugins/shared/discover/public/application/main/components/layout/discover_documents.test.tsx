@@ -15,13 +15,14 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DEFAULT_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { DiscoverGrid } from '../../../../components/discover_grid';
@@ -40,11 +41,6 @@ jest.mock('../../../../components/discover_grid_flyout', () => ({
 
 const discoverGridMock = jest.mocked(DiscoverGrid);
 const singleEsHit = esHitsMock.slice(0, 1);
-const cascadedColumnsMeta: DataTableColumnsMeta = {
-  bytes: {
-    type: 'number',
-  },
-};
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
@@ -88,6 +84,14 @@ async function mountComponent({
   const testDocuments = {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+    ...(isEsqlMode
+      ? {
+          dataSource: createMockEsqlSource(
+            [],
+            [{ id: 'message', name: 'message', meta: { type: 'string' as const } }]
+          ),
+        }
+      : {}),
   };
 
   const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
@@ -293,14 +297,8 @@ describe('Discover documents layout', () => {
         })
       );
 
-      toolkit.internalState.dispatch(
-        internalStateActions.setCascadedDocumentsState({
-          tabId,
-          cascadedDocumentsState: {
-            ...toolkit.getCurrentTab().cascadedDocumentsState,
-            columnsMeta: cascadedColumnsMeta,
-          },
-        })
+      toolkit.runtimeStateManager.tabs.byId[tabId].cascadedLeafDataSource$.next(
+        createMockEsqlSource([{ name: 'bytes', type: 'number', source: 'index' }])
       );
 
       await mountComponent({

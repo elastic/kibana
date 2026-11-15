@@ -69,21 +69,6 @@ describe('setDynamicSettingsEffect', () => {
     expect(gen.next().done).toBe(true);
   });
 
-  it('does not refresh default alert rules when only the sync interval changes', () => {
-    const payload: DynamicSettings = {
-      ...savedSettings,
-      privateLocationsSyncInterval: 15,
-    };
-    const gen = getSetDynamicSettingsWorker()(setDynamicSettingsAction.get(payload));
-
-    expect(gen.next().value).toEqual(select(selectDynamicSettings));
-    expect(gen.next({ settings: savedSettings }).value).toEqual(
-      call(setDynamicSettings, { settings: payload })
-    );
-    expect(gen.next().value).toEqual(put(setDynamicSettingsAction.success(payload)));
-    expect(gen.next().done).toBe(true);
-  });
-
   it('refreshes default alert rules when alerting fields change', () => {
     const payload: DynamicSettings = {
       ...savedSettings,

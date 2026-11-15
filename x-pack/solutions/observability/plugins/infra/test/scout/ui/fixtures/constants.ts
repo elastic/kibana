@@ -119,6 +119,42 @@ export const DATE_WITH_SEMCONV_DATA = '04/02/2024 6:20:59 PM';
 
 export const DATE_WITHOUT_DATA = '04/03/2024 6:20:59 PM';
 
+export interface SemconvPodFixture {
+  uid: string;
+  name: string;
+  nodeName: string;
+  withoutLimits?: boolean;
+  /** Pod has kubeletstats cpu and network docs, and no memory fields. */
+  omitMemory?: boolean;
+  interfaces?: string[];
+}
+
+export const SEMCONV_PODS: SemconvPodFixture[] = [
+  { uid: 'semconv-pod-0-uid', name: 'semconv-pod-0', nodeName: SEMCONV_HOST1_NAME },
+  {
+    uid: 'semconv-pod-1-uid',
+    name: 'semconv-pod-1',
+    nodeName: SEMCONV_HOST1_NAME,
+    withoutLimits: true,
+  },
+  {
+    uid: 'semconv-pod-2',
+    name: 'semconv-pod-2',
+    nodeName: SEMCONV_HOST2_NAME,
+    interfaces: ['eth0', 'net1'],
+  },
+];
+
+export const SEMCONV_POD_UIDS = SEMCONV_PODS.map((pod) => pod.uid);
+
+export const DATE_WITH_SEMCONV_POD_DATA_FROM = '2024-04-04T18:20:00.000Z';
+export const DATE_WITH_SEMCONV_POD_DATA_TO = '2024-04-04T18:21:00.000Z';
+export const DATE_WITH_SEMCONV_POD_DATA = '04/04/2024 6:20:59 PM';
+
+export const DATE_WITH_MIXED_POD_DATA_FROM = '2024-04-05T18:20:00.000Z';
+export const DATE_WITH_MIXED_POD_DATA_TO = '2024-04-05T18:21:00.000Z';
+export const DATE_WITH_MIXED_POD_DATA = '04/05/2024 6:20:59 PM';
+
 export const EXTENDED_TIMEOUT = 45000; // 45 seconds
 
 // Pre-computed metrics-anomaly ML jobs/results replayed via the ML API; see metrics_anomalies_ml.ts.
@@ -197,3 +233,11 @@ export const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES: Omit<
   },
   preferredSchema: 'ecs',
 };
+
+// Logs ML pages (Anomalies and Categories). Each spec points the `observability:logSources`
+// setting of its worker's space at this empty index, so the pages' default log view finds an
+// existing index and renders the setup screen / privilege prompts instead of the no-data page.
+// (Serverless has no log view saved objects, only the built-in default log view, which reads that
+// setting.) The index name must not start with `.` (the built-in viewer/editor roles can't read
+// dot indices) or `logs` (it would match the default log sources, `logs*`, used by other specs).
+export const LOGS_ML_INDEX = 'scout-infra-logs-ml';

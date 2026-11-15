@@ -21,6 +21,7 @@ import { Definition } from './definition/definition';
 import { SloDetailsAlerts } from './slo_detail_alerts';
 import { SloHealthCallout } from './slo_health_callout';
 import { SloRemoteCallout } from './slo_remote_callout';
+import { SyntheticsTimesliceWindowCallout } from './synthetics_timeslice_window_callout';
 import { ActionModalProvider } from '../../../context/action_modal';
 
 export interface Props {
@@ -66,6 +67,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
       <EuiFlexGroup direction="column" gutterSize="xl">
         <SloRemoteCallout slo={slo} />
         <SloHealthCallout slo={slo} />
+        <SyntheticsTimesliceWindowCallout slo={slo} />
         <EuiFlexGroup direction="column" gutterSize="l">
           {isApmIndicatorType(slo.indicator) && <ApmSourcePanel slo={slo} />}
           <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />

@@ -97,7 +97,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.eventLog.logEntries=true',
+          '--xpack.eventLog.logEntries=false',
           `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([
             'testing_ignored.constant',
             '/testing_regex*/',
@@ -115,7 +115,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           '--uiSettings.overrides.securitySolution:enableRuleChangesHistory=true',
           `--plugin-path=${path.resolve(
             __dirname,
-            '../../../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
+            '../../../../../../../src/platform/test_plugins/analytics/analytics_ftr_helpers'
           )}`,
 
           '--xpack.task_manager.poll_interval=1000',

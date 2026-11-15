@@ -1,0 +1,92 @@
+{
+  "10.13.0": [
+    {
+      "taskType": "sample-recurring-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:05:00.000Z",
+      "schedule": { "interval": "5m" },
+      "params": "{}",
+      "state": "{\"runs\":1}",
+      "stateVersion": 1,
+      "traceparent": "",
+      "scope": ["testing"],
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "idle",
+      "partition": 42,
+      "priority": 50,
+      "cost": "normal"
+    },
+    {
+      "taskType": "sample-scoped-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:00:00.000Z",
+      "params": "{\"id\":\"sample\"}",
+      "state": "{}",
+      "traceparent": "",
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "idle",
+      "partition": 7,
+      "cost": "normal",
+      "userScope": {
+        "apiKeyId": "sample-api-key-id",
+        "spaceId": "default",
+        "apiKeyCreatedByUser": false,
+        "userProfileId": "sample-user-profile-id",
+        "userName": "elastic"
+      }
+    }
+  ],
+  "10.14.0": [
+    {
+      "taskType": "sample-recurring-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:05:00.000Z",
+      "schedule": { "interval": "5m" },
+      "params": "{}",
+      "state": "{\"runs\":1}",
+      "stateVersion": 1,
+      "traceparent": "",
+      "scope": ["testing"],
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "idle",
+      "partition": 42,
+      "priority": 50,
+      "cost": "normal"
+    },
+    {
+      "taskType": "sample-scoped-task",
+      "scheduledAt": "2026-09-29T10:00:00.000Z",
+      "startedAt": null,
+      "retryAt": null,
+      "runAt": "2026-09-29T10:00:00.000Z",
+      "params": "{\"id\":\"sample\"}",
+      "state": "{}",
+      "traceparent": "",
+      "ownerId": null,
+      "enabled": true,
+      "attempts": 0,
+      "status": "idle",
+      "partition": 7,
+      "cost": "normal",
+      "userScope": {
+        "apiKeyId": "sample-api-key-id",
+        "spaceId": "default",
+        "apiKeyCreatedByUser": false,
+        "userProfileId": "sample-user-profile-id",
+        "userName": "elastic"
+      }
+    }
+  ]
+}

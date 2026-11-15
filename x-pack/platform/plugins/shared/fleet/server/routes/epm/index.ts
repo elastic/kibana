@@ -1344,7 +1344,17 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       security: INSTALL_PACKAGES_SECURITY,
       summary: `Install a package by upload`,
-      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB).`,
+      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB).
+
+Archives that contain Kibana assets requiring additional privileges are subject to a preflight authorization check before the package is installed. Privileges are checked in every space the package will be installed into.
+
+The following asset types require the corresponding Kibana API privilege:
+
+- \`security_rule\`: \`rules-all\`
+- \`security_rule\` with type \`machine_learning\`: \`rules-all\` and \`ml:canCreateJob\`
+- \`security_ai_prompt\`: \`elasticAssistant\`
+
+If any required privilege is missing, the request returns 403 and no assets are written. To learn more, refer to [Upload an integration to Kibana](https://www.elastic.co/docs/extend/integrations/upload-new-integration).`,
     })
     .addVersion(
       {
@@ -1362,6 +1372,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
             400: {
               description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            403: {
+              description:
+                'Forbidden. The caller lacks a Kibana API privilege required by an asset in the archive.',
               body: genericErrorResponse,
             },
           },

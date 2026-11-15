@@ -35,10 +35,11 @@ import {
   JEST_CONFIG_NAMES,
   type MoonJestResult,
   type JestFailedTest,
-} from '@kbn/test';
+} from '@kbn/jest';
 import { executeTypeCheckValidation } from './type_check_validation_loader';
 
 import { executeEslintValidation } from './eslint/run_eslint_contract';
+import { executeOxlintValidation } from './oxlint/run_oxlint_contract';
 
 // ── Output helpers ──────────────────────────────────────────────────────────
 
@@ -119,6 +120,14 @@ const createSilentLog = () => {
   const log = new ToolingLog();
   log.setWriters([writer]);
   return { log, captured };
+};
+
+const writeCaptured = (captured: string[]) => {
+  if (captured.length === 0) return;
+  writeln('');
+  for (const msg of captured) {
+    for (const l of msg.split('\n')) writeln(`    ${l}`);
+  }
 };
 
 // ── Header ──────────────────────────────────────────────────────────────────
@@ -380,6 +389,44 @@ run(
       }
     }
 
+    // ── oxlint ─────────────────────────────────────────────────────────
+
+    {
+      const { log, captured } = createSilentLog();
+      const progress = startProgress('oxlint');
+      try {
+        const result = await executeOxlintValidation({ baseContext, log, fix });
+        if (!result) {
+          progress.writeResult(line('oxlint', '—', 'no files changed'));
+        } else if (result.failedFiles.length > 0) {
+          progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
+          writeCaptured(captured);
+          writeln(`    $ node scripts/lint ${result.failedFiles.join(' ')}`);
+          writeln('');
+          errors.push(new Error('oxlint failed'));
+        } else {
+          const suffix =
+            result.warningCount > 0 ? ` (${pluralize(result.warningCount, 'warning')})` : '';
+          progress.writeResult(
+            line(
+              'oxlint',
+              result.warningCount > 0 ? '⚠' : '✓',
+              `${pluralize(result.fileCount, 'file')}${suffix}`,
+              progress.elapsed()
+            )
+          );
+          if (result.warningCount > 0) writeCaptured(captured);
+        }
+      } catch (error) {
+        progress.writeResult(line('oxlint', '✗', 'failed', progress.elapsed()));
+        const failure = error instanceof Error ? error : new Error(String(error));
+        writeln('');
+        for (const l of failure.message.split('\n')) writeln(`    ${l}`);
+        writeln('');
+        errors.push(failure);
+      }
+    }
+
     // ── lint ───────────────────────────────────────────────────────────
 
     {
@@ -391,10 +438,7 @@ run(
           progress.writeResult(line('lint', '—', 'no files changed'));
         } else if (result.failedFiles.length > 0) {
           progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
-          if (captured.length > 0) {
-            writeln('');
-            for (const msg of captured) writeln(`    ${msg}`);
-          }
+          writeCaptured(captured);
           writeln(`    $ node scripts/eslint ${result.failedFiles.join(' ')}`);
           writeln('');
           errors.push(new Error('eslint failed'));
@@ -415,6 +459,7 @@ run(
               progress.elapsed()
             )
           );
+          if (result.warningCount > 0) writeCaptured(captured);
           if (verbose && result.fixedFiles.length > 0) {
             for (const file of result.fixedFiles) {
               writeln(`         fixed: ${file}`);

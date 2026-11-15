@@ -178,25 +178,25 @@ All event-driven trigger definitions must be approved by the workflows-eng team 
 
 1. When you register a new trigger, the test detects it during CI runs.
 2. Each trigger has a **schema hash** (derived from its `eventSchema`). The test compares registered triggers against the approved list.
-3. The approved list lives in `test/scout_workflows_extensions/api/fixtures/approved_trigger_definitions.ts`. That Scout suite is the **full catalog** on stateful classic: CI boots the `workflows_extensions` config set so every registered trigger is present, including plugins that default to disabled (Nightshift).
+3. The approved list lives in `test/scout_nightshift_investigations/api/fixtures/approved_trigger_definitions.ts`. That Scout suite is the **full catalog** on stateful classic: CI boots the `nightshift_investigations` config set so every registered trigger is present, including plugins that default to disabled (Nightshift).
 
 ### Adding a new trigger
 
 1. **Register your trigger** (common + server + public) as in [Contributing Event-Driven Triggers](#contributing-event-driven-triggers).
-2. **Run the suite** (or start the server with the workflows Scout config set) and GET `internal/workflows_extensions/trigger_definitions` to obtain the `schemaHash` for your trigger id:
+2. **Run the suite** (or start the server with the `nightshift_investigations` Scout config set) and GET `internal/workflows_extensions/trigger_definitions` to obtain the `schemaHash` for your trigger id:
 
    ```bash
    node scripts/scout.js run-tests --arch stateful --domain classic \
-     --config src/platform/plugins/shared/workflows_extensions/test/scout_workflows_extensions/api/playwright.config.ts
+     --config src/platform/plugins/shared/workflows_extensions/test/scout_nightshift_investigations/api/playwright.config.ts
    ```
 
    Or start the stack separately:
 
    ```bash
-   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet workflows_extensions
+   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet nightshift_investigations
    ```
 
-3. **Add an entry** to `test/scout_workflows_extensions/api/fixtures/approved_trigger_definitions.ts` (alphabetically by id):
+3. **Add an entry** to `test/scout_nightshift_investigations/api/fixtures/approved_trigger_definitions.ts` (alphabetically by id):
 
    ```typescript
    export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
@@ -212,7 +212,7 @@ If you change the trigger's `eventSchema`, the schema hash changes; update the a
 
 Some triggers are only registered when the owning plugin is loaded (Kibana `enabled` config, e.g. `xpack.nightshift_investigations.enabled`). That is boot-time config, not a runtime LaunchDarkly flag — `feature_flags.overrides` cannot load a disabled plugin.
 
-The workflows Scout suite turns those flags on via `kbnTestServer.serverArgs` in the `workflows_extensions` config set (`classic.stateful.config.ts`). If you add a trigger gated by a **new** plugin `enabled` flag, add `--xpack.<plugin>.enabled=true` there.
+The workflows Scout suite turns those flags on via `kbnTestServer.serverArgs` in the `nightshift_investigations` config set (`classic.stateful.config.ts`). If you add a trigger gated by a **new** plugin `enabled` flag, add `--xpack.<plugin>.enabled=true` there.
 
 ## Event-driven guardrails
 
@@ -251,7 +251,7 @@ steps:
         iteration: '{{ event.iteration | default: 0 | plus: 1 }}'
 ```
 
-1. **Run Kibana with examples:** `yarn start --run-examples`.
+1. **Run Kibana with examples:** `pnpm start --run-examples`.
 2. **Create the loop workflow** using the YAML above (trigger `example.loopTrigger` and the `kibana.request` step as shown).
 3. **Start the loop:**
    ```bash

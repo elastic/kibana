@@ -32,9 +32,11 @@ export class CreateRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create a rule',
     description:
-      'Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.',
+      'Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/{id}/.',
     oasOperationObject: createRuleOasExamples,
   } as const;
   static schemas = {

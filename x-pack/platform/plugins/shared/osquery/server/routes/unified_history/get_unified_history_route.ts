@@ -103,7 +103,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           const clusterClient = coreStart.elasticsearch.client;
           const internalEsClient = clusterClient.asInternalUser;
           const readEsClient = getReadEsClient(clusterClient, request, cpsActive);
-          const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+          // A fanned-out CPS read does not also add CCS `*:` remote expressions.
+          const ccsEnabled = !cpsActive && (await hasConnectedRemoteClusters(internalEsClient));
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -265,7 +266,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             request,
-            spaceId,
             integrationNamespaces,
             ccsEnabled,
             cpsActive,

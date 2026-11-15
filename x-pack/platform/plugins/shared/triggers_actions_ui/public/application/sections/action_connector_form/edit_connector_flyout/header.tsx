@@ -144,6 +144,13 @@ const FlyoutHeaderComponent: React.FC<{
                       />
                     </h3>
                   </EuiTitle>
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    data-test-subj="edit-connector-flyout-header-name"
+                  >
+                    <p>{connectorName}</p>
+                  </EuiText>
                 </EuiFlexItem>
                 {isExperimental && (
                   <EuiFlexItem grow={false}>

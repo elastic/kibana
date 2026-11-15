@@ -17,3 +17,8 @@ export enum DataSourceSelectionChange {
   Add = 'add',
   Remove = 'remove',
 }
+
+/** Describes the source a selection change refers to, beyond its name. */
+export interface DataSourceSelectionDetails {
+  isView: boolean;
+}

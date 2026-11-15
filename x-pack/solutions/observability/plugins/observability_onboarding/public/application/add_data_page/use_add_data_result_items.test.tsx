@@ -68,6 +68,29 @@ describe('useAddDataResultItems', () => {
     expect(result.current.items[0].url).toContain('returnAppId=');
   });
 
+  it('finds a bundled service through the onboarding tile and records which one matched', () => {
+    const { result } = renderItems('guardduty', [
+      makeCard({
+        id: 'epr:aws',
+        name: 'aws-onboarding',
+        title: 'Amazon Web Services',
+        categories: ['aws', 'observability'],
+        searchableContent: 'guardduty Amazon GuardDuty cloudtrail AWS CloudTrail',
+        searchMembers: [
+          { name: 'guardduty', title: 'Amazon GuardDuty' },
+          { name: 'cloudtrail', title: 'AWS CloudTrail' },
+        ],
+      }),
+      makeCard({}),
+    ]);
+
+    expect(result.current.items.map(({ id }) => id)).toEqual(['epr:aws']);
+    expect(result.current.items[0].searchMemberMatch).toEqual({
+      memberTitles: ['Amazon GuardDuty'],
+      collectionTitle: 'Amazon Web Services',
+    });
+  });
+
   // The curated tiles are always visible below the results, so mirroring them
   // into the result list only produced duplicates of the EPR cards.
   it('does not mirror curated tiles into the results', () => {

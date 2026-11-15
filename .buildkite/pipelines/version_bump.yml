@@ -2,9 +2,8 @@ notify:
   - slack:
       channels:
         - '#kibana-operations-alerts'
-      message: '<!subteam^S2XQAJ39Q|kibana-operations-team> Version bump to ${NEW_VERSION} — ${BUILDKITE_BUILD_URL}'
-    if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) &&
-      (build.state == 'passed' || build.state == 'failed')
+      message: ':red_circle: Kibana version bump to ${NEW_VERSION} (${WORKFLOW}, branch ${BRANCH}) failed — ${BUILDKITE_BUILD_URL}'
+    if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && build.state == 'failed'
   - slack:
       channels:
         - '#mission-control'
@@ -18,7 +17,7 @@ steps:
     key: bump-version
     label: Bump version
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
@@ -33,27 +32,25 @@ steps:
       cpu: 2
       memory: 4G
       ephemeralStorage: 10G
-    command:
-      - echo "Starting DRA artifacts retrieval..."
     timeout_in_minutes: 240
+    # The plugin only polls DRA manifests; a Kibana clone outgrows ephemeralStorage on a cold mirror.
+    env:
+      BUILDKITE_SKIP_CHECKOUT: 'true'
+    # -1 covers lost agents and timeouts; other plugin failures (bad product/version, every manifest 404) are deterministic.
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 2
       manual:
         permit_on_passed: true
 
     plugins:
-      - elastic/json-watcher#v1.0.0:
-          url: 'https://artifacts-staging.elastic.co/kibana/latest/${BRANCH}.json'
-          field: '.version'
-          expected_value: '${NEW_VERSION}'
-          polling_interval: '30'
-      - elastic/json-watcher#v1.0.0:
-          url: 'https://storage.googleapis.com/elastic-artifacts-snapshot/kibana/latest/${BRANCH}.json'
-          field: '.version'
-          expected_value: '${NEW_VERSION}-SNAPSHOT'
-          polling_interval: '30'
+      - elastic/version-bump-dra#v1.0.0:
+          product: 'kibana'
+          version: '${NEW_VERSION}'
+          workflow: '${WORKFLOW}'
+          polling_interval: 30
+          dry_run: '${DRY_RUN:-false}'
 
   - wait
 
@@ -61,7 +58,7 @@ steps:
     label: 'Verify ES Snapshot'
     if: build.env("DRY_RUN") != "true"
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4

@@ -61,18 +61,18 @@ spaceTest.describe(
       await spaceTest.step('Navigate and verify initial off state', async () => {
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
-        await expect(managementPage.entityAnalyticsHealth).toContainText('Off');
+        await expect(managementPage.entityAnalyticsSwitch).toHaveAccessibleName('Disabled');
       });
 
       await spaceTest.step('Toggle on and verify enabled state', async () => {
         await managementPage.toggleEntityAnalytics();
-        // Sync on backend readiness first. The UI shows "Off" while the entity
+        // Sync on backend readiness first. The switch stays "Disabled" while the entity
         // store is in `installing` state (status === 'enabling'), so asserting
         // UI text alone races against install completion. Mirrors
         // engine_status_management.spec.ts. See #259664.
         await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 180000);
         await managementPage.waitForStatusLoaded();
-        await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
+        await expect(managementPage.entityAnalyticsSwitch).toHaveAccessibleName('Enabled', {
           timeout: 30000,
         });
       });
@@ -85,7 +85,7 @@ spaceTest.describe(
         // assert the UI flip.
         await apiServices.entityAnalytics.waitForEntityStoreStatus('stopped', 60000);
         await managementPage.waitForStatusLoaded();
-        await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
+        await expect(managementPage.entityAnalyticsSwitch).toHaveAccessibleName('Disabled', {
           timeout: 30000,
         });
       });
@@ -120,7 +120,7 @@ spaceTest.describe(
       await managementPage.navigate();
       await managementPage.waitForStatusLoaded();
 
-      await expect(managementPage.entityAnalyticsHealth).toContainText('Off');
+      await expect(managementPage.entityAnalyticsSwitch).toHaveAccessibleName('Disabled');
 
       await page.route('**/api/security/entity_store/install', (route) =>
         route.fulfill({

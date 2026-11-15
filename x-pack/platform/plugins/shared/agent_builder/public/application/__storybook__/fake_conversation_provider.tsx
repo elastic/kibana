@@ -50,7 +50,7 @@ export const FakeConversationProvider: React.FC<FakeConversationProviderProps> =
         isEmbeddedContext: false,
         agentId,
         conversationId,
-        conversationActions: {} as ConversationActions,
+        conversationActions: { invalidateConversation: () => {} } as unknown as ConversationActions,
         attachments,
         upsertAttachments,
         removeAttachment,

@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { evaluateKql } from '@kbn/eval-kql';
-import type { CustomTrigger, WorkflowDetailDto } from '@kbn/workflows';
+import { ALL_CONNECTOR_IDS, type CustomTrigger, type WorkflowDetailDto } from '@kbn/workflows';
 
 /**
  * Why a subscribed workflow did or did not match an emitted trigger event (for funnel telemetry).
@@ -22,7 +22,7 @@ export type WorkflowTriggerMatchOutcome =
   | 'connector_id_mismatch';
 
 export interface ClassifyWorkflowTriggerMatchOptions {
-  /** When true, YAML `connector-id` must equal payload `connectorId` before KQL. */
+  /** When true, YAML `connector-id` must equal payload `connectorId` or `*` before KQL. */
   requiresConnectorId?: boolean;
 }
 
@@ -40,8 +40,10 @@ const getYamlConnectorId = (trigger: CustomTrigger): string =>
 
 /**
  * Picks the YAML trigger block to evaluate for this emit.
- * When `requiresConnectorId`, scans every same-type block and returns the one whose
- * `connector-id` equals `payload.connectorId`. Otherwise the first block of that type.
+ * When `requiresConnectorId`, scans every same-type block and returns an exact
+ * `connector-id` match before falling back to `*`. If more than one `*` block
+ * exists for this type, the first in YAML order wins. Otherwise the first block
+ * of that type.
  */
 export const findMatchingWorkflowTrigger = (
   triggers: readonly unknown[] | undefined,
@@ -62,7 +64,10 @@ export const findMatchingWorkflowTrigger = (
   if (eventConnectorId === '') {
     return undefined;
   }
-  return ofType.find((trigger) => getYamlConnectorId(trigger) === eventConnectorId);
+  return (
+    ofType.find((trigger) => getYamlConnectorId(trigger) === eventConnectorId) ??
+    ofType.find((trigger) => getYamlConnectorId(trigger) === ALL_CONNECTOR_IDS)
+  );
 };
 
 /**

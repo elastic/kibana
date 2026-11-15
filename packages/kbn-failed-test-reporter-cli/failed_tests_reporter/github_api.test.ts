@@ -71,6 +71,65 @@ describe('GithubApi#getIssueComments()', () => {
   });
 });
 
+describe('GithubApi writes', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+  });
+
+  it('logs writes without sending them in dry-run mode', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+    const api = new GithubApi({ log, token: undefined, dryRun: true });
+
+    await api.editIssueBodyAndEnsureOpen(7, 'body');
+    await api.addIssueComment(7, 'comment');
+    await api.closeAsDuplicate(7, 1007);
+    expect((await api.createIssue('title', 'body')).html_url).toBe('https://dryrun');
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('closes an issue as a duplicate of the issue with the given id', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse({}));
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+
+    await api.closeAsDuplicate(7, 1042);
+
+    const [[url, init]] = fetchMock.mock.calls;
+    expect(String(url)).toBe('https://api.github.com/repos/elastic/kibana/issues/7');
+    expect(init?.method).toBe('PATCH');
+    expect(JSON.parse(String(init?.body))).toEqual({
+      state: 'closed',
+      state_reason: 'duplicate',
+      duplicate_issue_id: 1042,
+    });
+  });
+
+  it('spaces consecutive writes a second apart but never delays reads', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-09-09T09:00:00.000Z'));
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () => jsonResponse([]));
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+
+    const first = api.addIssueComment(1, 'a');
+    await jest.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await first;
+    const second = api.addIssueComment(2, 'b');
+    await jest.advanceTimersByTimeAsync(999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await jest.advanceTimersByTimeAsync(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await second;
+
+    const read = api.getIssueComments(3);
+    await jest.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    await read;
+  });
+});
+
 describe('nextPageUrl()', () => {
   it('returns the rel="next" link', () => {
     expect(

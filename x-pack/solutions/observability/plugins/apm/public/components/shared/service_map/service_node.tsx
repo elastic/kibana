@@ -25,16 +25,22 @@ import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { getSeverity, getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import {
+  IDLE_NODE_OPACITY,
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
   SERVICE_NODE_CIRCLE_SIZE,
 } from '../../../../common/service_map/constants';
+import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { NodeLabel } from './node_label';
+import { NodeStatsLine } from './node_stats_line';
+import { FailureRing } from './failure_ring';
+import { formatCompactRate, describeCompactRate } from './compact_rate';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertsBadge } from '../badge/alerts_badge';
 import { SloStatusBadge } from '../slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
 import { useServiceMapAlertsNavigate } from './service_map_alerts_navigate_context';
+import { useServiceMapInteractivity } from './service_map_interactivity_context';
 import { HighlightWrapper } from './highlight_wrapper';
 import { SERVICE_MAP_EBT_ELEMENTS } from './ebt_constants';
 
@@ -52,7 +58,12 @@ export const ServiceNode = memo(
     const canReadSlos = !!apmPluginContext?.core?.application?.capabilities?.slo?.read;
     const { onSloBadgeClick } = useServiceMapSloFlyout();
     const navigateToAlertsTab = useServiceMapAlertsNavigate(data.label);
+    const isInteractive = useServiceMapInteractivity();
     const isDarkMode = colorMode === 'DARK';
+    // Stats are only present when service map grouping is enabled; that look replaces the agent
+    // icon with the failure ring and numbers.
+    const showStats = data.stats !== undefined;
+    const isIdle = showStats && Boolean(data.isIdle);
 
     const { borderColor, borderWidth } = useMemo(() => {
       const score = data.serviceAnomalyStats?.anomalyScore;
@@ -71,11 +82,11 @@ export const ServiceNode = memo(
     }, [data.serviceAnomalyStats, selected, euiTheme]);
 
     const iconUrl = useMemo(() => {
-      if (data.agentName) {
+      if (!showStats && data.agentName) {
         return getAgentIcon(data.agentName, isDarkMode);
       }
       return null;
-    }, [data.agentName, isDarkMode]);
+    }, [showStats, data.agentName, isDarkMode]);
 
     // Build accessible label for screen readers
     const ariaLabel = useMemo(() => {
@@ -104,8 +115,42 @@ export const ServiceNode = memo(
         );
       }
 
+      if (data.stats) {
+        const rateDescribed = describeCompactRate(data.stats.throughput);
+        if (rateDescribed) {
+          parts.push(rateDescribed);
+        }
+        if (
+          typeof data.stats.failedTransactionRate === 'number' &&
+          data.stats.failedTransactionRate > 0
+        ) {
+          parts.push(
+            i18n.translate('xpack.apm.serviceMap.serviceNode.failedShareInfo', {
+              defaultMessage: '{share} of requests failed',
+              values: { share: asPercent(data.stats.failedTransactionRate, 1) },
+            })
+          );
+        }
+        if (typeof data.stats.latency === 'number') {
+          parts.push(
+            i18n.translate('xpack.apm.serviceMap.serviceNode.latencyInfo', {
+              defaultMessage: 'Latency {latency}',
+              values: { latency: asDuration(data.stats.latency) },
+            })
+          );
+        }
+      }
+
+      if (isIdle) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.serviceNode.idleInfo', {
+            defaultMessage: 'Low traffic relative to other services on the map',
+          })
+        );
+      }
+
       return parts.join('. ');
-    }, [data.label, data.agentName, data.serviceAnomalyStats?.anomalyScore]);
+    }, [data.label, data.agentName, data.serviceAnomalyStats?.anomalyScore, data.stats, isIdle]);
 
     const containerStyles = css`
       position: relative;
@@ -128,19 +173,22 @@ export const ServiceNode = memo(
       justify-content: center;
       box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs}
         ${euiTheme.colors.backgroundBaseSubdued};
-      cursor: pointer;
+      cursor: ${isInteractive ? 'pointer' : 'default'};
       pointer-events: all;
 
-      &:focus-visible {
-        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-        outline-offset: ${euiTheme.size.xxs};
-      }
+      ${isInteractive &&
+      css`
+        &:focus-visible {
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.size.xxs};
+        }
 
-      [data-id]:focus &,
-      [data-id]:focus-visible & {
-        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-        outline-offset: ${euiTheme.size.xxs};
-      }
+        [data-id]:focus &,
+        [data-id]:focus-visible & {
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.size.xxs};
+        }
+      `}
     `;
 
     const iconStyles = css`
@@ -160,6 +208,10 @@ export const ServiceNode = memo(
       pointer-events: auto;
     `;
 
+    const idleStyles = css`
+      opacity: ${IDLE_NODE_OPACITY};
+    `;
+
     // Match service inventory cells: show count when API merged data (no extra capability check;
     // `alerting:show` is enforced when opening linked views; badge is display-only here).
     const showAlertsBadge = data.alertsCount !== undefined && data.alertsCount > 0;
@@ -176,23 +228,36 @@ export const ServiceNode = memo(
           gutterSize="xs"
           responsive={false}
           data-test-subj={`serviceMapNode-service-${data.id}`}
+          css={isIdle ? idleStyles : undefined}
         >
           <EuiFlexItem grow={false} css={containerStyles}>
             <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
             <div
               data-test-subj="serviceMapNodeServiceCircle"
               css={circleStyles}
-              role="button"
-              tabIndex={0}
+              role={isInteractive ? 'button' : undefined}
+              tabIndex={isInteractive ? 0 : -1}
               aria-label={ariaLabel}
-              aria-pressed={selected}
-              {...getEbtProps({
-                action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
-                element: SERVICE_MAP_EBT_ELEMENTS.SERVICE_NODE,
-              })}
+              aria-pressed={isInteractive ? selected : undefined}
+              {...(isInteractive
+                ? getEbtProps({
+                    action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+                    element: SERVICE_MAP_EBT_ELEMENTS.SERVICE_NODE,
+                  })
+                : {})}
             >
-              {iconUrl && (
-                <img src={iconUrl} alt={data.agentName} css={iconStyles} aria-hidden="true" />
+              {showStats ? (
+                <FailureRing
+                  size={SERVICE_NODE_CIRCLE_SIZE - 2 * NODE_BORDER_WIDTH_SELECTED}
+                  failedRate={data.stats?.failedTransactionRate}
+                  requestCount={data.stats?.requestCount}
+                >
+                  {formatCompactRate(data.stats?.throughput)}
+                </FailureRing>
+              ) : (
+                iconUrl && (
+                  <img src={iconUrl} alt={data.agentName} css={iconStyles} aria-hidden="true" />
+                )
               )}
             </div>
             <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
@@ -232,7 +297,7 @@ export const ServiceNode = memo(
                       sloCount={data.sloCount}
                       serviceName={data.label}
                       compactLabelOnNarrowScreens
-                      {...(onSloBadgeClick
+                      {...(isInteractive && onSloBadgeClick
                         ? {
                             onClick: (e) => {
                               e.stopPropagation();
@@ -247,6 +312,11 @@ export const ServiceNode = memo(
             </EuiFlexItem>
           )}
           <NodeLabel label={data.label} selected={selected} />
+          {showStats && (
+            <EuiFlexItem grow={false}>
+              <NodeStatsLine stats={data.stats} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </HighlightWrapper>
     );

@@ -13,3 +13,8 @@ export {
 } from './src/ml/ui_actions';
 
 export { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from './src/aiops/ui_actions';
+export {
+  ACTION_REVERSE_CATEGORIZE_FIELD,
+  type ReverseCategorizeFieldContext,
+  type ReverseCategorizeOpenInNewTab,
+} from './src/aiops/ui_actions';

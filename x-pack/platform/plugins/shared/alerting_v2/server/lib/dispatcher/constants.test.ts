@@ -9,41 +9,30 @@ import {
   DISPATCH_CHUNK_SIZE,
   MAX_WINDOW_MINUTES,
   OVERLAP_WINDOW_MINUTES,
-  TICK_DEADLINE_MS,
+  TICK_DEADLINE_MARGIN_MS,
+  getTickDeadlineMs,
 } from './constants';
-import { EPISODE_QUERY_LIMIT } from './queries';
-
-/** Parses a TM timeout string like '1m' or '30s' to milliseconds. */
-const parseTimeoutMs = (timeout: string): number => {
-  const match = timeout.match(/^(\d+)(m|s)$/);
-  if (!match) throw new Error(`Unknown timeout format: ${timeout}`);
-  const [, value, unit] = match;
-  return Number(value) * (unit === 'm' ? 60_000 : 1_000);
-};
+import { parseDurationToMs } from '../duration';
+import { ESQL_QUERY_ROW_LIMIT } from './queries';
 
 describe('dispatcher constants invariants', () => {
   it('MAX_WINDOW_MINUTES is strictly greater than OVERLAP_WINDOW_MINUTES (forward-progress guarantee)', () => {
     expect(MAX_WINDOW_MINUTES).toBeGreaterThan(OVERLAP_WINDOW_MINUTES);
   });
 
-  it('TICK_DEADLINE_MS is strictly below the task timeout so the watermark is always persisted', async () => {
-    const { DISPATCHER_TASK_TIMEOUT } = await import('./constants');
-    const taskTimeoutMs = parseTimeoutMs(DISPATCHER_TASK_TIMEOUT);
-    expect(TICK_DEADLINE_MS).toBeLessThan(taskTimeoutMs);
-  });
+  it.each(['1m', '5m'])(
+    'getTickDeadlineMs(%s) stops the tick 15s before the task timeout',
+    (timeout) => {
+      expect(getTickDeadlineMs(timeout)).toBe(parseDurationToMs(timeout) - TICK_DEADLINE_MARGIN_MS);
+      expect(TICK_DEADLINE_MARGIN_MS).toBe(15_000);
+    }
+  );
 
   it('DISPATCH_CHUNK_SIZE is 250', () => {
     expect(DISPATCH_CHUNK_SIZE).toBe(250);
   });
 
-  it('EPISODE_QUERY_LIMIT matches the LIMIT literal in getDispatchableAlertEventsQuery', async () => {
-    // Dynamically import to keep the assertion co-located without a cross-file import cycle.
-    const { getDispatchableAlertEventsQuery } = await import('./queries');
-    const { query } = getDispatchableAlertEventsQuery({
-      gte: '2026-01-22T07:20:00.000Z',
-      lte: '2026-01-22T07:35:00.000Z',
-    });
-
-    expect(query).toContain(`LIMIT ${EPISODE_QUERY_LIMIT}`);
+  it('ESQL_QUERY_ROW_LIMIT does not exceed the ES|QL maximum LIMIT of 10 000', () => {
+    expect(ESQL_QUERY_ROW_LIMIT).toBeLessThanOrEqual(10_000);
   });
 });

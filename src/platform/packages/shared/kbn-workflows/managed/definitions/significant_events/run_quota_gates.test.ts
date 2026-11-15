@@ -37,7 +37,9 @@ interface WorkflowStep {
 interface WorkflowDefinition {
   triggers: Array<{
     type: string;
-    inputs?: Array<{ name: string; type: string }>;
+    inputs?:
+      | Array<{ name: string; type: string }>
+      | { properties?: Record<string, { type: string }> };
   }>;
   steps: WorkflowStep[];
 }
@@ -71,7 +73,13 @@ const findInput = (
   name: string
 ): { name: string; type: string } | undefined =>
   definition.triggers
-    .flatMap((trigger) => trigger.inputs ?? [])
+    .flatMap((trigger) => {
+      if (Array.isArray(trigger.inputs)) {
+        return trigger.inputs;
+      }
+      const input = trigger.inputs?.properties?.[name];
+      return input ? [{ name, type: input.type }] : [];
+    })
     .find((input) => input.name === name);
 
 const stepIndex = (definition: WorkflowDefinition, name: string): number =>
@@ -108,9 +116,9 @@ describe('Significant Events run quota workflow contracts', () => {
     }
   });
 
-  it('runs all three gates only for workers whose root origin is scheduled', () => {
+  it('runs detection and KI extraction gates only for workers whose root origin is scheduled', () => {
     expect(quotaSteps.map((step) => step.with?.body?.group).sort()).toEqual(
-      ['detection', 'investigation', 'ki_extraction'].sort()
+      ['detection', 'ki_extraction'].sort()
     );
 
     for (const step of quotaSteps) {
@@ -137,7 +145,8 @@ describe('Significant Events run quota workflow contracts', () => {
   });
 
   it('places discovery and KI gates before their expensive work', () => {
-    expect(definitions.discovery.steps.slice(0, 3).map(({ name }) => name)).toEqual([
+    expect(definitions.discovery.steps.slice(0, 4).map(({ name }) => name)).toEqual([
+      'report_discovery_started',
       'bootstrap_cleanup_workflow',
       'check_budget',
       'exit_if_budget_denied',
@@ -176,11 +185,27 @@ describe('Significant Events run quota workflow contracts', () => {
 
     expect(discoveryDenial.steps).toEqual([
       expect.objectContaining({
+        type: 'kibana.request',
+        with: expect.objectContaining({
+          path: expect.stringContaining('/discovery/_completed'),
+          body: expect.objectContaining({
+            outcome: 'completed',
+            has_work: false,
+            budget_denied: true,
+          }),
+        }),
+      }),
+      expect.objectContaining({
         type: 'workflow.output',
         with: {
           processedCount: 0,
           hasWork: false,
-          suppressedRuleCount: 0,
+          skippedCount: 0,
+          heldBackCount: 0,
+          needsAgentCount: 0,
+          classifierReasonCounts: '{}',
+          classifierProbeStatusCounts: '{}',
+          classifierFailed: false,
         },
       }),
     ]);
@@ -189,7 +214,7 @@ describe('Significant Events run quota workflow contracts', () => {
         type: 'workflow.output',
         status: 'cancelled',
         with: {
-          streamName: '${{ inputs.streamName }}',
+          sourceId: '${{ inputs.sourceId }}',
           featuresSkipped: true,
           featuresConnectorUsed: '',
           discoveredFeatures: [],
@@ -200,55 +225,6 @@ describe('Significant Events run quota workflow contracts', () => {
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
           keepAliveRefreshed: 0,
         },
-      })
-    );
-  });
-
-  it('gates investigations after eligibility, event resolution, and deduplication but before launch', () => {
-    const orderedSteps = [
-      'gate_investigatable_severity',
-      'resolve_open_event',
-      'check_prior_investigation',
-      'guard_resolved_event',
-      'guard_missing_investigation',
-      'consume_investigation_quota',
-      'guard_investigation_quota',
-      'trigger_investigation',
-    ];
-    const indexes = orderedSteps.map((name) => stepIndex(definitions.discovery, name));
-
-    expect(indexes.every((index) => index >= 0)).toBe(true);
-    expect(indexes).toEqual([...indexes].sort((left, right) => left - right));
-  });
-
-  it('sends no severity policy in the investigation quota request', () => {
-    const gate = findStep(definitions.discovery, 'consume_investigation_quota');
-
-    expect(gate.with?.body).toEqual({ group: 'investigation' });
-  });
-
-  it('prevents investigation launch only on explicit denial', () => {
-    const guard = findStep(definitions.discovery, 'guard_investigation_quota');
-
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: { output: { allowed: false } } },
-      })
-    ).toBe(false);
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: { output: { allowed: true } } },
-      })
-    ).toBe(true);
-    expect(
-      evaluateStepCondition(guard, {
-        steps: { consume_investigation_quota: {} },
-      })
-    ).toBe(true);
-    expect(guard.steps?.[0]).toEqual(
-      expect.objectContaining({
-        name: 'trigger_investigation',
-        type: 'workflow.executeAsync',
       })
     );
   });

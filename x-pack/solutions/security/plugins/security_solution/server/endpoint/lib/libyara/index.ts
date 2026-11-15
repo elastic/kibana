@@ -46,4 +46,5 @@ export type {
   YaraDiagnosticSeverity,
   YaraValidateResult,
 } from './types';
+export { YaraEngineUnavailableError } from './errors';
 export { getYaraEngineVersion, setYaraLogger, validateYaraRule } from './validate_yara_rule';

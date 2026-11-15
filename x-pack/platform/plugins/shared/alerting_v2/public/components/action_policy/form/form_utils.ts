@@ -8,40 +8,48 @@
 import type {
   CreateActionPolicyData,
   ActionPolicyResponse,
-  PolicyMatcher,
-  UpdateActionPolicyBody,
+  UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { needsInterval } from '@kbn/alerting-v2-schemas';
+import { normalizeMatcher } from '@kbn/alerting-v2-utils';
 import { DEFAULT_STRATEGY_FOR_MODE } from './constants';
 import type { ActionPolicyFormState } from './types';
 
 export { needsInterval };
 
 /**
- * Collapses a matcher where both `tags` and `expression` are empty/null back to `null`
- * (catch-all). Prevents persisting `{ tags: null, expression: null }` which would be
- * truthy but semantically equivalent to no matcher.
+ * The throttle is one strategy variant, so the interval is sent only by the strategies that have
+ * one. A PATCH replaces the whole block, which is what the form submits either way.
  */
-const normalizeMatcher = (matcher: PolicyMatcher | null): PolicyMatcher | null =>
-  matcher && (matcher.tags?.length || matcher.expression?.trim()) ? matcher : null;
+const buildThrottle = (state: ActionPolicyFormState): CreateActionPolicyData['throttle'] =>
+  needsInterval(state.throttleStrategy)
+    ? { strategy: state.throttleStrategy, interval: state.throttleInterval }
+    : { strategy: state.throttleStrategy };
 
-const buildThrottle = (state: ActionPolicyFormState) => ({
-  strategy: state.throttleStrategy,
-  interval: needsInterval(state.throttleStrategy) ? state.throttleInterval : null,
-});
+/**
+ * The grouping is one mode variant, so the fields are sent only by the mode that groups on them.
+ * The form blocks submitting `per_field` with no fields, which is the only pairing the union
+ * cannot express.
+ */
+const buildGrouping = (state: ActionPolicyFormState): CreateActionPolicyData['grouping'] =>
+  state.groupingMode === 'per_field'
+    ? { mode: state.groupingMode, fields: state.groupBy }
+    : { mode: state.groupingMode };
 
 export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormState => {
-  const groupingMode = response.grouping_mode ?? 'per_episode';
+  const { grouping, throttle } = response;
+  const groupingMode = grouping?.mode ?? 'per_alert';
 
   return {
     name: response.name,
-    description: response.description,
-    tags: response.tags ?? [],
+    description: response.description ?? '',
     matcher: response.matcher ?? null,
     groupingMode,
-    groupBy: response.group_by ?? [],
-    throttleStrategy: response.throttle?.strategy ?? DEFAULT_STRATEGY_FOR_MODE[groupingMode],
-    throttleInterval: response.throttle?.interval ?? '',
+    // The form keeps the field list across mode switches, so the modes that group on none seed it empty.
+    groupBy: grouping?.mode === 'per_field' ? grouping.fields : [],
+    throttleStrategy: throttle?.strategy ?? DEFAULT_STRATEGY_FOR_MODE[groupingMode],
+    // The form keeps an interval field for every strategy, so the intervalless variants seed it blank.
+    throttleInterval: throttle && 'interval' in throttle ? throttle.interval : '',
     destinations: response.destinations.map((d) => ({ type: d.type, id: d.id })),
     inlineActions: [],
   };
@@ -51,30 +59,33 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   const matcher = normalizeMatcher(state.matcher);
   return {
     name: state.name,
-    description: state.description,
-    grouping_mode: state.groupingMode,
-    ...(state.tags.length > 0 ? { tags: state.tags } : {}),
+    ...(state.description ? { description: state.description } : {}),
+    grouping: buildGrouping(state),
     ...(matcher ? { matcher } : {}),
-    ...(state.groupingMode === 'per_field' && state.groupBy.length > 0
-      ? { group_by: state.groupBy }
-      : {}),
     throttle: buildThrottle(state),
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };
 };
 
-export const toUpdatePayload = (
-  state: ActionPolicyFormState,
-  version: string
-): UpdateActionPolicyBody => {
+/**
+ * The form always submits the matcher in full, so an emptied sub-field has to be sent as `null`:
+ * PATCH merges leaf by leaf, and an omitted leaf would keep the value the user just cleared.
+ */
+const toMatcherPatch = (
+  matcher: ActionPolicyFormState['matcher']
+): UpdateActionPolicyData['matcher'] => {
+  const normalized = normalizeMatcher(matcher);
+  if (!normalized) return null;
+
+  return { tags: normalized.tags ?? null, expression: normalized.expression ?? null };
+};
+
+export const toUpdatePayload = (state: ActionPolicyFormState): UpdateActionPolicyData => {
   return {
-    version,
     name: state.name,
-    description: state.description,
-    grouping_mode: state.groupingMode,
-    tags: state.tags.length > 0 ? state.tags : null,
-    matcher: normalizeMatcher(state.matcher),
-    group_by: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
+    description: state.description || null,
+    grouping: buildGrouping(state),
+    matcher: toMatcherPatch(state.matcher),
     throttle: buildThrottle(state),
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };

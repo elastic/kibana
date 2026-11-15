@@ -10,10 +10,13 @@
 import Path from 'path';
 import Fs from 'fs';
 import type { RuleSetRule, Configuration, RspackPluginInstance } from '@rspack/core';
+import type { LegacySharedOptions } from 'sass-embedded';
 import { getSharedConfig } from '@kbn/transpiler-config';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { rspack } from '../rspack_runtime';
 import type { ThemeTag } from '../types';
+
+const CORE_STYLES_DIR = 'src/core/packages/core/public/styles';
 
 /**
  * Shared resolve configuration for all RSPack builds.
@@ -101,7 +104,7 @@ export function getSharedResolveFallback(): Record<string, false> {
  * Common SWC options for both TypeScript and JavaScript files.
  * Uses @kbn/transpiler-config for consistent settings across Babel and SWC.
  */
-function getSwcOptions(dist: boolean, hmr: boolean = false) {
+export function getSwcOptions(dist: boolean, hmr: boolean = false) {
   const sharedConfig = getSharedConfig();
 
   return {
@@ -250,10 +253,16 @@ export function getBabelLoaderRule(dist: boolean): RuleSetRule {
  *
  * Note: We explicitly set type: 'javascript/auto' to tell RSPack to use
  * the loader chain instead of trying to use native CSS parsing.
+ *
+ * `?raw` imports must skip this rule. Webpack/Rspack apply every matching
+ * rule, so without the exclusion style-loader still runs and
+ * `getRawQueryLoaderRule` then stringifies that JS into the module. Core's
+ * `disable_animations.css?raw` injection depends on receiving actual CSS.
  */
 export function getCssLoaderRule(dist: boolean): RuleSetRule {
   return {
     test: /\.css$/,
+    resourceQuery: { not: /raw/ },
     type: 'javascript/auto', // Use loader chain, not native CSS parsing
     use: [
       { loader: require.resolve('style-loader') },
@@ -266,6 +275,29 @@ export function getCssLoaderRule(dist: boolean): RuleSetRule {
 }
 
 /**
+ * Sass options shared by every SCSS rule.
+ *
+ * `repoRoot` must be an include path: `@elastic/eui-theme-borealis` imports
+ * `node_modules/@elastic/eui-theme-common/...` relative to the repo root. Dart
+ * Sass's legacy `render` API (used by sass-loader 10) also searches the process
+ * cwd, which masked this for in-repo builds; external plugin builds run from
+ * the plugin directory and need it explicitly.
+ */
+export function getSassOptions(repoRoot: string, dist: boolean): LegacySharedOptions<'async'> {
+  return {
+    outputStyle: dist ? 'compressed' : 'expanded',
+    includePaths: [
+      repoRoot,
+      Path.resolve(repoRoot, 'node_modules'),
+      Path.resolve(repoRoot, CORE_STYLES_DIR),
+      Path.resolve(repoRoot, 'packages'),
+    ],
+    quietDeps: true,
+    silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
+  };
+}
+
+/**
  * Get the sass-loader chain for a specific theme.
  * Each theme uses different globals (light vs dark colors/shadows).
  */
@@ -274,10 +306,10 @@ function getSassLoaderChain(
   theme: ThemeTag,
   dist: boolean
 ): NonNullable<RuleSetRule['use']> {
-  const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
   const globalsPath = Path.resolve(
     repoRoot,
-    `src/core/public/styles/core_app/_globals_${theme}.scss`
+    CORE_STYLES_DIR,
+    `core_app/_globals_${theme}.scss`
   ).replace(/\\/g, '/');
 
   return [
@@ -291,17 +323,7 @@ function getSassLoaderChain(
       options: {
         additionalData: `@import "${globalsPath}";\n`,
         implementation: require('sass-embedded'),
-        sassOptions: {
-          outputStyle: dist ? 'compressed' : 'expanded',
-          includePaths: [
-            nodeModulesPath,
-            Path.resolve(repoRoot, 'src/core/public/styles'),
-            Path.resolve(repoRoot, 'packages'),
-          ],
-          loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
-          quietDeps: true,
-          silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
-        },
+        sassOptions: getSassOptions(repoRoot, dist),
       },
     },
   ];
@@ -353,8 +375,6 @@ export function getScssLoaderRule(
  * Node modules SCSS is compiled with light theme globals only.
  */
 export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): RuleSetRule {
-  const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
-
   return {
     test: /\.scss$/,
     include: /node_modules/,
@@ -370,20 +390,11 @@ export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): R
         options: {
           additionalData: `@import "${Path.resolve(
             repoRoot,
-            'src/core/public/styles/core_app/_globals_borealislight.scss'
+            CORE_STYLES_DIR,
+            'core_app/_globals_borealislight.scss'
           ).replace(/\\/g, '/')}";\n`,
           implementation: require('sass-embedded'),
-          sassOptions: {
-            outputStyle: dist ? 'compressed' : 'expanded',
-            includePaths: [
-              nodeModulesPath,
-              Path.resolve(repoRoot, 'src/core/public/styles'),
-              Path.resolve(repoRoot, 'packages'),
-            ],
-            loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
-            quietDeps: true,
-            silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
-          },
+          sassOptions: getSassOptions(repoRoot, dist),
         },
       },
     ],
@@ -479,6 +490,27 @@ export function getSharedModuleRules(
     getImageLoaderRule(),
     getFontLoaderRule(),
     getTextLoaderRule(),
+    // The MapLibre worker imports the shared module by relative filename.
+    {
+      test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl-(?:worker|shared)\.mjs$/,
+      resourceQuery: /asUrl/,
+      type: 'asset/resource',
+      sideEffects: true,
+      generator: { filename: 'maplibre-gl/[name][ext]' },
+    },
+    // MapLibre 6 imports .mjs plugins, but evaluates .js plugins, which Kibana's CSP blocks.
+    {
+      test: /[\\/]@mapbox[\\/]mapbox-gl-rtl-text[\\/]mapbox-gl-rtl-text\.min\.js$/,
+      resourceQuery: /asUrl/,
+      type: 'asset/resource',
+      generator: { filename: 'maplibre-gl/[name].[contenthash].mjs' },
+    },
+    // MapLibre wraps a cross-origin (CDN) worker URL with `new URL(url, import.meta.url)`.
+    // Rspack would otherwise bundle that as an asset context module and throw at runtime.
+    {
+      test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl\.mjs$/,
+      parser: { url: false },
+    },
     getRawQueryLoaderRule(),
     getPeggyLoaderRule(),
   ];
@@ -490,10 +522,9 @@ export function getSharedModuleRules(
  */
 export function getSharedIgnoreWarnings(): RegExp[] {
   return [
-    // Same as legacy webpack optimizer (STATS_WARNINGS_FILTER)
     /export .* was not found in/,
     /chunk .* \[mini-css-extract-plugin\].*Conflicting order between/,
-    // RSPack-specific: Node.js globals mocking (webpack silently mocks these)
+    // Node.js globals mocking (webpack silently mocks these)
     /__dirname.*is used and has been mocked/,
     /__filename.*is used and has been mocked/,
   ];

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSourceTypeKey, getSourceTypeLabel } from './utils';
+import { SOURCES_TYPES } from '@kbn/esql-types';
+import { getSourceTypeKey, getSourceTypeLabel, VIEW_TYPE_KEY } from './utils';
 
 describe('getSourceTypeLabel', () => {
   it('returns External data for External type', () => {
@@ -30,6 +31,8 @@ describe('getSourceTypeLabel', () => {
     expect(getSourceTypeLabel('Data Stream')).toBe('Stream');
     expect(getSourceTypeLabel('Alias')).toBe('Alias');
     expect(getSourceTypeLabel('Lookup')).toBe('Lookup Index');
+    expect(getSourceTypeLabel(SOURCES_TYPES.VIEW)).toBe('View');
+    expect(getSourceTypeLabel('view')).toBe('View');
   });
 });
 
@@ -54,5 +57,8 @@ describe('getSourceTypeKey', () => {
     expect(getSourceTypeKey('Data Stream')).toBe('stream');
     expect(getSourceTypeKey('Alias')).toBe('alias');
     expect(getSourceTypeKey('Lookup')).toBe('lookup_index');
+    expect(VIEW_TYPE_KEY).toBe('view');
+    expect(getSourceTypeKey(SOURCES_TYPES.VIEW)).toBe('view');
+    expect(getSourceTypeKey('view')).toBe('view');
   });
 });

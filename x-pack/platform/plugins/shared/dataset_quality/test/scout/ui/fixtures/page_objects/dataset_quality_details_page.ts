@@ -69,9 +69,9 @@ export class DatasetQualityDetailsPage {
     this.headerButton = page.testSubj.locator('datasetQualityDetailsHeaderButton');
     this.emptyPrompt = page.testSubj.locator('datasetQualityDetailsEmptyPrompt');
     this.qualityIssuesTable = page.testSubj.locator('datasetQualityDetailsDegradedFieldTable');
-    this.qualityIssuesTableNoData = page.testSubj.locator(
-      'datasetQualityDetailsDegradedTableNoData'
-    );
+    this.qualityIssuesTableNoData = page
+      .getByRole('cell')
+      .getByTestId('datasetQualityDetailsDegradedTableNoData');
     this.degradedFieldFlyout = page.testSubj.locator('datasetQualityDetailsDegradedFieldFlyout');
     this.linkToDiscover = page.testSubj.locator('datasetQualityDetailsLinkToDiscover');
     this.flyoutCloseButton = page.testSubj.locator('euiFlyoutCloseButton');
@@ -407,6 +407,8 @@ export class DatasetQualityDetailsPage {
   }
 
   async openIntegrationActionsMenu(): Promise<void> {
+    // The details section is a skeleton, so the button is absent, until the Fleet check resolves.
+    await this.getIntegrationRow('integration').waitFor({ state: 'visible', timeout: 30_000 });
     await this.integrationActionsButton.click();
   }
 

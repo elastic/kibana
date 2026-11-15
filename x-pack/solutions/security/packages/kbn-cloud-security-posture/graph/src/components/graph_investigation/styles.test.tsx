@@ -27,7 +27,7 @@ describe('AnimatedSearchBarContainer', () => {
     // the viewport instead of wrapping inside the chip (see security-team#17288).
     const { getByTestId } = renderContainer();
 
-    expect(getByTestId('container')).toHaveStyleRule('grid-template-columns', 'minmax(0, 1fr)');
+    expect(getByTestId('container')).toHaveStyleRule('grid-template-columns', /minmax\(0,\s?1fr\)/);
   });
 
   it('keeps a single grid row so the toggle-search collapse/expand animation is preserved', () => {

@@ -12,7 +12,8 @@ import type { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import { asHttpRequestExecutionSource } from '../../../lib/action_execution_source';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
+import { getConnectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
+import type { ActionsConfigurationUtilities } from '../../../actions_config';
 import type {
   ExecuteConnectorRequestBodyV1,
   ExecuteConnectorRequestParamsV1,
@@ -26,7 +27,8 @@ import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const executeConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.post(
     {
@@ -39,20 +41,23 @@ export const executeConnectorRoute = (
           'You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.',
         tags: ['oas-tag:connectors'],
       },
-      validate: {
-        request: {
-          body: executeConnectorRequestBodySchemaV1,
-          params: executeConnectorRequestParamsSchemaV1,
-        },
-        response: {
-          200: {
-            description: 'Indicates a successful call.',
-            body: () => connectorResponseSchemaV1,
+      validate: () => {
+        const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        return {
+          request: {
+            body: executeConnectorRequestBodySchemaV1,
+            params: executeConnectorRequestParamsSchemaV1,
           },
-          403: {
-            description: 'Indicates that this call is forbidden.',
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () => getConnectorResponseSchemaV1(includeInboundEventsField),
+            },
+            403: {
+              description: 'Indicates that this call is forbidden.',
+            },
           },
-        },
+        };
       },
     },
     router.handleLegacyErrors(

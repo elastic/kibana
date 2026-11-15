@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { useReducer, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
+  getLinkBasePath,
   fetchEsqlData,
-  fillTemplate,
+  fetchEsqlDatasets,
+  fillTemplateDatasets,
   sanitizeHtml,
   applyHtmlTheme,
   type EsqlDataResult,
@@ -35,7 +37,8 @@ export interface EditFlyoutState {
 }
 
 export interface UseEditFlyoutStateParams {
-  esqlQuery: string | undefined;
+  /** The panel's queries. The editor changes the first; the others are kept as they are. */
+  esqlQueries: readonly string[];
   template: string | undefined;
   timeRange: TimeRange | undefined;
   colorMode: EuiThemeColorModeStandard;
@@ -49,7 +52,7 @@ export interface UseEditFlyoutStateParams {
 }
 
 export const useEditFlyoutState = ({
-  esqlQuery,
+  esqlQueries,
   template,
   timeRange,
   colorMode,
@@ -61,8 +64,10 @@ export const useEditFlyoutState = ({
   esqlVariables,
   onRunPreview,
 }: UseEditFlyoutStateParams): EditFlyoutState => {
+  // Previewed with the first query, not edited.
+  const additionalEsqlQueries = useMemo(() => esqlQueries.slice(1), [esqlQueries]);
   const [state, dispatch] = useReducer(flyoutReducer, {
-    draftEsqlQuery: esqlQuery ?? '',
+    draftEsqlQuery: esqlQueries[0] ?? '',
     draftTemplate: template ?? '',
     isDataLoading: false,
     esqlData: null,
@@ -167,22 +172,27 @@ export const useEditFlyoutState = ({
 
     try {
       let rawHtml: string;
-      if (state.draftEsqlQuery) {
-        const result = await fetchEsqlData(
+      // The preview has to show what applying the template will, so every query the panel has is
+      // fetched, not only the one the editor changes.
+      const queries = state.draftEsqlQuery ? [state.draftEsqlQuery, ...additionalEsqlQueries] : [];
+      if (queries.length > 0) {
+        const { datasets } = await fetchEsqlDatasets(
           search,
           core.http,
-          state.draftEsqlQuery,
+          queries,
           timeRange,
           controller.signal,
           fetchOptions
         );
         if (controller.signal.aborted) return;
-        rawHtml = await fillTemplate(state.draftTemplate, result.columns, result.values ?? []);
+        rawHtml = await fillTemplateDatasets(state.draftTemplate, datasets);
       } else {
         rawHtml = state.draftTemplate;
       }
       if (!controller.signal.aborted && draftVersionRef.current === snapVersion) {
-        onRunPreview(applyHtmlTheme(sanitizeHtml(rawHtml), colorMode, euiTheme));
+        onRunPreview(
+          applyHtmlTheme(sanitizeHtml(rawHtml, getLinkBasePath(core.http)), colorMode, euiTheme)
+        );
       }
     } catch (err) {
       if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
@@ -198,6 +208,7 @@ export const useEditFlyoutState = ({
     }
   }, [
     state.draftEsqlQuery,
+    additionalEsqlQueries,
     state.draftTemplate,
     timeRange,
     isApproximate,

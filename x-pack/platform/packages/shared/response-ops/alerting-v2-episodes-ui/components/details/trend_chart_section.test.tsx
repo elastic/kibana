@@ -34,7 +34,6 @@ const episode = { 'rule.id': 'rule1' } as never;
 const singleMetricRule = {
   version: '1',
   query: {
-    format: 'composed',
     base: 'FROM logs-* | STATS count = COUNT(*) BY `host.name`',
     breach: { segment: '| WHERE count > 100' },
   },
@@ -44,7 +43,6 @@ const singleMetricRule = {
 const multiMetricRule = {
   version: '1',
   query: {
-    format: 'composed',
     base: 'FROM logs-* | STATS errors = COUNT(*), total = COUNT(*) | EVAL error_rate = errors / total * 100',
     breach: { segment: '| WHERE errors > 10 AND error_rate > 5' },
   },
@@ -69,7 +67,7 @@ describe('AlertEpisodeTrendChartSection', () => {
     mockUseFetchRule.mockReturnValue(
       asQuery({
         version: '1',
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+        query: { base: 'FROM logs-* | LIMIT 1' },
       })
     );
     mockUseFetchEpisodeTrendQuery.mockReturnValue(asQuery([]));

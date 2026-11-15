@@ -56,12 +56,12 @@ export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
     const total = compactNumberFormatter.format(usage.totalTokens);
     const label = compact
       ? total
-      : i18n.translate('workflowsManagement.tokenUsage.totalBadge', {
+      : i18n.translate('workflows.tokenUsage.totalBadge', {
           defaultMessage: '{total} tokens',
           values: { total },
         });
 
-    const ariaLabel = i18n.translate('workflowsManagement.tokenUsage.ariaLabel', {
+    const ariaLabel = i18n.translate('workflows.tokenUsage.ariaLabel', {
       defaultMessage: 'AI token usage: {total} total',
       values: { total: fullNumberFormatter.format(usage.totalTokens) },
     });

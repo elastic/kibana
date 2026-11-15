@@ -555,7 +555,7 @@ describe('toUnifiedAttachmentRequest', () => {
 
   it('throws with excess fields', () => {
     expect(() => toUnifiedAttachmentRequest({ ...comment, foo: 'bar' })).toThrow(
-      'invalid keys "foo"'
+      'Excess keys are not allowed'
     );
   });
 

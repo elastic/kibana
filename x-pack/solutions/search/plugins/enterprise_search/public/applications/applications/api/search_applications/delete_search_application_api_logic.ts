@@ -21,7 +21,9 @@ export interface DeleteSearchApplicationApiLogicResponse {
 export const deleteSearchApplication = async ({
   searchApplicationName,
 }: DeleteSearchApplicationApiLogicArguments): Promise<DeleteSearchApplicationApiLogicResponse> => {
-  const route = `/internal/enterprise_search/search_applications/${searchApplicationName}`;
+  const route = `/internal/enterprise_search/search_applications/${encodeURIComponent(
+    searchApplicationName
+  )}`;
   await HttpLogic.values.http.delete<DeleteSearchApplicationApiLogicResponse>(route);
   return { searchApplicationName };
 };

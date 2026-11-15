@@ -1345,7 +1345,7 @@ describe('metric visualization', () => {
       }
     );
 
-    it.each(['hidden', 'before', 'after'] as const)(
+    it.each(['hidden', 'before', 'after', 'tooltip'] as const)(
       'forwards the %s name visibility',
       (visibility) => {
         const expression = visualization.toExpression(

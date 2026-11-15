@@ -33,8 +33,7 @@ small for pages with sticky or shared top-nav constraints while still using the 
 Use `useChromeAppHeaderRegistration` only for lower-level wrappers that need to compose registration
 with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 
-Use deprecated `chrome.next.appHeader.set` only when a React adapter is not practical. It is the
-imperative primitive behind the React APIs.
+Do not register app-header state through `core.chrome`. Use the React adapters in this package.
 
 ## Migrating route headers
 
@@ -94,7 +93,7 @@ back from breadcrumbs, mount:
 migration over long-lived suppression.
 
 Tri-state `back` lives only on chrome registration (`ChromeAppHeaderConfig` via
-`ChromeAppHeaderRegistration` / `chrome.next.appHeader.set`). The rendered `AppHeader` component
+`ChromeAppHeaderRegistration`). The rendered `AppHeader` component
 does not accept `false`:
 
 - value — explicit chrome back (no breadcrumb fallback)
@@ -124,7 +123,7 @@ Discover uses `DiscoverAppHeader` from `@kbn/app-header/discover` to place its U
 the title. This is a Discover-specific layout exception; other apps should use the structured
 `tabs` or `badges` props on `AppHeader`. The public header components discard undeclared props, so
 this internal title slot cannot be forced through a type suppression. When the tabs bar is present,
-it owns the bottom separator and title actions remain visible without hovering.
+it owns the bottom separator.
 
 ## Loading skeleton
 

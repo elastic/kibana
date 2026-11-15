@@ -7,24 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import useLatest from 'react-use/lib/useLatest';
 import type { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
-import type { InTableSearchControlProps } from './in_table_search_control';
-import { InTableSearchControl } from './in_table_search_control';
+import type { UseInTableSearchControlProps } from './in_table_search_control';
+import { useInTableSearchControl } from './in_table_search_control';
 import type { InTableSearchRestorableState, RenderCellValueWrapper } from './types';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
 import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper';
 import { getHighlightColors } from './get_highlight_colors';
 import { getActiveMatchCss } from './get_active_match_css';
 
+export type InTableSearchScrollToCell = UseInTableSearchControlProps['scrollToCell'];
+
 export interface UseDataGridInTableSearchProps
-  extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
+  extends Pick<UseInTableSearchControlProps, 'rows' | 'visibleColumns'> {
   enableInTableSearch?: boolean;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps | null>;
+  /**
+   * Overrides how the grid is scrolled to the active match. Required when the grid uses
+   * `renderCustomGridBody`, since EUI's `scrollToItem` is a no-op without its virtualized body.
+   */
+  scrollToCell?: InTableSearchScrollToCell;
+  /** Additional hosts containing table controls rendered outside the grid wrapper. */
+  additionalSearchScopeElements?: readonly HTMLElement[];
   cellContext: EuiDataGridProps['cellContext'] | undefined;
   pagination: EuiDataGridProps['pagination'] | undefined;
   renderCellValue: EuiDataGridProps['renderCellValue'];
@@ -39,7 +48,9 @@ export interface UseDataGridInTableSearchState {
 
 export interface UseDataGridInTableSearchReturn {
   inTableSearchTermCss?: UseDataGridInTableSearchState['inTableSearchTermCss'];
-  inTableSearchControl: React.JSX.Element | undefined;
+  inTableSearchControl: React.ReactNode;
+  inTableSearchButton: React.ReactNode;
+  inTableSearchInput: React.ReactNode;
   cellContextWithInTableSearchSupport: EuiDataGridProps['cellContext'];
   renderCellValueWithInTableSearchSupport: RenderCellValueWrapper;
 }
@@ -50,7 +61,9 @@ export const useDataGridInTableSearch = (
   const {
     enableInTableSearch = true,
     dataGridWrapper,
+    additionalSearchScopeElements,
     dataGridRef,
+    scrollToCell: customScrollToCell,
     visibleColumns,
     rows,
     renderCellValue,
@@ -94,64 +107,91 @@ export const useDataGridInTableSearch = (
           : undefined,
     }));
 
-  const inTableSearchControl = useMemo(() => {
-    if (!enableInTableSearch) {
-      return undefined;
-    }
-    const controlsCount = dataGridWrapper
-      ? dataGridWrapper.querySelectorAll('.euiDataGridHeaderCell--controlColumn').length
-      : 0;
-    return (
-      <InTableSearchControl
-        initialState={initialState}
-        onInitialStateChange={onInitialStateChange}
-        inTableSearchTerm={inTableSearchTerm}
-        visibleColumns={visibleColumns}
-        rows={rows}
-        renderCellValue={renderCellValueWithInTableSearchSupport}
-        pageSize={pageSize}
-        getColumnIndexFromId={(columnId) => visibleColumns.indexOf(columnId) + controlsCount}
-        scrollToCell={(params) => {
-          dataGridRef.current?.scrollToItem?.(params);
-        }}
-        shouldOverrideCmdF={(element) => {
-          if (!dataGridWrapper) {
-            return false;
-          }
-          return dataGridWrapper.contains?.(element) ?? false;
-        }}
-        onChange={(searchTerm) => {
-          const nextSearchTerm = searchTerm || '';
-          setInTableSearchState({ inTableSearchTerm: nextSearchTerm });
-          if (!nextSearchTerm) {
-            clearSearchTermRegExpCache();
-          }
-        }}
-        onChangeCss={(styles) =>
-          setInTableSearchState((prevState) => ({ ...prevState, inTableSearchTermCss: styles }))
-        }
-        onChangeToExpectedPage={(expectedPageIndex: number) => {
-          if (isPaginationEnabled && pageIndexRef.current !== expectedPageIndex) {
-            onChangePage?.(expectedPageIndex);
-          }
-        }}
-      />
-    );
-  }, [
-    enableInTableSearch,
-    setInTableSearchState,
-    visibleColumns,
-    rows,
-    renderCellValueWithInTableSearchSupport,
-    dataGridRef,
-    dataGridWrapper,
-    inTableSearchTerm,
-    isPaginationEnabled,
-    pageSize,
-    onChangePage,
+  const controlsCount = useMemo(
+    () =>
+      dataGridWrapper
+        ? dataGridWrapper.querySelectorAll('.euiDataGridHeaderCell--controlColumn').length
+        : 0,
+    [dataGridWrapper]
+  );
+
+  const getColumnIndexFromId = useCallback(
+    (columnId: string) => visibleColumns.indexOf(columnId) + controlsCount,
+    [visibleColumns, controlsCount]
+  );
+
+  const scrollToCell = useCallback<InTableSearchScrollToCell>(
+    (params) => {
+      if (customScrollToCell) {
+        customScrollToCell(params);
+        return;
+      }
+      dataGridRef.current?.scrollToItem?.(params);
+    },
+    [dataGridRef, customScrollToCell]
+  );
+
+  const shouldOverrideCmdF = useCallback(
+    (element: HTMLElement) =>
+      Boolean(
+        dataGridWrapper?.contains(element) ||
+          additionalSearchScopeElements?.some((scope) => scope.contains(element))
+      ),
+    [dataGridWrapper, additionalSearchScopeElements]
+  );
+
+  const onChange = useCallback(
+    (searchTerm: string | undefined) => {
+      const nextSearchTerm = searchTerm || '';
+      setInTableSearchState({ inTableSearchTerm: nextSearchTerm });
+      if (!nextSearchTerm) {
+        clearSearchTermRegExpCache();
+      }
+    },
+    [setInTableSearchState]
+  );
+
+  const onChangeCss = useCallback(
+    (styles: SerializedStyles) =>
+      setInTableSearchState((prevState) => ({ ...prevState, inTableSearchTermCss: styles })),
+    [setInTableSearchState]
+  );
+
+  const onChangeToExpectedPage = useCallback(
+    (expectedPageIndex: number) => {
+      if (isPaginationEnabled && pageIndexRef.current !== expectedPageIndex) {
+        onChangePage?.(expectedPageIndex);
+      }
+    },
+    [isPaginationEnabled, onChangePage]
+  );
+
+  const {
+    searchButton: inTableSearchButton,
+    searchInput: inTableSearchInput,
+    isInputVisible,
+  } = useInTableSearchControl({
+    enabled: enableInTableSearch,
     initialState,
     onInitialStateChange,
-  ]);
+    inTableSearchTerm,
+    visibleColumns,
+    rows,
+    renderCellValue: renderCellValueWithInTableSearchSupport,
+    pageSize,
+    getColumnIndexFromId,
+    scrollToCell,
+    shouldOverrideCmdF,
+    onChange,
+    onChangeCss,
+    onChangeToExpectedPage,
+  });
+
+  const inTableSearchControl = enableInTableSearch
+    ? isInputVisible
+      ? inTableSearchInput
+      : inTableSearchButton
+    : undefined;
 
   const cellContextWithInTableSearchSupport: EuiDataGridProps['cellContext'] = useMemo(() => {
     if (!inTableSearchTerm && !cellContext) {
@@ -174,12 +214,16 @@ export const useDataGridInTableSearch = (
     () => ({
       inTableSearchTermCss,
       inTableSearchControl,
+      inTableSearchButton,
+      inTableSearchInput,
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     }),
     [
       inTableSearchTermCss,
       inTableSearchControl,
+      inTableSearchButton,
+      inTableSearchInput,
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     ]

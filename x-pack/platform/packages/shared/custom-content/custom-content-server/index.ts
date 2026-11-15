@@ -6,6 +6,7 @@
  */
 
 export type {
+  CustomContentTemplateResolver,
   CustomContentTemplateResolverDeps,
   ResolvedCustomContentTemplate,
 } from './src/custom_content_resolver';

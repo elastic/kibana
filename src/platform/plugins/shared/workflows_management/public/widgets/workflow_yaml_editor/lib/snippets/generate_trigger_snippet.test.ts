@@ -24,6 +24,26 @@ describe('generateTriggerSnippet', () => {
     });
   });
 
+  describe('page trigger', () => {
+    it('includes a title, a description, and an example input', () => {
+      expect(generateTriggerSnippet('page', { full: true })).toBe(
+        [
+          '- type: page',
+          '  title: Report an incident',
+          '  description: Tell us what happened',
+          '  inputs:',
+          '    properties:',
+          '      summary:',
+          '        type: string',
+          '        description: What happened',
+          '    required:',
+          '      - summary',
+          '',
+        ].join('\n')
+      );
+    });
+  });
+
   describe('custom triggers with defaultCondition', () => {
     it('should include defaultCondition in the snippet when provided', () => {
       const snippet = generateTriggerSnippet('custom.my_trigger', {
@@ -51,11 +71,15 @@ describe('generateTriggerSnippet', () => {
       });
       expect(snippet).toContain(`type: ${connectorEventTriggerId}`);
       expect(snippet).toContain('connector-id: ""');
-      expect(snippet).toContain('Id of the connector instance this trigger is bound to');
-      expect(snippet).toMatch(
-        /# Id of the connector instance this trigger is bound to\n\s+connector-id:/
+      expect(snippet).toContain(
+        'Id of the connector instance this trigger is bound to, or "*" for every instance of this type'
       );
-      expect(snippet).not.toMatch(/# Id of the connector instance this trigger is bound to\n\n/);
+      expect(snippet).toMatch(
+        /# Id of the connector instance this trigger is bound to, or "\*" for every instance of this type\n\s+connector-id:/
+      );
+      expect(snippet).not.toMatch(
+        /# Id of the connector instance this trigger is bound to, or "\*" for every instance of this type\n\n/
+      );
       expect(snippet).toContain('condition:');
       const schema = getTriggerSchema([{ id: connectorEventTriggerId, requiresConnectorId: true }]);
       expect(schema.safeParse({ type: connectorEventTriggerId, 'connector-id': '' }).success).toBe(

@@ -6,16 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { IWorkflowEventLogger, IWorkflowEventLoggerService } from './types';
+import type { IWorkflowEventLogger, IWorkflowLogsQueryService } from './types';
 
 jest.mock('./workflow_event_logger', () => ({
   WorkflowEventLogger: jest.fn().mockImplementation(() => createMockWorkflowEventLogger()),
 }));
 
-jest.mock('./workflow_event_logger_service', () => ({
-  WorkflowEventLoggerService: jest
-    .fn()
-    .mockImplementation(() => createMockWorkflowEventLoggerService()),
+jest.mock('./workflow_event_logger_factory', () => ({
+  WorkflowEventLoggerFactory: jest.fn().mockImplementation(() => ({
+    createLogger: jest.fn(() => createMockWorkflowEventLogger()),
+    createWorkflowLogger: jest.fn(),
+    createExecutionLogger: jest.fn(),
+    createStepLogger: jest.fn(),
+  })),
 }));
 
 export const createMockWorkflowEventLogger = (): jest.Mocked<IWorkflowEventLogger> => {
@@ -27,21 +30,15 @@ export const createMockWorkflowEventLogger = (): jest.Mocked<IWorkflowEventLogge
     startTiming: jest.fn(),
     stopTiming: jest.fn(),
     createStepLogger: jest.fn(),
-    flushEvents: jest.fn(),
   };
 };
 
-export const createMockWorkflowEventLoggerService =
-  (): jest.Mocked<IWorkflowEventLoggerService> => {
-    return {
-      createLogger: jest.fn(),
-      createWorkflowLogger: jest.fn(),
-      createExecutionLogger: jest.fn(),
-      createStepLogger: jest.fn(),
-      getExecutionLogs: jest.fn(),
-      getStepLogs: jest.fn(),
-      getLogsByLevel: jest.fn(),
-      searchLogs: jest.fn(),
-      getRecentLogs: jest.fn(),
-    };
+export const createMockWorkflowEventLoggerService = (): jest.Mocked<IWorkflowLogsQueryService> => {
+  return {
+    getExecutionLogs: jest.fn(),
+    getStepLogs: jest.fn(),
+    getLogsByLevel: jest.fn(),
+    searchLogs: jest.fn(),
+    getRecentLogs: jest.fn(),
   };
+};

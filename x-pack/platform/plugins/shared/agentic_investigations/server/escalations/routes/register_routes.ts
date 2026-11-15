@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EscalationRouteDependencies } from '../types';
+import { registerAssignEscalationRoute } from './assign_escalation';
+import { registerCreateEscalationRoute } from './create_escalation';
+import { registerListEscalationsRoute } from './list_escalations';
+import { registerListLinkedInvestigationsRoute } from './list_linked_investigations';
+import { registerSuggestUsersRoute } from './suggest_users';
+import { registerLinkEscalationRoute } from './link_escalation';
+import { registerSetEscalationStatusRoute } from './set_escalation_status';
+import { registerSyncEscalationRoute } from './sync_escalation';
+import { registerGetEscalationClosePreviewRoute } from './get_escalation_close_preview';
+
+export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
+  // Shared with the investigation assignee picker, so it stays when escalations are disabled.
+  registerSuggestUsersRoute(deps);
+  if (!deps.escalationsEnabled) {
+    return;
+  }
+  registerCreateEscalationRoute(deps);
+  registerListEscalationsRoute(deps);
+  registerListLinkedInvestigationsRoute(deps);
+  registerLinkEscalationRoute(deps);
+  registerAssignEscalationRoute(deps);
+  registerSetEscalationStatusRoute(deps);
+  registerGetEscalationClosePreviewRoute(deps);
+  registerSyncEscalationRoute(deps);
+};

@@ -12,7 +12,7 @@ Kibana-only dependencies (`@kbn/i18n`) with lightweight stubs via aliases.
 ## Quick start
 
 ```bash
-yarn kbn bootstrap
+pnpm kbn bootstrap
 src/platform/kbn-ui/side-navigation/packaging/scripts/build.sh
 ```
 

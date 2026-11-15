@@ -154,6 +154,31 @@ describe('useFetchSpan', () => {
     );
   });
 
+  it('should use the timeRange prop instead of the global time filter when provided', async () => {
+    mockFetchSpan.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() =>
+      useFetchSpan({
+        spanId,
+        traceId,
+        timeRange: { from: '2024-05-01T00:00:00.000Z', to: '2024-05-01T01:00:00.000Z' },
+      })
+    );
+
+    await waitFor(() => !result.current.loading);
+
+    expect(mockGetAbsoluteTime).not.toHaveBeenCalled();
+    expect(mockFetchSpan).toHaveBeenCalledWith(
+      {
+        traceId,
+        spanId,
+        start: '2024-05-01T00:00:00.000Z',
+        end: '2024-05-01T01:00:00.000Z',
+      },
+      expect.any(AbortSignal)
+    );
+  });
+
   it('should handle when span is not found (returns undefined)', async () => {
     mockFetchSpan.mockResolvedValue(undefined);
 

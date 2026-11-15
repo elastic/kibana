@@ -25,6 +25,9 @@ export const authenticationServiceMock = {
       deleteConnection: jest.fn(),
       resolveUsers: jest.fn(),
     },
+    systemIdentity: {
+      createEphemeralToken: jest.fn().mockResolvedValue('essu_mock-kibana-token'),
+    },
     login: jest.fn(),
     logout: jest.fn(),
     getCurrentUser: jest.fn(),

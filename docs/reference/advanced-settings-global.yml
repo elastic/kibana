@@ -33,6 +33,63 @@ groups:
           self: ga
           serverless: unavailable
 
+      - setting: "contextEngine:memoryEnabled"
+        id: context-engine-memory-enabled
+        description: |
+          When on, turns on [memory](docs-content://explore-analyze/ai-features/context-engine/concepts.md#memory) for [Context Engine](docs-content://explore-analyze/ai-features/context-engine.md) AI indices.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: experimental 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+  - group: Universal Alerting
+    id: kibana-alerting-v2-global-settings
+    settings:
+
+      - setting: "alerting:v2:enabled"
+        id: alerting-v2-enabled
+        description: |
+          Makes the {{esql}}-based Universal Alerting system available in {{product.kibana}}, including its rules, action policies, and APIs. When this setting is off, {{product.kibana}} hides the **Universal Alerting** interface and rejects requests to its APIs, but rules and action policies that already exist keep running. Disable your rules before you turn this setting off.
+
+          For the steps to turn the system on, confirm that it is available, and stop rules from running, refer to [Set up Universal Alerting](docs-content://explore-analyze/alerting/experimental-alerting-system/get-started/setup.md).
+        datatype: bool
+        default: true
+        applies_to:
+          stack: experimental =9.5, ga 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+        note: |
+          :applies_to: security: ga
+          This setting is unavailable on the [Elastic AI SOC Engine (EASE)](docs-content://solutions/security/ai/ease/ease-intro.md) Security project type.
+
+  - group: "{{esql}} Data Federation"
+    id: kibana-data-federation-global-settings
+    settings:
+
+      - setting: "dataFederation:enabled"
+        id: data-federation-enabled
+        description: |
+          When on, {{product.kibana}} shows the [{{esql}} Data Federation](elasticsearch://reference/query-languages/esql/esql-data-federation.md) management UI. Turning this setting off hides the UI but doesn't affect existing data sources or datasets. You can still manage them through the API and reference datasets in {{esql}} queries. Refresh the page to apply the change.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+        note: |
+          {{esql}} Data Federation requires an Enterprise [subscription](https://www.elastic.co/subscriptions).
+
   - group: Custom branding
     id: kibana-custom-branding-settings
     note: "Custom branding is a [subscription feature](https://www.elastic.co/subscriptions)."

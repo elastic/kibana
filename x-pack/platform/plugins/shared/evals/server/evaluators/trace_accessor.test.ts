@@ -27,8 +27,12 @@ describe('createTraceAccessor', () => {
       await accessor.runSearch('traces', {
         filter: [{ type: 'term', field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
         fields: ['@timestamp', 'attributes.gen_ai.tool.name'],
-        sort: { field: '@timestamp', order: 'asc' },
+        sort: [
+          { field: '@timestamp', order: 'asc' },
+          { field: 'span_id', order: 'asc', unmappedType: 'keyword' },
+        ],
         size: 10,
+        trackTotalHits: 21,
       });
 
       expect(searchMock).toHaveBeenCalledTimes(1);
@@ -37,8 +41,12 @@ describe('createTraceAccessor', () => {
         ignore_unavailable: true,
         _source: ['@timestamp', 'attributes.gen_ai.tool.name'],
         size: 10,
+        track_total_hits: 21,
         aggs: undefined,
-        sort: [{ '@timestamp': { order: 'asc' } }],
+        sort: [
+          { '@timestamp': { order: 'asc' } },
+          { span_id: { order: 'asc', unmapped_type: 'keyword' } },
+        ],
         query: {
           bool: {
             filter: [
@@ -110,12 +118,16 @@ describe('createTraceAccessor', () => {
       });
     });
 
-    it('returns _source documents from hits only', async () => {
+    it('returns hit metadata with _source documents', async () => {
       const { esClient, searchMock } = createEsClient();
       searchMock.mockResolvedValueOnce({
         hits: {
+          total: { value: 2, relation: 'eq' },
           hits: [
             {
+              _id: 'doc-1',
+              _index: 'logs-evals-default',
+              sort: [1782468000000],
               _source: { '@timestamp': '2026-06-26T10:00:00.000Z', 'attributes.content': 'hello' },
             },
             { _source: undefined },
@@ -125,7 +137,18 @@ describe('createTraceAccessor', () => {
       const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
 
       await expect(accessor.runSearch('logs', { size: 2 })).resolves.toEqual({
-        documents: [{ '@timestamp': '2026-06-26T10:00:00.000Z', 'attributes.content': 'hello' }],
+        documents: [
+          {
+            id: 'doc-1',
+            index: 'logs-evals-default',
+            sort: [1782468000000],
+            source: {
+              '@timestamp': '2026-06-26T10:00:00.000Z',
+              'attributes.content': 'hello',
+            },
+          },
+        ],
+        total: 2,
         aggregations: undefined,
       });
     });

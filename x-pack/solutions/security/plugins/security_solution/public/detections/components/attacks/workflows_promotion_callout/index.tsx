@@ -48,7 +48,7 @@ const WorkflowsPromotionCalloutComponent: React.FC = () => {
   // Read the feature flag and per-space opt-in synchronously during render so the
   // callout never flashes in and out. The FF is only `false` when an administrator
   // disables the feature globally.
-  const isWorkflowsFeatureAvailable = featureFlags.getBooleanValue(
+  const isWorkflowsFeatureAvailable = featureFlags.useBooleanValue(
     'securitySolution.attackDiscoveryWorkflowsEnabled',
     true
   );

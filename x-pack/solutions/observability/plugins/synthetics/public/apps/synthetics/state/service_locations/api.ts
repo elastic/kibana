@@ -11,7 +11,6 @@ import type {
   ServiceLocationsApiResponse,
   ThrottlingOptions,
 } from '../../../../../common/runtime_types';
-import { ServiceLocationsApiResponseCodec } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
 export const fetchServiceLocations = async (): Promise<{
@@ -19,9 +18,7 @@ export const fetchServiceLocations = async (): Promise<{
   locations: ServiceLocations;
 }> => {
   const { throttling, locations } = await apiService.get<ServiceLocationsApiResponse>(
-    SYNTHETICS_API_URLS.SERVICE_LOCATIONS,
-    undefined,
-    ServiceLocationsApiResponseCodec
+    SYNTHETICS_API_URLS.SERVICE_LOCATIONS
   );
   return { throttling, locations };
 };

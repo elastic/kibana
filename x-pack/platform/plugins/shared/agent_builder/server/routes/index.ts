@@ -8,6 +8,7 @@
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
 import { registerInternalToolsRoutes } from './internal/tools';
+import { registerInternalConnectorRoutes } from './internal/connectors';
 import { registerInternalSkillsRoutes } from './internal/skills';
 import { registerInternalAgentRoutes } from './internal/agents';
 import { registerInternalConversationRoutes } from './internal/conversations';
@@ -31,6 +32,7 @@ import { registerSpaceSettingsRoutes } from './internal/space_settings';
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
   registerInternalToolsRoutes(dependencies);
+  registerInternalConnectorRoutes(dependencies);
   registerInternalSkillsRoutes(dependencies);
   registerInternalAgentRoutes(dependencies);
   registerInternalConversationRoutes(dependencies);

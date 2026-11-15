@@ -1,0 +1,465 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { createSignificantSecurityEventAttachmentType } from './significant_security_event';
+import { formatToText } from './test_utils';
+
+const validPayload = {
+  attachmentLabel: 'Significant Security Event',
+  title: 'Suspicious lateral movement detected',
+  severity: 'high' as const,
+  confidence: 0.82,
+  status: 'open' as const,
+  source_watch: 'lateral-movement-watch',
+  capability: 'lateral-movement-detection',
+  run_id: 'run-123',
+  report_id: 'tr-lateral-movement-2026-01',
+  security_knowledge_indicators: [
+    { type: 'technique', value: 'T1021', confidence: 0.9, technique_id: 'T1021' },
+  ],
+  entities: [
+    { field: 'host.name' as const, value: 'srv-01' },
+    { field: 'user.name' as const, value: 'jdoe' },
+  ],
+  hypothesis_tested: 'Adversary used stolen credentials to move laterally',
+  evidence_for: ['RDP session from unusual host'],
+  evidence_against: [],
+  evaluation_record_ref: 'eval-record-1',
+};
+
+describe('createSignificantSecurityEventAttachmentType', () => {
+  const attachmentType = createSignificantSecurityEventAttachmentType();
+  const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
+
+  // Generic zod-shape cases (required fields, enum bounds, array caps) live in
+  // common/significant_security_event_schema.test.ts. Only the schema's custom
+  // superRefine checks are re-verified here, through the attachment type's own
+  // validate() entry point.
+  describe('validate', () => {
+    it('rejects a technique indicator missing technique_id', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        security_knowledge_indicators: [{ type: 'technique', value: 'T1021' }],
+      });
+
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects an ioc indicator missing ioc', async () => {
+      const result = await attachmentType.validate({
+        ...validPayload,
+        security_knowledge_indicators: [{ type: 'ioc', value: 'suspicious hash' }],
+      });
+
+      expect(result.valid).toBe(false);
+    });
+  });
+
+  describe('format', () => {
+    it('returns a text representation quoting the title and severity', async () => {
+      const value = await formatToText(attachmentType, formatContext, validPayload);
+
+      expect(value).toContain(validPayload.title);
+      expect(value).toContain('high');
+    });
+
+    it('hides a legacy timeline from the agent', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        timeline: [{ at: '2026-01-01T00:00:00Z', what: 'RDP session established' }],
+      });
+
+      expect(value).not.toContain('Timeline:');
+      expect(value).not.toContain('RDP session established');
+    });
+
+    it('includes indicators, structured entities, evidence, and the evaluation record ref', async () => {
+      const value = await formatToText(attachmentType, formatContext, validPayload);
+
+      expect(value).toContain('technique: T1021 [T1021] (confidence 0.9)');
+      expect(value).toContain('host.name: srv-01');
+      expect(value).toContain('user.name: jdoe');
+      expect(value).toContain('- RDP session from unusual host');
+      expect(value).toContain('Evidence against:\n  none recorded');
+      expect(value).toContain('Evaluation record: eval-record-1');
+      expect(value).toContain('taxonomy labels, not Discover IOCs');
+    });
+
+    it('omits the Evaluation record line when evaluation_record_ref is absent', async () => {
+      const { evaluation_record_ref: _omit, ...withoutEval } = validPayload;
+      const value = await formatToText(attachmentType, formatContext, withoutEval);
+
+      expect(value).not.toContain('Evaluation record:');
+    });
+
+    it('formats a hunt_result without resolved_iocs', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          hit_sources: ['tier1'],
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'environment_hits_found',
+            counts: { total_hits: 2, returned_hits: 2, affected_hosts: 1, affected_users: 0 },
+            per_index: [
+              { index: 'logs-endpoint.events.process-default', hit_count: 2, required: true },
+            ],
+            searched_ioc_count: 1,
+          },
+        },
+      });
+
+      expect(value).toContain('IOC Hunt: environment_hits_found');
+      expect(value).not.toContain('Resolved IOCs');
+    });
+
+    it('surfaces summary, basis and detections so the agent sees what the card leads with', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        summary: 'ip 203.0.113.10 seen 12x on 3 hosts',
+        basis: 'ioc_and_behavior',
+        detections: [
+          {
+            id: 'ioc:ip:203.0.113.10',
+            kind: 'ioc',
+            field: 'destination.ip',
+            basis: 'ioc_strong',
+            matched_on: [{ field: 'destination.ip', value: '203.0.113.10' }],
+            total: 12,
+            host_count: 3,
+            user_count: 1,
+          },
+          {
+            id: 'behavior:T1078.004',
+            kind: 'behavior',
+            technique_id: 'T1078.004',
+            technique_name: 'Cloud Accounts',
+            basis: 'ioc_and_behavior',
+            matched_on: [],
+            total: 4,
+            host_count: 2,
+            from_sample: true,
+          },
+        ],
+      });
+
+      expect(value).toContain('Summary: ip 203.0.113.10 seen 12x on 3 hosts');
+      expect(value).toContain('Basis: ioc_and_behavior');
+      expect(value).toContain(
+        '  - ioc 203.0.113.10 on destination.ip [ioc_strong]: 12 event(s), 3 host(s), 1 user(s)'
+      );
+      expect(value).toContain(
+        '  - behavior T1078.004 Cloud Accounts [ioc_and_behavior]: 4 event(s), 2 host(s), from sampled hits'
+      );
+    });
+
+    it('omits the hit-centric lines on an old payload without them', async () => {
+      const value = await formatToText(attachmentType, formatContext, validPayload);
+
+      expect(value).not.toContain('Summary:');
+      expect(value).not.toContain('Basis:');
+      expect(value).not.toContain('Detections');
+    });
+
+    it('includes the report_id so the agent can tie the event back to its threat report', async () => {
+      const value = await formatToText(attachmentType, formatContext, validPayload);
+
+      expect(value).toContain(`Threat report: ${validPayload.report_id}`);
+    });
+
+    it('surfaces matched IOC and technique evidence on formatted events', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        events: [
+          {
+            event_id: 'evt-1',
+            source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+            matched: { ioc: { type: 'ip', value: '203.0.113.5' }, field: 'destination.ip' },
+          },
+          {
+            event_id: 'evt-2',
+            source_index: '.ds-logs-endpoint.events.network-default-2026.09.22-000001',
+            matched: { technique_id: 'T1021', field: 'process.command_line' },
+          },
+          {
+            event_id: 'evt-3',
+            source_index: '.ds-logs-endpoint.events.file-default-2026.09.22-000001',
+          },
+        ],
+      });
+
+      expect(value).toContain(
+        '  evt-1 (.ds-logs-endpoint.events.process-default-2026.09.22-000001) [matched: ioc 203.0.113.5 on destination.ip]'
+      );
+      expect(value).toContain(
+        '  evt-2 (.ds-logs-endpoint.events.network-default-2026.09.22-000001) [matched: technique T1021 on process.command_line]'
+      );
+      expect(value).toContain('  evt-3 (.ds-logs-endpoint.events.file-default-2026.09.22-000001)');
+      expect(value).not.toContain(
+        'evt-3 (.ds-logs-endpoint.events.file-default-2026.09.22-000001) [matched'
+      );
+    });
+
+    it('does not render maps_to_proposal, which only packaging reads', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        maps_to_proposal: {
+          category: 'containment',
+          impact: 'Isolate affected hosts',
+          confidence: 0.7,
+          actionWorkflowId: 'workflow-1',
+          actionInput: { endpoint_ids: 'abc-123', force: true },
+          manual_remediation: ['Rotate the compromised key'],
+        },
+      });
+
+      expect(value).not.toContain('Maps to proposal');
+      expect(value).not.toContain('Isolate affected hosts');
+      expect(value).not.toContain('workflow-1');
+      expect(value).not.toContain('Rotate the compromised key');
+    });
+
+    it('surfaces the truncation note when the payload was truncated', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        truncated: true,
+        truncated_original_count: 120,
+      });
+
+      expect(value).toContain('truncated from 120 original entries');
+    });
+
+    it('names the tier that confirmed the finding and what each behavior query found', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          // Tier 2 alone, over a report whose Tier 1 was clean: the tier statuses below
+          // cannot say which tier corroborated this finding, so the model needs the line.
+          hit_sources: ['tier2'],
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'no_environment_hits',
+            counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+            per_index: [],
+            resolved_iocs: [],
+          },
+          tier2: {
+            status: 'behaviors_proposed',
+            behaviors: [
+              {
+                technique_id: 'T1021',
+                tactic_ids: ['TA0008'],
+                confidence: 0.9,
+                title: 'hit',
+                execution: { executed: true, row_count: 3, hit: true },
+              },
+              {
+                technique_id: 'T1078',
+                tactic_ids: [],
+                confidence: 0.5,
+                title: 'clean',
+                execution: { executed: true, row_count: 0, hit: false },
+              },
+              {
+                technique_id: 'T1098',
+                tactic_ids: [],
+                confidence: 0.5,
+                title: 'no verdict',
+                execution: {
+                  executed: true,
+                  row_count: 4,
+                  hit: false,
+                  inconclusive_reason: 'rows_unclassifiable',
+                },
+              },
+              {
+                technique_id: 'T1110',
+                tactic_ids: [],
+                confidence: 0.5,
+                title: 'never ran',
+                execution: { executed: false, row_count: 0, hit: false },
+              },
+              {
+                technique_id: 'T1136',
+                tactic_ids: [],
+                confidence: 0.5,
+                title: 'unreported',
+              },
+            ],
+          },
+        },
+      });
+
+      expect(value).toContain('Confirmed by: Behavior Hunt');
+      expect(value).toContain('hit — executed, hit (3 row(s) in required indices)');
+      expect(value).toContain('clean — executed, no rows in required indices (clean)');
+      expect(value).toContain(
+        'no verdict — executed, no verdict (rows_unclassifiable); this is not evidence the environment is clean'
+      );
+      expect(value).toContain('never ran — not executed');
+      // Absence is not a verdict: the producer reported no result, which is not "did not run".
+      expect(value).toContain('unreported — execution not reported');
+    });
+
+    it('marks lists the producer truncated, and says nothing confirmed a clean run', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: false,
+          hit_sources: [],
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'no_environment_hits',
+            counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+            per_index: [
+              {
+                index: 'logs-endpoint.events.process-default',
+                hit_count: 0,
+                required: true,
+              },
+            ],
+            resolved_iocs: [{ type: 'hash', value: 'abc123' }],
+            per_index_truncated: true,
+            resolved_iocs_truncated: true,
+          },
+          tier2: {
+            status: 'behaviors_proposed',
+            behaviors: [
+              { technique_id: 'T1021', tactic_ids: [], confidence: 0.5, title: 'proposal' },
+            ],
+            behaviors_truncated: true,
+          },
+        },
+      });
+
+      expect(value).toContain('Confirmed by: nothing (no confirmed hit)');
+      expect(value).toContain('Per index (truncated by the producer: not the complete set):');
+      expect(value).toContain('Resolved IOCs (truncated by the producer: not the complete set):');
+      expect(value).toContain(
+        'Behavior Hunt: behaviors_proposed (truncated by the producer: not the complete set)'
+      );
+    });
+  });
+
+  describe('getAgentDescription', () => {
+    it('documents the payload shape and the render_attachment contract', () => {
+      const description = attachmentType.getAgentDescription?.();
+
+      expect(description).toContain('Significant Security Event');
+      expect(description).not.toContain('timeline');
+      expect(description).toContain('hypothesis_tested');
+      expect(description).toContain('{ field, value }');
+      expect(description).toContain('NOT Discover IOCs');
+      expect(description).toContain('<render_attachment id="ATTACHMENT_ID" version="VERSION" />');
+    });
+  });
+
+  describe('max-size payload', () => {
+    it('keeps every section at the schema max sizes, naming what each one left out', async () => {
+      const maxSizePayload = {
+        ...validPayload,
+        title: 't'.repeat(512),
+        hypothesis_tested: 'h'.repeat(4000),
+        security_knowledge_indicators: Array.from({ length: 50 }, () => ({
+          type: 'ioc' as const,
+          value: 'v'.repeat(2048),
+          ioc: { type: 'hash' as const, value: 'h'.repeat(2048) },
+        })),
+        entities: Array.from({ length: 50 }, () => ({
+          field: 'host.name' as const,
+          value: 'e'.repeat(2048),
+        })),
+        alerts: Array.from({ length: 50 }, () => ({
+          alert_id: 'a'.repeat(512),
+          index: 'i'.repeat(256),
+        })),
+        events: Array.from({ length: 50 }, () => ({
+          event_id: 'e'.repeat(512),
+          source_index: 'i'.repeat(256),
+        })),
+        evidence_for: Array.from({ length: 50 }, () => 'f'.repeat(2000)),
+        evidence_against: Array.from({ length: 50 }, () => 'a'.repeat(2000)),
+        hunt_result: {
+          has_confirmed_hit: true,
+          // Both tiers, so the formatter emits the longest source list the schema allows;
+          // `tier2` requires a behavior that actually executed and hit.
+          hit_sources: ['tier1' as const, 'tier2' as const],
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'environment_hits_found' as const,
+            // One hit per `per_index` entry: the schema rejects a breakdown that sums past
+            // the total, so the full 20 entries need a total of at least 20.
+            counts: { total_hits: 20, returned_hits: 20, affected_hosts: 1, affected_users: 1 },
+            per_index: Array.from({ length: 20 }, (_, index) => ({
+              // Distinct names: 20 copies of one index is not a breakdown any search produces.
+              index: `${index}`.padEnd(256, 'i'),
+              hit_count: 1,
+              required: true,
+            })),
+            resolved_iocs: Array.from({ length: 50 }, () => ({
+              type: 'hash' as const,
+              value: 'h'.repeat(2048),
+            })),
+          },
+          tier2: {
+            status: 'behaviors_proposed' as const,
+            behaviors: Array.from({ length: 20 }, () => ({
+              technique_id: 't'.repeat(32),
+              tactic_ids: Array.from({ length: 20 }, () => 'x'.repeat(32)),
+              confidence: 0.9,
+              title: 'r'.repeat(256),
+              execution: { executed: true, row_count: 1, hit: true },
+            })),
+          },
+        },
+        // `maps_to_proposal` at its schema maximums, including the 32KB `actionInput` cap. The
+        // formatter does not emit it, so it must not count against the content limit.
+        maps_to_proposal: {
+          category: 'c'.repeat(256),
+          impact: 'i'.repeat(2000),
+          confidence: 1,
+          actionWorkflowId: 'w'.repeat(512),
+          // 50 keys at the 256-char key cap, with values sized so the serialized payload sits
+          // just under the 32768-byte `actionInput` cap (32601 bytes).
+          actionInput: Object.fromEntries(
+            Array.from({ length: 50 }, (_, i) => [`key-${i}`.padEnd(256, 'k'), 'v'.repeat(390)])
+          ),
+          manual_remediation: Array.from({ length: 50 }, () => 'm'.repeat(2000)),
+        },
+      };
+
+      const value = await formatToText(attachmentType, formatContext, maxSizePayload);
+
+      // Asserting on the length alone cannot fail: `getRepresentation` slices to the limit
+      // before returning. What matters is that the slice never happens — it cuts at one
+      // point, mid-entry, and silently drops every section the formatter emits after it.
+      expect(value).not.toContain('[truncated: representation exceeded');
+      expect(value.length).toBeLessThanOrEqual(attachmentType.maxContentLength ?? Infinity);
+
+      // Including the sections that come last, which a single cut would take first.
+      for (const section of [
+        'Hunt result:',
+        'Confirmed by: IOC Hunt, Behavior Hunt',
+        'Security knowledge indicators',
+        'Entities:',
+        'Alerts:',
+        'Events:',
+        'Evidence for:',
+        'Evidence against:',
+        `Evaluation record: ${validPayload.evaluation_record_ref}`,
+      ]) {
+        expect(value).toContain(section);
+      }
+
+      // Each section that ran out of budget says so, rather than ending mid-list.
+      expect(value).toContain('more not shown (section size limit reached)');
+    });
+  });
+});

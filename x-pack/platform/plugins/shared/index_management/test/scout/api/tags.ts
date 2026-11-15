@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 
-// All serverless except vectordb/workplaceai, which preset the `logs-*` index mode and so reject the
+// All serverless except vectordb, which presets the `logs-*` index mode and so reject the
 // logsdb suites' data stream (duplicate `index.mode` from LogsdbIndexModeSettingsProvider).
 export const SERVERLESS_LOGS_CAPABLE: string[] = [
   ...tags.serverless.search,

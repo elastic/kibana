@@ -7,14 +7,26 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { TaskOutput } from '@kbn/evals';
+import type { DefaultEvaluators, EvalsExecutorClient, Evaluator, TaskOutput } from '@kbn/evals';
+import { EICAR_TRAP_EVALUATOR_NAME } from './evaluators/eicar_trap_evaluator';
+import { RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME } from './evaluators/rubric_cap_no_tool_call_evaluator';
+import { SIMULATION_AWARENESS_EVALUATOR_NAME } from './evaluators/simulation_awareness_evaluator';
+import { STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME } from './evaluators/stalled_after_load_skill_evaluator';
+import { UNREQUESTED_SIDE_EFFECTS_EVALUATOR_NAME } from './evaluators/unrequested_side_effects_evaluator';
+import { WORKFLOW_VALIDITY_EVALUATOR_NAME } from './evaluators/workflow_validity_evaluator';
 import {
   toDatasetExample,
+  createEvaluatePersonaMatrixDataset,
   createPersonaMatrixTrajectoryEvaluator,
   createPersonaMatrixExpectedToolCalledEvaluator,
+  createPersonaMatrixFinalAnswerPresentEvaluator,
+  createPersonaMatrixMinExpectedStepsEvaluator,
   createPersonaMatrixSkillInvokedEvaluator,
+  isRankablePathContract,
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
+import type { PersonaMatrixChatClient } from './chat_client';
+import type { AgentProfile } from './agent_profile';
 import {
   PERSONA_MATRIX_EXAMPLES,
   type PersonaMatrixExample,
@@ -42,6 +54,29 @@ const buildLog = (): ToolingLog =>
     error: jest.fn(),
     debug: jest.fn(),
   } as unknown as ToolingLog);
+
+describe('path contract classification', () => {
+  it('keeps probes diagnostic and leaves candidate/rankable paths measurable', () => {
+    expect(isRankablePathContract({ pathContract: 'probe' })).toBe(false);
+    expect(isRankablePathContract({ pathContract: 'candidate' })).toBe(true);
+    expect(isRankablePathContract({ pathContract: 'rankable' })).toBe(true);
+    expect(isRankablePathContract(undefined)).toBe(true);
+  });
+
+  it('marks every hunt example as a probe', () => {
+    const probePrefixes = [
+      'alert-analysis-',
+      'entity-analytics-',
+      'multi-step-',
+      'threat-hunting-',
+    ];
+    const probes = PERSONA_MATRIX_EXAMPLES.filter((example) =>
+      probePrefixes.some((prefix) => example.id.startsWith(prefix))
+    );
+    expect(probes).toHaveLength(12);
+    expect(probes.every((example) => example.metadata.pathContract === 'probe')).toBe(true);
+  });
+});
 
 describe('toDatasetExample', () => {
   it('resolves the golden path from metadata.expectedTools into output.tool_sequence', () => {
@@ -162,21 +197,29 @@ describe('createPersonaMatrixTrajectoryEvaluator', () => {
           }))
         )
       );
-      expect(result.score).not.toBeNull();
-      const metadata = result.metadata as { expected: string[] } | undefined;
-      expect(metadata?.expected).toEqual(wrapped.output.tool_sequence);
+      if (example.metadata.pathContract === 'probe') {
+        expect(result.score).toBeNull();
+        expect(result.metadata).toMatchObject({ pathContract: 'probe' });
+      } else {
+        expect(result.score).not.toBeNull();
+        const metadata = result.metadata as { expected: string[] } | undefined;
+        expect(metadata?.expected).toEqual(wrapped.output.tool_sequence);
+      }
     }
   });
 });
 
 describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
-  it('scores 1 when the primary expected tool was called', async () => {
+  it('scores 1 when every declared expected tool was called', async () => {
     const evaluator = createPersonaMatrixExpectedToolCalledEvaluator();
     const result = await evaluator.evaluate({
       input: { question: 'q' },
       expected: toDatasetExample(baseExample).output,
       output: {
-        steps: [{ type: 'tool_call', tool_id: 'security.alerts' }],
+        steps: [
+          { type: 'tool_call', tool_id: 'security.alerts' },
+          { type: 'tool_call', tool_id: 'security.get_related_alerts' },
+        ],
       } as unknown as TaskOutput,
       metadata: baseExample.metadata,
     } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
@@ -195,6 +238,290 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
       output: { steps: [] } as unknown as TaskOutput,
       metadata: unannotated.metadata,
     } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  // Regression: only `expectedTools[0]` used to be checked, so a run that
+  // skipped every later declared tool still scored a full 1.
+  it('scores 0 when a non-primary expected tool was skipped', async () => {
+    const evaluator = createPersonaMatrixExpectedToolCalledEvaluator();
+    const multiTool: PersonaMatrixExample = {
+      ...baseExample,
+      metadata: {
+        ...baseExample.metadata,
+        expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
+      },
+    };
+    const result = await evaluator.evaluate({
+      input: { question: 'q' },
+      expected: toDatasetExample(multiTool).output,
+      output: {
+        steps: [{ type: 'tool_call', tool_id: 'platform.core.generate_esql' }],
+      } as unknown as TaskOutput,
+      metadata: multiTool.metadata,
+    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    expect(result.score).toBe(0);
+    expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([
+      'platform.core.execute_esql',
+    ]);
+  });
+
+  it('scores 1 only when every declared expected tool was called', async () => {
+    const evaluator = createPersonaMatrixExpectedToolCalledEvaluator();
+    const multiTool: PersonaMatrixExample = {
+      ...baseExample,
+      metadata: {
+        ...baseExample.metadata,
+        expectedTools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
+      },
+    };
+    const result = await evaluator.evaluate({
+      input: { question: 'q' },
+      expected: toDatasetExample(multiTool).output,
+      output: {
+        steps: [
+          { type: 'tool_call', tool_id: 'platform.core.generate_esql' },
+          { type: 'tool_call', tool_id: 'platform.core.list_indices' },
+          { type: 'tool_call', tool_id: 'platform.core.execute_esql' },
+        ],
+      } as unknown as TaskOutput,
+      metadata: multiTool.metadata,
+    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    expect(result.score).toBe(1);
+    expect((result.metadata as { missingToolIds: string[] }).missingToolIds).toEqual([]);
+  });
+});
+
+describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
+  const evaluate = (output: unknown) =>
+    createPersonaMatrixFinalAnswerPresentEvaluator().evaluate({
+      input: { question: 'q' },
+      expected: undefined,
+      output,
+      metadata: {},
+    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixFinalAnswerPresentEvaluator>['evaluate']>[0]);
+
+  it('scores 1 when the run produced a non-empty final message', async () => {
+    const result = await evaluate({ messages: [{ message: 'Rule created: ...' }] });
+    expect(result.score).toBe(1);
+  });
+
+  it('scores 0 when the only message is the last-assistant-step fallback', async () => {
+    const result = await evaluate({
+      messages: [{ message: 'Let me check that rule.' }],
+      messageSource: 'last_assistant_step',
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 1 for a real closing message even when messageSource is "response"', async () => {
+    const result = await evaluate({
+      messages: [{ message: 'Done.' }],
+      messageSource: 'response',
+    });
+    expect(result.score).toBe(1);
+  });
+
+  // Regression: some detection-rule-edit runs ended
+  // on a tool call with no user-facing closing text.
+  it('scores 0 when every message is empty', async () => {
+    const result = await evaluate({ messages: [{ message: '' }] });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when messages are missing from the output', async () => {
+    const result = await evaluate({ steps: [] });
+    expect(result.score).toBe(0);
+  });
+
+  const ruleToolStep = (data: unknown, toolId = 'security.create_detection_rule') => ({
+    type: 'tool_call',
+    tool_id: toolId,
+    results: [{ type: 'other', data }],
+  });
+
+  const RULE_ATTACHMENT_ID = 'rule_attachment_1';
+  const renderTag = (id: string) => `<render_attachment id="${id}" version="1" />`;
+  const createdRule = (extra: Record<string, unknown> = {}) => ({
+    success: true,
+    rule: { id: 'abc', severity: 'high' },
+    attachment_id: RULE_ATTACHMENT_ID,
+    ...extra,
+  });
+
+  // The detection-rule-edit references ask the agent to render the created rule
+  // attachment inline "rather than describing the rule in prose only". A run
+  // whose only message is chat_client's last-assistant-step fallback but that
+  // emitted the matching render tag HAS shown the rule to the user.
+  it('scores 1 when the run rendered the created rule via a matching render tag', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule())],
+    });
+    expect(result.score).toBe(1);
+    expect(result.explanation).toContain('artifact');
+  });
+
+  it('scores 1 for an update_detection_rule artifact as well', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule(), 'security.update_detection_rule')],
+    });
+    expect(result.score).toBe(1);
+  });
+
+  // The rule tool only stores the attachment; without the render tag the user
+  // sees nothing. This is the silent-termination case the gate must catch.
+  it('scores 0 when a rule was created but no render tag was emitted', async () => {
+    const result = await evaluate({
+      messages: [{ message: '' }],
+      steps: [ruleToolStep(createdRule())],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when the fallback narration does not render the created attachment', async () => {
+    const result = await evaluate({
+      messages: [{ message: 'Let me create that rule.' }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule())],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when the render tag points at a different attachment', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag('some_other_attachment') }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule())],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('still scores 0 when the rule tool call failed', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule({ success: false }))],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('still scores 0 when a rule tool reported success without a rule payload', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep({ success: true, attachment_id: RULE_ATTACHMENT_ID })],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('does not count a non-artifact tool call as an answer', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule(), 'security.run_rule_preview')],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  // `generate_workflow` returns only ids plus prose; the user sees the workflow
+  // solely through the render tag, exactly like a created rule.
+  const generateWorkflowStep = (data: unknown) =>
+    ruleToolStep(data, 'platform.core.generate_workflow');
+  const WORKFLOW_ATTACHMENT_ID = 'wf_attachment_1';
+  const generatedWorkflow = (extra: Record<string, unknown> = {}) => ({
+    success: true,
+    attachment_id: WORKFLOW_ATTACHMENT_ID,
+    attachment_version: 1,
+    ...extra,
+  });
+
+  it('scores 1 when the run rendered the generated workflow via a matching render tag', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag(WORKFLOW_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [generateWorkflowStep(generatedWorkflow())],
+    });
+    expect(result.score).toBe(1);
+    expect(result.explanation).toContain('artifact');
+  });
+
+  it('scores 0 when a workflow was generated but never rendered', async () => {
+    const result = await evaluate({
+      messages: [{ message: 'Let me draft that workflow.' }],
+      messageSource: 'last_assistant_step',
+      steps: [generateWorkflowStep(generatedWorkflow())],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when generate_workflow failed or returned no attachment id', async () => {
+    const failed = await evaluate({
+      messages: [{ message: renderTag(WORKFLOW_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [generateWorkflowStep(generatedWorkflow({ success: false }))],
+    });
+    const noId = await evaluate({
+      messages: [{ message: renderTag(WORKFLOW_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [generateWorkflowStep({ success: true })],
+    });
+    expect(failed.score).toBe(0);
+    expect(noId.score).toBe(0);
+  });
+
+  it('returns N/A when there is no task output at all', async () => {
+    const result = await evaluate(undefined);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+});
+
+describe('createPersonaMatrixMinExpectedStepsEvaluator', () => {
+  const toolStep = (id: string) => ({ type: 'tool_call', tool_id: id });
+  const evaluate = (output: unknown, expectedTools?: string[]) =>
+    createPersonaMatrixMinExpectedStepsEvaluator().evaluate({
+      input: { question: 'q' },
+      expected: expectedTools ? { tool_sequence: expectedTools } : {},
+      output,
+      metadata: expectedTools ? { expectedTools } : {},
+    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixMinExpectedStepsEvaluator>['evaluate']>[0]);
+
+  it('scores 1 when tool calls meet the expected minimum', async () => {
+    const result = await evaluate(
+      { steps: [toolStep('platform.core.generate_esql'), toolStep('platform.core.execute_esql')] },
+      ['platform.core.generate_esql', 'platform.core.execute_esql']
+    );
+    expect(result.score).toBe(1);
+  });
+
+  // Regression: some runs produced an answer in <3 steps having
+  // called nothing — premature termination that FinalAnswerPresent alone misses.
+  it('scores 0 when the agent gave up without trying (fewer calls than expected)', async () => {
+    const result = await evaluate({ steps: [] }, ['on_call_lookup']);
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when only some of the expected tools were called', async () => {
+    const result = await evaluate({ steps: [toolStep('platform.core.generate_esql')] }, [
+      'platform.core.generate_esql',
+      'platform.core.execute_esql',
+    ]);
+    expect(result.score).toBe(0);
+  });
+
+  it('returns N/A when the example declares no expectedTools', async () => {
+    const result = await evaluate({ steps: [toolStep('x')] });
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  it('returns N/A when there is no task output', async () => {
+    const result = await evaluate(undefined, ['on_call_lookup']);
     expect(result.score).toBeNull();
     expect(result.label).toBe('N/A');
   });
@@ -242,7 +569,7 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
     // A predicate pinned to `filestore.read` can never match, so `skill_invoked`
     // stays 0 while `total_tool_spans` is non-zero -- meaning the "unavailable"
     // guard does NOT trip and the evaluator reports a confident false 0 for
-    // every model. Verified against the golden cluster: over 7 days,
+    // every model. Verified against the scores cluster: over 7 days,
     // filestore.read = 0 spans, load_skill = 7,991 spans.
     const query = jest.fn().mockResolvedValue({
       columns: [{ name: 'total_tool_spans' }, { name: 'skill_invoked' }],
@@ -261,6 +588,61 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
     expect(sent).toContain('load_skill');
     expect(result.score).toBe(1);
   });
+
+  describe('skill predicate against load_skill arguments', () => {
+    // Evaluates the LIKE patterns the evaluator emits against sample
+    // `gen_ai.tool.call.arguments` strings, so the test goes red when the
+    // predicate stops matching rather than asserting on query text.
+    const likeToRegExp = (pattern: string) =>
+      new RegExp(
+        `^${pattern
+          .split('*')
+          .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+          .join('[\\s\\S]*')}$`
+      );
+
+    const buildMatcher = async (metadata: PersonaMatrixExample['metadata']) => {
+      const query = jest.fn().mockResolvedValue({
+        columns: [{ name: 'total_tool_spans' }, { name: 'skill_invoked' }],
+        values: [[2, 1]],
+      });
+      const evaluator = createPersonaMatrixSkillInvokedEvaluator({
+        traceEsClient: { esql: { query } } as unknown as EsClient,
+        log: buildLog(),
+      });
+      await evaluator.evaluate(buildEvaluatorArgs(metadata, '0af7651916cd43dd8448eb211c80319c'));
+      const sent = query.mock.calls[0][0].query as string;
+      const patterns = [...sent.matchAll(/arguments LIKE "((?:[^"\\]|\\.)*)"/g)].map((m) =>
+        likeToRegExp(m[1].replace(/\\(.)/g, '$1'))
+      );
+      expect(patterns.length).toBeGreaterThan(0);
+      return (args: string) => patterns.some((re) => re.test(args));
+    };
+
+    const metadata = {
+      ...baseExample.metadata,
+      expectedSkill: 'alert-analysis',
+      allowSkills: ['threat-hunting'],
+    };
+
+    it('matches a bare-id load_skill argument', async () => {
+      const matches = await buildMatcher(metadata);
+      expect(matches('{"skill":"alert-analysis"}')).toBe(true);
+      expect(matches('{"skill":"threat-hunting"}')).toBe(true);
+    });
+
+    it('still matches the legacy SKILL.md path argument', async () => {
+      const matches = await buildMatcher(metadata);
+      expect(matches('{"skill":"/skills/security/alert-analysis/SKILL.md"}')).toBe(true);
+    });
+
+    it('does not match another skill or one that only shares a prefix', async () => {
+      const matches = await buildMatcher(metadata);
+      expect(matches('{"skill":"workflow-authoring"}')).toBe(false);
+      expect(matches('{"skill":"alert-analysis-v2"}')).toBe(false);
+      expect(matches('{"skill":"/skills/security/workflow-authoring/SKILL.md"}')).toBe(false);
+    });
+  });
 });
 
 describe('task output shape', () => {
@@ -277,5 +659,641 @@ describe('task output shape', () => {
     const messages = (taskOutput as { messages?: Array<{ message?: string }> }).messages ?? [];
     const latestMessage = messages[messages.length - 1]?.message;
     expect(latestMessage).toBe('the real answer');
+  });
+
+  it('forwards messageSource so a fallback answer is distinguishable from a real final turn', async () => {
+    // chat_client falls back to the last non-empty reasoning/output step when a
+    // model ends its turn on a tool call, and tags which one it used via
+    // `messageSource`. If the task drops that tag, every stored cell looks like
+    // a genuine closing answer and mid-run narration ("I will now preview the
+    // detection rule...") is scored as if it were the model's final response.
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockResolvedValue({
+          messages: [{ message: 'I will now preview the detection rule.' }],
+          messageSource: 'last_assistant_step',
+          steps: [],
+          errors: [],
+          traceId: 'trace-1',
+        }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+
+    expect(output.messageSource).toBe('last_assistant_step');
+  });
+});
+
+describe('task judges and the last-assistant-step fallback', () => {
+  const runTask = async (
+    response: Record<string, unknown>,
+    { criteriaRejects = false }: { criteriaRejects?: boolean } = {}
+  ) => {
+    const correctnessEvaluate = jest.fn().mockResolvedValue({ metadata: { verdict: 'ok' } });
+    const groundednessEvaluate = jest.fn().mockResolvedValue({ metadata: { verdict: 'ok' } });
+    const criteriaEvaluate = criteriaRejects
+      ? jest.fn().mockRejectedValue(new Error('criteria judge down'))
+      : jest
+          .fn()
+          .mockResolvedValue({ score: 0.75, label: null, explanation: 'criteria-explanation' });
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+    let capturedEvaluators: Evaluator[] = [];
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest
+          .fn()
+          .mockResolvedValue({ steps: [], errors: [], traceId: 'trace-1', ...response }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: () => ({
+          name: 'criteria',
+          kind: 'LLM',
+          direction: 'maximize',
+          evaluate: criteriaEvaluate,
+        }),
+        correctnessAnalysis: () => ({ evaluate: correctnessEvaluate }),
+        groundednessAnalysis: () => ({ evaluate: groundednessEvaluate }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }, evaluators: Evaluator[]) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+          capturedEvaluators = evaluators;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+    });
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+    return {
+      output,
+      correctnessEvaluate,
+      groundednessEvaluate,
+      criteriaEvaluate,
+      capturedEvaluators,
+    };
+  };
+
+  it('registers the deterministic behaviour evaluators', async () => {
+    const { capturedEvaluators } = await runTask({ messages: [{ message: 'ok' }] });
+    const names = capturedEvaluators.map(({ name }) => name);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        WORKFLOW_VALIDITY_EVALUATOR_NAME,
+        EICAR_TRAP_EVALUATOR_NAME,
+        SIMULATION_AWARENESS_EVALUATOR_NAME,
+        UNREQUESTED_SIDE_EFFECTS_EVALUATOR_NAME,
+        STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME,
+        RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME,
+      ])
+    );
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  const judgedAnswer = (evaluate: jest.Mock) => {
+    const { output } = evaluate.mock.calls[0][0] as {
+      output: { messages: Array<{ message: string }> };
+    };
+    return output.messages[output.messages.length - 1]?.message;
+  };
+
+  it('does not let the judges grade fallback narration as the final answer', async () => {
+    const { output, correctnessEvaluate, groundednessEvaluate } = await runTask({
+      messages: [{ message: 'I will now preview the detection rule.' }],
+      messageSource: 'last_assistant_step',
+    });
+    expect(judgedAnswer(correctnessEvaluate)).toBe('');
+    expect(judgedAnswer(groundednessEvaluate)).toBe('');
+    // The narration stays on the stored output for the trace card.
+    expect((output.messages as Array<{ message: string }>)[0].message).toBe(
+      'I will now preview the detection rule.'
+    );
+  });
+
+  it('judges the rendered artifact when a fallback run ends on one', async () => {
+    const { correctnessEvaluate } = await runTask({
+      messages: [{ message: 'Created it. <render_attachment id="att-9" version="1"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.create_detection_rule',
+          results: [
+            {
+              data: {
+                success: true,
+                attachment_id: 'att-9',
+                rule: { name: 'chrysalis-beacon', query: 'process.name: curl' },
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const answer = judgedAnswer(correctnessEvaluate);
+    expect(answer).toContain('chrysalis-beacon');
+    expect(answer).not.toContain('preview');
+  });
+
+  it('runs the criteria judge on the judged submission, not the fallback narration', async () => {
+    const { output, criteriaEvaluate, capturedEvaluators } = await runTask({
+      messages: [{ message: 'I will now preview the detection rule.' }],
+      messageSource: 'last_assistant_step',
+    });
+    expect(judgedAnswer(criteriaEvaluate)).toBe('');
+    expect((output.messages as Array<{ message: string }>)[0].message).toBe(
+      'I will now preview the detection rule.'
+    );
+
+    // The registered criteria evaluator reads the precomputed result back and
+    // never calls the judge itself.
+    const criteria = capturedEvaluators.find(({ name }) => name === 'criteria');
+    expect(criteria).toBeDefined();
+    const result = await criteria!.evaluate({
+      input: {},
+      expected: {},
+      output: output as TaskOutput,
+      metadata: {},
+    });
+    expect(result).toMatchObject({ score: 0.75, explanation: 'criteria-explanation' });
+    expect(criteriaEvaluate).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports criteria as unavailable when the criteria judge fails', async () => {
+    const { output, criteriaEvaluate, capturedEvaluators } = await runTask(
+      { messages: [{ message: 'the real answer' }], messageSource: 'response' },
+      { criteriaRejects: true }
+    );
+    expect(criteriaEvaluate).toHaveBeenCalledTimes(1);
+    expect((output.messages as Array<{ message: string }>)[0].message).toBe('the real answer');
+    const criteria = capturedEvaluators.find(({ name }) => name === 'criteria');
+    const result = await criteria!.evaluate({
+      input: {},
+      expected: {},
+      output: output as TaskOutput,
+      metadata: {},
+    });
+    expect(result).toMatchObject({ score: null, label: 'unavailable' });
+  });
+
+  it('forwards workflowAttachments and judges a rendered workflow on its attachment YAML', async () => {
+    const workflowAttachments = [{ id: 'wf-7', version: 1, yaml: 'name: chrysalis-workflow' }];
+    const { output, correctnessEvaluate } = await runTask({
+      messages: [{ message: 'Done. <render_attachment id="wf-7" version="1"/>' }],
+      messageSource: 'last_assistant_step',
+      workflowAttachments,
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.generate_workflow',
+          params: { query: 'post to Slack' },
+          results: [{ data: { success: true, attachment_id: 'wf-7', attachment_version: 1 } }],
+        },
+      ],
+    });
+    expect(output.workflowAttachments).toEqual(workflowAttachments);
+    expect(judgedAnswer(correctnessEvaluate)).toBe('name: chrysalis-workflow');
+  });
+
+  const createRuleStep = (attachmentId: string) => ({
+    type: 'tool_call',
+    tool_id: 'security.create_detection_rule',
+    params: {},
+    results: [
+      {
+        data: {
+          success: true,
+          attachment_id: attachmentId,
+          rule: { name: 'chrysalis-beacon', severity: 'low' },
+        },
+      },
+    ],
+  });
+  const updateRuleStep = (attachmentId: string, toolId = 'attachments.update') => ({
+    type: 'tool_call',
+    tool_id: toolId,
+    params: {
+      attachment_id: attachmentId,
+      data: { text: JSON.stringify({ name: 'chrysalis-beacon', severity: 'high' }) },
+    },
+    results: [
+      {
+        data: {
+          attachment_id: attachmentId,
+          type: 'security.rule',
+          previous_version: 1,
+          version: 2,
+          version_created: true,
+        },
+      },
+    ],
+  });
+
+  it('judges the updated rule when the render tag shows the latest version', async () => {
+    const { correctnessEvaluate } = await runTask({
+      messages: [{ message: 'Updated. <render_attachment id="att-r"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [createRuleStep('att-r'), updateRuleStep('att-r')],
+    });
+    const answer = judgedAnswer(correctnessEvaluate);
+    expect(answer).toContain('"severity":"high"');
+    expect(answer).not.toContain('"severity":"low"');
+  });
+
+  it('judges the version the render tag pinned', async () => {
+    const pinnedFirst = await runTask({
+      messages: [{ message: 'Draft. <render_attachment id="att-r" version="1"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [createRuleStep('att-r'), updateRuleStep('att-r', 'attachment_update')],
+    });
+    expect(judgedAnswer(pinnedFirst.correctnessEvaluate)).toContain('"severity":"low"');
+
+    const pinnedSecond = await runTask({
+      messages: [{ message: 'Final. <render_attachment version="2" id="att-r"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [createRuleStep('att-r'), updateRuleStep('att-r', 'attachment_update')],
+    });
+    expect(judgedAnswer(pinnedSecond.correctnessEvaluate)).toContain('"severity":"high"');
+  });
+
+  it('ignores a failed attachment update', async () => {
+    const failedUpdate = {
+      ...updateRuleStep('att-r'),
+      results: [{ type: 'error', data: { message: 'Attachment update failed' } }],
+    };
+    const { correctnessEvaluate } = await runTask({
+      messages: [{ message: 'Updated. <render_attachment id="att-r"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [createRuleStep('att-r'), failedUpdate],
+    });
+    const answer = judgedAnswer(correctnessEvaluate);
+    expect(answer).toContain('"severity":"low"');
+    expect(answer).not.toContain('"severity":"high"');
+  });
+
+  it('resolves a pinned version across query rewrites of the same attachment', async () => {
+    const rewrite = (version: number, query: string) => ({
+      type: 'tool_call',
+      tool_id: 'security.create_detection_rule',
+      params: { attachment_id: 'att-r' },
+      results: [
+        {
+          data: {
+            success: true,
+            attachment_id: 'att-r',
+            version,
+            rule: { name: 'chrysalis-beacon', query },
+          },
+        },
+      ],
+    });
+    const { correctnessEvaluate } = await runTask({
+      messages: [{ message: 'First draft. <render_attachment id="att-r" version="1"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [rewrite(1, 'first-query'), rewrite(2, 'rewritten-query')],
+    });
+    const answer = judgedAnswer(correctnessEvaluate);
+    expect(answer).toContain('first-query');
+    expect(answer).not.toContain('rewritten-query');
+  });
+
+  it('sends the criteria judge no fallback narration anywhere in its payload', async () => {
+    const { criteriaEvaluate } = await runTask({
+      messages: [{ message: 'I will now preview the detection rule.' }],
+      messageSource: 'last_assistant_step',
+      workflowAttachments: [{ id: 'wf-x', version: 1, yaml: 'name: leftover-draft' }],
+      steps: [
+        { type: 'reasoning', reasoning: 'I will now preview the detection rule.' },
+        {
+          type: 'tool_call',
+          tool_id: 'security.run_rule_preview',
+          params: {},
+          results: [{ data: { hits: 3 } }],
+        },
+      ],
+    });
+    const payload = JSON.stringify(criteriaEvaluate.mock.calls[0][0].output);
+    expect(payload).not.toContain('preview the detection rule');
+    expect(payload).not.toContain('leftover-draft');
+    expect(payload).not.toContain('last_assistant_step');
+    expect(payload).toContain('security.run_rule_preview');
+  });
+
+  it('still judges a real closing answer', async () => {
+    const { correctnessEvaluate, groundednessEvaluate } = await runTask({
+      messages: [{ message: 'the real answer' }],
+      messageSource: 'response',
+    });
+    expect(judgedAnswer(correctnessEvaluate)).toBe('the real answer');
+    expect(judgedAnswer(groundednessEvaluate)).toBe('the real answer');
+  });
+});
+
+describe('task judge failure isolation', () => {
+  it('keeps the trajectory and degrades qualitative scores when a judge call rejects', async () => {
+    // Regression guard for whole-suite aborts: a single judge
+    // call failing (e.g. inference 500 toolValidationError) must not throw out
+    // of the task and take down all remaining examples.
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockResolvedValue({
+          messages: [{ message: 'the real answer' }],
+          steps: [],
+          errors: [],
+          traceId: 'trace-1',
+        }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
+        correctnessAnalysis: () => ({
+          evaluate: jest.fn().mockRejectedValue(new Error('toolValidationError')),
+        }),
+        groundednessAnalysis: () => ({
+          evaluate: jest.fn().mockResolvedValue({ metadata: { verdict: 'grounded' } }),
+        }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    expect(capturedTask).toBeDefined();
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+
+    // The failed judge degrades to an absent analysis (quantitative evaluators
+    // then report "unavailable"); the successful judge and the agent's real
+    // trajectory are preserved.
+    expect(output.correctnessAnalysis).toBeUndefined();
+    expect(output.groundednessAnalysis).toEqual({ verdict: 'grounded' });
+    expect((output.messages as Array<{ message: string }>)[0].message).toBe('the real answer');
+    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('CorrectnessAnalysis failed'));
+    expect((log.error as jest.Mock).mock.calls.flat().join(' ')).toContain('toolValidationError');
+  });
+});
+
+describe('createEvaluatePersonaMatrixDataset judge payload cap', () => {
+  const HUGE = 'h'.repeat(50_000);
+  const hugeSteps = [
+    {
+      type: 'tool_call',
+      tool_id: 'security.alerts',
+      results: [{ type: 'other', data: { content: HUGE } }],
+    },
+  ];
+
+  const run = async () => {
+    const analysisOutputs: unknown[] = [];
+    const analysis = () => ({
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        analysisOutputs.push(output);
+        return { metadata: { ok: true } };
+      }),
+    });
+    const evaluators = {
+      correctnessAnalysis: analysis,
+      groundednessAnalysis: analysis,
+      criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn() }),
+      traceBasedEvaluators: {},
+    };
+    let taskResult: Record<string, unknown> | undefined;
+    const executorClient = {
+      runExperiment: jest.fn(async ({ task }: { task: (example: unknown) => Promise<unknown> }) => {
+        taskResult = (await task(toDatasetExample(baseExample))) as Record<string, unknown>;
+      }),
+    };
+    const chatClient = {
+      query: jest.fn(async () => ({
+        messages: [{ message: 'final answer' }],
+        steps: hugeSteps,
+        errors: [],
+        traceId: 'trace-1',
+      })),
+    };
+
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient,
+      evaluators,
+      executorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+    } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [baseExample] } });
+    return { analysisOutputs, taskResult: taskResult! };
+  };
+
+  const previous = process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+  afterEach(() => {
+    if (previous === undefined) {
+      delete process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+    } else {
+      process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP = previous;
+    }
+  });
+
+  it('gives the analysis judges a capped copy, keeps the stored transcript verbatim, and reports the trim', async () => {
+    process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP = '1000';
+    const { analysisOutputs, taskResult } = await run();
+
+    expect(analysisOutputs).toHaveLength(2);
+    for (const seen of analysisOutputs) {
+      expect(JSON.stringify(seen).length).toBeLessThan(5_000);
+    }
+    expect(JSON.stringify(taskResult.steps)).toContain(HUGE);
+    expect(taskResult.judgePayloadTrim).toMatchObject({
+      trimmed: [expect.objectContaining({ toolId: 'security.alerts', pass: 'result-cap' })],
+    });
+  });
+
+  it('leaves the judges and the stored output untouched when no cap is configured', async () => {
+    delete process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+    const { analysisOutputs, taskResult } = await run();
+
+    for (const seen of analysisOutputs) {
+      expect(JSON.stringify(seen)).toContain(HUGE);
+    }
+    expect(taskResult).not.toHaveProperty('judgePayloadTrim');
+  });
+});
+
+describe('createEvaluatePersonaMatrixDataset rawResponse', () => {
+  const runWith = async (extra: Record<string, unknown>) => {
+    const judged: unknown[] = [];
+    const analysis = () => ({
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        judged.push(output);
+        return { metadata: { ok: true } };
+      }),
+    });
+    const criteria = {
+      name: 'criteria',
+      kind: 'LLM',
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        judged.push(output);
+        return { score: 1 };
+      }),
+    };
+    let taskResult: Record<string, unknown> | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn(async () => ({
+          messages: [{ message: 'final answer' }],
+          steps: [{ type: 'tool_call', tool_id: 'security.alerts', results: [] }],
+          errors: [],
+          traceId: 'trace-1',
+          ...extra,
+        })),
+      },
+      evaluators: {
+        correctnessAnalysis: analysis,
+        groundednessAnalysis: analysis,
+        criteria: () => criteria,
+        traceBasedEvaluators: {},
+      },
+      executorClient: {
+        runExperiment: jest.fn(
+          async ({ task }: { task: (example: unknown) => Promise<unknown> }) => {
+            taskResult = (await task(toDatasetExample(baseExample))) as Record<string, unknown>;
+          }
+        ),
+      },
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+    } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [baseExample] } });
+    return { judged, taskResult: taskResult as Record<string, unknown> };
+  };
+
+  it('stores rawResponse on the task output but leaves the judge payload unchanged', async () => {
+    const withRaw = await runWith({ rawResponse: '{"message":"final answer","secret":"RAW"}' });
+    const withoutRaw = await runWith({});
+
+    expect(withRaw.taskResult.rawResponse).toBe('{"message":"final answer","secret":"RAW"}');
+    expect(withRaw.judged).toHaveLength(3);
+    expect(withRaw.judged).toEqual(withoutRaw.judged);
+    expect(JSON.stringify(withRaw.judged)).not.toContain('RAW');
+  });
+});
+
+describe('reporting identity per agent profile', () => {
+  const captureExperiment = async (agentProfile: AgentProfile) => {
+    const runExperiment = jest.fn(async () => {});
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: { query: jest.fn() } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {},
+        criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn() }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn() }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn() }),
+      } as unknown as DefaultEvaluators,
+      executorClient: { runExperiment } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+      agentProfile,
+    });
+    await evaluateDataset({
+      dataset: {
+        name: 'security: security-persona-matrix',
+        description: 'd',
+        examples: [baseExample],
+      },
+    });
+    return (
+      runExperiment.mock.calls as unknown as Array<
+        [
+          {
+            datasets: Array<{
+              name: string;
+              examples: Array<{ metadata?: Record<string, unknown> }>;
+            }>;
+            metadata: Record<string, unknown>;
+          }
+        ]
+      >
+    )[0][0];
+  };
+
+  it('keeps the established dataset and suite names for the default agent', async () => {
+    const experiment = await captureExperiment('default');
+    expect(experiment.datasets[0].name).toBe('security: security-persona-matrix');
+    // Example metadata feeds the dataset example id, so default runs must stay
+    // byte-identical to the unprofiled shape or every example is re-added.
+    expect(experiment.metadata).toEqual({
+      suite: 'security-persona-matrix',
+      source: 'persona-matrix-eval',
+    });
+    const exampleMetadata = experiment.datasets[0].examples[0].metadata;
+    expect(exampleMetadata).not.toHaveProperty('agentProfile');
+    expect(exampleMetadata).toEqual(toDatasetExample(baseExample).metadata);
+  });
+
+  it('gives the parity agent its own dataset name, suite and per-example profile', async () => {
+    const experiment = await captureExperiment('chrysalis-parity');
+    expect(experiment.datasets[0].name).toBe(
+      'security: security-persona-matrix (chrysalis-parity)'
+    );
+    expect(experiment.metadata).toMatchObject({
+      suite: 'security-persona-matrix-chrysalis-parity',
+      agent_profile: 'chrysalis-parity',
+    });
+    expect(experiment.datasets[0].examples[0].metadata).toMatchObject({
+      agentProfile: 'chrysalis-parity',
+    });
   });
 });

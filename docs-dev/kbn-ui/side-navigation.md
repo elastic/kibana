@@ -176,5 +176,5 @@ export const navigationItems = {
 See [Development](index.md#kbn-ui-development) for the shared Storybook and docs preview. Run this package's tests with:
 
 ```bash
-yarn test:jest src/platform/kbn-ui/side-navigation
+pnpm test:jest src/platform/kbn-ui/side-navigation
 ```

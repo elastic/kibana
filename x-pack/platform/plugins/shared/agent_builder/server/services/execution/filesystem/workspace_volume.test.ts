@@ -138,6 +138,31 @@ describe('WorkspaceVolume', () => {
   });
 
   describe('flush', () => {
+    it('loads the persisted workspace but never writes it back when persistence is off', async () => {
+      const client = mockWorkspaceClient();
+      client.load.mockResolvedValueOnce(
+        persistedDoc({
+          '/workspace/notes.txt': {
+            content: Buffer.from('hi').toString('base64'),
+            mode: 0o644,
+            mtime: '2025-01-01T00:00:00.000Z',
+          },
+        })
+      );
+      const v = new WorkspaceVolume({
+        workspaceClient: client,
+        initialWorkspaceId: 'ws-scratch',
+        persist: false,
+      });
+      await v.load();
+      expect(await v.getFilesystem().readFile('/notes.txt')).toBe('hi');
+
+      await v.getFilesystem().writeFile('/notes.txt', 'changed');
+      await v.flush();
+
+      expect(client.save).not.toHaveBeenCalled();
+    });
+
     it('is a no-op when no workspaceId is set', async () => {
       const client = mockWorkspaceClient();
       const v = new WorkspaceVolume({ workspaceClient: client });

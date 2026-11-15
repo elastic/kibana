@@ -6,7 +6,6 @@
  */
 
 import type { Subject } from 'rxjs';
-import type { ObjectType } from '@kbn/config-schema';
 import type {
   RequestHandler,
   RouteConfig,
@@ -59,10 +58,11 @@ export interface UMServerRoute<T> {
 
 /**
  * Merges basic uptime route properties with the route config type
- * provided by Kibana core.
+ * provided by Kibana core. `any` (not config-schema `ObjectType`) so `validate`
+ * can take zod schemas — core's HTTP router already accepts them.
  */
 export type UMRouteDefinition<T> = UMServerRoute<T> &
-  Omit<RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>, 'security'> & {
+  Omit<RouteConfig<any, any, any, RouteMethod>, 'security'> & {
     security?: RouteSecurity;
   };
 
@@ -72,7 +72,7 @@ export type UMRouteDefinition<T> = UMServerRoute<T> &
  * to successfully interact with the Kibana platform.
  */
 export type UMKibanaRoute = UMRouteDefinition<
-  RequestHandler<ObjectType, ObjectType, ObjectType, UptimeRequestHandlerContext>
+  RequestHandler<any, any, any, UptimeRequestHandlerContext>
 >;
 
 export type SyntheticsRestApiRouteFactory<

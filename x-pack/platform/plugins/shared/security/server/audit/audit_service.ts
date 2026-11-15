@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map, shareReplay } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilKeyChanged,
+  map,
+  shareReplay,
+  startWith,
+  Subject,
+  take,
+} from 'rxjs';
 
 import type {
   HttpServiceSetup,
   KibanaRequest,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
   Logger,
   LoggerContextConfigInput,
   LoggingServiceSetup,
   StatusServiceSetup,
 } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
@@ -51,6 +63,13 @@ interface AuditServiceSetupParams {
     request: KibanaRequest
   ): ReturnType<SecurityPluginSetup['authc']['getCurrentUser']> | undefined;
 
+  /**
+   * Identifies a fake request minted for a service account, without I/O. Fake requests never pass
+   * through the authenticator, so this is the only way their events can name an actor. Defaults to
+   * identifying none.
+   */
+  getFakeRequestPrincipal?(request: KibanaRequest): AuthenticatedPrincipal | null;
+
   getSID(request: KibanaRequest): Promise<string | undefined>;
 
   getSpaceId(
@@ -76,11 +95,24 @@ export class AuditService {
     status,
     isServerless = false,
     getCurrentUser,
+    getFakeRequestPrincipal = () => null,
     getSID,
     getSpaceId,
     recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
     const auditLogPath = config.enabled ? getAuditLogPath(config.appender) : undefined;
+
+    const runtimeWriteAccess$ = new Subject<AuditLogWriteAccess>();
+    const onWriteError = auditLogPath
+      ? ({ path, code, reason }: LogFileWriteError) =>
+          runtimeWriteAccess$.next({
+            granted: false,
+            path,
+            code,
+            reason,
+            checkedAt: new Date().toISOString(),
+          })
+      : undefined;
 
     const probed$ = license.features$.pipe(
       distinctUntilKeyChanged('allowAuditLogging'),
@@ -94,8 +126,19 @@ export class AuditService {
       shareReplay(1)
     );
 
+    const state$ = combineLatest([
+      probed$,
+      runtimeWriteAccess$.pipe(take(1), startWith(undefined)),
+    ]).pipe(
+      map(([{ features, writeAccess }, runtimeFailure]) => ({
+        features,
+        writeAccess: features.allowAuditLogging ? runtimeFailure ?? writeAccess : writeAccess,
+      })),
+      shareReplay(1)
+    );
+
     const writeAccess$ = auditLogPath
-      ? probed$.pipe(map(({ writeAccess }) => writeAccess))
+      ? state$.pipe(map(({ writeAccess }) => writeAccess))
       : undefined;
 
     // Report the plugin as degraded while the audit log cannot be written, so the lost audit
@@ -104,9 +147,9 @@ export class AuditService {
 
     // Configure logging during setup and when the license changes
     logging.configure(
-      probed$.pipe(
+      state$.pipe(
         map(({ features, writeAccess }) =>
-          createLoggingConfig(config, isServerless, writeAccess)(features)
+          createLoggingConfig(config, isServerless, writeAccess, onWriteError)(features)
         )
       )
     );
@@ -157,23 +200,40 @@ export class AuditService {
         }
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
+        // Resolved before the first await. Callers do not await `log`, so a workload can release
+        // its fake request before this resumes, and the registry no longer knows it after that.
+        const principal = user
+          ? getAuthenticatedPrincipal(user)
+          : request.isFakeRequest
+          ? getFakeRequestPrincipal(request)
+          : null;
+        const serviceAccountId =
+          principal?.type === 'service_account' ? principal.serviceAccountId : undefined;
         const sessionId = await getSID(request);
         const forwardedFor = getForwardedFor(request);
+        // The request user is the actor. An event may also name who the action was taken on, as
+        // ECS `user.target`, and that is the event's to keep.
+        const target = event.user?.target;
 
         log({
           ...event,
-          user:
-            (user && {
-              id: user.profile_uid,
-              name: user.username,
-              ...(user.email ? { email: user.email } : {}),
-              ...(user.full_name ? { full_name: user.full_name } : {}),
-              ...(includeUserDomain && user.authentication_realm?.name
-                ? { domain: user.authentication_realm.name }
-                : {}),
-              roles: user.roles as string[],
-            }) ||
-            event.user,
+          user: user
+            ? {
+                // A service account has no user profile, so its id stands in for one.
+                id: user.profile_uid ?? serviceAccountId,
+                name: user.username,
+                ...(user.email ? { email: user.email } : {}),
+                ...(user.full_name ? { full_name: user.full_name } : {}),
+                ...(includeUserDomain && user.authentication_realm?.name
+                  ? { domain: user.authentication_realm.name }
+                  : {}),
+                roles: user.roles as string[],
+                ...(target ? { target } : {}),
+              }
+            : serviceAccountId
+            ? // The registry knows only which account a fake request runs as, not its roles.
+              { id: serviceAccountId, name: serviceAccountId, ...(target ? { target } : {}) }
+            : event.user,
           kibana: {
             space_id: spaceId,
             session_id: sessionId,
@@ -217,7 +277,12 @@ export class AuditService {
 }
 
 export const createLoggingConfig =
-  (config: ConfigType['audit'], isServerless = false, writeAccess?: AuditLogWriteAccess) =>
+  (
+    config: ConfigType['audit'],
+    isServerless = false,
+    writeAccess?: AuditLogWriteAccess,
+    onWriteError?: LogFileWriteErrorHandler
+  ) =>
   (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
     if (writeAccess && !writeAccess.granted) {
       // Audit events are dropped rather than redirected to stdout on purpose: they carry usernames,
@@ -261,8 +326,13 @@ export const createLoggingConfig =
           }
         : baseAppender;
 
+    const auditTrailAppender =
+      onWriteError && (appender.type === 'file' || appender.type === 'rolling-file')
+        ? { ...appender, onWriteError }
+        : appender;
+
     return {
-      appenders: { auditTrailAppender: appender },
+      appenders: { auditTrailAppender },
       loggers: [
         {
           name: 'audit.ecs',

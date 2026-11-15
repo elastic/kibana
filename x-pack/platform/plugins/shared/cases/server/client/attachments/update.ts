@@ -7,29 +7,24 @@
 
 import Boom from '@hapi/boom';
 
-import { UnifiedAttachmentPatchRequestRt } from '../../../common/types/api';
+import { UnifiedAttachmentPutRequestSchema } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
-import type { Case } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import type { Case, UnifiedAttachment } from '../../../common/types/domain';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
+import { flattenAttachmentSavedObject } from '../../common/utils';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
-import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 
-/**
- * Update an attachment.
- *
- * @ignore
- */
-export async function update(
+const replaceAttachment = async (
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
-): Promise<Case> {
+): Promise<CaseCommentModel> => {
   const {
     services: { attachmentService, userActionService },
     logger,
@@ -38,12 +33,10 @@ export async function update(
   } = clientArgs;
 
   try {
-    const {
-      id: queryCommentId,
-      version: queryCommentVersion,
-      ...queryRestAttributes
-    } = decodeWithExcessOrThrow(UnifiedAttachmentPatchRequestRt)(queryParams);
-    decodeCommentRequestV2(queryRestAttributes, unifiedAttachmentTypeRegistry);
+    const { id: queryCommentId, ...putRequest } = queryParams;
+    const { version: queryCommentVersion, ...queryRestAttributes } = decodeWithExcessOrThrowZod(
+      UnifiedAttachmentPutRequestSchema
+    )(putRequest);
 
     await validateMaxUserActions({
       caseId: caseID,
@@ -51,10 +44,7 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    // Also enforce registry registration and the unified zod schema for
-    // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
-    // paths so PATCH stays in sync with POST.
-    validateRegisteredAttachments({
+    validateUnifiedAttachments({
       query: queryRestAttributes,
       unifiedAttachmentTypeRegistry,
     });
@@ -64,7 +54,7 @@ export async function update(
     });
 
     if (myComment == null) {
-      throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
+      throw Boom.notFound(`This attachment ${queryCommentId} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
@@ -82,46 +72,64 @@ export async function update(
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
     }
 
-    if (
-      isCommentRequestTypeExternalReference(myComment.attributes) &&
-      isCommentRequestTypeExternalReference(queryRestAttributes) &&
-      myComment.attributes.externalReferenceStorage.type !==
-        queryRestAttributes.externalReferenceStorage.type
-    ) {
-      throw Boom.badRequest(`You cannot change the storage type of an external reference comment.`);
-    }
-
     const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
     if (caseRef == null || (caseRef != null && caseRef.id !== model.savedObject.id)) {
       throw Boom.notFound(
-        `This comment ${queryCommentId} does not exist in ${model.savedObject.id}).`
+        `This attachment ${queryCommentId} does not exist in case ${model.savedObject.id}.`
       );
     }
 
     if (queryCommentVersion !== myComment.version) {
       throw Boom.conflict(
-        'This case has been updated. Please refresh before saving additional updates.'
+        'This attachment has been updated. Please refresh before saving additional updates.'
       );
     }
 
     const updatedDate = new Date().toISOString();
 
-    const updatedModel = await model.updateComment({
+    return await model.updateComment({
       updateRequest: {
         id: queryCommentId,
         version: queryCommentVersion,
         ...queryRestAttributes,
       },
       updatedAt: updatedDate,
-      owner: myComment.attributes.owner,
+      currentAttachment: myComment,
     });
-
-    return await updatedModel.encodeWithComments();
   } catch (error) {
     throw createCaseError({
-      message: `Failed to patch comment case id: ${caseID}: ${error}`,
+      message: `Failed to replace attachment case id: ${caseID}: ${error}`,
       error,
       logger,
     });
   }
-}
+};
+
+/**
+ * Full replace of an attachment. Returns the updated attachment.
+ */
+export const update = async (
+  updateArgs: UpdateArgs,
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment> => {
+  await replaceAttachment(updateArgs, clientArgs);
+
+  // The update response only has the written attributes, so read the full attachment back.
+  const updatedAttachment = await clientArgs.services.attachmentService.getter.get({
+    savedObjectId: updateArgs.updateRequest.id,
+  });
+
+  return toUnifiedAttachment(flattenAttachmentSavedObject(updatedAttachment));
+};
+
+/**
+ * Full replace of an attachment. Returns the case with all its attachments.
+ */
+export const updateAndGetCase = async (
+  updateArgs: UpdateArgs,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const model = await replaceAttachment(updateArgs, clientArgs);
+
+  return model.encodeWithComments();
+};

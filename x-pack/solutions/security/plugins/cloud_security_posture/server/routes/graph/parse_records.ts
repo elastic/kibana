@@ -16,8 +16,8 @@ import type {
   EdgeDataModel,
   EntityNodeDataModel,
   GraphResponse,
-  GroupNodeDataModel,
-  LabelNodeDataModel,
+  ConnectorGroupNodeDataModel,
+  EventNodeDataModel,
   NodeDataModel,
   NodeDocumentDataModel,
   RelationshipNodeDataModel,
@@ -30,18 +30,23 @@ import {
   type RelationshipEdge,
   type RelationshipEsqlRow,
   type EntityRecord,
+  type RiskScoreRange,
+  type AssetCriticalityCount,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
 import {
-  transformEntityTypeToIconAndShape,
+  getEntityTypeIcon,
   compareConnectorNodes,
   hashIds,
   addValuesToSet,
   filterDocDataToIds,
   rebuildDocData,
+  aggregateRiskScore,
+  aggregateAssetCriticality,
 } from './utils';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
+import { isKnownAssetCriticalityLevel } from './asset_criticality_levels';
 
 interface ConnectorEdges {
   source: string;
@@ -65,7 +70,7 @@ interface ParseContext {
 }
 
 interface NodeVisualProps {
-  shape: EntityNodeDataModel['shape'];
+  kind: EntityNodeDataModel['kind'];
   label?: EntityNodeDataModel['label'];
   tag?: EntityNodeDataModel['tag'];
   icon?: EntityNodeDataModel['icon'];
@@ -125,6 +130,14 @@ export const parseRecords = (
           entitySubType: entity.sub_type,
           entityName: entity.name,
           docData: entity.docData ? castArray(entity.docData) : [],
+          // A standalone entity node always represents exactly one entity, so the range
+          // collapses to a single value and the distribution to a single entry.
+          riskScore:
+            entity.riskScore != null ? { min: entity.riskScore, max: entity.riskScore } : undefined,
+          assetCriticality:
+            entity.assetCriticality != null && isKnownAssetCriticalityLevel(entity.assetCriticality)
+              ? [{ level: entity.assetCriticality, count: 1 }]
+              : undefined,
         },
         ctx.logger
       );
@@ -149,22 +162,19 @@ export const parseRecords = (
 };
 
 const deriveEntityAttributesFromType = (entityGroupType: string): NodeVisualProps => {
-  const mappedProps: Partial<NodeVisualProps> = {
-    shape: 'rectangle',
+  const mappedProps: NodeVisualProps = {
+    kind: 'entity',
   };
 
   if (entityGroupType) {
-    const { icon, shape } = transformEntityTypeToIconAndShape(entityGroupType);
+    const icon = getEntityTypeIcon(entityGroupType);
     if (icon) {
       mappedProps.icon = icon;
-    }
-    if (shape) {
-      mappedProps.shape = shape;
     }
     mappedProps.tag = entityGroupType;
   }
 
-  return mappedProps as NodeVisualProps;
+  return mappedProps;
 };
 
 /**
@@ -219,10 +229,22 @@ const createEntityNode = (
     entityName?: string | string[] | null;
     docData?: Array<string | null> | string;
     hostIps?: string[];
+    riskScore?: RiskScoreRange;
+    assetCriticality?: AssetCriticalityCount[];
   },
   logger?: Logger
 ): void => {
-  const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
+  const {
+    nodeId,
+    idsCount,
+    entityType,
+    entitySubType,
+    entityName,
+    docData,
+    hostIps,
+    riskScore,
+    assetCriticality,
+  } = params;
   const EXPAND_DOT_NOTATION = false;
 
   if (nodesMap[nodeId] !== undefined) return;
@@ -256,6 +278,8 @@ const createEntityNode = (
     ...deriveEntityAttributesFromType(resolvedType),
     ...(idsCount > 1 ? { count: idsCount } : {}),
     ...(hostIps && hostIps.length > 0 ? { ips: hostIps } : {}),
+    ...(riskScore ? { riskScore } : {}),
+    ...(assetCriticality && assetCriticality.length > 0 ? { assetCriticality } : {}),
   };
 };
 
@@ -275,6 +299,8 @@ const createGroupedActorAndTargetNodes = (
     actorEntitySubType,
     actorEntityName,
     actorHostIps,
+    actorRiskScore,
+    actorAssetCriticality,
     targetNodeId,
     targetIdsCount,
     targetsDocData,
@@ -282,6 +308,8 @@ const createGroupedActorAndTargetNodes = (
     targetEntitySubType,
     targetEntityName,
     targetHostIps,
+    targetRiskScore,
+    targetAssetCriticality,
   } = record;
 
   // Create actor entity node
@@ -295,6 +323,8 @@ const createGroupedActorAndTargetNodes = (
       entityName: actorEntityName,
       docData: actorsDocData,
       hostIps: actorHostIps ? castArray(actorHostIps) : [],
+      riskScore: actorRiskScore,
+      assetCriticality: actorAssetCriticality,
     },
     logger
   );
@@ -313,6 +343,8 @@ const createGroupedActorAndTargetNodes = (
         entityName: targetEntityName,
         docData: targetsDocData,
         hostIps: targetHostIps ? castArray(targetHostIps) : [],
+        riskScore: targetRiskScore,
+        assetCriticality: targetAssetCriticality,
       },
       logger
     );
@@ -333,9 +365,9 @@ const createGroupedActorAndTargetNodes = (
   };
 };
 
-const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNodeDataModel => {
+const createEventNode = (logger: Logger | undefined, record: EventEdge): EventNodeDataModel => {
   const {
-    labelNodeId,
+    eventNodeId,
     action,
     docs,
     isOrigin,
@@ -348,7 +380,7 @@ const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNo
     sourceCountryCodes,
   } = record;
 
-  const labelId = `label(${action})ln(${labelNodeId})oe(${isOrigin ? 1 : 0})oa(${
+  const labelId = `label(${action})ln(${eventNodeId})oe(${isOrigin ? 1 : 0})oa(${
     isOriginAlert ? 1 : 0
   })`;
   const color =
@@ -362,7 +394,7 @@ const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNo
     id: labelId,
     label: action,
     color,
-    shape: 'label',
+    kind: 'event',
     documentsData: parseDocumentsData(logger, docs),
     count: badge,
     ...(uniqueEventsCount > 0 ? { uniqueEventsCount } : {}),
@@ -373,7 +405,7 @@ const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNo
 };
 
 /**
- * Unified function to process connector nodes (labels and relationships).
+ * Unified function to process connector nodes (events and relationships).
  * Adds the node to nodesMap if new, and accumulates edges in connectorEdges.
  */
 const processConnectorNode = (
@@ -381,7 +413,7 @@ const processConnectorNode = (
   nodeData: {
     sourceId: string;
     targetId: string;
-    connectorNode: LabelNodeDataModel | RelationshipNodeDataModel;
+    connectorNode: EventNodeDataModel | RelationshipNodeDataModel;
   }
 ) => {
   const { nodesMap, connectorEdges } = context;
@@ -420,12 +452,12 @@ const emitAPINodesLimitMessage = (context: ParseContext) => {
 
 const processEventRecord = (record: EventEdge, context: ParseContext) => {
   const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
-  const labelNode = createLabelNode(context.logger, record);
+  const eventNode = createEventNode(context.logger, record);
 
   processConnectorNode(context, {
     sourceId: actorId,
     targetId,
-    connectorNode: labelNode,
+    connectorNode: eventNode,
   });
 };
 
@@ -445,7 +477,7 @@ const createRelationshipNode = (
   return {
     id: `rel(${relationshipNodeId})`,
     label: getRelationshipLabel(relationship),
-    shape: 'relationship',
+    kind: 'relationship',
   };
 };
 
@@ -464,6 +496,8 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
       entityName: record.actorEntityName,
       docData: record.actorsDocData,
       hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
+      riskScore: record.actorRiskScore,
+      assetCriticality: record.actorAssetCriticality,
     },
     context.logger
   );
@@ -478,6 +512,8 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
       entityName: record.targetEntityName,
       docData: record.targetsDocData,
       hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
+      riskScore: record.targetRiskScore,
+      assetCriticality: record.targetAssetCriticality,
     },
     context.logger
   );
@@ -495,13 +531,13 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
   const groupNodes: NodeDataModel[] = [];
-  const connectorNodes: (LabelNodeDataModel | RelationshipNodeDataModel)[] = [];
+  const connectorNodes: (EventNodeDataModel | RelationshipNodeDataModel)[] = [];
   const otherNodes: NodeDataModel[] = [];
 
   for (const node of Object.values(nodesMap)) {
-    if (node.shape === 'group') {
+    if (node.kind === 'connectorGroup') {
       groupNodes.push(node);
-    } else if (node.shape === 'relationship' || node.shape === 'label') {
+    } else if (node.kind === 'relationship' || node.kind === 'event') {
       connectorNodes.push(node);
     } else {
       otherNodes.push(node);
@@ -514,7 +550,7 @@ const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
 };
 
 /**
- * Sort edges so relationship edges come before label edges.
+ * Sort edges so relationship edges come before event edges.
  * This affects Dagre layout which positions nodes based on edge order.
  */
 const sortEdges = (
@@ -523,37 +559,41 @@ const sortEdges = (
 ): EdgeDataModel[] => {
   const edges = Object.values(edgesMap);
 
-  // Helper to get the connector node shape for an edge
-  const getConnectorShape = (edge: EdgeDataModel): 'relationship' | 'label' | 'other' => {
+  // Helper to get the connector node kind for an edge
+  const getConnectorKind = (edge: EdgeDataModel): ConnectorNodeType | 'other' => {
     // Check if target is a connector node
     const targetNode = nodesMap[edge.target];
-    if (targetNode?.shape === 'relationship') return 'relationship';
-    if (targetNode?.shape === 'label') return 'label';
+    if (targetNode?.kind === 'relationship') return 'relationship';
+    if (targetNode?.kind === 'event') return 'event';
 
     // Check if source is a connector node
     const sourceNode = nodesMap[edge.source];
-    if (sourceNode?.shape === 'relationship') return 'relationship';
-    if (sourceNode?.shape === 'label') return 'label';
+    if (sourceNode?.kind === 'relationship') return 'relationship';
+    if (sourceNode?.kind === 'event') return 'event';
 
     return 'other';
   };
 
   return edges.sort((a, b) => {
-    const shapeA = getConnectorShape(a);
-    const shapeB = getConnectorShape(b);
+    const kindA = getConnectorKind(a);
+    const kindB = getConnectorKind(b);
 
-    // Priority: relationship > label > other
-    const priority = { relationship: 0, label: 1, other: 2 };
-    const shapeDiff = priority[shapeA] - priority[shapeB];
+    // Priority: relationship > event > other
+    const priority: Record<ConnectorNodeType | 'other', number> = {
+      relationship: 0,
+      event: 1,
+      other: 2,
+    };
+    const kindDiff = priority[kindA] - priority[kindB];
 
     // If same priority, sort alphabetically by edge ID for deterministic ordering
-    if (shapeDiff !== 0) return shapeDiff;
+    if (kindDiff !== 0) return kindDiff;
     return a.id.localeCompare(b.id);
   });
 };
 
 /**
- * Helper to process either label or relationship connector groups.
+ * Helper to process either event or relationship connector groups.
  */
 const processConnectorGroup = (
   groupingKey: string,
@@ -567,7 +607,7 @@ const processConnectorGroup = (
     const connectorId = connectorIds[0];
     const edges = connectorEdgesMap[connectorId];
 
-    // A single label can fan out to multiple targets (e.g., one action affecting multiple entities)
+    // A single event can fan out to multiple targets (e.g., one action affecting multiple entities)
     // Create edges for all source-target pairs
     edges.forEach((edge) => {
       connectEntitiesAndConnectorNode(
@@ -581,15 +621,15 @@ const processConnectorGroup = (
     });
   } else {
     // Create group node for multiple connectors
-    const groupNode: GroupNodeDataModel = {
+    const groupNode: ConnectorGroupNodeDataModel = {
       id: `grp(${groupingKey})`,
-      shape: 'group',
+      kind: 'connectorGroup',
     };
     nodesMap[groupNode.id] = groupNode;
 
     let groupEdgesColor: EdgeColor = 'subdued';
 
-    // Get all unique source-target pairs from all labels in this group
+    // Get all unique source-target pairs from all events in this group
     const firstConnectorEdges = connectorEdgesMap[connectorIds[0]];
 
     // Order of creation matters when using dagre layout, first create edges to the group node,
@@ -608,7 +648,7 @@ const processConnectorGroup = (
 
     connectorIds.forEach((connectorId) => {
       const node = nodesMap[connectorId];
-      (node as Writable<LabelNodeDataModel | RelationshipNodeDataModel>).parentId = groupNode.id;
+      (node as Writable<EventNodeDataModel | RelationshipNodeDataModel>).parentId = groupNode.id;
 
       connectEntitiesAndConnectorNode(
         edgesMap,
@@ -619,8 +659,8 @@ const processConnectorGroup = (
         connectorEdgesMap[connectorId][0].edgeType
       );
 
-      // Update group color if any label node is danger
-      if (connectorType === 'label' && (node as LabelNodeDataModel).color === 'danger') {
+      // Update group color if any event node is danger
+      if (connectorType === 'event' && (node as EventNodeDataModel).color === 'danger') {
         groupEdgesColor = 'danger';
       }
     });
@@ -630,9 +670,9 @@ const processConnectorGroup = (
 const createEdgesAndGroups = (context: ParseContext) => {
   const { edgesMap, nodesMap, connectorEdges } = context;
 
-  // Build grouping for connector nodes (labels and relationships)
+  // Build grouping for connector nodes (events and relationships)
   // Nodes with same source-target pairs get stacked together
-  const labelGrouping: Record<string, string[]> = {};
+  const eventGrouping: Record<string, string[]> = {};
   const relationshipGrouping: Record<string, string[]> = {};
 
   Object.entries(connectorEdges).forEach(([connectorNodeId, edges]) => {
@@ -645,12 +685,12 @@ const createEdgesAndGroups = (context: ParseContext) => {
     const groupingKey = createHash('sha256').update(edgePairs.join(',')).digest('hex');
 
     // Build grouping maps by node type
-    if (node.shape === 'label') {
-      if (!labelGrouping[groupingKey]) {
-        labelGrouping[groupingKey] = [];
+    if (node.kind === 'event') {
+      if (!eventGrouping[groupingKey]) {
+        eventGrouping[groupingKey] = [];
       }
-      labelGrouping[groupingKey].push(connectorNodeId);
-    } else if (node.shape === 'relationship') {
+      eventGrouping[groupingKey].push(connectorNodeId);
+    } else if (node.kind === 'relationship') {
       if (!relationshipGrouping[groupingKey]) {
         relationshipGrouping[groupingKey] = [];
       }
@@ -658,9 +698,9 @@ const createEdgesAndGroups = (context: ParseContext) => {
     }
   });
 
-  // Process label nodes (handles stacking)
-  Object.entries(labelGrouping).forEach(([groupingKey, nodeIds]) => {
-    processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'label');
+  // Process event nodes (handles stacking)
+  Object.entries(eventGrouping).forEach(([groupingKey, nodeIds]) => {
+    processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'event');
   });
 
   // Process relationship nodes (handles stacking)
@@ -696,8 +736,8 @@ const connectNodes = (
   const sourceNode = nodesMap[sourceNodeId];
   const targetNode = nodesMap[targetNodeId];
   const color =
-    (sourceNode.shape === 'label' && sourceNode.color === 'danger') ||
-    (targetNode.shape === 'label' && targetNode.color === 'danger')
+    (sourceNode.kind === 'event' && sourceNode.color === 'danger') ||
+    (targetNode.kind === 'event' && targetNode.color === 'danger')
       ? 'danger'
       : 'subdued';
 
@@ -876,7 +916,7 @@ const docIdsForTargets = (
  * column, and records the actor/target IDs that belong to this group from this row.
  * Doc id / doc / doc-data columns are restricted to the documents that referenced this group's
  * targets (via targetDocMap) so that a STATS row shared across multiple target-type groups keeps
- * each group's documents, counts, and label node separate — matching a targetEntityId group key.
+ * each group's documents, counts, and event node separate — matching a targetEntityId group key.
  * Doc id / doc-data columns drop the empty-string sentinel; source IP / country keep
  * the historical null-only guard.
  */
@@ -1064,11 +1104,11 @@ export const regroupEvents = (
         : hashIds(targetEntityIds);
 
     const docIds = [...group.docIds];
-    // Label node is keyed on this group's own documents (already restricted, via targetDocMap, to
+    // Event node is keyed on this group's own documents (already restricted, via targetDocMap, to
     // the docs that referenced this group's targets). Two target-type groups that share the exact
-    // same documents therefore share one label node that fans out to both targets; groups backed
-    // by different documents get separate label nodes — matching a targetEntityId group key.
-    const labelNodeId = docIds.length === 1 ? docIds[0] : hashIds(docIds);
+    // same documents therefore share one event node that fans out to both targets; groups backed
+    // by different documents get separate event nodes — matching a targetEntityId group key.
+    const eventNodeId = docIds.length === 1 ? docIds[0] : hashIds(docIds);
 
     const actorNames = actorEntityIds
       .map((id) => enrichmentMap.get(id)?.name)
@@ -1096,7 +1136,7 @@ export const regroupEvents = (
       isOrigin: group.isOrigin,
       isOriginAlert: group.isOriginAlert,
       pinned: group.pinned,
-      labelNodeId,
+      eventNodeId,
       docs: [...group.docs],
       sourceIps: sourceIps.length > 0 ? sourceIps : undefined,
       sourceCountryCodes: sourceCountryCodes.length > 0 ? sourceCountryCodes : undefined,
@@ -1107,6 +1147,8 @@ export const regroupEvents = (
       actorEntityName:
         actorNames.length === 0 ? null : actorNames.length === 1 ? actorNames[0] : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorRiskScore: aggregateRiskScore(actorEntityIds, enrichmentMap),
+      actorAssetCriticality: aggregateAssetCriticality(actorEntityIds, enrichmentMap),
       actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetEntityIds.length,
@@ -1115,6 +1157,8 @@ export const regroupEvents = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetRiskScore: aggregateRiskScore(targetEntityIds, enrichmentMap),
+      targetAssetCriticality: aggregateAssetCriticality(targetEntityIds, enrichmentMap),
       targetsDocData: [...group.targetsDocData],
     };
   });
@@ -1336,6 +1380,8 @@ export const regroupRelationships = (
           ? actorNames[0]
           : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorRiskScore: aggregateRiskScore(actorIds, enrichmentMap),
+      actorAssetCriticality: aggregateAssetCriticality(actorIds, enrichmentMap),
       actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetIds.length,
@@ -1344,6 +1390,8 @@ export const regroupRelationships = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetRiskScore: aggregateRiskScore(targetIds, enrichmentMap),
+      targetAssetCriticality: aggregateAssetCriticality(targetIds, enrichmentMap),
       targetsDocData: [...group.targetsDocData],
       relationship: group.relationship,
       relationshipNodeId,
@@ -1354,10 +1402,14 @@ export const regroupRelationships = (
 };
 
 /**
- * Rebuilds targetsDocData for each relationship using entity store enrichment.
- * actorsDocData is intentionally left unchanged: relationship actor docData is already
- * built inline in the ES|QL query with full entity metadata (the actor IS the
- * entity-store source row). Only target entities need TypeScript-side enrichment.
+ * Rebuilds actorsDocData and targetsDocData for each relationship using entity store
+ * enrichment.
+ *
+ * The relationship query builds actor docData inline (the actor IS the entity-store source
+ * row), but it is still rebuilt here so the actor side gets the same per-entity treatment as
+ * every other path — notably `sourceFields` unioning and the unknown-criticality filtering
+ * applied in `rebuildDocData`. Without this, relationship actors were the only entities in
+ * the API missing risk score / criticality under `documentsData`.
  */
 export const enrichRelationshipDocData = (
   relationships: RelationshipEdge[],
@@ -1365,13 +1417,11 @@ export const enrichRelationshipDocData = (
 ): RelationshipEdge[] => {
   return relationships.map((rel) => ({
     ...rel,
+    actorsDocData: rebuildDocData(rel.actorsDocData, enrichmentMap),
     targetsDocData: rebuildDocData(rel.targetsDocData, enrichmentMap),
   }));
 };
 
-/**
- * Applies enrichment to entity records from the entity store.
- */
 export const enrichEntityRecords = (
   records: EntityRecord[],
   enrichmentMap: Map<string, EntityEnrichmentFields>
@@ -1384,6 +1434,11 @@ export const enrichEntityRecords = (
       name: enrichment.name ?? record.name,
       type: enrichment.type ?? record.type,
       sub_type: enrichment.subType ?? record.sub_type,
+      // Rebuilt through the shared path so this docData gets the same treatment as every
+      // other entity document — in particular the unknown-criticality filtering applied via
+      // the enrichment map. The entities query serializes these fields itself, so this is a
+      // normalization pass rather than the only source of them.
+      docData: record.docData ? rebuildDocData(record.docData, enrichmentMap)[0] : record.docData,
     };
   });
 };

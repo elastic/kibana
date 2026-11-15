@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitForeachNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { ExitForeachNode } from '@kbn/workflows/graph';
 import type { ForeachStepState } from './types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
@@ -22,7 +23,7 @@ export class ExitForeachNodeImpl implements NodeImplementation {
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
     private stepIoService: StepIoService,
-    private workflowGraph: WorkflowGraph
+    private workflowGraph: RuntimeGraphView
   ) {}
 
   public run(): void {

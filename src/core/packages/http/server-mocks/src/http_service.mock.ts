@@ -224,6 +224,8 @@ const createInternalSetupContractMock = () => {
     }),
     registerRouterAfterListening: jest.fn(),
     rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,
+    setSelfClientUnauthorizedErrorHandler: jest.fn(),
+    setSelfClientCredentialRefresher: jest.fn(),
   });
 
   mock.authRequestHeaders.get.mockReturnValue({ authorization: 'authorization-header' });
@@ -248,6 +250,8 @@ const createSetupContractMock = <
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     getServerInfo: internalMock.getServerInfo,
+    setSelfClientUnauthorizedErrorHandler: internalMock.setSelfClientUnauthorizedErrorHandler,
+    setSelfClientCredentialRefresher: internalMock.setSelfClientCredentialRefresher,
     staticAssets: lazyObject({
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
       prependPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
@@ -282,6 +286,8 @@ const createInternalStartContractMock = () => {
     staticAssets: createInternalStaticAssetsMock(basePath),
     isListening: jest.fn(),
     setRedactedSessionIdGetter: jest.fn(),
+    setSelfClientUiamAttestationGetter: jest.fn(),
+    setSelfClientOwnClientAuthenticationCheck: jest.fn(),
   };
 
   mock.isListening.mockReturnValue(true);

@@ -146,7 +146,6 @@ describe('Config schema', () => {
     expect(() => {
       config.schema.validate({
         iacProvisioner: {
-          enabled: true,
           api: {
             url: 'https://iac-provisioner.api.url',
             tls: {
@@ -164,7 +163,6 @@ describe('Config schema', () => {
     expect(() => {
       config.schema.validate({
         iacProvisioner: {
-          enabled: true,
           api: {
             url: 'https://iac-provisioner.api.url',
             tls: {

@@ -16,8 +16,10 @@ import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provid
 import { getTabsDisplayed } from '../../flyout_v2/ioc/main/tabs';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { DiscoverCellActions } from '../cell_actions';
+import type { FlyoutV2DocViewerStateProps } from '../../flyout_v2/shared/url_state/flyout_v2_doc_viewer_state_schema';
+import { FlyoutV2DocViewerStateSync } from '../flyout_v2_doc_viewer_state_sync';
 
-export interface IOCFlyoutOverviewTabProps {
+export interface IOCFlyoutOverviewTabProps extends FlyoutV2DocViewerStateProps {
   /**
    * The document record for the IOC indicator.
    */
@@ -56,6 +58,8 @@ export const IOCFlyoutOverviewTab = ({
   filter,
   onAddColumn,
   onRemoveColumn,
+  initialState,
+  onInitialStateChange,
 }: IOCFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -115,9 +119,16 @@ export const IOCFlyoutOverviewTab = ({
     services,
     store,
     children: (
-      <div css={{ 'padding-top': '1em' }}>
-        <Content tabs={tabs} selectedTabId={'overview'} />
-      </div>
+      <>
+        <FlyoutV2DocViewerStateSync
+          hit={hit}
+          initialState={initialState}
+          onInitialStateChange={onInitialStateChange}
+        />
+        <div css={{ 'padding-top': '1em' }}>
+          <Content tabs={tabs} selectedTabId={'overview'} />
+        </div>
+      </>
     ),
   });
 };

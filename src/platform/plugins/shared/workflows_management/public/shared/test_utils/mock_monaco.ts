@@ -21,6 +21,7 @@ export const createMockMonacoModel = (value: string): monaco.editor.ITextModel =
   const lines = value.split('\n');
   return {
     getValue: jest.fn(() => value),
+    getVersionId: jest.fn(() => 1),
     getLineContent: jest.fn((lineNum: number) => lines[lineNum - 1] ?? ''),
     getLineMaxColumn: jest.fn((lineNum: number) => (lines[lineNum - 1]?.length ?? 0) + 1),
     getLineCount: jest.fn(() => lines.length),
@@ -74,9 +75,14 @@ export const createMockMonacoEditor = (
   const lineCount = value.split('\n').length;
   const editor: monaco.editor.IStandaloneCodeEditor = {
     createDecorationsCollection: jest.fn(() => decorationsCollection),
+    addAction: jest.fn(() => ({ dispose: jest.fn() })),
     getModel: jest.fn(() => model),
+    getOption: jest.fn(),
+    onMouseDown: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChangeConfiguration: jest.fn(() => ({ dispose: jest.fn() })),
     onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
     onDidChangeModelContent: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChangeModel: jest.fn(() => ({ dispose: jest.fn() })),
     onDidScrollChange: jest.fn(() => ({ dispose: jest.fn() })),
     onDidLayoutChange: jest.fn(() => ({ dispose: jest.fn() })),
     getPosition: jest.fn(() => ({ lineNumber: 1, column: 1 })),

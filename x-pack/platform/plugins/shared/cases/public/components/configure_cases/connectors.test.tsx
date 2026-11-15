@@ -14,8 +14,8 @@ import { noConnectorsCasePermission, renderWithTestingProviders } from '../../co
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
 import userEvent from '@testing-library/user-event';
+import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
   typeof useApplicationCapabilities
@@ -74,9 +74,9 @@ describe('Connectors', () => {
   it('the connector is changed successfully', async () => {
     renderWithTestingProviders(<Connectors {...props} />);
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await new EuiSuperSelectTestHarness('dropdown-connectors').select(
+      'dropdown-connector-resilient-2'
+    );
 
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('resilient-2');
@@ -92,9 +92,9 @@ describe('Connectors', () => {
       />
     );
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getByTestId('dropdown-connector-no-connector'));
+    await new EuiSuperSelectTestHarness('dropdown-connectors').select(
+      'dropdown-connector-no-connector'
+    );
 
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('none');

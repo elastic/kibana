@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -12,7 +13,15 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import type { WorkflowEnablementApi } from './schedule';
 import { createFeedbackAnalysisScheduleService } from './schedule';
 
-const WORKFLOW_DOCUMENT_ID = `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-orders`;
+const DEFAULT_SPACE = 'default';
+
+const suffixFor = (aiIndexId: string, spaceId: string) =>
+  `${aiIndexId}-${createHash('sha256').update(spaceId).digest('hex').slice(0, 16)}`;
+
+const documentIdFor = (aiIndexId: string, spaceId: string) =>
+  `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${suffixFor(aiIndexId, spaceId)}`;
+
+const WORKFLOW_DOCUMENT_ID = documentIdFor('orders', DEFAULT_SPACE);
 
 describe('createFeedbackAnalysisScheduleService', () => {
   let client: jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install' | 'uninstall'>>;
@@ -42,13 +51,14 @@ describe('createFeedbackAnalysisScheduleService', () => {
   it('installs a per-index schedule when analysis is enabled', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true, schedule: { interval: '6h' } },
       request,
     });
 
     expect(client.install).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: 'default',
-      workflowIdSuffix: 'orders',
+      spaceId: DEFAULT_SPACE,
+      workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
       values: { aiIndexId: 'orders', intervalMinutes: 360 },
     });
     expect(client.uninstall).not.toHaveBeenCalled();
@@ -59,6 +69,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
     // Manager, so the configuration reads as scheduled while no run ever happens.
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true },
       request,
     });
@@ -66,7 +77,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
     expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
       WORKFLOW_DOCUMENT_ID,
       { enabled: true },
-      'default',
+      DEFAULT_SPACE,
       request
     );
   });
@@ -74,6 +85,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
   it('enables after installing, so there is a workflow to enable', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true },
       request,
     });
@@ -90,11 +102,13 @@ describe('createFeedbackAnalysisScheduleService', () => {
 
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true },
       request,
     });
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true },
       request: laterRequest,
     });
@@ -103,7 +117,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
     expect(workflowsManagement.updateWorkflow).toHaveBeenLastCalledWith(
       WORKFLOW_DOCUMENT_ID,
       { enabled: true },
-      'default',
+      DEFAULT_SPACE,
       laterRequest
     );
   });
@@ -116,6 +130,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
     await expect(
       withoutManagement.reconcile({
         aiIndexId: 'orders',
+        spaceId: DEFAULT_SPACE,
         feedbackAnalysis: { enabled: true },
         request,
       })
@@ -125,6 +140,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
   it('falls back to the default interval when none is configured', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true },
       request,
     });
@@ -138,13 +154,14 @@ describe('createFeedbackAnalysisScheduleService', () => {
   it('uninstalls when analysis is disabled', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: false, schedule: { interval: '1d' } },
       request,
     });
 
     expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: 'default',
-      workflowIdSuffix: 'orders',
+      spaceId: DEFAULT_SPACE,
+      workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
     });
     expect(client.install).not.toHaveBeenCalled();
   });
@@ -152,6 +169,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
   it('disables by uninstalling alone, which drops the trigger with the document', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: false },
       request,
     });
@@ -160,7 +178,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
   });
 
   it('treats a removed analysis block as disabled', async () => {
-    await service.reconcile({ aiIndexId: 'orders', request });
+    await service.reconcile({ aiIndexId: 'orders', spaceId: DEFAULT_SPACE, request });
 
     expect(client.uninstall).toHaveBeenCalled();
     expect(client.install).not.toHaveBeenCalled();
@@ -169,11 +187,13 @@ describe('createFeedbackAnalysisScheduleService', () => {
   it('reinstalls with the new interval when the schedule changes', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true, schedule: { interval: '1d' } },
       request,
     });
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true, schedule: { interval: '30m' } },
       request,
     });
@@ -187,6 +207,7 @@ describe('createFeedbackAnalysisScheduleService', () => {
   it('keeps an unparsable stored interval from scheduling nothing', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true, schedule: { interval: 'whenever' } },
       request,
     });
@@ -198,39 +219,86 @@ describe('createFeedbackAnalysisScheduleService', () => {
   });
 
   it('tears the schedule down when the AI index is deleted', async () => {
-    await service.remove({ aiIndexId: 'orders' });
+    await service.remove({ aiIndexId: 'orders', spaceId: DEFAULT_SPACE });
 
     expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
-      spaceId: 'default',
-      workflowIdSuffix: 'orders',
+      spaceId: DEFAULT_SPACE,
+      workflowIdSuffix: suffixFor('orders', DEFAULT_SPACE),
     });
   });
 
-  it('installs and uninstalls in the same space whichever space the write came from, since an AI index is global', async () => {
-    await service.reconcile({ aiIndexId: 'orders', feedbackAnalysis: { enabled: true }, request });
-    await service.reconcile({ aiIndexId: 'orders', feedbackAnalysis: { enabled: false }, request });
+  it('installs independent schedules per space for the same AI index id', async () => {
+    await service.reconcile({
+      aiIndexId: 'orders',
+      spaceId: 'default',
+      feedbackAnalysis: { enabled: true },
+      request,
+    });
+    await service.reconcile({
+      aiIndexId: 'orders',
+      spaceId: 'marketing',
+      feedbackAnalysis: { enabled: true },
+      request,
+    });
 
-    const [, installOptions] = client.install.mock.calls[0];
-    const [, uninstallOptions] = client.uninstall.mock.calls[0];
-
-    expect((installOptions as { spaceId: string }).spaceId).toBe('default');
-    expect((uninstallOptions as { spaceId: string }).spaceId).toBe('default');
-    expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
-      WORKFLOW_DOCUMENT_ID,
-      { enabled: true },
-      'default',
-      request
+    // The workflow document id is the ES `_id` and is not namespaced by space, so a suffix of
+    // just the AI index id would point both spaces at one document.
+    expect(client.install).toHaveBeenCalledTimes(2);
+    expect(client.install.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        spaceId: 'default',
+        workflowIdSuffix: suffixFor('orders', 'default'),
+      })
     );
+    expect(client.install.mock.calls[1][1]).toEqual(
+      expect.objectContaining({
+        spaceId: 'marketing',
+        workflowIdSuffix: suffixFor('orders', 'marketing'),
+      })
+    );
+    expect(workflowsManagement.updateWorkflow.mock.calls.map(([workflowId]) => workflowId)).toEqual(
+      [documentIdFor('orders', 'default'), documentIdFor('orders', 'marketing')]
+    );
+
+    await service.remove({ aiIndexId: 'orders', spaceId: 'marketing' });
+
+    expect(client.uninstall).toHaveBeenCalledTimes(1);
+    expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
+      spaceId: 'marketing',
+      workflowIdSuffix: suffixFor('orders', 'marketing'),
+    });
+  });
+
+  it('keeps hyphenated space and AI index ids from composing the same schedule', async () => {
+    await service.reconcile({
+      aiIndexId: 'c',
+      spaceId: 'a-b',
+      feedbackAnalysis: { enabled: true },
+      request,
+    });
+    await service.reconcile({
+      aiIndexId: 'b-c',
+      spaceId: 'a',
+      feedbackAnalysis: { enabled: true },
+      request,
+    });
+
+    const [first, second] = client.install.mock.calls.map(
+      ([, options]) => (options as { workflowIdSuffix: string }).workflowIdSuffix
+    );
+    expect(first).not.toEqual(second);
   });
 
   it('gives each AI index its own schedule', async () => {
     await service.reconcile({
       aiIndexId: 'orders',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true },
       request,
     });
     await service.reconcile({
       aiIndexId: 'customers',
+      spaceId: DEFAULT_SPACE,
       feedbackAnalysis: { enabled: true },
       request,
     });
@@ -239,9 +307,9 @@ describe('createFeedbackAnalysisScheduleService', () => {
       client.install.mock.calls.map(
         ([, options]) => (options as { workflowIdSuffix: string }).workflowIdSuffix
       )
-    ).toEqual(['orders', 'customers']);
+    ).toEqual([suffixFor('orders', DEFAULT_SPACE), suffixFor('customers', DEFAULT_SPACE)]);
     expect(workflowsManagement.updateWorkflow.mock.calls.map(([workflowId]) => workflowId)).toEqual(
-      [WORKFLOW_DOCUMENT_ID, `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-customers`]
+      [WORKFLOW_DOCUMENT_ID, documentIdFor('customers', DEFAULT_SPACE)]
     );
   });
 });

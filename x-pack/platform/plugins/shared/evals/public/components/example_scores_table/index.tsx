@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -15,6 +23,8 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiPagination,
   EuiSpacer,
   EuiText,
@@ -25,8 +35,10 @@ import {
 import { css } from '@emotion/css';
 import type {
   EvaluationExperimentDatasetExample,
+  EvaluationExperimentExamplePreview,
   EvaluationScoreDocument,
 } from '@kbn/evals-common';
+import { useExperimentExampleDetails } from '../../hooks/use_evals_api';
 import * as i18n from './translations';
 
 const formatScore = (score: number | null | undefined) =>
@@ -141,18 +153,24 @@ const splitScoreName = (scoreName: string): { evaluatorName: string; scoreLabel:
   };
 };
 
+/**
+ * A missing value counts as its own entry rather than being dropped, so a group that mixes
+ * scores carrying the attribute with scores that lack it cannot collapse onto the one value
+ * that happens to be present and label the others with it.
+ */
 const collectModelIds = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
-  new Set(
-    scores
-      .map((scoreDoc) => scoreDoc.evaluator.model?.id)
-      .filter((modelId): modelId is string => Boolean(modelId))
-  );
+  new Set(scores.map((scoreDoc) => scoreDoc.evaluator.model?.id ?? ''));
+
+const collectVersions = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
+  new Set(scores.map((scoreDoc) => scoreDoc.evaluator.version ?? ''));
 
 interface EvaluatorScoreGroup {
   evaluatorName: string;
   scores: EvaluationExperimentDatasetExample['scores'];
   /** Only set when the group's scores agree on one judge, so the group can label itself once. */
   sharedModelId?: string;
+  /** Only set when the group's scores agree on one definition, as they do outside a mid-run edit. */
+  sharedVersion?: string;
 }
 
 const groupScoresByEvaluator = (
@@ -172,9 +190,12 @@ const groupScoresByEvaluator = (
 
   return Array.from(groupsByName.values()).map((group) => {
     const [onlyModelId, ...otherModelIds] = collectModelIds(group.scores);
-    return otherModelIds.length === 0 && onlyModelId
-      ? { ...group, sharedModelId: onlyModelId }
-      : group;
+    const [onlyVersion, ...otherVersions] = collectVersions(group.scores);
+    return {
+      ...group,
+      ...(otherModelIds.length === 0 && onlyModelId ? { sharedModelId: onlyModelId } : {}),
+      ...(otherVersions.length === 0 && onlyVersion ? { sharedVersion: onlyVersion } : {}),
+    };
   });
 };
 
@@ -197,13 +218,208 @@ const JudgeLabel: React.FC<{ modelId: string }> = ({ modelId }) => (
   </EuiText>
 );
 
+/**
+ * Which definition produced the score. A user-defined evaluator can be edited after a run, so
+ * without this the numbers cannot be traced back to what was actually asked of the judge.
+ */
+const VersionLabel: React.FC<{ version: string }> = ({ version }) => (
+  <EuiToolTip content={i18n.getEvaluatorVersionTooltip(version)}>
+    <EuiBadge color="hollow" tabIndex={0}>
+      {i18n.getEvaluatorVersionLabel(version)}
+    </EuiBadge>
+  </EuiToolTip>
+);
+
+interface ExampleDetailsContext {
+  experimentId: string;
+  datasetId: string;
+  executionId?: string;
+  exampleId: string;
+  repetitionIndex: number;
+}
+
+const renderJsonPreview = (value: unknown) => {
+  if (value == null) {
+    return '-';
+  }
+
+  const serializedValue = JSON.stringify(value, null, 2);
+  if (!serializedValue) {
+    return '-';
+  }
+
+  return (
+    <EuiCodeBlock
+      // Table cell content is a flex container, so without an explicit width the block
+      // shrink-wraps the JSON and pulls its copy/expand controls in with it.
+      css={{ width: '100%' }}
+      overflowHeight={200}
+      language="json"
+      paddingSize="none"
+      transparentBackground
+      fontSize="s"
+      isCopyable
+    >
+      {serializedValue}
+    </EuiCodeBlock>
+  );
+};
+
+const PREVIEW_MAX_HEIGHT_PX = 200;
+const PREVIEW_FADE_HEIGHT_PX = 32;
+
+const previewDetailCss = css`
+  width: 100%;
+`;
+
+const previewFrameCss = css`
+  max-height: ${PREVIEW_MAX_HEIGHT_PX}px;
+  overflow: hidden;
+`;
+
+const previewFadeButtonCss = (backgroundColor: string, focusColor: string, overlap: boolean) => css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: ${PREVIEW_FADE_HEIGHT_PX}px;
+  margin: ${overlap ? -PREVIEW_FADE_HEIGHT_PX : 0}px 0 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(to bottom, transparent, ${backgroundColor});
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+
+  &:focus-visible {
+    outline: 2px solid ${focusColor};
+    outline-offset: -2px;
+  }
+`;
+
+const PreviewFadeButton: React.FC<{
+  field: 'input' | 'output';
+  expanded: boolean;
+  overlap: boolean;
+  onClick: () => void;
+}> = ({ field, expanded, overlap, onClick }) => {
+  const { euiTheme } = useEuiTheme();
+  const viewLabel =
+    field === 'input' ? i18n.VIEW_FULL_INPUT_BUTTON_LABEL : i18n.VIEW_FULL_OUTPUT_BUTTON_LABEL;
+  const hideLabel =
+    field === 'input' ? i18n.HIDE_FULL_INPUT_ARIA_LABEL : i18n.HIDE_FULL_OUTPUT_ARIA_LABEL;
+  const label = expanded ? hideLabel : viewLabel;
+
+  return (
+    <button
+      type="button"
+      aria-expanded={expanded}
+      aria-label={label}
+      onClick={onClick}
+      className={previewFadeButtonCss(euiTheme.colors.emptyShade, euiTheme.colors.primary, overlap)}
+    >
+      <EuiIcon
+        type={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+        size="m"
+        color="subdued"
+        aria-hidden={true}
+      />
+    </button>
+  );
+};
+
+const PreviewJsonDetail: React.FC<{
+  detailsContext: ExampleDetailsContext;
+  field: 'input' | 'output';
+  previews?: EvaluationExperimentExamplePreview[];
+}> = ({ detailsContext, field, previews }) => {
+  const [requested, setRequested] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [frameHeight, setFrameHeight] = useState(0);
+  const { experimentId, datasetId, executionId, exampleId, repetitionIndex } = detailsContext;
+  const serializedPreview = previews?.find(
+    (preview) => preview.repetition_index === repetitionIndex
+  )?.[field];
+  const { data, isLoading, error } = useExperimentExampleDetails(
+    experimentId,
+    datasetId,
+    exampleId,
+    repetitionIndex,
+    executionId,
+    { enabled: requested }
+  );
+
+  useLayoutEffect(() => {
+    const node = frameRef.current;
+    setFrameHeight(node?.scrollHeight ?? 0);
+  }, [serializedPreview?.content, expanded]);
+
+  const toggle = () => {
+    setRequested(true);
+    setExpanded((current) => !current);
+  };
+
+  const overlap =
+    (Boolean(serializedPreview?.truncated) || frameHeight > PREVIEW_MAX_HEIGHT_PX) &&
+    frameHeight > PREVIEW_FADE_HEIGHT_PX;
+
+  if (expanded && isLoading) {
+    return <EuiLoadingSpinner size="m" data-test-subj="evalsExampleDetailsLoading" />;
+  }
+
+  if (expanded && error) {
+    return (
+      <div className={previewDetailCss}>
+        <EuiText color="danger" size="xs">
+          {i18n.getDetailsLoadErrorMessage(String(error))}
+        </EuiText>
+        <PreviewFadeButton field={field} expanded overlap={false} onClick={toggle} />
+      </div>
+    );
+  }
+
+  if (expanded && data) {
+    return (
+      <div className={previewDetailCss}>
+        {renderJsonPreview(field === 'input' ? data.example.input : data.task.output)}
+        <PreviewFadeButton field={field} expanded overlap={false} onClick={toggle} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={previewDetailCss}>
+      <div ref={frameRef} className={previewFrameCss}>
+        {serializedPreview ? (
+          <EuiCodeBlock
+            css={{ width: '100%' }}
+            language="json"
+            paddingSize="none"
+            transparentBackground
+            fontSize="s"
+          >
+            {serializedPreview.content}
+          </EuiCodeBlock>
+        ) : (
+          '-'
+        )}
+      </div>
+      <PreviewFadeButton field={field} expanded={false} overlap={overlap} onClick={toggle} />
+    </div>
+  );
+};
+
 const EvaluatorScoreAccordion: React.FC<{
   score: EvaluationScoreDocument;
   exampleId: string;
   scoreLabel: string;
   judgeModelId?: string;
+  version?: string;
   onTraceClick: (traceId: string) => void;
-}> = ({ score, exampleId, scoreLabel, judgeModelId, onTraceClick }) => {
+}> = ({ score, exampleId, scoreLabel, judgeModelId, version, onTraceClick }) => {
   const { evaluator } = score;
   const accordionId = [exampleId, evaluator.name, score.task.repetition_index].join('-');
 
@@ -224,6 +440,11 @@ const EvaluatorScoreAccordion: React.FC<{
           <EuiBadge color={getVerdictBadgeColor(evaluator.label, evaluator.score)}>
             {evaluator.label}
           </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {version && (
+        <EuiFlexItem grow={false}>
+          <VersionLabel version={version} />
         </EuiFlexItem>
       )}
       {judgeModelId && (
@@ -296,7 +517,7 @@ const EvaluatorScoreGroupBlock: React.FC<{
   onTraceClick: (traceId: string) => void;
 }> = ({ group, exampleId, showJudge, onTraceClick }) => {
   const { euiTheme } = useEuiTheme();
-  const { evaluatorName, scores, sharedModelId } = group;
+  const { evaluatorName, scores, sharedModelId, sharedVersion } = group;
 
   // A single-score evaluator needs no heading: the score already carries the evaluator name.
   if (scores.length === 1) {
@@ -307,6 +528,7 @@ const EvaluatorScoreGroupBlock: React.FC<{
         exampleId={exampleId}
         scoreLabel={score.evaluator.name}
         judgeModelId={showJudge ? score.evaluator.model?.id : undefined}
+        version={score.evaluator.version}
         onTraceClick={onTraceClick}
       />
     );
@@ -314,9 +536,18 @@ const EvaluatorScoreGroupBlock: React.FC<{
 
   return (
     <div css={{ marginBottom: euiTheme.size.s }}>
-      <EuiText size="xs" color="subdued">
-        <strong>{evaluatorName}</strong>
-      </EuiText>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <strong>{evaluatorName}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        {sharedVersion && (
+          <EuiFlexItem grow={false}>
+            <VersionLabel version={sharedVersion} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {showJudge && sharedModelId && <JudgeLabel modelId={sharedModelId} />}
       {/* The rule marks where the evaluator's scores end, so the next top-level score is not
           mistaken for one of them. */}
@@ -337,6 +568,8 @@ const EvaluatorScoreGroupBlock: React.FC<{
               // The group heading already names a shared judge; only per-score judges are left.
               showJudge && !sharedModelId ? score.evaluator.model?.id : undefined
             }
+            // Likewise: only shown here when a mid-run edit split the group across versions.
+            version={sharedVersion ? undefined : score.evaluator.version}
             onTraceClick={onTraceClick}
           />
         ))}
@@ -348,17 +581,24 @@ const EvaluatorScoreGroupBlock: React.FC<{
 interface ExampleScoreRow {
   exampleId: string;
   exampleIndex: number | null;
+  previews?: EvaluationExperimentExamplePreview[];
   repetitionIndices: number[];
   scoresByRepetition: Record<number, EvaluationExperimentDatasetExample['scores']>;
 }
 
 export interface ExampleScoresTableProps {
+  experimentId: string;
+  datasetId: string;
+  executionId?: string;
   examples: EvaluationExperimentDatasetExample[];
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
 }
 
 export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
+  experimentId,
+  datasetId,
+  executionId,
   examples,
   selectedExampleId,
   onTraceClick,
@@ -424,6 +664,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         return {
           exampleId: example.example_id,
           exampleIndex: example.example_index ?? null,
+          previews: example.previews,
           repetitionIndices,
           scoresByRepetition,
         };
@@ -460,33 +701,6 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           .filter((value): value is string => Boolean(value))
       )
     );
-
-  const renderJsonPreview = (value: unknown) => {
-    if (value == null) {
-      return '-';
-    }
-
-    const serializedValue = JSON.stringify(value, null, 2);
-    if (!serializedValue) {
-      return '-';
-    }
-
-    return (
-      <EuiCodeBlock
-        // Table cell content is a flex container, so without an explicit width the block
-        // shrink-wraps the JSON and pulls its copy/expand controls in with it.
-        css={{ width: '100%' }}
-        overflowHeight={200}
-        language="json"
-        paddingSize="none"
-        transparentBackground
-        fontSize="s"
-        isCopyable
-      >
-        {serializedValue}
-      </EuiCodeBlock>
-    );
-  };
 
   const itemIdToExpandedRowMap = useMemo<Record<string, ReactNode>>(() => {
     return rows.reduce<Record<string, ReactNode>>((acc, row) => {
@@ -538,10 +752,20 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
-      ) => {
-        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.example.input);
-      },
+      ) => (
+        <PreviewJsonDetail
+          key={`input-${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
+          field="input"
+          previews={row.previews}
+          detailsContext={{
+            experimentId,
+            datasetId,
+            executionId,
+            exampleId: row.exampleId,
+            repetitionIndex: getSelectedRepetitionIndex(row),
+          }}
+        />
+      ),
     },
     {
       field: 'scoresByRepetition',
@@ -550,10 +774,20 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
-      ) => {
-        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.task.output);
-      },
+      ) => (
+        <PreviewJsonDetail
+          key={`output-${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
+          field="output"
+          previews={row.previews}
+          detailsContext={{
+            experimentId,
+            datasetId,
+            executionId,
+            exampleId: row.exampleId,
+            repetitionIndex: getSelectedRepetitionIndex(row),
+          }}
+        />
+      ),
     },
     {
       field: 'scoresByRepetition',

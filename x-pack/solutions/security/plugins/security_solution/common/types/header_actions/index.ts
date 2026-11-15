@@ -17,7 +17,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { BrowserFields } from '../../search_strategy';
 
@@ -99,6 +99,8 @@ export interface ActionProps {
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
+  /** Adds a "Remove from case" item to the row's more actions menu. */
+  onRemoveFromCase?: (eventId: string) => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   refetch?: () => void;

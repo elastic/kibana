@@ -9,6 +9,7 @@ import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/c
 import {
   OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS,
   OBSERVABILITY_MACHINE_LEARNING_PROJECT_SETTINGS,
+  OBSERVABILITY_PROFILING_PROJECT_SETTINGS,
   OBSERVABILITY_PROJECT_SETTINGS,
   OBSERVABILITY_STREAMS_TIERED_PROJECT_SETTINGS,
 } from '@kbn/serverless-observability-settings';
@@ -74,6 +75,7 @@ export class ServerlessObservabilityPlugin
           ...(pluginsSetup.observabilityAIAssistant
             ? OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS
             : []),
+          ...(pluginsSetup.profiling ? OBSERVABILITY_PROFILING_PROJECT_SETTINGS : []),
         ]);
       })
       .catch((error) => {

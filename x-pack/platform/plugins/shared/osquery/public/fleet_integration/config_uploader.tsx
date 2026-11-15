@@ -13,6 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 const SUPPORTED_CONFIG_EXTENSIONS = ['application/json', 'text/plain'];
 
+const SELECT_CONFIG_FILE_LABEL = i18n.translate(
+  'xpack.osquery.configUploader.initialPromptTextLabel',
+  {
+    defaultMessage: 'Select or drag and drop osquery config file',
+  }
+);
+
 const ExampleConfigLink = React.memo(() => (
   <EuiLink
     href="https://github.com/osquery/osquery/blob/master/tools/deployment/osquery.example.conf"
@@ -34,42 +41,41 @@ interface ConfigUploaderProps {
 const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) => {
   const filePickerRef = useRef<EuiFilePickerRef>(null);
   const [isInvalid, setIsInvalid] = useState<string | null>(null);
-  // @ts-expect-error update types
-  let fileReader;
 
-  const handleFileRead = () => {
-    // @ts-expect-error update types
-    const content = fileReader.result;
+  const handleFileRead = useCallback(
+    (content: string) => {
+      let parsedContent;
 
-    let parsedContent;
+      try {
+        parsedContent = JSON.parse(content.replaceAll('\\\n', ''), (key, value) => {
+          if (key === 'query') {
+            // remove any multiple spaces from the query
+            return value.replaceAll(/\s(?=\s)/gm, '');
+          }
 
-    try {
-      parsedContent = JSON.parse(content.replaceAll('\\\n', ''), (key, value) => {
-        if (key === 'query') {
-          // remove any multiple spaces from the query
-          return value.replaceAll(/\s(?=\s)/gm, '');
-        }
+          return value;
+        });
 
-        return value;
-      });
+        setIsInvalid(null);
+      } catch (error) {
+        setIsInvalid(error);
+        filePickerRef.current?.removeFiles();
+      }
 
-      setIsInvalid(null);
-    } catch (error) {
-      setIsInvalid(error);
+      onChange(parsedContent);
       filePickerRef.current?.removeFiles();
-    }
+    },
+    [onChange]
+  );
 
-    onChange(parsedContent);
-    filePickerRef.current?.removeFiles();
-  };
-
-  // @ts-expect-error update types
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleFileChosen = (file) => {
-    fileReader = new FileReader();
-    fileReader.onloadend = handleFileRead;
-    fileReader.readAsText(file);
-  };
+  const handleFileChosen = useCallback(
+    (file: File) => {
+      const fileReader = new FileReader();
+      fileReader.onloadend = () => handleFileRead(fileReader.result as string);
+      fileReader.readAsText(file);
+    },
+    [handleFileRead]
+  );
 
   const handleInputChange = useCallback(
     (inputFiles: any) => {
@@ -115,9 +121,8 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
         <EuiFilePicker
           ref={filePickerRef}
           id="osquery_config_picker"
-          initialPromptText={i18n.translate('xpack.osquery.configUploader.initialPromptTextLabel', {
-            defaultMessage: 'Select or drag and drop osquery config file',
-          })}
+          aria-label={SELECT_CONFIG_FILE_LABEL}
+          initialPromptText={SELECT_CONFIG_FILE_LABEL}
           onChange={handleInputChange}
           display="large"
           fullWidth
