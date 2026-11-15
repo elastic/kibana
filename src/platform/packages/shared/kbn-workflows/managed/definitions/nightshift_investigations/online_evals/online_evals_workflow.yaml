@@ -85,6 +85,7 @@ steps:
         - name: nightshift_rca_reward
         - name: nightshift_investigation_process
         - name: nightshift_conclusion_quality
+        - name: nightshift_missing_data
       investigation_started_at: '{{ inputs.investigation_started_at }}'
       # `${{ }}` passes a missing optional input as undefined; `{{ }}` would pass an empty string.
       investigation_ended_at: '${{ inputs.investigation_ended_at }}'
