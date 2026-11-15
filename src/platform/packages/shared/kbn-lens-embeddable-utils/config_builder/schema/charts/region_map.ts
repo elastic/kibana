@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
@@ -81,6 +81,7 @@ export const regionMapConfigSchemaESQL = lazySchema(() =>
 export const regionMapConfigSchema = lazySchema(() =>
   z.union([regionMapConfigSchemaNoESQL, regionMapConfigSchemaESQL]).meta({
     id: 'visRegionMapChart',
+    ...tfUnion({ merge: true }), // ES|QL vs not, no variant key
     title: 'Region Map',
     description: 'A choropleth map with geographic regions colored by the aggregated metric value.',
   })

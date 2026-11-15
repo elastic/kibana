@@ -12,6 +12,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
@@ -68,6 +69,7 @@ interface SetupDeps {
 
 export interface StartDeps {
   embeddable: EmbeddableStart;
+  dataViews: DataViewsServerPluginStart;
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;

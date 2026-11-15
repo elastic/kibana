@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
@@ -127,6 +127,7 @@ export const tagcloudConfigSchemaESQL = lazySchema(() =>
 export const tagcloudConfigSchema = lazySchema(() =>
   z.union([tagcloudConfigSchemaNoESQL, tagcloudConfigSchemaESQL]).meta({
     id: 'visTagcloudChart',
+    ...tfUnion({ merge: true }), // ES|QL vs not, no variant key
     title: 'Tag Cloud Chart',
     description: 'A word cloud with terms sized by metric value.',
   })

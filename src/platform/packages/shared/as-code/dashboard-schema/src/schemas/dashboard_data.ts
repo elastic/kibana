@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfUnion, tfOmit, tfRef } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import {
   asCodeEsqlApproximationSchema,
@@ -45,7 +45,17 @@ export function getPanelSchema(
     );
 
   type PanelSchema = (typeof panelSchemas)[number];
-  return z.discriminatedUnion('type', panelSchemas as [PanelSchema, ...PanelSchema[]]);
+  return z.discriminatedUnion('type', panelSchemas as [PanelSchema, ...PanelSchema[]]).meta({
+    // Terraform variant mapping for the panel-type union.
+    ...tfUnion({
+      discriminator: 'type',
+      key_template: '{value}_config',
+      discriminator_placement: 'outside',
+      content: 'config',
+      exclusivity: 'conflicts_with',
+      extra_json_variant: { key: 'config_json', values: ['markdown', 'vis'] },
+    }),
+  });
 }
 
 /** Creates a full dashboard state schema, accepting runtime dependencies as parameters. */
@@ -84,7 +94,9 @@ export function getDashboardDataSchema<P extends z.ZodTypeAny>(
         .array(
           isDashboardAppRequest // looser route validation for dashboard application requests
             ? (z.object({}).loose() as unknown as ReturnType<typeof getPanelSchema>) // keeps derived types happy
-            : z.union([panelSchema, getSectionSchema(panelSchema)])
+            : // No Terraform mapping on purpose: the resource keeps sections in their own list, a special case
+              // in @kbn/as-code-dashboard-terraform rather than a mapping feature.
+              z.union([panelSchema, getSectionSchema(panelSchema)])
         )
         .max(isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS)
         .default([])
@@ -92,17 +104,25 @@ export function getDashboardDataSchema<P extends z.ZodTypeAny>(
           description:
             'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
         }),
-      project_routing: z.string().optional().meta({
-        description:
-          'Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.',
-      }),
+      project_routing: z
+        .string()
+        .optional()
+        .meta({
+          ...tfOmit(), // API-only, not in the Terraform resource
+          description:
+            'Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.',
+        }),
       ...asCodeEsqlApproximationSchema.shape,
+      // API-only, not in the Terraform resource
+      esql_approximation: asCodeEsqlApproximationSchema.shape.esql_approximation.meta(tfOmit()),
       query: asCodeQuerySchema.optional(),
       refresh_interval: refreshIntervalSchema.optional(),
       tags: getAsCodeTagsSchema(
         'Tag IDs to associate with this dashboard.',
         isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : undefined
-      ).optional(),
+      )
+        .meta(tfRef({ resource_type: 'elasticstack_kibana_tag', id_attribute: 'tag_id' }))
+        .optional(),
       time_range: timeRangeSchema.optional(),
       title: z.string().min(1).meta({ description: 'A human-readable title for the dashboard.' }),
       access_control: accessControlSchema,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -174,6 +174,11 @@ export const waffleConfigSchemaESQL = lazySchema(() =>
 export const waffleConfigSchema = lazySchema(() =>
   z.union([waffleConfigSchemaNoESQL, waffleConfigSchemaESQL]).meta({
     id: 'visWaffleChart',
+    // ES|QL vs not, no variant key. The provider holds each metric and breakdown as the config_json of an object.
+    ...tfUnion({
+      merge: true,
+      json_leaves: { 'group_by[]': 'config_json', 'metrics[]': 'config_json' },
+    }),
     title: 'Waffle Chart',
     description: 'Waffle chart configuration: DSL or ES|QL query based',
   })
