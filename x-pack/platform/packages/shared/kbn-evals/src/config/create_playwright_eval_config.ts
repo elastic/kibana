@@ -19,6 +19,7 @@ import {
   type StackConnectorDefinition,
 } from '../utils/eval_connector';
 import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from '../utils/concurrency';
+import { getTimeoutMsFromEnv } from '../utils/timeout';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connectorParam: EvalConnector;
@@ -45,6 +46,7 @@ export function createPlaywrightEvalsConfig({
   repetitions?: number;
   /** Examples each experiment runs at once, unless `EVAL_CONCURRENCY` or the spec sets it. */
   concurrency?: number;
+  /** Playwright per-test timeout in ms, unless `EVAL_TIMEOUT_MINUTES` is set. Defaults to 5 minutes. */
   timeout?: number;
   runGlobalSetup?: boolean;
   workers?: 1 | 2 | 3;
@@ -137,7 +139,7 @@ export function createPlaywrightEvalsConfig({
     projects: [...hookProjects, ...nextProjects],
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
-    timeout: timeout ?? 5 * 60_000,
+    timeout: getTimeoutMsFromEnv() ?? timeout ?? 5 * 60_000,
     // Playwright's default also matches `*.test.ts`, which would load Jest unit tests colocated
     // with the specs and fail on `describe is not defined`. Evals are always `*.spec.ts`.
     testMatch: '**/*.spec.ts',

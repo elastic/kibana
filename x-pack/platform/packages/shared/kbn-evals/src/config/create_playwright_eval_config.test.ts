@@ -71,3 +71,44 @@ describe('createPlaywrightEvalsConfig concurrency', () => {
     );
   });
 });
+
+describe('createPlaywrightEvalsConfig timeout', () => {
+  const previousEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env.EVAL_CONNECTOR_ID = 'judge';
+    delete process.env.EVAL_TIMEOUT_MINUTES;
+  });
+
+  afterEach(() => {
+    process.env = { ...previousEnv };
+  });
+
+  const configTimeout = (options: { timeout?: number } = {}) =>
+    createPlaywrightEvalsConfig({ testDir: '/evals', ...options }).timeout;
+
+  it('defaults to 5 minutes', () => {
+    expect(configTimeout()).toBe(5 * 60_000);
+  });
+
+  it("uses the suite's configured timeout", () => {
+    expect(configTimeout({ timeout: 30 * 60_000 })).toBe(30 * 60_000);
+  });
+
+  it('lets EVAL_TIMEOUT_MINUTES override the suite timeout', () => {
+    process.env.EVAL_TIMEOUT_MINUTES = '360';
+    expect(configTimeout({ timeout: 30 * 60_000 })).toBe(360 * 60_000);
+  });
+
+  it('treats an empty EVAL_TIMEOUT_MINUTES as unset, as CI forwards it', () => {
+    process.env.EVAL_TIMEOUT_MINUTES = '';
+    expect(configTimeout({ timeout: 30 * 60_000 })).toBe(30 * 60_000);
+  });
+
+  it('rejects an invalid EVAL_TIMEOUT_MINUTES', () => {
+    process.env.EVAL_TIMEOUT_MINUTES = '90m';
+    expect(() => configTimeout()).toThrow(
+      'EVAL_TIMEOUT_MINUTES must be a positive integer, got "90m".'
+    );
+  });
+});
