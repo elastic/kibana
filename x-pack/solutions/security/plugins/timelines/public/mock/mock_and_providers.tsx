@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IS_OPERATOR } from '../../common/types/timeline';
-import type { DataProvider, DataProvidersAnd } from '../../common/types/timeline';
+import { IS_OPERATOR } from '@kbn/securitysolution-timeline-common';
+import type { DataProvider, DataProvidersAnd } from '@kbn/securitysolution-timeline-common';
 
 export const providerA: DataProvidersAnd = {
   enabled: true,

@@ -10,7 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IS_OPERATOR } from '@kbn/timelines-plugin/common';
+import { IS_OPERATOR } from '@kbn/securitysolution-timeline-common';
 import type { IdentityFields } from '../../../../../flyout/document_details/shared/utils';
 import {
   getDataProvider,
