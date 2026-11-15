@@ -151,9 +151,19 @@ describe('findings writer', () => {
       first_seen: at(0),
     });
     expect(docs.get('CVE-2026-2')?.native_vuln_scanner.fixed_at).toBeUndefined();
+    expect(docs.get('CVE-2026-2')?.event.created).toBe(at(2));
+    expect(docs.get('CVE-2026-1')?.event.created).toBe(at(0));
     expect(
       [...(await byCve(CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN)).keys()].sort()
     ).toEqual(['CVE-2026-1', 'CVE-2026-2']);
+
+    await write(5, [finding('CVE-2026-1'), finding('CVE-2026-2')]);
+    docs = await byCve(FINDINGS_INDEX);
+    expect(docs.get('CVE-2026-2')?.native_vuln_scanner).toMatchObject({
+      state: 'active',
+      first_seen: at(0),
+    });
+    expect(docs.get('CVE-2026-2')?.event.created).toBe(at(2));
   });
 
   it('leaves findings of hosts outside the run untouched', async () => {

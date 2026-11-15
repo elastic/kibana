@@ -60,6 +60,15 @@ Manager's `Cancelling task ... as it expired` warning, plus the `Vulnerability s
 (with `aborted: true`) when the timeout lands while the releases are being processed; a timeout
 during the index setup or the inventory read logs no summary line.
 
+## Finding lifecycle and detection rules
+
+A finding is `new` on its first sighting, `active` while later scans still match it, `fixed` once
+a scan of its host no longer does, and `reopened` if it matches again. `event.created` is set on
+the first sighting and kept until a reopen, which resets it to that scan's time; a detection rule
+created from a finding is keyed on it, so the rule alerts once per new finding and once more each
+time it reopens. `native_vuln_scanner.first_seen` never changes, so "First found" in the flyout
+stays at the original sighting.
+
 ## Agent runtime requirement
 
 Elastic Agents 9.7+ route agent inputs through the OTel collector runtime by default, and that

@@ -17,13 +17,14 @@ const HOST_BATCH = 1000;
 
 /**
  * Runs on an existing finding: takes the fresh document, keeps the first sighting, and moves
- * the state forward (fixed -> reopened, anything else -> active).
+ * the state forward (fixed -> reopened, anything else -> active). `event.created` is kept except
+ * on a reopen, where it restarts so a detection rule keyed on it alerts again.
  */
 export const UPSERT_SCRIPT = `
 def prev = ctx._source.native_vuln_scanner;
 def firstSeen = prev == null ? params.doc.native_vuln_scanner.first_seen : prev.first_seen;
-def created = ctx._source.event == null ? params.doc.event.created : ctx._source.event.created;
 def state = prev != null && prev.state == 'fixed' ? 'reopened' : 'active';
+def created = state == 'reopened' || ctx._source.event == null ? params.doc.event.created : ctx._source.event.created;
 ctx._source.clear();
 ctx._source.putAll(params.doc);
 ctx._source.native_vuln_scanner.first_seen = firstSeen;
