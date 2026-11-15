@@ -412,6 +412,26 @@ describe('selectWinner', () => {
     expect(result.reasons[0]).not.toContain('c)');
   });
 
+  it('reports a tie when the gap equals min_delta despite float error', () => {
+    const result = selectWinner(
+      build(
+        [
+          arm('a', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.8, pValue: 0.01 }),
+            ...codePass,
+          ]),
+          arm('b', [
+            row({ evaluatorName: 'correctness', meanTarget: 0.7, pValue: 0.01 }),
+            ...codePass,
+          ]),
+        ],
+        { min_delta: 0.1 }
+      )
+    );
+
+    expect(result).toMatchObject({ winner_index: -1, tie: true, tied_indexes: [0, 1] });
+  });
+
   it('does not report a tie between arms that both fall below the baseline', () => {
     const result = selectWinner(
       build(

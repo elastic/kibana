@@ -82,7 +82,7 @@ export const aesopCaptureDatasetStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.aesopCaptureDataset.documentation.details',
       {
         defaultMessage:
-          'Searches the agent’s conversations, reads each one, and maps every completed round to an example with the user message as input, the assistant message as output and the conversation as metadata. Examples whose input has a Jaccard similarity at or above the threshold to an existing or already kept example are dropped. The result is merged with the existing examples and upserted, so existing examples are never removed.',
+          'Searches the agent’s conversations, reads each one, and maps every completed round to an example with the user message as input, the assistant message as output and the conversation as metadata. Examples whose input has a Jaccard similarity at or above the threshold to an existing or already kept example are dropped. The result is merged with the existing examples and upserted; because the existing examples are sent back with it, `removed` stays 0 unless the dataset changed during the run.',
       }
     ),
     examples: [

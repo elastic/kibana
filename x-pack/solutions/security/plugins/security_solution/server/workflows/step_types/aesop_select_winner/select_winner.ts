@@ -187,7 +187,7 @@ export const selectWinner = (input: Input): Output => {
 
   const best = qualifying.reduce((top, row) => (row.improvement > top.improvement ? row : top));
   const tied = qualifying.filter(
-    ({ improvement }) => best.improvement - improvement <= input.min_delta
+    ({ improvement }) => best.improvement - improvement <= input.min_delta + EPSILON
   );
   if (tied.length > 1) {
     return noWinner(
