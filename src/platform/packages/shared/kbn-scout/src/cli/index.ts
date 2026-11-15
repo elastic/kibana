@@ -17,6 +17,7 @@ import { resolveTestingScopeCmd } from './resolve_testing_scope';
 import { createTestTracks } from './create_test_tracks';
 import { generateCmd } from './generate';
 import { auditCmd } from './audit';
+import { doctorCmd } from './doctor';
 
 export async function run() {
   await new RunWithCommands(
@@ -37,6 +38,7 @@ export async function run() {
       updateTestConfigManifests,
       generateCmd,
       auditCmd,
+      doctorCmd,
     ]
   ).execute();
 }
