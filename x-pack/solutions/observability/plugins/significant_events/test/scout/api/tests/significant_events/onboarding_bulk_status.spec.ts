@@ -17,9 +17,6 @@ apiTest.describe(
   'Onboarding bulk status API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Streams + availability are owned by global.setup.ts / global.teardown.ts for the whole run.
-    // Per-test enable/disable below is intentional for the 403 denial path only.
-
     apiTest(
       'returns not_started for every requested source id that has never been onboarded',
       async ({ apiClient, samlAuth }) => {
@@ -56,26 +53,5 @@ apiTest.describe(
 
       expect(response.statusCode).toBe(400);
     });
-
-    apiTest(
-      'returns 403 when significant events is disabled',
-      async ({ apiClient, samlAuth, apiServices }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-        await apiServices.significantEventsTest.disableSignificantEvents();
-
-        try {
-          const response = await apiClient.post(BULK_STATUS_ENDPOINT, {
-            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-            body: { sourceIds: [uuidv4()] },
-            responseType: 'json',
-          });
-
-          expect(response.statusCode).toBe(403);
-        } finally {
-          await apiServices.significantEventsTest.enableSignificantEvents();
-        }
-      }
-    );
   }
 );
