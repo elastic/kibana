@@ -33,6 +33,8 @@ export {
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID,
+  DASHBOARD_TIME_RANGE_INPUT_DEFINITION_ID,
+  DASHBOARD_QUERY_INPUT_DEFINITION_ID,
   mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
 } from './spec/builtin_workflow_input_definitions';
 export type { JsonSchema } from './spec/schema/common/json_model_shape_schema';
