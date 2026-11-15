@@ -14,6 +14,7 @@ import type { DiscoverStartPlugins } from '../types';
 import type { DiscoverEBTContextProps } from './types';
 import { cascadeEventType } from '../application/main/components/layout/cascaded_documents/telemetry/event_definition';
 import { discoverInDashboardEventType } from './discover_in_dashboard_event_definition';
+import { esqlCategorizeEventType } from './esql_categorize_event_definition';
 
 /**
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
@@ -210,4 +211,6 @@ export const registerDiscoverEBTManagerAnalytics = (
   core.analytics.registerEventType(cascadeEventType);
 
   core.analytics.registerEventType(discoverInDashboardEventType);
+
+  core.analytics.registerEventType(esqlCategorizeEventType);
 };

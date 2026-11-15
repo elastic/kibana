@@ -27,6 +27,15 @@ describe('Document view mode toggle component', () => {
     setDiscoverViewMode = jest.fn(),
     useDataViewWithTextFields = true,
     focusOnMountRef = { current: false },
+    append,
+  }: {
+    showFieldStatistics?: boolean;
+    viewMode?: VIEW_MODE;
+    isEsqlMode?: boolean;
+    setDiscoverViewMode?: jest.Mock;
+    useDataViewWithTextFields?: boolean;
+    focusOnMountRef?: MutableRefObject<boolean>;
+    append?: React.ReactElement;
   } = {}) => {
     const services = createDiscoverServicesMock();
 
@@ -58,6 +67,7 @@ describe('Document view mode toggle component', () => {
           setDiscoverViewMode={setDiscoverViewMode}
           dataView={dataView}
           focusOnMountRef={focusOnMountRef}
+          append={append}
         />
       </DiscoverToolkitTestProvider>
     );
@@ -113,6 +123,18 @@ describe('Document view mode toggle component', () => {
     expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
     expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('10');
     expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('10 results');
+  });
+
+  it('should render the appended element after the count', async () => {
+    await renderComponent({
+      isEsqlMode: true,
+      append: <button data-test-subj="appendedAction">Appended</button>,
+    });
+
+    const count = screen.getByTestId('discoverQueryTotalHits');
+    const appended = screen.getByTestId('appendedAction');
+    expect(appended).toBeVisible();
+    expect(count.compareDocumentPosition(appended)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when the Documents option is clicked', async () => {

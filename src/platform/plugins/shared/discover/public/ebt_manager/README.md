@@ -118,6 +118,19 @@ Tracks Discover session saves from a dashboard and tab switches inside embedded 
 | `tabSwitchedFromId` | `keyword` (optional) | Source tab identifier; present for `tabSwitched` events.        |
 | `tabSwitchedToId`   | `keyword` (optional) | Destination tab identifier; present for `tabSwitched` events.   |
 
+### `discover_esql_categorize`
+
+Tracks entry points that group ES|QL results into patterns with `CATEGORIZE`.
+
+| Event name                       | Description                                                       |
+| -------------------------------- | ----------------------------------------------------------------- |
+| `group_similar_messages_clicked` | The "Group similar messages" button was clicked in ES\|QL mode. |
+
+| Field       | Type      | Description                        |
+| ----------- | --------- | ---------------------------------- |
+| `eventName` | `keyword` | Categorize action.                 |
+| `fieldName` | `keyword` | Name of the field that is grouped. |
+
 ## Standard performance metrics
 
 These events are reported through `reportPerformanceMetricEvent` and use the shared `performance_metric` event type.

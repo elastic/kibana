@@ -47,6 +47,7 @@ export const DocumentViewModeToggle = ({
   viewMode,
   isEsqlMode,
   prepend,
+  append,
   setDiscoverViewMode,
   patternCount,
   fieldsCount,
@@ -57,6 +58,8 @@ export const DocumentViewModeToggle = ({
   viewMode: VIEW_MODE;
   isEsqlMode: boolean;
   prepend?: ReactElement;
+  /** Rendered right after the count, e.g. actions that act on the current results. */
+  append?: ReactElement;
   setDiscoverViewMode: (viewMode: VIEW_MODE, replace?: boolean) => Promise<VIEW_MODE>;
   patternCount?: number;
   fieldsCount?: number;
@@ -247,6 +250,18 @@ export const DocumentViewModeToggle = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>{countDisplay}</EuiFlexItem>
+      {append && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            &:empty {
+              display: none;
+            }
+          `}
+        >
+          {append}
+        </EuiFlexItem>
+      )}
       {showViewModeSelector && (
         <>
           <EuiFlexItem grow={false}>
