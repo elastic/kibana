@@ -1052,10 +1052,10 @@ describe('runWatchdogWorker', () => {
       expect(profileMeta().captureDurationMs).toBe(525);
     });
 
-    it('keeps a worst-case capture log line within 4,094 bytes through createWorkerLogger', async () => {
-      // ASCII names and paths pushed past the 48-character name / 120-character location caps, so
-      // every name and location in the line is at its cap. Kibana names and paths are ASCII.
-      const noisyName = 'a_long_function_name_'.repeat(4);
+    /** Logs one capture with every name built from `noisyName`, through a real worker logger. */
+    const logCaptureLine = async (
+      noisyName: string
+    ): Promise<{ line: string; droppedLogLines: number }> => {
       const makeUrl = (prefix: string, tag: string) =>
         `file://${ROOT}/${prefix}/${'a_segment/'.repeat(15)}${tag}_file.ts`;
 
@@ -1162,49 +1162,78 @@ describe('runWatchdogWorker', () => {
         reply();
         await settle();
 
-        expect(realLogger.getDroppedLogLineCount()).toBe(0);
+        const droppedLogLines = realLogger.getDroppedLogLineCount();
         const lines = fs
           .readFileSync(logFile, 'utf8')
           .trim()
           .split('\n')
           .filter((l) => l.includes('"Event loop block profile #'));
         expect(lines).toHaveLength(1);
-        const lineBytes = Buffer.byteLength(lines[0], 'utf8');
-        expect(lineBytes).toBeLessThanOrEqual(4_094);
-
-        const parsed = JSON.parse(lines[0]);
-        expect(parsed.message).not.toMatch(/\[truncated\]$/);
-        expect(parsed.message).toContain('Kibana code: 45.5% ');
-        // The frame lists are cut at their cap; the full lists are in `profile`.
-        const frameLists = parsed.message.slice(parsed.message.indexOf('Top: '));
-        expect(frameLists).toHaveLength(MAX_MESSAGE_FRAMES_LENGTH);
-        expect(frameLists.endsWith('...')).toBe(true);
-        expect(parsed.kibana.worker).toEqual({ name: WATCHDOG_WORKER_NAME, thread_id: 99 });
-        const loggedProfile = parsed.kibana.event_loop_watchdog.profile;
-        expect(loggedProfile.frames).toHaveLength(2);
-        for (const frame of loggedProfile.frames) {
-          expect(frame.name).toHaveLength(MAX_NAME_LENGTH);
-          expect(frame.location).toHaveLength(MAX_LOCATION_LENGTH);
-        }
-        expect(loggedProfile.kibanaFrames).toHaveLength(3);
-        for (const frame of loggedProfile.kibanaFrames) {
-          expect(frame.name).toHaveLength(MAX_NAME_LENGTH);
-          expect(frame.location).toHaveLength(MAX_LOCATION_LENGTH);
-          expect(frame.callers).toHaveLength(2);
-          for (const caller of frame.callers) {
-            expect(caller.name).toHaveLength(MAX_NAME_LENGTH);
-            expect(caller.location).toHaveLength(MAX_LOCATION_LENGTH);
-          }
-        }
-        expect(loggedProfile.topKibanaFrame).toEqual({
-          location: loggedProfile.kibanaFrames[0].location,
-          percent: 45.5,
-        });
+        return { line: lines[0], droppedLogLines };
       } finally {
         fs.closeSync(fd);
         fs.rmSync(tmpDir, { recursive: true, force: true });
         jest.restoreAllMocks();
       }
+    };
+
+    it('keeps a worst-case capture log line within 4,094 bytes through createWorkerLogger', async () => {
+      // ASCII names and paths pushed past the 48-character name / 120-character location caps, so
+      // every name and location in the line is at its cap. Kibana names and paths are ASCII.
+      const { line, droppedLogLines } = await logCaptureLine('a_long_function_name_'.repeat(4));
+      expect(droppedLogLines).toBe(0);
+      const lineBytes = Buffer.byteLength(line, 'utf8');
+      expect(lineBytes).toBeLessThanOrEqual(4_094);
+
+      const parsed = JSON.parse(line);
+      expect(parsed.message).not.toMatch(/\[truncated\]$/);
+      expect(parsed.message).toContain('Kibana code: 45.5% ');
+      // The frame lists are cut at their cap; the full lists are in `profile`.
+      const frameLists = parsed.message.slice(parsed.message.indexOf('Top: '));
+      expect(frameLists).toHaveLength(MAX_MESSAGE_FRAMES_LENGTH);
+      expect(frameLists.endsWith('...')).toBe(true);
+      expect(parsed.kibana.worker).toEqual({ name: WATCHDOG_WORKER_NAME, thread_id: 99 });
+      const loggedProfile = parsed.kibana.event_loop_watchdog.profile;
+      expect(loggedProfile.frames).toHaveLength(2);
+      for (const frame of loggedProfile.frames) {
+        expect(frame.name).toHaveLength(MAX_NAME_LENGTH);
+        expect(frame.location).toHaveLength(MAX_LOCATION_LENGTH);
+      }
+      expect(loggedProfile.kibanaFrames).toHaveLength(3);
+      for (const frame of loggedProfile.kibanaFrames) {
+        expect(frame.name).toHaveLength(MAX_NAME_LENGTH);
+        expect(frame.location).toHaveLength(MAX_LOCATION_LENGTH);
+        expect(frame.callers).toHaveLength(2);
+        for (const caller of frame.callers) {
+          expect(caller.name).toHaveLength(MAX_NAME_LENGTH);
+          expect(caller.location).toHaveLength(MAX_LOCATION_LENGTH);
+        }
+      }
+      expect(loggedProfile.topKibanaFrame).toEqual({
+        location: loggedProfile.kibanaFrames[0].location,
+        percent: 45.5,
+      });
+    });
+
+    it('keeps the whole message and drops the profile data when non-ASCII names push the line past 4,094 bytes', async () => {
+      // The ASCII worst case is 3,843 bytes; '€' takes 3 bytes, so these names add well over the 251 left.
+      const { line, droppedLogLines } = await logCaptureLine('€'.repeat(84));
+      expect(droppedLogLines).toBe(0);
+      expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(4_094);
+      const parsed = JSON.parse(line);
+      expect(parsed.kibana?.event_loop_watchdog).toBeUndefined();
+      expect(parsed.message).toMatch(/\[truncated\]$/);
+      expect(parsed.message).toMatch(
+        /^Event loop block profile #1: block ~100000ms .* stopped: block_ended\. Top: /
+      );
+      // The message itself is not cut: the frame lists are all there, up to their own `...` cap.
+      const frameLists = parsed.message.slice(
+        parsed.message.indexOf('Top: '),
+        -' [truncated]'.length
+      );
+      expect(frameLists).toContain('Kibana code: 45.5% ');
+      expect(frameLists).toHaveLength(MAX_MESSAGE_FRAMES_LENGTH);
+      expect(frameLists.endsWith('...')).toBe(true);
     });
 
     it('reports the active profiling time per stats period, splitting a capture across two', async () => {
