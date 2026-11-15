@@ -125,10 +125,15 @@ export class RuleCreateWizardPage {
     this.esqlEditor = new EsqlEditor(this.page, 'ruleEsqlQueryBar');
   }
 
-  /** Switches the Define step to the ES|QL rule type and waits for the query bar. */
+  /** Switches the Define step to the ES|QL rule type and waits for its Monaco editor to mount. */
   async selectEsqlRuleType(): Promise<void> {
     await this.esqlRuleTypeButton.click();
-    await this.esqlQueryBar.waitFor({ state: 'visible' });
+    // The ES|QL editor bundle loads lazily on first switch, which outlasts 10 s on a cold project.
+    // EsqlEditor.waitReady() uses the default timeout, so wait for the mount here first.
+    await this.esqlQueryBar
+      .getByTestId('ESQLEditor')
+      .getByTestId('kibanaCodeEditor')
+      .waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   /** Replaces the query in the ES|QL query bar of the Define step. */
