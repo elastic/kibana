@@ -11,7 +11,7 @@ import { rpmKey } from '../version_compare';
 import { classifyRhelCriterion, parseRhelOval } from './rhel_oval';
 import type { FeedParseResult } from './types';
 
-// Five definitions trimmed from rhel-9.oval.xml, plus the tests/states of giflib and git-lfs.
+// Five definitions trimmed from rhel-9.oval.xml with every referenced test, object and state.
 const fixture = readFileSync(join(__dirname, '__fixtures__', 'rhel_9_trimmed.oval.xml'));
 
 describe('parseRhelOval', () => {
@@ -196,6 +196,46 @@ describe('parseRhelOval', () => {
     const other = await parseRhelOval([fixture], { major: '8' });
     expect(other.records).toEqual([]);
     expect(other.skipped.other_release).toBeGreaterThan(0);
+  });
+});
+
+describe('rhel_9_trimmed fixture', () => {
+  const xml = fixture.toString('utf8');
+  const ids = (section: string) => {
+    const body = xml.split(`<${section}>`)[1]?.split(`</${section}>`)[0] ?? '';
+    return new Set([...body.matchAll(/ id="([^"]+)"/g)].map(([, id]) => id));
+  };
+  const tests = [
+    ...xml.matchAll(
+      /<\S+_test [^>]*comment="([^"]*)" id="([^"]+)"[^>]*>\s*<\S+ object_ref="([^"]+)"\/>\s*<\S+ state_ref="([^"]+)"\/>/g
+    ),
+  ].map(([, comment, id, objectRef, stateRef]) => ({ comment, id, objectRef, stateRef }));
+
+  it('defines a test for every criterion', () => {
+    const defined = new Set(tests.map((t) => t.id));
+    const referenced = [...xml.matchAll(/test_ref="([^"]+)"/g)].map(([, ref]) => ref);
+    expect(referenced.filter((ref) => !defined.has(ref))).toEqual([]);
+  });
+
+  it('defines the object and state of every test', () => {
+    const objects = ids('objects');
+    const states = ids('states');
+    expect(tests.length).toBeGreaterThan(0);
+    expect(tests.filter((t) => !objects.has(t.objectRef))).toEqual([]);
+    expect(tests.filter((t) => !states.has(t.stateRef))).toEqual([]);
+  });
+
+  it('names the package of each rpminfo test object as in the criterion comment', () => {
+    const names = new Map(
+      [...xml.matchAll(/<red-def:rpminfo_object id="([^"]+)"[^>]*>\s*<red-def:name>([^<]+)</g)].map(
+        ([, id, name]) => [id, name]
+      )
+    );
+    const rpmTests = tests.filter((t) => names.has(t.objectRef));
+    expect(rpmTests.length).toBeGreaterThan(0);
+    expect(rpmTests.filter((t) => !t.comment.startsWith(`${names.get(t.objectRef)} `))).toEqual(
+      []
+    );
   });
 });
 
