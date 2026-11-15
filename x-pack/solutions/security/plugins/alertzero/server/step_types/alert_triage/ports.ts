@@ -11,18 +11,23 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ALERT_FETCH_LIMIT,
+  TAG_CHUNK_SIZE,
   ALERT_SEVERITIES,
   BATCH_ALERT_CAP,
   OPEN_ALERT_STATUSES,
   RULE_FETCH_LIMIT,
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
+  TRIAGE_WOULD_CLOSE_TAG_PREFIX,
+  TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
+  TRIAGE_WOULD_SKIP_TAG_PREFIX,
   VERDICT_TAGS,
   type AlertSeverity,
 } from '../../alert_triage/constants';
 import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
-import { getDetection } from '../../alert_triage/pattern_key';
+import { PATTERN_KEY_FIELDS, getDetection } from '../../alert_triage/pattern_key';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
+import type { MatchCandidate } from '../../alert_triage/fp_decisions';
 import type { TriageAlert } from '../../alert_triage/types';
 
 type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
@@ -31,6 +36,8 @@ type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
 // security_solution constants.
 const SIGNALS_SEARCH_PATH = '/api/detection_engine/signals/search';
 const SIGNALS_TAGS_PATH = '/api/detection_engine/signals/tags';
+const SIGNALS_STATUS_PATH = '/api/detection_engine/signals/status';
+const NOTE_PATH = '/api/note';
 
 const WORKFLOW_RUN_TASK_TYPE = 'workflow:run';
 
@@ -49,6 +56,7 @@ const ALERT_FIELDS = {
   ruleName: 'kibana.alert.rule.name',
   riskScore: 'kibana.alert.risk_score',
   status: 'kibana.alert.workflow_status',
+  reason: 'kibana.alert.workflow_reason',
   tags: 'kibana.alert.workflow_tags',
   timestamp: '@timestamp',
   nameOverride: 'kibana.alert.rule.rule_name_override',
@@ -338,6 +346,272 @@ export const tagAlerts =
     }
   };
 
+/** What a search response says about its own completeness. */
+interface SearchCompleteness {
+  timed_out?: boolean;
+  _shards?: { failed?: number };
+}
+
+/**
+ * Throws when a search answered with part of the result: a shard failed or the search timed out.
+ * The signals search route returns the raw Elasticsearch body, so an HTTP 200 can be incomplete,
+ * and a missing hit or bucket would then read as "none" where the caller acts on it.
+ */
+const assertCompleteSearch = ({ timed_out: timedOut, _shards: shards }: SearchCompleteness) => {
+  const failedShards = shards?.failed ?? 0;
+  if (timedOut === true || failedShards > 0) {
+    throw new Error(
+      `The alerts search returned a partial result (timed_out: ${
+        timedOut === true
+      }, failed shards: ${failedShards})`
+    );
+  }
+};
+
+/**
+ * Closes the given alerts as false positives, but only those that are still `open` when the write
+ * runs, so an alert an analyst acknowledged after the search is left alone. The status route cannot
+ * check the previous status for ids, so this sends the ids and the status as one query. Returns how
+ * many alerts were closed, which is less than the given count when some had moved on. Throws when
+ * the update reports failures.
+ */
+export const closeStillOpenAlertsAsFalsePositive = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<number> => {
+  const { body } = await callKibanaApi<{
+    updated?: number;
+    version_conflicts?: number;
+    failures?: unknown[];
+  }>({
+    method: 'POST',
+    path: SIGNALS_STATUS_PATH,
+    body: {
+      query: {
+        bool: {
+          filter: [{ ids: { values: [...alertIds] } }, { term: { [ALERT_FIELDS.status]: 'open' } }],
+        },
+      },
+      status: 'closed',
+      reason: 'false_positive',
+    },
+  });
+  const failureCount = body.failures?.length ?? 0;
+  if (failureCount > 0) {
+    throw new Error(
+      `Closing ${alertIds.length} alert(s) was not fully applied (updated: ${
+        body.updated ?? 0
+      }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
+    );
+  }
+  return body.updated ?? 0;
+};
+
+/**
+ * Reopens the given alerts that are still closed as a false positive when the write runs, which is
+ * how a decision closed them. An alert an analyst has since closed for another reason, or
+ * acknowledged, is left alone. The status route cannot check the previous state for ids, so this
+ * sends the ids and the state as one query, in the chunks the route takes. Returns how many alerts
+ * were reopened, which is less than the given count when some had moved on. Throws when the update
+ * timed out or reports failures, because revoke removes the tag after this returns and a rerun
+ * could not find an alert that was missed. A version conflict is a 409, which also throws.
+ */
+export const reopenFalsePositiveClosedAlerts = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<number> => {
+  let reopened = 0;
+  for (let from = 0; from < alertIds.length; from += TAG_CHUNK_SIZE) {
+    const chunk = alertIds.slice(from, from + TAG_CHUNK_SIZE);
+    const { body } = await callKibanaApi<{
+      updated?: number;
+      timed_out?: boolean;
+      version_conflicts?: number;
+      failures?: unknown[];
+    }>({
+      method: 'POST',
+      path: SIGNALS_STATUS_PATH,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: chunk } },
+              { term: { [ALERT_FIELDS.status]: 'closed' } },
+              { term: { [ALERT_FIELDS.reason]: 'false_positive' } },
+            ],
+          },
+        },
+        status: 'open',
+      },
+    });
+    const failureCount = body.failures?.length ?? 0;
+    if (body.timed_out === true || failureCount > 0) {
+      throw new Error(
+        `Reopening ${chunk.length} alert(s) was not fully applied (updated: ${
+          body.updated ?? 0
+        }, timed_out: ${body.timed_out === true}, conflicts: ${
+          body.version_conflicts ?? 0
+        }, failures: ${failureCount})`
+      );
+    }
+    reopened += body.updated ?? 0;
+  }
+  return reopened;
+};
+
+/** Which of the given alerts are still open or acknowledged. Used to undo a tag after a failed close. */
+export const findOpenAlertIds = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          filter: [
+            { ids: { values: [...alertIds] } },
+            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+          ],
+        },
+      },
+    },
+  });
+  assertCompleteSearch(body);
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
+/**
+ * Which of the given alerts are not closed as a false positive: still open or acknowledged, or
+ * closed by an analyst for another reason. Used to take a tag off alerts the close did not close.
+ */
+export const findAlertsNotClosedAsFalsePositive = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          filter: [{ ids: { values: [...alertIds] } }],
+          must_not: [
+            {
+              bool: {
+                filter: [
+                  { term: { [ALERT_FIELDS.status]: 'closed' } },
+                  { term: { [ALERT_FIELDS.reason]: 'false_positive' } },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  assertCompleteSearch(body);
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
+/**
+ * The ids of the alerts that carry a tag, up to one page. Used by revoke to find what to put back.
+ * A partial result throws: an empty page from a failed shard would read as "nothing left".
+ */
+export const findAlertIdsByTag = async (
+  { callKibanaApi }: KibanaApi,
+  tag: string
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: ALERT_FETCH_LIMIT,
+      _source: false,
+      query: { bool: { filter: [{ term: { [ALERT_FIELDS.tags]: tag } }] } },
+    },
+  });
+  assertCompleteSearch(body);
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
+/**
+ * Writes the given notes, `concurrency` at a time, because the notes route takes one note per call.
+ * It starts no note after `deadline`. Never throws: returns how many notes were not written, those
+ * that failed and those it did not start.
+ */
+export const writeAlertNotes = async (
+  { callKibanaApi }: KibanaApi,
+  notes: ReadonlyArray<{ alertId: string; note: string }>,
+  { concurrency, deadline }: { concurrency: number; deadline: number }
+): Promise<number> => {
+  let next = 0;
+  let failed = 0;
+  const worker = async () => {
+    while (next < notes.length && Date.now() <= deadline) {
+      const { alertId, note } = notes[next++];
+      try {
+        await callKibanaApi({
+          method: 'PATCH',
+          path: NOTE_PATH,
+          body: { note: { eventId: alertId, timelineId: '', note } },
+        });
+      } catch {
+        failed++;
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, notes.length) }, worker));
+  return failed + (notes.length - next);
+};
+
+/**
+ * Alerts one decision closed in the last 24 hours, for its daily cap. shortcut: it relies on
+ * `kibana.alert.workflow_status_updated_at`, which every closed alert carries; if a mapping lacks
+ * it the count is 0 and only the per-sweep cap applies. Upgrade to a stored counter if that matters.
+ * A partial result or a missing total throws, so the caller closes nothing on an undercount.
+ */
+export const countClosedByDecision = async (
+  { callKibanaApi }: KibanaApi,
+  decisionId: string,
+  since: number
+): Promise<number> => {
+  const { body } = await callKibanaApi<
+    SearchCompleteness & { hits?: { total?: { value?: number } | number } }
+  >({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: 0,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { [ALERT_FIELDS.tags]: `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${decisionId}` },
+            },
+            {
+              range: {
+                'kibana.alert.workflow_status_updated_at': { gte: new Date(since).toISOString() },
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  assertCompleteSearch(body);
+  const total = body.hits?.total;
+  const count = typeof total === 'number' ? total : total?.value;
+  if (count === undefined) throw new Error('Close count missing from the search response');
+  return count;
+};
+
 /** One count query, no writes: open alerts older than the look-back that were never triaged. */
 export const countAgedOutAlerts = async (
   { callKibanaApi }: KibanaApi,
@@ -449,6 +723,170 @@ export const readKeyHistory = async (
   };
 };
 
+/** Keys per search, so the `terms` clauses stay far below the default clause limit. */
+const BLOCKED_KEYS_CHUNK = 500;
+
+/**
+ * The strict key tags among `keyTags` that some alert carries together with a verdict tag other
+ * than false positive. Every alert counts, with no time limit: the consistency rule is about
+ * every earlier verdict of the key. A failed read throws, so no decision is written on a guess.
+ */
+export const findKeyTagsWithVerdicts = async (
+  { callKibanaApi }: KibanaApi,
+  keyTags: readonly string[],
+  verdictTags: readonly string[]
+): Promise<Set<string>> => {
+  const found = new Set<string>();
+  for (let from = 0; from < keyTags.length; from += BLOCKED_KEYS_CHUNK) {
+    const chunk = keyTags.slice(from, from + BLOCKED_KEYS_CHUNK);
+    const { body } = await callKibanaApi<
+      SearchCompleteness & {
+        aggregations?: { keys?: { buckets?: Array<{ key: string }> } };
+      }
+    >({
+      method: 'POST',
+      path: SIGNALS_SEARCH_PATH,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { terms: { [ALERT_FIELDS.tags]: chunk } },
+              { terms: { [ALERT_FIELDS.tags]: [...verdictTags] } },
+            ],
+          },
+        },
+        // `include` keeps only the key tags: the matching alerts carry other tags as well.
+        aggs: {
+          keys: { terms: { field: ALERT_FIELDS.tags, include: chunk, size: chunk.length } },
+        },
+      },
+    });
+    // A failed shard can drop a bucket, and a dropped bucket would let a blocked key through.
+    assertCompleteSearch(body);
+    const buckets = body.aggregations?.keys?.buckets;
+    if (buckets === undefined) throw new Error('Key verdicts missing from the search response');
+    for (const { key } of buckets) found.add(key);
+  }
+  return found;
+};
+
+/** Orders alerts of one timestamp the same way on every page. */
+const ALERT_UUID_FIELD = 'kibana.alert.uuid';
+
+/** The status code of an Elasticsearch or Kibana client error, whichever shape the client used. */
+export const statusCodeOf = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const { statusCode, meta } = error as { statusCode?: unknown; meta?: { statusCode?: unknown } };
+  const code = statusCode ?? meta?.statusCode;
+  return typeof code === 'number' ? code : undefined;
+};
+
+/**
+ * Where the next page of candidates starts: the last timestamp read, and the ids already read at
+ * that timestamp. The alerts route drops `search_after`, so a page is read as "from this
+ * timestamp on, except these ids" instead.
+ */
+export interface DecisionCursor {
+  timestamp: number;
+  seenIds: string[];
+}
+
+const nextCursor = (
+  hits: ReadonlyArray<{ _id: string; sort?: unknown[] }>,
+  lastTimestamp: number,
+  previous: DecisionCursor | undefined
+): DecisionCursor => {
+  const atLast = hits
+    .filter(({ sort }) => Number(sort?.[0]) === lastTimestamp)
+    .map(({ _id }) => _id);
+  // A page that stayed inside one timestamp keeps the ids read there before.
+  const earlier = previous?.timestamp === lastTimestamp ? previous.seenIds : [];
+  return { timestamp: lastTimestamp, seenIds: [...earlier, ...atLast] };
+};
+
+export interface DecisionCandidatesPage {
+  candidates: MatchCandidate[];
+  /** The cursor of the next page. Absent on the last page. */
+  after?: DecisionCursor;
+}
+
+/**
+ * One page of the open (not acknowledged), untriaged alerts of the look-back that a decision may match, oldest first,
+ * so the alerts closest to ageing out are matched first. They are the alerts the planner would
+ * consider, not only the ones it picks, so a match never has to wait for a batch. Alerts already
+ * tagged by a decision match are left out. Only the fields a key reads are fetched. A page is at
+ * most `ALERT_FETCH_LIMIT` alerts; pass `after` of the last page to read the next. A timestamp with
+ * more than one page of alerts is read through its `seenIds`, so no alert is read twice or missed.
+ */
+export const fetchDecisionCandidates = async (
+  { callKibanaApi }: KibanaApi,
+  analysisTagPrefix: string,
+  windowStart: number,
+  filters: TriageFilters,
+  { after }: { after?: DecisionCursor } = {}
+): Promise<DecisionCandidatesPage> => {
+  const { body } = await callKibanaApi<{
+    hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> };
+  }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: ALERT_FETCH_LIMIT,
+      _source: [...PATTERN_KEY_FIELDS, SEVERITY_FIELD],
+      sort: [{ [ALERT_FIELDS.timestamp]: 'asc' }, { [ALERT_UUID_FIELD]: 'asc' }],
+      query: {
+        bool: {
+          filter: [
+            // Only `open`: an analyst who acknowledged an alert has taken it, so a decision must not
+            // close it or keep it out of analysis.
+            { term: { [ALERT_FIELDS.status]: 'open' } },
+            { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(windowStart).toISOString() } } },
+            ...severityFilter(filters.minSeverity),
+            ...(after
+              ? [
+                  {
+                    range: {
+                      [ALERT_FIELDS.timestamp]: { gte: after.timestamp, format: 'epoch_millis' },
+                    },
+                  },
+                ]
+              : []),
+          ],
+          must_not: [
+            ...UNTRIAGED_MUST_NOT(analysisTagPrefix),
+            ...(after ? [{ ids: { values: after.seenIds } }] : []),
+            // An alert a decision closed and an analyst reopened keeps this tag. It must not be
+            // closed again: the analyst's act wins, and revoke still finds it by the tag.
+            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX } },
+            // A match already tagged stays out in every mode, so later pages move past it. In `on`
+            // only a cloud match held in shadow carries this tag; read again, it would stay at the
+            // front of the oldest-first search every sweep.
+            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
+            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
+            ...excludedByFilters(filters),
+          ],
+        },
+      },
+    },
+  });
+  const hits = body.hits?.hits ?? [];
+  const lastTimestamp = Number(hits[hits.length - 1]?.sort?.[0]);
+  return {
+    candidates: hits.map(({ _id, _source = {} }) => {
+      const severity = readField(_source, SEVERITY_FIELD);
+      return {
+        id: _id,
+        doc: expandDottedKeys(_source),
+        ...(typeof severity === 'string' ? { severity } : {}),
+      };
+    }),
+    ...(hits.length === ALERT_FETCH_LIMIT && Number.isFinite(lastTimestamp)
+      ? { after: nextCursor(hits, lastTimestamp, after) }
+      : {}),
+  };
+};
+
 /** Ids per search, so a proposal of up to 1,000 alerts does not exceed the 10 MiB response cap. */
 const LOAD_CHUNK_SIZE = 100;
 
@@ -489,6 +927,45 @@ export const loadAlertsByIds = async (
     missingAlertIds: alertIds.filter((id) => !found.has(id)),
   };
 };
+
+/**
+ * Which of the given alerts an analyst closed with a reason other than false positive (a true
+ * positive, for example). A closed alert with no reason is not one of them. A failed read throws,
+ * so no decision is written on a guess.
+ */
+export const findAlertIdsClosedAsOther = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const found: string[] = [];
+  // The search reads no `_source` and the filter runs in Elasticsearch, so a chunk can be large.
+  for (let from = 0; from < alertIds.length; from += CLOSE_REASON_CHUNK_SIZE) {
+    const ids = alertIds.slice(from, from + CLOSE_REASON_CHUNK_SIZE);
+    const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
+      method: 'POST',
+      path: SIGNALS_SEARCH_PATH,
+      body: {
+        size: ids.length,
+        _source: false,
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: ids } },
+              { term: { [ALERT_FIELDS.status]: 'closed' } },
+              { exists: { field: ALERT_FIELDS.reason } },
+            ],
+            must_not: [{ term: { [ALERT_FIELDS.reason]: 'false_positive' } }],
+          },
+        },
+      },
+    });
+    assertCompleteSearch(body);
+    found.push(...(body.hits?.hits ?? []).map(({ _id }) => _id));
+  }
+  return found;
+};
+
+const CLOSE_REASON_CHUNK_SIZE = 1000;
 
 const SEARCH_RESULT_LIMIT = 10_000;
 

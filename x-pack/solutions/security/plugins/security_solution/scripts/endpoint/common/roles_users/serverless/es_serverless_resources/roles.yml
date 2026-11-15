@@ -1119,6 +1119,13 @@ _alertzero_alert_triage:
         - "auto_configure"
       allow_restricted_indices: false
     - names:
+        - ".ai-index-idx-security-triage-decisions"
+      privileges:
+        - "read"
+        - "index"
+        - "auto_configure"
+      allow_restricted_indices: false
+    - names:
         - ".ai-index-idx-elastic-index"
       privileges:
         - "view_index_metadata"
