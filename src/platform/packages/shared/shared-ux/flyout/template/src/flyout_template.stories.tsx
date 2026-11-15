@@ -944,7 +944,11 @@ const LoadedDetails = ({
   if (!isLoaded) {
     return (
       <FlyoutTemplate onClose={onClose}>
-        <FlyoutTemplate.Header title="Alert details" isLoading />
+        <FlyoutTemplate.Header
+          title="Alert details"
+          isLoading
+          loadingLabel="Loading alert details"
+        />
         <FlyoutTemplate.Body />
       </FlyoutTemplate>
     );

@@ -78,8 +78,14 @@ export const FooterZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutF
       data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Footer')}
       // EUI pads the footer less vertically than horizontally, from a flyout-scoped rule that
       // outranks a single class, so the even padding is set inline. `size.base` is the padding
-      // `EuiFlyout` applies to the other zones for the template's `paddingSize="m"`.
-      style={{ padding: euiTheme.size.base }}
+      // `EuiFlyout` applies to the other zones for the template's `paddingSize="m"`. EUI also
+      // gives the footer a subdued background, and the template keeps it as plain as the body,
+      // set apart by the same thin border that closes the header.
+      style={{
+        padding: euiTheme.size.base,
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        borderBlockStart: euiTheme.border.thin,
+      }}
     >
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
         {secondaryAction && <EuiFlexItem grow={false}>{secondaryAction}</EuiFlexItem>}
