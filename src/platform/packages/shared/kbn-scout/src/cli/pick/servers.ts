@@ -77,17 +77,25 @@ const describeServers = (servers: RunningServers[]) =>
     )
     .join(', ');
 
-/** start-server with ES and Kibana and everything else they started */
-const getProcessTree = async (pid: number) => {
+/** The given processes with everything they started, so ES and Kibana come along with their server */
+const getProcessTrees = async (pids: number[]) => {
   const { stdout } = await execa('ps', ['-ax', '-o', 'pid=,ppid=']);
   const children = new Map<number, number[]>();
   for (const line of stdout.split('\n')) {
     const [child, parent] = line.trim().split(/\s+/).map(Number);
     children.set(parent, [...(children.get(parent) ?? []), child]);
   }
-  const tree = [pid];
+
+  const tree = [...new Set(pids)];
+  const seen = new Set(tree);
   for (let index = 0; index < tree.length; index++) {
-    tree.push(...(children.get(tree[index]) ?? []));
+    for (const child of children.get(tree[index]) ?? []) {
+      // trees overlap when one server started another, and a pid is only signalled once
+      if (!seen.has(child)) {
+        seen.add(child);
+        tree.push(child);
+      }
+    }
   }
   return tree;
 };
@@ -104,7 +112,7 @@ const isAlive = (pid: number) => {
 /** Stops start-server with ES and Kibana, and waits until they have exited */
 const stopServers = async (servers: RunningServers[]) => {
   // ES and Kibana outlive start-server on SIGTERM, so each of them gets it too
-  const pids = (await Promise.all(servers.map(({ pid }) => getProcessTree(pid)))).flat();
+  const pids = await getProcessTrees(servers.map(({ pid }) => pid));
   for (const pid of pids) {
     try {
       process.kill(pid, 'SIGTERM');

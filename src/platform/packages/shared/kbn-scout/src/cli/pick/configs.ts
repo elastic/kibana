@@ -50,6 +50,7 @@ export const getConfigs = (): PickableConfig[] =>
     }))
   );
 
+/** The config that claims a spec, or undefined when none does */
 const getConfigForSpec = (spec: string): string | undefined => {
   try {
     return validateAndProcessTestFiles(spec).configPath;
@@ -58,6 +59,7 @@ const getConfigForSpec = (spec: string): string | undefined => {
   }
 };
 
+/** A config's specs; one directory can hold several configs, so each spec is attributed back */
 export const getSpecs = (configPath: string): string[] => {
   const dir = Path.resolve(REPO_ROOT, Path.dirname(configPath));
   return Fs.readdirSync(dir, { recursive: true, encoding: 'utf8' })
@@ -72,6 +74,7 @@ const git = async (args: string[]) => {
   return stdout.split('\n').filter(Boolean);
 };
 
+// with no remote to compare against, only uncommitted specs are left to report as changed
 const findMergeBase = async () => {
   for (const ref of ['upstream/main', 'origin/main', 'main']) {
     const [base] = await git(['merge-base', 'HEAD', ref]).catch(() => []);
@@ -84,10 +87,8 @@ let mergeBase: Promise<string> | undefined;
 const getMergeBase = () => (mergeBase ??= findMergeBase());
 
 /**
- * Specs changed on this branch or not committed yet. Only specs: a page object, fixture or
- * es_archive can be imported from any module, so the specs a change to one affects cannot be
- * told from its path, and guessing from the directory it sits in would be wrong as often as
- * right.
+ * Specs changed on this branch or not committed yet. Only specs: a page object or es_archive can
+ * be imported from any module, so which specs a change to one affects can't be told from its path.
  */
 export const getChangedFiles = async (): Promise<string[]> => {
   const pathspec = ['*.spec.ts'];

@@ -35,9 +35,8 @@ let shownPrompts = 0;
 export const getShownPrompts = () => shownPrompts;
 
 /**
- * The questions answered so far, so each prompt can name the one Esc goes back to. Only
- * answered prompts count: a question skipped because it had a single answer, or one left by
- * pressing Esc, is not somewhere Esc can return to.
+ * The questions answered so far, so each prompt can name the one Esc goes back to. A question
+ * skipped because it had a single answer, or left by pressing Esc, is not one to return to.
  */
 const answered: string[] = [];
 

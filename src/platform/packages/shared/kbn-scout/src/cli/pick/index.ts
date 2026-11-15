@@ -15,8 +15,19 @@ import { runPick } from './run_pick';
  */
 export const pickCmd: Command<void> = {
   name: 'pick',
-  description:
-    'Pick Scout tests to run: pinned configs, specs changed on your branch, or search for a config',
+  description: `
+  Pick Scout tests to run in an interactive terminal.
+
+  Asks for a config, the specs and the test target, then finds or starts the servers they need
+  and stays open to rerun them. Starts from the configs you pinned, the specs you changed on
+  your branch, or a search across all Scout configs.
+
+  Common usage:
+    node scripts/scout pick
+
+  Needs an interactive terminal, and relies on 'ps' to find running servers, so it is macOS
+  and Linux only.
+  `,
   run: async ({ log }) => {
     await runPick(log);
   },

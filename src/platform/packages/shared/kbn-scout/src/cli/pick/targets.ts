@@ -10,12 +10,10 @@
 import Path from 'path';
 import { testTargets } from '@kbn/scout-info';
 import { getGitSHA1ForPath, testConfig } from '@kbn/scout-reporting';
-import { getSpecs } from './configs';
 import type { PinnedConfig } from './pins';
 
 const LOCAL_TAGS = new Set(testTargets.local.map(({ tag }) => tag));
 
-/** Writes the manifests the picker reads, for every config whose own is missing or outdated */
 export const MANIFEST_UPDATE_CMD = 'node scripts/scout update-test-config-manifests';
 
 /** Manifests record `@local-…`, the target tags they map to drop the `@` */
@@ -27,24 +25,22 @@ const toLocalTags = (tags: string[]): string[] =>
 /** Local target tags each spec declares, by repo-relative spec path */
 type SpecTags = Map<string, string[]>;
 
-/** A spec with no local tag still gets an entry, so it isn't mistaken for an unlisted one */
-const addTags = (specTags: SpecTags, file: string, tags: string[]) => {
-  specTags.set(file, [...new Set([...(specTags.get(file) ?? []), ...toLocalTags(tags)])]);
-};
-
 /**
- * Tags recorded by the last test config manifest update, which runs on a schedule. Tags change
- * far less often than test bodies, so a spec the manifest lists is trusted even when you have
- * edited it; a spec it doesn't list at all, such as a new one, can only fall back.
+ * Tags recorded by the last manifest update, which runs on a schedule. Tags change far less
+ * often than test bodies, so a spec the manifest lists is trusted even when you have edited it.
+ * A spec it doesn't list at all, a new one for instance, leaves the manifest unable to answer.
  */
 const fromManifest = (configPath: string, specs: string[]): SpecTags | undefined => {
   const { manifest } = testConfig.fromPath(configPath);
   if (!manifest.exists) {
     return undefined;
   }
+
   const specTags: SpecTags = new Map();
   for (const { location, tags } of manifest.tests) {
-    addTags(specTags, location.file, tags);
+    // a spec with no local tag still gets an entry, so it isn't mistaken for an unlisted one
+    const known = specTags.get(location.file) ?? [];
+    specTags.set(location.file, [...new Set([...known, ...toLocalTags(tags)])]);
   }
   return specs.every((spec) => specTags.has(spec)) ? specTags : undefined;
 };
@@ -62,10 +58,9 @@ export interface TargetCoverage {
 
 /**
  * The targets the specs about to run actually declare. A config's own targets are the union over
- * all of its tests, so offering those would let you pick one that runs none of the picked specs.
+ * all of its tests, so offering those would let you pick one that runs none of the given specs.
  */
-export const getTargetCoverage = (config: PinnedConfig, picked: string[]): TargetCoverage => {
-  const specs = picked.length ? picked : getSpecs(config.path);
+export const getTargetCoverage = (config: PinnedConfig, specs: string[]): TargetCoverage => {
   const total = specs.length;
   const fallback: TargetCoverage = { tags: config.targets, counts: new Map(), total, known: false };
 

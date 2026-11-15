@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./configs', () => ({ getSpecs: jest.fn() }));
 jest.mock('@kbn/scout-reporting', () => ({
   getGitSHA1ForPath: jest.fn(),
   testConfig: { fromPath: jest.fn() },
 }));
 
 import { getGitSHA1ForPath, testConfig } from '@kbn/scout-reporting';
-import { getSpecs } from './configs';
 import type { PinnedConfig } from './pins';
 import { getTargetCoverage, isManifestOutdated } from './targets';
 
 const mockFromPath = testConfig.fromPath as jest.MockedFunction<typeof testConfig.fromPath>;
-const mockGetSpecs = getSpecs as jest.MockedFunction<typeof getSpecs>;
 const mockGetGitSHA1ForPath = getGitSHA1ForPath as jest.MockedFunction<typeof getGitSHA1ForPath>;
 
 const CONFIG_PATH = 'src/platform/plugins/shared/dashboard/test/scout/ui/playwright.config.ts';
@@ -118,17 +115,6 @@ describe('getTargetCoverage', () => {
       tags: config.targets,
       known: false,
     });
-  });
-
-  it('covers every spec of the config when none are picked', () => {
-    mockGetSpecs.mockReturnValue([SPEC_A, SPEC_B]);
-    givenManifest([
-      { file: SPEC_A, tags: ['@local-stateful-classic'] },
-      { file: SPEC_B, tags: ['@local-stateful-classic'] },
-    ]);
-
-    expect(getTargetCoverage(config, [])).toMatchObject({ total: 2, known: true });
-    expect(mockGetSpecs).toHaveBeenCalledWith(CONFIG_PATH);
   });
 });
 

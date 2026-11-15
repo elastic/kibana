@@ -105,7 +105,6 @@ const runSteps = async <S extends string>(
       if (!(error instanceof GoBack)) {
         throw error;
       }
-      // the question Esc goes back to is about to be asked again
       forgetAnswer();
       step = asked.pop() ?? step;
     }
@@ -160,6 +159,8 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
     }
     return config;
   };
+
+  const specName = (file: string) => Path.relative(Path.dirname(getConfig().path), file);
 
   const steps: Record<Step, () => Promise<Step | undefined>> = {
     group: async () => {
@@ -266,11 +267,8 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
       return 'scope';
     },
     scope: async () => {
-      const { path } = getConfig();
-      configSpecs = getSpecs(path);
-      const configDir = Path.dirname(path);
-      const names = (files: string[]) =>
-        files.map((file) => Path.relative(configDir, file)).join(', ');
+      configSpecs = getSpecs(getConfig().path);
+      const names = (files: string[]) => files.map(specName).join(', ');
       const { specs: changedSpecs = [] } = changedConfig ?? {};
 
       const scope = await select('Run', [
@@ -284,13 +282,11 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
       return scope === 'pick' ? 'specs' : 'target';
     },
     specs: async () => {
-      const configDir = Path.dirname(getConfig().path);
-      // the ones you are working on are the ones you most likely came here to run
       const changed = await getChangedSpecs(configSpecs);
       specs = await multiSelect(
         'Specs',
         configSpecs.map((spec) => ({
-          label: Path.relative(configDir, spec),
+          label: specName(spec),
           value: spec,
           // preselected, so Enter runs what you edited and Space adds the rest
           ...(changed.has(spec) ? { hint: chalk.yellow('changed'), checked: true } : {}),
@@ -299,7 +295,11 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
       return 'target';
     },
     target: async () => {
-      const { tags, counts, total, known } = getTargetCoverage(getConfig(), specs);
+      // scope always runs before this and leaves every spec of the config in configSpecs
+      const { tags, counts, total, known } = getTargetCoverage(
+        getConfig(),
+        specs.length ? specs : configSpecs
+      );
       if (!known) {
         log.write(
           chalk.yellow('No manifest entry for these specs yet, showing every target of the config')

@@ -25,6 +25,8 @@ const LOG_FILE = '.scout/logs/scout_pick.log';
 // local run would pick up tests that need attributes a local target doesn't declare, e.g. fips
 const { grepInvert } = getPlaywrightLimitOptions([]);
 
+/** Playwright runs the specs directly against servers that are already up; otherwise run-tests
+ * starts them, runs and stops them again */
 const getCommand = (
   { config, specs, target, verbose, headed }: Selection,
   mode: ServersMode,
