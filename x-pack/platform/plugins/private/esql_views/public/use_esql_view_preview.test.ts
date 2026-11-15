@@ -7,14 +7,14 @@
 
 import { act, renderHook } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
-import { formatESQLColumns, getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import { formatESQLColumns, getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { IEsqlSearchResult } from '@kbn/search-types';
 import type { EsqlViewPreviewDependencies } from './use_esql_view_preview';
 import { useEsqlViewPreview } from './use_esql_view_preview';
 
 jest.mock('@kbn/esql-utils', () => ({
   formatESQLColumns: jest.fn(),
   getESQLAdHocDataview: jest.fn(),
-  getESQLResults: jest.fn(),
   prettifyQuery: jest.fn((value: string) => value.replace(/\s+/g, ' ').trim()),
 }));
 
@@ -22,13 +22,13 @@ const mockFormatESQLColumns = formatESQLColumns as jest.MockedFunction<typeof fo
 const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
   typeof getESQLAdHocDataview
 >;
-const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
 
 const dataView = { id: 'preview-data-view' };
+const mockSearch = jest.fn();
 const dependencies = {
   dataViews: {},
   http: {},
-  search: jest.fn(),
+  search: { esql: mockSearch },
 } as unknown as EsqlViewPreviewDependencies;
 
 const query = (esql: string): AggregateQuery => ({ esql });
@@ -39,8 +39,7 @@ const createResponse = ({
   rows = [['hello']],
   took = 12,
 } = {}) => ({
-  params: {},
-  response: {
+  rawResponse: {
     columns,
     documents_found: documentsFound,
     took,
@@ -68,19 +67,17 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('runs a query and exposes formatted grid data and query stats', async () => {
-    mockGetESQLResults.mockResolvedValue(createResponse() as never);
+    mockSearch.mockResolvedValue(createResponse() as never);
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
 
     await act(async () => {
       await result.current.runPreview(query('FROM logs-*'));
     });
 
-    expect(mockGetESQLResults).toHaveBeenCalledWith({
-      esqlQuery: 'FROM logs-*',
-      includeColumnMetadata: true,
-      search: dependencies.search,
-      signal: expect.any(AbortSignal),
-    });
+    expect(mockSearch).toHaveBeenCalledWith(
+      { query: 'FROM logs-*', columnMetadata: true },
+      { abortSignal: expect.any(AbortSignal) }
+    );
     expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith({
       dataViewsService: dependencies.dataViews,
       http: dependencies.http,
@@ -101,7 +98,7 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('retains an empty successful result', async () => {
-    mockGetESQLResults.mockResolvedValue(createResponse({ documentsFound: 0, rows: [] }) as never);
+    mockSearch.mockResolvedValue(createResponse({ documentsFound: 0, rows: [] }) as never);
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
 
     await act(async () => {
@@ -114,7 +111,7 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('preserves preview results when only query formatting changes', async () => {
-    mockGetESQLResults.mockResolvedValue(createResponse() as never);
+    mockSearch.mockResolvedValue(createResponse() as never);
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
 
     await act(async () => {
@@ -130,7 +127,7 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('preserves preview results when the query meaningfully changes', async () => {
-    mockGetESQLResults.mockResolvedValue(createResponse() as never);
+    mockSearch.mockResolvedValue(createResponse() as never);
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
 
     await act(async () => {
@@ -147,7 +144,7 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('exposes execution errors without producing a result', async () => {
-    mockGetESQLResults.mockRejectedValue(new Error('Invalid query'));
+    mockSearch.mockRejectedValue(new Error('Invalid query'));
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
 
     await act(async () => {
@@ -160,7 +157,7 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('preserves the last successful result when a subsequent query fails', async () => {
-    mockGetESQLResults
+    mockSearch
       .mockResolvedValueOnce(createResponse({ rows: [['existing']] }) as never)
       .mockRejectedValueOnce(new Error('Invalid query'));
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
@@ -185,8 +182,8 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('keeps the previous result until a replacement query succeeds', async () => {
-    const replacementRequest = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
-    mockGetESQLResults
+    const replacementRequest = createDeferred<IEsqlSearchResult>();
+    mockSearch
       .mockResolvedValueOnce(createResponse({ rows: [['existing']] }) as never)
       .mockReturnValueOnce(replacementRequest.promise);
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
@@ -214,8 +211,8 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('stops loading when the editor aborts the query', async () => {
-    const deferred = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
-    mockGetESQLResults.mockReturnValue(deferred.promise);
+    const deferred = createDeferred<IEsqlSearchResult>();
+    mockSearch.mockReturnValue(deferred.promise);
     const abortController = new AbortController();
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
 
@@ -241,11 +238,11 @@ describe('useEsqlViewPreview', () => {
 
   it('aborts the active query without clearing existing results when the editor query changes', async () => {
     let requestSignal: AbortSignal | undefined;
-    const deferred = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
-    mockGetESQLResults
+    const deferred = createDeferred<IEsqlSearchResult>();
+    mockSearch
       .mockResolvedValueOnce(createResponse({ rows: [['existing']] }) as never)
-      .mockImplementationOnce(({ signal }) => {
-        requestSignal = signal;
+      .mockImplementationOnce((_params, { abortSignal }) => {
+        requestSignal = abortSignal;
         return deferred.promise;
       });
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
@@ -278,9 +275,9 @@ describe('useEsqlViewPreview', () => {
 
   it('aborts the active query when unmounted', async () => {
     let requestSignal: AbortSignal | undefined;
-    const deferred = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
-    mockGetESQLResults.mockImplementation(({ signal }) => {
-      requestSignal = signal;
+    const deferred = createDeferred<IEsqlSearchResult>();
+    mockSearch.mockImplementation((_params, { abortSignal }) => {
+      requestSignal = abortSignal;
       return deferred.promise;
     });
     const { result, unmount } = renderHook(() => useEsqlViewPreview(dependencies));
@@ -298,11 +295,9 @@ describe('useEsqlViewPreview', () => {
   });
 
   it('ignores a stale response after a newer query succeeds', async () => {
-    const firstRequest = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
-    const secondRequest = createDeferred<Awaited<ReturnType<typeof getESQLResults>>>();
-    mockGetESQLResults
-      .mockReturnValueOnce(firstRequest.promise)
-      .mockReturnValueOnce(secondRequest.promise);
+    const firstRequest = createDeferred<IEsqlSearchResult>();
+    const secondRequest = createDeferred<IEsqlSearchResult>();
+    mockSearch.mockReturnValueOnce(firstRequest.promise).mockReturnValueOnce(secondRequest.promise);
     const { result } = renderHook(() => useEsqlViewPreview(dependencies));
 
     let firstRun = Promise.resolve();

@@ -43,10 +43,6 @@ jest.mock('../../../../common/options_list/get_esql_single_column_values', () =>
   return { getESQLSingleColumnValues: fn };
 });
 
-jest.mock('../../utils/get_controls_timezone', () => ({
-  getControlsTimezone: () => 'UTC',
-}));
-
 const baseProps = {
   selectedDataView: undefined,
   isEdit: false,

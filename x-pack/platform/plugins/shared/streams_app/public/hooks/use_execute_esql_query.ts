@@ -6,19 +6,17 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { getESQLResults } from '@kbn/esql-utils';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { buildEsqlFilter } from '@kbn/streams-plugin/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 
 interface ExecuteEsqlParams {
   query: string;
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
   signal?: AbortSignal;
   filter?: estypes.QueryDslQueryContainer;
-  timezone?: string;
   kuery?: string;
   start?: number;
   end?: number;
@@ -40,7 +38,6 @@ export async function executeEsqlQuery({
   signal,
   dropNullColumns,
   filter,
-  timezone,
   kuery,
   start,
   end,
@@ -49,22 +46,24 @@ export async function executeEsqlQuery({
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const combinedFilter = buildEsqlFilter({ filter, kuery, start, end, esQueryConfig });
 
-  const { response } = await getESQLResults({
-    dropNullColumns,
-    esqlQuery: query,
-    search,
-    signal,
-    filter: combinedFilter,
-    timezone,
-    timeRange:
-      start !== undefined && end !== undefined
-        ? {
-            from: new Date(start).toISOString(),
-            to: new Date(end).toISOString(),
-            mode: 'absolute' as const,
-          }
-        : undefined,
-  });
+  const { rawResponse } = await search.esql(
+    {
+      query,
+      dropNullColumns,
+      filter: combinedFilter,
+      kibanaQueryContext: {
+        timeRange:
+          start !== undefined && end !== undefined
+            ? {
+                from: new Date(start).toISOString(),
+                to: new Date(end).toISOString(),
+                mode: 'absolute' as const,
+              }
+            : undefined,
+      },
+    },
+    { abortSignal: signal }
+  );
 
-  return response;
+  return rawResponse;
 }

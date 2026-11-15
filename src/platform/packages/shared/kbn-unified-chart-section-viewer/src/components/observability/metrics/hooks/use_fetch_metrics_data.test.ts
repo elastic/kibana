@@ -115,16 +115,16 @@ const createMockParsedMetrics = (
   },
 });
 
-// Minimal services surface the hook-under-test reads: `data.search.search`
+// Minimal services surface the hook-under-test reads: `data.search.esql`
 // and `uiSettings`. Declared as a partial so we don't have to mock the
 // entire UnifiedHistogramServices tree.
 interface MockServices {
-  data: { search: { search: jest.Mock } };
+  data: { search: { esql: jest.Mock } };
   uiSettings: Record<string, unknown>;
 }
 
 const createMockServices = (): MockServices => ({
-  data: { search: { search: jest.fn() } },
+  data: { search: { esql: jest.fn() } },
   uiSettings: {},
 });
 
@@ -198,7 +198,6 @@ describe('useFetchMetricsData', () => {
       rawResponse: {
         columns: [],
         values: [],
-        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       },
       requestParams: { query: 'TS metrics-* | METRICS_INFO' },
     });
@@ -245,7 +244,6 @@ describe('useFetchMetricsData', () => {
         rawResponse: {
           columns: [],
           values: [],
-          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
         },
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
@@ -294,7 +292,6 @@ describe('useFetchMetricsData', () => {
         rawResponse: {
           columns: [],
           values: [],
-          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
         },
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       };
@@ -428,7 +425,6 @@ describe('useFetchMetricsData', () => {
           rawResponse: {
             columns: [],
             values: [],
-            requestParams: { query: 'TS metrics-* | METRICS_INFO' },
           },
           requestParams: { query: 'TS metrics-* | METRICS_INFO' },
         };
@@ -469,7 +465,6 @@ describe('useFetchMetricsData', () => {
         rawResponse: {
           columns: [],
           values: [],
-          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
         },
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });

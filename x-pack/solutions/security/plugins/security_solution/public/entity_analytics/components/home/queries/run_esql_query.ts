@@ -8,7 +8,6 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { getESQLResults } from '@kbn/esql-utils';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import {
   buildExecutionContext,
@@ -18,22 +17,22 @@ import {
 export type EsqlContext = string | { id: string; meta?: KibanaExecutionContext['meta'] };
 
 export const runEsqlQuery = async (
-  searchService: DataPublicPluginStart['search'],
+  searchService: Pick<DataPublicPluginStart['search'], 'esql'>,
   query: string,
   context: EsqlContext,
   signal?: AbortSignal
 ): Promise<ESQLSearchResponse> => {
   const { id, meta } = typeof context === 'string' ? { id: context, meta: undefined } : context;
-  const { response } = await getESQLResults({
-    esqlQuery: query,
-    search: searchService.search,
-    signal,
-    projectRouting: PROJECT_ROUTING.ORIGIN,
-    executionContext: {
-      ...buildExecutionContext(EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE, id),
-      id,
-      ...(meta ? { meta } : {}),
-    },
-  });
-  return response;
+  const { rawResponse } = await searchService.esql(
+    { query, projectRouting: PROJECT_ROUTING.ORIGIN },
+    {
+      abortSignal: signal,
+      executionContext: {
+        ...buildExecutionContext(EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE, id),
+        id,
+        ...(meta ? { meta } : {}),
+      },
+    }
+  );
+  return rawResponse;
 };

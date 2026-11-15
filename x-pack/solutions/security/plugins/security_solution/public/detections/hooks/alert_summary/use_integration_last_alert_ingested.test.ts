@@ -35,10 +35,8 @@ describe('useIntegrationLastAlertIngested', () => {
     (useQuery as jest.Mock).mockReturnValue({
       isLoading: false,
       data: {
-        response: {
-          columns: [{ name: 'event.ingested' }],
-          values: [['2025-01-01T00:00:000Z']],
-        },
+        columns: [{ name: 'event.ingested' }],
+        values: [['2025-01-01T00:00:000Z']],
       },
       refetch: jest.fn(),
     });
@@ -53,7 +51,7 @@ describe('useIntegrationLastAlertIngested', () => {
     const refetch = jest.fn();
     (useQuery as jest.Mock).mockReturnValue({
       isLoading: false,
-      data: {},
+      data: undefined,
       refetch,
     });
 

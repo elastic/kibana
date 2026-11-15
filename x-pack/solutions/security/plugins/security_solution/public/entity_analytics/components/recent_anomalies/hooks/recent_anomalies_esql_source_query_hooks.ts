@@ -26,7 +26,7 @@ const BASE_RECORD_FILTER = `| WHERE result_type == "record" AND is_interim == fa
 
 /**
  * Time-range filter applied inside the query text via ?_tstart/?_tend named
- * params (populated by getESQLResults when given a timeRange) instead of the
+ * params (populated by the esql search when given a `kibanaQueryContext.timeRange`) instead of the
  * request-level `filter` DSL. A request-level filter that matches no data
  * makes the FROM pattern resolve to zero indices, which trips an
  * Elasticsearch bug in LOOKUP JOIN lookup-index resolution and fails the

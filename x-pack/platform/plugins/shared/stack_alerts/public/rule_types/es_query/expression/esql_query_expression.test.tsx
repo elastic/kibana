@@ -58,7 +58,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common', () => {
 
 jest.mock('@kbn/esql-utils', () => {
   return {
-    getESQLResults: jest.fn().mockResolvedValue({}),
     getIndexPattern: jest.fn(),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getESQLTimeField: jest.fn().mockResolvedValue('@timestamp'),
@@ -126,7 +125,6 @@ describe('EsqlQueryRuleTypeExpression', () => {
     hasExpressionValidationErrors.mockReturnValue(false);
     global.Date.now = jest.fn(() => fakeNow.getTime());
 
-    esqlUtilsMock.getESQLResults.mockResolvedValue({});
     esqlUtilsMock.getESQLTimeField.mockResolvedValue('@timestamp');
     esqlUtilsMock.getEsqlSourceColumns.mockResolvedValue(defaultSourceColumns);
     esqlUtilsMock.getSourceCommandQueryFromESQLQuery.mockImplementation((esql: string) => esql);
@@ -459,10 +457,10 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show success message if Test Query is successful', async () => {
-    const { getESQLResults } = esqlUtilsMock;
+    const esql = dataMock.search.esql as jest.Mock;
 
-    getESQLResults.mockResolvedValue({
-      response: {
+    esql.mockResolvedValue({
+      rawResponse: {
         type: 'datatable',
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -495,7 +493,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
+    await waitFor(() => expect(esql).toHaveBeenCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query matched 1 documents in the last 15s.')).toBeInTheDocument();
@@ -503,10 +501,10 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show grouped success message if Test Query is successful', async () => {
-    const { getESQLResults } = esqlUtilsMock;
+    const esql = dataMock.search.esql as jest.Mock;
 
-    getESQLResults.mockResolvedValue({
-      response: {
+    esql.mockResolvedValue({
+      rawResponse: {
         type: 'datatable',
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -539,7 +537,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
+    await waitFor(() => expect(esql).toHaveBeenCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query returned 1 rows in the last 15s.')).toBeInTheDocument();
@@ -547,9 +545,9 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show error message if Test Query is throws error', async () => {
-    const { getESQLResults } = esqlUtilsMock;
+    const esql = dataMock.search.esql as jest.Mock;
 
-    getESQLResults.mockRejectedValue('Error getting test results.!');
+    esql.mockRejectedValue('Error getting test results.!');
 
     const result = render(
       <EsqlQueryExpression
@@ -574,7 +572,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(result.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
+    await waitFor(() => expect(esql).toHaveBeenCalled());
 
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.getByTestId('testQueryError')).toBeInTheDocument();

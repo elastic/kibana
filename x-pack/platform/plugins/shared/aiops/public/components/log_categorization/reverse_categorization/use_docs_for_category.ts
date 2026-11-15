@@ -12,7 +12,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildQueryFromFilters, isOfAggregateQueryType } from '@kbn/es-query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import { getESQLResults } from '@kbn/esql-utils';
+import type { IEsqlSearchParams } from '@kbn/search-types';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { createFilter } from '../use_discover_links';
 import { buildEsqlCategoryDocsQuery } from './build_esql_analysis_queries';
@@ -53,7 +53,7 @@ export function useDocsForCategory() {
       query?: Query | AggregateQuery;
       timeRange?: TimeRange;
       signal?: AbortSignal;
-      filter?: unknown;
+      filter?: IEsqlSearchParams['filter'];
     }): Promise<{ total: number; results: { timestamp: string; message: string }[] }> => {
       if (isOfAggregateQueryType(query) && timeField) {
         const esqlQuery = buildEsqlCategoryDocsQuery({
@@ -64,14 +64,15 @@ export function useDocsForCategory() {
           size,
         });
 
-        const { response } = await getESQLResults({
-          esqlQuery,
-          search: search.search,
-          signal,
-          filter,
-          timeRange,
-          dropNullColumns: true,
-        });
+        const { rawResponse: response } = await search.esql(
+          {
+            query: esqlQuery,
+            filter,
+            dropNullColumns: true,
+            kibanaQueryContext: { timeRange },
+          },
+          { abortSignal: signal }
+        );
 
         const fieldIndex = response.columns.findIndex((column) => column.name === field);
         const timeIndex = response.columns.findIndex((column) => column.name === timeField);

@@ -12,17 +12,12 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLQueryStats } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
-import {
-  formatESQLColumns,
-  getESQLAdHocDataview,
-  getESQLResults,
-  prettifyQuery,
-} from '@kbn/esql-utils';
+import { formatESQLColumns, getESQLAdHocDataview, prettifyQuery } from '@kbn/esql-utils';
 
 export interface EsqlViewPreviewDependencies {
   dataViews: DataPublicPluginStart['dataViews'];
   http: HttpStart;
-  search: DataPublicPluginStart['search']['search'];
+  search: Pick<DataPublicPluginStart['search'], 'esql'>;
 }
 
 export interface EsqlViewPreviewResult {
@@ -148,13 +143,11 @@ export const useEsqlViewPreview = ({
       abortController.signal.addEventListener('abort', handleAbort, { once: true });
 
       try {
-        const [{ response }, dataView] = await Promise.all([
-          getESQLResults({
-            esqlQuery,
-            includeColumnMetadata: true,
-            search,
-            signal: abortController.signal,
-          }),
+        const [{ rawResponse: response }, dataView] = await Promise.all([
+          search.esql(
+            { query: esqlQuery, columnMetadata: true },
+            { abortSignal: abortController.signal }
+          ),
           getESQLAdHocDataview({
             dataViewsService: dataViews,
             http,

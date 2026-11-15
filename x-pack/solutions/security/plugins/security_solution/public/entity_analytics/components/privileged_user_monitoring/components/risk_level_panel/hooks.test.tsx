@@ -6,17 +6,15 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { getESQLResults } from '@kbn/esql-utils';
 import { createReactQueryWrapper } from '../../../../../common/mock/create_react_query_wrapper';
 import { useRiskLevelsPrivilegedUserQuery } from './hooks';
 
 jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
   prettifyQuery: jest.fn((query) => query),
 }));
 
 jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { data: { search: { search: jest.fn() } } } }),
+  useKibana: () => ({ services: { data: { search: { esql: mockEsql } } } }),
 }));
 
 jest.mock('../../../../../common/hooks/esql/use_esql_global_filter', () => ({
@@ -39,12 +37,12 @@ jest.mock('../../../../api/hooks/use_risk_engine_status', () => ({
   }),
 }));
 
-const mockGetESQLResults = getESQLResults as jest.Mock;
+const mockEsql = jest.fn();
 
 describe('useRiskLevelsPrivilegedUserQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetESQLResults.mockResolvedValue({ response: { columns: [], values: [] } });
+    mockEsql.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
   });
 
   it('labels the query with the pum_risk_level_panel execution context', async () => {
@@ -52,9 +50,10 @@ describe('useRiskLevelsPrivilegedUserQuery', () => {
       wrapper: createReactQueryWrapper(),
     });
 
-    await waitFor(() => expect(mockGetESQLResults).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockEsql).toHaveBeenCalledTimes(1));
 
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
+    expect(mockEsql).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({
         executionContext: {
           child: {

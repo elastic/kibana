@@ -57,9 +57,7 @@ export const useFetchExemplars = ({
   const { dataSource } = fetchParams;
   const timeFieldName = dataSource?.timeFieldName;
   const {
-    data: {
-      search: { search },
-    },
+    data: { search },
     uiSettings,
   } = services;
 

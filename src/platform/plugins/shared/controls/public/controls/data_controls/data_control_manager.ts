@@ -39,7 +39,6 @@ import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
-import { getControlsTimezone } from '../utils';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
@@ -272,10 +271,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
       dataControlStateManager.api.setDataViewId(dataViewId);
       const result = await getESQLSingleColumnValues({
         query,
-        search: dataService.search.search,
+        search: dataService.search,
         esqlVariables,
         timeRange: dataService.query.timefilter.timefilter.getTime(),
-        timezone: getControlsTimezone(),
       });
       if (!getESQLSingleColumnValues.isSuccess(result)) {
         throw result.errors[0];

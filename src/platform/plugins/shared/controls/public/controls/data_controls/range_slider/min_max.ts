@@ -23,7 +23,6 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { dataService } from '../../../services/kibana_services';
 import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
-import { getControlsTimezone } from '../../utils';
 
 export function minMax$({
   controlFetch$,
@@ -152,9 +151,8 @@ export async function getMinMax({
       timeRange,
       filter: esqlPreFilter,
       signal: abortSignal,
-      search: dataService.search.search,
+      search: dataService.search,
       esqlVariables: esqlVariables ?? [],
-      timezone: getControlsTimezone(),
     });
     if (getESQLSingleColumnValues.isNumericResult(result)) {
       return { min: min(result.values), max: max(result.values) };

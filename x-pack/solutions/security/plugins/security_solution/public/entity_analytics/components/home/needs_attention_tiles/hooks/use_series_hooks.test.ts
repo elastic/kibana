@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -239,7 +238,7 @@ describe('series hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { search: { search: mockSearch } } },
+      services: { data: { search: { esql: mockSearch } } },
     });
     mockIndex.mockReturnValue({ data: { indexName: '.entities-v1' }, isLoading: false });
     // The index as the index hook resolves it, and the plain filter clauses: the group overrides of the
@@ -320,22 +319,20 @@ describe('series hooks', () => {
       const columns = hook.columns.flatMap((column, t) =>
         Array.from({ length: DOT_COUNT }, (_, k) => ({ name: column(k), value: 1000 * t + k }))
       );
-      mockSearch.mockReturnValue(
-        of({
-          rawResponse: {
-            columns: columns.map(({ name }) => ({ name })),
-            values: [columns.map(({ value }) => value)],
-          },
-        })
-      );
+      mockSearch.mockResolvedValue({
+        rawResponse: {
+          columns: columns.map(({ name }) => ({ name })),
+          values: [columns.map(({ value }) => value)],
+        },
+      });
       run(hook);
       expect(mockUseQuery).toHaveBeenCalledTimes(1);
       const [key, queryFn] = lastCall();
       expect(key[0]).toBe(hook.tileKey);
       const parsed = await queryFn({ signal: undefined });
       expect(mockSearch).toHaveBeenCalledWith(
-        { params: { query: key[1] } },
-        expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+        { query: key[1], projectRouting: '_alias:_origin' },
+        expect.anything()
       );
       // Oldest first: the first dot is column 5 of the tile, the last is column 0.
       hook.fromParsed(parsed).forEach((dots, t) => {
@@ -437,7 +434,7 @@ describe('series hooks', () => {
 const setUpSettledSeries = (hook: HookCase) => {
   jest.clearAllMocks();
   (useKibana as jest.Mock).mockReturnValue({
-    services: { data: { search: { search: mockSearch } } },
+    services: { data: { search: { esql: mockSearch } } },
   });
   mockIndex.mockReturnValue({ data: { indexName: '.entities-v1' }, isLoading: false });
   mockJobs.mockReturnValue({ jobIds: ['job_a'], loading: false });

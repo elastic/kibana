@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { useRiskLevelsEsqlQuery } from './use_risk_levels_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -49,21 +48,18 @@ describe('useRiskLevelsEsqlQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockSearch.mockReturnValue(
-      of({
-        rawResponse: {
-          columns: [{ name: 'count' }, { name: 'level' }],
-          values: [[5, 'Critical']],
-        },
-        requestParams: {},
-      })
-    );
+    mockSearch.mockResolvedValue({
+      rawResponse: {
+        columns: [{ name: 'count' }, { name: 'level' }],
+        values: [[5, 'Critical']],
+      },
+    });
 
     mockUseKibana.mockReturnValue({
       services: {
         data: {
           search: {
-            search: mockSearch,
+            esql: mockSearch,
           },
         },
       },
@@ -75,10 +71,8 @@ describe('useRiskLevelsEsqlQuery', () => {
     mockUseQuery.mockImplementation((queryKey, queryFn, options) => {
       return {
         data: {
-          response: {
-            columns: [{ name: 'count' }, { name: 'level' }],
-            values: [[5, 'Critical']],
-          },
+          columns: [{ name: 'count' }, { name: 'level' }],
+          values: [[5, 'Critical']],
         },
         error: undefined,
         isError: false,
@@ -142,7 +136,7 @@ describe('useRiskLevelsEsqlQuery', () => {
 
     await queryFn({ signal: undefined });
 
-    expect(mockSearch.mock.calls[0][0].params).toEqual(
+    expect(mockSearch.mock.calls[0][0]).toEqual(
       expect.objectContaining({ filter: 'mock-filter-with-time' })
     );
   });
@@ -154,7 +148,7 @@ describe('useRiskLevelsEsqlQuery', () => {
 
     await queryFn({ signal: undefined });
 
-    expect(mockSearch.mock.calls[0][0].params).toEqual(
+    expect(mockSearch.mock.calls[0][0]).toEqual(
       expect.objectContaining({ filter: 'mock-filter-no-time' })
     );
   });
@@ -166,7 +160,7 @@ describe('useRiskLevelsEsqlQuery', () => {
 
     await queryFn({ signal: undefined });
 
-    expect(mockSearch.mock.calls[0][1]).toEqual(
+    expect(mockSearch.mock.calls[0][0]).toEqual(
       expect.objectContaining({ projectRouting: '_alias:_origin' })
     );
   });

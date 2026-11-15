@@ -10,7 +10,7 @@
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import {
   EXEMPLARS_INDEX_PREFIX,
   EXEMPLARS_METRIC_NAME_FIELD,
@@ -39,7 +39,7 @@ export const EXEMPLARS_PROBE_QUERY = `FROM ${EXEMPLARS_OTEL_STREAMS} | STATS BY 
 export type MetricsWithExemplars = ReadonlyMap<string, ReadonlySet<string>>;
 
 export interface FetchMetricsWithExemplarsParams {
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
   timeFieldName?: string;
   timeRange: TimeRange;
   uiSettings: IUiSettingsClient;

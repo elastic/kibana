@@ -14,7 +14,7 @@ jest.mock('../utils/fetch_metrics_with_exemplars', () => ({
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import { fetchMetricsWithExemplars } from '../utils/fetch_metrics_with_exemplars';
 import {
   ExemplarsAvailabilityProvider,
@@ -26,7 +26,7 @@ const mockFetch = fetchMetricsWithExemplars as jest.MockedFunction<
 >;
 
 const requestParams = {
-  search: jest.fn() as unknown as ISearchGeneric,
+  search: { esql: jest.fn() } as unknown as Pick<ISearchMethods, 'esql'>,
   timeFieldName: '@timestamp',
   timeRange: { from: 'now-15m', to: 'now' },
   uiSettings: {} as IUiSettingsClient,

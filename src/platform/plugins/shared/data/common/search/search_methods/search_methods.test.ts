@@ -105,6 +105,16 @@ describe('SearchMethodsService', () => {
       );
     });
 
+    it('reports all-empty rows as no rows', async () => {
+      mockSearch.mockReturnValue(
+        createMockResponse({ columns: [{ name: 'a', type: 'keyword' }], values: [[], []] })
+      );
+
+      const { rawResponse } = await service.esql({ query: 'FROM logs' });
+
+      expect(rawResponse.values).toEqual([]);
+    });
+
     it('passes options correctly', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
@@ -215,6 +225,47 @@ describe('SearchMethodsService', () => {
           dropNullColumns: undefined,
           include_execution_metadata: undefined,
         });
+      });
+
+      it('does not log a request that was already aborted before it started', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+        const controller = new AbortController();
+        controller.abort();
+
+        await service.esql({ query: 'FROM logs' }, { inspector, abortSignal: controller.signal });
+
+        expect(inspector.adapter.start).not.toHaveBeenCalled();
+      });
+
+      it('includes approximation and project_routing in the request params when set', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql(
+          { query: 'FROM logs', approximation: true, projectRouting: '_alias:_origin' },
+          { inspector }
+        );
+
+        expect(requestResponder.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: 'FROM logs',
+            approximation: true,
+            project_routing: '_alias:_origin',
+          })
+        );
+      });
+
+      it('omits project_routing from the request params when it is not set', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(requestResponder.json.mock.calls[0][0]).not.toHaveProperty('project_routing');
       });
 
       it('calls requestResponder.stats with getEsqlInspectorStats result on success', async () => {

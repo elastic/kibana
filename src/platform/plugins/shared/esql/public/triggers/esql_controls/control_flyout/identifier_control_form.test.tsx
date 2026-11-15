@@ -37,7 +37,7 @@ const defaultProps = {
   onSaveControl: jest.fn(),
   closeFlyout: jest.fn(),
   onCancelControl: jest.fn(),
-  search: dataPluginMock.createStartContract().search.search,
+  search: dataPluginMock.createStartContract().search,
   cursorPosition: { column: 19, lineNumber: 1 } as monaco.Position,
   esqlVariables: [],
   ariaLabelledBy: 'esqlControlFlyoutTitle',

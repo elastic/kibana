@@ -26,7 +26,6 @@ import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { getESQLResults } from '@kbn/esql-utils';
 import { Observable, catchError, filter, from, map, of, switchMap, tap, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
@@ -386,15 +385,18 @@ function collectEsqlSamples({
         data_source_type: dataSourceType,
       });
 
-      const { response } = await getESQLResults({
-        esqlQuery,
-        search: data.search.search,
-        signal: abortController.signal,
-        filter: userFilter,
-        timeRange: timeRange
-          ? { from: timeRange.from, to: timeRange.to, mode: 'absolute' as const }
-          : undefined,
-      });
+      const { rawResponse: response } = await data.search.esql(
+        {
+          query: esqlQuery,
+          filter: userFilter,
+          kibanaQueryContext: {
+            timeRange: timeRange
+              ? { from: timeRange.from, to: timeRange.to, mode: 'absolute' as const }
+              : undefined,
+          },
+        },
+        { abortSignal: abortController.signal }
+      );
 
       let docs = esqlResultToPlainObjects<SampleDocument>(response);
 

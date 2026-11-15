@@ -27,7 +27,6 @@ not full ES|QL parsing.
 - `appendStatsByToQuery` - Add `stats by` aggregation syntax.
 
 ### Running queries
-- `getESQLResults` - Execute an ES|QL query through the provided client.
 - `formatESQLColumns` - Format ES|QL columns for UI consumption.
 - `getStartEndParams` - Extract time range params used by the query.
 
