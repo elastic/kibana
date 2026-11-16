@@ -216,14 +216,30 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
     }
   });
 
-  apiTest(
-    'counts the page loads by 12 hours from local midnight and noon in the time zone',
-    async ({ apiClient, samlAuth }) => {
+  const TIME_ZONE_CASES = [
+    {
+      buckets: '12 hours from local midnight and noon in the time zone',
+      range: THIRTY_DAYS,
+      interval: { value: 43200, unit: 's' },
+      isBucketStart: isLocalMidnightOrNoon,
+      pageLoadsByBucket: LOCAL_PAGE_LOADS.halfDays,
+    },
+    {
+      buckets: 'local days across a daylight saving change',
+      range: ACROSS_DAYLIGHT_SAVING,
+      interval: { value: 1, unit: 'd' },
+      isBucketStart: isLocalMidnight,
+      pageLoadsByBucket: LOCAL_PAGE_LOADS.days,
+    },
+  ] as const;
+
+  for (const { buckets, range, interval, isBucketStart, pageLoadsByBucket } of TIME_ZONE_CASES) {
+    apiTest(`counts the page loads by ${buckets}`, async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
       const response = await apiClient.get(
         withQuery(APPLICATIONS_PATH, {
-          ...THIRTY_DAYS,
+          ...range,
           timeZone: NEW_YORK_TIME_ZONE,
           environment: TIME_ZONE_ENVIRONMENT,
         }),
@@ -233,44 +249,14 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
       expect(response).toHaveStatusCode(200);
       const { pageLoadsOverTime } = response.body as ApplicationsResponse;
       expect(pageLoadsOverTime.histogram).toStrictEqual({
-        interval: { value: 43200, unit: 's' },
-        start: Date.parse(THIRTY_DAYS.start),
-        end: Date.parse(THIRTY_DAYS.end),
+        interval,
+        start: Date.parse(range.start),
+        end: Date.parse(range.end),
       });
-      expect(
-        pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnightOrNoon(timestamp))
-      ).toBe(true);
-      expectCounts(pageLoadsOverTime.otel, LOCAL_PAGE_LOADS.halfDays);
-    }
-  );
-
-  apiTest(
-    'counts the page loads by local days across a daylight saving change',
-    async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
-      const response = await apiClient.get(
-        withQuery(APPLICATIONS_PATH, {
-          ...ACROSS_DAYLIGHT_SAVING,
-          timeZone: NEW_YORK_TIME_ZONE,
-          environment: TIME_ZONE_ENVIRONMENT,
-        }),
-        { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      const { pageLoadsOverTime } = response.body as ApplicationsResponse;
-      expect(pageLoadsOverTime.histogram).toStrictEqual({
-        interval: { value: 1, unit: 'd' },
-        start: Date.parse(ACROSS_DAYLIGHT_SAVING.start),
-        end: Date.parse(ACROSS_DAYLIGHT_SAVING.end),
-      });
-      expect(pageLoadsOverTime.otel.every(({ timestamp }) => isLocalMidnight(timestamp))).toBe(
-        true
-      );
-      expectCounts(pageLoadsOverTime.otel, LOCAL_PAGE_LOADS.days);
-    }
-  );
+      expect(pageLoadsOverTime.otel.every(({ timestamp }) => isBucketStart(timestamp))).toBe(true);
+      expectCounts(pageLoadsOverTime.otel, pageLoadsByBucket);
+    });
+  }
 
   apiTest('buckets the Overview trend in the time zone', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
