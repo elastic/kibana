@@ -7,31 +7,30 @@
 
 import { injectable, multiInject, optional } from 'inversify';
 import { DuplicateStrategyError } from './duplicate_strategy_error';
-import { DetectionStrategy } from './tokens';
-import type { IDetectionStrategy } from './types';
+import { DetectionStrategy } from './detection_strategy';
 
 /** The detection strategies bound in the container, by id. */
 @injectable()
 export class StrategyCatalog {
-  private readonly strategiesById: Map<string, IDetectionStrategy>;
+  private readonly strategiesById: Map<string, DetectionStrategy>;
 
   // Optional: the engine starts with no strategy bound, and the catalog is then empty.
-  constructor(@multiInject(DetectionStrategy) @optional() strategies: IDetectionStrategy[] = []) {
+  constructor(@multiInject(DetectionStrategy) @optional() strategies: DetectionStrategy[] = []) {
     this.strategiesById = indexStrategiesById(strategies);
   }
 
   /** Every strategy, in binding order. */
-  public list(): IDetectionStrategy[] {
+  public list(): DetectionStrategy[] {
     return [...this.strategiesById.values()];
   }
 
   /** The strategy with this descriptor id, or `undefined` when none is bound. */
-  public get(id: string): IDetectionStrategy | undefined {
+  public get(id: string): DetectionStrategy | undefined {
     return this.strategiesById.get(id);
   }
 }
 
-const indexStrategiesById = (strategies: IDetectionStrategy[]): Map<string, IDetectionStrategy> => {
+const indexStrategiesById = (strategies: DetectionStrategy[]): Map<string, DetectionStrategy> => {
   const duplicate = strategies.find(
     ({ descriptor }, index) =>
       strategies.findIndex((other) => other.descriptor.id === descriptor.id) !== index
