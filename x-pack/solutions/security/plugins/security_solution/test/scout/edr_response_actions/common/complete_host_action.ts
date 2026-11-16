@@ -210,6 +210,15 @@ export const deleteGetFileUploads = async ({
   }
 };
 
+/**
+ * How long `waitForHostIsolation` waits for the metadata-transform lock: the suite's budget for
+ * one host seed (`HOST_SEED_TIMEOUT_MS`), the longest lock hold the suite plans for.
+ */
+export const HOST_ISOLATION_LOCK_WAIT_MS = 600_000;
+
+/** Agent-status poll budget, counted once the lock is held. */
+const HOST_ISOLATION_POLL_MS = 60_000;
+
 interface HostIsolationWaitParams {
   kbnClient: KbnClient;
   spaceId: string;
@@ -221,10 +230,13 @@ interface HostIsolationWaitParams {
  * Waits until agent status reports the isolation flag written by `completeHostAction`.
  * The metadata transform has to pick up the new document before the flyout can show it.
  * The poll holds the metadata-transform lock, so another worker's host seed cannot
- * force-stop that transform while it waits; the 60s budget starts once the lock is held.
+ * force-stop that transform while it waits. Waiting for the lock fails after
+ * `HOST_ISOLATION_LOCK_WAIT_MS`; the 60s poll budget starts once the lock is held.
  */
 export const waitForHostIsolation = (params: HostIsolationWaitParams): Promise<void> =>
-  withMetadataTransformLock(() => pollHostIsolation(params));
+  withMetadataTransformLock(() => pollHostIsolation(params), {
+    acquireTimeoutMs: HOST_ISOLATION_LOCK_WAIT_MS,
+  });
 
 const pollHostIsolation = async ({
   kbnClient,
@@ -232,7 +244,7 @@ const pollHostIsolation = async ({
   agentId,
   isolated,
 }: HostIsolationWaitParams): Promise<void> => {
-  const deadline = Date.now() + 60_000;
+  const deadline = Date.now() + HOST_ISOLATION_POLL_MS;
   const pathPrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
   const path = `${pathPrefix}${AGENT_STATUS_ROUTE}?agentIds=${encodeURIComponent(
     agentId

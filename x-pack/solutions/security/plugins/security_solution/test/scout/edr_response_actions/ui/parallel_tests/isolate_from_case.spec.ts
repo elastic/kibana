@@ -13,8 +13,10 @@ import { seedHostWithAlert, type SeededHostAlert } from '../../common/seed_endpo
 import {
   completeHostAction,
   deleteSubmittedHostActions,
+  HOST_ISOLATION_LOCK_WAIT_MS,
   waitForHostIsolation,
 } from '../../common/complete_host_action';
+import { PARALLEL_HOST_SEED_TIMEOUT_MS } from '../../common/get_file_spec_helpers';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
 
 spaceTest.describe(
@@ -23,8 +25,9 @@ spaceTest.describe(
     tag: tags.stateful.classic,
   },
   () => {
-    // Isolate, release, and the agent-status poll do not fit in the default 60s.
-    spaceTest.setTimeout(240_000);
+    // Isolate, release, and the agent-status poll do not fit in the default 60s. The poll can
+    // first wait for the other worker's host seed to release the metadata-transform lock.
+    spaceTest.setTimeout(HOST_ISOLATION_LOCK_WAIT_MS + 240_000);
 
     let seeded: (SeededHostAlert & { cleanup: () => Promise<void> }) | undefined;
     let caseId: string | undefined;
@@ -32,8 +35,9 @@ spaceTest.describe(
     const submittedActionIds: string[] = [];
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
-      // One host seed waits up to 8 minutes, after the other worker's metadata-transform lock.
-      spaceTest.setTimeout(1_200_000);
+      // One host seed waits up to 8 minutes, after the other worker's metadata-transform lock,
+      // which is held for one host seed or one isolation poll.
+      spaceTest.setTimeout(PARALLEL_HOST_SEED_TIMEOUT_MS);
       await scoutSpace.setSolutionView('security');
       const hostAlert = await seedHostWithAlert({
         esClient,

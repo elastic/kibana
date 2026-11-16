@@ -12,12 +12,15 @@ import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_e
 import {
   completeHostAction,
   deleteSubmittedHostActions,
+  HOST_ISOLATION_LOCK_WAIT_MS,
   waitForHostIsolation,
 } from '../../common/complete_host_action';
 import { PARALLEL_HOST_SEED_TIMEOUT_MS, requireHost } from '../../common/get_file_spec_helpers';
 
-// Submit, the action-details poll, the agent-status poll and the list reload do not fit in the default 60s.
-const ISOLATE_FLOW_TIMEOUT_MS = 240_000;
+// Submit, the action-details poll, the agent-status poll and the list reload do not fit in the
+// default 60s. The agent-status poll can first wait for the other worker's host seed to release
+// the metadata-transform lock.
+const ISOLATE_FLOW_TIMEOUT_MS = HOST_ISOLATION_LOCK_WAIT_MS + 240_000;
 
 spaceTest.describe(
   'Response console isolate from the endpoint list',

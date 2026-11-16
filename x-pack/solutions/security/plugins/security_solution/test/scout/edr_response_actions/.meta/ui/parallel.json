@@ -1,5 +1,5 @@
 {
-  "sha1": "244ff239ce1d2428fbb6616e5355f156cf876a8f",
+  "sha1": "cfeddc2b8e3deeeced12b74a0bc13847c328854f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -40,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 50,
-        "column": 18
+        "line": 57,
+        "column": 29
       }
     },
     {
@@ -54,8 +54,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 65,
-        "column": 29
+        "line": 74,
+        "column": 26
       }
     },
     {
@@ -68,8 +68,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/endpoint_list_sorting.spec.ts",
-        "line": 89,
-        "column": 13
+        "line": 98,
+        "column": 25
       }
     },
     {
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_alert.spec.ts",
-        "line": 59,
+        "line": 63,
         "column": 31
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_case.spec.ts",
-        "line": 72,
+        "line": 76,
         "column": 9
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_console.spec.ts",
-        "line": 57,
+        "line": 60,
         "column": 31
       }
     },
@@ -211,7 +211,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_case.spec.ts",
-        "line": 48,
+        "line": 50,
         "column": 7
       }
     }
