@@ -21,6 +21,7 @@ import type { Logger } from '@kbn/logging';
 import { UiamAPIKeys } from './uiam_api_keys';
 import type { SecurityLicense } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
+import { securityTelemetry } from '../../../otel/instrumentation';
 import type { UiamServicePublic } from '../../../uiam';
 
 describe('UiamAPIKeys', () => {
@@ -60,6 +61,7 @@ describe('UiamAPIKeys', () => {
       refreshSessionTokens: jest.fn(),
       invalidateSessionTokens: jest.fn(),
       grantApiKey: jest.fn(),
+      cloneApiKey: jest.fn(),
       revokeApiKey: jest.fn(),
       convertApiKeys: jest.fn(),
       exchangeOAuthToken: jest.fn(),
@@ -385,6 +387,222 @@ describe('UiamAPIKeys', () => {
         undefined
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
+    });
+  });
+
+  describe('copy()', () => {
+    const createMockRequest = (authHeader?: string): KibanaRequest =>
+      httpServerMock.createKibanaRequest({
+        headers: authHeader ? { authorization: authHeader } : {},
+      });
+
+    const createUiamError = (statusCode: number, code: string, message: string) => {
+      const error = new Boom.Boom(`[${code}] ${message}`, { statusCode });
+      Object.assign(error.output.payload, { error: { code, message } });
+      return error;
+    };
+
+    const cloned = { id: 'cloned_id', key: 'essu_cloned_key', description: 'copy-name' };
+    const granted = { id: 'granted_id', key: 'essu_granted_key', description: 'copy-name' };
+
+    let recordFallback: jest.SpyInstance;
+
+    beforeEach(() => {
+      recordFallback = jest
+        .spyOn(securityTelemetry, 'recordApiKeyCopyFallback')
+        .mockImplementation(() => {});
+      mockUiam.cloneApiKey.mockResolvedValue(cloned);
+      mockUiam.grantApiKey.mockResolvedValue(granted);
+    });
+
+    afterEach(() => {
+      recordFallback.mockRestore();
+    });
+
+    it('returns null when license is not enabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      expect(
+        await uiamApiKeys.copy(createMockRequest('ApiKey essu_internal_key'), { name: 'copy-name' })
+      ).toBeNull();
+      expect(mockUiam.cloneApiKey).not.toHaveBeenCalled();
+      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws when the request does not contain an authorization header', async () => {
+      await expect(uiamApiKeys.copy(createMockRequest(), { name: 'copy-name' })).rejects.toThrow(
+        'Unable to determine if request has UIAM credentials, request does not contain an authorization header'
+      );
+    });
+
+    describe('what is cloned and what is granted', () => {
+      it('clones an internal UIAM API key', async () => {
+        authenticatedWithApiKey(true);
+        const request = createMockRequest('ApiKey essu_internal_key');
+
+        const result = await uiamApiKeys.copy(request, { name: 'copy-name' });
+
+        expect(result).toEqual({ id: 'cloned_id', name: 'copy-name', api_key: 'essu_cloned_key' });
+        expect(mockUiam.cloneApiKey).toHaveBeenCalledTimes(1);
+        expect(mockUiam.cloneApiKey).toHaveBeenCalledWith(
+          expect.objectContaining({ scheme: 'ApiKey', credentials: 'essu_internal_key' }),
+          { name: 'copy-name' }
+        );
+        expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+        expect(recordFallback).not.toHaveBeenCalled();
+      });
+
+      it('grants from an access token, which is not an API key', async () => {
+        const result = await uiamApiKeys.copy(createMockRequest('Bearer essu_access_token'), {
+          name: 'copy-name',
+        });
+
+        expect(result).toEqual({
+          id: 'granted_id',
+          name: 'copy-name',
+          api_key: 'essu_granted_key',
+        });
+        expect(mockUiam.cloneApiKey).not.toHaveBeenCalled();
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
+          expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_access_token' }),
+          { name: 'copy-name' },
+          undefined
+        );
+        expect(recordFallback).not.toHaveBeenCalled();
+      });
+
+      it('grants from a user-created (external) API key', async () => {
+        authenticatedWithApiKey(false);
+
+        await uiamApiKeys.copy(createMockRequest('ApiKey essu_external_key'), {
+          name: 'copy-name',
+        });
+
+        expect(mockUiam.cloneApiKey).not.toHaveBeenCalled();
+        expect(mockUiam.grantApiKey).toHaveBeenCalledTimes(1);
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          null
+        );
+      });
+
+      it('grants from an external API key that a fake request is marked as carrying', async () => {
+        mockGetCurrentUser.mockReturnValue(null);
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'ApiKey essu_external_key' },
+        });
+        markExternalUiamCredential(request);
+
+        await uiamApiKeys.copy(request, { name: 'copy-name' });
+
+        expect(mockUiam.cloneApiKey).not.toHaveBeenCalled();
+        expect(mockUiam.grantApiKey).toHaveBeenCalledTimes(1);
+      });
+
+      it('clones an internal key carried by a fake request that is not marked as external', async () => {
+        mockGetCurrentUser.mockReturnValue(null);
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'ApiKey essu_internal_key' },
+        });
+
+        await uiamApiKeys.copy(request, { name: 'copy-name' });
+
+        expect(mockUiam.cloneApiKey).toHaveBeenCalledTimes(1);
+        expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+      });
+
+      it('does not clone a credential that is not a UIAM credential', async () => {
+        await expect(
+          uiamApiKeys.copy(createMockRequest('ApiKey regular_api_key_123'), { name: 'copy-name' })
+        ).rejects.toThrow('Cannot grant API key: provided credential is not compatible with UIAM');
+
+        expect(mockUiam.cloneApiKey).not.toHaveBeenCalled();
+        expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when UIAM refuses the clone', () => {
+      beforeEach(() => authenticatedWithApiKey(true));
+
+      it.each([
+        ['endpoint_not_found', createUiamError(404, '0x1C6964', 'not found')],
+        ['client_not_authenticated', createUiamError(401, '0xBA477C', 'no authentication found')],
+        ['client_not_authenticated', createUiamError(401, '0x1C6964', 'Authentication failed')],
+        [
+          'client_not_service_account',
+          createUiamError(403, '0x9F3B1D', 'Project principal required'),
+        ],
+      ])('falls back to grant and records %s', async (reason, refusal) => {
+        mockUiam.cloneApiKey.mockRejectedValue(refusal);
+        const request = createMockRequest('ApiKey essu_internal_key');
+
+        const result = await uiamApiKeys.copy(request, { name: 'copy-name' });
+
+        expect(result).toEqual({
+          id: 'granted_id',
+          name: 'copy-name',
+          api_key: 'essu_granted_key',
+        });
+        expect(mockUiam.grantApiKey).toHaveBeenCalledTimes(1);
+        expect(recordFallback).toHaveBeenCalledTimes(1);
+        expect(recordFallback).toHaveBeenCalledWith({ reason });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`UIAM refused to clone an API key (${reason}), granting instead`)
+        );
+      });
+
+      it('warns on every fallback and does not skip the clone afterwards', async () => {
+        mockUiam.cloneApiKey.mockRejectedValue(createUiamError(404, '0x1C6964', 'not found'));
+        const request = createMockRequest('ApiKey essu_internal_key');
+
+        await uiamApiKeys.copy(request, { name: 'first' });
+        await uiamApiKeys.copy(request, { name: 'second' });
+
+        expect(mockUiam.cloneApiKey).toHaveBeenCalledTimes(2);
+        expect(mockUiam.grantApiKey).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+        expect(recordFallback).toHaveBeenCalledTimes(2);
+      });
+
+      it('throws when the grant it falls back to also fails', async () => {
+        mockUiam.cloneApiKey.mockRejectedValue(createUiamError(404, '0x1C6964', 'not found'));
+        const failure = new Error('grant failed');
+        mockUiam.grantApiKey.mockRejectedValue(failure);
+
+        await expect(
+          uiamApiKeys.copy(createMockRequest('ApiKey essu_internal_key'), { name: 'copy-name' })
+        ).rejects.toBe(failure);
+      });
+    });
+
+    describe('when the clone fails for another reason', () => {
+      beforeEach(() => authenticatedWithApiKey(true));
+
+      it.each([
+        ['a revoked or invalid source key', createUiamError(400, '0x824009', 'invalid source')],
+        ['an external source key', createUiamError(400, '0x21D2B8', 'not internal')],
+        [
+          'a source key without access to the project',
+          createUiamError(403, '0xDEF39C', 'no access'),
+        ],
+        ['a 403 that is not about the caller', createUiamError(403, '0xB45D3A', 'mtls required')],
+        ['an organization over its key limit', createUiamError(400, '0x3196F8', 'too many keys')],
+        ['a UIAM server error', createUiamError(500, '0x1C6964', 'boom')],
+        ['a network failure', new Error('socket hang up')],
+      ])('throws on %s without falling back', async (_, failure) => {
+        mockUiam.cloneApiKey.mockRejectedValue(failure);
+
+        await expect(
+          uiamApiKeys.copy(createMockRequest('ApiKey essu_internal_key'), { name: 'copy-name' })
+        ).rejects.toBe(failure);
+
+        expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+        expect(recordFallback).not.toHaveBeenCalled();
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to clone API key')
+        );
+      });
     });
   });
 

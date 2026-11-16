@@ -28,6 +28,22 @@ export interface UiamAPIKeysType {
   grant(request: KibanaRequest, params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
 
   /**
+   * Copies the request's credential into a new API key that keeps the same creator, so actions the
+   * copy performs can be traced back to the user who created the original.
+   *
+   * An internal UIAM API key is cloned, which keeps its creator and expiration. Any other credential
+   * (a session, a token, a user-created key) is granted from, like `grant`, and so is a clone UIAM
+   * refuses because it does not accept Kibana as a project service account or has no clone endpoint.
+   * Any other failure, such as a revoked source key, is thrown.
+   *
+   * @param request The Kibana request instance containing the credential to copy.
+   * @param params The parameters for creating the API key (name).
+   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
+   * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
+   */
+  copy(request: KibanaRequest, params: CopyUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
+
+  /**
    * Invalidates an API key via the UIAM service.
    *
    * @param request The Kibana request instance containing the authorization header.
@@ -85,6 +101,16 @@ export interface GrantUiamAPIKeyParams {
    * Optional expiration time for the API key
    */
   expiration?: string;
+}
+
+/**
+ * Parameters for copying a UIAM API key.
+ */
+export interface CopyUiamAPIKeyParams {
+  /**
+   * Name for the new API key
+   */
+  name: string;
 }
 
 /**
