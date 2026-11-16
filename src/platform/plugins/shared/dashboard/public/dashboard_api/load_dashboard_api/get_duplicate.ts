@@ -9,7 +9,7 @@
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { isDashboardSection } from '../../../common';
+import { isDashboardPanel } from '../../../common';
 import { embeddableService } from '../../services/kibana_services';
 
 export interface CachedPanel {
@@ -43,9 +43,7 @@ export const getDuplicate = async (
       // Incoming panels are placed at the top level, so panels scoped to a section are not valid duplicate targets.
       panels = [
         ...(initialState.pinned_panels ?? []),
-        ...(initialState.panels ?? []).flatMap((widget) =>
-          isDashboardSection(widget) ? [] : [widget]
-        ),
+        ...(initialState.panels ?? []).filter(isDashboardPanel),
       ]
         .filter((panel) => panel.type === type)
         .map(({ type: panelType, id, config }) => ({ type: panelType, id, state: config }));
