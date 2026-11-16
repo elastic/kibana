@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { basename, isAbsolute, relative } from 'node:path';
+import { basename, isAbsolute, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const MAX_NAME_LENGTH = 48;
@@ -29,5 +29,5 @@ export const relativeLocation = (url: string, root: string): string | undefined 
   if (url.startsWith('node:')) return url;
   const path = url.startsWith('file://') ? fileURLToPath(url) : url;
   const rel = relative(root, path);
-  return rel.startsWith('..') || isAbsolute(rel) ? basename(path) : rel;
+  return rel.startsWith('..') || isAbsolute(rel) ? basename(path) : rel.split(sep).join('/');
 };
