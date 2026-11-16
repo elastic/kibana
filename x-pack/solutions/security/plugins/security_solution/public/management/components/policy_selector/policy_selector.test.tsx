@@ -217,7 +217,9 @@ describe('PolicySelector component', () => {
     props.useCheckbox = true;
     const { getByTestId } = await render();
 
-    expect(getByTestId(`test-policy-${testPolicyId1}-checkbox`)).toBeTruthy();
+    expect(getByTestId(`test-policy-${testPolicyId1}-checkbox`)).toHaveAccessibleName(
+      apiPolicies[0].name
+    );
   });
 
   describe('and when "showPolicyLink" prop is true', () => {
@@ -536,7 +538,7 @@ describe('PolicySelector component', () => {
       props.useCheckbox = true;
       const { getByTestId, queryByTestId } = await render();
 
-      expect(getByTestId('test-customItem1-checkbox')).toBeTruthy();
+      expect(getByTestId('test-customItem1-checkbox')).toHaveAccessibleName('Item 1');
       expect(getByTestId('test-customItem2-checkbox')).toBeTruthy();
 
       // EUI Selectable Group Label item should NOT have the checkbox
