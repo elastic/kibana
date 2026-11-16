@@ -6,8 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isRunQuotaReached, type RunQuotasResponse } from '@kbn/significant-events-plugin/common';
-import { isScheduleOnlyAutomation } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  isInvestigationQuotaReached,
+  isScheduleOnlyAutomation,
+  type InvestigationQuotasResponse,
+} from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../../data/automations/use_automations';
 
 export const RUN_AUTOMATION_LABEL = i18n.translate('xpack.nightshift.automations.runButtonLabel', {
@@ -54,16 +57,14 @@ export const getManualRunQuotaDisabledReason = ({
   isInitialLoading,
   isError,
 }: {
-  data?: RunQuotasResponse;
+  data?: InvestigationQuotasResponse;
   isInitialLoading?: boolean;
   isError?: boolean;
 }): string | undefined => {
   if (quotas) {
     const group = (['total_investigation', 'manual_investigation'] as const).find((candidate) =>
-      isRunQuotaReached({
-        group: candidate,
+      isInvestigationQuotaReached({
         enabled: quotas.enabled,
-        investigationLimitsEnabled: quotas.investigationLimitsEnabled,
         limit: quotas.limits[candidate],
         count: quotas.counts[candidate],
       })
