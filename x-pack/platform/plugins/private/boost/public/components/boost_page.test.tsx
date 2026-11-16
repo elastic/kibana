@@ -173,7 +173,7 @@ describe('Project defaults', () => {
 
     await userEvent.click(screen.getByTestId('boostEditProjectDefault-data_streams'));
     expect(screen.getByTestId('boostProjectDefaultRuleNote')).toHaveTextContent(
-      'Changes the boost profile of the default rule "_default-data-streams", which applies to every data stream no other rule targets.'
+      'All data streams in your project use this boost profile unless a boost rule assigns a different one. Changing it updates "_default-data-streams", the default rule.'
     );
   });
 

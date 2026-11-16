@@ -119,12 +119,12 @@ export const DeleteRuleModal = ({
           {hasAffected
             ? i18n.translate('xpack.boost.rulesTab.deleteModalBodyInUse', {
                 defaultMessage:
-                  "Deleting this rule will cause the {dataSources} below to fall back to the next matching rule and its boost profile. The boost profile this rule uses won't be deleted. You can't undo this action.",
+                  "Deleting this rule will cause the {dataSources} below to switch to the next matching rule and its boost profile. The boost profile for this rule won't be deleted. You can't undo this action.",
                 values: { dataSources: formatDataSourceCount(profileType, affected.length) },
               })
             : i18n.translate('xpack.boost.rulesTab.deleteModalBody', {
                 defaultMessage:
-                  "This permanently deletes the rule. The boost profile it uses won't be deleted. You can't undo this action.",
+                  "This permanently deletes the rule. The boost profile for this rule won't be deleted. You can't undo this action.",
               })}
         </p>
       </EuiText>

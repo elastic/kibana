@@ -88,6 +88,12 @@ interface RuleFlyoutProps {
 
 const PROFILE_TYPES: readonly BoostProfileType[] = ['indices', 'data_streams'];
 
+// What a rule does and how rules combine, under the flyout's title.
+const RULE_DESCRIPTION = i18n.translate('xpack.boost.ruleForm.description', {
+  defaultMessage:
+    'A rule assigns a profile to indices or data streams. If more than one rule matches, the rule with the highest priority applies. If none of the other rules match, the project default applies.',
+});
+
 // The same for either type: Elasticsearch calls the syntax that matches data streams an index
 // pattern too, and the placeholder and list show which type the field takes.
 const TARGET_LABEL = i18n.translate('xpack.boost.ruleForm.indexTargetLabel', {
@@ -125,6 +131,16 @@ const EDIT_PROFILE_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
   data_streams: i18n.translate('xpack.boost.ruleForm.editDataStreamsProfileDescription', {
     defaultMessage:
       "Lists only data stream profiles, since a rule can't switch types after it's created.",
+  }),
+};
+
+// When duplicating, which lists only profiles of the original rule's type.
+const DUPLICATE_PROFILE_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.duplicateIndicesProfileDescription', {
+    defaultMessage: "Lists only indices profiles, since a duplicate keeps the rule's type.",
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.duplicateDataStreamsProfileDescription', {
+    defaultMessage: "Lists only data stream profiles, since a duplicate keeps the rule's type.",
   }),
 };
 
@@ -292,10 +308,12 @@ export const RuleFlyout = ({
     }
   };
 
-  // Elasticsearch can't move a rule to a profile of another type, so editing lists only its own.
-  const savedProfileType = rule && profilesByName.get(rule.boost_profile)?.type;
+  // Elasticsearch can't move a rule to a profile of another type, so editing lists only its own. A
+  // duplicate keeps its original's type too, as switching would carry over little but the pattern.
+  const typedRule = rule ?? duplicateOf;
+  const lockedProfileType = typedRule && profilesByName.get(typedRule.boost_profile)?.type;
   const profileOptions: Array<EuiComboBoxOptionOption<string>> = PROFILE_TYPES.filter(
-    (profileType) => !savedProfileType || profileType === savedProfileType
+    (profileType) => !lockedProfileType || profileType === lockedProfileType
   ).map((profileType) => ({
     label: PROFILE_TYPE_LABELS[profileType],
     isGroupLabelOption: true,
@@ -471,7 +489,13 @@ export const RuleFlyout = ({
           </EuiLink>
         </EuiText>
       }
-      helpText={savedProfileType ? EDIT_PROFILE_HELP_TEXTS[savedProfileType] : PROFILE_HELP_TEXT}
+      helpText={
+        !lockedProfileType
+          ? PROFILE_HELP_TEXT
+          : isEditing
+          ? EDIT_PROFILE_HELP_TEXTS[lockedProfileType]
+          : DUPLICATE_PROFILE_HELP_TEXTS[lockedProfileType]
+      }
       isInvalid={Boolean(visibleErrors.profile)}
       error={visibleErrors.profile && PROFILE_REQUIRED_MESSAGE}
       fullWidth
@@ -564,7 +588,9 @@ export const RuleFlyout = ({
     <ProfileFlyoutContent
       forRule={{
         ruleName: draft.name || undefined,
-        type,
+        // A rule whose type can't change only takes a new profile of that type.
+        type: lockedProfileType ?? type,
+        isTypeLocked: lockedProfileType !== undefined,
         isProjectDefault: false,
         estimate: estimateWithNewProfile,
         onCreate: onProfileCreate,
@@ -592,6 +618,10 @@ export const RuleFlyout = ({
         <EuiTitle size="s">
           <h2 id={titleId}>{title}</h2>
         </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued" data-test-subj="boostRuleFlyoutDescription">
+          <p>{RULE_DESCRIPTION}</p>
+        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

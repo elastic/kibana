@@ -29,7 +29,6 @@ import { getProfileNameError } from '../../../common/validation';
 import type { BoostProfileType } from '../../../common/types';
 import { ChangeTable } from '../change_table';
 import { getCopyName } from '../copy_name';
-import { formatDataSourceCount } from '../format';
 import { MODAL_WIDTH } from '../modal_width';
 import { TargetName } from '../rules/target_name';
 import { PROFILE_NAME_ERROR_MESSAGES, PROFILE_NAME_HELP } from './profile_messages';
@@ -182,11 +181,17 @@ export const ProfileChangesModal = ({
           <EuiModalBody>
             <EuiText size="s">
               <p>
-                {i18n.translate('xpack.boost.profileChangesModal.body', {
-                  defaultMessage:
-                    'This profile applies to {dataSources}, which these changes apply to as well. You may save as a new boost profile to avoid unintended changes.',
-                  values: { dataSources: formatDataSourceCount(type, affected.length) },
-                })}
+                {type === 'data_streams'
+                  ? i18n.translate('xpack.boost.profileChangesModal.dataStreamsBody', {
+                      defaultMessage:
+                        '{count, plural, one {Saving these profile changes will affect the # data stream that currently uses it. Alternatively, you may save it as a new boost profile to avoid affecting this data stream.} other {Saving these profile changes will affect the # data streams that currently use it. Alternatively, you may save it as a new boost profile to avoid affecting these data streams.}}',
+                      values: { count: affected.length },
+                    })
+                  : i18n.translate('xpack.boost.profileChangesModal.indicesBody', {
+                      defaultMessage:
+                        '{count, plural, one {Saving these profile changes will affect the # index that currently uses it. Alternatively, you may save it as a new boost profile to avoid affecting this index.} other {Saving these profile changes will affect the # indices that currently use it. Alternatively, you may save it as a new boost profile to avoid affecting these indices.}}',
+                      values: { count: affected.length },
+                    })}
               </p>
             </EuiText>
             <EuiSpacer size="l" />

@@ -64,6 +64,12 @@ export const CREATE_PROFILE_TITLE = i18n.translate('xpack.boost.profileForm.crea
   defaultMessage: 'Create boost profile',
 });
 
+// What a profile does and when it takes effect, under the flyout's title.
+const PROFILE_DESCRIPTION = i18n.translate('xpack.boost.profileForm.description', {
+  defaultMessage:
+    'A boost profile defines how search resources are allocated to indices or data streams. It takes effect when a boost rule assigns it.',
+});
+
 /**
  * A new profile created from a rule's flyout or a project default's, which shows this form in place
  * of its own.
@@ -73,6 +79,11 @@ export interface ProfileForRule {
   ruleName?: string;
   /** The rule's current type, which the new profile starts with. */
   type?: BoostProfileType;
+  /**
+   * Whether the rule's type is fixed, as when editing or duplicating it, so the new profile takes
+   * that type without offering another.
+   */
+  isTypeLocked?: boolean;
   /**
    * Whether the profile is for a project default, the profile its default rule uses, rather than a
    * custom rule. It takes the default's type, so the form doesn't offer one.
@@ -162,7 +173,7 @@ export const INDEX_OPTIONS: ReadonlyArray<{
     key: 'prewarm',
     title: i18n.translate('xpack.boost.profileForm.prewarmTitle', { defaultMessage: 'Prewarm' }),
     description: i18n.translate('xpack.boost.profileForm.prewarmDescription', {
-      defaultMessage: "Load data into cache ahead of time so the first query doesn't wait.",
+      defaultMessage: "Preload data into cache so the first query doesn't wait.",
     }),
   },
   {
@@ -195,6 +206,10 @@ export const ProfileFlyoutContent = ({
   const { notifications } = useBoostServices();
   const optionsId = useGeneratedHtmlId({ prefix: 'boostProfileOptions' });
   const isEditing = profile !== undefined;
+  // A new profile whose type is set for it: a duplicate keeps its original's, since switching would
+  // copy nothing over, and a rule whose type can't change passes its own.
+  const isTypeFixed = !isEditing && (duplicateOf !== undefined || forRule?.isTypeLocked === true);
+  const showsTypeBadge = isEditing || isTypeFixed;
 
   const [draft, setDraft] = useState<ProfileDraft>(() =>
     getInitialDraft(profile, duplicateOf, forRule, takenNames)
@@ -356,8 +371,9 @@ export const ProfileFlyoutContent = ({
               : CREATE_PROFILE_TITLE}
           </h2>
         </EuiTitle>
-        {/* The name and type can't change after creation, so editing shows them read-only here. */}
-        {isEditing && (
+        {/* A type that can't be chosen here is shown read-only instead: a saved profile's, which
+            can't change after creation, a duplicate's original, or a type-locked rule's. */}
+        {showsTypeBadge && (
           <>
             <EuiSpacer size="s" />
             <EuiBadge color="hollow" data-test-subj="boostProfileType">
@@ -365,6 +381,10 @@ export const ProfileFlyoutContent = ({
             </EuiBadge>
           </>
         )}
+        <EuiSpacer size={showsTypeBadge ? 's' : 'xs'} />
+        <EuiText size="xs" color="subdued" data-test-subj="boostProfileFlyoutDescription">
+          <p>{PROFILE_DESCRIPTION}</p>
+        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -393,8 +413,10 @@ export const ProfileFlyoutContent = ({
               />
             </EuiFormRow>
 
-            {/* A profile for a project default takes the default's type, which the title names. */}
-            {!forRule?.isProjectDefault && (
+            {/* A profile for a project default takes the default's type, which the title names. A
+                duplicate keeps its original's type, and a type-locked rule's profile takes the
+                rule's, which the header's badge shows. */}
+            {!forRule?.isProjectDefault && !isTypeFixed && (
               <FormSection
                 title={i18n.translate('xpack.boost.profileForm.typeTitle', {
                   defaultMessage: 'Type',
@@ -426,7 +448,7 @@ export const ProfileFlyoutContent = ({
             <>
               {i18n.translate('xpack.boost.profileForm.boostDescription', {
                 defaultMessage:
-                  'The default is 1. Higher values handle more queries; lower values cost less. Enter values from {min} to {max}.',
+                  'Boost sets how many search resources a profile allocates. Higher values handle more queries; lower values cost less. The default minimum is 1. Enter values from {min} to {max}.',
                 values: { min: MIN_BOOST, max: MAX_BOOST.toLocaleString(i18n.getLocale()) },
               })}{' '}
               <EuiLink href={BOOST_DOCS_URL} target="_blank" external>

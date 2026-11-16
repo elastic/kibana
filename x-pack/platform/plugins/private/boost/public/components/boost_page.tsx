@@ -25,7 +25,7 @@ type BoostTab = 'profiles' | 'rules';
 
 const BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.boost.page.description', {
   defaultMessage:
-    'Balance search performance and cost for the indices and data streams in this project.',
+    'Project-wide defaults determine the search resources allocated to your indices and data streams. Create boost rules to override those defaults with a different boost profile for specific indices or data streams.',
 });
 
 /**

@@ -201,7 +201,7 @@ describe('RuleFlyout profile creation', () => {
   const getTypeRadio = (type: string) =>
     within(screen.getByTestId(`boostProfileTypePreset-${type}`)).getByRole('radio');
 
-  it('shows the profile form in place of the rule, starting from its type', async () => {
+  it("shows the profile form in place of the rule, keeping an edited rule's type", async () => {
     renderFlyout();
 
     await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
@@ -211,8 +211,22 @@ describe('RuleFlyout profile creation', () => {
     ).toBeInTheDocument();
     expect(screen.queryByTestId('boostRuleProfile')).not.toBeInTheDocument();
     expect(screen.getByTestId('boostProfileName')).toHaveFocus();
+    expect(screen.getByTestId('boostProfileType')).toHaveTextContent('Indices');
+    expect(screen.queryByTestId('boostProfileTypePreset-indices')).not.toBeInTheDocument();
+  });
+
+  it("offers either type for a new rule's profile", async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+    await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
+
     expect(getTypeRadio('indices')).toBeChecked();
     expect(getTypeRadio('data_streams')).toBeEnabled();
+    expect(screen.queryByTestId('boostProfileType')).not.toBeInTheDocument();
   });
 
   it('creates the profile and selects it in the rule', async () => {
@@ -527,6 +541,27 @@ describe('RuleFlyout duplicate', () => {
       },
       expect.anything()
     );
+  });
+
+  it("keeps the original rule's type, for its profile and any new one", async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout duplicateOf={rule} onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+    await userEvent.click(
+      within(screen.getByTestId('boostRuleProfile')).getByTestId('comboBoxSearchInput')
+    );
+    expect(screen.getByRole('option', { name: 'zeta-search' })).toBeInTheDocument();
+    expect(screen.queryByText('Data streams')).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostRuleProfile').closest('.euiFormRow')).toHaveTextContent(
+      "Lists only indices profiles, since a duplicate keeps the rule's type."
+    );
+
+    await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
+    expect(screen.getByTestId('boostProfileType')).toHaveTextContent('Indices');
+    expect(screen.queryByTestId('boostProfileTypePreset-indices')).not.toBeInTheDocument();
   });
 });
 

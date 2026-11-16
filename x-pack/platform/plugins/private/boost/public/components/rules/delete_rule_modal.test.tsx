@@ -71,10 +71,10 @@ describe('DeleteRuleModal', () => {
     renderModal('catalogs');
 
     expect(screen.getByTestId('deleteBoostRuleModal')).toHaveTextContent(
-      'Deleting this rule will cause the 2 indices below to fall back to the next matching rule and its boost profile.'
+      'Deleting this rule will cause the 2 indices below to switch to the next matching rule and its boost profile.'
     );
     expect(screen.getByTestId('deleteBoostRuleModal')).toHaveTextContent(
-      "The boost profile this rule uses won't be deleted."
+      "The boost profile for this rule won't be deleted."
     );
     const [header, ...rows] = within(screen.getByRole('table')).getAllByRole('row');
     expect(header).toHaveTextContent('Affected indexNew ruleNew profile');
@@ -95,7 +95,7 @@ describe('DeleteRuleModal', () => {
     renderModal('unused');
 
     expect(screen.getByTestId('deleteBoostRuleModal')).toHaveTextContent(
-      "This permanently deletes the rule. The boost profile it uses won't be deleted."
+      "This permanently deletes the rule. The boost profile for this rule won't be deleted."
     );
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });

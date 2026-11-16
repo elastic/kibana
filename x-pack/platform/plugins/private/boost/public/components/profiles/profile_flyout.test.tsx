@@ -94,6 +94,29 @@ describe('ProfileFlyout estimate', () => {
   });
 });
 
+describe('ProfileFlyout duplicate', () => {
+  it("keeps the original profile's type, showing it in the header instead of offering a choice", () => {
+    mockState = createState(['catalog-*']);
+    render(
+      <IntlProvider locale="en">
+        <ProfileFlyout
+          duplicateOf={savedProfile}
+          takenNames={[...BUILTIN_PROFILES, savedProfile].map(({ name }) => name)}
+          onClose={jest.fn()}
+        />
+      </IntlProvider>
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Duplicate boost profile "catalog-search"' })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('boostProfileName')).toHaveValue('catalog-search-copy');
+    expect(screen.getByTestId('boostProfileType')).toHaveTextContent('Indices');
+    expect(screen.queryByTestId('boostProfileTypePreset-indices')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('boostProfileTypePreset-data_streams')).not.toBeInTheDocument();
+  });
+});
+
 describe('ProfileFlyout options', () => {
   // A checkbox card's test subject is on its checkbox.
   const getOption = (key: string) => screen.getByTestId(`boostProfileOption-${key}`);
@@ -149,7 +172,7 @@ describe('ProfileFlyout saving changes', () => {
 
     const modal = screen.getByTestId('boostProfileChangesModal');
     expect(modal).toHaveTextContent(
-      'Update boost profile "catalog-search"?This profile applies to 1 index, which these changes apply to as well.'
+      'Update boost profile "catalog-search"?Saving these profile changes will affect the 1 index that currently uses it.'
     );
     const [, row] = within(modal).getAllByRole('row');
     expect(row).toHaveTextContent('catalog-fallcatalogs');

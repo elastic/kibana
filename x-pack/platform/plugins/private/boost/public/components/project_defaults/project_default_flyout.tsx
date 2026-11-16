@@ -55,17 +55,18 @@ const TITLES: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
-// Says which rule the flyout changes, which the rules table lists with the others.
+// Says what the default covers and which rule the flyout changes, which the rules table lists with
+// the others.
 const getDefaultRuleNote = (type: BoostProfileType, ruleName: string): string =>
   type === 'data_streams'
     ? i18n.translate('xpack.boost.projectDefaultForm.dataStreamsRuleNote', {
         defaultMessage:
-          'Changes the boost profile of the default rule "{ruleName}", which applies to every data stream no other rule targets.',
+          'All data streams in your project use this boost profile unless a boost rule assigns a different one. Changing it updates "{ruleName}", the default rule.',
         values: { ruleName },
       })
     : i18n.translate('xpack.boost.projectDefaultForm.indicesRuleNote', {
         defaultMessage:
-          'Changes the boost profile of the default rule "{ruleName}", which applies to every index no other rule targets.',
+          'All indices in your project use this boost profile unless a boost rule assigns a different one. Changing it updates "{ruleName}", the default rule.',
         values: { ruleName },
       });
 
@@ -228,7 +229,7 @@ export const ProjectDefaultFlyout = ({ type, historyKey, onClose }: ProjectDefau
         </EuiTitle>
         {/* The default is its type's default boost rule, as the rules table lists it. */}
         <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued" data-test-subj="boostProjectDefaultRuleNote">
+        <EuiText size="xs" color="subdued" data-test-subj="boostProjectDefaultRuleNote">
           <p>{getDefaultRuleNote(type, DEFAULT_RULE_NAMES[type])}</p>
         </EuiText>
       </EuiFlyoutHeader>

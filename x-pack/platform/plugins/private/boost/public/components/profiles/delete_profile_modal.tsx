@@ -108,10 +108,14 @@ export const DeleteProfileModal = ({
       ? [
           type === 'indices'
             ? i18n.translate('xpack.boost.deleteProfileModal.indicesFallBack', {
-                defaultMessage: 'Affected indices will fall back to the next matching rule.',
+                defaultMessage:
+                  '{count, plural, one {The # affected index will fall back to the next matching rule.} other {The # affected indices will fall back to the next matching rule.}}',
+                values: { count: affectedCount },
               })
             : i18n.translate('xpack.boost.deleteProfileModal.dataStreamsFallBack', {
-                defaultMessage: 'Affected data streams will fall back to the next matching rule.',
+                defaultMessage:
+                  '{count, plural, one {The # affected data stream will fall back to the next matching rule.} other {The # affected data streams will fall back to the next matching rule.}}',
+                values: { count: affectedCount },
               }),
         ]
       : []),
