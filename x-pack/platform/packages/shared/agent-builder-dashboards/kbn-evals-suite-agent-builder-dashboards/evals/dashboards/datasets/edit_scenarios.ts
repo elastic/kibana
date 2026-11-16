@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
+import { toQueryList } from '@kbn/agent-builder-visualizations-common';
 import { LOGS_VISUALIZATIONS } from '../../../src/fixtures/logs_visualizations';
 import { SECTIONED_LOGS_DASHBOARD_DSL_VEGA } from '../../../src/fixtures/sectioned_logs_dashboard';
 import { TOP_LEVEL, type DashboardDatasetExample } from '../../../src/types';
@@ -71,7 +71,7 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
       sections: [
         {
           titleIncludesAny: ['key chart'],
-          queries: compact(LOGS_VISUALIZATIONS.map(({ data }) => data.esql)),
+          queries: LOGS_VISUALIZATIONS.flatMap(({ data }) => toQueryList(data.esql)),
         },
       ],
     },

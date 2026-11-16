@@ -43,24 +43,22 @@ const toIssues = (
   return [...byStep.values()].sort((a, b) => a.step - b.step);
 };
 
-const issuesScore = (name: string, noun: string, issues: ToolCallIssue[]): Score => ({
+const issuesScore = (
+  name: string,
+  noun: string,
+  issues: ToolCallIssue[],
+  callCount: number
+): Score => ({
   name,
   score: issues.length,
-  label: issues.length > 0 ? noun : 'none',
+  // The total makes counts comparable between a round of 10 calls and one of 150.
+  label: `${issues.length}/${callCount}`,
   explanation: capExplanation(
     issues.length > 0
       ? issues.map(({ step, reason }) => `call ${step}: ${reason}`).join('\n')
       : `No ${noun} tool calls.`
   ),
 });
-
-const notApplicableScores = (explanation: string): Score[] =>
-  ['tool_calls_failed', 'tool_calls_empty'].map((name) => ({
-    name,
-    score: null,
-    label: 'n/a',
-    explanation,
-  }));
 
 export const toolCallHealthJudge: RegisteredEvaluatorDefinition = {
   name: 'nightshift_tool_call_health',
@@ -77,14 +75,15 @@ export const toolCallHealthJudge: RegisteredEvaluatorDefinition = {
 
     const callCount = round.steps.length;
     if (callCount === 0) {
-      return { scores: notApplicableScores('The investigation made no tool calls.') };
+      return { scores: [], notApplicable: { reason: 'The investigation made no tool calls.' } };
     }
     const { text, omitted } = renderToolCalls(round, { maxFieldChars: MAX_FIELD_CHARS });
     if (omitted > 0) {
       return {
-        scores: notApplicableScores(
-          `${omitted} of ${callCount} tool calls did not fit the judge's context, so a count of failed or empty calls would miss them.`
-        ),
+        scores: [],
+        notApplicable: {
+          reason: `${omitted} of ${callCount} tool calls did not fit the judge's context, so a count of failed or empty calls would miss them.`,
+        },
       };
     }
 
@@ -103,8 +102,8 @@ export const toolCallHealthJudge: RegisteredEvaluatorDefinition = {
 
     return {
       scores: [
-        issuesScore('tool_calls_failed', 'failed', failed),
-        issuesScore('tool_calls_empty', 'no-data', empty),
+        issuesScore('tool_calls_failed', 'failed', failed, callCount),
+        issuesScore('tool_calls_empty', 'no-data', empty, callCount),
       ],
     };
   },

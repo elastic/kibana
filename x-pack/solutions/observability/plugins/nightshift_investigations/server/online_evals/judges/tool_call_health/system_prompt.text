@@ -8,7 +8,7 @@ The call did not do what the agent was trying to do. Examples:
 - an error message, stack trace, timeout, permission or authentication failure, or a non-zero `exit_code`;
 - a query rejected or mangled by a syntax error, an unknown index/field/column, or a bad argument;
 - a read of a file or path that does not exist;
-- a "success" response that carries only metadata or a warning and none of the requested content.
+- a "success" response that carries only a warning or an error notice instead of the requested content.
 
 ## NO DATA
 The call ran correctly but came back empty, so the agent learned nothing from it. Examples:

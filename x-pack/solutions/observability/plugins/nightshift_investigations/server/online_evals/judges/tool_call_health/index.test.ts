@@ -55,39 +55,39 @@ describe('nightshift_tool_call_health', () => {
       {
         name: 'tool_calls_failed',
         score: 1,
-        label: 'failed',
+        label: '1/2',
         explanation: 'call 1: The query was rejected.',
       },
       {
         name: 'tool_calls_empty',
         score: 1,
-        label: 'no-data',
+        label: '1/2',
         explanation: 'call 2: No hits came back.',
       },
     ]);
   });
 
-  it('scores zero with a "none" label when the judge finds nothing', async () => {
+  it('scores zero out of the number of calls when the judge finds nothing', async () => {
     const prompt = judgeReturning({ failed_calls: [], empty_calls: [] });
 
     const { scores } = await evaluate(prompt, [{ tool_id: 'platform.core.search', result: [] }]);
 
     expect(scores.map(({ name, score, label }) => ({ name, score, label }))).toEqual([
-      { name: 'tool_calls_failed', score: 0, label: 'none' },
-      { name: 'tool_calls_empty', score: 0, label: 'none' },
+      { name: 'tool_calls_failed', score: 0, label: '0/1' },
+      { name: 'tool_calls_empty', score: 0, label: '0/1' },
     ]);
   });
 
   it('is not applicable, without calling the judge, when the agent made no tool calls', async () => {
     const prompt = judgeReturning({ failed_calls: [], empty_calls: [] });
 
-    const { scores } = await evaluate(prompt, []);
+    const result = await evaluate(prompt, []);
 
     expect(prompt).not.toHaveBeenCalled();
-    expect(scores.map(({ score, label }) => ({ score, label }))).toEqual([
-      { score: null, label: 'n/a' },
-      { score: null, label: 'n/a' },
-    ]);
+    expect(result).toEqual({
+      scores: [],
+      notApplicable: { reason: 'The investigation made no tool calls.' },
+    });
   });
 
   it('is not applicable when tool calls were left out to fit the judge context', async () => {
@@ -96,7 +96,7 @@ describe('nightshift_tool_call_health', () => {
 
     // Each argument and result is cut to a couple of thousand characters, so it takes many
     // large calls to overflow the judge's context.
-    const { scores } = await evaluate(
+    const result = await evaluate(
       prompt,
       Array.from({ length: 150 }, () => ({
         tool_id: 'platform.core.search',
@@ -106,11 +106,8 @@ describe('nightshift_tool_call_health', () => {
     );
 
     expect(prompt).not.toHaveBeenCalled();
-    expect(scores.map(({ score, label }) => ({ score, label }))).toEqual([
-      { score: null, label: 'n/a' },
-      { score: null, label: 'n/a' },
-    ]);
-    expect(scores[0].explanation).toContain('did not fit');
+    expect(result.scores).toEqual([]);
+    expect(result.notApplicable?.reason).toContain('did not fit');
   });
 
   it('keeps the start and the end of a long result, where the outcome usually is', async () => {

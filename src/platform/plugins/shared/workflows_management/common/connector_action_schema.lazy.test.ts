@@ -49,7 +49,7 @@ describe('schema.ts lazy-loading boundary', () => {
   });
 
   it('loads connector_action_schema after a consumer function triggers the boundary', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { getAllConnectors } = require('./schema') as typeof import('./schema');
     expect(getLoadedHeavyModules()).toEqual([]);
 

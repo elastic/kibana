@@ -201,9 +201,7 @@ describe('truncateKeepingEnds', () => {
   });
 
   it('keeps the start and the end and counts the characters cut', () => {
-    expect(truncateKeepingEnds('abcdefghij', 4)).toBe(
-      'ab\n[truncated 6 characters]\ngj'.replace('gj', 'ij')
-    );
+    expect(truncateKeepingEnds('abcdefghij', 4)).toBe('ab\n[truncated 6 characters]\nij');
   });
 });
 
