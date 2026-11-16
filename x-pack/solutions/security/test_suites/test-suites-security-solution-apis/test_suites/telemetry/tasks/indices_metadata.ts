@@ -283,7 +283,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
-      const regex = new RegExp(`^\.ds-${index}-\\d{4}.\\d{2}.\\d{2}-\\d{6}$`);
+      const regex = new RegExp(String.raw`^\.ds-${index}-\d{4}\.\d{2}\.\d{2}-\d{6}$`);
       let events: any[] = [];
       // A single forced-run write can be silently dropped by a concurrent Task
       // Manager claim. Re-arm the trigger on a bounded interval (not every tick,
