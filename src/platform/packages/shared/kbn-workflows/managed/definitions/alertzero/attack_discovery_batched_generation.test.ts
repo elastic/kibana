@@ -181,6 +181,7 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         expect(check().with).toEqual({
           index: '.alerts-security.alerts-{{ workflow.spaceId }}',
           size: 0,
+          track_total_hits: false,
         });
       });
 

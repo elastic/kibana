@@ -87,6 +87,7 @@ steps:
     with:
       index: .alerts-security.alerts-{{ workflow.spaceId }}
       size: 0
+      track_total_hits: false
     on-failure:
       continue: "${{ error.type == 'ResponseError' and error.message contains 'index_not_found_exception' }}"
 
