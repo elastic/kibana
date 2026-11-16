@@ -44,6 +44,7 @@ examples/share_examples @elastic/appex-sharedux
 examples/sidebar_examples @elastic/appex-sharedux
 examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
+examples/trailblazer @elastic/response-ops
 examples/unified_doc_viewer @elastic/kibana-discover
 examples/unified_field_list_examples @elastic/kibana-discover
 examples/unified_tabs_examples @elastic/kibana-discover
