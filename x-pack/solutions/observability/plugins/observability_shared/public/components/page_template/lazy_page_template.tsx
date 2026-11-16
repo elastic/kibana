@@ -24,7 +24,8 @@ export function createLazyObservabilityPageTemplate({
   return (pageTemplateProps: LazyObservabilityPageTemplateProps) => {
     const isSidebarEnabled = useObservable(isSidebarEnabled$, isSidebarEnabled$.getValue());
     const { showSolutionNav: showSolutionNavProp, ...props } = pageTemplateProps;
-    const showSolutionNav = Boolean(!!showSolutionNavProp || isSidebarEnabled);
+    // The sidebar setting decides unless the page does, e.g. to give its width to the content.
+    const showSolutionNav = showSolutionNavProp ?? isSidebarEnabled;
 
     return (
       <React.Suspense fallback={null}>

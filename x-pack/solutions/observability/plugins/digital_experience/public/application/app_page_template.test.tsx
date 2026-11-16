@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import type { DigitalExperienceStartDeps } from '../types';
+import { AppPageTemplate } from './app_page_template';
+import { SideNavProvider, useHideSideNav } from './side_nav_context';
+
+jest.mock('@kbn/typed-react-router-config', () => ({ RouteRenderer: () => null }));
+
+const mockChrome = {
+  getChromeStyle: jest.fn(() => 'classic'),
+  sideNav: { getIsCollapsed: jest.fn(() => false), setIsCollapsed: jest.fn() },
+};
+jest.mock('../hooks/use_kibana_services', () => ({
+  useKibanaServices: () => ({ chrome: mockChrome }),
+}));
+
+const pageTemplateProps = jest.fn();
+const PageTemplate = ((props: { showSolutionNav?: boolean; children?: React.ReactNode }) => {
+  pageTemplateProps(props);
+  return <>{props.children}</>;
+}) as unknown as DigitalExperienceStartDeps['observabilityShared']['navigation']['PageTemplate'];
+
+/** A page that takes the navigation's width, like a session with the sessions list beside it. */
+function PageHidingTheNav() {
+  useHideSideNav(true);
+  return null;
+}
+
+const showSolutionNav = () => pageTemplateProps.mock.calls.at(-1)?.[0].showSolutionNav;
+
+describe('AppPageTemplate', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('leaves the navigation to the sidebar setting while no page hides it', () => {
+    render(
+      <SideNavProvider>
+        <AppPageTemplate PageTemplate={PageTemplate} />
+      </SideNavProvider>
+    );
+
+    // Not `true`: the setting is off where the layout has a navigation of its own.
+    expect(showSolutionNav()).toBeUndefined();
+  });
+
+  it('hides the navigation for a page that asked for its width', () => {
+    render(
+      <SideNavProvider>
+        <AppPageTemplate PageTemplate={PageTemplate} />
+        <PageHidingTheNav />
+      </SideNavProvider>
+    );
+
+    expect(showSolutionNav()).toBe(false);
+  });
+});

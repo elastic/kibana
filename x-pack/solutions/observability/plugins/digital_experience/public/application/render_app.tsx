@@ -12,10 +12,12 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import { RouterProvider } from '@kbn/typed-react-router-config';
 import { RouteBreadcrumbsContextProvider } from '../breadcrumbs/route_breadcrumbs_context';
 import { digitalExperienceRouter } from '../routes';
 import type { DigitalExperienceStartDeps } from '../types';
+import { AppPageTemplate } from './app_page_template';
+import { SideNavProvider } from './side_nav_context';
 
 const router = digitalExperienceRouter as unknown as ComponentProps<
   typeof RouterProvider
@@ -44,10 +46,9 @@ export const renderApp = ({
               {/* Outside the template's error boundary, so an invalid URL param reaches the
               router's boundary, which removes it from the URL. */}
               <RouteBreadcrumbsContextProvider>
-                {/* Unpadded, so each page's AppHeader spans the page; pages pad their own content. */}
-                <PageTemplate pageSectionProps={{ paddingSize: 'none' }}>
-                  <RouteRenderer />
-                </PageTemplate>
+                <SideNavProvider>
+                  <AppPageTemplate PageTemplate={PageTemplate} />
+                </SideNavProvider>
               </RouteBreadcrumbsContextProvider>
             </RedirectAppLinks>
           </div>

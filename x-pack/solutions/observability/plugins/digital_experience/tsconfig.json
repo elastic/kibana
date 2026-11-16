@@ -49,6 +49,7 @@
     "@kbn/scout-oblt",
     "@kbn/task-manager-plugin",
     "@kbn/timerange",
+    "@kbn/resizable-layout",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
     "@kbn/utility-types",
