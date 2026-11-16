@@ -134,6 +134,7 @@ describe('judge_analysis', () => {
         hunt: {
           behaviors: [
             { technique_name: 'Password Spraying', execution: { executed: true, row_count: 0 } },
+            { technique_name: 'Role Assumption', execution: { executed: true } },
           ],
         },
       })
@@ -149,6 +150,7 @@ describe('judge_analysis', () => {
       'IOC Hunt indices: logs-*',
       'Behavior Hunt targets: logs-aws.cloudtrail-*',
       'Password Spraying executed, 0 row(s)',
+      'Role Assumption executed, row count not recorded',
     ]) {
       expect(groundTruth).toContain(fact);
     }

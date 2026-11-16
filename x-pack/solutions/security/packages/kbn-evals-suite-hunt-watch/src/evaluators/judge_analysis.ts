@@ -97,7 +97,9 @@ const asStrings = (value: unknown): string[] =>
 const describeBehavior = ({ technique_name: name, execution }: HuntBehaviorOutput): string => {
   const label = name ?? 'unnamed behavior';
   if (!execution?.executed) return `${label} not executed`;
-  return `${label} executed, ${execution.row_count ?? 0} row(s)`;
+  return typeof execution.row_count === 'number'
+    ? `${label} executed, ${execution.row_count} row(s)`
+    : `${label} executed, row count not recorded`;
 };
 
 /**
