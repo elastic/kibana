@@ -649,7 +649,7 @@ describe('renderDriftIssue', () => {
       { owners: [] }
     );
 
-    expect(title).toBe('[Connectors][Validation] `.acme`: 0 actions need attention');
+    expect(title).toBe('[Connectors][Validation] `.acme`: 3 problems need attention');
     expect(body).toContain('> **All 2 actions work with the latest spec.**');
     expect(body).toContain(
       `> The check found 3 problems outside the actions, which don't occur against the committed snapshot (see "Other problems").`

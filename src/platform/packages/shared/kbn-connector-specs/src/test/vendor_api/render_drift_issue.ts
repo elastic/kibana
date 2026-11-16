@@ -504,12 +504,29 @@ const attentionOf = (
   };
 };
 
-/** Every drift issue's title: `[Connectors][Validation] `.acme`: 2 actions need attention`. */
+// What needs attention besides the actions: problems outside them, spec changes no action calls,
+// spec corrections that no longer apply, and specs that couldn't be fetched or classified.
+const problemsOutsideActions = (drift: ConnectorDrift, attention: Attention): number =>
+  (drift.verdict === 'kibana-regression'
+    ? drift.otherProblems?.snapshot.length ?? 0
+    : drift.otherProblems?.latest?.length ?? 0) +
+  attention.unattached +
+  (drift.staleCorrections?.length ?? 0) +
+  Object.values(drift.sources).filter(
+    ({ status, changes }) => status === 'unreachable' || (status === 'changed' && !changes)
+  ).length;
+
+/**
+ * Every drift issue's title: `[Connectors][Validation] `.acme`: 2 actions need attention`, or
+ * the problems that do when no action does.
+ */
 const titleOf = (drift: ConnectorDrift, attention: Attention): string => {
   // When a latest spec didn't load, no action could be checked against it.
-  const needing = drift.verdict === 'unknown' ? attention.total : attention.actions.size;
-  return `[Connectors][Validation] \`${drift.connector}\`: ${plural(needing, 'action')} ${
-    needing === 1 ? 'needs' : 'need'
+  const actions = drift.verdict === 'unknown' ? attention.total : attention.actions.size;
+  const problems = actions === 0 ? problemsOutsideActions(drift, attention) : 0;
+  const [count, noun] = problems > 0 ? [problems, 'problem'] : [actions, 'action'];
+  return `[Connectors][Validation] \`${drift.connector}\`: ${plural(count, noun)} ${
+    count === 1 ? 'needs' : 'need'
   } attention`;
 };
 
