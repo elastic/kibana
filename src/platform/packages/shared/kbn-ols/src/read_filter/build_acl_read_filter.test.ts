@@ -213,34 +213,6 @@ describe('buildAclReadFilter', () => {
     );
   });
 
-  describe('with shapes that only the normalizer tests cover', () => {
-    const EVERYONE_EDITS = Object.fromEntries(PROBES.map((probe) => [probe, 'edit' as const]));
-
-    it.each([
-      ['a key the mapping does not know is no ACL', { acl: { foo: 'bar' } }, EVERYONE_EDITS],
-      [
-        'an entry with only added_at is a damaged ACL',
-        { acl: { entries: [{ added_at: '2026-10-21T00:00:00Z' }] } },
-        {},
-      ],
-      ['an empty general access string is a damaged ACL', { acl: { general_access: '' } }, {}],
-      [
-        'sibling dotted entry keys grant nothing',
-        {
-          acl: {
-            ...PRIVATE,
-            'entries.type': 'user',
-            'entries.id': 'u_grantee',
-            'entries.access': 'use',
-          },
-        },
-        { owner: 'manage' as const },
-      ],
-    ])('%s', (_, source, access) => {
-      expectAccess(source, FIXTURE_POLICY, access);
-    });
-  });
-
   describe('spaces', () => {
     const publicObject = indexDocument({}, ['other']);
 

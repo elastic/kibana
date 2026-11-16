@@ -28,6 +28,8 @@ import { TestProviders } from '../../../../../common/mock';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../../../flyout_v2/shared/components/test_ids';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
+import type { GraphEntryPoint } from '../../../../../common/lib/telemetry';
+import { useGraphTelemetry } from '../../../../../flyout_v2/shared/hooks/use_graph_telemetry';
 
 jest.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -43,6 +45,13 @@ jest.mock('react-redux-v7', () => {
 });
 
 jest.mock('../../../../shared/hooks/use_should_show_graph');
+
+jest.mock('../../../../../flyout_v2/shared/hooks/use_graph_telemetry', () => {
+  const actual = jest.requireActual('../../../../../flyout_v2/shared/hooks/use_graph_telemetry');
+  return { ...actual, useGraphTelemetry: jest.fn(actual.useGraphTelemetry) };
+});
+
+const mockUseGraphTelemetry = useGraphTelemetry as jest.Mock;
 
 const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
@@ -69,10 +78,12 @@ const renderVisualizationsSection = ({
   contextValue = panelContextValue,
   isPreviewMode = false,
   scopeId = 'test-scope-id',
+  graphEntryPoint,
 }: {
   contextValue?: typeof panelContextValue;
   isPreviewMode?: boolean;
   scopeId?: string;
+  graphEntryPoint?: GraphEntryPoint;
 } = {}) =>
   render(
     <IntlProvider locale="en">
@@ -82,6 +93,7 @@ const renderVisualizationsSection = ({
             entityId="test-entity-id"
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
+            graphEntryPoint={graphEntryPoint}
           />
         </DocumentDetailsContext.Provider>
       </TestProviders>
@@ -92,6 +104,7 @@ describe('<VisualizationsSection />', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
 
   beforeEach(() => {
+    mockUseGraphTelemetry.mockClear();
     // Default mock: graph visualization available
     mockUseShouldShowGraph.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
@@ -171,6 +184,23 @@ describe('<VisualizationsSection />', () => {
     expect(
       queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeNull();
+  });
+
+  it('should report the graph preview through the entity flyout entry point by default', () => {
+    mockUseExpandSection.mockReturnValue(true);
+
+    renderVisualizationsSection();
+
+    expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
+  });
+
+  it('should forward the graph entry point to the graph preview', () => {
+    mockUseExpandSection.mockReturnValue(true);
+
+    renderVisualizationsSection({ graphEntryPoint: 'ai_chat_attachment' });
+
+    expect(mockUseGraphTelemetry).toHaveBeenCalledWith('ai_chat_attachment');
+    expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_flyout');
   });
 
   it('should not render the graph preview component if the graph feature is disabled', () => {

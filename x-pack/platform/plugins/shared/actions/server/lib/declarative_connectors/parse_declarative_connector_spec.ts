@@ -150,6 +150,17 @@ const httpRequestSchema = lazySchema(() =>
       headers: z.record(z.string(), z.unknown()).optional(),
       body: z.unknown().optional(),
       bodyType: z.enum(['json', 'form', 'text']).optional(),
+      response: z
+        .object({
+          dataPath: z.string().optional(),
+          outputKey: z.string().optional(),
+          linkHeader: z
+            .object({ header: z.string().optional(), outputKey: z.string().min(1) })
+            .strict()
+            .optional(),
+        })
+        .strict()
+        .optional(),
     })
     .strict()
     .superRefine((request, context) => {
