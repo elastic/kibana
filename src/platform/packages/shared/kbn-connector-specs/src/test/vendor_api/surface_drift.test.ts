@@ -426,7 +426,11 @@ describe('renderDriftIssue', () => {
     const { body } = renderDriftIssue(drifted, { owners: [] });
 
     expect(body).toContain('> [!WARNING]');
-    expect(body).toContain('**1 of 2 checked actions of `.acme` fail against the latest spec.**');
+    expect(body).toContain(
+      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` fails against the latest spec: GET /items breaks the spec: limit must be <= 50.\n>\n> Update the connector to ensure it will continue working.'
+    );
+    // A failing action isn't also described as passing with changes
+    expect(body).not.toContain('`search` passes');
     expect(body.indexOf('| `search` |')).toBeLessThan(body.indexOf('| `getItem` |'));
     expect(body).toContain(
       '| `search` | `GET /items` | ❌ Fails against the latest spec: GET /items breaks the spec: limit must be <= 50 |'
@@ -481,8 +485,9 @@ describe('renderDriftIssue', () => {
     expect(body).toContain(
       '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` passes but calls a deprecated endpoint.\n>\n> Update the connector to ensure it will continue working.'
     );
+    expect(body).toContain('| Operation | Change | Connector Actions | Details |');
     expect(body).toContain(
-      '| Deprecated | `GET /items` | `search` | endpoint deprecated (`endpoint-deprecated`) |'
+      '| `GET /items` | Deprecated | `search` | endpoint deprecated (`endpoint-deprecated`) |'
     );
     // The request change is verified by running the actions, so it isn't one to review
     expect(body).not.toContain('| Request changed |');
@@ -557,7 +562,7 @@ describe('renderDriftIssue', () => {
     );
 
     expect(body).toContain('`search` passes but calls an endpoint removed from the current spec.');
-    expect(body).toContain('| Removed | `GET /items` | `search` |');
+    expect(body).toContain('| `GET /items` | Removed | `search` |');
     expect(body).toContain(
       '| `search` | `GET /items` | ✅ Passes · removed (see changes to review) |'
     );

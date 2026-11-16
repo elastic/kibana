@@ -136,6 +136,20 @@ const listed = (items: readonly string[], max = MAX_LISTED): string => {
   return shown.length > 1 ? `${shown.slice(0, -1).join(', ')} and ${shown.at(-1)}` : shown[0];
 };
 
+// A failing action's status from the actions table, as a sentence: "`scrape` fails against the
+// latest spec: …", "`listRules` calls `GET /rules`, which is removed from the current spec."
+const failureSentence = (action: string, status: string): string => {
+  const removed = status.match(/^Removed from current spec: (.*)$/);
+  if (removed) {
+    const several = (removed[1].match(/`/g) ?? []).length > 2;
+    return `${code(action)} calls ${removed[1]}, which ${
+      several ? 'are' : 'is'
+    } removed from the current spec.`;
+  }
+  const text = `${status.charAt(0).toLowerCase()}${status.slice(1)}`.replace(/\.$/, '');
+  return `${code(action)} ${text}.`;
+};
+
 interface OtherProblemRow {
   readonly problem: string;
   readonly operation: string;
@@ -415,8 +429,10 @@ const specChanges = (drift: ConnectorDrift): string[] => {
   ];
 };
 
-/** Which actions need attention when the actions pass, and why. */
+/** Which actions need attention, and why. */
 interface Attention {
+  /** Actions that fail, with their status. */
+  readonly failing: ReadonlyArray<{ readonly action: string; readonly status: string }>;
   /** Actions that read a response field that changed. */
   readonly readers: readonly string[];
   /** Per kind of change to review, the actions it affects. */
@@ -431,7 +447,11 @@ interface Attention {
   readonly total: number;
 }
 
-const attentionOf = (actions: readonly ActionDrift[], review: readonly ReviewItem[]): Attention => {
+const attentionOf = (
+  actions: readonly ActionDrift[],
+  review: readonly ReviewItem[],
+  failing: Attention['failing']
+): Attention => {
   const readers = actions
     .filter(({ fieldChanges = [] }) => fieldChanges.length > 0)
     .map(({ action }) => action);
@@ -445,11 +465,13 @@ const attentionOf = (actions: readonly ActionDrift[], review: readonly ReviewIte
     .filter((action) => !isChecked(action) && action.unmatched.length > 0)
     .map(({ action }) => action);
   return {
+    failing,
     readers,
     byKind,
     missing,
     unattached: review.filter((item) => item.actions.length === 0).length,
     actions: new Set([
+      ...failing.map(({ action }) => action),
       ...readers,
       ...[...byKind.values()].flatMap((named) => [...named]),
       ...missing,
@@ -574,10 +596,16 @@ export const renderDriftIssue = (
   const statuses = new Map(
     actions.map((action) => [action.action, statusOf(action, changesOf, reviewOf)])
   );
-  // Counted once, for the title and the summary of an issue whose actions pass.
-  const attention = attentionOf(actions, review);
+  // Counted once, for the title and the summary.
+  const attention = attentionOf(
+    actions,
+    review,
+    actions.flatMap(({ action }) => {
+      const status = statuses.get(action);
+      return status?.rank === 'fails' ? [{ action, status: status.text }] : [];
+    })
+  );
 
-  const checked = actions.filter(isChecked);
   const notChecked = actions.filter((action) => !isChecked(action));
   const failing = actions.filter((action) => {
     const status = statuses.get(action.action);
@@ -597,14 +625,22 @@ export const renderDriftIssue = (
   const overlayCausesMoves = movedOnly && serversCorrection !== undefined;
 
   // Summary
-  // The note when no action fails: how many work, which need attention and why, and what to do.
+  // The note: how many actions work, which need attention and why, and what to do.
   const passingSummary = (extra: readonly string[]): string => {
-    const { readers, byKind, missing, unattached, total } = attention;
+    const { missing, unattached, total } = attention;
     const working = total - attention.actions.size;
+    // A failing action is named for its failure only, not as passing with changes.
+    const failed = new Set(attention.failing.map(({ action }) => action));
+    const readers = attention.readers.filter((action) => !failed.has(action));
+    const byKind = [...attention.byKind].map(
+      ([kind, named]) =>
+        [kind, new Set([...named].filter((action) => !failed.has(action)))] as const
+    );
     // The actions are the point of these sentences, so more of them are named.
     const sentence = (named: readonly string[], [one, many]: readonly [string, string]) =>
       `${listed(named.map(code), MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`;
     const reasons = [
+      ...attention.failing.map(({ action, status }) => failureSentence(action, status)),
       ...(readers.length > 0
         ? [
             sentence(readers, [
@@ -613,7 +649,7 @@ export const renderDriftIssue = (
             ]),
           ]
         : []),
-      ...[...byKind]
+      ...byKind
         .filter(([, named]) => named.size > 0)
         .map(([kind, named]) => sentence([...named], AFFECTED[kind])),
       ...(missing.length > 0
@@ -657,8 +693,18 @@ export const renderDriftIssue = (
     ].join('\n\n');
   };
 
-  // No action fails, but the latest spec has problems that belong to no single action.
-  const latestOutsideOnly = drift.verdict === 'vendor-drift' && failing.length === 0;
+  // Vendor drift gets the same note, unless every failing action only moved in the spec, which
+  // has its own diagnosis.
+  const vendorDriftNote = drift.verdict === 'vendor-drift' && !movedOnly;
+  const otherLatest = drift.otherProblems?.latest?.length ?? 0;
+  const outsideActions =
+    otherLatest > 0
+      ? [
+          `The check found ${plural(otherLatest, 'problem')} outside the actions, which ${
+            otherLatest === 1 ? "doesn't" : "don't"
+          } occur against the committed snapshot (see "Other problems").`,
+        ]
+      : [];
   let alert: 'NOTE' | 'WARNING' | 'CAUTION';
   let summary: string;
   switch (drift.verdict) {
@@ -681,15 +727,10 @@ export const renderDriftIssue = (
             )} outside the actions (see "Other problems"). The vendor didn't cause this: the connector, its artifacts or the checking tooling changed.`;
       break;
     case 'vendor-drift':
-      if (latestOutsideOnly) {
+      if (vendorDriftNote) {
         alert = 'WARNING';
-        const others = drift.otherProblems?.latest?.length ?? 0;
-        summary = passingSummary([
-          `The check found ${plural(others, 'problem')} outside the actions, which ${
-            others === 1 ? "doesn't" : "don't"
-          } occur against the committed snapshot (see "Other problems").`,
-        ]);
-      } else if (movedOnly) {
+        summary = passingSummary(outsideActions);
+      } else {
         alert = 'NOTE';
         summary = `**${name}'s spec moved ${listed(
           serverPaths.map(code)
@@ -703,11 +744,6 @@ export const renderDriftIssue = (
             ? ` Update the connector's spec corrections in \`${OVERLAY}\`, not the connector.`
             : ''
         }`;
-      } else {
-        alert = 'WARNING';
-        summary = `**${failing.length} of ${plural(checked.length, 'checked action')} of \`${
-          drift.connector
-        }\` fail against the latest spec.** They pass against the committed snapshot, so the vendor's API or its spec changed. Check the vendor's docs before changing the connector.`;
       }
       break;
     default:
@@ -716,7 +752,7 @@ export const renderDriftIssue = (
   }
   // The note for passing actions names these already.
   const missingEndpoints =
-    drift.verdict === 'healthy' || latestOutsideOnly
+    drift.verdict === 'healthy' || vendorDriftNote
       ? []
       : notChecked.filter(({ unmatched }) => unmatched.length > 0);
   if (missingEndpoints.length > 0) {
@@ -855,13 +891,13 @@ export const renderDriftIssue = (
       ? [
           '### Changes to review',
           '',
-          '| Change | Operation | Actions | Details |',
+          '| Operation | Change | Connector Actions | Details |',
           '|---|---|---|---|',
           ...review
             .slice(0, MAX_REVIEW_ROWS)
             .map(
               ({ kind, change: { operation, text, id: rule }, actions: affected }) =>
-                `| ${kind} | ${operation ? code(operation) : '—'} | ${
+                `| ${operation ? code(operation) : '—'} | ${kind} | ${
                   affected.map(code).join(', ') || '—'
                 } | ${cell(text)} (${code(rule)}) |`
             ),
