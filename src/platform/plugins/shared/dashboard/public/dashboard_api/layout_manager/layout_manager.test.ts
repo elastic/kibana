@@ -14,8 +14,11 @@ import { waitFor } from '@testing-library/react';
 import {
   ControlValuesSource,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
+  ESQL_CONTROL,
 } from '@kbn/controls-constants';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasLibraryTransforms,
@@ -231,6 +234,194 @@ describe('layout manager', () => {
     });
     expect(incomingPanelStatePanelThree).toEqual({
       title: 'Panel Three',
+    });
+  });
+
+  describe('addIncomingEmbeddables existing and pinned panel updates', () => {
+    const pinnedEsqlControl = {
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      id: 'pinnedEsqlControl',
+      type: ESQL_CONTROL,
+      config: {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['US'],
+      },
+    } as NonNullable<DashboardState['pinned_panels']>[number];
+
+    test('should update an existing pinned ES|QL control in place when incoming control has the same id', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [pinnedEsqlControl],
+        trackPanelMock
+      );
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'pinnedEsqlControl',
+          type: ESQL_CONTROL,
+          serializedState: {
+            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+            variable_name: 'geo_dest',
+            variable_type: ESQLVariableType.VALUES,
+            selected_options: ['CN'],
+          },
+        },
+      ]);
+
+      const layout = layoutManager.api.layout$.value;
+      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID]);
+      expect(layout.panels.pinnedEsqlControl).toBeUndefined();
+      expect(layout.pinnedPanels).toEqual({
+        pinnedEsqlControl: {
+          type: ESQL_CONTROL,
+          width: DEFAULT_PINNED_CONTROL_STATE.width,
+          grow: DEFAULT_PINNED_CONTROL_STATE.grow,
+          order: 0,
+        },
+      });
+      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual({
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['CN'],
+      });
+    });
+
+    test('should scroll to and highlight the new grid panel, not the pinned control it updates', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [pinnedEsqlControl],
+        trackPanelMock
+      );
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'pinnedEsqlControl',
+          type: ESQL_CONTROL,
+          serializedState: {
+            ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+            variable_name: 'geo_dest',
+            variable_type: ESQLVariableType.VALUES,
+            selected_options: ['CN'],
+          },
+        },
+        {
+          embeddableId: 'searchPanel',
+          type: 'search',
+          serializedState: { title: 'Session' },
+          size: { width: 1, height: 1 },
+        },
+      ]);
+
+      const layout = layoutManager.api.layout$.value;
+      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID, 'searchPanel']);
+      expect(layout.panels.pinnedEsqlControl).toBeUndefined();
+      expect(Object.keys(layout.pinnedPanels)).toEqual(['pinnedEsqlControl']);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual({
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['CN'],
+      });
+      expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith('searchPanel');
+      expect(trackPanelMock.setHighlightPanelId).toHaveBeenCalledWith('searchPanel');
+    });
+
+    test('should apply incoming state to a mounted pinned ES|QL control when its id is sent again', async () => {
+      const existingState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['US'],
+      };
+      const updatedState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        variable_name: 'geo_dest',
+        variable_type: ESQLVariableType.VALUES,
+        selected_options: ['CN'],
+      };
+      const latestState$ = new BehaviorSubject(existingState);
+      const applySerializedState = jest.fn((nextState) => {
+        latestState$.next(nextState);
+        return Promise.resolve();
+      });
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [pinnedEsqlControl],
+        trackPanelMock
+      );
+      layoutManager.api.registerChildApi({
+        ...panel1Api,
+        type: ESQL_CONTROL,
+        uuid: 'pinnedEsqlControl',
+        latestState$,
+        serializeState: () => latestState$.value,
+        applySerializedState,
+        hasUnsavedChanges$: new BehaviorSubject(false),
+      } as DefaultEmbeddableApi);
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: 'pinnedEsqlControl',
+          type: ESQL_CONTROL,
+          serializedState: updatedState,
+        },
+      ]);
+
+      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      await waitFor(() => {
+        expect(applySerializedState).toHaveBeenCalledWith(updatedState);
+        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+      });
+
+      const layout = layoutManager.api.layout$.value;
+      expect(Object.keys(layout.panels)).toEqual([PANEL_ONE_ID]);
+      expect(layout.panels.pinnedEsqlControl).toBeUndefined();
+      expect(Object.keys(layout.pinnedPanels)).toEqual(['pinnedEsqlControl']);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('pinnedEsqlControl')).toEqual(
+        updatedState
+      );
+      expect(trackPanelMock.setScrollToPanelId).not.toHaveBeenCalled();
+      expect(trackPanelMock.setHighlightPanelId).not.toHaveBeenCalled();
+    });
+
+    test('should apply incoming state to a mounted grid panel and clear loading even if applySerializedState fails', async () => {
+      const applySerializedState = jest.fn(() => {
+        throw new Error('Failed to apply state');
+      });
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [panel1],
+        [],
+        trackPanelMock
+      );
+      layoutManager.api.registerChildApi({
+        ...panel1Api,
+        applySerializedState,
+        hasUnsavedChanges$: new BehaviorSubject(false),
+      } as DefaultEmbeddableApi);
+
+      layoutManager.api.addIncomingEmbeddables([
+        {
+          embeddableId: PANEL_ONE_ID,
+          type: panel1.type,
+          serializedState: { title: 'Updated Panel One' },
+        },
+      ]);
+
+      expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(true);
+      await waitFor(() => {
+        expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated Panel One' });
+        expect(layoutManager.internalApi.childrenStateLoading$.value).toBe(false);
+      });
+
+      expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);
+      expect(trackPanelMock.setHighlightPanelId).toHaveBeenCalledWith(PANEL_ONE_ID);
     });
   });
 
