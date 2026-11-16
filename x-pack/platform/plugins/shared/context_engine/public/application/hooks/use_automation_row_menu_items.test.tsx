@@ -20,10 +20,7 @@ const createDefaultParams = (
   editHref: '/app/workflows/wf-1',
   isReadOnly: false,
   isBusy: false,
-  canRun: true,
-  isRunDisabled: false,
   onCloseMenu: jest.fn(),
-  onRun: jest.fn(),
   onPreview: jest.fn(),
   onDelete: jest.fn(),
   ...overrides,
@@ -43,33 +40,40 @@ const renderMenu = (overrides: Partial<UseAutomationRowMenuItemsParams> = {}) =>
 };
 
 describe('useAutomationRowMenuItems', () => {
-  it('includes an enabled Run item when canRun is true and isRunDisabled is false', () => {
-    renderMenu({ canRun: true, isRunDisabled: false });
+  it('offers View, Open in Workflows and Delete; Run is a row button', () => {
+    renderMenu();
 
-    const runItem = screen.getByTestId('contextRunAutomationButton');
-    expect(runItem).toBeInTheDocument();
-    expect(runItem).toHaveTextContent('Run');
-    expect(runItem).not.toBeDisabled();
-  });
-
-  it('omits the Run item when canRun is false', () => {
-    renderMenu({ canRun: false });
-
+    expect(screen.getByTestId('contextPreviewWorkflowButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextOpenWorkflowButton')).toHaveAttribute(
+      'href',
+      '/app/workflows/wf-1'
+    );
+    expect(screen.getByTestId('contextRemoveAutomationButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextRunAutomationButton')).not.toBeInTheDocument();
   });
 
-  it('disables the Run item when isRunDisabled is true', () => {
-    renderMenu({ canRun: true, isRunDisabled: true });
+  it('only offers View on a read-only AI index', () => {
+    renderMenu({ isReadOnly: true });
 
-    expect(screen.getByTestId('contextRunAutomationButton')).toBeDisabled();
+    expect(screen.getByTestId('contextPreviewWorkflowButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextOpenWorkflowButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextRemoveAutomationButton')).not.toBeInTheDocument();
   });
 
-  it('closes the menu and invokes onRun when Run is clicked', () => {
+  it('closes the menu before opening the preview or the delete confirmation', () => {
     const params = renderMenu();
 
-    fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextPreviewWorkflowButton'));
+    fireEvent.click(screen.getByTestId('contextRemoveAutomationButton'));
 
-    expect(params.onCloseMenu).toHaveBeenCalledTimes(1);
-    expect(params.onRun).toHaveBeenCalledTimes(1);
+    expect(params.onCloseMenu).toHaveBeenCalledTimes(2);
+    expect(params.onPreview).toHaveBeenCalledTimes(1);
+    expect(params.onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables Delete while the AI index is being saved', () => {
+    renderMenu({ isBusy: true });
+
+    expect(screen.getByTestId('contextRemoveAutomationButton')).toBeDisabled();
   });
 });

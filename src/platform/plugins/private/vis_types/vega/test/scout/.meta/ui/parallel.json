@@ -1,17 +1,17 @@
 {
-  "sha1": "9bb0232607f140d9f76917d84da9da7e343bbf71",
+  "sha1": "fcc50bd4fc6977c1810b43f21f3e736e10f1d686",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "fb6a28fdbf970dc-afb747e911dd160",
-      "title": "Enable the Vega feature flags",
+      "id": "fb6a28fdbf970dc-aa40d033d190e40",
+      "title": "Enable the Vega as code feature flag",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 8,
+        "line": 7,
         "column": 1
       }
     },
@@ -22,8 +22,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 17,
-        "column": 26
+        "line": 15,
+        "column": 5
       }
     },
     {
@@ -61,8 +61,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_dashboard_library.spec.ts",
-        "line": 55,
-        "column": 33
+        "line": 63,
+        "column": 5
       }
     },
     {
@@ -74,7 +74,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_dashboard_library.spec.ts",
-        "line": 63,
+        "line": 73,
         "column": 36
       }
     },
@@ -87,7 +87,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 45,
+        "line": 56,
         "column": 40
       }
     },
@@ -100,8 +100,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 86,
-        "column": 26
+        "line": 87,
+        "column": 28
       }
     },
     {
@@ -113,8 +113,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 85,
-        "column": 5
+        "line": 103,
+        "column": 86
       }
     },
     {
@@ -126,13 +126,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 105,
-        "column": 14
+        "line": 126,
+        "column": 43
       }
     },
     {
-      "id": "824a1c0d9b29284-e20f893877d4a0a",
-      "title": "Reset the Vega feature flags",
+      "id": "824a1c0d9b29284-19d3e3fbdec443e",
+      "title": "Reset the Vega as code feature flag",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
