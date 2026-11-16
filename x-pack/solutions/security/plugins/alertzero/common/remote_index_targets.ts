@@ -91,6 +91,13 @@ export interface RemoteIndexTargets {
   index: string;
   /** The cluster aliases the target searches, as written in the data view. */
   clusters: string[];
+  /**
+   * True when the target is the local patterns only because the data view could not be used in
+   * full: it is not a list, it is longer than the helper reads, or an entry is longer than the
+   * helper reads. Remote clusters the data view names may then be missing from the search, which
+   * is not the same as a data view that names none.
+   */
+  incomplete: boolean;
 }
 
 /**
@@ -113,6 +120,11 @@ export interface RemoteIndexTargets {
  * cannot read events the space excluded. Local exclusions, and ES|QL mode prefixes (`_any:`,
  * `_remote:`, `_coordinator:`), add nothing. The data view's own streams are not searched: a caller
  * reads only the patterns it names.
+ *
+ * A data view the helper cannot read in full searches the local patterns only and is reported as
+ * `incomplete`. Dropping the tail of a long list, or one over-long entry, could drop an exclusion
+ * while keeping the wildcard include it was meant to limit, so the search would read a cluster the
+ * space excluded.
  */
 export const remoteIndexTargets = (
   dataViewPatterns: readonly string[],
@@ -122,12 +134,21 @@ export const remoteIndexTargets = (
   const result: string[] = [...locals];
   const included = new Set<string>();
   const excluded: RemoteExclusion[] = [];
-  const list = Array.isArray(dataViewPatterns) ? dataViewPatterns.slice(0, MAX_PATTERNS) : [];
+  const localOnly = (): RemoteIndexTargets => ({
+    index: locals.join(','),
+    clusters: [],
+    incomplete: true,
+  });
 
-  for (const raw of list) {
+  if (!Array.isArray(dataViewPatterns) || dataViewPatterns.length > MAX_PATTERNS) {
+    return localOnly();
+  }
+
+  for (const raw of dataViewPatterns) {
     if (typeof raw !== 'string') continue;
     const entry = raw.trim();
-    if (entry.length === 0 || entry.length > MAX_PATTERN_LENGTH) continue;
+    if (entry.length === 0) continue;
+    if (entry.length > MAX_PATTERN_LENGTH) return localOnly();
 
     const { exclude, cluster, index } = parseIndexScopeEntry(entry);
     if (cluster === undefined || cluster.startsWith('_') || !CLUSTER_ALIAS.test(cluster)) continue;
@@ -198,5 +219,5 @@ export const remoteIndexTargets = (
   for (const entry of result.slice(locals.length)) {
     if (!entry.startsWith('-')) clusters.add(entry.slice(0, entry.indexOf(':')));
   }
-  return { index: result.join(','), clusters: [...clusters] };
+  return { index: result.join(','), clusters: [...clusters], incomplete: false };
 };

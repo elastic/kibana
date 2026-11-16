@@ -916,14 +916,63 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         expect(eventsDegraded({ load_events_by_host_name: returned({ skipped: 1 }) })).toBe(true);
       });
 
-      it('is true when the local retry answered a failed combined search, while events_failed stays false', () => {
+      const resolved = (clusterAliases: string[], incomplete = false) => ({
+        resolve_endpoint_event_index: {
+          output: { index: 'logs-endpoint.events.*', clusters: clusterAliases, incomplete },
+        },
+      });
+
+      it('is true when the local retry answered a failed search that included a remote, while events_failed stays false', () => {
         const outputs = {
+          ...resolved(['remote_a']),
           load_events_by_host_id: { error: searchFailed },
           load_events_by_host_id_local: returned(),
         };
 
         expect(eventsDegraded(outputs)).toBe(true);
         expect(eventsFailed(outputs)).toBe(false);
+      });
+
+      it.each(['load_events_by_host_id', 'load_events_by_host_name'] as const)(
+        'is false when a local-only %s search failed and its retry answered',
+        (search) => {
+          expect(
+            eventsDegraded({
+              ...resolved([]),
+              [search]: { error: searchFailed },
+              [`${search}_local`]: returned(),
+            })
+          ).toBe(false);
+        }
+      );
+
+      it('is true when a local-only search and its retry both fail', () => {
+        expect(
+          eventsDegraded({
+            ...resolved([]),
+            load_events_by_host_id: { error: searchFailed },
+            load_events_by_host_id_local: { error: searchFailed },
+          })
+        ).toBe(true);
+      });
+
+      it('is true when the resolver could not use the data view in full', () => {
+        expect(eventsDegraded({ ...resolved([], true), load_events_by_host_id: returned() })).toBe(
+          true
+        );
+      });
+
+      it('is true when the resolver step failed', () => {
+        expect(
+          eventsDegraded({
+            resolve_endpoint_event_index: { error: searchFailed },
+            load_events_by_host_id: returned(),
+          })
+        ).toBe(true);
+      });
+
+      it('is false for a complete local-only read', () => {
+        expect(eventsDegraded({ ...resolved([]), load_events_by_host_id: returned() })).toBe(false);
       });
 
       it('is true when the combined search and the local retry both fail', () => {

@@ -185,6 +185,7 @@ describe('remoteIndexTargets with several local patterns', () => {
     expect(remoteIndexTargets(['remote_a:logs-*', 'logs-*'], [PROCESS, NETWORK])).toEqual({
       index: `${PROCESS},${NETWORK},remote_a:${PROCESS},remote_a:${NETWORK}`,
       clusters: ['remote_a'],
+      incomplete: false,
     });
   });
 
@@ -192,6 +193,7 @@ describe('remoteIndexTargets with several local patterns', () => {
     expect(remoteIndexTargets(['logs-*', 'filebeat-*'], [PROCESS, NETWORK])).toEqual({
       index: `${PROCESS},${NETWORK}`,
       clusters: [],
+      incomplete: false,
     });
   });
 
@@ -208,6 +210,7 @@ describe('remoteIndexTargets with several local patterns', () => {
     ).toEqual({
       index: `${PROCESS},${NETWORK},remote_a:${NETWORK}`,
       clusters: ['remote_a'],
+      incomplete: false,
     });
   });
 
@@ -220,6 +223,7 @@ describe('remoteIndexTargets with several local patterns', () => {
     ).toEqual({
       index: `${PROCESS},${NETWORK}`,
       clusters: [],
+      incomplete: false,
     });
   });
 
@@ -261,5 +265,53 @@ describe('remoteIndexTargets with several local patterns', () => {
     expect(remoteIndexTargets(['remote_a:logs-*'], [PROCESS, '', PROCESS]).index).toBe(
       `${PROCESS},remote_a:${PROCESS}`
     );
+  });
+});
+
+describe('remoteIndexTargets with a data view it cannot read in full', () => {
+  const E = 'logs-endpoint.events.*';
+  const filler = (count: number) => Array.from({ length: count }, (_, i) => `filler-${i}-*`);
+
+  it('keeps an exclusion that follows the 200th entry by searching locally only', () => {
+    // A wildcard include whose exclusion falls past the cap would otherwise read the excluded cluster.
+    expect(remoteIndexTargets(['*:logs-*', ...filler(205), '-remote_private:*'], [E])).toEqual({
+      index: E,
+      clusters: [],
+      incomplete: true,
+    });
+  });
+
+  it('reads a list of exactly 200 entries in full', () => {
+    expect(remoteIndexTargets(['*:logs-*', ...filler(198), '-remote_private:*'], [E])).toEqual({
+      index: `${E},*:${E},-remote_private:${E}`,
+      clusters: ['*'],
+      incomplete: false,
+    });
+  });
+
+  it('searches locally only when one entry is longer than the helper reads', () => {
+    expect(
+      remoteIndexTargets(['*:logs-*', `-remote_private:logs-${'a'.repeat(1100)}*`], [E])
+    ).toEqual({ index: E, clusters: [], incomplete: true });
+  });
+
+  it('searches every local pattern when it falls back', () => {
+    expect(remoteIndexTargets(filler(201), ['a-*', 'b-*'])).toEqual({
+      index: 'a-*,b-*',
+      clusters: [],
+      incomplete: true,
+    });
+  });
+
+  it('searches locally only when the data view is not a list', () => {
+    expect(remoteIndexTargets(undefined as unknown as readonly string[], [E])).toEqual({
+      index: E,
+      clusters: [],
+      incomplete: true,
+    });
+  });
+
+  it('is complete for a data view that names no cluster', () => {
+    expect(remoteIndexTargets(['logs-*', 'filebeat-*'], [E]).incomplete).toBe(false);
   });
 });

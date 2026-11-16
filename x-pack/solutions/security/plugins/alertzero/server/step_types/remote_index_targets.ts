@@ -18,15 +18,18 @@ export interface RemoteIndexTargetsStepDependencies {
   logger?: Logger;
 }
 
+/** The local patterns only. Used when the data view could not be read, so remotes are unknown. */
 const localOnly = (localTargets: readonly string[]): RemoteIndexTargets => ({
   index: localTargets.join(','),
   clusters: [],
+  incomplete: true,
 });
 
 /**
  * Reads `securitySolution:defaultIndex` as the running identity and turns its
  * cluster aliases into a search target for `localTargets`. A missing setting or a
- * failed read returns the local patterns, so the caller still searches this cluster.
+ * failed read returns the local patterns, so the caller still searches this cluster,
+ * and reports `incomplete`: the data view may name remote clusters that were not read.
  */
 export const resolveRemoteIndexTargets = async (
   getUiSettingsClient: RemoteIndexTargetsStepDependencies['getUiSettingsClient'],

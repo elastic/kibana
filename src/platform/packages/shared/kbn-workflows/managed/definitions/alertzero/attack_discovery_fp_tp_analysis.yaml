@@ -448,13 +448,23 @@ steps:
     with:
       entities_failed: "${{ steps.load_entities.error != null }}"
       events_failed: "${{ (steps.load_events_by_host_id.error != null and steps.load_events_by_host_id_local.error != null) or (steps.load_events_by_host_name.error != null and steps.load_events_by_host_name_local.error != null) }}"
-      # The hits may be missing events that live on a remote cluster. True when the combined
-      # search failed (the local retry then answered, or nothing did) or when a remote was
-      # skipped, partial, or failed in a search that returned. `events_failed` stays false in
-      # these cases, so it cannot stand for "every event was read".
+      # The hits may be missing events that live on a remote cluster. True when:
+      #   - the resolver could not use the data view in full (`incomplete`), or failed;
+      #   - the combined search failed and either remote clusters were in the target (the
+      #     local retry then drops them) or the retry failed too; or
+      #   - a remote was skipped, partial, or failed in a search that returned.
+      # A local-only target that failed once and then succeeded on retry ran the same query,
+      # so it is complete. `events_failed` stays false for every case but a double failure, so
+      # it cannot stand for "every event was read".
       events_degraded: >-
-        ${{ steps.load_events_by_host_id.error != null
-          or steps.load_events_by_host_name.error != null
+        ${{ steps.resolve_endpoint_event_index.error != null
+          or steps.resolve_endpoint_event_index.output.incomplete == true
+          or (steps.load_events_by_host_id.error != null
+            and ((steps.resolve_endpoint_event_index.output.clusters | size) > 0
+              or steps.load_events_by_host_id_local.error != null))
+          or (steps.load_events_by_host_name.error != null
+            and ((steps.resolve_endpoint_event_index.output.clusters | size) > 0
+              or steps.load_events_by_host_name_local.error != null))
           or steps.load_events_by_host_id.output._clusters.skipped > 0
           or steps.load_events_by_host_id.output._clusters.partial > 0
           or steps.load_events_by_host_id.output._clusters.failed > 0

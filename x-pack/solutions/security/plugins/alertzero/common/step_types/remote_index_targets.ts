@@ -44,6 +44,11 @@ const outputSchema = lazySchema(() =>
       .describe(
         'The remote cluster aliases the target searches. Empty when the search stays local.'
       ),
+    incomplete: z
+      .boolean()
+      .describe(
+        'True when the target is the local patterns only because the data view could not be read or used in full, so remote clusters it names may be missing. False for a data view that names none.'
+      ),
   })
 );
 

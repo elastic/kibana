@@ -41,6 +41,7 @@ describe('resolveRemoteIndexTargets', () => {
     ).resolves.toEqual({
       index: `${ENDPOINT_EVENTS},remote_a:${ENDPOINT_EVENTS},remote_*:${ENDPOINT_EVENTS}`,
       clusters: ['remote_a', 'remote_*'],
+      incomplete: false,
     });
   });
 
@@ -52,6 +53,7 @@ describe('resolveRemoteIndexTargets', () => {
     ).resolves.toEqual({
       index: `${PROCESS},${NETWORK},remote_a:${PROCESS},remote_a:${NETWORK}`,
       clusters: ['remote_a'],
+      incomplete: false,
     });
   });
 
@@ -69,7 +71,7 @@ describe('resolveRemoteIndexTargets', () => {
 
     await expect(
       resolveRemoteIndexTargets(getUiSettingsClient, request, [PROCESS, NETWORK])
-    ).resolves.toEqual({ index: `${PROCESS},${NETWORK}`, clusters: [] });
+    ).resolves.toEqual({ index: `${PROCESS},${NETWORK}`, clusters: [], incomplete: true });
   });
 
   it('returns the local patterns when the read throws', async () => {
@@ -80,7 +82,7 @@ describe('resolveRemoteIndexTargets', () => {
 
     await expect(
       resolveRemoteIndexTargets(getUiSettingsClient, request, [ENDPOINT_EVENTS])
-    ).resolves.toEqual({ index: ENDPOINT_EVENTS, clusters: [] });
+    ).resolves.toEqual({ index: ENDPOINT_EVENTS, clusters: [], incomplete: true });
   });
 });
 
@@ -101,7 +103,7 @@ describe('remote index targets step', () => {
 
     const { output } = await step.handler(contextFor(undefined, [PROCESS, NETWORK]));
 
-    expect(output).toEqual({ index: `${PROCESS},${NETWORK}`, clusters: [] });
+    expect(output).toEqual({ index: `${PROCESS},${NETWORK}`, clusters: [], incomplete: true });
   });
 
   it('returns the local patterns when core has not started', async () => {
@@ -113,7 +115,7 @@ describe('remote index targets step', () => {
 
     const { output } = await step.handler(contextFor(httpServerMock.createKibanaRequest()));
 
-    expect(output).toEqual({ index: ENDPOINT_EVENTS, clusters: [] });
+    expect(output).toEqual({ index: ENDPOINT_EVENTS, clusters: [], incomplete: true });
   });
 
   it('resolves the requested patterns for the running identity', async () => {
@@ -125,7 +127,21 @@ describe('remote index targets step', () => {
     expect(output).toEqual({
       index: `${ENDPOINT_EVENTS},remote_a:${ENDPOINT_EVENTS}`,
       clusters: ['remote_a'],
+      incomplete: false,
     });
+  });
+
+  it('reports an incomplete resolution for a data view it cannot read in full', async () => {
+    const { getUiSettingsClient } = settingsWith([
+      '*:logs-*',
+      ...Array.from({ length: 205 }, (_, i) => `filler-${i}-*`),
+      '-remote_private:*',
+    ]);
+    const step = getRemoteIndexTargetsStepDefinition({ getUiSettingsClient });
+
+    const { output } = await step.handler(contextFor(httpServerMock.createKibanaRequest()));
+
+    expect(output).toEqual({ index: ENDPOINT_EVENTS, clusters: [], incomplete: true });
   });
 
   it('bounds the patterns it accepts', () => {
