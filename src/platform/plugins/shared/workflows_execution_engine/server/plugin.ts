@@ -110,6 +110,7 @@ import {
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
+import { setWorkflowExecutionFinishedPublisher } from './topics/publish_workflow_execution_finished';
 import { workflowExecutionFinishedTopic } from './topics/workflow_execution_finished';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
@@ -1450,6 +1451,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Core setup not available');
     }
     setConcurrencyGroupLock(new LockManagerService(this.coreSetup, this.logger));
+    setWorkflowExecutionFinishedPublisher({ pubsub: coreStart.pubsub, logger: this.logger });
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -2400,6 +2402,7 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {
+    setWorkflowExecutionFinishedPublisher(undefined);
     setConcurrencyGroupLock(undefined);
     void this.dataClientBundle.stop();
   }
