@@ -11,10 +11,13 @@ import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/manag
 import { getAuthzFromRequest } from '../../services/security/security';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
 
+import { appContextService } from '../../services/app_context';
+
 import { createGetAwsOnboardingStateTool } from './get_aws_onboarding_state';
 
 jest.mock('../../services/security/security');
 jest.mock('../../services/utils/agentic_aws_onboarding');
+jest.mock('../../services/app_context');
 
 const request = httpServerMock.createKibanaRequest();
 
@@ -248,6 +251,26 @@ describe('get_aws_onboarding_state', () => {
       expect(attachments.update).toHaveBeenCalledWith('att-9', {
         data: expect.objectContaining({ status: 'verify_failed', error: 'AccessDenied' }),
       });
+    });
+
+    it('still returns the run state when the card cannot be created', async () => {
+      const warn = jest.fn();
+      jest.mocked(appContextService.getLogger).mockReturnValue({ warn } as any);
+      const attachments = createAttachments();
+      attachments.add.mockRejectedValue(new Error('boom'));
+      const { results } = await runWithAttachments(
+        waitingExecution('ask_credentials', [
+          step('credentials', 1, { status: 'completed', output: { configured: false } }),
+        ]),
+        attachments
+      );
+
+      expect(results[0].data).toMatchObject({
+        status: 'waiting_for_input',
+        waiting: { step_name: 'ask_credentials' },
+      });
+      expect(results[0].data).not.toHaveProperty('credentials_card_attachment_id');
+      expect(warn).toHaveBeenCalledTimes(1);
     });
   });
 });

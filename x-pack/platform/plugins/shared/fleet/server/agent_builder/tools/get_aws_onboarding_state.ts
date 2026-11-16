@@ -26,6 +26,8 @@ import type { AwsOnboardingStackStatusOutput } from '../../../common/workflows/s
 import type { AwsOnboardingCreatePoliciesOutput } from '../../../common/workflows/steps/create_policies';
 import type { AwsOnboardingHasDataOutput } from '../../../common/workflows/steps/has_data';
 
+import { appContextService } from '../../services/app_context';
+
 import { checkOnboardingAccess, getOnboardingExecution } from './common';
 import type { AwsOnboardingToolDeps } from './common';
 
@@ -156,14 +158,22 @@ export const createGetAwsOnboardingStateTool = ({
     const credentialsOutput =
       lastOutput<AwsOnboardingCredentialsOutput>(execution, 'credentials_recheck') ??
       lastOutput<AwsOnboardingCredentialsOutput>(execution, 'credentials');
-    const cardId = attachments
-      ? await syncCredentialsCard({
+    let cardId: string | undefined;
+    if (attachments) {
+      try {
+        cardId = await syncCredentialsCard({
           attachments,
           executionId,
           waitingStepId: waitingStep?.stepId,
           credentialsOutput,
-        })
-      : undefined;
+        });
+      } catch (e) {
+        // The card is a UI nicety: never fail the state the agent asked for because of it.
+        appContextService
+          .getLogger()
+          .warn(`Could not sync the AWS onboarding credentials card: ${e.message}`);
+      }
+    }
 
     return {
       results: [
