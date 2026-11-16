@@ -25,6 +25,12 @@ import {
 } from '../../../common/services/cloud_connectors';
 
 import {
+  TEMPLATE_URL_PARAM_REGEX,
+  getQuickCreateUrl,
+  setQuickCreateStackParams,
+} from '../../../common/services/cloud_formation_urls';
+
+import {
   getTemplateTokenValues,
   getTemplateUrlTokens,
 } from '../../../common/services/cloud_connector_template';
@@ -563,9 +569,6 @@ export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars
 
 // IaC launch URL helpers
 
-const AWS_QUICK_CREATE_URL =
-  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate';
-
 type StackParams = Readonly<Record<string, string>>;
 
 export interface StaticLaunchUrlParams {
@@ -594,33 +597,9 @@ export interface ArtifactLaunchUrlParams {
   staticUrl?: string;
 }
 
-const TEMPLATE_URL_PARAM_REGEX = /([?&])templateURL=[^&]*/;
-
 /** Whether stack parameters can be added to this static URL (a quick-create link). */
 export const isQuickCreateLaunchUrl = (url: string | undefined): url is string =>
   !!url && TEMPLATE_URL_PARAM_REGEX.test(url);
-
-const getQuickCreateUrl = (artifactUrl: string, staticUrl: string | undefined): string => {
-  const templateUrlParam = `templateURL=${encodeURIComponent(artifactUrl)}`;
-  if (staticUrl && TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
-    return staticUrl.replace(
-      TEMPLATE_URL_PARAM_REGEX,
-      (_match, separator: string) => `${separator}${templateUrlParam}`
-    );
-  }
-  return `${AWS_QUICK_CREATE_URL}?${templateUrlParam}`;
-};
-
-const setQuickCreateStackParams = (url: string, stackParams: StackParams): string =>
-  Object.entries(stackParams).reduce((acc, [name, value]) => {
-    const param = `param_${name}=${encodeURIComponent(value)}`;
-    const existingParam = new RegExp(`([?&])param_${name}=[^&]*`);
-    if (existingParam.test(acc)) {
-      // A replacer function keeps `$` sequences in the value literal.
-      return acc.replace(existingParam, (_match, separator: string) => `${separator}${param}`);
-    }
-    return `${acc}${acc.includes('?') ? '&' : '?'}${param}`;
-  }, url);
 
 const getAwsStackUpdateUrl = (deploymentId: string, artifactUrl: string): string | undefined => {
   // Only a CloudFormation stack ARN can be updated: a region alone does not make one (a
