@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { Case } from '../../../common/types/domain';
 import {
@@ -74,10 +75,25 @@ export const emitCaseAttachment = async (
   data: CaseAttachmentData,
   description?: string
 ): Promise<string> => {
+  const resolvedDescription = description ?? `Case: ${data.title}`;
+  const existing = attachments.getActive().find((attachment) => {
+    if (attachment.type !== CASE_ATTACHMENT_TYPE) {
+      return false;
+    }
+    const latest = getLatestVersion(attachment);
+    const latestData = latest?.data as Partial<CaseAttachmentData> | undefined;
+    return latestData?.id === data.id;
+  });
+
+  if (existing) {
+    await attachments.update(existing.id, { data, description: resolvedDescription });
+    return existing.id;
+  }
+
   const added = await attachments.add({
     type: CASE_ATTACHMENT_TYPE,
     data,
-    description: description ?? `Case: ${data.title}`,
+    description: resolvedDescription,
   });
   return added.id;
 };

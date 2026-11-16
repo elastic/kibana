@@ -13,6 +13,7 @@ import {
 import { CASES_UPDATED_UI_EVENT } from '../../../common/types/agent_builder/ui_events';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import type { Case } from '../../../common/types/domain';
+import type { CaseAttachmentData } from '../../../common/types/agent_builder/attachment_schemas';
 
 const buildCase = (id = 'case-1'): Case =>
   ({
@@ -46,6 +47,19 @@ const buildCase = (id = 'case-1'): Case =>
 
 const buildAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
+  getActive: jest.fn().mockReturnValue([]),
+  update: jest.fn().mockResolvedValue(undefined),
+});
+
+const buildStoredCaseAttachment = (attachmentId: string, caseData: CaseAttachmentData) => ({
+  id: attachmentId,
+  type: CASE_ATTACHMENT_TYPE,
+  active: true,
+  current_version: 2,
+  versions: [
+    { version: 1, data: { ...caseData, total_observables: null } },
+    { version: 2, data: caseData },
+  ],
 });
 
 const buildEvents = () => ({
@@ -133,6 +147,73 @@ describe('emitFromStepResult', () => {
     expect(attachments.add).not.toHaveBeenCalled();
     expect(ids).toEqual([]);
     expect(events.sendUiEvent).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// emitCaseAttachment (dedupe per case id)
+// ---------------------------------------------------------------------------
+
+describe('emitCaseAttachment', () => {
+  it('updates the existing attachment when the same case is emitted again', async () => {
+    const attachments = buildAttachments();
+    const events = buildEvents();
+    const created = buildCase('c1');
+    const withObservables = { ...buildCase('c1'), total_observables: 2 } as Case;
+
+    const first = await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: created } }],
+    });
+    attachments.getActive.mockReturnValue([
+      buildStoredCaseAttachment('att-1', toCaseAttachmentData(created)),
+    ]);
+    const second = await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: withObservables } }],
+    });
+
+    expect(attachments.add).toHaveBeenCalledTimes(1);
+    expect(attachments.update).toHaveBeenCalledTimes(1);
+    const [updatedId, updateInput] = attachments.update.mock.calls[0];
+    expect(updatedId).toBe('att-1');
+    expect(updateInput.data.total_observables).toBe(2);
+    expect(second).toEqual(first);
+  });
+
+  it('adds a new attachment for a different case id', async () => {
+    const attachments = buildAttachments();
+    attachments.add.mockResolvedValueOnce({ id: 'att-1' }).mockResolvedValueOnce({ id: 'att-2' });
+    const events = buildEvents();
+
+    await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: buildCase('c1') } }],
+    });
+    attachments.getActive.mockReturnValue([
+      buildStoredCaseAttachment('att-1', toCaseAttachmentData(buildCase('c1'))),
+    ]);
+    const ids = await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: buildCase('c2') } }],
+    });
+
+    expect(attachments.add).toHaveBeenCalledTimes(2);
+    expect(attachments.update).not.toHaveBeenCalled();
+    expect(ids).toEqual(['att-2']);
+  });
+
+  it('adds a new attachment when the prior attachment for the case is no longer active', async () => {
+    const attachments = buildAttachments();
+    const events = buildEvents();
+    // getActive() only returns active attachments, so an inactive one is simply absent.
+    attachments.getActive.mockReturnValue([]);
+
+    await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: buildCase('c1') } }],
+    });
+    await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: buildCase('c1') } }],
+    });
+
+    expect(attachments.add).toHaveBeenCalledTimes(2);
+    expect(attachments.update).not.toHaveBeenCalled();
   });
 });
 
