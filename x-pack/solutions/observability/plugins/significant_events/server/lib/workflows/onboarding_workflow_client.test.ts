@@ -181,7 +181,8 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         expect.objectContaining({
           workflow_execution_id: 'execution-id',
           execution_id: 'execution-id',
-        })
+        }),
+        expect.anything()
       );
       expect(managementApi.getWorkflow).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
