@@ -386,6 +386,10 @@ describe('renderDriftIssue', () => {
 
     expect(title).toBe('[Connectors][Validation] `.sentry`: 2 actions need attention');
     expect(body).not.toContain('### Changes to review');
+    expect(body).toContain(
+      "The check can't match the requests of 1 action to the latest spec, so it didn't check it, but every operation it calls is still in the latest spec, at the same full URL."
+    );
+    expect(body).not.toContain('❌');
     expect(body).toContain('> [!NOTE]');
     expect(body).toContain(
       "**Sentry's spec moved `/api/0` from its paths into its server URL. The connector most likely still works.**"
@@ -400,7 +404,7 @@ describe('renderDriftIssue', () => {
       '[Committed snapshot](https://github.com/elastic/kibana/blob/main/src/specs/sentry/vendor_api/snapshots/v0.openapi.json)'
     );
     expect(body).toContain(
-      '| `getIssue` | `GET /api/0/issues/{id}/` | ❌ Fails | ⚠️ Moved in the spec, same URL |'
+      "| `getIssue` | `GET /api/0/issues/{id}/` | ➖ Not checked | ⚠️ Moved in the spec, same URL, so it isn't checked against the latest spec (see below) |"
     );
     expect(body).toContain(
       '| `listRules` | `GET /api/0/rules/` | ➖ Not checked | No spec describes the endpoint ([#296284](https://github.com/elastic/kibana/issues/296284), see below) |'

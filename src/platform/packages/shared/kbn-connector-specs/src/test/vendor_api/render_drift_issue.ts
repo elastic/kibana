@@ -451,8 +451,9 @@ const statusOf = (
       return {
         rank: 'attention',
         text: MOVED_STATUS,
-        outcome: 'fails',
-        details: `${ICONS.attention} ${MOVED_STATUS}`,
+        // Its request goes where it did, but the check can't match it to the latest spec.
+        outcome: 'not-checked',
+        details: `${ICONS.attention} ${MOVED_STATUS}, so it isn't checked against the latest spec (see below)`,
       };
     }
     if (unmatchedOnly && locations.includes('missing')) {
@@ -963,10 +964,12 @@ export const renderDriftIssue = (
         alert = 'NOTE';
         summary = `**${name}'s spec moved ${listed(
           serverPaths.map(code)
-        )} from its paths into its server URL. The connector most likely still works.** ${plural(
+        )} from its paths into its server URL. The connector most likely still works.** The check can't match the requests of ${plural(
           failing.length,
-          'checked action'
-        )} ${fails(failing.length)} the drift check, but every operation ${
+          'action'
+        )} to the latest spec, so it didn't check ${
+          failing.length === 1 ? 'it' : 'them'
+        }, but every operation ${
           failing.length === 1 ? 'it calls' : 'they call'
         } is still in the latest spec, at the same full URL.${
           overlayCausesMoves
