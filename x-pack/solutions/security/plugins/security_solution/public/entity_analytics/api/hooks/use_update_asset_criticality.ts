@@ -15,6 +15,15 @@ import { applyEntityStoreSearchCachePatch } from '../../../flyout/entity_details
 import { useKibana } from '../../../common/lib/kibana';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const ASSET_CRITICALITY_UPDATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY,
+  'asset_criticality_update'
+);
 
 const ASSET_CRITICALITY_UPDATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityDetails.entityPanel.assetCriticalityError',
@@ -44,16 +53,20 @@ export const useUpdateAssetCriticality = (
       }
 
       try {
-        await bulkUpdateEntities(http, {
-          entityType,
-          body: {
-            entity: { id: entityIdToUpdate },
-            asset: {
-              criticality: updatedAssetCriticality,
+        await bulkUpdateEntities(
+          http,
+          {
+            entityType,
+            body: {
+              entity: { id: entityIdToUpdate },
+              asset: {
+                criticality: updatedAssetCriticality,
+              },
             },
+            force: true,
           },
-          force: true,
-        });
+          { context: ASSET_CRITICALITY_UPDATE_CONTEXT }
+        );
         applyEntityStoreSearchCachePatch(
           queryClient,
           entityType,

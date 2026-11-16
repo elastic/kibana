@@ -17,6 +17,10 @@ import type {
 } from '../../../../common/api/entity_analytics';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { useHasSecurityCapability } from '../../../helper_hooks';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
@@ -26,6 +30,19 @@ import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_l
 const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
 const ASSET_CRITICALITY_LIST_KEY = 'ASSET_CRITICALITY_LIST';
 const PRIVILEGES_KEY = 'PRIVILEGES';
+
+const ASSET_CRITICALITY_PRIVILEGES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY,
+  'asset_criticality_privileges'
+);
+const ASSET_CRITICALITY_CREATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY,
+  'asset_criticality_create'
+);
+const ASSET_CRITICALITY_DELETE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY,
+  'asset_criticality_delete'
+);
 
 const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolve({
   has_all_required: false,
@@ -45,7 +62,7 @@ export const useAssetCriticalityPrivileges = (
   return useQuery({
     queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, hasEntityAnalyticsCapability],
     queryFn: hasEntityAnalyticsCapability
-      ? fetchEntityStoreV2Privileges
+      ? () => fetchEntityStoreV2Privileges({ context: ASSET_CRITICALITY_PRIVILEGES_CONTEXT })
       : () => nonAuthorizedResponse,
   });
 };
@@ -78,7 +95,7 @@ export const useAssetCriticalityData = ({
   entity: Entity;
   enabled?: boolean;
   onChange?: () => void;
-  /** Applied to the GET only; the create/delete mutation is not tagged. */
+  /** Applied to the GET only; the create and delete requests carry their own contexts. */
   executionContext?: KibanaExecutionContext;
 }): State => {
   const QC = useQueryClient();
@@ -111,6 +128,7 @@ export const useAssetCriticalityData = ({
           idField: params.idField,
           idValue: params.idValue,
           refresh: 'wait_for',
+          context: ASSET_CRITICALITY_DELETE_CONTEXT,
         });
       }
 
@@ -119,6 +137,7 @@ export const useAssetCriticalityData = ({
         idValue: params.idValue,
         criticalityLevel: params.criticalityLevel,
         refresh: 'wait_for',
+        context: ASSET_CRITICALITY_CREATE_CONTEXT,
       });
     },
     onSuccess: (data) => {

@@ -17,6 +17,10 @@ import { useKibana, useUiSetting } from '../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useEntityStoreStatus } from '../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { useEntityAnalyticsRoutes } from '../../entity_analytics/api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../common/utils/execution_context';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
 import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 
@@ -37,6 +41,11 @@ export interface AssetInventoryStatusResponse {
 const ASSET_INVENTORY_HAS_DOCS_QUERY_KEY = ['GET', 'ASSET_INVENTORY_HAS_DOCS'];
 const ASSET_INVENTORY_PRIVILEGES_QUERY_KEY = ['GET', 'ASSET_INVENTORY_ENTITY_STORE_PRIVILEGES'];
 const STATUS_REFETCH_INTERVAL_MS = 3000;
+
+const ASSET_INVENTORY_PRIVILEGES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
+  'asset_inventory_privileges'
+);
 
 type EntityStoreEngineStatus = GetEntityStoreStatusResponse['engines'][number];
 
@@ -131,7 +140,7 @@ export const useAssetInventoryStatus = () => {
 
   const privilegesQuery = useQuery<EntityAnalyticsPrivileges>({
     queryKey: ASSET_INVENTORY_PRIVILEGES_QUERY_KEY,
-    queryFn: () => fetchEntityStoreV2Privileges(),
+    queryFn: () => fetchEntityStoreV2Privileges({ context: ASSET_INVENTORY_PRIVILEGES_CONTEXT }),
     enabled: featureGatesPassed,
     refetchInterval: auxRefetchInterval,
   });

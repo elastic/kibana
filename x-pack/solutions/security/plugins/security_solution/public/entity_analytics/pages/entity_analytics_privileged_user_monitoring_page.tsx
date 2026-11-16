@@ -42,6 +42,10 @@ import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { PageScope } from '../../data_view_manager/constants';
 import { forceHiddenTimeline } from '../../common/utils/timeline/force_hidden_timeline';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../common/utils/execution_context';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -101,6 +105,11 @@ function reducer(state: PageState, action: Action): PageState {
   }
 }
 
+const PUM_ENGINE_INIT_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_engine_init'
+);
+
 export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const { initPrivilegedMonitoringEngine } = useEntityAnalyticsRoutes();
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -125,7 +134,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const initEngineCallBack = useCallback(
     async (userCount: number) => {
       dispatch({ type: 'INITIALIZING_ENGINE', userCount });
-      const response = await initPrivilegedMonitoringEngine();
+      const response = await initPrivilegedMonitoringEngine({ context: PUM_ENGINE_INIT_CONTEXT });
       dispatch({ type: 'UPDATE_INIT_ENGINE_RESPONSE', initResponse: response });
 
       // TODO add status polling when BE API supports it

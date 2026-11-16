@@ -81,6 +81,13 @@ describe('CreateIndexModal', () => {
       expect(mockCreatePrivMonImportIndex).toHaveBeenCalledWith({
         name: 'my-index',
         mode: 'standard',
+        context: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:privileged_user_monitoring',
+            id: 'pum_index_create',
+          },
+        },
       });
       expect(onCreateMock).toHaveBeenCalledWith('my-index');
     });

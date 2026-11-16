@@ -6,6 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -161,6 +162,153 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on entity de
         method: 'GET',
         query: { entityId: 'alice', entityType: 'user', mode: 'resolved' },
       })
+    );
+  });
+});
+
+describe('useEntityAnalyticsRoutes — executionContext propagation on feature-scoped requests', () => {
+  type Routes = ReturnType<typeof useEntityAnalyticsRoutes>;
+
+  const context = {
+    child: {
+      type: 'security_solution',
+      name: 'entity_analytics:risk_score_management',
+      id: 'test-request',
+    },
+  };
+  const watchlistSource = { watchlistId: 'watchlist-1', entitySourceId: 'source-1' };
+
+  const requests: Array<[string, (routes: Routes, ctx: KibanaExecutionContext) => unknown]> = [
+    [
+      'calculateEntityRiskScoreV2',
+      (routes, ctx) =>
+        routes.calculateEntityRiskScoreV2({ identifier_type: 'user', identifier: 'alice' }, ctx),
+    ],
+    [
+      'fetchRiskEnginePrivileges',
+      (routes, ctx) => routes.fetchRiskEnginePrivileges({ context: ctx }),
+    ],
+    [
+      'fetchEntityStorePrivileges',
+      (routes, ctx) => routes.fetchEntityStorePrivileges({ context: ctx }),
+    ],
+    [
+      'fetchEntityStoreV2Privileges',
+      (routes, ctx) => routes.fetchEntityStoreV2Privileges({ context: ctx }),
+    ],
+    [
+      'createPrivMonImportIndex',
+      (routes, ctx) =>
+        routes.createPrivMonImportIndex({ name: 'my-index', mode: 'standard', context: ctx }),
+    ],
+    [
+      'registerPrivMonMonitoredIndices',
+      (routes, ctx) => routes.registerPrivMonMonitoredIndices('index-1', ctx),
+    ],
+    [
+      'updatePrivMonMonitoredIndices',
+      (routes, ctx) => routes.updatePrivMonMonitoredIndices('source-1', 'index-1', ctx),
+    ],
+    [
+      'createAssetCriticality',
+      (routes, ctx) =>
+        routes.createAssetCriticality({
+          idField: 'host.name',
+          idValue: 'host-1',
+          criticalityLevel: 'high_impact',
+          context: ctx,
+        }),
+    ],
+    [
+      'deleteAssetCriticality',
+      (routes, ctx) =>
+        routes.deleteAssetCriticality({ idField: 'host.name', idValue: 'host-1', context: ctx }),
+    ],
+    [
+      'initPrivilegedMonitoringEngine',
+      (routes, ctx) => routes.initPrivilegedMonitoringEngine({ context: ctx }),
+    ],
+    [
+      'fetchPrivilegeMonitoringPrivileges',
+      (routes, ctx) => routes.fetchPrivilegeMonitoringPrivileges({ context: ctx }),
+    ],
+    [
+      'fetchWatchlistsPrivileges',
+      (routes, ctx) => routes.fetchWatchlistsPrivileges({ context: ctx }),
+    ],
+    ['fetchRiskEngineSettings', (routes, ctx) => routes.fetchRiskEngineSettings({ context: ctx })],
+    [
+      'updateSavedObjectConfiguration',
+      (routes, ctx) => routes.updateSavedObjectConfiguration({ enable_reset_to_zero: true }, ctx),
+    ],
+    [
+      'updateWatchlistEntitySource',
+      (routes, ctx) =>
+        routes.updateWatchlistEntitySource({ ...watchlistSource, body: { type: 'index' } }, ctx),
+    ],
+    [
+      'createWatchlistEntitySource',
+      (routes, ctx) =>
+        routes.createWatchlistEntitySource(
+          { watchlistId: 'watchlist-1', body: { type: 'index', name: 'source' } },
+          ctx
+        ),
+    ],
+    [
+      'deleteWatchlistEntitySource',
+      (routes, ctx) => routes.deleteWatchlistEntitySource(watchlistSource, ctx),
+    ],
+    [
+      'searchWatchlistIndices',
+      (routes, ctx) => routes.searchWatchlistIndices({ query: 'logs', context: ctx }),
+    ],
+    [
+      'uploadWatchlistCsv',
+      (routes, ctx) =>
+        routes.uploadWatchlistCsv('watchlist-1', new File(['name'], 'entities.csv'), ctx),
+    ],
+    [
+      'enableLeadGeneration',
+      (routes, ctx) => routes.enableLeadGeneration({ connectorId: 'connector-1', context: ctx }),
+    ],
+    ['disableLeadGeneration', (routes, ctx) => routes.disableLeadGeneration({ context: ctx })],
+    [
+      'fetchLeadGenerationPrivileges',
+      (routes, ctx) => routes.fetchLeadGenerationPrivileges({ context: ctx }),
+    ],
+    ['fetchAnomalyPrivileges', (routes, ctx) => routes.fetchAnomalyPrivileges({ context: ctx })],
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useKibanaMock.mockReturnValue({ services: { http: { fetch: mockFetch } } });
+    mockFetch.mockResolvedValue({});
+  });
+
+  it.each(requests)('forwards context to http.fetch in %s', async (_name, request) => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+
+    await request(result.current, context);
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ context })
+    );
+  });
+
+  it('ignores the react-query context a parameterless fetcher receives as a queryFn', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+    const queryFunctionContext = {
+      queryKey: ['GET', 'FETCH_RISK_ENGINE_PRIVILEGES'],
+      meta: undefined,
+    };
+
+    await result.current.fetchRiskEnginePrivileges(queryFunctionContext as never);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ context: undefined })
     );
   });
 });

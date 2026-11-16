@@ -45,6 +45,15 @@ import type { Entity, State } from './use_asset_criticality';
 import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
 import { ENTITY_GRID_QUERY_KEY } from '../home/entities_grid/common';
 import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
+
+const ASSET_CRITICALITY_GET_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY,
+  'asset_criticality_get'
+);
 import type {
   CriticalityLevel,
   CriticalityLevelWithUnassigned,
@@ -183,6 +192,7 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
     entity,
     enabled: !!privileges.data?.has_read_permissions && !entityRecord,
     onChange,
+    executionContext: ASSET_CRITICALITY_GET_CONTEXT,
   });
 
   const entityStoreMutation = useMutation({

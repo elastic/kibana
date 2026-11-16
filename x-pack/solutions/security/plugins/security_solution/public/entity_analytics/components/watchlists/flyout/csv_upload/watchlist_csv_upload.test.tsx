@@ -165,7 +165,13 @@ describe('WatchlistCsvUpload', () => {
       fireEvent.click(getByTestId('watchlist-csv-upload-button'));
 
       await waitFor(() => {
-        expect(mockUploadWatchlistCsv).toHaveBeenCalledWith('test-watchlist-id', expect.any(File));
+        expect(mockUploadWatchlistCsv).toHaveBeenCalledWith('test-watchlist-id', expect.any(File), {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:watchlists',
+            id: 'watchlist_csv_upload',
+          },
+        });
         expect(mockInvalidateQueries).toHaveBeenCalledWith({
           queryKey: ['watchlists-management-table'],
         });

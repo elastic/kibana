@@ -32,6 +32,14 @@ const LEADS_GENERATION_STATUS_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
   'leads_generation_status'
 );
+const LEADS_SCHEDULE_ENABLE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_schedule_enable'
+);
+const LEADS_SCHEDULE_DISABLE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_schedule_disable'
+);
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
 const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
@@ -297,7 +305,9 @@ export const useHuntingLeads = (
 
   const { mutate: toggleSchedule } = useMutation({
     mutationFn: (enabled: boolean) =>
-      enabled ? enableLeadGeneration({ connectorId }) : disableLeadGeneration(),
+      enabled
+        ? enableLeadGeneration({ connectorId, context: LEADS_SCHEDULE_ENABLE_CONTEXT })
+        : disableLeadGeneration({ context: LEADS_SCHEDULE_DISABLE_CONTEXT }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [LEAD_SCHEDULE_QUERY_KEY] }),
     onError: (error: Error) => addError(error, { title: i18n.SCHEDULE_UPDATE_ERROR }),
   });

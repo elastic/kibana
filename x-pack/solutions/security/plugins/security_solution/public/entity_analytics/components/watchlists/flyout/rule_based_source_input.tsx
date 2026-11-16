@@ -37,6 +37,10 @@ import { useDataViewSetup } from './hooks/use_data_view_setup';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+import {
   WATCHLIST_ENTITY_FIELD_ARIA_LABEL,
   WATCHLIST_ENTITY_FIELD_PLACEHOLDER,
   WATCHLIST_FILTER_QUERY_LABEL,
@@ -49,6 +53,11 @@ import {
 import { PageScope } from '../../../../data_view_manager/constants';
 
 const DEBOUNCE_OPTIONS = { wait: 300 };
+
+const WATCHLIST_ENTITY_SOURCE_REAUTHORIZE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlist_entity_source_reauthorize'
+);
 
 interface FilterQueryRowProps {
   dataView: DataView | undefined;
@@ -129,11 +138,14 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
       if (!watchlistId || !indexSourceWithMissingApiKey) {
         throw new Error('Missing watchlist id or index source');
       }
-      return updateWatchlistEntitySource({
-        watchlistId,
-        entitySourceId: indexSourceWithMissingApiKey.id,
-        body: { type: indexSourceWithMissingApiKey.type },
-      });
+      return updateWatchlistEntitySource(
+        {
+          watchlistId,
+          entitySourceId: indexSourceWithMissingApiKey.id,
+          body: { type: indexSourceWithMissingApiKey.type },
+        },
+        WATCHLIST_ENTITY_SOURCE_REAUTHORIZE_CONTEXT
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['watchlist-entity-sources', watchlistId]);

@@ -6,6 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { EntityType } from '../common';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../common';
 
@@ -31,7 +32,7 @@ export interface BulkUpdateEntitiesResponse {
 export async function bulkUpdateEntities(
   http: HttpStart,
   params: BulkUpdateEntitiesParams,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal; context?: KibanaExecutionContext }
 ): Promise<BulkUpdateEntitiesResponse> {
   return http.fetch<BulkUpdateEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_BULK_UPDATE, {
     version: API_VERSIONS.public.v1,
@@ -41,5 +42,6 @@ export async function bulkUpdateEntities(
       entities: [{ type: params.entityType, doc: params.body }],
     }),
     signal: options?.signal,
+    context: options?.context,
   });
 }

@@ -9,12 +9,22 @@ import { useCallback } from 'react';
 import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { RiskScoresEntityCalculationRequest } from '../../../../common/api/entity_analytics';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import { useEntityAnalyticsRoutes } from '../api';
 import { getMissingIndexPrivileges } from '../../../../common/entity_analytics/risk_engine';
 import { useEntityEnginePrivileges } from '../../components/entity_store/hooks/use_entity_engine_privileges';
 import { useRiskEnginePrivileges } from './use_risk_engine_privileges';
+
+const RISK_SCORE_ENTITY_CALCULATION_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.RISK_SCORE_MANAGEMENT,
+  'risk_score_entity_calculation'
+);
 
 export const useCalculateEntityRiskScore = ({
   identifierType,
@@ -56,10 +66,14 @@ export const useCalculateEntityRiskScore = ({
     [addError, identifierType]
   );
 
-  const { mutate: mutateV2, isLoading } = useMutation(calculateEntityRiskScoreV2, {
-    onSuccess,
-    onError,
-  });
+  const { mutate: mutateV2, isLoading } = useMutation(
+    (params: RiskScoresEntityCalculationRequest) =>
+      calculateEntityRiskScoreV2(params, RISK_SCORE_ENTITY_CALCULATION_CONTEXT),
+    {
+      onSuccess,
+      onError,
+    }
+  );
 
   const calculateEntityRiskScoreCb = useCallback(async () => {
     // skip for users who can't calculate it

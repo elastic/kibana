@@ -30,8 +30,21 @@ import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useFetchPrivilegedUserIndices } from '../hooks/use_fetch_privileged_user_indices';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { CreateIndexModal } from './create_index_modal';
 import { useUserLimitStatus } from '../../../hooks/use_privileged_monitoring_health';
+
+const PUM_MONITORED_INDICES_REGISTER_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_monitored_indices_register'
+);
+const PUM_MONITORED_INDICES_UPDATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_monitored_indices_update'
+);
 
 export const SELECT_INDEX_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.comboboxPlaceholder',
@@ -96,10 +109,14 @@ export const IndexSelectorModal = ({
       if (editDataSource?.id) {
         await updatePrivMonMonitoredIndices(
           editDataSource.id,
-          selectedOptions.map(({ label }) => label).join(',')
+          selectedOptions.map(({ label }) => label).join(','),
+          PUM_MONITORED_INDICES_UPDATE_CONTEXT
         );
       } else {
-        await registerPrivMonMonitoredIndices(selectedOptions.map(({ label }) => label).join(','));
+        await registerPrivMonMonitoredIndices(
+          selectedOptions.map(({ label }) => label).join(','),
+          PUM_MONITORED_INDICES_REGISTER_CONTEXT
+        );
       }
 
       onImport(0); // The API does not return the user count because it is not available at this point.
