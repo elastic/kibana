@@ -431,10 +431,12 @@ const createVagrantVm = async ({
     try {
       await destroyVagrantMachine(VAGRANT_CWD, log);
 
+      // Kill a hung `vagrant up` rather than let it hold the job-wide Vagrant machine lock.
       const vagrantUpResponse = (
         await execa.command('vagrant up', {
           env: vagrantEnv,
           stdio: ['inherit', 'pipe', 'pipe'],
+          timeout: 600_000,
         })
       ).stdout;
 
