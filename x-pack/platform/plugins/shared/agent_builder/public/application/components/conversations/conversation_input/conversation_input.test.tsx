@@ -94,10 +94,18 @@ jest.mock('../../../hooks/use_toasts', () => ({
 }));
 const steerIfBusyHandler = jest.fn();
 const mockOnEditorRender = jest.fn();
+const mockEditorProps: { onPasteFile?: (file: File) => string | undefined } = {};
 jest.mock('./message_editor', () => ({
   useMessageEditor: jest.fn(),
-  MessageEditor: ({ onSubmit }: { onSubmit: () => void }) => {
+  MessageEditor: ({
+    onSubmit,
+    onPasteFile,
+  }: {
+    onSubmit: () => void;
+    onPasteFile?: (file: File) => string | undefined;
+  }) => {
     mockOnEditorRender();
+    mockEditorProps.onPasteFile = onPasteFile;
     return (
       <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
         submit
@@ -590,6 +598,37 @@ describe('ConversationInput', () => {
         expect(sendUserMessage).not.toHaveBeenCalled();
         expect(submitMessage).not.toHaveBeenCalled();
         await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
+      });
+
+      it('refuses to steer while attachments wait to be sent', () => {
+        mockedUseConversationContext.mockReturnValue({
+          attachments: [{ id: 'a1', type: 'text', data: {} }],
+          upsertAttachments: jest.fn(),
+          removeAttachment: jest.fn(),
+          resetAttachments: jest.fn(),
+          isEmbeddedContext: false,
+          conversationActions: {} as never,
+        } as never);
+        renderInput(<ConversationInput />);
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+        expect(mockSendSteer).not.toHaveBeenCalled();
+        expect(editorController.clear).not.toHaveBeenCalled();
+        expect(addErrorToast).toHaveBeenCalledTimes(1);
+      });
+
+      it('refuses an image paste instead of uploading it', () => {
+        renderInput(<ConversationInput />);
+        const { upsertAttachments } = mockedUseConversationContext.mock.results[0].value;
+
+        const pasted = mockEditorProps.onPasteFile?.(
+          new File([''], 'shot.png', { type: 'image/png' })
+        );
+
+        expect(pasted).toBeUndefined();
+        expect(addErrorToast).toHaveBeenCalledTimes(1);
+        expect(upsertAttachments).not.toHaveBeenCalled();
       });
 
       it('puts the text back when the steer fails after the submit', () => {

@@ -191,6 +191,22 @@ interface ConversationInputProps {
   onSubmitOverride?: (message: string) => void;
 }
 
+// A steer carries text only; attachments wait for the next ordinary send.
+const attachmentsWhileRunningMessage = i18n.translate(
+  'xpack.agentBuilder.conversationInput.steer.attachmentsNotSent',
+  {
+    defaultMessage:
+      "Attachments can't be sent to a running agent. Wait for it to finish, then send them with your next message.",
+  }
+);
+const imagePasteWhileRunningMessage = i18n.translate(
+  'xpack.agentBuilder.conversationInput.steer.imagePasteRefused',
+  {
+    defaultMessage:
+      "Images can't be sent to a running agent. Wait for it to finish, then paste the image again.",
+  }
+);
+
 const disabledPlaceholder = (agentId?: string) =>
   i18n.translate('xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder', {
     defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
@@ -325,12 +341,17 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
   const { sendSteer, steerIfBusy, isUnansweredSteer, isSending: isSendingSteer } = useSendSteer();
   const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt;
+  const hasUnsentAttachments = (attachments?.length ?? 0) > 0;
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
       addErrorToast,
       messageEditorController,
     });
+  const refuseImagePaste = (): undefined => {
+    addErrorToast(imagePasteWhileRunningMessage);
+    return undefined;
+  };
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -537,6 +558,10 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
         );
         return;
       }
+      if (hasUnsentAttachments) {
+        addErrorToast(attachmentsWhileRunningMessage);
+        return;
+      }
       // Cleared at the submit, as for an ordinary send, so edits made during the request are kept.
       lastEditorContentRef.current = '';
       clearDraft();
@@ -601,7 +626,9 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           placeholder={placeholder}
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
-          onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onPasteFile={
+            upsertAttachments ? (canSteer ? refuseImagePaste : handlePasteFile) : undefined
+          }
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredImageName}
           uploadingNames={uploadingNames}
