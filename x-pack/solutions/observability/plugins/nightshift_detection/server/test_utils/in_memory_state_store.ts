@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StateConflictError } from '../lib/state/state_conflict_error';
+import { StateConflictError } from '../lib/errors/state_conflict_error';
 import type { StateDocuments, StateVersion, StateKind } from '../lib/state/state_kinds';
 import type { StateStore, VersionedState } from '../lib/state/state_store';
 
