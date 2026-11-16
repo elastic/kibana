@@ -1074,7 +1074,6 @@ describe('ai indices routes', () => {
         { name: 'type' },
         { name: 'title' },
         { name: 'updated_at' },
-        { name: 'lifecycle_status' },
         { name: 'ki_status' },
       ],
       values,
@@ -1151,7 +1150,7 @@ describe('ai indices routes', () => {
       esEsqlQuery
         .mockResolvedValueOnce(probe)
         .mockResolvedValueOnce(
-          rows([[kiBackingIndex, 'ki-1', 'playbook', 'Refund playbook', null, 'active', 'active']])
+          rows([[kiBackingIndex, 'ki-1', 'playbook', 'Refund playbook', null, 'active']])
         )
         .mockResolvedValueOnce(totals(12))
         .mockResolvedValueOnce(buckets([[12, 'playbook']]));
@@ -1179,7 +1178,6 @@ describe('ai indices routes', () => {
               index: kiBackingIndex,
               type: 'playbook',
               title: 'Refund playbook',
-              lifecycle_status: 'active',
               status: 'active',
             },
           ],

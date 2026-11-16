@@ -8,11 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import {
-  toOptionalKiLifecycleStatus,
-  toOptionalKiStatus,
-  type KiStatus,
-} from '../../common/ki_lifecycle_status';
+import { toOptionalKiStatus, type KiStatus } from '../../common/ki_lifecycle_status';
 import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../common/ki_list_sort';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
@@ -61,8 +57,7 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
   const { _index: index, id, type, title, updated_at: updatedAt, expires_at: expiresAt } = row;
   const updatedAtValue = toOptionalString(updatedAt);
   const expiresAtValue = toOptionalString(expiresAt);
-  const lifecycleStatus = toOptionalKiLifecycleStatus(row[KI_LIFECYCLE_STATUS_ALIAS]) ?? 'active';
-  const status = toOptionalKiStatus(row[KI_STATUS_ALIAS]) ?? lifecycleStatus;
+  const status = toOptionalKiStatus(row[KI_STATUS_ALIAS]) ?? 'active';
   return {
     id: String(id),
     index: String(index),
@@ -70,7 +65,6 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
     ...(typeof title === 'string' ? { title } : {}),
     ...(updatedAtValue !== undefined ? { updated_at: updatedAtValue } : {}),
     ...(expiresAtValue !== undefined ? { expires_at: expiresAtValue } : {}),
-    lifecycle_status: lifecycleStatus,
     status,
   };
 };
@@ -255,7 +249,6 @@ export const getKis = async (
     'title',
     'updated_at',
     'expires_at',
-    KI_LIFECYCLE_STATUS_ALIAS,
     KI_STATUS_ALIAS,
   ].join(', ');
 

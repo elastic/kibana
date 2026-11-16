@@ -11,32 +11,25 @@ import {
   KI_STATUS_BADGE_COLOR,
   KI_STATUS_LABEL,
   KI_VERIFICATION_FAILED_TITLE,
-  resolveKiStatus,
 } from '../../../utils/ki_expiry';
-import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
+import type { KiStatus } from '../../../../../common/ki_lifecycle_status';
 import { kiLabelCapitalizeCss } from './ki_type_display';
 
-interface KiLifecycleStatusBadgeProps {
-  lifecycleStatus?: KiLifecycleStatus;
-  expiresAt?: string;
+interface KiStatusBadgeProps {
+  status: KiStatus;
   'data-test-subj'?: string;
 }
 
-export const KiLifecycleStatusBadge = ({
-  lifecycleStatus,
-  expiresAt,
+export const KiStatusBadge = ({
+  status,
   'data-test-subj': dataTestSubj = 'contextKiRowLifecycleStatus',
-}: KiLifecycleStatusBadgeProps) => {
-  const status = resolveKiStatus(lifecycleStatus, expiresAt);
-
-  return (
-    <EuiBadge
-      color={KI_STATUS_BADGE_COLOR[status]}
-      data-test-subj={dataTestSubj}
-      css={kiLabelCapitalizeCss}
-      title={status === 'verification_failed' ? KI_VERIFICATION_FAILED_TITLE : undefined}
-    >
-      {KI_STATUS_LABEL[status]}
-    </EuiBadge>
-  );
-};
+}: KiStatusBadgeProps) => (
+  <EuiBadge
+    color={KI_STATUS_BADGE_COLOR[status]}
+    data-test-subj={dataTestSubj}
+    css={kiLabelCapitalizeCss}
+    title={status === 'verification_failed' ? KI_VERIFICATION_FAILED_TITLE : undefined}
+  >
+    {KI_STATUS_LABEL[status]}
+  </EuiBadge>
+);

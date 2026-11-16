@@ -34,6 +34,19 @@ const unknownIndexError = () =>
   });
 
 const rowsResponse = (
+  rows: Array<[string, string, string | null, string | null, string | null, string | null]>
+) => ({
+  columns: [
+    { name: '_index' },
+    { name: 'id' },
+    { name: 'type' },
+    { name: 'title' },
+    { name: 'updated_at' },
+    { name: 'ki_status' },
+  ],
+  values: rows,
+});
+const rowsResponseWithExpiresAt = (
   rows: Array<
     [string, string, string | null, string | null, string | null, string | null, string | null]
   >
@@ -44,33 +57,7 @@ const rowsResponse = (
     { name: 'type' },
     { name: 'title' },
     { name: 'updated_at' },
-    { name: 'lifecycle_status' },
-    { name: 'ki_status' },
-  ],
-  values: rows,
-});
-const rowsResponseWithExpiresAt = (
-  rows: Array<
-    [
-      string,
-      string,
-      string | null,
-      string | null,
-      string | null,
-      string | null,
-      string | null,
-      string | null
-    ]
-  >
-) => ({
-  columns: [
-    { name: '_index' },
-    { name: 'id' },
-    { name: 'type' },
-    { name: 'title' },
-    { name: 'updated_at' },
     { name: 'expires_at' },
-    { name: 'lifecycle_status' },
     { name: 'ki_status' },
   ],
   values: rows,
@@ -108,9 +95,8 @@ describe('ki_list', () => {
             'Refund playbook',
             '2026-01-02T00:00:00.000Z',
             'active',
-            'active',
           ],
-          [BACKING_INDEX, 'ki-2', 'policy', 'Refund policy', null, null, 'active'],
+          [BACKING_INDEX, 'ki-2', 'policy', 'Refund policy', null, 'active'],
         ])
       )
       .mockResolvedValueOnce(totalsResponse(6))
@@ -139,7 +125,6 @@ describe('ki_list', () => {
           type: 'playbook',
           title: 'Refund playbook',
           updated_at: '2026-01-02T00:00:00.000Z',
-          lifecycle_status: 'active',
           status: 'active',
         },
         {
@@ -147,7 +132,6 @@ describe('ki_list', () => {
           index: BACKING_INDEX,
           type: 'policy',
           title: 'Refund policy',
-          lifecycle_status: 'active',
           status: 'active',
         },
       ],
@@ -167,7 +151,7 @@ describe('ki_list', () => {
         'WHERE lifecycle_status != "deleted"',
         'EVAL expires_at = TO_STRING(NULL)',
         'SORT revision_time DESC, id ASC',
-        'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status, ki_status',
+        'KEEP _index, id, type, title, updated_at, expires_at, ki_status',
         'LIMIT 25',
       ].join('\n| ')
     );
@@ -190,7 +174,6 @@ describe('ki_list', () => {
             'Expired memory',
             null,
             '2020-01-01T00:00:00.000Z',
-            'active',
             'expired',
           ],
         ])
@@ -208,7 +191,6 @@ describe('ki_list', () => {
           type: 'memory.session',
           title: 'Expired memory',
           expires_at: '2020-01-01T00:00:00.000Z',
-          lifecycle_status: 'active',
           status: 'expired',
         },
       ],
@@ -238,7 +220,7 @@ describe('ki_list', () => {
     query
       .mockResolvedValueOnce(
         rowsResponse([
-          [BACKING_INDEX, 'ki-deleted', 'memory.session', 'Forgotten', null, 'deleted', 'deleted'],
+          [BACKING_INDEX, 'ki-deleted', 'memory.session', 'Forgotten', null, 'deleted'],
         ])
       )
       .mockResolvedValueOnce(totalsResponse(1))
@@ -255,7 +237,6 @@ describe('ki_list', () => {
           index: BACKING_INDEX,
           type: 'memory.session',
           title: 'Forgotten',
-          lifecycle_status: 'deleted',
           status: 'deleted',
         },
       ],
@@ -268,7 +249,7 @@ describe('ki_list', () => {
     query
       .mockResolvedValueOnce(
         rowsResponse([
-          [BACKING_INDEX, 'ki-deleted', 'memory.session', 'Forgotten', null, 'deleted', 'deleted'],
+          [BACKING_INDEX, 'ki-deleted', 'memory.session', 'Forgotten', null, 'deleted'],
         ])
       )
       .mockResolvedValueOnce(totalsResponse(1))
@@ -289,7 +270,6 @@ describe('ki_list', () => {
           index: BACKING_INDEX,
           type: 'memory.session',
           title: 'Forgotten',
-          lifecycle_status: 'deleted',
           status: 'deleted',
         },
       ],
@@ -375,9 +355,7 @@ describe('ki_list', () => {
   it('filters rows and the total by type but keeps unfiltered type counts', async () => {
     query
       .mockResolvedValueOnce(
-        rowsResponse([
-          [BACKING_INDEX, 'ki-1', 'playbook', 'Refund playbook', null, 'active', 'active'],
-        ])
+        rowsResponse([[BACKING_INDEX, 'ki-1', 'playbook', 'Refund playbook', null, 'active']])
       )
       .mockResolvedValueOnce(totalsResponse(5, 1))
       .mockResolvedValueOnce(
@@ -426,10 +404,9 @@ describe('ki_list', () => {
             'Complete KI',
             '2026-01-01T00:00:00.000Z',
             'active',
-            'active',
           ],
-          [BACKING_INDEX, 'ki-missing-type', null, 'Missing type', null, null, 'active'],
-          [BACKING_INDEX, 'ki-missing-title', 'policy', null, null, null, 'active'],
+          [BACKING_INDEX, 'ki-missing-type', null, 'Missing type', null, 'active'],
+          [BACKING_INDEX, 'ki-missing-title', 'policy', null, null, 'active'],
         ])
       )
       .mockResolvedValueOnce(totalsResponse(3))
@@ -456,21 +433,18 @@ describe('ki_list', () => {
           type: 'playbook',
           title: 'Complete KI',
           updated_at: '2026-01-01T00:00:00.000Z',
-          lifecycle_status: 'active',
           status: 'active',
         },
         {
           id: 'ki-missing-type',
           index: BACKING_INDEX,
           title: 'Missing type',
-          lifecycle_status: 'active',
           status: 'active',
         },
         {
           id: 'ki-missing-title',
           index: BACKING_INDEX,
           type: 'policy',
-          lifecycle_status: 'active',
           status: 'active',
         },
       ],
@@ -497,7 +471,7 @@ describe('ki_list', () => {
     query.mockResolvedValueOnce(probeResponse(['type', 'title']));
     query
       .mockResolvedValueOnce(
-        rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales', null, 'active', 'active']])
+        rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales', null, 'active']])
       )
       .mockResolvedValueOnce(totalsResponse(1))
       .mockResolvedValueOnce(bucketsResponse([[1, 'dashboard']]));
@@ -510,7 +484,6 @@ describe('ki_list', () => {
             index: BACKING_INDEX,
             type: 'dashboard',
             title: 'Sales',
-            lifecycle_status: 'active',
             status: 'active',
           },
         ],
@@ -527,7 +500,7 @@ describe('ki_list', () => {
         'EVAL updated_at = TO_STRING(NULL)',
         'EVAL expires_at = TO_STRING(NULL)',
         'SORT id ASC',
-        'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status, ki_status',
+        'KEEP _index, id, type, title, updated_at, expires_at, ki_status',
         'LIMIT 25',
       ].join('\n| ')
     );
@@ -646,7 +619,7 @@ describe('ki_list', () => {
       );
     });
 
-    it('returns both the stored and the computed status', async () => {
+    it('returns only the computed status, not the stored lifecycle status', async () => {
       query.mockReset();
       query
         .mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT))
@@ -659,7 +632,6 @@ describe('ki_list', () => {
               'Old',
               null,
               '2020-01-01T00:00:00.000Z',
-              'active',
               'expired',
             ],
           ])
@@ -673,11 +645,10 @@ describe('ki_list', () => {
         statuses: ['expired'],
       });
 
-      expect(kis).toEqual([
-        expect.objectContaining({ lifecycle_status: 'active', status: 'expired' }),
-      ]);
+      expect(kis).toEqual([expect.objectContaining({ status: 'expired' })]);
+      expect(kis[0]).not.toHaveProperty('lifecycle_status');
       expect(queryText(0)).toContain(
-        'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status, ki_status'
+        'KEEP _index, id, type, title, updated_at, expires_at, ki_status'
       );
     });
   });
@@ -699,7 +670,7 @@ describe('ki_list', () => {
           'WHERE type == ?type',
           'EVAL title_sort = CASE(title == "", NULL, TO_LOWER(title))',
           'SORT title_sort ASC NULLS LAST, id ASC',
-          'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status, ki_status',
+          'KEEP _index, id, type, title, updated_at, expires_at, ki_status',
           'LIMIT 25',
         ].join('\n| ')
       );

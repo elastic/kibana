@@ -49,17 +49,11 @@ const ki = (
 
 interface ListedKi {
   id: string;
-  lifecycle_status: string;
   status: string;
 }
 
-const byId = (kis: ListedKi[]) =>
-  Object.fromEntries(
-    kis.map(({ id, lifecycle_status: lifecycleStatus, status }) => [
-      id,
-      { lifecycle_status: lifecycleStatus, status },
-    ])
-  );
+const statusById = (kis: ListedKi[]) =>
+  Object.fromEntries(kis.map(({ id, status }) => [id, status]));
 
 apiTest.describe('context engine KI list status', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
@@ -105,7 +99,7 @@ apiTest.describe('context engine KI list status', { tag: tags.stateful.classic }
   });
 
   apiTest(
-    'returns the stored and the computed status, excluding deleted KIs by default',
+    'returns the computed status only, excluding deleted KIs by default',
     async ({ apiClient }) => {
       const response = await apiClient.get(kiListPath(AI_INDEX_ID), {
         headers: adminInternalHeaders,
@@ -113,15 +107,15 @@ apiTest.describe('context engine KI list status', { tag: tags.stateful.classic }
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(byId(response.body.kis)).toStrictEqual({
-        active: { lifecycle_status: 'active', status: 'active' },
-        unexpired: { lifecycle_status: 'active', status: 'active' },
-        expired: { lifecycle_status: 'active', status: 'expired' },
-        'failed-past-expiry': {
-          lifecycle_status: 'verification_failed',
-          status: 'verification_failed',
-        },
+      expect(statusById(response.body.kis)).toStrictEqual({
+        active: 'active',
+        unexpired: 'active',
+        expired: 'expired',
+        'failed-past-expiry': 'verification_failed',
       });
+      expect(
+        response.body.kis.some((item: ListedKi) => Object.keys(item).includes('lifecycle_status'))
+      ).toBe(false);
       expect(response.body.total).toBe(4);
     }
   );
@@ -133,8 +127,8 @@ apiTest.describe('context engine KI list status', { tag: tags.stateful.classic }
     );
 
     expect(response).toHaveStatusCode(200);
-    expect(byId(response.body.kis)).toStrictEqual({
-      expired: { lifecycle_status: 'active', status: 'expired' },
+    expect(statusById(response.body.kis)).toStrictEqual({
+      expired: 'expired',
     });
     expect(response.body.total).toBe(1);
   });
@@ -158,8 +152,8 @@ apiTest.describe('context engine KI list status', { tag: tags.stateful.classic }
         { headers: adminInternalHeaders, responseType: 'json' }
       );
       expect(deleted).toHaveStatusCode(200);
-      expect(byId(deleted.body.kis)).toStrictEqual({
-        'deleted-past-expiry': { lifecycle_status: 'deleted', status: 'deleted' },
+      expect(statusById(deleted.body.kis)).toStrictEqual({
+        'deleted-past-expiry': 'deleted',
       });
 
       const failed = await apiClient.get(
@@ -167,11 +161,8 @@ apiTest.describe('context engine KI list status', { tag: tags.stateful.classic }
         { headers: adminInternalHeaders, responseType: 'json' }
       );
       expect(failed).toHaveStatusCode(200);
-      expect(byId(failed.body.kis)).toStrictEqual({
-        'failed-past-expiry': {
-          lifecycle_status: 'verification_failed',
-          status: 'verification_failed',
-        },
+      expect(statusById(failed.body.kis)).toStrictEqual({
+        'failed-past-expiry': 'verification_failed',
       });
     }
   );

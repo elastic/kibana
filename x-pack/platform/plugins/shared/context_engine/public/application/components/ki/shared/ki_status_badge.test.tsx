@@ -9,46 +9,25 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { KiLifecycleStatusBadge } from './ki_lifecycle_status_badge';
+import { KiStatusBadge } from './ki_status_badge';
 
-const FIXED_NOW_MS = Date.parse('2026-06-15T12:00:00.000Z');
-
-const renderBadge = (props: React.ComponentProps<typeof KiLifecycleStatusBadge>) =>
+const renderBadge = (props: React.ComponentProps<typeof KiStatusBadge>) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <KiLifecycleStatusBadge {...props} />
+        <KiStatusBadge {...props} />
       </EuiProvider>
     </I18nProvider>
   );
 
-describe('KiLifecycleStatusBadge', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(FIXED_NOW_MS);
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('renders active for a non-deleted document with future expiry', () => {
-    renderBadge({ expiresAt: '2030-01-01T00:00:00.000Z', 'data-test-subj': 'kiStatus' });
-    expect(screen.getByTestId('kiStatus')).toHaveTextContent('active');
-  });
-
-  it('renders deleted when lifecycle is deleted', () => {
-    renderBadge({ lifecycleStatus: 'deleted', 'data-test-subj': 'kiStatus' });
-    expect(screen.getByTestId('kiStatus')).toHaveTextContent('deleted');
-  });
-
-  it('renders failed when lifecycle is verification_failed', () => {
-    renderBadge({ lifecycleStatus: 'verification_failed', 'data-test-subj': 'kiStatus' });
-    expect(screen.getByTestId('kiStatus')).toHaveTextContent('failed');
-  });
-
-  it('renders expired when expires_at is in the past', () => {
-    renderBadge({ expiresAt: '2020-01-01T00:00:00.000Z', 'data-test-subj': 'kiStatus' });
-    expect(screen.getByTestId('kiStatus')).toHaveTextContent('expired');
+describe('KiStatusBadge', () => {
+  it.each([
+    ['active', 'active'],
+    ['deleted', 'deleted'],
+    ['verification_failed', 'failed'],
+    ['expired', 'expired'],
+  ] as const)('renders %s as "%s"', (status, label) => {
+    renderBadge({ status, 'data-test-subj': 'kiStatus' });
+    expect(screen.getByTestId('kiStatus')).toHaveTextContent(label);
   });
 });
