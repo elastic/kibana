@@ -9,16 +9,16 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LatencyMapSelection, LatencyMapUnit } from '../types';
 import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { getCountText, getFailedText } from './unit_text';
 
 /**
- * The selection in the header's top-right cluster, as in the prototype: a compact badge with
- * the bounds and count (times and failures in its tooltip), the host's own actions, and a way
- * to clear it.
+ * The selection's bounds and counts as plain text, on the header's left next to the range
+ * statistics, with the host's own actions beside it. Clearing lives with the menus on the
+ * right.
  */
 export function SelectionSummary({
   selection,
@@ -28,7 +28,6 @@ export function SelectionSummary({
   unit,
   sampled,
   timeZone,
-  onClear,
   actions,
 }: {
   selection: LatencyMapSelection;
@@ -40,65 +39,41 @@ export function SelectionSummary({
   unit: LatencyMapUnit;
   sampled: boolean;
   timeZone?: string;
-  onClear: () => void;
   actions?: ReactNode;
 }) {
-  const detail = (
-    <>
-      {formatTimestamp(Date.parse(selection.from), timeZone)} –{' '}
-      {formatTimestamp(Date.parse(selection.to), timeZone)}
-      {spans !== undefined && failed !== undefined && failed > 0 && (
-        <>
-          <br />
-          {getFailedText(failed, spans)}
-        </>
-      )}
-    </>
-  );
   return (
     <EuiFlexGroup
-      gutterSize="xs"
+      gutterSize="s"
       alignItems="center"
       wrap
       responsive={false}
       data-test-subj="traceLatencyMapSelectionBar"
     >
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          onClick={onClear}
-          aria-label={i18n.translate('traceLatencyMap.selection.clearAriaLabel', {
-            defaultMessage: 'Clear selection',
-          })}
-          data-test-subj="traceLatencyMapClearSelection"
-        >
-          {i18n.translate('traceLatencyMap.selection.clear', { defaultMessage: 'Clear' })}
-        </EuiButtonEmpty>
+        <EuiText size="xs" color="subdued" data-test-subj="traceLatencyMapSelectionSummary">
+          {selection.label && (
+            <>
+              <strong>{selection.label}</strong>
+              {' · '}
+            </>
+          )}
+          {formatDuration(selection.minDuration)} – {formatDuration(selection.maxDuration)}
+          {' · '}
+          {formatTimestamp(Date.parse(selection.from), timeZone)} –{' '}
+          {formatTimestamp(Date.parse(selection.to), timeZone)}
+          {spans !== undefined && ` · ${getCountText(unit, spans, sampled)}`}
+          {spans !== undefined && failed !== undefined && failed > 0 && (
+            <>
+              {' · '}
+              {getFailedText(failed, spans)}
+            </>
+          )}
+          {failedOnly &&
+            ` · ${i18n.translate('traceLatencyMap.selection.failedOnly', {
+              defaultMessage: 'failed only',
+            })}`}
+        </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={detail}>
-          <EuiBadge
-            color="hollow"
-            iconType="crosshair"
-            tabIndex={0}
-            data-test-subj="traceLatencyMapSelectionSummary"
-          >
-            {selection.label && `${selection.label} · `}
-            {formatDuration(selection.minDuration)} – {formatDuration(selection.maxDuration)}
-            {spans !== undefined && ` · ${getCountText(unit, spans, sampled)}`}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-      {failedOnly && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="danger" data-test-subj="traceLatencyMapFailedOnlyBadge">
-            {i18n.translate('traceLatencyMap.selection.failedOnlyBadge', {
-              defaultMessage: 'Failed only',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
       {actions && <EuiFlexItem grow={false}>{actions}</EuiFlexItem>}
     </EuiFlexGroup>
   );

@@ -62,9 +62,11 @@ export function MapHeader({
   failedOnly,
   onFailedOnlyChange,
   onSelectSlowest,
+  activeSlowest,
   sampling,
   isDisabled,
   selectionSummary,
+  onClearSelection,
   operationsWithGroups,
   onFocusOperation,
   focusedOperation,
@@ -74,11 +76,15 @@ export function MapHeader({
   failedOnly: boolean;
   onFailedOnlyChange: (failedOnly: boolean) => void;
   onSelectSlowest: (percentile: SlowestPercentile) => void;
+  /** The slowest shortcut the selection currently matches, shown on the menu's button. */
+  activeSlowest?: SlowestPercentile;
   /** How a large range is sampled; undefined when every span is read. */
   sampling?: MapSampling;
   isDisabled: boolean;
-  /** The selection at the far right, as in the prototype; the slowest shortcuts make way. */
+  /** The selection as text, on the left next to the statistics. */
   selectionSummary?: ReactNode;
+  /** With a selection, the Clear button at the far right, by the menus. */
+  onClearSelection?: () => void;
   /** Operations with distinct duration groups, offered in a dropdown while none is focused. */
   operationsWithGroups?: OperationBands[];
   onFocusOperation?: (operation: LatencyMapOperation) => void;
@@ -96,24 +102,29 @@ export function MapHeader({
       data-test-subj="traceLatencyMapHeader"
     >
       <EuiFlexItem grow>
-        {stats && (
-          // The p99 is the figure to read at a glance: full colour and bold, a size up.
-          <EuiText size="s" color="subdued" data-test-subj="traceLatencyMapStats">
-            {i18n.translate('traceLatencyMap.header.maxStat', {
-              defaultMessage: '{max} max',
-              values: { max: formatDuration(stats.max) },
-            })}
-            {' · '}
-            <EuiTextColor color="default">
-              <strong>
-                {i18n.translate('traceLatencyMap.header.p99Stat', {
-                  defaultMessage: '{p99} p99',
-                  values: { p99: formatDuration(stats.p99) },
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
+          {stats && (
+            <EuiFlexItem grow={false}>
+              {/* The p99 is the figure to read at a glance: full colour and bold, a size up. */}
+              <EuiText size="s" color="subdued" data-test-subj="traceLatencyMapStats">
+                {i18n.translate('traceLatencyMap.header.maxStat', {
+                  defaultMessage: '{max} max',
+                  values: { max: formatDuration(stats.max) },
                 })}
-              </strong>
-            </EuiTextColor>
-          </EuiText>
-        )}
+                {' · '}
+                <EuiTextColor color="default">
+                  <strong>
+                    {i18n.translate('traceLatencyMap.header.p99Stat', {
+                      defaultMessage: '{p99} p99',
+                      values: { p99: formatDuration(stats.p99) },
+                    })}
+                  </strong>
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          {selectionSummary && <EuiFlexItem grow={false}>{selectionSummary}</EuiFlexItem>}
+        </EuiFlexGroup>
       </EuiFlexItem>
       {stats && sampling && (
         <EuiFlexItem grow={false}>
@@ -139,7 +150,7 @@ export function MapHeader({
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {!selectionSummary && onFocusOperation && operationsWithGroups?.length ? (
+      {onFocusOperation && operationsWithGroups?.length ? (
         <EuiFlexItem grow={false}>
           <DurationGroupsPicker
             operations={operationsWithGroups}
@@ -147,58 +158,77 @@ export function MapHeader({
           />
         </EuiFlexItem>
       ) : null}
-      {!selectionSummary && (
-        <EuiPopover
-          button={
-            <EuiButtonEmpty
-              size="xs"
-              iconType="chevronSingleDown"
-              iconSide="right"
-              isDisabled={isDisabled || !stats}
-              onClick={() => setIsSlowestOpen((open) => !open)}
-              data-test-subj="traceLatencyMapSelectSlowest"
-            >
-              {i18n.translate('traceLatencyMap.header.selectSlowest', {
-                defaultMessage: 'Select slowest',
-              })}
-            </EuiButtonEmpty>
-          }
-          aria-label={i18n.translate('traceLatencyMap.header.selectSlowestAriaLabel', {
-            defaultMessage: 'Select the slowest spans, from a percentile up',
-          })}
-          isOpen={isSlowestOpen}
-          closePopover={() => setIsSlowestOpen(false)}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel
-            items={SLOWEST_PERCENTILES.map((percentile) => (
-              <EuiContextMenuItem
-                key={percentile}
-                onClick={() => {
-                  setIsSlowestOpen(false);
-                  onSelectSlowest(percentile);
-                }}
-                data-test-subj={`traceLatencyMapSlowest${percentile}`}
-              >
-                {i18n.translate('traceLatencyMap.header.abovePercentile', {
-                  defaultMessage: 'Above p{percentile} ({duration})',
-                  values: {
-                    percentile,
-                    duration: stats ? formatDuration(percentileDuration(stats, percentile)) : '',
-                  },
+      <EuiPopover
+        button={
+          <EuiButtonEmpty
+            size="xs"
+            iconType="chevronSingleDown"
+            iconSide="right"
+            isDisabled={isDisabled || !stats}
+            onClick={() => setIsSlowestOpen((open) => !open)}
+            data-test-subj="traceLatencyMapSelectSlowest"
+          >
+            {activeSlowest
+              ? // The active shortcut shows on the button, as the errors menu does.
+                i18n.translate('traceLatencyMap.header.selectSlowestActive', {
+                  defaultMessage: 'Select slowest (p{percentile})',
+                  values: { percentile: activeSlowest },
+                })
+              : i18n.translate('traceLatencyMap.header.selectSlowest', {
+                  defaultMessage: 'Select slowest',
                 })}
-              </EuiContextMenuItem>
-            ))}
-          />
-        </EuiPopover>
-      )}
+          </EuiButtonEmpty>
+        }
+        aria-label={i18n.translate('traceLatencyMap.header.selectSlowestAriaLabel', {
+          defaultMessage: 'Select the slowest spans, from a percentile up',
+        })}
+        isOpen={isSlowestOpen}
+        closePopover={() => setIsSlowestOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel
+          items={SLOWEST_PERCENTILES.map((percentile) => (
+            <EuiContextMenuItem
+              key={percentile}
+              icon={activeSlowest === percentile ? 'check' : 'empty'}
+              onClick={() => {
+                setIsSlowestOpen(false);
+                onSelectSlowest(percentile);
+              }}
+              data-test-subj={`traceLatencyMapSlowest${percentile}`}
+            >
+              {i18n.translate('traceLatencyMap.header.abovePercentile', {
+                defaultMessage: 'Above p{percentile} ({duration})',
+                values: {
+                  percentile,
+                  duration: stats ? formatDuration(percentileDuration(stats, percentile)) : '',
+                },
+              })}
+            </EuiContextMenuItem>
+          ))}
+        />
+      </EuiPopover>
       <ErrorsMenu
         failedOnly={failedOnly}
         onFailedOnlyChange={onFailedOnlyChange}
         isDisabled={isDisabled}
       />
-      {selectionSummary && <EuiFlexItem grow={false}>{selectionSummary}</EuiFlexItem>}
+      {onClearSelection && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="cross"
+            onClick={onClearSelection}
+            aria-label={i18n.translate('traceLatencyMap.selection.clearAriaLabel', {
+              defaultMessage: 'Clear selection',
+            })}
+            data-test-subj="traceLatencyMapClearSelection"
+          >
+            {i18n.translate('traceLatencyMap.selection.clear', { defaultMessage: 'Clear' })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

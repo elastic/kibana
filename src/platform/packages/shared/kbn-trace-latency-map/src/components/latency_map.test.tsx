@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { LatencyMapSelection, TraceSource } from '../types';
+import { durationToRow } from '../query/duration_rows';
 import { getTimeGrid } from '../query/time_grid';
 import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
@@ -585,11 +585,11 @@ describe('LatencyMap', () => {
       );
     });
 
-    it('hides the dropdown while a selection exists, as the slowest shortcuts do', async () => {
+    it('keeps the dropdown while a selection exists, as the slowest shortcuts do', async () => {
       const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
       renderMap({ onFocusOperation: jest.fn(), selection }, gridTable(CELLS), mixedOperations);
       await screen.findByTestId('traceLatencyMapSelectionBar');
-      expect(screen.queryByTestId('traceLatencyMapDurationGroups')).not.toBeInTheDocument();
+      expect(await screen.findByTestId('traceLatencyMapDurationGroups')).toBeInTheDocument();
     });
 
     it('draws the bands of a dominant operation, and a click selects the band', async () => {
@@ -826,16 +826,35 @@ describe('LatencyMap', () => {
       const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
       // The busy cell and the quiet one: 60 spans, 10 of them failed (17%).
       expect(summary).toHaveTextContent('60 spans');
-      // The times and the failures are the badge's tooltip.
-      await userEvent.hover(summary);
-      expect(await screen.findByRole('tooltip')).toHaveTextContent('10 failed (17%)');
+      expect(summary).toHaveTextContent('10 failed (17%)');
       expect(screen.getByRole('button', { name: /^Filter \(\d+\)$/ })).toBeInTheDocument();
     });
 
-    it('makes way in the header: no slowest shortcuts while a selection exists', async () => {
+    it('keeps the slowest shortcuts while a selection exists, naming the active one', async () => {
       renderMap({ selection });
       await screen.findByTestId('traceLatencyMapSelectionBar');
-      expect(screen.queryByTestId('traceLatencyMapSelectSlowest')).not.toBeInTheDocument();
+      // The menus never make way; a hand-drawn selection names no shortcut.
+      expect(screen.getByTestId('traceLatencyMapSelectSlowest')).toHaveTextContent(
+        /^Select slowest$/
+      );
+    });
+
+    it('names the active shortcut on the menu button, with a check on its entry', async () => {
+      // The selection the p95 shortcut writes: full width, from the p95 row to the top.
+      const p95Row = Math.floor(durationToRow(stats.p95, stats));
+      const slowest = geometry.rangeToSelection({
+        x0: 0,
+        x1: geometry.bins,
+        y0: p95Row,
+        y1: geometry.rows,
+      });
+      renderMap({ selection: slowest });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      const button = screen.getByTestId('traceLatencyMapSelectSlowest');
+      expect(button).toHaveTextContent('Select slowest (p95)');
+      fireEvent.click(button);
+      const active = screen.getByTestId('traceLatencyMapSlowest95');
+      expect(active.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
     });
 
     it('leads with the label of a selection that has one', async () => {
@@ -880,7 +899,7 @@ describe('LatencyMap', () => {
         'Errors (filtered)'
       );
       expect(summary).toHaveTextContent('10 spans');
-      expect(screen.getByTestId('traceLatencyMapFailedOnlyBadge')).toBeInTheDocument();
+      expect(summary).toHaveTextContent('failed only');
     });
 
     it('clears the selection', async () => {
@@ -959,7 +978,7 @@ describe('LatencyMap', () => {
       renderMap({ selection, failedOnly: true, onFailedOnlyChange: jest.fn() });
       const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
       expect(summary).toHaveTextContent('10 spans');
-      expect(screen.getByTestId('traceLatencyMapFailedOnlyBadge')).toBeInTheDocument();
+      expect(summary).toHaveTextContent('failed only');
     });
 
     it('normalizes a selection that carries its own failure clause when the filter changes', async () => {

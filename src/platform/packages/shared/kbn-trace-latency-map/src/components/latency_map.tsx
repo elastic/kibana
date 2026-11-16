@@ -801,9 +801,9 @@ export function LatencyMap({
     );
   }
 
-  // In the header's top-right cluster, as in the prototype, so nothing sits under the map.
-  // Shown in the error state too: the selection still filters the host's documents, so the
-  // way to clear it must not go down with the map (the counts do, so they are left out).
+  // As text on the header's left, next to the statistics. Shown in the error state too:
+  // the selection still filters the host's documents, so the way to clear it must not go
+  // down with the map (the counts do, so they are left out).
   const selectionSummary = selection && (geometry || error) && (
     <SelectionSummary
       selection={selection}
@@ -813,13 +813,33 @@ export function LatencyMap({
       unit={unit}
       sampled={sampled || selectedCounts.estimated}
       timeZone={timeZone}
-      onClear={() => commit(undefined)}
       actions={renderSelectionActions?.(
         selection,
         selectionToEsqlCondition(selection, { unit, scope: selectionCondition })
       )}
     />
   );
+
+  // The slowest shortcut the committed selection matches, shown on the menu's button. The
+  // same snapping `selectSlowest` writes; overlapping rows prefer the higher percentile.
+  const activeSlowest = useMemo((): SlowestPercentile | undefined => {
+    if (!committedRange || !geometry || !stats) return undefined;
+    if (
+      committedRange.x0 !== 0 ||
+      committedRange.x1 !== geometry.bins ||
+      committedRange.y1 !== geometry.rows
+    ) {
+      return undefined;
+    }
+    return ([99, 95, 90] as SlowestPercentile[]).find((percentile) => {
+      const duration = percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
+      const row = Math.min(
+        geometry.rows - 1,
+        Math.max(0, Math.floor(durationToRow(duration, stats)))
+      );
+      return committedRange.y0 === row;
+    });
+  }, [committedRange, geometry, stats]);
 
   return (
     <div ref={setContainer} data-test-subj={dataTestSubj}>
@@ -828,9 +848,11 @@ export function LatencyMap({
         failedOnly={failedOnly}
         onFailedOnlyChange={changeFailedOnly}
         onSelectSlowest={selectSlowest}
+        activeSlowest={activeSlowest}
         sampling={grid && !isEmpty ? sampling : undefined}
         isDisabled={!geometry || isEmpty}
         selectionSummary={selectionSummary || undefined}
+        onClearSelection={selectionSummary ? () => commit(undefined) : undefined}
         operationsWithGroups={onFocusOperation ? mapBands?.operations : undefined}
         onFocusOperation={onFocusOperation ? focusOperation : undefined}
         focusedOperation={focusedOperation}
