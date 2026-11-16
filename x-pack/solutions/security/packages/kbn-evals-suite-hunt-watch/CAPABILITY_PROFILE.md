@@ -50,6 +50,10 @@ three judged rows per cohort a single run moves by about ±0.1. Code scores are 
 with `node scripts/evals compare` rather than against these fixed numbers. The playbook allows
 unratified thresholds for the MVP slice but requires sign-off before any Pilot claim.
 
+Relevance has no threshold here on purpose. Against independent graded labels it tracks under the
+gemini-3.1-pro judge (19/21 golden, 48/53 hard at 0.8) but not under glm-5.2, where the score runs
+opposite to the labels on the golden cohort. Quote it only from gemini-judged runs.
+
 ## Threshold tradeoffs
 
 **Ratify early.** A clear pass or fail line before Pilot makes stakeholder review simple. Risk:

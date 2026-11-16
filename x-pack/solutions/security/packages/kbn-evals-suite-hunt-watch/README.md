@@ -75,6 +75,13 @@ packaging, Proposals, evidence, plus every pending Proposal in the space because
 notes cite other Investigations), so a dip there is a claim the Worker made that none of its
 own data supports.
 
+Read Relevance only under a judge that has been checked against graded labels. Under the
+gemini-3.1-pro judge it agrees with independent graders on 19/21 golden and 48/53 hard cells at
+0.8. Under the glm-5.2 judge it carries no signal: almost every narrative is labelled
+`PARTIALLY_RELEVANT`, and on the golden cohort narratives the graders passed scored lower on
+average (0.51) than the ones they failed (0.71), so neither a lower threshold nor a label rule
+recovers it. Do not compare Relevance across judges.
+
 ## Proposal gate (approve and dismiss)
 
 `evals/hunt_watch_approval.spec.ts` is an unscored e2e for the human side of the gate. Each test
