@@ -10,7 +10,7 @@
 import type { EsqlProfileDriver, EsqlProfilePlan, EsqlQueryProfile } from '@kbn/es-types';
 import type { QueryResultsSummary } from './compare_results';
 
-const PLANNING_PHASE_IDS = [
+export const PLANNING_PHASE_IDS = [
   'parsing',
   'view_resolution',
   'dataset_resolution',
@@ -185,7 +185,7 @@ function parseProfile(profile: unknown): EsqlQueryProfile | undefined {
   return profile as EsqlQueryProfile;
 }
 
-function readTookMillis(span: { took_millis?: number } | undefined): number | undefined {
+function readTookMillis(span: { took_millis?: number } | null | undefined): number | undefined {
   const tookMillis = span?.took_millis;
   return typeof tookMillis === 'number' && Number.isFinite(tookMillis) ? tookMillis : undefined;
 }
@@ -225,13 +225,22 @@ function readPipelineIndex(drivers: EsqlProfileDriver[]): Map<string, number> {
 }
 
 /**
- * Most operators report `process_nanos`. Aggregation and TopN operators report their time in
- * separate phases instead, so those are summed. Exchange and output operators report no time.
+ * Most operators report `process_nanos`. Aggregation, TopN and sampling operators report their time
+ * in separate phases instead, so those are summed. Exchange and output operators report no time.
+ * The test next to this file checks these against every operator the ES|QL profile schema lists.
  */
-const PHASE_NANOS_FIELDS = ['hash_nanos', 'aggregation_nanos', 'receive_nanos', 'emit_nanos'];
+export const PROCESS_NANOS_FIELD = 'process_nanos';
+export const PHASE_NANOS_FIELDS: readonly string[] = [
+  'hash_nanos',
+  'aggregation_nanos',
+  'aggregation_finish_nanos',
+  'receive_nanos',
+  'collect_nanos',
+  'emit_nanos',
+];
 
 function readOperatorNanos(status: Record<string, unknown>): number | undefined {
-  const processNanos = readNumber(status, 'process_nanos');
+  const processNanos = readNumber(status, PROCESS_NANOS_FIELD);
   if (processNanos !== undefined) {
     return processNanos;
   }

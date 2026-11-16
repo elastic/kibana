@@ -307,6 +307,49 @@ describe('aggregateEsqlProfile operator time', () => {
     expect(nanosOf('ExchangeSink')).toBe(0);
   });
 
+  it('counts the finish phase of an aggregation without grouping', () => {
+    // From a real `STATS COUNT(*), AVG(bytes), MAX(bytes)` profile: finishing is small but separate.
+    const { operators } = aggregateEsqlProfile({
+      drivers: [
+        {
+          description: 'data',
+          operators: [
+            {
+              operator: 'AggregationOperator[mode=INITIAL]',
+              status: {
+                aggregation_nanos: 15_296_000,
+                aggregation_finish_nanos: 6_000,
+                rows_received: 100_000,
+                rows_emitted: 1,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(operators[0].processNanos).toBe(15_296_000 + 6_000);
+    expect(operators[0].timeReported).toBe(true);
+  });
+
+  it('counts both phases of a sampling operator', () => {
+    const { operators } = aggregateEsqlProfile({
+      drivers: [
+        {
+          description: 'data',
+          operators: [
+            {
+              operator: 'SampleOperator[probability=0.1]',
+              status: { collect_nanos: 4_000, emit_nanos: 1_000, rows_received: 10 },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(operators[0].processNanos).toBe(4_000 + 1_000);
+  });
+
   it('includes those operators in shares and the per-driver timeline', () => {
     const view = aggregateEsqlProfile({
       ...profile,
