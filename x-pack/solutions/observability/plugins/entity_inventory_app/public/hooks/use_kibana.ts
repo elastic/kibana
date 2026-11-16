@@ -8,10 +8,13 @@
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../inventory_api/client';
-import type { EntityInventoryAppStartDependencies } from '../types';
+import type { EntityInventoryAppPublicConfig, EntityInventoryAppStartDependencies } from '../types';
 
 export type StartServices = CoreStart &
-  EntityInventoryAppStartDependencies & { inventoryApi: EntityInventoryApiClient };
+  EntityInventoryAppStartDependencies & {
+    inventoryApi: EntityInventoryApiClient;
+    config: EntityInventoryAppPublicConfig;
+  };
 
 const useTypedKibana = () => useKibana<StartServices>();
 
