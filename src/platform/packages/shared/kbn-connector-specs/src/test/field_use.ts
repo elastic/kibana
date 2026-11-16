@@ -19,12 +19,15 @@ export interface FieldUse {
   readonly copied: Set<string>;
   /** Values the handler returned as they were, without reading into them. */
   readonly returned: Set<string>;
+  /** Fields of the JSON request bodies the handler sent. */
+  readonly sent: Set<string>;
 }
 
 export const createFieldUse = (): FieldUse => ({
   read: new Set(),
   copied: new Set(),
   returned: new Set(),
+  sent: new Set(),
 });
 
 // Properties that every object answers, or that runtimes and test tools ask for; not fields.
@@ -48,6 +51,21 @@ const NOT_FIELDS = new Set([
 const tracked = new WeakMap<object, { readonly path: string; readonly use: FieldUse }>();
 
 const join = (path: string, segment: string): string => (path ? `${path}/${segment}` : segment);
+
+/** Adds the fields of a JSON request body to `sent`, array elements as `items`. */
+export const recordSentFields = (body: unknown, use: FieldUse, path = ''): void => {
+  if (Array.isArray(body)) {
+    body.forEach((item) => recordSentFields(item, use, join(path, 'items')));
+    return;
+  }
+  if (typeof body !== 'object' || body === null) {
+    return;
+  }
+  for (const [key, value] of Object.entries(body)) {
+    use.sent.add(join(path, key));
+    recordSentFields(value, use, join(path, key));
+  }
+};
 
 // Only parsed JSON is tracked: plain objects and arrays.
 const isJsonContainer = (value: unknown): value is object => {

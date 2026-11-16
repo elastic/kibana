@@ -565,6 +565,53 @@ describe('reviewOfChange', () => {
     });
   });
 
+  it('reviews a deprecated property only for the tracked callers that use it', () => {
+    const deprecated = (id: string, property: string, operation: string): SpecChange => ({
+      kind: 'deprecation',
+      id,
+      text: `${id.split('-')[0]} property \`${property}\` deprecated`,
+      operation,
+    });
+    const used: Omit<ConnectorDrift, 'outcome'> = {
+      ...drift,
+      actions: [
+        action('crawl', 'POST /crawl', {
+          fieldUse: {
+            'main POST /crawl': {
+              read: ['status'],
+              copied: [],
+              returned: ['data'],
+              sent: ['options', 'options/waitFor'],
+            },
+          },
+        }),
+        action('untracked', 'POST /crawl', { tracked: false }),
+      ],
+    };
+    const reviewOf = reviewOfChange(used);
+    const property = (id: string, name: string) =>
+      reviewOf('main', deprecated(id, name, 'POST /crawl'));
+
+    expect(
+      property('request-property-deprecated', 'allOf[#/components/schemas/Options]/waitFor')
+    ).toEqual({
+      needsReview: true,
+      actions: ['untracked'],
+    });
+    expect(property('request-property-deprecated', 'options/waitFor')).toEqual({
+      needsReview: true,
+      actions: ['crawl', 'untracked'],
+    });
+    expect(property('response-property-deprecated', 'data/items/language')).toEqual({
+      needsReview: true,
+      actions: ['crawl', 'untracked'],
+    });
+    expect(property('response-property-deprecated', 'meta/region')).toEqual({
+      needsReview: true,
+      actions: ['untracked'],
+    });
+  });
+
   it('always reviews deprecations, and changes no action calls unless every action passes', () => {
     expect(review('main', change('endpoint-deprecated', 'POST /crawl'))).toEqual({
       needsReview: true,

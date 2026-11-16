@@ -23,7 +23,7 @@ import type {
 } from '../connector_spec';
 import { getSchemaForAuthType } from '../lib';
 import type { FieldUse } from './field_use';
-import { markReturned, trackFieldUse } from './field_use';
+import { markReturned, recordSentFields, trackFieldUse } from './field_use';
 
 export interface ContractContextOptions extends EmulatorOptions {
   readonly connector: ConnectorSpec;
@@ -150,6 +150,18 @@ const toSecrets = (
     }
   }
   return schema.parse(secrets);
+};
+
+// Axios sends JSON bodies as strings; other bodies have no fields to record.
+const parseJsonBody = (data: unknown): unknown => {
+  if (typeof data !== 'string') {
+    return undefined;
+  }
+  try {
+    return JSON.parse(data);
+  } catch {
+    return undefined;
+  }
 };
 
 // Not a jest mock, so the vendor API recorder can run outside jest.
@@ -279,9 +291,12 @@ export const createContractContext = async ({
       .reverse()
       .find(({ request: called, matched }) => called === request && matched && 'method' in matched);
     const matched = call?.matched;
-    return matched && 'method' in matched
-      ? { ...response, data: trackFieldUse(response.data, trackFields(matched)) }
-      : response;
+    if (!matched || !('method' in matched)) {
+      return response;
+    }
+    const use = trackFields(matched);
+    recordSentFields(parseJsonBody(response.config.data), use);
+    return { ...response, data: trackFieldUse(response.data, use) };
   });
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;

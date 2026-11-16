@@ -259,10 +259,52 @@ const verifiedBy = ({ kind, id }: SpecChange, passes: boolean, fieldsCompared: b
 const passesBoth = ({ snapshotProblems, latestProblems }: ActionDrift): boolean =>
   snapshotProblems.length === 0 && latestProblems !== undefined && latestProblems.length === 0;
 
+const DEPRECATED_PROPERTY = /^(request|response)-property-deprecated$/;
+// `allOf[#/components/schemas/Options]/waitFor`: oasdiff names the subschema a property is in.
+const COMPOSITION = /(?:allOf|anyOf|oneOf)\[[^\]]*\]\/?/g;
+
+// The property a deprecation names, as field use paths do: `items` for array elements.
+const deprecatedPropertyOf = ({ id, text }: SpecChange): string | undefined =>
+  DEPRECATED_PROPERTY.test(id)
+    ? text
+        .match(/property `([^`]+)`/)?.[1]
+        ?.replace(COMPOSITION, '')
+        .replace(/\/$/, '')
+    : undefined;
+
+const within = (field: string, parent: string): boolean =>
+  field === parent || field.startsWith(`${parent}/`);
+
+/**
+ * Whether a tracked action uses a deprecated property of an operation's request or response:
+ * sends it or something in it, reads it or something in it, or copies or returns it whole.
+ */
+const usesProperty = (
+  { fieldUse = {} }: ActionDrift,
+  source: string,
+  change: SpecChange,
+  property: string
+): boolean => {
+  const use = fieldUse[`${source} ${change.operation}`];
+  if (!use) {
+    return false;
+  }
+  if (change.id.startsWith('request-')) {
+    return (use.sent ?? []).some((field) => within(field, property));
+  }
+  return (
+    use.read.some((field) => within(field, property)) ||
+    [...use.copied, ...use.returned].some(
+      (field) => field === '' || within(field, property) || within(property, field)
+    )
+  );
+};
+
 /**
  * Per spec change, the actions calling its operation that need to review it, and whether it
- * needs review at all. Deprecations and sunsets always do; a breaking change does for each caller
- * whose passing against the latest spec doesn't verify it. A change no action calls needs review
+ * needs review at all. Deprecations and sunsets do, unless a deprecated property is one the caller
+ * neither sends nor reads; a breaking change does for each caller whose passing against the
+ * latest spec doesn't verify it. A change no action calls needs review
  * unless every action passing verifies it.
  */
 export const reviewOfChange = (
@@ -285,11 +327,16 @@ export const reviewOfChange = (
     if (callers.length === 0) {
       return { needsReview: !verifiedBy(change, passes, fieldsCompared), actions: [] };
     }
+    const property = deprecatedPropertyOf(change);
     const reviewers = callers
-      .filter(
-        (action) =>
-          !verifiedBy(change, passesBoth(action), passesBoth(action) && action.tracked === true)
-      )
+      .filter((action) => {
+        const passing = passesBoth(action);
+        const tracked = passing && action.tracked === true;
+        if (property !== undefined && tracked) {
+          return usesProperty(action, source, change, property);
+        }
+        return !verifiedBy(change, passing, tracked);
+      })
       .map(({ action }) => action);
     return { needsReview: reviewers.length > 0, actions: reviewers };
   };

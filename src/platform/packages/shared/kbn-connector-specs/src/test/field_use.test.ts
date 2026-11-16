@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createFieldUse, markReturned, trackFieldUse } from './field_use';
+import { createFieldUse, markReturned, recordSentFields, trackFieldUse } from './field_use';
 
 const body = () => ({
   id: 1,
@@ -87,5 +87,21 @@ describe('markReturned', () => {
     markReturned(data);
 
     expect(sorted(use.returned)).toEqual(['', 'labels']);
+  });
+});
+
+describe('recordSentFields', () => {
+  it('records the fields of a JSON body, array elements as items', () => {
+    const use = createFieldUse();
+
+    recordSentFields({ query: { text: 'a' }, tags: [{ name: 'x' }], limit: 5 }, use);
+
+    expect([...use.sent].sort()).toEqual([
+      'limit',
+      'query',
+      'query/text',
+      'tags',
+      'tags/items/name',
+    ]);
   });
 });

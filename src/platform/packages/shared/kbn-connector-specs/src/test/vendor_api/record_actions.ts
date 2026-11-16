@@ -36,6 +36,8 @@ export interface RecordedFieldUse {
   readonly read: readonly string[];
   readonly copied: readonly string[];
   readonly returned: readonly string[];
+  /** Fields of the JSON request bodies it sent; left out when there were none. */
+  readonly sent?: readonly string[];
 }
 
 export interface RequestedPath {
@@ -428,6 +430,7 @@ export const recordActions = async ({
                     read: sortedList(use.read),
                     copied: sortedList(use.copied),
                     returned: sortedList(use.returned),
+                    ...(use.sent.size > 0 ? { sent: sortedList(use.sent) } : {}),
                   },
                 ])
               ),
