@@ -86,6 +86,11 @@ const getEntityClauses = (source: HasDataSource): estypes.QueryDslQueryContainer
       ...existsQuery(hostInventoryModel.fields.id),
       ...existsQuery(findInventoryFields('container').id),
       ...existsQuery(findInventoryFields('pod').id),
+      // SemConv pods carry `k8s.pod.uid` rather than the ECS `kubernetes.pod.uid`.
+      // Inventory already renders these pods (schema: "semconv"), so the onboarding
+      // gate must also recognise them or OTel/SemConv-only clusters stay stuck on
+      // the "Add metrics data" screen despite having queryable pod metrics.
+      ...existsQuery(findInventoryFields('pod', 'semconv').id),
       ...existsQuery(findInventoryFields('awsEC2').id),
       ...existsQuery(findInventoryFields('awsS3').id),
       ...existsQuery(findInventoryFields('awsRDS').id),

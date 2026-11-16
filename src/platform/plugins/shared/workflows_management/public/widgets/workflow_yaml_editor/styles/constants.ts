@@ -110,3 +110,6 @@ export const MINIMAP_RESERVE_PX =
  * bottom, like the proposed-changes bulk bar, don't sit underneath it.
  */
 export const BOTTOM_BAR_CLEARANCE_PX = 66;
+
+/** Below this editor-area width the step minimap is hidden so it doesn't eat editor width. */
+export const MINIMAP_HIDE_BREAKPOINT_PX = 720;

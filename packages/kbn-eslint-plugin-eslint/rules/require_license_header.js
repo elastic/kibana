@@ -62,7 +62,7 @@ module.exports = {
             message: 'File must start with a license header',
             loc: {
               start: { line: 1, column: 0 },
-              end: { line: 1, column: sourceCode.lines[0].length - 1 },
+              end: { line: 1, column: sourceCode.lines[0].length },
             },
             fix(fixer) {
               if (isHashbang(sourceCode.lines[0])) {

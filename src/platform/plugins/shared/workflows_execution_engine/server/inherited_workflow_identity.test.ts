@@ -141,15 +141,348 @@ describe('inherited workflow execution identity', () => {
   it.each([
     { ...approval, 'run-as-mode': 'default' as const },
     { 'workflow-id': child.id },
-    { ...approval, 'workflow-id': '{{ inputs.child }}' },
     { 'workflow-id': child.id, inheritRunAs: true },
   ])('rejects missing, unsupported, or dynamic identity choices: %j', async (withInput) => {
     await withWorkflowExecutionIdentity(core, parent(withInput), caller, async (request) => {
       expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
-        'literal workflow-id and identity choice'
+        'literal identity choice'
       );
     });
   });
+
+  it.each(['workflow.execute', 'workflow.executeAsync'] as const)(
+    'allows a templated %s child only from the saved literal allowlist',
+    async (type) => {
+      const execution = parent({
+        ...approval,
+        'workflow-id': '{{ variables.action_workflow_id }}',
+        'allowed-workflow-ids': [child.id, 'other-approved-child'],
+      });
+      execution.workflowDefinition.steps[0].type = type;
+      await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
+        expect(resolveInheritedWorkflowIdentity(request, child, context)).toEqual(identity);
+        expect(() =>
+          resolveInheritedWorkflowIdentity(request, { ...child, id: 'unapproved-child' }, context)
+        ).toThrow('not approved');
+        expect(() =>
+          resolveInheritedWorkflowIdentity(request, { ...child, managed: false }, context)
+        ).toThrow('Only managed child');
+      });
+    }
+  );
+
+  it.each(['workflow.execute', 'workflow.executeAsync'] as const)(
+    'allows a tagged dynamic %s child using saved definitions',
+    async (type) => {
+      const execution = parent({
+        ...approval,
+        'workflow-id': '{{ variables.child }}',
+        'allowed-workflow-tags': ['auto-approvable', 'another-approved-tag'],
+      });
+      execution.workflowDefinition.steps[0].type = type;
+      const taggedChild = {
+        ...child,
+        definition: { ...child.definition, tags: ['action', 'auto-approvable'] },
+      };
+      await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
+        expect(resolveInheritedWorkflowIdentity(request, taggedChild, context)).toEqual(identity);
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'not approved'
+        );
+        expect(() =>
+          resolveInheritedWorkflowIdentity(
+            request,
+            {
+              ...taggedChild,
+              managed: false,
+            },
+            context
+          )
+        ).toThrow('Only managed child');
+        expect(() =>
+          resolveInheritedWorkflowIdentity(
+            request,
+            {
+              ...taggedChild,
+              definition: { ...child.definition, tags: ['auto-approvable-extra'] },
+            },
+            context
+          )
+        ).toThrow('not approved');
+      });
+    }
+  );
+
+  it.each([
+    { ids: [child.id], tags: ['auto-approvable'], allowed: true },
+    { ids: ['other'], tags: ['auto-approvable'], allowed: false },
+    { ids: [child.id], tags: ['other'], allowed: false },
+  ])('requires both ID and tag restrictions when supplied: %j', async ({ ids, tags, allowed }) => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({
+        ...approval,
+        'workflow-id': '{{ variables.child }}',
+        'allowed-workflow-ids': ids,
+        'allowed-workflow-tags': tags,
+      }),
+      caller,
+      async (request) => {
+        const resolve = () =>
+          resolveInheritedWorkflowIdentity(
+            request,
+            {
+              ...child,
+              definition: { ...child.definition, tags: ['auto-approvable'] },
+            },
+            context
+          );
+        if (allowed) expect(resolve()).toEqual(identity);
+        else expect(resolve).toThrow('not approved');
+      }
+    );
+  });
+
+  it.each([
+    { tags: [] },
+    { tags: ['{{ inputs.tag }}'] },
+    { tags: ['{% if true %}action{% endif %}'] },
+  ])('rejects invalid saved tag restrictions: %j', async ({ tags }) => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({
+        ...approval,
+        'allowed-workflow-tags': tags,
+      }),
+      caller,
+      async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'literal identity choice'
+        );
+      }
+    );
+  });
+
+  it('does not accept child tags or parent restrictions supplied through inputs', async () => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({
+        ...approval,
+        'workflow-id': '{{ variables.child }}',
+        'allowed-workflow-tags': ['auto-approvable'],
+        inputs: { tags: ['auto-approvable'], 'allowed-workflow-tags': ['action'] },
+      }),
+      caller,
+      async (request) => {
+        expect(() =>
+          resolveInheritedWorkflowIdentity(
+            request,
+            {
+              ...child,
+              definition: { ...child.definition, tags: ['action'] },
+            },
+            context
+          )
+        ).toThrow('not approved');
+      }
+    );
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({
+        ...approval,
+        'workflow-id': '{{ variables.child }}',
+        inputs: { 'allowed-workflow-tags': ['auto-approvable'] },
+      }),
+      caller,
+      async (request) => {
+        expect(() =>
+          resolveInheritedWorkflowIdentity(
+            request,
+            {
+              ...child,
+              definition: { ...child.definition, tags: ['auto-approvable'] },
+            },
+            context
+          )
+        ).toThrow('not approved');
+      }
+    );
+  });
+
+  it('keeps literal targets restricted even when tags match', async () => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({
+        ...approval,
+        'workflow-id': 'other',
+        'allowed-workflow-tags': ['auto-approvable'],
+      }),
+      caller,
+      async (request) => {
+        expect(() =>
+          resolveInheritedWorkflowIdentity(
+            request,
+            {
+              ...child,
+              definition: { ...child.definition, tags: ['auto-approvable'] },
+            },
+            context
+          )
+        ).toThrow('not approved');
+      }
+    );
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({
+        ...approval,
+        'allowed-workflow-tags': ['auto-approvable'],
+      }),
+      caller,
+      async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'not approved'
+        );
+      }
+    );
+  });
+
+  it.each(['inherit', 'override'] as const)(
+    'preserves %s for a tag-authorized bound child',
+    async (mode) => {
+      const boundChild = {
+        ...child,
+        definition: {
+          ...child.definition,
+          tags: ['auto-approvable'],
+          settings: { run_as: 'child-account' },
+        },
+      };
+      await withWorkflowExecutionIdentity(
+        core,
+        parent({
+          'workflow-id': '{{ variables.child }}',
+          'run-as-mode': mode,
+          'allowed-workflow-tags': ['auto-approvable'],
+        }),
+        caller,
+        async (request) => {
+          const resolve = () => resolveInheritedWorkflowIdentity(request, boundChild, context);
+          if (mode === 'inherit') expect(resolve).toThrow('run-as-mode: override');
+          else expect(resolve()).toEqual(identity);
+          expect(boundChild.definition.settings.run_as).toBe('child-account');
+        }
+      );
+    }
+  );
+
+  it.each([
+    '{{ variables.child }}',
+    '${{ variables.child }}',
+    '{% if inputs.useChild %}child{% endif %}',
+    'child-{{ inputs.suffix }}',
+  ])('accepts an allowlisted target resolved from %s', async (configuredId) => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({ ...approval, 'workflow-id': configuredId, 'allowed-workflow-ids': [child.id] }),
+      caller,
+      async (request) => {
+        expect(resolveInheritedWorkflowIdentity(request, child, context)).toEqual(identity);
+      }
+    );
+  });
+
+  it.each([
+    '{{ variables.child }}',
+    '${{ variables.child }}',
+    '{% if inputs.useChild %}child{% endif %}',
+    'child-{{ inputs.suffix }}',
+  ])('requires a literal allowlist for %s', async (configuredId) => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({ ...approval, 'workflow-id': configuredId }),
+      caller,
+      async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'requires literal allowed-workflow-ids'
+        );
+      }
+    );
+  });
+
+  it.each([
+    { allowedIds: ['{{ variables.child }}'] },
+    { allowedIds: ['{% if true %}child{% endif %}'] },
+    { allowedIds: ['child', '{{ variables.other }}'] },
+    { allowedIds: [] },
+  ])('rejects nonliteral or empty saved allowlists: %j', async ({ allowedIds }) => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({ ...approval, 'allowed-workflow-ids': allowedIds }),
+      caller,
+      async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'literal allowed-workflow-ids'
+        );
+      }
+    );
+  });
+
+  it('does not use the allowlist to override a different literal target', async () => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({ ...approval, 'workflow-id': 'other', 'allowed-workflow-ids': [child.id] }),
+      caller,
+      async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'not approved'
+        );
+      }
+    );
+  });
+
+  it('enforces an explicit allowlist for literal targets too', async () => {
+    await withWorkflowExecutionIdentity(
+      core,
+      parent({ ...approval, 'allowed-workflow-ids': ['other'] }),
+      caller,
+      async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'not approved'
+        );
+      }
+    );
+  });
+
+  it.each(['inherit', 'override'] as const)(
+    'preserves %s semantics for an allowlisted child with its own SA',
+    async (mode) => {
+      const boundChild = {
+        ...child,
+        definition: { ...child.definition, settings: { run_as: 'child-account' } },
+      };
+      await withWorkflowExecutionIdentity(
+        core,
+        parent({
+          'workflow-id': '{{ variables.child }}',
+          'allowed-workflow-ids': [child.id],
+          'run-as-mode': mode,
+        }),
+        caller,
+        async (request) => {
+          if (mode === 'inherit') {
+            expect(() => resolveInheritedWorkflowIdentity(request, boundChild, context)).toThrow(
+              'run-as-mode: override'
+            );
+          } else {
+            expect(resolveInheritedWorkflowIdentity(request, boundChild, context)).toEqual(
+              identity
+            );
+          }
+          expect(boundChild.definition.settings.run_as).toBe('child-account');
+        }
+      );
+    }
+  );
 
   it.each([false, undefined])('rejects unmanaged children (%s)', async (managed) => {
     await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
@@ -219,6 +552,7 @@ describe('inherited workflow execution identity', () => {
         workloadId: 'parent',
         spaceId: 'default',
         expectedServiceAccountId: 'account-a',
+        executionId: 'parent-execution',
       },
       expect.any(Function)
     );

@@ -69,12 +69,15 @@ const VulnerabilitiesCount = ({
 export const VulnerabilitiesPreview = ({
   identityFields,
   entityRecord,
+  aliasRecords,
   isPreviewMode,
   openDetailsPanel,
   hideHeaderIcons,
 }: {
   identityFields: IdentityFields;
   entityRecord?: EntityStoreRecord | null;
+  /** Resolution-group aliases of `entityRecord`; their vulnerabilities are counted too. */
+  aliasRecords?: readonly EntityStoreRecord[];
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   hideHeaderIcons?: boolean;
@@ -89,8 +92,9 @@ export const VulnerabilitiesPreview = ({
     () =>
       buildEuidCspPreviewOptions(entityType, entityRecord, euidApi, {
         legacyIdentityFields: identityFields,
+        aliasRecords,
       }),
-    [entityType, entityRecord, euidApi, identityFields]
+    [entityType, entityRecord, aliasRecords, euidApi, identityFields]
   );
   const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
 

@@ -11,7 +11,7 @@ import type { Locations, PrivateLocation, SyntheticsMonitor } from '../../../com
 import { ConfigKey, MonitorTypeEnum, LocationStatus } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
-import { SyntheticsService } from '../synthetics_service';
+import { ServiceManagedLocations } from '../service_managed_locations';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -24,6 +24,7 @@ import * as addMonitorBulk from '../../routes/monitor_cruds/bulk_cruds/add_monit
 import { mockEncryptedSO } from '../utils/mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../common/lib/schedule_to_time';
 
 jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
   getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
@@ -129,12 +130,11 @@ describe('ProjectMonitorFormatter', () => {
     fleet: { runWithCache: async (cb: any) => await cb() },
   } as unknown as SyntheticsServerSetup;
 
-  const syntheticsService = new SyntheticsService(serverMock);
+  const serviceManagedLocations = new ServiceManagedLocations(serverMock);
 
-  syntheticsService.addConfigs = jest.fn();
-  syntheticsService.editConfig = jest.fn();
-  syntheticsService.deleteConfigs = jest.fn();
-  syntheticsService.getMaintenanceWindows = jest.fn();
+  serviceManagedLocations.addMonitors = jest.fn();
+  serviceManagedLocations.editMonitors = jest.fn();
+  serviceManagedLocations.deleteMonitors = jest.fn();
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
@@ -152,7 +152,8 @@ describe('ProjectMonitorFormatter', () => {
     };
   }) as Locations;
 
-  const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+  const monitorClient = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+  monitorClient.getMaintenanceWindows = jest.fn();
 
   const routeContext = {
     savedObjectsClient: soClient,
@@ -449,6 +450,7 @@ describe('ProjectMonitorFormatter', () => {
             [ConfigKey.NAMESPACE]: 'default',
             [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
             [ConfigKey.CONFIG_ID]: expect.any(String),
+            [SCHEDULE_INTERVAL_FIELD]: 180,
           },
         }),
         expect.objectContaining({
@@ -457,6 +459,7 @@ describe('ProjectMonitorFormatter', () => {
             ...soData[1].attributes,
             [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
             [ConfigKey.CONFIG_ID]: expect.any(String),
+            [SCHEDULE_INTERVAL_FIELD]: 180,
           },
         }),
       ])

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 
 import { useFormattedEOLDate } from '../../hooks/use_formatted_eol_date';
-import { getModelDeprecatedMessage } from '../../utils/eis_utils';
+import { ModelDateTooltipContent } from './model_date_tooltip_content';
 
 interface ModelDeprecatedBadgeProps {
   id: string;
@@ -23,18 +23,8 @@ interface ModelDeprecatedBadgeProps {
 export const ModelDeprecatedBadge = ({ id, metadata, iconOnly }: ModelDeprecatedBadgeProps) => {
   const eolDate = useFormattedEOLDate(metadata);
 
-  const tooltipContent = getModelDeprecatedMessage(eolDate);
-
   return (
-    <EuiToolTip
-      title={i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.title',
-        {
-          defaultMessage: 'Deprecation notice',
-        }
-      )}
-      content={tooltipContent}
-    >
+    <EuiToolTip content={<ModelDateTooltipContent date={eolDate} status="deprecated" />}>
       <EuiBadge
         tabIndex={0}
         iconSide="left"

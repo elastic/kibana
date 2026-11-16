@@ -6,7 +6,7 @@
  */
 
 import type { ProfilingSetupOptions, SetupState } from '@kbn/profiling-data-access-plugin/server';
-import { enableResourceManagement, setMaximumBuckets } from './lib/cluster_settings';
+import { enableResourceManagement } from './lib/cluster_settings';
 
 export async function setupSelfManaged({
   setupState,
@@ -17,7 +17,6 @@ export async function setupSelfManaged({
 }) {
   const executeFunctions = [
     ...(setupState.resource_management.enabled ? [] : [enableResourceManagement]),
-    ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
   ];
 
   await Promise.all(executeFunctions.map((fn) => fn(setupParams)));

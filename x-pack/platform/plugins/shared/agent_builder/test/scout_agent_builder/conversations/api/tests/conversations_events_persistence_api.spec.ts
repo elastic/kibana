@@ -9,8 +9,12 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
-import type { TimelineEvent } from '@kbn/agent-builder-common';
-import { CONVERSATION_SCHEMA_VERSION, TimelineEventType } from '@kbn/agent-builder-common';
+import type { ConversationEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import {
+  CONVERSATION_SCHEMA_VERSION,
+  ConversationActivityEventType,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
@@ -68,7 +72,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'newly created conversations are stored events-native (schema_version + empty events on _source, matched by GET)',
+      'newly created conversations are stored events-native (schema_version + the creation activity on _source, matched by GET)',
       async ({ asAdmin, esClient }) => {
         const createRes = await asAdmin.post(CONVERSATIONS_PATH, {
           body: { title: 'Events-native create' },
@@ -78,16 +82,19 @@ apiTest.describe(
         const created = createRes.body as CreateConversationResponse;
         conversationIds.push(created.id);
 
-        // Raw _source: an empty conversation is still stamped events-native, with an empty projection.
+        // Raw _source: an empty conversation is stamped events-native; its projection holds only
+        // the `conversation_created` activity event.
         const rawDoc = await esClient.get<{
           schema_version?: number;
-          events?: TimelineEvent[];
+          events?: ConversationEvent[];
         }>({
           index: CHAT_CONVERSATIONS_INDEX,
           id: created.id,
         });
         expect(rawDoc._source?.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-        expect(rawDoc._source?.events).toStrictEqual([]);
+        expect(rawDoc._source?.events?.map((event) => event.type)).toStrictEqual([
+          ConversationActivityEventType.conversationCreated,
+        ]);
 
         // GET surface lifts `schema_version` onto the response and reflects the stored events.
         const getRes = await asAdmin.get(
@@ -97,7 +104,7 @@ apiTest.describe(
         expect(getRes).toHaveStatusCode(200);
         const fetched = getRes.body as GetConversationResponse;
         expect(fetched.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-        expect(fetched.events).toStrictEqual([]);
+        expect(fetched.events).toStrictEqual(rawDoc._source?.events);
       }
     );
 
@@ -132,7 +139,13 @@ apiTest.describe(
         });
         expect(rawDoc._source?.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
         const storedEvents = rawDoc._source?.events ?? [];
-        expect(storedEvents.map((event) => event.type)).toStrictEqual(ROUND_BOUNDARY_EVENT_TYPES);
+        // The creation activity leads, the round boundaries follow, and the generated title
+        // closes the round's write.
+        expect(storedEvents.map((event) => event.type)).toStrictEqual([
+          ConversationActivityEventType.conversationCreated,
+          ...ROUND_BOUNDARY_EVENT_TYPES,
+          ConversationActivityEventType.titleUpdated,
+        ]);
         expect(storedEvents.every((event) => event.type !== TimelineEventType.executionStep)).toBe(
           true
         );

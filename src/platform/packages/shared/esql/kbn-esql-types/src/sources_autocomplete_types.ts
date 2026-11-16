@@ -47,6 +47,7 @@ export interface EsqlView {
   name: string;
   query: string;
   description?: string;
+  reserved?: boolean;
   links?: Array<{ label: string; url: string }>;
   type?: string;
 }

@@ -24,8 +24,12 @@ export class DiscoverPage extends DiscoverApp {
     return this.page.testSubj.locator('discoverUninitialized');
   }
 
-  getUninitializedKeyboardShortcuts(): Locator {
-    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
+  getRecommendedQueries(): Locator {
+    return this.page.testSubj.locator('discoverRecommendedQueries');
+  }
+
+  getRecommendedQueryRunButton(label: string): Locator {
+    return this.getRecommendedQueries().getByRole('button', { name: `Run query: ${label}` });
   }
 
   async selectClassicMode() {
@@ -167,6 +171,16 @@ export class DiscoverPage extends DiscoverApp {
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
     await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Saves a library session from the embedded Discover editor and returns to the dashboard.
+   * Unlike {@link saveAndReturnToEditor}, a by-reference panel opens the save modal first.
+   */
+  async saveEditorSessionAndReturn() {
+    await this.clickAppMenuItem('discoverSaveButton');
+    await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
+    await this.confirmSaveModal();
   }
 
   /**

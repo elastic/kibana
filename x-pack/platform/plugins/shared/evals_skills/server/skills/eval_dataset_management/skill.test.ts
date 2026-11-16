@@ -18,8 +18,7 @@ const deps: EvalDatasetManagementToolDeps = {
   getStartDependencies: jest.fn(),
 };
 
-const writeToolIds = [
-  evalsDatasetTools.createDataset,
+const confirmationToolIds = [
   evalsDatasetTools.upsertDataset,
   evalsDatasetTools.editExamples,
   evalsDatasetTools.copyDataset,
@@ -49,11 +48,19 @@ describe('createEvalDatasetManagementSkill', () => {
     ]);
   });
 
-  it('guards every write tool behind a user confirmation', async () => {
+  it('creates datasets without requiring user confirmation', async () => {
+    const skill = createEvalDatasetManagementSkill(deps);
+    const tools = (await skill.getInlineTools?.()) ?? [];
+    const tool = tools.find((candidate) => candidate.id === evalsDatasetTools.createDataset);
+
+    expect(tool?.confirmation).toBeUndefined();
+  });
+
+  it('guards the remaining write tools behind a user confirmation', async () => {
     const skill = createEvalDatasetManagementSkill(deps);
     const tools = (await skill.getInlineTools?.()) ?? [];
 
-    for (const toolId of writeToolIds) {
+    for (const toolId of confirmationToolIds) {
       const tool = tools.find((candidate) => candidate.id === toolId) as {
         confirmation?: { askUser?: string };
       };

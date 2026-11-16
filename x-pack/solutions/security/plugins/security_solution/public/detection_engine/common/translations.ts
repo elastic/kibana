@@ -640,7 +640,7 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
     defaultMessage:
-      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE ATT&CK™ tactic or technique (e.g., "Defense Evasion" or "TA0005")',
+      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE tactic or technique (e.g., "Defense Evasion", "TA0005" or "AML.T0044")',
   }
 );
 
@@ -1205,6 +1205,34 @@ export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.autoRefreshPopoverAriaLabel',
   {
     defaultMessage: 'Auto refresh settings',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_ON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_ON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOnAriaLabel',
+  {
+    defaultMessage: 'Auto refresh: On',
+  }
+);
+
+export const AUTO_REFRESH_BUTTON_OFF_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshButtonOffAriaLabel',
+  {
+    defaultMessage: 'Auto refresh: Off',
   }
 );
 

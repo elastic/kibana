@@ -114,6 +114,43 @@ steps:
           core.warning(`Duplicate detection failed: ${err.message}`);
         }
 
+# Copy ownership metadata automatically once safe_outputs creates a PR, even if
+# posting the outcome comment fails or the agent never calls link_fix_pr.
+jobs:
+  label_fix_pr:
+    # gh-aw requires an explicit agent dependency to classify this as a post-agent job.
+    needs: [agent, safe_outputs]
+    if: ${{ !cancelled() && needs.safe_outputs.outputs.created_pr_number != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout labeling helper from trusted main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: elastic/kibana
+          ref: main
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - name: Copy source issue ownership labels to the fix PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          SOURCE_ISSUE_NUMBER: *issue_number
+          FIX_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          retries: 3
+          script: |
+            const { labelFlakyFixPr } = require('./.github/scripts/label_flaky_fix_pr.ts');
+            await labelFlakyFixPr({
+              github,
+              core,
+              ...context.repo,
+              issueNumber: Number(process.env.SOURCE_ISSUE_NUMBER),
+              prNumber: Number(process.env.FIX_PR_NUMBER),
+            });
+
 network:
   allowed:
     - defaults
@@ -201,7 +238,7 @@ safe-outputs:
         - name: Append PR link to outcome comment
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
           with:
-            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            github-token: ${{ github.token }}
             script: |
               const prUrl = process.env.GH_AW_PR_URL;
               const prNumber = process.env.GH_AW_PR_NUMBER;
@@ -250,6 +287,7 @@ Many `failed-test` issues share a single **root cause**, so the fixer can open s
 - A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ team, candidates }`): `team` is this issue's owning team (from its `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Read it first.
 - Same team means same owning code area, not the same test — so **open each candidate's diff** and treat it as a real match only when it addresses the **same root cause / same method for the same purpose** as this issue's failing test — not merely the same team, a similar file, or the same file for an unrelated reason (a different method of the same page object is not a duplicate).
 - If this issue has no `Team:` label, `candidates` falls back to only the PRs already closing this exact issue.
+- When the issue carries `failure:fix-did-not-hold`, the merged PR whose fix came back is **not** a duplicate: it is the disproved hypothesis that [When an earlier fix did not hold](#when-an-earlier-fix-did-not-hold) asks you to study. Every other candidate still goes through the diff check above.
 - If a real match exists (open, or already merged), **do not open a PR**: post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 9), and stop. If you **cannot confirm** a true duplicate, proceed and open the PR — the downstream Flaky Fix Verifier is the backstop that closes any real duplicate that slips through, whereas a flake you wrongly skip here just goes unfixed.
 
 ## Environment
@@ -274,8 +312,8 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 
 ## Steps
 
-1. **Rule out a duplicate.** Before any investigation, run [Duplicate detection](#duplicate-detection). If a fix for this root cause is already in flight (or already merged), **do not open a PR** — skip straight to step 8 (outcome comment) and step 9 (remove label).
-2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any relevant PR/commit history and its precise causal role, and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8.
+1. **Rule out a duplicate.** Before any investigation, run [Duplicate detection](#duplicate-detection). If a fix for this root cause is already in flight (or already merged), **do not open a PR** — skip straight to step 8 (outcome comment) and step 9 (remove label). A merged fix that came back (the issue carries `failure:fix-did-not-hold`) does not count as a duplicate — see that section.
+2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any relevant PR/commit history and its precise causal role, and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8. If the issue carries `failure:fix-did-not-hold`, also apply [When an earlier fix did not hold](#when-an-earlier-fix-did-not-hold) before writing any patch.
 3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, following the [Fix guidelines](#fix-guidelines). If the failing test is Security Cypress, apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) first — a migrate / new-Scout verdict means skip to step 8, not a Scout rewrite. Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
@@ -301,6 +339,15 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). The doctor owns the diagnosis and recommended action; if the two skills disagree, the doctor wins. Use the `flaky-test-investigator` skill only for CI artifact retrieval, pipeline context, and this workflow's steps, PR format, and fix guidelines. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance. Then apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) before writing any patch.
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
+
+## When an earlier fix did not hold
+
+The issue may carry `failure:fix-did-not-hold`: the investigator confirmed that a fix for this same failure already merged and the failure came back in a build that contained it. Treat that fix as a disproved hypothesis, not as a starting point.
+
+- Find the merged fix PR: the issue timeline, the investigator's latest comment, or a sibling `failed-test` issue with the same test title (the reporter files a new issue once the old one has been closed for a while). Read its description and diff: what it assumed the cause was, how it verified that, and its `flaky-fix-check:*` verdict.
+- Name the assumption the recurrence contradicts before proposing anything. If you cannot, the diagnosis is not current: re-investigate per [Validate the investigation is current](#validate-the-investigation-is-current).
+- Do not ship a patch of the same shape (another wait on the same signal, a longer timeout, a second retry) unless you can say why it will hold where the earlier one did not. A fix that only widens the earlier fix is the pattern that comes back.
+- In the PR's Context section, name the earlier fix PR, what it assumed, and how this patch differs.
 
 ## Security Cypress: what this fixer may ship
 

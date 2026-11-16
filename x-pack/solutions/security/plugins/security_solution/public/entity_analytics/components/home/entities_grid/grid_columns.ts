@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridColumnActions } from '@elastic/eui';
 import { alertCountQuerySpec, lastSeenAlertQuerySpec } from './queries/alerts';
 import { anomalyCountQuerySpec } from './queries/anomalies';
 import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
 import { groupSizeQuerySpec } from './queries/group_size';
 import { caseCountQuerySpec } from './queries/cases';
 import { nativeSortQuerySpec } from './queries/native';
+import { withResolvedEntityValues } from './queries/resolved_entities';
+import { isOneOf } from './common';
 import type { RowsMode } from './common';
 import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/types';
 
@@ -20,30 +22,40 @@ import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/t
 // Ordered list of all grid columns; GridColumnId and the rows-mode lists derive from it.
 const COLUMNS = [
   { id: 'entity.name', displayAsText: 'Entity name', initialWidth: 200 },
-  { id: 'group_size', displayAsText: 'Records', initialWidth: 100 },
+  { id: 'group_size', displayAsText: 'Records', initialWidth: 100, schema: 'numeric' },
   {
     id: 'entity.relationships.resolution.resolved_to',
     displayAsText: 'Resolved to',
     initialWidth: 200,
   },
   { id: 'entity.EngineMetadata.Type', displayAsText: 'Entity type', initialWidth: 120 },
-  { id: 'entity.risk.calculated_score_norm', displayAsText: 'Risk score', initialWidth: 120 },
-  { id: 'risk_score_change', displayAsText: 'Risk score change', initialWidth: 140 },
+  {
+    id: 'entity.risk.calculated_score_norm',
+    displayAsText: 'Risk score',
+    initialWidth: 85,
+    schema: 'numeric',
+  },
+  {
+    id: 'risk_score_change',
+    displayAsText: 'Risk score change',
+    initialWidth: 160,
+    schema: 'numeric',
+  },
   { id: 'asset.criticality', displayAsText: 'Asset criticality', initialWidth: 160 },
-  { id: 'entity.source', displayAsText: 'Source', initialWidth: 140 },
-  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 140 },
-  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
-  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120 },
-  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100 },
+  { id: 'entity.source', displayAsText: 'Source', initialWidth: 170 },
+  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 180 },
+  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 140 },
+  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 110, schema: 'numeric' },
+  { id: 'case_count', displayAsText: 'Cases', initialWidth: 90, schema: 'numeric' },
   { id: 'entity.attributes.watchlists', displayAsText: 'Watchlists', initialWidth: 200 },
-  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 180 },
-  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
-] as const;
+  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 140 },
+  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 140 },
+] as const satisfies readonly EuiDataGridColumn[];
 
 export type GridColumnId = (typeof COLUMNS)[number]['id'];
 
 /** How the grid sorts and reads each column; columns without a spec are plain entity fields. */
-const QUERY_SPECS: Readonly<Partial<Record<GridColumnId, ColumnQuerySpec>>> = {
+export const QUERY_SPECS: Readonly<Partial<Record<GridColumnId, ColumnQuerySpec>>> = {
   'entity.name': nativeSortQuerySpec,
   group_size: groupSizeQuerySpec,
   'entity.EngineMetadata.Type': nativeSortQuerySpec,
@@ -65,39 +77,46 @@ export const isGridColumnId = (id: string): id is GridColumnId => GRID_COLUMN_ID
 const getQuerySpec = (id: string): ColumnQuerySpec | undefined =>
   isGridColumnId(id) ? QUERY_SPECS[id] : undefined;
 
-export const findSortPageFetcher = (id: string): SortPageFetcher | undefined =>
-  getQuerySpec(id)?.fetchSortPage;
+/** On resolved rows, the page's rows also get their resolved entities' values. */
+export const findSortPageFetcher = (id: string): SortPageFetcher | undefined => {
+  const fetchSortPage = getQuerySpec(id)?.fetchSortPage;
 
-/** Sortable columns with their sort page fetcher, in grid order. */
-export const SORT_PAGE_FETCHERS: ReadonlyArray<[GridColumnId, SortPageFetcher]> = COLUMNS.flatMap(
-  ({ id }) => {
-    const fetchSortPage = QUERY_SPECS[id]?.fetchSortPage;
-    return fetchSortPage ? [[id, fetchSortPage] as [GridColumnId, SortPageFetcher]] : [];
-  }
-);
+  if (!fetchSortPage) return undefined;
 
-/** Columns with an enricher, with the enricher, in grid order. */
-export const COLUMN_ENRICHERS: ReadonlyArray<[GridColumnId, PageEnricher]> = COLUMNS.flatMap(
-  ({ id }) => {
-    const enricher = QUERY_SPECS[id]?.enricher;
-    return enricher ? [[id, enricher] as [GridColumnId, PageEnricher]] : [];
-  }
-);
+  return async (args, ctx) => {
+    const rows = await fetchSortPage(args, ctx);
+    return args.rowsMode === 'resolved' ? withResolvedEntityValues(rows, args, ctx.runQuery) : rows;
+  };
+};
 
 /** Fields the enrichers read; their cells stay blank until the page is enriched. */
 export const ENRICHED_FIELDS: ReadonlySet<string> = new Set(
-  COLUMN_ENRICHERS.flatMap(([, { fields }]) => fields)
+  Object.values(QUERY_SPECS).flatMap((spec) => spec?.enricher?.fields ?? [])
 );
+
+/**
+ * EUI merges these into the header menu's built-in items and keeps their labels, so a click on one
+ * tells which action it was. It types each as a full `EuiListGroupItemProps`, which requires a
+ * `label` that would replace the built-in one, so only the test subjects are passed, cast.
+ */
+export const COLUMN_ACTIONS = {
+  showSortAsc: { 'data-test-subj': 'eaGridColumnSortAsc' },
+  showSortDesc: { 'data-test-subj': 'eaGridColumnSortDesc' },
+  showHide: { 'data-test-subj': 'eaGridColumnHide' },
+  showMoveLeft: { 'data-test-subj': 'eaGridColumnMoveLeft' },
+  showMoveRight: { 'data-test-subj': 'eaGridColumnMoveRight' },
+} as EuiDataGridColumnActions;
 
 const ALL_COLUMNS: readonly EuiDataGridColumn[] = COLUMNS.map((column) => ({
   ...column,
+  actions: COLUMN_ACTIONS,
   isSortable: QUERY_SPECS[column.id]?.fetchSortPage != null,
   isExpandable: false,
   isResizable: false,
 }));
 
 const getColumnsWithout = (...ids: GridColumnId[]): readonly EuiDataGridColumn[] =>
-  ALL_COLUMNS.filter(({ id }) => !(ids as string[]).includes(id));
+  ALL_COLUMNS.filter(({ id }) => !isOneOf(ids, id));
 
 // Resolved rows: entities grouped by identity; shows "Records" count, hides "Resolved to".
 export const RESOLVED_ROWS_COLUMNS = getColumnsWithout(
@@ -113,12 +132,45 @@ export const CHILD_ROWS_COLUMNS = getColumnsWithout(
   'entity.relationships.resolution.resolved_to'
 );
 
-const getEnrichers = (columns: readonly EuiDataGridColumn[]): readonly PageEnricher[] =>
-  columns.flatMap(({ id }) => getQuerySpec(id)?.enricher ?? []);
+/**
+ * Whether the user can read each source the page queries: `undefined` while its check loads, and
+ * `true` when the check fails, so the page still works.
+ */
+export interface ReadAccess {
+  alerts?: boolean;
+  risk?: boolean;
+  anomalies?: boolean;
+  cases?: boolean;
+}
 
-/** Enrichers of the columns each kind of row shows. */
-export const PAGE_ENRICHERS: Readonly<Record<RowsMode | 'child', readonly PageEnricher[]>> = {
-  resolved: getEnrichers(RESOLVED_ROWS_COLUMNS),
-  individual: getEnrichers(INDIVIDUAL_ROWS_COLUMNS),
-  child: getEnrichers(CHILD_ROWS_COLUMNS),
+const SOURCE_COLUMNS: Readonly<Record<keyof ReadAccess, readonly GridColumnId[]>> = {
+  alerts: ['alert_count', 'last_seen_alert'],
+  risk: ['risk_score_change'],
+  anomalies: ['anomaly_count'],
+  cases: ['case_count'],
 };
+
+/** The columns whose sources the user can read; a source still being checked shows none yet. */
+export const getReadableColumns = (
+  columns: readonly EuiDataGridColumn[],
+  readAccess: ReadAccess
+): readonly EuiDataGridColumn[] => {
+  const hidden = (Object.keys(SOURCE_COLUMNS) as Array<keyof ReadAccess>).flatMap((source) =>
+    readAccess[source] ? [] : SOURCE_COLUMNS[source]
+  );
+  return columns.filter(({ id }) => !isOneOf(hidden, id));
+};
+
+const ROWS_MODE_COLUMNS: Readonly<Record<RowsMode, readonly EuiDataGridColumn[]>> = {
+  resolved: RESOLVED_ROWS_COLUMNS,
+  individual: INDIVIDUAL_ROWS_COLUMNS,
+};
+
+/** Enrichers of the columns a view shows, so a column the user can't read runs no query. */
+export const getPageEnrichers = (
+  rowsMode: RowsMode,
+  columnIds: readonly string[]
+): readonly PageEnricher[] =>
+  ROWS_MODE_COLUMNS[rowsMode].flatMap(({ id }) =>
+    columnIds.includes(id) ? getQuerySpec(id)?.enricher ?? [] : []
+  );

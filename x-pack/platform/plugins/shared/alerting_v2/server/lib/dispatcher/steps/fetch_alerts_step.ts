@@ -16,12 +16,15 @@ import type {
 import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { ESQL_QUERY_ROW_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
+import { getDispatchableAlertEventsQuery } from '../queries';
 import { AlertScan } from '../state';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlSubPlanTooLargeError } from '../../errors/esql_sub_plan_too_large_error';
 import { PRE_FETCH_STUCK_ADVANCE_LAG_MS } from '../constants';
+import { ConfigService } from '../../services/config_service/config_service';
+import { buildAlertDetailsUrl } from '../alert_details_url';
+import { KibanaBaseUrlToken } from '../tokens';
 
 interface RawAlert {
   last_event_timestamp: string;
@@ -37,10 +40,15 @@ interface RawAlert {
 @injectable()
 export class FetchAlertsStep implements DispatcherStep {
   public readonly name = 'fetch_alerts';
+  private readonly alertsPerTick: number;
 
   constructor(
-    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
-  ) {}
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
+    @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string,
+    @inject(ConfigService) configService: ConfigService
+  ) {
+    this.alertsPerTick = configService.get('dispatcher.run.alerts.max');
+  }
 
   public async execute(
     state: Readonly<DispatcherPipelineState>,
@@ -52,8 +60,8 @@ export class FetchAlertsStep implements DispatcherStep {
 
     let result: RawAlert[];
     try {
-      result = await this.queryService.executeQueryRows<RawAlert>({
-        query: getDispatchableAlertEventsQuery({ gte, lte }).query,
+      result = await this.queryService.executeQuery<RawAlert>({
+        query: getDispatchableAlertEventsQuery({ gte, lte, limit: this.alertsPerTick }).query,
         // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
         // drop action docs stamped with `now` (after the settle buffer) and
         // break `last_fired` dedup. Event rows are still capped at `lte` inside
@@ -85,9 +93,9 @@ export class FetchAlertsStep implements DispatcherStep {
 
     // Event-row `lte` makes windowEnd a provable watermark advance target:
     // the scan has a defined upper edge to advance to.
-    const truncated = result.length === ESQL_QUERY_ROW_LIMIT;
+    const truncated = result.length === this.alertsPerTick;
 
-    const alerts = parseAlerts(result);
+    const alerts = parseAlerts(result, this.kibanaBaseUrl);
 
     if (alerts.length === 0) {
       return { type: 'halt', reason: 'no_alerts' };
@@ -97,9 +105,14 @@ export class FetchAlertsStep implements DispatcherStep {
   }
 }
 
-export function parseAlerts(raw: RawAlert[]): Alert[] {
+export function parseAlerts(raw: RawAlert[], kibanaBaseUrl: string): Alert[] {
   return raw.map(({ severity, ...rest }) => ({
     ...rest,
     ...(severity ? { severity } : {}),
+    alert_url: buildAlertDetailsUrl({
+      baseUrl: kibanaBaseUrl,
+      spaceId: rest.space_id,
+      alertId: rest.alert_id,
+    }),
   }));
 }

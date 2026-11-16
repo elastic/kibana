@@ -8,7 +8,7 @@
 import { inject, injectable } from 'inversify';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../../services/rules_saved_object_service/tokens';
-import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
+import { savedObjectNamespacesToSpaceId } from '../../saved_object_namespaces_to_space_id';
 import { AlertTriage, RuleCatalog } from '../state';
 import type {
   DispatcherPipelineState,
@@ -39,15 +39,19 @@ export class FetchRulesStep implements DispatcherStep {
       return { type: 'continue', data: { rules: RuleCatalog.empty() } };
     }
 
-    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds);
+    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds, {
+      fields: ['metadata', 'grouping'],
+    });
     const rules = new Map<RuleId, Rule>();
 
     for (const doc of result) {
+      const { metadata, grouping } = doc.attributes;
       rules.set(doc.id, {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
-        name: doc.attributes.metadata.name,
-        routingTags: doc.attributes.metadata.routing_tags ?? [],
+        name: metadata.name,
+        routingTags: metadata.routing_tags ?? [],
+        groupingFields: grouping?.fields ?? [],
       });
     }
 

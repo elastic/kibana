@@ -248,6 +248,33 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
 
     expect(result).toMatchSnapshot();
   });
+
+  describe('with castFields: false', () => {
+    const entityTypes = ['generic', 'host', 'service', 'user'] as const;
+
+    it.each(entityTypes)('references the raw fields, with no cast, for %s', (entityType) => {
+      const result = getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType), {
+        castFields: false,
+      });
+
+      expect(result).not.toMatch(/\bTO_[A-Z]+\(/);
+    });
+
+    it.each(entityTypes)(
+      'is the default filter with only the casts removed for %s',
+      (entityType) => {
+        const definition = getBuiltInEntityDefinition(entityType);
+        const withoutCasts = getEuidEsqlDocumentsContainsIdFilter(definition).replace(
+          /\bTO_[A-Z]+\(([^()]+)\)/g,
+          '$1'
+        );
+
+        expect(getEuidEsqlDocumentsContainsIdFilter(definition, { castFields: false })).toBe(
+          withoutCasts
+        );
+      }
+    );
+  });
 });
 
 describe('getFieldEvaluationsEsql', () => {
@@ -327,7 +354,10 @@ describe('getEuidEsqlEvaluation', () => {
     expect(result).toContain('user_email_present =');
     expect(result).toContain('user_id_present =');
     expect(result).toContain('user_name_present =');
-    expect(result).not.toMatch(/entity\.id.*IS NOT NULL AND/);
+    expect(result).toContain('user_entity_id_present =');
+    // The output column itself never gets a presence check (user.entity.id is an identity field).
+    expect(result).not.toMatch(/\bentity_id_present\b/);
+    expect(result).not.toContain('TO_STRING(entity.id)');
   });
 
   it('honours the outputColumn parameter', () => {

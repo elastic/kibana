@@ -6,6 +6,7 @@
  */
 
 import Semver from 'semver';
+import { omit } from 'lodash';
 import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObject } from '@kbn/core/server';
@@ -19,6 +20,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
 import { createNewAPIKeySet, createRuleSavedObject } from '../../../../rules_client/lib';
+import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { CloneRuleParams } from './types';
@@ -149,13 +151,7 @@ export async function cloneRule<Params extends RuleParams = never>(
   });
 
   // remove API key attributes from rule SO
-  const {
-    apiKey: _sourceApiKey,
-    apiKeyOwner: _sourceApiKeyOwner,
-    apiKeyCreatedByUser: _sourceApiKeyCreatedByUser,
-    uiamApiKey: _sourceUiamApiKey,
-    ...sourceAttributes
-  } = ruleSavedObject.attributes;
+  const sourceAttributes = omit(ruleSavedObject.attributes, API_KEY_ATTRIBUTES_TO_STRIP);
 
   const ruleAttributes: RawRule = {
     ...sourceAttributes,

@@ -104,6 +104,7 @@ describe('KibanaActionStepImpl', () => {
     };
     contextManager = {
       renderValueAccordingToContext: jest.fn((value) => value),
+      renderObjectAccordingToContextAsync: jest.fn(async (value) => value),
       getWorkflowSpaceId: jest.fn().mockReturnValue('default'),
       callKibanaApi: jest.fn().mockResolvedValue({
         status: 200,
@@ -134,6 +135,7 @@ describe('KibanaActionStepImpl', () => {
     runtime = {
       contextManager,
       abortController: new AbortController(),
+      getStepTimeoutMs: jest.fn(),
     } as unknown as StepExecutionRuntime;
   });
 
@@ -190,6 +192,15 @@ describe('KibanaActionStepImpl', () => {
           signal: runtime.abortController.signal,
           timeout: 300_000,
         })
+      );
+    });
+
+    it('uses the step timeout as the headers timeout when set', async () => {
+      jest.mocked(runtime.getStepTimeoutMs).mockReturnValue(600_000);
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ timeout: 600_000 })
       );
     });
 
@@ -525,6 +536,59 @@ describe('KibanaActionStepImpl', () => {
       expect(requestBody.title).toBe('Test');
       expect(requestBody.description).toBe('Test Description');
       expect(requestBody.owner).toBe('securitySolution');
+    });
+
+    it('bounds the fetch by the step abort signal', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect(fetchOptions.signal).toBe(runtime.abortController.signal);
+    });
+
+    it('uses a step timeout above 300s as the Agent headers timeout', async () => {
+      const { Agent } = await import('undici');
+      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      MockedAgent.mockClear();
+
+      jest.mocked(runtime.getStepTimeoutMs).mockReturnValue(600_000);
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+
+      expect(MockedAgent).toHaveBeenCalledWith({ headersTimeout: 600_000 });
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect((fetchOptions as any).dispatcher).toBeDefined();
+    });
+
+    it('does not create an Agent for a step timeout of 300s or less', async () => {
+      const { Agent } = await import('undici');
+      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      MockedAgent.mockClear();
+
+      jest.mocked(runtime.getStepTimeoutMs).mockReturnValue(60_000);
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+
+      expect(MockedAgent).not.toHaveBeenCalled();
+    });
+
+    it('lets fetcher options override the step headers timeout', async () => {
+      const { Agent } = await import('undici');
+      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      MockedAgent.mockClear();
+
+      jest.mocked(runtime.getStepTimeoutMs).mockReturnValue(600_000);
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { headersTimeout: 1000, skip_ssl_verification: true },
+      });
+      await (step as any)._run();
+
+      expect(MockedAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headersTimeout: 1000,
+          connect: expect.objectContaining({ rejectUnauthorized: false }),
+        })
+      );
     });
 
     it('works without fetcher options and does not attach a dispatcher', async () => {
@@ -1018,6 +1082,22 @@ describe('KibanaActionStepImpl', () => {
       );
       expect(contextManager.callKibanaApi).toHaveBeenCalled();
       expect(global.fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getInput', () => {
+    it('renders `with` with the async renderer', async () => {
+      const withValue = { method: 'GET', path: '/api/{{ inputs.id }}' };
+      contextManager.renderObjectAccordingToContextAsync.mockResolvedValue({
+        method: 'GET',
+        path: '/api/1',
+      });
+
+      await expect(createStep(withValue).getInput()).resolves.toEqual({
+        method: 'GET',
+        path: '/api/1',
+      });
+      expect(contextManager.renderObjectAccordingToContextAsync).toHaveBeenCalledWith(withValue);
     });
   });
 });

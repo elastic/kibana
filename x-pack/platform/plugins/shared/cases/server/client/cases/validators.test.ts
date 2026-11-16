@@ -990,7 +990,7 @@ describe('validators', () => {
         })
       ).resolves.toBeUndefined();
 
-      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original', undefined, {
+      expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original', '1', {
         includeDeleted: true,
       });
     });

@@ -20,14 +20,20 @@ export const RunStepTypeId = 'security.attack-discovery.run';
 /**
  * Input schema for the Run step.
  *
- * All fields are optional. When `connector_id` is omitted, the server resolves
- * `feature_id` if given, then the configured default AI connector
+ * All fields are optional. When `connector_id` is omitted, the server tries
+ * each `feature_id` in order, then the configured default AI connector
  * (`genAiSettings:defaultAIConnector`, with an `inference.getDefaultConnector`
  * fallback). Provide `connector_id` to override both.
  */
 export const RunStepInputSchema = lazySchema(() =>
   z.object({
     additional_context: z.string().optional(),
+    /**
+     * Parent feature id the generation model calls' token usage also aggregates
+     * under. Only meaningful with `plugin_id`, which names the caller; omit both
+     * to leave the calls untagged.
+     */
+    aggregate_by: z.string().max(256).optional(),
     alert_retrieval_mode: z
       .enum(['custom_only', 'custom_query', 'esql', 'provided'])
       .optional()
@@ -38,18 +44,39 @@ export const RunStepInputSchema = lazySchema(() =>
     end: z.string().optional(),
     esql_query: z.string().optional(),
     /**
-     * Model Management > Feature settings feature id whose configured model this
-     * run should use. Lets a caller pick a tier without naming an endpoint, so a
-     * leaf step can state its own tier rather than having a `connector_id`
-     * threaded down to it through `workflow.execute` inputs.
+     * Model Management > Feature settings feature id, or an ordered list of them,
+     * whose configured model this run should use. Lets a caller pick a tier
+     * without naming an endpoint, so a leaf step can state its own tier rather
+     * than having a `connector_id` threaded down to it through `workflow.execute`
+     * inputs.
      *
-     * Consulted only when `connector_id` is omitted, and skipped when the id is
-     * not a registered `chat_completion` feature — resolution then continues to
-     * the configured default, which is what happens when the plugin owning the
+     * Consulted only when `connector_id` is omitted. Each id is tried in order
+     * and the first registered `chat_completion` feature with a configured model
+     * wins. An id that is not registered, or that resolves no connector, is
+     * skipped — resolution then continues to the next id and finally the
+     * configured default, which is what happens when the plugin owning the
      * feature is disabled.
      */
-    feature_id: z.string().max(256).optional(),
+    feature_id: z.union([z.string().max(256), z.array(z.string().max(256)).max(8)]).optional(),
     filter: z.record(z.string(), z.unknown()).optional(),
+    /**
+     * Identifies the producer of these attacks. Contributes to the attack hash,
+     * so attacks from one producer never deduplicate against another producer's
+     * attacks built from the same alerts. Omit for Kibana Attack Discovery, whose
+     * existing hashes must not change.
+     */
+    generation_source: z.string().max(256).optional(),
+    /**
+     * Whether the generation-phase ground-truth gate runs. Defaults to `true`.
+     *
+     * The gate runs the Attack Discovery skill to corroborate the candidate
+     * alerts against raw telemetry and entity context, and hands its findings,
+     * including false-positive triage, to the generation prompt. Set `false`
+     * when a later step in the workflow owns the false-positive decision, so
+     * generation does not drop a chain on the gate's triage first. `false` also
+     * disables the skill's own additional alert retrieval.
+     */
+    ground_truth_gate_enabled: z.boolean().optional().default(true),
     /**
      * Whether the generated discoveries are returned inline. Defaults to `true`.
      *
@@ -62,6 +89,12 @@ export const RunStepInputSchema = lazySchema(() =>
      */
     include_attack_discoveries: z.boolean().optional().default(true),
     mode: z.enum(['async', 'sync']).optional().default('sync'),
+    /**
+     * Token-usage attribution (`feature_id` in the token-usage index) for the
+     * generation model calls, so a caller can see this run's cost under its own
+     * name. Unset by default, which leaves the calls untagged.
+     */
+    plugin_id: z.string().max(256).optional(),
     size: z.number().int().optional().default(100),
     start: z.string().optional(),
     validation_workflow_id: z.string().optional().default(''),

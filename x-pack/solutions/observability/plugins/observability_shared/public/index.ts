@@ -51,9 +51,10 @@ export { TechnicalPreviewBadge } from './components/technical_preview_badge/tech
 export { InspectorContextProvider } from './contexts/inspector/inspector_context';
 export type { AddInspectorRequest } from './contexts/inspector/inspector_context';
 export { useInspectorContext } from './contexts/inspector/use_inspector_context';
+export { ProfilingSchemaStateProvider } from './contexts/profiling_schema_state/profiling_schema_state_context';
+export { useProfilingSchemaState } from './contexts/profiling_schema_state/use_profiling_schema_state';
 
 export { useTheme } from './hooks/use_theme';
-export { useEditableSettings } from './hooks/use_editable_settings';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
 export { useValuesList } from './hooks/use_values_list';
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
@@ -96,12 +97,15 @@ export {
 export {
   EMBEDDABLE_FLAMEGRAPH,
   EMBEDDABLE_FUNCTIONS,
+  EMBEDDABLE_PROFILING_SCHEMA_SELECTOR,
   EMBEDDABLE_PROFILING_SEARCH_BAR,
   EMBEDDABLE_STACK_TRACES,
   EmbeddableFlamegraph,
   EmbeddableFunctions,
+  EmbeddableProfilingSchemaSelector,
   EmbeddableProfilingSearchBar,
   EmbeddableStackTraces,
+  type EmbeddableProfilingSchemaSelectorProps,
   type EmbeddableProfilingSearchBarProps,
 } from './components/profiling/embeddables';
 

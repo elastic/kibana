@@ -55,8 +55,34 @@ describe('restart handlers', () => {
         mockResponse
       );
 
-      expect(AgentService.restartAgent).toHaveBeenCalledWith(esClientMock, soClientMock, 'agent-1');
+      expect(AgentService.restartAgent).toHaveBeenCalledWith(
+        esClientMock,
+        soClientMock,
+        'agent-1',
+        {
+          force: undefined,
+        }
+      );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { actionId: 'action-abc' } });
+    });
+
+    it('passes force to the restart service', async () => {
+      (AgentService.restartAgent as jest.Mock).mockResolvedValue({ actionId: 'action-abc' });
+
+      await restartAgentHandler(
+        mockContext,
+        { params: { agentId: 'agent-1' }, body: { force: true } } as any,
+        mockResponse
+      );
+
+      expect(AgentService.restartAgent).toHaveBeenCalledWith(
+        esClientMock,
+        soClientMock,
+        'agent-1',
+        {
+          force: true,
+        }
+      );
     });
 
     it('propagates FleetError (version unsupported) to the fleet router error handler', async () => {

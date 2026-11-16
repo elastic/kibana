@@ -111,6 +111,27 @@ const pathLookupCases: Array<{
     ],
   },
   {
+    name: 'resolves linux.ransomware.mode as a writable protection field',
+    path: 'linux.ransomware.mode',
+    expected: {
+      found: true,
+      match: 'exact',
+      path: 'linux.ransomware.mode',
+      writable: true,
+      acceptedValues: { type: 'enum', values: ['detect', 'prevent', 'off'] },
+    },
+  },
+  {
+    name: 'expands the ransomware protection key to every OS including Linux',
+    path: 'ransomware.mode',
+    expected: {
+      found: true,
+      match: 'protection_key_path',
+      path: 'ransomware.mode',
+    },
+    entryPaths: ['windows.ransomware.mode', 'mac.ransomware.mode', 'linux.ransomware.mode'],
+  },
+  {
     name: 'returns the four accepted values for usb_storage',
     path: 'windows.device_control.usb_storage',
     expected: {

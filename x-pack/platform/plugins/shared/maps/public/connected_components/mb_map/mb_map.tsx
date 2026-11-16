@@ -88,6 +88,7 @@ export interface Props {
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
   renderTooltipContent?: RenderToolTipContent;
+  isInteractive?: boolean;
   timeslice?: Timeslice;
   featureModeActive: boolean;
   filterModeActive: boolean;
@@ -474,10 +475,12 @@ export class MbMap extends Component<Props> {
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
           mbMap={this._mbMap}
-          addFilters={this.props.addFilters}
-          getFilterActions={this.props.getFilterActions}
-          getActionContext={this.props.getActionContext}
-          onSingleValueTrigger={this.props.onSingleValueTrigger}
+          addFilters={this.props.isInteractive ? this.props.addFilters : null}
+          getFilterActions={this.props.isInteractive ? this.props.getFilterActions : undefined}
+          getActionContext={this.props.isInteractive ? this.props.getActionContext : undefined}
+          onSingleValueTrigger={
+            this.props.isInteractive ? this.props.onSingleValueTrigger : undefined
+          }
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
@@ -496,10 +499,14 @@ export class MbMap extends Component<Props> {
         ref={this._setContainerRef}
         data-test-subj="mapContainer"
       >
-        {drawFilterControl}
-        {drawFeatureControl}
-        {keydownScrollZoomControl}
-        {scaleControl}
+        {this.props.isInteractive && (
+          <>
+            {drawFilterControl}
+            {drawFeatureControl}
+            {keydownScrollZoomControl}
+            {scaleControl}
+          </>
+        )}
         {tooltipControl}
         {tileStatusTrackerControl}
       </div>

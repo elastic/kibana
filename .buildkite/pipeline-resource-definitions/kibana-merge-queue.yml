@@ -26,6 +26,7 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_ALL_BRANCHES: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
+        SCOUT_TEST_RUN_SCOPE: 'merge-queue'
       allow_rebuilds: true
       branch_configuration: gh-readonly-queue/* gh-readonly-queue/*/*
       default_branch: main

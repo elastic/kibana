@@ -134,8 +134,8 @@ const getAlertIds = (attachment: AttachmentRequestV2): string[] | null => {
   return null;
 };
 
-const toAlertIdSet = (alertIdsByAttachmentId: Map<string, string[]>): Set<string> =>
-  new Set([...alertIdsByAttachmentId.values()].flat());
+const toAlertIdSet = (alertIdsByCommentId: Map<string, string[]>): Set<string> =>
+  new Set([...alertIdsByCommentId.values()].flat());
 
 /**
  * Rebuilds the alert ids on the case at the latest push. Relies on every comment
@@ -149,15 +149,14 @@ const getAlertIdsAtLatestPush = (
     return new Set();
   }
 
-  const alertIdsByAttachmentId = new Map<string, string[]>();
+  const alertIdsByCommentId = new Map<string, string[]>();
 
   for (const userAction of userActions.slice(0, latestPushInfo.index)) {
-    const { comment_id: attachmentId } = userAction;
-    const isAttachmentUserAction =
-      userAction.type === UserActionTypes.comment && attachmentId != null;
+    const { comment_id: commentId } = userAction;
+    const isAttachmentUserAction = userAction.type === UserActionTypes.comment && commentId != null;
 
     if (isAttachmentUserAction && userAction.action === UserActionActions.delete) {
-      alertIdsByAttachmentId.delete(attachmentId);
+      alertIdsByCommentId.delete(commentId);
     } else if (
       isAttachmentUserAction &&
       isCommentUserAction(userAction) &&
@@ -169,17 +168,17 @@ const getAlertIdsAtLatestPush = (
         // Older bulk create user actions logged the request before dedupe, so drop ids already on the case.
         const alertIdsOnCase =
           userAction.action === UserActionActions.create
-            ? toAlertIdSet(alertIdsByAttachmentId)
+            ? toAlertIdSet(alertIdsByCommentId)
             : new Set<string>();
-        alertIdsByAttachmentId.set(
-          attachmentId,
+        alertIdsByCommentId.set(
+          commentId,
           alertIds.filter((id) => !alertIdsOnCase.has(id))
         );
       }
     }
   }
 
-  return toAlertIdSet(alertIdsByAttachmentId);
+  return toAlertIdSet(alertIdsByCommentId);
 };
 
 const getAlertsDelta = ({

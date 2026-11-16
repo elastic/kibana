@@ -1,0 +1,118 @@
+# DENSE-VECTOR
+
+The `DENSE_VECTOR` command generates vector embeddings from one or more `text` or `keyword` columns. It embeds each row independently through an inference endpoint and appends the resulting `dense_vector` columns to the query output. You can embed indexed or computed text, or base64-encoded image data.
+
+## Syntax
+
+`DENSE_VECTOR <input_column> [, <input_column>, ...] [WITH { <options> }]`
+
+`DENSE_VECTOR <output_column> = <input_column> [WITH { <options> }]`
+
+`DENSE_VECTOR suffix = "<suffix>" ON <input_column> [, <input_column>, ...] [WITH { <options> }]`
+
+### Parameters
+
+#### `input_column`
+
+One or more comma-separated `text` or `keyword` columns to embed. For image input, the column must contain a base64-encoded image data URI. A non-string column is rejected before execution. If a value is `null`, the generated vector is also `null`.
+
+#### `output_column`
+
+Optional. The name of the generated column. You can specify an output column name only when embedding one input column. If the name matches an existing column, the generated column replaces it.
+
+#### `suffix`
+
+Optional. A quoted string appended to each input column name. For example, `DENSE_VECTOR suffix = "_dv" ON title, body` produces `title_dv` and `body_dv`. You can use a suffix with one or more input columns. Without a naming clause, output columns use the name `<input_column>_dense_vector`.
+
+#### `inference_id`
+
+Optional. The ID of the inference endpoint used to embed the input. If omitted, `DENSE_VECTOR` selects a default text embedding endpoint.
+
+#### `type`
+
+Optional. The input modality. Accepts `text` (default) or `image`. An `image` input is a base64 data URI embedded through a multimodal endpoint.
+
+#### `timeout`
+
+Optional. Timeout for the inference request, for example `"30s"` or `"1m"`. If not specified, the default inference timeout applies.
+
+## Examples
+
+Embed a `title` text column and add a `title_dense_vector` output column:
+
+```esql
+FROM books
+| WHERE book_no IN ("7480", "8605")
+| DENSE_VECTOR title WITH { "inference_id" : "test_dense_inference" }
+| SORT book_no
+| KEEP book_no, title, title_dense_vector
+```
+
+Embed multiple text columns with one `DENSE_VECTOR` command:
+
+```esql
+FROM books
+| WHERE book_no IN ("7480", "8605")
+| DENSE_VECTOR title, publisher WITH { "inference_id" : "test_dense_inference" }
+| SORT book_no
+| KEEP book_no, title, publisher, title_dense_vector, publisher_dense_vector
+```
+
+Specify `book_vector` as the generated output column name:
+
+```esql
+FROM books
+| WHERE book_no IN ("7480", "8605")
+| DENSE_VECTOR book_vector = title WITH { "inference_id" : "test_dense_inference" }
+| SORT book_no
+| KEEP book_no, title, book_vector
+```
+
+
+Apply `_vec` as the suffix for generated vector columns:
+
+```esql
+FROM books
+| WHERE book_no IN ("7480", "8605")
+| DENSE_VECTOR suffix = "_vec" ON title, publisher WITH { "inference_id" : "test_dense_inference" }
+| SORT book_no
+| KEEP book_no, title_vec, publisher_vec
+```
+
+Embed a computed `description` column created with `EVAL`:
+
+```esql
+FROM books
+| WHERE book_no IN ("7480", "8605")
+| EVAL description = CONCAT(title, " (", publisher, ")")
+| DENSE_VECTOR description WITH { "inference_id" : "test_dense_inference" }
+| SORT book_no
+| KEEP book_no, description, description_dense_vector
+```
+
+Diversify generated vector results with `MMR`:
+
+```esql
+FROM books
+| DENSE_VECTOR title WITH { "inference_id" : "test_dense_inference" }
+| SORT book_no
+| LIMIT 10
+| MMR ON title_dense_vector LIMIT 3
+| KEEP book_no, title
+```
+
+Embed a base64-encoded image data URI with a multimodal endpoint:
+
+```esql
+ROW input = "data:image/jpeg;base64,V2hvIGlzIFZpY3RvciBIdWdvPw=="
+| DENSE_VECTOR input WITH { "inference_id" : "test_embedding_inference", "type" : "image" }
+```
+
+
+## Limitations
+
+For a multivalued input column, `DENSE_VECTOR` embeds only the first value and reports a warning for the discarded values. The first value depends on how the column is loaded. To select the value explicitly, reduce the column first with a function such as `MV_FIRST`.
+
+For image input, no default image endpoint is available, so you must specify `inference_id`.
+
+By default, `esql.command.dense_vector.limit` sets the maximum number of input rows processed by the command to `1000`. The command can also be disabled with `esql.command.dense_vector.enabled`.

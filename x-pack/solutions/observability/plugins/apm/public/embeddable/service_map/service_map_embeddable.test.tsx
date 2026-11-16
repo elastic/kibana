@@ -21,6 +21,20 @@ import { LicenseContext } from '../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
 import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
 
+const mockServiceMapGraph = jest.fn();
+jest.mock('../../components/app/service_map/graph', () => ({
+  ServiceMapGraph: (props: Record<string, unknown>) => {
+    mockServiceMapGraph(props);
+    return (
+      <>
+        {props.fullMapHref ? <a href={props.fullMapHref as string}>View in Service map</a> : null}
+        <button data-test-subj="serviceMapFitViewButton">Fit view</button>
+      </>
+    );
+  },
+  ContextualServiceMapGraph: () => null,
+}));
+
 jest.mock('../../context/time_range_metadata/time_range_metadata_context', () => {
   const actual = jest.requireActual(
     '../../context/time_range_metadata/time_range_metadata_context'
@@ -578,6 +592,37 @@ describe('ServiceMapEmbeddable', () => {
       });
       renderEmbeddable({ onRendered });
       expect(onRendered).toHaveBeenCalledWith(true);
+    });
+  });
+
+  describe('non-interactive mode', () => {
+    const dataWithNodes = {
+      nodes: [
+        {
+          id: 'node-1',
+          data: { id: 'node-1', label: 'service-a', isService: true as const },
+          position: { x: 0, y: 0 },
+          type: 'service',
+        },
+      ],
+      edges: [],
+      nodesCount: 1,
+      tracesCount: 10,
+    };
+
+    beforeEach(() => {
+      mockServiceMapGraph.mockClear();
+      mockUseServiceMap.mockReturnValue({
+        data: dataWithNodes,
+        status: FETCH_STATUS.SUCCESS,
+      });
+    });
+
+    it('passes isInteractive=false to ServiceMapGraph when viewMode is non-interactive', () => {
+      renderEmbeddable({ viewMode: 'non-interactive' });
+
+      const lastProps = mockServiceMapGraph.mock.calls.at(-1)?.[0];
+      expect(lastProps?.isInteractive).toBe(false);
     });
   });
 });

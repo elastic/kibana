@@ -29,6 +29,7 @@ class MockControlGroupRendererApi {
   } | null>;
   esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
   addNewPanel: jest.Mock;
+  removePanel = jest.fn();
 
   constructor() {
     this.inputSubject = new BehaviorSubject<{
@@ -331,6 +332,26 @@ describe('useESQLVariables', () => {
       });
 
       expect(getInputSpy.mock.calls.length).toBe(getInputCallsBeforeVariableRerender);
+    });
+
+    it.each([undefined, {}])('removes controls absent after a reset to %p', async (controls) => {
+      const { toolkit } = await renderUseESQLVariables({});
+      mockControlGroupAPI.updateInput.mockImplementation(() => {});
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({ initialChildControlState: mockControlState });
+      });
+
+      act(() => {
+        toolkit.internalState.dispatch(
+          internalStateActions.updateAttributes({
+            tabId: toolkit.getCurrentTab().id,
+            attributes: { controlGroupState: controls },
+          })
+        );
+      });
+
+      expect(mockControlGroupAPI.removePanel).toHaveBeenCalledWith('panel1');
     });
 
     it('should reset control panels when tab attributes change', async () => {

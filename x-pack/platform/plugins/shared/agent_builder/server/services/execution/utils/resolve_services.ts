@@ -13,45 +13,84 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import { createAgentNotFoundError, isAgentNotFoundError } from '@kbn/agent-builder-common';
+import type { ModelProvider, ModelSource } from '@kbn/agent-builder-server/runner';
 import type { AgentRegistry, AgentsServiceStart } from '../../agents';
 import { createModelProvider } from '../runner/model_provider';
-import { resolveExecutionConnectorId } from './resolve_execution_connector_id';
 
-const getAgentInferenceFeatureId = async ({
+export interface ResolvedServices {
+  modelProvider: ModelProvider;
+  /** Where the run's default model comes from; `undefined` leaves the provider's own default. */
+  defaultModel?: ModelSource;
+}
+
+const getAgentConfiguration = async ({
   agentRegistry,
   agentId,
-  connectorId,
+  runAs,
 }: {
   agentRegistry: AgentRegistry;
   agentId: string;
-  connectorId?: string;
-}): Promise<string | undefined> => {
-  const notFoundError = () =>
-    createAgentNotFoundError({
-      agentId,
-      customMessage: `Agent "${agentId}" not found or not available`,
-    });
-
-  if (connectorId !== undefined) {
-    if (!(await agentRegistry.has(agentId))) {
-      throw notFoundError();
-    }
-    return undefined;
-  }
-
+  runAs?: string;
+}): Promise<AgentConfiguration> => {
   try {
-    const agent = await agentRegistry.get(agentId);
-    return agent.configuration.inference_feature_id;
+    const { configuration } =
+      runAs !== undefined
+        ? await agentRegistry.get(agentId, { runAs })
+        : await agentRegistry.get(agentId);
+    return configuration;
   } catch (error) {
-    throw isAgentNotFoundError(error) ? notFoundError() : error;
+    throw isAgentNotFoundError(error)
+      ? createAgentNotFoundError({
+          agentId,
+          customMessage: `Agent "${agentId}" not found or not available`,
+        })
+      : error;
   }
 };
 
+/**
+ * Decides where the default model of a run comes from, using the first of:
+ * 1. The connector requested by the caller.
+ * 2. The inference feature the execution was given (`inferenceFeatureId`).
+ * 3. The inference feature the agent declares.
+ * Returns `undefined` when none applies, leaving the provider on the Agent Builder default.
+ */
+const selectModelSource = ({
+  connectorId,
+  inferenceFeatureId,
+  agentInferenceFeatureId,
+}: {
+  connectorId?: string;
+  inferenceFeatureId?: string;
+  agentInferenceFeatureId?: string;
+}): ModelSource | undefined => {
+  if (connectorId !== undefined) {
+    return { connectorId };
+  }
+  const featureId = inferenceFeatureId ?? agentInferenceFeatureId;
+  return featureId !== undefined ? { featureId } : undefined;
+};
+
+/**
+ * Resolves the model provider an agent execution runs with, and the model source it was built
+ * from. No connector is resolved here: a feature source is handed to the inference plugin as is,
+ * and a run with no source fails at its first model use when no default endpoint is available.
+ *
+ * @param connectorId - Connector requested by the caller. When set, inference features are ignored.
+ * @param inferenceFeatureId - Inference feature the execution was given; overrides the agent's.
+ * @param runAs - Service account the execution runs as; see `GetAgentOptions.runAs`.
+ * @returns The model provider and the model source the run uses.
+ * @throws {AgentBuilderError} with code `agentNotFound` when the agent does not exist or the
+ * caller cannot access it.
+ */
 export const resolveServices = async ({
   agentId,
   connectorId,
+  inferenceFeatureId,
   telemetryMetadata,
+  runAs,
   request,
   logger,
   inference,
@@ -63,7 +102,9 @@ export const resolveServices = async ({
 }: {
   agentId: string;
   connectorId?: string;
+  inferenceFeatureId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  runAs?: string;
   request: KibanaRequest;
   logger: Logger;
   inference: InferenceServerStart;
@@ -72,35 +113,25 @@ export const resolveServices = async ({
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
-}) => {
+}): Promise<ResolvedServices> => {
+  // Always loaded, so an unavailable agent fails with `agentNotFound` even when a connector is passed.
   const agentRegistry = await agentService.getRegistry({ request });
-  const inferenceFeatureId = await getAgentInferenceFeatureId({
+  const { inference_feature_id: agentInferenceFeatureId } = await getAgentConfiguration({
     agentRegistry,
     agentId,
-    connectorId,
+    runAs,
   });
 
-  const { connectorId: selectedConnectorId, source } = await resolveExecutionConnectorId({
+  const defaultModel = selectModelSource({
     connectorId,
     inferenceFeatureId,
-    request,
-    searchInferenceEndpoints,
+    agentInferenceFeatureId,
   });
-
-  if (inferenceFeatureId !== undefined && source === 'default') {
-    logger.warn(
-      `No model available for inference feature "${inferenceFeatureId}" declared by agent "${agentId}", falling back to the default model`
-    );
-  }
-
-  if (!selectedConnectorId) {
-    throw new Error('No connector available for chat execution');
-  }
 
   const modelProvider = createModelProvider({
     inference,
     request,
-    defaultConnectorId: selectedConnectorId,
+    defaultModel,
     telemetryMetadata,
     logger,
     searchInferenceEndpoints,
@@ -111,6 +142,6 @@ export const resolveServices = async ({
 
   return {
     modelProvider,
-    selectedConnectorId,
+    defaultModel,
   };
 };

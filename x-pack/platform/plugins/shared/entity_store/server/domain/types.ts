@@ -53,6 +53,8 @@ export interface GetStatusSuccessResult {
   logsExtractionConfig: LogExtractionConfig;
   /** Config in effect per entity type, keyed by the types with an installed engine. */
   logsExtractionConfigByType: Partial<Record<EntityType, LogExtractionConfig>>;
+  /** Non-priority config, keyed by the types that run a non-priority process. */
+  nonPriorityLogsExtractionConfigByType: Partial<Record<EntityType, LogExtractionConfig>>;
   excludedUserNames: string[];
 }
 

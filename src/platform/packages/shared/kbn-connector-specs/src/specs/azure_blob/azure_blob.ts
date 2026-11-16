@@ -25,6 +25,8 @@ const AZURE_BLOB_API_VERSION = '2021-06-08';
 const MAX_CONTAINER_NAME_LENGTH = 63;
 const MAX_BLOB_NAME_LENGTH = 1024;
 const MAX_MARKER_LENGTH = 2048;
+// Azure returns at most 5000 items per page and rejects maxresults below 1.
+const MAX_RESULTS = 5000;
 
 function encodePathSegment(segment: string): string {
   return encodeURIComponent(segment).replace(/%2F/gi, '/');
@@ -126,7 +128,7 @@ export const AzureBlob: ConnectorSpec = {
   metadata: {
     id: '.azure-blob',
     displayName: 'Azure Blob Storage',
-    description: i18n.translate('core.kibanaConnectorSpecs.azureBlob.metadata.description', {
+    description: i18n.translate('connectorSpecs.azureBlob.metadata.description', {
       defaultMessage:
         'Connect to Azure Blob Storage to list containers and blobs, and retrieve blob content.',
     }),
@@ -148,23 +150,20 @@ export const AzureBlob: ConnectorSpec = {
         .string()
         .min(1)
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.azureBlob.config.accountUrl.description', {
+          i18n.translate('connectorSpecs.azureBlob.config.accountUrl.description', {
             defaultMessage: 'Azure Blob Storage account URL',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.azureBlob.config.accountUrl.label', {
+          label: i18n.translate('connectorSpecs.azureBlob.config.accountUrl.label', {
             defaultMessage: 'Storage account URL',
           }),
           placeholder: 'https://myaccount.blob.core.windows.net',
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.azureBlob.config.accountUrl.helpText',
-            {
-              defaultMessage:
-                'The blob service endpoint, for example https://myaccount.blob.core.windows.net.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.azureBlob.config.accountUrl.helpText', {
+            defaultMessage:
+              'The blob service endpoint, for example https://myaccount.blob.core.windows.net.',
+          }),
         }),
     })
   ),
@@ -186,6 +185,9 @@ export const AzureBlob: ConnectorSpec = {
             ),
           maxresults: z
             .number()
+            .int()
+            .min(1)
+            .max(MAX_RESULTS)
             .optional()
             .describe('Maximum number of containers to return. Omit to use the service default.'),
           marker: z
@@ -237,6 +239,9 @@ export const AzureBlob: ConnectorSpec = {
             ),
           maxresults: z
             .number()
+            .int()
+            .min(1)
+            .max(MAX_RESULTS)
             .optional()
             .describe('Maximum number of blobs to return. Omit to use the service default.'),
           marker: z
@@ -370,7 +375,7 @@ export const AzureBlob: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.azureBlob.test.description', {
+    description: i18n.translate('connectorSpecs.azureBlob.test.description', {
       defaultMessage: 'Verifies Azure Blob connection by listing containers with maxresults=1',
     }),
     handler: async (ctx) => {

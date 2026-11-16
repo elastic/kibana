@@ -66,8 +66,8 @@ Fallback lane nodes render and are fully positioned. They do not yet have ports 
 | Package | Role in authoring |
 |---|---|
 | `@kbn/workflows` (`graph_layout/`) | Logical graph construction; `visitStepChildSlots` (shared traversal); topology fingerprint |
-| `@kbn/dag-layout` | Dagre wrapper; `dagLayout`, `DagPositionedNode`, `DagPositionedEdge`; `separatePositionedOverlapsInPlace` (PAVA overlap repair) |
-| `@kbn/workflows-ui` | ReactFlow rendering; post-dagre positioning pipeline (`enforce_lane_order.ts`, `workflow_layout_pipeline.ts`); `WorkflowGraphEditActions` seam; `port_geometry.ts` |
+| `@kbn/dag-layout` | Dagre wrapper; `dagLayout`, `DagPositionedNode`, `DagPositionedEdge`; `separatePositionedOverlapsInPlace` (PAVA overlap repair; no longer used by the pipeline) |
+| `@kbn/workflows-ui` | ReactFlow rendering; structure-driven cross-axis packing after `dagLayout` (`pack_workflow_structure.ts`, `workflow_layout_pipeline.ts`; ADR-0013); `WorkflowGraphEditActions` seam; `port_geometry.ts` |
 | `@kbn/workflows-yaml` (`lib/yaml_edit`) | YAML AST utilities; `getStepNode`, `buildWorkflowLookup` |
 | `workflows_management` | Redux store; snippet mutation path; `insertStepSnippet`; `WorkflowVisualEditor` |
 
@@ -96,7 +96,7 @@ The mutation source is always `selectYamlString`, never `selectEditorYaml`. On t
 
 See [`@kbn/workflows/CONTEXT.md`](../../../../packages/shared/kbn-workflows/CONTEXT.md) for the canonical glossary. Key terms:
 
-- **lane** — the cross-axis extent of one child slot's steps; declaration order is the invariant enforced post-dagre
+- **lane** — the cross-axis extent of one child slot's steps; declaration order is the invariant enforced by the cross-axis packer (ADR-0013)
 - **port** — the interactive attachment point (affordance), not the ReactFlow `Handle` primitive
 - **fallback steps** — steps under `on-failure.fallback`; not "error handling steps"
 - **fallback lane** — the placed row/column of fallback steps; not "error branch"

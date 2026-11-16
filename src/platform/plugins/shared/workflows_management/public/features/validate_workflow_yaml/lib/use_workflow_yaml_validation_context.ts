@@ -23,6 +23,7 @@ import {
   selectWorkflow,
   selectWorkflows,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { getCalledWorkflowOutputs } from '../../../entities/workflows/store/workflow_detail/utils/get_called_workflow_outputs';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
 
@@ -48,12 +49,15 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const { application, http, data, licensing, featureFlags, workflowsExtensions } =
     useKibana().services;
   const registry = useMemo(
-    () => createWorkflowContextRegistry(workflowsExtensions),
-    [workflowsExtensions]
+    () =>
+      createWorkflowContextRegistry(workflowsExtensions, (workflowId) =>
+        getCalledWorkflowOutputs(workflows, workflowId)
+      ),
+    [workflows, workflowsExtensions]
   );
   const warnIgnoredKibanaFetcher = featureFlags.useBooleanValue(
     WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
-    false
+    true
   );
   const esqlCallbacks = useWorkflowEsqlCallbacks({
     http,
@@ -102,7 +106,7 @@ export const getWorkflowYamlValidationContextError = (
 ): Error | null =>
   context.connectorTypes.status === 'failed'
     ? new Error(
-        i18n.translate('workflowsManagement.validation.connectorMetadataUnavailable', {
+        i18n.translate('workflows.validation.connectorMetadataUnavailable', {
           defaultMessage: 'Validation unavailable: connectors failed to load',
         }),
         // The underlying reason is usually generic transport text ("Failed to fetch"), so it

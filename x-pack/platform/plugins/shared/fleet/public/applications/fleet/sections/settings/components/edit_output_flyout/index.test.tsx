@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor, within } from '@testing-library/react';
 
 import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -15,7 +15,9 @@ import { ExperimentalFeaturesService } from '../../../../../../services';
 import {
   useStartServices,
   useKafkaAuthMethods,
+  useOtlpOutputEnabled,
   sendPutOutput,
+  sendPostOutput,
   licenseService,
 } from '../../../../hooks';
 
@@ -45,7 +47,9 @@ jest.mock('../../../../hooks', () => {
     useBreadcrumbs: jest.fn(),
     useStartServices: jest.fn(),
     useKafkaAuthMethods: jest.fn(),
+    useOtlpOutputEnabled: jest.fn(),
     sendPutOutput: jest.fn(),
+    sendPostOutput: jest.fn(),
   };
 });
 
@@ -56,6 +60,8 @@ jest.mock('./confirm_update', () => ({
 const mockSendPutOutput = sendPutOutput as jest.MockedFunction<typeof sendPutOutput>;
 const mockUseStartServices = useStartServices as jest.Mock;
 const mockUseKafkaAuthMethods = useKafkaAuthMethods as jest.Mock;
+const mockUseOtlpOutputEnabled = useOtlpOutputEnabled as jest.Mock;
+const mockSendPostOutput = sendPostOutput as jest.MockedFunction<typeof sendPostOutput>;
 
 const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
@@ -123,7 +129,8 @@ describe('EditOutputFlyout', () => {
     mockStartServices(false);
     jest.clearAllMocks();
     // the optional authentication methods of the Kafka output are off by default
-    mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false });
+    mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+    mockUseOtlpOutputEnabled.mockReturnValue(false);
     jest.spyOn(licenseService, 'isEnterprise').mockClear();
 
     mockedUseFleetStatus.mockReturnValue({} as any);
@@ -418,6 +425,266 @@ describe('EditOutputFlyout', () => {
       expect(payload.username).toBeUndefined();
       expect(payload.password).toBeUndefined();
       expect(payload.secrets?.password).toBeUndefined();
+    });
+  });
+
+  describe('kafka Kerberos authentication', () => {
+    const kafkaOutput = {
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      version: '1.0.0',
+      compression: 'none',
+    } as any;
+
+    const change = (
+      utils: ReturnType<typeof renderFlyout>['utils'],
+      testSubj: string,
+      value: string
+    ) =>
+      fireEvent.change(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`), {
+        target: { value },
+      });
+    const save = (utils: ReturnType<typeof renderFlyout>['utils']) =>
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+    beforeEach(() => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+      mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: true });
+    });
+
+    it('should not offer Kerberos when the feature flag is off', () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      expect(utils.queryByTestId('kafkaAuthenticationKerberosRadioButton')).not.toBeInTheDocument();
+    });
+
+    it('should offer Kerberos when the feature flag is on', () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      expect(utils.getByTestId('kafkaAuthenticationKerberosRadioButton')).toBeInTheDocument();
+    });
+
+    it('should warn that Kerberos is not supported only in a FIPS environment', () => {
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+        isFipsEnabled: true,
+      } as any);
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaKerberosFipsCallout')
+      ).toBeInTheDocument();
+    });
+
+    it('should save the keytab authentication, keeping the timeout', async () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaKerberosFipsCallout')).toBeNull();
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaKerberosPasswordInput')).toBeNull();
+      // Kerberos runs on the Beats runtime when the agent cannot translate the timeout
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaBrokerTimeoutInput')
+      ).toBeInTheDocument();
+
+      change(utils, 'kafkaKerberosConfigPathInput', '/etc/krb5.conf');
+      change(utils, 'kafkaKerberosRealmInput', 'EXAMPLE.COM');
+      change(utils, 'kafkaKerberosKeytabInput', '/etc/kafka.keytab');
+      change(utils, 'kafkaKerberosServiceNameInput', 'kafka');
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'kerberos',
+            kerberos: {
+              auth_type: 'keytab',
+              config_path: '/etc/krb5.conf',
+              realm: 'EXAMPLE.COM',
+              keytab: '/etc/kafka.keytab',
+              service_name: 'kafka',
+            },
+          })
+        );
+      });
+      const payload = mockSendPutOutput.mock.calls[0][1] as any;
+      expect(payload.secrets).toBeUndefined();
+      expect(payload.timeout).toBeDefined();
+      expect(payload.username).toBeUndefined();
+      expect(payload.sasl).toBeUndefined();
+    });
+
+    it('should save the password authentication with the password as a secret', async () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+      // the radio group of Kerberos, not the one of the authentication methods
+      fireEvent.click(
+        within(utils.getByTestId('settingsOutputsFlyout.kafkaKerberosAuthTypeInput')).getByRole(
+          'radio',
+          { name: 'Username / Password' }
+        )
+      );
+
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaKerberosKeytabInput')).toBeNull();
+
+      change(utils, 'kafkaKerberosConfigPathInput', '/etc/krb5.conf');
+      change(utils, 'kafkaKerberosRealmInput', 'EXAMPLE.COM');
+      change(utils, 'kafkaKerberosUsernameInput', 'kafka');
+      change(utils, 'kafkaKerberosPasswordInput', 'my-password');
+      fireEvent.click(utils.getByTestId('settingsOutputsFlyout.kafkaKerberosEnableFastInput'));
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'kerberos',
+            kerberos: {
+              auth_type: 'password',
+              config_path: '/etc/krb5.conf',
+              realm: 'EXAMPLE.COM',
+              username: 'kafka',
+              enable_krb5_fast: true,
+            },
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+      });
+    });
+
+    it('should not save the output when the required Kerberos settings are missing', async () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+      save(utils);
+
+      await waitFor(() => {
+        expect(utils.getByText('Kerberos configuration file is required')).toBeInTheDocument();
+        expect(utils.getByText('Realm is required')).toBeInTheDocument();
+        expect(utils.getByText('Keytab file is required')).toBeInTheDocument();
+      });
+      expect(mockSendPutOutput).not.toHaveBeenCalled();
+    });
+
+    it('should save an output set up before Kerberos had settings when Kerberos is not enabled', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      // only the type and the advanced YAML, as an output created through the API before this form
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'kerberos',
+        config_yaml: 'kerberos:\n  enabled: true\n',
+      });
+
+      change(utils, 'nameInput', 'renamed kafka output');
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({ auth_type: 'kerberos' })
+        );
+      });
+      // there are no settings to send, the server keeps the output as it is
+      expect((mockSendPutOutput.mock.calls[0][1] as any).kerberos).toBeUndefined();
+    });
+
+    describe('output set up before Kerberos had settings, with Kerberos enabled', () => {
+      const legacyOutput = {
+        ...kafkaOutput,
+        auth_type: 'kerberos',
+        config_yaml: 'kerberos:\n  enabled: true\n',
+      };
+
+      it('should show the Kerberos form without errors, and save the output as it is', async () => {
+        const { utils } = renderFlyout(legacyOutput);
+
+        expect(
+          utils.getByTestId('settingsOutputsFlyout.kafkaKerberosConfigPathInput')
+        ).toBeVisible();
+        change(utils, 'nameInput', 'renamed kafka output');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({ auth_type: 'kerberos' })
+          );
+        });
+        expect(utils.queryByText('Realm is required')).not.toBeInTheDocument();
+        expect((mockSendPutOutput.mock.calls[0][1] as any).kerberos).toBeUndefined();
+        expect((mockSendPutOutput.mock.calls[0][1] as any).secrets).toBeUndefined();
+      });
+
+      it('should require every setting once one is entered', async () => {
+        const { utils } = renderFlyout(legacyOutput);
+
+        change(utils, 'kafkaKerberosConfigPathInput', '/etc/krb5.conf');
+        save(utils);
+
+        await waitFor(() => {
+          expect(utils.getByText('Realm is required')).toBeInTheDocument();
+          expect(utils.getByText('Keytab file is required')).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should send the saved Kerberos settings unchanged when Kerberos is not enabled', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      const kerberos = {
+        auth_type: 'keytab',
+        config_path: '/etc/krb5.conf',
+        keytab: '/etc/kafka.keytab',
+        realm: 'EXAMPLE.COM',
+      };
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'kerberos', kerberos });
+
+      change(utils, 'nameInput', 'renamed kafka output');
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({ auth_type: 'kerberos', kerberos })
+        );
+      });
+    });
+
+    it('should keep the saved settings of an output that does not allow Kerberos to be edited', () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'kerberos',
+        kerberos: {
+          auth_type: 'keytab',
+          config_path: '/etc/krb5.conf',
+          keytab: '/etc/kafka.keytab',
+          realm: 'EXAMPLE.COM',
+        },
+      });
+
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+      ).toBeInTheDocument();
     });
   });
 
@@ -1116,6 +1383,83 @@ describe('EditOutputFlyout', () => {
     expect(mockSendPutOutput).not.toHaveBeenCalled();
   });
 
+  it('should remove the stored secret key of an elasticsearch output when the user clears it', async () => {
+    // the API keeps a stored secret an update leaves out, so a cleared one is sent as null
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSSLSecrets: true } as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: { certificate: 'cert', certificate_authorities: [] },
+      secrets: { ssl: { key: { id: 'stored-key-id' } } },
+    });
+
+    fireEvent.click(utils.getByText('Replace Client SSL certificate key'));
+    fireEvent.change(utils.getByDisplayValue('cert'), { target: { value: '' } });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputES',
+        expect.objectContaining({
+          secrets: { ssl: { key: null } },
+          ssl: { certificate: '', certificate_authorities: [] },
+        })
+      );
+    });
+  });
+
+  it('should keep the stored secret key of an elasticsearch output the user does not change', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSSLSecrets: true } as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: { certificate: 'cert', certificate_authorities: [] },
+      secrets: { ssl: { key: { id: 'stored-key-id' } } },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+      target: { value: 'elasticsearch output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputES',
+        expect.objectContaining({
+          secrets: { ssl: { key: { id: 'stored-key-id' } } },
+        })
+      );
+    });
+  });
+
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
     mockedUseFleetStatus.mockReturnValue({
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
@@ -1653,6 +1997,367 @@ describe('EditOutputFlyout', () => {
             otel_exporter_config_yaml: 'flush_interval: 10s',
           })
         );
+      });
+    });
+  });
+
+  describe('OTLP output', () => {
+    const otlpOutput: Output = {
+      id: 'outputOtlp',
+      name: 'otlp output',
+      type: 'otlp',
+      is_default: false,
+      is_default_monitoring: false,
+      otlp_exporter: {
+        protocol: 'grpc',
+        endpoint: 'collector.example.com:4317',
+        compression: 'zstd',
+        timeout: '10s',
+        headers: { 'x-tenant': 'acme' },
+        balancer_name: 'pick_first',
+        keepalive: { time: '30s', timeout: '5s', permit_without_stream: true },
+        read_buffer_size: 1024,
+        write_buffer_size: 2048,
+        wait_for_ready: true,
+        user_agent: 'my-agent',
+        authority: 'collector.internal',
+      },
+    };
+
+    const selectOtlpType = (utils: ReturnType<typeof renderFlyout>['utils']) =>
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.typeInput'), {
+        target: { value: 'otlp' },
+      });
+
+    const clear = (utils: ReturnType<typeof renderFlyout>['utils'], testSubj: string) =>
+      fireEvent.change(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`), {
+        target: { value: '' },
+      });
+
+    beforeEach(() => {
+      mockUseOtlpOutputEnabled.mockReturnValue(true);
+      mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+      mockSendPostOutput.mockResolvedValue({ data: {} } as any);
+    });
+
+    it('should not offer the OTLP type when the feature flag is off', () => {
+      mockUseOtlpOutputEnabled.mockReturnValue(false);
+      const { utils } = renderFlyout();
+
+      expect(
+        within(utils.getByTestId('settingsOutputsFlyout.typeInput')).queryByText('OTLP')
+      ).toBeNull();
+    });
+
+    it('should offer the OTLP type when the feature flag is on', () => {
+      const { utils } = renderFlyout();
+
+      expect(
+        within(utils.getByTestId('settingsOutputsFlyout.typeInput')).queryByText('OTLP')
+      ).not.toBeNull();
+    });
+
+    it('should render the core and gRPC fields, without the beats or OpenTelemetry exporter settings', () => {
+      const { utils } = renderFlyout();
+      selectOtlpType(utils);
+
+      [
+        'otlpEndpointInput',
+        'otlpCompressionInput',
+        'otlpTimeoutInput',
+        'otlpHeaderName0',
+        'otlpBalancerNameInput',
+        'otlpKeepaliveTimeInput',
+        'otlpKeepaliveTimeoutInput',
+        'otlpKeepalivePermitWithoutStreamInput',
+        'otlpReadBufferSizeInput',
+        'otlpWriteBufferSizeInput',
+        'otlpWaitForReadyInput',
+        'otlpUserAgentInput',
+        'otlpAuthorityInput',
+      ].forEach((testSubj) =>
+        expect(utils.queryByTestId(`settingsOutputsFlyout.${testSubj}`)).not.toBeNull()
+      );
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).toBeNull();
+      expect(utils.queryByTestId('settingsOutputsFlyout.yamlConfigInput')).toBeNull();
+      expect(utils.queryByText(/Make this output the default for/)).toBeNull();
+    });
+
+    it('should show the OTel spec default with a link to the versioned spec', () => {
+      const { utils } = renderFlyout();
+      selectOtlpType(utils);
+
+      const links = utils.getAllByText('OpenTelemetry v0.155.0 spec');
+      expect(links.length).toBeGreaterThan(0);
+      links.forEach((link) =>
+        expect(link.closest('a')?.getAttribute('href')).toContain(
+          'opentelemetry-collector/blob/v0.155.0/'
+        )
+      );
+    });
+
+    it('should require the endpoint', async () => {
+      const { utils } = renderFlyout();
+      selectOtlpType(utils);
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'otlp' },
+      });
+
+      expect(utils.getByTestId('saveApplySettingsBtn')).toBeDisabled();
+    });
+
+    it('should validate a field when leaving it and disable saving while it is invalid', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      const saveButton = utils.getByTestId('saveApplySettingsBtn');
+      const timeoutInput = utils.getByTestId('settingsOutputsFlyout.otlpTimeoutInput');
+
+      fireEvent.change(timeoutInput, { target: { value: '5 seconds' } });
+      fireEvent.blur(timeoutInput);
+
+      expect(utils.getByText('Specify a duration such as 500ms, 5s, 1m30s')).toBeInTheDocument();
+      expect(saveButton).toBeDisabled();
+
+      fireEvent.change(timeoutInput, { target: { value: '5s' } });
+
+      expect(utils.queryByText('Specify a duration such as 500ms, 5s, 1m30s')).toBeNull();
+      expect(saveButton).not.toBeDisabled();
+
+      const writeBufferSizeInput = utils.getByTestId(
+        'settingsOutputsFlyout.otlpWriteBufferSizeInput'
+      );
+      fireEvent.change(writeBufferSizeInput, { target: { value: '-1' } });
+      fireEvent.blur(writeBufferSizeInput);
+
+      expect(utils.getByText('Specify a whole number of bytes, 0 or more')).toBeInTheDocument();
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('should validate durations and buffer sizes', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpTimeoutInput'), {
+        target: { value: 'ten seconds' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpReadBufferSizeInput'), {
+        target: { value: '-1' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(utils.getByText('Specify a duration such as 500ms, 5s, 1m30s')).toBeInTheDocument();
+        expect(utils.getByText('Specify a whole number of bytes, 0 or more')).toBeInTheDocument();
+      });
+      expect(mockSendPutOutput).not.toHaveBeenCalled();
+    });
+
+    it('should create an OTLP output with the gRPC protocol', async () => {
+      const { utils } = renderFlyout();
+      selectOtlpType(utils);
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'my otlp' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+        target: { value: ' collector.example.com:4317 ' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderName0'), {
+        target: { value: 'x-tenant' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderValue0'), {
+        target: { value: 'acme' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpKeepaliveTimeInput'), {
+        target: { value: '30s' },
+      });
+      fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpKeepaliveTimeInput'));
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpWriteBufferSizeInput'), {
+        target: { value: '4096' },
+      });
+      fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpWriteBufferSizeInput'));
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPostOutput).toHaveBeenCalledWith({
+          name: 'my otlp',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: {
+            protocol: 'grpc',
+            endpoint: 'collector.example.com:4317',
+            compression: 'gzip',
+            timeout: null,
+            headers: { 'x-tenant': 'acme' },
+            balancer_name: null,
+            keepalive: { time: '30s', timeout: null, permit_without_stream: false },
+            read_buffer_size: null,
+            write_buffer_size: 4096,
+            wait_for_ready: false,
+            user_agent: null,
+            authority: null,
+          },
+        });
+      });
+    });
+
+    it('should load the stored settings and send them back on update', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'otlp output updated' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputOtlp',
+          expect.objectContaining({
+            name: 'otlp output updated',
+            otlp_exporter: otlpOutput.otlp_exporter,
+          })
+        );
+      });
+    });
+
+    it('should send null for the cleared settings so the stored values are unset', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      [
+        'otlpTimeoutInput',
+        'otlpBalancerNameInput',
+        'otlpKeepaliveTimeInput',
+        'otlpKeepaliveTimeoutInput',
+        'otlpReadBufferSizeInput',
+        'otlpWriteBufferSizeInput',
+        'otlpUserAgentInput',
+        'otlpAuthorityInput',
+        'otlpHeaderName0',
+        'otlpHeaderValue0',
+      ].forEach((testSubj) => clear(utils, testSubj));
+      fireEvent.click(
+        utils.getByTestId('settingsOutputsFlyout.otlpKeepalivePermitWithoutStreamInput')
+      );
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputOtlp',
+          expect.objectContaining({
+            otlp_exporter: {
+              protocol: 'grpc',
+              endpoint: 'collector.example.com:4317',
+              compression: 'zstd',
+              timeout: null,
+              headers: null,
+              balancer_name: null,
+              keepalive: null,
+              read_buffer_size: null,
+              write_buffer_size: null,
+              wait_for_ready: true,
+              user_agent: null,
+              authority: null,
+            },
+          })
+        );
+      });
+    });
+
+    it('should keep the keepalive block while one of its settings is set', async () => {
+      const { utils } = renderFlyout(otlpOutput);
+      clear(utils, 'otlpKeepaliveTimeInput');
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputOtlp',
+          expect.objectContaining({
+            otlp_exporter: expect.objectContaining({
+              keepalive: { time: null, timeout: '5s', permit_without_stream: true },
+            }),
+          })
+        );
+      });
+    });
+
+    it('should keep the HTTP protocol of an output created through the API, without gRPC settings', async () => {
+      const { utils } = renderFlyout({
+        ...otlpOutput,
+        otlp_exporter: {
+          protocol: 'http/protobuf',
+          endpoint: 'https://collector.example.com:4318',
+          compression: 'none',
+        },
+      });
+
+      expect(utils.queryByTestId('settingsOutputsFlyout.otlpGrpcSettings')).toBeNull();
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'http output' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputOtlp',
+          expect.objectContaining({
+            otlp_exporter: {
+              protocol: 'http/protobuf',
+              endpoint: 'https://collector.example.com:4318',
+              compression: 'none',
+              timeout: null,
+              headers: null,
+            },
+          })
+        );
+      });
+    });
+
+    it('should link the headers hint to the spec of the protocol', () => {
+      const { utils: grpcUtils } = renderFlyout(otlpOutput);
+      expect(
+        grpcUtils
+          .getByText('Headers (optional)')
+          .closest('.euiFormRow')
+          ?.querySelector('a')
+          ?.getAttribute('href')
+      ).toContain('/config/configgrpc/README.md');
+      grpcUtils.unmount();
+
+      const { utils: httpUtils } = renderFlyout({
+        ...otlpOutput,
+        otlp_exporter: {
+          protocol: 'http/protobuf',
+          endpoint: 'https://collector.example.com:4318',
+        },
+      });
+      expect(
+        httpUtils
+          .getByText('Headers (optional)')
+          .closest('.euiFormRow')
+          ?.querySelector('a')
+          ?.getAttribute('href')
+      ).toContain('/config/confighttp/README.md');
+    });
+
+    it('should not send the exporter of a preconfigured output that only allows renaming', async () => {
+      const { utils } = renderFlyout({
+        ...otlpOutput,
+        is_preconfigured: true,
+        allow_edit: ['name'],
+      });
+
+      expect(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput')).toBeDisabled();
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'renamed otlp output' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith('outputOtlp', {
+          name: 'renamed otlp output',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+        });
       });
     });
   });

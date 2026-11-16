@@ -102,6 +102,14 @@ const DISABLED_LABEL = i18n.translate(
   { defaultMessage: 'Disabled' }
 );
 
+const CLASSIC_RULES_BADGE: AppHeaderBadge = {
+  label: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.classicRulesBadge', {
+    defaultMessage: 'Classic',
+  }),
+  color: 'hollow',
+  'data-test-subj': 'classicRulesBadge',
+};
+
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
@@ -123,6 +131,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     userProfile,
     notifications: { toasts },
     setBreadcrumbs,
+    showClassicBadge,
   } = useKibana().services;
   const { capabilities } = application;
 
@@ -353,6 +362,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const statusColor = getHealthColor(rule.executionStatus.status);
 
   const badges: AppHeaderBadge[] = [
+    ...(showClassicBadge ? [CLASSIC_RULES_BADGE] : []),
     {
       label:
         rule.executionStatus.status.charAt(0).toUpperCase() + rule.executionStatus.status.slice(1),
@@ -363,13 +373,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       label: rule.enabled ? ENABLED_LABEL : DISABLED_LABEL,
       color: rule.enabled ? 'success' : 'default',
       'data-test-subj': 'ruleEnabledBadge',
-    },
-    {
-      label: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.classicRulesBadge', {
-        defaultMessage: 'Classic rules',
-      }),
-      color: 'hollow',
-      'data-test-subj': 'classicRulesBadge',
     },
     ...rule.tags.map((tag): AppHeaderBadge => ({ label: tag, color: 'hollow' })),
   ];

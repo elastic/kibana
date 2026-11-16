@@ -27,7 +27,10 @@ import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
 import type { RateLimiterConfig } from './rate_limiter';
 import type { HttpConfig } from './http_config';
-import type { SelfClientUiamAttestationGetter } from './self_client';
+import type {
+  SelfClientOwnClientAuthenticationCheck,
+  SelfClientUiamAttestationGetter,
+} from './self_client';
 
 /** @internal */
 export interface InternalHttpServicePreboot
@@ -93,6 +96,9 @@ export interface InternalHttpServiceStart extends Omit<HttpServiceStart, 'static
     getter: (request: KibanaRequest) => Promise<string | undefined>
   ) => void;
   setSelfClientUiamAttestationGetter: (getter: SelfClientUiamAttestationGetter) => void;
+  setSelfClientOwnClientAuthenticationCheck: (
+    check: SelfClientOwnClientAuthenticationCheck
+  ) => void;
 }
 
 /** @internal */

@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, COMMON_HEADERS, STARRED_DASHBOARDS_COUNT_API_PATH } from '../fixtures';
 
@@ -21,10 +22,9 @@ const NO_DASHBOARDS_ROLE = {
   elasticsearch: { cluster: [], indices: [] },
 };
 
-// Suite fails on MKI: https://github.com/elastic/kibana/issues/296478
 apiTest.describe(
   'Vector DB starred dashboards count API',
-  { tag: ['@local-serverless-vectordb'] },
+  { tag: [...tags.serverless.vectordb] },
   () => {
     apiTest.beforeAll(async ({ kbnClient }) => {
       await kbnClient.savedObjects.create({
@@ -83,11 +83,12 @@ apiTest.describe(
 
     apiTest(
       'returns no count for a user without dashboard access',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(NO_DASHBOARDS_ROLE);
+      async ({ apiClient, requestAuth }) => {
+        // an API key carries the custom role's privileges; a Cloud SAML session keeps the test account's own
+        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(NO_DASHBOARDS_ROLE);
 
         const response = await apiClient.post(STARRED_DASHBOARDS_COUNT_API_PATH, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
           body: { dashboardIds: [EXISTING_DASHBOARD_ID] },
           responseType: 'json',
         });

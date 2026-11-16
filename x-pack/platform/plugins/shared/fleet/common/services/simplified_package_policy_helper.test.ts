@@ -294,6 +294,32 @@ describe('toPackagePolicy', () => {
       });
     });
 
+    it('should pass stream-level var_group_selections to the stream', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_id: 'policy123',
+          policy_ids: ['policy123'],
+          description: 'Test description',
+          inputs: {
+            'nginx-logfile': {
+              streams: {
+                'nginx.error': { var_group_selections: { log_source: 'file' } },
+              },
+            },
+          },
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      const logfile = res.inputs.find((input) => input.type === 'logfile')!;
+      const errorStream = logfile.streams.find((s) => s.data_stream.dataset === 'nginx.error')!;
+      const accessStream = logfile.streams.find((s) => s.data_stream.dataset === 'nginx.access')!;
+      expect(errorStream.var_group_selections).toEqual({ log_source: 'file' });
+      expect(accessStream.var_group_selections).toBeUndefined();
+    });
+
     it('should to pass experimental_data_stream_features', () => {
       const res = simplifiedPackagePolicytoNewPackagePolicy(
         {

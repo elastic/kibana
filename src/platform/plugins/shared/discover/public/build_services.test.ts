@@ -71,6 +71,6 @@ describe('discoverFeatureFlags', () => {
         })
     );
 
-    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(false);
+    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(true);
   });
 });

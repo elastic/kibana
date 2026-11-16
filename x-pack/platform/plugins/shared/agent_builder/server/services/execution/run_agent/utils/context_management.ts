@@ -13,7 +13,8 @@ import {
   ConversationRoundStepType,
   createSubstitutionStep,
 } from '@kbn/agent-builder-common';
-import type { AgentEventEmitter } from '@kbn/agent-builder-server';
+import type { AgentBuilderAnalytics, AgentEventEmitter } from '@kbn/agent-builder-server';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import {
@@ -53,6 +54,10 @@ export interface ContextManagementDeps extends VisibleContextDeps {
   cacheControl?: ChatCompleteCacheControl;
   abortSignal?: AbortSignal;
   previousRound?: PreviousRoundInfo;
+  analyticsService?: AgentBuilderAnalytics;
+  agentId?: string;
+  executionId?: string;
+  toolManager?: ToolManager;
 }
 
 /**
@@ -250,6 +255,15 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
       );
       return { compactionRequest: undefined, lastContextActionCycle: state.currentCycle };
     }
+    deps.analyticsService?.reportCompactionTriggered({
+      agentId: deps.agentId,
+      executionId: deps.executionId,
+      trigger: request.trigger,
+      tokenCountBefore: result.tokensBefore,
+      tokenCountAfter: result.tokensAfter,
+      summarizedCycleCount: result.summarizedCycleCount,
+      modelId: deps.connector.connectorId,
+    });
     deps.events.emit({
       type: ChatEventType.compactionStarted,
       data: { token_count_before: request.tokensBefore },

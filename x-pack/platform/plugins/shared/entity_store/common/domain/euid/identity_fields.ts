@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityDefinitionOfAnyType } from '../definitions/entity_schema';
+import type { EntityDefinitionWithoutId } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { isEuidField, getSourceFieldNames } from './commons';
 
@@ -43,7 +43,7 @@ export interface NamespaceSourceFields {
  * @param definition - The entity definition
  * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidRanking
  */
-export function getEuidSourceFields(definition: EntityDefinitionOfAnyType): IdentitySourceFields {
+export function getEuidSourceFields(definition: EntityDefinitionWithoutId): IdentitySourceFields {
   const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -91,7 +91,7 @@ export function getEuidSourceFields(definition: EntityDefinitionOfAnyType): Iden
  * @returns exactMatchFields and prefixMatchFields from the entity's fieldEvaluations sources
  */
 export function getEuidNamespaceSourceFields(
-  definition: EntityDefinitionOfAnyType
+  definition: EntityDefinitionWithoutId
 ): NamespaceSourceFields {
   const { identityField } = definition;
   if (isSingleFieldIdentity(identityField)) {
@@ -124,7 +124,7 @@ export function getEuidNamespaceSourceFields(
  *   source for this entity definition
  */
 export function getEuidNamespaceSourcePrefix(
-  definition: EntityDefinitionOfAnyType,
+  definition: EntityDefinitionWithoutId,
   field: string,
   observedValue: string
 ): string | undefined {

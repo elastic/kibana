@@ -44,3 +44,10 @@ export interface EnabledProfilingStatus extends EnabledProfilingSchemasStatus {
 }
 
 export type ProfilingStatus = DisabledProfilingStatus | EnabledProfilingStatus;
+
+/** Whether there is profiling data that can be queried:
+ * OTel data can be used without any setup while Universal Profiling requires setup. */
+export const hasUsableProfilingData = (status?: ProfilingSchemasStatus): boolean =>
+  status?.isEnabled === true &&
+  (status.otel.hasData ||
+    (status.universalProfiling.hasData && status.universalProfiling.hasSetup));

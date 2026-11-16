@@ -22,6 +22,7 @@ export const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
 export const ENTITY_STORE_ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_STORE_ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_STORE_RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
+export const ENTITY_STORE_NAMESPACE_FIELD = 'entity.namespace';
 
 export type EntityType = z.infer<typeof IdentifierType>;
 export const ENTITY_IDENTIFIER_TYPES = ['host', 'user', 'service', 'generic'] as const;
@@ -214,6 +215,8 @@ export interface EntityIdentity {
    * is itself a group target
    */
   resolvedTo?: string;
+  /** Identity source the entity comes from (e.g. `okta`, `active_directory`, `local`), when projected. */
+  namespace?: string;
 }
 
 /**
@@ -237,12 +240,16 @@ export const describeEntityRow = ({
   const rawId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
   const rawName = getRowValue(columns, row, ENTITY_STORE_ENTITY_NAME_FIELD);
   const rawResolvedTo = getRowValue(columns, row, ENTITY_STORE_RESOLVED_TO_FIELD);
+  const rawNamespace = getRowValue(columns, row, ENTITY_STORE_NAMESPACE_FIELD);
 
   const entityStoreId = typeof rawId === 'string' && rawId.length > 0 ? rawId : undefined;
   const bareFromId = entityStoreId ? stripEntityIdPrefix(entityStoreId, rawType) : undefined;
   const bareName = typeof rawName === 'string' && rawName.length > 0 ? rawName : undefined;
   const resolvedTo =
     typeof rawResolvedTo === 'string' && rawResolvedTo.length > 0 ? rawResolvedTo : undefined;
+
+  const namespace =
+    typeof rawNamespace === 'string' && rawNamespace.length > 0 ? rawNamespace : undefined;
 
   const identifier = bareName ?? bareFromId;
   if (!identifier) {
@@ -254,6 +261,7 @@ export const describeEntityRow = ({
     identifier,
     ...(entityStoreId ? { entityStoreId } : {}),
     ...(resolvedTo ? { resolvedTo } : {}),
+    ...(namespace ? { namespace } : {}),
   };
 };
 

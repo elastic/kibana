@@ -185,8 +185,9 @@ async function fetchAgentVersionsFromApi() {
   };
 
   // Use a fresh AbortController per attempt so a timed-out request doesn't carry its
-  // already-aborted signal into the retry. The body is read inside the same scope so the
-  // timeout covers the whole exchange rather than just the connect and response-header phases.
+  // already-aborted signal into the retry. `fetch` resolves as soon as the response headers
+  // arrive, so the body is read here too — clearing the timer any earlier would leave the
+  // body read unbounded, and a stalled body would hang every caller indefinitely.
   const fetchWithTimeout = async () => {
     const controller = new AbortController();
     const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
@@ -195,7 +196,10 @@ async function fetchAgentVersionsFromApi() {
       timeoutHandle.unref();
     }
     try {
-      const response = await fetch(PRODUCT_VERSIONS_URL, { ...options, signal: controller.signal });
+      const response = await fetch(PRODUCT_VERSIONS_URL, {
+        ...options,
+        signal: controller.signal,
+      });
       return { status: response.status, rawBody: await response.text() };
     } finally {
       clearTimeout(timeoutHandle);

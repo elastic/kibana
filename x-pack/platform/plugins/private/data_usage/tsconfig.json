@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -38,6 +39,8 @@
     "@kbn/i18n-react",
     "@kbn/charts-theme",
     "@kbn/react-query",
+    "@kbn/scout",
+    "@kbn/mock-idp-utils",
   ],
   "exclude": ["target/**/*"]
 }

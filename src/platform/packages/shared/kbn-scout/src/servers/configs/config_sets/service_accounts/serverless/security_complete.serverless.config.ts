@@ -9,7 +9,11 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
-import { serviceAccountsServerArgs, serviceAccountsUiamEphemeralTokenExpiration } from '../shared';
+import {
+  serviceAccountsServerArgs,
+  serviceAccountsUiamEphemeralTokenExpiration,
+  serviceAccountsUiamServerArgs,
+} from '../shared';
 
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
@@ -20,6 +24,10 @@ export const servers: ScoutServerConfig = {
   },
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
-    serverArgs: [...uiamConfig.kbnTestServer.serverArgs, ...serviceAccountsServerArgs],
+    serverArgs: [
+      ...uiamConfig.kbnTestServer.serverArgs,
+      ...serviceAccountsServerArgs,
+      ...serviceAccountsUiamServerArgs,
+    ],
   },
 };

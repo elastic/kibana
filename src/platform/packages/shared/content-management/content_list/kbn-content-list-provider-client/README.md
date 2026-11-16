@@ -76,9 +76,9 @@ const findItems = useCallback(
 | `labels`        | `ContentListLabels`           | Yes      | User-facing entity labels (should be i18n-translated).                         |
 | `findItems`     | `TableListViewFindItemsFn`    | Yes      | Your existing `TableListView` findItems function.                              |
 | `core`          | `ContentListKibanaCore`       | Yes      | Kibana `CoreStart` slice. Used to read `savedObjects:perPage` / `savedObjects:listingLimit` from `uiSettings`, and to power the internal `ContentEditorKibanaProvider` that backs the Content Editor flyout. A full `CoreStart` value satisfies this structurally. |
-| `features`      | `ContentListClientFeatures`   | No       | Feature configuration. Replaces the base provider's `contentEditor` with a Kibana-flavored config bag (`isReadonly`, `onSave`, `customValidators`, `appendRows`); the provider rebuilds it into the base shape's `features.contentEditor.open` callback so `<Action.ContentEditor />` can read it directly. |
+| `features`      | `ContentListClientFeatures`   | No       | Feature configuration. Replaces the base provider's `contentEditor` with a Kibana-flavored config bag (`isReadonly`, `readonlyReason`, `onSave`, `customValidators`, `appendRows`); the provider rebuilds it into the base shape's `features.contentEditor.open` callback so `<Action.ContentEditor />` can read it directly. |
 | `services`      | `ContentListClientServices`   | No       | Domain services. Extends `ContentListServices` with `savedObjectsTagging` (powers the Content Editor flyout's tag UI). |
-| `item`          | `ContentListItemConfig`       | No       | Per-item configuration for links.                                              |
+| `item`          | `ContentListItemConfig`       | No       | Per-item links and actions. Edit restrictions are also applied to the Content Editor flyout. |
 | `isReadOnly`    | `boolean`                     | No       | Disable mutation actions.                                                      |
 
 \*At least one of `id` or `queryKeyScope` is required.
@@ -283,23 +283,64 @@ For full control over the popover, drop `createFilterControl` and use `CustomFil
 `<Action.ContentEditor />` reads `open` from `features.contentEditor` on the active provider. When the consumer supplies a `contentEditor` config here, the client provider rebuilds it into a base `{ open }` callback so the action can wire itself; if no config is supplied, `open` is `undefined` and the action self-skips, dropping the row icon. Consumers therefore render the action unconditionally — there's no flag to gate on.
 
 ```tsx
-import { useContentListConfig } from '@kbn/content-list-provider';
-
-const MyList = () => {
-  const { isReadOnly } = useContentListConfig();
-  return (
-    <ContentListTable>
-      <Column.Name showDescription showTags />
-      {!isReadOnly && (
-        <Column.Actions>
-          <Action.ContentEditor />
-          <Action.Delete />
-        </Column.Actions>
-      )}
-    </ContentListTable>
-  );
-};
+const MyList = () => (
+  <ContentListTable>
+    <Column.Name showDescription showTags />
+    <Column.Actions>
+      <Action.ContentEditor />
+      <Action.Delete />
+    </Column.Actions>
+  </ContentListTable>
+);
 ```
+
+### Read-only Content Editor reasons
+
+Use `features.contentEditor.readonlyReason` for a reason that applies to the
+entire list, such as missing write privileges:
+
+```tsx
+<ContentListClientProvider
+  isReadOnly={!canEdit}
+  features={{
+    contentEditor: {
+      isReadonly: !canEdit,
+      readonlyReason: !canEdit
+        ? 'You do not have permission to edit dashboards.'
+        : undefined,
+      onSave: updateItemMetadata,
+    },
+  }}
+>
+  <MyList />
+</ContentListClientProvider>
+```
+
+Use `item.actions.edit.restriction` for item-specific restrictions:
+
+```tsx
+<ContentListClientProvider
+  features={{
+    contentEditor: {
+      isReadonly: false,
+      onSave: updateItemMetadata,
+    },
+  }}
+  item={{
+    actions: {
+      edit: {
+        onItemAction: editItem,
+        restriction: (item) =>
+          item.managed ? 'Managed dashboards cannot be edited.' : undefined,
+      },
+    },
+  }}
+>
+  <MyList />
+</ContentListClientProvider>
+```
+
+The Content Editor remains available for restricted items, but opens in read-only mode and displays the restriction reason. A configured list-wide reason takes precedence. If no list-wide reason is configured, an available item-specific reason is used; otherwise the flyout uses its generic read-only message.
 
 ## Exports
 

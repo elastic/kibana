@@ -47,6 +47,14 @@ describe('MatcherSuggestionsService.getSuggestions', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
+  it.each(['constructor', 'toString', '__proto__'])(
+    'does not treat Object.prototype field %s as a configured suggestion field',
+    async (field) => {
+      await expect(service.getSuggestions(field, '')).resolves.toEqual([]);
+      expect(esClient.search).not.toHaveBeenCalled();
+    }
+  );
+
   it('suggests the alert.id values for alert_id', async () => {
     esClient.search.mockResolvedValue({
       ...buildSearchResponse([]),
@@ -54,6 +62,20 @@ describe('MatcherSuggestionsService.getSuggestions', () => {
     } as SearchResponse<unknown>);
 
     expect(await service.getSuggestions('alert_id', 'al')).toEqual(['alert-1']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: { suggestions: { terms: expect.objectContaining({ field: 'alert.id' }) } },
+      })
+    );
+  });
+
+  it('suggests alert.id values using the v2 search field', async () => {
+    esClient.search.mockResolvedValue({
+      ...buildSearchResponse([]),
+      aggregations: { suggestions: { buckets: [{ key: 'alert-1' }] } },
+    } as SearchResponse<unknown>);
+
+    expect(await service.getSuggestions('alert.id', 'al')).toEqual(['alert-1']);
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         aggs: { suggestions: { terms: expect.objectContaining({ field: 'alert.id' }) } },
@@ -150,5 +172,21 @@ describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
     esClient.search.mockRejectedValue(error);
 
     await expect(service.getRuleEventFieldNames()).rejects.toBe(error);
+  });
+});
+
+describe('MatcherSuggestionsService.getSuggestions for episode fields', () => {
+  const service = new MatcherSuggestionsService(createMockEsClient());
+
+  it('suggests episode status values using the episode index field name', async () => {
+    await expect(service.getSuggestions('episode.status', 'act')).resolves.toEqual(['active']);
+  });
+
+  it('suggests episode status values using the canonical alert field name', async () => {
+    await expect(service.getSuggestions('alert.status', 'act')).resolves.toEqual(['active']);
+  });
+
+  it('suggests severity values', async () => {
+    await expect(service.getSuggestions('severity', 'h')).resolves.toContain('high');
   });
 });

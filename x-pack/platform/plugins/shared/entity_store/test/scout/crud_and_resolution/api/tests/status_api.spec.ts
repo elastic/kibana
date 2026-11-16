@@ -95,9 +95,14 @@ apiTest.describe.skip('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS 
     });
     expect(response.statusCode).toBe(200);
 
+    // The key is always present; it is null for types without a non-priority process.
+    for (const engine of response.body.engines) {
+      expect('nonPriority' in engine).toBe(true);
+    }
+
     // `user` is the only type with a priority extraction gate today.
     const withBlock: StatusEngineWithNonPriority[] = response.body.engines.filter(
-      (engine: { nonPriority?: unknown }) => 'nonPriority' in engine
+      (engine: { nonPriority: unknown }) => engine.nonPriority !== null
     );
     expect(withBlock.map(({ type }) => type)).toStrictEqual(['user']);
 
@@ -110,10 +115,10 @@ apiTest.describe.skip('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS 
     expect('samplingRate' in nonPriority).toBe(true);
   });
 
-  // The non-priority task skips every run with the flag off but keeps its stored status, so the
-  // block would report a stale `started`.
+  // The non-priority task skips every run with the flag off but keeps its stored status, so a
+  // populated block would report a stale `started`.
   apiTest(
-    'omits the nonPriority block with the dual-process flag off',
+    'reports a null nonPriority block with the dual-process flag off',
     async ({ apiClient, apiServices }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: false },
@@ -124,9 +129,9 @@ apiTest.describe.skip('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS 
         responseType: 'json',
       });
       expect(response.statusCode).toBe(200);
-      expect(
-        response.body.engines.filter((engine: { nonPriority?: unknown }) => 'nonPriority' in engine)
-      ).toStrictEqual([]);
+      for (const engine of response.body.engines) {
+        expect(engine.nonPriority).toBeNull();
+      }
 
       await apiServices.core.settings({
         'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: true },

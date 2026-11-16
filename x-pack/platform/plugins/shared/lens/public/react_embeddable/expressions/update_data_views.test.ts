@@ -56,6 +56,26 @@ describe('getUsedDataViews', () => {
     expect(dataViews.create).not.toHaveBeenCalled();
   });
 
+  it.each([undefined, {}])(
+    'publishes the DataView of an ES|QL layer that has no persisted spec (%p)',
+    async (persistedSpecs) => {
+      const result = await getUsedDataViews([], persistedSpecs, dataViews, { layers, http });
+
+      expect(result).toEqual([shimDataView]);
+      expect(dataViews.create).not.toHaveBeenCalled();
+    }
+  );
+
+  it('publishes the DataView of the dataset when it resolves to another id than the layer and there is no spec', async () => {
+    const registered = { id: 'another-id' } as unknown as DataView;
+    mockRegisterEsqlSourceInDataViewsCache.mockResolvedValue(registered);
+
+    const result = await getUsedDataViews([], undefined, dataViews, { layers, http });
+
+    expect(result).toEqual([registered]);
+    expect(dataViews.create).not.toHaveBeenCalled();
+  });
+
   it('registers the DataView from the schema the source was just created with', async () => {
     await getUsedDataViews([], { [spec.id!]: spec }, dataViews, { layers, http });
 
@@ -173,15 +193,86 @@ describe('getUsedDataViews', () => {
     );
   });
 
-  it('falls back to the spec when the dataset resolves to another id than the layer one', async () => {
-    const specDataView = { id: 'esql-dataset-id', fromSpec: true } as unknown as DataView;
-    mockRegisterEsqlSourceInDataViewsCache.mockResolvedValue({ id: 'another-id' } as DataView);
-    dataViews.create.mockResolvedValue(specDataView);
+  describe('layers whose saved id is not the dataset id, e.g. created as code', () => {
+    const asCodeSpec: DataViewSpec = { id: 'logs-as-code-id', title: 'logs-*' };
+    const asCodeLayers = (esql: string, timeField?: string) => ({
+      layer1: { index: 'logs-as-code-id', query: { esql }, columns: [], timeField },
+    });
+    const httpFor = (timeField: string | undefined) => {
+      const post = jest.fn(async (path: string) =>
+        path.includes('timefield') ? { timeField } : { columns: [] }
+      );
+      return { post, http: { post } as unknown as HttpStart };
+    };
 
-    const result = await getUsedDataViews([], { [spec.id!]: spec }, dataViews, { layers, http });
+    it('publishes the DataView of the dataset, not one created from the spec', async () => {
+      const result = await getUsedDataViews([], { [asCodeSpec.id!]: asCodeSpec }, dataViews, {
+        layers: asCodeLayers('FROM logs-code-*', '@timestamp'),
+        http,
+      });
 
-    expect(result).toEqual([specDataView]);
-    expect(dataViews.create).toHaveBeenCalledWith(spec);
+      expect(result).toEqual([shimDataView]);
+      expect(dataViews.create).not.toHaveBeenCalled();
+    });
+
+    it('resolves the time field of a layer without one, like the filters created from clicks', async () => {
+      const { post, http: resolvingHttp } = httpFor('@timestamp');
+
+      await getUsedDataViews([], { [asCodeSpec.id!]: asCodeSpec }, dataViews, {
+        layers: asCodeLayers('FROM logs-resolve-*'),
+        http: resolvingHttp,
+      });
+
+      expect(post).toHaveBeenCalledWith(expect.stringContaining('timefield'), expect.anything());
+      const [, registeredSource] = mockRegisterEsqlSourceInDataViewsCache.mock.calls[0];
+      expect((registeredSource as EsqlSource).timeFieldName).toBe('@timestamp');
+    });
+
+    it('requests the time field and the schema of a layer without a time field in parallel', async () => {
+      let releaseTimeField = () => {};
+      const post = jest.fn((path: string) =>
+        path.includes('timefield')
+          ? new Promise((resolve) => {
+              releaseTimeField = () => resolve({ timeField: '@timestamp' });
+            })
+          : Promise.resolve({ columns: [] })
+      );
+
+      const pending = getUsedDataViews([], { [asCodeSpec.id!]: asCodeSpec }, dataViews, {
+        layers: asCodeLayers('FROM logs-parallel-*'),
+        http: { post } as unknown as HttpStart,
+      });
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(post).toHaveBeenCalledWith(expect.stringContaining('source_info'), expect.anything());
+
+      releaseTimeField();
+      await pending;
+    });
+
+    it('does not resolve the time field of a layer saved with the dataset id', async () => {
+      const esql = 'FROM logs-ui-*';
+      const { datasetId } = await EsqlSource.resolveDataset({ query: esql });
+      const { post, http: spyingHttp } = httpFor('@timestamp');
+
+      await getUsedDataViews(
+        [],
+        { [datasetId]: { id: datasetId, title: 'logs-ui-*' } },
+        dataViews,
+        {
+          layers: { layer1: { index: datasetId, query: { esql }, columns: [] } },
+          http: spyingHttp,
+        }
+      );
+
+      expect(post).not.toHaveBeenCalledWith(
+        expect.stringContaining('timefield'),
+        expect.anything()
+      );
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ query: esql, timeFieldName: undefined })
+      );
+    });
   });
 
   it('creates the DataView from the spec when there is no ES|QL layer for it', async () => {
@@ -194,8 +285,10 @@ describe('getUsedDataViews', () => {
       http,
     });
 
-    expect(result).toEqual([created]);
-    expect(mockRegisterEsqlSourceInDataViewsCache).not.toHaveBeenCalled();
+    expect(result).toEqual([created, shimDataView]);
+    expect(dataViews.create).toHaveBeenCalledTimes(1);
+    expect(dataViews.create).toHaveBeenCalledWith(formBasedSpec);
+    expect(mockRegisterEsqlSourceInDataViewsCache).toHaveBeenCalledTimes(1);
   });
 
   it('creates the DataView from the spec when no ES|QL context is given', async () => {

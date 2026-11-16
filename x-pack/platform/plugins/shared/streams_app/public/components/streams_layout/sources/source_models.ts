@@ -13,7 +13,6 @@ import type {
   ConfiguredSource,
   SourceApiKey,
   SourceRuntimeMetadata,
-  SourceStatus,
   SourceType,
   SourceViewModel,
 } from './types';
@@ -29,16 +28,39 @@ const SUPPORTED_SOURCE_TYPES: SourceType[] = [
   'bulk',
 ];
 
-const OTLP_SIGNALS: StreamsV2.OtlpSignal[] = ['logs', 'metrics', 'traces'];
+export type SourceSignal = StreamsV2.OtlpSignal;
+
+/** Logs, metrics, and traces. Spec also has docs/profiles; those are not ingest choices here. */
+export const SOURCE_SIGNALS: SourceSignal[] = ['logs', 'metrics', 'traces'];
+
+/** Docs shows as a badge but is never picked, so it stays out of `SourceSignal`. */
+export type SourceDisplaySignal = SourceSignal | 'docs';
+
+export const SOURCE_DISPLAY_SIGNALS: SourceDisplaySignal[] = ['logs', 'metrics', 'traces', 'docs'];
 
 const DEFAULT_SUPPORTED_TELEMETRY: Record<SourceType, UnitSource['supported_telemetry']> = {
-  otlp: ['logs', 'metrics', 'traces'],
-  es_otlp: ['logs', 'metrics', 'traces'],
+  otlp: [...SOURCE_SIGNALS],
+  es_otlp: [...SOURCE_SIGNALS],
+  // Prometheus Remote Write v1 decodes only to OTel metrics.
   prometheus_remote_write: ['metrics'],
   es_prometheus_remote_write: ['metrics'],
+  // Managed _bulk carries documents only (streams-spec async_bulk.schema.yaml).
   async_bulk: ['docs'],
   bulk: ['docs'],
 };
+
+/** Signals the user can pick for this source type (empty when the type is fixed). */
+export const selectableSignalsForSourceType = (type: SourceType): SourceSignal[] =>
+  SOURCE_SIGNALS.filter((signal) => DEFAULT_SUPPORTED_TELEMETRY[type].includes(signal));
+
+export const sourceTypeSelectsSignals = (type: SourceType): boolean =>
+  selectableSignalsForSourceType(type).length > 1;
+
+export const defaultSignalsForSourceType = (type: SourceType): SourceSignal[] =>
+  sourceTypeSelectsSignals(type) ? selectableSignalsForSourceType(type) : [];
+
+const orderedSignals = (type: SourceType, signals: readonly SourceSignal[]): SourceSignal[] =>
+  selectableSignalsForSourceType(type).filter((signal) => signals.includes(signal));
 
 export const isSupportedSourceType = (type: string): type is SourceType =>
   SUPPORTED_SOURCE_TYPES.includes(type as SourceType);
@@ -47,16 +69,29 @@ export const createUnitSource = ({
   id,
   name,
   type,
+  supportedTelemetry,
 }: {
   id: string;
   name: string;
   type: SourceType;
+  supportedTelemetry?: UnitSource['supported_telemetry'];
 }): UnitSource => ({
   id,
   name,
   type,
-  supported_telemetry: DEFAULT_SUPPORTED_TELEMETRY[type],
+  supported_telemetry: supportedTelemetry ?? DEFAULT_SUPPORTED_TELEMETRY[type],
 });
+
+export const telemetryForSelectedSignals = (
+  type: SourceType,
+  signals: readonly SourceSignal[]
+): UnitSource['supported_telemetry'] => {
+  if (!sourceTypeSelectsSignals(type)) {
+    return DEFAULT_SUPPORTED_TELEMETRY[type];
+  }
+  const selected = orderedSignals(type, signals);
+  return selected.length > 0 ? selected : DEFAULT_SUPPORTED_TELEMETRY[type];
+};
 
 export const createConfiguredSource = ({
   id,
@@ -130,24 +165,51 @@ export const toConfiguredSource = (source: UnitSource): ConfiguredSource | undef
   }
 };
 
-/** Destination names each configured source currently forwards to. */
-export const connectedDestinationLabels = (unit: Unit): Record<string, string[]> => {
+export interface ConnectedDestination {
+  id: string;
+  label: string;
+}
+
+const connectedDestinationsByUnit = new WeakMap<Unit, Record<string, ConnectedDestination[]>>();
+
+/**
+ * The destinations each configured source currently forwards to, through processing and route
+ * delegation. The result is kept per unit object, so the nodes of one canvas share one build.
+ */
+export const connectedDestinations = (unit: Unit): Record<string, ConnectedDestination[]> => {
+  const cached = connectedDestinationsByUnit.get(unit);
+  if (cached) {
+    return cached;
+  }
   const sources = getConfiguredSources(unit);
   const destinations = unit.unit.destinations ?? [];
   const nameById = new Map(
     destinations.map((destination) => [destination.id, destination.name?.trim() || destination.id])
   );
-  const labels: Record<string, string[]> = {};
-  for (const connection of getUnitConnections(
+  const connected: Record<string, ConnectedDestination[]> = {};
+  for (const { sourceId, destinationId } of getUnitConnections(
     unit,
     new Set(sources.map(({ id }) => id)),
     new Set(destinations.map(({ id }) => id))
   )) {
-    const label = nameById.get(connection.destinationId) ?? connection.destinationId;
-    labels[connection.sourceId] = [...(labels[connection.sourceId] ?? []), label];
+    connected[sourceId] = [
+      ...(connected[sourceId] ?? []),
+      { id: destinationId, label: nameById.get(destinationId) ?? destinationId },
+    ];
   }
-  return labels;
+  connectedDestinationsByUnit.set(unit, connected);
+
+  return connected;
 };
+
+/** Destination names each configured source currently forwards to. */
+export const connectedDestinationLabels = (unit: Unit): Record<string, string[]> =>
+  Object.fromEntries(
+    Object.entries(connectedDestinations(unit)).map(([sourceId, items]) => [
+      sourceId,
+      items.map(({ label }) => label),
+    ])
+  );
 
 export const createRuntimeMetadata = (
   source: ConfiguredSource,
@@ -156,6 +218,7 @@ export const createRuntimeMetadata = (
   const { endpoint, endpoints } = resolveSourceCapabilities({
     type: source.type,
     sourceId: source.id,
+    signals: readConfiguredOtlpSignals(source),
     ...environment,
   });
   return {
@@ -168,25 +231,51 @@ export const createRuntimeMetadata = (
 export const createSourceViewModel = ({
   source,
   metadata,
-  status,
   apiKeys,
+  supportedTelemetry,
 }: {
   source: ConfiguredSource;
   metadata: SourceRuntimeMetadata;
-  status: SourceStatus;
   apiKeys: SourceApiKey[];
+  supportedTelemetry?: UnitSource['supported_telemetry'];
 }): SourceViewModel => ({
   ...source,
   ...metadata,
-  status,
   apiKeys,
+  supportedTelemetry,
 });
+
+export const getSourceDisplaySignals = (
+  source: ConfiguredSource,
+  supportedTelemetry?: UnitSource['supported_telemetry']
+): SourceDisplaySignal[] => {
+  const configured = readConfiguredOtlpSignals(source);
+  if (configured && configured.length > 0) {
+    return SOURCE_SIGNALS.filter((signal) => configured.includes(signal));
+  }
+  if (supportedTelemetry !== undefined) {
+    return SOURCE_DISPLAY_SIGNALS.filter((signal) => supportedTelemetry.includes(signal));
+  }
+  return SOURCE_DISPLAY_SIGNALS.filter((signal) =>
+    DEFAULT_SUPPORTED_TELEMETRY[source.type].includes(signal)
+  );
+};
+
+const readConfiguredOtlpSignals = (source: ConfiguredSource): SourceSignal[] | undefined => {
+  if (source.type === 'otlp') {
+    return source.config?.otlp?.signals;
+  }
+  if (source.type === 'es_otlp') {
+    return source.config?.es_otlp?.signals;
+  }
+  return undefined;
+};
 
 function otlpSignalsFromTelemetry(
   supportedTelemetry: UnitSource['supported_telemetry']
 ): StreamsV2.NonEmptyArray<StreamsV2.OtlpSignal> | undefined {
   const signals = supportedTelemetry.filter((signal): signal is StreamsV2.OtlpSignal =>
-    OTLP_SIGNALS.includes(signal as StreamsV2.OtlpSignal)
+    SOURCE_SIGNALS.includes(signal as StreamsV2.OtlpSignal)
   );
   const [firstSignal, ...restSignals] = signals;
 

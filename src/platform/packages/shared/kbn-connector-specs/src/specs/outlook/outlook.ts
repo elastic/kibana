@@ -43,7 +43,7 @@ export const Outlook: ConnectorSpec = {
   metadata: {
     id: '.outlook',
     displayName: 'Outlook',
-    description: i18n.translate('core.kibanaConnectorSpecs.outlook.metadata.description', {
+    description: i18n.translate('connectorSpecs.outlook.metadata.description', {
       defaultMessage: 'Search emails, list folders, and read messages and attachments in Outlook',
     }),
     minimumLicense: 'enterprise',
@@ -63,7 +63,7 @@ export const Outlook: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.outlook.auth.oauthCode.authorizationUrl.helpText',
+                'connectorSpecs.outlook.auth.oauthCode.authorizationUrl.helpText',
                 {
                   defaultMessage:
                     'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize — replace {tenantId} with your Microsoft Entra tenant ID.',
@@ -73,14 +73,11 @@ export const Outlook: ConnectorSpec = {
             },
             tokenUrl: {
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.outlook.auth.oauthCode.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token — replace {tenantId} with your Microsoft Entra tenant ID.',
-                  values: { tenantId: '{tenant-id}' },
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.outlook.auth.oauthCode.tokenUrl.helpText', {
+                defaultMessage:
+                  'https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token — replace {tenantId} with your Microsoft Entra tenant ID.',
+                values: { tenantId: '{tenant-id}' },
+              }),
             },
             scope: { hidden: true },
           },
@@ -241,7 +238,7 @@ export const Outlook: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.outlook.test.description', {
+    description: i18n.translate('connectorSpecs.outlook.test.description', {
       defaultMessage: 'Verifies Outlook connection by fetching mailbox information',
     }),
     handler: async (ctx) => {

@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/deeplinks-ml'
   - '@kbn/content-management-utils'
   - '@kbn/embeddable-plugin'
+  - '@kbn/es-errors'
   - '@kbn/es-query'
   - '@kbn/es-types'
   - '@kbn/es-ui-shared-plugin'
@@ -164,12 +165,15 @@ dependsOn:
   - '@kbn/core-rendering-browser'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
+  - '@kbn/date-range-picker'
+  - '@kbn/date-range-picker-presets'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -182,6 +186,4 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -16,6 +16,8 @@ import { automatedResolutionMaintainerConfig, MAINTAINER_ID } from '.';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 import { runEsqlMatcherRule } from '../../matcher';
 import { AUTOMATED_RESOLUTION_STATE_VERSION, type AutomatedResolutionState } from './types';
+import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
+import * as customRules from './custom_rules';
 import { RESOLUTION_RULE_CONFIGS } from '../..';
 
 const EMAIL_RULE = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
@@ -75,7 +77,8 @@ const runConfig = async (
   esClient: ElasticsearchClient,
   persistedState: unknown,
   effectiveRules = DEFAULT_EFFECTIVE_RULES,
-  signal: AbortSignal = new AbortController().signal
+  signal: AbortSignal = new AbortController().signal,
+  getCustomRules: jest.Mock = jest.fn().mockResolvedValue([])
 ): Promise<AutomatedResolutionState> => {
   const context = {
     status: {
@@ -94,6 +97,14 @@ const runConfig = async (
     cpsEsClient: esClient,
     resolutionRulesClient: {
       getEffectiveRules: jest.fn().mockResolvedValue(effectiveRules),
+      getCustomRules,
+      getCustomRule: jest
+        .fn()
+        .mockImplementation(async (id: string) =>
+          ((await getCustomRules().catch(() => [])) as Array<{ id: string }>).find(
+            (candidate) => candidate.id === id
+          )
+        ),
     },
     telemetry: { report: jest.fn() },
   } as unknown as EntityMaintainerTaskMethodContext;
@@ -115,6 +126,10 @@ describe('automatedResolutionMaintainerConfig', () => {
   it('registers under the stable maintainer id and requires enterprise license', () => {
     expect(automatedResolutionMaintainerConfig.id).toBe(MAINTAINER_ID);
     expect(automatedResolutionMaintainerConfig.minLicense).toBe('enterprise');
+  });
+
+  it('sets the task timeout the custom-rules deadline is derived from', () => {
+    expect(automatedResolutionMaintainerConfig.timeout).toBe('5m');
   });
 
   it('seeds initialState with versioned empty rules map (rules backfill on first run)', () => {
@@ -147,6 +162,38 @@ describe('automatedResolutionMaintainerConfig', () => {
     expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
   });
 
+  it('gives every rule the index resolved once for the run, custom rules included', async () => {
+    (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce('.entities.v2.latest.run');
+    await runConfig(
+      createEsClient(),
+      { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: watermarkedRules },
+      DEFAULT_EFFECTIVE_RULES.map((rule) => ({ ...rule, enabled: true })),
+      undefined,
+      jest.fn().mockResolvedValue([
+        {
+          id: 'rule-1',
+          name: 'custom',
+          namespaces: ['local', 'active_directory'],
+          match_value: 'TO_LOWER(user.name)',
+          decline_same_namespace_duplicates: true,
+          enabled: true,
+        },
+      ])
+    );
+
+    expect((runEsqlMatcherRule as jest.Mock).mock.calls.map(([deps]) => deps.ruleId)).toContain(
+      'custom:rule-1'
+    );
+
+    const indexes = [
+      ...(runEsqlMatcherRule as jest.Mock).mock.calls.map(([deps]) => deps.index),
+      ...(runRelatedUserAliasResolution as jest.Mock).mock.calls.map(([deps]) => deps.index),
+    ];
+    expect(indexes.length).toBeGreaterThan(1);
+    expect(new Set(indexes)).toEqual(new Set(['.entities.v2.latest.run']));
+    expect(resolveLatestEntitiesIndexName).toHaveBeenCalledTimes(1);
+  });
+
   it('serializes one null-watermark backfill per tick', async () => {
     const esClient = createEsClient();
     const first = await runConfig(esClient, {
@@ -169,6 +216,95 @@ describe('automatedResolutionMaintainerConfig', () => {
       EMAIL_RULE,
       RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
     ]);
+  });
+
+  describe('failure backoff', () => {
+    const calledRuleIds = () =>
+      (runEsqlMatcherRule as jest.Mock).mock.calls.map(([deps]) => deps.ruleId);
+
+    it('records a failed built-in rule in its state and keeps its watermark', async () => {
+      (runEsqlMatcherRule as jest.Mock).mockImplementation(async ({ ruleId }) => {
+        if (ruleId === EMAIL_RULE) {
+          throw new Error('circuit_breaking_exception: Data too large');
+        }
+        return matcherState;
+      });
+      const before = Date.now();
+
+      const result = await runConfig(createEsClient(), {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: watermarkedRules,
+      });
+
+      expect(result.rules[EMAIL_RULE]).toEqual({
+        ...matcherState,
+        lastError: 'circuit_breaking_exception: Data too large',
+        lastFailedAt: expect.any(String),
+        consecutiveFailures: 1,
+        nextAttemptAt: expect.any(String),
+      });
+      const waitMs = Date.parse(result.rules[EMAIL_RULE].nextAttemptAt as string) - before;
+      expect(waitMs).toBeGreaterThanOrEqual(5 * 60_000);
+      expect(waitMs).toBeLessThan(6 * 60_000);
+    });
+
+    it('skips a rule that is backing off and runs the others', async () => {
+      const backingOff = {
+        ...matcherState,
+        lastError: 'boom',
+        consecutiveFailures: 2,
+        nextAttemptAt: new Date(Date.now() + 60_000).toISOString(),
+      };
+
+      const result = await runConfig(createEsClient(), {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: { ...watermarkedRules, [EMAIL_RULE]: backingOff },
+      });
+
+      expect(calledRuleIds()).not.toContain(EMAIL_RULE);
+      expect(calledRuleIds().length).toBeGreaterThan(0);
+      expect(result.rules[EMAIL_RULE]).toEqual(backingOff);
+    });
+
+    it('does not let a backing-off rule hold the backfill slot', async () => {
+      const backingOffBackfill = {
+        lastProcessedTimestamp: null,
+        lastRun: null,
+        consecutiveFailures: 1,
+        nextAttemptAt: new Date(Date.now() + 60_000).toISOString(),
+      };
+      const othersWatermarked = Object.fromEntries(
+        Object.entries(watermarkedRules).filter(
+          ([id]) => id !== RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE
+        )
+      );
+
+      await runConfig(createEsClient(), {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: { ...othersWatermarked, [EMAIL_RULE]: backingOffBackfill },
+      });
+
+      expect(calledRuleIds()).toContain(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE);
+      expect(calledRuleIds()).not.toContain(EMAIL_RULE);
+    });
+
+    it('runs the rule again once the backoff has passed, and a success clears the streak', async () => {
+      const result = await runConfig(createEsClient(), {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          ...watermarkedRules,
+          [EMAIL_RULE]: {
+            ...matcherState,
+            lastError: 'boom',
+            consecutiveFailures: 4,
+            nextAttemptAt: new Date(Date.now() - 1_000).toISOString(),
+          },
+        },
+      });
+
+      expect(calledRuleIds()).toContain(EMAIL_RULE);
+      expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
+    });
   });
 
   it('does not start the next rule when the task has been aborted', async () => {
@@ -267,6 +403,192 @@ describe('automatedResolutionMaintainerConfig', () => {
     expect(runEsqlMatcherRule).toHaveBeenCalledTimes(1);
     expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].ruleId).toBe(EMAIL_RULE);
     expect(runRelatedUserAliasResolution).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears the failure streak after related_user succeeds', async () => {
+    const enabled = DEFAULT_EFFECTIVE_RULES.map((rule) =>
+      rule.id === ALIAS_RESOLUTION_RULE ? { ...rule, enabled: true } : rule
+    );
+    (runRelatedUserAliasResolution as jest.Mock).mockImplementationOnce(async ({ state }) => ({
+      ...state,
+      lastRun: null,
+    }));
+
+    const result = await runConfig(
+      createEsClient(),
+      {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          [ALIAS_RESOLUTION_RULE]: {
+            lastProcessedTimestamp: null,
+            lastRun: null,
+            lastError: 'boom',
+            lastFailedAt: '2026-10-01T00:00:00.000Z',
+            consecutiveFailures: 3,
+            nextAttemptAt: new Date(Date.now() - 1_000).toISOString(),
+          },
+        },
+      },
+      enabled
+    );
+
+    expect(runRelatedUserAliasResolution).toHaveBeenCalledTimes(1);
+    expect(result.rules[ALIAS_RESOLUTION_RULE]).toEqual({
+      lastProcessedTimestamp: null,
+      lastRun: null,
+    });
+  });
+
+  it('keeps the failure streak when the related_user run is aborted', async () => {
+    const enabled = DEFAULT_EFFECTIVE_RULES.map((rule) =>
+      rule.id === ALIAS_RESOLUTION_RULE ? { ...rule, enabled: true } : rule
+    );
+    const controller = new AbortController();
+    (runRelatedUserAliasResolution as jest.Mock).mockImplementationOnce(async ({ state }) => {
+      controller.abort();
+      return state;
+    });
+    const failed = {
+      lastProcessedTimestamp: null,
+      lastRun: null,
+      lastError: 'boom',
+      lastFailedAt: '2026-10-01T00:00:00.000Z',
+      consecutiveFailures: 3,
+      nextAttemptAt: new Date(Date.now() - 1_000).toISOString(),
+    };
+
+    const result = await runConfig(
+      createEsClient(),
+      { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: { [ALIAS_RESOLUTION_RULE]: failed } },
+      enabled,
+      controller.signal
+    );
+
+    expect(result.rules[ALIAS_RESOLUTION_RULE]).toEqual(failed);
+  });
+
+  describe('custom rules', () => {
+    const customRule = {
+      id: 'rule-1',
+      name: 'CrowdStrike local users to AD',
+      namespaces: ['local', 'active_directory'],
+      match_value: 'TO_LOWER(user.name)',
+      decline_same_namespace_duplicates: true,
+      enabled: true,
+    };
+    const persisted = { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: watermarkedRules };
+
+    it('runs saved custom rules after every OOTB rule', async () => {
+      const esClient = createEsClient();
+      const result = await runConfig(
+        esClient,
+        persisted,
+        DEFAULT_EFFECTIVE_RULES,
+        undefined,
+        jest.fn().mockResolvedValue([customRule])
+      );
+
+      const ruleIds = (runEsqlMatcherRule as jest.Mock).mock.calls.map((call) => call[0].ruleId);
+      expect(ruleIds[ruleIds.length - 1]).toBe('custom:rule-1');
+      expect(ruleIds.slice(0, -1)).not.toContain('custom:rule-1');
+      expect(result.rules['custom:rule-1']).toEqual({
+        ...matcherState,
+        definitionFingerprint: expect.any(String),
+        lastAttemptAt: expect.any(String),
+        lastStartedFirstAt: expect.any(String),
+        deferredByDeadline: false,
+        lastError: null,
+      });
+    });
+
+    it('stops a hanging custom rule a minute before the task timeout', async () => {
+      jest.useFakeTimers({ now: new Date('2026-10-15T10:00:00Z') });
+      try {
+        let abortedAfterMs: number | undefined;
+        (runEsqlMatcherRule as jest.Mock).mockImplementation(
+          async ({ ruleId, signal }: { ruleId: string; signal: AbortSignal }) => {
+            if (!ruleId.startsWith('custom:')) {
+              return matcherState;
+            }
+            const startedAt = Date.parse('2026-10-15T10:00:00Z');
+            return new Promise((resolve) => {
+              signal.addEventListener('abort', () => {
+                abortedAfterMs = Date.now() - startedAt;
+                resolve(matcherState);
+              });
+            });
+          }
+        );
+
+        const pending = runConfig(
+          createEsClient(),
+          persisted,
+          DEFAULT_EFFECTIVE_RULES,
+          undefined,
+          jest.fn().mockResolvedValue([customRule])
+        );
+        await jest.advanceTimersByTimeAsync(5 * 60 * 1000);
+        const result = await pending;
+
+        expect(abortedAfterMs).toBe(4 * 60 * 1000);
+        expect(result.rules['custom:rule-1']).toMatchObject({ deferredByDeadline: true });
+        expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('keeps the OOTB results when the custom-rule phase throws', async () => {
+      const spy = jest
+        .spyOn(customRules, 'runCustomResolutionRules')
+        .mockRejectedValueOnce(new Error('unexpected'));
+      try {
+        const result = await runConfig(
+          createEsClient(),
+          persisted,
+          DEFAULT_EFFECTIVE_RULES,
+          undefined,
+          jest.fn().mockResolvedValue([customRule])
+        );
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it('leaves OOTB results unchanged when custom rules cannot be loaded', async () => {
+      const withoutCustom = await runConfig(createEsClient(), persisted);
+      jest.clearAllMocks();
+      (runEsqlMatcherRule as jest.Mock).mockResolvedValue(matcherState);
+
+      const withFailure = await runConfig(
+        createEsClient(),
+        persisted,
+        DEFAULT_EFFECTIVE_RULES,
+        undefined,
+        jest.fn().mockRejectedValue(new Error('403 saved objects'))
+      );
+
+      expect(withFailure).toEqual(withoutCustom);
+    });
+
+    it('does not let an OOTB rule holding the first-scan slot block a custom rule backfill', async () => {
+      const esClient = createEsClient();
+      await runConfig(
+        esClient,
+        { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: {} },
+        DEFAULT_EFFECTIVE_RULES,
+        undefined,
+        jest.fn().mockResolvedValue([customRule])
+      );
+
+      expect((runEsqlMatcherRule as jest.Mock).mock.calls.map((call) => call[0].ruleId)).toEqual([
+        EMAIL_RULE,
+        'custom:rule-1',
+      ]);
+    });
   });
 
   it('runs related_user when that rule is enabled', async () => {

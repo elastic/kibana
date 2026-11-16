@@ -89,10 +89,10 @@ describe('buildMitreCoverageFromRules', () => {
     expect(result).toEqual({
       total_installed_rules: 1,
       total_with_mitre_mapping: 1,
-      tactics: [{ id: 'TA0040', name: 'Impact', count: 1 }],
+      tactics: [{ id: 'TA0040', name: 'Impact', count: 1, framework: 'MITRE ATT&CK' }],
       techniques: [
-        { id: 'T1491', name: 'Defacement', count: 1 },
-        { id: 'T1565', name: 'Data Manipulation', count: 1 },
+        { id: 'T1491', name: 'Defacement', count: 1, framework: 'MITRE ATT&CK' },
+        { id: 'T1565', name: 'Data Manipulation', count: 1, framework: 'MITRE ATT&CK' },
       ],
     });
   });
@@ -118,11 +118,16 @@ describe('buildMitreCoverageFromRules', () => {
 
     expect(result.total_with_mitre_mapping).toBe(3);
     expect(result.tactics).toEqual([
-      { id: 'TA0001', name: 'Initial Access', count: 2 },
-      { id: 'TA0002', name: 'Execution', count: 1 },
+      { id: 'TA0001', name: 'Initial Access', count: 2, framework: 'MITRE ATT&CK' },
+      { id: 'TA0002', name: 'Execution', count: 1, framework: 'MITRE ATT&CK' },
     ]);
     expect(result.techniques).toEqual([
-      { id: 'T1059', name: 'Command and Scripting Interpreter', count: 3 },
+      {
+        id: 'T1059',
+        name: 'Command and Scripting Interpreter',
+        count: 3,
+        framework: 'MITRE ATT&CK',
+      },
     ]);
   });
 
@@ -138,11 +143,16 @@ describe('buildMitreCoverageFromRules', () => {
 
     expect(result.total_with_mitre_mapping).toBe(1);
     expect(result.techniques).toEqual([
-      { id: 'T1059', name: 'Command and Scripting Interpreter', count: 1 },
+      {
+        id: 'T1059',
+        name: 'Command and Scripting Interpreter',
+        count: 1,
+        framework: 'MITRE ATT&CK',
+      },
     ]);
     expect(result.tactics).toEqual([
-      { id: 'TA0001', name: 'Initial Access', count: 1 },
-      { id: 'TA0002', name: 'Execution', count: 1 },
+      { id: 'TA0001', name: 'Initial Access', count: 1, framework: 'MITRE ATT&CK' },
+      { id: 'TA0002', name: 'Execution', count: 1, framework: 'MITRE ATT&CK' },
     ]);
   });
 
@@ -161,7 +171,9 @@ describe('buildMitreCoverageFromRules', () => {
     );
 
     // The technique is counted once; its subtechniques are not surfaced as a field.
-    expect(result.techniques).toEqual([{ id: 'T1055', name: 'Process Injection', count: 1 }]);
+    expect(result.techniques).toEqual([
+      { id: 'T1055', name: 'Process Injection', count: 1, framework: 'MITRE ATT&CK' },
+    ]);
     expect('subtechniques' in result.techniques[0]).toBe(false);
   });
 
@@ -199,7 +211,53 @@ describe('buildMitreCoverageFromRules', () => {
       )
     );
 
-    expect(result.tactics).toEqual([{ id: 'TA0001', name: 'TA0001', count: 1 }]);
+    expect(result.tactics).toEqual([
+      { id: 'TA0001', name: 'TA0001', count: 1, framework: 'MITRE ATT&CK' },
+    ]);
+  });
+
+  it('counts ATLAS-only rules and tags entries with their framework', () => {
+    const atlas = (tacticId: string, techniqueId: string) => ({
+      framework: 'MITRE ATLAS',
+      tactic: { id: tacticId, name: 'Reconnaissance', reference: 'https://atlas' },
+      technique: [{ id: techniqueId, name: 'Search Victim', reference: 'https://atlas' }],
+    });
+    const result = buildMitreCoverageFromRules(
+      rules(rule([atlas('AML.TA0002', 'AML.T0000')]), rule([atlas('AML.TA0002', 'AML.T0000')]))
+    );
+
+    expect(result.total_with_mitre_mapping).toBe(2);
+    expect(result.tactics).toEqual([
+      { id: 'AML.TA0002', name: 'Reconnaissance', count: 2, framework: 'MITRE ATLAS' },
+    ]);
+    expect(result.techniques).toEqual([
+      { id: 'AML.T0000', name: 'Search Victim', count: 2, framework: 'MITRE ATLAS' },
+    ]);
+  });
+
+  it('lets a mixed ATT&CK + ATLAS rule contribute to both frameworks once', () => {
+    const result = buildMitreCoverageFromRules(
+      rules(
+        rule([
+          mitre('TA0001', 'Initial Access', [tech('T1566', 'Phishing')]),
+          {
+            framework: 'MITRE ATLAS',
+            tactic: { id: 'AML.TA0002', name: 'Reconnaissance', reference: 'https://atlas' },
+            technique: [{ id: 'AML.T0000', name: 'Search Victim', reference: 'https://atlas' }],
+          },
+        ])
+      )
+    );
+
+    expect(result.total_with_mitre_mapping).toBe(1);
+    expect(result.tactics).toEqual([
+      { id: 'AML.TA0002', name: 'Reconnaissance', count: 1, framework: 'MITRE ATLAS' },
+      { id: 'TA0001', name: 'Initial Access', count: 1, framework: 'MITRE ATT&CK' },
+    ]);
+    expect(result.techniques).toEqual([
+      { id: 'AML.T0000', name: 'Search Victim', count: 1, framework: 'MITRE ATLAS' },
+      { id: 'T1566', name: 'Phishing', count: 1, framework: 'MITRE ATT&CK' },
+    ]);
   });
 
   it('treats rules without threat as having no MITRE mapping', () => {
@@ -264,10 +322,15 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
         expect(result.results[0].data).toEqual({
           total_installed_rules: 2,
           total_with_mitre_mapping: 2,
-          tactics: [{ id: 'TA0001', name: 'Initial Access', count: 2 }],
+          tactics: [{ id: 'TA0001', name: 'Initial Access', count: 2, framework: 'MITRE ATT&CK' }],
           techniques: [
-            { id: 'T1190', name: 'Exploit Public-Facing Application', count: 1 },
-            { id: 'T1566', name: 'Phishing', count: 1 },
+            {
+              id: 'T1190',
+              name: 'Exploit Public-Facing Application',
+              count: 1,
+              framework: 'MITRE ATT&CK',
+            },
+            { id: 'T1566', name: 'Phishing', count: 1, framework: 'MITRE ATT&CK' },
           ],
         });
       }

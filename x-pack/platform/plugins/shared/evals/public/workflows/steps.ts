@@ -11,6 +11,7 @@ import {
   executeTaskCommonDefinition,
   evaluateTraceCommonDefinition,
   ingestScoresCommonDefinition,
+  persistOnlineScoresCommonDefinition,
   evaluateExampleCommonDefinition,
   evaluateDatasetCommonDefinition,
   startExperimentCommonDefinition,
@@ -34,6 +35,10 @@ export const evaluateTracePublicStep = createPublicStepDefinition({
 
 export const ingestScoresPublicStep = createPublicStepDefinition({
   ...ingestScoresCommonDefinition,
+});
+
+export const persistOnlineScoresPublicStep = createPublicStepDefinition({
+  ...persistOnlineScoresCommonDefinition,
 });
 
 export const evaluateExamplePublicStep = createPublicStepDefinition({

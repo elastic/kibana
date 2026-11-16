@@ -216,4 +216,31 @@ describe('executeCascadeListField', () => {
 
     await expect(run()).resolves.toEqual({ updated: 1 });
   });
+
+  it('audits a failed attack lookup once, rethrows, and skips the mutation', async () => {
+    esClient.search.mockRejectedValueOnce(new Error('search failed'));
+
+    await expect(run()).rejects.toThrow('search failed');
+
+    expect(mutate).not.toHaveBeenCalled();
+    const auditLogger = context.securitySolution.getAuditLogger();
+    expect(auditLogger?.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger?.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
+        error: expect.objectContaining({ message: 'search failed' }),
+      })
+    );
+  });
+
+  it('does not audit a failure thrown by the mutation itself', async () => {
+    esClient.search.mockResolvedValueOnce(
+      searchResponse([{ _id: 'attack1', tags: [], alertIds: [] }])
+    );
+    mutate.mockRejectedValueOnce(new Error('update failed'));
+
+    await expect(run({ eventBus: undefined })).rejects.toThrow('update failed');
+
+    expect(context.securitySolution.getAuditLogger()?.log).not.toHaveBeenCalled();
+  });
 });

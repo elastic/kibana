@@ -35,7 +35,7 @@ import type { RenderDocumentViewMeta } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
+import type { DocViewerRestorableState, DocViewerShareableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
@@ -57,6 +57,7 @@ export interface InternalStateDataRequestParams {
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
   isSearchSessionRestored: boolean;
+  replayCacheLastFetched?: string;
 }
 
 export interface TabStateGlobalState {
@@ -158,6 +159,11 @@ export interface DiscoverAppState {
    * The expanded document reference
    */
   expandedDoc?: ExpandedDocRef;
+  /**
+   * The URL-shareable doc viewer state (selected tab + per-tab shareable slices) restored alongside
+   * the expanded document from a shared link.
+   */
+  docViewerState?: DocViewerShareableState;
 }
 
 export interface CascadedDocumentsState {
@@ -280,12 +286,18 @@ export enum TabsBarVisibility {
   hidden = 'hidden',
 }
 
+export interface SaveSessionModalState {
+  isOpen: boolean;
+  initialTitle: string | undefined;
+  initialCopyOnSave: boolean;
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasDataView: boolean };
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
-  draftSessionTitle: string | undefined;
+  saveSessionModal: SaveSessionModalState;
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];

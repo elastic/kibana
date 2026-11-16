@@ -17,6 +17,13 @@ describe('getAnonymizationUiSettings', () => {
     expect(setting.solutionViews).toBeUndefined();
   });
 
+  it('is managed from the Anonymization page: hidden from Advanced Settings but still writable', () => {
+    // Advanced Settings lists only settings that are not `readonly`; 'ui' mode (rather than
+    // 'strict') is what keeps the page's own saves and API writes allowed.
+    expect(setting.readonly).toBe(true);
+    expect(setting.readonlyMode).toBe('ui');
+  });
+
   it('ships a valid default with masking switched off', () => {
     const settings: AnonymizationSettings = JSON.parse(String(setting.value));
 

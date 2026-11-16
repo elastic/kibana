@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { USER_TS_EXTRACTION_CASES } from '../../../test/scout/query_translation/api/fixtures/user_ts_extraction_cases';
+import { USER_TS_EXTRACTION_CASES } from '../../../test/fixtures/user_ts_extraction_cases';
 import { getEuidFromObject } from './memory';
 import { applyWhenConditionTrueSetFields, getDocument } from './commons';
 import {
@@ -29,11 +29,11 @@ function deriveUserMeta(doc: Record<string, unknown>) {
   if (identityEvaluations.length > 0) {
     Object.assign(d, applyFieldEvaluations(d, identityEvaluations));
   }
-  if (def.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(d, def.whenConditionTrueSetFieldsPreAgg);
+  if (def.extraction.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFields(d, def.extraction.whenConditionTrueSetFieldsPreAgg);
   }
-  if (def.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(d, def.whenConditionTrueSetFieldsAfterStats);
+  if (def.extraction.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(d, def.extraction.whenConditionTrueSetFieldsAfterStats);
   }
   return {
     namespace: d['entity.namespace'] as string | undefined,

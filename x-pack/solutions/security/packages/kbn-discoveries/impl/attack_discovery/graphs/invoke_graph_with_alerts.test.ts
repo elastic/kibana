@@ -8,11 +8,13 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import { invokeAttackDiscoveryGraphWithAlerts } from './invoke_graph_with_alerts';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { getDefaultAttackDiscoveryGraph } from '.';
 import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
+import { resolveAttackDiscoveryTemplateCompletion } from './template_completion';
 
 jest.mock('@kbn/langchain/server');
 jest.mock('@kbn/langchain/server/tracers/langsmith');
@@ -21,6 +23,15 @@ jest.mock('.', () => ({
   getDefaultAttackDiscoveryGraph: jest.fn(),
 }));
 jest.mock('./throw_if_error_counts_exceeded');
+jest.mock('./template_completion', () => {
+  const actual = jest.requireActual('./template_completion');
+  return {
+    ...actual,
+    resolveAttackDiscoveryTemplateCompletion: jest.fn(
+      actual.resolveAttackDiscoveryTemplateCompletion
+    ),
+  };
+});
 
 describe('invokeAttackDiscoveryGraphWithAlerts', () => {
   const mockActionsClient = {} as PublicMethodsOf<ActionsClient>;
@@ -96,6 +107,86 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
         tracers: [],
       },
     });
+  });
+
+  it('passes caller-provided telemetryMetadata to the LLM so its calls are attributed', async () => {
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+      telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+    });
+
+    expect(ActionsClientLlm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+      })
+    );
+  });
+
+  it('passes caller-provided telemetryMetadata to the template completion resolver', async () => {
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.inference',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+      telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+    });
+
+    expect(resolveAttackDiscoveryTemplateCompletion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+      })
+    );
+  });
+
+  it('does not invent telemetryMetadata when the caller provides none', async () => {
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+    });
+
+    const [constructorArgs] = (ActionsClientLlm as unknown as jest.Mock).mock.calls.at(-1) ?? [];
+    expect(constructorArgs.telemetryMetadata).toBeUndefined();
   });
 
   it('strips leading dot from action_type_id for llmType', async () => {
@@ -254,6 +345,44 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
       discoveries: mockDiscoveries,
       replacements: mockReplacements,
     });
+  });
+
+  it('caps a template connector at 100 alerts and logs the omitted count', async () => {
+    const alerts = Array.from({ length: 120 }, (_, index) => ({
+      metadata: {},
+      pageContent: `alert ${index}`,
+    }));
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: alerts.slice(0, 100),
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts,
+      apiConfig: {
+        action_type_id: '.inference',
+        connector_id: 'daybreak',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      inferenceClient: {
+        chatComplete: jest.fn(),
+        getConnectorById: jest.fn().mockResolvedValue({
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      } as unknown as InferenceClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+      size: 500,
+    });
+
+    expect(getDefaultAttackDiscoveryGraph).toHaveBeenCalledWith(
+      expect.objectContaining({ size: 100 })
+    );
+    expect(mockGraphInvoke.mock.calls[0][0].anonymizedDocuments).toHaveLength(100);
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('omitting 20 of 120'));
   });
 
   it('uses default size of 10 when not provided', async () => {

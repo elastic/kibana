@@ -708,7 +708,7 @@ export class FleetPlugin
     );
 
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    registerRoutes(fleetAuthzRouter, config, isServerless);
+    registerRoutes(fleetAuthzRouter, config, isServerless, router);
 
     this.telemetryEventsSender.setup(deps.telemetry);
     // Register tasks
@@ -801,6 +801,7 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.versionSpecificPolicyAssignment?.taskInterval,
+        orphanSweepIntervalMs: config.versionSpecificPolicyAssignment?.orphanSweepIntervalMs,
       },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());

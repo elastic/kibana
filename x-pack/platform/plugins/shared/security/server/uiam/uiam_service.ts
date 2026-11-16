@@ -15,6 +15,9 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  resolveUiamClientAuthentication,
+  UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import type {
@@ -37,7 +40,10 @@ import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
 } from './get_client_authentication';
-import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import {
+  getUiamAuthorizationHeaderFromRequest,
+  getUiamCredentialsFromRequest,
+} from './get_uiam_credentials';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
@@ -303,9 +309,10 @@ export interface UiamServicePublic {
 
   /**
    * Fetches one service account via the UIAM service. Only returns the account when its
-   * `assumable_by` policy names this Kibana's project.
+   * `assumable_by` policy names this Kibana's project. Resolves `null` when UIAM does not know the
+   * account, whether it says so with a 404 or with the 403 it sends for an unknown account.
    */
-  getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
+  getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails | null>;
 
   /**
    * Revokes one service account via the UIAM service. Authorized against the account's
@@ -322,8 +329,11 @@ export interface UiamServicePublic {
    * UIAM authorizes the exchange against the service account's `assumable_by` policy.
    *
    * @param serviceAccountId The ID of the service account to exchange a token for.
+   * @returns The token, and its lifetime as an ISO-8601 duration when UIAM reports one.
    */
-  exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }>;
+  exchangeServiceAccountToken(
+    serviceAccountId: string
+  ): Promise<{ token: string; expires_in?: string }>;
 
   /**
    * Authenticates to UIAM as Kibana itself, using only the mTLS client certificate, and returns
@@ -520,15 +530,28 @@ export class UiamService implements UiamServicePublic {
     };
   }
 
-  /**
-   * Builds the `Authorization` and client authentication headers for a UIAM call made on behalf of
-   * the given request: the request's own UIAM access token, plus the client authentication that
-   * rode in with it, or Kibana's own shared secret when none was supplied.
-   */
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
+    const credential = getUiamAuthorizationHeaderFromRequest(request);
+    const clientAuthentication = resolveUiamClientAuthentication(
+      this.#config.sharedSecret,
+      request.isFakeRequest
+        ? {
+            credentialSource: isExternalUiamCredential(request) ? 'external' : 'internal',
+            credential,
+          }
+        : {
+            credentialSource: 'inbound',
+            credential,
+            relayedClientAuthentication: request.headers[ES_CLIENT_AUTHENTICATION_HEADER],
+            requestHeaders: request.headers,
+          }
+    );
+
     return {
-      ...this.#getClientAuthenticationHeaders(getUiamClientAuthentication(request)),
-      Authorization: `Bearer ${getUiamCredentialsFromRequest(request)}`,
+      ...(typeof clientAuthentication === 'string'
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
+        : {}),
+      Authorization: credential.toString(),
     };
   }
 
@@ -885,9 +908,9 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getServiceAccount}.
    */
-  async getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails> {
+  async getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails | null> {
     try {
-      this.#logger.debug(`Attempting to get service account ${serviceAccountId}.`);
+      this.#logger.debug(`Attempting to get service account [${serviceAccountId}].`);
 
       const response = await UiamService.#parseUiamResponse(
         await fetch(
@@ -904,11 +927,22 @@ export class UiamService implements UiamServicePublic {
         )
       );
 
-      this.#logger.debug(`Successfully got service account ${serviceAccountId}.`);
+      this.#logger.debug(`Successfully got service account [${serviceAccountId}].`);
       return response;
     } catch (err) {
-      this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
+      // An unknown account is an answer rather than a failure, so it resolves rather than throws.
+      if (
+        UiamService.#getErrorCode(err) ===
+          UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND ||
+        (Boom.isBoom(err) && err.output.statusCode === 404)
+      ) {
+        this.#logger.debug(`Service account [${serviceAccountId}] was not found.`);
+        return null;
+      }
 
+      this.#logger.error(
+        () => `Failed to get service account [${serviceAccountId}]: ${getDetailedErrorMessage(err)}`
+      );
       throw err;
     }
   }
@@ -949,7 +983,9 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeServiceAccountToken}.
    */
-  async exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }> {
+  async exchangeServiceAccountToken(
+    serviceAccountId: string
+  ): Promise<{ token: string; expires_in?: string }> {
     this.#logger.debug(
       `Attempting to exchange service account [id=${serviceAccountId}] for an ephemeral token.`
     );
@@ -959,7 +995,7 @@ export class UiamService implements UiamServicePublic {
       // The certificate identifies Kibana's project for the account's assumable_by policy.
       dispatcher: this.#dispatcher,
     };
-    let response: { token: string };
+    let response: { token: string; expires_in?: string };
     try {
       response = await UiamService.#parseUiamResponse(
         await fetch(
@@ -1503,6 +1539,15 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
+  }
+
+  static #getErrorCode(err: unknown): string | undefined {
+    if (!Boom.isBoom(err)) {
+      return undefined;
+    }
+
+    const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
+    return payload?.error?.code;
   }
 
   static #getOAuthTokenExchangeErrorAttributes(err: unknown): {

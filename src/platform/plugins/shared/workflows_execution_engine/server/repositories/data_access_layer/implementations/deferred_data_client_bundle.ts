@@ -9,6 +9,7 @@
 
 import { instrumentAsyncMethods } from '@kbn/apm-utils';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
 import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
 import type {
   DataClient,
@@ -20,6 +21,7 @@ import type {
 
 export interface DeferredDataClientBundleDeps {
   source: ExecutionStorageSource;
+  dataRetention: string;
   logger: Logger;
 }
 
@@ -27,8 +29,6 @@ export class DeferredDataClientBundle implements DataClientBundle {
   private readonly dataClientBundle: DataClientBundle;
   private startPromise: Promise<void> | undefined;
   private setupPromise: Promise<void> | undefined;
-  private workflowClient: WorkflowExecutionsDataClient | undefined;
-  private stepClient: StepExecutionsDataClient | undefined;
 
   constructor(private readonly deps: DeferredDataClientBundleDeps) {
     this.dataClientBundle = this.createDataClientBundle();
@@ -57,22 +57,20 @@ export class DeferredDataClientBundle implements DataClientBundle {
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
-    return (this.workflowClient ??= this.deferClient(() =>
-      this.dataClientBundle.createWorkflowDataClient()
-    ));
+    return this.deferClient(() => this.dataClientBundle.createWorkflowDataClient());
   }
 
   createStepDataClient(): StepExecutionsDataClient {
-    return (this.stepClient ??= this.deferClient(() =>
-      this.dataClientBundle.createStepDataClient()
-    ));
+    return this.deferClient(() => this.dataClientBundle.createStepDataClient());
   }
 
   private createDataClientBundle(): DataClientBundle {
     const { deps } = this;
     switch (deps.source) {
-      case 'system_index':
+      case 'plain_index':
         return new PlainIndexDataClientBundle(deps);
+      case 'data_stream':
+        return new DataStreamDataClientBundle(deps);
       default:
         throw new Error(`Unsupported storage source: ${deps.source}`);
     }

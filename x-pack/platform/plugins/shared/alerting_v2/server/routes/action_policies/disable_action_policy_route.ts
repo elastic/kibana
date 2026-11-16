@@ -34,6 +34,7 @@ export class DisableActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Disable an action policy',
     description: 'Disable an action policy by identifier.',
     oasOperationObject: disableActionPolicyOasExamples,

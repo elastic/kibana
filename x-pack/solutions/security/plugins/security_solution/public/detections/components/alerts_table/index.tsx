@@ -11,6 +11,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type {
   AlertsTableProps as ResponseOpsAlertsTableProps,
+  BulkActionsConfig,
   RenderContext as ResponseOpsRenderContext,
 } from '@kbn/response-ops-alerts-table/types';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
@@ -147,6 +148,10 @@ interface AlertTableProps
   isLoading?: boolean;
   onRuleChange?: () => void;
   disableAdditionalToolbarControls?: boolean;
+  /** Appended to the security bulk actions, unlike `additionalBulkActions`, which replaces them. */
+  additionalBulkActionItems?: BulkActionsConfig[];
+  /** Adds a "Remove from case" item to each row's more actions menu. */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 const sort: GetSecurityAlertsTableProp<'sort'> = [
@@ -178,6 +183,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   isLoading,
   onRuleChange,
   disableAdditionalToolbarControls,
+  additionalBulkActionItems,
+  onRemoveFromCase,
   ...tablePropsOverrides
 }) => {
   const { id } = tablePropsOverrides;
@@ -500,8 +507,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       tableType,
       pageScope,
       openDocumentFlyout,
+      onRemoveFromCase,
     }),
-    [leadingControlColumn, pageScope, openDocumentFlyout, tableType, userProfiles]
+    [leadingControlColumn, pageScope, openDocumentFlyout, onRemoveFromCase, tableType, userProfiles]
   );
 
   const refreshAlertsTable = useCallback(() => {
@@ -517,8 +525,17 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     tableType,
     finalBoolQuery,
     refreshAlertsTable,
-    runtimeMappings
+    runtimeMappings,
+    // A host's `query` (e.g. a case's attached alert ids) replaces finalBoolQuery on the table.
+    tablePropsOverrides.query ?? finalBoolQuery
   );
+  const tableBulkActions = useMemo(() => {
+    if (!additionalBulkActionItems?.length) {
+      return bulkActions;
+    }
+    const [{ items, ...itemsPanel }, ...panels] = bulkActions;
+    return [{ ...itemsPanel, items: [...items, ...additionalBulkActionItems] }, ...panels];
+  }, [additionalBulkActionItems, bulkActions]);
 
   useEffect(() => {
     if (isDataTableInitialized) return;
@@ -653,7 +670,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
                 shouldRenderAdditionalToolbarControls ? undefined : AdditionalToolbarControls
               }
               actionsColumnWidth={leadingControlColumn.width}
-              additionalBulkActions={bulkActions}
+              additionalBulkActions={tableBulkActions}
               fieldsBrowserOptions={
                 DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType)
                   ? fieldsBrowserOptions

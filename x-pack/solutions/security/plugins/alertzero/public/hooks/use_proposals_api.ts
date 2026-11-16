@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import type { UseInfiniteQueryResult, UseQueryResult } from '@kbn/react-query';
 import { useInfiniteQuery, useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -19,12 +18,6 @@ import type { ProposalsPageResponse } from '../../common/proposals/list';
 import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
 
-/**
- * Workers add proposals on their own cadence, so the queue polls. React Query does
- * not poll a disabled query, so a collapsed section refreshes only its count.
- */
-export const PROPOSALS_POLL_INTERVAL_MS = 60_000;
-
 const categoryPath = (category: string) =>
   ALERTZERO_PROPOSALS_CATEGORY_URL.replace('{category}', encodeURIComponent(category));
 
@@ -32,6 +25,8 @@ interface PagesOptions {
   firstPageSize: number;
   step: number;
   enabled: boolean;
+  /** Only proposals whose impact lists this entity id; the server applies it. */
+  entity?: string | null;
 }
 
 /**
@@ -50,7 +45,8 @@ const nextOffset = (lastPage: ProposalsPageResponse, pages: ProposalsPageRespons
 const useProposalsCount = (
   queryKey: readonly unknown[],
   path: string,
-  enabled: boolean
+  enabled: boolean,
+  entity?: string | null
 ): UseQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
@@ -59,25 +55,21 @@ const useProposalsCount = (
     queryFn: async (): Promise<ProposalsPageResponse> =>
       services.http!.get<ProposalsPageResponse>(path, {
         version: API_VERSIONS.internal.v1,
-        query: { size: 0, from: 0 },
+        query: { size: 0, from: 0, ...(entity ? { entity } : {}) },
       }),
     enabled,
-    refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
 };
 
-/** Only the newest window moves on its own; the rest is history the analyst paged into. */
-const isLeadingPage = (_page: ProposalsPageResponse, index: number) => index === 0;
-
 const useProposalsPages = (
   queryKey: readonly unknown[],
   path: string,
-  { firstPageSize, step, enabled }: PagesOptions
+  { firstPageSize, step, enabled, entity }: PagesOptions
 ): UseInfiniteQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
-  const query = useInfiniteQuery({
+  return useInfiniteQuery({
     queryKey,
     // React Query v4 calls the first page with `pageParam: undefined`.
     queryFn: async ({ pageParam }: { pageParam?: number }): Promise<ProposalsPageResponse> => {
@@ -87,46 +79,45 @@ const useProposalsPages = (
       const size = Math.min(from === 0 ? firstPageSize : step, MAX_QUEUE_REACH - from);
       return services.http!.get<ProposalsPageResponse>(path, {
         version: API_VERSIONS.internal.v1,
-        query: { from, size },
+        query: { from, size, ...(entity ? { entity } : {}) },
       });
     },
     getNextPageParam: nextOffset,
     enabled,
     retry: retryOnTransientError,
   });
-
-  // Not `refetchInterval`, which replays every page the analyst has opened and grows
-  // the steady-state request count with each Show more.
-  //
-  // Deliberately only this one, slow heartbeat — no faster poll while a row is settling. A
-  // faster poll here would refetch the very row `useDropDecidedProposal` just removed
-  // optimistically: search consistency for a just-written decision can lag behind the plain
-  // document GET `waitForDecision` confirms it with, so a refetch too soon after deciding reads
-  // the row as still pending and restores it (see that hook's own comment). The slow cadence
-  // gives that lag time to resolve before the next look; a faster one does not.
-  const { refetch } = query;
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-    const poll = setInterval(
-      () => void refetch({ refetchPage: isLeadingPage }),
-      PROPOSALS_POLL_INTERVAL_MS
-    );
-    return () => clearInterval(poll);
-  }, [enabled, refetch]);
-
-  return query;
 };
 
-export const useProposalsByCategoryCount = (category: string, enabled: boolean) =>
-  useProposalsCount(queryKeys.proposals.byCategoryCount(category), categoryPath(category), enabled);
+export const useProposalsByCategoryCount = (
+  category: string,
+  enabled: boolean,
+  entity?: string | null
+) =>
+  useProposalsCount(
+    queryKeys.proposals.byCategoryCount(category, entity),
+    categoryPath(category),
+    enabled,
+    entity
+  );
 
-export const useClosedProposalsCount = (enabled: boolean) =>
-  useProposalsCount(queryKeys.proposals.closedCount(), ALERTZERO_PROPOSALS_CLOSED_URL, enabled);
+export const useClosedProposalsCount = (enabled: boolean, entity?: string | null) =>
+  useProposalsCount(
+    queryKeys.proposals.closedCount(entity),
+    ALERTZERO_PROPOSALS_CLOSED_URL,
+    enabled,
+    entity
+  );
 
 export const useProposalsByCategory = (category: string, options: PagesOptions) =>
-  useProposalsPages(queryKeys.proposals.byCategory(category), categoryPath(category), options);
+  useProposalsPages(
+    queryKeys.proposals.byCategory(category, options.entity),
+    categoryPath(category),
+    options
+  );
 
 export const useClosedProposals = (options: PagesOptions) =>
-  useProposalsPages(queryKeys.proposals.closed(), ALERTZERO_PROPOSALS_CLOSED_URL, options);
+  useProposalsPages(
+    queryKeys.proposals.closed(options.entity),
+    ALERTZERO_PROPOSALS_CLOSED_URL,
+    options
+  );

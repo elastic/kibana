@@ -11,10 +11,24 @@ export const contextEngineQueryKeys = {
   aiIndex: {
     list: () => ['context_engine', 'ai_index', 'list'] as const,
     detail: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId] as const,
-    kiList: (aiIndexId: string, size: number, type: string | undefined) =>
-      ['context_engine', 'ai_index', aiIndexId, 'ki_list', size, type ?? ''] as const,
-    ki: (aiIndexId: string, index: string, kiId: string) =>
-      ['context_engine', 'ai_index', aiIndexId, 'ki', index, kiId] as const,
+    dreaming: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId, 'dreaming'] as const,
+    listKi: (
+      aiIndexId: string,
+      size: number,
+      type: string | undefined,
+      query: string | undefined,
+      lifecycleStatus?: readonly KiLifecycleStatus[]
+    ) =>
+      [
+        'context_engine',
+        'ai_index',
+        aiIndexId,
+        'list_ki',
+        size,
+        type ?? '',
+        query ?? '',
+        lifecycleStatus?.join(',') ?? '',
+      ] as const,
     viewKi: (
       aiIndexId: string,
       index: string,
@@ -30,6 +44,11 @@ export const contextEngineQueryKeys = {
         kiId,
         lifecycleStatus.join(','),
       ] as const,
+  },
+  dreamingTemplates: {
+    list: () => ['context_engine', 'dreaming_templates', 'list'] as const,
+    all: () => ['context_engine', 'dreaming_templates', 'all'] as const,
+    detail: (id: string) => ['context_engine', 'dreaming_templates', id] as const,
   },
   connectors: {
     list: () => ['context_engine', 'connectors', 'list'] as const,

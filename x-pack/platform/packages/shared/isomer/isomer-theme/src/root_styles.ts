@@ -25,17 +25,10 @@ export const rootStyles = isomerDistillery.createStyleModule(
       `,
       { auto: false }
     ),
-    light: rule(() => `${ROOT_SELECTOR}[data-theme='light']`, decls`color-scheme: light;`, {
-      auto: false,
-    }),
-    dark: rule(() => `${ROOT_SELECTOR}[data-theme='dark']`, decls`color-scheme: dark;`, {
-      auto: false,
-    }),
   })
 );
 
 /** Collects the root styles, which no primitive resolves on its own. */
 export const collectRootStyles = (collector: StylesCollector): void => {
-  const { root, light, dark } = rootStyles.handles;
-  collector.use([root, light, dark]);
+  collector.use([rootStyles.handles.root]);
 };

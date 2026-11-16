@@ -11,13 +11,14 @@ import type { StartPlugins } from '../../../plugin';
 import { scheduleAssetCriticalityEcsCompliancyMigration } from '../asset_criticality/migrations/schedule_ecs_compliancy_migration';
 import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/update_asset_criticality_mappings';
 import { updateRiskScoreMappings } from '../risk_engine/migrations/update_risk_score_mappings';
-import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rename_risk_score_component_templates';
 import { cleanupLegacyRiskEngine } from '../risk_engine/migrations/cleanup_previous_risk_engine';
 import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
 import { installPrebuiltWatchlists } from '../watchlists/migrations/install_prebuilt_watchlists';
+import { scheduleAlertEntityIdBackfill } from './backfill_alert_entity_id';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { EntityAnalyticsConfig } from '../types';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -26,6 +27,7 @@ export interface EntityAnalyticsMigrationsParams {
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
   experimentalFeatures?: ExperimentalFeatures;
+  entityAnalyticsConfig?: EntityAnalyticsConfig;
   hasEncryptionKey: boolean;
   /** When defined, migrations are scoped to this space only. When undefined, all spaces are migrated. */
   spaceId?: string;
@@ -41,10 +43,6 @@ export interface EntityAnalyticsMigrationsParams {
  * - Update the mapping object [here](../asset_criticality/constants.ts)
  * - Pump the `ASSET_CRITICALITY_MAPPINGS_VERSIONS` version [here](../asset_criticality/constants.ts)
  *
- * ### How to update the risk score transform config?
- * - Update the transform config [here](../risk_score/configurations.ts)
- * - Pump the `version` [here](../risk_score/configurations.ts)
- * 
  * ### How to update managed entity sources (privmon/watchlist data sources)?
  * 1. For entity source mappings:
  *     - Update the mapping object [here](../privilege_monitoring/saved_objects/monitoring_entity_source_type.ts)
@@ -66,7 +64,6 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await createEventIngestedPipelineInAllNamespaces(paramsWithScopedLogger);
   await updateAssetCriticalityMappings(paramsWithScopedLogger);
   await scheduleAssetCriticalityEcsCompliancyMigration(paramsWithScopedLogger);
-  await renameRiskScoreComponentTemplate(paramsWithScopedLogger);
   await updateRiskScoreMappings(paramsWithScopedLogger);
   await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
   await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
@@ -75,7 +72,7 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
     await installPrebuiltWatchlists(paramsWithScopedLogger);
   }
 
-  if (paramsWithScopedLogger.experimentalFeatures?.entityAnalyticsEntityStoreV2) {
-    await cleanupLegacyRiskEngine(paramsWithScopedLogger);
-  }
+  await cleanupLegacyRiskEngine(paramsWithScopedLogger);
+
+  await scheduleAlertEntityIdBackfill(paramsWithScopedLogger);
 };

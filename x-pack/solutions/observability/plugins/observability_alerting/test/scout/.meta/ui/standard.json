@@ -1,5 +1,5 @@
 {
-  "sha1": "cb57c35c3e4fb059aef615e5b69c8eac266930e3",
+  "sha1": "0628a59afc825fb7afa08dee7bfa4e2efb0085aa",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,6 +18,214 @@
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "36b89cf202f1730-f8fbe94a65f4879",
+      "title": "Observability Alerting - add to case for classic alerts adds an alert to a new case from the row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 84,
+        "column": 19
+      }
+    },
+    {
+      "id": "36b89cf202f1730-ff33e714a90b693",
+      "title": "Observability Alerting - add to case for classic alerts adds an alert to an existing case from the row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 97,
+        "column": 36
+      }
+    },
+    {
+      "id": "36b89cf202f1730-f6a980ed1a94583",
+      "title": "Observability Alerting - add to case for classic alerts adds the selected alerts to a new case from the bulk action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 107,
+        "column": 17
+      }
+    },
+    {
+      "id": "36b89cf202f1730-7accd2cf377d2fd",
+      "title": "Observability Alerting - add to case for classic alerts adds the selected alerts to an existing case, which is then offered as already attached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 116,
+        "column": 60
+      }
+    },
+    {
+      "id": "36b89cf202f1730-5a17a77d3fc99e7",
+      "title": "Observability Alerting - add to case for classic alerts skips the alerts already attached to the chosen case",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 136,
+        "column": 11
+      }
+    },
+    {
+      "id": "36b89cf202f1730-5ee4f5fe3fa3f6a",
+      "title": "Observability Alerting - add to case for classic alerts hides the add to case actions without cases privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 156,
+        "column": 11
+      }
+    },
+    {
+      "id": "004cac2336f17c2-a92e9f9e3491e82",
+      "title": "Observability Alerting - alert action privileges user with rule privileges on the alert sees the classic write actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/alert_action_privileges.spec.ts",
+        "line": 61,
+        "column": 13
+      }
+    },
+    {
+      "id": "004cac2336f17c2-11429ef922c0264",
+      "title": "Observability Alerting - alert action privileges user with the alerts-only write capability sees the classic write actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/alert_action_privileges.spec.ts",
+        "line": 61,
+        "column": 94
+      }
+    },
+    {
+      "id": "004cac2336f17c2-62b96872ea85a66",
+      "title": "Observability Alerting - alert action privileges rule privileges on any rule type grant the classic write actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/alert_action_privileges.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "004cac2336f17c2-ab497a4f56ce0ab",
+      "title": "Observability Alerting - alert action privileges read-only user only sees the read-safe view-in-app action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/alert_action_privileges.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "004cac2336f17c2-fdb972eb0a7f5ca",
+      "title": "Observability Alerting - alert action privileges universal write privilege only enables write actions on the universal alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/alert_action_privileges.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "004cac2336f17c2-d92ae4351af4ada",
+      "title": "Observability Alerting - alert action privileges classic write privilege only enables write actions on the classic alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/alert_action_privileges.spec.ts",
+        "line": 97,
+        "column": 13
+      }
+    },
+    {
+      "id": "8c0fc2f4c771c47-bc5500a0e16b623",
+      "title": "Observability Alerting - classic stack alert action privileges user with the stack alerts write capability sees the stack alert write actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/classic_stack_alert_action_privileges.spec.ts",
+        "line": 55,
+        "column": 52
+      }
+    },
+    {
+      "id": "8c0fc2f4c771c47-c3dc4fb605088c8",
+      "title": "Observability Alerting - classic stack alert action privileges write capability on any classic alerts feature applies to every classic alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/classic_stack_alert_action_privileges.spec.ts",
+        "line": 56,
+        "column": 52
       }
     },
     {
@@ -73,12 +281,13 @@
       "title": "Observability Alerting - privilege-based page access user with logs read privilege sees the full inbox page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 279,
-        "column": 26
+        "line": 215,
+        "column": 24
       }
     },
     {
@@ -86,12 +295,13 @@
       "title": "Observability Alerting - privilege-based page access user with logs read privilege and only classic index access sees no error toasts",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 295,
-        "column": 77
+        "line": 231,
+        "column": 9
       }
     },
     {
@@ -99,12 +309,13 @@
       "title": "Observability Alerting - privilege-based page access user with alerting_v2_alerts read privilege sees the full inbox page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 278,
-        "column": 24
+        "line": 246,
+        "column": 79
       }
     },
     {
@@ -112,11 +323,12 @@
       "title": "Observability Alerting - privilege-based page access user with no alerting privileges is blocked",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 290,
+        "line": 227,
         "column": 24
       }
     },
@@ -425,8 +637,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-3200306d454ad51",
-      "title": "Observability Alerting URLs settings flyout does not leave Observability Alerting",
+      "id": "648c81c97fb0579-da3e9492e872e0a",
+      "title": "Observability Alerting URLs settings page does not leave Observability Alerting",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -473,8 +685,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-c8f03d58511bccc",
-      "title": "Observability Alerting URLs settings from logs does not leave Observability Alerting",
+      "id": "648c81c97fb0579-c9d4c6da5c29c1b",
+      "title": "Observability Alerting URLs settings from logs stays under Observability Alerting",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

@@ -7,6 +7,7 @@
 
 import type { StructuredTool } from '@langchain/core/tools';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { UserProvidedContext } from './user_context';
 
 export interface SubAgentParams {
   name: string;
@@ -28,4 +29,5 @@ export interface AutomaticImportAgentParams {
   model: InferenceChatModel;
   subagents: SubAgent[];
   samples?: string[];
+  userContext?: UserProvidedContext;
 }

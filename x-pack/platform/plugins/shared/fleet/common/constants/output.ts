@@ -105,6 +105,12 @@ export const kafkaOAuth2SignatureAlgorithm = {
 // Elastic Agent supports OAUTHBEARER for the Kafka output from this version.
 export const KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
 
+// How the agent authenticates to the Kerberos server: with a keytab file or with a password.
+export const kafkaKerberosAuthType = {
+  Keytab: 'keytab',
+  Password: 'password',
+} as const;
+
 export const kafkaPartitionType = {
   Random: 'random',
   RoundRobin: 'round_robin',
@@ -240,6 +246,10 @@ export const BEATS_OUTPUT_TYPES: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+// Output types valid for agent policies that mix OTel and Beats inputs, and that carry the
+// `otel_exporter_config_yaml` / `otel_disable_beatsauth` settings ("OpenTelemetry exporter" UI section).
+// otlp is excluded: Beats inputs cannot ship to it, and it is configured through `otlp_exporter`.
+// OTel-only policies can use otlp, see OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES.
 export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.Elasticsearch,
   outputType.RemoteElasticsearch,

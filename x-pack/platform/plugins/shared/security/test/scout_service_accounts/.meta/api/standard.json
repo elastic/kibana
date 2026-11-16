@@ -1,5 +1,5 @@
 {
-  "sha1": "e426ad745550290c52be08415af6d1bfcf7371f2",
+  "sha1": "05c7b9b25386e30abadaa3d186023fb219dc6e45",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -312,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 361,
-        "column": 20
+        "line": 362,
+        "column": 25
       }
     },
     {
@@ -325,7 +325,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 412,
+        "line": 413,
         "column": 20
       }
     },
@@ -338,7 +338,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 426,
+        "line": 427,
         "column": 22
       }
     },
@@ -351,7 +351,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 446,
+        "line": 447,
         "column": 6
       }
     },
@@ -585,8 +585,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 128,
-        "column": 1
+        "line": 200,
+        "column": 5
       }
     },
     {
@@ -598,7 +598,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 149,
+        "line": 230,
         "column": 24
       }
     },
@@ -611,8 +611,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 179,
-        "column": 7
+        "line": 258,
+        "column": 17
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-3429d9a84072140",
+      "title": "List and get Elasticsearch service accounts names an account created with an API key by the key and its owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 265,
+        "column": 84
       }
     },
     {
@@ -624,8 +637,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 185,
-        "column": 22
+        "line": 306,
+        "column": 12
       }
     },
     {
@@ -637,8 +650,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 199,
-        "column": 22
+        "line": 321,
+        "column": 29
       }
     },
     {
@@ -650,8 +663,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 252,
-        "column": 14
+        "line": 371,
+        "column": 5
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-2a7af9396e69e77",
+      "title": "List and get Elasticsearch service accounts counts the workloads bound to an account across every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 434,
+        "column": 23
       }
     },
     {
@@ -663,8 +689,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 316,
-        "column": 25
+        "line": 475,
+        "column": 53
       }
     },
     {
@@ -676,34 +702,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 325,
-        "column": 9
+        "line": 485,
+        "column": 18
       }
     },
     {
-      "id": "99ae9153aa6c845-d578af991c99a56",
-      "title": "List and get Elasticsearch service accounts allows a caller with `read_security` to read but not to create",
+      "id": "99ae9153aa6c845-f6bb3404418cc1b",
+      "title": "List and get Elasticsearch service accounts refuses a caller with only `read_security`, since reading takes `manage_security` too",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 339,
-        "column": 20
+        "line": 493,
+        "column": 65
       }
     },
     {
-      "id": "99ae9153aa6c845-bbaea54c7e12533",
-      "title": "List and get Elasticsearch service accounts refuses a caller without `read_security`",
+      "id": "99ae9153aa6c845-3fd0bf349b9e526",
+      "title": "List and get Elasticsearch service accounts refuses a caller without `manage_security`",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 389,
-        "column": 23
+        "line": 532,
+        "column": 4
       }
     },
     {
@@ -733,6 +759,19 @@
       }
     },
     {
+      "id": "c5e12f6b333e70b-60363125e676c59",
+      "title": "Refresh UIAM service account credentials before a self call finishes a short handler after its original token expires",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/refresh_uiam_self_call.spec.ts",
+        "line": 47,
+        "column": 24
+      }
+    },
+    {
       "id": "80aa0268a56d47d-1e8d60f2f8bd33f",
       "title": "Renew UIAM service account workload tokens renews an expired token transparently on an existing scoped ES client",
       "expectedStatus": "passed",
@@ -756,6 +795,32 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/renew_uiam_service_account.spec.ts",
         "line": 95,
         "column": 31
+      }
+    },
+    {
+      "id": "59d216cc3c0fabb-4163c34b2953cb6",
+      "title": "Service account audit events audits a create, and a create the user is not authorized for",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_audit.spec.ts",
+        "line": 69,
+        "column": 5
+      }
+    },
+    {
+      "id": "59d216cc3c0fabb-52bba63f83b4dc7",
+      "title": "Service account audit events audits a binding, the execution under it, and the unbind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_audit.spec.ts",
+        "line": 122,
+        "column": 23
       }
     },
     {
@@ -821,6 +886,58 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_created_workloads.spec.ts",
         "line": 257,
         "column": 17
+      }
+    },
+    {
+      "id": "be270b630b801ee-c374133a145f347",
+      "title": "Workloads created by a UIAM service account a direct caller creates a rule that holds only a UIAM API key and outlives the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
+        "line": 182,
+        "column": 70
+      }
+    },
+    {
+      "id": "be270b630b801ee-b4bf0c94eb5f5b4",
+      "title": "Workloads created by a UIAM service account a direct caller schedules a task that holds only a UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
+        "line": 200,
+        "column": 17
+      }
+    },
+    {
+      "id": "be270b630b801ee-26232a6741eae49",
+      "title": "Workloads created by a UIAM service account a workload running as the account creates a rule through the self client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
+        "line": 216,
+        "column": 27
+      }
+    },
+    {
+      "id": "be270b630b801ee-970eaa2f132f5f3",
+      "title": "Workloads created by a UIAM service account a workload running as the account schedules a task through the self client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/uiam_service_account_created_workloads.spec.ts",
+        "line": 244,
+        "column": 15
       }
     }
   ]

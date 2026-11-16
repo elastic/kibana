@@ -13,6 +13,8 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import agent from 'elastic-apm-node';
 import * as apmUtils from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
@@ -22,6 +24,9 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import { WorkflowExecutionTelemetryEventTypes } from '../../lib/telemetry/events/workflows_execution/types';
+import { WorkflowExecutionTelemetryClient } from '../../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { buildWorkflowContext } from '../build_workflow_context';
 import {
@@ -36,6 +41,7 @@ import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
 
 jest.mock('../build_workflow_context', () => {
   return {
+    ...jest.requireActual('../build_workflow_context'),
     buildWorkflowContext: jest.fn(),
   };
 });
@@ -84,6 +90,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       return mockDateNow;
     });
+    // The telemetry client parses timestamps, so keep the static parser on the mocked constructor.
+    global.Date.parse = originalDateCtor.parse;
   });
   afterAll(() => {
     jest.restoreAllMocks();
@@ -261,6 +269,27 @@ describe('WorkflowExecutionRuntimeManager', () => {
   describe('start', () => {
     beforeEach(() => {
       mockDateNow = new Date('2025-08-05T20:00:00.000Z');
+    });
+
+    it('preserves the name assigned at creation when starting and resuming', async () => {
+      workflowExecution.runName = 'Deploy staging';
+      workflowExecution.workflowDefinition = {
+        name: 'Deploy',
+        version: '1',
+        enabled: true,
+        'run-name': 'A different name',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+      };
+
+      await underTest.start();
+      workflowExecution.currentNodeId = 'node2';
+      await underTest.resume();
+
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith(
+        expect.objectContaining({ runName: expect.anything() })
+      );
+      expect(underTest.getWorkflowExecution().runName).toBe('Deploy staging');
     });
 
     it('should set current step to the first node in the workflow', async () => {
@@ -615,6 +644,40 @@ describe('WorkflowExecutionRuntimeManager', () => {
       );
       expect(workflowLogger.logInfo).not.toHaveBeenCalledWith(
         `Workflow execution completed successfully`,
+        expect.anything()
+      );
+    });
+
+    it('should finalize the terminal state only once when saved again after completion', async () => {
+      workflowExecutionCursor.setCurrentNodeId(undefined);
+      await underTest.saveState();
+
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          status: ExecutionStatus.COMPLETED,
+          finishedAt: '2025-08-06T00:00:04.000Z',
+          duration: 14404000,
+        })
+      );
+
+      // The execution loop saves once more after the flow loop exits, with the status already stored.
+      jest.mocked(workflowExecutionState.getWorkflowExecution).mockReturnValue({
+        ...workflowExecution,
+        status: ExecutionStatus.COMPLETED,
+        finishedAt: '2025-08-06T00:00:04.000Z',
+        duration: 14404000,
+      });
+      mockDateNow = new Date('2025-08-06T00:00:05.000Z');
+      await underTest.saveState();
+
+      const secondUpdate = jest.mocked(workflowExecutionState.updateWorkflowExecution).mock
+        .lastCall?.[0];
+      expect(secondUpdate).toEqual(expect.objectContaining({ status: ExecutionStatus.COMPLETED }));
+      expect(secondUpdate).not.toHaveProperty('finishedAt');
+      expect(secondUpdate).not.toHaveProperty('duration');
+      expect(workflowLogger.logInfo).toHaveBeenCalledTimes(1);
+      expect(workflowLogger.logInfo).toHaveBeenCalledWith(
+        'Workflow execution completed successfully',
         expect.anything()
       );
     });
@@ -1136,5 +1199,143 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       expect(mockReport).toHaveBeenCalledTimes(1);
     });
+
+    it.each([
+      [ExecutionStatus.COMPLETED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted],
+      [ExecutionStatus.FAILED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed],
+      [ExecutionStatus.CANCELLED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled],
+    ])(
+      'should report composition fields for a %s child execution after the context is rebuilt',
+      async (status, eventType) => {
+        const analytics = analyticsServiceMock.createAnalyticsServiceStart();
+        const childWorkflowExecution = {
+          ...workflowExecution,
+          context: {
+            parentDepth: 1,
+            parentWorkflowExecutionId: 'parent-execution-id',
+            parentWorkflowId: 'parent-workflow-id',
+            parentWorkflowInvocation: 'sync',
+          },
+          status,
+          triggeredBy: 'workflow-step',
+          workflowDefinition: { steps: [] } as Partial<WorkflowYaml> as WorkflowYaml,
+        } as EsWorkflowExecution;
+        (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue(
+          childWorkflowExecution
+        );
+        // The rebuilt context has the render shape, without the raw parent* keys.
+        buildWorkflowContextMock.mockReturnValue({
+          execution: {} as WorkflowExecutionContext,
+          parent: {
+            depth: 2,
+            executionId: 'parent-execution-id',
+            workflowId: 'parent-workflow-id',
+          },
+        } as WorkflowContext);
+        underTest = new WorkflowExecutionRuntimeManager({
+          coreStart: fakeCoreStart as CoreStart,
+          dependencies: fakeContextDependencies,
+          stepIoService,
+          telemetryClient: new WorkflowExecutionTelemetryClient(analytics, loggerMock.create()),
+          workflowExecution: childWorkflowExecution,
+          workflowExecutionCursor,
+          workflowExecutionGraph,
+          workflowExecutionState,
+          workflowLogger,
+        });
+        workflowExecutionCursor.setCurrentNodeId(undefined);
+
+        await underTest.saveState();
+
+        expect(analytics.reportEvent).toHaveBeenCalledWith(
+          eventType,
+          expect.objectContaining({
+            compositionDepth: 2,
+            parentWorkflowId: 'parent-workflow-id',
+            parentWorkflowInvocation: 'sync',
+          })
+        );
+      }
+    );
+
+    it.each([
+      [ExecutionStatus.COMPLETED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted],
+      [ExecutionStatus.FAILED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed],
+      [ExecutionStatus.CANCELLED, WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled],
+    ])(
+      'should report the execution chain, and no flat lineage ids, for a %s child execution after the context is rebuilt',
+      async (status, eventType) => {
+        const analytics = analyticsServiceMock.createAnalyticsServiceStart();
+        const childWorkflowExecution = {
+          ...workflowExecution,
+          context: {
+            executionChain: [
+              {
+                executionId: 'root-execution-id',
+                invocation: 'async',
+                workflowId: 'root-workflow-id',
+              },
+              {
+                executionId: 'parent-execution-id',
+                invocation: 'sync',
+                workflowId: 'parent-workflow-id',
+              },
+            ],
+            parentDepth: 1,
+            parentWorkflowExecutionId: 'parent-execution-id',
+            parentWorkflowId: 'parent-workflow-id',
+            parentWorkflowInvocation: 'sync',
+          },
+          status,
+          triggeredBy: 'workflow-step',
+          workflowDefinition: { steps: [] } as Partial<WorkflowYaml> as WorkflowYaml,
+        } as EsWorkflowExecution;
+        (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue(
+          childWorkflowExecution
+        );
+        // The rebuilt context has the render shape, without the raw parent* and chain keys.
+        buildWorkflowContextMock.mockReturnValue({
+          execution: {} as WorkflowExecutionContext,
+          parent: {
+            depth: 2,
+            executionId: 'parent-execution-id',
+            workflowId: 'parent-workflow-id',
+          },
+        } as WorkflowContext);
+        underTest = new WorkflowExecutionRuntimeManager({
+          coreStart: fakeCoreStart as CoreStart,
+          dependencies: fakeContextDependencies,
+          stepIoService,
+          telemetryClient: new WorkflowExecutionTelemetryClient(analytics, loggerMock.create()),
+          workflowExecution: childWorkflowExecution,
+          workflowExecutionCursor,
+          workflowExecutionGraph,
+          workflowExecutionState,
+          workflowLogger,
+        });
+        workflowExecutionCursor.setCurrentNodeId(undefined);
+
+        await underTest.saveState();
+
+        expect(analytics.reportEvent).toHaveBeenCalledWith(
+          eventType,
+          expect.objectContaining({
+            executionChain: [
+              {
+                executionId: 'root-execution-id',
+                invocation: 'async',
+                workflowId: 'root-workflow-id',
+              },
+              {
+                executionId: 'parent-execution-id',
+                invocation: 'sync',
+                workflowId: 'parent-workflow-id',
+              },
+            ],
+            compositionDepth: 2,
+          })
+        );
+      }
+    );
   });
 });

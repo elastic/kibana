@@ -28,8 +28,6 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/data-views-plugin'
-  - '@kbn/data-view-utils'
-  - '@kbn/expressions-plugin'
   - '@kbn/lens-plugin'
   - '@kbn/shared-ux-toolbar-selector'
   - '@kbn/ui-actions-plugin'
@@ -71,6 +69,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

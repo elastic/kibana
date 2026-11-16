@@ -47,6 +47,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
     closeModal: closeRunWorkflowModal,
     inputs: workflowInputs,
     runWorkflow,
+    telemetry: workflowTelemetry,
     filterWorkflow: workflowFilterWorkflow,
     sortWorkflow: workflowSortWorkflow,
   } = useRunCaseWorkflow({ caseData });
@@ -170,6 +171,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           filterWorkflow={workflowFilterWorkflow}
           sortWorkflow={workflowSortWorkflow}
           onClose={closeRunWorkflowModal}
+          telemetry={workflowTelemetry}
         />
       )}
     </EuiFlexItem>

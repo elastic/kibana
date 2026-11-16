@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/restorable-state'
   - '@kbn/scout'
   - '@kbn/core'
+  - '@kbn/utility-types'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package
@@ -44,6 +46,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

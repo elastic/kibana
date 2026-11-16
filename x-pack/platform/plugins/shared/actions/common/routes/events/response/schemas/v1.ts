@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { MAX_HANDSHAKE_CHALLENGE_LENGTH } from '@kbn/connector-specs';
+import {
+  MAX_HANDLE_EVENTS_HTTP_BODY_BYTES,
+  MAX_HANDSHAKE_CHALLENGE_LENGTH,
+} from '@kbn/connector-specs';
 
 export const ingestEventsResponseSchema = schema.object(
   {
@@ -19,11 +22,7 @@ export const ingestEventsResponseSchema = schema.object(
   { meta: { id: 'ingest_events_response' } }
 );
 
-/**
- * Public ingest HTTP 200. v1 is a generic JSON object so a later connector can ack
- * without a new OAS version. `.inboundWebhook` handshake is `{ challenge }`.
- */
-export const ingestEventsAckResponseSchema = schema.object(
+const ingestEventsAckJsonResponseSchema = schema.object(
   {
     challenge: schema.maybe(
       schema.string({
@@ -39,9 +38,29 @@ export const ingestEventsAckResponseSchema = schema.object(
   {
     unknowns: 'allow',
     meta: {
-      id: 'ingest_events_ack_response',
       description:
-        'Connector HTTP 200 ack. `.inboundWebhook` handshake is `{ challenge }`. Other connector types may return a different JSON object.',
+        'Connector HTTP 200 JSON ack. `.inboundWebhook` and Slack handshake is `{ challenge }`.',
+    },
+  }
+);
+
+const ingestEventsAckTextResponseSchema = schema.string({
+  minLength: 1,
+  maxLength: MAX_HANDLE_EVENTS_HTTP_BODY_BYTES,
+  meta: {
+    description: 'Plain-text HTTP ack body.',
+  },
+});
+
+/**
+ * Public ingest HTTP 200. A JSON object or a non-empty plain-text string.
+ */
+export const ingestEventsAckResponseSchema = schema.oneOf(
+  [ingestEventsAckTextResponseSchema, ingestEventsAckJsonResponseSchema],
+  {
+    meta: {
+      id: 'ingest_events_ack_response',
+      description: 'Connector HTTP 200 ack. JSON or a plain-text body. No event is emitted.',
     },
   }
 );

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { EntityDefinitionOfAnyType, EuidAttribute } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
+import type { EntityDefinitionWithoutId, EuidAttribute } from '../definitions/entity_schema';
+import {
+  getPostStatsFieldOverrides,
+  getPreAggFieldOverrides,
+  isSingleFieldIdentity,
+} from '../definitions/entity_schema';
 import type { EuidGateOptions } from './commons';
 import {
   applyWhenConditionTrueSetFields,
@@ -28,7 +32,7 @@ import { applyFieldEvaluations } from './field_evaluations';
  *
  * For single-field identities there is nothing to evaluate, so `doc` is returned unchanged.
  */
-export function buildEvaluatedDoc(entityDefinition: EntityDefinitionOfAnyType, doc: any): any {
+export function buildEvaluatedDoc(entityDefinition: EntityDefinitionWithoutId, doc: any): any {
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -40,17 +44,13 @@ export function buildEvaluatedDoc(entityDefinition: EntityDefinitionOfAnyType, d
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     evaluatedDoc = { ...evaluatedDoc, ...evaluated };
   }
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(
-      evaluatedDoc,
-      entityDefinition.whenConditionTrueSetFieldsPreAgg
-    );
+  const preAggFieldOverrides = getPreAggFieldOverrides(entityDefinition);
+  if (preAggFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(evaluatedDoc, preAggFieldOverrides);
   }
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(
-      evaluatedDoc,
-      entityDefinition.whenConditionTrueSetFieldsAfterStats
-    );
+  const postStatsFieldOverrides = getPostStatsFieldOverrides(entityDefinition);
+  if (postStatsFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(evaluatedDoc, postStatsFieldOverrides);
   }
   return evaluatedDoc;
 }
@@ -81,7 +81,7 @@ export function buildEvaluatedDoc(entityDefinition: EntityDefinitionOfAnyType, d
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
 export function getEuidFromObject(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   doc: any,
   options?: EuidGateOptions
 ) {
@@ -133,7 +133,7 @@ export function getEuidFromObject(
  * @param doc - The document to derive entity id from. May be a flattened or nested shape.
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
-export function getEuidFromObjectForSearch(entityDefinition: EntityDefinitionOfAnyType, doc: any) {
+export function getEuidFromObjectForSearch(entityDefinition: EntityDefinitionWithoutId, doc: any) {
   return getEuidFromObject(entityDefinition, doc, { applyPostAggFilter: false });
 }
 
@@ -142,7 +142,7 @@ export function getEuidFromObjectForSearch(entityDefinition: EntityDefinitionOfA
  * using the same rules as {@link getEuidFromObject}. Use for entity store resolution / flyout identity seeds.
  */
 export function getEntityIdentifiersFromDocument(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   doc: unknown
 ): Record<string, string> | undefined {
   if (!doc) {

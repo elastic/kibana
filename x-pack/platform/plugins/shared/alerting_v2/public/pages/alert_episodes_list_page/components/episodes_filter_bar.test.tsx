@@ -6,30 +6,24 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { createMockServices } from '@kbn/alerting-v2-episodes-ui/hooks/test_utils';
 import { useFetchEpisodeTagOptions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options';
+import { useFetchEpisodeConnectorSources } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_connector_sources';
+import * as inlineFilterPopoverModule from '@kbn/alerting-v2-episodes-ui/components/filters/inline_filter_popover';
 import { useBulkGetProfiles } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles';
 import { fetchRulesSearch } from '@kbn/alerting-v2-episodes-ui/apis/fetch_rules_search';
 import { TestProviders } from '../../../test_utils/test_providers';
 import { EpisodesFilterBar } from './episodes_filter_bar';
 
-jest.mock('react-use/lib/useDebounce', () => jest.fn());
-
-const mockUseEuiContainerQuery = jest.fn();
-
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiContainerQuery: (condition: string) => ({
-    ref: { current: null },
-    matches: mockUseEuiContainerQuery(condition),
-  }),
-}));
-
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  AlertingDateRangePicker: ({
+const mockEpisodesKqlInput = jest.fn((_props: Record<string, unknown>) => (
+  <div data-test-subj="episodesFilterBar-search" />
+));
+const mockAlertingDateRangePicker = jest.fn(
+  ({
     collapsed,
     showTimeWindowButtons,
     'data-test-subj': dataTestSubj,
@@ -43,11 +37,33 @@ jest.mock('@kbn/alerting-v2-browser-shared', () => ({
       data-collapsed={collapsed}
       data-show-time-window-buttons={showTimeWindowButtons}
     />
-  ),
+  )
+);
+
+jest.mock('./episodes_kql_input', () => ({
+  EpisodesKqlInput: (props: Record<string, unknown>) => mockEpisodesKqlInput(props),
+}));
+
+const mockUseEuiContainerQuery = jest.fn();
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useEuiContainerQuery: (condition: string) => ({
+    ref: { current: null },
+    matches: mockUseEuiContainerQuery(condition),
+  }),
+}));
+
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: (props: Record<string, unknown>) => mockAlertingDateRangePicker(props),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options', () => ({
   useFetchEpisodeTagOptions: jest.fn(),
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_connector_sources', () => ({
+  useFetchEpisodeConnectorSources: jest.fn(),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_rules_search', () => ({
@@ -59,6 +75,8 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles', () => ({
 }));
 
 const mockUseFetchEpisodeTagOptions = jest.mocked(useFetchEpisodeTagOptions);
+const mockUseFetchEpisodeConnectorSources = jest.mocked(useFetchEpisodeConnectorSources);
+const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 const mockFetchRulesSearch = jest.mocked(fetchRulesSearch);
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 
@@ -91,6 +109,31 @@ const renderFilterBar = () =>
     </TestProviders>
   );
 
+const getLatestEpisodesKqlInputProps = () => {
+  const props = mockEpisodesKqlInput.mock.calls.at(-1)?.[0];
+  if (!props) {
+    throw new Error('EpisodesKqlInput was not rendered');
+  }
+  return props as {
+    onChange: (value: string) => void;
+    onSubmit: () => void;
+  };
+};
+
+const getLatestDateRangePickerProps = () => {
+  const props = mockAlertingDateRangePicker.mock.calls.at(-1)?.[0];
+  if (!props) {
+    throw new Error('AlertingDateRangePicker was not rendered');
+  }
+  return props as {
+    needsUpdate: boolean;
+    isRefreshDisabled: boolean;
+    onRefresh: () => void;
+    onManualRefresh: () => void;
+    refreshTooltip?: string;
+  };
+};
+
 describe('EpisodesFilterBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -99,11 +142,175 @@ describe('EpisodesFilterBar', () => {
       data: [],
       isLoading: false,
     } as unknown as ReturnType<typeof useFetchEpisodeTagOptions>);
+    mockUseFetchEpisodeConnectorSources.mockReturnValue({
+      data: [],
+      isLoading: false,
+    } as unknown as ReturnType<typeof useFetchEpisodeConnectorSources>);
     mockFetchRulesSearch.mockResolvedValue([]);
     mockUseBulkGetProfiles.mockReturnValue({
       data: [],
       isFetching: false,
     } as unknown as ReturnType<typeof useBulkGetProfiles>);
+  });
+
+  it('does not apply a query while typing', () => {
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      const { onChange } = getLatestEpisodesKqlInputProps();
+      onChange('severity: high');
+    });
+
+    expect(defaultProps.onFilterChange).not.toHaveBeenCalled();
+    expect(getLatestDateRangePickerProps()).toMatchObject({
+      needsUpdate: true,
+      isRefreshDisabled: false,
+    });
+  });
+
+  it('applies a valid KQL query on submit', () => {
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('severity: high');
+    });
+    act(() => {
+      getLatestEpisodesKqlInputProps().onSubmit();
+    });
+
+    const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
+    expect(updateFilter({ status: ['active'] })).toEqual({
+      status: ['active'],
+      queryString: 'severity: high',
+    });
+  });
+
+  it('removes the applied query as soon as the input is cleared', () => {
+    render(
+      <TestProviders>
+        <EpisodesFilterBar
+          {...defaultProps}
+          filterState={{ status: ['active'], queryString: 'severity: high' }}
+        />
+      </TestProviders>
+    );
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('');
+    });
+
+    expect(defaultProps.onFilterChange).toHaveBeenCalledTimes(1);
+    const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
+    expect(updateFilter({ status: ['active'], queryString: 'severity: high' })).toEqual({
+      status: ['active'],
+      queryString: undefined,
+    });
+  });
+
+  it('does not update filters when an input without an applied query is emptied', () => {
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('severity: high');
+    });
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('');
+    });
+
+    expect(defaultProps.onFilterChange).not.toHaveBeenCalled();
+  });
+
+  it('uses the refresh button to submit a valid draft', () => {
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('severity: high');
+    });
+    act(() => {
+      getLatestDateRangePickerProps().onManualRefresh();
+    });
+
+    expect(defaultProps.onFilterChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('refreshes the applied query without submitting a valid draft on auto-refresh', () => {
+    const onRefresh = jest.fn();
+    render(
+      <TestProviders>
+        <EpisodesFilterBar {...defaultProps} onRefresh={onRefresh} />
+      </TestProviders>
+    );
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('severity: high');
+    });
+    act(() => {
+      getLatestDateRangePickerProps().onRefresh();
+    });
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+    expect(defaultProps.onFilterChange).not.toHaveBeenCalled();
+  });
+
+  it('disables update and exposes the validation error for an unsupported draft', () => {
+    renderFilterBar();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('data.enabled > true');
+    });
+
+    expect(getLatestDateRangePickerProps()).toMatchObject({
+      needsUpdate: true,
+      isRefreshDisabled: true,
+      refreshTooltip: expect.stringContaining('data.enabled'),
+    });
+  });
+
+  it('writes a source selection into the filter state', async () => {
+    const user = userEvent.setup({ delay: null });
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    await user.click(screen.getByTestId('episodesFilterBar-source-button'));
+    const popoverProps = InlineFilterPopoverSpy.mock.calls.at(-1)?.[0];
+    if (!popoverProps) {
+      throw new Error('Source filter popover was not opened');
+    }
+    act(() => {
+      popoverProps.onSelectionChange(['v2', 'zabbix']);
+    });
+
+    const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
+    expect(updateFilter({ status: ['active'] })).toEqual({
+      status: ['active'],
+      sources: ['v2', 'zabbix'],
+    });
+  });
+
+  it('drops the sources key when the selection is cleared', async () => {
+    const user = userEvent.setup({ delay: null });
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    await user.click(screen.getByTestId('episodesFilterBar-source-button'));
+    const popoverProps = InlineFilterPopoverSpy.mock.calls.at(-1)?.[0];
+    if (!popoverProps) {
+      throw new Error('Source filter popover was not opened');
+    }
+    act(() => {
+      popoverProps.onSelectionChange([]);
+    });
+
+    const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
+    expect(updateFilter({ status: ['active'], sources: ['v2'] })).toEqual({
+      status: ['active'],
+    });
   });
 
   it('renders search and all episode filters', () => {
@@ -112,6 +319,7 @@ describe('EpisodesFilterBar', () => {
     expect(screen.getByRole('search', { name: 'Filter alerts' })).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-search')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-status-button')).toBeInTheDocument();
+    expect(screen.getByTestId('episodesFilterBar-source-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-severity-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-rule-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-tags-button')).toBeInTheDocument();

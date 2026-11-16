@@ -6,7 +6,11 @@
  */
 
 import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinition,
+  NodeDefinition,
+  PanelOpenerChildDefinition,
+} from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
@@ -228,6 +232,7 @@ describe('Navigation Tree', () => {
           title: 'Rule Management',
           children: expect.arrayContaining([
             expect.objectContaining({ link: 'observabilityAlerting:rules-v2' }),
+            expect.objectContaining({ link: 'observabilityAlerting:rule-library' }),
             expect.objectContaining({
               link: 'observabilityAlerting:rules-v1',
               sideNavStatus: 'hidden',
@@ -317,6 +322,53 @@ describe('Navigation Tree', () => {
     expect((indicesSection as any).children).toContainEqual(
       expect.objectContaining({ link: 'management:data_federation' })
     );
+  });
+
+  describe('Entity Inventory navigation group', () => {
+    const getInfrastructureSectionChildren = (
+      options: Parameters<typeof createNavigationTree>[0]
+    ): NodeDefinition[] => {
+      const { body } = createNavigationTree(options) as NavigationTreeDefinition;
+      const infrastructure = body.find((item) => item.id === 'metrics');
+
+      return (infrastructure?.children as NodeDefinition[]) ?? [];
+    };
+
+    it('does not include the group when the plugin is absent', () => {
+      const children = getInfrastructureSectionChildren({ core });
+
+      expect(children.find((item) => item.title === 'Entity Inventory')).toBeUndefined();
+    });
+
+    it('includes the group provided by the plugin when it is present', () => {
+      const entityInventoryNavGroup: PanelOpenerChildDefinition = {
+        title: 'Entity Inventory',
+        children: [
+          { link: 'entityInventoryApp:allResources' as const },
+          { link: 'entityInventoryApp:hosts' as const },
+          { link: 'entityInventoryApp:kubernetes' as const },
+        ],
+      };
+
+      const children = getInfrastructureSectionChildren({ core, entityInventoryNavGroup });
+
+      expect(children).toContainEqual(entityInventoryNavGroup);
+    });
+
+    it('keeps the original Infrastructure links when the plugin is present', () => {
+      const children = getInfrastructureSectionChildren({
+        core,
+        entityInventoryNavGroup: {
+          title: 'Entity Inventory',
+          children: [{ link: 'entityInventoryApp:allResources' as const }],
+        },
+      });
+      const infrastructureLinks = children[0].children?.map((item) => item.link);
+
+      expect(infrastructureLinks).toEqual(
+        expect.arrayContaining(['metrics:inventory', 'metrics:hosts'])
+      );
+    });
   });
 
   describe('filterForFeatureAvailability', () => {

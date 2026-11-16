@@ -12,6 +12,7 @@ import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { KibanaRequest } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type {
@@ -80,7 +81,7 @@ export const getAvailableConnectors = async (params: {
   const actionsClientWithRequest = await getActionsClientWithRequest(request);
 
   const [connectors, actionTypes] = await Promise.all([
-    actionsClient.getAll(spaceId),
+    actionsClient.getAll(brandSpaceId(spaceId)),
     actionsClientWithRequest.listTypes({
       featureId: WorkflowsConnectorFeatureId,
       includeSystemActionTypes: false,

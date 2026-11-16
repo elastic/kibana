@@ -64,6 +64,7 @@ export const registerFindThreatReportsRoute = ({
             from: request.query.from,
             to: request.query.to,
             usableOnly: request.query.usableOnly,
+            indicatorEligibleOnly: request.query.indicatorEligibleOnly,
             sort: request.query.sort as ThreatReportSort | undefined,
           });
           return response.ok({ body: result });

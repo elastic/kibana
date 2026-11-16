@@ -42,6 +42,7 @@ export const createEditTagsAction = (
 ): EpisodeAction => ({
   id: EDIT_TAGS_ACTION_ID,
   order: 40,
+  enforcesOwnPrivileges: false,
   displayName: i18n.EDIT_TAGS,
   iconType: 'tag',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
@@ -56,26 +57,25 @@ export const createEditTagsAction = (
     });
     if (tags == null) return;
 
-    try {
-      await executeCompositeAction<{ tags: string[] }>({
-        episodes,
-        nativeExecute: (eps, http) =>
-          bulkTagEpisodeActions(
-            http,
-            eps.map(
-              (ep): BulkTagEpisodeActionItem => ({
-                alert_id: ep['episode.id'],
-                tags,
-              })
-            )
-          ),
-        extension,
-        extensionContext: { tags },
-        deps,
-      });
-      onSuccess?.();
-    } catch {
-      deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
-    }
+    await executeCompositeAction<{ tags: string[] }>({
+      episodes,
+      nativeExecute: (eps, http) =>
+        bulkTagEpisodeActions(
+          http,
+          eps.map(
+            (ep): BulkTagEpisodeActionItem => ({
+              alert_id: ep['episode.id'],
+              // The API clears with `null` and rejects an empty array, so an
+              // emptied selection is sent as a clear.
+              tags: tags.length === 0 ? null : tags,
+            })
+          )
+        ),
+      extension,
+      extensionContext: { tags },
+      actionName: i18n.EDIT_TAGS,
+      onSuccess,
+      deps,
+    });
   },
 });

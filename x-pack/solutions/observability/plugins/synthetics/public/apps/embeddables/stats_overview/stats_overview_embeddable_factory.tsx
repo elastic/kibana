@@ -18,6 +18,7 @@ import type {
   PublishesTitle,
   HasEditCapabilities,
   HasSupportedTriggers,
+  ViewMode,
   CanCancelRequests,
 } from '@kbn/presentation-publishing';
 import {
@@ -25,6 +26,7 @@ import {
   useBatchedPublishingSubjects,
   fetch$,
   titleComparators,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
@@ -153,6 +155,8 @@ export const getStatsOverviewEmbeddableFactory = (
         },
       });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       const fetchSubscription = fetch$(api)
         .pipe()
         .subscribe((next) => {
@@ -163,7 +167,7 @@ export const getStatsOverviewEmbeddableFactory = (
       return {
         api,
         Component: () => {
-          const [filters] = useBatchedPublishingSubjects(filters$);
+          const [filters, viewMode] = useBatchedPublishingSubjects(filters$, viewMode$);
 
           useEffect(() => {
             return () => {
@@ -179,6 +183,7 @@ export const getStatsOverviewEmbeddableFactory = (
             >
               <StatsOverviewComponent
                 reload$={reload$}
+                viewMode={viewMode}
                 filters={filters || DEFAULT_FILTERS}
                 requestCancellationManager={requestCancellationManager}
               />

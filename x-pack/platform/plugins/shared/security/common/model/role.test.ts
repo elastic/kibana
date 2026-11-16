@@ -74,6 +74,9 @@ describe('role', () => {
       expect(
         isRoleHiddenOnServerless({ name: '_alertzero_alert_triage', metadata: { _reserved: true } })
       ).toBe(true);
+      expect(
+        isRoleHiddenOnServerless({ name: '_nightshift_agent', metadata: { _reserved: true } })
+      ).toBe(true);
     });
 
     test('should return false for a custom role with a hidden name prefix', () => {

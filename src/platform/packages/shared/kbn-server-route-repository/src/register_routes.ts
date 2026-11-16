@@ -56,7 +56,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   const router = core.http.createRouter();
 
   routes.forEach((route) => {
-    const { endpoint, handler, security } = route;
+    const { endpoint, handler, security, responses } = route;
 
     const params = 'params' in route ? route.params : undefined;
 
@@ -186,7 +186,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             access,
           },
           security,
-          validate: validationObject,
+          validate: responses
+            ? { request: validationObject, response: responses }
+            : validationObject,
         },
         wrappedHandler
       );
@@ -196,7 +198,16 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         access,
         summary: options.summary,
         description: options.description,
-        options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
+        operationId: options.operationId,
+        options: omit(
+          options,
+          'access',
+          'description',
+          'summary',
+          'operationId',
+          'deprecated',
+          'discontinued'
+        ),
         security,
       }).addVersion(
         {
@@ -204,6 +215,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           options,
           validate: {
             request: validationObject,
+            ...(responses ? { response: responses } : {}),
           },
         },
         wrappedHandler

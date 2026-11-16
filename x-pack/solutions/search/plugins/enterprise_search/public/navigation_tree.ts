@@ -320,6 +320,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:genAiSettings' },
+                    { link: 'management:aiAnonymizationSettings' },
                     { link: 'management:evals' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],

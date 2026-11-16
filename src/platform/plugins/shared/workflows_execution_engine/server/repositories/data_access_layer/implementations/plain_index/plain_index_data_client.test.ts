@@ -115,7 +115,7 @@ describe('PlainIndexDataClient', () => {
         {
           _id: 'a',
           _index: '.workflows-executions',
-          _source: { includes: ['status'] },
+          _source: { includes: ['status', 'deleted'] },
         },
       ],
     });

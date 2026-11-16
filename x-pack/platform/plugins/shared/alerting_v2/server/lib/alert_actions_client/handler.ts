@@ -10,6 +10,7 @@ import type { AlertActionDocument } from '../../resources/datastreams/alert_acti
 import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { AlertEventRecord } from './types';
 import type { AlertActionState } from './context_loaders/load_alert_action_states';
+import type { SeriesActionState } from './context_loaders/load_series_action_states';
 
 /**
  * Prepared write payload for one alert action. The audit `.alert-actions`
@@ -36,19 +37,23 @@ export interface PreparedAction {
  * - `alertEvent` — the alert event the orchestrator resolved for this
  *   row.
  * - `alertActionDoc` — the audit doc the orchestrator has already built
- *   from `action` + `alertEvent`. Handlers pass it through unchanged
- *   for audit-only actions, or wrap it alongside a synthetic
- *   `.rule-events` doc for lifecycle actions.
- * - `actionState` — the alert's current ack / assignee / tags, which the
+ *   from `action` + `alertEvent`. Handlers pass it through unchanged,
+ *   or wrap it alongside a synthetic `.rule-events` doc for lifecycle
+ *   actions.
+ * - `alertActionState` — the alert's current ack / assignee / tags, which the
  *   preconditioned handlers compare their request against. Only loaded for
  *   handlers that declare {@link ActionHandler.requiresActionState}; the
  *   rest receive the empty state and must not read it.
+ * - `seriesActionState` — the series' current snooze, for the series-scoped
+ *   handlers that declare {@link ActionHandler.requiresSeriesActionState};
+ *   same contract as `alertActionState`.
  */
 export interface HandlerItem<TBody extends CreateAlertActionBody> {
   action: TBody;
   alertEvent: AlertEventRecord;
   alertActionDoc: AlertActionDocument;
-  actionState: AlertActionState;
+  alertActionState: AlertActionState;
+  seriesActionState: SeriesActionState;
 }
 
 /**
@@ -68,11 +73,13 @@ export interface HandlerItem<TBody extends CreateAlertActionBody> {
  */
 export interface ActionHandler<TBody extends CreateAlertActionBody = CreateAlertActionBody> {
   /**
-   * Declares that `prepare` reads `item.actionState`, so the orchestrator
+   * Declares that `prepare` reads `item.alertActionState`, so the orchestrator
    * only pays for the `.alert-actions` round-trip when a request contains
    * one of these actions.
    */
   readonly requiresActionState?: boolean;
+  /** Same as {@link ActionHandler.requiresActionState}, for `item.seriesActionState`. */
+  readonly requiresSeriesActionState?: boolean;
   /**
    * Pure, synchronous precondition check + doc build. Throws Boom 4xx on
    * precondition failure (same error codes routes already surface); the
