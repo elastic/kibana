@@ -13,17 +13,20 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { sendSubmitAwsOnboardingSettings } from '../../../hooks/use_request/aws_onboarding_settings';
 
 import { AwsOnboardingSettingsCard } from './card';
-import { clearSettingsDraft } from './drafts';
+import { clearSettingsDraft, settingsDraftKey } from './drafts';
 import { AwsOnboardingSettingsForm } from './form';
 import { settingsAttachmentData } from './fixtures';
 
 jest.mock('../../../hooks/use_request/aws_onboarding_settings');
 
+// The key definition.tsx derives for both renderers.
+const KEY = settingsDraftKey({ id: 'att-1', data: settingsAttachmentData });
+
 const renderForm = (onSubmitted: () => void) =>
   render(
     <I18nProvider>
       <AwsOnboardingSettingsForm
-        attachmentId="att-1"
+        attachmentId={KEY}
         data={settingsAttachmentData}
         onSubmitted={onSubmitted}
       />
@@ -33,7 +36,7 @@ const renderForm = (onSubmitted: () => void) =>
 describe('AwsOnboardingSettingsForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    clearSettingsDraft('att-1');
+    clearSettingsDraft(KEY);
   });
 
   it('submits the answer and calls onSubmitted on 200 resumed', async () => {
@@ -150,7 +153,7 @@ describe('AwsOnboardingSettingsForm', () => {
       .mockResolvedValue({ data: { status: 'resumed' }, error: null } as never);
     const card = render(
       <I18nProvider>
-        <AwsOnboardingSettingsCard attachmentId="att-1" data={settingsAttachmentData} />
+        <AwsOnboardingSettingsCard attachmentId={KEY} data={settingsAttachmentData} />
       </I18nProvider>
     );
     await userEvent.click(screen.getByLabelText(/GuardDuty API polling — Collect logs/));

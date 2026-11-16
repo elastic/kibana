@@ -114,4 +114,19 @@ describe('AwsOnboardingSettingsCard', () => {
 
     expect(screen.getByLabelText(/GuardDuty API polling — Collect logs/)).toBeChecked();
   });
+
+  it('shows a top-level problem when no service is selected', () => {
+    render(
+      <I18nProvider>
+        <AwsOnboardingSettingsCard
+          attachmentId="att-1:v1"
+          data={{ ...settingsAttachmentData, answer: { services: {} } }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('awsOnboardingSettingsTopLevelProblems')).toHaveTextContent(
+      'Select at least one service.'
+    );
+  });
 });

@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { validateSettingsAnswer } from '../../../../common/workflows/steps/settings';
 import type {
@@ -382,8 +383,26 @@ export const SettingsSections: React.FC<{
     ),
   ];
 
+  const topLevel = [
+    ...new Set(
+      [...validateSettingsAnswer(requirement, draft), ...problems]
+        .filter((problem) => problem.path === 'services')
+        .map((problem) => problem.message)
+    ),
+  ];
+
   return (
     <>
+      {topLevel.length > 0 && (
+        <>
+          <KbnDangerCallout
+            announceOnMount={false}
+            data-test-subj="awsOnboardingSettingsTopLevelProblems"
+            title={topLevel.join(' ')}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
       {requirement.services.map((service) => (
         <div key={service.id} data-test-subj={`awsOnboardingSettings-service-${service.id}`}>
           <EuiTitle size="xxs">

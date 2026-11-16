@@ -7,10 +7,21 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 
+import type { AwsOnboardingSettingsAttachmentData } from '../../../../common/agent_builder/aws_onboarding_settings_attachment';
 import type { AwsOnboardingSettingsAnswer } from '../../../../common/workflows/steps/settings';
 
 // The inline card and the canvas form render in separate React roots, so the draft they edit
 // lives here, keyed by attachment, rather than in component state.
+/**
+ * The store key for an attachment. The rendered attachment carries no version number, so the key
+ * includes what a new version changes (the recorded answer and its problems): a new version then
+ * reseeds, and remounts, both the card and the canvas form.
+ */
+export const settingsDraftKey = (attachment: {
+  id: string;
+  data: AwsOnboardingSettingsAttachmentData;
+}) => `${attachment.id}:${JSON.stringify([attachment.data.answer, attachment.data.problems])}`;
+
 const drafts = new Map<string, AwsOnboardingSettingsAnswer>();
 const listeners = new Set<() => void>();
 

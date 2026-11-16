@@ -22,6 +22,8 @@ import type {
 } from '../../../../common/agent_builder/aws_onboarding_settings_attachment';
 import type { FleetStartServices } from '../../../plugin';
 
+import { settingsDraftKey } from './drafts';
+
 // The card and form pull in the field editors; load them only when an attachment renders.
 const LazyCard = React.lazy(() =>
   import('./card').then((module) => ({ default: module.AwsOnboardingSettingsCard }))
@@ -47,11 +49,6 @@ const Providers: React.FC<{ startServices: FleetStartServices; children: React.R
   </KibanaContextProvider>
 );
 
-// The rendered attachment carries no version number, so key the draft on what a new version
-// changes: the recorded answer and its problems. A new version then reseeds card and canvas.
-const draftKey = (attachment: AwsOnboardingSettingsAttachment) =>
-  `${attachment.id}:${JSON.stringify([attachment.data.answer, attachment.data.problems])}`;
-
 export const createAwsOnboardingSettingsAttachmentDefinition = (
   startServices: FleetStartServices
 ): AttachmentUIDefinition<AwsOnboardingSettingsAttachment> => ({
@@ -65,8 +62,8 @@ export const createAwsOnboardingSettingsAttachmentDefinition = (
     <Providers startServices={startServices}>
       <Suspense fallback={<EuiLoadingSpinner />}>
         <LazyCard
-          key={draftKey(attachment)}
-          attachmentId={draftKey(attachment)}
+          key={settingsDraftKey(attachment)}
+          attachmentId={settingsDraftKey(attachment)}
           data={attachment.data}
         />
       </Suspense>
@@ -75,7 +72,12 @@ export const createAwsOnboardingSettingsAttachmentDefinition = (
   renderCanvasContent: ({ attachment }, { closeCanvas }) => (
     <Providers startServices={startServices}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyForm attachmentId={attachment.id} data={attachment.data} onSubmitted={closeCanvas} />
+        <LazyForm
+          key={settingsDraftKey(attachment)}
+          attachmentId={settingsDraftKey(attachment)}
+          data={attachment.data}
+          onSubmitted={closeCanvas}
+        />
       </Suspense>
     </Providers>
   ),
