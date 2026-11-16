@@ -12,3 +12,5 @@ export const entityInventoryRouteRepository = {
   ...typesRoute,
   ...listRoute,
 };
+
+export type EntityInventoryRouteRepository = typeof entityInventoryRouteRepository;
