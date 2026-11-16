@@ -177,7 +177,10 @@ export function IntroBannerVideo(): React.ReactElement {
     pointer-events: none;
   `;
 
+  // Match the Vidyard document's (light) color scheme: on a mismatch, browsers paint the
+  // iframe opaque white, which shows as white letterbox bars in Kibana's dark mode.
   const previewIframeStyles = css`
+    color-scheme: light;
     position: absolute;
     inset: 0;
     width: 100%;
