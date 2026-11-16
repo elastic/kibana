@@ -225,9 +225,9 @@ Two different version fields:
 | Field | Where | Meaning |
 |-------|--------|---------|
 | YAML `version: "1"` | Top of each Worker `*.yaml` | Workflow document schema / format version (stays `"1"` until the YAML language changes). |
-| Definition `version: N` | The Worker's module under `managed/definitions/alertzero/` | **Managed reconciliation counter** for `@kbn/workflows/managed`. Bump when you need install/`ready()` to re-apply the definition (`versionStrategy: 'auto'`). |
+| Definition `version: N` | The Worker's module under `managed/definitions/alertzero/` | **Managed reconciliation counter** for `@kbn/workflows/managed`. Bump only when a change outside the rendered YAML, such as `billable` or `management`, must reach installed copies (`versionStrategy: 'auto'`). |
 
-Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. A change to a render helper in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts` reaches installed copies without a bump, because the platform hashes each document's rendered YAML; no test requires one.
+Start a new definition at `1`. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. Changes to a Worker's YAML, its defaults in `worker_settings_defaults.ts`, or a render helper in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts` need no bump: the platform hashes the YAML each copy renders, and the startup pass reinstalls the copies that differ. To see whether an enabled Worker's copy in a space is behind, read its `workflowOutdated` field rather than comparing `managedVersion` across spaces.
 
 ### Central AlertZero Worker registry guide
 
@@ -240,11 +240,13 @@ The current YAML files are Worker stubs rather than final Watch-team definitions
 5. Defaults from the declaration are used for a fresh per-space install. Persisted values are untrusted: on read and write they are parsed by the Worker's complete schema (`workerId` literal, `autonomy` restricted to the allowed levels, `scheduleInterval` only if declared, `extras` only if declared, unknown keys rejected). A stored document that fails projects the Worker as `unavailable`.
 6. A PATCH composes the next settings from the stored ones and validates the result with the same complete schema (semantics under [Worker-specific settings](#worker-specific-settings-extras)). Failures return 400 naming the field; nothing is written. Do not add per-Worker branches to the server path — extend the declaration.
 7. `toSettings` projects stored values into `WorkerSettings`: `workerId`, `autonomy`, `scheduleInterval` for schedule-driven Workers, `extras` for Workers that declare them. Read and PATCH use the same names and nesting.
-8. Add settings-module tests for defaults, patches, and that projected keys are not stripped. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring. Imported YAML changes require an explicit managed-definition version decision.
+8. Add settings-module tests for defaults, patches, and that projected keys are not stripped. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring.
 9. If the Worker loses some or all of its work while another Worker is off (it acts on records that Worker writes, or hands records to it that only it reads), add an entry to `WORKER_DEPENDENCIES` in `public/pages/watches/worker_dependencies/worker_dependencies.tsx`. The entry carries its own dialog and warning copy, which names only what is lost.
 10. Every child workflow the Worker calls with `workflow.execute` or `workflow.executeAsync`, directly or through another child, sets `run-as-mode: inherit` with a literal `workflow-id` (see [Worker lifecycle](#worker-lifecycle)). Action workflows keep the default identity.
 
 The Workers service owns per-space installation, reading persisted values, enable/disable, and upgrades. Settings responses carry a logical revision (`settingsRevision`, `null` before the per-space document exists). A settings PATCH sends the revision its draft was built from; the server returns 409 when the stored revision differs and the client keeps the draft. Compare-then-write, not an atomic guard.
+
+`workflowOutdated` (see `Worker` in `@kbn/alertzero-common/impl/schemas/components/watch_settings.schema.yaml`) covers only the Worker's own per-space workflow. The shared child workflows it calls are installed once in the global space at each start, and a failed install there shows only in the startup log. Each Kibana start reinstalls the outdated copies its startup pass reaches, so a copy still outdated after a restart was not upgraded. Look for `Failed to install managed AlertZero workflow` and `AlertZero managed workflow reconciliation failed` in that start's log. A copy whose template throws for its stored settings stays outdated until those settings change.
 
 ### Scheduled Workers
 
@@ -269,12 +271,11 @@ To give another Worker a schedule:
        scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
    ```
 
-2. **`<worker>.ts`** — swap the template type and renderer, and bump the definition `version`:
+2. **`<worker>.ts`** — swap the template type and renderer:
 
    ```ts
    import { renderScheduledWorkerYaml, type ScheduledWorkerTemplateValues } from './worker_template_values';
 
-   version: 2,
    yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
      renderScheduledWorkerYaml(WORKER_YAML, values),
    } as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
@@ -286,7 +287,7 @@ Nothing changes in the API schema or the UI: `scheduleInterval` is already optio
 
 Tests to update:
 
-- `managed_workflow_definitions.test.ts` — add `scheduleInterval` to the Worker's `templateRepresentativeValuesById` entry and update its fingerprint row to `<newVersion>:<newHash>` (the failure message prints the hash).
+- `managed_workflow_definitions.test.ts` — add `scheduleInterval` to the Worker's `templateRepresentativeValuesById` entry.
 - `worker_registry.test.ts` — set the Worker's `EXPECTED_WORKER_SETTINGS` entry with its `scheduleInterval` and add `'scheduled'` to `triggerTypes` (keep `'manual'` if the YAML keeps that trigger).
 - `worker_settings.test.ts` — add the Worker to `SCHEDULED_WORKER_IDS` so the "rejects an interval patch" cases stop running against it.
 - `worker_settings_compat.test.ts` — regenerate the settings contract snapshot (see [Changing Worker settings safely](#changing-worker-settings-safely)).
@@ -323,7 +324,7 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 
 1. **Schema** — add the field to the Worker's extras object in `@kbn/alertzero-common/impl/schemas/components/<watch>_watch_settings.schema.yaml` (`additionalProperties: false`, required) and run `yarn openapi:generate` in that package.
 2. **Default** — add its default to the Worker's `extras.defaultValue` in `managed/definitions/alertzero/worker_settings_defaults.ts`; the declaration in `impl/worker_settings/<watch>.ts` picks it up. An installed document that lacks the key reads and renders that default; a stored value always wins.
-3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML and bump the definition `version`; the setting is done only when the saved value reaches the run. Then regenerate the settings contract snapshot ([Changing Worker settings safely](#changing-worker-settings-safely)).
+3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML; the setting is done only when the saved value reaches the run. Then regenerate the settings contract snapshot ([Changing Worker settings safely](#changing-worker-settings-safely)).
 4. **Control** — build a real control in the Worker's own folder under `public/pages/watches/custom_settings/<worker>/` (Rule Tuning lives in `custom_settings/rule_tuning/`), registered by Worker id in `custom_settings/registry.ts`. It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
 
 The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every card also carries a Models row linking to Stack Management → Feature Settings, where models are picked per space for each AlertZero tier; a Worker has no model setting of its own, so don't add one to `extras`. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
@@ -345,17 +346,17 @@ Every configured space stores its own copy of a Worker's settings, and that copy
 - **Unclassified schema features.** A failure saying "Unclassified … Teach the Worker settings contract check about it" means the schema uses a JSON Schema construct the classifier does not know. Ask the Common Worker Layer team to extend `test_helpers/settings_contract.ts`; do not work around it.
 - **Validation the contract cannot compare.** A failure saying "Cannot establish settings compatibility at …" means a stored or saved setting goes through a refinement (`.refine`, `.superRefine`, `.check`), a transform, a preprocess or a pipe. JSON Schema drops those, so a change to them would pass unnoticed. It is not a breaking change and cannot be accepted: express the constraint as a bound, an enum or a pattern, or ask the Common Worker Layer team to teach the contract to compare it.
 
-Installed copies re-render when the YAML a Worker renders for them or its definition `version` changes. `managed_workflow_definitions.test.ts` fails until you bump it whenever the Worker's YAML or its defaults in `worker_settings_defaults.ts` change: its fingerprint row covers both. A YAML-only edit touches nothing in the settings contract.
+A YAML-only edit touches nothing in the settings contract.
 
 | Change | Result | What to do |
 |---|---|---|
-| New setting with a default, loosened bound, added allowed value, new Worker | Safe | Run the update command. Bump the definition version when the YAML or the defaults change (enforced). |
+| New setting with a default, loosened bound, added allowed value, new Worker | Safe | Run the update command. |
 | New schedule on an existing Worker | Safe | As above. Task Manager picks up the schedule on the next save or enable in each space. |
-| Changed default | Safe | Bump the definition version (enforced) and run the update command. It reaches fresh installs and every stored document that does not hold the field; a stored value always wins. |
-| YAML edit | Not a settings change | Bump the definition version (enforced). |
-| Render-helper edit (`src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts`) | Not a settings change | Installed copies re-render on their own; no test requires a definition version bump. |
-| Removed autonomy level that has a lower allowed level (for example `supervised` when `assisted` stays) | Safe | Bump the definition version (enforced) and run the update command. Stored documents holding the removed level read and render as the nearest allowed level; a trigger that depends on the level changes on the next save or enable in each space. |
-| Removed `extras` from a Worker | Safe | Bump the definition version (enforced) and run the update command. Stored extras are ignored on read and render. |
+| Changed default | Safe | Run the update command. It reaches fresh installs and every stored document that does not hold the field; a stored value always wins. |
+| YAML edit | Not a settings change | Nothing; installed copies re-render on their own. |
+| Render-helper edit (`src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts`) | Not a settings change | Nothing; installed copies re-render on their own. |
+| Removed autonomy level that has a lower allowed level (for example `supervised` when `assisted` stays) | Safe | Run the update command. Stored documents holding the removed level read and render as the nearest allowed level; a trigger that depends on the level changes on the next save or enable in each space. |
+| Removed `extras` from a Worker | Safe | Run the update command. Stored extras are ignored on read and render. |
 | Renamed, removed or retyped setting; tightened bound; removed allowed value (autonomy: the lowest allowed level); new setting without a default, including a required key inside a nested object; removed Worker; settings version bump; a `WorkerSettings` or `WorkerSettingsWrite` change that rejects documents or saves that used to pass | Breaking | Prefer keeping the stored key and changing only the label. Otherwise, before customers, a coordinated reset recorded with `ACCEPT_WORKER_SETTINGS_BREAKING_CHANGE=<issue-url>` in update mode; after that, a migration ([security-team#19312](https://github.com/elastic/security-team/issues/19312)). |
 
 `Safe` means safe on upgrade. While a rollout or rollback mixes versions, a Kibana that predates an added field shows that Worker as unavailable and rejects settings saves until every node runs the same version.
