@@ -160,6 +160,15 @@ export interface EmulatorOptions extends PaginationOptions {
    * the defaults: the latest 100 calls keep theirs, and bodies are cut at 8 KiB.
    */
   readonly capture?: boolean | CaptureOptions;
+  /**
+   * OpenAPI operations, by source, method and path template, that win over equally specific ones
+   * of other sources, e.g. the ones a recorder found before when two specs describe one path.
+   */
+  readonly preferredOperations?: ReadonlyArray<{
+    readonly source?: string;
+    readonly method: string;
+    readonly path: string;
+  }>;
 }
 
 export interface Emulator {
@@ -369,6 +378,7 @@ export const createEmulatorFetch = ({
   checkScopes = false,
   onCall,
   capture,
+  preferredOperations = [],
 }: EmulatorOptions): Emulator => {
   const captureOptions = capture === true ? {} : capture || undefined;
   if (captureOptions) {
@@ -401,9 +411,20 @@ export const createEmulatorFetch = ({
     },
     engine.respond
   );
-  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, {
-    checkScopes: checkScopes !== false,
-  });
+  const preferred = new Set(
+    preferredOperations.map(
+      ({ source, method, path }) => `${source ?? ''} ${method.toLowerCase()} ${path}`
+    )
+  );
+  const contract = createOpenApiAdapter(
+    operations,
+    respond ?? defaultChain,
+    { checkScopes: checkScopes !== false },
+    {
+      isPreferred: ({ spec: { source }, method, path }) =>
+        preferred.has(`${source ?? ''} ${method} ${path}`),
+    }
+  );
   const awsJsonServices = loadAwsJsonServices(specs);
   const state = new Map<unknown, unknown>();
   // The contexts whose responder deferred to the default chain, for `responseSource`.

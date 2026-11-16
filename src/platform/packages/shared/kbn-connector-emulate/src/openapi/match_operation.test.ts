@@ -124,6 +124,33 @@ describe('createOperationMatcher', () => {
     });
   });
 
+  it('prefers the operations it is told to of those two sources describe', () => {
+    const spec = (title: string) => ({
+      openapi: '3.0.3',
+      info: { title, version: '1' },
+      servers: [{ url: 'https://api.example.com' }],
+      paths: { '/items': { get: { operationId: `${title}List`, responses: ok } } },
+    });
+    const operations = [
+      ...loadOperations(spec('first'), 'first'),
+      ...loadOperations(spec('second'), 'second'),
+    ];
+    const url = 'https://api.example.com/items';
+
+    expect(match(createOperationMatcher(operations), 'GET', url)).toMatchObject({
+      operation: 'firstList',
+    });
+    expect(
+      match(
+        createOperationMatcher(operations, {
+          isPreferred: ({ spec: { source } }) => source === 'second',
+        }),
+        'GET',
+        url
+      )
+    ).toMatchObject({ operation: 'secondList' });
+  });
+
   it('matches server URL variables by their enum values', () => {
     const matcher = createMatcher([
       {

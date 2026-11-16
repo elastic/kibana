@@ -273,6 +273,14 @@ const decodePathSegment = (segment: string): string => {
   }
 };
 
+export interface OperationMatcherOptions {
+  /**
+   * Breaks ties between sources: of the operations equally specific for a request, e.g. one path
+   * that two specs describe, those it returns true for win.
+   */
+  readonly isPreferred?: (operation: ContractOperation) => boolean;
+}
+
 /**
  * Creates a router that finds the operation for a request. When several path templates match,
  * the one with the fewest parameters spanning segments wins, so Azure's
@@ -287,8 +295,12 @@ const decodePathSegment = (segment: string): string => {
  * missing. So `/?restype=service&comp=properties` takes precedence over `/?comp=properties`, and
  * a lease request goes to the operation whose `x-ms-lease-action` it sends.
  */
-export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
+export const createOperationMatcher = (
+  operations: readonly ContractOperation[],
+  { isPreferred = () => false }: OperationMatcherOptions = {}
+) => {
   const routes = operations.map(compileRoute);
+  const preferred = new Set(routes.filter(({ operation }) => isPreferred(operation)));
   // Operations on one template may mark its parameters differently, so they rank the same.
   const multiSegmentByTemplate = new Map<string, number>();
   for (const { template, multiSegmentCount } of routes) {
@@ -346,6 +358,7 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
     const consistent = onTemplate.filter(({ conflicts }) => !conflicts);
     const [best] = (consistent.length > 0 ? consistent : onTemplate).sort(
       (a, b) =>
+        Number(preferred.has(b.route)) - Number(preferred.has(a.route)) ||
         fixedQueryCount(b.route, url) - fixedQueryCount(a.route, url) ||
         missingQueryCount(a.route, url) - missingQueryCount(b.route, url) ||
         declaredQueryCount(b.route, url) - declaredQueryCount(a.route, url) ||

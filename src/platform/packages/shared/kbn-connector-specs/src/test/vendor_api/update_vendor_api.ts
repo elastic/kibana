@@ -251,7 +251,16 @@ export const updateVendorApi = async ({
   log.info(
     `Recording ${Object.keys(connector.actions).length} actions of ${connector.metadata.id}`
   );
-  const recording = await recordActions({ connector, specs, fixtures, trackFields });
+  // A path several sources describe stays on the source it was recorded from, so the latest
+  // specs adding it to another source doesn't move the actions there.
+  const preferredOperations = Object.values(previous?.operations ?? {}).flat();
+  const recording = await recordActions({
+    connector,
+    specs,
+    fixtures,
+    trackFields,
+    preferredOperations,
+  });
   // Each generated input reports its own findings, which are often the same.
   const problems = new Set<string>();
   const problemsByAction = new Map<string, Set<string>>();

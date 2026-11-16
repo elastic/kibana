@@ -8,6 +8,7 @@
  */
 
 import type { ContractAdapter, Responder } from '../contract/types';
+import type { OperationMatcherOptions } from './match_operation';
 import { createOperationMatcher } from './match_operation';
 import type { ContractOperation } from './types';
 import { validateRequest } from './validate_request';
@@ -19,9 +20,10 @@ import { validateSecurity } from './validate_security';
 export const createOpenApiAdapter = (
   operations: readonly ContractOperation[],
   respond: Responder,
-  securityOptions: SecurityOptions = {}
+  securityOptions: SecurityOptions = {},
+  matcherOptions: OperationMatcherOptions = {}
 ): ContractAdapter => {
-  const match = createOperationMatcher(operations);
+  const match = createOperationMatcher(operations, matcherOptions);
   return {
     route: ({ method, url, headers }) => match(method, url, headers),
     authenticate: ({ operation }, { query, headers }) =>
